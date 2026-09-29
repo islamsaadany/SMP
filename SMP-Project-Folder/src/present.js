@@ -295,6 +295,8 @@ function unitSwotSlides(u){
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
+  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
+  var pOn = planOn(u);
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
@@ -498,13 +500,13 @@ function deckSlides(u){
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  if (u.items.length)
+  if (pOn && u.items.length)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
 
-  if (u.items.length) S.push('<section class="dslide"' +
+  if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
     '<div class="pcards" style="--n:' + u.items.length +
@@ -538,7 +540,7 @@ function deckSlides(u){
     '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>';
 
-  u.items.forEach(function(p, pi){
+  (pOn ? u.items : []).forEach(function(p, pi){
     /* §416: and it gets no slides of its own until its year comes. */
     if (!runsNow(p)) return;
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
@@ -575,10 +577,10 @@ function deckSlides(u){
         anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
         deckPillarHead(u, p, pi, DW("overview", "one", p)) +
         '<div class="obody"><div>' +
-          (String(p.ovObj || "").trim() ? '<div class="ok">Objective</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+          (String(p.ovObj || "").trim() ? '<div class="ok">' + ovArea("ovobj", p) + '</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
           '<div class="two">' +
-            (String(p.ovWhy || "").trim() ? '<div><div class="ok">Why now</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
-            (ovRisks.length ? '<div><div class="ok">Risks &amp; mitigations</div><ul>' +
+            (String(p.ovWhy || "").trim() ? '<div><div class="ok">' + ovArea("ovwhy", p) + '</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+            (ovRisks.length ? '<div><div class="ok">' + ovArea("ovrisk", p) + '</div><ul>' +
               ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
           '</div></div>' +
           ((ovMs || ovTs) ? '<div class="side">' +
@@ -817,7 +819,7 @@ function deckSlides(u){
     "Where the " + L("pillar","bu") + " stand, where " +
       (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
     null));
-  if (u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
@@ -1011,6 +1013,8 @@ function deckSlidesFn(subject){
         '<tbody>' + kRows + '</tbody></table></section>');
     }
 
+    /* §422: a plan switched off draws its objectives and no plan slides. */
+    if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
       var aRows = acts.map(function(a3, i){

@@ -63,6 +63,9 @@ function detailWord(det, form, x){
   return LTraw(t, nk, form);
 }
 function DW(det, form, x){ return esc(detailWord(det, form, x)); }
+/* §422: what one of the overview's three areas is called on the subject `x`
+   holds — the layer's own name (Setup › Structure), else the platform's. */
+function ovArea(key, x){ return esc(LTraw(planSubjectOf(x), key, "one")); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one

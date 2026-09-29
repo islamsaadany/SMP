@@ -4038,8 +4038,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
                                   one per way of planning
        structure[level].words  = { key: { one, many } } this layer's names
      ALL STORED AS AN ABSENCE (§50.6) and read as TODAY'S PRODUCT, so a client
-     nobody touches opens exactly as it did. The plan section has no switch:
-     it is what the layer is measured on. */
+     nobody touches opens exactly as it did. The plan section has had a switch
+     since §422 (planOn below). */
   function fnExists(group) {
     var s = structureOf(group), f = s && s.fn;
     return !(f && f.exists === false);
@@ -4074,6 +4074,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return lv === "fn" ? ["s", "w"] : SWOT_QUADS.slice();
   }
   var PLAN_WAYS = ["pillars", "projects", "objectives"];
+  /* §422: THE PLAN SECTION HAS A SWITCH NOW (Islam, 2026-09-29: *"for the
+     top level make the plan section on and off as well and same for the BUs
+     and functions"*, and of Off, *"yes"* to: hidden on that layer's pages,
+     nothing written is lost, and a unit or function with its plan off has
+     nothing to report, so its Reporting tab and plan slides go and it leaves
+     the scores). Stored as an ABSENCE like the first section's (§50.6), so a
+     client nobody touches opens exactly as before. */
+  function planOn(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "plan");
+    return !(b && b.on === false);
+  }
   function planTitle(group, target, way) {
     var b = levelBlock(group, structLevelOf(target), "plan");
     var t = b && typeof b[way] === "string" ? b[way].trim() : "";
@@ -4096,8 +4107,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     deliverable: ["Deliverable", "Deliverables"], outcome: ["Outcome", "Outcomes"],
     milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"],
     overview: ["Overview", "Overviews"], tacoutcome: ["Outcome", "Outcomes"],
-    requirement: ["Requirement", "Requirements"]
+    requirement: ["Requirement", "Requirements"],
+    /* §422: the overview's three areas (§413), each nameable per layer. */
+    ovobj: ["Objective", "Objectives"], ovwhy: ["Why now", "Why now"],
+    ovrisk: ["Risks & mitigations", "Risks & mitigations"]
   };
+  var OVERVIEW_AREAS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
   var QUAD_KEYS = { s: "strengths", w: "weaknesses", o: "opportunities", t: "threats" };
   var SEC_FOUND_PARTS = ["brief", "purpose", "aspiration", "keyobj", "theme", "values"];
   var PLAN_PARTS = {
@@ -4630,7 +4645,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     midExists: midExists,
     fnExists: fnExists, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
-    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord,
+    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
+    OVERVIEW_AREAS: OVERVIEW_AREAS,
     PART_DEFAULTS: PART_DEFAULTS, QUAD_KEYS: QUAD_KEYS,
     SEC_FOUND_PARTS: SEC_FOUND_PARTS, PLAN_PARTS: PLAN_PARTS,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,

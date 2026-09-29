@@ -4040,8 +4040,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
                                   one per way of planning
        structure[level].words  = { key: { one, many } } this layer's names
      ALL STORED AS AN ABSENCE (§50.6) and read as TODAY'S PRODUCT, so a client
-     nobody touches opens exactly as it did. The plan section has no switch:
-     it is what the layer is measured on. */
+     nobody touches opens exactly as it did. The plan section has had a switch
+     since §422 (planOn below). */
   function fnExists(group) {
     var s = structureOf(group), f = s && s.fn;
     return !(f && f.exists === false);
@@ -4076,6 +4076,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return lv === "fn" ? ["s", "w"] : SWOT_QUADS.slice();
   }
   var PLAN_WAYS = ["pillars", "projects", "objectives"];
+  /* §422: THE PLAN SECTION HAS A SWITCH NOW (Islam, 2026-09-29: *"for the
+     top level make the plan section on and off as well and same for the BUs
+     and functions"*, and of Off, *"yes"* to: hidden on that layer's pages,
+     nothing written is lost, and a unit or function with its plan off has
+     nothing to report, so its Reporting tab and plan slides go and it leaves
+     the scores). Stored as an ABSENCE like the first section's (§50.6), so a
+     client nobody touches opens exactly as before. */
+  function planOn(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "plan");
+    return !(b && b.on === false);
+  }
   function planTitle(group, target, way) {
     var b = levelBlock(group, structLevelOf(target), "plan");
     var t = b && typeof b[way] === "string" ? b[way].trim() : "";
@@ -4098,8 +4109,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     deliverable: ["Deliverable", "Deliverables"], outcome: ["Outcome", "Outcomes"],
     milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"],
     overview: ["Overview", "Overviews"], tacoutcome: ["Outcome", "Outcomes"],
-    requirement: ["Requirement", "Requirements"]
+    requirement: ["Requirement", "Requirements"],
+    /* §422: the overview's three areas (§413), each nameable per layer. */
+    ovobj: ["Objective", "Objectives"], ovwhy: ["Why now", "Why now"],
+    ovrisk: ["Risks & mitigations", "Risks & mitigations"]
   };
+  var OVERVIEW_AREAS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
   var QUAD_KEYS = { s: "strengths", w: "weaknesses", o: "opportunities", t: "threats" };
   var SEC_FOUND_PARTS = ["brief", "purpose", "aspiration", "keyobj", "theme", "values"];
   var PLAN_PARTS = {
@@ -4632,7 +4647,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     midExists: midExists,
     fnExists: fnExists, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
-    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord,
+    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
+    OVERVIEW_AREAS: OVERVIEW_AREAS,
     PART_DEFAULTS: PART_DEFAULTS, QUAD_KEYS: QUAD_KEYS,
     SEC_FOUND_PARTS: SEC_FOUND_PARTS, PLAN_PARTS: PLAN_PARTS,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
@@ -6766,6 +6782,10 @@ function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
    tactic, which is resolved to the subject that holds it. With nothing
    given, the page being drawn (TARGET) is the subject. */
 function planDetailOn(key, x){ return SMPRules.planDetailOn(GROUP, key, planSubjectOf(x)); }
+/* §422: whether the subject `x` belongs to a layer whose plan section is on.
+   Off, the plan is hidden and kept: its rows leave every score, the report
+   asks nothing and the board draws no row — asked here, once, by all of them. */
+function planOn(x){ return SMPRules.planOn(GROUP, planSubjectOf(x)); }
 /* §420: which subject a plan row belongs to. The pillars and tactics of every
    unit, pillars function and pillars capability are indexed once per
    synchronous task (a render walks thousands of rows and must not walk the
@@ -11715,6 +11735,7 @@ function canSpeakFor(target){
 function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
   var t = String(target || "");
+  if (t && !planOn(t)) return false;
   if (t === "group" || t.indexOf("co:") === 0) return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
@@ -12041,6 +12062,7 @@ function outstandingSources(u){
    target, and the tactics whose quarters fall inside the window. A tactic
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
+  if (u && !planOn(u)) return [];
   /* §405: a unit that plans otherwise is asked what its holder holds — the
      function's own list, over `u:<key>` (§53.5: one walk, never a second). */
   if (unitOwnWay(u)) return fnReportItems("u:" + u.ukey);
@@ -12205,6 +12227,7 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
    comes to say something a Reporting page does not (§53.5). Every caller that
    still hands a bare key keeps working, because `capsShown` resolves it. */
 function fnReportItems(subject){
+  if (subject && !planOn(subject)) return [];
   var out = [];
   capsShown(subject).forEach(function(c){
     /* §279: a capability's objectives sit above its rail and each project is
@@ -12643,14 +12666,14 @@ function reportState(c, key){
    TWO LISTS, because the totals must have exactly the membership the rows
    have: §108.1's miscount is the parts growing while the divisor did not. */
 function boardUnitTargets(){
-  return activeKeys();
+  return activeKeys().filter(function(k){ return planOn(k); });
 }
 /* Every supporting function that can be asked for a report, in ONE list and in
    the register's own order. A pillars function has no capabilities to count, so
    what it must have instead is a plan of its own -- a row for a subject nobody
    can report on is a row nobody can clear (§61). */
 function boardFunctionTargets(){
-  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; });
+  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; }).filter(function(t){ return planOn(t); });
 }
 /* ── EVERY SUBJECT THAT REPORTS HAS A ROW (§244's rule, §334) ──────────────
    Islam's *"yes for all"* to the question the mockup asked: a capability has
@@ -13813,6 +13836,7 @@ function planYear(){ return SMPRules.planYearOf(GROUP); }
 function pillarYears(p){ return SMPRules.pillarYears(p); }
 function runsNow(p){ return SMPRules.runsNow(GROUP, p, planSubjectOf(p)); }
 function itemsNow(u){
+  if (u && !planOn(u)) return [];
   var it = (u && u.items) || [];
   return yearsOn(u) ? it.filter(runsNow) : it;
 }
@@ -15071,6 +15095,7 @@ function unitOwnWay(u){
   return (u && u.ukey && UNITS[u.ukey] === u && unitFormat(u) !== "pillars") ? unitFormat(u) : null;
 }
 function unitOwnExec(u){
+  if (!planOn(u)) return null;
   var h = unitOwnHolder(u.ukey);
   if (!h) return null;
   return unitOwnWay(u) === "objectives" ? fnActionsTally("u:" + u.ukey).pct : capExec(h).pct;
@@ -17221,6 +17246,13 @@ function fnCoWeightSet(fk){
 function fnMemberScores(fk){
   var f = FUNCTIONS[fk];
   if (!f) return { perf:null, exec:null };
+  /* §422: a plan switched off scores no execution; the objectives stand. */
+  if (!planOn("fn:" + fk)) {
+    var o = fnPlansInPillars(f) ? (unitLike("fn:" + fk) ? unitObjectives(unitLike("fn:" + fk)) : null)
+          : fnPlansInObjectives(f) ? fnObjScore(fk)
+          : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
+    return { perf: o, exec: null };
+  }
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
     return u ? { perf: unitObjectives(u), exec: unitRatio(u) } : { perf:null, exec:null };
@@ -23071,7 +23103,8 @@ function pptxUnitSlides(u, kicker){
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
-  (u.items || []).forEach(function(p, pi){
+  /* §422: a plan section switched off leaves the plan out of its slides too. */
+  (planOn(u) ? (u.items || []) : []).forEach(function(p, pi){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
     /* §416: the plan download carries every direction — it is the plan —
        and names the years each runs in beside its code. */
@@ -26824,6 +26857,7 @@ function renderUnitPerformance(u){
   if (uw) return uw === "objectives" ? fnObjPerformance("u:" + u.ukey) : renderFnPerformance("u:" + u.ukey);
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
+  var pOn = planOn(u);
   /* §264: the same two questions the pillar card had. The membership comes from
      `scorableKOs()` — koScore()'s own list — so the Highest can never name an
      objective the headline above it left out, and the figure is the SCORE the
@@ -26967,6 +27001,9 @@ function renderUnitPerformance(u){
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
+      /* §422: a plan switched off scores nothing, so its two cards go and
+         the objectives stand alone. */
+      (!pOn ? '' : (
       '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
@@ -26984,7 +27021,7 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
-          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
+          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>')) +
       /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
          §6.3's one promise: each section carries BOTH headline numbers, so
          whichever you are standing in you can see the other and cross. Drawn
@@ -27003,7 +27040,7 @@ function renderUnitPerformance(u){
     /* The arrange hint went with the button (§63.3): reordering is decided on
        the plan now, and a hint on a page with no control is a hint about
        something you cannot do from here. */
-    section("", "", null, unitPerfRail(u));
+    (pOn ? section("", "", null, unitPerfRail(u)) : planOffNote());
 }
 
 /* ── Foundation ────────────────────────────────────────────────────
@@ -31395,6 +31432,12 @@ function renderFnPerformance(fnKey){
      1372 — a unit's pixels exactly, which is the assertion the check makes
      (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(target);
+  /* §422: a plan switched off shows each holder's objectives and nothing the
+     plan would have scored. */
+  if (!planOn(target)) return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
+      : presentMenu(isCapTarget(target) ? "cap" : "fn", isCapTarget(target) ? capKeyOf(target) : fk)) +
+    caps.map(function(c){ return '<div class="capbody">' + capKOTable(c) + '</div>'; }).join("") +
+    planOffNote();
   return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
     : presentMenu(isCapTarget(target) ? "cap" : "fn",
                   isCapTarget(target) ? capKeyOf(target) : fk)) +
@@ -31902,7 +31945,12 @@ function fnObjPerfTables(fk){
     '<h4 class="mini">' + L("action") + '</h4>' +
     miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
 }
+/* §422: said where a plan switched off would have been scored. */
+function planOffNote(){
+  return '<div class="note" data-planoff="1">The plan section is switched off for this layer, so there is nothing to score. Nothing entered is lost.</div>';
+}
 function fnObjPerformance(fk){
+  if (!planOn(holderTarget(fk))) return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) + planOffNote();
   /* §405: a unit planning this way presents as the UNIT it is. */
   return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) +
     '<div class="capbody">' + fnObjCards(fk) + fnObjPerfTables(fk) + '</div>';
@@ -32715,7 +32763,8 @@ function pillarBand(code, name, right, kind, cls){
    first word could never be written (§61). Written by the office alone,
    because these are plan fields and the plan's pen is the office's (§94). */
 var DOV_OPEN = {};
-var DOV_FIELDS = [["ovObj", "Objective"], ["ovWhy", "Why now"], ["ovRisk", "Risks &amp; mitigations"]];
+/* §422: the second entry is the area's key; its name is the layer's (ovArea). */
+var DOV_FIELDS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
 function dirOverview(it, ed){
   if (!planDetailOn("overview", it)) return "";
   var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
@@ -32726,7 +32775,7 @@ function dirOverview(it, ed){
     (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
     '<div class="dovw">' + DOV_FIELDS.map(function(f){
       var v = it[f[0]] || "";
-      return '<div class="dovc"><div class="dovk">' + f[1] + '</div>' +
+      return '<div class="dovc"><div class="dovk">' + ovArea(f[1], it) + '</div>' +
         (ed ? fieldOr("plan", v, "dovta", function(x){
                 var t = String(x == null ? "" : x);
                 if (t.trim()) it[f[0]] = t; else delete it[f[0]];
@@ -33941,6 +33990,9 @@ function detailWord(det, form, x){
   return LTraw(t, nk, form);
 }
 function DW(det, form, x){ return esc(detailWord(det, form, x)); }
+/* §422: what one of the overview's three areas is called on the subject `x`
+   holds — the layer's own name (Setup › Structure), else the platform's. */
+function ovArea(key, x){ return esc(LTraw(planSubjectOf(x), key, "one")); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
    "Capabilities" and "Functions", shortened from the defaults to fit one
@@ -44580,6 +44632,8 @@ function unitSwotSlides(u){
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
+  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
+  var pOn = planOn(u);
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
@@ -44783,13 +44837,13 @@ function deckSlides(u){
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  if (u.items.length)
+  if (pOn && u.items.length)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
         " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
 
-  if (u.items.length) S.push('<section class="dslide"' +
+  if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
     '<div class="pcards" style="--n:' + u.items.length +
@@ -44823,7 +44877,7 @@ function deckSlides(u){
     '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>';
 
-  u.items.forEach(function(p, pi){
+  (pOn ? u.items : []).forEach(function(p, pi){
     /* §416: and it gets no slides of its own until its year comes. */
     if (!runsNow(p)) return;
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
@@ -44860,10 +44914,10 @@ function deckSlides(u){
         anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
         deckPillarHead(u, p, pi, DW("overview", "one", p)) +
         '<div class="obody"><div>' +
-          (String(p.ovObj || "").trim() ? '<div class="ok">Objective</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+          (String(p.ovObj || "").trim() ? '<div class="ok">' + ovArea("ovobj", p) + '</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
           '<div class="two">' +
-            (String(p.ovWhy || "").trim() ? '<div><div class="ok">Why now</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
-            (ovRisks.length ? '<div><div class="ok">Risks &amp; mitigations</div><ul>' +
+            (String(p.ovWhy || "").trim() ? '<div><div class="ok">' + ovArea("ovwhy", p) + '</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+            (ovRisks.length ? '<div><div class="ok">' + ovArea("ovrisk", p) + '</div><ul>' +
               ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
           '</div></div>' +
           ((ovMs || ovTs) ? '<div class="side">' +
@@ -45102,7 +45156,7 @@ function deckSlides(u){
     "Where the " + L("pillar","bu") + " stand, where " +
       (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
     null));
-  if (u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
@@ -45296,6 +45350,8 @@ function deckSlidesFn(subject){
         '<tbody>' + kRows + '</tbody></table></section>');
     }
 
+    /* §422: a plan switched off draws its objectives and no plan slides. */
+    if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
       var aRows = acts.map(function(a3, i){
@@ -57286,8 +57342,23 @@ var CLIENTSETUP = (function () {
        pillars only. */
     var s3 = el("section", "stsec");
     var h3 = el("div", "stsech"); h3.appendChild(el("span", "stkind", "Plan section"));
-    h3.appendChild(el("span", "stfixed", "Always on"));
+    /* §422: the plan section switches like the first one. */
+    var pOn = SMPRules.planOn(GROUP, tgt);
+    h3.appendChild(onOff(pOn, function (v) {
+      var nx = structNow(), l = nx[k]; l.plan = l.plan || {};
+      if (v) delete l.plan.on; else l.plan.on = false;
+      if (!Object.keys(l.plan).length) delete l.plan;
+      structWrite(nx);
+    }, k + "|plan"));
     s3.appendChild(h3);
+    if (!pOn) {
+      s3.appendChild(el("p", "sthid", (k === "bu" || k === "fn")
+        ? "Not shown on this layer, nothing to report and not in the scores. Nothing entered is lost."
+        : "Not shown on this layer. Nothing entered is lost."));
+      secs.appendChild(s3); box.appendChild(secs);
+      structTail(box, L, k);
+      return;
+    }
     var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : ["pillars"];
     if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name all three ways here."));
     ways.forEach(function (way) {
@@ -57309,7 +57380,9 @@ var CLIENTSETUP = (function () {
     });
     secs.appendChild(s3);
     box.appendChild(secs);
-
+    structTail(box, L, k);
+  }
+  function structTail(box, L, k){
     if (k !== "fn") {
       /* Capabilities are their own item and sit outside the three sections
          (the mockup's own note); the tick stays, because a capability's
@@ -57345,31 +57418,55 @@ var CLIENTSETUP = (function () {
      layer set on its own stops following the client-wide answer (§413's
      `structure.details`, the fallback). Off HIDES and keeps (§44); an off
      row draws no name boxes, because nothing on this layer would read them. */
-  var DETAIL_ROWS = [["overview", "Overview"], ["outcomes", "Several outcomes"],
-                     ["requirements", "Requirements"], ["years", "Years 1 \u00b7 2 \u00b7 3"]];
+  /* §422: split in two (Islam, 2026-09-29: *"extra details general and extra
+     details for the tactics … show me the areas under the overview and show
+     me the years"*). The overview's three areas each take a name box, one
+     name each (his *"name boxes"*); the years are shown, never named (his
+     *"shown only"*). */
+  var DETAIL_GROUPS = [
+    ["Extra details \u00b7 general", [["overview", "Overview"], ["years", "Years"]]],
+    ["Extra details \u00b7 tactics", [["outcomes", "Several outcomes"], ["requirements", "Requirements"]]]
+  ];
+  var AREA_LABEL = { ovobj: "Objective", ovwhy: "Why now", ovrisk: "Risks" };
   function detailRows(wb, k, tgt){
     var layer = { top: "the top level", mid: "the second layer",
                   bu: W("unitword", "many", "Business units").toLowerCase(),
                   fn: W("fnword", "many", "Supporting functions").toLowerCase() }[k];
-    wb.appendChild(el("p", "lab", "Extra details"));
-    DETAIL_ROWS.forEach(function (d) {
-      var on = SMPRules.planDetailOn(GROUP, d[0], tgt), nk = SMPRules.DETAIL_NAMES[d[0]];
-      var r = el("div", "stpart stdet" + (on ? "" : " off"));
-      r.setAttribute("data-stdetrow", k + "|" + d[0]);
-      var t = tickBtn(on, d[1] + " for " + layer, null, function () {
-        var nx = structNow(), l = nx[k];
-        l.details = Object.assign({}, l.details || {});
-        l.details[d[0]] = !on;
-        structWrite(nx);
+    DETAIL_GROUPS.forEach(function (g) {
+      var grp = el("div", "stdetg"); grp.setAttribute("data-stdetg", k + "|" + (g[1][0][0] === "overview" ? "general" : "tactics"));
+      grp.appendChild(el("p", "lab", g[0]));
+      g[1].forEach(function (d) {
+        var on = SMPRules.planDetailOn(GROUP, d[0], tgt), nk = SMPRules.DETAIL_NAMES[d[0]];
+        var r = el("div", "stpart stdet" + (on ? "" : " off"));
+        r.setAttribute("data-stdetrow", k + "|" + d[0]);
+        var t = tickBtn(on, d[1] + " for " + layer, null, function () {
+          var nx = structNow(), l = nx[k];
+          l.details = Object.assign({}, l.details || {});
+          l.details[d[0]] = !on;
+          structWrite(nx);
+        });
+        t.setAttribute("data-stdetail", k + "|" + d[0]);
+        r.appendChild(t);
+        r.appendChild(el("span", "stdetn", d[1]));
+        if (on && nk) {
+          r.appendChild(nameBox(k, nk, "one", d[1] + ", one"));
+          r.appendChild(nameBox(k, nk, "many", d[1] + ", many"));
+        } else if (on && d[0] === "years") {
+          var ys = el("span", "styears"); ys.setAttribute("data-styears", k);
+          [1, 2, 3].forEach(function (n) { ys.appendChild(el("span", "styr", "Year " + n)); });
+          r.appendChild(ys);
+        } else r.appendChild(el("span", "stdetw", "Off for " + layer));
+        grp.appendChild(r);
+        if (on && d[0] === "overview") SMPRules.OVERVIEW_AREAS.forEach(function (a) {
+          var sr = el("div", "stpart stdet stsub"); sr.setAttribute("data-stdetrow", k + "|" + a[1]);
+          sr.appendChild(el("span"));
+          sr.appendChild(el("span", "stdetn", AREA_LABEL[a[1]]));
+          sr.appendChild(nameBox(k, a[1], "one", AREA_LABEL[a[1]] + ", name"));
+          sr.appendChild(el("span"));
+          grp.appendChild(sr);
+        });
       });
-      t.setAttribute("data-stdetail", k + "|" + d[0]);
-      r.appendChild(t);
-      r.appendChild(el("span", "stdetn", d[1]));
-      if (on && nk) {
-        r.appendChild(nameBox(k, nk, "one", d[1] + ", one"));
-        r.appendChild(nameBox(k, nk, "many", d[1] + ", many"));
-      } else r.appendChild(el("span", "stdetw", on ? "No names needed" : "Off for " + layer));
-      wb.appendChild(r);
+      wb.appendChild(grp);
     });
   }
   function structureStep(box){
@@ -59435,7 +59532,9 @@ var SYNC = (function () {
                           planning; unnamed, it is what it always was. */
                        label: SMPRules.planTitle(GROUP, k, fmt) ||
                               (fmt === "projects" ? L("project") : "Plan"),
-                       render:renderFnProjects };
+                       render:renderFnProjects,
+                       /* §422: the layer may switch its plan section off. */
+                       when: function(t){ return planOn(t); } };
           /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
              FORMAT. §211.2 removed the Overview here on a premise measured
              against the wrong field name and simply WRONG: a pillars function
@@ -59477,7 +59576,8 @@ var SYNC = (function () {
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
+        when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB
@@ -59544,7 +59644,8 @@ var SYNC = (function () {
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan },
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
+                    when: function(t){ return planOn(t); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -59600,7 +59701,8 @@ var SYNC = (function () {
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
+        when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB

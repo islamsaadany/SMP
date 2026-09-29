@@ -274,9 +274,3 @@
   .csetup .stsec { border-right:0; border-bottom:1px solid var(--line); }
   .csetup .stsec:last-child { border-bottom:0; }
 }
-/* §422: the extra details in two groups, the overview's areas under it,
-   and the years shown as chips. */
-.csetup .stdetg { display:grid; gap:6px; border-top:1px solid var(--line); padding-top:6px; margin-top:4px; }
-.csetup .stpart.stsub .stdetn { padding-left:14px; color:var(--ink-2); }
-.csetup .styears { grid-column:3 / 5; display:flex; gap:6px; flex-wrap:wrap; }
-.csetup .styr { border:1px solid var(--line); border-radius:12px; padding:2px 10px; font-size:12px; color:var(--ink-2); background:var(--surface); }

@@ -2710,6 +2710,7 @@ function renderUnitPerformance(u){
   if (uw) return uw === "objectives" ? fnObjPerformance("u:" + u.ukey) : renderFnPerformance("u:" + u.ukey);
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
+  var pOn = planOn(u);
   /* §264: the same two questions the pillar card had. The membership comes from
      `scorableKOs()` — koScore()'s own list — so the Highest can never name an
      objective the headline above it left out, and the figure is the SCORE the
@@ -2853,6 +2854,9 @@ function renderUnitPerformance(u){
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
+      /* §422: a plan switched off scores nothing, so its two cards go and
+         the objectives stand alone. */
+      (!pOn ? '' : (
       '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
@@ -2870,7 +2874,7 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
-          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
+          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>')) +
       /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
          §6.3's one promise: each section carries BOTH headline numbers, so
          whichever you are standing in you can see the other and cross. Drawn
@@ -2889,7 +2893,7 @@ function renderUnitPerformance(u){
     /* The arrange hint went with the button (§63.3): reordering is decided on
        the plan now, and a hint on a page with no control is a hint about
        something you cannot do from here. */
-    section("", "", null, unitPerfRail(u));
+    (pOn ? section("", "", null, unitPerfRail(u)) : planOffNote());
 }
 
 /* ── Foundation ────────────────────────────────────────────────────
@@ -7281,6 +7285,12 @@ function renderFnPerformance(fnKey){
      1372 — a unit's pixels exactly, which is the assertion the check makes
      (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(target);
+  /* §422: a plan switched off shows each holder's objectives and nothing the
+     plan would have scored. */
+  if (!planOn(target)) return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
+      : presentMenu(isCapTarget(target) ? "cap" : "fn", isCapTarget(target) ? capKeyOf(target) : fk)) +
+    caps.map(function(c){ return '<div class="capbody">' + capKOTable(c) + '</div>'; }).join("") +
+    planOffNote();
   return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
     : presentMenu(isCapTarget(target) ? "cap" : "fn",
                   isCapTarget(target) ? capKeyOf(target) : fk)) +
@@ -7788,7 +7798,12 @@ function fnObjPerfTables(fk){
     '<h4 class="mini">' + L("action") + '</h4>' +
     miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
 }
+/* §422: said where a plan switched off would have been scored. */
+function planOffNote(){
+  return '<div class="note" data-planoff="1">The plan section is switched off for this layer, so there is nothing to score. Nothing entered is lost.</div>';
+}
 function fnObjPerformance(fk){
+  if (!planOn(holderTarget(fk))) return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) + planOffNote();
   /* §405: a unit planning this way presents as the UNIT it is. */
   return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) +
     '<div class="capbody">' + fnObjCards(fk) + fnObjPerfTables(fk) + '</div>';
@@ -8601,7 +8616,8 @@ function pillarBand(code, name, right, kind, cls){
    first word could never be written (§61). Written by the office alone,
    because these are plan fields and the plan's pen is the office's (§94). */
 var DOV_OPEN = {};
-var DOV_FIELDS = [["ovObj", "Objective"], ["ovWhy", "Why now"], ["ovRisk", "Risks &amp; mitigations"]];
+/* §422: the second entry is the area's key; its name is the layer's (ovArea). */
+var DOV_FIELDS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
 function dirOverview(it, ed){
   if (!planDetailOn("overview", it)) return "";
   var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
@@ -8612,7 +8628,7 @@ function dirOverview(it, ed){
     (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
     '<div class="dovw">' + DOV_FIELDS.map(function(f){
       var v = it[f[0]] || "";
-      return '<div class="dovc"><div class="dovk">' + f[1] + '</div>' +
+      return '<div class="dovc"><div class="dovk">' + ovArea(f[1], it) + '</div>' +
         (ed ? fieldOr("plan", v, "dovta", function(x){
                 var t = String(x == null ? "" : x);
                 if (t.trim()) it[f[0]] = t; else delete it[f[0]];

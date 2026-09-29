@@ -363,7 +363,9 @@
                           planning; unnamed, it is what it always was. */
                        label: SMPRules.planTitle(GROUP, k, fmt) ||
                               (fmt === "projects" ? L("project") : "Plan"),
-                       render:renderFnProjects };
+                       render:renderFnProjects,
+                       /* §422: the layer may switch its plan section off. */
+                       when: function(t){ return planOn(t); } };
           /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
              FORMAT. §211.2 removed the Overview here on a premise measured
              against the wrong field name and simply WRONG: a pillars function
@@ -405,7 +407,8 @@
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
+        when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB
@@ -472,7 +475,8 @@
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan },
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
+                    when: function(t){ return planOn(t); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -528,7 +532,8 @@
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState(); },
+        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
+        when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB

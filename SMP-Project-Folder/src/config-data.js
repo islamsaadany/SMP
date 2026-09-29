@@ -152,6 +152,10 @@ function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
    tactic, which is resolved to the subject that holds it. With nothing
    given, the page being drawn (TARGET) is the subject. */
 function planDetailOn(key, x){ return SMPRules.planDetailOn(GROUP, key, planSubjectOf(x)); }
+/* §422: whether the subject `x` belongs to a layer whose plan section is on.
+   Off, the plan is hidden and kept: its rows leave every score, the report
+   asks nothing and the board draws no row — asked here, once, by all of them. */
+function planOn(x){ return SMPRules.planOn(GROUP, planSubjectOf(x)); }
 /* §420: which subject a plan row belongs to. The pillars and tactics of every
    unit, pillars function and pillars capability are indexed once per
    synchronous task (a render walks thousands of rows and must not walk the
@@ -5101,6 +5105,7 @@ function canSpeakFor(target){
 function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
   var t = String(target || "");
+  if (t && !planOn(t)) return false;
   if (t === "group" || t.indexOf("co:") === 0) return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
@@ -5427,6 +5432,7 @@ function outstandingSources(u){
    target, and the tactics whose quarters fall inside the window. A tactic
    outside it is not an empty box somebody forgot \u2014 it is not asked. */
 function reportItems(u){
+  if (u && !planOn(u)) return [];
   /* §405: a unit that plans otherwise is asked what its holder holds — the
      function's own list, over `u:<key>` (§53.5: one walk, never a second). */
   if (unitOwnWay(u)) return fnReportItems("u:" + u.ukey);
@@ -5591,6 +5597,7 @@ function missingNotes(u){ return askedItems(u).filter(needsNote); }
    comes to say something a Reporting page does not (§53.5). Every caller that
    still hands a bare key keeps working, because `capsShown` resolves it. */
 function fnReportItems(subject){
+  if (subject && !planOn(subject)) return [];
   var out = [];
   capsShown(subject).forEach(function(c){
     /* §279: a capability's objectives sit above its rail and each project is
@@ -6029,14 +6036,14 @@ function reportState(c, key){
    TWO LISTS, because the totals must have exactly the membership the rows
    have: §108.1's miscount is the parts growing while the divisor did not. */
 function boardUnitTargets(){
-  return activeKeys();
+  return activeKeys().filter(function(k){ return planOn(k); });
 }
 /* Every supporting function that can be asked for a report, in ONE list and in
    the register's own order. A pillars function has no capabilities to count, so
    what it must have instead is a plan of its own -- a row for a subject nobody
    can report on is a row nobody can clear (§61). */
 function boardFunctionTargets(){
-  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; });
+  return boardFunctionKeys().map(function(fk){ return "fn:" + fk; }).filter(function(t){ return planOn(t); });
 }
 /* ── EVERY SUBJECT THAT REPORTS HAS A ROW (§244's rule, §334) ──────────────
    Islam's *"yes for all"* to the question the mockup asked: a capability has
@@ -7199,6 +7206,7 @@ function planYear(){ return SMPRules.planYearOf(GROUP); }
 function pillarYears(p){ return SMPRules.pillarYears(p); }
 function runsNow(p){ return SMPRules.runsNow(GROUP, p, planSubjectOf(p)); }
 function itemsNow(u){
+  if (u && !planOn(u)) return [];
   var it = (u && u.items) || [];
   return yearsOn(u) ? it.filter(runsNow) : it;
 }
@@ -8457,6 +8465,7 @@ function unitOwnWay(u){
   return (u && u.ukey && UNITS[u.ukey] === u && unitFormat(u) !== "pillars") ? unitFormat(u) : null;
 }
 function unitOwnExec(u){
+  if (!planOn(u)) return null;
   var h = unitOwnHolder(u.ukey);
   if (!h) return null;
   return unitOwnWay(u) === "objectives" ? fnActionsTally("u:" + u.ukey).pct : capExec(h).pct;
@@ -10607,6 +10616,13 @@ function fnCoWeightSet(fk){
 function fnMemberScores(fk){
   var f = FUNCTIONS[fk];
   if (!f) return { perf:null, exec:null };
+  /* §422: a plan switched off scores no execution; the objectives stand. */
+  if (!planOn("fn:" + fk)) {
+    var o = fnPlansInPillars(f) ? (unitLike("fn:" + fk) ? unitObjectives(unitLike("fn:" + fk)) : null)
+          : fnPlansInObjectives(f) ? fnObjScore(fk)
+          : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
+    return { perf: o, exec: null };
+  }
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
     return u ? { perf: unitObjectives(u), exec: unitRatio(u) } : { perf:null, exec:null };

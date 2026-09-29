@@ -9891,6 +9891,11 @@ python3 checks/detail-layers.py # the plan details per layer (§420): the rule
                                 # asked per layer with the client-wide fallback, the
                                 # names reaching the page, and the Structure step's
                                 # rows pressed and read back. Red 2 ways from the sources
+python3 checks/plan-switch.py   # the plan section switches per layer and the extra
+                                # details split in two (§422): Off asks nothing, scores
+                                # nothing, draws no board row and no plan slides, loses
+                                # nothing; the overview's three area names reach the page.
+                                # Red 1 / 3 / 1 from the sources
 python3 checks/structure-sections.py # each layer's three sections as the pages read
                                 # them (&sect;418): the first section off, titles,
                                 # S&amp;W boxes, names per layer (unit and function
@@ -10651,7 +10656,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-29 — **§420: each layer has its own switches for the plan details.** Islam: *"every layer or area like units and functions should have their separate options and switches"*, then *"ok build it"* from the round-2 mockup. The four details (overview, several outcomes, requirements, years) are ticked and named per layer under each layer's Plan section on the Structure step, stored on `structure[level].details`, with the old client-wide switch as the fallback so nothing moves on upgrade. `SMPRules.planDetailOn(group,key,target)` asks the layer; a tactic's single outcome keeps "Outcome" where several-outcomes is off; the yearly revision stays client-wide. `checks/detail-layers.py` red two ways from the sources. On the branch, not merged.*
+*Last Updated: 2026-09-29 — **§421–§422: the top level's type can be changed on a client with a plan, and the plan section switches.** §421: the Group/Company/Holding buttons were greyed by the shape freeze on a client with a plan; a word is not the shape (§417), so they write live now, with a notice saying what is still changeable. §422, from the mockup Islam answered *"1. name boxes 2. shown only 3. yes, build it"*: every layer's plan section has an On/Off (`structure[level].plan.on`, an absence, read by `SMPRules.planOn`); for units and functions Off hides the plan section and the Reporting tab, asks nothing, draws no board row and no plan slides, and scores execution null while the objectives stay; at the top and second layer it only hides the plan names. The extra details split into general (overview + three area name boxes `ovobj`/`ovwhy`/`ovrisk`; years as Year 1·2·3 chips) and tactics (several outcomes, requirements); area names reach the page and deck via `ovArea`, workbook heads unchanged. `checks/plan-switch.py` red three ways from the sources. On the branch, not merged.*
+
+*Earlier: 2026-09-29 — **§420: each layer has its own switches for the plan details.** Islam: *"every layer or area like units and functions should have their separate options and switches"*, then *"ok build it"* from the round-2 mockup. The four details (overview, several outcomes, requirements, years) are ticked and named per layer under each layer's Plan section on the Structure step, stored on `structure[level].details`, with the old client-wide switch as the fallback so nothing moves on upgrade. `SMPRules.planDetailOn(group,key,target)` asks the layer; a tactic's single outcome keeps "Outcome" where several-outcomes is off; the yearly revision stays client-wide. `checks/detail-layers.py` red two ways from the sources. On the branch, not merged.*
 
 *Earlier: 2026-09-29 — **§418.1: the Structure step keeps every key it does not draw.** Checked `claude/exciting-bardeen-szm6n3` against §418 by trial merge: its Plan details switches live on the same `GROUP.structure` object and both sides rewrote `structNow()`, so either side alone would wipe the other's settings. `structNow()` now starts from a copy of the whole stored structure; `structure.py` asserts it (1 red with the old start). All checks of both branches green on the merged copy. On the branch, not merged.*
 

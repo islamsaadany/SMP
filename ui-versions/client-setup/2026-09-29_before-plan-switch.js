@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1587,23 +1586,8 @@ var CLIENTSETUP = (function () {
        pillars only. */
     var s3 = el("section", "stsec");
     var h3 = el("div", "stsech"); h3.appendChild(el("span", "stkind", "Plan section"));
-    /* §422: the plan section switches like the first one. */
-    var pOn = SMPRules.planOn(GROUP, tgt);
-    h3.appendChild(onOff(pOn, function (v) {
-      var nx = structNow(), l = nx[k]; l.plan = l.plan || {};
-      if (v) delete l.plan.on; else l.plan.on = false;
-      if (!Object.keys(l.plan).length) delete l.plan;
-      structWrite(nx);
-    }, k + "|plan"));
+    h3.appendChild(el("span", "stfixed", "Always on"));
     s3.appendChild(h3);
-    if (!pOn) {
-      s3.appendChild(el("p", "sthid", (k === "bu" || k === "fn")
-        ? "Not shown on this layer, nothing to report and not in the scores. Nothing entered is lost."
-        : "Not shown on this layer. Nothing entered is lost."));
-      secs.appendChild(s3); box.appendChild(secs);
-      structTail(box, L, k);
-      return;
-    }
     var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : ["pillars"];
     if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name all three ways here."));
     ways.forEach(function (way) {
@@ -1625,9 +1609,7 @@ var CLIENTSETUP = (function () {
     });
     secs.appendChild(s3);
     box.appendChild(secs);
-    structTail(box, L, k);
-  }
-  function structTail(box, L, k){
+
     if (k !== "fn") {
       /* Capabilities are their own item and sit outside the three sections
          (the mockup's own note); the tick stays, because a capability's
@@ -1663,55 +1645,31 @@ var CLIENTSETUP = (function () {
      layer set on its own stops following the client-wide answer (§413's
      `structure.details`, the fallback). Off HIDES and keeps (§44); an off
      row draws no name boxes, because nothing on this layer would read them. */
-  /* §422: split in two (Islam, 2026-09-29: *"extra details general and extra
-     details for the tactics … show me the areas under the overview and show
-     me the years"*). The overview's three areas each take a name box, one
-     name each (his *"name boxes"*); the years are shown, never named (his
-     *"shown only"*). */
-  var DETAIL_GROUPS = [
-    ["Extra details \u00b7 general", [["overview", "Overview"], ["years", "Years"]]],
-    ["Extra details \u00b7 tactics", [["outcomes", "Several outcomes"], ["requirements", "Requirements"]]]
-  ];
-  var AREA_LABEL = { ovobj: "Objective", ovwhy: "Why now", ovrisk: "Risks" };
+  var DETAIL_ROWS = [["overview", "Overview"], ["outcomes", "Several outcomes"],
+                     ["requirements", "Requirements"], ["years", "Years 1 \u00b7 2 \u00b7 3"]];
   function detailRows(wb, k, tgt){
     var layer = { top: "the top level", mid: "the second layer",
                   bu: W("unitword", "many", "Business units").toLowerCase(),
                   fn: W("fnword", "many", "Supporting functions").toLowerCase() }[k];
-    DETAIL_GROUPS.forEach(function (g) {
-      var grp = el("div", "stdetg"); grp.setAttribute("data-stdetg", k + "|" + (g[1][0][0] === "overview" ? "general" : "tactics"));
-      grp.appendChild(el("p", "lab", g[0]));
-      g[1].forEach(function (d) {
-        var on = SMPRules.planDetailOn(GROUP, d[0], tgt), nk = SMPRules.DETAIL_NAMES[d[0]];
-        var r = el("div", "stpart stdet" + (on ? "" : " off"));
-        r.setAttribute("data-stdetrow", k + "|" + d[0]);
-        var t = tickBtn(on, d[1] + " for " + layer, null, function () {
-          var nx = structNow(), l = nx[k];
-          l.details = Object.assign({}, l.details || {});
-          l.details[d[0]] = !on;
-          structWrite(nx);
-        });
-        t.setAttribute("data-stdetail", k + "|" + d[0]);
-        r.appendChild(t);
-        r.appendChild(el("span", "stdetn", d[1]));
-        if (on && nk) {
-          r.appendChild(nameBox(k, nk, "one", d[1] + ", one"));
-          r.appendChild(nameBox(k, nk, "many", d[1] + ", many"));
-        } else if (on && d[0] === "years") {
-          var ys = el("span", "styears"); ys.setAttribute("data-styears", k);
-          [1, 2, 3].forEach(function (n) { ys.appendChild(el("span", "styr", "Year " + n)); });
-          r.appendChild(ys);
-        } else r.appendChild(el("span", "stdetw", "Off for " + layer));
-        grp.appendChild(r);
-        if (on && d[0] === "overview") SMPRules.OVERVIEW_AREAS.forEach(function (a) {
-          var sr = el("div", "stpart stdet stsub"); sr.setAttribute("data-stdetrow", k + "|" + a[1]);
-          sr.appendChild(el("span"));
-          sr.appendChild(el("span", "stdetn", AREA_LABEL[a[1]]));
-          sr.appendChild(nameBox(k, a[1], "one", AREA_LABEL[a[1]] + ", name"));
-          sr.appendChild(el("span"));
-          grp.appendChild(sr);
-        });
+    wb.appendChild(el("p", "lab", "Extra details"));
+    DETAIL_ROWS.forEach(function (d) {
+      var on = SMPRules.planDetailOn(GROUP, d[0], tgt), nk = SMPRules.DETAIL_NAMES[d[0]];
+      var r = el("div", "stpart stdet" + (on ? "" : " off"));
+      r.setAttribute("data-stdetrow", k + "|" + d[0]);
+      var t = tickBtn(on, d[1] + " for " + layer, null, function () {
+        var nx = structNow(), l = nx[k];
+        l.details = Object.assign({}, l.details || {});
+        l.details[d[0]] = !on;
+        structWrite(nx);
       });
-      wb.appendChild(grp);
+      t.setAttribute("data-stdetail", k + "|" + d[0]);
+      r.appendChild(t);
+      r.appendChild(el("span", "stdetn", d[1]));
+      if (on && nk) {
+        r.appendChild(nameBox(k, nk, "one", d[1] + ", one"));
+        r.appendChild(nameBox(k, nk, "many", d[1] + ", many"));
+      } else r.appendChild(el("span", "stdetw", on ? "No names needed" : "Off for " + layer));
+      wb.appendChild(r);
     });
   }
   function structureStep(box){

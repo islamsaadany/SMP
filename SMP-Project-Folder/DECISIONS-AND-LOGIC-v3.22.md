@@ -58524,3 +58524,63 @@ the sources; the four detail checks rewritten to press the per-layer ticks
 (storing `structure.bu.details.KEY`, touching no other layer), never loosened;
 the structure family, the deck/workbook/plan-builder neighbours, 797/0 server
 rules, 140/0 change list and the full page sweep.
+
+## §421 — the top level's name can be changed on a client with a plan (2026-09-29, on the branch)
+
+Islam: *"I'm trying to adjust the top level type to company but I can't."* On a
+client that holds a plan (§417's frozen shape) the Structure step drew the
+top level's Group / Company / Holding buttons and the second layer's Company /
+Division / Sector buttons **greyed**, because `namePick` handed them the shape
+freeze. But a word is not the shape — §417 already made every name box on that
+step write live to `LABELS` — so the freeze reached a control it was never
+about. The buttons now work on a client with a plan (the `ro` argument is kept
+and unused, with a comment saying why), the lit button follows the pick, and
+the flow's own words (`S.shape.words`) are updated beside `LABELS` so the
+summary does not contradict the step. **A notice says what is still
+changeable**: *"This client has a plan in it, so its lists of units and
+functions are set. Every name and switch on this step can still be changed, and
+saves as you change it."* Checked: `checks/structure.py` §6b presses Company on a
+client with a plan and reads the stored word back; the check's own *"has a plan
+in it"* absence assertion was rewritten to the sentence it was actually about
+(§218). `client-setup-outside.py`'s 29 failures reproduce identically on the
+build before this change (§303) and are recorded, not touched.
+
+## §422 — the plan section switches, and the extra details split in two (2026-09-29, on the branch)
+
+Islam: *"for the extra details you can split it to extra details general and
+extra details for the tactics … show me the areas under the overview and show
+me the years … and for the several outcomes and requirements these should be
+under the tactics options not generic … and for the top level make the plan
+section on and off as well and same for the BUs and functions"*, then of the
+mockup's three questions, *"1. name boxes 2. shown only 3. yes, build it"*.
+
+- **The plan section has an On/Off on every layer** (`structure[level].plan.on
+  = false`, stored as an absence, §50.6), read by `SMPRules.planOn(group,
+  target)` and the browser's `planOn(x)`. Off hides and keeps (§44).
+- **What Off means for a business unit or a function is his *"yes"***: the Plan
+  section and the Reporting tab are not offered; `reportItems`,
+  `fnReportItems` and `reportPending` ask nothing; the cycle board draws no row;
+  `itemsNow` returns nothing, so its pillars and execution score null and it
+  leaves the group's execution figure (`weightedOver` skips null); a function's
+  `fnMemberScores` keeps its objectives and drops execution; the Performance
+  page keeps the objectives and says, in one line, that the plan is off; the
+  review deck and the plan download draw no plan slides. **The key objectives
+  stay** — they are the first section's, not the plan's.
+- **At the top level and the second layer there is no plan page**, so there the
+  switch only hides the plan names on the Structure step. Said here rather than
+  implied.
+- **The extra details are two groups** under the pillars way: *general* (the
+  overview, with its three areas each taking ONE name box — `ovobj` · `ovwhy` ·
+  `ovrisk`, new keys in `PART_DEFAULTS` — and the years, shown as Year 1 · 2 · 3
+  chips with no name) and *tactics* (several outcomes, requirements).
+- **The area names reach the page and the deck** through `ovArea(key, x)` (the
+  layer's name, else the platform's). **The workbook's column heads do not
+  move** — a header is a contract (§22, §65).
+- No migration, no schema change, no server rule.
+
+Checked: `checks/plan-switch.py` (both ends — the units off beside a pillars
+function on; nothing to report, nothing scored, off the board, no plan slides;
+nothing written lost; the Structure step's switch, groups, area name boxes and
+year chips pressed and read back), red three ways from the sources (1 / 3 / 1:
+`itemsNow` ungated, the two groups merged, the area labels fixed). The structure
+family, the detail checks and the full sweep green.

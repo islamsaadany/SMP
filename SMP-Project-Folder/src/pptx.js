@@ -461,7 +461,8 @@ function pptxUnitSlides(u, kicker){
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
-  (u.items || []).forEach(function(p, pi){
+  /* §422: a plan section switched off leaves the plan out of its slides too. */
+  (planOn(u) ? (u.items || []) : []).forEach(function(p, pi){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
     /* §416: the plan download carries every direction — it is the plan —
        and names the years each runs in beside its code. */

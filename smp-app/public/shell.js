@@ -69216,6 +69216,7 @@ var SYNC = (function () {
         var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
         if (!b) return;
         var go = b.dataset.trgo;
+        if (b.getAttribute("aria-current") === "true") { Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; }); return; }
         Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
@@ -69278,16 +69279,23 @@ var SYNC = (function () {
        On the client's settings the menu held only the modules' SETTINGS, and
        on a module's own settings it left out the module you are in — so
        neither had a way back into a module. Now: the modules, a rule, then
-       the settings pages. The module you are in is left out only on its own
-       normal page, where it is the step's own name and there is nowhere to go
-       back to (§401). */
+       the settings pages. (Its leaving out the module you are on, on that
+       module's normal page, is reversed by §413 below.) */
+    /* §413: ONE FULL LIST IN EVERY CASE (Islam: "why don't I see the 2nd
+       full list in all cases?"). Every module, a rule, every module's
+       settings, then Client settings — on a module's page, on its settings
+       and on the client's settings alike. The page you are on is the bold
+       entry (aria-current) and pressing it does nothing. */
     var modItems = [];
     mods.forEach(function (x) {
-      if (!cs && !onSetup && x.key === MODULE) return;
-      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key });
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key,
+                      here: !cs && !onSetup && x.key === MODULE });
     });
     if (modItems.length) modItems.push({ rule: true });
-    if (cs) mods.forEach(function (x) { modItems.push({ label: x.label + " settings", go: "cross:" + x.key }); });
+    mods.forEach(function (x) {
+      modItems.push({ label: x.label + " settings", go: "cross:" + x.key,
+                      here: !cs && onSetup && x.key === MODULE });
+    });
     modItems.push({ label: "Client settings", go: "cross:client", here: cs });
     var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
       esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";

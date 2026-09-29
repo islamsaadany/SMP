@@ -793,17 +793,21 @@ if (browser) {
   await page.locator("nav.trail .trmod > summary").click();
   await page.waitForTimeout(200);
   const items = await page.locator("nav.trail .trmod .menu button").allInnerTexts();
-  const OTHERS = MENU.filter((m) => m.key !== DEFAULT_MODULE);
-  const modItems = items.slice(0, OTHERS.length);
-  check("the module step lists every OTHER module this client has, in order",
-    OTHERS.length > 0 && OTHERS.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
+  /* §413 REWRITTEN, NEVER LOOSENED (§218): the module step is ONE full list
+     everywhere — every module this client has (the one you are in included,
+     bold), a rule, every module's settings, then Client settings. */
+  const modItems = items.slice(0, MENU.length);
+  check("the module step lists every module this client has, in order, the one you are in included (§413)",
+    MENU.length > 0 && MENU.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
   check("…each with the line the server gave it, never one worked out from the key",
-    OTHERS.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
-  check("…and NOT the module you are in — it is the step's own name (§401)",
-    !items.some((t) => t.split("\n")[0] === MODULE_DEF[DEFAULT_MODULE].label), items.join(" | "));
-  const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim()));
-  check("…then a rule, then Client settings, last",
-    tail.length >= 2 && tail[tail.length - 2] === "|" && tail[tail.length - 1] === "Client settings", JSON.stringify(tail));
+    MENU.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+  const bold = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu [aria-current='true']")).map((e) => e.textContent.trim().split("\n")[0]));
+  check("…with the module you are in the one bold entry (§413)",
+    bold.length === 1 && bold[0].startsWith(MODULE_DEF[DEFAULT_MODULE].label), JSON.stringify(bold));
+  const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim().split("\n")[0]));
+  const wantTail = ["|"].concat(MENU.map((m) => m.label + " settings"), ["Client settings"]);
+  check("…then a rule, every module's settings, then Client settings, last (§413)",
+    JSON.stringify(tail.slice(MENU.length)) === JSON.stringify(wantTail), JSON.stringify(tail));
   const box = await page.locator("nav.trail .trmod .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
   /* the client step is the server's list less the client you are on (§401) */
@@ -831,8 +835,11 @@ if (browser) {
   await one.waitForTimeout(250);
   await one.locator("nav.trail .trmod > summary").click().catch(() => {});
   const oneItems = await one.locator("nav.trail .trmod .menu > *").allInnerTexts();
-  check("a client with ONE module offers no other module and no rule — only Client settings",
-    oneItems.length === 1 && oneItems[0].trim() === "Client settings", JSON.stringify(oneItems));
+  /* §413: the same full list with one module — the module, a rule, its
+     settings, Client settings */
+  const oneLabel = MODULE_DEF[DEFAULT_MODULE].label;
+  check("a client with ONE module offers it, a rule, its settings and Client settings (§413)",
+    oneItems.length === 4 && oneItems[0].trim().startsWith(oneLabel) && oneItems[2].trim() === oneLabel + " settings" && oneItems[3].trim() === "Client settings", JSON.stringify(oneItems));
   /* BOTH ENDS (§94.2): a build that drew the trail for everybody passes
      everything above. */
   const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });

@@ -1,0 +1,94 @@
+<title>Top Layer Plan</title>
+<style>
+:root{--bg:#F5F7FA;--card:#FFFFFF;--ink:#16325C;--ink2:#3C4A5E;--quiet:#5B6778;--line:#D6DCE5;--gold:#C9A227;--goldbg:#FBF3DC;
+ --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}
+body{background:var(--bg);color:var(--ink2);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 80px}
+header{border-bottom:3px solid var(--gold);padding-bottom:16px;margin-bottom:28px}
+.kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--quiet);font-weight:700}
+h1{color:var(--ink);font-size:30px;margin:6px 0 8px;text-wrap:balance}
+h2{color:var(--ink);font-size:21px;margin:0 0 6px;text-wrap:balance}
+p{margin:0 0 10px;max-width:72ch}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.num{display:inline-block;background:var(--ink);color:var(--card);border-radius:50%;width:26px;height:26px;text-align:center;line-height:26px;font-weight:700;font-size:13px;margin-right:8px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){.pair{grid-template-columns:1fr}}
+figure{margin:0;min-width:0}
+figcaption{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--quiet);margin-bottom:6px}
+figcaption.new{color:var(--gold)}
+figure img{display:block;width:100%;border:1px solid var(--line);border-radius:6px}
+ul{margin:0;padding-left:20px}li{margin:3px 0}
+.note{background:var(--goldbg);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;font-size:14px;color:var(--ink2)}
+.slides{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.slide{aspect-ratio:16/9;max-width:100%;border:1px solid var(--line);border-radius:6px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;background:var(--card);font-size:13px;color:var(--ink)}
+.slide b{font-size:14px}.slide.div{background:#16325C;color:#fff;border-color:#16325C}.slide.old{opacity:.55}
+.slide span{font-size:11px;color:var(--quiet)}.slide.div span{color:#C9D3E3}
+</style>
+<div class="wrap">
+<header>
+ <div class="kick">Mockup for sign-off · 30 September 2026</div>
+ <h1>The top layer gets its own plan, and capabilities get their own card</h1>
+ <p>Shot from the running platform, with the new parts laid in. The content is the demo's own words used as a stand-in; the gold outline marks what is new. The top layer shows here under its client word, <b>Group</b>.</p>
+</header>
+
+<section>
+ <h2><span class="num">1</span>A Strategy tab on the top layer, with its own SWOT</h2>
+ <p>The top layer's row of tabs gains <b>Strategy</b> at the front and an orange <b>Reporting</b> at the end — the same two a business unit has. Focus, Temple and Weighting stay where they are. Inside Strategy: Foundation, SWOT and Plan. The SWOT is four boxes about the whole top layer, one slide in its deck.</p>
+ <div class="pair">
+  <figure><figcaption>Today — the top layer</figcaption><img src="shots/perf-today.png" alt="The top layer today: Performance, Foundation, Focus, Temple, Weighting"></figure>
+  <figure><figcaption class="new">Proposed — Strategy › SWOT</figcaption><img src="shots/top-swot.png" alt="Proposed top layer SWOT"></figure>
+ </div>
+ <div class="note">Today's Foundation tab moves inside Strategy as its first section, the way a unit's does. Nothing in it changes.</div>
+</section>
+
+<section>
+ <h2><span class="num">2</span>Its plan is pillars, key measures and tactics</h2>
+ <p>The same page a business unit plans on, and pillars only. The SMO team writes it; nobody else holds the pen.</p>
+ <figure><figcaption class="new">Proposed — Strategy › Plan</figcaption><img src="shots/top-plan.png" alt="Proposed top layer plan"></figure>
+ <div class="note">Pillars here are not the Temple's themes. The Temple stays a picture drawn from the aspiration, the North Star and the themes; it does not read these pillars.</div>
+</section>
+
+<section>
+ <h2><span class="num">3</span>It reports like a unit</h2>
+ <p>The SMO team and the top layer's CEO enter the figures and press Submit. Same boxes, same notes rule, same Submit rule as a unit.</p>
+ <figure><figcaption class="new">Proposed — Reporting</figcaption><img src="shots/top-report.png" alt="Proposed top layer reporting"></figure>
+</section>
+
+<section>
+ <h2><span class="num">4</span>Its own score, beside the units' score — not mixed in</h2>
+ <p>A new card sits after the top layer's key objectives. Every number that is on this page today stays exactly as it is.</p>
+ <figure><figcaption class="new">Proposed — Performance</figcaption><img src="shots/perf-proposed.png" alt="Proposed performance with a new own-plan card"></figure>
+</section>
+
+<section>
+ <h2><span class="num">5</span>A row on the cycle board</h2>
+ <p>The office sees whether the top layer has reported, first on the list, the same way it sees every unit.</p>
+ <figure><figcaption class="new">Proposed — Setup › Reporting cycle</figcaption><img src="shots/board-proposed.png" alt="Cycle board with the top layer's row first"></figure>
+</section>
+
+<section>
+ <h2><span class="num">6</span>Its slides open its deck</h2>
+ <p>Before today's slides, the top layer's own: its SWOT, then per pillar the key measures and the tactics — built by the same slide builder a unit's deck uses.</p>
+ <div class="slides">
+  <div class="slide">Cover<span>unchanged</span></div>
+  <div class="slide div"><b>SWOT</b><span>new · one slide</span></div>
+  <div class="slide div"><b>GR01 · Key measures</b><span>new · per pillar</span></div>
+  <div class="slide div"><b>GR01 · Tactics</b><span>new · per pillar</span></div>
+  <div class="slide old">Today's slides<span>unchanged, after</span></div>
+ </div>
+</section>
+
+<section>
+ <h2><span class="num">7</span>Capabilities get their own card on Structure</h2>
+ <p>A fifth card after Supporting Functions, with the same three sections. A capability plans in pillars or in projects, so its plan section names those two ways only. Until somebody changes it, the card holds exactly what the functions' card holds today — nothing moves for any client.</p>
+ <div class="pair">
+  <figure><figcaption>Today — Supporting Functions card</figcaption><img src="shots/card-fns-today.png" alt="Functions card today"></figure>
+  <figure><figcaption class="new">Proposed — Capabilities card</figcaption><img src="shots/card-caps-proposed.png" alt="New capabilities card"></figure>
+ </div>
+ <p>And the <b>Carries capabilities</b> tick goes from the top layer, second layer and business units cards, since the card now answers it.</p>
+ <figure><figcaption>Top level card foot — today, then proposed</figcaption><img src="shots/x-feet.png" alt="The Carries capabilities tick removed"></figure>
+ <div class="note">One thing to see: the Temple's note still says its base is the capabilities. With the tick gone, the base shows when the Capabilities card is On.</div>
+</section>
+</div>

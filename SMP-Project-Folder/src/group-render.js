@@ -8677,7 +8677,7 @@ function pillarBand(code, name, right, kind, cls){
    Islam, for RHI: a direction carries its Objective, Why now, and Risks &
    mitigations as plain text; its key measures and tactics are the tables
    below it, so they are not typed a second time. Drawn only while the Plan
-   details switch is on (Setup › Structure), so a client that never turns it
+   details switch is on (Client set-up › Structure), so a client that never turns it
    on sees nothing change.
 
    FOLDED UNTIL PRESSED (his: *"it needs to be expandable and collapsable not

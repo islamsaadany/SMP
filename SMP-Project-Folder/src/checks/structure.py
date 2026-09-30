@@ -84,23 +84,33 @@ with sync_playwright() as p:
     ck("the function's Overview draws no 'What it is' card",
        safe(pg, "()=>{var h=holderOverview('fn:%s'); return typeof h==='string' && !/What it is/.test(h)}" % fk) is True)
 
-    # ── 2. Setup › Structure: one item's SWOT, pressed ────────────────
-    ok = press(pg, '[data-md="setup"]') and press(pg, '.ritem[data-setupgo="structure"]')
-    ck("Setup › Structure opens from the rail", ok)
-    dots = safe(pg, "()=>document.querySelectorAll('[data-stover]').length", 0)
-    ck("it draws a pressable box per item and component", (dots or 0) >= 9 * 3, dots)
-    hdr = safe(pg, "()=>[...document.querySelectorAll('table.stadj thead th')].map(t=>t.textContent)", [])
-    ck("a function's row offers no box for the brief, themes, pillars, capabilities or values",
-       safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stover=\"fn:%s|'+c+'\"]'))" % fk) is True)
-    ck("…while it offers one for its North Star, and a unit's row a live brief and a greyed theme (§427)",
-       safe(pg, "()=>{var u=[...document.querySelectorAll('table.stadj tbody tr')].find(r=>r.querySelector('[data-stover=\"%s|brief\"]')); return !!document.querySelector('[data-stover=\"fn:%s|keyobj\"]') && !!u && !document.querySelector('[data-stover=\"%s|theme\"]') && u.querySelectorAll('span.stdot.dummy').length===3}" % (unit, fk, unit)) is True)
-    ck("its columns are headed with the client's own words",
-       safe(pg, "()=>labelWord('keyobj','bu')") in (hdr or []), hdr)
-    ck("pressing the unit's SWOT box", press(pg, '[data-stover="%s|swot"]' % unit))
+    # ── 2. One item's SWOT, pressed in Client set-up › Structure (§435) ──
+    # §435 MOVED the per-item exceptions off their own Setup page into an
+    # "Except for" box at the foot of each layer's card; the claims below are
+    # §404's, asserted where the control lives now (§218: rewritten, never
+    # loosened), plus the page asserted GONE at both ends (§94.2).
+    ok = press(pg, '[data-md="setup"]')
+    ck("Setup opens", ok)
+    ck("Setup's rail no longer carries a Structure page (§435)",
+       safe(pg, "()=>!document.querySelector('[data-setupgo=\"structure\"]')") is True)
+    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
+    ck("Client set-up › Structure opens", ok)
+    ck("every card below the top carries an Except for box",
+       safe(pg, "()=>['mid','bu','fn','cap'].every(k=>!!document.querySelector('[data-stexcept=\"'+k+'\"]'))") is True)
+    ck("…the business units' box starts empty and says so",
+       safe(pg, "()=>{var x=document.querySelector('[data-stexcept=\"bu\"]'); return !!x.querySelector('.stxnone') && !x.querySelector('[data-stxitem]')}") is True)
+    def pick(k, v):
+        try:
+            pg.select_option('[data-stexcept="%s"] select.stxadd' % k, v); pg.wait_for_timeout(250); return True
+        except Exception: return False
+    ck("picking the unit in 'Make an exception for…'", pick("bu", unit))
+    ck("…draws its row and stores NOTHING yet (§50.6)",
+       safe(pg, "()=>!!document.querySelector('[data-stxitem=\"%s\"]') && !SMPRules.structureOf(GROUP)" % unit) is True)
+    ck("pressing the unit's SWOT chip", press(pg, '[data-stxover="%s|swot"]' % unit))
     ck("…stores ONE adjustment, off (§96)",
        safe(pg, "()=>GROUP.structure&&GROUP.structure.over&&GROUP.structure.over['%s'].swot" % unit) is False)
-    ck("…and the box wears the differs ring",
-       safe(pg, "()=>document.querySelector('[data-stover=\"%s|swot\"]').classList.contains('diff')" % unit) is True)
+    ck("…and the chip wears the differs ring",
+       safe(pg, "()=>document.querySelector('[data-stxover=\"%s|swot\"]').classList.contains('diff')" % unit) is True)
     s1 = secs(unit)
     ck("OFF: that unit offers no SWOT section", "swot" not in s1, s1)
     other = safe(pg, "()=>activeKeys()[1]")
@@ -110,10 +120,18 @@ with sync_playwright() as p:
     deck = safe(pg, "()=>/d-swot/.test(deckHtmlFor('%s'))" % unit)
     ck("OFF: the deck draws no SWOT slides for it", deck is False, deck)
     ck("…and a unit left on still does", safe(pg, "()=>/d-swot/.test(deckHtmlFor('%s'))" % other) is True)
-    press(pg, '[data-stover="%s|swot"]' % unit)
+    press(pg, '[data-stxover="%s|swot"]' % unit)
     ck("pressing it back DELETES the adjustment and the empty structure (§50.6)",
        safe(pg, "()=>!('structure' in GROUP)") is True)
+    ck("…the row leaves the list once it follows the layer again",
+       safe(pg, "()=>!document.querySelector('[data-stxitem=\"%s\"]')" % unit) is True)
     ck("…and the SWOT section is back", "swot" in (secs(unit) or []))
+    ck("a function's row offers no brief, themes or values chip, and does offer its North Star",
+       pick("fn", "fn:" + str(fk)) and safe(pg, "()=>!['brief','theme','values','purpose'].some(c=>document.querySelector('[data-stxover=\"fn:%s|'+c+'\"]')) && !!document.querySelector('[data-stxover=\"fn:%s|keyobj\"]')" % (fk, fk)) is True)
+    ck("…and a unit's row offers a brief but no themes (§427)",
+       pick("bu", unit) and safe(pg, "()=>!!document.querySelector('[data-stxover=\"%s|brief\"]') && !document.querySelector('[data-stxover=\"%s|theme\"]')" % (unit, unit)) is True)
+    ck("…Remove takes a row off without storing anything",
+       press(pg, '[data-stxitem="%s"] .linkbu' % unit) and safe(pg, "()=>!document.querySelector('[data-stxitem=\"%s\"]') && !SMPRules.structureOf(GROUP)" % unit) is True)
 
     # ── 3. A level's components, as the set-up step writes them ───────
     safe(pg, """()=>{GROUP.structure={top:{on:['brief','purpose','aspiration','keyobj','values'],temple:true},

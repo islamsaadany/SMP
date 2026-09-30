@@ -3,7 +3,7 @@
 Islam, 2026-09-29: "every layer or area like units and functions should have
 their separate options and switches." The four RHI details — a direction's
 overview, several outcomes per tactic, a tactic's requirements, years 1·2·3 —
-are switched per layer on Setup › Structure, in each layer's plan section, and
+are switched per layer on Client set-up › Structure, in each layer's plan section, and
 the three that add a part carry its own one/many name per layer.
 
 BOTH ENDS every time (§94.2): a unit asked "on" is asked beside a pillars

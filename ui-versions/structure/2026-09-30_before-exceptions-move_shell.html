@@ -669,8 +669,13 @@
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      /* §435: Setup › Structure is gone — its per-item exceptions sit under
-         each layer's card on Client set-up › Structure ("Except for"). */
+      /* §404: Setup › Structure — which component each item shows. The
+         office's (the server classifies it `setup`); the level answers are
+         set on Getting started's Structure step, this is the per-item half. */
+      { k:"structure", ac:"c_units", grp:"run", mod:"client", label:"Structure", glyph:"⊞",
+        when: function(){ return inOffice(); },
+        find:"structure levels components brief purpose aspiration north star key objectives themes pillars capabilities values swot hide show temple",
+        render:renderStructure },
       { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -9231,6 +9236,15 @@
         var a = b.dataset.drail.split("|");
         RAIL["drv:" + a[0]] = a.slice(1).join("|");
         paint();
+      });
+    });
+    /* §404: one item's component, from Setup › Structure. */
+    document.querySelectorAll("[data-stover]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice()) return;
+        var a = b.dataset.stover, i = a.lastIndexOf("|"), t = a.slice(0, i), c = a.slice(i + 1);
+        setCompOver(t, c, !compOn(t, c));
+        fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){

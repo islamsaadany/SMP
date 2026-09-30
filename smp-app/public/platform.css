@@ -5063,17 +5063,6 @@ html[data-client-settings] .viewer { display:none; }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
-/* §404: Setup › Structure's ticks. A box, not a glyph (§52): filled is
-   shown, empty is hidden, a ring differs from its level. */
-.cfg table.stadj tr.stlvl td { background:var(--surface-2); color:var(--ink-3); font-size:var(--fs-micro);
-  letter-spacing:.07em; text-transform:uppercase; font-weight:700; }
-.cfg table.stadj td.stitem { font-weight:600; }
-.stdot { display:inline-block; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--line);
-  background:var(--surface); padding:0; cursor:pointer; vertical-align:middle; }
-span.stdot { cursor:default; }
-span.stdot.dummy { opacity:.4; background:var(--surface-2); cursor:not-allowed; } /* §427 */
-.stdot.on { background:var(--gold-deep); border-color:var(--gold-deep); }
-.stdot.diff { box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--gold); }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -10637,3 +10626,21 @@ body.presenting #buildband { display:none; }
 .csetup .stpart.stsub .stdetn { padding-left:14px; color:var(--ink-2); }
 .csetup .styears { grid-column:3 / 5; display:flex; gap:6px; flex-wrap:wrap; }
 .csetup .styr { border:1px solid var(--line); border-radius:12px; padding:2px 10px; font-size:12px; color:var(--ink-2); background:var(--surface); }
+
+/* §435: EXCEPT FOR — the items on a layer that differ from its ticks, at the
+   foot of the layer's card. The chip is the Setup tick in a pill, so an
+   exception reads as the same control as the ticks above it; a gold ring
+   marks the part that differs from the layer. */
+.csetup .stexcept { margin-top:14px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); display:flex; flex-direction:column; gap:0; }
+.csetup .stexcept > .lab { margin:0 0 4px; }
+.csetup .stxnone { margin:4px 0 10px; font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .stxrow { display:grid; grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto; gap:12px; align-items:center; padding:9px 0; border-top:1px solid var(--line); }
+.csetup .stxrow:first-of-type { border-top:0; }
+.csetup .stxrow > b { font-size:13.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.csetup .stxchips { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+.csetup .stxchip { display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12.5px; padding:4px 9px 4px 6px; border:1px solid var(--line); border-radius:999px; color:var(--ink-2); background:var(--surface); cursor:pointer; }
+.csetup .stxchip i { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--ink-3); flex:none; }
+.csetup .stxchip.on i { background:var(--panel); border-color:var(--panel); }
+.csetup .stxchip.diff { border-color:var(--gold-deep); box-shadow:inset 0 0 0 1px var(--gold-deep); color:var(--ink); }
+.csetup .stxadd { margin-top:10px; max-width:280px; }
+@media (max-width:760px){ .csetup .stxrow { grid-template-columns:minmax(0,1fr) auto; } .csetup .stxchips { grid-column:1 / -1; grid-row:2; } }

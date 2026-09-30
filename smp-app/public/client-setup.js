@@ -1766,11 +1766,13 @@ var CLIENTSETUP = (function () {
       mid.appendChild(el("p", "lab", "Called"));
       namePick(mid, "division", MID_NAMES, "both", ro);
       structLevel(mid, lv, "mid");
+      exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
     var bu = card(W("unitword", "many", "Business units"));
     callBoxes(bu, "unitword", ro);
     structLevel(bu, lv, "bu");
+    exceptBox(bu, "bu");
 
     var fn = card(W("fnword", "many", "Supporting functions"));
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));
@@ -1781,6 +1783,7 @@ var CLIENTSETUP = (function () {
     if (lv.fn.exists) {
       callBoxes(fn, "fnword", ro);
       structLevel(fn, lv, "fn");
+      exceptBox(fn, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
     /* §428: CAPABILITIES ARE A CARD OF THEIR OWN, after the functions, with
@@ -1797,13 +1800,112 @@ var CLIENTSETUP = (function () {
     if (lv.cap.exists) {
       callBoxes(cp, "capability", ro);
       structLevel(cp, lv, "cap");
+      exceptBox(cp, "cap");
     } else cp.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
 
     box.appendChild(el("p", "wzwhy",
-      "These apply to every item at a layer; each one can be adjusted later on Setup › Structure. " +
+      "These apply to every item at a layer. Where one item needs to differ, add it under Except for on that layer's card. " +
       "Switching something off hides it and keeps what was written. An empty name box uses the client's own word from Terminology."));
     return box;
+  }
+
+  /* ── EXCEPT FOR (§435) ───────────────────────────────────────────
+     Islam, of Setup › Structure: *"why do we need this page while we have it
+     in the client setup?"*, then *"go with 2"*. The per-item adjustments
+     (§404's second half) move here, under the layer they are exceptions to,
+     and that page goes. Only the items that DIFFER are listed; each chip is
+     one part of the first section, plus the second section whole — exactly
+     what the old page could change, and nothing of the plan section, whose
+     answers stay the layer's. The store is unchanged: `structure.over`,
+     written through the same setCompOver, which deletes an answer equal to
+     the layer's (§50.6), so an item back on the layer's ticks leaves the
+     list by itself. One just picked from the list is held in XADD until its
+     first press, or it would vanish the instant it was added.
+
+     NOT FROZEN BY A PLAN (§421): an exception changes what an item shows,
+     never which rows exist, and the old page was the office's at any time. */
+  var XADD = {};
+  function exceptItems(k){
+    if (k === "mid") return (COMPANY_KEYS || []).filter(function (c) {
+      return COMPANIES[c] && COMPANIES[c].active !== false; }).map(function (c) { return ["co:" + c, COMPANIES[c].name]; });
+    if (k === "bu") return activeKeys().map(function (u) { return [u, UNITS[u].name]; });
+    if (k === "fn") return (FUNCTION_KEYS || []).filter(function (f) {
+      return FUNCTIONS[f] && FUNCTIONS[f].active !== false; }).map(function (f) { return ["fn:" + f, FUNCTIONS[f].name]; });
+    if (k === "cap") return (GROUP.capabilities || []).filter(function (c) { return c && c.id && c.active !== false; })
+      .map(function (c) { return ["cap:" + c.id, c.name]; });
+    return [];
+  }
+  /* The parts an item on this layer can be given: the first section's
+     (offered and built for it), then the second section as one switch. */
+  function exceptParts(t){
+    var p = SMPRules.SEC_FOUND_PARTS.filter(function (c) {
+      return SMPRules.compOffered(t, c) && SMPRules.compBuilt(t, c); });
+    if (SMPRules.compBuilt(t, "swot")) p.push("swot");
+    return p;
+  }
+  function partWord(t, c){
+    if (c === "swot") return SMPRules.swotTitle(GROUP, t) ||
+      (/^(fn|cap):/.test(t) ? "S&W" : (typeof LTraw === "function" ? LTraw(t, "swot", "many") : "SWOT"));
+    return typeof LTraw === "function" ? LTraw(t, c, "many") : (PART_LABEL[c] || c);
+  }
+  function exceptBox(card, k){
+    var items = exceptItems(k);
+    if (!items.length) return;
+    var over = (SMPRules.structureOf(GROUP) || {}).over || {};
+    var box = el("div", "stexcept"); box.setAttribute("data-stexcept", k);
+    box.appendChild(el("p", "lab", "Except for"));
+    var shown = items.filter(function (it) { return over[it[0]] || XADD[it[0]]; });
+    if (!shown.length) box.appendChild(el("p", "stxnone", "Every " +
+      w({ mid:"division", bu:"unitword", fn:"fnword", cap:"capability" }[k], "one", "item") +
+      " follows the ticks above."));
+    shown.forEach(function (it) {
+      var t = it[0], row = el("div", "stxrow"); row.setAttribute("data-stxitem", t);
+      row.appendChild(el("b", null, it[1]));
+      var chips = el("span", "stxchips");
+      var lvl = SMPRules.structLevelOf(t), def = SMPRules.levelComponents(GROUP, lvl);
+      exceptParts(t).forEach(function (c) {
+        var on = SMPRules.compOn(GROUP, t, c), diff = on !== (def.indexOf(c) >= 0);
+        var b = el("button", "stxchip" + (on ? " on" : "") + (diff ? " diff" : ""));
+        b.type = "button"; b.setAttribute("aria-pressed", String(on));
+        b.setAttribute("data-stxover", t + "|" + c);
+        var w = partWord(t, c);
+        b.setAttribute("aria-label", w + " for " + it[1] + (on ? ": shown" : ": hidden") + (diff ? ", differs from the layer" : ""));
+        b.title = diff ? "Differs from the ticks above" : "Same as the ticks above";
+        b.appendChild(el("i")); b.appendChild(document.createTextNode(w));
+        b.addEventListener("click", function () {
+          delete XADD[t];
+          setCompOver(t, c, !SMPRules.compOn(GROUP, t, c));
+          redraw();
+        });
+        chips.appendChild(b);
+      });
+      row.appendChild(chips);
+      var rm = el("button", "linkbu", "Remove"); rm.type = "button";
+      rm.setAttribute("aria-label", "Put " + it[1] + " back on the ticks above");
+      rm.addEventListener("click", function () {
+        delete XADD[t];
+        var s = SMPRules.structureOf(GROUP);
+        if (s && s.over && s.over[t]) {
+          delete s.over[t];
+          if (!Object.keys(s.over).length) delete s.over;
+          if (!Object.keys(s).length) delete GROUP[SMPRules.STRUCTURE];
+        }
+        redraw();
+      });
+      row.appendChild(rm);
+      box.appendChild(row);
+    });
+    var rest = items.filter(function (it) { return !over[it[0]] && !XADD[it[0]]; });
+    if (rest.length) {
+      var sel = el("select", "fld stxadd");
+      sel.setAttribute("aria-label", "Make an exception");
+      var o0 = el("option", null, "Make an exception for…"); o0.value = ""; sel.appendChild(o0);
+      rest.forEach(function (it) { var o = el("option", null, it[1]); o.value = it[0]; sel.appendChild(o); });
+      sel.addEventListener("change", function () { if (!sel.value) return; XADD[sel.value] = true; redraw(); });
+      box.appendChild(sel);
+    }
+    card.appendChild(box);
   }
 
   /* ── THE OFFICE, AS A SETUP TABLE (§364) ────────────────────────────

@@ -54,7 +54,7 @@ function LTraw(target, key, which){
 }
 function LT(target, key, which){ return esc(LTraw(target, key, which)); }
 /* §420: what a plan detail's part is called on the subject `x` holds — the
-   layer's own name for it (Client set-up › Structure), else the platform's word. A
+   layer's own name for it (Setup › Structure), else the platform's word. A
    tactic's outcome existed before its switch did, so its column keeps
    "Outcome" wherever the several-outcomes switch is off for that layer. */
 function detailWord(det, form, x){
@@ -64,7 +64,7 @@ function detailWord(det, form, x){
 }
 function DW(det, form, x){ return esc(detailWord(det, form, x)); }
 /* §422: what one of the overview's three areas is called on the subject `x`
-   holds — the layer's own name (Client set-up › Structure), else the platform's. */
+   holds — the layer's own name (Setup › Structure), else the platform's. */
 function ovArea(key, x){ return esc(LTraw(planSubjectOf(x), key, "one")); }
 function L1(key){ return esc(labelWord(key, "group")); }
 /* THE NAVIGATION'S SHORT WORDS (§392). The switch has always said "Units",
@@ -80,6 +80,65 @@ function navWord(key, short){
 }
 
 /* ── Terminology ─────────────────────────────────────────────────────── */
+/* ── SETUP › STRUCTURE (§404) ──────────────────────────────────────
+   Islam: *"components can be applied for all as a start and later the smo
+   can adjust the components of each unit or function."* One row per item,
+   one column per component, headed with the client's own word for it. A
+   tick is what that item SHOWS; one that differs from its level wears a
+   ring, and pressing it back to the level's answer deletes the adjustment
+   (setCompOver) rather than storing a copy of the default (§50.6). Off hides
+   and keeps what was written, which the page says once. */
+var STRUCT_COLS = ["brief","purpose","aspiration","keyobj","theme","pillar","capability","values","swot"];
+function renderStructure(){
+  var editable = grant("c_units") === "edit" && inOffice();
+  var rows = [["top", [["group", labelWord("topword","group")]]]];
+  if (midExists()) rows.push(["mid", (COMPANY_KEYS || []).filter(function(k){
+    return COMPANIES[k] && COMPANIES[k].active !== false; }).map(function(k){ return ["co:" + k, COMPANIES[k].name]; })]);
+  rows.push(["bu", activeKeys().map(function(k){ return [k, UNITS[k].name]; })]);
+  rows.push(["fn", (FUNCTION_KEYS || []).filter(function(k){
+    return FUNCTIONS[k] && FUNCTIONS[k].active !== false; }).map(function(k){ return ["fn:" + k, FUNCTIONS[k].name]; })]);
+  var lvName = { top: labelWord("topword","group"), mid: labelWord("division","bu"),
+                 bu: labelWord("unitword","bu"), fn: labelWord("fnword","bu") };
+  var body = rows.map(function(r){
+    if (!r[1].length) return "";
+    return '<tr class="stlvl"><td colspan="' + (STRUCT_COLS.length + 1) + '">' + esc(lvName[r[0]]) + '</td></tr>' +
+      r[1].map(function(it){
+        var t = it[0];
+        return '<tr><td class="stitem">' + esc(it[1]) + '</td>' + STRUCT_COLS.map(function(c){
+          /* A function carries no brief and no themes, ever (SMPRules.compOffered):
+             a dash, not a toggle, or the table offers what the rule refuses. */
+          if (!SMPRules.compOffered(t, c)) return '<td class="cc" title="' + esc(labelWord(c, "bu")) +
+            ' is never shown for a ' + esc(labelWord("fnword","group")) + '">&mdash;</td>';
+          /* §405: A UNIT'S PILLARS ARE ITS OWN CHOICE, set on its row in
+             Setup › Business units — so here they are a word saying which way
+             it plans, never a second switch for one fact (his *"yes"* to the
+             drawing). The level's tick above stays the default for new units. */
+          if (c === "pillar" && r[0] === "bu" && UNITS[t])
+            return '<td class="cc"><span class="pill kind" title="Set on its row in ' +
+              esc(L("unitword","bu")) + '">' + esc(unitPlanWord(unitFormat(UNITS[t]))) + '</span></td>';
+          /* §427: a part with no page on this layer is drawn off and greyed,
+             never a toggle that changes nothing. */
+          if (!SMPRules.compBuilt(t, c)) return '<td class="cc"><span class="stdot dummy" title="' +
+            esc(labelWord(c, "bu")) + ' is not available for a ' + esc(lvName[r[0]]) + ' yet"></span></td>';
+          var on = compOn(t, c);
+          var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
+          var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');
+          return '<td class="cc">' + (editable
+            ? '<button type="button" class="stdot' + (on ? ' on' : '') + (on !== def ? ' diff' : '') +
+              '" data-stover="' + esc(t) + '|' + c + '" aria-pressed="' + on + '" aria-label="' + lab + '" title="' + lab +
+              (on !== def ? ' — differs from its level' : '') + '"></button>'
+            : '<span class="stdot' + (on ? ' on' : '') + (on !== def ? ' diff' : '') + '" role="img" aria-label="' + lab + '"></span>') +
+            '</td>';
+        }).join("") + '</tr>';
+      }).join("");
+  }).join("");
+  /* The legend is a hover (1b-ii): a filled box is shown, an empty one is
+     hidden and keeps what was written, a ring differs from its level. */
+  return '<div class="cfg"><table class="unitcfg stadj"><thead><tr><th title="A filled box is shown; an empty one is hidden and keeps what was written; a ring means the item differs from its level, set in Getting started › Structure.">Item</th>' +
+    STRUCT_COLS.map(function(c){ return '<th class="cc">' + esc(labelWord(c, "bu")) + '</th>'; }).join("") +
+    '</tr></thead><tbody>' + body + '</tbody></table></div>';
+}
+
 function renderLabels(){
   var editable = grant("c_labels") === "edit";
 

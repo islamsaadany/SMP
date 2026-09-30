@@ -58955,3 +58955,15 @@ Verified on the merged tree: `qa.py` ERRORS none, authoriser 889/0, differ
 clean, and fifteen browser checks from both sides green. **`main`'s own
 authoriser suite runs 763/0 against the merged rules**, so no save that worked
 is refused: no forced sign-out is owed (spec 029).
+
+## §435 — one item's exceptions live on its layer's card; Setup › Structure goes (2026-09-30)
+
+Islam, of Setup › Structure beside Client set-up › Structure: *"why do we need this page while we have it in the client setup?"* — then option 2 of the two offered, from a mockup (`design-mockups/structure-exceptions/`, published as an artifact): the per-item exceptions move to an **Except for** box at the foot of each layer's card, and the Setup page is removed. Asked, and confirmed: the exceptions cover the first section's parts and the second section (the SWOT, as one switch); the plan section stays per layer.
+
+**Two places answered one question**, which is §53.5's drift waiting to happen: the step set what every item at a layer carries, and a separate page set where one item differs, so the office had to know the second page existed to see why a unit looked different. One card now says both, the layer's ticks above and its exceptions under them.
+
+**Nothing stored moves.** The box writes the same `GROUP.structure.over[target][comp]` through the same `setCompOver()` the page wrote, so every exception a tenant already holds appears on the card unchanged, and an answer equal to its layer's is still deleted rather than stored (§50.6). An item is added from *Make an exception for…* and is held on screen (`XADD`) until its first press, or the delete-on-equal rule would remove the row the moment it was drawn; an item whose chips all return to the layer's answer leaves the list by itself. **The chips offer only what the item can show** — `compOffered` and `compBuilt`, the rules the pages ask (§42), so a function's row has no brief, themes or values and a unit's no themes (§404.1, §427). **The box is not frozen by the plan-shape lock**: an exception changes what an item shows, never which rows exist.
+
+**Deleted, not hidden** (§24): the `structure` Setup def, `renderStructure()`, `STRUCT_COLS`, the `[data-stover]` wiring and the `.stadj`/`.stdot` CSS.
+
+`checks/structure.py` §2 **rewritten, never loosened** (§218): every claim it made on the old page is asserted on the new box, plus the page asserted gone from the rail and the row leaving once it follows the layer. **11 red** from the SOURCES with the business units' box removed (§276). Screen only — no `api/`, `lib/` or `db/` file — so no server rule moves and nobody is signed out.

@@ -513,6 +513,48 @@ function renameBrands(g) {
   }));
 }
 
+/* ── 18 · every function's strengths and weaknesses ────────────────
+   Islam, 2026-09-30: *"why are the S&W empty in the functions?"* — the
+   example never had any, so every function opened an empty page. Written to
+   agree with each function's own plan and figures, aligned in chat first
+   ("18 yes"). A function's S&W is `swot.s` and `swot.w` (renderFnSW); the
+   other two quadrants are a unit's and stay empty. */
+const FN_SW = {
+  finance: {
+    s: ["Month-end close down to 6 days", "Utilisation report automated", "Single view of the credit facilities"],
+    w: ["Forecasting still annual, not rolling", "Collections over 90 days handled unit by unit", "Cost of borrowing above plan"] },
+  treasury: {
+    s: ["Daily cash position across every bank", "FX hedging policy approved by the board", "Strong relationships with principals' finance teams"],
+    w: ["Hedging lags the principals' payment calendar", "No investment mandate for surplus cash", "No cash pooling between the two companies"] },
+  hr: {
+    s: ["Three senior hires closed this year", "Group training calendar in place", "Retention plans for the two highest-attrition roles"],
+    w: ["Four key roles still open", "High attrition in field sales", "Thin succession cover below unit heads"] },
+  marketing: {
+    s: ["Twelve-month trade communication calendar", "Perception study with trade and end customers done", "Clear owner for the brand"],
+    w: ["No agreed positioning statement yet", "B2B leads not tracked end to end", "Share of voice trails the category leaders"] },
+  it: {
+    s: ["Data warehouse live for the distribution units", "Two legacy systems retired", "Steady delivery rhythm on the automation backlog"],
+    w: ["Three ERP instances still run in parallel", "B2C units not yet on the warehouse", "Reporting still relies on spreadsheets"] },
+  care: {
+    s: ["Voice-of-customer loop across units", "Written service recovery standard", "First-time fix rate above target"],
+    w: ["Net promoter score follows repair turnaround rather than leading it", "Customer feedback not shared with Retail and Online", "Headcount limits the next step"] },
+  smo: {
+    s: ["9 of 10 units plan on the platform", "Every custodian trained", "Review packs drawn from the platform, not slides"],
+    w: ["Two plans signed off late", "Recovery plans for off-track rows not yet the norm", "2027 planning kit not started"] },
+  merchandising: {
+    s: ["Category roles defined for most of the estate", "Quarterly range review with the buying team", "Stronger supplier terms"],
+    w: ["Slow-moving stock concentrated in two categories", "Stock cover above target", "Range productivity below plan"] },
+};
+function functionSW(g) {
+  Object.keys(FN_SW).forEach((k) => {
+    const f = g.functions[k];
+    if (!f) return;
+    const sw = f.swot || {};
+    if ((sw.s || []).length || (sw.w || []).length) return;   /* never over what the example holds */
+    f.swot = { s: FN_SW[k].s.slice(), w: FN_SW[k].w.slice(), o: sw.o || [], t: sw.t || [] };
+  });
+}
+
 /* ── the pass ───────────────────────────────────────────────────── */
 function eachRow(g, fn) {
   const walkUnit = (u) => {
@@ -569,6 +611,7 @@ function enrich(g) {
   if (bp) bp.breakdown = BREAKDOWN.value;
   noteRows(g);
   renameBrands(g);
+  functionSW(g);
   return g;
 }
 

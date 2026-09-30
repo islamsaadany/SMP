@@ -49,7 +49,7 @@ Module._initPaths();
 const D = require("../../scripts/seed-demo-client.js");   /* the frozen renamer AND its refusal */
 const G = require("../lib/graph-io.cjs");                 /* the loader's own row builders */
 
-export async function seedDemo({ url, replace = false, brk = null, log = (s) => console.log(s) } = {}) {
+export async function seedDemo({ url, replace = false, brk = null, log = (s) => console.log(s), store = null } = {}) {
   const real = D.realNames(JSON.parse(readFileSync(join(here, "..", "..", "db", "seed-state.json"), "utf8")));
   /* THE BREAK IS THE UNRENAMED EXAMPLE, which is the one thing a demo must
      never be — so the falsification is of the claim that matters rather than
@@ -92,10 +92,17 @@ export async function seedDemo({ url, replace = false, brk = null, log = (s) => 
         "INSERT INTO tenants (key, name, kind, made_here) VALUES ($1,$2,'demo',true) RETURNING id",
         [D.CLIENT_KEY, graph.group.org])).rows[0];
     }
-    const extra = D.moduleContent([]).modules;
+    const done = await withTenant(row.id, (c) => replaceContent(c, row.id, graph));
+    const kept = done.keep;
+    /* THE LIBRARY AFTER THE GRAPH, OUTSIDE ITS TRANSACTION: a report is a file
+       in the store as well as a row, and a store that is not set up in this
+       build must cost the demo its reports, never the build (point 19). The
+       modules are written after it, so Insights is switched on only where the
+       library has something in it. */
+    const reports = await seedLibrary(row.id, done.oldFiles, log, store);
+    const extra = D.moduleContent([]).modules.concat(reports > 0 ? ["insights"] : []);
     await owner.query("UPDATE tenants SET name = $2, modules = $3::jsonb WHERE id = $1",
       [row.id, graph.group.org, JSON.stringify(extra)]);
-    const kept = await withTenant(row.id, (c) => replaceContent(c, row.id, graph));
     const back = await withTenant(row.id, (c) => readState(c));
     if (!back) throw new Error("seed-demo: the tenant holds no graph after loading it");
     /* THE PEOPLE A MEMBERSHIP POINTS AT ARE NOT THE DEMO'S CONTENT. They are
@@ -123,6 +130,12 @@ async function replaceContent(c, tenantId, graph) {
     "SELECT person_key, seat FROM tenant_users WHERE tenant_id = $1", [tenantId])).rows;
   const keep = new Set(members.map((m) => m.person_key));
   for (const t of MODULE_TABLES) await c.query('DELETE FROM "' + t + '" WHERE tenant_id = $1', [tenantId]);
+  /* THE LIBRARY: ONLY WHAT THIS SEED PUT THERE. A report somebody uploaded to
+     the demo by hand is theirs and stays; the seed's own carry `extra.demo`,
+     and their files are handed back so the store is emptied of them too. */
+  const oldFiles = (await c.query(
+    "DELETE FROM library_items WHERE tenant_id = $1 AND extra->>'demo' = 'true' RETURNING file_path",
+    [tenantId])).rows.map((r) => r.file_path).filter(Boolean);
   for (const t of G.ALL_TABLES) {
     if (t === "people") {
       await c.query("DELETE FROM people WHERE tenant_id = $1 AND NOT (key = ANY($2::text[]))", [tenantId, [...keep]]);
@@ -155,7 +168,7 @@ async function replaceContent(c, tenantId, graph) {
       "INSERT INTO notes (title, met_on, attendees, raw, minutes, created_by) VALUES ($1,$2,$3::jsonb,$4,$5::jsonb,'demo')",
       [n.title, n.metOn, JSON.stringify(n.attendees), n.raw, JSON.stringify(n.minutes)]);
   }
-  return keep;
+  return { keep, oldFiles };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
@@ -166,4 +179,51 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   if (!dry && !url) { console.error("seed-demo: no owner connection string (DATABASE_URL_UNPOOLED)"); process.exit(2); }
   seedDemo({ url, replace: process.argv.includes("--replace"), brk })
     .then(() => {}, (e) => { console.error(e.message); process.exit(1); });
+}
+
+/* ── THE INSIGHTS REPORTS (point 19, 2026-09-30) ─────────────────────────
+   Five invented reports, one per library category, rendered once to PDF by
+   scripts/demo-reports/reports.mjs and committed. Each goes the way a
+   consultant's upload goes — a row, the file under the path the library
+   mints for it, the file set on the row, published — through the library's
+   and the store's OWN functions, so there is no second writer of either.
+
+   A BUILD WITHOUT THE STORE'S KEY SKIPS THEM AND SAYS SO: the rows would list
+   reports whose Download answers "Not found". `store` is the check's stand-in
+   for the real store; everything else is the product's. */
+async function seedLibrary(tenantId, oldFiles, log, store) {
+  const B = store || await import("../lib/blob-api.ts");
+  for (const f of oldFiles) { try { await B.dropBlob(f); } catch { /* an orphan file is not a failed demo */ } }
+  if (!B.ready()) {
+    log("Insights: no file store key in this build — the demo's reports are skipped and Insights stays off");
+    return 0;
+  }
+  const LIB = await import("../lib/library.ts");
+  const { REPORTS, reportText } = await import("../../scripts/demo-reports/reports.mjs");
+  D.refuseIfAnySurvives(REPORTS.map(reportText),
+    D.realNames(JSON.parse(readFileSync(join(here, "..", "..", "db", "seed-state.json"), "utf8"))));
+  let n = 0;
+  for (const r of REPORTS) {
+    try {
+      const bytes = readFileSync(join(here, "..", "..", "scripts", "demo-reports", r.file));
+      const item = await withTenant(tenantId, (c) => LIB.insertItem(c, "insights",
+        LIB.draftOf({ title: r.title, summary: r.summary, categories: r.categories, reportDate: r.date })));
+      await withTenant(tenantId, (c) => c.query(
+        "UPDATE library_items SET extra = COALESCE(extra,'{}'::jsonb) || '{\"demo\":true}'::jsonb WHERE id = $1", [item.id]));
+      const path = LIB.filePath("insights", tenantId, item.id, r.file);
+      const up = await B.beginUpload(path, "application/pdf");
+      if (!up) throw new Error("the store refused to start the upload");
+      const etag = await B.putPart(path, up.key, up.uploadId, 1, bytes);
+      await B.finishUpload(path, up.key, up.uploadId, [{ etag, partNumber: 1 }]);
+      await withTenant(tenantId, async (c) => {
+        await LIB.setFile(c, item.id, path, r.file, bytes.length);
+        await LIB.setState(c, item.id, "published", "demo");
+      });
+      n++;
+    } catch (e) {
+      log("Insights: '" + r.title + "' was not published — " + String((e && e.message) || e).split("\n")[0]);
+    }
+  }
+  log("Insights: " + n + " of " + REPORTS.length + " demo reports published");
+  return n;
 }

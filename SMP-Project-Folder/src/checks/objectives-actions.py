@@ -238,23 +238,39 @@ def main():
         ck("Reporting asks for both",
            "Retail academy" in rep and "Achieve revenue target" in rep, rep[:140])
 
-        print("\n§4 the Overview is the one a projects function draws (§213)")
-        # §3 left the report TAB, and the section row belongs to Strategy — a
-        # press that cannot land leaves the previous page on screen and every
-        # assertion after it measures that (§215, §50.6).
+        print("\n§4 the objectives are on the PLAN, and the Overview is the brief alone (§415)")
+        # §415 REWRITES WHAT §213 ASSERTED HERE, at Islam's word (2026-09-30):
+        # *"a function PLANNING in objectives and actions get their objectives
+        # and actions in the plan tab not the overview tab"*. The agreement with
+        # a projects function's Overview is replaced, not loosened (§218): the
+        # objectives are asserted ON the Plan, ABOVE the actions, and ABSENT
+        # from this function's Overview — beside a projects function whose
+        # Overview still draws them, or a build that dropped objectives
+        # everywhere would pass (§113.8).
         ck("the Strategy tab comes back", tab(pg, "fnstrat"))
-        ck("and the Overview section opens", sec(pg, "found"))
-        mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
-                      " function(x){ return x.textContent.trim(); })", [])
-        ck("it draws something", len(mine) > 0, mine)
+        ck("the Plan section opens", sec(pg, "proj"))
+        heads = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h4.mini'),"
+                       " function(x){ return x.textContent.trim().toLowerCase(); })", [])
+        ko_at = next((i for i, h in enumerate(heads) if "objective" in h), -1)
+        ac_at = next((i for i, h in enumerate(heads) if h.startswith("actions")), -1)
+        ck("the Plan draws the objectives, then the actions", 0 <= ko_at < ac_at, heads)
+        ck("and the objectives are this function's own",
+           "Achieve revenue target" in panel(pg), panel(pg)[:160])
+        brief = ev(pg, "(k)=>compOn('fn:'+k,'brief')", False, FK)
+        opened = sec(pg, "found")
+        ck("the Overview is offered exactly while the brief is switched on",
+           bool(opened) == bool(brief), {"brief": brief, "overview": opened})
+        if opened:
+            mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
+                          " function(x){ return x.textContent.trim(); })", [])
+            ck("and it holds no objectives", not any("Objective" in h for h in mine), mine)
         ck("the control function opens", go(pg, CTRL))
         ck("its Strategy tab comes back", tab(pg, "fnstrat"))
         ck("and its Overview opens", sec(pg, "found"))
         theirs = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
                         " function(x){ return x.textContent.trim(); })", [])
-        # §94.8: the AGREEMENT, never a list of headings a wording change breaks.
-        ck("and it is the same page the other format draws", mine == theirs,
-           {"objectives": mine, "projects": theirs})
+        ck("and a projects function's Overview still draws its objectives",
+           any("Objective" in h for h in theirs), theirs)
 
         print("\n§5 every press reaches the STORED graph (§96)")
         go(pg, FK); sec(pg, "proj")
@@ -263,7 +279,11 @@ def main():
         except Exception:
             pass
         wrote = ev(pg, """(k)=>{
-          var box = document.querySelector('#panel textarea[data-fld], #panel input[data-fld]');
+          /* §415: the Plan holds two tables now, the objectives first, so the
+             action's box is asked of the LAST one — the first box on the page
+             is an objective's name. */
+          var tbs = document.querySelectorAll('#panel table');
+          var box = tbs.length ? tbs[tbs.length-1].querySelector('textarea[data-fld], input[data-fld]') : null;
           if (!box) return null;
           box.value = "Retail academy 2027";
           box.dispatchEvent(new Event('change', {bubbles:true}));

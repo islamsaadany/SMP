@@ -140,6 +140,8 @@ try {
       .forEach((m) => { if (m.actual == null || m.actual === "") unrep.push(k + ":" + (m.id || m.name)); });
   });
   check(unrep.length === 0, "every objective and measure has a reported figure", unrep.slice(0, 6));
+  const noSW = Object.entries(back.functions).filter(([, f]) => !((f.swot || {}).s || []).length || !((f.swot || {}).w || []).length).map(([k]) => k);
+  check(noSW.length === 0, "every function has strengths and weaknesses", noSW);
   check(back.history.length >= 3 && back.archives.length >= 1, "three closed periods and an archived cycle",
     { history: back.history.length, archives: back.archives.length });
   const unsub = Object.keys(back.units).filter((k) => !back.review.submitted[k]);
@@ -185,6 +187,44 @@ try {
     const t = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [row.id])).rows[0];
     check(t && ["tracker", "notes"].every((m) => (t.modules || []).includes(m)), "and both modules are switched on", t && t.modules);
   }
+
+  /* THE INSIGHTS REPORTS (point 19). The real store is not reachable from a
+     check, so a stand-in records what the seeder hands it — the seeder's own
+     path through the library's functions is what runs. Both ends (§94.2): a
+     build with no store key publishes nothing and leaves Insights off; one
+     with a store publishes five, one per category, and a replace takes back
+     exactly the seed's own reports and files while a hand-uploaded one stays. */
+  console.log("── the Insights reports");
+  const none = { ready: () => false, dropBlob: async () => true };
+  await seedDemo({ url: URL_, replace: true, brk, log: () => {}, store: none });
+  const offMods = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [row.id])).rows[0].modules;
+  const offRows = await withTenant(row.id, async (c) => (await c.query(
+    "SELECT count(*)::int n FROM library_items WHERE extra->>'demo' = 'true'")).rows[0].n);
+  check(!offMods.includes("insights") && offRows === 0, "with no file store, no reports and Insights stays off", { offMods, offRows });
+  const put = [], dropped = [];
+  const fake = { ready: () => true,
+    beginUpload: async (p) => ({ key: "k", uploadId: "u:" + p }),
+    putPart: async (p, k, u, n, bytes) => { put.push({ p, size: bytes.length, pdf: bytes.subarray(0, 4).toString() }); return "etag"; },
+    finishUpload: async () => true,
+    dropBlob: async (p) => { dropped.push(p); return true; } };
+  await seedDemo({ url: URL_, replace: true, brk, log: () => {}, store: fake });
+  const lib = await withTenant(row.id, async (c) => (await c.query(
+    "SELECT title, state, file_path, file_size, categories FROM library_items WHERE extra->>'demo' = 'true' ORDER BY report_date")).rows);
+  const cats = new Set(lib.flatMap((r) => r.categories));
+  check(lib.length === 5 && lib.every((r) => r.state === "published" && r.file_path && Number(r.file_size) > 1000),
+    "five reports published, each with its file", lib.map((r) => [r.title, r.state, r.file_size]));
+  check(["Analysis", "Macro", "Market", "Sector", "Governance"].every((c2) => cats.has(c2)), "one in every category", [...cats]);
+  check(put.length === 5 && put.every((x) => x.pdf === "%PDF"), "and what went to the store is five PDFs", put);
+  const onMods = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [row.id])).rows[0].modules;
+  check(onMods.includes("insights"), "and Insights is switched on", onMods);
+  await withTenant(row.id, (c) => c.query("INSERT INTO library_items (title, state) VALUES ('Uploaded by hand', 'published')"));
+  const firstPaths = lib.map((r) => r.file_path);
+  await seedDemo({ url: URL_, replace: true, brk, log: () => {}, store: fake });
+  const after = await withTenant(row.id, async (c) => (await c.query("SELECT title, extra->>'demo' AS demo FROM library_items")).rows);
+  check(firstPaths.every((p2) => dropped.includes(p2)), "a replace takes the seed's old files out of the store", { dropped: dropped.length });
+  check(after.filter((r) => r.demo === "true").length === 5 && after.some((r) => r.title === "Uploaded by hand"),
+    "and leaves five of its own and the one uploaded by hand", after.map((r) => r.title));
+  await withTenant(row.id, (c) => c.query("DELETE FROM library_items WHERE title = 'Uploaded by hand'"));
 } catch (e) {
   fail("the file died rather than reporting (§215)", e && e.message ? e.message.split("\n")[0] : e);
 } finally { await owner.end(); }

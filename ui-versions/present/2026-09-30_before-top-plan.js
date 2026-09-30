@@ -208,10 +208,7 @@ function unitAimSlides(u){
      and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
      shifts and the slide still renders perfectly (§243's own note). */
   /* §404: the aspiration and the North Star are components; off draws nothing. */
-  /* §428: the top layer's own deck carries no aim slide — its aspiration and
-     objectives are the group's Foundation, shown on its own tab, and its
-     unit-shaped view holds neither (topAsUnit). */
-  var aimAsp = !fnAim && !u.topLayer && compOn(u.ukey, "aspiration"), aimKo = !u.topLayer && compOn(u.ukey, "keyobj");
+  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
   var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
@@ -277,7 +274,7 @@ function unitSwotSlides(u){
        one accent across a row, never one per card (§41's budget). */
     S.push(sectSlide("swothead", "After the SWOT title page",
       SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
-      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
+      "Where this unit is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
@@ -389,7 +386,7 @@ function deckSlides(u){
      slide explains a reading it is not showing. */
   var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
+    '><h2>Where ' + (u.fnKey ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
       (koShown
         ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
@@ -507,7 +504,7 @@ function deckSlides(u){
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
-        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
+        " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
 
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +

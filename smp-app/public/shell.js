@@ -992,6 +992,13 @@
      an a_unit_other edit is the office's own wide grant, not a client role
      handing itself a neighbour's plan. */
   function mayAuthorPage(w, person, pageKey, target) {
+    /* §428: THE TOP LAYER'S OWN PLAN AND SWOT ARE THE OFFICE'S ALONE (Islam,
+       of the mockup: *"The SMO team writes it; nobody else holds the pen"*).
+       The group's CEO owns the group (ownsEveryPlace) and reports it, and
+       does not author it. */
+    if (target === "group" && isStrategyPage(pageKey)) {
+      return isOffice(w, person) && grantAtPage(w, person, pageKey, target) === "edit";
+    }
     if (isStrategyPage(pageKey) && !isOffice(w, person)) {
       var ownsIt = rolesOrFloor(w, person).some(function (r) {
         return roleOwns(w, r, target);
@@ -1972,6 +1979,17 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
 
   var ARRANGE_ROLES = ["owner", "custodian", "fnhead", "capowner"];
+
+  /* ── WHO REPORTS THE TOP LAYER'S OWN PLAN (§428) ─────────────────────
+     Islam, of the mockup: *"The SMO team and the top layer's CEO enter the
+     figures and press Submit"*, and *"ok for all, build it"*. A RULE and not
+     a matrix cell, for §37's reason: the answer is one pair of roles whatever
+     a tenant sets. The group's CEO reports and does not author (mayAuthorPage
+     keeps the pen the office's). */
+  function mayReportTop(w, person) {
+    if (!person) return false;
+    return personRoleKeys(w, person).some(function (k) { return isOfficeRole(k) || k === "gceo"; });
+  }
 
   function mayArrange(w, person, target) {
     if (!person || !target) return false;
@@ -3879,7 +3897,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var STRUCTURE = "structure";
   var STRUCT_COMPONENTS = ["brief", "purpose", "aspiration", "keyobj", "theme",
                            "pillar", "capability", "values", "swot"];
-  var STRUCT_LEVELS = ["top", "mid", "bu", "fn"];
+  var STRUCT_LEVELS = ["top", "mid", "bu", "fn", "cap"];
   /* The TEMPLE is not a component (his first answer): it is a way of DRAWING
      three that are, so it can only be on where all three are. Capabilities
      join the drawing as its base when they are ticked, and do not block it. */
@@ -3909,8 +3927,30 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var t = String(target || "");
     if (!t || t === "group") return "top";
     if (t.indexOf("co:") === 0) return "mid";
-    if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) return "fn";
+    if (t.indexOf("fn:") === 0) return "fn";
+    /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
+       Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
+       office saves that card, the capability layer READS the functions'
+       answers (effLevel below), which is exactly what it carried before this
+       card existed — nothing moves for any client. */
+    if (t.indexOf("cap:") === 0) return "cap";
     return "bu";
+  }
+  /* The level whose stored answers apply. The capability layer falls back to
+     the functions' while nobody has set it (§428). */
+  function effLevel(group, level) {
+    if (level !== "cap") return level;
+    var s = structureOf(group);
+    return s && s.cap && typeof s.cap === "object" ? "cap" : "fn";
+  }
+  /* §428 — WHETHER THIS CLIENT HAS CAPABILITIES. The "Carries capabilities"
+     tick left the top, second and unit cards; the Capabilities card answers
+     it now. Unsaid, it is what the Temple's base asked before today — the
+     top level carrying the capability component — so nothing moves. */
+  function capExists(group) {
+    var s = structureOf(group), c = s && s.cap;
+    if (c && typeof c.exists === "boolean") return c.exists;
+    return levelComponents(group, "top").indexOf("capability") >= 0;
   }
   /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
      fifth answer says, with ONE exception: a supporting function's own S&W
@@ -3924,6 +3964,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      first press, so the step and the pages cannot disagree (§53.5). */
   var STRUCT_UNSAID = { fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }) };
   function levelComponents(group, level) {
+    level = effLevel(group, level);
     var s = structureOf(group), l = s && s[level];
     return l && Array.isArray(l.on) ? l.on : (STRUCT_UNSAID[level] || STRUCT_COMPONENTS);
   }
@@ -4030,7 +4071,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function planDetailOn(group, key, target) {
     var s = structureOf(group);
     if (!s) return false;
-    var l = s[structLevelOf(target)], ld = l && l.details;
+    var l = s[effLevel(group, structLevelOf(target))], ld = l && l.details;
     if (ld && typeof ld[key] === "boolean") return ld[key];
     var d = s.details;
     return !!(d && d[key] === true);
@@ -4077,9 +4118,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), f = s && s.fn;
     return !(f && f.exists === false);
   }
-  var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview" };
+  var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview", cap: "Overview" };
   function levelBlock(group, level, part) {
-    var s = structureOf(group), l = s && s[level], b = l && l[part];
+    var s = structureOf(group), l = s && s[effLevel(group, level)], b = l && l[part];
     return b && typeof b === "object" ? b : null;
   }
   function foundOn(group, target) {
@@ -4104,7 +4145,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       var q = SWOT_QUADS.filter(function (x) { return b.quads.indexOf(x) >= 0; });
       if (q.length) return q;
     }
-    return lv === "fn" ? ["s", "w"] : SWOT_QUADS.slice();
+    return (lv === "fn" || lv === "cap") ? ["s", "w"] : SWOT_QUADS.slice();
   }
   var PLAN_WAYS = ["pillars", "projects", "objectives"];
   /* §422: THE PLAN SECTION HAS A SWITCH NOW (Islam, 2026-09-29: *"for the
@@ -4675,6 +4716,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
     STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
     structureOf: structureOf, structLevelOf: structLevelOf,
+    effLevel: effLevel, capExists: capExists, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
     fnExists: fnExists, foundOn: foundOn, foundTitle: foundTitle,
@@ -5064,8 +5106,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       return { keyObjectives: ROW_TREE.keyObjectives, items: ROW_TREE.items,
                actions: ROW_TREE.actions,
                projects: ROW_TREE.capabilities.projects };
+    /* §428: the top layer's own pillars travel row by row too, as a unit's
+       do, or the office and the CEO reporting in the same minutes send the
+       whole group part and collide (§216). */
     if (ROW_PARTS_FLAT.indexOf(part) > -1)
-      return { capabilities: ROW_TREE.capabilities };
+      return { capabilities: ROW_TREE.capabilities, items: ROW_TREE.items };
     return null;
   }
   function entryRows(at, part, a, b) {
@@ -6838,6 +6883,7 @@ function planIdx(){
     Object.keys(UNITS || {}).forEach(function(k){ if (UNITS[k]) { m.set(UNITS[k], k); put(UNITS[k].items, k); } });
     Object.keys(FUNCTIONS || {}).forEach(function(k){ var f = FUNCTIONS[k]; if (f) { m.set(f, "fn:" + k); put(f.items, "fn:" + k); } });
     ((GROUP && GROUP.capabilities) || []).forEach(function(c){ if (c) { m.set(c, "cap:" + c.id); put(c.items, "cap:" + c.id); } });
+    if (GROUP && Array.isArray(GROUP.items)) put(GROUP.items, "group");
   } catch (e) {}
   PLAN_IDX = m;
   (typeof queueMicrotask === "function" ? queueMicrotask : function(f){ Promise.resolve().then(f); })(function(){ PLAN_IDX = null; });
@@ -11568,6 +11614,8 @@ function unitLike(target){
      fallback below would hand back UNITS["cap:x"], which is undefined and
      renders as a page with nothing on it. */
   if (t.indexOf("cap:") === 0) return capAsUnit(t);
+  /* §428: the top layer's own plan, read as a unit. */
+  if (t === "group") return topAsUnit();
   if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
   return fnAsUnit(t.slice(3));
 }
@@ -11599,6 +11647,13 @@ function planEditable(){
    It also means the screen and the server answer from the same function. */
 function canReport(unitKey){
   if (REVIEW.state !== "open") return false;
+  /* §428: the top layer's own plan is reported by the office and the group's
+     CEO — a rule, the same one the server asks. */
+  if (unitKey === "group") {
+    if (!topHasPlan() || !planOn("group")) return false;
+    if (CYCLE.locked && !inOffice()) return false;
+    return SMPRules.mayReportTop(world(), viewer());
+  }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
@@ -11735,6 +11790,7 @@ function canReportFnWhole(target){
    stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = subjKey(target);
+  if (t === "group") return canReport("group");
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
     return canReportFn(t) &&
            !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
@@ -11768,7 +11824,9 @@ function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
   var t = String(target || "");
   if (t && !planOn(t)) return false;
-  if (t === "group" || t.indexOf("co:") === 0) return false;
+  /* §428: the top layer submits once it has a plan of its own. */
+  if (t === "group") return topHasPlan() && !(REVIEW.submitted && REVIEW.submitted.group) && canSpeakFor("group");
+  if (t.indexOf("co:") === 0) return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
@@ -12698,7 +12756,9 @@ function reportState(c, key){
    TWO LISTS, because the totals must have exactly the membership the rows
    have: §108.1's miscount is the parts growing while the divisor did not. */
 function boardUnitTargets(){
-  return activeKeys().filter(function(k){ return planOn(k); });
+  /* §428: the top layer first, once it has a plan of its own. */
+  return (topHasPlan() && planOn("group") ? ["group"] : [])
+    .concat(activeKeys().filter(function(k){ return planOn(k); }));
 }
 /* Every supporting function that can be asked for a report, in ONE list and in
    the register's own order. A pillars function has no capabilities to count, so
@@ -12727,6 +12787,7 @@ function boardCapTargets(){
 function boardWho(target){
   /* §334: a capability is run by the function that holds it, so the board
      names the same person its Overview does — one fact, one answer. */
+  if (target === "group") return "SMO team";
   var fk = isCapTarget(target)
     ? ((capOfTarget(target) || {}).fn || null) : fnKeyOfTarget(target);
   var r = fk ? (FUNCTIONS[fk] || {}) : (UNIT_ROLES[target] || {});
@@ -14877,6 +14938,46 @@ function fnWritable(fk){
   });
   return u;
 }
+/* ── THE TOP LAYER'S OWN PLAN, READ AS A UNIT (§428) ────────────────
+   Islam, of the mockup: *"ok for all, build it"*. The top layer (the group,
+   in the client's own word) gains a Strategy tab — Foundation · SWOT · Plan —
+   and its Plan is pillars, key measures and tactics, drawn and reported by the
+   UNIT's own pages. The same trick `fnAsUnit` and `capAsUnit` play, for the
+   same reason: a pillar is a pillar whoever holds it (§53.5).
+
+   STORED AS `GROUP.items` AND `GROUP.swot`, on the group's own row
+   (`org.extra`), so no migration. A reader never creates them (§50.6): absent,
+   they read as shared frozen empties and nothing changes for any client until
+   the office writes the first pillar or the first SWOT line.
+
+   THESE PILLARS ARE NOT THE TEMPLE'S THEMES. The Temple goes on drawing from
+   the aspiration, the North Star and the themes; it never reads these. The
+   group's own key objectives are NOT on this view either: they are the
+   Foundation's, rolled up from the units, and asking them here would put them
+   on the top layer's Reporting page as figures nobody enters. */
+function topHasPlan(){ return Array.isArray(GROUP.items) && GROUP.items.length > 0; }
+function topSwotHas(){
+  var sw = GROUP.swot;
+  return !!(sw && ["s","w","o","t"].some(function(q){ return Array.isArray(sw[q]) && sw[q].length; }));
+}
+function topPrefix(){
+  var w = String(labelWord("topword","group") || GROUP.org || "Group").replace(/[^A-Za-z]/g, "");
+  return (w.slice(0, 2) || "GR").toUpperCase();
+}
+function topAsUnit(){
+  return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
+           navName:null, codePrefix:topPrefix(),
+           items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
+           keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
+           swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,
+           active:true };
+}
+function topWritable(){
+  if (!Array.isArray(GROUP.items)) GROUP.items = [];
+  if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
+  ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
+  return topAsUnit();
+}
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
   if (!f || !u) return;
@@ -14908,6 +15009,7 @@ function swotWritable(target){
 function unitLikeWritable(target){
   var t = String(target || "");
   if (t.indexOf("cap:") === 0) return capWritable(t);
+  if (t === "group") return topWritable();
   if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
   return fnWritable(t.slice(3));
 }
@@ -15548,7 +15650,9 @@ function pillarHolderTargets(){
     .concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; }))
     .concat((GROUP.capabilities || []).filter(function(c){
       return c && capPlansInPillars(c);
-    }).map(function(c){ return "cap:" + c.id; }));
+    }).map(function(c){ return "cap:" + c.id; }))
+    /* §428: the top layer's own pillars, once it has any. */
+    .concat(topHasPlan() ? ["group"] : []);
 }
 function listById(kind, id){
   var out = null;
@@ -25658,7 +25762,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -26561,6 +26665,30 @@ function whereNext(keys){
     }).join("") + '</div>';
 }
 
+  /* §428: THE TOP LAYER'S OWN PLAN, SCORED BESIDE THE UNITS AND NOT MIXED
+     IN. Islam, of the mockup: *"its own score, beside the units' score — not
+     mixed in"*. The figure is the same one a unit's pillars card draws
+     (`unitPillars`, over the top layer's own view), so nothing new is
+     computed (§53.5), and it is drawn only where the top layer HAS a plan —
+     every existing client's page is byte for byte what it was. */
+  function topPlanCard(){
+    if (!topHasPlan() || !planOn("group")) return "";
+    var tu = topAsUnit(), items = itemsNow(tu);
+    var drill = miniTable(["#", L1("pillar"), "Performance", "Delivered", "Planned"],
+      items.map(function(p, i){
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(pillarCode(tu, i) + " " + (p.name || "")) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(pillarPerf(p)) + '">' + pct(pillarPerf(p)) + '</td>' +
+          '<td class="num">' + pct(pillarExec(p)) + '</td><td class="num">' + pct(pillarPlan(p)) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
+      'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
+      sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
+      drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
+      modalSub: "The top layer’s own plan, kept apart from the units"
+    });
+  }
+
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
@@ -26573,6 +26701,7 @@ function whereNext(keys){
             "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
+        topPlanCard() +
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
@@ -26621,7 +26750,11 @@ function whereNext(keys){
       TIP_CAP(), viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
-  return perfActs(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
+  /* §428: the top layer's own review deck — its SWOT and its pillars — is
+     presented from here once it has a plan, through the one menu every
+     subject uses (§53.5). No plan, no menu: the page is what it was. */
+  var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
+  return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
 var GROUP_SECTIONS = [], GSEC = 0;
 
@@ -26743,7 +26876,7 @@ function renderTemple(){
     /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
        the top level carries, and a client that switched capabilities off at
        the top is not shown a base with nothing it chose to put there. */
-    (!compOn("group", "capability") ? '</div>' :
+    (!SMPRules.capExists(GROUP) ? '</div>' :
     '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
@@ -27220,7 +27353,11 @@ var SEC_PENS = {
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
 };
+/* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
+   page and grant (g_found), and its SWOT and Plan take the unit's. */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"] };
 function secPagePair(sec){
+  if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
   var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
@@ -27270,7 +27407,7 @@ function secPagePair(sec){
    otherwise open it twice. */
 function secPagesOpen(){
   var seen = {}, out = [];
-  Object.keys(SEC_PENS).forEach(function(k){
+  Object.keys(TARGET === "group" ? SEC_PENS_TOP : SEC_PENS).forEach(function(k){
     var p = secPagePair(k);
     if (!p || seen[p[0]] || !mayAuthor(p[1])) return;
     seen[p[0]] = 1;
@@ -29250,9 +29387,13 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
      goes with it — it is `position:relative` plus 34px of right padding held
      open for a pen, and holding that gap for a control that is not there is
      what §24 is about. */
-  return '<div class="card' + (isGroup ? ' hoverpen' : '') +
+  /* §428: the top layer's Foundation is a SECTION of its Strategy tab now,
+     so its pen is on the section line, as a unit's is; a company keeps its
+     own, having no line. */
+  var ownPen = isGroup && tgt !== "group";
+  return '<div class="card' + (ownPen ? ' hoverpen' : '') +
     '"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
-    (isGroup ? penBtn(page, acKey) : '') +
+    (ownPen ? penBtn(page, acKey) : '') +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
@@ -30590,7 +30731,9 @@ function renderReport(u){
      reportBar() counts all four and says where each one is. */
   return waitingNote + reportBar(u.ukey) +
     bar +
-    section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +
+    /* §428: the top layer's own report asks its pillars alone — its key
+       objectives are the group's Foundation, not figures entered here. */
+    (u.topLayer ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -33354,6 +33497,16 @@ function renderUnitPlan(u){
      does. And the page it points at is named CORRECTLY: this sentence said
      "Setup → Import & plans" and the page has been called Import & archives
      for as long as it has existed (§104.8). */
+  /* §428: THE TOP LAYER'S EMPTY PLAN OFFERS ONE ROUTE. The guided builder and
+     the workbook both address a unit or a function by name and neither knows
+     the top layer, so offering them would be two doors onto nothing (§61).
+     The first pillar is added here, by the office, like any other row. */
+  if (!sel && u.topLayer) return '<div class="bempty">' +
+    '<b>' + esc(u.name) + ' has no plan of its own yet.</b>' +
+    (typeof mayEditPlan === "function" && mayEditPlan()
+      ? '<div class="row"><button class="bprim" data-rowadd="pillar|' + esc(u.ukey) +
+          '">Add the first ' + esc(L1("pillar")) + '</button></div>'
+      : '<p>The SMO team writes it.</p>') + '</div>';
   if (!sel) return '<div class="bempty">' +
     '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()
@@ -44581,7 +44734,10 @@ function unitAimSlides(u){
      and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
      shifts and the slide still renders perfectly (§243's own note). */
   /* §404: the aspiration and the North Star are components; off draws nothing. */
-  var aimAsp = !fnAim && compOn(u.ukey, "aspiration"), aimKo = compOn(u.ukey, "keyobj");
+  /* §428: the top layer's own deck carries no aim slide — its aspiration and
+     objectives are the group's Foundation, shown on its own tab, and its
+     unit-shaped view holds neither (topAsUnit). */
+  var aimAsp = !fnAim && !u.topLayer && compOn(u.ukey, "aspiration"), aimKo = !u.topLayer && compOn(u.ukey, "keyobj");
   var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
@@ -44647,7 +44803,7 @@ function unitSwotSlides(u){
        one accent across a row, never one per card (§41's budget). */
     S.push(sectSlide("swothead", "After the SWOT title page",
       SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
-      "Where this unit is strong, exposed, and what the market is offering it.",
+      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
       sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
     sw.forEach(function(x, xi){
       var items = (u.swot[x[0]] || []).map(function(t, i){
@@ -44759,7 +44915,7 @@ function deckSlides(u){
      slide explains a reading it is not showing. */
   var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where ' + (u.fnKey ? esc(u.name) : "the unit") + ' stands</h2>' +
+    '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
       (koShown
         ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
@@ -44877,7 +45033,7 @@ function deckSlides(u){
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
-        " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
+        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
 
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
@@ -56252,7 +56408,7 @@ var CLIENTSETUP = (function () {
       units:  (UNIT_KEYS || []).length > 0,
       cos:    (COMPANY_KEYS || []).length > 0 || !SMPRules.midExists(GROUP, COMPANIES),
       fns:    (FUNCTION_KEYS || []).length > 0 || !SMPRules.fnExists(GROUP),
-      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !capsCarried(),
+      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !SMPRules.capExists(GROUP),
       office: ff
     };
     var done = 0, todo = [];
@@ -56953,15 +57109,9 @@ var CLIENTSETUP = (function () {
     if (!SMPRules.midExists(GROUP, COMPANIES)) return [];
     return S.shape.companies.map(function (c) { return String(c.name || "").trim(); }).filter(Boolean);
   }
-  /* Whether any level carries capabilities (§404.4): the step asks for
-     capabilities only where the Structure step ticked them somewhere. */
-  function capsCarried(){
-    var lv = structNow();
-    return ["top", "mid", "bu"].some(function (k) {
-      if (k === "mid" && !lv.mid.exists) return false;
-      return lv[k].on.indexOf("capability") >= 0;
-    });
-  }
+  /* Whether this client has capabilities (§404.4, §428): the step asks for
+     them only where the Structure step's Capabilities card says so. */
+  function capsCarried(){ return SMPRules.capExists(GROUP); }
 
   function companiesStep(box){
     /* §404.4: whether there IS a second layer is the Structure step's
@@ -57129,9 +57279,23 @@ var CLIENTSETUP = (function () {
     out.mid.temple = !!(st && st.mid && st.mid.temple === true);
     out.bu.on = lv("bu"); out.fn.on = lv("fn");
     out.fn.exists = SMPRules.fnExists(GROUP);
+    /* §428: THE CAPABILITIES CARD HOLDS THE FUNCTIONS' ANSWERS UNTIL IT IS
+       SAVED. Unsaid, a capability reads the functions' level (effLevel), so
+       the card is drawn from a copy of theirs; the copy is written only when
+       something on THIS card changed (structWrite compares it with the
+       baseline taken here), or a press on the functions' card would freeze
+       the capabilities at the functions' old answers. */
+    var capSaved = !!(st && st.cap && typeof st.cap === "object");
+    out.cap = capSaved ? copy("cap") : JSON.parse(JSON.stringify(out.fn));
+    delete out.cap.exists;
+    out.cap.on = lv("cap");
+    out.cap.exists = SMPRules.capExists(GROUP);
+    CAP_BASE = capSaved ? null : JSON.stringify(out.cap);
     return out;
   }
+  var CAP_BASE = null;
   function structWrite(next){
+    if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
     redraw();
   }
@@ -57325,7 +57489,7 @@ var CLIENTSETUP = (function () {
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
   var WAY_LABEL = { pillars:"pillars", projects:"projects", objectives:"objectives and actions" };
   function structLevel(box, lv, k){
-    var L = lv[k], tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k];
+    var L = lv[k], tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k];
     var secs = el("div", "stsecs");
 
     /* 1 — the first section: on/off, its title, its parts. */
@@ -57346,7 +57510,7 @@ var CLIENTSETUP = (function () {
       s1.appendChild(el("p", "lab", "Parts"));
       s1.appendChild(partHead());
       SMPRules.SEC_FOUND_PARTS.forEach(function (c) {
-        if (k === "fn" && !SMPRules.compOffered("fn:", c)) return;
+        if ((k === "fn" || k === "cap") && !SMPRules.compOffered("fn:", c)) return;
         var built = SMPRules.compBuilt(tgt, c), on = built && L.on.indexOf(c) >= 0;
         var r = el("div", "stpart" + (on ? "" : " off"));
         r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function () { compToggle(k, c); }));
@@ -57371,7 +57535,7 @@ var CLIENTSETUP = (function () {
     else if (!sOn) s2.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
     else {
       s2.appendChild(el("p", "lab", "Section title"));
-      s2.appendChild(titleBox(k, "swot", null, k === "fn" ? "S&W" : fallbackWord("swot", "many"), "The second section's title"));
+      s2.appendChild(titleBox(k, "swot", null, (k === "fn" || k === "cap") ? "S&W" : fallbackWord("swot", "many"), "The second section's title"));
       s2.appendChild(el("p", "lab", "Boxes"));
       var qs = SMPRules.swotQuads(GROUP, tgt);
       SMPRules.SWOT_QUADS.forEach(function (q) {
@@ -57410,20 +57574,23 @@ var CLIENTSETUP = (function () {
     h3.appendChild(pSw);
     s3.appendChild(h3);
     if (!pOn) {
-      s3.appendChild(el("p", "sthid", !pBuilt ? "Not available on this layer yet." : (k === "bu" || k === "fn")
+      s3.appendChild(el("p", "sthid", !pBuilt ? "Not available on this layer yet." : (k === "bu" || k === "fn" || k === "cap")
         ? "Not shown on this layer, nothing to report and not in the scores. Nothing entered is lost."
         : "Not shown on this layer. Nothing entered is lost."));
       secs.appendChild(s3); box.appendChild(secs);
       structTail(box, L, k);
       return;
     }
-    var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : ["pillars"];
-    if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name all three ways here."));
+    /* §428: a capability plans in pillars or in projects (capFormat), so its
+       card names those two ways only. */
+    var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : k === "cap" ? ["pillars", "projects"] : ["pillars"];
+    if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name " +
+      (ways.length === 2 ? "both" : "all three") + " ways here."));
     ways.forEach(function (way) {
       var wb = el("div", "stway"); wb.setAttribute("data-stway", k + "|" + way);
       if (ways.length > 1) wb.appendChild(el("span", "stkind", "If planned in " + WAY_LABEL[way]));
       wb.appendChild(el("p", "lab", "Section title"));
-      var dflt = way === "projects" && k === "fn" ? fallbackWord("project", "many") : "Plan";
+      var dflt = way === "projects" && (k === "fn" || k === "cap") ? fallbackWord("project", "many") : "Plan";
       wb.appendChild(titleBox(k, "plan", way, dflt, "The plan section's title, " + WAY_LABEL[way]));
       wb.appendChild(partHead());
       SMPRules.PLAN_PARTS[way].forEach(function (c) {
@@ -57441,16 +57608,8 @@ var CLIENTSETUP = (function () {
     structTail(box, L, k);
   }
   function structTail(box, L, k){
-    if (k !== "fn") {
-      /* Capabilities are their own item and sit outside the three sections
-         (the mockup's own note); the tick stays, because a capability's
-         presence is still this layer's to say. */
-      var cap = el("div", "stcap");
-      cap.appendChild(tickBtn(L.on.indexOf("capability") >= 0, "Carries capabilities", k + "|capability",
-        function () { compToggle(k, "capability"); }));
-      cap.appendChild(el("span", null, "Carries " + fallbackWord("capability", "many").toLowerCase()));
-      box.appendChild(cap);
-    }
+    /* §428: the "Carries capabilities" tick is gone from every layer — the
+       Capabilities card answers whether this client has them. */
     if (k === "top" || k === "mid") {
       var need = SMPRules.TEMPLE_NEEDS.filter(function (c) { return L.on.indexOf(c) < 0; });
       var tp = el("div", "sttemple");
@@ -57469,7 +57628,7 @@ var CLIENTSETUP = (function () {
       tp.appendChild(el("span", "wzwhy", need.length
         ? "Needs " + need.map(function (c) { return PART_LABEL[c] || c; }).join(", ") + " ticked."
         : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
-          (L.on.indexOf("capability") >= 0 ? ", and the capabilities (base)." : ".")));
+          (SMPRules.capExists(GROUP) ? ", and the capabilities (base)." : ".")));
       box.appendChild(tp);
     }
   }
@@ -57495,7 +57654,8 @@ var CLIENTSETUP = (function () {
   function detailRows(wb, k, tgt){
     var layer = { top: "the top level", mid: "the second layer",
                   bu: W("unitword", "many", "Business units").toLowerCase(),
-                  fn: W("fnword", "many", "Supporting functions").toLowerCase() }[k];
+                  fn: W("fnword", "many", "Supporting functions").toLowerCase(),
+                  cap: W("capability", "many", "Capabilities").toLowerCase() }[k];
     DETAIL_GROUPS.forEach(function (g) {
       var grp = el("div", "stdetg"); grp.setAttribute("data-stdetg", k + "|" + (g[1][0][0] === "overview" ? "general" : "tactics"));
       grp.appendChild(el("p", "lab", g[0]));
@@ -57569,6 +57729,22 @@ var CLIENTSETUP = (function () {
       callBoxes(fn, "fnword", ro);
       structLevel(fn, lv, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
+
+    /* §428: CAPABILITIES ARE A CARD OF THEIR OWN, after the functions, with
+       the same three sections. Its On/Off is whether this client has them at
+       all — the question the three "Carries capabilities" ticks used to
+       answer layer by layer. */
+    var cp = card(W("capability", "many", "Capabilities"));
+    cp.setAttribute("data-stcard", "cap");
+    var ch = el("div", "stsech"); ch.appendChild(el("span", "lab", "This client has them"));
+    ch.appendChild(onOff(lv.cap.exists, function (v) {
+      var nx = structNow(); nx.cap.exists = v; structWrite(nx);
+    }, "cap|layer"));
+    cp.appendChild(ch);
+    if (lv.cap.exists) {
+      callBoxes(cp, "capability", ro);
+      structLevel(cp, lv, "cap");
+    } else cp.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
 
     box.appendChild(el("p", "wzwhy",
@@ -59670,16 +59846,33 @@ var SYNC = (function () {
       LIB_TAB
     ],
     group: [
+      /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
+         Islam, of the mockup: *"ok for all, build it"*. The top layer gains
+         the unit's Strategy tab: today's Foundation moves inside it as its
+         first section, unchanged, and a SWOT and a Plan of its own follow.
+         The key stays `strategy`, which is what makes the section line, its
+         pen and the missing bar the unit's own (§53.5). Each section is
+         offered while the Structure step carries it (§404, §418, §422). */
+      { k:"strategy", ac:"g_found", label:"Strategy", sections: function(){
+          return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
+                    when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
+                  { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
+                    render: function(){ return renderUnitAnalysis(topAsUnit()); },
+                    when: function(){ return compOn("group", "swot"); } },
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
+                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
+        } },
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
-      /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
-         Foundation holds five components; the Temple is a picture drawn from
-         three of them and is a switch of its own (templeOn). */
-      { k:"foundation",  ac:"g_found",  label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
-        when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      /* §428: the orange Reporting tab, once the top layer has a plan of its
+         own — reported by the office and the group's CEO (mayReportTop). */
+      { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
+        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB
     ],

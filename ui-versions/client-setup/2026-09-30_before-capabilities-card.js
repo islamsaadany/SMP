@@ -460,7 +460,7 @@ var CLIENTSETUP = (function () {
       units:  (UNIT_KEYS || []).length > 0,
       cos:    (COMPANY_KEYS || []).length > 0 || !SMPRules.midExists(GROUP, COMPANIES),
       fns:    (FUNCTION_KEYS || []).length > 0 || !SMPRules.fnExists(GROUP),
-      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !SMPRules.capExists(GROUP),
+      caps:   ((GROUP && GROUP.capabilities) || []).length > 0 || !capsCarried(),
       office: ff
     };
     var done = 0, todo = [];
@@ -1161,9 +1161,15 @@ var CLIENTSETUP = (function () {
     if (!SMPRules.midExists(GROUP, COMPANIES)) return [];
     return S.shape.companies.map(function (c) { return String(c.name || "").trim(); }).filter(Boolean);
   }
-  /* Whether this client has capabilities (§404.4, §428): the step asks for
-     them only where the Structure step's Capabilities card says so. */
-  function capsCarried(){ return SMPRules.capExists(GROUP); }
+  /* Whether any level carries capabilities (§404.4): the step asks for
+     capabilities only where the Structure step ticked them somewhere. */
+  function capsCarried(){
+    var lv = structNow();
+    return ["top", "mid", "bu"].some(function (k) {
+      if (k === "mid" && !lv.mid.exists) return false;
+      return lv[k].on.indexOf("capability") >= 0;
+    });
+  }
 
   function companiesStep(box){
     /* §404.4: whether there IS a second layer is the Structure step's
@@ -1331,23 +1337,9 @@ var CLIENTSETUP = (function () {
     out.mid.temple = !!(st && st.mid && st.mid.temple === true);
     out.bu.on = lv("bu"); out.fn.on = lv("fn");
     out.fn.exists = SMPRules.fnExists(GROUP);
-    /* §428: THE CAPABILITIES CARD HOLDS THE FUNCTIONS' ANSWERS UNTIL IT IS
-       SAVED. Unsaid, a capability reads the functions' level (effLevel), so
-       the card is drawn from a copy of theirs; the copy is written only when
-       something on THIS card changed (structWrite compares it with the
-       baseline taken here), or a press on the functions' card would freeze
-       the capabilities at the functions' old answers. */
-    var capSaved = !!(st && st.cap && typeof st.cap === "object");
-    out.cap = capSaved ? copy("cap") : JSON.parse(JSON.stringify(out.fn));
-    delete out.cap.exists;
-    out.cap.on = lv("cap");
-    out.cap.exists = SMPRules.capExists(GROUP);
-    CAP_BASE = capSaved ? null : JSON.stringify(out.cap);
     return out;
   }
-  var CAP_BASE = null;
   function structWrite(next){
-    if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
     redraw();
   }
@@ -1541,7 +1533,7 @@ var CLIENTSETUP = (function () {
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
   var WAY_LABEL = { pillars:"pillars", projects:"projects", objectives:"objectives and actions" };
   function structLevel(box, lv, k){
-    var L = lv[k], tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k];
+    var L = lv[k], tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k];
     var secs = el("div", "stsecs");
 
     /* 1 — the first section: on/off, its title, its parts. */
@@ -1562,7 +1554,7 @@ var CLIENTSETUP = (function () {
       s1.appendChild(el("p", "lab", "Parts"));
       s1.appendChild(partHead());
       SMPRules.SEC_FOUND_PARTS.forEach(function (c) {
-        if ((k === "fn" || k === "cap") && !SMPRules.compOffered("fn:", c)) return;
+        if (k === "fn" && !SMPRules.compOffered("fn:", c)) return;
         var built = SMPRules.compBuilt(tgt, c), on = built && L.on.indexOf(c) >= 0;
         var r = el("div", "stpart" + (on ? "" : " off"));
         r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function () { compToggle(k, c); }));
@@ -1587,7 +1579,7 @@ var CLIENTSETUP = (function () {
     else if (!sOn) s2.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
     else {
       s2.appendChild(el("p", "lab", "Section title"));
-      s2.appendChild(titleBox(k, "swot", null, (k === "fn" || k === "cap") ? "S&W" : fallbackWord("swot", "many"), "The second section's title"));
+      s2.appendChild(titleBox(k, "swot", null, k === "fn" ? "S&W" : fallbackWord("swot", "many"), "The second section's title"));
       s2.appendChild(el("p", "lab", "Boxes"));
       var qs = SMPRules.swotQuads(GROUP, tgt);
       SMPRules.SWOT_QUADS.forEach(function (q) {
@@ -1626,23 +1618,20 @@ var CLIENTSETUP = (function () {
     h3.appendChild(pSw);
     s3.appendChild(h3);
     if (!pOn) {
-      s3.appendChild(el("p", "sthid", !pBuilt ? "Not available on this layer yet." : (k === "bu" || k === "fn" || k === "cap")
+      s3.appendChild(el("p", "sthid", !pBuilt ? "Not available on this layer yet." : (k === "bu" || k === "fn")
         ? "Not shown on this layer, nothing to report and not in the scores. Nothing entered is lost."
         : "Not shown on this layer. Nothing entered is lost."));
       secs.appendChild(s3); box.appendChild(secs);
       structTail(box, L, k);
       return;
     }
-    /* §428: a capability plans in pillars or in projects (capFormat), so its
-       card names those two ways only. */
-    var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : k === "cap" ? ["pillars", "projects"] : ["pillars"];
-    if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name " +
-      (ways.length === 2 ? "both" : "all three") + " ways here."));
+    var ways = (k === "bu" || k === "fn") ? SMPRules.PLAN_WAYS : ["pillars"];
+    if (ways.length > 1) s3.appendChild(el("p", "wzwhy", "Each one picks how it plans on its own row. Name all three ways here."));
     ways.forEach(function (way) {
       var wb = el("div", "stway"); wb.setAttribute("data-stway", k + "|" + way);
       if (ways.length > 1) wb.appendChild(el("span", "stkind", "If planned in " + WAY_LABEL[way]));
       wb.appendChild(el("p", "lab", "Section title"));
-      var dflt = way === "projects" && (k === "fn" || k === "cap") ? fallbackWord("project", "many") : "Plan";
+      var dflt = way === "projects" && k === "fn" ? fallbackWord("project", "many") : "Plan";
       wb.appendChild(titleBox(k, "plan", way, dflt, "The plan section's title, " + WAY_LABEL[way]));
       wb.appendChild(partHead());
       SMPRules.PLAN_PARTS[way].forEach(function (c) {
@@ -1660,8 +1649,16 @@ var CLIENTSETUP = (function () {
     structTail(box, L, k);
   }
   function structTail(box, L, k){
-    /* §428: the "Carries capabilities" tick is gone from every layer — the
-       Capabilities card answers whether this client has them. */
+    if (k !== "fn") {
+      /* Capabilities are their own item and sit outside the three sections
+         (the mockup's own note); the tick stays, because a capability's
+         presence is still this layer's to say. */
+      var cap = el("div", "stcap");
+      cap.appendChild(tickBtn(L.on.indexOf("capability") >= 0, "Carries capabilities", k + "|capability",
+        function () { compToggle(k, "capability"); }));
+      cap.appendChild(el("span", null, "Carries " + fallbackWord("capability", "many").toLowerCase()));
+      box.appendChild(cap);
+    }
     if (k === "top" || k === "mid") {
       var need = SMPRules.TEMPLE_NEEDS.filter(function (c) { return L.on.indexOf(c) < 0; });
       var tp = el("div", "sttemple");
@@ -1680,7 +1677,7 @@ var CLIENTSETUP = (function () {
       tp.appendChild(el("span", "wzwhy", need.length
         ? "Needs " + need.map(function (c) { return PART_LABEL[c] || c; }).join(", ") + " ticked."
         : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +
-          (SMPRules.capExists(GROUP) ? ", and the capabilities (base)." : ".")));
+          (L.on.indexOf("capability") >= 0 ? ", and the capabilities (base)." : ".")));
       box.appendChild(tp);
     }
   }
@@ -1706,8 +1703,7 @@ var CLIENTSETUP = (function () {
   function detailRows(wb, k, tgt){
     var layer = { top: "the top level", mid: "the second layer",
                   bu: W("unitword", "many", "Business units").toLowerCase(),
-                  fn: W("fnword", "many", "Supporting functions").toLowerCase(),
-                  cap: W("capability", "many", "Capabilities").toLowerCase() }[k];
+                  fn: W("fnword", "many", "Supporting functions").toLowerCase() }[k];
     DETAIL_GROUPS.forEach(function (g) {
       var grp = el("div", "stdetg"); grp.setAttribute("data-stdetg", k + "|" + (g[1][0][0] === "overview" ? "general" : "tactics"));
       grp.appendChild(el("p", "lab", g[0]));
@@ -1781,22 +1777,6 @@ var CLIENTSETUP = (function () {
       callBoxes(fn, "fnword", ro);
       structLevel(fn, lv, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
-
-    /* §428: CAPABILITIES ARE A CARD OF THEIR OWN, after the functions, with
-       the same three sections. Its On/Off is whether this client has them at
-       all — the question the three "Carries capabilities" ticks used to
-       answer layer by layer. */
-    var cp = card(W("capability", "many", "Capabilities"));
-    cp.setAttribute("data-stcard", "cap");
-    var ch = el("div", "stsech"); ch.appendChild(el("span", "lab", "This client has them"));
-    ch.appendChild(onOff(lv.cap.exists, function (v) {
-      var nx = structNow(); nx.cap.exists = v; structWrite(nx);
-    }, "cap|layer"));
-    cp.appendChild(ch);
-    if (lv.cap.exists) {
-      callBoxes(cp, "capability", ro);
-      structLevel(cp, lv, "cap");
-    } else cp.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
 
     box.appendChild(el("p", "wzwhy",

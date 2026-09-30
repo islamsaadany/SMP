@@ -58747,3 +58747,69 @@ with the rule reverted and **4 red** with the controls made pressable again,
 both from the sources (§276). Three assertions there and one in
 `smp-app/checks/setup-shape.mjs` held the old rule and were REWRITTEN, never
 loosened (§218).
+
+## §428 — The top layer's own plan, and capabilities as a card of their own (2026-09-30)
+
+Islam, of the mockup `design-mockups/top-layer-plan/2026-09-30_top-layer-plan-and-capability-card.html`
+(published as an artifact, seven parts): **"ok for all, build it."**
+
+**THE TOP LAYER IS DRAWN AS A UNIT, FOR THE REASON A PILLARS FUNCTION IS
+(§59).** `topAsUnit()` hands the unit's pages a view of the group — `ukey`
+`"group"`, `topLayer:true`, its pillars from `GROUP.items` and its SWOT from
+`GROUP.swot` — and `topWritable()` is the writing half (§50.6): a reader hands
+out frozen empties, so no client's stored state moves until the office adds the
+first pillar or the first SWOT line. Both ride `org.extra`, so **no migration**.
+The group's own key objectives are deliberately NOT on the view: they are the
+Foundation's, and asking them on the top layer's Reporting page would put
+figures there that nobody enters — so its report asks its pillars alone, and its
+deck carries no aim slide.
+
+**THE TABS.** Strategy leads the group's row (Foundation, unchanged, as its first
+section; SWOT; Plan), each section offered while the Structure step carries it
+(§404, §418, §422). The old Foundation tab is removed rather than kept beside it
+(§87). The orange Reporting tab is drawn once the top layer has a plan and the
+viewer may report it.
+
+**WHO.** The plan is the office's alone: `mayAuthorPage` answers the group's
+strategy pages from the office's own grant, and `lib/authorize.js` classifies
+`group.items` / `group.swot` through `collectUnit("group", …)` — the unit's own
+classifier — so a pillar, a measure, a tactic or a SWOT line is `unitPlan` /
+`unitAnalysis` and a figure is `unitReporting`. Reporting is
+`SMPRules.mayReportTop()`: an office role or the group CEO; a unit head reports
+nothing here. **The two server edits go together** (§259.2): `items` and `swot`
+join `gExtra`.
+
+**PERFORMANCE KEEPS EVERY EXISTING NUMBER.** A new card, "Group Pillars — own
+plan", sits after the group's key objectives and is scored like a unit's
+pillars; nothing it computes enters the group's headline or the units' compile
+— asserted as the two readings unmoved before and after a plan exists.
+
+**THE BOARD AND THE DECK.** `boardUnitTargets()` puts `"group"` first once there
+is a plan, reported by "SMO team". `deckHtmlFor("group")` is the unit deck over
+the view. **One correction to the mockup, said rather than hidden:** it drew the
+top layer's slides "before today's slides", and the group had no deck of its own
+before — so the top layer's deck is these slides, and its SWOT uses the unit
+deck's own builder (a divider and one slide per box), not a single slide.
+
+**THE EMPTY PLAN OFFERS ONE ROUTE.** The builder and the workbook address a unit
+or a function by name and know nothing of the top layer, so the empty state
+offers only *Add the first Pillar* (§61: two doors onto nothing is worse than
+one door).
+
+**CAPABILITIES GET A CARD.** A fifth card on the Structure step, after the
+functions, with the same three sections; its plan section names pillars and
+projects only (a capability plans no third way, §347.1). `SMPRules.effLevel()`
+reads the functions' level for `cap` until the card is saved, so **nothing moves
+for any client**, and `structWrite` drops the card when it still equals what it
+was drawn from. Its On/Off is `structure.cap.exists`, read by
+`SMPRules.capExists()` — which falls back to whether the top layer carries
+capabilities — and it replaces the three "Carries capabilities" ticks, which go.
+The Temple's base shows when `capExists()`.
+
+**PROVED.** `checks/top-plan.py` (35 assertions, the state MADE, §255) red three
+ways from the SOURCES (§276): reporting refused to all → 2, the own-plan card
+removed → 1, the Capabilities card renamed → 1. `test-authorize.js` §428
+(29 assertions, both ends) red 8 with the classifier removed and 4 with the
+report gate opened. `checks/structure.py` held the group's old Foundation tab
+and four cards: REWRITTEN, never loosened (§218), with the capabilities card's
+two ways and the missing tick asserted beside it.

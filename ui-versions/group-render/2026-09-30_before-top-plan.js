@@ -1479,7 +1479,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -2382,30 +2382,6 @@ function whereNext(keys){
     }).join("") + '</div>';
 }
 
-  /* §428: THE TOP LAYER'S OWN PLAN, SCORED BESIDE THE UNITS AND NOT MIXED
-     IN. Islam, of the mockup: *"its own score, beside the units' score — not
-     mixed in"*. The figure is the same one a unit's pillars card draws
-     (`unitPillars`, over the top layer's own view), so nothing new is
-     computed (§53.5), and it is drawn only where the top layer HAS a plan —
-     every existing client's page is byte for byte what it was. */
-  function topPlanCard(){
-    if (!topHasPlan() || !planOn("group")) return "";
-    var tu = topAsUnit(), items = itemsNow(tu);
-    var drill = miniTable(["#", L1("pillar"), "Performance", "Delivered", "Planned"],
-      items.map(function(p, i){
-        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(pillarCode(tu, i) + " " + (p.name || "")) + '</td>' +
-          '<td class="num final" style="color:' + bandInk(pillarPerf(p)) + '">' + pct(pillarPerf(p)) + '</td>' +
-          '<td class="num">' + pct(pillarExec(p)) + '</td><td class="num">' + pct(pillarPlan(p)) + '</td></tr>';
-      }).join("")) +
-      '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
-      'Kept apart from the ' + L("unitword") + '’ own score.</p>';
-    return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
-      sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
-      drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
-      modalSub: "The top layer’s own plan, kept apart from the units"
-    });
-  }
-
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
@@ -2418,7 +2394,6 @@ function whereNext(keys){
             "</b> objectives, each scored against its target.",
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        topPlanCard() +
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
@@ -2467,11 +2442,7 @@ function whereNext(keys){
       TIP_CAP(), viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
-  /* §428: the top layer's own review deck — its SWOT and its pillars — is
-     presented from here once it has a plan, through the one menu every
-     subject uses (§53.5). No plan, no menu: the page is what it was. */
-  var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
-  return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
+  return perfActs(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
 var GROUP_SECTIONS = [], GSEC = 0;
 
@@ -6448,9 +6419,7 @@ function renderReport(u){
      reportBar() counts all four and says where each one is. */
   return waitingNote + reportBar(u.ukey) +
     bar +
-    /* §428: the top layer's own report asks its pillars alone — its key
-       objectives are the group's Foundation, not figures entered here. */
-    (u.topLayer ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -9214,16 +9183,6 @@ function renderUnitPlan(u){
      does. And the page it points at is named CORRECTLY: this sentence said
      "Setup → Import & plans" and the page has been called Import & archives
      for as long as it has existed (§104.8). */
-  /* §428: THE TOP LAYER'S EMPTY PLAN OFFERS ONE ROUTE. The guided builder and
-     the workbook both address a unit or a function by name and neither knows
-     the top layer, so offering them would be two doors onto nothing (§61).
-     The first pillar is added here, by the office, like any other row. */
-  if (!sel && u.topLayer) return '<div class="bempty">' +
-    '<b>' + esc(u.name) + ' has no plan of its own yet.</b>' +
-    (typeof mayEditPlan === "function" && mayEditPlan()
-      ? '<div class="row"><button class="bprim" data-rowadd="pillar|' + esc(u.ukey) +
-          '">Add the first ' + esc(L1("pillar")) + '</button></div>'
-      : '<p>The SMO team writes it.</p>') + '</div>';
   if (!sel) return '<div class="bempty">' +
     '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()

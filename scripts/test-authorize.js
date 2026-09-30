@@ -5103,5 +5103,54 @@ console.log("\n§418–§422 · every structure switch is the office's");
   });
 })();
 
+/* ── §428: THE TOP LAYER'S OWN PLAN ────────────────────────────────────────
+   Islam, of the mockup: *"ok for all, build it"*. The top layer's pillars,
+   key measures and tactics ride `group.items`, its SWOT `group.swot`; the
+   plan is written by the SMO team alone, and reported by the office and the
+   group CEO. BOTH ENDS each (§94.2): the CEO may report and may not author, a
+   unit head may do neither, and the Capabilities card's switch is Setup. */
+console.log("\n§428 · the top layer's own plan");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([{ key: "t428_team", name: "Testcase Office Four", role: "smoteam", unit: "group" }]);
+  B.group.items = [{ id: "group-P1", code: "GR01", name: "Grow the group", sub: "", kind: "", theme: "", owner: "",
+    measures: [{ id: "group-P1-M1", name: "Group revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+    tactics: [{ id: "group-P1-T1", name: "Open the hub", q1: true, q2: true, q3: true, q4: true, status: "", actual: "" }] }];
+  B.group.swot = { s: ["Scale"], w: [], o: [], t: [] };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const addPillar = function (inc) { inc.group.items.push({ id: "group-P2", code: "", name: "New", sub: "", kind: "", theme: "", owner: "", measures: [], tactics: [] }); };
+  const rename   = function (inc) { inc.group.items[0].name = "Grow the whole group"; };
+  const swot     = function (inc) { inc.group.swot.w.push("Slow"); };
+  const figure   = function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; };
+  const tactic   = function (inc) { inc.group.items[0].tactics[0].actual = "50"; };
+  const capOff   = function (inc) { inc.group[R.STRUCTURE] = { cap: { exists: false } }; };
+  [["adds a pillar", addPillar], ["renames a pillar", rename], ["writes the SWOT", swot]].forEach(function (x) {
+    ["smo", "t428_team"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428: the office (" + who + ") " + x[0], v.ok, (v.refusals || []).join(" / "));
+    });
+    ["ceo", "mobhead", "own_mob"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428 REFUSED: " + who + " " + x[0], !v.ok, "was ALLOWED");
+    });
+  });
+  [["reports a key measure", figure], ["reports a tactic", tactic]].forEach(function (x) {
+    ["smo", "t428_team", "ceo"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428: " + who + " " + x[0], v.ok, (v.refusals || []).join(" / "));
+    });
+    ["mobhead", "own_mob"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428 REFUSED: " + who + " " + x[0], !v.ok, "was ALLOWED");
+    });
+  });
+  const inc = clone(B); figure(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§428: a top-layer figure classifies as reporting and nothing else",
+        kinds.length === 1 && kinds[0] === "unitReporting", kinds.join(",") || "(INVISIBLE)");
+  const inc2 = clone(B); capOff(inc2);
+  const k2 = A.collect(B, inc2, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§428: the Capabilities card's switch classifies as Setup",
+        k2.length > 0 && k2.every(function (k) { return k === "setup"; }), k2.join(",") || "(INVISIBLE)");
+  let v = as("smo", capOff);  check("§428: the office sets the Capabilities card", v.ok, (v.refusals || []).join(" / "));
+  v = as("ceo", capOff);      check("§428 REFUSED: the CEO may not", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

@@ -594,7 +594,20 @@ function collect(stored, incoming, w) {
   if (!same(sg[DRIVERS_ON], ig[DRIVERS_ON]))
     add("seasons", null, "whether revenue drivers are used at all");
 
-  const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
+  /* ── §428: THE TOP LAYER'S OWN PLAN AND SWOT ─────────────────────────
+     Judged by exactly the rules a business unit's plan gets — the same
+     `collectUnit()` pass over a unit-shaped view, against the `group`
+     target — so the verdicts below read `mayAuthorPage(…, "group")`, which
+     makes the plan and the SWOT the office's alone, and the figures go
+     through `unitReporting` like a unit's (§53.5: one set of rules). The
+     view carries ONLY the plan and the SWOT; the group's own words and its
+     objectives are GROUP_OWN's, judged above, and passing them through would
+     report every change twice. Both keys are named in gExtra below, or they
+     are swept as unknown as well (§259.2). */
+  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot))
+    collectUnit("group", topView(sg), topView(ig), add, w);
+
+  const gExtra = GROUP_OWN.concat(["items", "swot", "capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
                                    SEASONS, DRIVERS_ON, "planYear"]);
@@ -1313,6 +1326,12 @@ function asUnit(f, ukey) {
   return u;
 }
 
+/* §428: the top layer's own plan, in the shape collectUnit() reads. */
+function topView(g) {
+  return { ukey: "group", items: (g && g.items) || [], keyObjectives: [],
+           swot: (g && g.swot) || {}, aspiration: "", endInMind: "", clauses: [] };
+}
+
 /* Capabilities. WHAT EXISTS and WHICH FUNCTION OWNS IT is Setup (c_caps);
    what a capability IS, its key objectives and its projects belong to the
    function that carries it (k_found, k_proj); the figures are its reporting
@@ -1406,6 +1425,7 @@ function targetWord(w, t) {
       return c && c.id === id; })[0];
     return hit && hit.name ? hit.name : id;
   }
+  if (s === "group") return "the top layer";
   return s.replace(/^fn:/, "");
 }
 
@@ -1880,6 +1900,16 @@ function authorize(stored, incoming, person) {
       case "unitReporting":
       case "reportState": {
         const t = String(ch.target || "");
+        /* §428: THE TOP LAYER IS REPORTED BY THE OFFICE AND THE GROUP'S CEO,
+           a rule and not a matrix cell, asked through the one function the
+           screen draws its boxes from (§42). */
+        if (t === "group") {
+          if (!R.mayReportTop(w, person))
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+          else if (locked && !office)
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
@@ -1939,6 +1969,13 @@ function authorize(stored, incoming, person) {
          untouched and stay `reportState` above. */
       case "reportUnpark": {
         const t = String(ch.target || "");
+        if (t === "group") {
+          if (!R.mayReportTop(w, person))
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+          else if (locked && !office)
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head

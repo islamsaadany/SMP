@@ -437,16 +437,33 @@
       LIB_TAB
     ],
     group: [
+      /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
+         Islam, of the mockup: *"ok for all, build it"*. The top layer gains
+         the unit's Strategy tab: today's Foundation moves inside it as its
+         first section, unchanged, and a SWOT and a Plan of its own follow.
+         The key stays `strategy`, which is what makes the section line, its
+         pen and the missing bar the unit's own (§53.5). Each section is
+         offered while the Structure step carries it (§404, §418, §422). */
+      { k:"strategy", ac:"g_found", label:"Strategy", sections: function(){
+          return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
+                    when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
+                  { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
+                    render: function(){ return renderUnitAnalysis(topAsUnit()); },
+                    when: function(){ return compOn("group", "swot"); } },
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
+                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
+        } },
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
-      /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
-         Foundation holds five components; the Temple is a picture drawn from
-         three of them and is a switch of its own (templeOn). */
-      { k:"foundation",  ac:"g_found",  label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
-        when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      /* §428: the orange Reporting tab, once the top layer has a plan of its
+         own — reported by the office and the group's CEO (mayReportTop). */
+      { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
+        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
+        render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB
     ],

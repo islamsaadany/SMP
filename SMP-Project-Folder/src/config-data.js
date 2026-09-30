@@ -176,6 +176,7 @@ function planIdx(){
     Object.keys(UNITS || {}).forEach(function(k){ if (UNITS[k]) { m.set(UNITS[k], k); put(UNITS[k].items, k); } });
     Object.keys(FUNCTIONS || {}).forEach(function(k){ var f = FUNCTIONS[k]; if (f) { m.set(f, "fn:" + k); put(f.items, "fn:" + k); } });
     ((GROUP && GROUP.capabilities) || []).forEach(function(c){ if (c) { m.set(c, "cap:" + c.id); put(c.items, "cap:" + c.id); } });
+    if (GROUP && Array.isArray(GROUP.items)) put(GROUP.items, "group");
   } catch (e) {}
   PLAN_IDX = m;
   (typeof queueMicrotask === "function" ? queueMicrotask : function(f){ Promise.resolve().then(f); })(function(){ PLAN_IDX = null; });
@@ -4906,6 +4907,8 @@ function unitLike(target){
      fallback below would hand back UNITS["cap:x"], which is undefined and
      renders as a page with nothing on it. */
   if (t.indexOf("cap:") === 0) return capAsUnit(t);
+  /* §428: the top layer's own plan, read as a unit. */
+  if (t === "group") return topAsUnit();
   if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
   return fnAsUnit(t.slice(3));
 }
@@ -4937,6 +4940,13 @@ function planEditable(){
    It also means the screen and the server answer from the same function. */
 function canReport(unitKey){
   if (REVIEW.state !== "open") return false;
+  /* §428: the top layer's own plan is reported by the office and the group's
+     CEO — a rule, the same one the server asks. */
+  if (unitKey === "group") {
+    if (!topHasPlan() || !planOn("group")) return false;
+    if (CYCLE.locked && !inOffice()) return false;
+    return SMPRules.mayReportTop(world(), viewer());
+  }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
   if (CYCLE.locked && !inOffice()) return false;
@@ -5073,6 +5083,7 @@ function canReportFnWhole(target){
    stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = subjKey(target);
+  if (t === "group") return canReport("group");
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
     return canReportFn(t) &&
            !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
@@ -5106,7 +5117,9 @@ function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
   var t = String(target || "");
   if (t && !planOn(t)) return false;
-  if (t === "group" || t.indexOf("co:") === 0) return false;
+  /* §428: the top layer submits once it has a plan of its own. */
+  if (t === "group") return topHasPlan() && !(REVIEW.submitted && REVIEW.submitted.group) && canSpeakFor("group");
+  if (t.indexOf("co:") === 0) return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
@@ -6036,7 +6049,9 @@ function reportState(c, key){
    TWO LISTS, because the totals must have exactly the membership the rows
    have: §108.1's miscount is the parts growing while the divisor did not. */
 function boardUnitTargets(){
-  return activeKeys().filter(function(k){ return planOn(k); });
+  /* §428: the top layer first, once it has a plan of its own. */
+  return (topHasPlan() && planOn("group") ? ["group"] : [])
+    .concat(activeKeys().filter(function(k){ return planOn(k); }));
 }
 /* Every supporting function that can be asked for a report, in ONE list and in
    the register's own order. A pillars function has no capabilities to count, so
@@ -6065,6 +6080,7 @@ function boardCapTargets(){
 function boardWho(target){
   /* §334: a capability is run by the function that holds it, so the board
      names the same person its Overview does — one fact, one answer. */
+  if (target === "group") return "SMO team";
   var fk = isCapTarget(target)
     ? ((capOfTarget(target) || {}).fn || null) : fnKeyOfTarget(target);
   var r = fk ? (FUNCTIONS[fk] || {}) : (UNIT_ROLES[target] || {});
@@ -8215,6 +8231,46 @@ function fnWritable(fk){
   });
   return u;
 }
+/* ── THE TOP LAYER'S OWN PLAN, READ AS A UNIT (§428) ────────────────
+   Islam, of the mockup: *"ok for all, build it"*. The top layer (the group,
+   in the client's own word) gains a Strategy tab — Foundation · SWOT · Plan —
+   and its Plan is pillars, key measures and tactics, drawn and reported by the
+   UNIT's own pages. The same trick `fnAsUnit` and `capAsUnit` play, for the
+   same reason: a pillar is a pillar whoever holds it (§53.5).
+
+   STORED AS `GROUP.items` AND `GROUP.swot`, on the group's own row
+   (`org.extra`), so no migration. A reader never creates them (§50.6): absent,
+   they read as shared frozen empties and nothing changes for any client until
+   the office writes the first pillar or the first SWOT line.
+
+   THESE PILLARS ARE NOT THE TEMPLE'S THEMES. The Temple goes on drawing from
+   the aspiration, the North Star and the themes; it never reads these. The
+   group's own key objectives are NOT on this view either: they are the
+   Foundation's, rolled up from the units, and asking them here would put them
+   on the top layer's Reporting page as figures nobody enters. */
+function topHasPlan(){ return Array.isArray(GROUP.items) && GROUP.items.length > 0; }
+function topSwotHas(){
+  var sw = GROUP.swot;
+  return !!(sw && ["s","w","o","t"].some(function(q){ return Array.isArray(sw[q]) && sw[q].length; }));
+}
+function topPrefix(){
+  var w = String(labelWord("topword","group") || GROUP.org || "Group").replace(/[^A-Za-z]/g, "");
+  return (w.slice(0, 2) || "GR").toUpperCase();
+}
+function topAsUnit(){
+  return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
+           navName:null, codePrefix:topPrefix(),
+           items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
+           keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
+           swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,
+           active:true };
+}
+function topWritable(){
+  if (!Array.isArray(GROUP.items)) GROUP.items = [];
+  if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
+  ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
+  return topAsUnit();
+}
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
   if (!f || !u) return;
@@ -8246,6 +8302,7 @@ function swotWritable(target){
 function unitLikeWritable(target){
   var t = String(target || "");
   if (t.indexOf("cap:") === 0) return capWritable(t);
+  if (t === "group") return topWritable();
   if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
   return fnWritable(t.slice(3));
 }
@@ -8886,7 +8943,9 @@ function pillarHolderTargets(){
     .concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; }))
     .concat((GROUP.capabilities || []).filter(function(c){
       return c && capPlansInPillars(c);
-    }).map(function(c){ return "cap:" + c.id; }));
+    }).map(function(c){ return "cap:" + c.id; }))
+    /* §428: the top layer's own pillars, once it has any. */
+    .concat(topHasPlan() ? ["group"] : []);
 }
 function listById(kind, id){
   var out = null;

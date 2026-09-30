@@ -55,7 +55,11 @@ with sync_playwright() as p:
     s0 = secs(unit)
     ck("unstored: a unit offers Foundation and SWOT", "found" in s0 and "swot" in s0, s0)
     g0 = tabs("group", "group")
-    ck("unstored: the group offers Foundation and Temple", "foundation" in g0 and "temple" in g0, g0)
+    # §428: the group's Foundation now lives inside its Strategy tab, as a unit's does.
+    def gsecs():
+        return safe(pg, "()=>allowed(SUBS.group[0].sections(), 'group').map(d=>d.k)", [])
+    ck("unstored: the group offers Foundation (inside Strategy) and Temple",
+       "strategy" in g0 and "found" in (gsecs() or []) and "temple" in g0, [g0, gsecs()])
     c0 = tabs("co", "co:" + str(co))
     ck("unstored: a company offers NO Foundation tab (existing clients unchanged)", "foundation" not in c0, c0)
 
@@ -117,7 +121,7 @@ with sync_playwright() as p:
         bu:{on:['brief','aspiration','keyobj','pillar']},fn:{on:['brief','aspiration']}};}""")
     g1 = tabs("group", "group")
     ck("Temple needs the themes: with them off there is no Temple tab", "temple" not in g1, g1)
-    ck("…the Foundation stays", "foundation" in g1, g1)
+    ck("…the Foundation stays", "strategy" in g1 and "found" in (gsecs() or []), [g1, gsecs()])
     ck("a level without SWOT: no unit offers a SWOT section", "swot" not in (secs(other) or []))
     c1 = tabs("co", "co:" + str(co))
     ck("the second layer SAID its components: a company offers a Foundation tab", "foundation" in c1, c1)
@@ -187,8 +191,14 @@ with sync_playwright() as p:
     ck("…while the top level's SWOT and plan switches stay live",
        safe(pg, "()=>['top|swot','top|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); return w&&!w.classList.contains('dummy')&&[...w.querySelectorAll('button')].every(x=>!x.disabled)})") is True)
     ck("each layer draws three sections",
-       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "3,3,3,3",
+       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "3,3,3,3,3",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))
+    # §428: the fifth card is the capabilities', and its plan names two ways, never three.
+    ck("the capabilities card names pillars and projects only",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway).join(',')"))
+    ck("…and no card carries a 'Carries capabilities' tick",
+       safe(pg, "()=>!document.querySelector('[data-stcomp$=\"|capability\"]')") is True)
     ck("the plan section names all three ways on units and functions, pillars alone above them",
        safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "1,0,3,3",
        safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')"))

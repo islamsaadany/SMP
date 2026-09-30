@@ -58859,3 +58859,85 @@ visible difference left, and only the office opens that step.
 `checks/top-plan.py` §0 asserts the unsaid page and then MAKES the other state
 (§255) — red 3 with the old default; `checks/structure.py` asserts the stored
 top card equals what the step showed, rewritten never loosened (§218).
+
+## §429 — the Reporting cycle board counts objectives-and-actions plans (2026-09-29)
+
+The filled Meridian demo showed two faults on "Who has reported". A function planning in objectives and actions (§342) was never listed: `boardFunctionKeys()` admitted a function only for pillars, projects or a capability. A unit planning that way (§405) had its actions read as unreported (Nigeria 4/8 on the board, 8 of 8 on its own page), because `rowAnswered()` had no case for an action and fell through to `o.actual`. An action is now answered as a milestone is (`statusGiven`), and an objectives function is on the board. Nothing changes for a subject planning in pillars or projects; nothing stored moves. The note rule for actions (a behind action asks for no note, where a milestone does) is left open at Islam's word, "14 later".
+
+## §430 — a plan in objectives and actions holds its objectives on the Plan (2026-09-30)
+
+Islam, of Finance's Plan reading as six tasks with no targets: *"a function PLANNING in objectives and actions get their objectives and actions in the plan tab not the overview tab."* Mockup `design-mockups/objectives-on-the-plan/` built from the real page and signed off (*"16 approved"*).
+
+**The Plan draws Key Objectives above Actions.** For a function, the objectives are EDITED there too, under the Plan's pen: `capKoEdit()` takes its page and access key from the caller, and `k_found`/`k_proj` are one area on the server, so nothing is offered that a save refuses. **The Overview stops drawing them for this form**, so the list keeps one authoring surface. A UNIT planning this way reads them on its Plan and still writes them on its Foundation, whose editor carries the three-year target and was left alone at Islam's earlier word (§226).
+
+**The Overview tab goes when the brief is off** (*"17 yes"*). This REVERSES §212's *always drawn* for this one form (Principle II: recorded, not overwritten): the tab answers to the brief switch and the form, never to how many rows exist, so §45.2's rule still holds.
+
+`checks/objectives-actions.py` §4 REWRITTEN, never loosened (§218): the objectives are asserted on the Plan and above the actions, absent from this function's Overview, and the Overview offered exactly while the brief is on — beside a projects function whose Overview still draws them. §5's typed box is asked of the actions table, the second on the page now. Against the build before: **4 red**. With the change: 54/0; `unit-plans-in` 45/0, `plan-builder` and `import-page` green, and the demo check 20/0.
+
+## §431 — the platform opens on the last saved copy, then updates (2026-09-29)
+
+Islam: every new tab *"starts from scratch"*. Measured on the live site first: the program files are already cached by the browser, and the wait is the whole program starting again and then asking the server for all of the client's data, drawing only the grey placeholder (§94.10) until it lands — slowest when the database has been asleep. He agreed the recommendation in plain words (*"yes for question 1"*), and clarified that *"from the start"* meant the fresh load, not which page opens — **so where a tab lands is unchanged** (§94.6, §173).
+
+**The saved copy is the client's page as it last arrived, kept in the browser with the person it belongs to** (`smp.cache.<client>`, written after every live landing). On the next open it is drawn at once, **marked "Updating…" and locked**: the page body is `inert` and no save leaves while it is on screen, so nothing typed can be lost and §26's rule — never show a stale figure as current — holds by saying so rather than by showing nothing. When the server answers, the fresh copy replaces it in place (no reload) and the mark goes.
+
+**Three guards, each its own failure mode.** A saved copy belonging to somebody else is never drawn under this person: the page starts again once rather than repaint another person's chrome. Signing in AND signing out wipe every saved copy (the door, the console's Sign out and the platform's), because the copy is the client's plans and figures on that computer. And a server that never answers still gets §201's wall, over the saved copy.
+
+**Two faults the checks found, both in the landing order.** The baseline a save is compared with must be taken *before* the fresh copy lands, or the landing reads as a change and posts a save the server refuses — a 400 loop that stalled every Setup page (`late-baseline` break). And a fast answer arriving inside the saved copy's 180ms floor painted without the chrome, so a unit head landed as the office on the office's page; `chromeOnce()` draws the chrome on whichever landing runs first and only then.
+
+`smp-app/checks/quick-open.mjs` **19/0**: drawn at 501ms against a 3000ms answer, marked, locked, no save; replaced in place with the chrome drawn once and no save; another person's copy restarts once; the wall; signing out wipes it. Red three ways from the source (`no-cache` 7, `no-lock` 2, `late-baseline` 1). Beside it: modules 166/0, state 92/0, shell 136/1 and door-landing 143/2 with only their pre-existing reds, and the frozen `boot-skeleton`, `save-said`, `save-flush`, `viewas-fresh` and `qa.py` (ERRORS none) green. Nothing stored on the server moves, nothing migrated, no forced sign-out (spec 029). **On the branch, not merged.**
+
+
+## §432 — Strategy and its settings are one page, so crossing between them is a press
+
+Islam: *"when moving between client settings and strategy the strategy page loads"*, and on the cause and the fix, *"yes build it"*.
+
+§367 made the crossing between the two SETTINGS rails a press rather than a page load, and §413 recorded that a crossing pressed from a module's ordinary pages was still an ordinary link. **Both were true, and the second was the fault**: the client's settings, Strategy's settings and Strategy's own pages are ONE document — the server builds all three from the same arguments but the setup scope — so pressing *Strategy* on the client's settings (or *Client settings* from a Strategy page) threw the page away, downloaded the platform again and read every row again, to change one attribute the browser already holds a function for.
+
+**Both directions are a paint now, in the trail's one click handler** (`smp-app/shell/route.js`). To the module: the scope is cleared and `current` set to null, so the paint lands where the module always opens — `entryDest()`/`entrySub()`, the first paint's own question — because the remembered place has already been spent (`restoreWhere` asks once per page). To a settings rail: §367's cross branch no longer requires the press to START on a settings page. **Only for this document's own module**: Internal Tracker, Meeting Notes and Insights are documents of their own and still load, which the quick open (§431) already makes fast. A middle or modifier click is untouched, since the trail's items are buttons and the change sits inside its handler; Back still walks it, because the address is written after every paint.
+
+`smp-app/checks/shell.mjs` §3b asserts both directions with the §367 marker on `window` (survives a repaint, cannot survive a document) and where each lands — 4 new assertions, **red 2 with the module half removed and red 1 with the way back put behind `current === "setup"` again**, each alone. shell 140/1, modules 166/0, door-landing 143/2, quick-open 19/0, state 92/0 — the reds are the recorded pre-existing ones. No frozen source moved, so the built file and `sw.js` SHELL are unchanged; the served `shell.js` and the worker's release stamp are regenerated (§329, §397).
+
+## §433 — A crossing draws at once, then quietly catches up
+
+Islam, of §432: *"and if it shows me what I have does it refresh in the background?"* — it did not; the crossing repainted what the tab already held — then *"yes add the quiet refresh when crossing"*.
+
+**THE PRESS STILL DRAWS AT ONCE**; behind it the tab first saves anything waiting (`SYNC.saveNow`), then asks the server for its current copy and redraws only if that copy differs. Both directions: settings → the module, and the module → a settings rail.
+
+**IT NEVER TAKES WORK AWAY**, which is the whole design. `SYNC.refresh` is §237's `rebase` with one guard, checked twice (before the fetch and again when it lands): if a change has been made since the save, or a hand is in a field, the server's answer is DROPPED and the page keeps what it has. A bound field writes on blur into the object it was drawn from (§35), and hydrating replaces that object, so a refresh under a typing hand would lose the keystrokes. A save that is refused or fails takes nothing from the server either — that work is what §184's banner offers to put back. The view switch keeps the old unguarded `rebase`, because it flushes and overwrites deliberately.
+
+**No new request shape, nothing stored, no server change.** One fetch of the tab's own graph per crossing, the same one a reload makes.
+
+`checks/shell.mjs` §3b: a cycle name written on the server while the tab is open is on the page after the crossing, with the page NOT rebuilt, and asserted absent before the press (§113.8). Red with the two calls removed (`heldAfter` still the old name); 141/1 with the known Home-tab red. quick-open 19/0, state-api 92/0, modules 166/0, viewas-fresh, save-flush and save-said green, served copies byte-identical to their generators. `sw.js` bumped to `v5.53-quiet-refresh`.
+
+## §433.1 — merged to `main` 2026-09-30
+
+On Islam's word ("merge to main"). `main` had moved four commits: the Meridian demo, and its own §429 (the Reporting cycle board counting objectives-and-actions plans), which took the number this branch was using, so the branch's three were renumbered §414–§416 → §415–§417. (Those numbers, with main's §414 and §418, became §429–§434 when the Structure branch merged, §428.3: that branch already held §412–§428.) While the checks ran, `main` moved again and took §430 as well (objectives and actions on the Plan), so they were renumbered a second time, §430–§432 → §431–§433. Both times this was done **before** merging, while the merge base held none of those numbers in any spelling, so the renumber could only touch this branch's own lines (§264.3). The one conflict, `IMPLEMENTATION_PROGRESS.md`, was combined rather than picked (§318.7). The built file and the served copies were rebuilt from the merged sources rather than merged (§91, §329). `SHELL` became `v5.54`, past both sides. The scan of top-level declarations found only the six that §281.1 leaves. Checks on the merged tree: shell 141/1 and door-landing 143/2, where the three failures are out-of-date checks on main's own wording and steps (§400.1's *Platform*, §404.4's deleted *words* step), unchanged here; quick-open 19/0, state 92/0, modules 166/0, demo-seed 20/0, `tsc` clean cold, `qa.py` ERRORS none, built-in-step all good. Nothing about how a save is judged moved, so no forced sign-out is owed (spec 029).
+
+## §434 — an action that is behind asks for a note, as a milestone does (2026-09-30)
+
+Islam: *"let's fix the actions that ask for a note"* — point 14, parked at §429 and taken up now. `rowReads()` had no case for an action (§342), so it fell through to `measureScore`, which answers null for a row with no target: `needsNote` never fired, and Submit let a due action at 30% through with no explanation where a milestone in the same state is stopped. An action now reads through `statusReads`, the milestone's reader, so the note rule, the Submit refusal and the reporting page's note box all learn it at once, and `rowReads` and `rowAnswered` (§429) agree about the same row. An action whose date has not come is still not asked (`fnReportItems`' `asked`).
+
+**What a client planning in objectives and actions sees**: a due action in the bottom two bands with no note is now named when they press Submit, and the note box is marked — the same thing a milestone has always asked. Nothing stored changes. The demo's one such row (Finance's rolling forecast, 60%) carries a note.
+
+`checks/objectives-actions.py` §7b: asked with no note, named by Submit, cleared by a note, never asked of an action not yet due. On the build before, **2 red**; with the change 58/0, `unit-plans-in` 45/0, demo 28/0.
+
+## §428.3 — the Structure branch merges to `main` (2026-09-30)
+
+Islam: *"merge to main."* **Fetching first found the branch carries far more than
+§428**: §412–§427 (the RHI round and the Structure step's per-layer work) never
+reached `main` — the record's own lines saying some of it was merged were
+wrong, measured with `merge-base --is-ancestor` rather than read. So this merge
+brings all of it live. **And `main` had meanwhile used §414–§418 for its own
+work, with §416 used twice.** `main`'s side is the smaller (74 citations
+against several hundred), so it moved, **scoped by `git blame` to lines `main`
+added after the fork** (§264.3): §414→§429, §415→§430, §416 (quick open)→§431,
+§417→§432, §418→§433, §418.1→§433.1, and the second §416 (an action that is
+behind asks for a note)→§434, told apart by the commit that wrote each line.
+One sentence recording an earlier renumber was put back by hand (§385.3a).
+**Ten conflicts**: the three records COMBINED, never picked (§318.7);
+`arrange.css` keeps both blocks; `shell.html`'s function Overview combines this
+branch's per-layer title and switch (§418) with §430's rule for the
+objectives-and-actions form; the built file and `smp-app/public/` REBUILT from
+the merged sources (§91, §329); `sw.js` taken from `main` with a name past both
+sides (§146.2, §94.12). No new duplicate top-level declaration on either side
+(§56.7).

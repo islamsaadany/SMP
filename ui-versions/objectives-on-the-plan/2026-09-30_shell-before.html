@@ -290,26 +290,6 @@
   var MY_TAB = { k:"mylines", ac:"c_mylines", label:"My reporting",
                  when: myLinesHere, render: function(){ return renderMyLines(); } };
 
-  /* §428.2 — THE GROUP'S STRATEGY TAB. `lead` is its §428 place, first
-     like a unit's; the other is the place the Foundation tab held before
-     §428. Exactly one is drawn: the tab leads, and is called Strategy, only
-     once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")); }
-  function topStrategyTab(lead){
-    return { k:"strategy", ac:"g_found",
-      get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
-      when: function(){ return topExtrasOn() === lead; },
-      sections: function(){
-          return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
-                    when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
-                  { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
-                    render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
-      } };
-  }
   var SUBS = {
     /* A supporting function is the destination; the capabilities it carries are
        named inside its pages. */
@@ -379,13 +359,8 @@
              saying one thing and the page another (§124). */
           var fmt = fnFormat(FUNCTIONS[fnKeyOf(k)]);
           var plan = { k:"proj", ac:"k_proj",
-                       /* §418: the layer names the plan section per way of
-                          planning; unnamed, it is what it always was. */
-                       label: SMPRules.planTitle(GROUP, k, fmt) ||
-                              (fmt === "projects" ? L("project") : "Plan"),
-                       render:renderFnProjects,
-                       /* §422: the layer may switch its plan section off. */
-                       when: function(t){ return planOn(t); } };
+                       label: fmt === "projects" ? L("project") : "Plan",
+                       render:renderFnProjects };
           /* §212 REVERSES §211.2 AND RESTORES BOTH SECTIONS FOR EVERY
              FORMAT. §211.2 removed the Overview here on a premise measured
              against the wrong field name and simply WRONG: a pillars function
@@ -415,18 +390,9 @@
              S&W while the structure carries a SWOT. Switching it off hides the
              tab and forgets nothing, which is a decision rather than the data
              coming and going. */
-          /* §430 REVERSES §212'S "ALWAYS DRAWN" FOR ONE FORM, at Islam's word
-             (2026-09-30, point 17): a function planning in objectives and
-             actions holds its objectives on its Plan, so its Overview is the
-             brief alone and the tab goes when the brief is switched off. Still
-             a decision rather than data coming and going (§45.2): it answers
-             to the switch and the form, never to how many rows exist. */
-          /* §428.3: combined at the merge — the layer's own title and switch
-             (§418) AND §430's rule for the objectives-and-actions form. */
-          return [{ k:"found", ac:"k_found", label:SMPRules.foundTitle(GROUP, k), render:renderFnFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") ||
-                      (compOn(t, "keyobj") && !plansInObjectives(t))); } },
-                  { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
+                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
+                  { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
                   plan];
         } },
@@ -436,8 +402,7 @@
         } },
       /* The same tab on the other side of the switch (§53.5, §222). */
       { k:"report", ac:"k_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        when: function(){ return !!reportSectionState(); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
       LIB_TAB
@@ -456,40 +421,26 @@
          has SAID which components that layer carries — a client set up before
          the structure step opens exactly as it did (his "existing clients open
          with everything on, unchanged" means no new tab either). */
-      { k:"foundation", ac:"g_found", label:SMPRules.foundTitle(GROUP, "co:"), render:renderCompanyFoundation,
+      { k:"foundation", ac:"g_found", label:"Foundation", render:renderCompanyFoundation,
         when: function(t){
           var st = SMPRules.structureOf(GROUP), m = st && st.mid;
-          return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
+          return !!(m && Array.isArray(m.on)) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
       MY_TAB,
       LIB_TAB
     ],
     group: [
-      /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
-         Islam, of the mockup: *"ok for all, build it"*. The top layer gains
-         the unit's Strategy tab: today's Foundation moves inside it as its
-         first section, unchanged, and a SWOT and a Plan of its own follow.
-         The key stays `strategy`, which is what makes the section line, its
-         pen and the missing bar the unit's own (§53.5). Each section is
-         offered while the Structure step carries it (§404, §418, §422). */
-      /* §428.2: while Foundation is all the tab holds (the top layer's SWOT
-         and Plan start off, Islam 2026-09-30), the tab keeps the name AND
-         the place it had before §428 — after Performance — so a client who
-         switched neither on sees the group page exactly as it was. One def,
-         drawn in one of two places (topStrategyTab, beside SUBS). */
-      topStrategyTab(true),
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
-      topStrategyTab(false),
+      /* §404: A TAB IS OFFERED WHILE SOMETHING ON IT IS SWITCHED ON. The
+         Foundation holds five components; the Temple is a picture drawn from
+         three of them and is a switch of its own (templeOn). */
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation,
+        when: function(){ return ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
-      /* §428: the orange Reporting tab, once the top layer has a plan of its
-         own — reported by the office and the group's CEO (mayReportTop). */
-      { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
-        when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
-        render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
       LIB_TAB
     ],
@@ -511,15 +462,14 @@
              of the plan's authorship and is refused to everybody else by the
              rule that already refuses the plan (§42). */
           /* §404: each section is offered while its components are on. */
-          return [{ k:"found", ac:"u_found", label:SMPRules.foundTitle(GROUP, (u && u.ukey) || "u:"), render:renderUnitFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
-                  { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
+          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation,
+                    when: function(t){ return ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
+                  { k:"swot",  ac:"u_anal",  label:L("swot"),    render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
-                    when: function(t){ return planOn(t); } },
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -575,8 +525,7 @@
          THE DOT MOVES HERE from Performance. It means "you owe a
          submission", and that now has a tab of its own to sit on. */
       { k:"report", ac:"u_report", label:"Reporting", dot:true, cta:true,
-        /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
-        when: function(t){ return !!reportSectionState() && planOn(t); },
+        when: function(){ return !!reportSectionState(); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
       LIB_TAB
@@ -2108,13 +2057,6 @@
         if (secs.length) return tab;
       }
     }
-    /* §428: the group gained a Strategy tab FIRST, and it still opens where it
-       always has — on the tab marked primary (Performance). Strategy leading
-       the row is where it sits, not where a session lands. */
-    if (k === "group") {
-      var prim = d.filter(function(x){ return x.primary; })[0];
-      if (prim) return prim.k;
-    }
     return d[0].k;
   }
 
@@ -2868,7 +2810,6 @@
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
-    TARGET_SETUP = current === "setup" || current === "manage";
     /* Repainted rather than set once: Labels can rename the tenant while you
        are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all
@@ -3029,12 +2970,6 @@
       document.getElementById("secrow").hidden = true;
       return;
     }
-    /* §428.2: THE GROUP'S OLD FOUNDATION ADDRESS STILL OPENS THE FOUNDATION.
-       Before §428 it was a tab keyed `foundation`, so a bookmark or a
-       remembered place can still name it; it is the Strategy tab's first
-       section now, and falling back to the first tab would land on
-       Performance, which is not what was asked for (a bookmark is a door). */
-    if (current === "group" && currentSub === "foundation") { currentSub = "strategy"; CURSEC.strategy = "found"; }
     if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
 
     /* SETUP HAS NO TAB ROW. Its ten pages are the rail's job now (§46.1), and
@@ -4802,33 +4737,6 @@
         paint();
       });
     });
-    /* THE YEARLY REVISION (§416). The platform's own dialog, never the
-       browser's (§95, §273.3): it names what moves and what is archived.
-       Office only, like the pen it sits in; startYearRevision() asks again. */
-    var yr = document.querySelector("[data-yearrev]");
-    if (yr) yr.addEventListener("click", function(){
-      if (!inOffice()) return;
-      var next = planYear() + 1;
-      if (next > 3) return;
-      openModalHtml("Start the Year " + next + " revision?", esc(planYearLabel(next)),
-        '<div class="rmconfirm">' +
-          '<p>The plan moves from <b>' + esc(planYearLabel(next - 1)) + '</b> into <b>' +
-            esc(planYearLabel(next)) + '</b>. Directions that do not run in Year ' + next +
-            ' stop being asked for and scored; those that start in it begin.</p>' +
-          '<p class="archline">Every unit\u2019s plan as it stands is archived first. ' +
-            '<b>Setup \u203a Import &amp; storage</b> holds the way back.</p>' +
-          '<div class="mrow"><button class="quiet" data-yrno="1">Cancel</button>' +
-          '<button class="danger" data-yryes="1">Start the revision</button></div>' +
-        '</div>');
-      var box = document.getElementById("modal-b");
-      if (!box) return;
-      var no = box.querySelector("[data-yrno]");
-      if (no) no.addEventListener("click", function(){ closeModal(); });
-      var yes = box.querySelector("[data-yryes]");
-      if (yes) yes.addEventListener("click", function(){
-        closeModal(); startYearRevision(); paint();
-      });
-    });
     var cc = document.querySelector("[data-closecycle]");
     if (cc) cc.addEventListener("click", function(){
       /* §273.4: THE GUARD WENT WITH THE DRAFT. §273 held this button back while
@@ -5141,24 +5049,6 @@
           else hit.obj[bk] = joinTarget(hit.obj[bk], v, el.dataset.unit || "");
           paint(); return;
         }
-        /* ── §414: A SECOND OR LATER OUTCOME'S FIGURE ─────────────────
-           `data-fld` is `outActs:<id>`, so the figure lands in that outcome's
-           slot and nowhere else — joined with its unit as the first outcome's
-           is, or answered in §300's two halves where it is a yes or a no.
-           Emptied, the key goes (§50.6). The tactic's status follows all its
-           outcomes together. */
-        if (/^outActs:/.test(el.dataset.fld || "")) {
-          var oid = el.dataset.fld.slice(8), ocur = (hit.obj.outActs || {})[oid], nv;
-          if (el.dataset.ynpart) {
-            var ow = SMPRules.ynState(ocur);
-            nv = el.dataset.ynpart === "status"
-              ? SMPRules.ynJoin(v, v === "wip" ? ow.pct : null)
-              : SMPRules.ynJoin(ow.status || "wip", v);
-          } else nv = (v !== "" && unit) ? joinTarget(unitTight(ocur || ""), v, unit) : v;
-          setExtraFigure(hit.obj, oid, nv);
-          hit.obj.status = statusFromOutcomes(hit.obj);
-          paint(); return;
-        }
         if (el.dataset.ynpart) {
           var ynFld = el.dataset.fld === "outActual" ? "outActual" : "actual";
           var was = SMPRules.ynState(hit.obj[ynFld]);
@@ -5166,9 +5056,7 @@
             ? SMPRules.ynJoin(v, v === "wip" ? was.pct : null)
             : SMPRules.ynJoin(was.status || "wip", v);
           if (next === "") delete hit.obj[ynFld]; else hit.obj[ynFld] = next;
-          if (ynFld === "outActual" && scoredExtras(hit.obj).length) {
-            hit.obj.status = statusFromOutcomes(hit.obj);
-          } else if (ynFld === "outActual") {
+          if (ynFld === "outActual") {
             var yst = SMPRules.ynState(hit.obj.outActual);
             if (yst.status === "done") hit.obj.status = "Done";
             else if (yst.status === "wip" && hit.obj.status !== "Blocked") hit.obj.status = "WIP";
@@ -5190,8 +5078,6 @@
           /* The status still follows the work, and an outcome that has reached
              its target is done. `tacticOutcomeScore` is the one reader of that
              (§53.5) rather than a second comparison written here. */
-          /* §414: with several outcomes the status follows all of them. */
-          if (scoredExtras(hit.obj).length) { hit.obj.status = statusFromOutcomes(hit.obj); paint(); return; }
           var sc = typeof tacticOutcomeScore === "function" ? tacticOutcomeScore(hit.obj) : null;
           if (sc == null) hit.obj.status = "Not started";
           else if (sc >= 100) hit.obj.status = "Done";
@@ -8824,21 +8710,6 @@
         paint();
       });
     });
-    /* THE YEAR TOGGLES (§416). A direction's years are part of what was
-       agreed, so they are the pen's (`mayEditPlan`), resolved by the
-       pillar's id through the writable view (§48.2) — the same resolver
-       Remove uses — and togglePillarYear refuses to take the last one. */
-    document.querySelectorAll("[data-pyear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var a = this.dataset.pyear.split("|"), uk = a[0], id = a[1], y = +a[2];
-        var u = unitLikeWritable(uk);
-        var p = u && (u.items || []).filter(function(x){ return x && x.id === id; })[0];
-        if (!p || !togglePillarYear(p, y)) return;
-        if (/^fn:/.test(uk)) fnWriteBack(uk.slice(3), u);
-        paint();
-      });
-    });
     /* ── FILL THE GAPS (§145) ──────────────────────────────────────────
        The fill grant's quarter buttons: only a tactic with NO quarter at
        all is a gap (§128, §119.1), so these are only drawn there and while
@@ -8947,40 +8818,6 @@
            removed must be byte-identical, or every save carries a change
            nobody made. */
         if (list === "breakdown") bdTidyById(id);
-        paint();
-      });
-    });
-    /* §414: A SECOND OUTCOME, AND TAKING ONE AWAY. Behind the same gate as
-       every other row the pen adds or removes (§31, §94). A new outcome is
-       minted from the MAXIMUM id (§96.2) with its keys in the order Postgres
-       hands them back, so a round trip cannot read as a change (§249.3).
-       Removing one takes its figure with it, and the last one leaving
-       deletes both lists (§50.6) — a tactic that had extras and a tactic
-       that never did must be byte-identical. */
-    document.querySelectorAll("[data-outadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var t = hideableById(this.dataset.outadd);
-        if (!t || !outcomesOn(t)) return;
-        var id = nextOutcomeId(t);
-        t.outs = (t.outs || []).concat([{ id: id }]);
-        paint();
-        setTimeout(function(){
-          var f = document.querySelector('[data-outoff="' + t.id + '|' + id + '"]');
-          var box = f && f.parentNode.querySelector("textarea, input");
-          if (box) box.focus();
-        }, 0);
-      });
-    });
-    document.querySelectorAll("[data-outoff]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var a = this.dataset.outoff.split("|");
-        var t = hideableById(a[0]);
-        if (!t || !Array.isArray(t.outs)) return;
-        t.outs = t.outs.filter(function(x){ return x.id !== a[1]; });
-        if (!t.outs.length) delete t.outs;
-        setExtraFigure(t, a[1], "");
         paint();
       });
     });

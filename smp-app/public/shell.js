@@ -12258,6 +12258,13 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
+  /* §429: AND AN ACTION (§342), which is a milestone row with a date and was
+     left out of this list when it arrived. It fell through to `o.actual`, which
+     an action never carries, so the Reporting cycle board read Nigeria's four
+     answered actions as 0/4 while Nigeria's own page — `fnObjReported`, the
+     same test as `statusGiven` — said 8 of 8. Two counters over one row is
+     §53.5's fault; this is the one the board and the Submit walk share. */
+  if (x.kind === "action") return statusGiven(o);
   /* §343: a breakdown cell is answered by its own column's box. */
   if (x.kind === "bdcell") return SMPRules.bdAnswered(o, x.col);
   /* §300: a yes/no row is answered by one of the two ends, or by In progress
@@ -12285,6 +12292,13 @@ function rowReads(x){
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
+  /* §434: AND AN ACTION, read exactly as a milestone is. It fell through to
+     `measureScore`, which an action (no target) always answers null — so an
+     action that was due and behind never asked for a note and Submit let it
+     through unexplained, where a milestone in the same state is stopped.
+     Islam, 2026-09-30: "let's fix the actions that ask for a note". §429 gave
+     `rowAnswered` the same case; the two readers of one row now agree. */
+  if (x.kind === "action") return statusReads(x.obj);
   /* §343: and a breakdown cell reads its own score — NULL on an indicator
      column, which is what makes "a Mix figure can never be at risk" true
      rather than merely stated: the note rule asks this and nothing else. */
@@ -12807,6 +12821,14 @@ function boardWho(target){
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
     if (!fnShows(fk)) return false;
+    /* §429: a function planning in OBJECTIVES AND ACTIONS (§342) is asked for
+       a report like the other two — its own Reporting page has always asked
+       it — but it has no projects and usually no capability, so the test
+       below dropped it from the board: in the demo, Finance and Treasury were
+       missing from "Who has reported" while the rest of the page counted them
+       nowhere either. It is read by `holderRow`, whose counters
+       (`fnReportItems`) already walk a holder's objectives and actions. */
+    if (fnPlansInObjectives(FUNCTIONS[fk])) return true;
     return fnPlansInPillars(FUNCTIONS[fk])
       ? true
       : !!(fnOwnProjects(fk).length || capsOfFunction(fk).length);
@@ -32068,15 +32090,53 @@ function fnObjPlanBody(fk, ed){
   return '<h4 class="mini">' + L("action") + ' <em>— the work, and when it is due</em></h4>' +
     miniTable(["#","Action","Owner","Due"], rows);
 }
+/* §430: THE PLAN IS THE WHOLE PLAN — the objectives, then the actions.
+   Islam, of Finance's Plan reading as six tasks with no targets: *"a function
+   PLANNING in objectives and actions get their objectives and actions in the
+   plan tab not the overview tab"*, then the mockup (design-mockups/
+   objectives-on-the-plan) signed off. The Overview stops drawing them for this
+   form (`holderOverview`), so the objectives keep ONE authoring surface and it
+   is this one, under the Plan's own pen: k_found and k_proj are one area on
+   the server (authorize.js, the gapFill case), so a hand that may write the
+   actions may write these and nothing is offered that a save refuses (§42).
+
+   A UNIT PLANNING THIS WAY (§405) READS THEM HERE AND WRITES THEM WHERE IT
+   ALWAYS HAS: a unit's objectives carry a three-year target and are the
+   unit's Foundation, whose editor Islam asked to be left alone ("don't touch
+   the unit side", §226). Drawn here read-only, so its Plan is also the whole
+   plan without a second editor for one list. */
+function fnObjKoBlock(fk, ed){
+  var unit = isUnitHolderId(fk);
+  if (!unit && ed) {
+    var h = fnOwnHolderWritable(fk);
+    return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+      capKoEdit({ id: "fn:" + fk, keyObjectives: h.keyObjectives }, "plan", "k_proj");
+  }
+  var list = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
+  if (!list.length) return '';
+  var rows = list.map(function(m, i){
+    return '<tr><td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + (m.weight == null || m.weight === "" ? "&mdash;" : esc(m.weight) + "%") + '</td>' +
+      '<td class="cc">' + esc(m.dir || "") + '</td>' +
+      '<td class="cc">' + esc(unitTight(m.target)) + '</td>' +
+      '<td class="cc">' + esc(m.compile || "") + '</td></tr>';
+  }).join("");
+  return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+    miniTable(["#", "Objective", "Weight", "Dir.", "Target", "Compiled"], rows);
+}
 function fnObjPlan(fk){
   var ed = projEditing(), list = fnActions(fk);
+  var kos = isUnitHolderId(fk) ? [] : ((fnOwnHolder(fk) || {}).keyObjectives || []);
   /* §61: a function with no action yet is where the first one goes. The empty
      state has to say so and the pen has to be reachable, or the page is
-     readable and unstartable — §129's audit found that five times. */
+     readable and unstartable — §129's audit found that five times. §430: and
+     the objectives' own gaps are owed HERE now, where their fields are. */
   var owed = list.reduce(function(n, a){
-    return n + SMPRules.gapMissing("action", a).length; }, 0);
-  return fillBarOr("plan", "k_proj", owed, "the actions") +
-    '<div class="capbody">' + paneActs("plan", "u_plan") +
+    return n + SMPRules.gapMissing("action", a).length; }, 0) +
+    kos.reduce(function(n, m){ return n + SMPRules.gapMissing("capko", m).length; }, 0);
+  return fillBarOr("plan", "k_proj", owed, "the plan") +
+    '<div class="capbody">' + paneActs("plan", "u_plan") + fnObjKoBlock(fk, ed || filling("plan", "k_proj")) +
     (!list.length && !ed
       ? '<div class="note"><b>No actions yet.</b> The SMO adds them from the ' +
         'pen on this page, or they arrive with an upload.</div>'
@@ -33656,7 +33716,10 @@ function holderOverview(subject){
   var fl = filling("capfoundation", "k_found");
   /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
      North Star (key objectives). Off hides the card and forgets nothing. */
-  var briefOn = compOn(t, "brief"), koOn = compOn(t, "keyobj");
+  /* §430: a function planning in objectives and actions holds its objectives
+     on its PLAN (fnObjKoBlock), so the Overview is the brief alone. */
+  var briefOn = compOn(t, "brief"),
+      koOn = compOn(t, "keyobj") && !(!isCap && fnPlansInObjectives(f));
   if (!briefOn && !koOn) return "";
   var judged = isCap
     ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
@@ -33967,12 +34030,17 @@ function capKoTarget(c){
   if (id.indexOf("fn:") === 0) return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
-function capKoEdit(c){
-  var pg = "capfoundation";
+/* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
+   pair, as it always has; a function planning in objectives and actions draws
+   this same table on its PLAN, under the Plan's pen (Islam, 2026-09-30: "a
+   function PLANNING in objectives and actions get their objectives and
+   actions in the plan tab"). One editor, two pages that never both hold it. */
+function capKoEdit(c, pgIn, acIn){
+  var pg = pgIn || "capfoundation", ac = acIn || "k_found";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
-  var ed = authoring(pg, "k_found");
+  var ed = authoring(pg, ac);
   /* §226: the same three answers the unit's table got and this one never did —
      the NAME is prose and wraps (§189's textOr; a function's objective titles
      clipped at 101px in the card this table used to edit inside), the UNIT is
@@ -33998,26 +34066,26 @@ function capKoEdit(c){
       return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
         '<td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
         (ed ? '' : hidChip(m)) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
+        '<td class="cc">' + gapCell(pg, ac, m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
         /* §251: always drawn, on both function formats — this table and the
            unit's are one cell asking one question (§53.5). */
         '<td class="cc">' + (ed
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(pg, ac, m) || esc(targetUnitOf(m)))) + '</td>' +
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */
         monthlyTgtCell("cc", m, "monthly",
-          gapCell(pg, "k_found", m, "target",
+          gapCell(pg, ac, m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }),
           ed && !isYesNoRow(m)) +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
+        '<td class="cc">' + gapCell(pg, ac, m, "compile",
           { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
+        '<td class="cc">' + gapCell(pg, ac, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, "k_found") +
+        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
         (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
@@ -58206,6 +58274,65 @@ var SYNC = (function () {
      taken is what matters. */
   var OFFLINE = false;
   function bootNow() { return Date.now(); }
+  /* ── OPEN ON WHAT YOU SAW LAST TIME (§431) ──────────────────────────
+     Islam: *"why everytime I open the tab it opens from the start? why don't
+     we cash the pages and refresh silently and adjust if something new
+     comes"* — and, asked, *"yes"* to the three conditions put to him: one
+     copy PER PERSON, WIPED on sign-in and sign-out, an "Updating…" mark
+     while it is only the saved copy, and NOTHING SAVED until the fresh copy
+     has landed.
+
+     The program files were already kept by the browser (etag, 304); what
+     cost the time is the whole client graph asked for from a database that
+     may be asleep, with the grey skeleton (§94.10) standing until it came.
+     So the last graph this browser was handed is kept, drawn at once, and
+     replaced the moment the server answers.
+
+     §26 said the platform must never show stale figures AS CURRENT — this
+     does not: the mark says so, the page body is inert (nothing can be typed
+     into a copy about to be replaced, which would be lost), and `live` stays
+     false so no save leaves until the real graph is in (save() already
+     refuses while !live). Keyed by CLIENT, so two clients never cross; the
+     person it belongs to is stored with it and a different answer from the
+     server reloads rather than repaints (§185: a view is judged as somebody).
+     What it does not protect, stated: a laptop left signed in holds that
+     client's graph in its storage, exactly as it holds the open page. */
+  var CACHE_PREFIX = "smp.cache.";
+  function cacheKey() { return CACHE_PREFIX + (clientSlug() || "-"); }
+  function cacheRead() {
+    try {
+      var c = JSON.parse(localStorage.getItem(cacheKey()) || "null");
+      return c && c.state && c.person && c.person.key ? c : null;
+    } catch (e) { return null; }
+  }
+  function cacheWrite(state, who) {
+    if (!who || !who.key) return;
+    try { localStorage.setItem(cacheKey(), JSON.stringify({ at: Date.now(), person: who, state: state })); }
+    catch (e) { try { localStorage.removeItem(cacheKey()); } catch (e2) {} }
+  }
+  function cacheWipe() {
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(CACHE_PREFIX) === 0) localStorage.removeItem(k);
+      }
+    } catch (e) {}
+  }
+  /* The mark and the lock go on and off together, in one place. */
+  function markStale(on) {
+    var root = document.documentElement, panel = document.getElementById("panel");
+    if (on) root.setAttribute("data-stale", "1"); else root.removeAttribute("data-stale");
+    if (panel) { if (on) panel.setAttribute("inert", ""); else panel.removeAttribute("inert"); }
+    var f = document.getElementById("staleflag");
+    if (on && !f) {
+      f = document.createElement("span");
+      f.id = "staleflag"; f.className = "staleflag"; f.setAttribute("role", "status");
+      f.title = "Showing what you saw last time while the latest copy loads. Nothing can be changed until it has.";
+      f.textContent = "Updating\u2026";
+      var host = document.getElementById("topacts");
+      if (host) host.insertBefore(f, host.firstChild); else document.body.appendChild(f);
+    } else if (!on && f) f.parentNode.removeChild(f);
+  }
   /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
      theme.js puts the class on and never removes it, so there is one place to
      look when a page is stuck grey. */
@@ -58276,6 +58403,7 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
+  var stale = false;       /* §431: the saved copy is on screen and the fresh one has not landed */
   var timer = null;
   var saving = false;
   /* When the last save actually LEFT, so the leading edge below can tell a
@@ -59000,6 +59128,7 @@ var SYNC = (function () {
     out.className = "infobtn";
     out.textContent = "Sign out";
     out.addEventListener("click", function () {
+      cacheWipe();
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
@@ -59210,26 +59339,49 @@ var SYNC = (function () {
      fetch that fails leaves the tab exactly as it was and answers false —
      the switch still happens, judged correctly (§185), on the old
      baseline: the honest fallback, never a blocked way home (§209). */
-  function rebase(done) {
+  function rebase(done, quiet) {
     done = done || function () {};
     if (!live || saving) return done(false);
+    /* §433: THE QUIET REFRESH ON A CROSSING asks the same thing and takes the
+       server's answer ONLY IF NOTHING HERE WOULD BE LOST. The view switch
+       rebases after its own flush and may overwrite; a quiet refresh must
+       never — so if a change has been made since the flush, or a hand is in
+       a field (a bound field writes on blur into the object it was drawn
+       from, and hydrate replaces that object, §35), the answer is dropped
+       and the page keeps what it has. The next crossing asks again. */
+    var busy = function () {
+      if (serialize() !== lastSaved) return true;
+      var a = document.activeElement;
+      return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
+    };
+    if (quiet && busy()) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
-        if (r.status === 401 || r.status === 403) { location.replace(doorUrl()); throw new Error("sign in"); }
+        if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
       .then(function (data) {
         if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        if (quiet && busy()) return done(false);
+        var before = lastSaved;
         hydrate(data.state);
         lastSaved = serialize();
-        done(true);
+        done(true, lastSaved !== before);
       })
       .catch(function () { done(false); });
   }
 
   return {
-    isLive: function () { return live; },
+    /* THE SAVED COPY IS THE SERVER'S, ONLY OLDER (§431), so the page is told
+       it is served while it is on screen — or its first paint judges access
+       and pages as the offline file would, and the router, which decides
+       where to land once, keeps that answer (measured: a unit head asking
+       for the client's People page stayed there instead of being sent to
+       their own unit). Saving is NOT widened by this: save(), afterPaint()
+       and flushLeave() read `live` itself and still refuse until the fresh
+       copy has landed. */
+    isLive: function () { return live || stale; },
     /* An address with this client's name on it (spec 042, §313.35). The play
        address for a clip is built in slides.js, outside this module, and a
        GET has no body to carry the slug in — so the one helper that knows the
@@ -59252,6 +59404,9 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
+    /* The quiet refresh after a crossing (§433): the same fetch, dropped
+       rather than applied if anything on the page would be lost. */
+    refresh: function (done) { rebase(done, true); },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
@@ -59506,7 +59661,7 @@ var SYNC = (function () {
              §230.2 removed the "look at the example anyway" way past, at
              Islam's direction — the wall now stands until the server
              answers, and the words on it are the user's (see noServerWall). */
-          if (enabled && !live) noServerWall();
+          if (enabled && !live && !stale) noServerWall();
         }, wait);
       }
       /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
@@ -59517,6 +59672,40 @@ var SYNC = (function () {
                      (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
         land();
       }, BOOT_GIVEUP);
+      /* §431: THE SAVED COPY LANDS FIRST, if there is one. It paints through
+         the same chromeFor the live answer uses, with the person it was
+         saved for, and the fresh answer below repaints over it. If the saved
+         copy will not hydrate (an older shape), it is dropped and this is an
+         ordinary boot. */
+      stale = false;
+      /* ── THE CHROME IS DRAWN ONCE, BY WHICHEVER LANDING RUNS FIRST (§431) ──
+         The saved copy lands after the 180ms floor; a fast server's answer can
+         land INSIDE that floor and run its callback first. The chrome
+         (sign-out, the viewer, `VIEWER` itself) must be drawn by that first
+         paint and never twice: measured, a fresh copy that painted without it
+         left `VIEWER` at the file's default — the office — and the router,
+         which decides where to land ONCE, placed a unit head on the client's
+         People page as the office would be placed. */
+      var chromed = false;
+      function chromeOnce() {
+        if (chromed) return paint();
+        chromed = true;
+        chromeFor(paint);
+      }
+      var cached = enabled ? cacheRead() : null;
+      if (cached) {
+        try {
+          hydrate(cached.state);
+          person = cached.person;
+          stale = true;
+          /* markStale only while still stale: a fast answer can land between
+             this call and its delayed paint (BOOT_FLOOR). */
+          land(function () { chromeOnce(); if (stale) markStale(true); });
+          /* A server that never answers still gets the wall, over the saved
+             copy rather than over the example (§201). */
+          setTimeout(function () { if (!live && stale) noServerWall(); }, BOOT_GIVEUP);
+        } catch (e) { cacheWipe(); stale = false; }
+      }
       fetch(withClient("/api/state"), { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
@@ -59566,11 +59755,25 @@ var SYNC = (function () {
              the skeleton stays up until it does — which is right: the gate
              is where this person is going. */
           if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace(doorUrl()); return; }
+          /* §431: the saved copy belonged to somebody else — start again
+             rather than repaint another person's chrome under this one. */
+          if (stale && (!data.person || data.person.key !== cached.person.key)) {
+            cacheWipe(); cacheWrite(data.state, data.person); location.reload(); return;
+          }
           hydrate(data.state);
           live = true;
           person = data.person || null;
+          cacheWrite(data.state, person);
+          /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§431). With a saved
+             copy on screen the page has already landed, so `land()` runs its
+             callback AT ONCE rather than after the floor — and that paint ends
+             in afterPaint(), which with no baseline would post the whole graph
+             as a change nobody made (the server refuses it, 400, and the retry
+             every 5s keeps the page busy for ever). */
+          lastSaved = serialize();
           land(function () {
-            if (person) chromeFor(paint); else paint();
+            if (person) chromeOnce(); else paint();
+            if (stale) { stale = false; markStale(false); }
             /* ── AND ONLY NOW IS THERE ANYTHING TO SHOW SOMEBODY ──────
                The welcome screen and the onboarding tour offer themselves
                here and nowhere else: this is after the one paint that puts
@@ -59589,7 +59792,6 @@ var SYNC = (function () {
             try { greeted = WELCOME.offer(person); } catch (e) {}
             if (!greeted) TOUR.offer(person);
           });
-          lastSaved = serialize();
           setInterval(save, 5000);
         })
         .catch(function (e) {
@@ -59835,8 +60037,17 @@ var SYNC = (function () {
              S&W while the structure carries a SWOT. Switching it off hides the
              tab and forgets nothing, which is a decision rather than the data
              coming and going. */
+          /* §430 REVERSES §212'S "ALWAYS DRAWN" FOR ONE FORM, at Islam's word
+             (2026-09-30, point 17): a function planning in objectives and
+             actions holds its objectives on its Plan, so its Overview is the
+             brief alone and the tab goes when the brief is switched off. Still
+             a decision rather than data coming and going (§45.2): it answers
+             to the switch and the form, never to how many rows exist. */
+          /* §428.3: combined at the merge — the layer's own title and switch
+             (§418) AND §430's rule for the objectives-and-actions form. */
           return [{ k:"found", ac:"k_found", label:SMPRules.foundTitle(GROUP, k), render:renderFnFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") || compOn(t, "keyobj")); } },
+                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") ||
+                      (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
                   plan];
@@ -71103,7 +71314,46 @@ var SYNC = (function () {
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
-        if (cross && typeof current !== "undefined" && current === "setup" &&
+        /* §433: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+           "yes add the quiet refresh when crossing"). A press that is a paint
+           shows what this tab already holds; behind it, anything waiting is
+           saved first, then the server's copy is asked for and the page
+           redrawn only if it differs. A save that is refused or fails takes
+           nothing from the server — that is the work §184's banner offers to
+           put back — and SYNC.refresh drops the answer if a hand has since
+           touched the page. `window.__smpRefresh` counts landings, for the
+           check alone. */
+        var quietly = function () {
+          if (typeof SYNC === "undefined" || !SYNC.refresh || !SYNC.saveNow) return;
+          SYNC.saveNow(function (how) {
+            if (how !== "saved" && how !== "clean") return;
+            SYNC.refresh(function (ok, changed) {
+              if (ok) window.__smpRefresh = (window.__smpRefresh || 0) + 1;
+              if (ok && changed && typeof paint === "function") paint();
+            });
+          });
+        };
+        /* §432: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
+           ITSELF (Islam: "when moving between client settings and strategy
+           the strategy page loads"). The client's settings, a module's
+           settings and that module's own pages are ONE document — the server
+           builds all three with the same arguments but the scope — so from
+           either side the press is a paint, not a page load. Only for THIS
+           document's module: another module is its own document and loads.
+           Setting `current` to null lands where the module always opens,
+           because the first paint's own question (entryDest) answers it and
+           the remembered place has already been spent (restoreWhere asks
+           once per page). */
+        if (!cross && MODULE && go === "/" + SLUG + "/" + MODULE &&
+            typeof current !== "undefined" && current === "setup" && typeof paint === "function") {
+          if (typeof leaveModes === "function") leaveModes();
+          setScope(null);
+          current = null; currentSub = null;
+          paint(); window.scrollTo(0, 0);
+          quietly();
+          return;
+        }
+        if (cross && typeof current !== "undefined" &&
             typeof setupLandingKey === "function") {
           var k = setupLandingKey(cross);
           if (k) {
@@ -71111,6 +71361,7 @@ var SYNC = (function () {
             setScope(cross);
             current = "setup"; currentSub = k;
             paint(); window.scrollTo(0, 0);
+            quietly();
             return;
           }
         }

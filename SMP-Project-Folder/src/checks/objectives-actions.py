@@ -238,23 +238,39 @@ def main():
         ck("Reporting asks for both",
            "Retail academy" in rep and "Achieve revenue target" in rep, rep[:140])
 
-        print("\n§4 the Overview is the one a projects function draws (§213)")
-        # §3 left the report TAB, and the section row belongs to Strategy — a
-        # press that cannot land leaves the previous page on screen and every
-        # assertion after it measures that (§215, §50.6).
+        print("\n§4 the objectives are on the PLAN, and the Overview is the brief alone (§430)")
+        # §430 REWRITES WHAT §213 ASSERTED HERE, at Islam's word (2026-09-30):
+        # *"a function PLANNING in objectives and actions get their objectives
+        # and actions in the plan tab not the overview tab"*. The agreement with
+        # a projects function's Overview is replaced, not loosened (§218): the
+        # objectives are asserted ON the Plan, ABOVE the actions, and ABSENT
+        # from this function's Overview — beside a projects function whose
+        # Overview still draws them, or a build that dropped objectives
+        # everywhere would pass (§113.8).
         ck("the Strategy tab comes back", tab(pg, "fnstrat"))
-        ck("and the Overview section opens", sec(pg, "found"))
-        mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
-                      " function(x){ return x.textContent.trim(); })", [])
-        ck("it draws something", len(mine) > 0, mine)
+        ck("the Plan section opens", sec(pg, "proj"))
+        heads = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h4.mini'),"
+                       " function(x){ return x.textContent.trim().toLowerCase(); })", [])
+        ko_at = next((i for i, h in enumerate(heads) if "objective" in h), -1)
+        ac_at = next((i for i, h in enumerate(heads) if h.startswith("actions")), -1)
+        ck("the Plan draws the objectives, then the actions", 0 <= ko_at < ac_at, heads)
+        ck("and the objectives are this function's own",
+           "Achieve revenue target" in panel(pg), panel(pg)[:160])
+        brief = ev(pg, "(k)=>compOn('fn:'+k,'brief')", False, FK)
+        opened = sec(pg, "found")
+        ck("the Overview is offered exactly while the brief is switched on",
+           bool(opened) == bool(brief), {"brief": brief, "overview": opened})
+        if opened:
+            mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
+                          " function(x){ return x.textContent.trim(); })", [])
+            ck("and it holds no objectives", not any("Objective" in h for h in mine), mine)
         ck("the control function opens", go(pg, CTRL))
         ck("its Strategy tab comes back", tab(pg, "fnstrat"))
         ck("and its Overview opens", sec(pg, "found"))
         theirs = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
                         " function(x){ return x.textContent.trim(); })", [])
-        # §94.8: the AGREEMENT, never a list of headings a wording change breaks.
-        ck("and it is the same page the other format draws", mine == theirs,
-           {"objectives": mine, "projects": theirs})
+        ck("and a projects function's Overview still draws its objectives",
+           any("Objective" in h for h in theirs), theirs)
 
         print("\n§5 every press reaches the STORED graph (§96)")
         go(pg, FK); sec(pg, "proj")
@@ -263,7 +279,11 @@ def main():
         except Exception:
             pass
         wrote = ev(pg, """(k)=>{
-          var box = document.querySelector('#panel textarea[data-fld], #panel input[data-fld]');
+          /* §430: the Plan holds two tables now, the objectives first, so the
+             action's box is asked of the LAST one — the first box on the page
+             is an objective's name. */
+          var tbs = document.querySelectorAll('#panel table');
+          var box = tbs.length ? tbs[tbs.length-1].querySelector('textarea[data-fld], input[data-fld]') : null;
           if (!box) return null;
           box.value = "Retail academy 2027";
           box.dispatchEvent(new Event('change', {bubbles:true}));
@@ -318,6 +338,29 @@ def main():
         ck("the blank row is counted, not merely marked",
            owed.get("gaps", 0) >= 2 and sorted(owed.get("missing") or []) == ["due", "owner"], owed)
         ck("and Submit says so", "missing in the plan" in (owed.get("refusal") or ""), owed.get("refusal"))
+
+        print("\n§7b an action that is behind asks for a note, as a milestone does (§434)")
+        # Islam, 2026-09-30: *"let's fix the actions that ask for a note"*. An
+        # action read through `measureScore` always answered null, so a due and
+        # behind action never asked. BOTH ENDS (§94.2): asked with no note,
+        # cleared by one, and never asked of an action whose date has not come.
+        behind = ev(pg, """(k)=>{
+          var a = addAction(k); a.name = "Payroll audit"; a.owner = "Amr Hassan";
+          a.due = "Mar 26"; a.status = "wip"; a.pct = 30;
+          var b = addAction(k); b.name = "Next year's grading review"; b.owner = "Amr Hassan";
+          b.due = "Dec 26"; b.status = "wip"; b.pct = 10;
+          var ids = function(){ return fnMissingNotes("fn:" + k).map(function(x){ return x.id; }); };
+          var before = ids(), refusal = submitRefusal("fn:" + k);
+          a.note = "Waiting on the payroll system export, due in April.";
+          var after = ids();
+          return { a: a.id, b: b.id, before: before, after: after, refusal: refusal };
+        }""", {}, FK)
+        ck("a due action at 30% with no note is asked for one",
+           behind.get("a") in (behind.get("before") or []), behind)
+        ck("and Submit says a figure has no note", "no note" in (behind.get("refusal") or ""), behind.get("refusal"))
+        ck("a note clears it", behind.get("a") not in (behind.get("after") or []), behind)
+        ck("and an action not yet due is never asked",
+           behind.get("b") not in (behind.get("before") or []), behind)
 
         print("\n§8 the plan can leave and come back (§22)")
         wb = ev(pg, """(k)=>{

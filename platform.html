@@ -3926,6 +3926,8 @@
   }
 
   document.getElementById("signout").addEventListener("click", function () {
+    /* §431: signing out wipes every saved copy of a client's page */
+    try { for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && k.indexOf("smp.cache.") === 0) localStorage.removeItem(k); } } catch (e) {}
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });

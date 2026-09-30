@@ -7991,6 +7991,13 @@ details.dov[open]>summary .dovpeek{display:none}
 .planyears .yrchip.now { border-color:var(--gold); color:var(--ink); font-weight:600; }
 .pcard-y { display:block; margin-top:6px; font-size:.7em; color:var(--ink-3); }
 
+/* §431: while the page is the saved copy from last time, a quiet mark says so
+   and the page body takes no input (the fresh copy replaces it in a moment). */
+.staleflag { display:inline-flex; align-items:center; font-size:var(--fs-label); font-weight:600;
+  letter-spacing:.04em; color:var(--ink-3); border:1px solid var(--line); border-radius:999px;
+  padding:2px 10px; margin-right:8px; white-space:nowrap; }
+html[data-stale] #panel { cursor:progress; }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.

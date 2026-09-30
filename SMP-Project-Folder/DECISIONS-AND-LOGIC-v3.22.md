@@ -50423,3 +50423,58 @@ is vacuous and kept as the control (§113.8).
 `built-in-step.py` all good. **The frozen product is untouched and measured**,
 so `sw.js` is NOT bumped (§91's trigger is the built file's bytes changing, and
 they did not). **On the branch, not merged.**
+
+### §379.11 — AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS THREE FAULTS
+
+`checks/tracker.mjs` has read **224 passed, 4 failed** since 20 September.
+&sect;375 and &sect;376 each recorded it as *not this work's*, established the
+honest way &mdash; reproduced on a baseline worktree before anything was blamed
+(&sect;303) &mdash; and stopped there. **That is &sect;303 doing its job and
+being asked the wrong question**: it settles whose a red is and says nothing
+about whether anybody will clear it, so a failure with its provenance written
+down is still a failure people learn to scroll past, which is &sect;280.1's own
+finding about a check that could no longer go green. Worse, **&sect;377 wrote
+the lesson down naming this exact file** &mdash; *"Its dates are relative to
+`todayIn()`, never typed &mdash; the one lesson `checks/tracker.mjs` is four
+failures short of"* &mdash; and left the file four failures short of it.
+*A rule recorded against a file is not a rule applied to it.*
+
+**THREE CAUSES, AND ONLY THE FIRST WAS THE ONE THE RECORD PREDICTED.**
+
+**(a) A typed date became this week's own Thursday.** Two fixtures in the
+add-a-line section carried literal days, and `2026-10-01` was comfortably in
+the future when it was written and is now the Thursday of the week the check
+runs in &mdash; so the *group by week* assertion counted three headings over a
+page legitimately drawing two, and the *group by exact date* one counted three
+days over two. &sect;13.9 and &sect;214.3 in one line. They are **relative to
+today** now (`DAY(-10)` and `DAY(35)`), far enough either side that neither can
+collide with this week whatever day the check is run on, **and the expectations
+de-duplicate** rather than assuming three distinct days, or the fix re-creates
+the fault the first time two of them coincide.
+
+**(b) A probe measured a list nobody could see.** `teamFit()` asked
+`document.querySelector('.team')` for the box it was about to assert fits its
+widest name &mdash; and **every row carries one**, all of them closed but the
+one just pressed, so it measured a hidden list and reported `box 0, need 0,
+row 0`: a correct build called broken (&sect;100.3, &sect;50.6). It is scoped to
+the row that was pressed now, **which the assertion two lines above it already
+was** &mdash; and that is why it went unnoticed, because the neighbour it sits
+under passes for the right reason on the same build.
+
+**(c) Two different todays were compared in one string.** The week headings are
+worded by `weekWord(thursday, today)`, and the documents under test are rendered
+**as of 2026-09-15** (`TODAY`) while the rows' dates come off the real clock
+&mdash; so writing the expectation with `todayIn()` asks *what would this week
+be called today* of a page that was drawn a fortnight ago, and the answer
+differs by exactly the words this assertion exists to check (&sect;122.4's
+family). **Both sides read `TODAY`**, so it is an AGREEMENT that survives the
+clock moving rather than a string that goes stale in it (&sect;94.8).
+
+**Verified**: `check:tracker` **228 passed, 0 failed**, and the whole
+falsification suite re-run **red under all thirteen breaks** &mdash; which is
+the assertion that matters here, because three of them
+(`week-numbers`, `week-of-year`, `card-count`) stand on exactly the fixture
+dates this moved, and a repair that made them pass would have bought a green
+line by taking the check's subject away (&sect;218: rewrite, never loosen).
+**The product is untouched** &mdash; one check file, read off the diff &mdash;
+so nothing is rebuilt and `sw.js` is not bumped.

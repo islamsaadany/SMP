@@ -8174,12 +8174,38 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # details and the names list are asserted the same
                                 # way: an AGREEMENT worked out from the page's own
                                 # padding and the check's own arithmetic, never a
-                                # pixel count somebody typed. 228/0,
-                                # red THIRTEEN ways (`check:tracker:red`). Its first run
-                                # found ONE product fault (an undated line vanishing
-                                # from This week, &sect;356.7), one real page fault
-                                # (`hidden` hiding nothing under an author display,
-                                # &sect;356.8) and three faults of its own
+                                # pixel count somebody typed. 228/0, red
+                                # THIRTEEN ways (`check:tracker:red`). Its
+                                # first run found ONE product fault (an
+                                # undated line vanishing from This week,
+                                # &sect;356.7), one real page fault (`hidden`
+                                # hiding nothing under an author display,
+                                # &sect;356.8) and three faults of its own.
+                                # AND SINCE &sect;379.11 ITS DATES ARE
+                                # RELATIVE TO TODAY AND ITS PROBES ARE SCOPED
+                                # TO THE ROW THAT WAS PRESSED: it read 224/4
+                                # for ten days on three faults, every one of
+                                # them its own &mdash; a typed `2026-10-01`
+                                # that became THIS WEEK'S own Thursday, so
+                                # the grouping drew two headings where the
+                                # assertion counted three (&sect;13.9,
+                                # &sect;214.3, and &sect;377 wrote that rule
+                                # down naming this file); an unscoped
+                                # `.team` measuring a CLOSED list from
+                                # another row and reporting `box 0, row 0`,
+                                # a correct build called broken, unnoticed
+                                # because the assertion two lines above it
+                                # is scoped (&sect;100.3, &sect;50.6); and a
+                                # week worded with `todayIn()` over a page
+                                # rendered as of `TODAY`, two different
+                                # todays in one string (&sect;122.4). Both
+                                # sides read `TODAY` now, so it is an
+                                # AGREEMENT that survives the clock moving
+                                # (&sect;94.8). **&sect;303 settles WHOSE a
+                                # red is and says nothing about whether
+                                # anybody clears it** &mdash; two rounds
+                                # recorded this one as not theirs, honestly,
+                                # and left it standing (&sect;280.1)
 node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # minutes as an email (spec 055, &sect;357) &mdash;
                                 # `npm run check:notes`, needs a database and the
@@ -9910,7 +9936,33 @@ CORRECTED IN THE CODE**, neither visual: `page.ts` said *two of the four are
 not built* over a `TABS` list where all four are, and `plan.ts`'s header named
 the same two as *not yet* &mdash; &sect;378 built them and both comments stayed
 behind for a round (&sect;104.8). **A stale comment renders perfectly and
-nothing can go red on it.** Verified: `check:portfolio:module` **119/0**,
+nothing can go red on it.**
+**&sect;379.11 &mdash; AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS
+THREE FAULTS, EVERY ONE THE CHECK'S OWN**: `checks/tracker.mjs` has read
+224/4 since 20 September, and &sect;375 and &sect;376 each recorded it as *not
+this work's* &mdash; established the honest way, on a baseline worktree
+(&sect;303), and left standing. **&sect;303 settles WHOSE a red is and says
+nothing about whether anybody clears it**, so a failure with its provenance
+written down is still one people learn to scroll past (&sect;280.1) &mdash;
+and **&sect;377 wrote the rule down naming this exact file** (*"the one lesson
+`checks/tracker.mjs` is four failures short of"*) and left it four failures
+short of it. *A rule recorded against a file is not a rule applied to it.*
+(a) A typed `2026-10-01` was in the future when written and is **THIS WEEK'S
+own Thursday** now, so the grouping drew two headings where the assertion
+counted three (&sect;13.9, &sect;214.3) &mdash; relative to today now, far
+enough either side that neither can collide, **with the expectations
+de-duplicating** or the fix re-creates the fault the first time two coincide.
+(b) An unscoped `.team` measured a **CLOSED** list from another row and
+reported `box 0, row 0` &mdash; a correct build called broken (&sect;100.3,
+&sect;50.6), unnoticed because the assertion two lines above it is scoped.
+(c) A week worded with `todayIn()` over documents rendered as of `TODAY`:
+**two different todays in one string** (&sect;122.4), so both sides read
+`TODAY` and it is an AGREEMENT that survives the clock moving (&sect;94.8).
+**228/0, and the whole suite re-run red under all THIRTEEN breaks** &mdash;
+which is the assertion that matters, three of them standing on exactly the
+fixture dates this moved, where a repair that made them pass would have bought
+the green by taking the check's subject away (&sect;218).
+Verified: `check:portfolio:module` **119/0**,
 `typecheck` clean but for `lib/prisma.ts`'s pre-existing error,
 `generated-in-step` all clear, `built-in-step.py` all good. The frozen product
 is untouched and measured, so **`sw.js` is NOT bumped**. **On the branch, not

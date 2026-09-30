@@ -5785,6 +5785,26 @@ a `TABS` list where all four are, and `plan.ts`'s header named the same two as
 *not yet*. §378 built them and the comments stayed behind for a round (§104.8).
 **A stale comment renders perfectly and nothing can go red on it.**
 
+**And one of the checks has been failing for ten days, so it is fixed
+(§379.11).** The Internal Tracker's check has read *4 failed* since the 20th.
+Two earlier rounds looked at it, proved it was not their doing by running it
+against the code as it stood before them, wrote that down — and left it
+failing. That is the honest thing to do and it is only half the job: a failure
+with a note beside it saying whose it is not, is still a failure people stop
+reading. **Nothing was wrong with the product.** Three things were wrong with
+the check. It had a date typed into it — the 1st of October — which was
+comfortably in the future when it was written and is the end of **this** week
+now, so the page it looks at correctly grouped two weeks together while the
+check was still counting three. It measured the wrong row's list of people: the
+list is closed on every row but the one just opened, and it was asking the page
+for *the first one*, so it measured something nobody can see and reported a
+working page as broken. And it asked *what is this week called* of today's date
+while the page it was reading had been drawn as of the 15th — two different
+todays compared with each other. All three are now worked out from the clock
+rather than typed, so they cannot go stale again; the check reads **228 passed,
+0 failed**, and every one of the thirteen deliberate breaks still turns it red,
+which is what says the fix did not buy the green by removing what it checks.
+
 **Verified**: `check:portfolio:module` 119/0, `typecheck` clean but for
 `lib/prisma.ts`'s pre-existing error, `generated-in-step` all clear,
 `built-in-step.py` all good. The frozen product is untouched and measured, so

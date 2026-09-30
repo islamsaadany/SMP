@@ -244,7 +244,7 @@
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
-        /* §418: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+        /* §433: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
            "yes add the quiet refresh when crossing"). A press that is a paint
            shows what this tab already holds; behind it, anything waiting is
            saved first, then the server's copy is asked for and the page
@@ -263,7 +263,7 @@
             });
           });
         };
-        /* §417: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
+        /* §432: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
            ITSELF (Islam: "when moving between client settings and strategy
            the strategy page loads"). The client's settings, a module's
            settings and that module's own pages are ONE document — the server

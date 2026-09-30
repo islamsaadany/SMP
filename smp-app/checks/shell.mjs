@@ -601,13 +601,13 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   check(/^\/raya-trade\/strategy\/setup/.test(path()) && b.scope === "strategy" && b.row === true,
         "\u2026and Back returns to the module's Setup, wearing its bar again", path() + " / " + JSON.stringify(b));
 
-  /* §417: AND THE MODULE ITSELF IS A PRESS FROM ITS SETTINGS, BOTH WAYS
+  /* §432: AND THE MODULE ITSELF IS A PRESS FROM ITS SETTINGS, BOTH WAYS
      (Islam: "when moving between client settings and strategy the strategy
      page loads"). Same marker as above (§367): it survives a repaint and
      cannot survive a document. Both ends (§94.2). */
   await open("/raya-trade/setup/people");
   await page.evaluate(() => { window.__stay = 3; });
-  /* §418: AND BEHIND THE PRESS THE PAGE QUIETLY CATCHES UP. A change made on
+  /* §433: AND BEHIND THE PRESS THE PAGE QUIETLY CATCHES UP. A change made on
      the server while the tab was open — here the cycle's name, written as if
      by somebody else — must be on the page once the crossing has settled,
      WITHOUT the page being rebuilt. Both ends: the tab did not hold it before
@@ -620,10 +620,10 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   await page.waitForFunction(() => (window.__smpRefresh || 0) >= 1, null, { timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(400);
   b = await bar();
-  check(await page.evaluate(() => window.__stay === 3), "Client settings → Strategy is a press, not a page load (§417)", "the page was rebuilt");
+  check(await page.evaluate(() => window.__stay === 3), "Client settings → Strategy is a press, not a page load (§432)", "the page was rebuilt");
   const heldAfter = await page.evaluate(() => typeof REVIEW !== "undefined" && REVIEW.name);
   check(heldBefore !== cycleMark && heldAfter === cycleMark,
-        "…and behind it the page quietly took the server's newer copy (§418)", JSON.stringify({ heldBefore, heldAfter }));
+        "…and behind it the page quietly took the server's newer copy (§433)", JSON.stringify({ heldBefore, heldAfter }));
   await owner.query("update review set name = $1 where tenant_id = $2", [cycleWas, tenantId]);
   check(/^\/raya-trade\/strategy\/(?!setup)/.test(path()) && !b.scope && b.row === true && b.where === "Strategy",
         "…landing on Strategy's own pages, wearing its navigation", path() + " / " + JSON.stringify(b));
@@ -631,7 +631,7 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
   if (await pressTrail("cross:client")) await page.waitForURL(/\/raya-trade\/setup\//, { timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(400);
   b = await bar();
-  check(await page.evaluate(() => window.__stay === 4), "…and Strategy → Client settings is a press too (§417)", "the page was rebuilt");
+  check(await page.evaluate(() => window.__stay === 4), "…and Strategy → Client settings is a press too (§432)", "the page was rebuilt");
   check(/^\/raya-trade\/setup\/[\w-]+$/.test(path()) && b.scope === "client" && b.where === "Client settings",
         "…landing on the client's settings", path() + " / " + JSON.stringify(b));
 

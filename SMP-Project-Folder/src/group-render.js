@@ -7536,7 +7536,7 @@ function fnObjPlanBody(fk, ed){
   return '<h4 class="mini">Actions <em>— the work, and when it is due</em></h4>' +
     miniTable(["#","Action","Owner","Due"], rows);
 }
-/* §415: THE PLAN IS THE WHOLE PLAN — the objectives, then the actions.
+/* §430: THE PLAN IS THE WHOLE PLAN — the objectives, then the actions.
    Islam, of Finance's Plan reading as six tasks with no targets: *"a function
    PLANNING in objectives and actions get their objectives and actions in the
    plan tab not the overview tab"*, then the mockup (design-mockups/
@@ -7576,7 +7576,7 @@ function fnObjPlan(fk){
   var kos = isUnitHolderId(fk) ? [] : ((fnOwnHolder(fk) || {}).keyObjectives || []);
   /* §61: a function with no action yet is where the first one goes. The empty
      state has to say so and the pen has to be reachable, or the page is
-     readable and unstartable — §129's audit found that five times. §415: and
+     readable and unstartable — §129's audit found that five times. §430: and
      the objectives' own gaps are owed HERE now, where their fields are. */
   var owed = list.reduce(function(n, a){
     return n + SMPRules.gapMissing("action", a).length; }, 0) +
@@ -9040,7 +9040,7 @@ function holderOverview(subject){
   var fl = filling("capfoundation", "k_found");
   /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
      North Star (key objectives). Off hides the card and forgets nothing. */
-  /* §415: a function planning in objectives and actions holds its objectives
+  /* §430: a function planning in objectives and actions holds its objectives
      on its PLAN (fnObjKoBlock), so the Overview is the brief alone. */
   var briefOn = compOn(t, "brief"),
       koOn = compOn(t, "keyobj") && !(!isCap && fnPlansInObjectives(f));
@@ -9354,7 +9354,7 @@ function capKoTarget(c){
   if (id.indexOf("fn:") === 0) return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
-/* §415: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
+/* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
    pair, as it always has; a function planning in objectives and actions draws
    this same table on its PLAN, under the Plan's pen (Islam, 2026-09-30: "a
    function PLANNING in objectives and actions get their objectives and

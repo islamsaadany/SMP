@@ -238,8 +238,8 @@ def main():
         ck("Reporting asks for both",
            "Retail academy" in rep and "Achieve revenue target" in rep, rep[:140])
 
-        print("\n§4 the objectives are on the PLAN, and the Overview is the brief alone (§415)")
-        # §415 REWRITES WHAT §213 ASSERTED HERE, at Islam's word (2026-09-30):
+        print("\n§4 the objectives are on the PLAN, and the Overview is the brief alone (§430)")
+        # §430 REWRITES WHAT §213 ASSERTED HERE, at Islam's word (2026-09-30):
         # *"a function PLANNING in objectives and actions get their objectives
         # and actions in the plan tab not the overview tab"*. The agreement with
         # a projects function's Overview is replaced, not loosened (§218): the
@@ -279,7 +279,7 @@ def main():
         except Exception:
             pass
         wrote = ev(pg, """(k)=>{
-          /* §415: the Plan holds two tables now, the objectives first, so the
+          /* §430: the Plan holds two tables now, the objectives first, so the
              action's box is asked of the LAST one — the first box on the page
              is an objective's name. */
           var tbs = document.querySelectorAll('#panel table');
@@ -339,7 +339,7 @@ def main():
            owed.get("gaps", 0) >= 2 and sorted(owed.get("missing") or []) == ["due", "owner"], owed)
         ck("and Submit says so", "missing in the plan" in (owed.get("refusal") or ""), owed.get("refusal"))
 
-        print("\n§7b an action that is behind asks for a note, as a milestone does (§416)")
+        print("\n§7b an action that is behind asks for a note, as a milestone does (§434)")
         # Islam, 2026-09-30: *"let's fix the actions that ask for a note"*. An
         # action read through `measureScore` always answered null, so a due and
         # behind action never asked. BOTH ENDS (§94.2): asked with no note,

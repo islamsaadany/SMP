@@ -5450,7 +5450,7 @@ function rowAnswered(x){
      carrying a figure (§104.10) -- unchanged, and gathered here so the
      question has one answer rather than three. */
   if (x.kind === "deliverable" || x.kind === "milestone") return statusGiven(o);
-  /* §414: AND AN ACTION (§342), which is a milestone row with a date and was
+  /* §429: AND AN ACTION (§342), which is a milestone row with a date and was
      left out of this list when it arrived. It fell through to `o.actual`, which
      an action never carries, so the Reporting cycle board read Nigeria's four
      answered actions as 0/4 while Nigeria's own page — `fnObjReported`, the
@@ -5484,11 +5484,11 @@ function rowReads(x){
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  /* §416: AND AN ACTION, read exactly as a milestone is. It fell through to
+  /* §434: AND AN ACTION, read exactly as a milestone is. It fell through to
      `measureScore`, which an action (no target) always answers null — so an
      action that was due and behind never asked for a note and Submit let it
      through unexplained, where a milestone in the same state is stopped.
-     Islam, 2026-09-30: "let's fix the actions that ask for a note". §414 gave
+     Islam, 2026-09-30: "let's fix the actions that ask for a note". §429 gave
      `rowAnswered` the same case; the two readers of one row now agree. */
   if (x.kind === "action") return statusReads(x.obj);
   /* §343: and a breakdown cell reads its own score — NULL on an indicator
@@ -6009,7 +6009,7 @@ function boardWho(target){
 function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
     if (!fnShows(fk)) return false;
-    /* §414: a function planning in OBJECTIVES AND ACTIONS (§342) is asked for
+    /* §429: a function planning in OBJECTIVES AND ACTIONS (§342) is asked for
        a report like the other two — its own Reporting page has always asked
        it — but it has no projects and usually no capability, so the test
        below dropped it from the board: in the demo, Finance and Treasury were

@@ -1,4 +1,4 @@
-/* ── OPEN ON WHAT YOU SAW LAST TIME (§416) ──────────────────────────────
+/* ── OPEN ON WHAT YOU SAW LAST TIME (§431) ──────────────────────────────
    Islam: "why everytime I open the tab it opens from the start? why don't we
    cash the pages and refresh silently and adjust if something new comes" —
    with the three conditions he said yes to: one saved copy per person, wiped
@@ -156,7 +156,7 @@ try {
   check(navs - navs6 <= 1, "a normal open navigates once — no reload loop", navs - navs6);
   await page.waitForFunction(() => !document.documentElement.hasAttribute("data-stale") && !document.documentElement.classList.contains("booting"), null, { timeout: 20000 }).catch(() => {});
   /* A FAST ANSWER LANDS INSIDE THE SAVED COPY'S 180ms FLOOR, and whichever
-     landing runs first must draw the chrome (§416): the first build painted
+     landing runs first must draw the chrome (§431): the first build painted
      without it there, leaving VIEWER at the file's default — the office. */
   const fast = await page.evaluate(() => ({ viewer: window.VIEWER,
     signout: Array.from(document.querySelectorAll("#topacts button")).filter((b) => /sign out/i.test(b.textContent)).length }));

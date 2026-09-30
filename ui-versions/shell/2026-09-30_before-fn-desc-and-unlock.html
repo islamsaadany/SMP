@@ -424,7 +424,7 @@
           /* §428.3: combined at the merge — the layer's own title and switch
              (§418) AND §430's rule for the objectives-and-actions form. */
           return [{ k:"found", ac:"k_found", label:SMPRules.foundTitle(GROUP, k), render:renderFnFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, SMPRules.descPart(t)) ||
+                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") ||
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
@@ -3211,10 +3211,6 @@
       door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
       console: OPTS_CONSOLE,
       repaint: function(){ paint(); },
-      /* §436: how a function or a capability plans, changed from the set-up
-         flow on a client with a plan, goes through the one switch Setup's own
-         rows use — its warning, and hide-and-keep (§405). */
-      switchWay: function(kind, key, value, sel){ switchPlanWay(kind, key, value, sel); },
       /* §364: the team page draws a setup table, and a setup table's hover
          is MEASURED after it is on the screen (§88). paint() ends in
          clipTitles(), which is too early for a box the client's record fills
@@ -4777,8 +4773,10 @@
     document.querySelectorAll("[data-capformat]").forEach(function(el){
       el.addEventListener("change", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §436: through the one switch, which warns before it hides. */
-        switchPlanWay("cap", el.dataset.capformat, el.value, el);
+        var c = capById(el.dataset.capformat);
+        if (!c) return;
+        if (el.value === "pillars") c.format = "pillars"; else delete c.format;
+        paint();
       });
     });
     /* ── THE DESTINATION ROW REPLACED THE DROPDOWN (§135.5) ─────────
@@ -11090,20 +11088,15 @@
      A FUNCTION CARRYING A CAPABILITY IS STILL REFUSED, for §342's reason —
      that is somebody else's strategic entry, and a dropdown here is not where
      it is decided (§334). */
-  /* §436: A CAPABILITY TAKES THE SAME SWITCH (Islam: *"if I change how we
-     plan or … capabilities it needs to be changable with a warning"*). It
-     had none — Setup's control switched in silence — and it plans two ways
-     only, pillars or projects (capFormat), absent being projects. */
   function switchPlanWay(kind, key, value, sel){
-    var isUnit = kind === "unit", isCap = kind === "cap";
-    var rec = isUnit ? UNITS[key] : isCap ? capById(key) : FUNCTIONS[key];
+    var isUnit = kind === "unit";
+    var rec = isUnit ? UNITS[key] : FUNCTIONS[key];
     if (!rec) return;
-    var was = isUnit ? unitFormat(rec) : isCap ? (rec.format === "pillars" ? "pillars" : "projects") : fnFormat(rec);
-    var ways = isCap ? ["pillars", "projects"] : FN_FORMATS;
-    var now = ways.indexOf(String(value)) > -1 ? String(value) : was;
+    var was = isUnit ? unitFormat(rec) : fnFormat(rec);
+    var now = FN_FORMATS.indexOf(String(value)) > -1 ? String(value) : was;
     var back = function(){ if (sel) sel.value = was; };
     if (now === was) return;
-    if (!isUnit && !isCap && capsOfFunction(key).length) { back(); return; }
+    if (!isUnit && capsOfFunction(key).length) { back(); return; }
     var apply = function(){
       /* STORED AS AN ABSENCE (§50.6): a unit's absent is pillars, a
          function's absent is projects, so each default deletes the key. */

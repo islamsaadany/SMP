@@ -319,7 +319,7 @@ var CLIENTSETUP = (function () {
   /* §404: the components a level may carry, in the mockup's order, each with
      its fixed title (what it IS) — the client's word goes in the box beside
      it. The keys are SMPRules.STRUCT_COMPONENTS and the label keys both. */
-  var COMPONENTS = [["brief","Brief"], ["desc","Description"], ["purpose","Purpose"], ["aspiration","Aspiration"],
+  var COMPONENTS = [["brief","Brief"], ["purpose","Purpose"], ["aspiration","Aspiration"],
                     ["keyobj","North Star"], ["theme","Themes"], ["pillar","Pillars"],
                     ["capability","Capabilities"], ["values","Values"], ["swot","SWOT"]];
   var TOP_NAMES = [["Group","Group"], ["Company","Company"], ["Holding","Holding"]];
@@ -426,17 +426,17 @@ var CLIENTSETUP = (function () {
     (COMPANY_KEYS || []).forEach(function (k) { g.companies.push({ name: COMPANIES[k].name }); });
     (UNIT_KEYS || []).forEach(function (k) {
       var u = UNITS[k];
-      g.units.push({ key: k, name: u.name,
+      g.units.push({ name: u.name,
         company: u.company && COMPANIES[u.company] ? COMPANIES[u.company].name : "" });
     });
     (FUNCTION_KEYS || []).forEach(function (k) {
       var f = FUNCTIONS[k];
-      g.functions.push({ key: k, name: f.name,
+      g.functions.push({ name: f.name,
         format: f.format === "pillars" ? "pillars" : f.format === "objectives" ? "objectives" : "projects",
         company: f.company && COMPANIES[f.company] ? COMPANIES[f.company].name : "" });
     });
     ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
-      g.capabilities.push({ id: c.id, name: c.name,
+      g.capabilities.push({ name: c.name,
         fn: c.fn && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : "",
         format: c.format === "pillars" ? "pillars" : "projects" });
     });
@@ -482,9 +482,6 @@ var CLIENTSETUP = (function () {
             shape:liveShape(), shapeDirty:false, markState:undefined };
     }
     if (S.at > STEPS.length - 1) S.at = 0;
-    /* §436: a list nobody is editing is re-read off the graph, so a change
-       written straight into it (below, on a client with a plan) shows. */
-    if (!S.shapeDirty) S.shape = liveShape();
     ensureReg("[data-csetup]", mount);
     render();
   }
@@ -1052,50 +1049,6 @@ var CLIENTSETUP = (function () {
     return wrap;
   }
 
-  /* ── §436: WRITTEN STRAIGHT INTO THE ROW, ON A CLIENT WITH A PLAN ──────
-     The freeze (§346.5) exists because set-up saves a list by REBUILDING
-     it, which can drop work already entered against a row. These three
-     answers are properties of ONE row, so they are written onto that row
-     the way its own Setup page writes them, and the list is never rebuilt.
-     Names are turned into keys here, because the flow's rows carry names. */
-  function coKeyByName(nm){
-    nm = String(nm || "").trim();
-    var hit = (COMPANY_KEYS || []).filter(function (c) { return COMPANIES[c] && COMPANIES[c].name === nm; })[0];
-    return hit || null;
-  }
-  function liveDone(){ S.shape = liveShape(); if (OPTS.repaint) OPTS.repaint(); else render(); }
-  function liveDivision(kind, key, name){
-    var co = coKeyByName(name);
-    if (kind === "unit") { if (!UNITS[key]) return; UNITS[key].company = co || null; }
-    else {
-      var f = FUNCTIONS[key]; if (!f) return;
-      if (co) f.company = co; else delete f.company;
-      delete f.coWeight;                 /* a share of one division is not a share of another (§391) */
-    }
-    liveDone();
-  }
-  function liveCapFn(id, fnName){
-    var c = (GROUP.capabilities || []).filter(function (x) { return x && x.id === id; })[0];
-    if (!c) return;
-    var fk = (FUNCTION_KEYS || []).filter(function (k) { return FUNCTIONS[k] && FUNCTIONS[k].name === fnName; })[0];
-    c.fn = fk || null;
-    liveDone();
-  }
-  /* How a function or a capability plans: the shell's own switch, which asks
-     first and hides and keeps what the old way held (§405). A function that
-     carries a capability is refused there, and the refusal is SAID here —
-     a select that quietly jumps back is a control that looks broken (§62). */
-  function liveFormat(kind, key, sel){
-    if (kind === "fn" && typeof capsOfFunction === "function" && capsOfFunction(key).length) {
-      var f = FUNCTIONS[key];
-      sel.value = f && f.format === "pillars" ? "pillars" : f && f.format === "objectives" ? "objectives" : "projects";
-      say((f ? f.name : "This function") + " carries a " + w("capability", "one", "capability") +
-          ", so how it plans is changed after that " + w("capability", "one", "capability") + " moves to another function.", true);
-      return;
-    }
-    OPTS.switchWay(kind, key, sel.value, sel);
-  }
-
   /* ── A list you add to: units and functions are one control ───────── */
   function focusLastName(){
     var boxes = HOST ? HOST.querySelectorAll(".wzrow input.fld") : [];
@@ -1125,17 +1078,8 @@ var CLIENTSETUP = (function () {
             if (row.format === f[0]) o.selected = true;
             sel.appendChild(o);
           });
-          sel.setAttribute("data-wzfmt", row.key || "");
-          if (!shape) {
-            /* §436: A PLAN IN IT DOES NOT FREEZE HOW A FUNCTION PLANS (Islam:
-               *"it needs to be changable with a warning"*). The change is
-               written straight into that function through Setup's own switch
-               — the same warning, and the old way hidden and kept so
-               switching back brings it back (§405) — never through the list
-               rewrite that the freeze is there to stop. */
-            if (!row.key || !OPTS.switchWay) sel.disabled = true;
-            else sel.addEventListener("change", function () { liveFormat("fn", row.key, sel); });
-          } else sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
+          if (!shape) sel.disabled = true;
+          sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
           tail.appendChild(sel);
           r.appendChild(tail);
         }
@@ -1157,14 +1101,8 @@ var CLIENTSETUP = (function () {
             if ((row.company || "") === d) o.selected = true;
             ds.appendChild(o);
           });
-          if (!shape) {
-            /* §436: which division a row belongs to moves nothing it holds,
-               so on a client with a plan it is written straight in, exactly
-               as Setup's own row does (Islam: *"it belongs to commercial
-               division but I can't change that"*). */
-            if (!row.key) ds.disabled = true;
-            else ds.addEventListener("change", function () { liveDivision(kind, row.key, ds.value); });
-          } else ds.addEventListener("change", function () { row.company = ds.value; S.shapeDirty = true; });
+          if (!shape) ds.disabled = true;
+          ds.addEventListener("change", function () { row.company = ds.value; S.shapeDirty = true; });
           dt.appendChild(ds);
           r.appendChild(dt);
         }
@@ -1318,13 +1256,8 @@ var CLIENTSETUP = (function () {
           if (cp.fn === f.name) o.selected = true;
           who.appendChild(o);
         });
-        if (!shape) {
-          /* §436: assigning a capability to a function moves nothing it
-             holds, so a plan in the client does not freeze it (Islam: *"I
-             can't set where they are assigned"*). */
-          if (!cp.id) who.disabled = true;
-          else who.addEventListener("change", function () { liveCapFn(cp.id, who.value); });
-        } else who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
+        who.disabled = !shape;
+        who.addEventListener("change", function () { cp.fn = who.value; S.shapeDirty = true; });
         tail.appendChild(who);
         tail.appendChild(el("span", "wzsub", "plans in"));
         var how = el("select", "fld");
@@ -1334,10 +1267,8 @@ var CLIENTSETUP = (function () {
           if (cp.format === f[0]) o.selected = true;
           how.appendChild(o);
         });
-        if (!shape) {
-          if (!cp.id || !OPTS.switchWay) how.disabled = true;
-          else how.addEventListener("change", function () { liveFormat("cap", cp.id, how); });
-        } else how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
+        how.disabled = !shape;
+        how.addEventListener("change", function () { cp.format = how.value; S.shapeDirty = true; });
         tail.appendChild(how);
         r.appendChild(tail);
         if (shape) {
@@ -1605,23 +1536,9 @@ var CLIENTSETUP = (function () {
     });
     structWrite(nx);
   }
-  var PART_LABEL = { brief:"Brief", desc:"Description", purpose:"Purpose", aspiration:"Aspiration", keyobj:"North Star",
+  var PART_LABEL = { brief:"Brief", purpose:"Purpose", aspiration:"Aspiration", keyobj:"North Star",
     theme:"Themes", values:"Values", pillar:"Pillar", measure:"Key measure", tactic:"Tactic",
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
-  /* §436: WHICH FIRST-SECTION PARTS A LAYER'S CARD OFFERS. A function's
-     Overview is its description (Islam: *"an overview with a description
-     if needed"*) — its key objectives are the objectives-and-actions way of
-     planning, so the step offers no tick for them. A capability's is what the directions'
-     is made of that a capability page can draw: the brief ("What it is",
-     with its definition) and the North Star (Islam: *"add the description
-     in the first section like the directions"*). Every other layer offers
-     every part but a function's own description. */
-  function firstParts(k){
-    if (k === "cap") return ["brief", "keyobj"];
-    var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
-    return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
-      return SMPRules.compOffered(tgt, c) && !(k === "fn" && c === "keyobj"); });
-  }
   var WAY_LABEL = { pillars:"pillars", projects:"projects", objectives:"objectives and actions" };
   function structLevel(box, lv, k){
     var L = lv[k], tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:", cap:"cap:" }[k];
@@ -1644,7 +1561,8 @@ var CLIENTSETUP = (function () {
       s1.appendChild(titleBox(k, "found", null, SMPRules.foundTitle({}, tgt), "The first section's title"));
       s1.appendChild(el("p", "lab", "Parts"));
       s1.appendChild(partHead());
-      firstParts(k).forEach(function (c) {
+      SMPRules.SEC_FOUND_PARTS.forEach(function (c) {
+        if ((k === "fn" || k === "cap") && !SMPRules.compOffered("fn:", c)) return;
         var built = SMPRules.compBuilt(tgt, c), on = built && L.on.indexOf(c) >= 0;
         var r = el("div", "stpart" + (on ? "" : " off"));
         r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function () { compToggle(k, c); }));
@@ -1920,7 +1838,7 @@ var CLIENTSETUP = (function () {
   /* The parts an item on this layer can be given: the first section's
      (offered and built for it), then the second section as one switch. */
   function exceptParts(t){
-    var p = firstParts(SMPRules.structLevelOf(t)).filter(function (c) {
+    var p = SMPRules.SEC_FOUND_PARTS.filter(function (c) {
       return SMPRules.compOffered(t, c) && SMPRules.compBuilt(t, c); });
     if (SMPRules.compBuilt(t, "swot")) p.push("swot");
     return p;

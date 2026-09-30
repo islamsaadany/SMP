@@ -129,8 +129,11 @@ with sync_playwright() as p:
     # §436 (Islam, 2026-09-30): a function's first section is its description;
     # its key objectives belong to how it plans, so no chip. REWRITTEN, never
     # loosened (§218) — both ends: the description offered, the rest not.
-    ck("a function's row offers its description chip and no brief, themes, values or key objectives chip",
-       pick("fn", "fn:" + str(fk)) and safe(pg, "()=>!['brief','theme','values','purpose','keyobj'].some(c=>document.querySelector('[data-stxover=\"fn:%s|'+c+'\"]')) && !!document.querySelector('[data-stxover=\"fn:%s|desc\"]')" % (fk, fk)) is True)
+    # §437: the key objectives are a function's option again (Islam: *"keep
+    # them in the first section as an option"*), so the row offers them
+    # beside the description — asserted PRESENT, never merely not-absent.
+    ck("a function's row offers its description and key objectives chips and no brief, themes or values chip",
+       pick("fn", "fn:" + str(fk)) and safe(pg, "()=>!['brief','theme','values','purpose'].some(c=>document.querySelector('[data-stxover=\"fn:%s|'+c+'\"]')) && !!document.querySelector('[data-stxover=\"fn:%s|desc\"]') && !!document.querySelector('[data-stxover=\"fn:%s|keyobj\"]')" % (fk, fk, fk)) is True)
     ck("…and a unit's row offers a brief but no themes (§427)",
        pick("bu", unit) and safe(pg, "()=>!!document.querySelector('[data-stxover=\"%s|brief\"]') && !document.querySelector('[data-stxover=\"%s|theme\"]')" % (unit, unit)) is True)
     ck("…Remove takes a row off without storing anything",
@@ -178,16 +181,17 @@ with sync_playwright() as p:
     # asserted as the sections' own rows now (§218: rewritten, never
     # loosened). The first section's parts are the rule's own list, filtered
     # for a function by the same compOffered the pages ask (§42, §94.8).
-    # §436: every layer but the functions offers every part but a function's
-    # own description; the functions offer that description alone.
-    want = safe(pg, "()=>({top:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('group',c)).length, fn:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('fn:',c) && c!=='keyobj').length})", {})
+    # §436/§437: every layer but the functions offers every part but a
+    # function's own description; the functions offer that and their key
+    # objectives.
+    want = safe(pg, "()=>({top:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('group',c)).length, fn:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('fn:',c)).length})", {})
     got = safe(pg, "()=>['top','mid','bu','fn'].map(k=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"'+k+'|'+c+'\"]')).length)", [])
     ck("every layer's first section offers its parts, the functions' fewer (§404.1)",
        bool(want) and got == [want.get("top")] * 3 + [want.get("fn")], [got, want])
     ck("…the functions' level offers no Brief, Themes, Pillars, Capabilities or Values chip",
        safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
-    ck("…offers its Description and no North Star, with its SWOT a section switch (§436)",
-       safe(pg, "()=>!!document.querySelector('[data-stcomp=\"fn|desc\"]') && !document.querySelector('[data-stcomp=\"fn|keyobj\"]') && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
+    ck("…offers its Description AND its key objectives, with its SWOT a section switch (§436, §437)",
+       safe(pg, "()=>!!document.querySelector('[data-stcomp=\"fn|desc\"]') && !!document.querySelector('[data-stcomp=\"fn|keyobj\"]') && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
     ck("the capabilities' first section offers the brief and the North Star, as the directions do (§436)",
        safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')") == "brief,keyobj",
        safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')"))

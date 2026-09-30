@@ -58977,3 +58977,33 @@ Islam, on Client set-up of a client holding a plan: *"for the directions I mean 
 **A function's first section is a Description, off until ticked.** A new component key `desc` (`SMPRules.FN_DESC`), offered to functions only, rather than letting `brief` back in — every stored functions level already lists `brief`, so reusing it would have switched a description on for every existing client. `descPart(target)` answers which part a first section's description is (`desc` for a function, `brief` otherwise) and the function Overview's "What it is" card and tab gate ask it. **Key objectives leave the functions' chips on the Structure step and deliberately NOT the rule**: a projects or pillars function's key objectives feed its Performance headline (`fnMemberScores` → `capKOScore`), and removing them from the rule broke two checks and would have blanked that number — put to Islam as a question. **A capability's first section offers the description and the North Star**, like a direction's.
 
 `checks/setup-live-rows.py` new, on the worked example (it holds a plan, so the frozen state is the one it opens in): every newly live control PRESSED and read back off the graph, the warning asserted before confirmation, switching back asserted to restore what was held, and the list asserted still frozen. Falsified from the SOURCES two ways, **6 red each**, each break reddening its own assertions. `checks/structure.py` three assertions rewritten, never loosened (§218). Neighbouring checks green.
+
+
+## §437 — a supporting function's key objectives are a tick on its first section (2026-09-30)
+
+Islam, of §436 taking them off the Structure step: *"keep them in the first
+section as an option."* **THE TICK COMES BACK ON THE FUNCTIONS' ROW** of Client
+set-up › Structure, beside §436's Description, on by default — every stored
+functions level already lists `keyobj` (Raya's migration 019 wrote it) and the
+unsaid fallback includes it, so no client's pages move. **OFF HIDES AND STOPS
+COUNTING, NEVER ONLY HIDES**: §436 declined to hide them precisely because an
+invisible list would go on deciding a visible number, so `fnKoCounted()` is one
+answer read by the scores and the reporting — `capKOScore` and `unitObjectives`
+answer nothing for a function whose objectives are off, the Performance headline
+falls to the function's projects (`capPerf`, the fallback that already existed)
+or its pillars (`unitPillars`), and neither `reportItems` nor `fnReportItems`
+asks for them, so Submit is not held by them. Nothing is deleted; ticking it
+again brings them back as they were. **A function planning in objectives and
+actions is never reached** — there the objectives ARE the plan (§430) — and
+anything that is not a function answers true, so no unit, capability or group
+moves. The Overview already asked `compOn(t, "keyobj")` (§404), so the display
+half needed nothing. `checks/setup-live-rows.py` §5 asserts both ends (on:
+asked and scored; off: not asked, headline equals the projects' own figure,
+rows still stored; a unit untouched), red 1 / 1 from the sources — the rule
+forced true, and the tick filtered off the step again. No server rule, no
+migration.
+
+**AND THE ARCHIVED PLAN, ANSWERED IN WORDS**: a plan hidden by changing how a
+function or capability plans comes back by switching the row back (§405, §436);
+one archived by Clear plan, an upload's replace or a pre-§405 format switch is
+restored from Setup › Import & storage › Archived plans (§49.2, §232).

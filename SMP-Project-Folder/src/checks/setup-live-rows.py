@@ -153,6 +153,25 @@ with sync_playwright() as p:
     ck("the description is what a function's Overview reads",
        ev(pg, "()=>SMPRules.descPart('fn:x')==='desc' && SMPRules.descPart('mobile')==='brief'", False))
 
+    print("\n§5 · a function's key objectives are a tick (§437)")
+    ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
+    step(pg, "structure")
+    tick = ev(pg, "()=>{var b=document.querySelector('.csetup [data-stcomp=\"fn|keyobj\"]'); return b ? b.getAttribute('aria-pressed') : null}")
+    ck("the functions' first section offers a Key objectives tick, on by default", tick == "true", tick)
+    # the rule, both ends: on by default, off stops counting, a unit untouched
+    pf = ev(pg, "()=>FUNCTION_KEYS.filter(k=>fnOwnsProjects(k) && (FUNCTIONS[k].keyObjectives||[]).some(m=>measureScore(m)!=null))[0]")
+    ck("(fixture) a projects function with scored objectives", bool(pf), pf)
+    on0 = ev(pg, "()=>({ko:fnKoCounted('fn:%s'), asked:fnReportItems('%s').filter(x=>x.kind==='objective').length, perf:fnMemberScores('%s').perf, ko2:capKOScore(fnHolders('%s')[0])})" % (pf, pf, pf, pf), {})
+    ck("on by default: counted, asked and scored", on0.get("ko") is True and on0.get("asked", 0) > 0 and on0.get("perf") == on0.get("ko2"), on0)
+    ev(pg, "()=>{ var s=GROUP.structure=GROUP.structure||{}; s.over=s.over||{}; s.over['fn:%s']={keyobj:false}; }" % pf)
+    off = ev(pg, "()=>({ko:fnKoCounted('fn:%s'), asked:fnReportItems('%s').filter(x=>x.kind==='objective').length, perf:fnMemberScores('%s').perf, cap:capPerf(fnHolders('%s')[0])})" % (pf, pf, pf, pf), {})
+    ck("off: not asked, and the headline is the projects' own figure",
+       off.get("ko") is False and off.get("asked") == 0 and off.get("perf") == off.get("cap"), off)
+    ck("off: the objectives are still stored", ev(pg, "()=>(FUNCTIONS[%r].keyObjectives||[]).length" % pf, 0) > 0)
+    ck("a unit is never reached", ev(pg, "()=>fnKoCounted(%r)" % u0) is True)
+    ev(pg, "()=>{ delete GROUP.structure.over['fn:%s']; }" % pf)
+    ck("ticked back: counted again", ev(pg, "()=>fnKoCounted('fn:%s')" % pf) is True)
+
     ck("no page errors", not errs, errs[:4])
     b.close()
 

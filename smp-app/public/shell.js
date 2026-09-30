@@ -6892,6 +6892,23 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §437 (Islam, 2026-09-30: *"keep them in the first section as an option"*):
+   A SUPPORTING FUNCTION'S KEY OBJECTIVES ARE A TICK ON ITS FIRST SECTION, and
+   when it is off they are hidden AND stop counting — no longer asked for on
+   Reporting and no longer the Performance headline, which falls to the
+   function's projects or pillars — because an invisible list deciding a
+   visible number is the fault §436 declined to ship. Nothing is deleted;
+   ticking it again brings them back as they were. A function that plans in
+   objectives and actions is never reached: there they are the plan (§430).
+   Anything that is not a function answers true, so no unit, capability or
+   group moves. */
+function fnKoCounted(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return true;
+  var f = FUNCTIONS[t.slice(3)];
+  if (f && fnPlansInObjectives(f)) return true;
+  return compOn(t, "keyobj");
+}
 /* §413: one of the Plan details switches (off unless explicitly on).
    §420: asked about a SUBJECT, because each layer has its own switches —
    `x` may be a target string, a unit or a unit-like view, or a pillar or
@@ -10873,6 +10890,8 @@ function holderById(id){
    project's real story rather than a defect. */
 
 function capKOScore(c){
+  /* §437: a function's own objectives, switched off, score nothing. */
+  if (c && c.own && !fnKoCounted(c.id)) return null;
   /* Pending confirmation leaves the average (§145), as everywhere. */
   var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
   if (!list.length) return null;
@@ -12202,7 +12221,8 @@ function reportItems(u){
      and the walk all read it, and deriving it a second time in the renderer is
      how a chip comes to open a pillar the count was never about. */
   var koPlace = { key:"ko", label:L("keyobj","bu") };
-  SMPRules.shown(u.keyObjectives).forEach(function(m){
+  /* §437: a function whose objectives are switched off is not asked for them. */
+  (fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives) : []).forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"",
                place:koPlace });
   });
@@ -12377,7 +12397,7 @@ function fnReportItems(subject){
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    SMPRules.shown(c.keyObjectives).forEach(function(m){
+    (!c.own || fnKoCounted(c.id) ? SMPRules.shown(c.keyObjectives) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
                  place:koPlace });
     });
@@ -17292,7 +17312,11 @@ function activeUnits(){ return UNIT_KEYS.filter(function(k){ return UNITS[k].act
 
 /* A unit's headline is its Key Objectives, optionally weighted. Equal weight
    is the default nobody has to defend. */
-function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+function unitObjectives(u){
+  /* §437: a pillars function's objectives, switched off, score nothing. */
+  if (u && !fnKoCounted(u.ukey)) return null;
+  return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]);
+}
 
 /* The group's own scorecard, on the same footing as a unit's: computed from
    the objectives that are actually there, never read from a stored number
@@ -17452,7 +17476,10 @@ function fnMemberScores(fk){
   }
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
-    return u ? { perf: unitObjectives(u), exec: unitRatio(u) } : { perf:null, exec:null };
+    /* §437: with its objectives off the headline is its pillars' own figure. */
+    if (!u) return { perf:null, exec:null };
+    var uo = unitObjectives(u);
+    return { perf: uo != null || fnKoCounted(u.ukey) ? uo : unitPillars(u), exec: unitRatio(u) };
   }
   if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
   var h = fnHolders(fk)[0];
@@ -57608,8 +57635,9 @@ var CLIENTSETUP = (function () {
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
   /* §436: WHICH FIRST-SECTION PARTS A LAYER'S CARD OFFERS. A function's
      Overview is its description (Islam: *"an overview with a description
-     if needed"*) — its key objectives are the objectives-and-actions way of
-     planning, so the step offers no tick for them. A capability's is what the directions'
+     if needed"*), and its key objectives come back as a tick of their own
+     (§437, *"keep them in the first section as an option"*): on unless the
+     office takes it off, and off they stop counting too. A capability's is what the directions'
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
@@ -57618,7 +57646,7 @@ var CLIENTSETUP = (function () {
     if (k === "cap") return ["brief", "keyobj"];
     var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
-      return SMPRules.compOffered(tgt, c) && !(k === "fn" && c === "keyobj"); });
+      return SMPRules.compOffered(tgt, c); });
   }
   var WAY_LABEL = { pillars:"pillars", projects:"projects", objectives:"objectives and actions" };
   function structLevel(box, lv, k){

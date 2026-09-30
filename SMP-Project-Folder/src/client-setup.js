@@ -1610,8 +1610,9 @@ var CLIENTSETUP = (function () {
     project:"Project", deliverable:"Deliverable", outcome:"Outcome", milestone:"Milestone", action:"Action" };
   /* §436: WHICH FIRST-SECTION PARTS A LAYER'S CARD OFFERS. A function's
      Overview is its description (Islam: *"an overview with a description
-     if needed"*) — its key objectives are the objectives-and-actions way of
-     planning, so the step offers no tick for them. A capability's is what the directions'
+     if needed"*), and its key objectives come back as a tick of their own
+     (§437, *"keep them in the first section as an option"*): on unless the
+     office takes it off, and off they stop counting too. A capability's is what the directions'
      is made of that a capability page can draw: the brief ("What it is",
      with its definition) and the North Star (Islam: *"add the description
      in the first section like the directions"*). Every other layer offers
@@ -1620,7 +1621,7 @@ var CLIENTSETUP = (function () {
     if (k === "cap") return ["brief", "keyobj"];
     var tgt = { top:"group", mid:"co:", bu:"u:", fn:"fn:" }[k] || "group";
     return SMPRules.SEC_FOUND_PARTS.filter(function (c) {
-      return SMPRules.compOffered(tgt, c) && !(k === "fn" && c === "keyobj"); });
+      return SMPRules.compOffered(tgt, c); });
   }
   var WAY_LABEL = { pillars:"pillars", projects:"projects", objectives:"objectives and actions" };
   function structLevel(box, lv, k){

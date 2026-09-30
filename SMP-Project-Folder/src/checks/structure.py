@@ -12,7 +12,7 @@ satisfies "off hides the SWOT" perfectly. The controls are PRESSED (§70) and
 the stored graph read back (§96). The state is MADE (§255): the worked example
 stores no structure. SMP_BUILT points it at another build.
 """
-import os, sys
+import json, os, sys
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -205,10 +205,15 @@ with sync_playwright() as p:
     ck("the sections sit side by side on a wide window",
        safe(pg, "()=>{var s=[...document.querySelector('.stsecs').children].map(x=>Math.round(x.getBoundingClientRect().top)); return new Set(s).size===1}") is True)
     ck("nothing is stored until something is pressed", safe(pg, "()=>!('structure' in GROUP)") is True)
+    # §428.2: what the top card SHOWS unsaid is what the press stores for it —
+    # the top layer's own SWOT and Plan start off, so it is not all nine.
+    topShown = safe(pg, "()=>SMPRules.levelComponents(GROUP,'top').join(',')", "")
+    ck("§428.2: unsaid, the top level carries neither its own SWOT nor its own Plan",
+       ",swot" not in ","+topShown and ",pillar" not in ","+topShown and len(topShown.split(",")) == 7, topShown)
     ck("pressing the business units' SWOT off", press(pg, '[data-stsec="bu|swot"] button:nth-child(2)'))
     st = safe(pg, "()=>JSON.stringify(GROUP.structure)", "") or ""
     ck("…materialises the structure with SWOT off at that level only",
-       safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.length===9 && GROUP.structure.top.temple===true") is True, st)
+       safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.join(',')===" + json.dumps(topShown) + " && GROUP.structure.top.temple===true") is True, st)
     ck("…and the section says it is hidden rather than drawing its boxes",
        safe(pg, "()=>{var s=document.querySelectorAll('.stcard')[2].querySelectorAll('.stsec')[1]; return !!s.querySelector('.sthid') && !s.querySelector('.stquad')}") is True)
     # §418.1: a key this step does not draw survives a press (another

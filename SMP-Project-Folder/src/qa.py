@@ -1267,7 +1267,9 @@ with sync_playwright() as p:
     go_top(pg, "group")
     # §428: the group's Foundation is a SECTION of its own Strategy tab now,
     # as a unit's is — the old tab is gone (§214.3, rewritten not loosened).
-    pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+    # §428.2: pressed by its KEY, not its word — until the office switches
+    # the group's own SWOT or Plan on, the tab carries the Foundation's name.
+    pg.click('#subtabs button[data-s="strategy"]'); pg.wait_for_timeout(250)
     fnd = pg.query_selector('#secrow-in [data-sub2="found"]')
     if fnd: fnd.click(); pg.wait_for_timeout(350)
     # The absence below only means something on a page that DRAWS the

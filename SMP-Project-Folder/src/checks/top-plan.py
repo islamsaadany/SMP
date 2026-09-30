@@ -46,6 +46,20 @@ with sync_playwright() as p:
     tabs = lambda: safe(pg, "()=>allowed(SUBS.group, 'group').map(d=>d.k)", []) or []
     gsecs = lambda: safe(pg, "()=>allowed(SUBS.group[0].sections(), 'group').map(d=>d.k)", []) or []
 
+    # ── 0. §428.2: unsaid, the group page is what it was before §428 ──
+    # Islam: "what people might see different for the group should start in
+    # the structuring page off so they shouldn't see it". BOTH ENDS: with the
+    # Structure step never saved the tab is Foundation, AFTER Performance, and
+    # holds Foundation alone; section 1 then MAKES the other state (§255).
+    u0 = tabs()
+    ck("§428.2: unsaid, the tabs are the ones before §428, in that order",
+       u0[:5] == ["performance", "strategy", "focus", "temple", "weighting"], u0)
+    ck("…the tab is called by the Foundation's own name, not Strategy",
+       safe(pg, "()=>allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].label===SMPRules.foundTitle(GROUP,'group')") is True)
+    ck("…and holds Foundation alone, so no section row is drawn",
+       safe(pg, "()=>allowed(allowed(SUBS.group,'group').filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k).join(',')") == "found")
+    safe(pg, "()=>{GROUP.structure={top:{on:SMPRules.STRUCT_COMPONENTS.slice(),temple:true}};}")
+
     # ── 1. Nothing stored: the tabs, and nothing to report ────────────
     t0 = tabs()
     ck("the top layer's tabs lead with Strategy", t0[:1] == ["strategy"], t0)

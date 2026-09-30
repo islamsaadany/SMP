@@ -3962,7 +3962,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      was written there is still stored and comes back when it is ticked.
      The same list is what the Structure step shows and materialises on its
      first press, so the step and the pages cannot disagree (§53.5). */
-  var STRUCT_UNSAID = { fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }) };
+  /* §428.2 — AND THE TOP LAYER'S OWN SWOT AND PLAN START OFF (Islam,
+     2026-09-30: *"what people might see different for the group should
+     start in the structuring page off so they shouldn't see it"*). §428
+     drew them as ON for every client that never saved the top card, which
+     put two empty sections on Raya's group page that nobody there chose.
+     Same shape as the functions' S&W: off until the office ticks them on
+     the Structure step. Nothing else at the top read "pillar" or "swot"
+     before §428, so no page a client already sees moves. */
+  var STRUCT_UNSAID = {
+    top: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot" && c !== "pillar"; }),
+    fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; })
+  };
   function levelComponents(group, level) {
     level = effLevel(group, level);
     var s = structureOf(group), l = s && s[level];
@@ -59699,6 +59710,26 @@ var SYNC = (function () {
   var MY_TAB = { k:"mylines", ac:"c_mylines", label:"My reporting",
                  when: myLinesHere, render: function(){ return renderMyLines(); } };
 
+  /* §428.2 — THE GROUP'S STRATEGY TAB. `lead` is its §428 place, first
+     like a unit's; the other is the place the Foundation tab held before
+     §428. Exactly one is drawn: the tab leads, and is called Strategy, only
+     once the top layer's own SWOT or Plan is switched on. */
+  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")); }
+  function topStrategyTab(lead){
+    return { k:"strategy", ac:"g_found",
+      get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
+      when: function(){ return topExtrasOn() === lead; },
+      sections: function(){
+          return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
+                    when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
+                  { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
+                    render: function(){ return renderUnitAnalysis(topAsUnit()); },
+                    when: function(){ return compOn("group", "swot"); } },
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
+                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
+      } };
+  }
   var SUBS = {
     /* A supporting function is the destination; the capabilities it carries are
        named inside its pages. */
@@ -59853,17 +59884,14 @@ var SYNC = (function () {
          The key stays `strategy`, which is what makes the section line, its
          pen and the missing bar the unit's own (§53.5). Each section is
          offered while the Structure step carries it (§404, §418, §422). */
-      { k:"strategy", ac:"g_found", label:"Strategy", sections: function(){
-          return [{ k:"found", ac:"g_found", label:SMPRules.foundTitle(GROUP, "group"), render:renderGroupFoundation,
-                    when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
-                  { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
-                    render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
-        } },
+      /* §428.2: while Foundation is all the tab holds (the top layer's SWOT
+         and Plan start off, Islam 2026-09-30), the tab keeps the name AND
+         the place it had before §428 — after Performance — so a client who
+         switched neither on sees the group page exactly as it was. One def,
+         drawn in one of two places (topStrategyTab, beside SUBS). */
+      topStrategyTab(true),
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
+      topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
@@ -62412,6 +62440,12 @@ var SYNC = (function () {
       document.getElementById("secrow").hidden = true;
       return;
     }
+    /* §428.2: THE GROUP'S OLD FOUNDATION ADDRESS STILL OPENS THE FOUNDATION.
+       Before §428 it was a tab keyed `foundation`, so a bookmark or a
+       remembered place can still name it; it is the Strategy tab's first
+       section now, and falling back to the first tab would land on
+       Performance, which is not what was asked for (a bookmark is a door). */
+    if (current === "group" && currentSub === "foundation") { currentSub = "strategy"; CURSEC.strategy = "found"; }
     if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
 
     /* SETUP HAS NO TAB ROW. Its ten pages are the rail's job now (§46.1), and

@@ -58838,3 +58838,24 @@ now walks Strategy › Foundation, with the objectives asserted DRAWN before
 the toggle is asserted absent (§113.8); full sweep ERRORS none. `cycle-edit`
 and `render-fail` were red only under the
 parallel run's load and are green alone.
+
+**§428.2 — the top layer's own SWOT and Plan start OFF (2026-09-30).** Islam,
+told what a client like Raya would see differently: *"what people might see
+different for the group should start in the structuring page off so they
+shouldn't see it."* §428 read an unsaid top card as carrying everything, so
+every client that never saved the Structure step gained two empty sections on
+the group page and the Foundation tab was renamed Strategy and moved first.
+`STRUCT_UNSAID.top` now drops `swot` and `pillar` — the §423 shape the
+functions' S&W already has — so the Structure step shows both unticked and
+the pages follow it. **And the tab goes back to what it was, name AND place**:
+one def drawn in one of two positions (`topStrategyTab`), leading and called
+Strategy only once the office ticks either on, otherwise after Performance and
+called by the Foundation's own title. **A bookmark is a door**: the group's old
+`foundation` address is mapped onto the Strategy tab's Foundation section, or
+it would fall back to Performance — found by `foundation-objectives.py` going
+red. Nothing else at the top read those two components before §428, so no page
+a client already sees moves; the Capabilities card on Structure is the one
+visible difference left, and only the office opens that step.
+`checks/top-plan.py` §0 asserts the unsaid page and then MAKES the other state
+(§255) — red 3 with the old default; `checks/structure.py` asserts the stored
+top card equals what the step showed, rewritten never loosened (§218).

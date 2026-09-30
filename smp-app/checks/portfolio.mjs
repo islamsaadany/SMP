@@ -43,7 +43,8 @@
 import pg from "pg";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
-import { MODULE_DEF } from "../lib/modules.ts";
+import { MODULE_DEF, MODULES } from "../lib/modules.ts";
+import { serverFor } from "../modules/registry.ts";
 import {
   ROLES, ROLE_WORD, ROLE_DEFAULT, isRole, ACT_STATUSES, ACT_WORD, isActStatus,
   SUB_STATUSES, isSubStatus, CADENCES, isCadence, inOffice,
@@ -78,13 +79,25 @@ check("a sub-activity has THREE — it is never signed off", SUB_STATUSES.join("
 check("a near miss is not a status", isActStatus("completed") && !isActStatus("Completed") && !isActStatus("signed"));
 check("the rhythm is weekly or monthly, and never the reporting cycle", CADENCES.join(",") === "weekly,monthly" && isCadence("weekly") && !isCadence("quarterly"));
 check("the office is the two seats and nothing else", inOffice("super") && inOffice("smoteam") && !inOffice("none") && !inOffice(null) && !inOffice(""));
-/* THE DOOR IS STILL SHUT, asserted rather than assumed: three screens are
-   drawn and awaiting sign-off, so a module marked built with nothing behind
-   it would be the door onto the wrong room the flag exists to stop (§61). */
-check("portfolio is a reserved word and NOT built (§4, rule 1c unpaid on three screens)",
-  MODULE_DEF.portfolio && MODULE_DEF.portfolio.built === false, JSON.stringify(MODULE_DEF.portfolio));
-check("...while a module that IS built says so, or the assertion above means nothing (§113.8)",
-  MODULE_DEF.tracker && MODULE_DEF.tracker.built === true);
+/* THE DOOR, ASSERTED RATHER THAN ASSUMED — and REWRITTEN on 2026-09-30, never
+   loosened (§218, §214.3). It read *portfolio is a reserved word and NOT
+   built, rule 1c unpaid on three screens*, which was true for thirteen days
+   and stopped being true the morning every screen was signed off and the
+   first slice was built. A check that argues with a decision is one somebody
+   deletes; what SURVIVES the module being built is the rule underneath it —
+   **the flag and the room agree**. A module marked built with nothing to draw
+   is the door onto the wrong room the flag exists to stop (§61), and one
+   marked unbuilt with a server is the same fault wearing the other face.
+   `checks/modules.mjs` asserts the pair across every module; this asserts it
+   of the one this spec is about, so a Portfolio switched off with its own
+   server still sitting there turns THIS file red. */
+check("portfolio is built, and its own server is what a built module must have (§4, §61)",
+  MODULE_DEF.portfolio && MODULE_DEF.portfolio.built === true && typeof serverFor("portfolio") === "function",
+  JSON.stringify(MODULE_DEF.portfolio) + " server=" + typeof serverFor("portfolio"));
+check("...while a module that is NOT built has none, or the assertion above means nothing (§113.8)",
+  MODULES.filter((k) => !MODULE_DEF[k].built).every((k) => serverFor(k) === null) &&
+  MODULES.some((k) => !MODULE_DEF[k].built),
+  MODULES.filter((k) => !MODULE_DEF[k].built).join(", ") || "none left unbuilt");
 
 /* ══ §2 · who gets in ════════════════════════════════════════════════ */
 section("§2 · who gets in (§6), both ends of every rule");

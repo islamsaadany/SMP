@@ -5536,24 +5536,47 @@ re-measured for the sake of a number.
 
 ## Portfolio — the delivery plan, per client (spec 060)
 
-**No longer waiting on Islam. Every screen is signed off** — the project team,
-the charter and the plan on 17/18 September, and the landing, Progress and
-Analytics on the 30th (*"ok for the landing"*, then *"ok for the progress and
-analytics too"*). Nothing is built and no source has moved; this is a spec and
-six agreed drawings.
+**Building has started, on his word** (*"write it into the spec first, then
+start building"*). **Every screen is signed off** — the project team, the
+charter and the plan on 17/18 September, and the landing, Progress and Analytics
+on the 30th (*"ok for the landing"*, then *"ok for the progress and analytics
+too"*) — so the mockup-first rule is paid in full rather than set aside, and
+nothing is waiting on a decision of his.
 
-**What that changes, said plainly: the mockup-first rule is paid in full.** For
-six drawings this page has said nothing visual may be built until each screen
-is drawn and agreed, and that is now satisfied rather than set aside. So what
-stops a build is no longer a decision of his.
+**Portfolio is on the platform now, and two of its six screens work.** It has
+its own entry on a client's card, its own address, and its own line in the
+switcher, and what opens behind them is **the landing** — every project this
+client has, with how far along each one is, whether it is late, what is waiting
+on somebody, and when anybody next looks at it — and **a project's charter**,
+which opens when you press a project's name and is where its aim, its window
+and its sponsor are written. The plan, Progress and Analytics are next, and the
+product **says so rather than pretending**: a project with no plan behind it
+reads *No plan yet* on the landing, which is the state Islam signed off for
+exactly that case.
 
-**What stops it is that this repository has never seen the code it is porting
-from.** Both audits the spec leans on were written by sessions that had that
-repository attached, and **nothing in it has ever been run** — no database, no
-settings file and not one real project's rows — so there is not a single real
-rendered figure anywhere in this spec, and nothing is known about what a real
-client's plan looks like on any of these screens. Getting sight of it is the
-next thing, and it is not a drawing.
+**The frame cost almost nothing, which is the thing worth noticing.** Everything
+outside Portfolio's own folder comes to two lines — the module was already a
+reserved word, so the address, the card, the on/off switch, the door, the seats
+and the boundary that keeps one client's data away from another's all arrived
+working. That is the promise the modules groundwork made, paid for the first
+time by somebody who did not write it.
+
+**Who sees which project is enforced where it cannot be got round.** A member of
+the office sees every project on the client; anybody else sees only the projects
+that name them, and the narrowing is in the question put to the database rather
+than a tidy-up afterwards — so a project you cannot see is not merely absent
+from your list, its address answers exactly as an address for a project that
+does not exist would. You cannot find out what a client has by guessing.
+
+**And the reference code has been read at last.** For thirteen days this page
+said the repository had never seen the code it is porting from; Islam supplied
+it on the 30th and the whole read-through is in the spec's §11. Six screens
+against the code behind them, ten places where they disagree, **and none of the
+ten invalidates a signed-off screen** — three are instructions for whoever moves
+the old data across, two confirm that corrections already made were right, and
+two are decisions his. What is still genuinely unknown is what a real client's
+plan looks like on these screens, because there is no real plan data in that
+repository either — that is now certain rather than assumed.
 
 **The landing gained one section at his word before he signed it off**
 (*"yes add the commitments section to the landing"*): **what is owed next**,
@@ -5604,12 +5627,83 @@ measured across all four in both palettes (**0 failures**, with the probe proved
 able to fail first), and the table's fit was measured at seven widths from 1600
 to 768 with nothing scrolling sideways.
 
-**Next, and it is work rather than a decision now**: sight of the reference
-code, then a build. The spec's §10 lists what else is still open and none of it
-blocks — a Portfolio project pointing at a Strategy one, the workbook, the
-notice, the budget question and four choices about the landing (the order at
-twenty projects, where a finished project goes, whether the top strip counts
-what is yours, and making a commitment row openable). None has been started.
+**Two faults were found by running it rather than by reading it, and both were
+mine.** The landing told a reader *No projects yet* when what had actually
+happened was that it could not read the list — which on that page would say a
+client has no delivery work at all; it says *Not read just now* now, with a dash
+where the counts go. And a mistyped address inside Portfolio quietly drew the
+landing instead of sending you back to it, so a wrong address rendered a page
+that looked right. Both were caught because the modules check drives every
+module's server rather than reading a table.
+
+**Next**: the plan, because Progress and Analytics both read it. The spec's §10
+lists what else is still open and none of it blocks — a Portfolio project
+pointing at a Strategy one, the workbook, the notice, the budget question and
+four choices about the landing (the order at twenty projects, where a finished
+project goes, whether the top strip counts what is yours, and making a
+commitment row openable). None has been started.
+
+---
+
+## Portfolio — the module serves itself (2026-09-30, spec 060 §12)
+
+**Islam: *"write it into the spec first, then start building."*** The writing is
+the spec's §11 — the reference code read against all six drawings. This is the
+first slice of the building: **the landing and a project's charter**.
+
+**What can be opened now.** `Portfolio` appears on a client's card like any other
+module, can be switched on there, and behind it are two working pages. The
+landing lists every project this client has and answers one question four ways
+for each — how far along, whether it is late, what is waiting on somebody, and
+when anybody next looks at it — with a section underneath it for **what is owed
+next** across all of them. Pressing a project's name opens its **charter**: its
+aim, the window it runs in, who sponsors it, and who is on it.
+
+**Nothing on that list is a stored status.** Every figure is worked out from the
+plan underneath the project, so the landing cannot disagree with the pages behind
+it. A project with a charter and no plan says *No plan yet* rather than printing
+0%, and one with a plan nobody has started says 0% — which is the difference, and
+was signed off as such.
+
+**The plan, Progress and Analytics are not built, and the product says so.** That
+is deliberate: a page that quietly shows nothing looks exactly like one that is
+broken.
+
+**Adding the module to the platform took two lines outside its own folder.** The
+word was already reserved, so the address, the client's card, the on/off switch,
+the door, the seats and the boundary between clients all worked the moment the
+flag was flipped. The claim the modules groundwork made — that a module is a
+folder and an entry — has now been paid by somebody who did not write it.
+
+**Who sees what is enforced in the question put to the database.** The office
+sees every project; anybody else sees the projects that name them, and a project
+you cannot see answers exactly as one that does not exist — so the address bar
+cannot be used to find out what a client has.
+
+**Two faults were found by running it, and both were mine.** The landing said
+*No projects yet* when the truth was that it could not read the list, which on
+that page would report a client as having no delivery work at all; it says
+*Not read just now* now, with a dash where each count goes. And a wrong address
+inside Portfolio drew the landing instead of sending you back to it, so a typo
+rendered a page that looked correct. Both were caught because the platform's
+module check presses each module's server rather than reading a list of them.
+
+**And two checks were holding something this build moved.** One asserted that
+Portfolio was *not* built — true until the moment it was — and one named
+Portfolio by hand in a rule about modules that are not built yet. Both were
+rewritten to the thing that stays true rather than loosened, and both were proved
+able to fail before the green run was believed.
+
+**The container could not prove anything until it was made able to.** The
+typecheck reported 498 errors and the checks could not find the database: no
+dependencies installed and no database running. Both were set up rather than
+worked around, because a slice nothing can prove is a slice nobody can trust.
+Verified: the new check 36 of 36, red under each of its four deliberate breaks;
+the rules check still 121 of 121 and still red ten ways; the modules check 112 of
+112; Insights, Meeting Notes and the generated-files guard all clear; the app
+compiles. The Internal Tracker's four failures are **not this work's** — the same
+four appear with everything stashed, and they are the stale dates the 20 September
+entry already records, now four rather than one because the clock has moved on.
 
 ---
 

@@ -1,16 +1,18 @@
 # 056 · Portfolio — the delivery plan, per client
 
-**Status:** **the rules and the tables are built; no screen is.** §5's tree,
-team and words are in `db/schema.sql` and `db/migrations/015-portfolio.sql`,
+**Status:** **the rules, the tables, and the first screens are built.** §5's
+tree, team and words are in `db/schema.sql` and `db/migrations/015-portfolio.sql`,
 and §3's six rules, §6's reach and §9.8's roll-up are in
 `smp-app/lib/portfolio.ts`, proved by `checks/portfolio.mjs` (121/0, red ten
 ways) — which is the slice §8 names in its own words, *pure functions where
 they can be, so the sign-off, the derived dates, the computed progress, the
 cascade and the renumbering are provable without a browser*. **`portfolio` is
-still `built: false`** and there is no page, no address and no switcher entry
-— not because a drawing is owed, which as of 2026-09-30 none is, but because
-nothing visual has been built at all; the check asserts that flag rather than
-assuming it (§375). This is the
+`built: true` since 2026-09-30** and the module serves itself: **the landing
+(§9.13) and a project's charter (§5.1)** — §12 is that slice, with
+`checks/portfolio-module.mjs` at 36/0, red four ways. The plan, Progress and
+Analytics are next and are **said rather than left to be discovered** (§54.5):
+a project opens on its charter and its landing row reads *No plan yet*, which
+is the landing's own signed-off empty state and not a placeholder. This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Every screen is drawn and
@@ -33,9 +35,11 @@ spec first, then start building"*.
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
 the on/off drawer, the door and `withTenant` — it inherits without touching.
-`portfolio` is **already the reserved word** in `MODULES` and `MODULE_DEF`
-(`built: false`), so the address, the switcher and `isModule()` need no edit to
-make room for it; the flag flips when there is a page behind it.
+`portfolio` was **already the reserved word** in `MODULES` and `MODULE_DEF`,
+so the address, the switcher and `isModule()` needed no edit to make room for
+it — the whole of §12's frame cost one flag and one line in
+`modules/registry.ts`, which is spec 046 §4.5's claim paid rather than
+asserted.
 
 **Not the Internal Tracker (spec 054).** That is Forefront's weekly to-do list
 about one client, opened by the seat, and it stays exactly as it is. This is the
@@ -1946,3 +1950,133 @@ client migrated (§11.2), and that three of the six screens have no reference
 behaviour behind them (§11.1). Three are instructions for whoever writes the
 migration (§11.2, §11.3, §11.7). Two are confirmations that the design's own
 corrections were right (§11.5, §11.6).
+
+---
+
+## 12 · Built — the module serves itself, 2026-09-30
+
+Islam: *"write it into the spec first, then start building."* §11 is the
+writing; this is the first slice of the building. **What is here is the frame
+and two screens** — the landing (§9.13, with §9.13b's commitments section) and
+a project's charter (§5.1) — and what is not is said in the server's own
+header rather than left to be discovered (§54.5).
+
+### §12.1 · The frame cost one flag and one line
+
+Spec 046 §4.5 claims a module is *a folder and an entry*, and this is the first
+time that claim has been paid by somebody who did not write it.
+`portfolio` was already the reserved word, so the address, the switcher, the
+row on the client's card, the on/off drawer, the door, the seat and
+`withTenant` all arrived working: the entire edit outside the module's own
+folder is `built: false` → `true` in `lib/modules.ts` and `portfolio` added to
+`SERVERS` in `modules/registry.ts`. **Both of the registry's own breaks keep
+it**, so `no-server` and `wrong-server` go on falsifying what they were written
+for rather than incidentally falsifying this.
+
+### §12.2 · The queries live in their own file, so the rules stay pure
+
+`lib/portfolio.ts` is what `checks/portfolio.mjs` asks with **no database and
+no browser**, which is §8's own promise and the reason that check is 121
+assertions long. A query in it would have ended that. So
+`lib/portfolio-io.ts` is new and holds the six reads and writes —
+`listProjects`, `oneProject`, `addProject`, `setCharter`, `roleOn`, `planRows`
+— and **the rules file gained exactly one line**: `milestone?: boolean` on
+`Row`, because §5's commitment mark changes no arithmetic there and decides
+only which rows the landing reads (§9.13b) and what Analytics counts as a
+commitment met (§9.12).
+
+`planRows()` is **one query, not three**: a `UNION ALL` over phases, work
+packages and activities ordered by position at each level, returning the flat
+ordered array `_derive.js` already reads and §5.2 already argued for — *the
+plan on the screen and the plan on the server cannot arrive at two answers for
+one project*.
+
+### §12.3 · Who sees what is in the WHERE, never in a filter afterwards
+
+§6 says a seat on the client reaches every project and anybody else reaches the
+projects that name them. That narrowing is in `listProjects`' own `JOIN
+portfolio_members … WHERE person_key = $1`, and **a project this viewer cannot
+see answers the same *not found* as one that does not exist** — so the address
+cannot be used to discover what a client holds. §355's lesson, one module
+along: *a report kept off a list and still downloadable is no rule at all.*
+Asserted at both ends (§94.2) — B sees none of A's, A sees its own — and
+falsified: `see-everything` drops the join and goes **2 red**.
+
+### §12.4 · A read that failed is not an empty list
+
+Found by `checks/modules.mjs` **crashing**, not by reading: that file drives
+every module's server with a deliberately fake tenant id, and `withTenant`
+refuses one, so my landing threw where the tracker's degrades. The fix is not
+a try/catch that swallows: `seen` is `Seen[] | null` and **null is *it could
+not be read***, so the strip's counts draw an em-dash and the page says
+*Not read just now* rather than *No projects yet*. §35, §93 and §231.4 in one
+line — *counting an error as absence reports everybody as having none*, and on
+a landing that would tell a consultant their client has no delivery work.
+
+### §12.5 · A word it does not draw is a redirect, never the landing
+
+Also found by `checks/modules.mjs` going red: my server fell through to the
+landing for any address it did not recognise, and that check asserts a module
+answers **302** there — which is what every unknown word inside a client
+already gets (`lib/modules.ts`) and what stops a mistyped address rendering a
+page that looks right.
+
+### §12.6 · One spelling of the em-dash
+
+My own check contradicted itself: the strip wrote the character and the owe
+cell wrote the entity, and `esc()` escapes only `& < > " '`, so both render
+identically and only one can be asserted. Fixing the first broke the second.
+**The character, everywhere**, because it survives `esc()` — with a comment
+saying why, or the next person writes the entity again.
+
+### §12.7 · A break that cannot falsify is not a break
+
+The first falsification of the *No plan yet* state was a CSS
+`visibility:hidden`, and it went **green** — because every assertion in that
+section is about the document's words, and a rule that hides them changes
+none. §54.5: *a falsification that passes is indistinguishable from a working
+guard.* Replaced with `no-plan-yet`, which makes the cell print **0%** — the
+actual fault, a project with no plan reading as one that has done nothing —
+and it is 1 red.
+
+### §12.8 · Two checks held a literal this build moves
+
+§214.3 for the seventh time, both **REWRITTEN and never loosened** (§218).
+`checks/portfolio.mjs` asserted *portfolio is a reserved word and NOT built*,
+which was true for as long as it was and is now the opposite; it asserts what
+survives — **a built module has a server of its own, and one that is not built
+has none** — with the second half as the control, or the first passes on a
+build where every module is built (§113.8). It stands on `processes`, the one
+module still unbuilt, and it is **proved able to fail both ways**: the flag put
+back is 2 red, the registry entry removed is 1 red. `checks/modules.mjs`'s
+*an unbuilt module's word is not an address either* named `portfolio` outright;
+it derives the set from the table now, and says in its own detail when there is
+nothing left unbuilt for it to stand on.
+
+**And the second `const UNBUILT` I wrote for it collided with the file's own**
+— §56.7, caught by the parser rather than by a check, which is the loud end of
+that fault.
+
+### §12.9 · What is not built, said plainly
+
+The plan, Progress and Analytics. A project opens on its **charter**, and a
+row on the landing reads **No plan yet** — which is the landing's own
+signed-off state for a project with none (§9.13) and not a placeholder. The
+next slice is the plan, because Progress and Analytics both read it.
+
+### §12.10 · And the container could not verify anything until it was made able to
+
+`tsc` reported **498 errors** and `checks/portfolio.mjs` could not find the
+`tenants` table: no `node_modules` and no database. Both are set up rather than
+worked around — dependencies installed, Postgres 16 stood up and
+`db/apply.mjs` run through migration 016 — because **a slice nothing can prove
+is a slice nobody can trust**. Verified: `checks/portfolio-module.mjs` 36/0 and
+red four ways (5 / 2 / 2 / 1), `checks/portfolio.mjs` 121/0 still red ten ways,
+`checks/modules.mjs` 112/0, `checks/insights.mjs` 127/0,
+`checks/notes.mjs` 170/0, `generated-in-step` all clear, `next build` compiled,
+`tsc` clean but for `lib/prisma.ts`'s pre-existing error.
+**`checks/tracker.mjs` is 224/4 and it is not this work's** — established by
+stashing everything and reproducing the identical four on the baseline (§303).
+They are the date-relative literals §375 already records as `main`'s, now four
+rather than one because the clock has moved ten days further from the
+fixture's stamps.

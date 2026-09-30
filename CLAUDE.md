@@ -8226,6 +8226,36 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # the browser's locale format &mdash; the third found
                                 # by LOOKING at the built page beside the mockup,
                                 # which is what rule 1c's last step is for
+node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
+                                # landing and a project's charter (spec 060 &sect;12,
+                                # &sect;376) &mdash; `npm run check:portfolio:module`, needs a
+                                # database and no browser. It DRIVES `serve()` with the
+                                # exact arguments the route hands a module (&sect;96: a
+                                # server wired to the wrong module renders perfectly) and
+                                # reads the rows back from Postgres THROUGH the tenant,
+                                # never off the screen. BOTH ENDS everywhere (&sect;94.2):
+                                # the office reaches every project AND anybody else only
+                                # the projects that name them, with a project they cannot
+                                # see answering the same *not found* as one that does not
+                                # exist, or the address bar becomes a way to discover
+                                # what a client has (&sect;355); a Lead writes the charter
+                                # AND a Contributor is refused; a seat starts a project
+                                # AND a client's own person is told so with the way back
+                                # (&sect;61). **A READ THAT FAILED IS NOT AN EMPTY LIST**
+                                # (&sect;35, &sect;93, &sect;231.4): the strip's counts read an
+                                # em-dash and the page says *Not read just now*, asserted
+                                # beside a read that WORKED or a build that never reads
+                                # passes half. And *No plan yet* is asserted as the
+                                # landing's signed-off state for a project with none,
+                                # against the 0% a project with a started plan reads
+                                # &mdash; the difference &sect;9.13 exists to draw. 36/0, red
+                                # FOUR ways (`check:portfolio:module:red`): 5 / 2 / 2 / 1.
+                                # **AND THE FIRST BREAK OF THE NO-PLAN STATE WENT GREEN**
+                                # &mdash; a CSS `visibility:hidden` cannot falsify an
+                                # assertion about the document's WORDS (&sect;54.5), so it
+                                # was replaced with one that makes the cell print 0%: the
+                                # actual fault, a project with no plan reading as one that
+                                # has done nothing
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -9733,7 +9763,58 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
+*Last Updated: 2026-09-30 &mdash; **&sect;376: Portfolio &mdash; the reference
+code read, and the module serving itself (spec 060 &sect;11, &sect;12).** Islam:
+**"ok for the landing"**, then **"ok for the progress and analytics too"**
+&mdash; rule 1c paid in full for all six screens &mdash; then, of the modules
+band, **"where are the project management in the modules?"**, whose honest
+answer is that `built: false` was working exactly as designed and **saying so
+first is most of that exchange**; then **"so what. have we been doing all of
+that time?"**, answered from `git log` rather than memory (**no commits between
+the 20th and the 30th**, the reference-code ask standing thirteen days); then
+the correction that unblocked it, *"that's already what i though you have been
+doing"* &mdash; recorded as one: **I had not been reading that code and had not
+chased it.** Then **"do the read-through"** and **"write it into the spec first,
+then start building."** **&sect;375'S GATE IS ANSWERED AND IT WAS NOT A
+DRAWING**: six screens against the code behind them, **ten disagreements, NONE
+invalidating a signed-off screen** &mdash; three instructions for the carry, two
+CONFIRMING corrections already made (their on-time flaw is genuinely in the
+code; their analytics really does skip a level), two decisions his &mdash; and
+one thing now certain rather than assumed: **there is no ScopePlan data in that
+repository at all**, so what is unknown is the SHAPE, never the rules.
+**THE FRAME COST ONE FLAG AND ONE LINE**, which is spec 046 &sect;4.5 paid by
+somebody who did not write it: the address, the card, the switcher, the door,
+the seat and `withTenant` all arrived working. **THE QUERIES LIVE IN THEIR OWN
+FILE**, because &sect;8 promised a check with no database, so `lib/portfolio.ts`
+gained exactly one line; `planRows()` is ONE query and not three, returning the
+flat ordered array the drawings already read (&sect;5.2). **WHO SEES WHICH
+PROJECT IS IN THE `WHERE`** (&sect;355's lesson one module along), and a project
+you cannot see answers the same *not found* as one that does not exist.
+**TWO FAULTS FOUND BY THE NEIGHBOUR CRASHING AND GOING RED, BOTH MINE**: the
+landing said *No projects yet* where the truth was that it could not READ the
+list (&sect;35, &sect;93, &sect;231.4 &mdash; on that page, telling a consultant
+their client has no delivery work), and an address it does not draw fell through
+to the landing, so **a typo rendered a page that looked right** (&sect;96).
+**A BREAK THAT CANNOT FALSIFY IS NOT A BREAK** &mdash; a CSS `visibility:hidden`
+went green over assertions about the document's WORDS (&sect;54.5) &mdash; and
+**two checks held a literal this build moves** (&sect;214.3, seventh time),
+REWRITTEN never loosened (&sect;218) and proved able to fail both ways, with the
+second `const UNBUILT` colliding with the file's own (&sect;56.7, caught by the
+parser). **AND THE CONTAINER COULD NOT PROVE ANYTHING UNTIL IT WAS MADE ABLE
+TO**: 498 typecheck errors and no `tenants` table, both set up rather than
+worked around, **because a slice nothing can prove is a slice nobody can
+trust**. 36/0 red four ways &middot; 121/0 still red ten ways &middot; modules
+112/0 &middot; insights 127/0 &middot; notes 170/0 &middot;
+`generated-in-step` all clear &middot; `built-in-step.py` all good &middot;
+`next build` compiled &middot; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error. **`tracker` 224/4 is NOT this work's**, reproduced identical
+on a stashed baseline (&sect;303). **NOT BUILT AND SAID IN THE SERVER'S OWN
+HEADER** (&sect;54.5): the plan, Progress and Analytics &mdash; a project opens
+on its charter and its landing row reads *No plan yet*, the signed-off state and
+not a placeholder. The frozen product is untouched and MEASURED, so `sw.js` is
+not bumped. **On the branch, not merged.***
+
+*Earlier: 2026-09-20 &mdash; **&sect;375: Portfolio &mdash; the rules and the
 tables, before any screen (spec 060).** Islam, on the handover saying every
 screen was drawn and three of six signed off: **"proceed."** **WHAT IS BUILT IS
 THE HALF A *PROCEED* CAN HONESTLY REACH** &mdash; rule 1c is owed on three

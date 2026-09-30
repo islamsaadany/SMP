@@ -260,8 +260,17 @@ for (const k of BUILT_EXTRA) {
     whereOf(clientHref("raya-trade", k, "").split("/").slice(2), HAVE_BOTH).module === k,
     clientHref("raya-trade", k, ""));
 }
+/* AND THE UNBUILT ONE IS DERIVED, never typed (§214.3, §218). It named
+   `portfolio` outright and went red the day that module was built — which is
+   a check arguing with a decision rather than guarding one. What survives a
+   module being built is the RULE: a word MODULES reserves and MODULE_DEF has
+   not built is not an address, whichever word it is. With none left unbuilt
+   the assertion says so rather than passing over an empty list (§113.8).
+   `UNBUILT` is the file's own, declared at the top — a second `const` here
+   was §56.7's collision, caught by the parser rather than by reading. */
 check("an unbuilt module's word is not an address either",
-  whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
+  UNBUILT.length > 0 && UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : "none left unbuilt — this assertion has nothing to stand on");
 check("Setup is the spine's and carries no module", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 check("the tour is the spine's too", whereOf(["tour"], HAVE_BOTH).module === null);
 /* A caller that forgets to say which modules the client has gets the NARROW

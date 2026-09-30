@@ -49823,3 +49823,144 @@ been read off a real client's plan**. §375's own build is untouched by any of
 this, and the check still asserts the flag rather than assuming it. *A gate
 lifting is not the same as the road being clear, and saying which gate is which
 is the whole of why this line is here.*
+
+---
+
+## §376 — PORTFOLIO: THE REFERENCE CODE READ, AND THE MODULE SERVING ITSELF (2026-09-30, spec 060 §11, §12)
+
+Islam, of the three drawings that had been waiting: **"ok for the landing"**,
+then **"ok for the progress and analytics too"** — which paid rule 1c in full
+for all six screens and left §375's *"STILL ISLAM'S"* list holding nothing but
+the one gate no sign-off can answer. Then, of the modules band on a client's
+card: **"where are the project management in the modules?"** — and the honest
+answer is that `built: false` was working exactly as designed, so Portfolio had
+no entry to be missing from; **saying that first, rather than going looking for
+a fault, is most of that exchange.** Then, of where September went:
+**"so what. have we been doing all of that time?"** — answered from `git log`
+rather than from memory, five modules built between the 4th and the 16th,
+Portfolio's audit, spec, drawings and engine between the 17th and the 20th, and
+**no commits at all between the 20th and the 30th**, with the reference-code ask
+standing unanswered for thirteen days. And then the thing that unblocked it:
+**"the system is on another repo of Client PLus … that's already what i though
+you have been doing"** — a correction, and it is recorded as one: *I had not
+been reading that code, and had not chased it.* Finally, **"do the read-through
+and tell me where they disagree"**, and **"write it into the spec first, then
+start building."**
+
+**§376.1 — THE GATE §375 NAMED IS ANSWERED, AND IT WAS NOT A DRAWING.** That
+section wrote down that `portfolio` was held at `built: false` by *"this
+repository has never seen the reference code and nothing in it has ever been
+run"*. The repository was supplied and read: six screens against the code
+behind them, **ten places where they disagree**, written into spec 060 §11
+before a line was built. **NONE OF THE TEN INVALIDATES A SIGNED-OFF SCREEN**,
+which is the finding rather than a relief — three are instructions for whoever
+writes the carry (their phase progress is a flat average where ours is
+weighted, they hold a phase's progress twice and the two can disagree, and
+their six client-wide roles have to land on our three per project), two are
+**confirmations that corrections already made were right** (§11.5's on-time
+flaw is genuinely there in their code, and their analytics really does skip the
+work-package level), and two are decisions his. **AND ONE THING IS NOW CERTAIN
+RATHER THAN ASSUMED**: there is no ScopePlan data in that repository at all, so
+what remains unknown is the SHAPE a real client's plan takes on these screens
+and never the rules — a question for the screens, which is where it will be
+answered.
+
+**§376.2 — THE FRAME COST ONE FLAG AND ONE LINE, AND THAT IS SPEC 046 §4.5 PAID
+BY SOMEBODY WHO DID NOT WRITE IT.** `portfolio` was already the reserved word
+(§320.5's own argument for reserving it), so the address, the switcher, the row
+on the client's card, the on/off drawer, the door, the seat and `withTenant`
+arrived working: the whole edit outside `modules/portfolio/` is `built: true`
+and one entry in `SERVERS`. **Both of the registry's own breaks keep it**, so
+`no-server` and `wrong-server` go on falsifying what they were written for
+rather than incidentally falsifying this.
+
+**§376.3 — THE QUERIES LIVE IN THEIR OWN FILE, BECAUSE §8 PROMISED A CHECK WITH
+NO DATABASE.** `checks/portfolio.mjs` is 121 assertions long precisely because
+`lib/portfolio.ts` is pure, and one query in it would have ended that — so
+`lib/portfolio-io.ts` is new and **the rules file gained exactly one line**,
+`milestone?: boolean` on `Row`, since §5's commitment mark changes no arithmetic
+there and decides only which rows the landing reads (§9.13b) and what Analytics
+counts as a commitment met (§9.12). **`planRows()` is ONE query and not three**
+— a `UNION ALL` over phases, work packages and activities, ordered by position
+at each level, returning the flat ordered array the drawings' own `_derive.js`
+already reads (§5.2: *the plan on the screen and the plan on the server cannot
+arrive at two answers for one project*).
+
+**§376.4 — WHO SEES WHICH PROJECT IS IN THE `WHERE`, NEVER IN A FILTER
+AFTERWARDS** (§355's lesson one module along: *a report kept off a list and
+still downloadable is no rule at all*). A seat on the client reaches every
+project; anybody else reaches the projects that NAME them, through the
+membership join itself — and **a project this viewer cannot see answers the same
+*not found* as one that does not exist**, so the address cannot be used to
+discover what a client holds. Both ends asserted (§94.2), falsified at 2 red.
+
+**§376.5 — A READ THAT FAILED IS NOT AN EMPTY LIST, AND IT WAS FOUND BY THE
+NEIGHBOUR CRASHING.** `checks/modules.mjs` drives every module's server with a
+deliberately fake tenant id, and `withTenant` refuses one — so the landing threw
+where the tracker's degrades. **The answer is not a catch that swallows**:
+`seen` is `Seen[] | null` and **null is *it could not be read***, so the strip's
+counts draw an em-dash and the page says *Not read just now* rather than *No
+projects yet*. §35, §93 and §231.4 in one line, and on this page the cost of
+getting it wrong is telling a consultant their client has no delivery work at
+all.
+
+**§376.6 — AND A WORD IT DOES NOT DRAW IS A REDIRECT, NEVER THE LANDING.** Also
+found by that check going red: my server fell through to the landing for any
+address it did not recognise, so **a mistyped address rendered a page that
+looked right** (§96's family). It answers 302 now, which is what every unknown
+word inside a client already gets.
+
+**§376.7 — ONE SPELLING OF THE EM-DASH.** My own check contradicted itself: the
+strip wrote the character and the owe cell wrote the entity, and `esc()` escapes
+only `& < > " '`, so the two render identically and only one can be asserted —
+fixing the first broke the second. **The character, everywhere**, because it
+survives `esc()`, with a comment saying so or the next person writes the entity
+again.
+
+**§376.8 — A BREAK THAT CANNOT FALSIFY IS NOT A BREAK.** The first
+falsification of the *No plan yet* state was a CSS `visibility:hidden` and it
+went **green**, because every assertion in that section is about the document's
+WORDS and a rule that hides them changes none (§54.5: *a falsification that
+passes is indistinguishable from a working guard*). Replaced with a break that
+makes the cell print **0%** — the actual fault, a project with no plan reading
+as one that has done nothing — and it is 1 red.
+
+**§376.9 — TWO CHECKS HELD A LITERAL THIS BUILD MOVES** (§214.3, seventh time),
+both **REWRITTEN and never loosened** (§218). `checks/portfolio.mjs` asserted
+*portfolio is a reserved word and NOT built*, true for as long as it was and now
+its opposite; it asserts what survives — **a built module has a server of its
+own and one that is not built has none** — with the second half as the control,
+or the first passes on a build where everything is built (§113.8). It stands on
+`processes`, the one module still unbuilt, and **says so in its own detail when
+there is nothing left for it to stand on**. Proved able to fail both ways: the
+flag put back is 2 red, the registry entry removed is 1 red. And
+`checks/modules.mjs`'s *an unbuilt module's word is not an address either* named
+`portfolio` outright; it derives the set from the table now. **And the second
+`const UNBUILT` I wrote for it collided with the file's own** — §56.7, caught by
+the parser, which is the loud end of that fault.
+
+**§376.10 — AND THE CONTAINER COULD NOT PROVE ANYTHING UNTIL IT WAS MADE ABLE
+TO.** `tsc` reported **498 errors** and the checks could not find the `tenants`
+table: no `node_modules` and no database. Both set up rather than worked around
+— dependencies installed, Postgres 16 stood up, `db/apply.mjs` run through
+migration 016 — because **a slice nothing can prove is a slice nobody can
+trust**, and the alternative was shipping a module on an argument.
+**VERIFIED**: `checks/portfolio-module.mjs` **36/0**, red four ways
+(5 / 2 / 2 / 1); `checks/portfolio.mjs` **121/0** and still red ten ways;
+`checks/modules.mjs` **112/0**; insights 127/0; notes 170/0;
+`generated-in-step` all clear; `next build` compiled; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **`checks/tracker.mjs` is 224/4 and it is
+NOT this work's** — established by stashing everything and reproducing the
+identical four on the baseline (§303); they are the date-relative literals §375
+already records as `main`'s, now four rather than one because the clock has
+moved ten days further from the fixture's stamps. Recorded, not fixed in passing
+(rule 1b).
+
+**§376.11 — WHAT IS NOT BUILT, SAID IN THE SERVER'S OWN HEADER RATHER THAN LEFT
+TO BE DISCOVERED** (§54.5): the plan, Progress and Analytics. A project opens on
+its **charter**, and a row on the landing reads **No plan yet** — which is the
+landing's own signed-off state for a project with none (§9.13) and not a
+placeholder. The next slice is the plan, because the other two read it.
+**The frozen product is untouched and measured** (`built-in-step.py`), so
+`sw.js` is NOT bumped: §91's trigger is the built file's bytes changing, and
+they did not.

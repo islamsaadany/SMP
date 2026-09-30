@@ -294,6 +294,11 @@ export type Row = {
   end?: string | null;
   status?: ActStatus;
   assignee?: string | null;
+  /* An activity marked as a commitment — their `is_milestone` (§5). It
+     changes no arithmetic here: what it decides is which rows the landing's
+     "what is owed next" reads (§9.13b), and whether Analytics counts the row
+     as a commitment met (§9.12). */
+  milestone?: boolean;
   /* Written by `rollUp` onto a parent. */
   total?: number;
   done?: number;

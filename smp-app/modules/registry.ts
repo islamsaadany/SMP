@@ -29,14 +29,15 @@
    register's to answer (lib/place.ts). A module that wanted more would be a
    module asking the spine to hand over its own subject.
 
-   THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Portfolio
-   and Processes are words the address reserves and nothing more (lib/modules.ts
-   MODULE_DEF). That the two lists agree — every built module serves itself,
+   THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Processes
+   is a word the address reserves and nothing more (lib/modules.ts MODULE_DEF)
+   — Portfolio joined the built ones on 2026-09-30, its first slice (spec 060). That the two lists agree — every built module serves itself,
    and no unbuilt one claims to — is asserted in checks/modules.mjs rather than
    trusted, because a module marked built with nothing to draw is precisely the
    door onto the wrong room that flag exists to stop (§61). */
 import type { ModuleKey } from "../lib/modules.ts";
 import { serve as strategy } from "./strategy/index.ts";
+import { serve as portfolio } from "./portfolio/index.ts";
 import { serve as insights } from "./insights/index.ts";
 import { serve as tracker } from "./tracker/index.ts";
 import { serve as notes } from "./notes/index.ts";
@@ -71,12 +72,12 @@ export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 const BREAK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
 
 export const SERVERS: Partial<Record<ModuleKey, ModuleServer>> =
-  BREAK === "no-server" ? { strategy, trial, tracker, notes }
+  BREAK === "no-server" ? { strategy, trial, tracker, notes, portfolio }
   /* Two words pointing at one page — the door onto the wrong room, wired
      rather than guessed at. It renders perfectly, which is why the check
      DRIVES each server rather than reading the table (§96). */
-  : BREAK === "wrong-server" ? { strategy, insights: strategy, trial, tracker, notes }
-  : { strategy, insights, tracker, notes, trial };
+  : BREAK === "wrong-server" ? { strategy, insights: strategy, trial, tracker, notes, portfolio }
+  : { strategy, portfolio, insights, tracker, notes, trial };
 
 /* Null is "nothing here draws that", which the route answers as Not found
    rather than falling back to the Strategy shell: a module word that resolved

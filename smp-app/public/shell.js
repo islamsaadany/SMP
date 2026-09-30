@@ -61491,6 +61491,13 @@ var SYNC = (function () {
         if (secs.length) return tab;
       }
     }
+    /* §428: the group gained a Strategy tab FIRST, and it still opens where it
+       always has — on the tab marked primary (Performance). Strategy leading
+       the row is where it sits, not where a session lands. */
+    if (k === "group") {
+      var prim = d.filter(function(x){ return x.primary; })[0];
+      if (prim) return prim.k;
+    }
     return d[0].k;
   }
 

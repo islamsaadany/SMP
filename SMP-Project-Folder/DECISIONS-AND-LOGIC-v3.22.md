@@ -58813,3 +58813,28 @@ removed → 1, the Capabilities card renamed → 1. `test-authorize.js` §428
 report gate opened. `checks/structure.py` held the group's old Foundation tab
 and four cards: REWRITTEN, never loosened (§218), with the capabilities card's
 two ways and the missing tick asserted beside it.
+
+**§428.1 — the group still opens on Performance, and three checks followed
+the Foundation.** The full sweep found one real regression and three stale
+checks. **The regression**: the group's first tab is now Strategy, so a
+session landing on the group opened on Strategy and `renderGroupPerformance`
+never ran at boot — and it is what calls `syncWeights()`, so every unit's
+weight read 0 and `division-functions.py` died dividing by it. `entrySub()`
+lands the group on its `primary` tab, which is Performance, as before §428
+(the landing is a decision about what people come to read, §94.6; nothing
+about it changed). **The three checks** each asked for the group's old
+Foundation TAB, which §428 moved inside Strategy — §214.3 again, each
+REWRITTEN, never loosened (§218): `plan-edit-line.py` now asserts the group's
+Strategy tab wears ONE pen on the section line and none in the card, as a
+unit's does (red 1 on the build before, which is the proof it can fail);
+`unit-before-number.py` reaches the objectives through Strategy › Foundation;
+`structure.py` (above). **Every other red in the sweep was measured on the
+build before §428 and reads the same there** (§303): `enter-commits`,
+`measure-score-spread`, `objectives-table`, `save-fidelity`, `setup-header`,
+`state-contrast`, `team-page`, `wave3`, `chat-settings-scroll`,
+`client-archive`, `client-setup-outside`; `multi-client` and `platform-look`
+need a database. `qa.py` held the same old tab (a click on Foundation) and
+now walks Strategy › Foundation, with the objectives asserted DRAWN before
+the toggle is asserted absent (§113.8); full sweep ERRORS none. `cycle-edit`
+and `render-fail` were red only under the
+parallel run's load and are green alone.

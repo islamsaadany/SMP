@@ -300,12 +300,12 @@ with sync_playwright() as pw:
     pg.evaluate("""() => {
       const m = GROUP.keyObjectives[0];
       m.target = ""; delete m.target3y; delete m.pend;
-      /* THE GROUP'S FOUNDATION IS A TAB, NOT A SECTION OF ONE. A unit reaches
-         it through Strategy › Overview; the group carries Performance ·
-         Foundation · Focus · Temple · Weighting of its own, so asking for
-         "strategy" here lands silently back on Performance and the check
-         measures a page with no objectives table on it at all (§50.6). */
-      current = "group"; currentSub = "foundation";
+      /* SINCE §428 THE GROUP'S FOUNDATION IS A SECTION OF ITS OWN STRATEGY
+         TAB (Foundation · SWOT · Plan), exactly as a unit's is. Before that
+         it was a tab of its own and asking for "strategy" landed silently
+         back on Performance (§50.6); now asking for the old "foundation" tab
+         does the same, so the address is the section's (§214.3). */
+      current = "group"; currentSub = "strategy"; CURSEC.strategy = "found";
       EDIT_PAGE['foundation'] = true; paint();
     }""")
     pg.wait_for_timeout(600)

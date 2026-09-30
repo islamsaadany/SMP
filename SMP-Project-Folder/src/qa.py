@@ -1265,7 +1265,15 @@ with sync_playwright() as p:
         errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
     show_units(pg)
     go_top(pg, "group")
-    pg.click('#subtabs button:has-text("Foundation")'); pg.wait_for_timeout(350)
+    # §428: the group's Foundation is a SECTION of its own Strategy tab now,
+    # as a unit's is — the old tab is gone (§214.3, rewritten not loosened).
+    pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+    fnd = pg.query_selector('#secrow-in [data-sub2="found"]')
+    if fnd: fnd.click(); pg.wait_for_timeout(350)
+    # The absence below only means something on a page that DRAWS the
+    # group's objectives (§113.8), so that is asserted first.
+    if not pg.evaluate("()=>GROUP.keyObjectives.some(k=>document.querySelector('#panel').innerText.includes(k.name))"):
+        errs.append("KO YEAR: the group's Foundation did not draw its objectives, so the toggle's absence proves nothing")
     if pg.query_selector("[data-koyear]"):
         errs.append("KO YEAR: the toggle is on the group, whose objectives always show both")
     print("key objectives: the 1-year toggle is a unit's only, drops a column in "

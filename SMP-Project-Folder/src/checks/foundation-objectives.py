@@ -88,10 +88,12 @@ def side(pg, where, label):
     """Both callers of the same table, because only one of them worked."""
     print("── " + label)
     if where == "group":
-        # The group's tab key is `foundation`; a unit's is `found` (shell.html's
-        # two page lists). Named here rather than guessed, because a sub key
-        # that does not exist renders the LANDING page and every measurement
-        # below would then be of a screen this check never opened (§50.6).
+        # The group's old tab key is `foundation`; since §428 it is a SECTION
+        # of the group's Strategy tab, and the old key is still read as that
+        # section (a bookmark is a door), which is why this lands where it
+        # did — asserted below by the table being there. A sub key that
+        # renders the LANDING page would make every measurement below one of
+        # a screen this check never opened (§50.6).
         pg.evaluate("() => { current='group'; currentSub='foundation'; "
                     "EDIT_PAGE['foundation']=true; paint(); }")
     else:

@@ -59061,3 +59061,71 @@ Islam: *"go ahead with stage 1 and the mockup."* Stage 1 of spec 064's plan is t
 
 **RECORDED, NOT DONE.** A deliverable can be filed only through the api in stage 1 — *Save as deliverable* from a chat is stage 3. `/<client>/copilot/setup` would be read as the module's Setup rail; nothing links there. The round 2 mockup (ways to start, files, company-direction owners) awaits sign-off before stage 2.
 
+
+## §440 — the Strategy Copilot, stage 2: the AI in a chat (spec 064, 2026-09-30)
+
+Islam, of the round-2 mockup: *"ok for round 2, go ahead with stage 2."*
+
+**NOT A SECOND ASSISTANT.** `lib/assistant.cjs` stays the one place the key is
+read and the one call to the provider; the Copilot adds a file saying WHAT to
+send (`lib/copilot-ask.ts`) and a file saying HOW the AI should work per section
+(`lib/copilot-guidance.ts`). The second file is where Islam's own AI
+instructions go when he sends them — replacing its text touches nothing else.
+`askJson` gained one optional argument, `parts`, for a PDF riding on the
+question; every existing caller is byte-for-byte unchanged (§250's shape).
+
+**THE MODEL IS ASKED BETWEEN TWO TRANSACTIONS, NEVER INSIDE ONE.** A draft can
+take most of a minute, and a transaction held that long pins a connection
+(§289). Step 1 records what was said and reads what the AI needs; the model is
+asked; step 2 records the answer. **What was typed is kept whether or not an
+answer comes** — no key, a refusal and a timeout each end in a product line
+saying so (`NO_KEY`, `failedLine`), drawn as the product and never as the
+Copilot (§125). A row stage 1 wrote (`notConnected`) is still drawn as the
+product; nothing is migrated.
+
+**THE ANSWER IS CHECKED, NEVER TRUSTED AS WRITTEN (§96.2).** `shapeAnswer`
+caps and trims every list, allows at most ONE recommended option, reads a
+`source` naming a file nobody attached as *assumed* rather than drawing it as a
+file, and treats an answer with nothing in it as a failure rather than an empty
+bubble (§124). **The offer to keep pasted material is attached by the PRODUCT**,
+only under a message that really was pasted — never on the model's say — and
+saving it is judged against the STORED message (§42).
+
+**WHAT THE AI SEES IS SAID IN ONE LINE.** The tab builds the line from the
+platform's own readers (`pillarPerf`, `measureScore`, `bandOf`,
+`reportedCount`) and sends it as prompt material only; nothing is stored from
+it and nothing is decided by it. The detail is on the hover.
+
+**ASSUMPTIONS LIVE ON THE CHAT**, deduplicated case-insensitively and capped at
+40, and every later ask is sent them under *never ask about these again*.
+
+**FILES: WORD, PDF, EXCEL, AND NO DEPENDENCY.** A `.docx`/`.xlsx` is a zip, so
+the reader is a central-directory walk and `inflateRawSync` (§72's reasoning); a
+PDF goes to the model AS itself, because a text extraction would lose the tables
+it can read. The old `.doc`/`.xls` are refused in words. **3 MB each, three per
+message** — the platform cannot receive more (4.5 MB body, base64 adds a third),
+and the size is judged on the ENCODED text before anything is decoded. A file
+belongs to its chat (`copilot_files`, migration 021, RLS-forced like its
+neighbours); a waiting file can be taken off, a sent one is the record. Only the
+last three PDFs of a chat travel, or one chat of reports outgrows the request.
+
+**THE TEMPLATE ROAD WAITS** on Islam's template files; if chosen, the Copilot
+says so and offers another way.
+
+**CHECKS.** `checks/copilot.mjs` 46 → **88/0**: §1b reads a Word and an Excel
+file the check builds entry by entry (one deflated, so the inflate path is
+exercised) and asserts the answer rules; §5 stands a **stand-in model** in front
+of the real code on `GEMINI_ENDPOINT` (§100.3) and reads the wire — the
+guidance, the platform line, the Word file's words, the PDF as itself — then the
+answer kept, the assumption recorded once and sent back, the paste offer and its
+save, a failure and no key each keeping what was typed. **Red under five breaks,
+three new**: `trust-source`, `offer-always`, `forget-assumptions`. `shell.mjs`
+§3f presses it on the served app against a stand-in: a Word file through the
+paperclip, the answer drawn (playback, missing, draft with sources, two ways on),
+a quick reply pressed and the assumption going with the next ask — **164/0**.
+Built page looked at in both themes beside the mockup.
+
+**RECORDED, NOT DONE**: Save-as-deliverable in its shape and owners (stage 3),
+Advisory's budget (stage 4), the group and company grouping (stage 5), the
+Template road (waits on the templates), and the methodology prompts (wait on
+Islam's instructions).

@@ -1385,6 +1385,27 @@ CREATE TABLE copilot_versions (
   CONSTRAINT copilot_version_positive CHECK (n >= 1)
 );
 
+-- A file in a Copilot chat (spec 064 stage 2): belongs to its chat and
+-- nothing else. message_id is NULL while it waits above the composer.
+CREATE TABLE copilot_files (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  chat_id uuid NOT NULL,
+  message_id bigint,
+  name text NOT NULL,
+  kind text NOT NULL,
+  size integer NOT NULL,
+  bytes bytea NOT NULL,
+  text text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, chat_id) REFERENCES copilot_chats (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_file_kind CHECK (kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_file_size CHECK (size > 0 AND size <= 3145728)
+);
+CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users

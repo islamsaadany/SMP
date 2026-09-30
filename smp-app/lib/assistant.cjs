@@ -289,6 +289,13 @@ async function callModel(opts) {
   /* A conversation must start with the person, or the provider rejects it. */
   while (turns.length && turns[0].role === "model") turns.shift();
   turns.push({ role: "user", parts: [{ text: String(opts.question || "") }] });
+  /* EXTRA PARTS ON THE LAST TURN (spec 064 stage 2): a PDF goes to the model
+     AS a document (inlineData), because it reads one itself and a text
+     extraction would lose every table it can see. Optional, so every
+     existing caller is byte-for-byte unchanged (§250's shape). */
+  if (Array.isArray(opts.parts) && opts.parts.length) {
+    turns[turns.length - 1].parts = opts.parts.concat(turns[turns.length - 1].parts);
+  }
 
   /* NO THINKING FOR A LOOKUP (§134). The model reasons before it answers by
      default, and how long it reasons is a lottery — the same short question

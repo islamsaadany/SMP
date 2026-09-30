@@ -24,6 +24,7 @@
 
    Needs `npm run build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
+import http from "node:http";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -55,7 +56,28 @@ if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventLis
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
 const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk }, stdio: ["ignore", "pipe", "pipe"], detached: true });
+/* A STAND-IN MODEL (§100.3, spec 064 stage 2): the Copilot tab is pressed
+   against a provider that answers with a full answer, so what the tab DRAWS
+   of an answer is measured, and what it SENT is read off the wire. */
+const MODEL_SEEN = [];
+const MODEL_ANSWER = {
+  reply: "Here is a first foundation from the plan.",
+  playback: { understood: "Draft Mobile's foundation", workingFrom: "the platform", missing: "The purpose in the client's words" },
+  missing: ["The purpose in the client's words"],
+  options: [{ label: "Assume for me", recommended: true }, { label: "I'll give it" }],
+  assumptions: ["Purpose follows the aspiration"],
+  draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }] }] },
+};
+const model = http.createServer((req, res) => {
+  let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
+    try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
+  });
+});
+await new Promise((r) => model.listen(0, "127.0.0.1", r));
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk,
+  GEMINI_API_KEY: "stand-in-key", GEMINI_ENDPOINT: "http://127.0.0.1:" + model.address().port + "/models/" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", (d) => process.stderr.write(d));
 let up = false;
 for (let i = 0; i < 60 && !up; i++) { await new Promise((r) => setTimeout(r, 500)); try { up = (await fetch(BASE + "/")).status === 200; } catch {} }
@@ -781,7 +803,7 @@ await section("3e · the Copilot tab is stamped for the office only (spec 064)",
   }
 });
 
-await section("3f · the Copilot tab, pressed end to end (spec 064 stage 1)", async () => {
+await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 2)", async () => {
   /* PRESSED, AND READ BACK FROM THE DATABASE (§96): a rail that draws what it
      was handed and writes nothing looks identical to one that works. The
      state is MADE (§255) — the dev tenant holds no module and no chat. */
@@ -804,18 +826,46 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stage 1)", as
 
     const c0 = await count("copilot_chats"), m0 = await count("copilot_messages");
     await page.click("[data-cop-newchat]"); await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
+    const ctxLine = await page.evaluate(() => { const e = document.querySelector(".copctx"); return e ? e.textContent.trim() : ""; });
+    check(/Mobile/.test(ctxLine) && /pillar/i.test(ctxLine), "the chat says in one line what the AI can see for the place", ctxLine);
+    /* A file, attached through the real control and read back (§96). */
+    const docx = readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx"));
+    await page.setInputFiles("[data-cop-file]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: docx });
+    await page.waitForSelector(".coppend .copfile", { timeout: 8000 }).catch(() => {});
+    check(/notes\.docx/.test(await page.evaluate(() => (document.querySelector(".coppend") || {}).textContent || "")) && (await count("copilot_files")) >= 1,
+      "a Word file attaches through the paperclip and waits above the box as a chip");
+    const seen0 = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
     await page.click("[data-cop-send]");
-    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg").length >= 2, null, { timeout: 8000 }).catch(() => {});
+    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copplay"), null, { timeout: 15000 }).catch(() => {});
     check((await count("copilot_chats")) === c0 + 1, "+ New chat writes a chat to the database");
-    check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the product's own line");
-    const last = await page.evaluate(() => { const m = document.querySelectorAll("[data-cop-msgs] .copmsg"); return m.length ? m[m.length - 1].className + " :: " + m[m.length - 1].textContent : ""; });
-    check(/product/.test(last) && /not connected yet/.test(last), "…drawn as the product's line, never as the AI (§125)", last.slice(0, 120));
+    check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the Copilot's answer");
+    const sent = MODEL_SEEN[seen0];
+    const sys = sent && sent.systemInstruction ? sent.systemInstruction.parts.map((x) => x.text).join("") : "";
+    check(MODEL_SEEN.length === seen0 + 1 && /THIS SECTION PRODUCES: The place's foundation/.test(sys) && sys.includes(ctxLine) && /=== FILE: notes\.docx ===/.test(sys),
+      "the model was asked once, with the section's guidance, the tab's own line and the file", sys.slice(0, 160));
+    const ans = await page.evaluate(() => {
+      const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
+      return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
+        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector(".copopt.rec") || {}).textContent || "",
+        opts: m.querySelectorAll("[data-cop-reply]").length };
+    });
+    check(ans && ans.play && ans.miss && ans.groups === 2 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
+      "the answer draws its playback, what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
+    const mine = await page.evaluate(() => { const m = document.querySelectorAll("[data-cop-msgs] .copmsg.me"); return m.length ? m[m.length - 1].textContent : ""; });
+    check(/notes\.docx/.test(mine) && (await page.evaluate(() => !document.querySelector(".coppend .copfile"))), "…the file now rides on what was said, and nothing waits above the box", mine.slice(0, 120));
+    await page.click("[data-cop-reply='Assume for me']");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.me").length >= 2 && document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 2, null, { timeout: 15000 }).catch(() => {});
+    const again = MODEL_SEEN[MODEL_SEEN.length - 1];
+    const sys2 = again && again.systemInstruction ? again.systemInstruction.parts.map((x) => x.text).join("") : "";
+    check(MODEL_SEEN.length === seen0 + 2 && /- Purpose follows the aspiration/.test(sys2),
+      "pressing a quick reply sends it, and the assumption already made goes with the next ask", MODEL_SEEN.length - seen0);
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
 
     const made = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
-    check(made && made.ok && made.id, "a deliverable can be filed (through the api in stage 1)", JSON.stringify(made));
+    check(made && made.ok && made.id, "a deliverable can be filed (through the api until stage 3)", JSON.stringify(made));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     await page.click("[data-cop-deliv]"); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
     await page.click("[data-cop-edit]"); await page.waitForSelector("[data-cop-edit-text]", { timeout: 8000 });
@@ -1097,6 +1147,7 @@ await section("10 · the security headers cross with it, read from vercel.json (
 });
 
 try { process.kill(-server.pid); } catch {}
+model.close();
 await browser.close(); await owner.end();
 console.log((fails ? "RED   " : "GREEN ") + oks + " ok, " + fails + " failed" + (brk ? "  (--break=" + brk + ")" : ""));
 process.exit(fails ? 1 : 0);

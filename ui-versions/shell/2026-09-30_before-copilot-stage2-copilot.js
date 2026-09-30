@@ -1,4 +1,4 @@
-/* ══ THE STRATEGY COPILOT, AS A TAB (spec 064, stages 1 and 2) ════════════
+/* ══ THE STRATEGY COPILOT, AS A TAB (spec 064, stage 1) ═══════════════════
    Islam's decision record v0.4, and the picture he signed off
    (design-mockups/copilot/2026-09-30_copilot-tab.html): a Copilot tab on
    every place after Reporting, five sections inside it, and on the left two
@@ -10,14 +10,6 @@
    drawn as the PRODUCT speaking, never dressed as an answer (§125). A
    deliverable opens with every version it has had; Edit and Restore each ADD
    a version, and nothing is ever overwritten (decisions §3.6, §3.7).
-
-   STAGE 2 IS THE AI IN THE CHAT (plan §5), drawn as round 2 signed it off
-   (design-mockups/copilot/2026-09-30_copilot-round2.html): the one line of
-   what the AI can see for this place, read from the platform's own scoring
-   so the numbers match Performance; playback before a draft; missing input
-   named with its ways on as quick replies; "Assume for me" recorded on the
-   chat; pasted material marked with an offer to keep it; and files — Word,
-   PDF and Excel — attached beside the box and shown as chips.
 
    WHERE IT IS DRAWN IS THE SERVER'S ANSWER (§61, the Insights tab's own
    rule, §376): the served document carries `data-copilot` only where the
@@ -51,9 +43,6 @@ var COPILOT = (function(){
   var DRAFT = {};                /* chat id -> what is half-typed in its composer */
   var SAY = "";                  /* the outcome line under the pane (§63) */
   var busy = false, askedFor = null;
-  var THINKING = null;           /* chat id while its answer is being written */
-  var NOTNOW = {};               /* pasted-offer message ids waved away, this session */
-  var MAX_FILE = 3 * 1024 * 1024;
 
   function E(s){ return typeof esc === "function" ? esc(s) : String(s == null ? "" : s); }
   function live(){ return typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive(); }
@@ -179,109 +168,6 @@ var COPILOT = (function(){
     return s;
   }
 
-  /* ── WHAT THE AI CAN SEE (plan §5 stage 2) ─────────────────────────────
-     One line, with the detail on hover, built from the SAME readers the
-     Performance page scores with (unitLike, itemsNow, measureScore, bandOf,
-     reportedCount), so the Copilot is never told a number the platform does
-     not show (§53.5). It travels with each message as prompt material and
-     is stored nowhere. A place the scoring cannot read is named and nothing
-     more is claimed about it (§35). */
-  function lw(k, many){
-    try { if (typeof labelWord === "function") return labelWord(k, many ? "bu" : "group"); } catch (e) {}
-    return k;
-  }
-  function contextOf(){
-    var line = [placeWord()], detail = [];
-    var u = null;
-    try { u = typeof unitLike === "function" ? unitLike(place()) : null; } catch (e) { u = null; }
-    if (u) {
-      try {
-        var items = typeof itemsNow === "function" ? itemsNow(u) : (u.items || []);
-        var nm = 0, off = [];
-        items.forEach(function(p){
-          var shownM = (p.measures || []).filter(function(m){ return !(SMPRules.isHidden && SMPRules.isHidden(m)); });
-          nm += shownM.length;
-          var perf = typeof pillarPerf === "function" ? pillarPerf(p) : null;
-          detail.push((p.code ? p.code + " " : "") + (p.name || "") + (perf != null ? " — " + perf + "%" : ""));
-          shownM.forEach(function(m){
-            var sc = typeof measureScore === "function" ? measureScore(m) : null;
-            if (sc != null && typeof bandOf === "function" && bandOf(sc).key === "bad") off.push(m.name + " (" + sc + "%)");
-          });
-        });
-        if (items.length) line.push(plural(items.length, lw("pillar"), lw("pillar", true)));
-        if (nm) line.push(plural(nm, lw("measure"), lw("measure", true)));
-        var ko = (u.keyObjectives || []).length;
-        if (ko) line.push(plural(ko, lw("keyobj"), lw("keyobj", true)));
-        if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) {
-          var rc = typeof reportedCount === "function" ? reportedCount(u) : null;
-          line.push(REVIEW.name + (rc && rc.total ? ": " + rc.done + " of " + rc.total + " reported" : ""));
-        }
-        if (off.length) { line.push(plural(off.length, "measure", "measures") + " off track"); detail.push("Off track: " + off.join("; ")); }
-      } catch (e) { /* a place the readers cannot score is only named */ }
-    } else if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) {
-      line.push(REVIEW.name);
-    }
-    return { line: line.join(" · "), detail: detail.join("\n") };
-  }
-
-  function sizeWord(n){ return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
-  var KINDW = { pdf:"PDF", docx:"Word", xlsx:"Excel" };
-  function fileChip(f, pending){
-    var name = '<b>' + E(f.name) + '</b> · ' + (KINDW[f.kind] || "") + ' · ' + sizeWord(f.size);
-    return '<span class="copfile">' + FILEMARK +
-      (pending ? name + ' <button type="button" class="copx" data-cop-detach="' + E(f.id) + '" aria-label="Remove ' + E(f.name) + '">&times;</button>'
-               : '<a href="' + E(url("file", ["id=" + encodeURIComponent(f.id)])) + '" download>' + name + '</a>') + '</span>';
-  }
-  var FILEMARK = '<svg class="copfm" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z M9.5 1.5V5H13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
-  var CLIP = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.3 1.3 0 0 0 1.9 1.9l5-5a2.6 2.6 0 0 0-3.7-3.7l-5 5a3.9 3.9 0 0 0 5.5 5.5l4.2-4.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
-  var INFO = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
-
-  function srcTag(s){
-    if (!s || s === "platform") return '';
-    return ' <span class="copsrc' + (s === "assumed" ? " assumed" : "") + '">' + E(s === "pasted" ? "Pasted" : s === "assumed" ? "Assumed" : s) + '</span>';
-  }
-  function answerHtml(m, last){
-    var p = m.part || {};
-    var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    if (p.playback) {
-      var pb = p.playback, row = function(k, v){ return v ? '<dt>' + k + '</dt><dd>' + E(v) + '</dd>' : ''; };
-      h += '<dl class="copplay">' + row("Understood", pb.understood) + row("Working from", pb.workingFrom) + row("Missing", pb.missing) + '</dl>';
-    }
-    if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
-    if (p.draft && p.draft.groups) {
-      h += '<div class="copdraft">' + (p.draft.title ? '<div class="copdt">' + E(p.draft.title) + '</div>' : '') +
-        '<div class="copdg">' + p.draft.groups.map(function(g){
-          return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
-            g.items.map(function(it){ return '<li>' + E(it.text) + srcTag(it.source) + '</li>'; }).join("") + '</ul></div>';
-        }).join("") + '</div></div>';
-    }
-    if (p.assumptions && p.assumptions.length) h += '<div class="copassume"><b>Assumed</b> ' + p.assumptions.map(E).join(" · ") + '</div>';
-    if (p.pastedOffer && !NOTNOW[p.pastedOffer.messageId]) {
-      var sw = p.pastedOffer.section, lab = "";
-      for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === sw) lab = SECTIONS[i].label;
-      h += '<div class="copopts"><span class="copm">Keep the pasted material as its own deliverable?</span>' +
-        '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button>' +
-        '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button></div>';
-    }
-    if (p.options && p.options.length && last) {
-      h += '<div class="copopts">' + p.options.map(function(o){
-        return '<button type="button" class="copopt' + (o.recommended ? " rec" : "") + '" data-cop-reply="' + E(o.label) + '">' +
-          E(o.label) + (o.recommended ? ' <span class="coprec">(recommended)</span>' : '') + '</button>';
-      }).join("") + '</div>';
-    }
-    return h;
-  }
-  function personHtml(m){
-    var p = m.part || {}, body;
-    if (p.pasted) {
-      var first = String(m.body || "").replace(/\s+/g, " ").trim().slice(0, 80);
-      body = '<details class="coppaste"><summary><span class="copsrc">Pasted</span> ' + E(first) + '… — ' + plural(p.words || 0, "word", "words") + '</summary>' +
-        '<div class="copbody">' + E(m.body) + '</div></details>';
-    } else body = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    var files = (p.files || []).map(function(f){ return fileChip(f, false); }).join("");
-    return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
-  }
-
   function chatHtml(){
     var c = PANE.chat;
     var head = RENAME === c.id
@@ -291,30 +177,24 @@ var COPILOT = (function(){
       : '<h3 class="coph">' + E(c.title) + '</h3>' +
         '<button type="button" class="copbtn quiet" data-cop-rename>Rename</button>' +
         (PANE.mayDelete ? '<button type="button" class="copbtn quiet danger" data-cop-delete>Delete</button>' : '');
-    var n = PANE.messages.length;
-    var msgs = PANE.messages.map(function(m, i){
+    var msgs = PANE.messages.map(function(m){
       if (m.who === "ai") {
-        var product = !m.part || m.part.kind !== "answer";
-        if (product) return '<div class="copmsg product"><div class="copbody">' + E(m.body) + '</div></div>';
-        return '<div class="copmsg ai"><span class="copwho">Copilot</span>' + answerHtml(m, i === n - 1 && THINKING !== c.id) + '</div>';
+        var product = m.part && m.part.kind === "notConnected";
+        return '<div class="copmsg ' + (product ? "product" : "ai") + '">' +
+          (product ? '' : '<span class="copwho">Copilot</span>') + '<div class="copbody">' + E(m.body) + '</div></div>';
       }
-      return '<div class="copmsg me"><span class="copwho">' + E(nameOf(m.by)) + ' · ' + E(when(m.at)) + '</span>' + personHtml(m) + '</div>';
-    }).join("") + (THINKING === c.id ? '<div class="copmsg product" role="status"><div class="copbody">The Copilot is working on it…</div></div>' : '');
-    var ctx = contextOf();
-    var pend = (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("");
+      return '<div class="copmsg me"><span class="copwho">' + E(nameOf(m.by)) + ' · ' + E(when(m.at)) + '</span>' +
+        '<div class="copbody">' + E(m.body) + '</div></div>';
+    }).join("");
     return '<div class="copchat">' +
-      '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
       '<div class="copheadrow">' + head + '</div>' +
       (PANE.confirmDelete ? '<div class="copask" role="alert">Delete this chat and everything said in it? This cannot be undone. ' +
         '<button type="button" class="copbtn danger" data-cop-delete-yes>Delete</button>' +
         '<button type="button" class="copbtn quiet" data-cop-delete-no>Keep it</button></div>' : '') +
       '<div class="copmsgs" data-cop-msgs>' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div>' +
-      (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
       '<div class="copcompose">' +
-        '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
-        '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
-        '<textarea class="fld" data-cop-text rows="3" placeholder="' + (pend ? "Say what this file is for…" : "Ask about " + E(placeWord()) + "’s " + E(sectionWord().toLowerCase()) + "…") + '" aria-label="Message">' + E(DRAFT[c.id] || "") + '</textarea>' +
-        '<button type="button" class="copsend" data-cop-send' + (THINKING === c.id ? ' disabled' : '') + '>Send</button>' +
+        '<textarea class="fld" data-cop-text rows="3" placeholder="Write to the Copilot…" aria-label="Message">' + E(DRAFT[c.id] || "") + '</textarea>' +
+        '<button type="button" class="copsend" data-cop-send>Send</button>' +
       '</div></div>';
   }
 
@@ -412,60 +292,16 @@ var COPILOT = (function(){
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
     if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
   });
-  /* SENDING. What was typed appears at once and the product says the
-     Copilot is working, because a draft can take most of a minute and a box
-     that sits still for that long reads as broken (§124). The server's own
-     list replaces the page's guess when it lands. */
-  function send(forced){
-    if (!PANE || !PANE.chat || THINKING) return;
+  function send(){
+    if (!PANE || !PANE.chat) return;
     var id = PANE.chat.id, t = document.querySelector("[data-cop-text]");
-    var text = forced != null ? forced : (t ? t.value : (DRAFT[id] || ""));
-    var files = (PANE.pending || []).slice();
-    if (!text.trim() && !files.length) return;
-    var ctx = contextOf();
-    if (forced == null) { DRAFT[id] = ""; if (t) t.value = ""; }
-    PANE.messages = PANE.messages.concat([{ id:"new", who:"person", by: (typeof SYNC !== "undefined" && SYNC.actingAs && SYNC.actingAs()) || "",
-      body:text, part:{ kind:"said", files:files }, at:new Date().toISOString() }]);
-    PANE.pending = [];
-    THINKING = id; SAY = ""; draw();
-    post({ act:"say", id:id, text:text, fileIds: files.map(function(f){ return f.id; }),
-           context: ctx.line + (ctx.detail ? "\n" + ctx.detail : ""), placeWord: placeWord() }).then(function(x){
-      THINKING = null;
-      if (x.st === 200 && x.j && x.j.ok) {
-        if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; }
-        loadList(true); draw(); return;
-      }
-      SAY = (x.j && x.j.why) || "That did not send. Nothing was lost — try again.";
-      if (forced == null) DRAFT[id] = text;
-      openItem("chat", id);
-    }, function(){
-      THINKING = null; SAY = "The server could not be reached. What you typed is back in the box — try again.";
-      if (forced == null) DRAFT[id] = text; openItem("chat", id);
+    var text = t ? t.value : (DRAFT[id] || "");
+    if (!text.trim()) return;
+    act({ act:"say", id:id, text:text }, function(j){
+      DRAFT[id] = ""; var t2 = document.querySelector("[data-cop-text]"); if (t2) t2.value = "";
+      PANE.messages = j.messages || PANE.messages; loadList(true);
     });
   }
-
-  /* A FILE, read in the browser only as far as its size and name; the server
-     decides whether it can be read at all and says so in words. */
-  function attach(file){
-    if (!file || !PANE || !PANE.chat) return;
-    var id = PANE.chat.id;
-    if (!/\.(docx|pdf|xlsx)$/i.test(file.name)) { SAY = "The Copilot reads Word (.docx), PDF and Excel (.xlsx) files. Save it as one of those and attach it again."; draw(); return; }
-    if (file.size > MAX_FILE) { SAY = "That file is larger than 3 MB, so it was not attached. Split it, or paste the part that matters."; draw(); return; }
-    var r = new FileReader();
-    r.onload = function(){
-      var data = String(r.result || "").replace(/^data:[^,]*,/, "");
-      act({ act:"attach", id:id, name:file.name, type:file.type || "", data:data }, function(j){
-        if (PANE && PANE.chat && PANE.chat.id === id) PANE.pending = j.pending || [];
-        draw(); var t = document.querySelector("[data-cop-text]"); if (t) t.focus();
-      });
-    };
-    r.onerror = function(){ SAY = "That file could not be read by the browser. Try again."; draw(); };
-    r.readAsDataURL(file);
-  }
-  document.addEventListener("change", function(ev){
-    var f = hit(ev, "[data-cop-file]"); if (!f) return;
-    var file = f.files && f.files[0]; f.value = ""; attach(file);
-  });
   function rename(){
     var b = document.querySelector("[data-cop-rename-box]"); if (!b || !PANE || !PANE.chat) return;
     var id = PANE.chat.id, title = b.value;
@@ -487,25 +323,6 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-send]"))) { send(); return; }
-    if ((b = hit(ev, "[data-cop-reply]"))) { send(b.getAttribute("data-cop-reply")); return; }
-    if ((b = hit(ev, "[data-cop-attach]"))) { var fi = document.querySelector("[data-cop-file]"); if (fi) fi.click(); return; }
-    if ((b = hit(ev, "[data-cop-detach]"))) {
-      if (!PANE || !PANE.chat) return;
-      var cid = PANE.chat.id;
-      act({ act:"detach", id:cid, fileId:b.getAttribute("data-cop-detach") }, function(j){
-        if (PANE && PANE.chat && PANE.chat.id === cid) PANE.pending = j.pending || []; draw(); });
-      return;
-    }
-    if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
-    if ((b = hit(ev, "[data-cop-savepasted]"))) {
-      if (!PANE || !PANE.chat) return;
-      var sec = b.getAttribute("data-cop-sec"), mid = b.getAttribute("data-cop-savepasted"), lab = sec;
-      for (var si = 0; si < SECTIONS.length; si++) if (SECTIONS[si].k === sec) lab = SECTIONS[si].label;
-      act({ act:"savePasted", id:PANE.chat.id, messageId:mid, section:sec }, function(){
-        NOTNOW[mid] = true; SAY = "Kept in " + lab + " as a Copilot-only deliverable.";
-        LISTS[place() + "|" + sec] = null; loadList(true); });
-      return;
-    }
     if ((b = hit(ev, "[data-cop-rename]"))) { RENAME = PANE && PANE.chat ? PANE.chat.id : null; draw();
       var r = document.querySelector("[data-cop-rename-box]"); if (r) { r.focus(); r.select(); } return; }
     if ((b = hit(ev, "[data-cop-rename-save]"))) { rename(); return; }
@@ -544,6 +361,5 @@ var COPILOT = (function(){
 
   return { shown: shown, sections: sections, render: renderPane,
            /* for the checks */
-           state: function(){ return { open: OPEN[key()] || null, list: list(), pane: PANE, say: SAY, thinking: THINKING }; },
-           context: contextOf };
+           state: function(){ return { open: OPEN[key()] || null, list: list(), pane: PANE, say: SAY }; } };
 })();

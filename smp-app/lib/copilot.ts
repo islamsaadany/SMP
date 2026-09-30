@@ -67,12 +67,16 @@ export function mayDeleteChat(chat: { by: string }, who: Who): boolean {
 export const MAX_MESSAGE = 120_000;
 export const MAX_TITLE = 160;
 
-/* What the chat answers until the AI is connected (plan §5, stage 1). Said
-   in words, never a spinner, and never dressed as an answer: it is the
-   PRODUCT speaking, marked as such, so nobody mistakes it for the Copilot
-   having considered their question (§125's rule). */
-export const NOT_CONNECTED =
-  "The Copilot is not connected yet. What you type here is kept with this chat, and the AI will answer in it once it is switched on.";
+/* WHAT THE PRODUCT SAYS WHEN THE AI CANNOT (stage 2). Said in words and
+   marked as the PRODUCT speaking, never dressed as an answer, so nobody
+   mistakes it for the Copilot having considered their question (§125's rule).
+   A row written by stage 1 carries `notConnected` and is still drawn as the
+   product; nothing is migrated. */
+export const NO_KEY =
+  "The Copilot's AI is not switched on for this platform: no key is set. What you typed is kept with this chat, and it will be answered here once the key is added.";
+export function failedLine(why: string): string {
+  return "The Copilot could not answer just now (" + oneLine(why).slice(0, 200) + "). Your message is kept — send it again to retry.";
+}
 
 export function oneLine(v: unknown): string { return str(v).replace(/\s+/g, " ").trim(); }
 
@@ -111,15 +115,116 @@ export async function messagesOf(c: Q, chatId: string): Promise<Message[]> {
   const r = await c.query("SELECT id, who, by_key, body, part, at FROM copilot_messages WHERE chat_id = $1 ORDER BY id", [chatId]);
   return r.rows.map((x: any) => ({ id: str(x.id), who: x.who, by: str(x.by_key), body: str(x.body), part: x.part ?? null, at: iso(x.at) }));
 }
-/* WHAT IS TYPED IS KEPT, and — until stage 2 — answered by the product's own
-   line, marked `notConnected` so the screen draws it as the product and never
-   as the AI (§125). Both rows in one transaction with the chat's last touch,
-   so the rail's order and the conversation cannot disagree. */
-export async function say(c: Q, chatId: string, body: string, by: string): Promise<void> {
-  await c.query("INSERT INTO copilot_messages (chat_id, who, by_key, body) VALUES ($1, 'person', $2, $3)", [chatId, by, body]);
-  await c.query("INSERT INTO copilot_messages (chat_id, who, body, part) VALUES ($1, 'ai', $2, $3)",
-    [chatId, NOT_CONNECTED, JSON.stringify({ kind: "notConnected" })]);
+/* ── SAYING SOMETHING, IN THREE STEPS (stage 2) ─────────────────────────
+   The model is called BETWEEN two transactions, never inside one: a draft
+   can take most of a minute, and a transaction held open that long pins a
+   connection and holds the chat's rows for every other request (§289's
+   lesson about what a transaction pins). So: record what was said and read
+   what the AI needs (step 1), ask (the module), record the answer (step 2).
+   What was typed is kept even when the answer never comes. */
+export type FileMeta = { id: string; name: string; kind: string; size: number };
+export type Said = { messageId: string; files: FileMeta[] };
+
+export async function recordSaid(c: Q, chatId: string, a: { body: string; by: string; fileIds: string[]; pasted: boolean }): Promise<Said | "badFile"> {
+  let files: FileMeta[] = [];
+  if (a.fileIds.length) {
+    const r = await c.query(
+      "SELECT id, name, kind, size FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL AND id = ANY($2::uuid[]) ORDER BY at",
+      [chatId, a.fileIds]);
+    if (r.rows.length !== a.fileIds.length) return "badFile";
+    files = r.rows.map((x: any) => ({ id: str(x.id), name: str(x.name), kind: str(x.kind), size: Number(x.size) }));
+  }
+  const part = { kind: "said", files, pasted: a.pasted, words: a.body.trim() ? a.body.trim().split(/\s+/).length : 0 };
+  const m = await c.query(
+    "INSERT INTO copilot_messages (chat_id, who, by_key, body, part) VALUES ($1, 'person', $2, $3, $4) RETURNING id",
+    [chatId, a.by, a.body, JSON.stringify(part)]);
+  const messageId = str(m.rows[0].id);
+  if (files.length) {
+    await c.query("UPDATE copilot_files SET message_id = $2 WHERE chat_id = $1 AND id = ANY($3::uuid[])",
+      [chatId, messageId, files.map((f) => f.id)]);
+  }
   await c.query("UPDATE copilot_chats SET last_at = now() WHERE id = $1", [chatId]);
+  return { messageId, files };
+}
+
+/* What the AI is sent from the chat: the conversation before this message
+   (what the product said is left out — it is not the Copilot's), the
+   assumptions already made, and every file SENT in the chat. PDFs travel as
+   themselves, so only the most recent three do, or one chat of reports
+   would outgrow the request. */
+export type ChatMaterial = {
+  history: { from_office: boolean; body: string }[];
+  assumptions: string[];
+  files: { name: string; kind: string; text: string; bytes: Buffer | null }[];
+};
+export async function materialOf(c: Q, chatId: string, beforeId: string): Promise<ChatMaterial> {
+  const h = await c.query("SELECT who, body, part FROM copilot_messages WHERE chat_id = $1 AND id < $2 ORDER BY id", [chatId, beforeId]);
+  const history = h.rows
+    .filter((x: any) => x.who === "person" || !x.part || x.part.kind === "answer")
+    .map((x: any) => {
+      const names = x.part && Array.isArray(x.part.files) ? x.part.files.map((f: any) => f.name) : [];
+      return { from_office: x.who === "ai", body: str(x.body) + (names.length ? "\n[attached: " + names.join(", ") + "]" : "") };
+    });
+  const ch = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1", [chatId]);
+  const assumptions = Array.isArray(ch.rows[0]?.assumptions) ? ch.rows[0].assumptions.map(str) : [];
+  const f = await c.query(
+    "SELECT name, kind, text, CASE WHEN kind = 'pdf' THEN bytes END AS bytes, at FROM copilot_files " +
+    "WHERE chat_id = $1 AND message_id IS NOT NULL ORDER BY at", [chatId]);
+  const pdfKeep = new Set(f.rows.filter((x: any) => x.kind === "pdf").slice(-3).map((x: any) => x.name + "|" + iso(x.at)));
+  const files = f.rows.filter((x: any) => x.kind !== "pdf" || pdfKeep.has(x.name + "|" + iso(x.at)))
+    .map((x: any) => ({ name: str(x.name), kind: str(x.kind), text: str(x.text), bytes: x.bytes ?? null }));
+  return { history, assumptions, files };
+}
+
+/* The answer, or the product's line when there is none. A new assumption is
+   added to the chat's list once — the same words twice is one assumption. */
+export async function recordAnswer(c: Q, chatId: string, a: { body: string; part: unknown; assumptions?: string[] }): Promise<void> {
+  await c.query("INSERT INTO copilot_messages (chat_id, who, body, part) VALUES ($1, 'ai', $2, $3)",
+    [chatId, a.body, JSON.stringify(a.part)]);
+  if (a.assumptions && a.assumptions.length && (process.env.SMP_BREAK || "") !== "forget-assumptions") {
+    const ch = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1 FOR UPDATE", [chatId]);
+    const have: string[] = Array.isArray(ch.rows[0]?.assumptions) ? ch.rows[0].assumptions.map(str) : [];
+    const low = new Set(have.map((x) => x.toLowerCase()));
+    for (const x of a.assumptions) if (!low.has(x.toLowerCase())) { have.push(x); low.add(x.toLowerCase()); }
+    await c.query("UPDATE copilot_chats SET assumptions = $2::jsonb WHERE id = $1", [chatId, JSON.stringify(have.slice(-40))]);
+  }
+  await c.query("UPDATE copilot_chats SET last_at = now() WHERE id = $1", [chatId]);
+}
+
+export async function assumptionsOf(c: Q, chatId: string): Promise<string[]> {
+  const r = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1", [chatId]);
+  return Array.isArray(r.rows[0]?.assumptions) ? r.rows[0].assumptions.map(str) : [];
+}
+
+/* ── FILES (plan §7.3) ──────────────────────────────────────────────── */
+export async function attachFile(c: Q, chatId: string, a: { name: string; kind: string; size: number; bytes: Buffer; text: string; by: string }): Promise<FileMeta> {
+  const r = await c.query(
+    "INSERT INTO copilot_files (chat_id, name, kind, size, bytes, text, by_key) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+    [chatId, a.name, a.kind, a.size, a.bytes, a.text, a.by]);
+  return { id: str(r.rows[0].id), name: a.name, kind: a.kind, size: a.size };
+}
+/* Only a file still waiting to be sent may be taken off: a sent one is part
+   of what was said, and what was said is the record (decisions §3.6). */
+export async function detachFile(c: Q, chatId: string, fileId: string): Promise<boolean> {
+  const r = await c.query("DELETE FROM copilot_files WHERE chat_id = $1 AND id = $2 AND message_id IS NULL", [chatId, fileId]);
+  return (r.rowCount || 0) > 0;
+}
+export async function pendingFiles(c: Q, chatId: string): Promise<FileMeta[]> {
+  const r = await c.query("SELECT id, name, kind, size FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL ORDER BY at", [chatId]);
+  return r.rows.map((x: any) => ({ id: str(x.id), name: str(x.name), kind: str(x.kind), size: Number(x.size) }));
+}
+export async function pendingCount(c: Q, chatId: string): Promise<number> {
+  const r = await c.query("SELECT count(*) AS n FROM copilot_files WHERE chat_id = $1 AND message_id IS NULL", [chatId]);
+  return Number(r.rows[0].n) || 0;
+}
+export async function fileBytes(c: Q, fileId: string): Promise<{ name: string; kind: string; bytes: Buffer } | null> {
+  const r = await c.query("SELECT name, kind, bytes FROM copilot_files WHERE id = $1", [fileId]);
+  return r.rows[0] ? { name: str(r.rows[0].name), kind: str(r.rows[0].kind), bytes: r.rows[0].bytes } : null;
+}
+export async function oneMessage(c: Q, chatId: string, id: string): Promise<Message | null> {
+  const r = await c.query("SELECT id, who, by_key, body, part, at FROM copilot_messages WHERE chat_id = $1 AND id = $2", [chatId, id]);
+  const x = r.rows[0];
+  return x ? { id: str(x.id), who: x.who, by: str(x.by_key), body: str(x.body), part: x.part ?? null, at: iso(x.at) } : null;
 }
 
 /* ── DELIVERABLES AND THEIR VERSIONS ─────────────────────────────────── */

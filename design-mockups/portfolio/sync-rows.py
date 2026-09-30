@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Splice `_rows.js` into every Portfolio drawing that asks for it.
+"""Splice `_plan.js` into every Portfolio drawing that asks for it.
 
 Spec 056 §5.2. Three drawings read one plan, and three hand-kept copies of an
 array is the fault this spec is about — so the copy is MECHANICAL and the
@@ -19,7 +19,7 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "_rows.js")
+SRC = os.path.join(HERE, "_plan.js")
 OPEN, SHUT = "/* ROWS:start */", "/* ROWS:end */"
 
 def main():
@@ -53,7 +53,7 @@ def main():
     if not seen:
         sys.exit("no drawing carries the markers — that is a fault, not an empty run")
     if check and stale:
-        sys.exit("%d of %d drawing(s) are behind _rows.js" % (len(stale), seen))
+        sys.exit("%d of %d drawing(s) are behind _plan.js" % (len(stale), seen))
     print("%d drawing(s) read one plan." % seen)
 
 main()

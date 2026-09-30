@@ -3,12 +3,12 @@
 **Status:** **not built. No source has moved.** This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
-what it specifies is the shape, not the screens. **Three screens are drawn and
-signed off** — the project team (§6.4), the charter (§5.1) and the plan (§9.9);
-**Progress** (§9.10) and **Analytics** (§9.12) are drawn and await sign-off.
-**The landing is the one screen with no picture.** Rule 1c is paid for the first
-three and owed for the rest: nothing visual may be built from this page until
-each screen is drawn and signed off.
+what it specifies is the shape, not the screens. **Every screen is now drawn.**
+Three are signed off — the project team (§6.4), the charter (§5.1) and the plan
+(§9.9); **Progress** (§9.10), **Analytics** (§9.12) and **the landing** (§9.13)
+are drawn and await sign-off. Rule 1c is paid for the first three and owed for
+the other three: nothing visual may be built from this page until each screen is
+signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -148,7 +148,7 @@ and add notes. They do not restructure the plan.
 | 2 | Its own roles and areas | **Three roles, no areas at all.** There is no Portfolio column on Roles &amp; access. The roles belong to a project, not to the module (§6) — which is the contract's *own roles* answered honestly rather than by borrowing a grid. |
 | 3 | Its own Setup group | **Yes**, and it holds ONE thing: the three words (§9.1). Who leads a project is set on the project (§5.1a), which is where it belongs — so this group is a page with a row on it, and saying so now is cheaper than discovering it. |
 | 4 | Its own rhythm | **Checkpoints**, weekly or monthly, per project — **not** the reporting cycle. Strategy's cycle does not reach it and must not. **A checkpoint is a date and nothing else** (§9.10): it stores nothing, records nothing and gates nothing. |
-| 5 | A landing | The project list for this client, with each project's state. A client with one project lands in it. |
+| 5 | A landing | The project list for this client, with each project's state, and **what is owed next across all of them** — the one reading no project tab can give (§9.13). A client with one project lands in it, and somebody sent a link to one project lands in that project. |
 
 What the spine gives for nothing: the address `/<client>/portfolio/…`, the
 switcher entry, the row on the client's card, the on/off drawer, the door,
@@ -1443,9 +1443,9 @@ stand out by colour without being dragged to the top.
 
 #### The rows are spliced, not copied — and that is new here
 
-Three drawings now read one plan, and **three hand-kept copies of an array is
+Four drawings now read one plan, and **four hand-kept copies of an array is
 the fault §5.2 is about arriving in my own mockups**. So the canonical rows live
-in `design-mockups/portfolio/_rows.js` and `sync-rows.py` splices them between
+in `design-mockups/portfolio/_plan.js` and `sync-rows.py` splices them between
 markers in every drawing that carries them — **write, or `--check` to fail when
 one is behind**. It **refuses rather than guesses**: a file with one marker and
 not the other, markers the wrong way round, or a run that matched no drawing at
@@ -1458,14 +1458,129 @@ flag and moved one sign-off date, and the plan and Progress drawings picked both
 up with no editing — the plan's Gantt gained a second red overrun it is right to
 have, and Progress's signed-off list moved to the real date.
 
+**IT THEN CARRIED THE ARITHMETIC TOO, AND THAT IS THE POINT RATHER THAN
+TIDINESS** (§9.13): the landing had to be given three more projects, and a
+percentage worked out four ways is §5.2 exactly — so `roll()` moved into
+`_plan.js` and every drawing calls the one copy. It is a **superset** (the
+figure, the window, the status word and the done-of-total count) and each
+drawing reads what it needs. **Doing it exposed that the three copies had
+already drifted**: the plan's and the Analytics page's `roll()` had different
+bodies — one set a status word the other did not, one counted activities the
+other did not — both correct for their own page and neither the same function.
+Nobody would have noticed until the two printed different numbers.
+
 #### What it leaves
 
-- **Across projects is still not drawn.** §9.11 settled that the client-wide
-  reading belongs on the **landing** — the project list with each project's
-  state (§4 row 5) — and that is the last screen of this module with no picture.
+- **Across projects is drawn at §9.13**, on the landing, which is where §9.11
+  settled it belongs — and one number crossed back: its threshold for *soon* was
+  written as thirty days there while this page already had fourteen, so the two
+  now read one `SOON` out of `_plan.js` (§9.13).
 - **Nothing is printable or exportable.** A review deck out of this page is the
   obvious next ask and is deliberately not built; Strategy's own `.pptx` and PDF
   routes (§296, §305, §311) are what it would follow.
+
+---
+
+### 9.13 · The landing — drawn 2026-09-30, awaiting sign-off
+
+**DRAWN, AWAITING SIGN-OFF**, from
+`design-mockups/portfolio/2026-09-30_portfolio-landing.html`. The last screen of
+this module without a picture, and the one §9.11 left open: the client-wide
+reading had nowhere else to go, **because every other tab in Portfolio is about
+one project by construction**.
+
+**IT DOES TWO JOBS AND NOTHING ELSE**: you pick a project, and you see what is
+owed across all of them. Anything narrower than a client belongs on a project's
+own tabs, and anything about one person's own work is Progress's — so nothing is
+repeated across the two, which is §9.12's own rule one level up.
+
+**WHO SEES WHICH PROJECTS WAS ALREADY DECIDED AND IS NOT A NEW SETTING** (§4 row
+3): a seat on the client reaches every project, everybody else reaches the
+projects that name them. The switch at the top of the drawing is **drawing-only**
+and exists to show that rather than to be built — the office sees five projects,
+Omar Tarek sees the two that name him, **and is told nothing at all about the
+other three**: not a greyed row, not a count, because a row he cannot open only
+tells him something exists. **He sees each project's own state, not only his part
+of it** (§6.2: a Contributor reads the whole plan of a project that names them),
+so the Culture row says the same thing to both people. And **Rania holds a seat
+*and* is named on projects**, which is the normal case rather than an edge.
+
+**EVERY FIGURE IS DERIVED, WHICH IS WHAT MAKES THE ROW TRUSTWORTHY**: the Culture
+row reads **59%** because that is what its own phases average to — the same
+number its Analytics tab reads, off the same rows, asserted by running both
+(§5.2). A stored per-project percentage is the fault this spec spends its length
+on, and the reference product has two such columns that nothing ever writes
+(§9.8).
+
+#### The state that is easiest to draw wrong
+
+**A project with a charter and no plan yet**, which is what every project looks
+like on its first day. A row reading **0%** over *0 of 0 activities* reads as a
+broken row rather than a new project (§45.2), so it says **Not planned**, gives
+no figure — **and is given no progress track at all**, because an empty bar with
+a border round it reads as nought (§15.1: absent is not zero). The drawing
+carries such a project on purpose (§255).
+
+**And the window on the row is the PLAN's, never the charter's.** What was agreed
+and what is happening are two facts, and §5's charter is where the agreed dates
+live — putting them on this row as well is two drawings of one thing, which is
+the fault above. So an unplanned project shows no window either.
+
+#### Three things the drawing settles, and one number it admits to
+
+- **Behind and awaiting sign-off are separate marks**, because they need separate
+  people: late work needs whoever is doing it, and work waiting to be accepted
+  needs the Lead. A single *needs attention* mark would send both to the same
+  place.
+- **What is owed next is a rule, not a number of rows**: *anything overdue
+  anywhere, plus each project's next commitment.* So the section grows exactly as
+  the list above it does, and no cut-off has to be defended the first time
+  somebody adds a project (§122.5).
+- **Something both late and finished says it is *waiting*, not that it is late.**
+  The blueprint draft was due in February and the work is done; it is sitting
+  with a Lead. A red *18 days over* would send somebody chasing the person who
+  has already finished — so the badge names what is actually in the way and the
+  **date beside it stays red**. Both facts are on the row and only one of them is
+  the job. (The Analytics page already orders it the same way, which is why this
+  needed no new rule.)
+- **The one number somebody chose rather than derived is `SOON`, and the drawing
+  says so on the page.** How much warning a commitment deserves cannot be
+  measured, so it is a decision with a name rather than a guessed constant — and
+  **the first draft wrote thirty days here while §9.12's page already had
+  fourteen**, which is §5.2 arriving in a field instead of a row. One `SOON` in
+  `_plan.js` now, read by both. **It decides a COLOUR and never a word**: every
+  commitment prints how far away it is, because the first drawing said *To come*
+  past the threshold — a word doing the colour's job and telling nobody how long
+  they had.
+
+#### What could not be checked, said rather than left as an absence
+
+**There is no browser in this container**, so the landing has never been
+rendered — same as §9.9, §9.10 and §9.12. What was done instead: the script
+syntax-checked, the artifact contract asserted (one `<title>`, one `<script>`, no
+document wrapper), and **every figure it will draw printed in both viewer
+states** — 5 projects / 1 finished / 1 unplanned / 2 behind / 2 activities past
+their date / 2 awaiting sign-off in 2 projects for the office, and 2 / 0 / 0 / 1
+/ 1 / 1 in 1 for Omar, with *Add a project* **drawn** for the seat and **absent**
+for him (absent rather than disabled: a control that refuses is still a control
+somebody has to ask about). Neither palette has been looked at. **Three faults in
+the drawing were found by reading its own printed output** — the thirty-day
+threshold, the lying empty bar, and *To come* — and none of them by a check.
+
+#### Three things left for Islam
+
+- **The order.** Sorted by name, with the marks doing the work — which reads
+  properly at five projects and probably not at twenty, where whatever needs
+  attention should come first. The cost of worst-first is that the list reorders
+  itself as the work moves, so nobody can learn where a project sits.
+- **Where a finished project goes.** Procurement is done and is still in the list
+  with a **Done** word on it. It could drop to the bottom or leave for an
+  archive, which is a decision about whether a closed engagement is still part of
+  the portfolio and not one to take in passing.
+- **Whether the strip should count what is *yours*.** It counts the client's work
+  today. For Omar it could instead say what has his name on it — but that is
+  Progress's own question one level down, and answering it twice is how two
+  screens come to disagree.
 
 ---
 

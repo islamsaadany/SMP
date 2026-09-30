@@ -95,10 +95,18 @@ export async function seedDemo({ url, replace = false, brk = null, log = (s) => 
     const extra = D.moduleContent([]).modules;
     await owner.query("UPDATE tenants SET name = $2, modules = $3::jsonb WHERE id = $1",
       [row.id, graph.group.org, JSON.stringify(extra)]);
-    await withTenant(row.id, (c) => replaceContent(c, row.id, graph));
+    const kept = await withTenant(row.id, (c) => replaceContent(c, row.id, graph));
     const back = await withTenant(row.id, (c) => readState(c));
     if (!back) throw new Error("seed-demo: the tenant holds no graph after loading it");
-    if (!brk) D.refuseIfAnySurvives(back, real);
+    /* THE PEOPLE A MEMBERSHIP POINTS AT ARE NOT THE DEMO'S CONTENT. They are
+       the office — Forefront's own consultants, placed on the demo so they can
+       open it — and replacing keeps their register rows on purpose. The real
+       example names some of them as owners, so their names are on the
+       forbidden list, and the first production replace refused its own kept
+       rows (2026-09-30: "Islam Saadany" at people[33]). The scan skips exactly
+       those keys and nothing else: every row this seed WROTE is still read. */
+    if (!brk) D.refuseIfAnySurvives(Object.assign({}, back,
+      { people: (back.people || []).filter((p) => !kept.has(p.key)) }), real);
     log("Written and read back: " + (back.group && back.group.org) + " · " +
         Object.keys(back.units || {}).length + " units · " + (back.people || []).length + " people.");
     return { tenantId: row.id, graph: back, units, people, marks };
@@ -147,6 +155,7 @@ async function replaceContent(c, tenantId, graph) {
       "INSERT INTO notes (title, met_on, attendees, raw, minutes, created_by) VALUES ($1,$2,$3::jsonb,$4,$5::jsonb,'demo')",
       [n.title, n.metOn, JSON.stringify(n.attendees), n.raw, JSON.stringify(n.minutes)]);
   }
+  return keep;
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

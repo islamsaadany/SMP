@@ -67,11 +67,23 @@ try {
      `data:` URI anywhere is refused outright, because a mark cannot be
      renamed). What is different here is only WHERE it looks: at the columns,
      including any a graph reader does not surface. */
+  /* THE OFFICE IS NOT CONTENT (2026-09-30). A person a membership points at
+     is one of Forefront's consultants, placed on the tenant so they can open
+     it, and a replace keeps that row on purpose; the example names some of
+     them as owners, so their names are forbidden words. Skipped by KEY, only
+     in `people`, only while the membership exists — the first production
+     replace refused its own kept rows and failed the build. */
   const scan = async (tid) => {
     const hits = [];
+    const members = new Set((await owner.query(
+      "SELECT person_key FROM tenant_users WHERE tenant_id = $1", [tid])).rows.map((r) => r.person_key));
     await withTenant(tid, async (c) => {
       for (const t of tables) {
-        const rows = (await c.query('SELECT * FROM "' + t + '"')).rows;
+        /* …and a field that only HOLDS one of their keys (a membership, a
+           tracker owner) names the office, not the client. */
+        const rows = (await c.query('SELECT * FROM "' + t + '"')).rows
+          .filter((r) => !(t === "people" && members.has(r.key)))
+          .map((r) => Object.fromEntries(Object.entries(r).filter(([, v]) => !members.has(v))));
         for (const row2 of rows) {
           try { D.refuseIfAnySurvives(row2, real); }
           catch (e) { hits.push(t + " · " + (String(e.message).split("\n")[1] || String(e.message)).trim().slice(0, 120)); }
@@ -145,12 +157,29 @@ try {
     const again = await seedDemo({ url: URL_, replace: true, brk, log: () => {} });
     check(again.tenantId === row.id, "--replace keeps the tenant rather than making a new one", again.tenantId);
     const kept = (await owner.query("SELECT seat FROM tenant_users WHERE tenant_id = $1 AND user_id = $2", [row.id, office.id])).rows[0];
+    /* AND A KEPT PERSON WHOSE NAME IS A FORBIDDEN WORD DOES NOT REFUSE THE
+       REPLACE — production's own case: a consultant the example names as an
+       owner, placed on the demo. Named from the example's own words, so the
+       check never types a real name. */
+    const word = [...real].find((n) => /\s/.test(n)) || "Placed Person";
+    await withTenant(row.id, (c) => c.query(
+      "INSERT INTO people (key, idx, name, role) VALUES ('ff_check', 99, $1, 'super') ON CONFLICT (tenant_id, key) DO UPDATE SET name = $1", [word]));
+    const second = (await owner.query("SELECT id FROM users WHERE kind = 'office' AND id <> $1 ORDER BY created_at LIMIT 1", [office.id])).rows[0];
+    let replaced = null, why = null;
+    if (second) {
+      await owner.query("INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,'ff_check','smoteam') " +
+        "ON CONFLICT (tenant_id, user_id) DO UPDATE SET person_key = 'ff_check', seat = 'smoteam'", [row.id, second.id]);
+      try { replaced = await seedDemo({ url: URL_, replace: true, brk, log: () => {} }); } catch (e) { why = e.message.split("\n")[0]; }
+    }
+    check(!second || (replaced && !why), "a placed consultant the example names does not refuse the replace", why || (second ? "ok" : "no second office login"));
     check(kept && kept.seat === "super", "and the office seat on it survives", kept);
+    const seats = new Set((await owner.query(
+      "SELECT person_key FROM tenant_users WHERE tenant_id = $1 AND seat IN ('super','smoteam')", [row.id])).rows.map((r) => r.person_key));
     const mods = await withTenant(row.id, async (c) => ({
       actions: (await c.query("SELECT owner_key FROM tracker_actions")).rows,
       notes: (await c.query("SELECT count(*)::int AS n FROM notes")).rows[0].n,
     }));
-    check(mods.actions.length >= 10 && mods.actions.every((a) => a.owner_key === "smo"),
+    check(mods.actions.length >= 10 && mods.actions.every((a) => seats.has(a.owner_key)),
       "the tracker is filled, owned by the office seat it found", mods.actions.length);
     check(mods.notes >= 3, "and meeting notes are there", mods.notes);
     const t = (await owner.query("SELECT modules FROM tenants WHERE id = $1", [row.id])).rows[0];

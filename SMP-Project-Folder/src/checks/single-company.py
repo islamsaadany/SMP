@@ -44,6 +44,13 @@ with sync_playwright() as p:
     pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1')}catch(e){}")
     pg.goto("file://" + os.path.abspath(BUILT)); pg.wait_for_timeout(800)
 
+    # §439.1: one unit planned in objectives & actions, MADE (§255)
+    OBJ = safe(pg, """()=>{var k=activeKeys().slice(-1)[0], u=UNITS[k]; u.format='objectives';
+      u.keyObjectives=[{id:k+'-KO1',name:'Grow share',dir:'\u2265',target:'20%',compile:'Latest',actual:'12%',progress:60},
+                       {id:k+'-KO2',name:'Cut cost',dir:'\u2264',target:'5M EGP',compile:'Sum',actual:null,progress:null}];
+      u.actions=[{id:k+'-A1',name:'Open two branches',owner:'X Y',due:'Aug 26',status:'wip',pct:40},
+                 {id:k+'-A2',name:'Sign the agreement',owner:'',due:'Feb 26',status:'done'}];
+      return k}""")
     navUnits = lambda: safe(pg, "()=>[...document.querySelectorAll('#units [data-u]')].map(b=>b.dataset.u).filter(k=>UNIT_KEYS.indexOf(k)>-1).length", -1)
     # ── 0. Before: the units are the row, nothing is copied ──────────
     before = safe(pg, "()=>({units:activeKeys().length, pillars:activeKeys().reduce((n,k)=>n+(UNITS[k].format&&UNITS[k].format!=='pillars'?0:UNITS[k].items.length),0), top:(GROUP.items||[]).length, arch:ARCHIVES.length, exists:buExists()})", {})
@@ -65,13 +72,20 @@ with sync_playwright() as p:
     ck("pressing Move them and switch off", press(pg, '[data-buask-go]'))
     after = safe(pg, "()=>({exists:buExists(), top:(GROUP.items||[]).length, arch:ARCHIVES.length, units:activeKeys().length, kept:UNIT_KEYS.every(k=>UNITS[k].items!==undefined), topOn:SMPRules.levelComponents(GROUP,'top')})", {})
     ck("the layer is off", after.get("exists") is False, after)
-    ck("every unit pillar is now on the company page", after.get("top") == before.get("pillars"), [after.get("top"), before.get("pillars")])
+    ck("every unit pillar is now on the company page", after.get("top") == (before.get("pillars") or 0) + 1, [after.get("top"), (before.get("pillars") or 0) + 1])
     ck("…each unit's plan archived once", after.get("arch", 0) - before.get("arch", 0) >= 1, after)
     ck("…the units are hidden, not deleted", after.get("units") == 0 and after.get("kept") is True, after)
     ck("…and the company page's pillars and SWOT are switched on", "pillar" in (after.get("topOn") or []) and "swot" in (after.get("topOn") or []), after)
     ck("figures travel with the copy",
        safe(pg, "()=>{var k=UNIT_KEYS.filter(k=>UNITS[k].active!==false&&(UNITS[k].items||[]).length)[0], u=UNITS[k], p=u.items[0], c=GROUP.items.filter(q=>q.fromUnit===k&&q.fromId===p.id)[0]; return !!c && JSON.stringify(c.measures.map(m=>m.actual))===JSON.stringify(p.measures.map(m=>m.actual)) && c.id.indexOf('group-P')===0}") is True)
     ck("ids are fresh and unique", safe(pg, "()=>{var ids=[]; GROUP.items.forEach(p=>{ids.push(p.id); p.measures.forEach(m=>ids.push(m.id)); p.tactics.forEach(t=>ids.push(t.id));}); return new Set(ids).size===ids.length}") is True)
+    d = pg.evaluate("""(k)=>{var p=GROUP.items.filter(q=>q.fromUnit===k&&q.fromId==='u:'+k)[0]; if(!p) return null;
+      return {name:p.name===UNITS[k].name, m:p.measures.map(m=>[m.name,m.target,m.actual]), t:p.tactics.map(t=>[t.name,t.q1,t.q2,t.q3,t.q4,t.status,t.actual,t.due])}}""", OBJ)
+    ck("§439.1 the objectives unit arrives as ONE direction under its own name", bool(d) and d.get("name") is True, d)
+    ck("…its objectives are the direction's measures, figures kept",
+       bool(d) and d["m"] == [["Grow share","20%","12%"],["Cut cost","5M EGP",None]], d)
+    ck("…its actions are the tactics, timed by the quarter of their date, status and % kept",
+       bool(d) and d["t"] == [["Open two branches",0,0,1,0,"WIP",40,"Aug 26"],["Sign the agreement",1,0,0,0,"Done",100,"Feb 26"]], d)
     n1 = safe(pg, "()=>GROUP.items.length")
     safe(pg, "()=>buFoldIntoTop()")
     ck("pressing it twice copies nothing twice", safe(pg, "()=>GROUP.items.length") == n1)

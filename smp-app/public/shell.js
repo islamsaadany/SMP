@@ -15122,9 +15122,52 @@ function buFoldIntoTop(){
   var top = topWritable(), moved = 0;
   keys.forEach(function(k){
     var u = UNITS[k];
-    if (String(u.format || "pillars") !== "pillars") return;
     var head = personBy((UNIT_ROLES[k] || {}).head);
     var took = false;
+    /* §439.1 — A UNIT THAT PLANS IN OBJECTIVES & ACTIONS BECOMES ONE
+       DIRECTION. Islam: *"the plans where in objectives and actions actually
+       which in pillars shift to measures and tactics"* — so the unit's name is
+       the direction, its objectives are the direction's measures and its
+       actions are its tactics, every figure carried. An action's date becomes
+       the ONE quarter it falls in (a tactic is timed by quarters); the date is
+       kept on the row as well, so nothing written is lost (§96.2). A unit that
+       plans in PROJECTS is still left where it is — nobody has said what a
+       project becomes on a direction. */
+    if (unitFormat(u) === "objectives") {
+      if (GROUP.items.some(function(q){ return q && q.fromUnit === k && q.fromId === "u:" + k; })) return;
+      var kos = Array.isArray(u.keyObjectives) ? u.keyObjectives : [];
+      var acts = Array.isArray(u.actions) ? u.actions : [];
+      if (!kos.length && !acts.length) return;
+      var pid = mintRowId(GROUP.items, "group-P");
+      var dp = { id: pid, code: pillarCode(top, GROUP.items.length), name: u.name || "", sub: "",
+                 kind: "", theme: "", owner: head ? head.name : "", measures: [], tactics: [],
+                 fromUnit: k, fromId: "u:" + k };
+      kos.forEach(function(o, i){
+        var m = { id: pid + "-M" + (i + 1), name: o.name || "", dir: o.dir || "\u2265",
+                  target: o.target || "", compile: o.compile || "", actual: o.actual == null ? null : o.actual,
+                  progress: o.progress == null ? null : o.progress };
+        if (o.note) m.note = o.note;
+        if (o.hide) m.hide = true;
+        dp.measures.push(m);
+      });
+      acts.forEach(function(a, i){
+        var t = { id: pid + "-T" + (i + 1), name: a.name || "", owner: a.owner || "",
+                  q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+        var mo = monthsOf(a.due);
+        if (mo != null) t["q" + (Math.floor((mo % 12) / 3) + 1)] = 1;
+        if (a.due) t.due = a.due;
+        if (a.status === "done") { t.status = "Done"; t.actual = 100; }
+        else if (a.status === "wip") { t.status = "WIP"; t.actual = statusReads(a); }
+        else if (a.status === "todo") t.actual = 0;
+        if (a.note) t.note = a.note;
+        if (a.hide) t.hide = true;
+        dp.tactics.push(t);
+      });
+      GROUP.items.push(dp); moved++;
+      archiveUnitPlan(u, "moved to the company page");
+      return;
+    }
+    if (String(u.format || "pillars") !== "pillars") return;
     (u.items || []).forEach(function(p){
       if (GROUP.items.some(function(q){ return q && q.fromUnit === k && q.fromId === p.id; })) return;
       var c = clone(p);

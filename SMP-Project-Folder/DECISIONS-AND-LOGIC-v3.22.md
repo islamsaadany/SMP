@@ -59117,3 +59117,26 @@ graph-diff 140/0, platform-rules 69/0, my-reporting 65/0; `qa.py` ERRORS none;
 `built-in-step` all good. **Not run in this session**: the served-stack
 database checks. **Recorded, not done**: El Abd's own move is a press on the
 live client, to be made by Islam or at his word, not by a migration.
+
+### §439.1 — a unit that plans in Objectives & actions becomes one direction (2026-09-30)
+
+Islam, testing §439 on El Abd: *"I made the swtich but nothign shofted to the
+company"*, then, asked how the units plan: *"the plans where in objectives and
+actions actually which in pillars shift to measures and tactics."* **THE SWITCH
+WORKED AND THE MOVE COPIED NOTHING**, because `buFoldIntoTop()` only read a
+unit's PILLARS and El Abd's direction-units plan in objectives & actions
+(§405) — their pillars are empty by construction. So such a unit now arrives
+as **one direction under its own name**, owner its head: its objectives become
+the direction's measures (name, direction, target, compile rule, figure,
+progress, note, hidden mark), its actions its tactics (name, owner, note,
+hidden mark). **An action is timed by a date and a tactic by quarters**, so the
+date becomes the ONE quarter it falls in, and the date is kept on the row as
+well so nothing written is lost (§96.2); done reads Done at 100, in progress
+reads WIP at its per-cent, not started reads 0. Its plan is archived once and
+the move is idempotent (`fromId: "u:<key>"`). **A unit planning in PROJECTS is
+still left where it is** — nobody has said what a project becomes on a
+direction. An objective's weight has nowhere to go (a measure has none), which
+is stated rather than discovered. On a client already switched off, the move
+runs by switching the layer back on and off again. `checks/single-company.py`
+MAKES an objectives unit (§255) and asserts the direction, its measures and its
+tactics — **4 red** with the branch taken out, from the sources (§276).

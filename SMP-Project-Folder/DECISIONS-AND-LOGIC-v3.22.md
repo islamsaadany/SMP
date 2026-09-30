@@ -58090,3 +58090,17 @@ Islam, with two screenshots — a Strategy page's menu (*Insights · Client sett
 `checks/shell.mjs` and `checks/modules.mjs` REWRITTEN, never loosened (§218): each asserts the SAME full list as an AGREEMENT with the client's modules (§94.8) and exactly one bold entry — the module on its page, its settings on its settings, Client settings on the client's — and a one-module client now reads *Strategy | Strategy settings · Client settings*. With the §412 menu put back: **3 red** and **5 red**. With the change: shell 136 ok with the one pre-existing red (§412's note), modules 166/0. Screen only; nothing stored, nothing migrated, no forced sign-out (spec 029).
 
 **Merged to `main` 2026-09-29 on Islam's word**, a fast-forward — `main` had not moved since §412.
+
+## §414 — the Reporting cycle board counts objectives-and-actions plans (2026-09-29)
+
+The filled Meridian demo showed two faults on "Who has reported". A function planning in objectives and actions (§342) was never listed: `boardFunctionKeys()` admitted a function only for pillars, projects or a capability. A unit planning that way (§405) had its actions read as unreported (Nigeria 4/8 on the board, 8 of 8 on its own page), because `rowAnswered()` had no case for an action and fell through to `o.actual`. An action is now answered as a milestone is (`statusGiven`), and an objectives function is on the board. Nothing changes for a subject planning in pillars or projects; nothing stored moves. The note rule for actions (a behind action asks for no note, where a milestone does) is left open at Islam's word, "14 later".
+
+## §415 — a plan in objectives and actions holds its objectives on the Plan (2026-09-30)
+
+Islam, of Finance's Plan reading as six tasks with no targets: *"a function PLANNING in objectives and actions get their objectives and actions in the plan tab not the overview tab."* Mockup `design-mockups/objectives-on-the-plan/` built from the real page and signed off (*"16 approved"*).
+
+**The Plan draws Key Objectives above Actions.** For a function, the objectives are EDITED there too, under the Plan's pen: `capKoEdit()` takes its page and access key from the caller, and `k_found`/`k_proj` are one area on the server, so nothing is offered that a save refuses. **The Overview stops drawing them for this form**, so the list keeps one authoring surface. A UNIT planning this way reads them on its Plan and still writes them on its Foundation, whose editor carries the three-year target and was left alone at Islam's earlier word (§226).
+
+**The Overview tab goes when the brief is off** (*"17 yes"*). This REVERSES §212's *always drawn* for this one form (Principle II: recorded, not overwritten): the tab answers to the brief switch and the form, never to how many rows exist, so §45.2's rule still holds.
+
+`checks/objectives-actions.py` §4 REWRITTEN, never loosened (§218): the objectives are asserted on the Plan and above the actions, absent from this function's Overview, and the Overview offered exactly while the brief is on — beside a projects function whose Overview still draws them. §5's typed box is asked of the actions table, the second on the page now. Against the build before: **4 red**. With the change: 54/0; `unit-plans-in` 45/0, `plan-builder` and `import-page` green, and the demo check 20/0.

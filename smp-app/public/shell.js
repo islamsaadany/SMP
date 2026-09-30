@@ -31007,15 +31007,53 @@ function fnObjPlanBody(fk, ed){
   return '<h4 class="mini">Actions <em>— the work, and when it is due</em></h4>' +
     miniTable(["#","Action","Owner","Due"], rows);
 }
+/* §415: THE PLAN IS THE WHOLE PLAN — the objectives, then the actions.
+   Islam, of Finance's Plan reading as six tasks with no targets: *"a function
+   PLANNING in objectives and actions get their objectives and actions in the
+   plan tab not the overview tab"*, then the mockup (design-mockups/
+   objectives-on-the-plan) signed off. The Overview stops drawing them for this
+   form (`holderOverview`), so the objectives keep ONE authoring surface and it
+   is this one, under the Plan's own pen: k_found and k_proj are one area on
+   the server (authorize.js, the gapFill case), so a hand that may write the
+   actions may write these and nothing is offered that a save refuses (§42).
+
+   A UNIT PLANNING THIS WAY (§405) READS THEM HERE AND WRITES THEM WHERE IT
+   ALWAYS HAS: a unit's objectives carry a three-year target and are the
+   unit's Foundation, whose editor Islam asked to be left alone ("don't touch
+   the unit side", §226). Drawn here read-only, so its Plan is also the whole
+   plan without a second editor for one list. */
+function fnObjKoBlock(fk, ed){
+  var unit = isUnitHolderId(fk);
+  if (!unit && ed) {
+    var h = fnOwnHolderWritable(fk);
+    return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+      capKoEdit({ id: "fn:" + fk, keyObjectives: h.keyObjectives }, "plan", "k_proj");
+  }
+  var list = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
+  if (!list.length) return '';
+  var rows = list.map(function(m, i){
+    return '<tr><td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + (m.weight == null || m.weight === "" ? "&mdash;" : esc(m.weight) + "%") + '</td>' +
+      '<td class="cc">' + esc(m.dir || "") + '</td>' +
+      '<td class="cc">' + esc(unitTight(m.target)) + '</td>' +
+      '<td class="cc">' + esc(m.compile || "") + '</td></tr>';
+  }).join("");
+  return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+    miniTable(["#", "Objective", "Weight", "Dir.", "Target", "Compiled"], rows);
+}
 function fnObjPlan(fk){
   var ed = projEditing(), list = fnActions(fk);
+  var kos = isUnitHolderId(fk) ? [] : ((fnOwnHolder(fk) || {}).keyObjectives || []);
   /* §61: a function with no action yet is where the first one goes. The empty
      state has to say so and the pen has to be reachable, or the page is
-     readable and unstartable — §129's audit found that five times. */
+     readable and unstartable — §129's audit found that five times. §415: and
+     the objectives' own gaps are owed HERE now, where their fields are. */
   var owed = list.reduce(function(n, a){
-    return n + SMPRules.gapMissing("action", a).length; }, 0);
-  return fillBarOr("plan", "k_proj", owed, "the actions") +
-    '<div class="capbody">' + paneActs("plan", "u_plan") +
+    return n + SMPRules.gapMissing("action", a).length; }, 0) +
+    kos.reduce(function(n, m){ return n + SMPRules.gapMissing("capko", m).length; }, 0);
+  return fillBarOr("plan", "k_proj", owed, "the plan") +
+    '<div class="capbody">' + paneActs("plan", "u_plan") + fnObjKoBlock(fk, ed || filling("plan", "k_proj")) +
     (!list.length && !ed
       ? '<div class="note"><b>No actions yet.</b> The SMO adds them from the ' +
         'pen on this page, or they arrive with an upload.</div>'
@@ -32473,7 +32511,10 @@ function holderOverview(subject){
   var fl = filling("capfoundation", "k_found");
   /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
      North Star (key objectives). Off hides the card and forgets nothing. */
-  var briefOn = compOn(t, "brief"), koOn = compOn(t, "keyobj");
+  /* §415: a function planning in objectives and actions holds its objectives
+     on its PLAN (fnObjKoBlock), so the Overview is the brief alone. */
+  var briefOn = compOn(t, "brief"),
+      koOn = compOn(t, "keyobj") && !(!isCap && fnPlansInObjectives(f));
   if (!briefOn && !koOn) return "";
   var judged = isCap
     ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
@@ -32784,12 +32825,17 @@ function capKoTarget(c){
   if (id.indexOf("fn:") === 0) return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
-function capKoEdit(c){
-  var pg = "capfoundation";
+/* §415: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
+   pair, as it always has; a function planning in objectives and actions draws
+   this same table on its PLAN, under the Plan's pen (Islam, 2026-09-30: "a
+   function PLANNING in objectives and actions get their objectives and
+   actions in the plan tab"). One editor, two pages that never both hold it. */
+function capKoEdit(c, pgIn, acIn){
+  var pg = pgIn || "capfoundation", ac = acIn || "k_found";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
-  var ed = authoring(pg, "k_found");
+  var ed = authoring(pg, ac);
   /* §226: the same three answers the unit's table got and this one never did —
      the NAME is prose and wraps (§189's textOr; a function's objective titles
      clipped at 101px in the card this table used to edit inside), the UNIT is
@@ -32815,26 +32861,26 @@ function capKoEdit(c){
       return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
         '<td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
         (ed ? '' : hidChip(m)) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
+        '<td class="cc">' + gapCell(pg, ac, m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
         /* §251: always drawn, on both function formats — this table and the
            unit's are one cell asking one question (§53.5). */
         '<td class="cc">' + (ed
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(pg, ac, m) || esc(targetUnitOf(m)))) + '</td>' +
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */
         monthlyTgtCell("cc", m, "monthly",
-          gapCell(pg, "k_found", m, "target",
+          gapCell(pg, ac, m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }),
           ed && !isYesNoRow(m)) +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
+        '<td class="cc">' + gapCell(pg, ac, m, "compile",
           { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
+        '<td class="cc">' + gapCell(pg, ac, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, "k_found") +
+        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
         (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
@@ -58097,8 +58143,15 @@ var SYNC = (function () {
              S&W while the structure carries a SWOT. Switching it off hides the
              tab and forgets nothing, which is a decision rather than the data
              coming and going. */
+          /* §415 REVERSES §212'S "ALWAYS DRAWN" FOR ONE FORM, at Islam's word
+             (2026-09-30, point 17): a function planning in objectives and
+             actions holds its objectives on its Plan, so its Overview is the
+             brief alone and the tab goes when the brief is switched off. Still
+             a decision rather than data coming and going (§45.2): it answers
+             to the switch and the form, never to how many rows exist. */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
-                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
+                    when: function(t){ return compOn(t, "brief") ||
+                      (compOn(t, "keyobj") && !plansInObjectives(t)); } },
                   { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
                   plan];

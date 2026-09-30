@@ -390,15 +390,8 @@
              S&W while the structure carries a SWOT. Switching it off hides the
              tab and forgets nothing, which is a decision rather than the data
              coming and going. */
-          /* §415 REVERSES §212'S "ALWAYS DRAWN" FOR ONE FORM, at Islam's word
-             (2026-09-30, point 17): a function planning in objectives and
-             actions holds its objectives on its Plan, so its Overview is the
-             brief alone and the tab goes when the brief is switched off. Still
-             a decision rather than data coming and going (§45.2): it answers
-             to the switch and the form, never to how many rows exist. */
           return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation,
-                    when: function(t){ return compOn(t, "brief") ||
-                      (compOn(t, "keyobj") && !plansInObjectives(t)); } },
+                    when: function(t){ return compOn(t, "brief") || compOn(t, "keyobj"); } },
                   { k:"swot", ac:"k_found", label:"S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
                   plan];

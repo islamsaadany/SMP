@@ -1,0 +1,191 @@
+<title>One Company Page</title>
+<style>
+:root{--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B7C4D8;--panel-hover:#24487A;--gold:#C9A24D;--gold-deep:#8A6B22;--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--good-tx:#1F6248;--good-bg:#E4F0EA;--attn-tx:#7A5D1C;--attn-bg:#F7EFD6;--bad-tx:#8C3327;--note:#FDFAF1;--stone:#16325C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:#0F1A2E;--panel-ink:#E9ECF1;--panel-quiet:#9AA6B8;--panel-hover:#1A2030;--gold:#D9B665;--gold-deep:#C9A24D;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--good-tx:#8FD3B0;--good-bg:#1E3329;--attn-tx:#E8CA6A;--attn-bg:#332B15;--bad-tx:#E79A93;--note:#23201A;--stone:#7FA3D8;color-scheme:dark}}
+:root[data-theme="dark"]{--panel:#0F1A2E;--panel-ink:#E9ECF1;--panel-quiet:#9AA6B8;--panel-hover:#1A2030;--gold:#D9B665;--gold-deep:#C9A24D;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--good-tx:#8FD3B0;--good-bg:#1E3329;--attn-tx:#E8CA6A;--attn-bg:#332B15;--bad-tx:#E79A93;--note:#23201A;--stone:#7FA3D8;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:14px/1.45 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px;padding-block:24px 60px}
+.page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font-size:24px;margin:0;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:70ch;margin:6px 0 0}
+.panel{display:flex;flex-direction:column;gap:10px;min-width:0}
+.kick{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+.panel h2{font-size:18px;margin:0}
+.say{color:var(--ink-2);margin:0;max-width:75ch}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700}
+.mark{width:26px;height:26px;border-radius:6px;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-size:12px}
+.top .who{margin-left:auto;font-weight:400;color:var(--ink-3);font-size:12.5px}
+.nav{background:var(--panel);color:var(--panel-quiet);display:flex;gap:2px;padding:0 10px;overflow-x:auto;font-size:13.5px}
+.nav span{padding:11px 11px;white-space:nowrap;border-bottom:3px solid transparent}
+.nav .on{color:var(--panel-ink);border-color:var(--gold)}
+.nav .sep{border-left:1px solid var(--panel-hover);margin:8px 6px;padding:0}
+.nav .dd::after{content:" ▾";font-size:10px}
+.tabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.tabs span{padding:7px 12px;color:var(--ink-2)}
+.tabs .on{color:var(--ink);border-bottom:3px solid var(--gold);font-weight:700}
+.tabs .rep{color:#A4512C;font-weight:700}
+.secs{display:flex;gap:6px;padding:10px 14px;flex-wrap:wrap}
+.secs span{padding:4px 11px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;color:var(--ink-2)}
+.secs .on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.secs .new{border-style:dashed;border-color:var(--gold)}
+.body{display:grid;grid-template-columns:230px 1fr;gap:14px;padding:4px 14px 16px}
+@media (max-width:720px){.body{grid-template-columns:1fr}}
+.rail{border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0}
+.rail .rh{background:var(--panel);color:var(--panel-ink);padding:7px 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.ri{padding:8px 10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.ri b{font-size:13px}
+.ri small{color:var(--ink-3);font-size:11.5px}
+.ri.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+.ri .mine{color:var(--good-tx);font-weight:700}
+.pane{border:1px solid var(--line);border-radius:8px;min-width:0;overflow:hidden}
+.band{background:var(--panel);color:var(--panel-ink);padding:9px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.band .code{color:var(--gold);font-weight:700}
+.band small{margin-left:auto;color:var(--panel-quiet)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--surface-2);text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:7px 10px;white-space:nowrap}
+td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.box{display:inline-block;min-width:64px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;background:var(--surface);color:var(--ink-3)}
+.box.live{border-color:var(--gold)}
+.ro{color:var(--ink-3)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;padding:12px}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.card b{font-size:13.5px}
+.card small{color:var(--ink-3)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.note{background:var(--note);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.x{color:var(--bad-tx);text-decoration:line-through}
+.struct{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;padding:14px}
+.lc{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.lc h3{margin:0;font-size:14px;display:flex;align-items:center;gap:8px}
+.lc h3 .sw{margin-left:auto}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:12px;font-weight:700}
+.sw span{padding:3px 10px;color:var(--ink-3)}
+.sw .lit{background:var(--panel);color:var(--panel-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.chips .t{background:var(--surface-2);font-weight:700}
+.lc.off{opacity:.55}
+.lc.hl{border-color:var(--gold);box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 30%,transparent)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.cmp{grid-template-columns:1fr}}
+ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:80ch}
+</style>
+
+<div class="page">
+<header>
+  <div class="kick">Mockup · for sign-off · 30 Sep 2026</div>
+  <h1>El Abd as one company page</h1>
+  <p class="lede">Names below are placeholders, not El Abd's own. The shape is what is being agreed: one page for the company that holds its directions, its Foundation, its SWOT and its capabilities, with only the supporting functions beside it in the top row.</p>
+</header>
+
+<section class="panel">
+  <div class="kick">1 · Today</div>
+  <h2>Every direction is its own page in the top row</h2>
+  <div class="frame">
+    <div class="top"><span class="mark">EA</span>El Abd<span class="who">Viewing as · SMO</span></div>
+    <div class="nav"><span class="dd">El Abd</span><span class="sep"></span><span class="on">Grow the core</span><span>New channels</span><span>Customer first</span><span>Operational excellence</span><span>People &amp; culture</span><span class="sep"></span><span>Units | Functions</span></div>
+    <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+    <div class="secs"><span>Foundation</span><span>SWOT</span><span class="on">Plan</span></div>
+    <div class="body">
+      <div class="rail"><div class="rh">Pillars</div><div class="ri on"><b>GC01 Grow the core</b><small>4 measures · 6 tactics</small></div></div>
+      <div class="pane"><div class="band"><span class="code">GC01</span><b>Grow the core</b><small>the only pillar of a "unit"</small></div>
+        <div class="tbl"><table><tr><th>#</th><th>Key measure</th><th>Target</th></tr><tr><td>1</td><td>Revenue growth</td><td class="num">12%</td></tr><tr><td>2</td><td>Share of top-5 accounts</td><td class="num">40%</td></tr></table></div></div>
+    </div>
+  </div>
+  <p class="say">Each direction is set up as a business unit, so each gets its own Foundation and SWOT tab and its own row entry. The company's real Foundation and SWOT have no single home.</p>
+</section>
+
+<section class="panel">
+  <div class="kick">2 · Proposed · Strategy</div>
+  <h2>One company page; the directions are a section on it</h2>
+  <div class="frame">
+    <div class="top"><span class="mark">EA</span>El Abd<span class="who">Viewing as · SMO</span></div>
+    <div class="nav"><span class="on">El Abd</span><span class="sep"></span><span>Finance</span><span>HR</span><span>Supply chain</span><span>IT</span><span>Legal</span></div>
+    <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
+    <div class="secs"><span>Foundation</span><span>SWOT</span><span class="on">Strategic Directions</span><span class="new">Capabilities</span></div>
+    <div class="body">
+      <div class="rail"><div class="rh">Strategic Directions</div>
+        <div class="ri on"><b>SD01 Grow the core</b><small>Owner · Direction owner A</small></div>
+        <div class="ri"><b>SD02 New channels</b><small>Owner · Direction owner B</small></div>
+        <div class="ri"><b>SD03 Customer first</b><small>Owner · Direction owner C</small></div>
+        <div class="ri"><b>SD04 Operational excellence</b><small>Owner · Direction owner D</small></div>
+        <div class="ri"><b>SD05 People &amp; culture</b><small>Owner · Direction owner E</small></div>
+      </div>
+      <div class="pane"><div class="band"><span class="code">SD01</span><b>Grow the core</b><small>Owner · Direction owner A</small></div>
+        <div class="tbl"><table><tr><th>#</th><th>Key measure</th><th>Direction</th><th>Target</th><th>Owner</th></tr>
+          <tr><td>1</td><td>Revenue growth</td><td>≥</td><td class="num">12%</td><td>Direction owner A</td></tr>
+          <tr><td>2</td><td>Share of top-5 accounts</td><td>≥</td><td class="num">40%</td><td>Direction owner A</td></tr></table>
+        <table><tr><th>#</th><th>Tactic</th><th>Owner</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr>
+          <tr><td>1</td><td>Renew the top-20 contracts</td><td>Direction owner A</td><td>✓</td><td>✓</td><td></td><td></td></tr></table></div></div>
+    </div>
+  </div>
+  <p class="say">The row holds the company and its supporting functions only. Foundation and SWOT are the company's, once. The directions are one list with a rail, as a unit's pillars are today, and the office authors them.</p>
+</section>
+
+<section class="panel">
+  <div class="kick">3 · Proposed · Capabilities on the same page</div>
+  <h2>Capabilities are a section, not places in the row</h2>
+  <div class="frame">
+    <div class="secs" style="padding-top:12px"><span>Foundation</span><span>SWOT</span><span>Strategic Directions</span><span class="on">Capabilities</span></div>
+    <div class="cards">
+      <div class="card"><b>Data &amp; analytics</b><small>Held by IT · 2 projects</small><span><span class="pill good">On track · 82%</span></span></div>
+      <div class="card"><b>Digital sales</b><small>Held by Finance · 1 project</small><span><span class="pill attn">At risk · 61%</span></span></div>
+      <div class="card"><b>Demand planning</b><small>Held by Supply chain · 3 projects</small><span><span class="pill good">On track · 77%</span></span></div>
+    </div>
+    <p class="say" style="padding:0 14px 14px">Pressing a card opens that capability's own plan and figures inside this section; it keeps its holding function and its owner, as today.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="kick">4 · Proposed · Reporting, seen by a direction owner</div>
+  <h2>Each direction owner types their own direction and reads the rest</h2>
+  <div class="frame">
+    <div class="top"><span class="mark">EA</span>El Abd<span class="who">Viewing as · Direction owner B</span></div>
+    <div class="nav"><span class="on">El Abd</span></div>
+    <div class="tabs"><span>Strategy</span><span>Performance</span><span class="rep on">Reporting</span></div>
+    <div class="body">
+      <div class="rail"><div class="rh">Strategic Directions</div>
+        <div class="ri"><b>SD01 Grow the core</b><small>Read only</small></div>
+        <div class="ri on"><b>SD02 New channels</b><small class="mine">Yours · 0 of 5 entered</small></div>
+        <div class="ri"><b>SD03 Customer first</b><small>Read only</small></div>
+      </div>
+      <div class="pane"><div class="band"><span class="code">SD02</span><b>New channels</b><small>Save draft · Reopen</small></div>
+        <div class="tbl"><table><tr><th>#</th><th>Key measure</th><th>YTD target</th><th>YTD actual</th><th>Note</th></tr>
+          <tr><td>1</td><td>Online share of sales</td><td class="num">6%</td><td><span class="box live">type…</span></td><td><span class="box live">why…</span></td></tr>
+          <tr><td>2</td><td>Marketplace partners live</td><td class="num">3 #</td><td><span class="box live">type…</span></td><td><span class="box live">why…</span></td></tr></table></div></div>
+    </div>
+  </div>
+  <p class="say">A direction owner's own direction is open to type, the others read only, as a pillar owner works on a unit today. Submitting the whole company's report stays with the office and the company head.</p>
+</section>
+
+<section class="panel">
+  <div class="kick">5 · Proposed · Client set-up › Structure</div>
+  <h2>The switch: business units On | Off</h2>
+  <div class="frame">
+    <div class="struct">
+      <div class="lc hl"><h3>Company · El Abd <span class="sw"><span class="lit">On</span></span></h3>
+        <div class="chips"><span class="t">Foundation</span><span class="t">SWOT</span><span class="t">Strategic Directions</span><span class="t">Capabilities</span></div>
+        <small class="ro">Holds its own directions because units are off.</small></div>
+      <div class="lc off"><h3>Divisions <span class="sw"><span>On</span><span class="lit">None</span></span></h3><small class="ro">Already possible today.</small></div>
+      <div class="lc hl"><h3>Business units <span class="sw"><span>On</span><span class="lit">Off</span></span></h3>
+        <small class="ro">Off: no units in the row; the company page holds the plan.</small></div>
+      <div class="lc"><h3>Supporting functions <span class="sw"><span class="lit">On</span><span>Off</span></span></h3>
+        <div class="chips"><span class="t">Overview</span><span class="t">S&amp;W</span><span class="t">Plan</span></div><small class="ro">Keep their own pages, as today.</small></div>
+    </div>
+    <div class="note" style="margin:0 14px 14px">Switching units Off on a client that has them (El Abd today) asks first and says what happens: each unit's plan is archived, its pillars move into the company's directions with every figure kept, and the units are hidden, not deleted. Switching On again brings them back.</div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="kick">Still to decide</div>
+  <ol class="q">
+    <li>Moving El Abd's five direction-units in: each unit has one pillar today (as drawn), or several? If several, do they each become a direction, or does the unit's name become the direction and its pillars go underneath?</li>
+    <li>The unit pages' own Foundation and SWOT: carry them into the company's, or keep them archived only?</li>
+    <li>Performance for the company: the directions' scores averaged equally, or weighted like units are today?</li>
+  </ol>
+</section>
+</div>

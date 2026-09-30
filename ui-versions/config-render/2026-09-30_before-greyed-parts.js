@@ -116,10 +116,6 @@ function renderStructure(){
           if (c === "pillar" && r[0] === "bu" && UNITS[t])
             return '<td class="cc"><span class="pill kind" title="Set on its row in ' +
               esc(L("unitword","bu")) + '">' + esc(unitPlanWord(unitFormat(UNITS[t]))) + '</span></td>';
-          /* §427: a part with no page on this layer is drawn off and greyed,
-             never a toggle that changes nothing. */
-          if (!SMPRules.compBuilt(t, c)) return '<td class="cc"><span class="stdot dummy" title="' +
-            esc(labelWord(c, "bu")) + ' is not available for a ' + esc(lvName[r[0]]) + ' yet"></span></td>';
           var on = compOn(t, c);
           var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
           var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');

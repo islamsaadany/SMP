@@ -3957,8 +3957,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function compOffered(target, comp) {
     return !(String(target || "").indexOf("fn:") === 0 && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
+  /* §427 (Islam, 2026-09-30, of the audit of what each Structure tick
+     changes: *"A for 4,5,6,7"*, then *"leave them ticked off and greyed …
+     not able to tick on and off as it's not working"*): a company page has no
+     themes, no pillars and no SWOT, and a unit's Foundation draws no purpose,
+     no themes and no values. The Structure step went on offering all six, so
+     a tick there changed nothing on any page. They stay DRAWN — off, greyed
+     and unpressable — because a function's row lost its two (§426) by being
+     taken away and these are a different answer: the part exists on other
+     layers, it simply has no page on this one yet. Read as OFF everywhere,
+     whatever a client stored before today, so nothing can claim to show one. */
+  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["purpose", "theme", "values"] };
+  function compBuilt(target, comp) {
+    var n = STRUCT_NOT_BUILT[structLevelOf(target)];
+    return !(n && n.indexOf(comp) >= 0);
+  }
   function compOn(group, target, comp) {
-    if (!compOffered(target, comp)) return false;
+    if (!compOffered(target, comp) || !compBuilt(target, comp)) return false;
     if (STRUCT_COMPONENTS.indexOf(comp) < 0) return true;
     var s = structureOf(group);
     var o = s && s.over && s.over[String(target || "group")];
@@ -4658,6 +4673,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
+    STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
     structureOf: structureOf, structLevelOf: structLevelOf,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
@@ -34059,6 +34075,10 @@ function renderStructure(){
           if (c === "pillar" && r[0] === "bu" && UNITS[t])
             return '<td class="cc"><span class="pill kind" title="Set on its row in ' +
               esc(L("unitword","bu")) + '">' + esc(unitPlanWord(unitFormat(UNITS[t]))) + '</span></td>';
+          /* §427: a part with no page on this layer is drawn off and greyed,
+             never a toggle that changes nothing. */
+          if (!SMPRules.compBuilt(t, c)) return '<td class="cc"><span class="stdot dummy" title="' +
+            esc(labelWord(c, "bu")) + ' is not available for a ' + esc(lvName[r[0]]) + ' yet"></span></td>';
           var on = compOn(t, c);
           var def = SMPRules.levelComponents(GROUP, SMPRules.structLevelOf(t)).indexOf(c) >= 0;
           var lab = esc(labelWord(c, "bu")) + ' for ' + esc(it[1]) + (on ? ': shown' : ': hidden');
@@ -57266,6 +57286,18 @@ var CLIENTSETUP = (function () {
     b.classList.add("stonoff"); if (key) b.setAttribute("data-stsec", key);
     return b;
   }
+  /* §427: a part with no page on this layer is drawn off, greyed and
+     unpressable — `disabled`, never merely dimmed (§220) — with the reason
+     on the hover (1b-ii). One helper, so the tick, the switch and the Temple
+     say it the same way. */
+  var NOT_BUILT = "Not available on this layer yet — nothing on its pages would show it.";
+  function dummy(n){
+    n.classList.add("dummy");
+    (n.tagName === "BUTTON" || n.tagName === "INPUT" ? [n] : [].slice.call(n.querySelectorAll("button, input")))
+      .forEach(function (b) { b.disabled = true; });
+    n.title = NOT_BUILT;
+    return n;
+  }
   function tickBtn(on, label, key, press){
     var t = el("button", "sttick" + (on ? " on" : "")); t.type = "button";
     t.setAttribute("aria-pressed", String(on));
@@ -57315,11 +57347,12 @@ var CLIENTSETUP = (function () {
       s1.appendChild(partHead());
       SMPRules.SEC_FOUND_PARTS.forEach(function (c) {
         if (k === "fn" && !SMPRules.compOffered("fn:", c)) return;
-        var on = L.on.indexOf(c) >= 0;
+        var built = SMPRules.compBuilt(tgt, c), on = built && L.on.indexOf(c) >= 0;
         var r = el("div", "stpart" + (on ? "" : " off"));
         r.appendChild(tickBtn(on, "Show " + PART_LABEL[c], k + "|" + c, function () { compToggle(k, c); }));
         r.appendChild(nameBox(k, c, "one", PART_LABEL[c] + ", one"));
         r.appendChild(nameBox(k, c, "many", PART_LABEL[c] + ", many"));
+        if (!built) dummy(r);
         s1.appendChild(r);
       });
     }
@@ -57329,10 +57362,13 @@ var CLIENTSETUP = (function () {
        second switch for one fact. */
     var s2 = el("section", "stsec");
     var h2 = el("div", "stsech"); h2.appendChild(el("span", "stkind", "Second section"));
-    var sOn = L.on.indexOf("swot") >= 0;
-    h2.appendChild(onOff(sOn, function (v) { if (v !== sOn) compToggle(k, "swot"); }, k + "|swot"));
+    var sBuilt = SMPRules.compBuilt(tgt, "swot"), sOn = sBuilt && L.on.indexOf("swot") >= 0;
+    var sSw = onOff(sOn, function (v) { if (v !== sOn) compToggle(k, "swot"); }, k + "|swot");
+    if (!sBuilt) dummy(sSw);
+    h2.appendChild(sSw);
     s2.appendChild(h2);
-    if (!sOn) s2.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
+    if (!sBuilt) s2.appendChild(el("p", "sthid", "Not available on this layer yet."));
+    else if (!sOn) s2.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
     else {
       s2.appendChild(el("p", "lab", "Section title"));
       s2.appendChild(titleBox(k, "swot", null, k === "fn" ? "S&W" : fallbackWord("swot", "many"), "The second section's title"));
@@ -57361,16 +57397,20 @@ var CLIENTSETUP = (function () {
     var s3 = el("section", "stsec");
     var h3 = el("div", "stsech"); h3.appendChild(el("span", "stkind", "Plan section"));
     /* §422: the plan section switches like the first one. */
-    var pOn = SMPRules.planOn(GROUP, tgt);
-    h3.appendChild(onOff(pOn, function (v) {
+    /* §427: a company has no plan page, so its plan section is drawn off
+       and greyed rather than offering names nothing reads. */
+    var pBuilt = k !== "mid", pOn = pBuilt && SMPRules.planOn(GROUP, tgt);
+    var pSw = onOff(pOn, function (v) {
       var nx = structNow(), l = nx[k]; l.plan = l.plan || {};
       if (v) delete l.plan.on; else l.plan.on = false;
       if (!Object.keys(l.plan).length) delete l.plan;
       structWrite(nx);
-    }, k + "|plan"));
+    }, k + "|plan");
+    if (!pBuilt) dummy(pSw);
+    h3.appendChild(pSw);
     s3.appendChild(h3);
     if (!pOn) {
-      s3.appendChild(el("p", "sthid", (k === "bu" || k === "fn")
+      s3.appendChild(el("p", "sthid", !pBuilt ? "Not available on this layer yet." : (k === "bu" || k === "fn")
         ? "Not shown on this layer, nothing to report and not in the scores. Nothing entered is lost."
         : "Not shown on this layer. Nothing entered is lost."));
       secs.appendChild(s3); box.appendChild(secs);
@@ -57420,6 +57460,12 @@ var CLIENTSETUP = (function () {
       if (need.length) sw.disabled = true;
       sw.addEventListener("click", function () { var nx = structNow(); nx[k].temple = !nx[k].temple; structWrite(nx); });
       var band2 = el("div", "wzband"); band2.appendChild(sw); tp.appendChild(band2);
+      /* §427: a company has no Temple tab, whatever is ticked. */
+      if (k === "mid") {
+        sw.textContent = "Temple view: off"; sw.setAttribute("aria-pressed", "false"); dummy(band2);
+        tp.appendChild(el("span", "wzwhy", "Not available on this layer yet."));
+        box.appendChild(tp); return;
+      }
       tp.appendChild(el("span", "wzwhy", need.length
         ? "Needs " + need.map(function (c) { return PART_LABEL[c] || c; }).join(", ") + " ticked."
         : "Draws the picture from the aspiration (roof), the North Star and the themes (columns)" +

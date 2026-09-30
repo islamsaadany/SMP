@@ -5071,6 +5071,7 @@ html[data-client-settings] .viewer { display:none; }
 .stdot { display:inline-block; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--line);
   background:var(--surface); padding:0; cursor:pointer; vertical-align:middle; }
 span.stdot { cursor:default; }
+span.stdot.dummy { opacity:.4; background:var(--surface-2); cursor:not-allowed; } /* §427 */
 .stdot.on { background:var(--gold-deep); border-color:var(--gold-deep); }
 .stdot.diff { box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--gold); }
 
@@ -10596,6 +10597,10 @@ body.presenting #buildband { display:none; }
 .csetup .stsec > .lab, .csetup .stway > .lab { margin:4px 0 0; }
 .csetup .sthid { margin:0; font-size:var(--fs-small); color:var(--ink-3); background:var(--surface-2); border-radius:6px; padding:8px 10px; }
 .csetup .stonoff { flex:none; }
+/* §427: a part, section or switch with no page on this layer — drawn off,
+   greyed and unpressable; the reason is on the hover. */
+.csetup .dummy { opacity:.45; }
+.csetup .dummy button, .csetup button.dummy, .csetup .dummy input { cursor:not-allowed; }
 .csetup .sttitle { font-weight:700; }
 .csetup .stparth, .csetup .stpart { display:grid; grid-template-columns:22px minmax(0,1fr) minmax(0,1fr); gap:6px; align-items:center; }
 .csetup .stpart.stquad { grid-template-columns:22px minmax(0,1fr); }

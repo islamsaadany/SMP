@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-09-30 — Structure ticks that did nothing are now greyed and cannot be pressed (§427).** Checked every tick on the Structure step against the pages. On the second layer, Themes, Pillars, SWOT, the Temple switch and the plan section, and on business units, Purpose, Themes and Values, never showed anything; they are now shown off, greyed, with the reason on hover. Nothing a client sees changes and nothing stored is lost. Waiting on Islam: what the group's own SWOT, pillars and plan should hold (to build them), where a company's capabilities should be set, and pushing to `main`.
+
 **2026-09-29 — A function's row on the Structure step no longer offers Purpose or Aspiration (§426).** A supporting function's page never showed either, so ticking them did nothing; the row now offers what the page can show — the objectives and S&W. Nothing a client sees changes and nothing stored is lost. Islam chose this ("A"). Waiting on Islam: pushing to `main`.
 
 **2026-09-29 — Raya keeps its S&W, and the Structure work goes live (§423.1).** Raya Trade keeps the S&W tab and slide on its supporting functions exactly as today; a one-off switches it on for Raya only, at the next deploy. Other clients that never chose it stop seeing it. Everything built on this branch since the last merge (§412–§423: the Structure step's sections, names and switches, the plan On/Off, RHI's rounds) goes live with it, together with main's two trail-menu rounds, now numbered §424 and §425. Waiting on Islam: checking the screens.

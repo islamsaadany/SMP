@@ -2996,5 +2996,6 @@
 .stdot { display:inline-block; width:20px; height:20px; border-radius:5px; border:1.5px solid var(--line);
   background:var(--surface); padding:0; cursor:pointer; vertical-align:middle; }
 span.stdot { cursor:default; }
+span.stdot.dummy { opacity:.4; background:var(--surface-2); cursor:not-allowed; } /* §427 */
 .stdot.on { background:var(--gold-deep); border-color:var(--gold-deep); }
 .stdot.diff { box-shadow:0 0 0 2px var(--surface), 0 0 0 3.5px var(--gold); }

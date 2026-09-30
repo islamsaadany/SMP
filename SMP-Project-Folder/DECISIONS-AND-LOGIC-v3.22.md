@@ -58711,3 +58711,39 @@ still on a unit's row): 1 red with the rule reverted, from the sources (§276).
 *North Star* where the page heads the card with the client's word; the name
 boxes beside it carry the client's word, and renaming the fixed title reaches
 every layer, so it was left rather than widened.
+
+## §427 — What each Structure tick changes, and the ones that change nothing (2026-09-30)
+
+Islam: *"can you validate if any structure is not matching the clients pages.
+to make sure that our structure has a meaning?"* **Measured by reading every
+reader of the structure** (`compOn`, `foundOn`, `swotTitle`, `planOn`,
+`planDetailOn`, `templeOn`) against each layer's tabs, the deck and the
+workbook, and nine ticks were found that change nothing on any page. His
+answers, one per item: **B (build the page) for the top level's SWOT, Pillars
+and plan section**, which the group has no page for — not built here, content
+to be aligned first; **A for the second layer's Themes, Pillars and SWOT, its
+Temple switch and its plan section, and for a unit's Purpose, Themes and
+Values**; the capabilities tick (it only decides whether the set-up flow asks
+for capabilities) raised as its own question; and the units' Pillars tick kept
+as the default for a new unit, each unit choosing on its own Setup row.
+
+**Then, mid-build, how A is drawn** — *"leave them ticked off and greyed … as
+anything that is not really working should be dummied not able to tick on and
+off"*. So the six are not removed as §426's two were; they are DRAWN off,
+greyed and `disabled` (never merely dimmed, §220), with the reason on the hover
+(1b-ii) — a different answer from §426 because these parts exist on other
+layers and simply have no page on this one yet. `STRUCT_NOT_BUILT` in the
+shared rules is the one list (§42), and **`compOn` reads them OFF whatever is
+stored**, so nothing can claim to show one and a client's saved ticks are
+filtered, never rewritten (§96.2). The company's plan section and Temple switch
+are not components, so the step greys them directly. The per-item table on
+Setup › Structure draws a greyed, unpressable box in the same cells. **Nothing
+a client sees changes** — no page ever drew any of the six.
+
+`checks/structure.py` asserts both ends (live brief and aspiration beside the
+greyed three on a unit; a live company brief beside its greyed themes; the
+top's switches still live) and a stored "on" not bringing one back: **6 red**
+with the rule reverted and **4 red** with the controls made pressable again,
+both from the sources (§276). Three assertions there and one in
+`smp-app/checks/setup-shape.mjs` held the old rule and were REWRITTEN, never
+loosened (§218).

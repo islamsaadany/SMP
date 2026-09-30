@@ -67,8 +67,12 @@ with sync_playwright() as p:
     ck("unstored: a function carries no brief", safe(pg, "()=>compOn('fn:%s','brief')" % fk) is False)
     ck("…and no themes", safe(pg, "()=>compOn('fn:%s','theme')" % fk) is False)
     ck("…but keeps its North Star", safe(pg, "()=>compOn('fn:%s','keyobj')" % fk) is True)
-    ck("a unit keeps its brief and themes",
-       safe(pg, "()=>compOn('%s','brief')&&compOn('%s','theme')" % (unit, unit)) is True)
+    # §427: a unit's Foundation draws no themes, purpose or values, so they
+    # read OFF whatever is stored — both ends, the brief still ON beside them.
+    ck("a unit keeps its brief, and its themes are not available (§427)",
+       safe(pg, "()=>compOn('%s','brief')===true && compOn('%s','theme')===false" % (unit, unit)) is True)
+    ck("a stored 'on' cannot bring a unit's purpose or a company's SWOT back (§427)",
+       safe(pg, "()=>{GROUP.structure={over:{'%s':{purpose:true},'co:x':{swot:true}}}; var r=[compOn('%s','purpose'),compOn('co:x','swot'),compOn('co:x','brief')]; delete GROUP.structure; return r.join(',')}" % (unit, unit)) == "false,false,true")
     ck("a capability keeps its brief (§334's definition)",
        safe(pg, "()=>compOn('cap:x','brief')") is True)
     ck("a stored per-function 'on' cannot bring the brief back",
@@ -84,8 +88,8 @@ with sync_playwright() as p:
     hdr = safe(pg, "()=>[...document.querySelectorAll('table.stadj thead th')].map(t=>t.textContent)", [])
     ck("a function's row offers no box for the brief, themes, pillars, capabilities or values",
        safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stover=\"fn:%s|'+c+'\"]'))" % fk) is True)
-    ck("…while it offers one for its North Star, and a unit's row offers both",
-       safe(pg, "()=>!!document.querySelector('[data-stover=\"fn:%s|keyobj\"]') && !!document.querySelector('[data-stover=\"%s|brief\"]') && !!document.querySelector('[data-stover=\"%s|theme\"]')" % (fk, unit, unit)) is True)
+    ck("…while it offers one for its North Star, and a unit's row a live brief and a greyed theme (§427)",
+       safe(pg, "()=>{var u=[...document.querySelectorAll('table.stadj tbody tr')].find(r=>r.querySelector('[data-stover=\"%s|brief\"]')); return !!document.querySelector('[data-stover=\"fn:%s|keyobj\"]') && !!u && !document.querySelector('[data-stover=\"%s|theme\"]') && u.querySelectorAll('span.stdot.dummy').length===3}" % (unit, fk, unit)) is True)
     ck("its columns are headed with the client's own words",
        safe(pg, "()=>labelWord('keyobj','bu')") in (hdr or []), hdr)
     ck("pressing the unit's SWOT box", press(pg, '[data-stover="%s|swot"]' % unit))
@@ -167,13 +171,26 @@ with sync_playwright() as p:
     ck("the default words are singular but for Objectives, Pillars, Capabilities, Values (and Themes)",
        safe(pg, "()=>['purpose','aspiration'].map(k=>labelDefault(k).many).join('|')") == "Mission|Winning Aspiration",
        safe(pg, "()=>['purpose','aspiration','theme','keyobj'].map(k=>labelDefault(k).many).join('|')"))
-    ck("…while the business units' level offers both",
-       safe(pg, "()=>['brief','theme','purpose','aspiration'].every(c=>!!document.querySelector('[data-stcomp=\"bu|'+c+'\"]'))") is True)
+    # §427 (Islam: *"leave them ticked off and greyed … not able to tick on
+    # and off"*): both ends — the parts a unit's page draws stay pressable,
+    # the three it does not are drawn, off and disabled.
+    ck("…while the business units' level offers a live brief and aspiration",
+       safe(pg, "()=>['brief','aspiration'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&!t.disabled})") is True)
+    ck("…and draws purpose, themes and values off, greyed and unpressable (§427)",
+       safe(pg, "()=>['purpose','theme','values'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')&&!!t.closest('.dummy')})") is True)
+    ck("the second layer's themes tick is greyed and off, its brief live (§427)",
+       safe(pg, "()=>['theme'].every(c=>{var t=document.querySelector('[data-stcomp=\"mid|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')}) && !document.querySelector('[data-stcomp=\"mid|brief\"]').disabled") is True)
+    ck("…its SWOT and plan switches are greyed with Off lit and cannot be pressed (§427)",
+       safe(pg, "()=>['mid|swot','mid|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); if(!w||!w.classList.contains('dummy')) return false; var b=[...w.querySelectorAll('button')]; return b.every(x=>x.disabled) && b.some(x=>x.textContent==='Off'&&x.getAttribute('aria-pressed')==='true')})") is True)
+    ck("…and its Temple switch is greyed, off and disabled (§427)",
+       safe(pg, "()=>{var b=document.querySelector('[data-sttemple=\"mid\"]'); return !!b&&b.disabled&&b.getAttribute('aria-pressed')==='false'&&!!b.closest('.dummy')}") is True)
+    ck("…while the top level's SWOT and plan switches stay live",
+       safe(pg, "()=>['top|swot','top|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); return w&&!w.classList.contains('dummy')&&[...w.querySelectorAll('button')].every(x=>!x.disabled)})") is True)
     ck("each layer draws three sections",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "3,3,3,3",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))
     ck("the plan section names all three ways on units and functions, pillars alone above them",
-       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "1,1,3,3",
+       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "1,0,3,3",
        safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')"))
     ck("the sections sit side by side on a wide window",
        safe(pg, "()=>{var s=[...document.querySelector('.stsecs').children].map(x=>Math.round(x.getBoundingClientRect().top)); return new Set(s).size===1}") is True)

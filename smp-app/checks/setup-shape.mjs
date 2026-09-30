@@ -359,8 +359,14 @@ console.log("\n8 · an empty capability is not authored work");
     ["brief", "pillar", "swot"].every((c) => R.compOn(bare.group, "mobile", c)));
   check("the top level of a new client still carries everything",
     R.STRUCT_COMPONENTS.every((c) => R.compOn(bare.group, "group", c)));
-  check("a client whose structure is unsaid still reads everything on (existing clients unchanged)",
-    R.STRUCT_COMPONENTS.every((c) => R.compOn(seed.group, "mobile", c)));
+  /* §427 moved this, REWRITTEN rather than loosened (§218): a unit's page
+     draws no purpose, themes or values, so they read off whatever is stored —
+     and every part a unit's page DOES draw still reads on, which is the claim
+     "existing clients unchanged" was always about. Both ends (§94.2). */
+  check("a client whose structure is unsaid still reads on everything a unit's page draws (existing clients unchanged)",
+    R.STRUCT_COMPONENTS.filter((c) => R.compBuilt("mobile", c)).every((c) => R.compOn(seed.group, "mobile", c)));
+  check("…and the parts with no page on a unit read off (§427)",
+    ["purpose", "theme", "values"].every((c) => !R.compBuilt("mobile", c) && !R.compOn(seed.group, "mobile", c)));
   check("a shape pass keeps the defaults it was born with",
     same((frozen.shape(clone(bare), ANSWERS).state.group || {})[R.STRUCTURE], st));
 }

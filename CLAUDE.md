@@ -10656,7 +10656,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-29 — **§426: a function's Structure row offers what its page can show.** Islam, of the Structure step beside a function's Overview: *"A"*. Purpose and Aspiration join `STRUCT_NEVER_FN` (no page of a function drew either, §213), so the functions' row offers the objectives and S&W; nothing stored moves. `checks/structure.py` asserts both ends, 1 red reverted. On the branch, not merged.*
+*Last Updated: 2026-09-30 — **§427: Structure ticks that change nothing are drawn off, greyed and unpressable.** An audit of every Structure tick against the pages found nine that do nothing. Islam: A for the company's Themes, Pillars, SWOT, Temple and plan section and for a unit's Purpose, Themes and Values — and *"leave them ticked off and greyed"*, so they stay drawn and `disabled`, with `STRUCT_NOT_BUILT`/`compBuilt` in the shared rules making `compOn` read them off whatever is stored. B (build the group's own SWOT, pillars and plan) waits on content alignment. `structure.py` red 6 / 4 from the sources. On the branch, not merged.*
+
+*Earlier: 2026-09-29 — **§426: a function's Structure row offers what its page can show.** Islam, of the Structure step beside a function's Overview: *"A"*. Purpose and Aspiration join `STRUCT_NEVER_FN` (no page of a function drew either, §213), so the functions' row offers the objectives and S&W; nothing stored moves. `checks/structure.py` asserts both ends, 1 red reverted. On the branch, not merged.*
 
 *Earlier: 2026-09-29 — **§423.1: Raya keeps what it sees, and the Structure branch merges.** Islam: *"keep what raya sees today with the ticks and I will fix anything problematic when I check"*. Migration `smp-app/db/migrations/019` writes Raya Trade's functions' Structure level as it reads today (S&W on), only where never saved; every other level stays unsaid. The merge brings §412–§423 live with `main`'s two trail-menu rounds, renumbered §424/§425 because this branch held §412/§413 for RHI; `main`'s §425 menu replaces the branch's §417. Merged to `main` on his word.*
 

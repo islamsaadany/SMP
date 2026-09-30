@@ -22,7 +22,7 @@
    the document it is served in (lib/shell.ts stamps `data-module`), so
    shell/route.js keeps no second copy of these words (§53.5). */
 
-export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes"] as const;
+export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes", "copilot"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 /* Where a client lands when the address names no module. */
@@ -157,7 +157,13 @@ const INSIGHTS_MARK: MarkDef = (f) => {
     tip: g.newReports + " new report" + (g.newReports === 1 ? "" : "s") + " this month" };
 };
 
-export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef };
+/* `inside` NAMES A MODULE THAT IS A TAB OF ANOTHER (spec 064). The Copilot is
+   bought and switched on per client like any module, and it is drawn as a
+   tab inside Strategy's pages, because it works on the place you are
+   standing on. So it is never a door on the switcher — a menu entry that
+   lands you back in the module you came from is a door behind a door (§32) —
+   and its own address comes back to its host rather than drawing a page. */
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef; inside?: ModuleKey };
 const NOTHING: LineDef = { key: "none", label: "Nothing", example: "The module is listed with no line under it", read: () => "" };
 const STRATEGY_LINES: LineDef[] = [
   { key: "cycle", label: "The cycle\u2019s state", example: "Cycle open \u00b7 reports due 30 Sep",
@@ -207,6 +213,11 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      this client, opened by the seat. The attendees get an email and never
      open it. The word is Islam's to change (decision 11). */
   notes:     { label: "Meeting Notes",     note: "Notes taken in a meeting, refined into minutes and sent to the attendees", built: true, areas: [], lines: [NOTHING] },
+  /* THE STRATEGY COPILOT (spec 064). The office's alone — the Super user and
+     the SMO team, decision record v0.4 §2 — so NO AREA, for the tracker's
+     reason: it is opened by the seat, and a column here would be a cell no
+     client person should hold (§61). A tab inside Strategy (`inside`). */
+  copilot:   { label: "Copilot", note: "The office's AI workspace for each place's strategy", built: true, areas: [], lines: [NOTHING], inside: "strategy" },
 };
 
 export function isModule(s: unknown): s is ModuleKey {
@@ -298,7 +309,7 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
    differently (§53.5). */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
 export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
-  return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
+  return have.filter((k) => !MODULE_DEF[k].inside).map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
 }
 
 /* The one line a module says about a client on its card (spec 046 §4.6a).

@@ -18,6 +18,7 @@
 import { shellDocument, shellHeaders } from "../../lib/shell.ts";
 import { moduleMenu } from "../../lib/modules.ts";
 import { libraryStampFor } from "../../lib/library-viewer.ts";
+import { copilotStampFor } from "../../lib/copilot.ts";
 import type { ServeArgs } from "../registry.ts";
 
 /* THE REPORTS TAB'S FILTERS ARE STAMPED HERE (§385), and this module asking
@@ -28,6 +29,7 @@ import type { ServeArgs } from "../registry.ts";
    through the same clauses the list itself is read through. */
 export async function serve(a: ServeArgs): Promise<Response> {
   return new Response(shellDocument(a.tenantName, a.module, moduleMenu(a.have),
-      null, null, null, await libraryStampFor(a.tenantId, a.seat, a.personKey, a.have)),
+      null, null, null, await libraryStampFor(a.tenantId, a.seat, a.personKey, a.have),
+      copilotStampFor(a.have, a.seat)),
     { status: 200, headers: shellHeaders() });
 }

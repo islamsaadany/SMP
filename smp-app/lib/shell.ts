@@ -70,7 +70,14 @@ export function shellDocument(tenantName: string, module: string | null = null, 
                                  module and for somebody it is shut to; `[]` is a library
                                  with nothing filed under any category yet, which draws the
                                  tab and no filters. */
-                              libraryCats: readonly string[] | null = null): string {
+                              libraryCats: readonly string[] | null = null,
+                              /* THE COPILOT TAB IS DRAWN FOR THIS PERSON (spec 064): true only
+                                 where the client has the module AND the door gave this person an
+                                 office seat — the server's own gate, answered by the caller
+                                 (copilotStampFor). The frozen shell draws the tab off this
+                                 attribute alone, so there is no dead tab over file:// or for a
+                                 client's own person (§61, the data-library-cats pattern). */
+                              copilot = false): string {
   /* THE CHECK'S BREAKS (constitution XVI, checks/shell.mjs): `no-route`
      stands shell/route.js down, so the address stops naming the page;
      `open-csp` (shellHeaders) drops the policy. Never set on a deployment. */
@@ -137,6 +144,7 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        document only, where the page that draws it lives (lib/landing.ts
        landingStampFor). Absent everywhere else, and over file://, where the
        page says the served platform is where the line is set. */
+    (copilot && brk !== "no-copilot-stamp" ? " data-copilot='1'" : "") +
     (landing && brk !== "no-landing-stamp" ? " data-landing='" + esc(JSON.stringify(landing)) + "'" : "") +
     /* THE MODULE'S DECLARED AREAS (§359.5, spec 056 §4.4): what its Access
        page has columns for, on the Setup document alone and only for a

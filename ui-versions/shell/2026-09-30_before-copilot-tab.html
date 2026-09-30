@@ -223,7 +223,6 @@
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
 <script src="LIBRARY"></script>
-<script src="COPILOT"></script>
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
@@ -272,16 +271,6 @@
      second client-wide tab says so about itself and `ownTabs()` is never
      edited (§104.7). It is still DRAWN wherever you are; what it stops
      being is the REASON to be there. */
-  /* SPEC 064: THE STRATEGY COPILOT — the office's AI workspace for the place
-     you are standing on, after Reporting (Islam's decision record v0.4 and
-     the picture he signed off). `when` is the server's own gate read off the
-     document (COPILOT.shown); `everywhere` because, like the reports, being
-     able to open it is never a reason to be offered a destination (§383).
-     Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
-                  when: function(){ return COPILOT.shown(); },
-                  sections: function(){ return COPILOT.sections(); } };
-
   var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights", everywhere:true,
                   when: function(){ return LIBRARY.shown(); },
                   sections: function(){ return LIBRARY.sections(); } };
@@ -450,7 +439,6 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -474,7 +462,6 @@
           return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -503,7 +490,6 @@
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
         render: function(){ return renderReport(topAsUnit()); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -592,7 +578,6 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],

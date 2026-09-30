@@ -759,6 +759,86 @@ await section("3d · the reports tab is stamped with what this client HAS (§385
   }
 });
 
+await section("3e · the Copilot tab is stamped for the office only (spec 064)", async () => {
+  /* THE SEAM (§316.7's shape, spec 064 stage 1). The rule is copilotStampFor
+     — the client HAS the module AND the seat is the office's — and the tab
+     reads one attribute off the document the server wrote. A build that
+     stamped it for everybody satisfies every assertion made from the office's
+     side, so the client's own person is asked in the same run (§94.2). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const has = (h) => / data-copilot='1'/.test(h.slice(0, 1200));
+  const rawAs = async (who) => { await fresh(); await signIn(who);
+    const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+    return await (await fetch(BASE + "/raya-trade/strategy", { headers: { cookie: ck } })).text(); };
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    check(has(await rawAs("office@forefront.example")), "the office, on a client with the Copilot, is stamped for the tab");
+    check(!has(await rawAs("mobhead@raya.example")), "\u2026a client's own person on the same client is not (the office's alone)");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]);
+    check(!has(await rawAs("office@forefront.example")), "\u2026and a client WITHOUT the module stamps nobody (\u00a761)");
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3f · the Copilot tab, pressed end to end (spec 064 stage 1)", async () => {
+  /* PRESSED, AND READ BACK FROM THE DATABASE (§96): a rail that draws what it
+     was handed and writes nothing looks identical to one that works. The
+     state is MADE (§255) — the dev tenant holds no module and no chat. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const count = async (t) => Number((await asTenant(tenantId, (c) => c.query("select count(*)::int n from " + t))).rows[0].n);
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    const p = await place();
+    check(p[0] === "mobile" && p[1] === "copilot" && p[2] === "foundation", "the address opens Mobile's Copilot, Foundation section", JSON.stringify(p));
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
+    const ri = tabs.indexOf("report"), ci = tabs.indexOf("copilot");
+    check(ci >= 0 && (ri < 0 || ci === ri + 1), "the Copilot tab sits right after Reporting", tabs.join("|"));
+    const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).map((b) => b.textContent.trim()));
+    check(["Foundation", "Analysis", "Directions", "Execution", "Advisory"].every((w) => secs.includes(w)), "…with its five sections", secs.join("|"));
+    const rails = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => ({ t: r.getBoundingClientRect().top, h: r.querySelector("h3,.coprh,header") ? r.textContent.slice(0, 40) : r.textContent.slice(0, 40) })));
+    check(rails.length === 2 && rails[0].t < rails[1].t && /Chats/i.test(rails[0].h) && /Deliverables/i.test(rails[1].h),
+      "two rails, Chats above Deliverables", JSON.stringify(rails));
+
+    const c0 = await count("copilot_chats"), m0 = await count("copilot_messages");
+    await page.click("[data-cop-newchat]"); await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
+    await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg").length >= 2, null, { timeout: 8000 }).catch(() => {});
+    check((await count("copilot_chats")) === c0 + 1, "+ New chat writes a chat to the database");
+    check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the product's own line");
+    const last = await page.evaluate(() => { const m = document.querySelectorAll("[data-cop-msgs] .copmsg"); return m.length ? m[m.length - 1].className + " :: " + m[m.length - 1].textContent : ""; });
+    check(/product/.test(last) && /not connected yet/.test(last), "…drawn as the product's line, never as the AI (§125)", last.slice(0, 120));
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
+
+    const made = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
+    check(made && made.ok && made.id, "a deliverable can be filed (through the api in stage 1)", JSON.stringify(made));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    await page.click("[data-cop-deliv]"); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
+    await page.click("[data-cop-edit]"); await page.waitForSelector("[data-cop-edit-text]", { timeout: 8000 });
+    await page.fill("[data-cop-edit-text]", "Purpose: second draft");
+    await page.click("[data-cop-edit-save]");
+    await page.waitForSelector("[data-cop-restore]", { timeout: 8000 }).catch(() => {});
+    const vs = async () => (await asTenant(tenantId, (c) => c.query("select n, body->>'text' t from copilot_versions where deliverable_id = $1 order by n", [made.id]))).rows;
+    let v = await vs();
+    check(v.length === 2 && v[1].n === 2 && v[1].t === "Purpose: second draft", "Edit + Save adds v2 holding what was typed", JSON.stringify(v));
+    await page.click('[data-cop-restore="1"]'); await page.waitForTimeout(800);
+    v = await vs();
+    check(v.length === 3 && v[2].t === "Purpose: first draft", "Restore v1 adds v3 with v1's text, and v2 is still there", JSON.stringify(v));
+    check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "no sideways scroll on the Copilot page");
+
+    await fresh(); await signIn("mobhead@raya.example");
+    await open("/raya-trade/strategy/mobile/strategy");
+    check(await page.evaluate(() => !document.querySelector('#subtabs button[data-s="copilot"]')), "a client's own person sees no Copilot tab (the office's alone)");
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+  }
+});
+
 await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });

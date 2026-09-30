@@ -1293,6 +1293,98 @@ CREATE TABLE portfolio_terminology (
 -- and portfolio_history. Each arrives with the screen that reads it; a table
 -- ahead of its screen is a column nothing writes (§294.2).
 
+-- ── THE STRATEGY COPILOT (spec 064) ──────────────────────────────────────
+-- A chat with the AI about one place and one section, and the deliverables
+-- saved from it, each with every version it has had. Office-only, by the
+-- module's own server (modules/copilot). Tenant-owned, so the loop below
+-- fences them on a fresh database and migration 020 on one already up.
+CREATE TABLE copilot_chats (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  -- The product's own place word (§54): `group`, `co:<k>`, a unit key,
+  -- `fn:<k>`, `cap:<id>`.
+  place text NOT NULL,
+  section text NOT NULL,
+  title text NOT NULL,
+  -- What "assume for me" recorded on this chat (decisions §3.3), carried onto
+  -- anything saved from it. Written by stage 2; stored empty until then.
+  assumptions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  -- The Advisory question budget (decisions §5): questions asked, the round.
+  budget jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  last_at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_chat_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX copilot_chats_shelf ON copilot_chats (tenant_id, place, section, last_at DESC);
+
+-- Appended, never edited: what was said is the record of how a deliverable
+-- came to be (decisions §3.6).
+CREATE TABLE copilot_messages (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  chat_id uuid NOT NULL,
+  who text NOT NULL,
+  by_key text NOT NULL DEFAULT '',
+  body text NOT NULL DEFAULT '',
+  -- What the screen draws specially (playback, draft, an offer, an
+  -- assumption, pasted material). NULL is a plain message.
+  part jsonb,
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, chat_id) REFERENCES copilot_chats (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_message_who CHECK (who IN ('person','ai'))
+);
+CREATE INDEX copilot_messages_chat ON copilot_messages (tenant_id, chat_id, id);
+
+CREATE TABLE copilot_deliverables (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  place text NOT NULL,
+  section text NOT NULL,
+  type text NOT NULL DEFAULT 'free',
+  kind text NOT NULL DEFAULT 'copilot-only',
+  title text NOT NULL,
+  -- The approach recorded when the place was not set up yet (decisions §4.3).
+  approach text NOT NULL DEFAULT '',
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_deliverable_kind CHECK (kind IN ('promotable','copilot-only')),
+  CONSTRAINT copilot_deliverable_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX copilot_deliverables_shelf ON copilot_deliverables (tenant_id, place, section);
+
+-- A version is never edited or deleted: an edit and a restore each ADD one
+-- (decisions §3.6, §3.7). `chat_id` carries NO foreign key on purpose — a
+-- chat may be deleted by whoever started it, and the version it produced is
+-- the record and must outlive it; the chat's title is kept beside it.
+CREATE TABLE copilot_versions (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  deliverable_id uuid NOT NULL,
+  n integer NOT NULL,
+  body jsonb NOT NULL DEFAULT '{}'::jsonb,
+  note text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  chat_id uuid,
+  chat_title text NOT NULL DEFAULT '',
+  restored_from integer,
+  assumptions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  pasted boolean NOT NULL DEFAULT false,
+  gaps jsonb NOT NULL DEFAULT '[]'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, deliverable_id) REFERENCES copilot_deliverables (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_version_n UNIQUE (tenant_id, deliverable_id, n),
+  CONSTRAINT copilot_version_positive CHECK (n >= 1)
+);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users

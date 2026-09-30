@@ -66,7 +66,14 @@ const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_M
    assertions — and adding the next one means editing none. If there is no
    second built module at all the file says so once, here, rather than going
    quietly green over a list of one (§54.5, §113.8). */
-const OTHER = BUILT_EXTRA[0] || null;
+const OTHER = BUILT_EXTRA.filter((k) => !MODULE_DEF[k].inside)[0] || null;
+/* A MODULE THAT IS A TAB OF ANOTHER (spec 064, `inside`): the Copilot draws
+   no document of its own — it is a tab inside Strategy's pages — so it is
+   asserted the other way round below: its bare address and any unknown word
+   inside it go back to the module it lives in, and the switcher never lists
+   it (a door to a page that is a redirect is a door behind a door, §32). */
+const INSIDE = MODULES.filter((k) => MODULE_DEF[k].built && MODULE_DEF[k].inside);
+const PAGED = () => offerable().filter((k) => !MODULE_DEF[k].inside);
 
 let ok = 0;
 const bad = [];
@@ -192,7 +199,14 @@ const drawnBy = async (k, rest = []) => {
   return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
 };
 const drawn = {};
-for (const k of offerable()) {
+for (const k of INSIDE) {
+  const out = await drawnBy(k);
+  check("...and " + k + ", a tab inside " + MODULE_DEF[k].inside + ", sends its own address back there",
+    out.status === 302 && out.to.endsWith(clientHref("raya-trade", MODULE_DEF[k].inside, "")), out.status + " " + out.to);
+  check("...and the switcher does not list " + k, !moduleMenu(offerable()).some((m) => m.key === k),
+    moduleMenu(offerable()).map((m) => m.key).join(", "));
+}
+for (const k of PAGED()) {
   drawn[k] = await drawnBy(k);
   check("...and " + k + "'s server answers with a page of its own",
     drawn[k].status === 200 && /<html/.test(drawn[k].html),
@@ -207,7 +221,7 @@ for (const k of offerable()) {
    A title is written by the page out of its own vocabulary and cannot be
    handed in, so two modules sharing one is two modules sharing a page —
    compared as a SET, naming nothing, so a fourth module is covered. */
-const titles = offerable().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
+const titles = PAGED().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
 check("...and no two of them draw the same document — a table cannot point two words at one page",
   new Set(titles).size === titles.length, titles.join(" | "));
 /* A module's landing is its landing: an address inside one that it does not
@@ -216,7 +230,7 @@ check("...and no two of them draw the same document — a table cannot point two
 for (const k of BUILT_EXTRA) {
   const out = await drawnBy(k, ["nothing-here"]);
   check("...and a word " + k + " does not draw comes back to its landing",
-    out.status === 302 && out.to.endsWith(clientHref("raya-trade", k, "")),
+    out.status === 302 && out.to.endsWith(clientHref("raya-trade", MODULE_DEF[k].inside || k, "")),
     out.status + " " + out.to);
 }
 

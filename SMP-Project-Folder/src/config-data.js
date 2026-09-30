@@ -211,6 +211,10 @@ function planSubjectOf(x){
 }
 function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
 function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
+/* §439: whether the business-unit layer exists. Off, the company page holds
+   the directions (the top layer's own pillars, §428) and the units are hidden,
+   never deleted. */
+function buExists(){ return SMPRules.buExists(GROUP); }
 function structWritable(){
   var s = GROUP[SMPRules.STRUCTURE];
   if (!s || typeof s !== "object") s = GROUP[SMPRules.STRUCTURE] = {};
@@ -4964,7 +4968,10 @@ function canReport(unitKey){
   if (unitKey === "group") {
     if (!topHasPlan() || !planOn("group")) return false;
     if (CYCLE.locked && !inOffice()) return false;
-    return SMPRules.mayReportTop(world(), viewer());
+    /* §439: with the units off each direction's owner reports their own
+       direction here; canReportRow narrows them to it. */
+    return SMPRules.mayReportTop(world(), viewer()) ||
+           SMPRules.ownsTopPillar(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -5007,6 +5014,11 @@ function canReportRow(unitKey, x){
      unit's key objectives carry none, deliberately: they are the unit's
      headline and belong to no pillar, so nobody's draft can close them. */
   if (ownDraftShut(unitKey, x && x.cid)) return false;
+  /* §439: on the company page the office and the CEO enter every row; a
+     direction's owner enters the rows of their own direction. */
+  if (unitKey === "group")
+    return SMPRules.mayReportTop(world(), viewer()) ||
+           SMPRules.ownsTopPillar(world(), viewer(), (x && x.pown) || "");
   /* §341: `areaOfTarget()`, for the reason it was named once (§330.5) — this
      ternary is the same question one function below, and it answered "unit"
      for a capability while `boundedHere` two hundred lines down answered
@@ -5102,7 +5114,9 @@ function canReportFnWhole(target){
    stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = subjKey(target);
-  if (t === "group") return canReport("group");
+  /* §439: a direction's owner reports their own rows and never submits the
+     company's report — that stays the office's and the CEO's (§428). */
+  if (t === "group") return canReport("group") && SMPRules.mayReportTop(world(), viewer());
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
     return canReportFn(t) &&
            !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
@@ -8313,6 +8327,45 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
+/* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§439) ─────────────────
+   Islam, of El Abd: *"a one company with multiple directions … all the
+   directions and the Foundation and the SWAT belongs to its page only
+   without the navigation at the top"*, then *"every page is 1 direction"*,
+   *"kept in archive"* and *"equally"*.
+
+   Switching the business-unit layer off COPIES each unit's pillars onto the
+   top layer's own plan (§428), every figure with them, under fresh ids —
+   because an id is what a figure and a snapshot are keyed on (§48) and the
+   top layer's are minted from its own list. Each copy remembers where it came
+   from (`fromUnit`/`fromId`), so pressing it twice copies nothing twice.
+   Each unit's plan is ARCHIVED once, with its Foundation and SWOT, and the
+   unit itself is left exactly as it was — hidden, never deleted, and back
+   the moment the layer is on again. A pillar with no Owner takes the unit's
+   head, because the head of a one-direction page is that direction's owner
+   and it is the owner who reports it. Returns how many pillars moved. */
+function buFoldIntoTop(){
+  var keys = UNIT_KEYS.filter(function(k){ return UNITS[k] && UNITS[k].active !== false; });
+  var top = topWritable(), moved = 0;
+  keys.forEach(function(k){
+    var u = UNITS[k];
+    if (String(u.format || "pillars") !== "pillars") return;
+    var head = personBy((UNIT_ROLES[k] || {}).head);
+    var took = false;
+    (u.items || []).forEach(function(p){
+      if (GROUP.items.some(function(q){ return q && q.fromUnit === k && q.fromId === p.id; })) return;
+      var c = clone(p);
+      c.id = mintRowId(GROUP.items, "group-P");
+      c.code = pillarCode(top, GROUP.items.length);
+      c.fromUnit = k; c.fromId = p.id;
+      if (!c.owner && head) c.owner = head.name;
+      (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
+      (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
+      GROUP.items.push(c); moved++; took = true;
+    });
+    if (took) archiveUnitPlan(u, "moved to the company page");
+  });
+  return moved;
+}
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
   if (!f || !u) return;
@@ -10607,6 +10660,11 @@ function themeStats(ab){
    product is currently about; the nav, the cards, the compile and the
    weighting all ask it, so a retired unit cannot linger in one of them. */
 function activeKeys(){
+  /* §439: with the business-unit layer switched off there are no units to be
+     about — they are hidden, kept, and back the moment it is on again. The
+     nav, the cards, the compile and the weighting all ask here, which is what
+     makes it one switch rather than ten. */
+  if (!buExists()) return [];
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
 }
 
@@ -10653,7 +10711,10 @@ function weightedOver(keys, of){
   });
   return tot ? Math.round(acc / tot) : null;
 }
-function groupUnitsObjectives(){ return weightedOver(UNIT_KEYS, unitObjectives); }
+/* §439: the keys the group's own readings average — none while the units are
+   off, so a hidden unit cannot keep scoring a page it no longer appears on. */
+function scoringUnitKeys(){ return buExists() ? UNIT_KEYS : []; }
+function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObjectives); }
 /* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
 
    A tenant with no tactics loaded has nothing delivered and nothing planned,
@@ -10668,8 +10729,8 @@ function groupUnitsObjectives(){ return weightedOver(UNIT_KEYS, unitObjectives);
    drillCard renders null as "Not yet measurable", which is what the two cards
    beside it were doing correctly all along. splitCard had the same guard for
    the same reason; this is that guard, one level up. */
-function groupExec(){ return weightedOver(UNIT_KEYS, unitExec); }
-function groupPlan(){ return weightedOver(UNIT_KEYS, unitPlan); }
+function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
+function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
 function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 

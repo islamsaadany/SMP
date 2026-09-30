@@ -302,3 +302,7 @@
 .csetup .stxchip.diff { border-color:var(--gold-deep); box-shadow:inset 0 0 0 1px var(--gold-deep); color:var(--ink); }
 .csetup .stxadd { margin-top:10px; max-width:280px; }
 @media (max-width:760px){ .csetup .stxrow { grid-template-columns:minmax(0,1fr) auto; } .csetup .stxchips { grid-column:1 / -1; grid-row:2; } }
+/* §439: the question asked before the business-unit layer goes off. */
+.csetup .stask { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; background:var(--surface-2); font-size:var(--fs-small); color:var(--ink-2); }
+.csetup .stask p { margin:0 0 8px; }
+.csetup .stbtns { display:flex; gap:8px; flex-wrap:wrap; }

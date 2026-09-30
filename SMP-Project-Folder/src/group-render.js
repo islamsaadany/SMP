@@ -1611,6 +1611,33 @@ function capsTable(){
 }
 
 
+/* ── THE COMPANY PAGE'S CAPABILITIES (§439) ───────────────────────────
+   Islam, of round 2's mockup: *"splitting the directions and the
+   capabilities was a good choice"* — so with the business units off they
+   are a SECTION of their own on the company's Strategy tab, never folded
+   into the directions, and shown the way the Structure step sets them (for
+   El Abd, planned in pillars). One row per capability with the way into its
+   own pages, which are unchanged — the navigation row no longer carries a
+   Capabilities side, so this is where they are reached. */
+function renderTopCaps(){
+  var caps = capsReachable();
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
+  var rows = caps.map(function(c){
+    var fn = c.fn ? functionOf(c.fn) : null, pil = capPlansInPillars(c);
+    var cu = pil ? capAsUnit("cap:" + c.id) : null;
+    var n = pil ? itemsNow(cu).length : (c.projects || []).length;
+    var v = pil ? unitPillars(cu) : capPerf(c);
+    return '<tr><td>' + esc(c.name) + (fn ? '<span class="why">' + esc(fn.name) + '</span>' : '') + '</td>' +
+      '<td>' + (pil ? L("pillar", "bu") : L("project", "bu")) + '</td>' +
+      '<td class="num">' + n + '</td>' +
+      '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td>' +
+      '<td class="num"><button type="button" class="linkbtn" data-gocap="cap:' + esc(c.id) + '">Open</button></td></tr>';
+  }).join("");
+  return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th>Planned in</th><th class="num">Rows</th>' +
+    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+}
+
 /* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).
 
    Islam: "across the platform hide the distinction of direction and capability.
@@ -2399,6 +2426,13 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    /* §439: with the units off these ARE the company's directions and this is
+       its headline — the equal average Islam chose (*"yes equally"*). */
+    if (!buExists()) return drillCard(L("pillar", "bu") + " &mdash; performance", unitPillars(tu), {
+      primary: true, sub: "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", each counting equally.",
+      drill: drill, modalTitle: L("pillar", "bu") + " — performance",
+      modalSub: "Each direction scored and averaged equally"
+    });
     return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
       sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
       drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
@@ -2419,6 +2453,7 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
+        (!buExists() ? "" :
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
@@ -2436,8 +2471,8 @@ function whereNext(keys){
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
-        }) +
-      '</div>' + whereNext(UNIT_KEYS)) });
+        })) +
+      '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -2445,7 +2480,8 @@ function whereNext(keys){
         ' &middot; drag by the handle to reorder</span></div>' : '';
   };
 
-  SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
+  /* §439: no units section when the layer is off — they are hidden, not gone. */
+  if (buExists()) SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)

@@ -1415,6 +1415,7 @@ var CLIENTSETUP = (function () {
     out.mid.temple = !!(st && st.mid && st.mid.temple === true);
     out.bu.on = lv("bu"); out.fn.on = lv("fn");
     out.fn.exists = SMPRules.fnExists(GROUP);
+    out.bu.exists = SMPRules.buExists(GROUP);
     /* §428: THE CAPABILITIES CARD HOLDS THE FUNCTIONS' ANSWERS UNTIL IT IS
        SAVED. Unsaid, a capability reads the functions' level (effLevel), so
        the card is drawn from a copy of theirs; the copy is written only when
@@ -1430,6 +1431,7 @@ var CLIENTSETUP = (function () {
     return out;
   }
   var CAP_BASE = null;
+  var BU_ASK = false;
   function structWrite(next){
     if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
@@ -1866,10 +1868,43 @@ var CLIENTSETUP = (function () {
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
+    /* §439: THE BUSINESS-UNIT LAYER CAN BE SWITCHED OFF, for a client that
+       is one company with several directions (El Abd). Off moves each unit's
+       directions onto the company page — asked first, in the card, because
+       it copies figures and archives every unit's plan. On again brings the
+       units back exactly as they were; nothing is deleted either way. */
     var bu = card(W("unitword", "many", "Business units"));
-    callBoxes(bu, "unitword", ro);
-    structLevel(bu, lv, "bu");
-    exceptBox(bu, "bu");
+    bu.setAttribute("data-stcard", "bu");
+    var bh = el("div", "stsech"); bh.appendChild(el("span", "lab", "This client has them"));
+    bh.appendChild(onOff(lv.bu.exists, function (v) {
+      if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
+      BU_ASK = true; redraw();
+    }, "bu|layer"));
+    bu.appendChild(bh);
+    if (BU_ASK && lv.bu.exists) {
+      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
+      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
+        "'s directions move onto the company page with every figure, and each one's own page — its Foundation and SWOT — is kept in the archive. " +
+        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Switching back on brings them back as they were."));
+      var go = el("button", "btn amber", "Move them and switch off"); go.type = "button"; go.setAttribute("data-buask-go", "1");
+      go.onclick = function () {
+        BU_ASK = false;
+        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
+        var nx = structNow(); nx.bu.exists = false;
+        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
+        structWrite(nx);
+      };
+      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
+      no.onclick = function () { BU_ASK = false; redraw(); };
+      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
+      bu.appendChild(ask);
+    }
+    if (lv.bu.exists) {
+      callBoxes(bu, "unitword", ro);
+      structLevel(bu, lv, "bu");
+      exceptBox(bu, "bu");
+    } else bu.appendChild(el("p", "sthid", "Off: the company page holds the directions, and the " +
+      W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
     var fn = card(W("fnword", "many", "Supporting functions"));
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));

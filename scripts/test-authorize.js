@@ -5152,5 +5152,42 @@ console.log("\n§428 · the top layer's own plan");
   v = as("ceo", capOff);      check("§428 REFUSED: the CEO may not", !v.ok, "was ALLOWED");
 })();
 
+/* ── §439: ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE ────────────────────
+   With the business units switched off, a direction's owner reports the rows
+   of their own direction on the company page — and nothing else, never the
+   submission. BOTH ENDS (§94.2): their own direction allowed, another's
+   refused, the submission refused, and with the units ON the same person is
+   refused outright (the rule only exists while the directions ARE the top
+   layer's pillars). */
+console.log("\n§439 · a direction's owner on the company page");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([{ key: "t439_dir", name: "Testcase Direction Owner", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "", owner: "Testcase Direction Owner",
+      measures: [{ id: "group-P1-M1", name: "Revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+      tactics: [{ id: "group-P1-T1", name: "Open", q1: true, q2: true, q3: true, q4: true, status: "", actual: "" }] },
+    { id: "group-P2", code: "EA02", name: "Direction two", sub: "", kind: "", theme: "", owner: "Somebody Else Entirely",
+      measures: [{ id: "group-P2-M1", name: "Share", dir: ">=", target: "10%", compile: "Latest", actual: "" }],
+      tactics: [] }];
+  function as(who, mutate, base) { const b = base || B; const inc = clone(b); mutate(inc); return A.authorize(b, inc, personOf(b, who)); }
+  let v = as("t439_dir", function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; });
+  check("§439: a direction's owner reports their own direction", v.ok, (v.refusals || []).join(" / "));
+  v = as("t439_dir", function (inc) { inc.group.items[0].tactics[0].actual = "50"; });
+  check("§439: …its tactics too", v.ok, (v.refusals || []).join(" / "));
+  v = as("t439_dir", function (inc) { inc.group.items[1].measures[0].actual = "5%"; });
+  check("§439 REFUSED: another direction's figure", !v.ok, "was ALLOWED");
+  v = as("t439_dir", function (inc) { inc.group.items[0].name = "Renamed"; });
+  check("§439 REFUSED: renaming their direction (authoring stays the office's)", !v.ok, "was ALLOWED");
+  v = as("t439_dir", function (inc) { inc.review = inc.review || {}; inc.review.submitted = Object.assign({}, inc.review.submitted || {}, { group: { at: "30 Sep 2026", by: "t439_dir" } }); });
+  check("§439 REFUSED: submitting the company's report", !v.ok, "was ALLOWED");
+  v = as("smo", function (inc) { inc.group.items[1].measures[0].actual = "5%"; });
+  check("§439: the office still reports every direction", v.ok, (v.refusals || []).join(" / "));
+  const On = clone(B); delete On.group[R.STRUCTURE].bu;
+  v = as("t439_dir", function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; }, On);
+  check("§439 REFUSED: with the units ON the rule does not exist", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

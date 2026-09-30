@@ -59044,3 +59044,76 @@ directions) — **2 red** with the write removed. `setup-shape.mjs`'s two other
 failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
+
+## §439 — one company, its directions on its own page (2026-09-30)
+
+Islam, of El Abd: *"a client like elabd is a one company with multiple
+directions so I was thinking if it's a wrong company and the company has the
+multiple directions shouldn't it appear as 1 company and all the directions
+and the Foundation and the SWAT belongs to its page only without the
+navigation at the top and even the capabilities as well"*. Answered question
+by question — *"every page is 1 direction"*, *"kept in archive"*, *"yes
+equally"*, *"the capabilities should show the way it's set in the structure"*
+— drawn three times (`design-mockups/single-company/`), round 2 corrected by
+him (*"splitting the directions and the capabilities was a good choice whay
+did you join them again?"*), and round 3 signed off: *"ok build it"*.
+
+**THE BUSINESS-UNIT LAYER GETS THE FUNCTIONS' SWITCH** (§418's shape):
+`structure.bu.exists`, stored as an absence, read by ONE shared rule
+(`SMPRules.buExists`). Off, `activeKeys()` answers nothing — the navigation,
+the cards, the compile and the weighting all ask it, so it is one switch
+rather than ten — and the group's unit readings (`groupUnitsObjectives`,
+`groupExec`, `groupPlan`) average nothing, so a hidden unit cannot go on
+scoring a page it no longer appears on.
+
+**THE MOVE IS ASKED FIRST, IN THE CARD, BECAUSE IT COPIES FIGURES.** Pressing
+Off draws a question on the business units' card; *Move them and switch off*
+runs `buFoldIntoTop()`: every active pillars unit's pillars are COPIED onto
+the top layer's own plan (§428) with every figure, under fresh ids minted from
+the top layer's own list (an id is what a figure and a snapshot are keyed on,
+§48), each copy marked `fromUnit`/`fromId` so pressing twice copies nothing
+twice; a pillar with no Owner takes the unit's head, because the head of a
+one-direction page is that direction's owner; each unit's plan is archived
+once, with its Foundation and SWOT (*"kept in archive"*); and the top layer's
+pillars and SWOT components are switched on. **The units are left exactly as
+they were** — hidden, never deleted, and back the moment the layer is on
+again. The cost is stated: switching back on does not remove the copies from
+the company page; that is a deliberate decision rather than a guess about
+which copy somebody has been writing in.
+
+**THE COMPANY PAGE**: its Strategy tab holds the Foundation, the SWOT, the
+directions under the client's own word (`L("pillar","bu")` — *Strategic
+Directions* on El Abd), and **Capabilities as a section of its own**, one row
+per capability shown the way the Structure step sets it, with *Open* into its
+own pages — because the navigation row no longer carries a Capabilities side
+while the units are off. Performance leads with the directions card, each
+direction counting equally (`unitPillars`, the mean — *"yes equally"*), and
+drops the two unit cards, *Where to look next* and the units section.
+Weighting leaves the tab row: it weights units, and there are none.
+
+**A DIRECTION'S OWNER REPORTS THEIR OWN DIRECTION AND NEVER SUBMITS.** A rule
+beside `mayReportTop` (§428), for §37's reason: `SMPRules.ownsTopPillar` —
+true only while the units are off, since that is the only shape in which the
+top layer's pillars ARE the directions. The screen asks it in `canReport`,
+`canReportRow` (narrowed by the row's pillar owner) and keeps `canSpeakFor`
+on `mayReportTop`, so Submit, the note and the slides stay the office's and
+the CEO's. The server asks the same rule in `lib/authorize.js`'s group branch,
+row by row against the STORED top plan (§42). `topItems` and the group's
+structure join the world in `W()` AND `worldOf()` (§102.4).
+
+**VERIFIED.** `checks/single-company.py` 36/0, driving the real switch —
+question, Cancel, move — and asserting both ends; red **3** with the
+`activeKeys` gate out and **2** with the owner narrowing out, both from the
+SOURCES. `test-authorize.js` §439 **896/0**: own direction allowed, another's
+refused, renaming refused, submitting refused, the office still everywhere,
+and with the units ON the same person refused; red **1** with the row check
+out and **1** with the units gate out. **One gate is belt and braces and is
+said to be**: the `unitReporting` test in front of the row check changes no
+verdict when removed, because a submission carries no row ids and is refused
+further down either way. Neighbours green: structure, structure-sections,
+top-plan, client-setup, plan-switch, detail-layers, setup-live-rows,
+cycle-board, welcome, gap-fill, reporting-ytd-target, master-presentation;
+graph-diff 140/0, platform-rules 69/0, my-reporting 65/0; `qa.py` ERRORS none;
+`built-in-step` all good. **Not run in this session**: the served-stack
+database checks. **Recorded, not done**: El Abd's own move is a press on the
+live client, to be made by Islam or at his word, not by a migration.

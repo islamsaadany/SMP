@@ -158,6 +158,15 @@ function __smpShape(state, a, hydrate) {
     var co = byName[String((u && u.company) || "").trim().toLowerCase()] || null;
     var k = addBusinessUnit(nm, (u && u.prefix) || "", co);
     if (!k) return;
+    /* §438: how the unit plans, stored as an ABSENCE for pillars (§50.6).
+       Applied after the carry below as well, or an old unit's stored way
+       would win over the one just picked. */
+    var uf = (u && u.format) === "projects" ? "projects" : (u && u.format) === "objectives" ? "objectives" : null;
+    var setUf = function (kk) {
+      if (!u || !u.format) return;
+      if (uf) UNITS[kk].format = uf; else delete UNITS[kk].format;
+    };
+    setUf(k);
     var was = unitByName[nm.toLowerCase()];
     if (was && claimedU[was]) was = null;
     if (!was && wasUnits[k] && !claimedU[k]) was = k;
@@ -165,6 +174,7 @@ function __smpShape(state, a, hydrate) {
     claimedU[was] = true;
     rekeyUnit(k, was, nm); k = was;
     UNITS[k] = __smpCarry(wasUnits[k], UNITS[k], ["name", "company", "ukey"]);
+    setUf(k);
     if (wasRoles[k]) UNIT_ROLES[k] = wasRoles[k];
     if (wasW[k]) {
       var rows = GROUP.weighting.units;
@@ -427,6 +437,7 @@ var CLIENTSETUP = (function () {
     (UNIT_KEYS || []).forEach(function (k) {
       var u = UNITS[k];
       g.units.push({ key: k, name: u.name,
+        format: u.format === "projects" ? "projects" : u.format === "objectives" ? "objectives" : "pillars",
         company: u.company && COMPANIES[u.company] ? COMPANIES[u.company].name : "" });
     });
     (FUNCTION_KEYS || []).forEach(function (k) {
@@ -1115,7 +1126,12 @@ var CLIENTSETUP = (function () {
         if (!shape) nm.readOnly = true;
         nm.addEventListener("input", function () { row.name = nm.value; S.shapeDirty = true; });
         r.appendChild(nm);
-        if (kind === "fn") {
+        /* §438: a business unit says how it plans here too, exactly as a
+           function does (Islam: *"in the setup page for the functions it
+           shows how we plan already why we don't have it in the business
+           units as well"*). Same control, same words; a unit's default is
+           pillars. */
+        {
           var tail = el("span", "wzrt");
           tail.appendChild(el("span", "wzsub", "plans in"));
           var sel = el("select", "fld");
@@ -1126,6 +1142,7 @@ var CLIENTSETUP = (function () {
             sel.appendChild(o);
           });
           sel.setAttribute("data-wzfmt", row.key || "");
+          sel.setAttribute("aria-label", "How " + (row.name || "this row") + " plans");
           if (!shape) {
             /* §436: A PLAN IN IT DOES NOT FREEZE HOW A FUNCTION PLANS (Islam:
                *"it needs to be changable with a warning"*). The change is
@@ -1134,7 +1151,7 @@ var CLIENTSETUP = (function () {
                switching back brings it back (§405) — never through the list
                rewrite that the freeze is there to stop. */
             if (!row.key || !OPTS.switchWay) sel.disabled = true;
-            else sel.addEventListener("change", function () { liveFormat("fn", row.key, sel); });
+            else sel.addEventListener("change", function () { liveFormat(kind === "unit" ? "unit" : "fn", row.key, sel); });
           } else sel.addEventListener("change", function () { row.format = sel.value; S.shapeDirty = true; });
           tail.appendChild(sel);
           r.appendChild(tail);
@@ -1191,7 +1208,7 @@ var CLIENTSETUP = (function () {
           cb.appendChild(el("span", "p", "+"));
           cb.appendChild(document.createTextNode(nm));
           cb.addEventListener("click", function () {
-            list.push(markFromChip(kind === "unit" ? { name:nm, company:"" } : { name:nm, format:fnDefault(), company:"" }, nm));
+            list.push(markFromChip(kind === "unit" ? { name:nm, format:"pillars", company:"" } : { name:nm, format:fnDefault(), company:"" }, nm));
             addThenFocus();
           });
           crow.appendChild(cb);
@@ -1201,7 +1218,7 @@ var CLIENTSETUP = (function () {
       var add = el("button", "wzadd", kind === "unit" ? "+ Add a " + w("unitword", "one", "business unit") : "+ Add a " + w("fnword", "one", "supporting function"));
       add.type = "button";
       add.addEventListener("click", function () {
-        list.push(kind === "unit" ? { name:"", company:"" } : { name:"", format:fnDefault(), company:"" });
+        list.push(kind === "unit" ? { name:"", format:"pillars", company:"" } : { name:"", format:fnDefault(), company:"" });
         addThenFocus();
       });
       box.appendChild(add);
@@ -1210,9 +1227,7 @@ var CLIENTSETUP = (function () {
        the functions' half again — and the units' line only where units DO
        carry pillars, or it describes a plan this client does not make. */
     var line = kind === "unit"
-      ? (structNow().bu.on.indexOf("pillar") >= 0
-          ? "A unit plans in pillars, with key measures and tactics under each. Its code is made from the name and prefixes every pillar on it."
-          : "")
+      ? "A unit's plan type decides what its pages hold. Its code is made from the name and prefixes every row of its plan."
       : "A function's plan type decides what its pages hold, and it stays changeable until the function has a plan in it.";
     if (line) box.appendChild(el("p", "wzwhy", line));
     return box;

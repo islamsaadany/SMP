@@ -172,6 +172,29 @@ with sync_playwright() as p:
     ev(pg, "()=>{ delete GROUP.structure.over['fn:%s']; }" % pf)
     ck("ticked back: counted again", ev(pg, "()=>fnKoCounted('fn:%s')" % pf) is True)
 
+    print("\n§6 · a business unit says how it plans (§438)")
+    ev(pg, "()=>{ current='setup'; currentSub='start'; paint(); }"); pg.wait_for_timeout(400)
+    step(pg, "units")
+    nsel = ev(pg, "()=>document.querySelectorAll('.csetup select[data-wzfmt]').length", 0)
+    ck("every unit row carries a plans-in select", nsel == ev(pg, "()=>UNIT_KEYS.length", -1), [nsel])
+    shown = ev(pg, "()=>document.querySelector('.csetup select[data-wzfmt=%s]').value" % u0)
+    ck("…reading the way the unit plans today", shown == ev(pg, "()=>unitFormat(UNITS[%r])" % u0), shown)
+    uwas = ev(pg, "()=>unitFormat(UNITS[%r])" % u0)
+    un = ev(pg, "()=>(UNITS[%r].items||[]).length" % u0, 0)
+    ck("(fixture) the unit plans in pillars and holds some", uwas == "pillars" and un > 0, [uwas, un])
+    ok = pick(pg, ".csetup select[data-wzfmt=%s]" % u0, "projects")
+    ck("the unit's plans-in select is live on a frozen client", ok)
+    ck("a unit holding pillars is WARNED first, and nothing changes yet",
+       ev(pg, "()=>!!document.querySelector('#modal-b [data-rmyes]')", False) and
+       ev(pg, "()=>unitFormat(UNITS[%r])" % u0) == "pillars")
+    press(pg, "#modal-b [data-rmyes]", 600)
+    ck("confirmed, the unit plans in projects", ev(pg, "()=>UNITS[%r].format" % u0) == "projects")
+    step(pg, "units")
+    pick(pg, ".csetup select[data-wzfmt=%s]" % u0, "pillars")
+    if ev(pg, "()=>!!document.querySelector('#modal-b [data-rmyes]')", False):
+        press(pg, "#modal-b [data-rmyes]", 600)
+    ck("switching back brings the pillars back, and pillars is stored as an absence",
+       ev(pg, "()=>!('format' in UNITS[%r])" % u0) and ev(pg, "()=>(UNITS[%r].items||[]).length" % u0) == un)
     ck("no page errors", not errs, errs[:4])
     b.close()
 

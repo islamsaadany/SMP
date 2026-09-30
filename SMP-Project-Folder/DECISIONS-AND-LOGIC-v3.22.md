@@ -59007,3 +59007,40 @@ migration.
 function or capability plans comes back by switching the row back (§405, §436);
 one archived by Clear plan, an upload's replace or a pre-§405 format switch is
 restored from Setup › Import & storage › Archived plans (§49.2, §232).
+
+## §438 — a business unit says how it plans in the set-up flow (2026-09-30)
+
+Islam: *"in the setup page for the functions it shows how we plan already why
+we don't have it in the business units as well"* — then, of the proposal,
+*"ok build it that way"*.
+
+**THE CHOICE EXISTED AND THE FLOW DID NOT ASK IT.** Since §405 a unit plans in
+pillars, projects or objectives & actions, chosen in the row's *Edit details*
+dialog on Setup › Business units; Client set-up's Business units step asked for
+names only, while the Supporting functions step beside it carries a *plans in*
+dropdown on every row. **One control, copied, not a new one** (§53.5): the
+units step draws the functions row's own select with the same three words, and
+nothing new is drawn, so no mockup was owed.
+
+- **Pillars is the default and is stored as an absence** (§50.6), exactly as
+  `switchPlanWay` already stores it — so nobody's plan moves.
+- **On a client with a plan it is live**, through `switchPlanWay("unit", …)`,
+  the one switch Setup's own dialog uses: the platform's warning first, the
+  old way hidden and kept, switching back brings it back (§405, §436).
+- **On a client being shaped it rides the flow's answer**: `liveShape()` reads
+  a unit's way, and `__smpShape` writes it AFTER the carry, or an old unit's
+  stored way would win over the one just picked. A unit answered with no way
+  (the console's own create, which asks none) keeps what it had.
+- The step's line under the list stopped saying *"a unit plans in pillars"*,
+  which is no longer true of every unit.
+
+**Proved**: `checks/setup-live-rows.py` §6 (every unit row carries the select,
+it reads today's way, it is live on a frozen client, a unit holding pillars is
+warned first and nothing moves until confirmed, switching back restores the
+pillars and stores the absence) — **7 red** with the select gated back to
+functions, from the sources; `smp-app/checks/setup-shape.mjs` §10 (the flow's
+answer stored, pillars as an absence, a second pass writes the new way both
+directions) — **2 red** with the write removed. `setup-shape.mjs`'s two other
+failures (`desc` asked and unheld; the top level of a new client not carrying
+everything) reproduce identically with this change stashed — they are §428 and
+§436's, recorded here rather than fixed in passing.

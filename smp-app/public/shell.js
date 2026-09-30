@@ -56493,7 +56493,7 @@ var SYNC = (function () {
      taken is what matters. */
   var OFFLINE = false;
   function bootNow() { return Date.now(); }
-  /* ── OPEN ON WHAT YOU SAW LAST TIME (§415) ──────────────────────────
+  /* ── OPEN ON WHAT YOU SAW LAST TIME (§416) ──────────────────────────
      Islam: *"why everytime I open the tab it opens from the start? why don't
      we cash the pages and refresh silently and adjust if something new
      comes"* — and, asked, *"yes"* to the three conditions put to him: one
@@ -56622,7 +56622,7 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
-  var stale = false;       /* §415: the saved copy is on screen and the fresh one has not landed */
+  var stale = false;       /* §416: the saved copy is on screen and the fresh one has not landed */
   var timer = null;
   var saving = false;
   /* When the last save actually LEFT, so the leading edge below can tell a
@@ -57561,7 +57561,7 @@ var SYNC = (function () {
   function rebase(done, quiet) {
     done = done || function () {};
     if (!live || saving) return done(false);
-    /* §417: THE QUIET REFRESH ON A CROSSING asks the same thing and takes the
+    /* §418: THE QUIET REFRESH ON A CROSSING asks the same thing and takes the
        server's answer ONLY IF NOTHING HERE WOULD BE LOST. The view switch
        rebases after its own flush and may overwrite; a quiet refresh must
        never — so if a change has been made since the flush, or a hand is in
@@ -57592,7 +57592,7 @@ var SYNC = (function () {
   }
 
   return {
-    /* THE SAVED COPY IS THE SERVER'S, ONLY OLDER (§415), so the page is told
+    /* THE SAVED COPY IS THE SERVER'S, ONLY OLDER (§416), so the page is told
        it is served while it is on screen — or its first paint judges access
        and pages as the offline file would, and the router, which decides
        where to land once, keeps that answer (measured: a unit head asking
@@ -57623,7 +57623,7 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
-    /* The quiet refresh after a crossing (§417): the same fetch, dropped
+    /* The quiet refresh after a crossing (§418): the same fetch, dropped
        rather than applied if anything on the page would be lost. */
     refresh: function (done) { rebase(done, true); },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
@@ -57891,13 +57891,13 @@ var SYNC = (function () {
                      (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
         land();
       }, BOOT_GIVEUP);
-      /* §415: THE SAVED COPY LANDS FIRST, if there is one. It paints through
+      /* §416: THE SAVED COPY LANDS FIRST, if there is one. It paints through
          the same chromeFor the live answer uses, with the person it was
          saved for, and the fresh answer below repaints over it. If the saved
          copy will not hydrate (an older shape), it is dropped and this is an
          ordinary boot. */
       stale = false;
-      /* ── THE CHROME IS DRAWN ONCE, BY WHICHEVER LANDING RUNS FIRST (§415) ──
+      /* ── THE CHROME IS DRAWN ONCE, BY WHICHEVER LANDING RUNS FIRST (§416) ──
          The saved copy lands after the 180ms floor; a fast server's answer can
          land INSIDE that floor and run its callback first. The chrome
          (sign-out, the viewer, `VIEWER` itself) must be drawn by that first
@@ -57974,7 +57974,7 @@ var SYNC = (function () {
              the skeleton stays up until it does — which is right: the gate
              is where this person is going. */
           if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace(doorUrl()); return; }
-          /* §415: the saved copy belonged to somebody else — start again
+          /* §416: the saved copy belonged to somebody else — start again
              rather than repaint another person's chrome under this one. */
           if (stale && (!data.person || data.person.key !== cached.person.key)) {
             cacheWipe(); cacheWrite(data.state, data.person); location.reload(); return;
@@ -57983,7 +57983,7 @@ var SYNC = (function () {
           live = true;
           person = data.person || null;
           cacheWrite(data.state, person);
-          /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§415). With a saved
+          /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§416). With a saved
              copy on screen the page has already landed, so `land()` runs its
              callback AT ONCE rather than after the floor — and that paint ends
              in afterPaint(), which with no baseline would post the whole graph
@@ -69370,7 +69370,7 @@ var SYNC = (function () {
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
-        /* §417: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+        /* §418: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
            "yes add the quiet refresh when crossing"). A press that is a paint
            shows what this tab already holds; behind it, anything waiting is
            saved first, then the server's copy is asked for and the page
@@ -69389,7 +69389,7 @@ var SYNC = (function () {
             });
           });
         };
-        /* §416: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
+        /* §417: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
            ITSELF (Islam: "when moving between client settings and strategy
            the strategy page loads"). The client's settings, a module's
            settings and that module's own pages are ONE document — the server

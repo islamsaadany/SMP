@@ -5857,6 +5857,45 @@ step, the shipped file in step with its sources, and the type check clean. The
 frozen product is untouched and measured, so `sw.js` is not bumped. **On the
 branch, not merged.**
 
+### What the merge to `main` would involve — measured, so you can decide it
+
+**`main` has moved 313 commits under this branch while it was being built**, and
+the branch is 12 commits. Fetched and looked at rather than assumed, because
+another session pushing mid-round has happened here before.
+
+**The one thing that could have been expensive is not there.** Nobody else has
+built Portfolio: main holds none of its files, so the whole module is an
+addition rather than a reconciliation, and the spec file extends rather than
+collides — main's copy stops where this branch's additions begin. **And the
+first Portfolio round, the rules and the tables, is already on main**, so that
+one merged weeks ago.
+
+**Eleven files have been touched on both sides**: the three record files and
+eight checks and settings. None is a conflict of substance, and three were
+measured one at a time rather than guessed at:
+
+- The database proofs' fixture — **another session fixed two of the three
+  things I fixed, first, and their version is better**, so theirs is what we
+  keep and only the one repair they lack rides on top. Their fix is also why
+  their own copy is currently failing: they mended it, and then the Portfolio
+  tables landed on main and put the same proof straight back into the red,
+  where it has been since with nothing noticing.
+- The tracker check — their copy, run here, still fails three times, so this
+  round's repairs are still owed.
+- The demo scan and the insights check — they carry neither repair.
+
+**Four round numbers need changing before the merge, not after.** This branch's
+last four rounds are numbered 376 to 379 and main has given those four numbers
+to four entirely different pieces of work. Renaming them is mechanical and is
+done by matching the exact lines this branch wrote, never by a sweep — a sweep
+has taken another branch's references once before, in both of the two ways the
+numbers are written.
+
+**The merge itself is your call, and it is a real one**: the built file has
+to be rebuilt rather than merged, the four generated copies re-run, the
+carried rule files re-carried, and the service worker parsed after the splice.
+All of that is written down; none of it is started.
+
 ## Portfolio — Progress and Analytics (2026-09-30, spec 060 §14)
 
 **Both of the screens you signed off on the 30th are built** (*"ok for the

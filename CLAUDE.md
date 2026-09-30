@@ -9970,21 +9970,27 @@ which on an isolation proof is **unproven rather than merely unreported**
 **The throw is what made it findable and STAYS** (&sect;54.5 the useful way
 round): a fixture that silently dropped the column would have seeded a row the
 database refuses and **blamed the product**. **And fixing the CLASS rather than
-the instance found the other two**, each the next blocker, each measured:
-`notes.met_on` is a `date` and the table named no date type, so `date`, `time`
-and the two floats now cover every type `db/schema.sql` uses (&sect;104.7);
-`portfolio_activities`' first nullable FK is its own `depends_on`
-self-reference, and **a self-reference can never be satisfied by a table's
-first row** &mdash; NULL is the correct seed, so it is never chosen; and `'k'`
-is not a legal `tracker_events.kind`, where **two hand-written enum cases
-existed and a third module broke it**, so the value is READ out of
-`pg_get_constraintdef` and both cases are deleted (&sect;24) &mdash; the
-derivation giving `swot_items.cat` &rarr; `'s'`, byte-identical to the case it
-replaces, which is corroboration rather than an argument. **S2 now reads 55
-tenant tables isolated on all three verbs**, eight of nine proofs green, six
-falsifications still red, and **S8 recorded UNRUN rather than passing**
-(&sect;54.5: it wants a v2.0-shaped database this container does not hold and
-says so itself).
+the instance found the other two**, each the next blocker, each measured: no
+`date` branch for `notes.met_on`; `portfolio_activities`' first nullable FK
+being its own `depends_on` **self-reference**, which a table's first row can
+never satisfy (NULL is the correct seed, so it is never chosen); and `'k'` not
+being a legal `tracker_events.kind`, where two hand-written enum cases existed
+and a third module broke it. **AND TWO OF THE THREE ARE ALREADY ON `main`,
+which is the part worth recording**: its own harness carries `current_date` and
+an `allowedByCheck()` reading a constraint's first literal &mdash; another
+session's &sect;365.2, independent and in one respect **better** (it reads the
+bare `IN (…)` form too) &mdash; so the branch's first two are a rediscovery and
+the merge takes main's whole (&sect;318.7). **What is genuinely new is the
+self-reference guard, and it is what unblocks `main`'s OWN spike**: run against
+main's harness in this tree, S2 is `RED 0 ok, 1 failed` on
+`portfolio_activities`. So &sect;365.2 fixed the date and **&sect;375 then
+landed a self-referencing table on main and put the same proof straight back
+into the red**, where it has been since with nothing noticing &mdash; *a fixture
+that throws on the first missing thing hides the second*, cutting both ways.
+**S2 now reads 55 tenant tables isolated on all three verbs**, eight of nine
+proofs green, six falsifications still red, and **S8 recorded UNRUN rather than
+passing** (&sect;54.5: it wants a v2.0-shaped database this container does not
+hold and says so itself).
 **&sect;379.13 &mdash; AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE
 PLATFORM**: `checks/demo-seed.mjs`, the one file between a real client's names
 and a demo, read **102 hits** &mdash; the first a consultant's seat on another
@@ -10041,7 +10047,27 @@ memory 21 &middot; 14 &middot; 36 &middot; **42** &middot; 16, frameworks 90/0,
 frameworks:page 64/0, tracker **228/0**, eight of the nine spike proofs (S8
 UNRUN, &sect;379.12), `generated-in-step` all clear, `built-in-step.py` all
 good and **`typecheck` clean** (&sect;379.16). The frozen product is untouched
-and measured, so **`sw.js` is NOT bumped**. **On the branch, not merged.***
+and measured, so **`sw.js` is NOT bumped**.
+**&sect;379.17 &mdash; AND THE MERGE IS MEASURED, NOT MADE**: `main` has moved
+**313 commits** under this branch (12 ahead) and is at **&sect;438**, fetched
+and looked at rather than assumed (&sect;313.37). **The expensive thing is not
+there** &mdash; main holds **no `modules/portfolio/`**, so nobody built these
+screens twice and the module is additive; spec 060 stops at &sect;10 there and
+this branch adds &sect;11&ndash;&sect;15; and **&sect;375 is already on main
+wearing that number**. **Four numbers collide** &mdash; this branch's
+&sect;376&ndash;&sect;379 name four other pieces of work on main &mdash; so they
+become &sect;439&ndash;&sect;442, renumbered BEFORE the merge, by matched text,
+in **both spellings** (&sect;264.3, &sect;336.1). **Eleven files touched on both
+sides**, each COMBINED never picked (&sect;318.7), three of them measured one at
+a time: main's `_harness.mjs` fix is better and is kept; main's `tracker.mjs`
+run here is **226/3**, so &sect;379.11 is still owed; and main carries neither
+&sect;379.13 nor &sect;379.15. The merge's own checklist &mdash; rebuild rather
+than merge the built file (&sect;91), re-run the four generators (&sect;329),
+re-carry the `.cjs` rule modules (&sect;335), `node --check sw.js`
+(&sect;146.2), grep the result for duplicate declarations (&sect;56.7), and
+confirm the SHELL name against `origin/main` immediately before the push
+(&sect;94.16) &mdash; is written down and **not started**.
+**`main` is Islam's word, on that merge.** **On the branch, not merged.***
 
 *Earlier the same day: **&sect;378: Portfolio &mdash; Progress and
 Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:

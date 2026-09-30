@@ -50502,10 +50502,7 @@ silently left the column out would have seeded a row the database refuses and
 each one the next blocker, each measured:
 
 1. **`notes.met_on date NOT NULL`** with no default (&sect;357) and no `date`
-   branch in the table. `date`, `time` and the two float types are ordinary
-   column types; with the branches already there they now cover every type
-   `db/schema.sql` uses, so the next NOT NULL column of any of them costs
-   nothing (&sect;104.7).
+   branch in the table.
 2. **`portfolio_activities` referenced itself.** Its two parents are nullable
    with a CHECK that exactly one is set, so the fixture falls back to *the first
    nullable FK* &mdash; and the candidates are ordered by constraint name, which
@@ -50517,14 +50514,33 @@ each one the next blocker, each measured:
    hand-written cases for enumerated columns &mdash; `swot_items.cat` and
    `access_grants.grant_` &mdash; and a third module's column broke it, which is
    the shape of a list somebody forgets to add to. **An enumerated column names
-   its own legal values**, so `enumValues()` reads the first literal out of
-   `pg_get_constraintdef` and the two cases are DELETED with it (&sect;24),
-   matched on the SIMPLE form only, never on a conditional one like
-   `((c IS NULL) OR (c = ANY …))`, whose other branch is the answer. Measured:
-   exactly **three** enumerated columns on a tenant table are NOT NULL with no
-   default, so a rule replaces a list of two and already covers the third; and
-   the derivation gives `swot_items.cat` &rarr; `'s'`, **byte-identical to the
-   case it replaces**, which is corroboration rather than an argument.
+   its own legal values**, so the value is read out of the catalogue and the two
+   cases go with it (&sect;24).
+
+**AND TWO OF THOSE THREE ARE ALREADY ON `main`, WHICH IS THE PART WORTH
+RECORDING** (&sect;303 pointed forward rather than back, and measured rather
+than assumed): `origin/main`'s own `_harness.mjs` carries `current_date` and an
+`allowedByCheck()` that reads a constraint's first literal &mdash; another
+session's &sect;365.2, arrived at independently and, in one respect, **better**,
+since it reads the bare `IN (…)` form as well as the normalised
+`= ANY (ARRAY[…])`. So the branch's first two are a **rediscovery** and the
+merge takes main's whole (&sect;318.7: combine, never pick).
+
+**WHAT IS GENUINELY NEW IS THE SELF-REFERENCE GUARD, AND IT IS WHAT UNBLOCKS
+`main`'s OWN SPIKE.** Measured by running S2 against **main's harness** in this
+tree: `seed: portfolio_activities references portfolio_activities which has no
+row yet`, `RED 0 ok, 1 failed`. So the story is not that main was behind &mdash;
+**&sect;365.2 fixed the date, and &sect;375 then landed a self-referencing table
+on main and put the same proof straight back into the red**, where it has been
+since, with nothing on main noticing. *A fixture that throws on the first
+missing thing hides the second*, and that cuts both ways: it hid this one from
+the round that fixed the first.
+
+**AT THE MERGE**: main's `placeholder`/`allowedByCheck` whole, this branch's
+`f.ref !== t` guard carried onto it, and the `time`/`real`/`double precision`
+branches kept as **pre-emptive and said to be** &mdash; nothing needs them
+today, and the throw above already names the next one loudly enough that
+leaving them out would cost nothing either.
 
 **WHAT IT BOUGHT**: S2 reads **55 tenant tables isolated on all three verbs**
 where it had been `0 ok, 1 failed`. **Verified**: eight of the nine proofs
@@ -50631,3 +50647,57 @@ rounds established it was not theirs, correctly, and none asked what it was.
 The honest line from here is that the typecheck is clean, and a container where
 it is not needs `npm run build` (or `npx prisma generate`) rather than an
 excuse.
+
+### §379.17 — THE MERGE, MEASURED AND NOT MADE
+
+`main` has moved **313 commits** under this branch, which is **12** ahead, and
+it is at **&sect;438**. Measured rather than assumed, because the rule before
+every merge is to fetch main and LOOK at it (&sect;313.37, and §70 landed on
+main mid-session once already). Nothing here is merged; what follows is the
+merge priced, so that when Islam's word comes it is cheap and provably correct.
+
+**THE ONE THING THAT COULD HAVE BEEN EXPENSIVE IS NOT THERE**: `main` holds
+**no `smp-app/modules/portfolio/`** at all, so no second session built these
+screens and the whole module is additive. `specs/060-portfolio/spec.md` on main
+stops at **&sect;10** and this branch adds &sect;11&ndash;&sect;15, so that file
+extends rather than collides. And **&sect;375 &mdash; the rules and the tables
+&mdash; is already on main**, wearing that number, so that round merged cleanly
+weeks ago.
+
+**FOUR SECTION NUMBERS COLLIDE AND MUST MOVE BEFORE THE MERGE, NOT AFTER**
+(&sect;336.1's rule and why): this branch's &sect;376&ndash;&sect;379 name
+four different pieces of work on main &mdash; spec 061's reports tab, an
+address as a value, an address taken whole, and the working copy carrying the
+platform &mdash; so the branch's four become **&sect;439&ndash;&sect;442**. It
+is run **before** the merge, which is what makes it provably scoped to this
+branch's own lines, and by **matched text** rather than by number, because a
+blanket sweep takes the other side's citations (&sect;264.3 &mdash; 17 of them,
+once) **and it must cover BOTH spellings**, the literal `§` and the `&sect;`
+entity, or 83 citations go on naming somebody else's section (&sect;336.1).
+
+**ELEVEN FILES ARE TOUCHED ON BOTH SIDES** and each is COMBINED, never picked
+(&sect;318.7): the three record files, `checks/modules.mjs`,
+`checks/tracker.mjs`, `checks/demo-seed.mjs`, `checks/insights.mjs`,
+`spike/_harness.mjs`, `lib/modules.ts`, `modules/registry.ts` and
+`package.json`. Three of them were measured one at a time rather than reasoned
+about:
+
+* **`spike/_harness.mjs`** &mdash; main's fix is better and is what we keep
+  (&sect;379.12); this branch's self-reference guard rides onto it.
+* **`checks/tracker.mjs`** &mdash; main's copy, run in this tree, is
+  **226 passed, 3 failed**, so &sect;379.11's three repairs are still owed; the
+  file has grown 22 lines on main and 21 here, so it is a real hunk-by-hunk
+  combine.
+* **`checks/demo-seed.mjs`** and **`checks/insights.mjs`** &mdash; main carries
+  neither &sect;379.13's `PLATFORM_TABLES` exclusion nor &sect;379.15's move of
+  the fixture drop into the `finally`.
+
+**AND THE MERGE'S OWN CHECKLIST, WHICH IS NOT OPTIONAL HERE**: the built file
+REBUILT from the merged sources and never merged (&sect;91); the four
+generators in `smp-app/` re-run and `generated-in-step` read after
+(&sect;329); the carried `.cjs` rule modules re-carried, because main has
+moved `lib/rules.js` and friends (&sect;335); `node --check sw.js` after the
+splice (&sect;146.2); the merged result grepped for its own duplicate
+declarations (&sect;56.7, &sect;147.4, &sect;281); and the `sw.js` SHELL name
+confirmed against `origin/main` **immediately before the push** rather than at
+the start (&sect;94.16). **`main` is Islam's word, on that merge, every time.**

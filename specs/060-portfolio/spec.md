@@ -20,11 +20,15 @@ commitments section §9.13b), **Progress** (§9.10) and **Analytics** (§9.12) o
 2026-09-30. **RULE 1c IS PAID IN FULL**, so the sentence that stood here
 through six drawings — *nothing visual may be built until each screen is drawn
 and signed off* — is satisfied rather than waived, and what stops a build now
-is no longer a sign-off. **It is §10's own item**: this repository has never
-seen the reference code, both audits behind §7 and §9.11 were written by
-sessions that had it attached, and **nothing has ever been run** — no database,
-no `.env`, no ScopePlan rows, so there is not one real rendered value anywhere
-in this spec. That is what building needs next, and it is not a drawing.
+is no longer a sign-off. **AND §10's OWN ITEM IS ANSWERED TOO**: the reference
+repository was given to this session on 2026-09-30 and is read — **§11 is that
+read-through**, six screens against the code they describe, written before a
+line was built. Three of its ten findings are instructions for whoever writes
+the migration and two confirm the design's own corrections; **none invalidates
+a signed-off screen**. What is still true is that no real client's plan has
+been seen through it (§11.9), which is a question about shape and not about
+rules. **Building started 2026-09-30 on Islam's word**, *"write it into the
+spec first, then start building"*.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -1770,8 +1774,10 @@ window (§54.5). Neither palette has been looked at.
   optional value passed where a required one is typed — and the brief traced the
   runtime path and found it fails closed. The signature is wrong, not the
   behaviour. It is noted so the count does not frighten anybody pricing this.
-- **This session has not read the reference code, and two sessions that could
-  have.** `port-audit.md` (2,295 lines, commit `d569ba6`) and `analytics-audit.md`
+- **~~This session has not read the reference code~~ — ANSWERED 2026-09-30,
+  see §11.** The paragraph below is left as it read, because it is the record
+  of what was true for the thirteen days it stood.
+- **Two sessions read the reference code and this one could not.** `port-audit.md` (2,295 lines, commit `d569ba6`) and `analytics-audit.md`
   (848 lines, commit `bf9793c`) are theirs, written with that repository
   attached, and every claim in §7 and §9.11 is sourced to one of them with file
   and line. **What neither could do is RUN it** — no database, no `.env`, no
@@ -1786,3 +1792,157 @@ window (§54.5). Neither palette has been looked at.
   client's own people, so nothing joins them today. An optional pointer later is
   a field, not a redesign — the same shape spec 046 §8 records for a Portfolio
   project pointing at a Strategy one.
+
+---
+
+## 11 · The reference code, read at last — 2026-09-30
+
+**Islam gave this session the reference repository** (`aleymahmoud-ff/clientplus`)
+after asking what had been done with the time, and being told the honest answer:
+§10's last bullet has said since 17 September that this repository had never
+seen the code it is porting from, and nothing had been done about it. It is
+cloned now and read. **What follows is the first comparison of the six
+signed-off drawings against the thing they describe**, and it is written before
+a line is built, because a drawing agreed against an audit is agreed against
+somebody's summary.
+
+**MOST OF IT PORTED HONESTLY AND SAYING SO FIRST IS THE POINT**: the tree (phase
+→ optional work package → activity, with an activity straight under a phase
+numbered `1.1` rather than `1.1.1`), the two-step completion, the real dates
+stamped in one place (`src/lib/scopeplan/activityDates.ts`, whose own header
+says *all code paths MUST pass through* it), the 10% floor for a started
+activity with nothing finished, sub-activity weights summing to 100 with an
+equal-count fallback, the single dependency with a cascade preview, and Planning
+Mode are all present and behave as §3 and §7 describe. **The six rules are
+real.** What follows is only where the drawings and the code disagree.
+
+### §11.1 · There is no project, no charter and no checkpoint — at all
+
+**The word `charter` appears nowhere in that codebase, and neither does
+`checkpoint`.** Their hierarchy hangs off the CLIENT: `phases` carries
+`client_id`, with an optional `assignment_id` and `scope_id` beside it, and the
+page is `/clients/[clientId]/scopeplan`. A "scope" is a named row
+(`scopes`: a name, a subdomain, a creator, a status) and is a FILTER over one
+client's phases, not a container with a life of its own.
+
+**So three of the six signed-off screens have no counterpart to be checked
+against** — the charter (§5.1), the team (§6.4) and the landing (§9.13).
+They are NEW PRODUCT rather than a port, and that is stated rather than left to
+be discovered when one of them turns out wrong in use: there is no old
+behaviour to fall back on, and no reference implementation whose mistakes we
+have already learned from. The other three — the plan (§9.9), Progress (§9.10)
+and Analytics (§9.12) — do have one.
+
+**IT DOES NOT INVALIDATE THE DESIGN**, and the reason is in §5 already: a
+Portfolio project owns its phases, which is what makes a charter, a team and a
+landing row possible at all. What changes is the claim. This has been described
+as a rebuild; **half of it is a rebuild and half of it is new**, and the new
+half carries the risk that goes with anything nobody has used yet.
+
+### §11.2 · Their phase progress is a flat average, and ours is weighted
+
+`src/app/api/scopeplan/analytics/route.ts` computes a phase's figure as every
+activity in it counted equally — `reduce(…) / total`, with DONE and COMPLETED
+both scoring 100. There is no weight above the sub-activity: `SubActivity` has
+a `weight` column and `Phase`, `WorkPackage` and `Activity` do not.
+
+**§9.8 gave all three a weight** (`portfolio_phases.weight`,
+`portfolio_work_packages.weight`, `portfolio_activities.weight`, each
+nullable, each blank meaning *the average of those that were set*) and it is
+`checks/portfolio.mjs` proves. It is the better answer and it is Islam's.
+
+**THE COST IS A MIGRATION COST AND IT IS NOT SMALL**: a client moved across
+will see their phase percentages CHANGE — the same work, a different number,
+with nothing on the screen explaining why. Named here so it is a decision taken
+rather than a support call.
+
+### §11.3 · They hold a phase's progress twice, and the two can disagree
+
+`phases.progress_percent` and `scope_milestones.progress_percent` are stored
+columns, and `PATCH /api/scopeplan/phases/[id]` accepts a `progressPercent`
+between 0 and 100 and writes it. **The analytics endpoint ignores both and
+recomputes from the activities underneath.** So one phase can legitimately show
+two different numbers on two screens of one product — §5.2's fault, in the
+reference.
+
+**Ours is derived and never stored** (§9.8's own rule, one level up from
+§5.2's). **What this adds is a migration instruction**: that stored column is
+read by one screen and contradicted by another, so it is thrown away on the way
+across rather than carried into a column we would then have to explain.
+
+### §11.4 · Renumbering happens in Planning Mode and nowhere else
+
+`src/utils/scopeplan-numbering.ts` is headed *"Auto-renumbering logic for scope
+plan items in Planning Mode"* and every function in it takes a DRAFT. The live
+`DELETE /api/scopeplan/activities/[id]` has three modes (single, cascade,
+unlink) and **renumbers nothing** — so outside Planning Mode a delete leaves the
+hole: `1.1`, `1.3`, `1.4`.
+
+**§3's rule 5 says on every move, insert and delete**, which is what is built
+and proved. Ours is the more consistent behaviour and it is a real difference in
+feel: a number under somebody's eye can change when a colleague deletes a row
+above it. Recorded rather than reopened — **the display number is not the id**
+(§5's rows are keyed by uuid), so nothing keyed on a row is moved by it.
+
+### §11.5 · The on-time flaw is confirmed in the code, and our fix is right
+
+§7's audit row and §9.11 record that On-Time Delivery counts an activity with no
+recorded actual end date as on time. **It is there**, in the analytics route's
+milestone pass: after the on-or-before-its-date comparison, the next branch is
+`else if (isDone) milestoneStatus = 'on_time'` — done, no finish date, counted a
+success. Combined with the actual end being CLEARED on reopen, the figure
+flatters exactly the sign-off backlog it sits beside.
+
+**§9.11's answer — an activity with no real end date is not counted at all —
+is confirmed against the code rather than against a summary of it.**
+
+**AND ONE NUMBER MATCHED EXACTLY**, which is worth as much as a disagreement:
+their milestone `upcoming` window is **14 days**, the same figure §9.13b landed
+on independently for the landing's commitments list and named once in
+`_derive.js`.
+
+### §11.6 · Their analytics skips the work package level
+
+The activity filter is `phaseId IN (…) OR workPackage.phaseId IN (…)` and every
+roll-up is phase → activities. The middle level exists in the tree and is not
+rolled up. **Ours rolls up through it** (§9.8), which is what makes a work
+package's own figure mean anything. Minor, and a difference.
+
+### §11.7 · Six client-wide roles, against our three per project
+
+`ClientTeamMember.teamRole` is one of **CLIENT_LEAD · SCOPE_LEAD ·
+SENIOR_CONTRIBUTOR · CONTRIBUTOR · COLLABORATOR · VIEWER**, held for the whole
+CLIENT, crossed with a separate module permission level (CONTROL / EDIT / VIEW /
+NONE) in `src/lib/scopeplan/permissionUtils.ts`.
+
+**§6 is three roles held on the PROJECT**, which is Islam's own correction
+(*"the portfolio has it's own roles it's that simple. and it's relevant to the
+project itself not even the module"*). Unchanged, **with the migration cost
+named**: a person's role today covers everything for that client at once, so
+moving them means DECIDING a role per project rather than mapping one.
+
+### §11.8 · Their sign-off queue is one of our Progress page's four sections
+
+`/api/scopeplan/pending-completions` is, in its own words, the *Lead Completion
+Queue — activities that are DONE but not yet COMPLETED*. §9.10's Progress page
+carries that plus past its date, nobody on it, and signed off. Ours is a
+superset and no rule differs.
+
+### §11.9 · There is still no real data, and now it is certain rather than assumed
+
+`Dump20251023.sql` predates ScopePlan (built December 2025): it holds `scopes`
+(151 rows) and `scope_templates` (74) and **no phases, work packages or
+activities at all**, and neither `prisma/seed.ts` nor `prisma/seed-demo.ts`
+creates one. So the code is fully readable and **no real client's plan has been
+seen through it**. What that leaves unknown is shape rather than behaviour — how
+many activities a real phase holds, how long real names are — which is a
+question for the screens and not for the rules.
+
+### §11.10 · What this changes, and what it does not
+
+**Nothing here invalidates a signed-off screen.** Two things are decisions
+rather than findings and both are Islam's: that phase percentages MOVE for any
+client migrated (§11.2), and that three of the six screens have no reference
+behaviour behind them (§11.1). Three are instructions for whoever writes the
+migration (§11.2, §11.3, §11.7). Two are confirmations that the design's own
+corrections were right (§11.5, §11.6).

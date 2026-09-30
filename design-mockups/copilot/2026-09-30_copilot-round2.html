@@ -1,0 +1,77 @@
+<title>Copilot Round Two</title>
+<style>
+/* Layout: one column of numbered screens, each a card holding a real-platform shot. */
+:root{--bg:#F5F7FA;--card:#FFFFFF;--ink:#16325C;--ink2:#3C4A5E;--quiet:#5B6778;--line:#D6DCE5;--gold:#C9A227;--goldbg:#FBF3DC;
+ --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}
+body{background:var(--bg);color:var(--ink2);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 80px}
+header{border-bottom:3px solid var(--gold);padding-bottom:16px;margin-bottom:28px}
+.kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--quiet);font-weight:700}
+h1{color:var(--ink);font-size:30px;margin:6px 0 8px;text-wrap:balance}
+h2{color:var(--ink);font-size:21px;margin:0 0 6px;text-wrap:balance}
+p{margin:0 0 10px;max-width:72ch}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.num{display:inline-block;background:var(--ink);color:var(--card);border-radius:50%;width:26px;height:26px;text-align:center;line-height:26px;font-weight:700;font-size:13px;margin-right:8px}
+figure{margin:0;min-width:0}
+figure img{display:block;width:100%;border:1px solid var(--line);border-radius:6px}
+ul{margin:0;padding-left:20px}li{margin:3px 0}
+.note{background:var(--goldbg);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;font-size:14px;color:var(--ink2)}
+</style>
+<div class="wrap">
+<header>
+ <div class="kick">Mockup for sign-off · 30 September 2026 · round 2</div>
+ <h1>The Copilot tab: ways to start, files, and owners</h1>
+ <p>Four new pieces on top of the first mockup. Each screen is the running platform with the Copilot drawn in. The content is invented to show the shape. Nothing here is built yet.</p>
+</header>
+
+<section>
+ <h2><span class="num">1</span>The AI offers ways to start, inside the chat</h2>
+ <p>You say what you want. The AI answers with the ways it can build it, as buttons under its reply, with the one it recommends filled in. There is no picker in front of the chat.</p>
+ <figure><img src="shots/8-roads.png" alt="The Copilot offering four ways to build Mobile's foundation"></figure>
+</section>
+
+<section>
+ <h2><span class="num">2</span>When it can already see enough, it just starts</h2>
+ <p>Here Q3 is reported and an interview file is already in the chat, so the AI says which way it will go and starts. Two buttons let you send it another way.</p>
+ <figure><img src="shots/9-road-picked.png" alt="The Copilot choosing to work from Q3 figures and an attached interview file"></figure>
+</section>
+
+<section>
+ <h2><span class="num">3</span>Attaching a file</h2>
+ <p>The paperclip beside the box takes a Word, PDF or Excel file. A sent file shows as a chip with its name, type and size, and a file waiting to be sent sits above the box with a cross to remove it. Anything the AI takes from a file is tagged with the file's name.</p>
+ <figure><img src="shots/10-attach.png" alt="A chat with a PDF sent, SWOT items tagged with the file name, and an Excel file waiting in the composer"></figure>
+</section>
+
+<section>
+ <h2><span class="num">4</span>Company directions name an owner for each row</h2>
+ <p>At a client that plans as one company, the directions stay one deliverable. When you save, each row shows the unit or function that will own it. The AI's suggestions are marked "proposed", you can change any of them, and a row can stay unassigned.</p>
+ <figure><img src="shots/11-owners-save.png" alt="Save dialog for El Abd directions with an Owner column"></figure>
+</section>
+
+<section>
+ <h2><span class="num">5</span>The saved directions carry the Owner column</h2>
+ <p>Opened later, the deliverable shows each direction with its owner, and an unassigned row says so. The owner can be changed in place when editing.</p>
+ <figure><img src="shots/12-owners-deliverable.png" alt="El Abd directions deliverable with an Owner column and one row unassigned"></figure>
+</section>
+
+<section>
+ <h2><span class="num">6</span>The owner sees its own rows, read-only</h2>
+ <p>In Sales' own Copilot, the direction Sales owns appears on its shelf, marked as coming from El Abd and read-only. The link takes you to El Abd, where it is edited.</p>
+ <figure><img src="shots/13-owner-shelf.png" alt="Sales' Directions shelf showing one read-only row from El Abd"></figure>
+</section>
+
+<section>
+ <h2><span class="num">7</span>What this costs or leaves open</h2>
+ <ul>
+  <li>The ways to start only exist for Foundation and Analysis. Directions and Execution have none yet, so there the AI just works from what you say.</li>
+  <li>The Template button needs the template files from you before it can work.</li>
+  <li>A file belongs to its chat. It is not added to a shared library, so using it in another chat means attaching it again.</li>
+  <li>Files have a size limit, not yet set.</li>
+  <li>An owner's rows reach the platform itself only when promoting is built, which is a later round. Until then they show only on the owner's Copilot shelf.</li>
+  <li>If the owner later changes its rows in the platform, the next planning round shows that before anything is overwritten. That screen is not drawn here.</li>
+  <li>The El Abd screens use the demo platform with names swapped, so some tabs above them are the demo client's.</li>
+ </ul>
+</section>
+</div>

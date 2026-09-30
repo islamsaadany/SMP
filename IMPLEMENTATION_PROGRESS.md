@@ -5531,3 +5531,89 @@ running. **Re-run against the merged result**: memory 21 / 12 / 36 / 42 / 16 =
 and it is said why**: not one byte of the frozen build changes here, proved by
 rebuilding it, so `main`'s own sweep carries over rather than being
 re-measured for the sake of a number.
+
+---
+
+## Portfolio — the delivery plan, per client (spec 060)
+
+**Waiting on Islam, not on me.** Nothing is built and no source has moved; this
+is a spec and six drawings. Three screens are signed off — the project team, the
+charter and the plan — and **three await a word**: Progress, Analytics and now
+the landing.
+
+**Every screen is drawn as of 2026-09-20.** The landing was the last one with no
+picture: the project list for this client, with each project's state and the
+cross-project reading §9.11 deliberately kept off the tabs. One question and a
+row answers it four ways — how far along, whether it is late, what is waiting on
+somebody, and when anybody next looks at it.
+
+**A project has no status field and never gains one.** Every figure in that list
+is worked out from the plan underneath it, so the list cannot disagree with the
+four pages behind it. Two of the five projects drawn have no figure at all, on
+purpose: one has a charter and no plan (which says so rather than printing 0%),
+and one has a plan nobody has started (which is 0%, and is the difference).
+
+**What changed in the drawings' own plumbing.** The rows were already shared
+between three drawings; **the sums were not**, and were about to be copied a
+fourth time. They live in one file now and are spliced the same way — proved
+behaviour-neutral (all three render byte-identical to what they published) and
+proved load-bearing one break at a time. The extraction broke the Plan on its
+first attempt, taking a helper out with the block it sliced; the baseline had
+been captured before the first edit, so it was one diff rather than a hunt.
+
+**And this container can render, where the earlier rounds' could not.** So every
+figure on the new page was read out of the rendered document, the three older
+drawings were confirmed byte-identical to what they published, contrast was
+measured across all four in both palettes (**0 failures**, with the probe proved
+able to fail first), and the table's fit was measured at seven widths from 1600
+to 768 with nothing scrolling sideways.
+
+**Next, and it is a decision rather than work**: three sign-offs. After them,
+the spec's own §10 still says what building needs — this repository has never
+seen the reference code, so the two audits behind §7 and §9.11 were written by
+sessions with it attached and nothing has been run.
+
+---
+
+## Portfolio — the rules and the tables (2026-09-20, spec 060, §375)
+
+**Built: the half with no picture.** Every screen of this module is drawn and
+three of the six are signed off, so what could honestly be built is the part
+that is decided and has no design in it — the shape the data takes, and the
+rules that say what may be done to it.
+
+**Nothing on any screen has changed and nothing can be opened.** Portfolio is
+still switched off in the list of modules, so there is no page, no address and
+no entry in the switcher. That is asserted rather than assumed: a module
+switched on with nothing behind it is a door onto an empty room.
+
+**What is in it.** Eight tables — the plan's tree (phases, work packages,
+activities and their breakdown), who is on a project and at what, and the three
+words a client uses for the levels. And the rules the spec calls the actual
+product: two people finish an activity rather than one, and reopening it is
+gated the same way as signing it off; the real dates are worked out and never
+typed, at one place in the code; progress comes from the breakdown and a typed
+figure over it is refused with the reason; moving a date shows you what else
+moves before anything commits; the numbers renumber themselves, so deleting a
+phase cannot leave a gap; and a phase's figure is made of the rows under it
+rather than stored, which is what stops it disagreeing with the page it summarises.
+
+**How it is proved.** 121 assertions with no browser and no screen, each
+refusal asserted beside the same act allowed to somebody the rule admits — and
+the whole file proved able to fail ten times over, one break per rule, before
+the green run was believed. The tables were proved by running them twice: on a
+fresh database, and on one already up, where only the migration creates them.
+
+**Two things worth recording.** One break modelled a broken function rather
+than the defect it was named after, and was rewritten until it reproduces the
+fault exactly. And building §6 found two sentences in the spec pointing
+different ways — whether a Lead can name somebody onto a project, which the
+team screen says no to and the charter implies yes. Answered the narrow way,
+written into the spec, and Islam's to settle.
+
+**Not this work's, established on a baseline first**: the Tracker's check is
+one red on a date that has gone stale since it was written, and one spike proof
+dies in its own seed harness on a Meeting Notes column. Both recorded.
+
+**Next, and still a decision rather than work**: the three sign-offs. Nothing
+visual can be built until they are given.

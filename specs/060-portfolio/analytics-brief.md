@@ -1,4 +1,4 @@
-# Analytics brief — the one screen the first audit did not reach (spec 056 §9.10)
+# Analytics brief — the one screen the first audit did not reach (spec 060 §9.10)
 
 > **ANSWERED 2026-09-19.** The reply is `analytics-audit.md` (848 lines, commit
 > `bf9793c`), and what it settles and leaves open is §9.11 of the spec. This page

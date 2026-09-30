@@ -131,10 +131,13 @@
   .figs{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
   .pc{ font-size:17px; font-weight:700; letter-spacing:-.01em; }
   .word{ font-size:11.5px; color:var(--ink-3); }
-  .behind{ display:inline-block; font-size:10px; letter-spacing:.05em;
-           text-transform:uppercase; font-weight:700; color:var(--bad-tx);
-           background:var(--bad-bg); border:1px solid var(--bad);
-           border-radius:4px; padding:1px 6px; }
+  .behind, .cb{ display:inline-block; font-size:10px; letter-spacing:.05em;
+                text-transform:uppercase; font-weight:700;
+                border-radius:4px; padding:1px 6px; }
+  .behind, .cb.over{ color:var(--bad-tx); background:var(--bad-bg);
+                     border:1px solid var(--bad); }
+  .cb.wait{ color:var(--panel-ink); background:var(--panel); border:1px solid var(--panel); }
+  .cb.soon{ color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
   .noplan{ font-size:12.5px; color:var(--ink-3); font-style:italic; }
 
   .owe{ width:230px; }
@@ -150,6 +153,13 @@
 
   .empty{ margin:0; padding:22px 16px; text-align:center; font-size:13px;
           color:var(--ink-3); }
+
+  /* what is owed next — one date, one commitment, one thing in the way */
+  .cdue{ width:104px; font-variant-numeric:tabular-nums; font-weight:600; }
+  .cdue.past{ color:var(--bad-tx); }
+  .cwhat{ width:188px; }
+  .cname{ font-weight:600; }
+  .cproj{ font-size:11.5px; color:var(--ink-3); margin-top:2px; }
 
   .spec{ margin-top:26px; }
   .spec .box{ border-style:dashed; }
@@ -189,6 +199,16 @@
       <th class="when">Next look</th>
     </tr></thead>
     <tbody id="rows"></tbody>
+  </table></div>
+
+  <p class="sect" id="cosect"></p>
+  <div class="box"><table>
+    <thead><tr>
+      <th class="cdue">Due</th>
+      <th>Commitment</th>
+      <th class="cwhat">What is in the way</th>
+    </tr></thead>
+    <tbody id="commits"></tbody>
   </table></div>
 
   <div class="spec">
@@ -269,6 +289,39 @@
     is only ever drawn for somebody who can reach two or more, which is why
     there is no one-row state to look at. Omar is drawn on two for that
     reason.</p>
+
+    <h3>What is owed next, and why it belongs on this page and not a tab</h3>
+    <p>Islam, 2026-09-30: <i>&ldquo;yes add the commitments section to the
+    landing.&rdquo;</i> The list above answers <b>which project needs me</b>;
+    this answers <b>what do we owe next</b> &mdash; and it is the one reading no
+    project tab can give, because a commitment belongs to a project, so the
+    Analytics tab can only ever show one project&rsquo;s at a time
+    (&sect;9.11). It is the same table as the list for the same reason the list
+    is a table: a second shape for a second list on one page would be two
+    answers to how this page shows a list.</p>
+    <p><b>Met means signed off, never finished.</b> Culture&rsquo;s executive
+    alignment workshop was accepted five days late and is <b>met</b> &mdash; it
+    owes nothing, it is done, and whether it was on time is Analytics&rsquo;
+    question. Its blueprint draft is finished, unsigned, and is still owed. The
+    test is the one Analytics uses, so the two cannot mean different things by
+    it.</p>
+    <p><b>Three things put a commitment on this list</b>: it is waiting on a
+    sign-off, it is late, or it falls due in the next fortnight. <b>A sign-off
+    is owed now whatever its date says</b> &mdash; <i>Assortment rules</i> is
+    finished and sitting with a Lead and is not due until July, and it is on the
+    list, because the strip above already counts it as waiting on somebody and
+    two answers on one screen is the fault this whole module argues against.</p>
+    <p><b>Fourteen days is the one number here somebody chose rather than worked
+    out</b>, and it is the same fourteen the Analytics tab uses. It cannot be
+    measured &mdash; how much warning somebody wants is a judgement &mdash; so
+    it is a decision with a name in one place, and it decides a colour and never
+    a word: every row says how many days, late or not.</p>
+    <p><b>And something both late and finished says it is waiting, not that it
+    is late.</b> The blueprint draft was due in February and the work is done. A
+    red <i>18 days over</i> would send somebody chasing the person who has
+    already finished, so the badge names what is actually in the way and
+    <b>the date beside it stays red</b>. Both facts are on the row; only one of
+    them is the job.</p>
 
     <h3>The order is the plan's own start, earliest first</h3>
     <p>Not worst first. A short list is scanned for a <b>name</b>, and an order
@@ -376,8 +429,20 @@
 
    Every function takes its rows. Nothing here reads a global but `TODAY`, which
    is declared in `_rows.js` beside the plan it dates.
+
+   AND ONE NUMBER LIVES HERE, WHICH IS NOT THE SAME AS A FIGURE. `SOON` is how
+   much warning a commitment gets — the one thing in this drawing set somebody
+   CHOSE rather than derived, so it is named once and every screen that prints a
+   commitment date reads it. §9.13a is the record of it being written twice
+   (thirty days on a landing, beside the fourteen Analytics already had) and of
+   the lesson: it is not a guessed constant (§122.5's fix there is to measure,
+   and how much warning somebody wants cannot be measured) — it is a decision,
+   reversible in one place, and it decides a COLOUR and never a word.
    ────────────────────────────────────────────────────────────────────────── */
   function d(s){ return new Date(s + "T00:00:00Z").getTime(); }
+
+  var SOON = 14;   /* days of warning — see the note above */
+  function daysTo(e, today){ return Math.round((d(e) - d(today)) / 864e5); }
 
   /* the rows one level under row i — or, where that level is empty, everything
      beneath it, so a phase with activities hung straight off it still rolls up */
@@ -449,6 +514,15 @@
     return acts(rows).filter(function(r){ return !r.who && r.pct < 100; });
   }
   function signedOff(rows){ return acts(rows).filter(function(r){ return r.st === "done"; }); }
+
+  /* A COMMITMENT IS MET WHEN SOMEBODY SIGNED IT OFF, never when its work was
+     finished — §9.12's rule, shared so the Analytics tab and the landing cannot
+     mean two things by "met". Culture's 2.1 was accepted five days late and is
+     MET; its 2.2 is finished, unsigned, and is not. Whether a met one was met
+     ON TIME is Analytics' question and stays there. */
+  function commitments(rows){ return rows.filter(function(r){ return r.ms; }); }
+  function metOn(r){ return r.off || null; }
+  function unmet(rows){ return commitments(rows).filter(function(r){ return !metOn(r); }); }
   function owed(rows, today){
     var out = [];
     [waiting(rows), overdue(rows, today), nobodyOn(rows)].forEach(function(list){
@@ -480,17 +554,24 @@
       rows:[
         {lvl:0, n:"1", t:"Baseline"},
         {lvl:2, n:"1.1", t:"Margin baseline by category", who:"Hend Sabry", s:"2026-02-02", e:"2026-02-27", st:"done", pct:100},
-        {lvl:2, n:"1.2", t:"Promotion effectiveness review", who:"",           s:"2026-02-02", e:"2026-03-06", st:"wip", pct:55},
+        /* overdue, AND nobody on it — the row this drawing already used to show
+           that what is owed is a count of rows and not of reasons. A commitment
+           too, so the section below can be genuinely cross-project. */
+        {lvl:2, n:"1.2", t:"Promotion effectiveness review", who:"",           s:"2026-02-02", e:"2026-03-06", st:"wip", pct:55, ms:true},
         {lvl:0, n:"2", t:"Redesign"},
-        {lvl:2, n:"2.1", t:"Pricing architecture", who:"Hend Sabry", s:"2026-04-01", e:"2026-05-29", st:"not", pct:0},
-        {lvl:2, n:"2.2", t:"Assortment rules", who:"", s:"2026-06-01", e:"2026-07-31", st:"not", pct:0}
+        /* far out, so the window below provably bites rather than being claimed */
+        {lvl:2, n:"2.1", t:"Pricing architecture", who:"Hend Sabry", s:"2026-04-01", e:"2026-05-29", st:"not", pct:0, ms:true},
+        /* FINISHED EARLY AND SITTING WITH A LEAD, due in July — owed now, and
+           four months outside any window. The row that stops the section's
+           test being a claim. */
+        {lvl:2, n:"2.2", t:"Assortment rules", who:"", s:"2026-06-01", e:"2026-07-31", st:"sign", pct:100, ms:true, ran:"2026-03-04"}
       ] },
     { key:"finance", name:"Finance systems consolidation",
       brief:"One ledger and one close calendar across the ten units.",
       lead:"Rania Mounir", cad:"weekly", cday:2, team:["Rania Mounir"],
       rows:[
         {lvl:0, n:"1", t:"Discovery"},
-        {lvl:2, n:"1.1", t:"System inventory", who:"Rania Mounir", s:"2026-04-06", e:"2026-05-01", st:"not", pct:0},
+        {lvl:2, n:"1.1", t:"System inventory", who:"Rania Mounir", s:"2026-03-02", e:"2026-03-20", st:"not", pct:0, ms:true},
         {lvl:2, n:"1.2", t:"Close-calendar mapping", who:"Rania Mounir", s:"2026-05-04", e:"2026-05-29", st:"not", pct:0},
         {lvl:0, n:"2", t:"Design"},
         {lvl:2, n:"2.1", t:"Target ledger design", who:"", s:"2026-06-01", e:"2026-07-31", st:"not", pct:0}
@@ -505,7 +586,9 @@
       rows:[
         {lvl:0, n:"1", t:"Assessment"},
         {lvl:2, n:"1.1", t:"Single-source exposure map", who:"Hend Sabry", s:"2025-09-01", e:"2025-10-31", st:"done", pct:100},
-        {lvl:2, n:"1.2", t:"Buffer policy", who:"Hend Sabry", s:"2025-11-03", e:"2025-12-19", st:"done", pct:100},
+        /* MET, and long past its date — so it is excluded by having been signed
+           off rather than by being old, which is what the filter claims */
+        {lvl:2, n:"1.2", t:"Buffer policy", who:"Hend Sabry", s:"2025-11-03", e:"2025-12-19", st:"done", pct:100, ms:true, off:"2025-12-19"},
         {lvl:0, n:"2", t:"Rollout"},
         {lvl:2, n:"2.1", t:"Supplier qualification", who:"Hend Sabry", s:"2026-01-05", e:"2026-02-27", st:"done", pct:100}
       ] }
@@ -622,8 +705,111 @@
          + '<div class="s">' + esc(awayIn(nx.when)) + " · " + esc(nx.how) + "</div>";
   }
 
+  /* ── WHAT IS OWED NEXT, ACROSS EVERY PROJECT ───────────────────────
+     Islam, 2026-09-30, answering the question §9.13a left open: *"yes add the
+     commitments section to the landing."*
+
+     THE LIST ABOVE ANSWERS *which project needs me* AND THIS ANSWERS *what do we
+     owe next*, which is the one reading no project tab can give: a commitment
+     belongs to a project, so the Analytics tab can only ever show one project's
+     at a time (§9.11). It is the same table vocabulary as the list, because a
+     second shape for a second list on one page is two answers to how this page
+     shows a list (§53.5).
+
+     MET MEANS SIGNED OFF and the test is `_derive.js`'s, shared with Analytics so
+     the two cannot mean different things by it. Culture's 2.1 was accepted five
+     days late and is MET — it owes nothing, it is done, and whether it was on
+     time is Analytics' question.
+
+     THE WINDOW IS `SOON`, WHICH WAS ALREADY DECIDED: anything late, plus anything
+     falling due inside it. Bounded by TIME rather than by a row count, so it
+     needs no cut-off to defend the first time somebody adds a project — and it
+     reads the one number in `_derive.js` rather than a second copy, which is
+     §9.13a's whole lesson.
+
+     AND A COMMITMENT BOTH LATE AND FINISHED SAYS IT IS WAITING, not that it is
+     late. Culture's blueprint draft was due in February and the work is done; it
+     is sitting with a Lead. A red *18 days over* would send somebody chasing the
+     person who has already finished — so the badge names what is actually in the
+     way, and THE DATE BESIDE IT STAYS RED. Both facts are on the row and only
+     one of them is the job. (The list above orders it the same way, so this is
+     not a new rule.) */
+  function owedNext(list){
+    var out = [];
+    list.forEach(function(p){
+      unmet(p.rows).forEach(function(r){ out.push({ p:p, r:r }); });
+    });
+    return out.sort(function(a, b){ return d(a.r.e) - d(b.r.e); });
+  }
+  /* THE WINDOW IS NOT THE WHOLE TEST, and the first build got this wrong:
+     something FINISHED EARLY and sitting with a Lead is owed NOW whatever its
+     date says, so a commitment awaiting a sign-off three months out was being
+     excluded by a window that has nothing to do with it. Found by asking
+     whether a code path could be reached rather than by looking at the page,
+     because the fixture had no such row until one was made for it (§255) — and
+     the strip above already counts a sign-off as waiting on somebody, so
+     leaving it out here would have been two answers on one screen (§5.2). */
+  function inWindow(x){
+    if (x.r.st === "sign") return true;            /* owed now, date irrelevant */
+    return daysTo(x.r.e, TODAY) <= SOON;           /* late, or falling due soon */
+  }
+  /* WHAT IS IN THE WAY, for a row `inWindow` has already admitted — so the three
+     answers are exhaustive and there is no fourth badge to style (§24). */
+  function cState(r){
+    if (r.st === "sign") return "wait";
+    if (daysTo(r.e, TODAY) < 0) return "over";
+    return "soon";
+  }
+  var CWORD = {
+    wait: function(){ return "Waiting to sign off"; },
+    over: function(r){ return plural(-daysTo(r.e, TODAY), "day") + " over"; },
+    soon: function(r){ return "In " + plural(daysTo(r.e, TODAY), "day"); }
+  };
+  /* the year only when it is not this one — a rule, so a 2025 commitment cannot
+     read as a 2026 one and no date carries a year it did not need (§122.5) */
+  function dayY(e){
+    var x = new Date(d(e)), t = new Date(d(TODAY));
+    return day(e) + (x.getUTCFullYear() === t.getUTCFullYear()
+      ? "" : " " + String(x.getUTCFullYear()).slice(2));
+  }
+
+  function drawCommits(){
+    var all = owedNext(mine()), show = all.filter(inWindow);
+    document.getElementById("cosect").innerHTML =
+      "What is owed next <span>&mdash; anything waiting on a sign-off, anything "
+      + "late, and anything due in the next " + esc(plural(SOON, "day")) + "</span>";
+    var box = document.getElementById("commits");
+    if (!show.length){
+      /* AN EMPTY SECTION ON A LANDING READS AS BROKEN (§45.2), so it says what
+         it means — and names the next one anyway, because "nothing soon, and
+         the next is in May" is the whole honest answer rather than a blank. */
+      var say = !all.length
+        ? "No commitments on these projects yet."
+        : "Nothing is waiting on a sign-off, nothing is late, and nothing falls "
+          + "due in the next " + plural(SOON, "day")
+          + ". The next is " + all[0].r.t + " on " + dayY(all[0].r.e)
+          + ", in " + plural(daysTo(all[0].r.e, TODAY), "day") + ".";
+      box.innerHTML = '<tr><td colspan="3"><p class="empty">' + esc(say) + "</p></td></tr>";
+      return;
+    }
+    box.innerHTML = show.map(function(x){
+      var st = cState(x.r), past = daysTo(x.r.e, TODAY) < 0;
+      var owns = !isSeat() && x.r.who === ME;
+      return "<tr>"
+        + '<td class="cdue' + (past ? " past" : "") + (owns ? " mine" : "") + '">'
+          + esc(dayY(x.r.e)) + "</td>"
+        + '<td><div class="cname">' + esc(x.r.t) + "</div>"
+          + '<div class="cproj">' + esc(x.p.name) + " · " + esc(x.r.n)
+          + (x.r.who ? " · " + esc(x.r.who) : " · nobody on it") + "</div></td>"
+        + '<td class="cwhat"><span class="cb ' + st + '">'
+          + esc(CWORD[st](x.r)) + "</span></td>"
+        + "</tr>";
+    }).join("");
+  }
+
   function paint(){
     strip();
+    drawCommits();
     var list = mine();
     document.getElementById("lsect").innerHTML =
       esc(plural(list.length, "project")) + " <span>&mdash; "

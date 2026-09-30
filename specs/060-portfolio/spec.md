@@ -1611,15 +1611,9 @@ range).
   client with twelve years of work would eventually scroll. An archive, a fold,
   or nothing at all — a decision rather than a detail, and not taken here.
 - **Nothing is printable**, the same as Analytics and for the same reason.
-- **Should the landing name the next few commitments?** Asked because **two
-  sessions drew this screen on the same day and only one of them has it**
-  (§9.13a). The list answers *which project needs me*; the question it does not
-  answer is *what do we owe next*, which on a client-wide page is the one reading
-  no project tab can give — a handful of rows in date order, each naming its
-  project. The cost is a section on a screen deliberately built to hold four
-  facts per row **and nothing else**, so it is put here rather than added.
-  A shape that needs no cut-off to defend: *anything overdue anywhere, plus each
-  project's next commitment*, which grows exactly as the list above it does.
+- ~~Should the landing name the next few commitments?~~ **Answered
+  2026-09-30** — *"yes add the commitments section to the landing"* — and built
+  at §9.13b.
 
 
 #### §9.13a · Two sessions drew this screen, and one of them is thrown away
@@ -1661,6 +1655,95 @@ so nothing collided at all. *A clean merge is not a merge with one answer in
 it.* Resolved by riding this model whole rather than carrying a second
 (§256.2's own words), with every conflict taken from the branch and the tree
 asserted byte-identical to it afterwards rather than assumed.
+
+#### §9.13b · What is owed next — built (2026-09-30)
+
+Islam, of the question §9.13a left open: *"yes add the commitments section to the
+landing."* Built into **this** landing rather than kept as the other drawing's,
+so the page has one shape and one vocabulary (§53.5) — the same table as the
+list, because a second shape for a second list on one page would be two answers
+to how this page shows a list.
+
+**IT IS THE ONE READING NO PROJECT TAB CAN GIVE**, which is why it belongs here:
+a commitment belongs to a project, so the Analytics tab can only ever show one
+project's at a time (§9.11). The list above answers *which project needs me* and
+this answers *what do we owe next*.
+
+**MET MEANS SIGNED OFF, AND THE TEST IS SHARED** — `metOn()` in `_derive.js`,
+read by this page and by §9.12's, so the two cannot mean different things by it.
+Culture's executive alignment workshop was accepted five days late and is
+**met**: it owes nothing, it is done, and whether it was on time is Analytics'
+question. Its blueprint draft is finished, unsigned, and is still owed.
+
+**THREE THINGS PUT A COMMITMENT ON THE LIST**: it is waiting on a sign-off, it is
+late, or it falls due inside `SOON`. Bounded by **time** rather than by a row
+count, so no cut-off has to be defended the first time somebody adds a project.
+
+#### The fault building it found, and it was a code path rather than a picture
+
+**A SIGN-OFF IS OWED NOW WHATEVER ITS DATE SAYS**, and the first build excluded
+one: a commitment finished early and sitting with a Lead, due in July, fell
+outside a fortnight's window that has nothing to do with it. **Found by asking
+whether a branch could be reached** — not by looking at the page, because the
+fixture had no such row until one was made for it — and the giveaway is that
+**the strip above already counts a sign-off as waiting on somebody**, so leaving
+it out here would have been two answers on one screen, which is §5.2 in the
+thing built to avoid it. *Commercial excellence's Assortment rules* is drawn for
+it (§255), and one dead badge went with the fix: with the three cases exhaustive
+there is no fourth state to style (§24).
+
+#### And `SOON` is where §9.13a said the next screen would have to put it
+
+That section recorded me writing *how much warning a commitment deserves* twice
+— thirty days on the discarded landing, beside the fourteen §9.12 already had —
+and said the next screen printing commitment dates would read **one** number.
+**This is that screen**, so `SOON` moved into `_derive.js` beside the sums and
+the Analytics page's typed `14` now reads it. It is not a guessed constant
+(§122.5): how much warning somebody wants cannot be measured, so it is a
+decision with a name, reversible in one place — **and it decides a colour and
+never a word**, because every row prints how many days whether it is late or not.
+
+#### The fixture had to grow, and that is the argument rather than an aside
+
+**Four of the five projects carried no commitment at all**, so a cross-project
+section would have drawn one project's and proved nothing about being
+cross-project (§255). Five rows gained a flag, each for a state the section has
+to show: one **overdue on a second project** (so it is genuinely across them),
+one **inside the window on a project Omar is not named on** (so the switch
+provably narrows the section and not only the list — §94.2), one **waiting on a
+sign-off four months out**, one **outside the window** (so the window bites), and
+one **met and signed off in 2025** (so the filter provably excludes by having
+been accepted rather than by being old).
+
+**AND EVERY CLAIM §9.13's OWN PROSE MAKES WAS RE-READ RATHER THAN ASSUMED
+UNHARMED** (§303): Culture still 59%, Finance still 0%, Retail still no plan, the
+order still earliest-plan-first, and *Commercial excellence*'s **2 owed rows over
+3 reasons** — the row that exists to show §108.1's arithmetic — still 2 and
+still 3, though its headline moved 39% → 64% and is quoted nowhere. The Plan and
+Progress drawings and the Analytics page were re-read too, since the shared
+module grew under all four.
+
+#### What could not be checked
+
+**No browser in this container**, so nothing is rendered. What was done instead:
+every script syntax-checked, the artifact contract asserted, the splice asserted
+in step across all four drawings, **every row the section draws printed in both
+viewer states** (the seat sees six across three projects, Omar five across two,
+with the gold edge on his two and on none of the seat's), the two excluded
+reasons printed separately, and **the empty branch exercised on purpose** — it
+ships and nothing on the page reaches it, because six rows are always in the
+window (§54.5). Neither palette has been looked at.
+
+#### What it leaves
+
+- **A narrow window is untested and is not this section's fault.** The project
+  list is four columns of fixed width with **one** media query on the page, and
+  that is pre-existing; this section is three columns and its headers are
+  `nowrap` at roughly 250px, so it should squash rather than overflow. Neither
+  is measured, and a sideways page scroll is §27.2's own cost.
+- **A commitment cannot be opened from here.** The row names its project and its
+  number and nothing more — pressing it should reach the activity, which is the
+  Plan tab's panel, and that is a link this drawing does not draw.
 
 ---
 

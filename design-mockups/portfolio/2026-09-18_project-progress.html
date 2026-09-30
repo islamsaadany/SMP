@@ -364,8 +364,20 @@
 
    Every function takes its rows. Nothing here reads a global but `TODAY`, which
    is declared in `_rows.js` beside the plan it dates.
+
+   AND ONE NUMBER LIVES HERE, WHICH IS NOT THE SAME AS A FIGURE. `SOON` is how
+   much warning a commitment gets — the one thing in this drawing set somebody
+   CHOSE rather than derived, so it is named once and every screen that prints a
+   commitment date reads it. §9.13a is the record of it being written twice
+   (thirty days on a landing, beside the fourteen Analytics already had) and of
+   the lesson: it is not a guessed constant (§122.5's fix there is to measure,
+   and how much warning somebody wants cannot be measured) — it is a decision,
+   reversible in one place, and it decides a COLOUR and never a word.
    ────────────────────────────────────────────────────────────────────────── */
   function d(s){ return new Date(s + "T00:00:00Z").getTime(); }
+
+  var SOON = 14;   /* days of warning — see the note above */
+  function daysTo(e, today){ return Math.round((d(e) - d(today)) / 864e5); }
 
   /* the rows one level under row i — or, where that level is empty, everything
      beneath it, so a phase with activities hung straight off it still rolls up */
@@ -437,6 +449,15 @@
     return acts(rows).filter(function(r){ return !r.who && r.pct < 100; });
   }
   function signedOff(rows){ return acts(rows).filter(function(r){ return r.st === "done"; }); }
+
+  /* A COMMITMENT IS MET WHEN SOMEBODY SIGNED IT OFF, never when its work was
+     finished — §9.12's rule, shared so the Analytics tab and the landing cannot
+     mean two things by "met". Culture's 2.1 was accepted five days late and is
+     MET; its 2.2 is finished, unsigned, and is not. Whether a met one was met
+     ON TIME is Analytics' question and stays there. */
+  function commitments(rows){ return rows.filter(function(r){ return r.ms; }); }
+  function metOn(r){ return r.off || null; }
+  function unmet(rows){ return commitments(rows).filter(function(r){ return !metOn(r); }); }
   function owed(rows, today){
     var out = [];
     [waiting(rows), overdue(rows, today), nobodyOn(rows)].forEach(function(list){

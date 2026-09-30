@@ -5537,9 +5537,31 @@ re-measured for the sake of a number.
 ## Portfolio — the delivery plan, per client (spec 060)
 
 **Waiting on Islam, not on me.** Nothing is built and no source has moved; this
-is a spec and six drawings. Three screens are signed off — the project team, the
-charter and the plan — and **three await a word**: Progress, Analytics and now
-the landing.
+is a spec and six drawings. **Four screens are signed off** — the project team,
+the charter, the plan and, on 2026-09-30, the landing — and **two await a
+word**: Progress and Analytics.
+
+**The landing gained one section at his word before he signed it off**
+(*"yes add the commitments section to the landing"*): **what is owed next**,
+across every project this client has rather than one at a time. Three things put
+a commitment on that list — somebody owes it a sign-off, it is late, or it falls
+due inside a fortnight — and the list is by date, soonest first, with the rows
+that are yours marked. It is the one thing the other session's drawing of this
+page had and this one did not, so it was carried across rather than the page
+being replaced (the record of that is the spec's §9.13a).
+
+**Building it found one real fault, and it was a rule rather than a picture**: a
+commitment sitting with somebody for a sign-off was being left off the list
+whenever its own date was still months away — while the strip at the top of the
+same page was already counting it as waiting on that person. Two answers on one
+screen. A sign-off is owed now whatever the date says, so it is always on the
+list, and a row was added to the drawing's plan so the fix can be seen rather
+than taken on trust.
+
+**And one number stopped being written twice.** *How much warning is soon* is a
+judgement somebody made, not arithmetic — it was fourteen days on the Analytics
+page and would have been a second copy here. It is named once now and both
+screens read it, so nobody can change one and leave the other.
 
 **Every screen is drawn as of 2026-09-20.** The landing was the last one with no
 picture: the project list for this client, with each project's state and the
@@ -5568,7 +5590,7 @@ measured across all four in both palettes (**0 failures**, with the probe proved
 able to fail first), and the table's fit was measured at seven widths from 1600
 to 768 with nothing scrolling sideways.
 
-**Next, and it is a decision rather than work**: three sign-offs. After them,
+**Next, and it is a decision rather than work**: two sign-offs. After them,
 the spec's own §10 still says what building needs — this repository has never
 seen the reference code, so the two audits behind §7 and §9.11 were written by
 sessions with it attached and nothing has been run.

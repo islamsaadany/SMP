@@ -49804,3 +49804,12 @@ somewhere the server owns and every one of them came back green.
 sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
 every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
 question, which §9 still lists as live; and the carry in §9.7.
+
+**AMENDED 2026-09-30 — the landing is signed off** (*"ok for the landing"*),
+after gaining one section at his word (*"yes add the commitments section to the
+landing"*): spec 060 §9.13b, **what is owed next** across every project the
+client has. Two drawings now await a word, §9.10 Progress and §9.12 Analytics,
+and **nothing visual is built** — rule 1c is still owed on those two, so
+`portfolio` stays `built: false` and this section's own build is untouched.
+The list above is left as it read on 2026-09-20 rather than rewritten, because
+it is the record of what was true that day (Principle II).

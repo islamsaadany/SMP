@@ -13,11 +13,11 @@ rather than assuming it (§375). This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
 what it specifies is the shape, not the screens. **Every screen is now drawn.**
-Three are signed off — the project team (§6.4), the charter (§5.1) and the plan
-(§9.9); **Progress** (§9.10), **Analytics** (§9.12) and **the landing** (§9.13)
-are drawn and await sign-off. Rule 1c is paid for the first three and owed for
-the rest: nothing visual may be built from this page until each screen is drawn
-and signed off.
+Four are signed off — the project team (§6.4), the charter (§5.1), the plan
+(§9.9) and **the landing** (§9.13, with its commitments section, §9.13b);
+**Progress** (§9.10) and **Analytics** (§9.12) are drawn and await sign-off.
+Rule 1c is paid for the four and owed for the two: nothing visual may be built
+from this page until each screen is drawn and signed off.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -1500,10 +1500,13 @@ have, and Progress's signed-off list moved to the real date.
   routes (§296, §305, §311) are what it would follow.
 
 
-### 9.13 · The landing, drawn — 2026-09-20, awaiting sign-off
+### 9.13 · The landing — SIGNED OFF 2026-09-30
 
+**SIGNED OFF 2026-09-30** (*"ok for the landing"*), from
 `design-mockups/portfolio/2026-09-20_portfolio-landing.html`, in the platform's
-own tokens, both palettes. **The last screen of this module with no picture.**
+own tokens, both palettes — **with the commitments section §9.13b added at his
+word before the sign-off**, so what is signed off is the page including it.
+**The last screen of this module with no picture.**
 
 **ONE QUESTION, AND A ROW ANSWERS IT FOUR WAYS**: which project needs me — how
 far along it is, whether it is late, what is waiting on somebody, and when
@@ -1656,7 +1659,7 @@ it.* Resolved by riding this model whole rather than carrying a second
 (§256.2's own words), with every conflict taken from the branch and the tree
 asserted byte-identical to it afterwards rather than assumed.
 
-#### §9.13b · What is owed next — built (2026-09-30)
+#### §9.13b · What is owed next — built and SIGNED OFF (2026-09-30)
 
 Islam, of the question §9.13a left open: *"yes add the commitments section to the
 landing."* Built into **this** landing rather than kept as the other drawing's,

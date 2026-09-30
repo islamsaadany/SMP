@@ -1,0 +1,82 @@
+<title>Copilot Tab</title>
+<style>
+/* Layout: one column of numbered screens, each a card holding a real-platform shot. */
+:root{--bg:#F5F7FA;--card:#FFFFFF;--ink:#16325C;--ink2:#3C4A5E;--quiet:#5B6778;--line:#D6DCE5;--gold:#C9A227;--goldbg:#FBF3DC;
+ --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11161F;--card:#1A212D;--ink:#E9ECF1;--ink2:#C3CAD5;--quiet:#9AA4B3;--line:#333A45;--gold:#D9B447;--goldbg:#2E2917;color-scheme:dark}
+body{background:var(--bg);color:var(--ink2);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 16px 80px}
+header{border-bottom:3px solid var(--gold);padding-bottom:16px;margin-bottom:28px}
+.kick{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--quiet);font-weight:700}
+h1{color:var(--ink);font-size:30px;margin:6px 0 8px;text-wrap:balance}
+h2{color:var(--ink);font-size:21px;margin:0 0 6px;text-wrap:balance}
+p{margin:0 0 10px;max-width:72ch}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.num{display:inline-block;background:var(--ink);color:var(--card);border-radius:50%;width:26px;height:26px;text-align:center;line-height:26px;font-weight:700;font-size:13px;margin-right:8px}
+figure{margin:0;min-width:0}
+figure img{display:block;width:100%;border:1px solid var(--line);border-radius:6px}
+ul{margin:0;padding-left:20px}li{margin:3px 0}
+.note{background:var(--goldbg);border-left:3px solid var(--gold);padding:10px 14px;border-radius:0 6px 6px 0;font-size:14px;color:var(--ink2)}
+</style>
+<div class="wrap">
+<header>
+ <div class="kick">Mockup for sign-off · 30 September 2026 · core slice</div>
+ <h1>The Copilot tab inside each place</h1>
+ <p>Each screen below is the running platform on Mobile's page, with the Copilot drawn in. The content is invented to show the shape. Nothing here is built yet.</p>
+</header>
+
+<section>
+ <h2><span class="num">1</span>A new chat is an empty box</h2>
+ <p><b>Copilot</b> joins the row after Reporting. Inside it are the five sections: Foundation, Analysis, Directions, Execution and Advisory. On the left is that section's shelf for this place: deliverables first, then chats. The chat itself is empty. The one line above it says what the AI can see for Mobile, and the <b>i</b> gives the detail on hover.</p>
+ <figure><img src="shots/1-new-chat.png" alt="An empty new chat in Mobile's Copilot, Analysis section"></figure>
+ <div class="note">On the live platform, Insights sits between Reporting and Copilot. It doesn't show here because this shot is the offline copy.</div>
+</section>
+
+<section>
+ <h2><span class="num">2</span>The AI plays back before it produces</h2>
+ <p>Before it writes anything, the AI says what it understood, what it will work from, and what is missing. When you say "assume for me", the assumption is recorded and travels with anything saved from that chat. The draft appears in the conversation with a <b>Save to the shelf</b> button.</p>
+ <figure><img src="shots/2-chat.png" alt="A chat with the playback, a recorded assumption and a SWOT draft"></figure>
+</section>
+
+<section>
+ <h2><span class="num">3</span>Save shows exactly what will be stored</h2>
+ <p>The SWOT is rendered in Mobile's own shape and words. Each item shows its evidence, and the gaps and the assumption are said plainly. You write what changed, and it is saved as the next version of the same SWOT, not as a second copy.</p>
+ <figure><img src="shots/3-save.png" alt="The save dialog showing the SWOT to be stored as v4"></figure>
+</section>
+
+<section>
+ <h2><span class="num">4</span>A deliverable with its versions</h2>
+ <p>Opening a deliverable shows it with its kind (<b>Promotable</b> or <b>Copilot-only</b>), who made it, and every version with its note, author and date. <b>Edit</b> lets you correct it in place; the shot shows editing in progress, with the item being changed outlined in gold. Every edit becomes a new version. Restoring an old version adds a new one at the top of the list, so nothing is lost.</p>
+ <figure><img src="shots/4-deliverable.png" alt="The SWOT deliverable in edit mode with its version history"></figure>
+</section>
+
+<section>
+ <h2><span class="num">5</span>When something is missing</h2>
+ <p>Asked for directions with no internal analysis on the shelf, the AI says so and offers two ways on. Pasted material is marked as such, and the AI offers to save it to its own section.</p>
+ <figure><img src="shots/5-missing.png" alt="The AI naming a missing analysis and offering to save pasted material"></figure>
+</section>
+
+<section>
+ <h2><span class="num">6</span>Advisory asks one question at a time</h2>
+ <p>Advisory keeps the old Consultant Mode's rules: one question per turn, a visible count against the budget (5 per round, 2 rounds), the two quick replies, and a contradiction put to you rather than decided silently. Its deliverables are Copilot-only, and the usual one is a Decision Brief.</p>
+ <figure><img src="shots/6-advisory.png" alt="An Advisory chat with the question counter and quick replies"></figure>
+</section>
+
+<section>
+ <h2><span class="num">7</span>At the group, the shelf is organised by place</h2>
+ <p>The group has its own Copilot for cross-unit work. Its shelf groups deliverables under the place they belong to, and work made by a client's own person carries a <b>Client</b> mark beside the author's name.</p>
+ <figure><img src="shots/7-group.png" alt="The group's Execution shelf grouped by Mobile, Retail Stores and Finance"></figure>
+</section>
+
+<section>
+ <h2><span class="num">8</span>Not in this round</h2>
+ <ul>
+  <li>The material library</li>
+  <li>The methodology page on the console. The chat starts on a short placeholder until your instructions arrive.</li>
+  <li>The office's overview across all places</li>
+  <li>Promote to SMP</li>
+ </ul>
+ <p>The Copilot is for the Super user and the SMO team only. Nobody else sees the tab.</p>
+</section>
+</div>

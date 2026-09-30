@@ -77,9 +77,9 @@ ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-w
 
 <div class="page">
 <header>
-  <div class="kick">Mockup · round 2 · for sign-off · 30 Sep 2026</div>
+  <div class="kick">Mockup · round 3 · for sign-off · 30 Sep 2026</div>
   <h1>El Abd as one company page</h1>
-  <p class="lede">Names below are placeholders, not El Abd's own. The shape is what is being agreed: one page for the company that holds its directions, its Foundation and its SWOT. The supporting functions and the capabilities keep their own places, exactly as the Structure step sets them.</p>
+  <p class="lede">Names below are placeholders, not El Abd's own. The shape is what is being agreed: one page for the company that holds its Foundation, its SWOT, its Strategic Directions and its Capabilities as separate sections. The supporting functions keep their own pages.</p>
 </header>
 
 <section class="panel">
@@ -104,9 +104,9 @@ ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-w
   <h2>One company page; the directions are a section on it</h2>
   <div class="frame">
     <div class="top"><span class="mark">EA</span>El Abd<span class="who">Viewing as · SMO</span></div>
-    <div class="nav"><span class="on">El Abd</span><span class="sep"></span><span>Finance</span><span>HR</span><span>Supply chain</span><span>IT</span><span>Legal</span><span class="sep"></span><span>Functions | Capabilities</span></div>
+    <div class="nav"><span class="on">El Abd</span><span class="sep"></span><span>Finance</span><span>HR</span><span>Supply chain</span><span>IT</span><span>Legal</span></div>
     <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
-    <div class="secs"><span>Foundation</span><span>SWOT</span><span class="on">Strategic Directions</span></div>
+    <div class="secs"><span>Foundation</span><span>SWOT</span><span class="on">Strategic Directions</span><span>Capabilities</span></div>
     <div class="body">
       <div class="rail"><div class="rh">Strategic Directions</div>
         <div class="ri on"><b>SD01 Grow the core</b><small>Owner · Direction owner A</small></div>
@@ -123,24 +123,30 @@ ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-w
           <tr><td>1</td><td>Renew the top-20 contracts</td><td>Direction owner A</td><td>✓</td><td>✓</td><td></td><td></td></tr></table></div></div>
     </div>
   </div>
-  <p class="say">The row holds the company, then its supporting functions; the capabilities are one press away behind the Functions | Capabilities switch, as today. Foundation and SWOT are the company's, once. The directions are one list with a rail, as a unit's pillars are today, and the office authors them.</p>
+  <p class="say">The row holds the company and its supporting functions only. Directions and capabilities stay apart: each has its own section on the company page. Foundation and SWOT are the company's, once. The directions are one list with a rail, as a unit's pillars are today, and the office authors them.</p>
 </section>
 
 <section class="panel">
-  <div class="kick">3 · Proposed · Capabilities, unchanged</div>
-  <h2>Capabilities stay where the Structure step puts them</h2>
+  <div class="kick">3 · Proposed · Capabilities, their own section</div>
+  <h2>Capabilities sit beside the directions, not among them</h2>
   <div class="frame">
     <div class="top"><span class="mark">EA</span>El Abd<span class="who">Viewing as · SMO</span></div>
-    <div class="nav"><span>El Abd</span><span class="sep"></span><span class="on">Data &amp; analytics</span><span>Digital sales</span><span>Demand planning</span><span class="sep"></span><span>Functions | Capabilities</span></div>
+    <div class="nav"><span class="on">El Abd</span><span class="sep"></span><span>Finance</span><span>HR</span><span>Supply chain</span><span>IT</span><span>Legal</span></div>
     <div class="tabs"><span class="on">Strategy</span><span>Performance</span><span class="rep">Reporting</span></div>
-    <div class="secs"><span>Overview</span><span class="on">Pillars</span></div>
+    <div class="secs"><span>Foundation</span><span>SWOT</span><span>Strategic Directions</span><span class="on">Capabilities</span></div>
     <div class="body">
-      <div class="rail"><div class="rh">Pillars</div><div class="ri on"><b>DA01 One source of truth</b><small>3 measures · 4 tactics</small></div><div class="ri"><b>DA02 Self-serve reporting</b><small>2 measures · 3 tactics</small></div></div>
-      <div class="pane"><div class="band"><span class="code">DA01</span><b>One source of truth</b><small>Held by IT</small></div>
-        <div class="tbl"><table><tr><th>#</th><th>Key measure</th><th>Target</th></tr><tr><td>1</td><td>Reports built on the data platform</td><td class="num">80%</td></tr></table></div></div>
+      <div class="rail"><div class="rh">Capabilities</div>
+        <div class="ri on"><b>Data &amp; analytics</b><small>Held by IT · plans in pillars</small></div>
+        <div class="ri"><b>Digital sales</b><small>Held by Finance · plans in pillars</small></div>
+        <div class="ri"><b>Demand planning</b><small>Held by Supply chain · plans in pillars</small></div>
+      </div>
+      <div class="pane"><div class="band"><b>Data &amp; analytics</b><small>Held by IT · Owner · Capability owner A</small></div>
+        <div class="tbl"><table><tr><th>Pillar</th><th>Key measure</th><th>Target</th><th>Owner</th></tr>
+          <tr><td><b>DA01</b> One source of truth</td><td>Reports built on the data platform</td><td class="num">80%</td><td>Capability owner A</td></tr>
+          <tr><td><b>DA02</b> Self-serve reporting</td><td>Teams building their own dashboards</td><td class="num">6 #</td><td>Capability owner A</td></tr></table></div></div>
     </div>
   </div>
-  <p class="say">Nothing about capabilities changes: each keeps its own page, planned in pillars as El Abd's are set, with its holding function and owner.</p>
+  <p class="say">Pressing a capability opens its plan in this section, drawn the way the Structure step sets it (in pillars for El Abd). It keeps its holding function and its owner, and its owner reports it, as today.</p>
 </section>
 
 <section class="panel">
@@ -171,15 +177,15 @@ ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-w
   <div class="frame">
     <div class="struct">
       <div class="lc hl"><h3>Company · El Abd <span class="sw"><span class="lit">On</span></span></h3>
-        <div class="chips"><span class="t">Foundation</span><span class="t">SWOT</span><span class="t">Strategic Directions</span></div>
-        <small class="ro">Holds its own directions because units are off.</small></div>
+        <div class="chips"><span class="t">Foundation</span><span class="t">SWOT</span><span class="t">Strategic Directions</span><span class="t">Capabilities</span></div>
+        <small class="ro">Holds its own directions because units are off; capabilities are a separate section.</small></div>
       <div class="lc off"><h3>Divisions <span class="sw"><span>On</span><span class="lit">None</span></span></h3><small class="ro">Already possible today.</small></div>
       <div class="lc hl"><h3>Business units <span class="sw"><span>On</span><span class="lit">Off</span></span></h3>
         <small class="ro">Off: no units in the row; the company page holds the plan.</small></div>
       <div class="lc"><h3>Supporting functions <span class="sw"><span class="lit">On</span><span>Off</span></span></h3>
         <div class="chips"><span class="t">Overview</span><span class="t">S&amp;W</span><span class="t">Plan</span></div><small class="ro">Keep their own pages, as today.</small></div>
       <div class="lc"><h3>Capabilities <span class="sw"><span class="lit">On</span><span>Off</span></span></h3>
-        <div class="chips"><span class="t">Plans in: Pillars</span></div><small class="ro">Keep their own pages, as today.</small></div>
+        <div class="chips"><span class="t">Plans in: Pillars</span></div><small class="ro">Shown as a section on the company page, each planned as set here.</small></div>
     </div>
     <div class="note" style="margin:0 14px 14px">Switching units Off on a client that has them (El Abd today) asks first and says what happens: each unit's plan is archived (its Foundation and SWOT stay in the archive only), its one pillar becomes one of the company's directions with every figure kept, and the units are hidden, not deleted. Switching On again brings them back.</div>
   </div>
@@ -191,7 +197,7 @@ ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-w
     <li>Each of El Abd's pages holds one direction, so each becomes one direction on the company page.</li>
     <li>The pages' own Foundation and SWOT are kept in the archive only; the company's Foundation and SWOT start from what the office writes.</li>
     <li>The company's score averages the directions equally.</li>
-    <li>Capabilities stay where the Structure step puts them (their own pages, planned in pillars).</li>
+    <li>Capabilities stay a separate section from the directions, and each shows the way the Structure step sets it (in pillars for El Abd).</li>
   </ol>
 </section>
 </div>

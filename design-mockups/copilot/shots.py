@@ -9,6 +9,8 @@ INIT = "try{sessionStorage.setItem('smp.welcome.done','1');sessionStorage.setIte
 
 CSS = r"""
 .cop-split{display:grid;grid-template-columns:260px minmax(0,1fr);gap:18px;align-items:start}
+.cop-railcol{display:flex;flex-direction:column;gap:14px;min-width:0;width:260px}
+.cop-railcol > .cop-rail{width:100%;max-width:none;box-sizing:border-box;position:static;max-height:none}
 .cop-rail{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden}
 .cop-rail .rhead{display:flex;justify-content:space-between;align-items:center}
 .cop-new{margin:10px;display:block;width:calc(100% - 20px);text-align:center;border:1px dashed var(--line);border-radius:var(--r-sm);padding:7px;font:600 13px var(--sans);color:var(--stone);background:var(--surface)}
@@ -99,9 +101,22 @@ def page(p, unit="mobile", h=1000):
 
 SECS = ["Foundation","Analysis","Directions","Execution","Advisory"]
 
+def two_rails(rail):
+    # One builder string -> two stacked rails: Chats on top, Deliverables below.
+    import re
+    head, rest = rail.split('<div class="cop-gh">Deliverables</div>', 1)
+    dels, chats = rest.split('<div class="cop-gh">Chats</div>', 1)
+    where = re.search(r'<span class="rhl">(.*?)</span>', head).group(1)
+    new = re.search(r'<button class="cop-new".*?</button>', head).group(0)
+    tag = '<span style="font:600 11.5px var(--sans);opacity:.8">' + where + '</span>'
+    return ('<div class="cop-railcol">'
+      '<div class="cop-rail rail"><div class="rhead"><span class="rhl">Chats</span>' + tag + '</div>' + new + chats + '</div>'
+      '<div class="cop-rail rail"><div class="rhead"><span class="rhl">Deliverables</span></div>' + dels + '<div style="height:10px"></div></div>'
+      '</div>')
+
 def draw(pg, sel, rail, pane):
     pg.evaluate(SETUP, [CSS, SECS, sel, None])
-    pg.evaluate("""([r,p])=>{document.getElementById('panel').innerHTML='<div class="cop-split"><div class="cop-rail rail">'+r+'</div><div class="cop-pane">'+p+'</div></div>'}""", [rail, pane])
+    pg.evaluate("""([r,p])=>{document.getElementById('panel').innerHTML='<div class="cop-split">'+r+'<div class="cop-pane">'+p+'</div></div>'}""", [two_rails(rail), pane])
     pg.wait_for_timeout(250)
 
 MOBILE_CTX = '<span class="i" title="What the chat can see">i</span>Mobile &middot; 4 pillars &middot; 20 key measures &middot; Q3 reported &middot; 2 measures off track'
@@ -230,7 +245,7 @@ with sync_playwright() as p:
     pg = page(b, "group")
     pg.evaluate(SETUP, [CSS, SECS, "Execution", None])
     pg.evaluate("""([r,p])=>{const sec=document.querySelector('.secseg'); if(!sec){const t=document.getElementById('subtabs'); t.insertAdjacentHTML('afterend','');}
-      document.getElementById('panel').innerHTML='<div class="cop-split"><div class="cop-rail rail">'+r+'</div><div class="cop-pane">'+p+'</div></div>'}""",
-      [rail_grp, '<div class="cop-ctx"><span class="i">i</span>The group &middot; 10 units &middot; 8 functions &middot; Q3 reported by 9 of 18</div>' + head + tbl])
+      document.getElementById('panel').innerHTML='<div class="cop-split">'+r+'<div class="cop-pane">'+p+'</div></div>'}""",
+      [two_rails(rail_grp), '<div class="cop-ctx"><span class="i">i</span>The group &middot; 10 units &middot; 8 functions &middot; Q3 reported by 9 of 18</div>' + head + tbl])
     pg.wait_for_timeout(300)
     pg.screenshot(path=str(OUT/"7-group.png"), clip={"x":0,"y":0,"width":1500,"height":900}); pg.close()

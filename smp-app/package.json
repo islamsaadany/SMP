@@ -68,14 +68,14 @@
     "check:release:red": "SMP_BREAK=no-stamp node scripts/build-sw.mjs && (node checks/release-stamp.mjs; r=$?; node scripts/build-sw.mjs >/dev/null; test $r -ne 0)"
   },
   "dependencies": {
-    "@vercel/blob": "^2.8.0",
-    "web-push": "^3.6.7",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
-    "next": "^16.3.1",
+    "@vercel/blob": "^2.8.0",
+    "next": "^16.3.7",
     "pg": "^8.23.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",

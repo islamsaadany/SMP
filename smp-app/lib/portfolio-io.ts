@@ -15,7 +15,10 @@
    which. Nothing here computes a figure — `rollUp` does, on that array, so
    the server and the drawings cannot arrive at two answers (§5.2). */
 import type { PoolClient } from "pg";
-import { type Row, type Lvl, type Role, isRole, ROLE_DEFAULT } from "./portfolio.ts";
+import {
+  type Row, type Lvl, type Role, type ActStatus, isRole, ROLE_DEFAULT,
+  endDateRefused, stampDates,
+} from "./portfolio.ts";
 
 type Q = { query: PoolClient["query"] };
 
@@ -176,13 +179,14 @@ export async function planRows(c: Q, projectId: string): Promise<Row[]> {
             NULL AS status, NULL AS assignee_key, NULL::smallint AS progress,
             false AS is_milestone,
             NULL::date AS actual_start, NULL::date AS actual_end,
-            NULL::uuid AS depends_on, '' AS assignee_name
+            NULL::uuid AS depends_on, '' AS assignee_name,
+            NULL::date AS signed_off_on, '' AS signed_off_who
        FROM portfolio_phases ph
       WHERE ph.project_id = $1
       UNION ALL
      SELECT 1, wp.id, wp.name, ph.pos, wp.pos, 0,
             wp.weight, NULL, NULL, NULL, NULL, NULL, false,
-            NULL, NULL, NULL, ''
+            NULL, NULL, NULL, '', NULL, ''
        FROM portfolio_work_packages wp
        JOIN portfolio_phases ph ON ph.id = wp.phase_id
       WHERE ph.project_id = $1
@@ -191,7 +195,9 @@ export async function planRows(c: Q, projectId: string): Promise<Row[]> {
             COALESCE(ph.pos, ph2.pos), COALESCE(wp.pos, -1), a.pos,
             a.weight, a.planned_start, a.planned_end, a.status, a.assignee_key, a.progress,
             a.is_milestone,
-            a.actual_start, a.actual_end, a.depends_on, a.assignee_name
+            a.actual_start, a.actual_end, a.depends_on, a.assignee_name,
+            (a.signed_off_at AT TIME ZONE 'UTC')::date AS signed_off_on,
+            a.signed_off_by AS signed_off_who
        FROM portfolio_activities a
        LEFT JOIN portfolio_work_packages wp ON wp.id = a.work_package_id
        LEFT JOIN portfolio_phases ph  ON ph.id  = wp.phase_id
@@ -212,6 +218,8 @@ export async function planRows(c: Q, projectId: string): Promise<Row[]> {
       row.actualEnd = day(x.actual_end);
       row.dependsOn = x.depends_on == null ? null : str(x.depends_on);
       row.assigneeName = str(x.assignee_name);
+      row.signedOffAt = day(x.signed_off_on);
+      row.signedOffBy = str(x.signed_off_who);
     }
     return row;
   });
@@ -283,4 +291,86 @@ export async function oneActivity(c: Q, projectId: string, id: string): Promise<
     })),
     collaborators: (co.rows as Record<string, unknown>[]).map((v) => str(v.person_key)),
   };
+}
+
+/* ══ SIGNING OFF, AND UNDOING IT (§3 №1, §9.10) ════════════════════════ */
+/* THE ONLY PLACE THE REAL END DATE IS WRITTEN, and it is written by
+   `stampDates` rather than beside it (§53.5's chokepoint, and the reason
+   §7 gives for it: the reference has four copies of that arithmetic and
+   the live ones disagree about whether a date snaps to Sunday).
+
+   THE PROJECT IS IN THE `WHERE` on both of them, for `oneActivity`'s own
+   reason: an activity id is a uuid somebody can type, and the plan it
+   belongs to is what decides who may touch it (§6).
+
+   AND WHAT IS REFUSED IS REFUSED BY NAME (§123): `endDateRefused` answers
+   with the reason, which the screen shows BEFORE the press and the server
+   says again after it — the same rule twice on purpose, because a screen
+   that only narrows a picker has narrowed nothing (§42). */
+type Act = { status: ActStatus; progress: number; actualStart: string | null; actualEnd: string | null; end: string | null };
+
+async function actIn(c: Q, projectId: string, id: string): Promise<Act | null> {
+  const r = await c.query(
+    `SELECT a.status, a.progress, a.actual_start, a.actual_end, a.planned_end
+       FROM portfolio_activities a
+       LEFT JOIN portfolio_work_packages wp ON wp.id = a.work_package_id
+       LEFT JOIN portfolio_phases ph  ON ph.id  = wp.phase_id
+       LEFT JOIN portfolio_phases ph2 ON ph2.id = a.phase_id
+      WHERE a.id = $1 AND COALESCE(ph.project_id, ph2.project_id) = $2`, [id, projectId]);
+  const x = r.rows[0] as Record<string, unknown> | undefined;
+  if (!x) return null;
+  return {
+    status: str(x.status) as ActStatus, progress: Number(x.progress || 0),
+    actualStart: day(x.actual_start), actualEnd: day(x.actual_end), end: day(x.planned_end),
+  };
+}
+
+export async function signOff(
+  c: Q, projectId: string, id: string, a: { end: string; by: string; today: string },
+): Promise<{ ok: true } | { ok: false; why: string }> {
+  const before = await actIn(c, projectId, id);
+  if (!before) return { ok: false, why: "That activity is not on this project." };
+  /* ONLY WORK SOMEBODY HAS MARKED DONE IS WAITING TO BE ACCEPTED (§6.2's
+     two steps): accepting something nobody has finished would make the
+     second step the only step. */
+  if (before.status !== "done")
+    return { ok: false, why: "Only work somebody has marked done can be signed off." };
+  const why = endDateRefused(a.end, { start: before.actualStart, today: a.today });
+  if (why) return { ok: false, why };
+  const d = stampDates({ ...before }, { status: "completed", progress: before.progress, actualEnd: a.end }, a.today);
+  await c.query(
+    `UPDATE portfolio_activities
+        SET status = 'completed', actual_start = $3, actual_end = $4,
+            signed_off_by = $5, signed_off_at = now(), updated_at = now()
+      WHERE id = $1
+        AND (phase_id IN (SELECT id FROM portfolio_phases WHERE project_id = $2)
+         OR work_package_id IN (SELECT wp.id FROM portfolio_work_packages wp
+              JOIN portfolio_phases ph ON ph.id = wp.phase_id WHERE ph.project_id = $2))`,
+    [id, projectId, d.actualStart, d.actualEnd, a.by]);
+  return { ok: true };
+}
+
+/* REOPENING CLEARS BOTH THE DATE AND WHO ACCEPTED IT, which is what makes
+   §9.11's *on-time* reading honest — an activity with no real end date is
+   not counted at all there rather than counted as a success (§7.6). The
+   progress is left exactly as it was: reopening says *this is not accepted*
+   and never *this work was not done*. */
+export async function reopen(
+  c: Q, projectId: string, id: string, today: string,
+): Promise<{ ok: true } | { ok: false; why: string }> {
+  const before = await actIn(c, projectId, id);
+  if (!before) return { ok: false, why: "That activity is not on this project." };
+  if (before.status !== "completed")
+    return { ok: false, why: "That activity has not been signed off." };
+  const d = stampDates({ ...before }, { status: "done", progress: before.progress }, today);
+  await c.query(
+    `UPDATE portfolio_activities
+        SET status = 'done', actual_start = $3, actual_end = $4,
+            signed_off_by = '', signed_off_at = NULL, updated_at = now()
+      WHERE id = $1
+        AND (phase_id IN (SELECT id FROM portfolio_phases WHERE project_id = $2)
+         OR work_package_id IN (SELECT wp.id FROM portfolio_work_packages wp
+              JOIN portfolio_phases ph ON ph.id = wp.phase_id WHERE ph.project_id = $2))`,
+    [id, projectId, d.actualStart, d.actualEnd]);
+  return { ok: true };
 }

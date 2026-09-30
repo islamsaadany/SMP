@@ -44,7 +44,7 @@
     "check:portfolio": "node --experimental-strip-types checks/portfolio.mjs",
     "check:portfolio:red": "for b in any-build team-deletes viewer-comments anyone-completes restamp-start manual-wins equal-only no-collapse no-cascade owed-sums; do SMP_BREAK=$b node --experimental-strip-types checks/portfolio.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:portfolio:module": "node --experimental-strip-types checks/portfolio-module.mjs",
-    "check:portfolio:module:red": "for b in no-seat-gate see-everything charter-anyone no-plan-yet bad-order stale-name both-views no-elbows act-anywhere; do SMP_BREAK=$b node --experimental-strip-types checks/portfolio-module.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:portfolio:module:red": "for b in no-seat-gate see-everything charter-anyone no-plan-yet bad-order stale-name both-views no-elbows act-anywhere anyone-signs gold-on-done done-is-hit on-track far-words; do SMP_BREAK=$b node --experimental-strip-types checks/portfolio-module.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:tracker": "node --experimental-strip-types checks/tracker.mjs",
     "check:tracker:red": "for b in no-office-gate reset-carried owner-anyone who-everyone reload-on-add back-on-blur week-numbers note-standing week-of-year card-count card-jumps details-always wide-names; do SMP_BREAK=$b node --experimental-strip-types checks/tracker.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:notes": "node --experimental-strip-types checks/notes.mjs",

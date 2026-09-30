@@ -8285,7 +8285,54 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # than passing quietly. **Its dates are relative to
                                 # `todayIn()`, never typed** &mdash; the one lesson
                                 # `checks/tracker.mjs` is four failures short of
-                                # (&sect;214.3). 80/0, red NINE ways
+                                # (&sect;214.3). 80/0, red NINE ways.
+                                # AND SINCE &sect;378 IT COVERS PROGRESS AND ANALYTICS
+                                # (spec 060 &sect;14), the two screens that READ that
+                                # plan &mdash; so every count and every bar is asserted
+                                # against the rules' own answer and never a typed one
+                                # (&sect;94.8). It DRIVES the only two writes this
+                                # module has: a future end date and one before the work
+                                # started each refused BY NAME (&sect;123), a Viewer's
+                                # press refused though the page drew no button
+                                # (&sect;42's half that a drawn-control assertion cannot
+                                # see), an activity signed off THROUGH another project
+                                # refused because the project is in the WHERE, and a
+                                # successful sign-off READ BACK FROM POSTGRES &mdash;
+                                # status, real end date, who accepted it, when &mdash;
+                                # then reopened and the date and signer asserted CLEARED
+                                # while the progress figure stands, which is what keeps
+                                # the on-time reading honest. &sect;9.12's three
+                                # corrections of the reference are each asserted over a
+                                # commitment MADE to be in that state (&sect;255): marked
+                                # done counted in NEITHER column, one accepted late
+                                # saying how late, and the list in DATE order rather
+                                # than sorted by severity, which is triage. All six
+                                # commitment states drawn at once, *On Track* asserted
+                                # ABSENT (&sect;344), and the pair that reads like a
+                                # contradiction asserted NAMED on a hover rather than in
+                                # a grey paragraph (1b-ii). 119/0, red FOURTEEN ways
+                                # &mdash; and **`far-words` FIRST WENT GREEN**, because
+                                # it broke the shared `howFar` the check compares the
+                                # page against, so both sides moved together and the run
+                                # read 0 failures (&sect;54.5, &sect;337.1: both sides
+                                # wrong in the same way is a green run); the break lives
+                                # in the PAGE now, which is the drift the assertion
+                                # exists to catch (&sect;53.5). Four of its own first
+                                # failures were the CHECK: a `date` column comes back as
+                                # a `Date`, so `String(v).slice(0,10)` is `"Sat Sep 28"`
+                                # and never a day; THREE values read out of counted
+                                # offsets were each wrong by one, printing `>100%` and
+                                # `eadership interviews` &mdash; read out of the CAPTURE
+                                # GROUP now, because a magic offset is a literal nobody
+                                # can check by reading; and one assertion ended in
+                                # `|| true` and could not fail (&sect;113.8). Its tab
+                                # assertion was REWRITTEN, never loosened (&sect;218):
+                                # it held &sect;376's *the unbuilt tabs carry no link*,
+                                # which this slice moves, and its first rewrite then
+                                # reported a CORRECT build broken by testing
+                                # `href=".../plan"` against the whole document, where
+                                # the plan page's own List/Timeline switch holds one
+                                # (&sect;100.3) &mdash; scoped to the tab row now
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -9793,7 +9840,83 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 &mdash; **&sect;377: Portfolio &mdash; the plan, in
+*Last Updated: 2026-09-30 &mdash; **&sect;378: Portfolio &mdash; Progress and
+Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:
+**"ok for the progress and analytics too."** Built together, because **they
+read the same thing** &mdash; the plan &sect;377 built &mdash; and with them
+**five of Portfolio's six screens work**; what is left is WRITING a plan, and
+the landing's own header says so (&sect;54.5). **THREE SCREENS, ONE READ, AND
+NOT ONE OF THEM COMPUTES A FIGURE**: `serve()` asks `planRows` once per request
+and rolls it up once, and Plan, Progress and Analytics all map over that array
+&mdash; &sect;5.2 carried out literally &mdash; so Progress's three counts are
+`waitingSignOff`/`overdue`/`nobodyOn`, Analytics' bars are `rollUp`'s own
+percentages, its headline `overall`, its word `howFar`, its state `msState`,
+and the check asserts AGREEMENT with each rather than a typed number
+(&sect;94.8). **ACCEPTING WORK IS THE ONE WRITE AND IT IS TWO STEPS**
+(&sect;6.2): a Lead marks work done and somebody holding the seat agrees the
+date, so **nobody closes their own work** &mdash; the gate asked on the SERVER
+as well as used to decide which control is drawn, because a control the server
+would refuse is never drawn (&sect;61) AND a press the page did not draw is
+still refused (&sect;42), both asserted or either alone is half a rule. **THREE
+FENCES ON ONE WRITE**: the project is in the WHERE (an activity id is a uuid
+somebody can type), the row must already be marked done, and the date must be
+real &mdash; refused BY NAME through the sentence `stampDates` already used
+(&sect;123, &sect;53.5). **Reopening clears the date AND the signer** while the
+progress figure stands, which is what keeps the on-time reading honest.
+**AND THE BOUND THE DRAWING ASKS FOR CANNOT BE ENFORCED, SO IT IS SAID**: the
+accepted date may not fall before the day the work was marked done, and **there
+is no such column** (&sect;377.6's absence from the other side) &mdash; the two
+bounds that CAN be checked are, and the departure is in the file's own header,
+because adding a stored date is its own decision (rule 1b). *A bound nothing
+can measure is a promise, and a promise inside a refusal is worse than a
+narrower refusal that is true.* **&sect;9.12's THREE CORRECTIONS OF THE
+REFERENCE, EACH ASSERTED OVER A COMMITMENT MADE TO BE IN THAT STATE**
+(&sect;255): marked done is **not** hit and is counted in NEITHER column,
+because nobody has accepted it; one accepted after its date says HOW LATE in
+days so the headline cannot absorb it; and the list is in DATE order rather
+than sorted by severity, which is triage and not a record. **The pair that
+reads like a contradiction is NAMED on a hover** &mdash; past its date, marked
+done, waiting &mdash; never as a grey paragraph under the heading (1b-ii).
+***ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE** (&sect;344): the reference
+puts it beside a phase at 90%, and a figure cannot see a schedule, so `howFar`
+answers *how far along* and `behind` answers *is it late*, drawn as a separate
+red chip &mdash; a part can read 67% and be behind, and both are true.
+**AND A FALSIFICATION DID NOT FALSIFY** (&sect;54.5): `far-words` first changed
+`howFar` ITSELF, which the check compares the page against, so both sides moved
+together and the run read **0 failures** &mdash; &sect;337.1's shape in my own
+hands; the break lives in the PAGE now, which is the second-answer drift the
+assertion exists to catch (&sect;53.5), and the reason is written into the
+shared reader so nobody moves it back. **TWO FAULTS FOUND BY LOOKING AT THE
+RENDERED PAGE AND NONE BY A CHECK** (&sect;311.1), both now asserted: the red
+*Behind* chip jammed against the phase name, and a late row not saying what was
+blocking it where the drawing names the thing it waits on (&sect;123).
+**FOUR FAULTS IN THE CHECK ITSELF, THREE OF THEM ONE SHAPE**: a `date` column
+comes back as a `Date`, so `String(v).slice(0,10)` is `"Sat Sep 28"` and never
+a day (&sect;100.3); **three values read out of counted offsets were each wrong
+by one**, printing `&gt;100%` and `eadership interviews` &mdash; read out of the
+CAPTURE GROUP now, because *a magic offset in an assertion is a literal nobody
+can check by reading*; one assertion ended in `|| true` and could not fail
+(&sect;113.8); and the tab assertion held &sect;376's *the unbuilt tabs carry no
+link*, which this slice moves &mdash; REWRITTEN to the surviving rule, never
+loosened (&sect;218, &sect;214.3), and its first rewrite then reported a CORRECT
+build broken against the plan page's own List/Timeline switch. **RECORDED, NOT
+DONE**: the day work was marked done is not stored (one decision answers this
+and &sect;377.6 together), nothing records that a checkpoint HAPPENED so that
+line says only when the next falls due (&sect;124), and Analytics has no
+history because every figure on it is today's. **PROVED**: 119/0 red
+**FOURTEEN** ways &mdash; the five new ones 8 / 1 / 3 / 2 / 1, each reddening
+its own assertions &middot; portfolio 121/0 &middot; modules 112/0 &middot;
+insights 127/0 &middot; notes 170/0 &middot; `generated-in-step` all clear
+&middot; `built-in-step.py` all good &middot; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. Both pages swept at seven widths in both
+palettes &mdash; 0 overflow, 0 sideways scroll, 0 contrast failures &mdash;
+with the probe proved able to fail first; **the rendered pages read against the
+signed-off drawings figure by figure** and reproduce them exactly (59% overall,
+100/67/10, 1 of 6 met on time, 1 late, all six states drawn). The frozen
+product is untouched and MEASURED, so `sw.js` is not bumped. **On the branch,
+not merged.***
+
+*Earlier the same day: **&sect;377: Portfolio &mdash; the plan, in
 two views (spec 060 &sect;13).** The second slice on the same word &mdash;
 **"write it into the spec first, then start building"** &mdash; and the one
 Progress and Analytics both wait on: a project's **plan READ**, in the two

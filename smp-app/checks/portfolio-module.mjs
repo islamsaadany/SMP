@@ -26,6 +26,11 @@
      SMP_BREAK=both-views      node checks/portfolio-module.mjs  # must go red
      SMP_BREAK=no-elbows       node checks/portfolio-module.mjs  # must go red
      SMP_BREAK=act-anywhere    node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=anyone-signs    node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=gold-on-done    node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=done-is-hit     node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=on-track        node checks/portfolio-module.mjs  # must go red
+     SMP_BREAK=far-words       node checks/portfolio-module.mjs  # must go red
 
    TWO OF THOSE WENT GREEN WHEN THEY WERE FIRST WRITTEN, and both were this
    file rather than the product (§54.5): `stale-name` had no stored name to
@@ -38,9 +43,12 @@ import { usePools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { serve } from "../modules/portfolio/index.ts";
 import { offerable } from "../lib/modules.ts";
-import { rollUp } from "../lib/portfolio.ts";
+import {
+  rollUp, overall, behind, howFar, commitments, msState, hitOnTime,
+  waitingSignOff, overdue, nobodyOn, signedOff, nextCheckpoint,
+} from "../lib/portfolio.ts";
 import { planRows, oneActivity } from "../lib/portfolio-io.ts";
-import { todayIn } from "../lib/day.ts";
+import { todayIn, readableDay } from "../lib/day.ts";
 
 let ok = 0;
 const bad = [];
@@ -259,7 +267,11 @@ try {
               who: "omar", status: "not_started", pct: 0, ms: true, dep: A22 });
   /* Phase 3 · a work package, so an activity under one takes three parts. */
   const W31 = await wp(P3, "Activation toolkit", 0);
-  await act({ wp: W31, name: "Leadership communication guide", pos: 0, s: D(-5), e: D(15),
+  /* DUE INSIDE THE WARNING WINDOW, so Analytics has a commitment in the
+     `soon` state and all six of §9.12's states are drawn at once — the
+     drawing's own *one in every state the tracker can draw* (§255), and
+     without it two badges would ship unexercised. */
+  await act({ wp: W31, name: "Leadership communication guide", pos: 0, s: D(-5), e: D(10),
               rs: D(-5), who: "hend", status: "in_progress", pct: 40, ms: true });
   await act({ wp: W31, name: "Employee engagement resources", pos: 1, s: D(18), e: D(36), status: "not_started", pct: 0 });
   const W32 = await wp(P3, "Leadership-led rollout", 1);
@@ -441,12 +453,28 @@ try {
   check("the four tabs are the order §4 settled, on the plan and on the charter",
     /Charter/.test(plan.html) && /Plan/.test(plan.html) && /Progress/.test(plan.html) && /Analytics/.test(plan.html) &&
     /class="tabs"/.test(mineOpen.html));
-  check("...with the two that are not built carrying the word and NO link, rather than opening nothing (§61)",
-    /class="soon"[^>]*>Progress</.test(plan.html) && /class="soon"[^>]*>Analytics</.test(plan.html) &&
-    !/href="[^"]*\/progress"/.test(plan.html) && !/href="[^"]*\/analytics"/.test(plan.html));
-  check("...and the two that ARE built are links — both ends, or a row of dead words passes half (§113.8)",
-    /href="[^"]*\/plan"/.test(mineOpen.html) && /class="on"[^>]*>Plan</.test(plan.html));
-  const strayTab = await get(A, [proj.id, "progress"], SEAT);
+  /* EVERY TAB IS EITHER A LINK OR A WORD, AND WHICH IT IS FOLLOWS FROM
+     WHETHER IT IS BUILT — asserted as that rule rather than by naming the
+     two that were unbuilt when this was written (§214.3, §218: §378 opened
+     both, and a check holding the list would have gone red on a correct
+     build). The word carries no href either way, or a row of dead words
+     passes half (§113.8). */
+  const BUILT_TABS = ["plan", "progress", "analytics"];
+  const UNBUILT_TABS = [];
+  /* THE ROW ITSELF, never the whole document: the plan page's own View /
+     Timeline switch is two links whose address ends `/plan`, so asking the
+     document whether it holds one would report a correct build broken
+     (§100.3, caught on the first run of this very assertion). */
+  const navOf = (h) => (h.match(/<nav class="tabs">[\s\S]*?<\/nav>/) || [""])[0];
+  const navPlan = navOf(plan.html), navChart = navOf(mineOpen.html);
+  check("...every built tab is a LINK on the charter, and the one you are on is marked instead",
+    BUILT_TABS.every((t) => new RegExp('href="[^"]*/' + t + '"').test(navChart)) &&
+    /class="on"[^>]*>Plan</.test(navPlan) &&
+    !/href="[^"]*\/plan"/.test(navPlan), navPlan.slice(0, 120));
+  check("...and a tab that is NOT built carries the word with no link (§61) — vacuous while all four are built, and kept as the control",
+    UNBUILT_TABS.every((t) => /class="soon"[^>]*>/.test(navPlan) &&
+      !new RegExp('href="[^"]*/' + t + '"').test(navPlan)));
+  const strayTab = await get(A, [proj.id, "budget"], SEAT);
   check("a word under a project that is not one of its tabs comes back to the project, never a page that looks right (§96)",
     strayTab.status === 302 && strayTab.to.endsWith("/" + proj.id), strayTab.status + " " + strayTab.to);
 
@@ -460,6 +488,191 @@ try {
   check("a project with nothing broken down says so rather than drawing an empty table (§45.2)",
     /No plan yet/.test(bare.html) && !/class="head"/.test(bare.html),
     bare.html.length + " bytes");
+
+  /* ══ §9 · Progress — the queue and what is owed (§9.10) ════════════ */
+  section("§9 · Progress");
+  const rolledNow = async () => {
+    const c = await pool.connect();
+    try {
+      await c.query("SELECT set_config('app.tenant_id', $1, true)", [A]);
+      return rollUp(await planRows(c, proj.id));
+    } finally { c.release(); }
+  };
+  await owner("UPDATE portfolio_projects SET checkpoint_cadence='weekly', checkpoint_day=4 WHERE tenant_id=$1 AND id=$2",
+    [A, proj.id]);
+  const prog = await get(A, [proj.id, "progress"], SEAT);
+  check("Progress opens for a seat, with all four sections (§9.10)",
+    prog.status === 200 && /Waiting to be signed off/.test(prog.html) && /Past their date/.test(prog.html) &&
+    /Nobody is on these/.test(prog.html) && /Signed off/.test(prog.html), String(prog.status));
+
+  /* EVERY COUNT ON IT IS THE RULES' OWN ANSWER (§94.8), never a number typed
+     into this file — so a change to what is owed moves the page and the
+     check together and cannot move one. */
+  const rows9 = await rolledNow();
+  const counts = (prog.html.match(/class="v">([^<]*)</g) || []).map((m) => m.slice(10, -1));
+  check("...and its three counts are waitingSignOff, overdue and nobodyOn — the rules', not this file's",
+    counts.join(" ") === [waitingSignOff(rows9).length, overdue(rows9, TODAY).length, nobodyOn(rows9).length].join(" "),
+    counts.join(" "));
+  check("...with every one of them non-zero, or the three assertions above pass over nothing (§113.8)",
+    counts.every((n) => Number(n) > 0), counts.join(" "));
+  const qrows = (prog.html.match(/class="qrow/g) || []).length;
+  check("...and the three plain lists draw a row each for overdue, nobody-on and signed off",
+    qrows === overdue(rows9, TODAY).length + nobodyOn(rows9).length + signedOff(rows9).length, String(qrows));
+
+  /* BLOCKED IS SAID ON THE ROW AND IS NOT A SECTION (§9.10, §108.1). */
+  check("a late row that cannot start says what is in its way, on the row",
+    /blocked by 2\.2 Behavioural blueprint/.test(prog.html),
+    (prog.html.match(/blocked by[^<]*/g) || []).join(" | "));
+
+  /* THE CHECKPOINT IS A DATE AND NOTHING ELSE, and a project with none draws
+     no line rather than being nagged (§45.2 with the sign reversed) — both
+     ends, or a build that never drew it passes half. */
+  const nextChk = nextCheckpoint("weekly", 4, TODAY);
+  check("the checkpoint line names the next date, worked out rather than stored",
+    /class="chk"/.test(prog.html) && prog.html.includes(readableDay(String(nextChk))),
+    String(nextChk));
+  const noChk = await get(A, [other.json.id, "progress"], SEAT);
+  check("...and a project with no cadence set draws no line at all — both ends (§94.2)",
+    !/class="chk"/.test(noChk.html));
+
+  /* NOTHING IS HIDDEN FROM ANYBODY; WHAT CHANGES IS WHAT CAN BE PRESSED
+     (§9.10, §301). Omar is a VIEWER on this project by §5's last write. */
+  const progOmar = await get(A, [proj.id, "progress"], OMAR);
+  check("a Viewer reads the same four sections and the same counts",
+    (progOmar.html.match(/class="v">([^<]*)</g) || []).map((m) => m.slice(10, -1)).join(" ") === counts.join(" "));
+  check("...and is offered neither control — a control the server would refuse is never drawn (§61)",
+    !/data-signoff/.test(progOmar.html) && !/data-reopen/.test(progOmar.html));
+  check("...and is TOLD a Lead does it, rather than shown an empty space (§35)",
+    /A Lead signs this off/.test(progOmar.html));
+  check("a seat IS offered both — both ends, or a page with no controls passes half (§113.8)",
+    /data-signoff/.test(prog.html) && /data-reopen/.test(prog.html));
+
+  /* THE GOLD EDGE MEANS *THIS ONE IS YOURS TO DO* — on what is owed and
+     never on what is finished (§41's budget). The break paints it on the
+     signed-off list too. */
+  const minePos = progOmar.html.indexOf('class="qrow mine"');
+  const doneHead = progOmar.html.indexOf("Signed off");
+  check("the gold edge is on a row that is theirs and owed",
+    minePos > 0 && /2\.3/.test(progOmar.html.slice(minePos, minePos + 200)), String(minePos));
+  check("...and never on a finished one — the break paints it there and must redden this (§94.5)",
+    (progOmar.html.slice(doneHead).match(/class="qrow mine"/g) || []).length === 0);
+
+  /* SIGNING OFF WRITES, and what proves it is the ROW rather than the page
+     (§96 — a control wired to nothing renders perfectly). */
+  const a22 = rows9.find((r) => r.name === "Behavioural blueprint");
+  const badDate = await post(A, SEAT, { act: "signoff", id: proj.id, activity: a22.id, end: D(7) });
+  check("a real end date in the future is refused, by name (§123)",
+    badDate.status === 400 && /has not happened/.test(badDate.json?.why || ""), JSON.stringify(badDate.json));
+  const early = await post(A, SEAT, { act: "signoff", id: proj.id, activity: a22.id, end: D(-80) });
+  check("...and one before the work started is refused, by name",
+    early.status === 400 && /before the work started/.test(early.json?.why || ""), JSON.stringify(early.json));
+  const viewerSign = await post(A, OMAR, { act: "signoff", id: proj.id, activity: a22.id, end: D(-2) });
+  check("a Viewer's press is refused even when the page drew no button (§42)",
+    viewerSign.status === 403, JSON.stringify(viewerSign.json));
+  const stillDone = (await owner("SELECT status, actual_end FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, a22.id]))[0];
+  check("...and the row did not move — a refusal that wrote is not a refusal",
+    stillDone.status === "done" && stillDone.actual_end === null, JSON.stringify(stillDone));
+  const fromOther = await post(A, SEAT, { act: "signoff", id: other.json.id, activity: a22.id, end: D(-2) });
+  check("an activity signed off THROUGH another project is refused — the project is in the WHERE (§6)",
+    fromOther.status === 400 && /not on this project/.test(fromOther.json?.why || ""), JSON.stringify(fromOther.json));
+  const signed = await post(A, SEAT, { act: "signoff", id: proj.id, activity: a22.id, end: D(-2) });
+  check("a seat signs it off — both ends (§94.2)", signed.status === 200 && signed.json?.ok === true, JSON.stringify(signed.json));
+  const after = (await owner(
+    "SELECT status, actual_end, signed_off_by, signed_off_at FROM portfolio_activities WHERE tenant_id=$1 AND id=$2",
+    [A, a22.id]))[0];
+  /* A `date` COLUMN COMES BACK AS A Date OBJECT, NOT A STRING (§100.3): the
+     first draft compared `String(row.actual_end).slice(0,10)`, which is
+     `"Sat Sep 28"` and never a day — so it reported a correct write broken. */
+  const day = (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10));
+  check("...and the DATABASE holds the status, the real end date and who accepted it",
+    after.status === "completed" && day(after.actual_end) === D(-2) &&
+    after.signed_off_by === "islam" && after.signed_off_at !== null, JSON.stringify(after));
+  const twice = await post(A, SEAT, { act: "signoff", id: proj.id, activity: a22.id, end: D(-2) });
+  check("...and signing off something nobody has marked done is refused (§6.2's two steps)",
+    twice.status === 400 && /marked done/.test(twice.json?.why || ""), JSON.stringify(twice.json));
+
+  /* REOPENING IS GATED EXACTLY LIKE SIGNING OFF (§7.6) and CLEARS both the
+     date and who accepted it, which is what makes the on-time reading
+     honest (§9.11). */
+  const viewerOpen = await post(A, OMAR, { act: "reopen", id: proj.id, activity: a22.id });
+  check("a Viewer cannot undo a Lead's sign-off — theirs needs only the work-on gate (§7.6)",
+    viewerOpen.status === 403, JSON.stringify(viewerOpen.json));
+  const reopened = await post(A, SEAT, { act: "reopen", id: proj.id, activity: a22.id });
+  check("a seat reopens it — both ends", reopened.status === 200 && reopened.json?.ok === true, JSON.stringify(reopened.json));
+  const back9 = (await owner(
+    "SELECT status, actual_start, actual_end, signed_off_by, signed_off_at, progress FROM portfolio_activities WHERE tenant_id=$1 AND id=$2",
+    [A, a22.id]))[0];
+  check("...and the real end date and who accepted it are CLEARED, while the progress stands",
+    back9.status === "done" && back9.actual_end === null && back9.signed_off_at === null &&
+    back9.signed_off_by === "" && back9.progress === 100 && back9.actual_start !== null, JSON.stringify(back9));
+
+  const bareProg = await get(A, [third.json.id, "progress"], SEAT);
+  check("a project with no plan says so on Progress too, rather than drawing four empty boxes (§45.2)",
+    /No plan yet/.test(bareProg.html) && !/class="qrow/.test(bareProg.html));
+
+  /* ══ §10 · Analytics — the reading, not the queue (§9.12) ═══════════ */
+  section("§10 · Analytics");
+  const an = await get(A, [proj.id, "analytics"], SEAT);
+  const rows10 = await rolledNow();
+  check("Analytics opens, with TWO sections and nothing else",
+    an.status === 200 && /Where each part stands/.test(an.html) && /What we committed to/.test(an.html),
+    String(an.status));
+  check("...and none of what §9.11 binned, nor Progress's queue — what is absent IS the design (§9.12)",
+    !/[Hh]ealth score/.test(an.html) && !/Cancelled/.test(an.html) && !/Waiting to be signed off/.test(an.html) &&
+    !/Nobody is on these/.test(an.html) && !/data-signoff/.test(an.html));
+
+  /* READ A VALUE OUT OF ITS CAPTURE GROUP, NEVER OUT OF A COUNTED OFFSET:
+     all three of the first draft's `slice(n, -1)` were wrong by one, so three
+     correct pages read as broken and the detail printed `>100%` and
+     `eadership interviews` (§100.3). A group cannot be miscounted. */
+  const grab = (re) => [...an.html.matchAll(re)].map((m) => m[1]);
+  const pcts = grab(/class="ppc">([^<]*)</g);
+  const parts10 = rows10.filter((r) => r.lvl < 2);
+  check("every figure is rollUp's own answer over the same rows, never a typed one (§9.8)",
+    pcts.join(" ") === parts10.map((r) => (r.pct ?? 0) + "%").join(" "),
+    pcts.join(" ") + "  want " + parts10.map((r) => (r.pct ?? 0) + "%").join(" "));
+  check("...and the headline is `overall`'s", an.html.includes(">" + overall(rows10) + "%<"), String(overall(rows10)));
+
+  /* HOW FAR ALONG AND IS IT LATE ARE TWO QUESTIONS (§344, §9.12). */
+  const words = grab(/class="pwd [^"]*">([^<]*)</g);
+  check("the word beside each bar is howFar's, and the same five the landing reads (§53.5)",
+    words.join(" ") === parts10.map((r) => howFar(r.pct ?? 0).word).join(" "), words.join(" "));
+  check("...and it is never *On Track*, which is a claim about a schedule a figure cannot see (§344)",
+    !/On Track/i.test(an.html));
+  const behindNames = parts10.filter((r) => behind(r, TODAY)).map((r) => r.name);
+  check("a part that is late wears Behind, and one that is not does not — both ends",
+    behindNames.length > 0 && (an.html.match(/class="behind"/g) || []).length === behindNames.length,
+    behindNames.join(", "));
+
+  /* THE COMMITMENTS, IN DATE ORDER, REVERSING THE REFERENCE (§9.12). */
+  const ms10 = commitments(rows10);
+  const msNames = grab(/class="nm2"><b>([^<]*)</g);
+  check("every commitment is drawn, in date order — theirs sorts by severity, which is triage (§9.12)",
+    msNames.join(" | ") === ms10.map((r) => String(r.name)).join(" | "), msNames.join(" | "));
+  const badges = grab(/class="bd ([a-z]+)"/g);
+  check("...each wearing the state the rules give it, and all six drawn at once (§255)",
+    badges.join(" ") === ms10.map((r) => msState(r, TODAY)).join(" ") && new Set(badges).size === 6,
+    badges.join(" "));
+  /* AND ONE ASSERTION COULD NOT FAIL AS FIRST WRITTEN (§113.8): it ended in
+     `|| true`, so it was green on every build. What it is FOR is that a
+     commitment somebody has marked done but nobody has accepted is counted
+     in NEITHER headline — the reference counts it as delivered on time. */
+  const waiting = ms10.filter((r) => msState(r, TODAY) === "wait");
+  check("a commitment MARKED DONE is counted in neither column — theirs counts it as delivered on time (§9.12)",
+    waiting.length > 0 && waiting.every((r) => !hitOnTime(r, TODAY) && msState(r, TODAY) !== "late"),
+    waiting.map((r) => r.name).join(", "));
+  const headline = (an.html.match(/class="v">(\d+) <small>of (\d+)/) || []);
+  check("the headline counts only what was accepted ON OR BEFORE its date",
+    headline[1] === String(ms10.filter((r) => hitOnTime(r, TODAY)).length) && headline[2] === String(ms10.length),
+    headline.slice(1).join(" of "));
+  check("...so a commitment accepted five days late is NOT in it, and says how late it was",
+    /5 days late/i.test(an.html), (an.html.match(/class="bd late"[^>]*>[^<]*/g) || []).join(" | "));
+  check("and the pair that reads like a contradiction is NAMED, on a hover rather than a grey paragraph (§9.12, rule 1b-ii)",
+    /class="bd wait" title="[^"]*accepts it/.test(an.html));
+
+  const bareAn = await get(A, [third.json.id, "analytics"], SEAT);
+  check("a project with no plan says so on Analytics too (§45.2)",
+    /No plan yet/.test(bareAn.html) && !/class="pr /.test(bareAn.html));
 
   /* ══ §7 · a read that failed is not an empty list ══════════════════ */
   section("§7 · unread is not empty (§35, §93, §231.4)");

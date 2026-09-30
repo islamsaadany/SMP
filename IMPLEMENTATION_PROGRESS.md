@@ -5543,18 +5543,20 @@ on the 30th (*"ok for the landing"*, then *"ok for the progress and analytics
 too"*) — so the mockup-first rule is paid in full rather than set aside, and
 nothing is waiting on a decision of his.
 
-**Portfolio is on the platform now, and three of its six screens work.** It has
+**Portfolio is on the platform now, and five of its six screens work.** It has
 its own entry on a client's card, its own address, and its own line in the
 switcher, and what opens behind them is **the landing** — every project this
 client has, with how far along each one is, whether it is late, what is waiting
 on somebody, and when anybody next looks at it — **a project's charter**,
 which opens when you press a project's name and is where its aim, its window
-and its sponsor are written, and **the plan**, in both of the views you signed
-off: the tree, with a row per phase, work package and activity, and the chart,
-with the same rows against the months they run in. Progress and Analytics are
-next, and the product **says so rather than pretending**: a project with no plan
-behind it reads *No plan yet* on the landing, which is the state you signed off
-for exactly that case.
+and its sponsor are written, **the plan**, in both of the views you signed
+off (the tree, with a row per phase, work package and activity, and the chart,
+with the same rows against the months they run in), **Progress**, which is what
+is owed and where a sign-off is accepted, and **Analytics**, the reading. The
+one screen left is **writing** a plan, and the product **says so rather than
+pretending**: a project with no plan behind it reads *No plan yet* on all three
+of the screens that would otherwise draw empty boxes, which is the state you
+signed off for exactly that case.
 
 **The plan is read from the plan, once.** The tree and the chart are two
 readings of one list, so they cannot disagree about a project — which was the
@@ -5567,6 +5569,39 @@ what it produces, who is on it, whether it is billable and where its sign-off
 stands — and the address carries both which view you are in and which row is
 open, so a plan opened on one activity is a link you can send somebody.
 **Writing a plan is not built yet**, and the file says so.
+
+**Progress and Analytics read that same plan, which is why they came
+together.** Progress is the list of what is owed — work waiting to be accepted,
+work that has overrun, work nobody is on — with the rows that are yours marked,
+and it is where somebody with the seat **accepts** a piece of work a Lead has
+marked done. That is the one thing this round writes, and it is two steps on
+purpose: a Lead says the work is finished and somebody else agrees the date it
+finished on, so no single person can close their own work. The date is checked
+— it cannot be in the future and cannot be before the work started — and a
+refusal says which of the two it is rather than merely saying no. Undoing an
+acceptance clears the date and the name with it, so the on-time reading cannot
+quietly keep counting something nobody has agreed. Analytics is the reading of
+the same rows: how far each part is along, which parts are behind, and every
+commitment in date order with the state it is actually in. **Neither page holds
+a figure of its own** — all three screens ask the same rules the same way, so
+they cannot disagree about one project.
+
+**Three corrections of the old tool are carried out here, and they are the
+whole point of the page.** A commitment somebody has ticked but nobody has
+accepted is counted as delivered **on time** by the tool being replaced; here
+it is counted in neither column and says it is waiting, because nobody has
+agreed it. One accepted after its date says **how late** in days, so the
+headline cannot absorb it. And the list is in **date order** rather than sorted
+by how bad each item is — that is triage, and this is a record. The one pair
+that reads like a contradiction — past its date, marked done, waiting to be
+accepted, drawn as *Waiting* rather than *Overdue* — is **named on a hover**, so
+nobody has to work it out.
+
+**And the word beside a bar never says *On Track*.** The old tool labels a
+phase at 90% that way, and a percentage cannot see a schedule. *How far along*
+and *is it late* are two questions, so the bar answers the first and a separate
+red *Behind* mark answers the second — a part can read 67% and be behind, and
+both are true.
 
 **The frame cost almost nothing, which is the thing worth noticing.** Everything
 outside Portfolio's own folder comes to two lines — the module was already a
@@ -5650,22 +5685,124 @@ landing instead of sending you back to it, so a wrong address rendered a page
 that looked right. Both were caught because the modules check drives every
 module's server rather than reading a table.
 
-**Next**: Progress and Analytics, which both read the plan and can now be
-built. After them, writing a plan — adding a row, moving a date, reporting
-against the breakdown. The spec's §10 lists what else is still open and none of
-it blocks — a Portfolio project pointing at a Strategy one, the workbook, the
-notice, the budget question and four choices about the landing (the order at
-twenty projects, where a finished project goes, whether the top strip counts
-what is yours, and making a commitment row openable). None has been started.
+**Next**: writing a plan — adding a row, moving a date, reporting against the
+breakdown — which is the sixth screen and the last one drawn. The spec's §10
+lists what else is still open and none of it blocks — a Portfolio project
+pointing at a Strategy one, the workbook, the notice, the budget question and
+four choices about the landing (the order at twenty projects, where a finished
+project goes, whether the top strip counts what is yours, and making a
+commitment row openable). None has been started.
 
 **Two things the plan found are written down and deliberately not done.** The
 platform has no record of **the day a piece of work was marked done** — only
 the day it was signed off, which is right, because that is the date a Lead
 agrees rather than one anybody types. The cost is that a row waiting for a
 sign-off cannot be shown as having overrun, so the chart draws one overrun where
-your drawing draws two. And **a phase has no owner**: the drawing names a person
-on one, and there is nowhere to store it. Both are decisions rather than
-oversights, so they are recorded and left for you.
+your drawing draws two — and, as of Progress, that the sign-off box cannot
+refuse a date earlier than the day the work was marked done, which your drawing
+asks for. And **a phase has no owner**: the drawing names a person on one, and
+there is nowhere to store it. Both are decisions rather than oversights, so they
+are recorded and left for you.
+
+**Two more from Progress and Analytics, same kind.** Nothing records that a
+**checkpoint happened** — only how often one falls due — so that line says when
+the next one is and no more, rather than claiming to know whether anybody
+looked. And Analytics has **no history**: every figure on it is today's, so
+there is no trend, which needs something kept at each checkpoint. Both wait on
+the same decision as the first item above.
+
+---
+
+## Portfolio — Progress and Analytics (2026-09-30, spec 060 §14)
+
+**Both of the screens you signed off on the 30th are built** (*"ok for the
+progress and analytics too"*), and with them **five of Portfolio's six screens
+work**. They came together because they read the same thing: the plan §13
+built. One read per request, rolled up once, and Plan, Progress and Analytics
+all map over it — so three screens cannot disagree about one project, and not
+one of them holds a figure of its own.
+
+**What Progress does.** It is the list of what is owed, in four parts — work
+waiting to be accepted, work that has overrun, work nobody is on, and work
+already finished — with the rows that are yours marked in gold and a line at
+the top saying when this project is next looked at. Every count on it is the
+same count the landing draws.
+
+**And it is where work is accepted, which is the one thing this round writes.**
+Two steps, on purpose: a Lead marks a piece of work done, and somebody with the
+seat agrees the date it finished on. Nobody closes their own work. The date is
+checked — not in the future, not before the work started — and a refusal says
+**which** of the two, rather than merely saying no. Somebody without the seat is
+shown no button and, if they press one anyway, is refused by the server: the
+screen and the save answer the same question, so a control that would be
+refused is never drawn. Undoing an acceptance clears the date **and** the name
+with it, so nothing can go on counting as delivered on time once nobody has
+agreed it.
+
+**One bound your drawing asks for cannot be enforced, and that is said rather
+than quietly dropped.** The box says the accepted date may not be earlier than
+the day the work was marked done — and the platform does not store that day
+anywhere. So the two bounds that can be checked are checked, and this one is
+written down for you. Storing the marking day is a change to what is kept, and
+that is your decision rather than something to add on the way past.
+
+**What Analytics does, and the three things it corrects.** It is the reading:
+how far each part of the plan is along, which parts are behind, and every
+commitment with the state it is actually in. Against the tool being replaced:
+a commitment somebody has ticked but nobody has accepted is counted there as
+**delivered on time**, and here it is counted in neither column and says it is
+waiting; one accepted after its date says **how late** in days, so the headline
+cannot absorb it; and the list is in **date order** rather than sorted by how
+bad each row is, because sorting by severity is triage and this is a record.
+The one pair that reads like a contradiction — past its date, marked done,
+waiting to be accepted, drawn as *Waiting* rather than *Overdue* — is **named on
+a hover**, so nobody has to work it out and nothing grey has to be written under
+the heading.
+
+**And nothing on it says *On Track*.** The old tool puts that word beside a
+phase at 90%, and a percentage cannot see a schedule. *How far along* and *is it
+late* are two questions: the bar answers the first, and a separate red
+**Behind** mark answers the second. A part can read 67% and be behind, and both
+are true.
+
+**The rendered pages were read against your own drawings, figure by figure**,
+and they match: 59% overall, 100 / 67 / 10 across the three phases, one of six
+commitments met on time, one delivered late, and all six commitment states
+drawn at once. Both pages were swept at seven widths in both palettes —
+nothing overflows, nothing scrolls sideways, nothing is unreadable — with the
+measuring probe proved able to fail first by breaking a colour and a width and
+watching it report them.
+
+**Two faults were found by looking at the page rather than by any check**: the
+red **Behind** mark was jammed against the phase name, and a late row did not
+say what was blocking it, where your drawing names the thing it waits on. Both
+are fixed and both now have an assertion, so neither can come back unseen.
+
+**And four faults were in the check itself, three of them the same mistake.**
+A stored date comes back from the database as a date rather than as text, so one
+assertion read it as *"Sat Sep 28"* and reported a correct save as broken. Three
+values were pulled out of the page by counting characters and all three were off
+by one, so three correct pages read as broken — they are read by name now, which
+cannot be miscounted. One assertion could not fail at all, ending in a line that
+made it always true; what it exists for is asserted properly now. And one
+assertion held the old world — it said Progress and Analytics carry no link,
+which was true until this round — so it was rewritten to the rule that survives
+rather than loosened, and it then reported a correct build broken once before it
+was scoped properly.
+
+**Proved.** The Portfolio module check is **119 assertions, none failing**, with
+new sections for both screens — and it is **red under all fourteen deliberate
+breaks**, five of them new. Its neighbours are green: the rules check 121, the
+modules check 112, Insights 127, Meeting Notes 170, the generated-files check
+all clear, and the offline platform untouched and measured, so nothing a
+returning browser holds needed bumping.
+
+**And one of those five breaks first went green, which is the thing worth
+keeping.** A deliberate break that does not break anything reads exactly like a
+guard that works. It was changing the shared rule the check compares the page
+against, so both sides moved together — the fault it is for is the page keeping
+its **own** copy of the words, so the break now does that instead, and the
+reason is written beside the rule so nobody moves it back.
 
 ---
 

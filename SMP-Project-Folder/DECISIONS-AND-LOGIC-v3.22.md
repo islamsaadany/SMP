@@ -50097,3 +50097,161 @@ good; `tsc` clean but for `lib/prisma.ts`'s pre-existing error.
 stashed baseline (§303). **The frozen product is untouched and measured**, so
 `sw.js` is NOT bumped (§91's trigger is the built file's bytes changing, and
 they did not).
+
+---
+
+## §378 — PORTFOLIO: PROGRESS AND ANALYTICS (2026-09-30, spec 060 §14)
+
+Islam, of the two remaining project drawings: *"ok for the progress and
+analytics too."* Built together, because **they read the same thing** — the plan
+§377 built — and with them **five of Portfolio's six screens work**. What is
+left is WRITING a plan, and the landing's own header says so (§54.5).
+
+### §378.1 — THREE SCREENS, ONE READ, AND NOT ONE OF THEM COMPUTES A FIGURE
+
+`serve()` asks `planRows` once per request and rolls it up once, and Plan,
+Progress and Analytics all map over that array — **§5.2's rule carried out
+literally**, so three screens cannot disagree about one project. Every number
+comes from `lib/portfolio.ts`: Progress's three counts are `waitingSignOff`,
+`overdue` and `nobodyOn`; Analytics' bars are `rollUp`'s own percentages, its
+headline `overall`, its word `howFar`, its per-commitment state `msState`, its
+on-time count `hitOnTime`. `checks/portfolio.mjs` asks every one of them with no
+browser at all, and the module check asserts **agreement with the rule** rather
+than a typed number (§94.8) — so a change to the roll-up moves the page and the
+check together and cannot move one.
+
+### §378.2 — ACCEPTING WORK IS THE ONE WRITE, AND IT IS TWO STEPS
+
+`signOff` and `reopen` are the only new writes, and both are §6.2's two steps: a
+Lead marks work done, and somebody holding the seat accepts the date it finished
+on. **Nobody closes their own work.** The gate is `mayComplete`/`mayReopen`,
+asked on the SERVER as well as used to decide which control is drawn — a control
+the server would refuse is never drawn (§61) **and** a press the page did not
+draw is still refused (§42), both asserted, because either alone is half a rule.
+
+**Three fences on one write, each with its own assertion.** The **project is in
+the WHERE** — an activity id is a uuid somebody can type, so a row from another
+project is nothing here, and that is the fence `actIn()` exists for. The row
+must **already be marked done**, or accepting is one step wearing two names. And
+the date must be **real**: not in the future, not before the work started,
+refused **by name** (§123) through `endDateRefused`, the sentence `stampDates`
+already used rather than a second wording (§53.5).
+
+**Reopening clears the real end date AND who accepted it** while the progress
+figure stands — which is what keeps §378.4's reading honest: a commitment whose
+acceptance was undone must stop counting as met, and a cleared status with a
+date still on the row would go on counting.
+
+### §378.3 — A BOUND NOTHING CAN MEASURE IS SAID, NOT ANSWERED WITH A COLUMN
+
+The signed-off Progress drawing says the accepted date may not fall **before the
+day the work was marked done**. **There is no such column** — the platform
+stores when a row became `done` nowhere (§377.6 recorded the same absence from
+the other side, where it costs the chart an overrun mark). So what ships is the
+two bounds that CAN be checked, and the departure is written into the file's own
+header and into the record, because adding a stored date is its own decision and
+not something to ride in beside a screen (rule 1b). *A bound nothing can
+measure is a promise, and a promise in a refusal is worse than a narrower
+refusal that is true.*
+
+### §378.4 — A COMMITMENT IS HIT ONLY IF IT WAS ACCEPTED ON OR BEFORE ITS DAY
+
+§9.12's three corrections of the reference, every one carried out and every one
+asserted:
+
+- **MARKED DONE IS NOT HIT.** The reference counts a milestone somebody has
+  ticked as delivered on time. Here it is `wait` — counted in NEITHER column —
+  because nobody has accepted it, and the check asserts that over a commitment
+  MADE to be in that state (§255).
+- **LATE IS LATE, IN DAYS.** Accepted after its date is `late` and the row says
+  how late, so the headline cannot quietly absorb it.
+- **DATE ORDER, NEVER SEVERITY.** The reference sorts its list by how bad each
+  row is, which is triage; `commitments` sorts by date and the check asserts the
+  page's order against it.
+
+**AND THE PAIR THAT READS LIKE A CONTRADICTION IS NAMED** — past its date,
+marked done, waiting to be accepted, drawn as *Waiting* rather than *Overdue* —
+**on a hover**, never as a grey paragraph under the heading (1b-ii). A screen
+that draws two things that look inconsistent and explains neither teaches
+somebody to distrust both.
+
+### §378.5 — *ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE (§344)
+
+The reference labels a phase at 90% *On Track*, which is a claim about a
+SCHEDULE, and a figure cannot see one. So `howFar` answers **how far along**
+(*Not started · Early · Under way · Nearly done · Done*) and `behind` answers
+**is it late**, drawn as a separate red *Behind* chip — a part can read 67% and
+be behind, and both are true. Two breaks hold it: `on-track` puts the
+reference's label back, and `far-words` gives the page a word table of its own.
+
+### §378.6 — AND A FALSIFICATION THAT DID NOT FALSIFY (§54.5)
+
+`far-words` first changed **`howFar` itself**, and the check compares the page's
+words AGAINST `howFar` — so both sides moved together and the run read **0
+failures**, which is indistinguishable from a guard that works. §337.1's shape
+in my own hands: *both sides wrong in the same way is a green run.* The fault
+the assertion exists to catch is a SECOND answer to *how far along* (§53.5), so
+the break now lives in `analytics.ts` as a local word table — **1 red** — and
+the reason is written into the shared reader beside it, so nobody moves it back.
+
+### §378.7 — TWO FAULTS FOUND BY LOOKING AT THE RENDERED PAGE (§311.1)
+
+Neither by a check, which is that section's own lesson arriving again; both now
+asserted.
+
+- The red **Behind** chip was jammed against the phase name — the shared
+  `.behind` carries no left margin and the drawing has 7px.
+- A **late row did not say what was blocking it**. The drawing appends
+  *"— blocked by X"*, read off `dependsOn`; without it the row names a problem
+  and not its cause (§123).
+
+### §378.8 — FOUR FAULTS IN THE CHECK ITSELF, THREE OF THEM ONE SHAPE
+
+- **A `date` COLUMN COMES BACK AS A `Date`**, so
+  `String(row.actual_end).slice(0,10)` is `"Sat Sep 28"` and never a day — it
+  reported a correct write as broken (§100.3).
+- **THREE VALUES WERE READ OUT OF COUNTED OFFSETS** (`slice(11,-1)` and
+  friends) and **all three were wrong by one**, so three correct pages read as
+  broken with the detail printing `>100%` and `eadership interviews`. Read out
+  of the **capture group** now, which cannot be miscounted — *a magic offset in
+  an assertion is a literal nobody can check by reading.*
+- **ONE ASSERTION COULD NOT FAIL**, ending in `|| true` (§113.8). What it is
+  for — a commitment marked done counted in neither column — is asserted now,
+  over rows made to be in that state.
+- **AND THE TAB ASSERTION HELD A LITERAL THIS SLICE MOVED** (§214.3): it said
+  the two unbuilt tabs carry the word and NO link, and Progress and Analytics
+  now link. **REWRITTEN to the surviving rule**, never loosened (§218) — the
+  built tabs link and the unbuilt ones do not, derived from `BUILT_TABS` rather
+  than typed. **And its first rewrite then reported a correct build broken**,
+  testing `href=".../plan"` against the whole document where the plan page's own
+  List/Timeline switch contains one; scoped to the `<nav class="tabs">` block,
+  with the reason recorded in the check.
+
+### §378.9 — RECORDED, NOT DONE
+
+- **The day work was marked done is not stored**, so §378.3's third bound
+  cannot be enforced and §377.6's overrun mark cannot be drawn. One decision
+  answers both.
+- **The checkpoint line reports the cadence and never whether a checkpoint
+  happened** — nothing records one — so it says when the next falls due and no
+  more (§124: a status may not claim more than the thing measuring it can see).
+- **Analytics has no history**: every figure is today's, so there is no trend.
+  It needs something kept per checkpoint, which is the item above.
+
+### §378.10 — PROVED
+
+`checks/portfolio-module.mjs` **119 passed, 0 failed** with §9 (Progress) and
+§10 (Analytics) added, and **red under all fourteen breaks** — the five new ones
+`anyone-signs` (8 red), `gold-on-done` (1), `done-is-hit` (3), `on-track` (2)
+and `far-words` (1), each reddening its own assertions and no others (§54.5).
+`checks/portfolio.mjs` 121/0, `modules` 112/0, `insights` 127/0, `notes` 170/0,
+`generated-in-step` all clear, `built-in-step.py` all good; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. Both pages swept at
+1600/1440/1280/1100/1000/820/700 in both palettes — **0 overflow, 0 sideways
+scroll, 0 contrast failures** — with the probe proved able to fail first by
+breaking a colour and a width and watching it report them. **The rendered pages
+were read against the signed-off drawings figure by figure** and reproduce them
+exactly: 59% overall, 100/67/10 across three phases, 1 of 6 commitments met on
+time, 1 delivered late, all six commitment states drawn at once. **The frozen
+product is untouched and measured**, so `sw.js` is NOT bumped (§91's trigger is
+the built file's bytes changing, and they did not).

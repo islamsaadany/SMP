@@ -23,6 +23,7 @@ import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/mo
 import {
   type Row, type Cadence, ROLE_WORD, type Role,
   rollUp, overall, owed, waitingSignOff, overdue, nobodyOn, behind, nextCheckpoint,
+  howFar, msState, commitments, SOON,
 } from "../../lib/portfolio.ts";
 import type { Charter, Project } from "../../lib/portfolio-io.ts";
 
@@ -181,7 +182,14 @@ tbody tr:nth-child(even) td{background:var(--zebra)}
 .fld{width:100%;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:6px 9px}
 .fld:focus{outline:2px solid var(--focus);outline-offset:0}
 textarea.fld{min-height:64px;resize:vertical}
-.none2{color:var(--ink-3)}
+/* THE QUIET WORD FOR AN ABSENCE. It was declared as .none2 and used as
+   .none for one slice, so *No checkpoint set* drew in full ink where the
+   drawing has it grey — the rule and the markup disagreeing, which renders
+   perfectly (§96) and was found by reading. §378.
+   AND NO BACKTICK MAY APPEAR IN THIS COMMENT: the whole stylesheet is one
+   template literal, so a quoted class name here ENDS it (§272.8, §357.3
+   — walked into while writing this very note). */
+.none{color:var(--ink-3)}
 .dlg{position:fixed;inset:0;background:rgba(10,14,22,.5);display:grid;place-items:center;padding:20px;z-index:20}
 .dlg[hidden]{display:none!important}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;max-width:440px;width:100%}
@@ -235,14 +243,13 @@ function awayIn(d: string, today: string): string {
   const n = daysTo(d, today);
   return n === 0 ? "today" : n === 1 ? "tomorrow" : "in " + plural(n, "day");
 }
-/* The drawing's own words for a percentage, one place (§9.13). */
-function howFar(pct: number): string {
-  if (pct === 0) return "Not started";
-  if (pct === 100) return "Finished";
-  if (pct < 34) return "Early";
-  if (pct < 67) return "Under way";
-  return "Nearly there";
-}
+/* HOW FAR ALONG IS `lib/portfolio.ts`'s ANSWER AND NOT THIS FILE'S (§378).
+   It had five words and three thresholds of its own here for one slice —
+   *Finished* and *Nearly there* at 34 and 67 — which is neither the
+   drawing's vocabulary (`_derive.js`: Done · Nearly done · Under way ·
+   Early · Not started at 100 / 90 / 25) nor the one Analytics reads. Two
+   screens of one client describing one percentage differently is §53.5's
+   drift wearing an adjective. */
 
 export type Seen = {
   project: Project;
@@ -264,7 +271,7 @@ function farCell(s: Seen): string {
       '<div class="bar2"><i style="width:0%"></i></div>';
   if (s.pct === null) return '<span class="noplan">No plan yet</span>';
   return '<div class="figs"><span class="pc">' + s.pct + "%</span>" +
-    '<span class="word">' + esc(howFar(s.pct)) + "</span>" +
+    '<span class="word">' + esc(howFar(s.pct).word) + "</span>" +
     (s.behind ? '<span class="behind">Behind</span>' : "") +
     '</div><div class="bar2"><i class="' + (s.pct === 100 ? "done" : "") +
     '" style="width:' + s.pct + '%"></i></div>';
@@ -371,29 +378,39 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
    NOW WHATEVER ITS DATE SAYS — the strip above already counts it as waiting
    on somebody, so leaving it off here would be two answers on one screen
    (§5.2). The window is `SOON`, read from lib/portfolio.ts rather than typed
-   again (§9.13a's own lesson). */
-const SOON = 14;
+   again (§9.13a's own lesson) — **which this file said and did not do for
+   one slice**, declaring its own 14 directly under that sentence (§104.8).
+   Corrected at §378. */
 function commitmentsBlock(seen: Seen[], today: string): string {
   type C = { s: Seen; r: Row };
   const all: C[] = [];
-  for (const s of seen) for (const r of s.rows) {
-    if (r.lvl !== 2) continue;
-    if (!r.milestone) continue;
+  /* THE COMMITMENTS AND THEIR ORDER ARE THE RULES' (§9.12's date order),
+     asked per project and joined — an accepted one is not owed, so it is
+     the one state this list drops. */
+  for (const s of seen) for (const r of commitments(s.rows)) {
     if (r.status === "completed") continue;
     all.push({ s, r });
   }
-  all.sort((x, y) => String(x.r.end || "9999").localeCompare(String(y.r.end || "9999")));
-  const inWindow = (c: C) =>
-    c.r.status === "done" || !c.r.end || daysTo(c.r.end, today) <= SOON;
+  all.sort((x, y) => String(x.r.end || "9999-99-99").localeCompare(String(y.r.end || "9999-99-99")));
+  /* WHAT IS OWED IS THE STATE AND NEVER A SECOND READING OF THE DATE: a
+     sign-off is owed now whatever the date says (the strip above already
+     counts it as waiting on somebody), a passed date is owed, and one
+     inside the window is coming. `plan` is not owed yet — and a commitment
+     with no date at all reads `plan`, so it waits for a date rather than
+     being dragged to the top of a list it cannot be placed in. */
+  const inWindow = (c: C) => msState(c.r, today) !== "plan";
   const list = all.filter(inWindow);
 
-  const state = (r: Row) =>
-    r.status === "done" ? "wait" : (r.end && daysTo(r.end, today) < 0) ? "over" : "soon";
+  /* WHICH STATE A COMMITMENT IS IN IS `lib/portfolio.ts`'s ANSWER, so this
+     list and Analytics' cannot mean two things by one row (§9.12, §53.5).
+     This page draws the three that are OWED; Analytics draws all six. */
+  const state = (r: Row) => msState(r, today);
   const word = (r: Row) => {
     const st = state(r);
     if (st === "wait") return "Waiting to sign off";
     if (st === "over") return plural(-daysTo(String(r.end), today), "day") + " over";
-    return "In " + plural(daysTo(String(r.end), today), "day");
+    if (st === "soon") return "In " + plural(daysTo(String(r.end), today), "day");
+    return "Planned";
   };
 
   if (!list.length) {
@@ -519,8 +536,8 @@ export function seeProject(project: Project, rows: Row[], today: string, mine: b
 const TABS: { key: string; label: string; path: string | null }[] = [
   { key: "charter", label: "Charter", path: "" },
   { key: "plan", label: "Plan", path: "/plan" },
-  { key: "progress", label: "Progress", path: null },
-  { key: "analytics", label: "Analytics", path: null },
+  { key: "progress", label: "Progress", path: "/progress" },
+  { key: "analytics", label: "Analytics", path: "/analytics" },
 ];
 
 export function tabs(slug: string, projectId: string, current: string): string {
@@ -659,4 +676,115 @@ export const PLAN_CSS = `
            font-size:13px; align-items:center; }
   .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; text-align:right; }
   .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+`;
+
+/* ══ Progress's own stylesheet (§9.10) ═════════════════════════════════ */
+/* CARRIED from the signed-off drawing
+   (`design-mockups/portfolio/2026-09-18_project-progress.html`) less its
+   three drawing-only blocks — the `.asrow` *Looking as* switch, which the
+   drawing itself says is never a control of the product, the `.panel`
+   notes and the `.ask` rule.
+
+   THE ROWS ARE `.qrow` AND NOT `.row`, because `.row` is the charter's
+   label-and-value pair in the shared sheet above and a one-word class lives
+   in one namespace (§65.9). `.strip`, `.cell`, `.box`, `.empty`, `.mine`,
+   `.behind` and `.fld` are the shared ones and are NOT redeclared — a
+   second copy is how two screens of one module come to disagree about a
+   grey (§53.5). */
+export const PROGRESS_CSS = `
+  .pr-h{background:var(--panel);color:var(--panel-ink);padding:8px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .pr-h b{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .pr-h .c{font-size:11px;color:var(--panel-quiet);font-weight:700}
+  .chk{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:11px 14px;margin-bottom:16px;font-size:13.5px;color:var(--ink-2)}
+  .chk b{color:var(--ink)}
+  .chk .k{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+  .q{border-top:1px solid var(--line-soft);padding:12px 14px}
+  .q:first-of-type{border-top:0}
+  .qh{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+  .qh .qnum{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12px;font-weight:700}
+  .qh b{font-size:14px}
+  .qh .qwho{font-size:12.5px;color:var(--ink-3);margin-left:auto}
+  .qsub{font-size:13px;color:var(--ink-2);margin-top:3px}
+  .qact{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  .qfld{display:flex;gap:7px;align-items:center;font-size:13px}
+  .qfld input{font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:5px 8px;font-variant-numeric:tabular-nums}
+  .qfld input:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .qbound{font-size:12.5px;color:var(--ink-3);margin:6px 0 0;max-width:78ch}
+  .cta{font:inherit;cursor:pointer;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;background:var(--panel);color:var(--panel-ink);border:1px solid var(--panel);border-radius:5px;padding:6px 13px;margin-left:auto}
+  .cta:hover{background:var(--gold);border-color:var(--gold);color:var(--on-accent)}
+  .cta:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .cta[disabled]{opacity:.55;cursor:default}
+  .nocta{font-size:12.5px;color:var(--ink-3)}
+  .qrow{display:grid;grid-template-columns:62px minmax(0,1fr) 150px 116px 104px;gap:12px;align-items:center;padding:8px 14px;border-top:1px solid var(--line-soft);font-size:13.5px}
+  .qrow:first-of-type{border-top:0}
+  .qrow:hover{background:var(--zebra)}
+  .qrow .qnum{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12px;font-weight:700}
+  .qrow .qt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qrow .qwho{font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .qrow .qwin{font-variant-numeric:tabular-nums;font-size:12.5px;text-align:right;white-space:nowrap;color:var(--ink-2)}
+  .qrow .qwin.bad{color:var(--bad-tx);font-weight:600}
+  .qrow .qtail{justify-self:end;font-size:12.5px;color:var(--ink-3);text-align:right}
+  .qrow.mine{background:var(--zebra)}
+  .quiet{font:inherit;cursor:pointer;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;background:var(--surface);color:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:5px 11px}
+  .quiet:hover{border-color:var(--gold);color:var(--ink)}
+  .quiet:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .quiet[disabled]{opacity:.55;cursor:default}
+  @media (max-width:700px){
+    .qrow{grid-template-columns:52px minmax(0,1fr)}
+    .qrow .qwho,.qrow .qwin,.qrow .qtail{grid-column:2;text-align:left;justify-self:start}
+  }
+`;
+
+/* ══ Analytics' own stylesheet (§9.12) ═════════════════════════════════ */
+/* CARRIED from the signed-off drawing
+   (`design-mockups/portfolio/2026-09-20_project-analytics.html`) less its
+   four `.panel` note blocks and the `.ask` rule. `.pr` is Analytics' phase
+   row; Progress's queue rows are `.qrow` and the charter's are `.row`, so
+   the three do not meet (§65.9). */
+export const ANALYTICS_CSS = `
+  .an-h{background:var(--panel);color:var(--panel-ink);padding:8px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .an-h b{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .an-h .c{font-size:11px;color:var(--panel-quiet)}
+  .cell .v small{font-size:15px;font-weight:600;color:var(--ink-3)}
+  .cell.warn .v{color:var(--attn-tx)}
+  .pr{display:grid;grid-template-columns:54px minmax(0,1fr) 130px 58px 116px 122px;gap:12px;align-items:center;padding:9px 14px;border-top:1px solid var(--line-soft);font-size:13.5px}
+  .pr:first-of-type{border-top:0}
+  .pr:hover{background:var(--zebra)}
+  .pr.lvl0{font-weight:700}
+  .pr.lvl1{background:var(--zebra)}
+  .pr.lvl1 .pt{padding-left:16px;font-weight:600}
+  .pr .pn{font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12px;font-weight:700}
+  .pr .pt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pr .behind{margin-left:7px}
+  .pbar{height:8px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+  .pbar > i{display:block;height:100%;background:var(--good)}
+  .pr .ppc{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+  .pr .pwd{justify-self:end;font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;border-radius:4px;padding:2px 8px;white-space:nowrap;background:var(--surface-2);color:var(--ink-3)}
+  .pr .pwd.done{background:var(--good-bg);color:var(--good-tx)}
+  .pr .pwd.on{background:var(--attn-bg);color:var(--attn-tx)}
+  .pr .pcnt{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+  .ms{display:grid;grid-template-columns:104px minmax(0,1fr) 190px;gap:12px;align-items:baseline;padding:11px 14px;border-top:1px solid var(--line-soft);font-size:13.5px}
+  .ms:first-of-type{border-top:0}
+  .ms:hover{background:var(--zebra)}
+  .ms .when2{font-variant-numeric:tabular-nums;color:var(--ink-2);font-weight:600;white-space:nowrap}
+  .ms .nm2{min-width:0}
+  .ms .nm2 b{display:block;font-weight:600}
+  .ms .nm2 span{font-size:12.5px;color:var(--ink-3)}
+  .ms .bd{justify-self:end;font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;border-radius:4px;padding:3px 9px;white-space:nowrap;text-align:center}
+  .bd.hit{background:var(--good-bg);color:var(--good-tx)}
+  .bd.late{background:var(--bad-bg);color:var(--bad-tx)}
+  .bd.over{background:var(--bad);color:var(--on-fill)}
+  .bd.wait{background:var(--panel);color:var(--panel-accent)}
+  .bd.soon{background:var(--attn-bg);color:var(--attn-tx)}
+  .bd.plan{background:var(--surface-2);color:var(--ink-3)}
+  .ms.past .when2{color:var(--ink-3)}
+  @media (max-width:760px){
+    .pr{grid-template-columns:52px minmax(0,1fr) 58px}
+    .pr .pbar{grid-column:2 / -1}
+    .pr .pcnt,.pr .pwd{grid-column:2;justify-self:start;text-align:left}
+  }
+  @media (max-width:700px){
+    .ms{grid-template-columns:104px minmax(0,1fr)}
+    .ms .bd{grid-column:2;justify-self:start}
+  }
 `;

@@ -17,25 +17,31 @@
    drew: the rules are lib/portfolio.ts's, the same ones the page asked before
    drawing the control (§61 — a control the server refuses is never drawn).
 
-   WHAT IS NOT BUILT YET, said rather than left to be discovered (§54.5): the
-   plan, Progress and Analytics. A project opens on its charter, and a row on
-   the landing reads *No plan yet* because there is no plan tree to read —
-   which is the landing's own signed-off state for a project with none, not a
-   placeholder (§9.13). */
+   WHAT IS NOT BUILT YET, said rather than left to be discovered (§54.5):
+   WRITING a plan. All four of a project's tabs are served and read — the
+   charter, the plan in both views, Progress and Analytics — and nothing yet
+   adds a row, moves a date or reports against a breakdown. The two writes
+   that ARE here are the second step of finishing a piece of work: signing it
+   off, and undoing that (§3 №1, §9.10). */
 import { clientHref } from "../../lib/modules.ts";
 import { shellHeaders } from "../../lib/shell.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import type { ServeArgs } from "../registry.ts";
 import {
-  inOffice, mayStartProject, mayEditCharter, rollUp, type Row, type Who, type Role,
+  inOffice, mayStartProject, mayEditCharter, mayComplete, mayReopen,
+  rollUp, type Row, type Who, type Role,
 } from "../../lib/portfolio.ts";
 import {
-  listProjects, oneProject, addProject, setCharter, roleOn, planRows, oneActivity, CHARTER_FIELDS,
+  listProjects, oneProject, addProject, setCharter, roleOn, planRows, oneActivity,
+  signOff, reopen, CHARTER_FIELDS,
 } from "../../lib/portfolio-io.ts";
 import { readNames } from "../../lib/people.ts";
 import { landingDocument, charterDocument, refusedDocument, seeProject, type Seen } from "./page.ts";
 import { planDocument } from "./plan.ts";
+import { progressDocument } from "./progress.ts";
+import { analyticsDocument } from "./analytics.ts";
 import { PLAN_JS } from "./plan-js.ts";
+import { PROGRESS_JS } from "./progress-js.ts";
 import { APP_JS } from "./script.ts";
 /* TODAY IS THE SPINE'S ANSWER (lib/day.ts) and not a second copy: two of the
    office's modules disagreeing about which day it is at 23:30 in Cairo is
@@ -62,6 +68,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
      which must leave the chart complete and the elbows absent — a page that
      needs its script to be correct is a page that is wrong without one. */
   if (first === "plan.js" && a.rest.length === 1) return script(PLAN_JS);
+  if (first === "progress.js" && a.rest.length === 1) return script(PROGRESS_JS);
 
   /* THE SEAT IS THE DOOR'S ANSWER and the role is the project's. The break
      hands a seat to anybody with a membership, which must turn the check red
@@ -92,7 +99,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
     /* A word under a project that is not one of its tabs comes back to the
        project, for the same reason an unknown word inside the module comes
        back to the landing — never a page that looks right (§96). */
-    if (second && second !== "plan")
+    if (second && second !== "plan" && second !== "progress" && second !== "analytics")
       return Response.redirect(new URL(clientHref(a.slug, "portfolio", first), a.req.url), 302);
     try {
     return await withTenant(a.tenantId, async (c) => {
@@ -122,6 +129,26 @@ export async function serve(a: ServeArgs): Promise<Response> {
         return html(await planDocument({
           slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
           project, rows, names, today: todayIn(), view, act, actRow, role, office,
+        }));
+      }
+
+      /* PROGRESS AND ANALYTICS READ THE SAME ROLLED-UP ARRAY THE PLAN DOES
+         (§5.2, §9.8) — one read, one roll-up, and three screens that cannot
+         disagree about one project. Neither is narrowed: what changes for a
+         Contributor or a Viewer is which controls are drawn, and that is
+         asked of the rules rather than decided here (§9.10, §301). */
+      if (second === "progress" || second === "analytics") {
+        const rows = rollUp(await planRows(c, first));
+        const seat: Who["seat"] = office ? (a.seat as Who["seat"]) : "none";
+        if (second === "analytics")
+          return html(await analyticsDocument({
+            slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+            project, rows, today: todayIn(), role, seat,
+          }));
+        const names = (await readNames(c)).short;
+        return html(await progressDocument({
+          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+          project, rows, names, today: todayIn(), role, seat, personKey: a.personKey,
         }));
       }
 
@@ -199,6 +226,34 @@ async function act(c: Q, body: Record<string, unknown>, a: ServeArgs, office: bo
     const out = await setCharter(c, id, field, String(body.value ?? ""));
     if (!out) return no(404, "That project is not here.");
     return json(200, { ok: true, value: (out as unknown as Record<string, unknown>)[field] ?? "" });
+  }
+
+  /* ══ the second step of finishing a piece of work (§3 №1, §9.10) ══════ */
+  /* JUDGED AGAINST THE STORED ROW AND THE STORED MEMBERSHIP, never against
+     what drew the control (§42) — and the activity is read THROUGH the
+     project, so an id from another plan answers *not on this project*
+     rather than being accepted under this project's rights (§6). */
+  if (what === "signoff" || what === "reopen") {
+    const id = String(body.id || "");
+    const act = String(body.activity || "");
+    if (!UUID.test(id) || !UUID.test(act)) return no(400, "Which activity?");
+    const role = await roleOn(c, id, a.personKey);
+    if (!office && !role) return no(404, "That project does not name you.");
+    const w: Who = { seat: office ? (a.seat as Who["seat"]) : "none", role };
+    /* THE BREAK OPENS BOTH TO ANYBODY THE PROJECT NAMES, which empties the
+       two-step rule §6.5 is keeping — and must turn the check red (§94.5).
+       Never set on a deployment. */
+    const open = brk() === "anyone-signs";
+    if (what === "reopen") {
+      if (!open && !mayReopen(w))
+        return no(403, "Reopening a sign-off is the office's and the project's Lead.");
+      const out = await reopen(c, id, act, todayIn());
+      return out.ok ? json(200, { ok: true }) : no(400, out.why);
+    }
+    if (!open && !mayComplete(w))
+      return no(403, "Signing work off is the office's and the project's Lead.");
+    const out = await signOff(c, id, act, { end: String(body.end || ""), by: by, today: todayIn() });
+    return out.ok ? json(200, { ok: true }) : no(400, out.why);
   }
 
   return no(400, "Nothing to do.");

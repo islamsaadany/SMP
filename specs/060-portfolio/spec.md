@@ -2221,3 +2221,148 @@ still red ten ways; modules 112/0; insights 127/0; notes 170/0;
 `generated-in-step` all clear; `built-in-step.py` all good; `tsc` clean but for
 `lib/prisma.ts`'s pre-existing error. `checks/tracker.mjs` 224/4 reproduces
 identically on a stashed baseline (§303).
+
+## 14 · Built — Progress and Analytics, 2026-09-30
+
+The third slice, and the last of the three project screens the drawings
+settled: **Progress** (§9.10) — what is owed, and accepting it — and
+**Analytics** (§9.12), the reading. Both read the plan §13 built, which is why
+they came together: the same `planRows` + `rollUp`, asked once, three screens
+mapping over it. **Five of the six screens now work.** What is still not built
+is **writing** a plan, and the landing's own header says so (§54.5).
+
+### §14.1 · Three screens, one read (§5.2, §9.8)
+
+`serve()` reads the rolled-up rows ONCE for the whole request and hands the
+same array to Plan, Progress and Analytics, so the three cannot disagree about
+one project. Nothing on any of the three computes a figure: Progress's three
+counts are `waitingSignOff`, `overdue` and `nobodyOn`, Analytics' bars are
+`rollUp`'s own percentages, its headline is `overall`, its word beside each bar
+is `howFar` and its per-commitment state is `msState` — every one in
+`lib/portfolio.ts`, which `checks/portfolio.mjs` asks with no browser at all.
+The check asserts **agreement with the rule** in every case and never a typed
+number (§94.8).
+
+### §14.2 · Accepting work is the one thing this slice writes
+
+`signOff` and `reopen` are the module's only new writes, and both are
+**two-step** (§6.2): a Lead marks work done, and somebody with the seat accepts
+it. The gate is `mayComplete` / `mayReopen`, asked on the SERVER as well as
+used to decide which control is drawn — a control the server would refuse is
+never drawn (§61), and a press the page did not draw is still refused (§42),
+both asserted.
+
+Three fences on one write, each with its own assertion: the **project is in the
+WHERE** (an activity id is a uuid somebody can type, so a row from another
+project is nothing here), the row must **already be marked done** (accepting
+something nobody has finished is not a step), and the date must be **real** —
+not in the future, not before the work started — refused **by name** (§123)
+through `endDateRefused`, the same sentence `stampDates` already used.
+
+Reopening **clears the real end date and who accepted it** while the progress
+figure stands, which is what keeps the on-time reading honest: a commitment
+whose acceptance was undone must stop counting as met.
+
+### §14.3 · The bound the drawing asks for cannot be enforced, and it is said
+
+The Progress drawing's sign-off box says the accepted date may not be *before
+the day the work was marked done*. **There is no such column**: the platform
+stores when a row was marked `done` nowhere, so that bound cannot be checked.
+What ships is the two bounds that CAN be — not in the future, not before the
+real start — and the departure is recorded here and in the file's own header
+rather than answered by quietly adding a column, because adding a date rule is
+its own decision (rule 1b). Whether the marking day should be stored is
+§14.9's first open item.
+
+### §14.4 · A commitment is hit only if it was accepted on or before its day
+
+§9.12's three corrections of the reference, all carried out and all asserted:
+
+- **Marked done is not hit.** The reference counts a milestone somebody has
+  ticked as delivered on time. Here it is `wait` — counted in NEITHER column —
+  because nobody has accepted it. The check asserts that directly, over a
+  commitment made to be in that state.
+- **Late is late.** Accepted after its date is `late`, and the row says *how*
+  late in days, so the headline cannot quietly absorb it.
+- **Order is date order, never severity.** The reference sorts its milestone
+  list by how bad each one is, which is triage and not a record; `commitments`
+  sorts by date and the check asserts the page's order against it.
+
+**The pair that reads like a contradiction is NAMED** — a commitment past its
+date, marked done, waiting to be accepted, drawn as *Waiting* rather than
+*Overdue* — on a hover, never as a grey paragraph under the heading (1b-ii).
+
+### §14.5 · *On Track* is not a word a percentage may use (§344)
+
+The reference labels a phase at 90% *On Track*. That is a claim about a
+schedule, and a percentage cannot see one — so `howFar` answers **how far
+along** (*Not started · Early · Under way · Nearly done · Done*) and `behind`
+answers **is it late**, drawn as a separate red *Behind* chip. A part can read
+67% and *Behind*, and both are true. Two breaks hold it: `on-track` puts the
+reference's label back, and `far-words` gives the page a word table of its own.
+
+### §14.6 · And a falsification that did not falsify (§54.5)
+
+`far-words` first changed `howFar` itself — and the check compares the page's
+words against `howFar`, so **both sides moved together and the run read 0
+failures**, which is indistinguishable from a guard that works. The fault the
+assertion exists to catch is a SECOND answer to *how far along* (§53.5), so the
+break now lives in `analytics.ts` as a local word table, and the reason is
+written into the shared reader beside it so nobody moves it back.
+
+### §14.7 · Two faults found by looking at the rendered page (§311.1)
+
+Neither by a check, and both now asserted:
+
+- The **Behind** chip was jammed against the phase name — the shared `.behind`
+  carries no left margin and the drawing has 7px.
+- A **late row did not say what was blocking it**. The drawing appends
+  *"— blocked by X"*, read off `dependsOn`; without it the row names a problem
+  and not its cause (§123).
+
+### §14.8 · Four faults in the check itself, three of them one shape
+
+- **A `date` column comes back as a `Date`**, so
+  `String(row.actual_end).slice(0,10)` is `"Sat Sep 28"` and never a day — it
+  reported a correct write broken (§100.3).
+- **Three values were read out of counted offsets** (`slice(11,-1)` and
+  friends) and all three were wrong by one, so three correct pages read as
+  broken with the detail printing `>100%` and `eadership interviews`. Read out
+  of the **capture group** now, which cannot be miscounted.
+- **One assertion could not fail**, ending in `|| true` (§113.8). What it is
+  for — a commitment marked done counted in neither column — is asserted now,
+  over rows made to be in that state.
+- And **the tab assertion held a literal this slice moved** (§214.3): it said
+  the two unbuilt tabs carry no link, and Progress and Analytics now do.
+  REWRITTEN to the surviving rule — the built ones link and the unbuilt ones do
+  not — derived from `BUILT_TABS`, never typed (§218). Its first rewrite then
+  **reported a correct build broken**, testing `href=".../plan"` against the
+  whole document where the plan page's own List/Timeline switch contains one;
+  it is scoped to the `<nav class="tabs">` block, with the reason recorded.
+
+### §14.9 · Recorded, not done
+
+- **The day work was marked done is not stored**, so §14.3's third bound cannot
+  be enforced. Storing it is a schema change and a decision of its own.
+- **The checkpoint line reports the cadence and never whether a checkpoint
+  happened** — nothing records a checkpoint, so the line says when the next one
+  falls due and no more (§124: a status may not claim more than it can see).
+- **Analytics has no history**: every figure is today's. A trend needs
+  something stored per checkpoint, which is the item above.
+- **Writing a plan** is the next slice, and with it the sixth screen.
+
+### §14.10 · Proved
+
+`checks/portfolio-module.mjs` **119 passed, 0 failed**, with §9 (Progress) and
+§10 (Analytics) added — and red under **all fourteen** breaks, the five new
+ones being `anyone-signs` (8 red), `gold-on-done` (1), `done-is-hit` (3),
+`on-track` (2) and `far-words` (1). `checks/portfolio.mjs` 121/0, `modules`
+112/0, `insights` 127/0, `notes` 170/0, `generated-in-step` all clear,
+`built-in-step.py` all good. `tsc` clean but for `lib/prisma.ts`'s pre-existing
+error. **The frozen product is untouched and measured**, so `sw.js` is not
+bumped (§91's trigger is the built file's bytes changing, and they did not).
+
+Both pages swept at 1600/1440/1280/1100/1000/820/700 in both palettes: **0
+overflow, 0 sideways scroll, 0 contrast failures** — and the probe was proved
+able to fail first, by breaking a colour and a width and watching it report
+them (§54.5).

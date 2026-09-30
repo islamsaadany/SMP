@@ -371,5 +371,21 @@ console.log("\n8 · an empty capability is not authored work");
     same((frozen.shape(clone(bare), ANSWERS).state.group || {})[R.STRUCTURE], st));
 }
 
+/* ── §438 · a business unit's way of planning travels with the flow ───── */
+console.log("\n10 · a unit says how it plans (§438)");
+{
+  const A = { companies: [], functions: [], words: {},
+              units: [{ name: "Mobile", format: "objectives" }, { name: "Retail", format: "pillars" }, { name: "Online" }] };
+  const g = frozen.shape(clone(bare), A).state;
+  const key = (nm) => Object.keys(g.units).find((k) => g.units[k].name === nm);
+  check("a unit answered objectives is stored so", g.units[key("Mobile")].format === "objectives", g.units[key("Mobile")].format);
+  check("pillars is stored as an absence, and an unanswered unit is pillars too",
+    !("format" in g.units[key("Retail")]) && !("format" in g.units[key("Online")]));
+  const back = frozen.shape(clone(g), Object.assign({}, A, { units: [{ name: "Mobile", format: "pillars" }, { name: "Retail", format: "projects" }, { name: "Online" }] })).state;
+  const k2 = (nm) => Object.keys(back.units).find((k) => back.units[k].name === nm);
+  check("a second pass writes the new way over the old one, both directions",
+    !("format" in back.units[k2("Mobile")]) && back.units[k2("Retail")].format === "projects");
+}
+
 console.log("\n" + ok + " ok, " + bad.length + " failed");
 if (bad.length) process.exit(1);

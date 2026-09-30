@@ -357,11 +357,14 @@ with sync_playwright() as p:
        rows(pg) == 0 and ev(pg, "()=>/no second layer/.test(document.querySelector('.csetup').textContent) && /Structure step/.test(document.querySelector('.csetup').textContent)", False))
     press(pg, ".csetup .wzstep[data-step=units]")
     ck("…and no unit offers a division", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv]').length", -1) == 0)
-    ck("…and the units' pillar line is drawn while units carry pillars",
-       ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", False))
+    # §438 REWROTE THIS (§218): the line used to say "a unit plans in pillars",
+    # which stopped being true of every unit once the step asks each unit how
+    # it plans. It says what the plan type decides now, and never claims pillars.
+    ck("…and the units' step says a unit's plan type decides its pages, beside a plans-in select per row",
+       ev(pg, "()=>/plan type decides what its pages hold/.test(document.querySelector('.csetup').textContent) && document.querySelectorAll('.csetup select[data-wzfmt]').length===document.querySelectorAll('.csetup .wzrow').length", False))
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));['top','mid','bu'].forEach(k=>{st[k]=Object.assign({},st[k]||{});st[k].on=SMPRules.STRUCT_COMPONENTS.filter(c=>c!=='capability'&&c!=='pillar');});GROUP[SMPRules.STRUCTURE]=st;paint();}")
     press(pg, ".csetup .wzstep[data-step=fns]"); press(pg, ".csetup .wzstep[data-step=units]")
-    ck("…and NOT drawn once units carry no pillars", not ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", True))
+    ck("…and nothing claims every unit plans in pillars once units carry none", not ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", True))
     press(pg, ".csetup .wzstep[data-step=caps]")
     ck("with no level carrying capabilities the step says so in one line, and offers no Add",
        q(pg, ".csetup .wzadd") is None and ev(pg, "()=>/does not use/.test(document.querySelector('.csetup').textContent)", False))

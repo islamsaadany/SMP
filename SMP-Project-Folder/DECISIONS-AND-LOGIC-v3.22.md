@@ -58956,6 +58956,95 @@ clean, and fifteen browser checks from both sides green. **`main`'s own
 authoriser suite runs 763/0 against the merged rules**, so no save that worked
 is refused: no forced sign-out is owed (spec 029).
 
+## §435 — one item's exceptions live on its layer's card; Setup › Structure goes (2026-09-30)
+
+Islam, of Setup › Structure beside Client set-up › Structure: *"why do we need this page while we have it in the client setup?"* — then option 2 of the two offered, from a mockup (`design-mockups/structure-exceptions/`, published as an artifact): the per-item exceptions move to an **Except for** box at the foot of each layer's card, and the Setup page is removed. Asked, and confirmed: the exceptions cover the first section's parts and the second section (the SWOT, as one switch); the plan section stays per layer.
+
+**Two places answered one question**, which is §53.5's drift waiting to happen: the step set what every item at a layer carries, and a separate page set where one item differs, so the office had to know the second page existed to see why a unit looked different. One card now says both, the layer's ticks above and its exceptions under them.
+
+**Nothing stored moves.** The box writes the same `GROUP.structure.over[target][comp]` through the same `setCompOver()` the page wrote, so every exception a tenant already holds appears on the card unchanged, and an answer equal to its layer's is still deleted rather than stored (§50.6). An item is added from *Make an exception for…* and is held on screen (`XADD`) until its first press, or the delete-on-equal rule would remove the row the moment it was drawn; an item whose chips all return to the layer's answer leaves the list by itself. **The chips offer only what the item can show** — `compOffered` and `compBuilt`, the rules the pages ask (§42), so a function's row has no brief, themes or values and a unit's no themes (§404.1, §427). **The box is not frozen by the plan-shape lock**: an exception changes what an item shows, never which rows exist.
+
+**Deleted, not hidden** (§24): the `structure` Setup def, `renderStructure()`, `STRUCT_COLS`, the `[data-stover]` wiring and the `.stadj`/`.stdot` CSS.
+
+`checks/structure.py` §2 **rewritten, never loosened** (§218): every claim it made on the old page is asserted on the new box, plus the page asserted gone from the rail and the row leaving once it follows the layer. **11 red** from the SOURCES with the business units' box removed (§276). Screen only — no `api/`, `lib/` or `db/` file — so no server rule moves and nobody is signed out.
+
+## §436 — one row's settings stay changeable on a client with a plan; a function's first section is its Description (2026-09-30)
+
+Islam, on Client set-up of a client holding a plan: *"for the directions I mean we cose where it belongs it belongs to commercial division but I can't change that"*, *"for the capability I can't set where they are assigned and I can't assign it"*, and *"if I change how we plan or directions or capabilities it needs to be changable with a warning that things will be archived and will start fresh with a way to bring it back some how."* Then, of the first section: *"for functions … no need for key objectives in the first section as this is already a way to plan"* and *"for the capability you need to add the description in the first section like the directions."*
+
+**The cause was the §346.5 shape freeze, and it froze more than it was for.** The freeze stops the LIST being rewritten on a client with a plan, because the flow's commit re-mints every row (adding, removing, renaming). Which division a unit or function belongs to, which function carries a capability, and how a function or capability plans are properties of ONE row, and they were frozen with the list. They are now written straight into that row, never through the list rewrite: division and assignment through `liveDivision`/`liveCapFn` (the same fields Setup's own rows write), and a change of how something plans through **Setup's own `switchPlanWay`** — the platform's warning dialog, the old way HIDDEN AND KEPT, and switching back brings it back (§405). That is his *"a way to bring it back"*, and it is not an archive: nothing is deleted, so nothing needs restoring. A division or an assignment moves nothing the row holds, so it carries no warning. `switchPlanWay` learned a capability (two ways, pillars/projects), and Setup › Capabilities' plans-in now goes through it too — it used to write the format with no warning at all. A function carrying a capability is still refused, and the refusal is SAID on the step. The list itself stays frozen: no Add, names read-only.
+
+**A function's first section is a Description, off until ticked.** A new component key `desc` (`SMPRules.FN_DESC`), offered to functions only, rather than letting `brief` back in — every stored functions level already lists `brief`, so reusing it would have switched a description on for every existing client. `descPart(target)` answers which part a first section's description is (`desc` for a function, `brief` otherwise) and the function Overview's "What it is" card and tab gate ask it. **Key objectives leave the functions' chips on the Structure step and deliberately NOT the rule**: a projects or pillars function's key objectives feed its Performance headline (`fnMemberScores` → `capKOScore`), and removing them from the rule broke two checks and would have blanked that number — put to Islam as a question. **A capability's first section offers the description and the North Star**, like a direction's.
+
+`checks/setup-live-rows.py` new, on the worked example (it holds a plan, so the frozen state is the one it opens in): every newly live control PRESSED and read back off the graph, the warning asserted before confirmation, switching back asserted to restore what was held, and the list asserted still frozen. Falsified from the SOURCES two ways, **6 red each**, each break reddening its own assertions. `checks/structure.py` three assertions rewritten, never loosened (§218). Neighbouring checks green.
+
+
+## §437 — a supporting function's key objectives are a tick on its first section (2026-09-30)
+
+Islam, of §436 taking them off the Structure step: *"keep them in the first
+section as an option."* **THE TICK COMES BACK ON THE FUNCTIONS' ROW** of Client
+set-up › Structure, beside §436's Description, on by default — every stored
+functions level already lists `keyobj` (Raya's migration 019 wrote it) and the
+unsaid fallback includes it, so no client's pages move. **OFF HIDES AND STOPS
+COUNTING, NEVER ONLY HIDES**: §436 declined to hide them precisely because an
+invisible list would go on deciding a visible number, so `fnKoCounted()` is one
+answer read by the scores and the reporting — `capKOScore` and `unitObjectives`
+answer nothing for a function whose objectives are off, the Performance headline
+falls to the function's projects (`capPerf`, the fallback that already existed)
+or its pillars (`unitPillars`), and neither `reportItems` nor `fnReportItems`
+asks for them, so Submit is not held by them. Nothing is deleted; ticking it
+again brings them back as they were. **A function planning in objectives and
+actions is never reached** — there the objectives ARE the plan (§430) — and
+anything that is not a function answers true, so no unit, capability or group
+moves. The Overview already asked `compOn(t, "keyobj")` (§404), so the display
+half needed nothing. `checks/setup-live-rows.py` §5 asserts both ends (on:
+asked and scored; off: not asked, headline equals the projects' own figure,
+rows still stored; a unit untouched), red 1 / 1 from the sources — the rule
+forced true, and the tick filtered off the step again. No server rule, no
+migration.
+
+**AND THE ARCHIVED PLAN, ANSWERED IN WORDS**: a plan hidden by changing how a
+function or capability plans comes back by switching the row back (§405, §436);
+one archived by Clear plan, an upload's replace or a pre-§405 format switch is
+restored from Setup › Import & storage › Archived plans (§49.2, §232).
+
+## §438 — a business unit says how it plans in the set-up flow (2026-09-30)
+
+Islam: *"in the setup page for the functions it shows how we plan already why
+we don't have it in the business units as well"* — then, of the proposal,
+*"ok build it that way"*.
+
+**THE CHOICE EXISTED AND THE FLOW DID NOT ASK IT.** Since §405 a unit plans in
+pillars, projects or objectives & actions, chosen in the row's *Edit details*
+dialog on Setup › Business units; Client set-up's Business units step asked for
+names only, while the Supporting functions step beside it carries a *plans in*
+dropdown on every row. **One control, copied, not a new one** (§53.5): the
+units step draws the functions row's own select with the same three words, and
+nothing new is drawn, so no mockup was owed.
+
+- **Pillars is the default and is stored as an absence** (§50.6), exactly as
+  `switchPlanWay` already stores it — so nobody's plan moves.
+- **On a client with a plan it is live**, through `switchPlanWay("unit", …)`,
+  the one switch Setup's own dialog uses: the platform's warning first, the
+  old way hidden and kept, switching back brings it back (§405, §436).
+- **On a client being shaped it rides the flow's answer**: `liveShape()` reads
+  a unit's way, and `__smpShape` writes it AFTER the carry, or an old unit's
+  stored way would win over the one just picked. A unit answered with no way
+  (the console's own create, which asks none) keeps what it had.
+- The step's line under the list stopped saying *"a unit plans in pillars"*,
+  which is no longer true of every unit.
+
+**Proved**: `checks/setup-live-rows.py` §6 (every unit row carries the select,
+it reads today's way, it is live on a frozen client, a unit holding pillars is
+warned first and nothing moves until confirmed, switching back restores the
+pillars and stores the absence) — **7 red** with the select gated back to
+functions, from the sources; `smp-app/checks/setup-shape.mjs` §10 (the flow's
+answer stored, pillars as an absence, a second pass writes the new way both
+directions) — **2 red** with the write removed. `setup-shape.mjs`'s two other
+failures (`desc` asked and unheld; the top level of a new client not carrying
+everything) reproduce identically with this change stashed — they are §428 and
+§436's, recorded here rather than fixed in passing.
+
 ## §439 — the Strategy Copilot, stage 1: the shelf, with no AI (spec 064, 2026-09-30)
 
 Islam: *"go ahead with stage 1 and the mockup."* Stage 1 of spec 064's plan is the part that stands without the model: where the work lives, who may reach it, and a version history that never loses anything. Every decision here is from the decision record v0.4 and his answers on it; nothing was decided on the way.

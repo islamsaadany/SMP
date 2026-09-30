@@ -9402,9 +9402,7 @@ function holderOverview(subject){
      North Star (key objectives). Off hides the card and forgets nothing. */
   /* §430: a function planning in objectives and actions holds its objectives
      on its PLAN (fnObjKoBlock), so the Overview is the brief alone. */
-  /* §436: a function's "What it is" card answers its description (off until
-     the office ticks it on the Structure step); a capability's, its brief. */
-  var briefOn = compOn(t, SMPRules.descPart(t)),
+  var briefOn = compOn(t, "brief"),
       koOn = compOn(t, "keyobj") && !(!isCap && fnPlansInObjectives(f));
   if (!briefOn && !koOn) return "";
   var judged = isCap

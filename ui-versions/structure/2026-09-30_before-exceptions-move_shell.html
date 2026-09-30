@@ -223,7 +223,6 @@
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
 <script src="LIBRARY"></script>
-<script src="COPILOT"></script>
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
@@ -272,16 +271,6 @@
      second client-wide tab says so about itself and `ownTabs()` is never
      edited (§104.7). It is still DRAWN wherever you are; what it stops
      being is the REASON to be there. */
-  /* SPEC 064: THE STRATEGY COPILOT — the office's AI workspace for the place
-     you are standing on, after Reporting (Islam's decision record v0.4 and
-     the picture he signed off). `when` is the server's own gate read off the
-     document (COPILOT.shown); `everywhere` because, like the reports, being
-     able to open it is never a reason to be offered a destination (§383).
-     Declared once and referenced four times, the file's own idiom. */
-  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
-                  when: function(){ return COPILOT.shown(); },
-                  sections: function(){ return COPILOT.sections(); } };
-
   var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights", everywhere:true,
                   when: function(){ return LIBRARY.shown(); },
                   sections: function(){ return LIBRARY.sections(); } };
@@ -435,7 +424,7 @@
           /* §428.3: combined at the merge — the layer's own title and switch
              (§418) AND §430's rule for the objectives-and-actions form. */
           return [{ k:"found", ac:"k_found", label:SMPRules.foundTitle(GROUP, k), render:renderFnFoundation,
-                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, SMPRules.descPart(t)) ||
+                    when: function(t){ return SMPRules.foundOn(GROUP, t) && (compOn(t, "brief") ||
                       (compOn(t, "keyobj") && !plansInObjectives(t))); } },
                   { k:"swot", ac:"k_found", label:SMPRules.swotTitle(GROUP, k) || "S&W", render:renderFnSW,
                     when: function(t){ return compOn(t, "swot"); } },
@@ -450,7 +439,6 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -474,7 +462,6 @@
           return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -503,7 +490,6 @@
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
         render: function(){ return renderReport(topAsUnit()); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -592,7 +578,6 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
-      COP_TAB,
       MY_TAB,
       LIB_TAB
     ],
@@ -684,8 +669,13 @@
          wizard whose middle steps the server refuses (§172). `c_units` stays
          its grant key so the rail's machinery is untouched; every control
          inside still asks the real grant it needs. */
-      /* §435: Setup › Structure is gone — its per-item exceptions sit under
-         each layer's card on Client set-up › Structure ("Except for"). */
+      /* §404: Setup › Structure — which component each item shows. The
+         office's (the server classifies it `setup`); the level answers are
+         set on Getting started's Structure step, this is the per-item half. */
+      { k:"structure", ac:"c_units", grp:"run", mod:"client", label:"Structure", glyph:"⊞",
+        when: function(){ return inOffice(); },
+        find:"structure levels components brief purpose aspiration north star key objectives themes pillars capabilities values swot hide show temple",
+        render:renderStructure },
       { k:"units",  ac:"c_units",  grp:"run", mod:"client", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
@@ -3226,10 +3216,6 @@
       door: "/" + (location.pathname.split("/")[1] || "") + "/sign-in",
       console: OPTS_CONSOLE,
       repaint: function(){ paint(); },
-      /* §436: how a function or a capability plans, changed from the set-up
-         flow on a client with a plan, goes through the one switch Setup's own
-         rows use — its warning, and hide-and-keep (§405). */
-      switchWay: function(kind, key, value, sel){ switchPlanWay(kind, key, value, sel); },
       /* §364: the team page draws a setup table, and a setup table's hover
          is MEASURED after it is on the screen (§88). paint() ends in
          clipTitles(), which is too early for a box the client's record fills
@@ -4792,8 +4778,10 @@
     document.querySelectorAll("[data-capformat]").forEach(function(el){
       el.addEventListener("change", function(){
         if (grant("c_caps") !== "edit") return;
-        /* §436: through the one switch, which warns before it hides. */
-        switchPlanWay("cap", el.dataset.capformat, el.value, el);
+        var c = capById(el.dataset.capformat);
+        if (!c) return;
+        if (el.value === "pillars") c.format = "pillars"; else delete c.format;
+        paint();
       });
     });
     /* ── THE DESTINATION ROW REPLACED THE DROPDOWN (§135.5) ─────────
@@ -9250,6 +9238,15 @@
         paint();
       });
     });
+    /* §404: one item's component, from Setup › Structure. */
+    document.querySelectorAll("[data-stover]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!inOffice()) return;
+        var a = b.dataset.stover, i = a.lastIndexOf("|"), t = a.slice(0, i), c = a.slice(i + 1);
+        setCompOver(t, c, !compOn(t, c));
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-clauseadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.clauseadd;
@@ -11105,20 +11102,15 @@
      A FUNCTION CARRYING A CAPABILITY IS STILL REFUSED, for §342's reason —
      that is somebody else's strategic entry, and a dropdown here is not where
      it is decided (§334). */
-  /* §436: A CAPABILITY TAKES THE SAME SWITCH (Islam: *"if I change how we
-     plan or … capabilities it needs to be changable with a warning"*). It
-     had none — Setup's control switched in silence — and it plans two ways
-     only, pillars or projects (capFormat), absent being projects. */
   function switchPlanWay(kind, key, value, sel){
-    var isUnit = kind === "unit", isCap = kind === "cap";
-    var rec = isUnit ? UNITS[key] : isCap ? capById(key) : FUNCTIONS[key];
+    var isUnit = kind === "unit";
+    var rec = isUnit ? UNITS[key] : FUNCTIONS[key];
     if (!rec) return;
-    var was = isUnit ? unitFormat(rec) : isCap ? (rec.format === "pillars" ? "pillars" : "projects") : fnFormat(rec);
-    var ways = isCap ? ["pillars", "projects"] : FN_FORMATS;
-    var now = ways.indexOf(String(value)) > -1 ? String(value) : was;
+    var was = isUnit ? unitFormat(rec) : fnFormat(rec);
+    var now = FN_FORMATS.indexOf(String(value)) > -1 ? String(value) : was;
     var back = function(){ if (sel) sel.value = was; };
     if (now === was) return;
-    if (!isUnit && !isCap && capsOfFunction(key).length) { back(); return; }
+    if (!isUnit && capsOfFunction(key).length) { back(); return; }
     var apply = function(){
       /* STORED AS AN ABSENCE (§50.6): a unit's absent is pillars, a
          function's absent is projects, so each default deletes the key. */

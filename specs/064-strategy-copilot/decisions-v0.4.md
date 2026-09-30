@@ -1,10 +1,14 @@
 # Copilot inside SMP: rethink decisions
 
-**Version:** 0.3 (working draft, 30 Sep 2026)
+**Version:** 0.4 (working draft, 30 Sep 2026)
 **Status:** All design questions raised so far are settled. Nothing is built yet.
 **Source files:** `smp-platform-reference.html` (SMP as built) and `platform-reference.html` (Strategy Copilot as built).
 
 This document records only what has been agreed. It is updated as the conversation continues.
+
+**Changes since v0.3**
+- Roads are defined: the AI proposes a way forward; the named list per deliverable is deferred until real use shows what's needed (§3.2).
+- Company-level planning with assignment: one deliverable at company level, each row carries its owning place, and the set is split at promote (§4.6, §9).
 
 **Changes since v0.2**
 - The methodology is edited by Islam alone (§10).
@@ -82,7 +86,18 @@ Cross-unit conversations belong at **group level** (or company level where there
 - The chat opens as an **empty box, clean in view**, like Claude.
 - Above it sits **one line of context** saying what the AI can see for this place, e.g. "Mobile — three pillars, Q3 reported, two measures off track."
 - There are no road-picker cards, no banners and no explanatory text. SMP's rule applies: no grey descriptions; extra facts go in hover tips.
-- The old "roads" (guided questions, upload, template, deep research) become **suggestions inside the conversation**, not a gate in front of it.
+- **Roads** are the ways of producing a deliverable. They are **not a gate** in front of the chat:
+  - The consultant says what they want. The AI then **proposes a way forward**, e.g. "Building Mobile's SWOT — I can ask you through it, work from something you paste, or use the template."
+  - Where the AI can already see enough (reported cycles, relevant material in the library), it **proposes the road it thinks fits** without asking, and the consultant redirects if they want another.
+- **Roads carried over from the built product:**
+
+| Section | Roads |
+|---|---|
+| Foundation | Guided questions (recommended) · Upload notes · Template (multi-stakeholder synthesis, filled outside and brought back) · Import a finished foundation |
+| Analysis | Guided questions · Template · Upload data or reports · Deep-research prompt (run in another tool, pasted back) · Import a finished analysis |
+| Directions, Execution | None in the built product |
+
+- **Deferred:** a named list of roads **per deliverable type** (roads belong to a deliverable, not a section), and roads for Directions and Execution. These are designed later, from what consultants actually reach for in the free chat, not invented now. When defined, they live in the methodology (§10).
 
 ### 3.3 Playback before producing (all chats)
 Before producing anything, the AI says:
@@ -166,6 +181,20 @@ The **plan type set on that place in SMP decides what a deliverable looks like**
   - SMART / Balanced Scorecard / OKR objective sets
 - Over time, when one of them proves its worth, it is **given a home in SMP** and becomes promotable. The same route applies as in §4.4 and §11.
 - The shelf **shows each deliverable's kind plainly**, so a consultant sees at a glance what can go live and what cannot.
+
+### 4.6 Company-level planning with assignment
+Some clients plan as one company but hand parts of the plan to the units or functions that will own and report them.
+
+| Case | How it plans | Assignment needed? |
+|---|---|---|
+| **Raya** (group with units) | Each unit plans its own foundation, SWOT, directions… in its own Copilot. | No |
+| **El Abd** (one company) | Directions and capabilities are planned together at company level, then owned by different functions or units. | Yes |
+
+- **In the Copilot, the set stays one deliverable at company level.** It was argued as one piece, so it is planned and versioned as one object, with no forked history.
+- **Each row carries its owning place**: the unit or function, taken from SMP's structure, that will own and report it. Examples: one direction to Sales, two to Operations, a capability to HR.
+- **The split happens at promote, not in the Copilot** (§9). Each row goes to its owning place, so in SMP every owner sees, reviews and reports only their own directions.
+- The next planning round starts again from the company deliverable. If an owning place has since changed its rows in SMP, the next promote shows it among the consequences (§9). Nothing is overwritten silently.
+- Raya uses the same mechanism; it simply never assigns.
 
 ---
 
@@ -256,11 +285,13 @@ Before answering, the AI checks what already exists for this place and says so. 
 - **Piece by piece.** Examples: just the SWOT, or just one unit's pillars.
   - SMP must accept partial promotes cleanly. A promoted SWOT does not touch the pillars, and a promoted pillar set does not require a foundation.
   - SMP already tolerates incomplete plans through its Missing bar.
+- **Assigned rows split at promote.** A company-level set whose rows carry owning places (§4.6) is delivered row by row to those places in SMP.
 - **Promote is a version event on both sides.** SMP keeps what was there before as a superseded version, with the date, who promoted it and the source version, for recovery.
 - **No silent overwrite.** Before a promote, SMP shows the consequences and the office confirms. The consequences shown are:
   - what gets replaced
   - what is new
   - which reported figures would be orphaned (e.g. a pillar set drafted in June, where Mobile has since reported two cycles or been renamed)
+  - which rows an owning place has changed in SMP since the last promote (§4.6)
 - After a promote, the two sides are independent again.
 - **The Copilot never writes into SMP directly.** Small changes, such as fixing a target unit or adding a missing measure, are made **by the SMO by hand in SMP**, not through the Copilot.
 - (Full integration mechanics are **not in scope yet**. Only the principles above are agreed.)
@@ -313,4 +344,3 @@ None at present. New questions are added here as they come up.
 - No grey description paragraphs under titles; use hover tips.
 - Setup table rows stay on one line.
 - The Copilot is an SMP module: a folder plus one registry entry. It **never gets its own sign-in, tenancy or roles**. Its data carries the client id under row-level security, like every other client table.
-

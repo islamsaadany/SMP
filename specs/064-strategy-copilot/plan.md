@@ -1,7 +1,7 @@
 # Spec 064 — The Strategy Copilot inside SMP: build plan (core slice)
 
 **Status:** plan for sign-off, 30 Sep 2026. Nothing built yet.
-**Source of truth:** `decisions-v0.3.md` in this folder (Islam's decision record, copied in verbatim).
+**Source of truth:** `decisions-v0.4.md` in this folder (Islam's decision record, copied in verbatim; v0.3 superseded).
 **Picture signed off:** `design-mockups/copilot/2026-09-30_copilot-tab.html` (v2, chats and deliverables as two stacked rails).
 **Scope agreed in chat:** core workspace only, office-only, Gemini on the existing key, old Copilot data not carried (start empty), the methodology a placeholder until Islam's AI instructions arrive.
 
@@ -86,9 +86,18 @@ At the group (and a company), the Deliverables rail lists every place's delivera
 - `SMP-Project-Folder/src/checks/copilot-tab.py` (over HTTP with a stub, because the tab does not exist over `file://`): the tab drawn after Reporting, the two rails, a chat that writes and reads back, save/edit/restore driven by pressing the real controls, contrast in both themes, no sideways scroll.
 - The existing suites stay green: `qa.py` (walks every page as every viewer), authoriser, state, modules, door, shell, `generated-in-step`, `built-in-step`, `tsc`.
 
-## 7. Two questions for Islam before Stage 1
+## 7. Settled with Islam (30 Sep 2026)
 
-1. **Deleting.** The record says nothing about removing a chat or a deliverable. Proposal: a chat can be deleted by whoever started it or the Super user; a deliverable cannot be deleted in this slice (its history is the record). OK?
-2. **Pasted material size.** Proposal: up to about 30 pages of text per paste; anything longer is refused with the reason, until the material library exists. OK?
+1. **Deleting.** A chat can be deleted by whoever started it or the Super user. A deliverable cannot be deleted in this slice; its versions are the record.
+2. **Pasted text.** Up to about 30 pages per paste; longer is refused with the reason.
+3. **Files come in now** (v0.4 §3.2's roads): the chat takes **Word, PDF and Excel**. The file is stored with the chat (tenant-scoped, size-capped, office-only like everything here), a PDF is handed to Gemini as a document, Word and Excel are turned into text on the server. What was read from a file is marked with the file's name on anything produced from it, the same discipline as pasted material. The material library stays out of scope; a file here belongs to its chat.
+4. **Template road:** the existing Copilot's own templates for Foundation and Analysis, carried over as they are. **Waiting on Islam to send the files.**
+5. **Roads (v0.4 §3.2):** no picker. The AI proposes a way forward inside the chat as quick replies (Guided questions · Upload · Template · Import · Deep-research prompt, per the table), or picks the fitting road itself when it can already see enough, and the consultant redirects. Roads for Directions and Execution, and per deliverable type, are deferred; when defined they live in the methodology.
+6. **Company-level assignment (v0.4 §4.6):** a company-level set stays ONE deliverable with one history; each row carries its owning place from SMP's structure. **The AI proposes an owner per row, the consultant confirms or corrects it** in the save preview or with inline edit, and a row may stay unassigned. **The owning place's own Copilot shows those rows read-only**, marked with where they came from; they are edited only at company level. The split into SMP happens at Promote, which is a later round.
 
-Everything else is settled by the decision record and the mockup.
+## 8. What this changes in the stages
+
+- **A second mockup round before Stage 2.** Four things on screen are new and not in the signed-off mockup: the road proposal as quick replies, attaching a file (and the file shown in the chat), the owner column on a company-level deliverable, and the read-only "from the company" rows on an owner's rail.
+- **Stage 1 is unchanged** and can start now: it is the shelf the first mockup signed off.
+- **Stage 2** adds the roads and file intake (upload, store, read, mark). **Stage 3** adds the owner on each row of a company-level set, AI-proposed and consultant-confirmed. **Stage 5** adds the read-only assigned rows on the owning place's shelf.
+- **Data:** `copilot_files` (chat id, name, type, size, bytes, extracted text, by/at) joins the migration; a version's body carries each row's owning place.

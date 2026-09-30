@@ -26,10 +26,10 @@ import {
 } from "../../lib/portfolio.ts";
 import type { Charter, Project } from "../../lib/portfolio-io.ts";
 
-const esc = (s: unknown) =>
+export const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-const plural = (n: number, one: string, many?: string) => n + " " + (n === 1 ? one : (many || one + "s"));
+export const plural = (n: number, one: string, many?: string) => n + " " + (n === 1 ? one : (many || one + "s"));
 const brk = () => process.env.SMP_BREAK || "";
 
 /* No look-only break is declared here yet. The first one written was CSS —
@@ -121,6 +121,15 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offs
 
 .sect{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 7px}
 .sect span{color:var(--ink-3);font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px}
+/* THE FOUR TABS, SHARED because both the charter and the plan draw them and a
+   second copy is how one page's row comes to sit at a different height from
+   the other's (§53.5). */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:10px 0 18px;flex-wrap:wrap}
+.tabs > *{padding:8px 13px;font-size:13.5px;color:var(--ink-3);font-weight:600;border-bottom:2px solid transparent;text-decoration:none}
+.tabs > a:hover{color:var(--ink)}
+.tabs > .on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs > .soon{color:var(--ink-3);opacity:.6;cursor:default}
+.tabs > .soon::after{content:" \\2014 not yet";font-size:11px;font-weight:600;font-style:italic}
 .box{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
 table{width:100%;border-collapse:collapse}
 thead th{background:var(--panel);color:var(--panel-ink);text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:8px 14px;white-space:nowrap}
@@ -194,19 +203,24 @@ function switcher(slug: string, have: ModuleKey[]): string {
     '</g></svg></summary><div class="mmenu">' + items + "</div></details>";
 }
 
-function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; bar: string; api?: string; body: string }): string {
+/* ONE SKELETON FOR EVERY PAGE THIS MODULE SERVES (§53.5): the palette, the
+   chrome, the switcher and the policy are settled once, and a page adds only
+   its own stylesheet (`css`) and its own script (`js`). A second skeleton is
+   how two screens of one module come to disagree about their own header. */
+export function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; bar: string; api?: string; css?: string; js?: string; body: string }): string {
   return "<!doctype html>\n<html lang='en' data-module='portfolio'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(a.tenantName) + " &mdash; " + esc(MODULE_DEF.portfolio.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(a.bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", a.bar) + brkCss() + "</style>\n</head>\n" +
+    "<style>" + CSS.replace("%BAR%", a.bar) + (a.css || "") + brkCss() + "</style>\n</head>\n" +
     "<body" + (a.api ? ' data-api="' + esc(a.api) + '"' : "") + ">\n" +
     '<header class="bar">' + switcher(a.slug, a.have) +
     "<h1>" + esc(MODULE_DEF.portfolio.label) + "</h1>" +
     '<span class="org">&middot; <b>' + esc(a.tenantName) + "</b></span></header>\n" +
     a.body +
     (a.api ? '<script src="' + esc(clientHref(a.slug, "portfolio", "app.js")) + '"></script>\n' : "") +
+    (a.js ? '<script src="' + esc(a.js) + '"></script>\n' : "") +
     "</body>\n</html>\n";
 }
 
@@ -464,6 +478,7 @@ export async function charterDocument(a: CharterArgs): Promise<string> {
       '<a href="' + esc(clientHref(a.slug, "portfolio", "")) + '">Projects</a> &middot; Charter</p>' +
       "<h1>" + esc(a.charter.name) + "</h1></div>" +
       (who ? '<span class="word">You are here as ' + esc(who) + "</span>" : "") + "</div>\n" +
+    tabs(a.slug, a.charter.id, "charter") +
     secs + "\n</main>\n";
   return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
     api: a.mayEdit ? clientHref(a.slug, "portfolio", "api") : undefined, body });
@@ -474,7 +489,7 @@ export async function refusedDocument(slug: string, tenantId: string, tenantName
   const bar = await barFor(tenantId);
   return skeleton({ slug, tenantName, have, bar,
     body: '<main class="wrap"><div class="box"><p class="empty"><b>' + esc(why) + "</b><br>" +
-      '<a href="' + esc(clientHref(slug, "portfolio", "")) + '">Back to the projects</a></p></div></main>\n" ' });
+      '<a href="' + esc(clientHref(slug, "portfolio", "")) + '">Back to the projects</a></p></div></main>\n' });
 }
 
 /* WHAT THE LANDING NEEDS WORKED OUT, in one place, from the plan's own rows
@@ -493,3 +508,155 @@ export function seeProject(project: Project, rows: Row[], today: string, mine: b
     mine,
   };
 }
+
+/* ══ the four tabs (§4 row 1, §9.9 decision 3) ═════════════════════════ */
+/* TWO OF THE FOUR ARE NOT BUILT AND THE ROW SAYS SO rather than linking
+   nowhere (§54.5, §61): a tab that opens the page you are already on, or an
+   empty one, is a control that lies about what exists. Charter and Plan are
+   links; Progress and Analytics carry the word and no href, so the row is
+   the honest map of this project and the order §4 settled is visible from
+   the first screen rather than appearing a tab at a time. */
+const TABS: { key: string; label: string; path: string | null }[] = [
+  { key: "charter", label: "Charter", path: "" },
+  { key: "plan", label: "Plan", path: "/plan" },
+  { key: "progress", label: "Progress", path: null },
+  { key: "analytics", label: "Analytics", path: null },
+];
+
+export function tabs(slug: string, projectId: string, current: string): string {
+  return '<nav class="tabs">' + TABS.map((t) => {
+    const on = t.key === current;
+    if (t.path === null)
+      return '<span class="soon" title="Not built yet">' + esc(t.label) + "</span>";
+    if (on) return '<span class="on" aria-current="page">' + esc(t.label) + "</span>";
+    return '<a href="' + esc(clientHref(slug, "portfolio", projectId + t.path)) + '">' + esc(t.label) + "</a>";
+  }).join("") + "</nav>";
+}
+
+/* ══ the plan's own stylesheet ═════════════════════════════════════════ */
+/* CARRIED VERBATIM from the signed-off drawing
+   (`design-mockups/portfolio/2026-09-18_project-plan.html`) less its three
+   drawing-only blocks — the `.panel` notes, the `.ask` rule and the `.cta`
+   that stood for an Edit this build does not have. Every token it reads is
+   one `CSS` above already declares, so a rebranded client reaches this page
+   too (§354.3) and nothing here invents a colour (§25). */
+export const PLAN_CSS = `
+  .pbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .pbar .sp{ margin-left:auto; display:flex; gap:8px; }
+  .btn{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+        border-radius:5px; padding:6px 12px; text-decoration:none; display:inline-block; }
+  .btn:hover{ border-color:var(--gold); color:var(--ink); }
+  .btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .owed{ font-size:12.5px; color:var(--attn-tx); background:var(--attn-bg);
+         border-radius:4px; padding:3px 9px; font-weight:600; }
+  .owed.red{ color:var(--bad-tx); background:var(--bad-bg); }
+  .pcx{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  .pl .head, .pl .r{ display:grid;
+             grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px;
+             gap:12px; align-items:center; padding:7px 14px; }
+  .pl .head{ background:var(--panel); color:var(--panel-ink);
+         font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+  .pl .head span:nth-child(n+5){ text-align:right; }
+  .pl .r{ border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .pl .r:hover{ background:var(--zebra); }
+  .pl .r.lvl0{ background:var(--surface-2); font-weight:700; }
+  .pl .r.lvl1{ font-weight:600; }
+  .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; font-weight:700; }
+  .nm{ min-width:0; display:flex; align-items:center; gap:7px; }
+  .nm .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:inherit; text-decoration:none; }
+  .nm a.t:hover{ text-decoration:underline; }
+  .nm .tw{ color:var(--ink-3); font-size:11px; }
+  .pl .r.lvl1 .nm{ padding-left:16px; }
+  .pl .r.lvl2 .nm{ padding-left:32px; }
+  .pwho{ color:var(--ink-2); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .win{ font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+  .win.late{ color:var(--bad-tx); font-weight:600; }
+  .fig{ text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); }
+  .lvl0 .fig, .lvl1 .fig{ color:var(--ink); font-weight:700; }
+  .st{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+       font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
+  .st.done{ background:var(--good-bg); color:var(--good-tx); }
+  .st.wip{ background:var(--attn-bg); color:var(--attn-tx); }
+  .st.not{ background:var(--surface-2); color:var(--ink-3); }
+  .st.sign{ background:var(--panel); color:var(--panel-accent); }
+  .mk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+       color:var(--gold-deep); border:1px solid var(--gold); border-radius:3px; padding:0 4px; flex:none; }
+  .blk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+        font-weight:700; color:var(--bad-tx); flex:none; }
+  .pl .r.pick{ background:var(--zebra); box-shadow:inset 3px 0 0 var(--gold); }
+
+  .gwrap{ overflow-x:auto; }
+  .g{ min-width:820px; }
+  .ghead, .gr{ display:grid; grid-template-columns:300px minmax(0,1fr); align-items:center; }
+  .ghead{ background:var(--panel); color:var(--panel-ink); }
+  .ghead .gl{ padding:7px 14px; font-size:10px; letter-spacing:.08em;
+              text-transform:uppercase; font-weight:700; }
+  .months{ display:grid; }
+  .months span{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+                font-weight:700; padding:7px 0 7px 7px;
+                border-left:1px solid rgba(255,255,255,.18); }
+  .gr{ border-top:1px solid var(--line-soft); font-size:13px; }
+  .gr:hover{ background:var(--zebra); }
+  .gr.lvl0{ background:var(--surface-2); font-weight:700; }
+  .gr.lvl1{ font-weight:600; }
+  .gl{ display:flex; align-items:center; gap:7px; min-width:0; padding:5px 12px; }
+  .gl .gn{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:11.5px;
+           font-weight:700; flex:none; width:44px; }
+  .gl .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gr.lvl1 .gl .t{ padding-left:10px; }
+  .gr.lvl2 .gl .t{ padding-left:22px; }
+  .track{ position:relative; height:28px; border-left:1px solid var(--line); }
+  .grid{ position:absolute; inset:0; display:grid; pointer-events:none; }
+  .grid i{ border-left:1px solid var(--line-soft); }
+  .grid i:first-child{ border-left:0; }
+  .now{ position:absolute; top:0; bottom:0; width:2px; background:var(--gold); pointer-events:none; }
+  .nowlab{ position:absolute; top:2px; transform:translateX(-50%);
+           font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--on-accent); background:var(--gold);
+           border-radius:3px; padding:0 4px; white-space:nowrap; }
+  .b{ position:absolute; top:8px; height:12px; border-radius:3px;
+      background:var(--surface-2); border:1px solid var(--line); overflow:hidden; }
+  .b > i{ display:block; height:100%; background:var(--good); }
+  .b.sum{ top:11px; height:6px; background:var(--stone); border-color:var(--stone);
+          border-radius:2px; opacity:.55; }
+  .over{ position:absolute; top:8px; height:12px; border-radius:0 3px 3px 0; background:var(--bad); }
+  .dia{ position:absolute; top:8px; width:12px; height:12px; background:var(--gold);
+        border:1px solid var(--gold-deep); transform:translateX(-6px) rotate(45deg); }
+  .dia.not{ background:var(--surface); }
+  .dep{ position:absolute; height:0; border-top:1.5px dotted var(--ink-3); }
+  .depv{ position:absolute; width:0; border-left:1.5px dotted var(--ink-3); }
+  .deph{ position:absolute; width:0; height:0; border-top:4px solid transparent;
+         border-bottom:4px solid transparent; border-left:5px solid var(--ink-3); }
+  .gfoot{ display:flex; gap:16px; flex-wrap:wrap; padding:9px 14px;
+          border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-3); }
+  .gfoot b{ display:inline-block; width:22px; height:8px; border-radius:2px;
+            vertical-align:middle; margin-right:5px; }
+
+  .act{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        margin-top:16px; overflow:hidden; }
+  .act > header{ background:var(--panel); color:var(--panel-ink); padding:10px 16px;
+                 display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  .act > header b{ font-size:15px; }
+  .act > header .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+                    color:var(--panel-quiet); font-weight:700; }
+  .act > header a.k{ text-decoration:none; }
+  .act > header a.k:hover{ color:var(--panel-accent); }
+  .act > header .shut{ margin-left:12px; }
+  .abody{ padding:6px 16px 14px; display:grid; grid-template-columns:1fr 1fr; gap:0 28px; }
+  @media (max-width:820px){ .abody{ grid-template-columns:1fr; } }
+  .arow{ display:grid; grid-template-columns:116px minmax(0,1fr); gap:0 12px;
+         padding:8px 0; border-bottom:1px solid var(--line-soft); align-items:start; }
+  .arow > em{ font-style:normal; font-size:10.5px; letter-spacing:.07em;
+              text-transform:uppercase; color:var(--ink-3); font-weight:700; padding-top:3px; }
+  .arow .v{ min-width:0; font-size:13.5px; }
+  .arow .v p{ margin:0; color:var(--ink-2); }
+  .arow .v .soon{ color:var(--ink-3); font-size:12.5px; }
+  .full{ grid-column:1 / -1; }
+  .sub{ display:grid; gap:4px; }
+  .sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 92px 52px; gap:10px;
+           font-size:13px; align-items:center; }
+  .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; text-align:right; }
+  .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+`;

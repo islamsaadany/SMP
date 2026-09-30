@@ -5543,16 +5543,30 @@ on the 30th (*"ok for the landing"*, then *"ok for the progress and analytics
 too"*) — so the mockup-first rule is paid in full rather than set aside, and
 nothing is waiting on a decision of his.
 
-**Portfolio is on the platform now, and two of its six screens work.** It has
+**Portfolio is on the platform now, and three of its six screens work.** It has
 its own entry on a client's card, its own address, and its own line in the
 switcher, and what opens behind them is **the landing** — every project this
 client has, with how far along each one is, whether it is late, what is waiting
-on somebody, and when anybody next looks at it — and **a project's charter**,
+on somebody, and when anybody next looks at it — **a project's charter**,
 which opens when you press a project's name and is where its aim, its window
-and its sponsor are written. The plan, Progress and Analytics are next, and the
-product **says so rather than pretending**: a project with no plan behind it
-reads *No plan yet* on the landing, which is the state Islam signed off for
-exactly that case.
+and its sponsor are written, and **the plan**, in both of the views you signed
+off: the tree, with a row per phase, work package and activity, and the chart,
+with the same rows against the months they run in. Progress and Analytics are
+next, and the product **says so rather than pretending**: a project with no plan
+behind it reads *No plan yet* on the landing, which is the state you signed off
+for exactly that case.
+
+**The plan is read from the plan, once.** The tree and the chart are two
+readings of one list, so they cannot disagree about a project — which was the
+whole reason for asking for two views of one page rather than two pages. Nothing
+on that screen holds a figure of its own: a phase's percentage and the months it
+spans are made of the rows under it, the numbering renumbers itself, *late* is
+worked out from today, and the two counts at the top are the same two the
+landing counts. Pressing an activity opens a panel beside it with what it is,
+what it produces, who is on it, whether it is billable and where its sign-off
+stands — and the address carries both which view you are in and which row is
+open, so a plan opened on one activity is a link you can send somebody.
+**Writing a plan is not built yet**, and the file says so.
 
 **The frame cost almost nothing, which is the thing worth noticing.** Everything
 outside Portfolio's own folder comes to two lines — the module was already a
@@ -5636,12 +5650,94 @@ landing instead of sending you back to it, so a wrong address rendered a page
 that looked right. Both were caught because the modules check drives every
 module's server rather than reading a table.
 
-**Next**: the plan, because Progress and Analytics both read it. The spec's §10
-lists what else is still open and none of it blocks — a Portfolio project
-pointing at a Strategy one, the workbook, the notice, the budget question and
-four choices about the landing (the order at twenty projects, where a finished
-project goes, whether the top strip counts what is yours, and making a
-commitment row openable). None has been started.
+**Next**: Progress and Analytics, which both read the plan and can now be
+built. After them, writing a plan — adding a row, moving a date, reporting
+against the breakdown. The spec's §10 lists what else is still open and none of
+it blocks — a Portfolio project pointing at a Strategy one, the workbook, the
+notice, the budget question and four choices about the landing (the order at
+twenty projects, where a finished project goes, whether the top strip counts
+what is yours, and making a commitment row openable). None has been started.
+
+**Two things the plan found are written down and deliberately not done.** The
+platform has no record of **the day a piece of work was marked done** — only
+the day it was signed off, which is right, because that is the date a Lead
+agrees rather than one anybody types. The cost is that a row waiting for a
+sign-off cannot be shown as having overrun, so the chart draws one overrun where
+your drawing draws two. And **a phase has no owner**: the drawing names a person
+on one, and there is nowhere to store it. Both are decisions rather than
+oversights, so they are recorded and left for you.
+
+---
+
+## Portfolio — the plan, in two views (2026-09-30, spec 060 §13)
+
+**The second slice, and the one the other two pages were waiting on.** A
+project's plan now opens in both views you signed off — the tree and the chart
+— from the tab row on the project.
+
+**What you can do on it.** Walk the plan as a tree, a row per phase, work
+package and activity, with its numbering, how far along it is, who is on it,
+when it runs and whether it is late. Switch to the chart and the same rows sit
+against the months they run in, with the commitments as diamonds, the
+dependencies drawn as elbows between the rows they join, and today marked. Press
+any activity and a panel opens beside it: what the work is, what it produces,
+who is collaborating, whether it is billable to the client, how the breakdown
+under it stands, and where its sign-off has got to.
+
+**Nothing on the page works anything out for itself.** Every figure is the
+rules' own answer — the numbering, a parent's percentage, the months a phase
+spans, whether a row is late, and the two counts at the top. The check asserts
+each of them **against the rule rather than against a number somebody typed**,
+so a change to how a roll-up works moves the page and the check together and
+cannot move one without the other.
+
+**And doing it that way found a real fault in the first slice.** A phase was
+being sorted after its own rows, so the numbering read *0.1 0.2 1 1.1* where it
+should read *1 1.1 1.2 2* — and it was worse than a wrong order on a page,
+because the sums read the list by position, so **every figure the landing drew
+for such a project was made of the wrong rows**. It was invisible on the landing
+alone, because the only projects there were ones with no plan at all. One
+character, and a deliberate break puts it back so it cannot return unnoticed.
+
+**Five things were found by looking at the finished page, and none by a check.**
+A one-day commitment printed its date twice, as a range of nothing. A phase
+crossing from one year into the next read as though both months were in the
+later year. The chart's axis said *JAN* and *FEB* twice with nothing telling the
+years apart. A commitment falling on the scale's last day was drawn half outside
+the track. And the panel said a piece of work was *still running* one line under
+a status saying it was done. Every one now has an assertion of its own, because
+a fault nothing measures is a fault that comes back.
+
+**One word was changed and one was deliberately not.** The status column reads
+**Waiting to sign off**, which is your drawing's own word and what the two-step
+finish actually means; the status's stored name is untouched, because that is
+what the api and every refusal spell. Two questions, two answers, rather than
+one word asked to do both jobs.
+
+**And one thing moved out of the Internal Tracker.** The day helpers — what
+today is in Cairo, how a date reads — and the register's short names now live
+where every module can reach them, which is what the Meeting Notes code said
+should happen the moment a third module wanted them. **The fault that forced it
+was mine**: the first slice wrote its own copy of *what day is it*, which is
+exactly how one screen comes to say a row is late while another does not. What
+is genuinely the Tracker's own — the Sunday-to-Thursday week — stayed there.
+The move is proved to have changed nothing: both modules are at the counts they
+were before it.
+
+**Checked**: 80 assertions on a real database, driving the page in a browser and
+reading the database back; red under nine deliberate breaks, one per decision.
+**Two of those nine went green when they were first written** — both faults in
+the check rather than the product, and a break that goes green is
+indistinguishable from a guard that works, so both were corrected until they
+reddened. The rules check is still 121 of 121 and still red ten ways; the
+modules check, Insights, Meeting Notes, the generated-files guard and the
+offline file's own guard are all clear; the app compiles. The Internal Tracker's
+four failures are **not this work's**, established by stashing everything and
+reproducing the identical four.
+
+**Still yours**: the two decisions above — the day work is marked done, and
+whether a phase has an owner — and the module still has to be switched on for a
+client from its card.
 
 ---
 

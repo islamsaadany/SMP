@@ -299,6 +299,22 @@ export type Row = {
      "what is owed next" reads (§9.13b), and whether Analytics counts the row
      as a commitment met (§9.12). */
   milestone?: boolean;
+  /* WHEN THE WORK ACTUALLY RAN, stamped by `stampDates` and never typed
+     (§3 №3) — the plan's two views read it as the overrun past the planned
+     bar, and `stampDates` is what writes it. */
+  actualStart?: string | null;
+  actualEnd?: string | null;
+  /* THE ONE ACTIVITY THAT MUST FINISH FIRST (§5): one per activity, so the
+     graph is a forest of chains and `cascade`'s preview is a walk. It is a
+     rules field rather than a screen one — `cascade` takes exactly this
+     beside the two dates — which is why it belongs here and `billable`,
+     `description` and the breakdown do not (they are the panel's, read by
+     `oneActivity`). */
+  dependsOn?: string | null;
+  /* A name the register no longer holds keeps what was stored beside it
+     (§288.1, §96.2). What is DRAWN is the register's answer where there is
+     one; this is the fallback and never the first reading (§48, §130.9). */
+  assigneeName?: string;
   /* Written by `rollUp` onto a parent. */
   total?: number;
   done?: number;

@@ -8255,7 +8255,37 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # assertion about the document's WORDS (&sect;54.5), so it
                                 # was replaced with one that makes the cell print 0%: the
                                 # actual fault, a project with no plan reading as one that
-                                # has done nothing
+                                # has done nothing.
+                                # AND SINCE &sect;377 IT COVERS THE PLAN IN BOTH VIEWS
+                                # (spec 060 &sect;13): every figure on the page asserted
+                                # against `rollUp`'s OWN answer rather than a typed
+                                # number (&sect;94.8), so a change to the roll-up moves
+                                # the page and the check together and cannot move one
+                                # &mdash; which is what found the phase sorting after its
+                                # own children (`bad-order`, 3 red: the numbering read
+                                # `0.1 0.2 1 1.1`, and `rollUp`/`kidsOf` read that array
+                                # BY POSITION, so the landing's figures came from the
+                                # wrong set). BOTH VIEWS drawn from one read and both
+                                # asserted, or a build serving one of them passes half
+                                # (`both-views`); an opened activity asserted read
+                                # THROUGH its project, on `oneActivity` and NOT on the
+                                # page &mdash; the page holds a second fence, so the
+                                # page-level version of that assertion went GREEN under
+                                # its own break (&sect;113.8, &sect;54.5) and the page is
+                                # kept as the control (`act-anywhere`); the register's
+                                # name preferred over the one stored on the row, with a
+                                # stored name MADE to prefer it over (`stale-name`, which
+                                # also went green until the fixture held one); and the
+                                # elbows absent-but-chart-complete with the script NOT
+                                # served (`no-elbows`), because a page that needs its
+                                # script to be correct is wrong without one. It asserts
+                                # **EXACTLY ONE** overrun rather than at least one, so the
+                                # day the day-work-was-marked-done column lands
+                                # (&sect;377.6, recorded not fixed) this goes red rather
+                                # than passing quietly. **Its dates are relative to
+                                # `todayIn()`, never typed** &mdash; the one lesson
+                                # `checks/tracker.mjs` is four failures short of
+                                # (&sect;214.3). 80/0, red NINE ways
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -9763,7 +9793,64 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 &mdash; **&sect;376: Portfolio &mdash; the reference
+*Last Updated: 2026-09-30 &mdash; **&sect;377: Portfolio &mdash; the plan, in
+two views (spec 060 &sect;13).** The second slice on the same word &mdash;
+**"write it into the spec first, then start building"** &mdash; and the one
+Progress and Analytics both wait on: a project's **plan READ**, in the two
+views &sect;9.9 signed off, with writing one **not built and said in the
+server's own header** (&sect;54.5). **ONE READ, ROLLED UP ONCE, AND BOTH VIEWS
+READ THAT ARRAY**: the tree and the chart cannot disagree about a project,
+because `planRows` is asked once, `rollUp` writes the parents' figures onto
+that array once, and both views map over it &mdash; **nothing on the page
+computes a figure**, so the check asserts every one of them against `rollUp`'s
+own answer rather than a typed number (&sect;94.8). **AND THAT FOUND A REAL
+FAULT IN &sect;376's OWN SLICE**: a phase sorted after its own children, so
+the numbering read `0.1 0.2 1 1.1` &mdash; and worse, `rollUp` and `kidsOf`
+read that array **BY POSITION**, so every figure the landing drew for such a
+project was made of the wrong set; **invisible in slice 1**, whose only
+projects had no plan at all. One character, and `bad-order` puts it back (3
+red). **THE ADDRESS CARRIES THE VIEW AND THE OPENED ROW** (&sect;173, the
+tracker's idiom), and an opened activity is read THROUGH its project &mdash;
+**that assertion was unfalsifiable and went GREEN under its own break**
+(&sect;113.8), because the page holds a second fence behind the query; it is
+asked of `oneActivity` now with the page kept as the control. **FIVE THINGS
+FOUND BY LOOKING AT THE RENDERED PAGE AND NONE BY A CHECK** (&sect;311.1),
+each now asserted: `27 &ndash; 27 Feb` for a one-day commitment, `Sep &ndash;
+Feb 27` across a year the drawing never crossed, `JAN`/`FEB` twice on the axis
+with nothing telling the years apart, a commitment on the scale's last day
+drawn half outside the track, and **the panel saying *still running* one line
+under a status saying done** (&sect;124) &mdash; three states, three
+sentences, the middle one naming sign-off rather than leaving the absence to
+be wondered at (&sect;35). **THE STATUS COLUMN SAYS WHAT THE STATUS MEANS**
+(*Waiting to sign off*) **and `ACT_WORD` is untouched**, because the stored
+word is the status's NAME and these are two questions (&sect;53.5). **THE
+OVERRUN A ROW AWAITING SIGN-OFF CANNOT DRAW IS A FINDING, RECORDED AND NOT
+FIXED**: the schema and `stampDates` agree that a real end date is written AT
+SIGN-OFF (&sect;9.10) and **both disagree with the drawing**, because what
+neither holds is **the day the work was marked done** &mdash; there is no
+column for it, so the chart shows one overrun where the drawing shows two and
+&sect;9.10's own lower bound has nothing to read; this slice writes no date,
+so adding a column and re-falsifying ten guards is its own change (rule 1b),
+and the check asserts **EXACTLY ONE** overrun so the day it is closed this
+goes red (&sect;113.8). **A PHASE HAS NO OWNER AND THE DRAWING SHOWS ONE**
+&mdash; recorded, never invented (&sect;35). **THE DAY HELPERS AND THE NAMES
+LEFT THE TRACKER**, which `lib/notes.ts`'s own note prescribed for the third
+module (`lib/day.ts`, `lib/people.ts`, re-exported so every caller is
+untouched, the move asserted behaviour-neutral) &mdash; **and the fault that
+forced it was mine**, &sect;376 having written a second `todayIn` inside the
+module, which is how a row reads *late* on one screen and not another;
+`addDays`/`daysBetween` stay written twice and it is SAID (&sect;53.5 flagged,
+not folded in). **THE FIXTURE'S DATES ARE RELATIVE TO TODAY**, which is the
+lesson `tracker` is four failures short of (&sect;214.3). 80/0 red **NINE**
+ways &mdash; **two of them green when first written, both the check**
+(&sect;54.5) &middot; 121/0 still red ten ways &middot; modules 112/0 &middot;
+insights 127/0 &middot; notes 170/0 &middot; `generated-in-step` all clear
+&middot; `built-in-step.py` all good &middot; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **`tracker` 224/4 is NOT this work's**
+(&sect;303). The frozen product is untouched and MEASURED, so `sw.js` is not
+bumped. **On the branch, not merged.***
+
+*Earlier the same day: **&sect;376: Portfolio &mdash; the reference
 code read, and the module serving itself (spec 060 &sect;11, &sect;12).** Islam:
 **"ok for the landing"**, then **"ok for the progress and analytics too"**
 &mdash; rule 1c paid in full for all six screens &mdash; then, of the modules

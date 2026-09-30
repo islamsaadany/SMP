@@ -2080,3 +2080,144 @@ stashing everything and reproducing the identical four on the baseline (§303).
 They are the date-relative literals §375 already records as `main`'s, now four
 rather than one because the clock has moved ten days further from the
 fixture's stamps.
+
+---
+
+## 13 · Built — the plan, in two views, 2026-09-30
+
+The second slice, and the one Progress and Analytics both wait on: **the plan
+read**, in the two views §9.9 signed off. Writing one is not built and is said
+in the file's own header (§54.5).
+
+### §13.1 · One read, rolled up once, and both views read it
+
+§9.9's rule is that the tree and the chart are two readings of one list, so
+they cannot disagree — and it is carried out literally: `planRows` is asked
+once, `rollUp` writes the parents' figures onto that array once, and both views
+map over it. **Nothing on the page computes a figure**: the numbers are
+`renumber`'s, the parents' percentages and spans `rollUp`'s, *late* is
+`behind`'s and the two counts at the top are `waitingSignOff` and `overdue` —
+every one of them in `lib/portfolio.ts`, where `checks/portfolio.mjs` asks them
+with no browser. The check asserts **every figure on the page against
+`rollUp`'s own answer** rather than against a typed number, so a change to the
+roll-up moves both at once and cannot move one.
+
+### §13.2 · And that found a real fault in the first slice
+
+`planRows` ordered a phase row with `p2 = 0` and an activity hung straight off
+that phase with `-1`, so **the phase sorted after its own children** — and the
+numbering read `0.1 0.2 1 1.1` where it should read `1 1.1 1.2 2`. It is not
+only the order on a page: `rollUp` and `kidsOf` read that array **by
+position**, so every figure the landing drew for such a project was worked out
+from the wrong set. Invisible in slice 1, because the only projects it had were
+ones with no plan at all. One character, and the break `bad-order` puts it back
+(**3 red**).
+
+### §13.3 · The address carries the view and the opened row
+
+So a plan opened on one activity is a link somebody can send — the tracker's
+own idiom — and the switch is two `<a>`s rather than a script. **An opened
+activity is read THROUGH its project**: an activity id is a uuid somebody can
+type, and a row from another project is nothing here. The first version of that
+assertion was **unfalsifiable** and went green under its own break, because the
+page has a second fence behind the query (the opened row must also be in this
+project's rows); it is asked of the read itself now, with the page's refusal
+kept as the control (§113.8).
+
+### §13.4 · Five things found by looking at the rendered page
+
+None by a check, which is §311.1's own lesson arriving again — every one now
+has an assertion.
+
+1. **`27 – 27 Feb` for a one-day commitment.** A milestone's span is the day it
+   falls on; printing it twice reads as a range of nothing.
+2. **`Sep – Feb 27` for a phase crossing a year**, which reads as though
+   September were 2027 too. It says both years now. The drawing never crossed
+   one, so it never had to answer this.
+3. **`JAN` and `FEB` twice on the axis with nothing telling them apart.** The
+   first month of each later year carries its year; a year on every column
+   would be twelve repetitions of one fact.
+4. **A commitment on the scale's last day drawn half outside the track.** Both
+   ends of the scale snap to a whole month now, not only the first.
+5. **The panel said *still running* about work marked done** — which the
+   status one line above contradicts (§124). Three states, three sentences,
+   and the middle one says *the end date is written at sign-off* rather than
+   leaving the absence to be wondered at (§35).
+
+### §13.5 · The status column says what the status MEANS
+
+`ACT_WORD.done` is **Done**, and a column reading *Done* beside *Completed*
+asks the reader to have been told the difference — which is the whole of what
+§6.2's two steps are. The column reads the drawing's own word, **Waiting to
+sign off**; `ACT_WORD` is untouched and is still what the api and every refusal
+spell, because that is the status's NAME. One answer per question, and these
+are two questions (§53.5).
+
+### §13.6 · The overrun a row awaiting sign-off cannot draw — A FINDING
+
+The signed-off drawing draws an overrun for **2.2**, which is marked done,
+finished four days late, and waiting for a Lead. **The schema forbids that
+state**: `portfolio_activity_signed` requires `actual_end IS NULL` unless the
+status is `completed`, and `stampDates` agrees — the real end date is written
+**at sign-off** (§9.10), which is right, because it is the date a Lead agrees
+rather than one anybody types.
+
+So the two are consistent with each other and **both disagree with the
+drawing**, and the thing neither holds is **the day the work was marked done**.
+There is no column for it. That absence costs two things:
+
+- the plan cannot draw the overrun for a row awaiting sign-off, so the chart
+  shows one where the drawing shows two;
+- **§9.10's own lower bound has nothing to read**: *not before the day the work
+  was marked done* is a rule with no stored day behind it.
+
+**RECORDED, NOT FIXED HERE**, and deliberately: this slice reads a plan and
+writes no date, so adding a column, teaching `stampDates` to stamp it and
+re-falsifying ten guards is a change of its own and not one to ride in beside a
+read (rule 1b). The check asserts **exactly one** overrun rather than *at least
+one*, so the day it is closed this goes red rather than passing quietly
+(§113.8).
+
+### §13.7 · A phase has no owner, and the drawing shows one
+
+`portfolio_phases` carries a name, a position and a weight — no assignee — so
+the Owner cell on a phase draws an em-dash where the drawing names a person.
+Honest (§35) and a gap: whether a phase is owned at all is a decision §6 did
+not take, and the drawing took it in passing. Recorded, not invented.
+
+### §13.8 · The day helpers and the names left the tracker
+
+`lib/notes.ts`'s own note said *a third module wanting them is the day they
+move to a file of their own*, and Portfolio is that third module — so the day
+helpers are `lib/day.ts` and the register's names are `lib/people.ts`, both
+re-exported from `lib/tracker.ts` so every caller is untouched. The move is
+**behaviour-neutral and asserted as such** rather than claimed: tracker and
+notes are at exactly the counts they were before it.
+
+**The fault that forced it was mine.** Slice 1 wrote a second `todayIn` inside
+`modules/portfolio/`, which is a second answer to *which day is it* — the very
+drift the note was about, and the one that makes a row read *late* on one
+screen and not on another. What stays the tracker's is what is genuinely spec
+054's: the Sunday-to-Thursday week and the office seats. **And what did NOT
+move is recorded**: `addDays` and `daysBetween` are written twice, in
+`lib/tracker.ts` and `lib/portfolio.ts`, answering identically — the portfolio
+copy is what `cascade` does its arithmetic with under ten falsifications, so
+joining them is its own change.
+
+### §13.9 · And the fixture's dates are relative to today, never typed
+
+Which is the one lesson `checks/tracker.mjs` is currently four failures short
+of: every date in that check was written against the day it was written, and
+every one has since gone stale (§214.3's family). A plan whose rows are placed
+either side of `todayIn()` stays true on whatever day it is run.
+
+### §13.10 · Verified
+
+`checks/portfolio-module.mjs` **80/0**, red **nine** ways — and two of those
+nine went green when first written, both this file rather than the product
+(§54.5): `stale-name` had no stored name to prefer, and `act-anywhere` was
+asserted against the page rather than the read. `checks/portfolio.mjs` 121/0
+still red ten ways; modules 112/0; insights 127/0; notes 170/0;
+`generated-in-step` all clear; `built-in-step.py` all good; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. `checks/tracker.mjs` 224/4 reproduces
+identically on a stashed baseline (§303).

@@ -27,13 +27,22 @@ import { shellHeaders } from "../../lib/shell.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import type { ServeArgs } from "../registry.ts";
 import {
-  inOffice, mayStartProject, mayEditCharter, type Who, type Role,
+  inOffice, mayStartProject, mayEditCharter, rollUp, type Row, type Who, type Role,
 } from "../../lib/portfolio.ts";
 import {
-  listProjects, oneProject, addProject, setCharter, roleOn, planRows, CHARTER_FIELDS,
+  listProjects, oneProject, addProject, setCharter, roleOn, planRows, oneActivity, CHARTER_FIELDS,
 } from "../../lib/portfolio-io.ts";
+import { readNames } from "../../lib/people.ts";
 import { landingDocument, charterDocument, refusedDocument, seeProject, type Seen } from "./page.ts";
+import { planDocument } from "./plan.ts";
+import { PLAN_JS } from "./plan-js.ts";
 import { APP_JS } from "./script.ts";
+/* TODAY IS THE SPINE'S ANSWER (lib/day.ts) and not a second copy: two of the
+   office's modules disagreeing about which day it is at 23:30 in Cairo is
+   what a row reading *late* on one screen and not on another looks like. This
+   file had its own `todayIn` for one commit, which is the fault that moved
+   those helpers out of lib/tracker.ts. */
+import { todayIn } from "../../lib/day.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
@@ -41,22 +50,18 @@ const json = (status: number, body: unknown) =>
 const no = (status: number, why: string) => json(status, { ok: false, why });
 const html = (body: string, status = 200) => new Response(body, { status, headers: shellHeaders() });
 
-/* TODAY AS A CALENDAR DAY, in the team's own zone — the same rule the
-   tracker reads by (§356), so two of the office's modules cannot disagree
-   about which day it is at 23:30 in Cairo. */
-const TIME_ZONE = "Africa/Cairo";
-function todayIn(now: Date = new Date()): string {
-  const f = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit" });
-  return f.format(now);
-}
-
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function serve(a: ServeArgs): Promise<Response> {
   const first = a.rest[0] || "";
 
-  if (first === "app.js" && a.rest.length === 1)
-    return new Response(APP_JS, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+  const script = (body: string) =>
+    new Response(body, { status: 200, headers: { "Content-Type": "application/javascript; charset=utf-8", "Cache-Control": "no-store" } });
+  if (first === "app.js" && a.rest.length === 1) return script(APP_JS);
+  /* The elbows' own script. The check's break serves the page WITHOUT it,
+     which must leave the chart complete and the elbows absent — a page that
+     needs its script to be correct is a page that is wrong without one. */
+  if (first === "plan.js" && a.rest.length === 1) return script(PLAN_JS);
 
   /* THE SEAT IS THE DOOR'S ANSWER and the role is the project's. The break
      hands a seat to anybody with a membership, which must turn the check red
@@ -83,19 +88,46 @@ export async function serve(a: ServeArgs): Promise<Response> {
      two answer differently, because one sends somebody to look for a typo
      and the other sends them to whoever runs the platform (§123). */
   if (first && UUID.test(first)) {
+    const second = a.rest[1] || "";
+    /* A word under a project that is not one of its tabs comes back to the
+       project, for the same reason an unknown word inside the module comes
+       back to the landing — never a page that looks right (§96). */
+    if (second && second !== "plan")
+      return Response.redirect(new URL(clientHref(a.slug, "portfolio", first), a.req.url), 302);
     try {
     return await withTenant(a.tenantId, async (c) => {
       const role = await roleOn(c, first, a.personKey);
       if (!office && !role)
         return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have,
           "That project does not name you."), 404);
-      const charter = await oneProject(c, first);
-      if (!charter)
+      const project = await oneProject(c, first);
+      if (!project)
         return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have,
           "That project is not here."), 404);
+
+      if (second === "plan") {
+        /* ONE READ, ROLLED UP ONCE, AND BOTH VIEWS READ IT (§5.2, §9.9): the
+           tree and the chart are two readings of this array, so they cannot
+           disagree about one project. */
+        const rows = rollUp(await planRows(c, first));
+        const u = new URL(a.req.url);
+        const view = u.searchParams.get("view") === "time" ? "time" : "list";
+        const want = u.searchParams.get("act") || "";
+        /* AN OPENED ROW IS READ THROUGH THE PROJECT (§6): an activity id is a
+           uuid somebody can type, so a row from another project answers as
+           nothing rather than being drawn under this project's name. */
+        const act = want && UUID.test(want) ? await oneActivity(c, first, want) : null;
+        const actRow = act ? rows.find((r: Row) => r.id === act.id) || null : null;
+        const names = (await readNames(c)).short;
+        return html(await planDocument({
+          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+          project, rows, names, today: todayIn(), view, act, actRow, role, office,
+        }));
+      }
+
       return html(await charterDocument({
         slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
-        charter, role, office, mayEdit: mayEditCharter(who(role)),
+        charter: project, role, office, mayEdit: mayEditCharter(who(role)),
       }));
     });
     } catch (e) {

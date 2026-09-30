@@ -49805,11 +49805,21 @@ sign-off (§9.10 Progress, §9.12 Analytics, §9.13 the landing), and with them
 every screen of this module; §9.3's workbook, §9.5's notice and §9.6's budget
 question, which §9 still lists as live; and the carry in §9.7.
 
-**AMENDED 2026-09-30 — the landing is signed off** (*"ok for the landing"*),
-after gaining one section at his word (*"yes add the commitments section to the
-landing"*): spec 060 §9.13b, **what is owed next** across every project the
-client has. Two drawings now await a word, §9.10 Progress and §9.12 Analytics,
-and **nothing visual is built** — rule 1c is still owed on those two, so
-`portfolio` stays `built: false` and this section's own build is untouched.
-The list above is left as it read on 2026-09-20 rather than rewritten, because
-it is the record of what was true that day (Principle II).
+**AMENDED 2026-09-30 — ALL THREE DRAWINGS ARE SIGNED OFF, so rule 1c is paid in
+full for this module.** The landing first (*"ok for the landing"*), after
+gaining one section at his word (*"yes add the commitments section to the
+landing"*) — spec 060 §9.13b, **what is owed next** across every project the
+client has — and then Progress and Analytics together (*"ok for the progress and
+analytics too"*). The list above is left as it read on 2026-09-20 rather than
+rewritten, because it is the record of what was true that day (Principle II).
+
+**AND `portfolio` STAYS `built: false`, WHICH IS NOW A DIFFERENT SENTENCE.**
+Through six drawings that flag was held down by rule 1c; it is held down now by
+§10's own item, which no sign-off can answer: **this repository has never seen
+the reference code and nothing in it has ever been run** — the two audits behind
+§7 and §9.11 were written by sessions that had it attached, there is no
+database, no `.env` and no ScopePlan row, so **not one figure in that spec has
+been read off a real client's plan**. §375's own build is untouched by any of
+this, and the check still asserts the flag rather than assuming it. *A gate
+lifting is not the same as the road being clear, and saying which gate is which
+is the whole of why this line is here.*

@@ -7,17 +7,24 @@ and §3's six rules, §6's reach and §9.8's roll-up are in
 ways) — which is the slice §8 names in its own words, *pure functions where
 they can be, so the sign-off, the derived dates, the computed progress, the
 cascade and the renumbering are provable without a browser*. **`portfolio` is
-still `built: false`** and there is no page, no address and no switcher entry:
-rule 1c is owed on three of the six screens, and the check asserts the flag
-rather than assuming it (§375). This is the
+still `built: false`** and there is no page, no address and no switcher entry
+— not because a drawing is owed, which as of 2026-09-30 none is, but because
+nothing visual has been built at all; the check asserts that flag rather than
+assuming it (§375). This is the
 spec spec 046 §8 said Portfolio needed — *"Breakdowns, timelines and
 dependencies are named and not specified. Portfolio needs its own spec."* — and
-what it specifies is the shape, not the screens. **Every screen is now drawn.**
-Four are signed off — the project team (§6.4), the charter (§5.1), the plan
-(§9.9) and **the landing** (§9.13, with its commitments section, §9.13b);
-**Progress** (§9.10) and **Analytics** (§9.12) are drawn and await sign-off.
-Rule 1c is paid for the four and owed for the two: nothing visual may be built
-from this page until each screen is drawn and signed off.
+what it specifies is the shape, not the screens. **Every screen is drawn and
+every screen is signed off** — the project team (§6.4), the charter (§5.1) and
+the plan (§9.9) on 2026-09-17/18, and **the landing** (§9.13, with its
+commitments section §9.13b), **Progress** (§9.10) and **Analytics** (§9.12) on
+2026-09-30. **RULE 1c IS PAID IN FULL**, so the sentence that stood here
+through six drawings — *nothing visual may be built until each screen is drawn
+and signed off* — is satisfied rather than waived, and what stops a build now
+is no longer a sign-off. **It is §10's own item**: this repository has never
+seen the reference code, both audits behind §7 and §9.11 were written by
+sessions that had it attached, and **nothing has ever been run** — no database,
+no `.env`, no ScopePlan rows, so there is not one real rendered value anywhere
+in this spec. That is what building needs next, and it is not a drawing.
 
 **Read with spec 046 (Modules)**, whose §4.2 contract this passes in §4 and
 whose module frame — the address, the switcher, the row on the client's card,
@@ -1149,8 +1156,9 @@ owed for one of the four tabs.
 
 ---
 
-### 9.10 · Progress — drawn 2026-09-18, awaiting sign-off
+### 9.10 · Progress — SIGNED OFF 2026-09-30
 
+**SIGNED OFF 2026-09-30** (*"ok for the progress and analytics too"*), from
 `design-mockups/portfolio/2026-09-18_project-progress.html`, in the platform's
 own tokens, both palettes. **It reads the plan's rows** — the array is copied
 byte for byte from the plan drawing — so the count at the top of the Plan page
@@ -1421,8 +1429,9 @@ not — recorded here rather than discovered when it is built.
 
 ---
 
-### 9.12 · Analytics, drawn as B — 2026-09-20, awaiting sign-off
+### 9.12 · Analytics, drawn as B — SIGNED OFF 2026-09-30
 
+**SIGNED OFF 2026-09-30** (*"ok for the progress and analytics too"*), from
 `design-mockups/portfolio/2026-09-20_project-analytics.html`, in the platform's
 own tokens, both palettes. **Two sections and nothing else**: where each part of
 the plan stands, and every commitment with whether it was met.

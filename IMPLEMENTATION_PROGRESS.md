@@ -5536,10 +5536,24 @@ re-measured for the sake of a number.
 
 ## Portfolio — the delivery plan, per client (spec 060)
 
-**Waiting on Islam, not on me.** Nothing is built and no source has moved; this
-is a spec and six drawings. **Four screens are signed off** — the project team,
-the charter, the plan and, on 2026-09-30, the landing — and **two await a
-word**: Progress and Analytics.
+**No longer waiting on Islam. Every screen is signed off** — the project team,
+the charter and the plan on 17/18 September, and the landing, Progress and
+Analytics on the 30th (*"ok for the landing"*, then *"ok for the progress and
+analytics too"*). Nothing is built and no source has moved; this is a spec and
+six agreed drawings.
+
+**What that changes, said plainly: the mockup-first rule is paid in full.** For
+six drawings this page has said nothing visual may be built until each screen
+is drawn and agreed, and that is now satisfied rather than set aside. So what
+stops a build is no longer a decision of his.
+
+**What stops it is that this repository has never seen the code it is porting
+from.** Both audits the spec leans on were written by sessions that had that
+repository attached, and **nothing in it has ever been run** — no database, no
+settings file and not one real project's rows — so there is not a single real
+rendered figure anywhere in this spec, and nothing is known about what a real
+client's plan looks like on any of these screens. Getting sight of it is the
+next thing, and it is not a drawing.
 
 **The landing gained one section at his word before he signed it off**
 (*"yes add the commitments section to the landing"*): **what is owed next**,
@@ -5590,10 +5604,12 @@ measured across all four in both palettes (**0 failures**, with the probe proved
 able to fail first), and the table's fit was measured at seven widths from 1600
 to 768 with nothing scrolling sideways.
 
-**Next, and it is a decision rather than work**: two sign-offs. After them,
-the spec's own §10 still says what building needs — this repository has never
-seen the reference code, so the two audits behind §7 and §9.11 were written by
-sessions with it attached and nothing has been run.
+**Next, and it is work rather than a decision now**: sight of the reference
+code, then a build. The spec's §10 lists what else is still open and none of it
+blocks — a Portfolio project pointing at a Strategy one, the workbook, the
+notice, the budget question and four choices about the landing (the order at
+twenty projects, where a finished project goes, whether the top strip counts
+what is yours, and making a commitment row openable). None has been started.
 
 ---
 
@@ -5639,3 +5655,8 @@ dies in its own seed harness on a Meeting Notes column. Both recorded.
 
 **Next, and still a decision rather than work**: the three sign-offs. Nothing
 visual can be built until they are given.
+
+**Amended 2026-09-30 — all three were given** (the landing, then Progress and
+Analytics), so every screen of this module is agreed and the rule is paid. The
+list above is left as it read on the 20th rather than rewritten, because it is
+the record of what was true that day.

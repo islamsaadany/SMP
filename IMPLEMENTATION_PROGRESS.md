@@ -5685,13 +5685,29 @@ landing instead of sending you back to it, so a wrong address rendered a page
 that looked right. Both were caught because the modules check drives every
 module's server rather than reading a table.
 
-**Next**: writing a plan — adding a row, moving a date, reporting against the
-breakdown — which is the sixth screen and the last one drawn. The spec's §10
-lists what else is still open and none of it blocks — a Portfolio project
-pointing at a Strategy one, the workbook, the notice, the budget question and
-four choices about the landing (the order at twenty projects, where a finished
-project goes, whether the top strip counts what is yours, and making a
-commitment row openable). None has been started.
+**Writing a plan is DRAWN and waiting on you** — the sixth slice, and the
+mockup is published. It is not a sixth screen in the way the other five were:
+it is the writing half of two screens that already exist, the plan's tree and
+an activity's panel, plus the two things writing needs a question for. **It
+proposes a pen** — press Edit, the tree grows handles, press it again — with no
+Save and no Cancel, because that is how every other pen in this platform works
+and the one thing the old tool had here was settled against on the audit.
+**Adding a row is a name and Enter** at the foot of whatever it belongs to.
+**Moving a date shows you what shifts before anything commits**, with each row
+ticked so you can untick the ones that stay. **Removing a phase that still
+holds work is refused and the refusal names what is in it**, which is the
+answer you already gave one screen over. And **the person doing the work sees
+the breakdown and *Mark it done* and nothing else** — they report their own
+rows, they do not restructure the plan. Four things are asked on it, the first
+being **where *who is on a project* hangs**: that screen is drawn and signed off
+and the tab row was agreed as four, so it needs a fifth tab or a line on the
+charter. Nothing is built from any of it.
+
+**The spec's §10** lists what else is still open and none of it blocks — a
+Portfolio project pointing at a Strategy one, the workbook, the notice, the
+budget question and four choices about the landing (the order at twenty
+projects, where a finished project goes, whether the top strip counts what is
+yours, and making a commitment row openable). None has been started.
 
 **Two things the plan found are written down and deliberately not done.** The
 platform has no record of **the day a piece of work was marked done** — only
@@ -5712,6 +5728,67 @@ there is no trend, which needs something kept at each checkpoint. Both wait on
 the same decision as the first item above.
 
 ---
+
+## Portfolio — writing a plan, DRAWN (2026-09-30, spec 060 §15)
+
+**Nothing is built from this.** The drawing is
+`design-mockups/portfolio/2026-09-30_plan-writing.html`, published as an
+artifact and waiting on Islam. Five of Portfolio's six screens read and none of
+them writes; the sixth is the writing half of two that already exist, plus the
+two dialogs writing needs — so rule 1c is owed and this is it being paid.
+
+**The one decision everything else follows from is already in the spec**:
+§7.3 ruled Planning Mode out on the audit, because this platform deleted
+exactly that shape once and wrote down why (§273.4) — a field writes when the
+cursor leaves it and the autosave carries it, so there is no Save and no Cancel
+anywhere in the product. **So writing a plan is a pen**, and it is `.btn` on
+the plan's own bar rather than `.pen`, because §268 settled that a pen takes
+the shape of the line it sits on.
+
+**The row gains a strip and the fields stay on the panel** — one answer to
+*where is an activity changed* rather than two (§53.5), and it avoids §267's
+measured fault, where controls in a table's prose columns stop five of seven
+shrinking. **The strip folds under the name below 900px**, because at 700 it
+takes the row to 694px in a 662px box (§158). **Adding is a name and Enter at
+the foot of the container**, the tracker's own idiom (§356), with a phase
+offering both kinds because it may hold either. **Moving a date is a ticking
+list of what shifts**, not a pair of buttons, because both answers are real and
+a plan with six things downstream is usually a mix. **Removing a row that holds
+work is refused by name**, which is the answer §6.4 already gave one screen
+over.
+
+**EIGHT FAULTS CAME OUT OF RENDERING IT AND NONE OUT OF READING IT** (§311.1),
+and the sweep was proved able to fail first — 44 reds from one broken colour
+and one broken breakpoint (§54.5). The one worth keeping is **five class
+collisions with the page's own namespace** (§65.9): `.dlg` on that page means
+the OVERLAY, so the dialog card inherited `position:fixed; inset:0` and
+measured 520×756 at the top-left with its header off screen — and pulling that
+thread found `.fld`, `.pen`, `.n` and `.cell` too, **every one a second answer
+to something the page already answers** (§53.5). The page HAS a dialog; the
+drawing uses it and re-declares none of them. *A mockup drawn on a real page's
+stylesheet inherits its whole namespace*, so every class it introduces is
+checked against that namespace now rather than guessed at. Beside it:
+**`hidden` on a box with its own `display` hides nothing** (§298.2, §356.8, the
+third time here) — the contributor state drew the date buttons AND the
+read-only dates at once, which is exactly what a permission gate doing nothing
+looks like; and the breakdown's name and weight were boxes for whoever was
+reporting, quietly letting them re-weight their own work.
+
+**Four things are asked** (§379.9): where *who is on a project* hangs — drawn
+and signed off with no home named, and the tab row was agreed as four —
+whether a Lead may name people, whether a removed row is worth keeping, and
+whether the plan needs an undo.
+
+**And two stale comments were corrected in the code**, neither visual and
+neither needing a sign-off: `page.ts` said *two of the four are not built* over
+a `TABS` list where all four are, and `plan.ts`'s header named the same two as
+*not yet*. §378 built them and the comments stayed behind for a round (§104.8).
+**A stale comment renders perfectly and nothing can go red on it.**
+
+**Verified**: `check:portfolio:module` 119/0, `typecheck` clean but for
+`lib/prisma.ts`'s pre-existing error, `generated-in-step` all clear,
+`built-in-step.py` all good. The frozen product is untouched and measured, so
+`sw.js` is not bumped. **On the branch, not merged.**
 
 ## Portfolio — Progress and Analytics (2026-09-30, spec 060 §14)
 

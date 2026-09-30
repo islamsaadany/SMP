@@ -527,12 +527,22 @@ export function seeProject(project: Project, rows: Row[], today: string, mine: b
 }
 
 /* ══ the four tabs (§4 row 1, §9.9 decision 3) ═════════════════════════ */
-/* TWO OF THE FOUR ARE NOT BUILT AND THE ROW SAYS SO rather than linking
-   nowhere (§54.5, §61): a tab that opens the page you are already on, or an
-   empty one, is a control that lies about what exists. Charter and Plan are
-   links; Progress and Analytics carry the word and no href, so the row is
-   the honest map of this project and the order §4 settled is visible from
-   the first screen rather than appearing a tab at a time. */
+/* ALL FOUR ARE BUILT AND EVERY ONE IS A LINK, AND THAT SENTENCE IS THE EDIT
+   §379 MADE HERE: this comment read *two of the four are not built and the
+   row says so* until Progress and Analytics landed (§378), so it went on
+   describing an intention the code beneath it had stopped carrying out
+   (§104.8) — the one fault in this file nothing can go red on, because a
+   stale comment renders perfectly. The tab you are ON carries the word and
+   no href, or it opens the page you are already reading (§61).
+
+   THE `path: null` BRANCH AND ITS `.soon` RULE ARE KEPT DELIBERATELY: no tab
+   wears them today, so §24 would have them deleted — and the fifth tab is a
+   live question (where *who is on a project* hangs, §6.4, drawn and signed
+   off with no home named), so the honest state is that the way to say *not
+   yet* exists and nothing says it. `checks/portfolio-module.mjs` asserts
+   that absence over an EMPTY list and says in its own line that it is
+   vacuous and kept as the control (§113.8), which is what stops this being
+   dead code nobody remembers the shape of. */
 const TABS: { key: string; label: string; path: string | null }[] = [
   { key: "charter", label: "Charter", path: "" },
   { key: "plan", label: "Plan", path: "/plan" },

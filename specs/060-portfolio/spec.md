@@ -2366,3 +2366,195 @@ Both pages swept at 1600/1440/1280/1100/1000/820/700 in both palettes: **0
 overflow, 0 sideways scroll, 0 contrast failures** — and the probe was proved
 able to fail first, by breaking a colour and a width and watching it report
 them (§54.5).
+
+---
+
+## 15 · Drawn, not built — writing a plan, 2026-09-30
+
+**Mockup:** `design-mockups/portfolio/2026-09-30_plan-writing.html`, published
+as an artifact and **awaiting sign-off**. Nothing in `smp-app/` is built from
+it. This section is the record of what it proposes and why, so the decisions
+can be argued before any of them is in code.
+
+**&sect;12&ndash;&sect;14 built five of the six screens and every one of them
+READS.** The sixth is not a screen at all in the way the other five are: it is
+the WRITING half of two screens that already exist &mdash; the plan's tree and
+an activity's panel &mdash; plus the two dialogs that writing needs. So the
+drawing is of the Plan tab in a state nobody has seen.
+
+### 15.1 &middot; The one decision everything else follows from
+
+**There is no Planning Mode, and &sect;7.3 settled that on the audit.** Their
+version holds every added, changed and deleted row in the browser behind a
+banner and a *Save All*; this platform deleted exactly that shape once and
+wrote down why (&sect;273.4): *a field writes when the cursor leaves it and the
+autosave carries it*, so there is no Save and no Cancel anywhere in the
+product, and a draft is what forces both plus a guard on closing the tab.
+
+**So writing a plan is a pen** &mdash; `penBtn()`'s own two words, Edit and Done
+editing, on the bar where the signed-off drawing put a bare *Edit* and said
+nothing about what it opens. It is `.btn` and not `.pen`, because &sect;268
+settled that a pen takes the shape of the line it sits on and this line is a row
+of `.btn`s; lit it is `.btn.on`, which is what a pressed pen already looks like.
+**The cost is stated rather than discovered**: restructuring a plan is visible
+to anybody looking at it while it happens, where Planning Mode let you finish
+first &mdash; and building a two-hundred-row plan without a request per
+keystroke is what the workbook is for (&sect;9.3).
+
+### 15.2 &middot; The row gains a strip, and the fields stay on the panel
+
+**Three buttons on the right of each row in edit mode** &mdash; move up, move
+down, remove &mdash; **and the fields are not edited in the row.** They are
+edited on the panel, where all of them already are, so there is one answer to
+*where is an activity changed* rather than two (&sect;53.5). It also avoids a
+fault this product has already paid for: &sect;267 measured what happens when
+controls go into a table's prose columns &mdash; five of seven columns stop
+shrinking and the name pays for the window.
+
+**The strip is a seventh COLUMN, and it folds under the name below 900px**,
+because at 700 it takes the row to 694px in a 662px box and &sect;158's rule
+is
+*fit, never and it scrolls*. The read table already sits at its own edge there,
+leaving 58px for the name, so the strip cannot be afforded a column of its own.
+
+**An arrow that can do nothing is not drawn** &mdash; no move-up on the first
+row of its container, no move-down on the last &mdash; with its space kept, so
+the &times; does not move between rows (&sect;94.15, &sect;302's family).
+
+### 15.3 &middot; Adding is a name and Enter, at the foot of the container
+
+One add row at the foot of every container, and **the kind is decided by WHERE
+you are typing** rather than by a picker somewhere else: a work package holds
+activities and says so, the tree holds phases and says so, and **a phase may
+hold either, so it offers both** as two small keys and pressing one puts the
+cursor in the box. That is the Internal Tracker's idiom (&sect;356), chosen
+there for the same reason: *we are shifting from a simple google sheet, so it
+needs to be super simple.* Get the skeleton down, then open a row and fill it
+in.
+
+**A *+ add beneath* on the row strip was drawn and then removed**: on a phase it
+cannot say whether it means a work package or an activity, and the add rows
+already say it unambiguously &mdash; two ways to do one thing, one of them
+vague (&sect;32). What it cost is the ability to insert in the middle; a row is
+appended and moved up instead.
+
+### 15.4 &middot; What edit mode deliberately does NOT offer
+
+- **Status is not a field.** It is worked out: a real start date is stamped the
+  first time progress leaves nought, a real end date at sign-off (&sect;3 №2).
+  The way to change a status is to report against the row or to accept it on
+  Progress &mdash; never to pick it from a list.
+- **Nor is the per-cent, where there is a breakdown.** `manualProgressRefused`
+  turns a typed figure away with the reason, and &sect;61 says do not draw a
+  control the server refuses &mdash; so the box is simply not there and the
+  line says why. *Which means that refusal is unreachable from the screen and
+  reachable from the api and the workbook, and saying so is the point.*
+- **Reordering is by arrows, never by dragging.** &sect;101 put that choice to
+  Islam once already for Strategy's cards and he took the arrows; this stack
+  has no `arrange.js` to inherit either.
+
+### 15.5 &middot; Moving a date shows you first, and it is a ticking list
+
+Rule 4 in &sect;3 is *moving a date moves what depends on it, and shows you
+first*, and `cascade()` already returns the preview. **The dialog lists every
+row that would shift, each ticked, and you untick what stays** &mdash; rather
+than a pair of buttons saying *move them* against *leave them*.
+
+**Both answers are real**, which is the argument: sometimes the work downstream
+was going to slip anyway, sometimes it has a date of its own that nothing may
+touch, and a plan with six things downstream is usually a mix. A ticking list
+expresses any answer with one control, and ticking lists are the platform's own
+everywhere else. **Nothing is written until the press**, including the date
+being moved.
+
+### 15.6 &middot; Removing a row is refused where it holds work
+
+**A phase that still holds activities cannot be removed, and the refusal
+names what is in the way** &mdash; the same answer settled one screen over
+for taking somebody off a project (&sect;6.4, Islam: *refusal is better*), and
+&sect;62's shape. The press stays live either way, because a control that is
+simply missing tells nobody why.
+
+**There is no undo and no archive, and that is a question rather than a
+decision** (&sect;15.9). Strategy archives a plan before an upload replaces it
+because an upload replaces the whole thing; here a row goes one at a time and
+deliberately, so the guard is the refusal and the confirmation. If that is the
+wrong call it is a table and a restore screen.
+
+### 15.7 &middot; Two audiences share the panel and see different halves
+
+- **A Lead or a seat** (`mayBuildPlan`) writes every fact on the row.
+- **The person it is assigned to** (`mayReport`) gets the breakdown's status
+  pickers and *Mark it done*, and **nothing else** &mdash; the platform's own
+  rule in its own words, *see the plan, write your own rows* (&sect;7.4A).
+  **The step's NAME and its WEIGHT are the plan's, not the report's**, so they
+  read as text for them; the first draft made all three boxes and quietly let
+  somebody reporting their own work re-weight it.
+- **A Viewer** sees the read panel and no control at all. Everybody lands at
+  Viewer, so read-only is what the default quietly grants, which is the only
+  default that fails closed (&sect;7.4B).
+
+**Marking it done is the first of the two steps** (&sect;3 №1): the button says
+so and the sentence beside it says a Lead accepts it and sets the day the work
+actually ended, which is the half Progress already draws.
+
+### 15.8 &middot; Eight faults found by rendering it, and none by reading it
+
+The drawing was swept at seven widths in both palettes, in both states, for
+overflow, sideways scroll, contrast and console errors &mdash; and **the sweep
+was proved able to fail first**, 44 reds from one broken colour and one broken
+breakpoint (&sect;54.5). It is clean now. What it found on the way, and
+&sect;311.1 is the rule each of these earns again:
+
+1. the edit strip overrunning its box at 700px (&sect;15.2's fold);
+2. a tick invented in front of *Done editing* that the platform's own pen has
+   never worn (&sect;25);
+3. *+ work package* breaking across two lines in a 78px key column;
+4. the ambiguous *+ add beneath* (&sect;15.3);
+5. a move-up arrow on a row that cannot move up (&sect;94.15);
+6. **FIVE CLASS COLLISIONS with the page's own namespace** (&sect;65.9)
+   &mdash; see below;
+7. **`hidden` on a box with its own `display` hides nothing** (&sect;298.2,
+   &sect;356.8, the third time in this repository): `.two` and `.tick` are
+   flex, so the contributor state drew the date buttons AND the read-only
+   dates at once, which is exactly what a permission gate doing nothing looks
+   like;
+8. the breakdown's name and weight editable by whoever was reporting.
+
+**THE COLLISIONS ARE THE ONE WORTH KEEPING.** `.dlg` on this page means the
+OVERLAY, and the drawing used it for the CARD &mdash; so the card inherited
+`position:fixed; inset:0` and measured 520&times;756 at the top-left corner with
+its navy header off screen. Pulling that thread found `.fld`, `.pen`, `.n` and
+`.cell` too, **every one a second answer to something the page already
+answers** (&sect;53.5): this page has a dialog already, `.dlg > .card > h2 + p +
+.cbtns > .ghost + .start`, which is what *Start a project* opens. The drawing
+uses it and re-declares none of them. *A mockup drawn on a real page's
+stylesheet inherits its whole namespace*, so every class it introduces is now
+checked against that namespace rather than guessed at.
+
+### 15.9 &middot; What is asked, and it is four things
+
+1. **Where does *who is on a project* hang?** That screen is drawn and signed
+   off (&sect;6.4) and the tab row was agreed as four. **A fifth tab** &mdash;
+   *Team*, after Analytics &mdash; or **a line on the charter**, which already
+   names the four accountable people. The recommendation is the fifth tab:
+   naming people is done while the plan is in front of you, and the charter is
+   agreed once where the team changes through the work.
+2. **Can a Lead name people?** &sect;6.4a answered it the narrow way until
+   Islam says otherwise, and this is the round to widen it or leave it.
+3. **Is a removed row worth keeping?** &sect;15.6 says no archive; one sentence
+   either way settles it.
+4. **Does the plan need an undo?** Nothing else in the platform has one. A
+   mistyped name is retyped cheaply; a removed row with a breakdown on it is
+   not.
+
+### 15.10 &middot; And two things were corrected in the code while drawing this
+
+Neither is visual and neither needs a sign-off. `modules/portfolio/page.ts`
+carried a comment above `TABS` reading *two of the four are not built and the
+row says so* &mdash; true until &sect;378 built Progress and Analytics, and
+describing an intention the code beneath it had stopped carrying out
+(&sect;104.8). `modules/portfolio/plan.ts`'s header named the same two as *not
+yet* in its what-is-not-built list. **A stale comment renders perfectly and
+nothing can go red on it**, which is why both are corrected in the same commit
+as the drawing rather than left for the slice that builds from it.

@@ -30,9 +30,12 @@
 
    WHAT IS NOT BUILT, in this file's own words (§54.5): **Edit** — a plan is
    read here and written nowhere yet, so there is no Edit control rather than
-   one that refuses; **files** on the panel, because where a file lives IS the
-   permission and none of that is decided (§9.4); and Progress and Analytics,
-   which the tab row names as not yet rather than linking nowhere. */
+   one that refuses, and the drawing's own Edit button is the third thing in
+   its bar that this build does not draw; and **files** on the panel, because
+   where a file lives IS the permission and none of that is decided (§9.4).
+   Progress and Analytics were on this list until §378 built them, and the
+   clause naming them stayed behind for a round — §104.8 in a header, removed
+   at §379. */
 import { type ModuleKey, clientHref } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 import {

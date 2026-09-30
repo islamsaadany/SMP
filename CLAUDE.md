@@ -8332,7 +8332,19 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # reported a CORRECT build broken by testing
                                 # `href=".../plan"` against the whole document, where
                                 # the plan page's own List/Timeline switch holds one
-                                # (&sect;100.3) &mdash; scoped to the tab row now
+                                # (&sect;100.3) &mdash; scoped to the tab row now.
+                                # AND SINCE &sect;379 ITS UNBUILT-TAB ASSERTION IS A
+                                # CONTROL AND SAYS SO: all four tabs are built, so
+                                # `UNBUILT_TABS` is empty and the assertion is
+                                # vacuous &mdash; kept rather than deleted, because
+                                # the fifth tab is a live question (where *who is on
+                                # a project* hangs, &sect;6.4, drawn and signed off
+                                # with no home named) and the `path: null` branch and
+                                # its `.soon` rule are what will say *not yet* when
+                                # it lands. &sect;113.8's own rule: an assertion that
+                                # cannot fail is kept only where it is NAMED as the
+                                # control, and `modules/portfolio/page.ts` carries
+                                # the other half of that note beside `TABS`
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -9840,7 +9852,71 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 &mdash; **&sect;378: Portfolio &mdash; Progress and
+*Last Updated: 2026-09-30 &mdash; **&sect;379: Portfolio &mdash; writing a
+plan, DRAWN and not built (spec 060 &sect;15).** Five of Portfolio's six
+screens read and none of them writes; the sixth is not a screen the way the
+others were, it is the **writing half** of two that already exist &mdash; the
+plan's tree and an activity's panel &mdash; plus the two dialogs writing needs.
+**So rule 1c is owed and this pays it**:
+`design-mockups/portfolio/2026-09-30_plan-writing.html`, published as an
+artifact, **nothing in `smp-app/` built from it**. **THE ONE DECISION
+EVERYTHING ELSE FOLLOWS FROM WAS ALREADY TAKEN** &mdash; &sect;7.3 ruled
+Planning Mode out on the audit, because this platform deleted exactly that
+shape once and wrote down why (&sect;273.4): *a field writes when the cursor
+leaves it and the autosave carries it*, so there is no Save and no Cancel
+anywhere in the product and a draft is what forces both. **So writing a plan is
+a pen**, `.btn` and not `.pen`, because &sect;268 settled that a pen takes the
+shape of the line it sits on and this line is a row of `.btn`s. **THE ROW GAINS
+A STRIP AND THE FIELDS STAY ON THE PANEL** &mdash; one answer to *where is an
+activity changed* (&sect;53.5), and it avoids &sect;267's measured fault, where
+controls in the prose columns stop five of seven shrinking &mdash; **folding
+under the name below 900px**, because at 700 the seventh column takes the row
+to **694px in a 662px box** (&sect;158). **An arrow that can do nothing is not
+drawn** and its space is kept, so the &times; does not move (&sect;94.15).
+**ADDING IS A NAME AND ENTER AT THE FOOT OF THE CONTAINER** (&sect;356's
+idiom), the kind decided by WHERE you type, with a phase offering both because
+it may hold either &mdash; and the row strip's *+ add beneath* was drawn and
+REMOVED, because on a phase it cannot say which kind it means and the add rows
+already say it (&sect;32). **STATUS AND THE PER-CENT ARE NOT FIELDS**: both are
+worked out, so the box is simply absent where `manualProgressRefused` would
+refuse it (&sect;61) &mdash; *which makes that refusal unreachable from the
+screen and reachable from the api and the workbook, and saying so is the
+point*. **MOVING A DATE IS A TICKING LIST OF WHAT SHIFTS**, never a pair of
+buttons: both answers are real and a plan with six things downstream is usually
+a mix. **REMOVING A ROW THAT HOLDS WORK IS REFUSED BY NAME**, &sect;6.4's own
+answer one screen over. **THE PERSON DOING THE WORK GETS THE BREAKDOWN AND
+*MARK IT DONE* AND NOTHING ELSE** &mdash; *see the plan, write your own rows*
+(&sect;7.4A) &mdash; **and the step's NAME and WEIGHT are the plan's, not the
+report's**, which the first draft got wrong by making all three boxes.
+**EIGHT FAULTS CAME OUT OF RENDERING IT AND NONE OUT OF READING IT**
+(&sect;311.1), with the sweep proved able to fail first &mdash; **44 reds**
+from one broken colour and one broken breakpoint (&sect;54.5). **The one worth
+keeping is FIVE CLASS COLLISIONS** (&sect;65.9): `.dlg` on that page means the
+OVERLAY, so the dialog card inherited `position:fixed; inset:0` and measured
+**520&times;756 at the top-left** with its navy header off screen &mdash; and
+pulling that thread found `.fld`, `.pen`, `.n` and `.cell`, **every one a
+second answer to something the page already answers** (&sect;53.5), since that
+page HAS a dialog (`.dlg > .card > h2 + p + .cbtns > .ghost + .start`, what
+*Start a project* opens). *A mockup drawn on a real page's stylesheet inherits
+its whole namespace*, so every class is checked against it now rather than
+guessed at &mdash; four of the five were found one at a time first. Beside it:
+**`hidden` on a box with its own `display` hides nothing** (&sect;298.2,
+&sect;356.8, third time here), so the contributor state drew the date buttons
+AND the read-only dates at once, which is exactly what a permission gate doing
+nothing looks like. **FOUR THINGS ARE ASKED** (&sect;379.9), the first being
+where *who is on a project* hangs &mdash; drawn and signed off with no home
+named, against a tab row agreed as four. **AND TWO STALE COMMENTS WERE
+CORRECTED IN THE CODE**, neither visual: `page.ts` said *two of the four are
+not built* over a `TABS` list where all four are, and `plan.ts`'s header named
+the same two as *not yet* &mdash; &sect;378 built them and both comments stayed
+behind for a round (&sect;104.8). **A stale comment renders perfectly and
+nothing can go red on it.** Verified: `check:portfolio:module` **119/0**,
+`typecheck` clean but for `lib/prisma.ts`'s pre-existing error,
+`generated-in-step` all clear, `built-in-step.py` all good. The frozen product
+is untouched and measured, so **`sw.js` is NOT bumped**. **On the branch, not
+merged.***
+
+*Earlier the same day: **&sect;378: Portfolio &mdash; Progress and
 Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:
 **"ok for the progress and analytics too."** Built together, because **they
 read the same thing** &mdash; the plan &sect;377 built &mdash; and with them

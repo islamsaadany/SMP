@@ -50255,3 +50255,171 @@ exactly: 59% overall, 100/67/10 across three phases, 1 of 6 commitments met on
 time, 1 delivered late, all six commitment states drawn at once. **The frozen
 product is untouched and measured**, so `sw.js` is NOT bumped (§91's trigger is
 the built file's bytes changing, and they did not).
+
+
+---
+
+## §379 — PORTFOLIO: WRITING A PLAN, DRAWN NOT BUILT (2026-09-30, spec 060 §15)
+
+Five of Portfolio's six screens read and none of them writes. The sixth is not a
+screen in the way the other five are: it is the **writing half** of two that
+already exist — the plan's tree and an activity's panel — plus the two dialogs
+writing needs. **So rule 1c is owed**, the drawing is
+`design-mockups/portfolio/2026-09-30_plan-writing.html`, published as an
+artifact, and **nothing in `smp-app/` is built from it**.
+
+### §379.1 — THERE IS NO PLANNING MODE, AND THAT DECIDES EVERYTHING ELSE
+
+**§7.3 settled it on the audit and this is the first round that spends it.**
+Their version holds every added, changed and deleted row in the browser behind a
+banner and a *Save All*; this platform **deleted exactly that shape once and
+wrote down why** (§273.4) — *a field writes when the cursor leaves it and the
+autosave carries it*, so there is no Save and no Cancel anywhere in the product,
+and a draft is what forces both plus a guard on closing the tab.
+
+**So writing a plan is a pen**, where the signed-off drawing had a bare *Edit*
+button with nothing said about what it opens. **It is `.btn` and not `.pen`**,
+because §268 settled that a pen takes the shape of the line it sits on and this
+line is a row of `.btn`s; lit it is `.btn.on`, which is what a pressed pen
+already looks like everywhere else — **no new class and no new colour**. *The
+cost is stated rather than discovered*: restructuring a plan is visible to
+anybody looking at it while it happens, where Planning Mode let you finish
+first, and building a two-hundred-row plan without a request per keystroke is
+what the workbook is for (§9.3).
+
+### §379.2 — THE ROW GAINS A STRIP AND THE FIELDS STAY ON THE PANEL
+
+Three buttons on the right of each row in edit mode — move up, move down,
+remove — **and the fields are not edited in the row**: they are edited on the
+panel, where all of them already are, so there is one answer to *where is an
+activity changed* rather than two (§53.5). **It also avoids a fault this product
+has already paid for**: §267 measured what happens when controls go into a
+table's prose columns — five of seven stop shrinking and the name pays for the
+window.
+
+**The strip is a seventh COLUMN and it folds under the name below 900px**,
+because at 700 it takes the row to **694px in a 662px box** and §158's rule is
+*fit, never and it scrolls*. The read table already sits at its own edge there,
+leaving 58px for the name, so the strip cannot be afforded a column of its own.
+**An arrow that can do nothing is not drawn** — no move-up on the first row of
+its container, no move-down on the last — **with its space kept**, so the ×
+does not move between rows (§94.15, §302's family).
+
+### §379.3 — ADDING IS A NAME AND ENTER, AND THE KIND IS WHERE YOU TYPE
+
+One add row at the foot of every container, and **the kind is decided by WHERE
+you are typing** rather than by a picker somewhere else: a work package holds
+activities and says so, the tree holds phases and says so, and **a phase may
+hold either, so it offers both** as two small keys with the press putting the
+cursor in the box. That is the Internal Tracker's idiom (§356), chosen there for
+the same reason — *we are shifting from a simple google sheet, so it needs to be
+super simple*.
+
+**A *+ add beneath* on the row strip was drawn and then removed**: on a phase it
+cannot say whether it means a work package or an activity, and the add rows
+already say it unambiguously — two ways to do one thing, one of them vague
+(§32). What it cost is inserting in the middle; a row is appended and moved up.
+
+### §379.4 — WHAT EDIT MODE DELIBERATELY DOES NOT OFFER
+
+**Status is not a field.** It is worked out — a real start date the first time
+progress leaves nought, a real end date at sign-off (§3 №2) — so the way to
+change one is to report against the row or accept it on Progress, never to pick
+it from a list. **Nor is the per-cent where there is a breakdown**:
+`manualProgressRefused` turns a typed figure away with the reason, and §61 says
+do not draw a control the server refuses, so the box is not there and the line
+says why. *Which means that refusal is unreachable from the screen and reachable
+from the api and the workbook, and saying so is the point* (§42). **Reordering
+is by arrows and never by dragging** — §101 put that choice to Islam once
+already and he took the arrows, and this stack has no `arrange.js` to inherit.
+
+### §379.5 — MOVING A DATE SHOWS YOU FIRST, AND IT IS A TICKING LIST
+
+Rule 4 is *moving a date moves what depends on it, and shows you first*, and
+`cascade()` already returns the preview. **The dialog lists every row that would
+shift, each ticked, and you untick what stays** — rather than a pair of buttons
+saying *move them* against *leave them*. **Both answers are real**, which is the
+argument: sometimes the work downstream was going to slip anyway, sometimes it
+has a date of its own that nothing may touch, and a plan with six things
+downstream is usually a mix — a pair of buttons cannot express one. **Nothing is
+written until the press**, including the date being moved.
+
+### §379.6 — REMOVING IS REFUSED WHERE THE ROW HOLDS WORK
+
+**A phase that still holds activities cannot be removed and the refusal names
+what is in the way** — the answer already settled one screen over for taking
+somebody off a project (§6.4, Islam: *refusal is better*), and §62's shape. The
+press stays live either way, because a control that is simply missing tells
+nobody why. **There is no undo and no archive, and that is asked rather than
+decided** (§379.9).
+
+### §379.7 — TWO AUDIENCES SHARE THE PANEL AND SEE DIFFERENT HALVES
+
+A Lead or a seat writes every fact; **the person the row is assigned to gets the
+breakdown's status pickers and *Mark it done* and nothing else** — the
+platform's own rule in its own words, *see the plan, write your own rows*
+(§7.4A) — and a Viewer sees the read panel with no control at all, which is what
+the default quietly grants and the only default that fails closed. **The step's
+NAME and its WEIGHT are the plan's, not the report's**, so they read as text for
+whoever is reporting: the first draft made all three boxes and quietly let
+somebody re-weight their own work.
+
+### §379.8 — EIGHT FAULTS FOUND BY RENDERING IT AND NONE BY READING IT
+
+Swept at 1600/1440/1280/1100/1000/820/700 in both palettes, in the read state
+and the edit state, for overflow, sideways scroll, contrast and console errors —
+**and the sweep was proved able to fail first**, 44 reds from one broken colour
+and one broken breakpoint (§54.5). Clean now. On the way: the strip overrunning
+at 700 (§379.2); **a tick invented in front of *Done editing*** that the
+platform's own pen has never worn (§25); *+ work package* breaking across two
+lines in a 78px key column; the ambiguous *+ add beneath*; a move-up arrow on a
+row that cannot move up; **five class collisions**; **`hidden` on a box with its
+own `display` hiding nothing** (§298.2, §356.8 — the third time here: `.two` and
+`.tick` are flex, so the contributor state drew the date buttons AND the
+read-only dates at once, which is exactly what a permission gate doing nothing
+looks like); and the breakdown editable by whoever was reporting.
+
+**THE COLLISIONS ARE THE ONE WORTH KEEPING** (§65.9). `.dlg` on this page means
+the OVERLAY and the drawing used it for the CARD — so the card inherited
+`position:fixed; inset:0` and measured **520×756 at the top-left corner** with
+its navy header off screen. Pulling that thread found `.fld`, `.pen`, `.n` and
+`.cell` as well, **every one a second answer to something the page already
+answers** (§53.5): this page HAS a dialog, `.dlg > .card > h2 + p + .cbtns >
+.ghost + .start`, which is what *Start a project* opens. The drawing uses it and
+re-declares none of them. *A mockup drawn on a real page's stylesheet inherits
+its whole namespace*, so every class it introduces is now checked against that
+namespace rather than guessed at — which is what that rule actually asks for,
+and four of the five were found one at a time before the audit was written.
+
+### §379.9 — WHAT IS ASKED
+
+1. **Where does *who is on a project* hang?** Drawn and signed off at §6.4 with
+   no home named, and the tab row was agreed as four. A fifth tab, *Team*, or a
+   line on the charter. **The recommendation is the fifth tab**: naming people
+   is done while the plan is in front of you, and the charter is agreed once
+   where the team changes through the work.
+2. **Can a Lead name people?** §6.4a answered it the narrow way until Islam says
+   otherwise.
+3. **Is a removed row worth keeping?** §379.6 says no archive.
+4. **Does the plan need an undo?** Nothing else in the platform has one.
+
+### §379.10 — AND TWO STALE COMMENTS WERE CORRECTED IN THE CODE
+
+Neither is visual and neither needs a sign-off. `modules/portfolio/page.ts`
+carried a comment above `TABS` reading *two of the four are not built and the
+row says so* — true until §378 built Progress and Analytics, and by then
+describing an intention the code beneath it had stopped carrying out (§104.8);
+`modules/portfolio/plan.ts`'s header named the same two as *not yet*. **A stale
+comment renders perfectly and nothing can go red on it**, which is why both are
+corrected in the same commit as the drawing rather than left for the slice that
+builds from it. The `path: null` branch and its `.soon` rule are **kept
+deliberately** and the reason is written where they are: no tab wears them
+today, so §24 would delete them, and the fifth tab is a live question — the
+check asserts that absence over an EMPTY list and says in its own line that it
+is vacuous and kept as the control (§113.8).
+
+**Verified**: `check:portfolio:module` 119/0, `typecheck` clean but for
+`lib/prisma.ts`'s pre-existing error, `generated-in-step` all clear,
+`built-in-step.py` all good. **The frozen product is untouched and measured**,
+so `sw.js` is NOT bumped (§91's trigger is the built file's bytes changing, and
+they did not). **On the branch, not merged.**

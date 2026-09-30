@@ -1,0 +1,1055 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing a plan</title>
+<!--
+  MOCKUP · FOR SIGN-OFF · NOTHING BUILT — spec 060, the sixth slice.
+
+  Drawn ON THE REAL PAGE (§41.9, §245): the stylesheet below and every row in
+  the tree are the served Plan page's own bytes, captured out of the running
+  module, so what is proposed is measured against what is there rather than
+  against a stylesheet (§41.7's fault).
+
+  AND IT WAS RENDERED BEFORE IT WAS PUBLISHED (§54.5, §311.1) — swept at
+  1600/1440/1280/1100/1000/820/700 in both palettes, in the read state and the
+  edit state, for overflow, sideways scroll, contrast and console errors, and
+  the sweep was proved able to fail first (44 reds from one broken colour and
+  one broken breakpoint). EIGHT FAULTS CAME OUT OF THAT AND NOT ONE OUT OF
+  READING IT:
+
+    1 the edit strip took the row to 694px in a 662px box at 700 — §158's
+      *fit, never and it scrolls*; it folds under the name below 900 now;
+    2 a tick invented in front of *Done editing*, which the platform's own pen
+      has never worn (§25);
+    3 *+ work package* broke across two lines in a 78px key column;
+    4 a *+ add beneath* on a phase could not say whether it meant a work
+      package or an activity, and the add rows already say it (§32) — gone;
+    5 a move-up arrow on the first row of its container, which can do nothing
+      (§94.15) — omitted, with its space kept so the × does not move;
+    6 FIVE CLASS COLLISIONS with the page's own namespace (§65.9): `.dlg` is
+      the OVERLAY here, so the dialog card inherited `position:fixed; inset:0`
+      and measured 520×756 at the top-left with its header off screen — and
+      pulling that thread found `.fld`, `.pen`, `.n` and `.cell` too, every one
+      a second answer to something this page already answers (§53.5). The
+      dialogs are the page's own `.dlg > .card > h2 + p + .cbtns` now, and
+      nothing here re-declares a field or a pen;
+    7 `hidden` on a box with its own `display` hides nothing (§298.2, §356.8,
+      the third time here), so the contributor state drew the date buttons AND
+      the read-only dates at once — which is exactly what a permission gate
+      doing nothing looks like;
+    8 the breakdown's name and weight were boxes for the person REPORTING,
+      quietly letting them re-weight their own work.
+-->
+<style>
+
+*{box-sizing:border-box}
+:root{
+  --bar:#16325C;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --none:#8E97A3; --on-fill:#FFFFFF; --on-accent:#16325C;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+  }
+}
+:root[data-theme="dark"]{
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+  --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+}
+
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+/* the module chrome — the tracker's and Insights', class for class */
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw svg{width:17px;height:17px;display:block}
+.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
+.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi.on{background:var(--ground);cursor:default}
+.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 56px}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.phead h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
+.crumb{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 4px}
+.crumb a{color:inherit;text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.start{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;padding:8px 15px;font-size:13px;font-weight:700}
+.start:hover{background:var(--gold-deep);color:var(--on-fill)}
+
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+@media (max-width:820px){.strip{grid-template-columns:1fr}}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:12px 15px}
+.cell .k{margin:0;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.cell .v{font-size:25px;font-weight:700;line-height:1.15;margin-top:3px;letter-spacing:-.02em}
+.cell .w{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.cell.late .v{color:var(--bad-tx)}
+.cell.owed .v{color:var(--attn-tx)}
+
+.sect{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 7px}
+.sect span{color:var(--ink-3);font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px}
+/* THE FOUR TABS, SHARED because both the charter and the plan draw them and a
+   second copy is how one page's row comes to sit at a different height from
+   the other's (§53.5). */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:10px 0 18px;flex-wrap:wrap}
+.tabs > *{padding:8px 13px;font-size:13.5px;color:var(--ink-3);font-weight:600;border-bottom:2px solid transparent;text-decoration:none}
+.tabs > a:hover{color:var(--ink)}
+.tabs > .on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs > .soon{color:var(--ink-3);opacity:.6;cursor:default}
+.tabs > .soon::after{content:" \2014 not yet";font-size:11px;font-weight:600;font-style:italic}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--panel);color:var(--panel-ink);text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:8px 14px;white-space:nowrap}
+tbody td{border-top:1px solid var(--line-soft);padding:11px 14px;vertical-align:top;font-size:13.5px}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+
+.pname{font-weight:700;font-size:14.5px}
+.pname a{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+.pname a:hover{border-bottom-color:var(--gold)}
+.pbrief{font-size:11.5px;color:var(--ink-3);margin-top:2px;max-width:42ch}
+.far{width:210px}
+.bar2{height:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar2 i{display:block;height:100%;background:var(--gold)}
+.bar2 i.done{background:var(--good)}
+.figs{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pc{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.word{font-size:11.5px;color:var(--ink-3)}
+.behind,.cb{display:inline-block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;border-radius:4px;padding:1px 6px}
+.behind,.cb.over{color:var(--bad-tx);background:var(--bad-bg);border:1px solid var(--bad)}
+.cb.wait{color:var(--panel-ink);background:var(--panel);border:1px solid var(--panel)}
+.cb.soon{color:var(--attn-tx);background:var(--attn-bg);border:1px solid var(--attn)}
+.noplan{font-size:12.5px;color:var(--ink-3);font-style:italic}
+.owe{width:230px}
+.owe .n{font-size:17px;font-weight:700;color:var(--attn-tx)}
+.owe .n.clear{color:var(--ink-3);font-weight:600;font-size:13px}
+.owe .parts{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.mine{box-shadow:inset 3px 0 0 var(--gold)}
+.when{width:150px;font-size:12.5px}
+.when .d{font-weight:600}
+.when .s{font-size:11px;color:var(--ink-3)}
+.when .none{color:var(--ink-3)}
+.empty{margin:0;padding:22px 16px;text-align:center;font-size:13px;color:var(--ink-3)}
+.cdue{width:104px;font-variant-numeric:tabular-nums;font-weight:600}
+.cdue.past{color:var(--bad-tx)}
+.cwhat{width:188px}
+.cname{font-weight:600}
+.cproj{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* the charter (§5.1) — a page of rows, read, with a pen per section */
+.ch h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 7px;font-weight:700}
+.chbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:flex;gap:16px;padding:11px 15px;border-top:1px solid var(--line-soft)}
+.row:first-child{border-top:0}
+.row em{flex:none;width:158px;font-style:normal;font-size:11.5px;color:var(--ink-3);font-weight:600;padding-top:2px}
+.row .val{flex:1;min-width:0;font-size:13.5px;white-space:pre-wrap}
+.row .val.none{color:var(--ink-3);font-style:italic}
+.pen{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--ink-2)}
+.pen:hover{border-color:var(--gold)}
+.fld{width:100%;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:6px 9px}
+.fld:focus{outline:2px solid var(--focus);outline-offset:0}
+textarea.fld{min-height:64px;resize:vertical}
+/* THE QUIET WORD FOR AN ABSENCE. It was declared as .none2 and used as
+   .none for one slice, so *No checkpoint set* drew in full ink where the
+   drawing has it grey — the rule and the markup disagreeing, which renders
+   perfectly (§96) and was found by reading. §378.
+   AND NO BACKTICK MAY APPEAR IN THIS COMMENT: the whole stylesheet is one
+   template literal, so a quoted class name here ENDS it (§272.8, §357.3
+   — walked into while writing this very note). */
+.none{color:var(--ink-3)}
+.dlg{position:fixed;inset:0;background:rgba(10,14,22,.5);display:grid;place-items:center;padding:20px;z-index:20}
+.dlg[hidden]{display:none!important}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;max-width:440px;width:100%}
+.card h2{margin:0 0 4px;font-size:15px}
+.card p{margin:0 0 12px;font-size:12.5px;color:var(--ink-3)}
+.cbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.ghost{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 13px;font-size:13px;color:var(--ink-2);font-weight:600}
+
+  .pbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .pbar .sp{ margin-left:auto; display:flex; gap:8px; }
+  .btn{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+        border-radius:5px; padding:6px 12px; text-decoration:none; display:inline-block; }
+  .btn:hover{ border-color:var(--gold); color:var(--ink); }
+  .btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .owed{ font-size:12.5px; color:var(--attn-tx); background:var(--attn-bg);
+         border-radius:4px; padding:3px 9px; font-weight:600; }
+  .owed.red{ color:var(--bad-tx); background:var(--bad-bg); }
+  .pcx{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  .pl .head, .pl .r{ display:grid;
+             grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px;
+             gap:12px; align-items:center; padding:7px 14px; }
+  .pl .head{ background:var(--panel); color:var(--panel-ink);
+         font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+  .pl .head span:nth-child(n+5){ text-align:right; }
+  .pl .r{ border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .pl .r:hover{ background:var(--zebra); }
+  .pl .r.lvl0{ background:var(--surface-2); font-weight:700; }
+  .pl .r.lvl1{ font-weight:600; }
+  .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; font-weight:700; }
+  .nm{ min-width:0; display:flex; align-items:center; gap:7px; }
+  .nm .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:inherit; text-decoration:none; }
+  .nm a.t:hover{ text-decoration:underline; }
+  .nm .tw{ color:var(--ink-3); font-size:11px; }
+  .pl .r.lvl1 .nm{ padding-left:16px; }
+  .pl .r.lvl2 .nm{ padding-left:32px; }
+  .pwho{ color:var(--ink-2); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .win{ font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+  .win.late{ color:var(--bad-tx); font-weight:600; }
+  .fig{ text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); }
+  .lvl0 .fig, .lvl1 .fig{ color:var(--ink); font-weight:700; }
+  .st{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+       font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
+  .st.done{ background:var(--good-bg); color:var(--good-tx); }
+  .st.wip{ background:var(--attn-bg); color:var(--attn-tx); }
+  .st.not{ background:var(--surface-2); color:var(--ink-3); }
+  .st.sign{ background:var(--panel); color:var(--panel-accent); }
+  .mk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+       color:var(--gold-deep); border:1px solid var(--gold); border-radius:3px; padding:0 4px; flex:none; }
+  .blk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+        font-weight:700; color:var(--bad-tx); flex:none; }
+  .pl .r.pick{ background:var(--zebra); box-shadow:inset 3px 0 0 var(--gold); }
+
+  .gwrap{ overflow-x:auto; }
+  .g{ min-width:820px; }
+  .ghead, .gr{ display:grid; grid-template-columns:300px minmax(0,1fr); align-items:center; }
+  .ghead{ background:var(--panel); color:var(--panel-ink); }
+  .ghead .gl{ padding:7px 14px; font-size:10px; letter-spacing:.08em;
+              text-transform:uppercase; font-weight:700; }
+  .months{ display:grid; }
+  .months span{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+                font-weight:700; padding:7px 0 7px 7px;
+                border-left:1px solid rgba(255,255,255,.18); }
+  .gr{ border-top:1px solid var(--line-soft); font-size:13px; }
+  .gr:hover{ background:var(--zebra); }
+  .gr.lvl0{ background:var(--surface-2); font-weight:700; }
+  .gr.lvl1{ font-weight:600; }
+  .gl{ display:flex; align-items:center; gap:7px; min-width:0; padding:5px 12px; }
+  .gl .gn{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:11.5px;
+           font-weight:700; flex:none; width:44px; }
+  .gl .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gr.lvl1 .gl .t{ padding-left:10px; }
+  .gr.lvl2 .gl .t{ padding-left:22px; }
+  .track{ position:relative; height:28px; border-left:1px solid var(--line); }
+  .grid{ position:absolute; inset:0; display:grid; pointer-events:none; }
+  .grid i{ border-left:1px solid var(--line-soft); }
+  .grid i:first-child{ border-left:0; }
+  .now{ position:absolute; top:0; bottom:0; width:2px; background:var(--gold); pointer-events:none; }
+  .nowlab{ position:absolute; top:2px; transform:translateX(-50%);
+           font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--on-accent); background:var(--gold);
+           border-radius:3px; padding:0 4px; white-space:nowrap; }
+  .b{ position:absolute; top:8px; height:12px; border-radius:3px;
+      background:var(--surface-2); border:1px solid var(--line); overflow:hidden; }
+  .b > i{ display:block; height:100%; background:var(--good); }
+  .b.sum{ top:11px; height:6px; background:var(--stone); border-color:var(--stone);
+          border-radius:2px; opacity:.55; }
+  .over{ position:absolute; top:8px; height:12px; border-radius:0 3px 3px 0; background:var(--bad); }
+  .dia{ position:absolute; top:8px; width:12px; height:12px; background:var(--gold);
+        border:1px solid var(--gold-deep); transform:translateX(-6px) rotate(45deg); }
+  .dia.not{ background:var(--surface); }
+  .dep{ position:absolute; height:0; border-top:1.5px dotted var(--ink-3); }
+  .depv{ position:absolute; width:0; border-left:1.5px dotted var(--ink-3); }
+  .deph{ position:absolute; width:0; height:0; border-top:4px solid transparent;
+         border-bottom:4px solid transparent; border-left:5px solid var(--ink-3); }
+  .gfoot{ display:flex; gap:16px; flex-wrap:wrap; padding:9px 14px;
+          border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-3); }
+  .gfoot b{ display:inline-block; width:22px; height:8px; border-radius:2px;
+            vertical-align:middle; margin-right:5px; }
+
+  .act{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        margin-top:16px; overflow:hidden; }
+  .act > header{ background:var(--panel); color:var(--panel-ink); padding:10px 16px;
+                 display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  .act > header b{ font-size:15px; }
+  .act > header .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+                    color:var(--panel-quiet); font-weight:700; }
+  .act > header a.k{ text-decoration:none; }
+  .act > header a.k:hover{ color:var(--panel-accent); }
+  .act > header .shut{ margin-left:12px; }
+  .abody{ padding:6px 16px 14px; display:grid; grid-template-columns:1fr 1fr; gap:0 28px; }
+  @media (max-width:820px){ .abody{ grid-template-columns:1fr; } }
+  .arow{ display:grid; grid-template-columns:116px minmax(0,1fr); gap:0 12px;
+         padding:8px 0; border-bottom:1px solid var(--line-soft); align-items:start; }
+  .arow > em{ font-style:normal; font-size:10.5px; letter-spacing:.07em;
+              text-transform:uppercase; color:var(--ink-3); font-weight:700; padding-top:3px; }
+  .arow .v{ min-width:0; font-size:13.5px; }
+  .arow .v p{ margin:0; color:var(--ink-2); }
+  .arow .v .soon{ color:var(--ink-3); font-size:12.5px; }
+  .full{ grid-column:1 / -1; }
+  .sub{ display:grid; gap:4px; }
+  .sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 92px 52px; gap:10px;
+           font-size:13px; align-items:center; }
+  .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; text-align:right; }
+  .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+
+/* ══ THE MOCKUP'S OWN FURNITURE — none of this ships ═══════════════════ */
+.mkpage{ max-width:1180px; margin:0 auto; padding:26px 18px 90px; }
+.mklede{ margin:0 0 22px; }
+.mklede .key{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  font-weight:700; color:var(--bad-tx); margin:0 0 6px; }
+.mklede h1{ margin:0 0 8px; font-size:24px; letter-spacing:-.01em; }
+.mklede p{ margin:0; color:var(--ink-2); max-width:80ch; font-size:14px; }
+.mkstate{ margin:34px 0 0; }
+.mkstate > h2{ font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  font-weight:700; color:var(--gold-deep); margin:0 0 4px; }
+.mkstate > p.why{ margin:0 0 12px; color:var(--ink-2); font-size:13.5px; max-width:82ch; }
+.mkpanel{ background:var(--surface); border:1px solid var(--line);
+  border-radius:7px; padding:14px 16px; margin-top:16px; }
+.mkpanel h3{ margin:0 0 8px; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--gold-deep); font-weight:700; }
+.mkpanel ul{ margin:0; padding-left:18px; }
+.mkpanel li{ margin:7px 0; color:var(--ink-2); font-size:13.5px; max-width:80ch; }
+.mkpanel li b{ color:var(--ink); }
+.mkpanel.ask{ border-left:3px solid var(--gold); }
+.mkpanel.cost{ border-left:3px solid var(--bad); }
+.mkhr{ border:0; border-top:1px solid var(--line); margin:36px 0 0; }
+.mkthemebu{ position:fixed; right:14px; bottom:14px; z-index:40; }
+
+/* ══ WHAT IS PROPOSED · every rule here is new and every token is the
+      page's own (§25) ══════════════════════════════════════════════════ */
+
+/* the pen — `penBtn()`'s own two words, never a Save and never a Cancel
+   (§273.4, §7.3: Planning Mode is not ported). NO MARK BESIDE THE WORD: the
+   first draft put a tick in front of *Done editing* and the platform's own pen
+   has never carried one — an invented decoration is a thing to explain later
+   (§25), and looking at the render is what caught it. */
+
+/* edit mode gives the row a seventh column of its own rather than putting
+   controls INSIDE the prose columns, which is §267 exactly: five of seven
+   holding controls and the name paying for the window */
+.pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px 92px; }
+.rowbu{ display:flex; gap:2px; justify-self:end; }
+.rowbu button{ width:22px; height:22px; padding:0; line-height:1;
+  background:none; border:1px solid transparent; border-radius:4px;
+  color:var(--ink-3); font-size:12px; }
+.rowbu button:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.rowbu button.rm:hover{ border-color:var(--bad); color:var(--bad-tx); }
+.rowbu svg{ display:block; width:12px; height:12px; margin:0 auto; fill:currentColor; }
+/* AND IT FOLDS UNDER THE NAME ON A NARROW WINDOW — found by RENDERING this
+   drawing rather than by reading it (§311.1): at 700px the seventh column
+   takes the row to 694px in a 662px box, and §158's rule is *fit, never and
+   it scrolls*. The read table already sits at its own edge there (six columns
+   leaving 58px for the name), so the strip cannot be afforded a column of its
+   own and drops to its own line instead — §267's fold, one table over. */
+@media (max-width:900px){
+  .pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px; }
+  .pl.ed .r .rowbu{ grid-column:2; justify-self:start; margin-top:4px; }
+  .pl.ed .head .edonly{ display:none!important; }
+}
+
+/* the add row · one idiom for all three kinds (the tracker's own, §356) */
+.addr{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:7px 14px; border-top:1px solid var(--line-soft); background:var(--zebra); }
+.addr.l1{ padding-left:30px; } .addr.l2{ padding-left:46px; }
+/* THE KEY SIZES ITSELF — it was a 78px column to line up with `#`, and
+   *+ work package* broke across two lines in it (§311.1, found by looking).
+   Lining up with a column it does not belong to is not worth a wrapped word. */
+.addr .ak{ font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); white-space:nowrap; flex:none;
+  background:none; border:1px solid transparent; border-radius:4px; padding:3px 7px; }
+.addr button.ak:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.addr button.ak[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold-deep); }
+.addr input{ flex:1 1 220px; min-width:0; }
+.addr input{ font:inherit; font-size:13.5px; background:var(--surface);
+  border:1px solid var(--line); border-radius:5px; padding:4px 9px; color:var(--ink); }
+.addr input::placeholder{ color:var(--ink-3); }
+.addr input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+
+/* one quiet line saying the numbers move, said once where it happens (§35) */
+.ednote{ font-size:12.5px; color:var(--ink-2); background:var(--attn-bg);
+  border-top:1px solid var(--line-soft); padding:6px 14px; }
+
+/* THE PANEL'S FIELDS AND BOTH DIALOGS ARE THE PAGE'S OWN, and finding that
+   out was the round's best hour (§65.9, §53.5). The first draft declared
+   `.dlg` for the dialog CARD — and this page already uses `.dlg` for the
+   OVERLAY, so the card inherited `position:fixed; inset:0` and measured
+   520 x 756 at the top-left corner with its navy header off screen. A class
+   name is one global namespace, and MEASURING the render is what said so:
+   read, four buttons and a card looked perfectly regular.
+
+   Pulling that thread found the larger fault underneath it: this page ALREADY
+   HAS A DIALOG — `.dlg > .card > h2 + p + .cbtns > .ghost + .start` is what
+   *Start a project* opens — and it already has `.fld`, `textarea.fld` and a
+   `.pen`. Every one of those was being declared a second time here with
+   different numbers. So the mockup uses the page's and declares none of them,
+   and what is left below is only what genuinely does not exist yet.
+
+   THE PEN IS `.btn`, NOT `.pen`. The page's `.pen` is the charter's, drawn on
+   a card corner; this one sits in a row of `.btn`s beside List and Timeline,
+   and §268 settled that a pen takes the shape of the line it sits on. Lit, it
+   is `.btn.on` — the bar's own gold — which is what a pressed pen already
+   looks like everywhere else. No new class, no new colour. */
+
+/* a card a shade wider than the page's 440, MEASURED rather than guessed: the
+   shifts list is four columns and reads cramped under 500 */
+.card.wide{ max-width:520px; }
+.card .refuse{ font-size:13.5px; color:var(--bad-tx); background:var(--bad-bg);
+  border-radius:5px; padding:8px 11px; margin:0 0 12px; }
+.shifts{ display:grid; gap:0; margin:4px 0 12px; }
+.shifts .sh{ display:grid; grid-template-columns:20px 46px minmax(0,1fr) auto;
+  gap:9px; align-items:center; font-size:13px; padding:5px 0;
+  border-top:1px solid var(--line-soft); }
+.shifts .sh .code{ font-size:12px; font-weight:700; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; }
+.shifts .sh .mv{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
+.shifts .sh .mv b{ color:var(--bad-tx); }
+.cbtns.apart{ justify-content:space-between; }
+
+/* a day is set the way the office's other modules set one: the word is a
+   button and the press opens the browser's own picker (§356.14, §357.4) */
+.daybu{ font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:3px 9px; color:var(--ink); }
+.daybu:hover{ border-color:var(--gold); }
+.two{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.two .to{ color:var(--ink-3); font-size:12.5px; }
+.tick{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2); }
+
+/* the breakdown, being reported — the sub row grows a status picker */
+.sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 128px 56px 22px;
+  gap:8px; align-items:center; padding:3px 0; }
+.sub .s .fld{ padding:2px 7px; font-size:13px; }
+/* AND IT IS `wcell`, NOT `cell` — the FIFTH class this drawing collided with
+   (§65.9). `.cell` is Analytics' stat card on this same stylesheet: a border,
+   a radius and 12px of padding, which drew a box round a value that is meant
+   to be plain text. Every class introduced here is now checked against the
+   page's own namespace rather than guessed at, which is what that rule
+   actually asks for — the four before it were `.dlg`, `.fld`, `.pen` and `.n`.
+
+   THE STEP'S NAME AND ITS WEIGHT ARE THE PLAN'S, NOT THE REPORT'S — so the
+   person the row is assigned to gets the status picker and reads the other
+   two. The first draft made all three boxes, which quietly let somebody
+   reporting their own work re-weight it. */
+.sub .s .wcell{ min-width:0; display:block; font-size:13px; color:var(--ink-2); }
+.sub .s .wcell .wt{ font-variant-numeric:tabular-nums; color:var(--ink-3); }
+.sub .s select.fld{ font-size:12px; }
+.subadd{ display:grid; grid-template-columns:minmax(0,1fr) 128px 56px 22px;
+  gap:8px; align-items:center; padding:5px 0 0; }
+.derived{ font-size:12.5px; color:var(--ink-2); }
+.derived b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+/* the panel's own textarea is 64px tall by the page's rule, which is right for
+   a charter field and two lines too many for a one-line name */
+.act textarea.fld{ min-height:calc(3em + 14px); }
+
+/* marking it done — the first of the two steps (§3 №1, §6.5) */
+.donebar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  border-top:1px solid var(--line-soft); margin-top:12px; padding-top:12px; }
+.donebar .why{ font-size:12.5px; color:var(--ink-2); margin:0; max-width:64ch; }
+/* HIDDEN ON A BOX WITH ITS OWN `display` HIDES NOTHING, and this drawing
+   walked into it for the third time in this repository (§298.2, §356.8):
+   `.two` and `.tick` are flex, so an author `display` outranks the browser's
+   own `[hidden]{display:none}` — the Planned row showed the two date buttons
+   AND the read-only dates at once, which is exactly what it looks like when a
+   permission gate does nothing. Found by LOOKING at the contributor state;
+   read, the markup is correct on every line. */
+[hidden]{ display:none!important; }
+@media (prefers-reduced-motion:reduce){ *{ transition:none!important } }
+</style>
+<body>
+<div class="mkpage">
+
+<div class="mklede">
+  <p class="key">Mockup &middot; for sign-off &middot; nothing built</p>
+  <h1>Writing a plan</h1>
+  <p>Five of Portfolio's six screens read. This is the one that writes: putting the
+    tree together, changing an activity's facts, moving a date, and reporting against
+    a breakdown. Drawn on the real Plan page &mdash; the stylesheet and every row below
+    are the served page's own bytes, so what is proposed here is measured against what
+    is already there.</p>
+</div>
+
+<div class="mkpanel">
+  <h3>The one thing that decides the shape</h3>
+  <ul>
+    <li><b>There is no Planning Mode, and that was settled on the audit</b> (spec 060
+      &sect;7.3). Their version keeps every added, changed and deleted row in the
+      browser behind a banner and a <i>Save All</i>. This platform deleted exactly that
+      shape once and wrote down why: <b>a field writes when the cursor leaves it and the
+      autosave carries it</b>, so there is no Save and no Cancel anywhere in the product
+      &mdash; a draft is what forces both, plus a guard on closing the tab.</li>
+    <li><b>So writing a plan here is a pen.</b> Press it, the tree grows handles, you
+      work, you press it again. Nothing is held back and nothing is thrown away.
+      <b>Building a two-hundred-row plan without a request per keystroke is what the
+      workbook is for</b> (&sect;9.3), which is this product's own draft-and-commit.</li>
+    <li><b>The cost, stated:</b> restructuring a plan is visible to anybody looking at
+      it while it happens, where Planning Mode let you finish first.</li>
+  </ul>
+</div>
+
+<hr class="mkhr">
+
+<div class="mkstate">
+  <h2>1 &middot; The bar &mdash; the pen, where the drawing had an Edit button</h2>
+  <p class="why">The signed-off plan drawing put <i>Edit</i> beside List and Timeline and
+    said nothing about what it opens. It is the platform's own pen: two words, one
+    control, and the word says what pressing it will do. <b>Press it.</b> Only a Lead or
+    somebody holding a seat is drawn it at all &mdash; a control the server refuses is
+    never drawn.</p>
+
+  <nav class="tabs">
+    <span>Charter</span><span class="on" aria-current="page">Plan</span>
+    <span>Progress</span><span>Analytics</span>
+  </nav>
+
+  <div class="pbar">
+    <span class="owed">1 activity waiting for sign-off</span>
+    <span class="owed red">1 past its date</span>
+    <span class="pcx">59% of the plan done</span>
+    <span class="sp">
+      <button type="button" class="btn on" id="v-list">List</button>
+      <button type="button" class="btn" id="v-time">Timeline</button>
+      <button type="button" class="btn" id="pen" aria-pressed="false">Edit</button>
+    </span>
+  </div>
+
+  <div class="box pl" id="pl">
+    <div class="head"><span>#</span><span>Phase &middot; Work package &middot; Activity</span>
+      <span>Owner</span><span>Planned</span><span>Status</span><span>Done</span>
+      <span class="edonly"></span></div>
+    <div id="rows"></div>
+    <div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers
+      the ones after it &mdash; a code is where a row sits, not a name it keeps.</div>
+  </div>
+
+  <div class="mkpanel">
+    <h3>What edit mode does and does not do</h3>
+    <ul>
+      <li><b>The row gains a strip of its own, on the right.</b> Move up, move down, add
+        beneath, remove. <b>The fields are not edited in the row</b> &mdash; they are
+        edited on the panel, where all of them already are, so there is one answer to
+        <i>where is an activity changed</i> rather than two. It also avoids a fault this
+        product has already paid for (&sect;267): with controls in the prose columns,
+        five of seven columns stop shrinking and the name pays for the window.</li>
+      <li><b>Adding is a name and Enter</b>, for all three kinds &mdash; a phase, a work
+        package, an activity. That is the Internal Tracker's idiom, chosen there for the
+        same reason (<i>we are shifting from a simple google sheet, so it needs to be
+        super simple</i>). Get the skeleton down, then open a row and fill it in.</li>
+      <li><b>Status is not a field here.</b> It is worked out: a real start date is
+        stamped the first time progress leaves nought, a real end date at sign-off. The
+        way to change a status is to report against the row or to accept it on Progress
+        &mdash; never to pick it from a list.</li>
+      <li><b>Nor is the per-cent.</b> A parent's figure is its children by weight; an
+        activity's is its breakdown. Where there is a breakdown there is no box to type
+        in, because the figure is not a second opinion.</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="mkhr">
+
+<div class="mkstate">
+  <h2>2 &middot; One activity, being written</h2>
+  <p class="why">The panel is the same panel the plan already opens; what is new is that
+    its facts are boxes. Everything commits when the cursor leaves it, so there is
+    nothing to press. <b>Two audiences share this panel and see different halves of
+    it</b> &mdash; use the switch to look as each.</p>
+
+  <div class="pbar">
+    <span class="pcx">Looking as</span>
+    <span class="sp">
+      <button type="button" class="btn on" id="as-lead">A Lead</button>
+      <button type="button" class="btn" id="as-con">The person doing it</button>
+    </span>
+  </div>
+
+  <div class="act">
+    <header>
+      <span class="k">2.2</span><b>Behavioural blueprint</b>
+      <span class="k" style="margin-left:auto">Omar Tarek</span>
+      <span class="k shut">Close</span>
+    </header>
+    <div class="abody">
+
+      <div class="arow full"><em>Name</em><div class="v leadonly">
+        <input class="fld" value="Behavioural blueprint"></div>
+        <div class="v cononly" hidden>Behavioural blueprint</div></div>
+
+      <div class="arow full"><em>Produces</em><div class="v leadonly">
+        <textarea class="fld" rows="2">A documented set of behavioural pillars.</textarea></div>
+        <div class="v cononly" hidden><p>A documented set of behavioural pillars.</p></div></div>
+
+      <div class="arow full"><em>About</em><div class="v leadonly">
+        <textarea class="fld" rows="2">The pillars, with observable indicators.</textarea></div>
+        <div class="v cononly" hidden><p>The pillars, with observable indicators.</p></div></div>
+
+      <div class="arow"><em>Planned</em>
+        <div class="v leadonly two">
+          <button type="button" class="daybu" id="d-start">11 Aug 26</button>
+          <span class="to">to</span>
+          <button type="button" class="daybu" id="d-end">22 Aug 26</button>
+        </div>
+        <div class="v cononly" hidden><span class="win">11 &ndash; 22 Aug</span></div></div>
+
+      <div class="arow"><em>Owner</em>
+        <div class="v leadonly"><select class="fld">
+          <option>Nobody</option><option selected>Omar Tarek &mdash; Retail Stores</option>
+          <option>Hend Adel &mdash; Customer Experience</option>
+          <option>Hala Mansour &mdash; Customer Experience</option></select></div>
+        <div class="v cononly" hidden>Omar Tarek</div></div>
+
+      <div class="arow"><em>Actually</em><div class="v">11 Aug &ndash;
+        <span class="soon">the end date is written at sign-off</span></div></div>
+
+      <div class="arow"><em>Status</em><div class="v">
+        <span class="st sign">Waiting to sign off</span></div></div>
+
+      <div class="arow"><em>Depends on</em>
+        <div class="v leadonly"><select class="fld">
+          <option>Nothing</option>
+          <option selected>2.1 &mdash; Executive alignment workshop</option>
+          <option>1.2 &mdash; Leadership interviews</option></select></div>
+        <div class="v cononly" hidden>2.1 Executive alignment workshop</div></div>
+
+      <div class="arow"><em>Blocks</em><div class="v">2.3 Blueprint review</div></div>
+
+      <div class="arow"><em>Marks</em>
+        <div class="v leadonly two">
+          <label class="tick"><input type="checkbox" checked> A milestone</label>
+          <label class="tick"><input type="checkbox" checked> Billable</label></div>
+        <div class="v cononly" hidden><span class="mk">Milestone</span> <span class="mk">Billable</span></div></div>
+
+      <div class="arow full"><em>Broken into</em><div class="v">
+        <div class="sub">
+          <div class="s">
+            <span class="wcell"><input class="fld leadonly" value="Draft the pillars from the audit">
+              <span class="cononly" hidden>Draft the pillars from the audit</span></span>
+            <select class="fld"><option>To do</option><option>In progress</option>
+              <option selected>Done</option></select>
+            <span class="wcell"><input class="fld leadonly" value="40" inputmode="numeric" aria-label="Weight">
+              <span class="cononly wt" hidden>40%</span></span>
+            <span class="rowbu leadonly"><button type="button" class="rm" title="Remove">&times;</button></span></div>
+          <div class="s">
+            <span class="wcell"><input class="fld leadonly" value="Indicators for each pillar">
+              <span class="cononly" hidden>Indicators for each pillar</span></span>
+            <select class="fld"><option>To do</option><option>In progress</option>
+              <option selected>Done</option></select>
+            <span class="wcell"><input class="fld leadonly" value="40" inputmode="numeric" aria-label="Weight">
+              <span class="cononly wt" hidden>40%</span></span>
+            <span class="rowbu leadonly"><button type="button" class="rm" title="Remove">&times;</button></span></div>
+          <div class="s">
+            <span class="wcell"><input class="fld leadonly" value="Internal review with the SMO">
+              <span class="cononly" hidden>Internal review with the SMO</span></span>
+            <select class="fld"><option>To do</option><option>In progress</option>
+              <option selected>Done</option></select>
+            <span class="wcell"><input class="fld leadonly" value="20" inputmode="numeric" aria-label="Weight">
+              <span class="cononly wt" hidden>20%</span></span>
+            <span class="rowbu leadonly"><button type="button" class="rm" title="Remove">&times;</button></span></div>
+        </div>
+        <div class="subadd leadonly"><input class="fld" placeholder="Add a step and press Enter">
+          <span></span><span></span><span></span></div>
+        <div class="note derived">The figure above is <b>100%</b> &mdash; these three by
+          their weights, 40, 40 and 20. Nobody types it. <b>Where the weights do not add
+          up to 100 they are ignored and every step counts the same</b>, which is the
+          honest answer to a half-filled set rather than a refusal mid-edit.</div>
+      </div></div>
+
+      <div class="arow full"><em>Files</em><div class="v"><span class="soon">Not built yet
+        &mdash; where a file lives is the permission, and none of that is decided</span></div></div>
+    </div>
+
+    <div class="donebar" id="donebar">
+      <button type="button" class="start" id="mark">Mark it done</button>
+      <p class="why">A Lead accepts it and sets the day the work actually ended. Until then
+        it sits on Progress waiting, and its real end date stays empty.</p>
+    </div>
+  </div>
+
+  <div class="mkpanel">
+    <h3>Two audiences, one panel</h3>
+    <ul>
+      <li><b>A Lead or a seat</b> writes every fact on this row, and everything above is
+        a box.</li>
+      <li><b>The person the row is assigned to</b> gets the breakdown and <i>Mark it
+        done</i> and nothing else &mdash; they report their own work, they do not
+        restructure the plan. That is this platform's own rule, in its own words:
+        <i>see the plan, write your own rows.</i></li>
+      <li><b>A Viewer</b> sees the read panel, unchanged, and no control on it. Everybody
+        put on a project lands at Viewer, so read-only is what the default quietly
+        grants &mdash; which is the only default that fails safely.</li>
+      <li><b>Where there is no breakdown at all</b> the per-cent is a box and the person
+        reporting types it. Adding the first step is what takes the typing away.</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="mkhr">
+
+<div class="mkstate">
+  <h2>3 &middot; Moving a date &mdash; it shows you first</h2>
+  <p class="why">One of the six rules the plan is actually for: <b>moving a date moves
+    what depends on it, and shows you before anything commits.</b> Press the end date
+    above, or the button here. 2.2 blocks 2.3, and 2.3 blocks nothing further &mdash;
+    a chain is walked to its end, and a chain that loops back on itself is refused
+    rather than walked for ever.</p>
+
+  <p><button type="button" class="ghost" id="open-shift">Move 2.2's end date to 28 Aug</button></p>
+
+  <div class="mkpanel">
+    <h3>Why it is a ticking list and not two buttons</h3>
+    <ul>
+      <li><b>Both answers are real.</b> Sometimes the work downstream was going to slip
+        anyway; sometimes it has a date of its own that nothing may touch. A pair of
+        buttons &mdash; <i>move them</i> against <i>leave them</i> &mdash; cannot express
+        a mix, and a plan with six things downstream usually is one.</li>
+      <li><b>So every row that would shift arrives ticked and you untick what stays.</b>
+        One control, any answer, and the platform's ticking lists already behave this
+        way everywhere else.</li>
+      <li><b>Nothing is written until the press.</b> Closing it changes nothing, including
+        the date you were moving.</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="mkhr">
+
+<div class="mkstate">
+  <h2>4 &middot; Removing a row &mdash; and the refusal</h2>
+  <p class="why">A phase holds work. Removing one that still does is <b>refused, and the
+    refusal names what is in the way</b> &mdash; the same answer already settled one
+    screen over for taking somebody off a project (<i>refusal is better</i>). The press
+    is live either way, because a control that is simply missing tells nobody why.</p>
+
+  <p>
+    <button type="button" class="ghost" id="open-rm-full">Remove phase 2 &mdash; it holds three activities</button>
+    <button type="button" class="ghost" id="open-rm-empty">Remove an empty phase</button>
+  </p>
+
+  <div class="mkpanel cost">
+    <h3>What removing costs, said rather than discovered</h3>
+    <ul>
+      <li><b>There is no undo and no archive.</b> Strategy archives a plan before an
+        upload replaces it, because an upload replaces the whole thing; here a row is
+        removed one at a time and deliberately, so the guard is the refusal and the
+        confirmation rather than a copy nobody would ever open. <b>If that is the wrong
+        call, this is the place to say so</b> &mdash; an archive is a table and a
+        restore screen.</li>
+      <li><b>Every number after it moves.</b> Removing 2.2 makes the old 2.3 into the new
+        2.2. That is rule 5 working, and it is why the line above the tree says so.</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="mkhr">
+
+<div class="mkstate">
+  <h2>5 &middot; The one question with no answer in it yet</h2>
+
+  <div class="mkpanel ask">
+    <h3>Where does <i>who is on a project</i> hang?</h3>
+    <ul>
+      <li>That screen is drawn and signed off &mdash; the ticking list out of the
+        client's register, everybody landing as a Viewer, and taking somebody off who
+        holds activities refused by name. <b>What was never settled is where you reach
+        it from</b>, because the tab row was agreed as four: Charter, Plan, Progress,
+        Analytics.</li>
+      <li><b>A fifth tab</b> &mdash; <i>Team</i>, after Analytics. One press from
+        anywhere in the project, and it makes the row five wide.</li>
+      <li><b>Or a line on the charter</b>, which already names the four accountable
+        people, with the team opening from there. The tab row stays four and the team is
+        one press further away.</li>
+      <li>The recommendation is <b>the fifth tab</b>: naming people is something you do
+        while the plan is in front of you, not while reading the charter &mdash; and the
+        charter is agreed once where the team changes through the work.</li>
+    </ul>
+  </div>
+
+  <div class="mkpanel ask">
+    <h3>And three smaller ones</h3>
+    <ul>
+      <li><b>Can a Lead name people?</b> Today they cannot: naming is the seat's, which
+        is the narrow answer and the one that can be widened without taking anything
+        back. The cost is that a Lead correcting the charter cannot change who leads
+        the project from that row.</li>
+      <li><b>Is a removed row worth keeping?</b> The panel above says there is no
+        archive. One sentence either way settles it.</li>
+      <li><b>Does the plan need an <i>undo the last thing I did</i>?</b> Nothing else in
+        the platform has one. With no Planning Mode, a mistyped name is retyped and a
+        removed row is retyped &mdash; which is cheap for a name and not for a row with
+        a breakdown on it.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ the two dialogs ══════════════════════════════════════════════ -->
+<div class="dlg" id="ov-shift" hidden>
+  <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="sh1">
+    <h2 id="sh1">2.2 Behavioural blueprint &mdash; moving its end date</h2>
+    <div>
+      <p>Its end date moves from <b>22 Aug</b> to <b>28 Aug</b> &mdash; six days later.
+        <b>Two rows depend on it</b>, directly or through something that does. They arrive
+        ticked; untick anything that stays where it is.</p>
+      <div class="shifts">
+        <label class="sh"><input type="checkbox" checked><span class="code">2.3</span>
+          <span>Blueprint review</span>
+          <span class="mv">27 Aug &rarr; <b>2 Sep</b></span></label>
+        <label class="sh"><input type="checkbox" checked><span class="code">3.1.1</span>
+          <span>Leadership communication guide</span>
+          <span class="mv">25 Sep &rarr; <b>1 Oct</b></span></label>
+      </div>
+      <p class="derived">Nothing has changed yet. Closing this leaves 2.2 where it is too.</p>
+    </div>
+    <div class="cbtns apart">
+      <button type="button" class="ghost" data-shut>Leave everything</button>
+      <button type="button" class="start" data-shut>Move the date and the two rows</button>
+    </div>
+  </div>
+</div>
+
+<div class="dlg" id="ov-rm-full" hidden>
+  <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="sh2">
+    <h2 id="sh2">Remove phase 2, Alignment workshops</h2>
+    <div>
+      <p class="refuse" style="white-space:normal">This phase cannot be removed while it holds work.
+        <b>Three activities are in it</b> &mdash; 2.1 Executive alignment workshop,
+        2.2 Behavioural blueprint, 2.3 Blueprint review.</p>
+      <p>Move them to another phase or remove them first. One of them has been signed off
+        and one is waiting for sign-off, so removing this phase would take a reported
+        figure with it.</p>
+    </div>
+    <div class="cbtns"><button type="button" class="ghost" data-shut>Close</button></div>
+  </div>
+</div>
+
+<div class="dlg" id="ov-rm-empty" hidden>
+  <div class="card wide" role="dialog" aria-modal="true" aria-labelledby="sh3">
+    <h2 id="sh3">Remove phase 4, Sustain</h2>
+    <div>
+      <p>Nothing is in this phase. Removing it renumbers nothing, because it is the last.</p>
+      <p class="derived">A phase with activities in it is refused instead &mdash; press the
+        other button above to see it.</p>
+    </div>
+    <div class="cbtns apart">
+      <button type="button" class="ghost" data-shut>Keep it</button>
+      <button type="button" class="start" data-shut>Remove the phase</button>
+    </div>
+  </div>
+</div>
+
+<button type="button" class="btn mkthemebu" id="themebu">Dark</button>
+</div>
+<script>
+(function () {
+  /* THE ROWS ARE THE SERVED PAGE'S OWN, captured out of the running module and
+     re-declared here as data so the edit state can be drawn over them without
+     inventing a plan (§245). `lvl` is 0 phase · 1 work package · 2 activity. */
+  var ROWS = [
+    { lvl:0, n:"Culture audit",                   who:"—",    win:"Jul 26",           st:"done", stw:"Completed",           fig:"100%" },
+    { lvl:2, n:"Attribute survey",                who:"Omar", win:"2 – 14 Jul",       st:"done", stw:"Completed",           fig:"100%", a:1 },
+    { lvl:2, n:"Leadership interviews",           who:"Hend", win:"17 – 27 Jul",      st:"done", stw:"Completed",           fig:"100%", a:1, ms:1 },
+    { lvl:0, n:"Alignment workshops",             who:"—",    win:"Aug 26",           st:"wip",  stw:"In progress",         fig:"67%" },
+    { lvl:2, n:"Executive alignment workshop",    who:"Omar", win:"1 – 5 Aug",        st:"done", stw:"Completed",           fig:"100%", a:1, ms:1 },
+    { lvl:2, n:"Behavioural blueprint",           who:"Omar", win:"11 – 22 Aug",      st:"sign", stw:"Waiting to sign off", fig:"100%", a:1, ms:1, pick:1 },
+    { lvl:2, n:"Blueprint review",                who:"Omar", win:"27 – 31 Aug",      st:"not",  stw:"Not started",         fig:"0%",   a:1, ms:1, late:1, blk:1 },
+    { lvl:0, n:"Activation rollout",              who:"—",    win:"Sep 26 – Feb 27",  st:"wip",  stw:"In progress",         fig:"10%" },
+    { lvl:1, n:"Activation toolkit",              who:"—",    win:"Sep – Nov 26",     st:"wip",  stw:"In progress",         fig:"20%" },
+    { lvl:2, n:"Leadership communication guide",  who:"Hend", win:"25 Sep – 10 Oct",  st:"wip",  stw:"In progress",         fig:"40%", a:1, ms:1 },
+    { lvl:2, n:"Employee engagement resources",   who:"—",    win:"18 Oct – 5 Nov",   st:"not",  stw:"Not started",         fig:"0%",   a:1 },
+    { lvl:1, n:"Leadership-led rollout",          who:"—",    win:"Nov 26 – Feb 27",  st:"not",  stw:"Not started",         fig:"0%" },
+    { lvl:2, n:"Unit-by-unit sessions",           who:"—",    win:"Nov 26 – Jan 27",  st:"not",  stw:"Not started",         fig:"0%",   a:1 },
+    { lvl:2, n:"Embed in the performance cycle",  who:"—",    win:"27 Feb 2027",      st:"not",  stw:"Not started",         fig:"0%",   a:1, ms:1 }
+  ];
+
+  /* THE NUMBERS ARE WORKED OUT, never typed beside the names (§9.8's own fault:
+     two hand-kept figures, both wrong). Three parts under a work package, TWO
+     where an activity hangs straight off a phase — rule 5's collapse. */
+  function numbers(rows) {
+    var at = [0, 0, 0];
+    return rows.map(function (r) {
+      at[r.lvl] += 1;
+      for (var k = r.lvl + 1; k < 3; k++) at[k] = 0;
+      var pkg = false;
+      if (r.lvl === 2) for (var j = rows.indexOf(r) - 1; j >= 0; j--) {
+        if (rows[j].lvl === 1) { pkg = true; break; }
+        if (rows[j].lvl === 0) break;
+      }
+      if (r.lvl === 0) return String(at[0]);
+      if (r.lvl === 1) return at[0] + "." + at[1];
+      return pkg ? at[0] + "." + at[1] + "." + at[2] : at[0] + "." + at[2];
+    });
+  }
+
+  var UP   = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2 10 7H2z"/></svg>';
+  var DOWN = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 10 2 5h8z"/></svg>';
+  var RM   = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2.3 1 6 4.7 9.7 1 11 2.3 7.3 6 11 9.7 9.7 11 6 7.3 2.3 11 1 9.7 4.7 6 1 2.3z"/></svg>';
+
+  var rowsEl = document.getElementById("rows");
+  var pl = document.getElementById("pl");
+  var pen = document.getElementById("pen");
+  var editing = false;
+
+  /* WHERE A ROW SITS IN ITS OWN CONTAINER, which is what decides whether it
+     can move at all: an arrow on the first row of a phase does nothing, and a
+     control that can do nothing is furniture rather than a choice (§94.15).
+     Found by looking at the render — reading the code, four buttons on every
+     row looked perfectly regular. */
+  function firstIn(i) {
+    var r = ROWS[i], p = ROWS[i - 1];
+    return !p || p.lvl < r.lvl;
+  }
+  function lastIn(i) {
+    var r = ROWS[i], n = ROWS[i + 1];
+    return !n || n.lvl < r.lvl;
+  }
+
+  function draw() {
+    var nums = numbers(ROWS), out = "";
+    ROWS.forEach(function (r, i) {
+      var marks = (r.ms ? '<span class="mk">Milestone</span>' : "") +
+                  (r.blk ? '<span class="blk">Blocked</span>' : "");
+      var name = r.a
+        ? '<a class="t" href="#">' + r.n + "</a>"
+        : '<span class="tw">▾</span><span class="t">' + r.n + "</span>";
+      /* THE STRIP IS DRAWN ONLY IN EDIT MODE — never drawn and hidden, or a
+         row keeps a column of empty space it is not using. THREE BUTTONS AND
+         NOT FOUR: a *+ add beneath* on a phase cannot say whether it means a
+         work package or an activity, and the add rows below already say it
+         unambiguously — two ways to do one thing, one of them vague (§32). */
+      var bu = editing
+        ? '<span class="rowbu">' +
+            (firstIn(i) ? '<span style="width:22px"></span>'
+                        : '<button type="button" title="Move up">' + UP + "</button>") +
+            (lastIn(i)  ? '<span style="width:22px"></span>'
+                        : '<button type="button" title="Move down">' + DOWN + "</button>") +
+            '<button type="button" class="rm" title="Remove">' + RM + "</button>" +
+          "</span>"
+        : "";
+      out += '<div class="r lvl' + r.lvl + (r.pick ? " pick" : "") + '">' +
+        '<span class="num">' + nums[i] + "</span>" +
+        '<span class="nm">' + name + marks + "</span>" +
+        '<span class="pwho">' + r.who + "</span>" +
+        '<span class="win' + (r.late ? " late" : "") + '">' + r.win + "</span>" +
+        '<span class="st ' + r.st + '">' + r.stw + "</span>" +
+        '<span class="fig">' + r.fig + "</span>" + bu + "</div>";
+      /* ONE ADD ROW AT THE FOOT OF EVERY CONTAINER, and the kind is decided by
+         WHERE you are typing rather than by a picker somewhere else. A phase
+         may hold either kind, so it offers both and pressing one puts the
+         cursor in the box; a work package holds activities and nothing else,
+         so it says so and does not ask. */
+      var next = ROWS[i + 1];
+      if (!editing) return;
+      var closesPkg = r.lvl === 2 && (!next || next.lvl <= 1) && inPackage(i);
+      var closesPhase = (!next || next.lvl === 0) && r.lvl > 0;
+      if (closesPkg) out += addRow(2, ["activity"]);
+      if (closesPhase) out += addRow(1, inPackage(i) ? ["work package"] : ["activity", "work package"]);
+    });
+    if (editing) out += addRow(0, ["phase"]);
+    rowsEl.innerHTML = out;
+    rowsEl.querySelectorAll("button.ak").forEach(function (b) {
+      b.addEventListener("click", function () {
+        b.parentElement.querySelectorAll("button.ak").forEach(function (o) {
+          o.setAttribute("aria-pressed", String(o === b));
+        });
+        b.parentElement.querySelector("input").focus();
+      });
+    });
+  }
+
+  function inPackage(i) {
+    for (var j = i; j >= 0; j--) {
+      if (ROWS[j].lvl === 1) return true;
+      if (ROWS[j].lvl === 0) return false;
+    }
+    return false;
+  }
+
+  function addRow(lvl, kinds) {
+    var keys = kinds.length === 1
+      ? '<span class="ak">+ ' + kinds[0] + "</span>"
+      : kinds.map(function (k, n) {
+          return '<button type="button" class="ak" aria-pressed="' + (n === 0) + '">+ ' + k + "</button>";
+        }).join("");
+    return '<div class="addr l' + lvl + '">' + keys +
+      '<input placeholder="Name it and press Enter" aria-label="Add a ' + kinds[0] + '"></div>';
+  }
+
+  pen.addEventListener("click", function () {
+    editing = !editing;
+    pen.textContent = editing ? "Done editing" : "Edit";
+    pen.classList.toggle("on", editing);
+    pen.setAttribute("aria-pressed", String(editing));
+    pl.classList.toggle("ed", editing);
+    document.querySelectorAll(".edonly").forEach(function (e) {
+      e.style.display = editing ? "" : "none";
+    });
+    draw();
+  });
+
+  /* LOOKING AS · the two halves of the panel, which is the whole reason the
+     switch is here: one screen, two audiences, and the difference is what
+     needs signing off rather than either half on its own. */
+  function lookAs(lead) {
+    document.getElementById("as-lead").classList.toggle("on", lead);
+    document.getElementById("as-con").classList.toggle("on", !lead);
+    document.querySelectorAll(".leadonly").forEach(function (e) { e.hidden = !lead; });
+    document.querySelectorAll(".cononly").forEach(function (e) { e.hidden = lead; });
+  }
+  document.getElementById("as-lead").addEventListener("click", function () { lookAs(true); });
+  document.getElementById("as-con").addEventListener("click", function () { lookAs(false); });
+
+  function open(id) { document.getElementById(id).hidden = false; }
+  document.getElementById("open-shift").addEventListener("click", function () { open("ov-shift"); });
+  document.getElementById("d-end").addEventListener("click", function () { open("ov-shift"); });
+  document.getElementById("open-rm-full").addEventListener("click", function () { open("ov-rm-full"); });
+  document.getElementById("open-rm-empty").addEventListener("click", function () { open("ov-rm-empty"); });
+  document.querySelectorAll("[data-shut]").forEach(function (b) {
+    b.addEventListener("click", function () { b.closest(".dlg").hidden = true; });
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") document.querySelectorAll(".dlg").forEach(function (o) { o.hidden = true; });
+  });
+
+  document.getElementById("mark").addEventListener("click", function () {
+    var bar = document.getElementById("donebar");
+    bar.innerHTML = '<p class="why">Marked done just now. <b>It is on Progress waiting for a ' +
+      'Lead to accept it</b>, and its real end date stays empty until they do.</p>';
+  });
+
+  /* BOTH PALETTES ON ONE PAGE, because every colour here is the page's own and
+     a drawing signed off in one is signed off in half (§38.4). */
+  var t = document.getElementById("themebu");
+  t.addEventListener("click", function () {
+    var dark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    t.textContent = dark ? "Dark" : "Light";
+  });
+
+  draw();
+  document.querySelectorAll(".edonly").forEach(function (e) { e.style.display = "none"; });
+  lookAs(true);
+})();
+</script>
+</body>

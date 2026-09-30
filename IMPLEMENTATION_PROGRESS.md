@@ -5805,10 +5805,57 @@ rather than typed, so they cannot go stale again; the check reads **228 passed,
 0 failed**, and every one of the thirteen deliberate breaks still turns it red,
 which is what says the fix did not buy the green by removing what it checks.
 
-**Verified**: `check:portfolio:module` 119/0, `typecheck` clean but for
-`lib/prisma.ts`'s pre-existing error, `generated-in-step` all clear,
-`built-in-step.py` all good. The frozen product is untouched and measured, so
-`sw.js` is not bumped. **On the branch, not merged.**
+**And then the whole suite was run, which found four more things and not one
+of them in the product (§379.12–§379.15).** All four are checks, and the
+pattern is the same one every time: a check that is measured against the wrong
+world reads exactly like a broken product.
+
+- **The nine database proofs could not reach most of their own subject.** The
+  second one walks every table in turn and proves that one client cannot see
+  another's rows — and it had been stopping on the fourth table for a
+  fortnight, because Meeting Notes added a date column and the fixture that
+  fills a row in had never been taught what to put in a date. Everything after
+  that table went unchecked, which on a proof about one client not seeing
+  another's data is the part that matters. Fixing the general case rather than
+  that one column then uncovered two more of the same kind, each hiding behind
+  the last. It now walks **all 55 tables** and passes on all three counts.
+  One of the nine still cannot run here at all — it needs a copy of the old
+  database shape, which this machine does not have — and that is written down
+  rather than counted as a pass.
+- **The check that stands between a real client's names and the demo was
+  reading the whole platform.** It reported 102 problems and there was nothing
+  wrong with the demo: it works out which tables belong to a client by looking
+  for a client column, and two tables have one and belong to *us* rather than
+  to any client, so it read every client's rows and blamed them on the demo.
+  It asks the platform's own list now, and the part that proves it can still
+  spot a real name is untouched and still fires.
+- **Six reds were my own run.** Six checks start the app on a port, and the app
+  had never been built on this machine, so *"the app did not start"* was the
+  honest answer to a question nobody should have asked. Built, they all pass.
+- **And two checks were leaving their test clients in the database.** A hundred
+  runs had left two hundred of them, and that is not untidiness: the Memory
+  page opens on the first client by name, so the leftovers changed which client
+  a *different* check was looking at and made it fail. Both now clear up after
+  themselves whatever happens, proved by the count — eighteen deliberately
+  broken runs, and one client left in the database at the end of each.
+
+- **And the type check was never broken either.** Four rounds reported it as
+  *clean apart from one pre-existing error*, and that error was not in the
+  code: the build's first step generates the database's own types and this
+  machine had never been built on, so there were no types to find. After the
+  build it passes with nothing to say. *"Pre-existing" says whose a failure is
+  and not what it is* — which is the same lesson as the tracker check above,
+  twice in one afternoon.
+
+**Verified**: the whole app suite green — setup 33, deploy 5, assistant 10,
+portfolio 121, portfolio module 119, insights 127, standing 7, demo 7, schema
+room 10, modules 112, state 92, door 70, shell 72, clips 23, chat and mail 47,
+upload 9, notes 170, memory 21 · 14 · 36 · 42 · 16, frameworks 90, frameworks
+page 64, tracker 228, eight of the nine database proofs (the ninth needs a copy
+of the old database shape and is recorded as unrun), the generated files in
+step, the shipped file in step with its sources, and the type check clean. The
+frozen product is untouched and measured, so `sw.js` is not bumped. **On the
+branch, not merged.**
 
 ## Portfolio — Progress and Analytics (2026-09-30, spec 060 §14)
 

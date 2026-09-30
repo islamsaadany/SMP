@@ -9962,11 +9962,86 @@ reported `box 0, row 0` &mdash; a correct build called broken (&sect;100.3,
 which is the assertion that matters, three of them standing on exactly the
 fixture dates this moved, where a repair that made them pass would have bought
 the green by taking the check's subject away (&sect;218).
-Verified: `check:portfolio:module` **119/0**,
-`typecheck` clean but for `lib/prisma.ts`'s pre-existing error,
-`generated-in-step` all clear, `built-in-step.py` all good. The frozen product
-is untouched and measured, so **`sw.js` is NOT bumped**. **On the branch, not
-merged.***
+**&sect;379.12 &mdash; AND THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES'
+TABLES**: S2 is the isolation proof and it walks every tenant table in FK
+order, **dying on the fourth** &mdash; so every table after it went unwalked,
+which on an isolation proof is **unproven rather than merely unreported**
+(&sect;376 recorded it as somebody else's and left it, &sect;379.11 again).
+**The throw is what made it findable and STAYS** (&sect;54.5 the useful way
+round): a fixture that silently dropped the column would have seeded a row the
+database refuses and **blamed the product**. **And fixing the CLASS rather than
+the instance found the other two**, each the next blocker, each measured:
+`notes.met_on` is a `date` and the table named no date type, so `date`, `time`
+and the two floats now cover every type `db/schema.sql` uses (&sect;104.7);
+`portfolio_activities`' first nullable FK is its own `depends_on`
+self-reference, and **a self-reference can never be satisfied by a table's
+first row** &mdash; NULL is the correct seed, so it is never chosen; and `'k'`
+is not a legal `tracker_events.kind`, where **two hand-written enum cases
+existed and a third module broke it**, so the value is READ out of
+`pg_get_constraintdef` and both cases are deleted (&sect;24) &mdash; the
+derivation giving `swot_items.cat` &rarr; `'s'`, byte-identical to the case it
+replaces, which is corroboration rather than an argument. **S2 now reads 55
+tenant tables isolated on all three verbs**, eight of nine proofs green, six
+falsifications still red, and **S8 recorded UNRUN rather than passing**
+(&sect;54.5: it wants a v2.0-shaped database this container does not hold and
+says so itself).
+**&sect;379.13 &mdash; AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE
+PLATFORM**: `checks/demo-seed.mjs`, the one file between a real client's names
+and a demo, read **102 hits** &mdash; the first a consultant's seat on another
+client &mdash; with nothing wrong with the demo. It derives its table list from
+a COLUMN, and `tenant_users` and `memory_entries` carry a `tenant_id` and are
+the PLATFORM's, so RLS deliberately does not fence them (&sect;331) while the
+scan runs under `withTenant`, **whose narrowing IS that fence**. &sect;330's
+fault inside out &mdash; that one *scanned nothing and found no forbidden name*
+(a false clean), this *reports the whole platform as this tenant's* (a false
+alarm) &mdash; one root, the list coming from a column rather than from the
+product's own shared, asserted answer, which is IMPORTED now. **The control
+still fires** (&sect;94.2, &sect;113.8): the same scan next door still finds a
+real name in Raya's rows. 7/7, both falsifications red.
+**&sect;379.14 &mdash; AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN**:
+`state`, `door`, `shell`, `blob`, `comms` and `upload` each spawn `next start`,
+and **`.next/BUILD_ID` did not exist** &mdash; built, they read 92/0, 70/0,
+72/0, 23/23, 47/47 and 9/0. They had also been run as three concurrent batches
+against one set of ports, which gives the same sentence for a different reason.
+**Run them serially and check the build first**: &sect;105.6 reaches a whole
+sweep, where the wrong bytes are an absent build.
+**&sect;379.15 &mdash; AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A
+THIRD**: the sweep's one remaining red was in a module this branch has never
+touched &mdash; `checks/memory-page.mjs` **2 red**, asserting that an insight
+names the client it came from and reading **RHI** where it expects **Raya
+Trade**, a client it never creates. **203 leftover tenants, all made that day**:
+five module checks each insert two clients under a timestamped key, one named
+*Raya Trade* and one named *RHI*, and **two of the five never dropped them**
+&mdash; `portfolio-module.mjs` (&sect;376, no cleanup at all) and
+`insights.mjs`, whose delete sat inside the `try` under a comment reading *"the
+fixture goes, whatever happened above"* (&sect;104.8's third time in one day; a
+THROW skipped it, and a throw is what &sect;379.14 had been meeting all
+afternoon). **Litter is not untidiness, it is a moving subject**: the console's
+Memory page opens on the first client BY NAME and `RHI` sorts before `Raya
+Trade` case-sensitively, so a hundred portfolio runs quietly changed what
+another check was measuring &mdash; &sect;94.2 (put the state back) applied to a
+database rather than a row. Both drops move into the `finally`, and the proof is
+the COUNT: portfolio **121/0**, portfolio:module **119/0**, insights **127/0**,
+all five memory checks green (**42/0** where it was 40/2), and **one** tenant
+left afterwards, because a cleanup that runs and leaves rows is no cleanup.
+**&sect;379.16 &mdash; AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING
+GENERATE**: four rounds reported `typecheck` as *clean but for `lib/prisma.ts`'s
+pre-existing error*, and it is not a fault in that file &mdash; `npm run build`
+begins with `prisma generate` and this container had never been built in, so
+the generated client carried no types to find. After &sect;379.14's build,
+`npm run typecheck` **exits 0 with nothing to say**. *"Pre-existing" answers
+whose a failure is and not what it is* &mdash; &sect;379.11's finding about
+&sect;303 in a second place the same day, four rounds having established it was
+not theirs and none having asked what it was.
+Verified: `check:portfolio:module` **119/0**, and after &sect;379.11&ndash;.16
+the whole app suite: setup 33/0, deploy 5/0, assistant 10/0, portfolio 121/0,
+insights 127/0, standing 7/0, demo **7/0**, room 10/0, modules 112/0, state
+92/0, door 70/0, shell 72/0, blob 23/23, comms 47/47, upload 9/0, notes 170/0,
+memory 21 &middot; 14 &middot; 36 &middot; **42** &middot; 16, frameworks 90/0,
+frameworks:page 64/0, tracker **228/0**, eight of the nine spike proofs (S8
+UNRUN, &sect;379.12), `generated-in-step` all clear, `built-in-step.py` all
+good and **`typecheck` clean** (&sect;379.16). The frozen product is untouched
+and measured, so **`sw.js` is NOT bumped**. **On the branch, not merged.***
 
 *Earlier the same day: **&sect;378: Portfolio &mdash; Progress and
 Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:

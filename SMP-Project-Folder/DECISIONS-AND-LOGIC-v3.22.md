@@ -50478,3 +50478,156 @@ dates this moved, and a repair that made them pass would have bought a green
 line by taking the check's subject away (&sect;218: rewrite, never loosen).
 **The product is untouched** &mdash; one check file, read off the diff &mdash;
 so nothing is rebuilt and `sw.js` is not bumped.
+
+### §379.12 — THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES' TABLES
+
+`npm run spike` is the nine proofs spec 043 rests on, and **S2 is the isolation
+proof**: as `smp_app` with tenant A set, on EVERY tenant table from the
+catalogue, a SELECT with no WHERE returns A's rows only, an INSERT carrying B's
+`tenant_id` is refused, and a DELETE with no WHERE leaves B untouched. It walks
+the tables in FK order from a fixture that seeds one row per table, and **it had
+been dying on the fourth table in that order**, so every table after it went
+unwalked &mdash; which on an isolation proof is **unproven rather than merely
+unreported**. &sect;376 recorded it as somebody else's and left it, which is
+&sect;379.11's own finding a second time in one afternoon.
+
+**THE THROW IS WHAT MADE IT FINDABLE AND IT STAYS** (&sect;54.5 in the
+direction that helps): `placeholder()` ends in
+`throw new Error("seed: no placeholder for " + table + "." + col.name)`, so a
+column type it does not know stops the run and names itself. A fixture that
+silently left the column out would have seeded a row the database refuses and
+**blamed the product**.
+
+**AND FIXING THE CLASS RATHER THAN THE INSTANCE IS WHAT FOUND THE OTHER TWO**,
+each one the next blocker, each measured:
+
+1. **`notes.met_on date NOT NULL`** with no default (&sect;357) and no `date`
+   branch in the table. `date`, `time` and the two float types are ordinary
+   column types; with the branches already there they now cover every type
+   `db/schema.sql` uses, so the next NOT NULL column of any of them costs
+   nothing (&sect;104.7).
+2. **`portfolio_activities` referenced itself.** Its two parents are nullable
+   with a CHECK that exactly one is set, so the fixture falls back to *the first
+   nullable FK* &mdash; and the candidates are ordered by constraint name, which
+   puts `depends_on` (a self-reference, `ON DELETE SET NULL`, with a CHECK
+   forbidding a row depending on itself, &sect;375) before `phase_id`. **A
+   self-reference can never be satisfied by a table's first row and NULL is the
+   correct seed for one**, so it is never chosen.
+3. **`'k'` is not a legal `tracker_events.kind`.** The fixture held two
+   hand-written cases for enumerated columns &mdash; `swot_items.cat` and
+   `access_grants.grant_` &mdash; and a third module's column broke it, which is
+   the shape of a list somebody forgets to add to. **An enumerated column names
+   its own legal values**, so `enumValues()` reads the first literal out of
+   `pg_get_constraintdef` and the two cases are DELETED with it (&sect;24),
+   matched on the SIMPLE form only, never on a conditional one like
+   `((c IS NULL) OR (c = ANY …))`, whose other branch is the answer. Measured:
+   exactly **three** enumerated columns on a tenant table are NOT NULL with no
+   default, so a rule replaces a list of two and already covers the third; and
+   the derivation gives `swot_items.cat` &rarr; `'s'`, **byte-identical to the
+   case it replaces**, which is corroboration rather than an argument.
+
+**WHAT IT BOUGHT**: S2 reads **55 tenant tables isolated on all three verbs**
+where it had been `0 ok, 1 failed`. **Verified**: eight of the nine proofs
+green, all six falsifications of the three fixture-using proofs still red, and
+**S8 is recorded UNRUN rather than passing** (&sect;54.5) &mdash; it wants a
+v2.0-shaped database this container does not hold, which its own docstring says
+and &sect;328 records for seven other harnesses.
+
+### §379.13 — AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE PLATFORM
+
+`checks/demo-seed.mjs` is the one file standing between a real client's names
+and a demo shown to somebody else, and it read **102 hits**, the first of them a
+consultant's seat on another client entirely. **Nothing was wrong with the
+demo.** The scan derives its table list from a COLUMN &mdash; anything carrying
+`tenant_id` &mdash; and `tenant_users` and `memory_entries` carry one and are
+the **PLATFORM's**, so row-level security deliberately does not fence them
+(&sect;331). The scan runs under `withTenant`, **whose narrowing IS that
+fence**, so on those two tables it read every tenant's rows and attributed them
+to the demo.
+
+**IT IS &sect;330's FAULT TURNED INSIDE OUT, AND THE ROOT IS THE SAME.** That
+one asked the catalogue by NAME in the schema the tables had just left, found
+nought tables, and *a scan of nothing finds no forbidden name* &mdash; a false
+clean. This is *a scan whose narrowing is not there reports the whole platform
+as this tenant's* &mdash; a false alarm. Both come of the list being worked out
+from a column rather than from **the product's own answer to which tables are a
+tenant's**, and that answer exists, is shared, and is asserted against
+`db/schema.sql`'s own RLS loop (`PLATFORM_TABLES`, &sect;331) &mdash; so it is
+IMPORTED rather than listed (&sect;104.7).
+
+**AND THE CONTROL STILL FIRES**, which is the only thing that says the exclusion
+did not blind it (&sect;94.2, &sect;113.8): the same scan next door still finds
+a real name in Raya's rows. **And it answered a question it raised on the way**
+&mdash; the demo's own `people` register holds no Forefront consultant, so
+*whether the platform placing the person looking at the demo counts as a leak*
+does not arise today; the register IS scanned and would still catch one. **7/7,
+both falsifications red.**
+
+### §379.14 — AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN, TWICE OVER
+
+Worth writing down because six of them read exactly like product faults and are
+not. `check:state`, `door`, `shell`, `blob`, `comms` and `upload` each spawn
+`next start` on a fixed port, and **`.next/BUILD_ID` did not exist** &mdash; the
+app was never built in this container &mdash; so *"the app did not start"* was
+the honest answer to a question nobody should have asked. Built, they read
+**92/0** and **70/0**. Before that they had also been run as three concurrent
+batches against one database and one set of ports, which produced the same
+sentence for a different reason. **Run them serially, and check the build
+first**: &sect;105.6's rule &mdash; *a fix tested against the wrong bytes looks
+exactly like a fix that does not work* &mdash; reaches a whole sweep, where the
+wrong bytes are an absent build and the wrong state is a neighbour's.
+
+### §379.15 — AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A THIRD
+
+Found by running the whole app suite rather than the files this round edited
+(&sect;214), and the red it produced was in a module this branch has never
+touched: `checks/memory-page.mjs` went **2 red** asserting that an insight's row
+and the debrief prompt name the client they came from &mdash; observed **RHI**
+where it expects **Raya Trade**, a client that check never creates.
+
+**THE CAUSE WAS 203 LEFTOVER TENANTS, ALL CREATED THAT DAY.** Five module
+checks each insert two clients under a timestamped key &mdash; one named
+*Raya Trade*, one named *RHI* &mdash; and **two of the five never dropped
+them**: `checks/portfolio-module.mjs`, written at &sect;376 with no cleanup at
+all, and `checks/insights.mjs`, whose delete sat inside the `try` under a
+comment reading *"the fixture goes, whatever happened above"*. That comment is
+&sect;104.8 for the third time in one day: **a throw skipped it**, and a throw
+is the case a check meets most often on a day when the app will not start
+(&sect;379.14, an hour earlier).
+
+**LITTER IS NOT UNTIDINESS, IT IS A MOVING SUBJECT**, which is the finding
+rather than the fix: Forefront's console Memory page opens on the **first
+client BY NAME**, and `RHI` sorts before `Raya Trade` in a case-sensitive sort
+&mdash; so a hundred runs of the portfolio check quietly changed which client
+another check was measuring, and called a correct build broken. *A check that
+leaves its world changed is measured against its own leftovers the next time
+anything else runs* &mdash; &sect;94.2's rule (put the state back) applied to a
+whole database rather than to one row, and &sect;105.6's (the wrong state reads
+exactly like a fault) applied to a neighbour's leftovers rather than to a stale
+build.
+
+**BOTH DROPS MOVE INTO THE `finally`**, so a throw clears them too, and the
+proof is the count: with the fixtures cleared by hand, `portfolio` **121/0**,
+`portfolio:module` **119/0** and `insights` **127/0** all pass and the database
+is back to **one** tenant afterwards &mdash; which is the assertion, because a
+cleanup that runs and leaves rows behind is no cleanup. `portfolio.mjs`,
+`tracker.mjs` and `notes.mjs` already did this and are untouched.
+
+### §379.16 — AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING GENERATE
+
+Four rounds &mdash; &sect;375, &sect;376, &sect;377, &sect;379 &mdash; each
+reported `typecheck` as *"clean but for `lib/prisma.ts`'s pre-existing error"*
+(`Property 'PrismaClient' does not exist on type 'typeof
+import("@prisma/client/default")'`). It is not a fault in that file and never
+was: **`npm run build` begins with `prisma generate`**, and the container had
+never been built in, so the generated client carried no types to find. After
+&sect;379.14's build, `npm run typecheck` &mdash; which deletes
+`tsconfig.tsbuildinfo` first, &sect;320.5a &mdash; **exits 0 with nothing to
+say**.
+
+*"Pre-existing" answers whose a failure is and not what it is*, which is
+&sect;379.11's finding about &sect;303 in a second place on the same day: four
+rounds established it was not theirs, correctly, and none asked what it was.
+The honest line from here is that the typecheck is clean, and a container where
+it is not needs `npm run build` (or `npx prisma generate`) rather than an
+excuse.

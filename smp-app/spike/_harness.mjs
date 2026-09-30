@@ -133,22 +133,65 @@ export async function seedTwoTenants(owner) {
   return { A, B, order };
 }
 
+/* AN ENUMERATED COLUMN NAMES ITS OWN LEGAL VALUES, SO IT IS ASKED RATHER THAN
+   LISTED (§379.12, §104.7). This held two hand-written cases —
+   `swot_items.cat` and `access_grants.grant_` — and a third module's
+   `tracker_events.kind` broke it, which is the shape of a list somebody
+   forgets to add to. Postgres normalises `CHECK (col IN (…))` to
+   `(col = ANY (ARRAY['a'::text, …]))`, so `enumValues()` reads the first
+   literal out of the catalogue and the two named cases are DELETED with it
+   (§24) — asked of the SIMPLE form only, never of a conditional one like
+   `((c IS NULL) OR (c = ANY …))`, whose other branch is the answer and whose
+   column is nullable anyway. Measured: exactly three enumerated columns on a
+   tenant table are NOT NULL with no default, so this replaces a list of two
+   with a rule that already covers the third and the next one. */
 const PLACEHOLDER = { s: "'k'", w: "'w'" };
-function placeholder(col, table) {
-  if (table === "swot_items" && col.name === "cat") return "'s'";
-  if (table === "access_grants" && col.name === "grant_") return "'view'";
+function placeholder(col, table, enums) {
+  const en = enums && enums[table + "." + col.name];
+  if (en !== undefined) return "'" + en.replace(/'/g, "''") + "'";
   const t = col.type;
   if (t === "text" || t.startsWith("character")) return "'k'";
   if (t === "integer" || t === "bigint" || t === "numeric" || t === "smallint") return "1";
   if (t === "boolean") return "true";
   if (t === "jsonb" || t === "json") return "'{}'";
   if (t.startsWith("timestamp")) return "now()";
+  /* A DATE, A TIME AND A FLOAT ARE ORDINARY COLUMN TYPES AND THIS TABLE NAMED
+     NONE OF THEM (§379.12). `notes.met_on` is `date NOT NULL` with no default
+     (§357), so from the day Meeting Notes landed this threw on that one column
+     and took S2, S4 and S5 down with it — every table after `notes` in the FK
+     order went unwalked, which on the isolation proof means unproven rather
+     than merely unreported. §376 recorded it as somebody else's and left it.
+     The throw below is what made it findable at all and STAYS (§54.5): a
+     fixture that silently skipped the column would have seeded a row the
+     database refuses and blamed the product. What is fixed is the CLASS and
+     not the instance — `date`, `time` and the two floats, which together with
+     the branches above cover every type `db/schema.sql` uses today, so the
+     next NOT NULL column of any of them costs nothing (§104.7). */
+  if (t === "date") return "current_date";
+  if (t.startsWith("time")) return "'00:00'";
+  if (t === "real" || t === "double precision") return "1";
   if (t === "uuid") return "gen_random_uuid()";
   throw new Error("seed: no placeholder for " + table + "." + col.name + " " + t);
 }
 
+/* `{ "<table>.<column>": "<first legal value>" }` for every enumerated column
+   on a tenant table, read off the catalogue. */
+export async function enumValues(owner) {
+  const rows = (await owner.query(
+    "SELECT c.relname AS t, pg_get_constraintdef(f.oid) AS def FROM pg_constraint f " +
+    "JOIN pg_class c ON c.oid = f.conrelid JOIN pg_namespace n ON n.oid = c.relnamespace " +
+    "WHERE n.nspname = current_schema() AND f.contype = 'c'")).rows;
+  const out = {};
+  for (const r of rows) {
+    const m = /^CHECK \(\((\w+) = ANY \(ARRAY\['((?:[^']|'')*)'/.exec(r.def);
+    if (m) out[r.t + "." + m[1]] = m[2].replace(/''/g, "'");
+  }
+  return out;
+}
+
 export async function seedRows(owner, tenantId) {
   const tables = await tenantTables(owner);
+  const enums = await enumValues(owner);
   const cols = {}, fks = {};
   for (const t of tables) {
     cols[t] = (await owner.query(
@@ -175,15 +218,25 @@ export async function seedRows(owner, tenantId) {
     /* FK columns from the parent row: every NOT NULL FK, and — where none is
        NOT NULL — the first nullable one only (pillars_one_owner wants exactly
        one of two). */
-    const notNullFk = fks[t].filter((f) => f.cols.every((c) => cols[t].find((x) => x.name === c).notnull));
-    const use = notNullFk.length ? notNullFk : fks[t].slice(0, 1);
+    /* A SELF-REFERENCE CAN NEVER BE SATISFIED BY A TABLE'S FIRST ROW, AND NULL
+       IS THE CORRECT SEED FOR ONE (§379.12). `portfolio_activities.depends_on`
+       is a nullable self-FK with `ON DELETE SET NULL` and a CHECK forbidding a
+       row depending on itself (§375), and the candidate list is ordered by
+       constraint name — `depends_on` before `phase_id` — so the rule below
+       picked the one FK that cannot be met and threw. It was hidden behind
+       `notes.met_on` until that was fixed in the same edit: *a fixture that
+       throws on the first missing thing hides the second*, which is the
+       argument for fixing the class rather than the instance. */
+    const usable = fks[t].filter((f) => f.ref !== t);
+    const notNullFk = usable.filter((f) => f.cols.every((c) => cols[t].find((x) => x.name === c).notnull));
+    const use = notNullFk.length ? notNullFk : usable.slice(0, 1);
     for (const f of use) {
       if (!first[f.ref]) throw new Error("seed: " + t + " references " + f.ref + " which has no row yet");
       f.cols.forEach((c, i) => { if (c !== "tenant_id") row[c] = first[f.ref][f.refcols[i]]; });
     }
     for (const c of cols[t]) {
       if (row[c.name] !== undefined) continue;
-      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t);
+      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t, enums);
     }
     const names = Object.keys(row);
     const ins = await owner.query("INSERT INTO " + t + " (" + names.join(", ") + ") VALUES (" + names.map((n) => row[n]).join(", ") + ") RETURNING *");

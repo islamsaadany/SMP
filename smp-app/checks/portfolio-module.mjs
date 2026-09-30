@@ -89,12 +89,24 @@ const post = async (tenantId, who, body) => {
 };
 
 let failed = false;
+/* THE TWO CLIENTS THIS MAKES ARE DROPPED IN THE `finally` (§379.15), declared
+   out here so a throw still clears them. Written without it at §376, this had
+   left **100 pairs** of tenants in the check database by the end of §379 —
+   and litter is not tidiness, it is a moving subject: the console's Memory
+   page defaults to the FIRST client BY NAME, and `RHI` sorts before
+   `Raya Trade` in a case-sensitive sort, so `checks/memory-page.mjs` went 2
+   red naming a client it never created. *A check that leaves its world
+   changed is measured against its own leftovers the next time anything else
+   runs.* `checks/portfolio.mjs`, `tracker.mjs` and `notes.mjs` already do
+   this; `insights.mjs` did not and now does. */
+let A_ = null, B_ = null;
 try {
   await owner("SET search_path TO " + SCHEMA);
   const TODAY = todayIn();
   const stamp = "pf" + Date.now().toString(36);
   const [{ id: A }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-a", "Raya Trade"]);
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-b", "RHI"]);
+  A_ = A; B_ = B;
   const person = async (t, key, name, seat, idx) => {
     const [u] = await owner(
       "INSERT INTO users (email, name, kind, is_admin, must_change, password_hash) VALUES ($1,$2,'client',false,false,'x') RETURNING id",
@@ -685,6 +697,7 @@ try {
   failed = true;
   console.log("\n  FAIL the check threw — " + (e && e.message ? e.message : String(e)));
 } finally {
+  if (A_ || B_) await owner("DELETE FROM tenants WHERE id = ANY($1)", [[A_, B_].filter(Boolean)]).catch(() => {});
   await pool.end().catch(() => {});
   await appPool.end().catch(() => {});
 }

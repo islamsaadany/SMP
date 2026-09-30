@@ -58941,3 +58941,17 @@ objectives-and-actions form; the built file and `smp-app/public/` REBUILT from
 the merged sources (§91, §329); `sw.js` taken from `main` with a name past both
 sides (§146.2, §94.12). No new duplicate top-level declaration on either side
 (§56.7).
+
+**The two sides met in one check.** `objectives-actions.py` went 56/2 on the
+merged tree and green on each side alone: §430 takes the objectives off an
+objectives function's Overview and §423 keeps a function's S&W off until the
+office ticks it, so together such a function's Strategy tab holds ONE section
+and draws no section row (§213's gate) — and the check pressed a row that is
+not drawn. The page was right. The helper asks the shell which section is
+showing when there is no row to press, so the claim is kept and only the way
+it is reached changes (§218); 58/0 on the merged build and on `main`'s.
+Verified on the merged tree: `qa.py` ERRORS none, authoriser 889/0, differ
+140/0, platform rules 69/0, built-in-step and generated-in-step clear, `tsc`
+clean, and fifteen browser checks from both sides green. **`main`'s own
+authoriser suite runs 763/0 against the merged rules**, so no save that worked
+is refused: no forced sign-out is owed (spec 029).

@@ -94,6 +94,14 @@ def go(pg, fk):
         return False
 
 def sec(pg, k):
+    # A tab with ONE section draws no section row at all (§213's gate), which
+    # is the state an objectives function reaches once its Overview holds
+    # nothing and its S&W waits for the office (§423, §430). There is then no
+    # button to press, and the question is whether that one section IS k —
+    # asked of the shell's own answer, never assumed (§218: the claim that the
+    # Plan opens is kept, only the way it is reached changes).
+    if not ev(pg, "(k)=>!!document.querySelector('#secrow-in [data-sub2]')", True, k):
+        return bool(ev(pg, "(k)=>CURSEC[currentSub]===k", False, k))
     try:
         pg.click('#secrow-in [data-sub2="%s"]' % k, timeout=2500); pg.wait_for_timeout(520)
         return True

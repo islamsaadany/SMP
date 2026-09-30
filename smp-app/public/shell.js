@@ -57543,9 +57543,22 @@ var SYNC = (function () {
      fetch that fails leaves the tab exactly as it was and answers false —
      the switch still happens, judged correctly (§185), on the old
      baseline: the honest fallback, never a blocked way home (§209). */
-  function rebase(done) {
+  function rebase(done, quiet) {
     done = done || function () {};
     if (!live || saving) return done(false);
+    /* §416: THE QUIET REFRESH ON A CROSSING asks the same thing and takes the
+       server's answer ONLY IF NOTHING HERE WOULD BE LOST. The view switch
+       rebases after its own flush and may overwrite; a quiet refresh must
+       never — so if a change has been made since the flush, or a hand is in
+       a field (a bound field writes on blur into the object it was drawn
+       from, and hydrate replaces that object, §35), the answer is dropped
+       and the page keeps what it has. The next crossing asks again. */
+    var busy = function () {
+      if (serialize() !== lastSaved) return true;
+      var a = document.activeElement;
+      return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
+    };
+    if (quiet && busy()) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
         if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
@@ -57554,9 +57567,11 @@ var SYNC = (function () {
       })
       .then(function (data) {
         if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        if (quiet && busy()) return done(false);
+        var before = lastSaved;
         hydrate(data.state);
         lastSaved = serialize();
-        done(true);
+        done(true, lastSaved !== before);
       })
       .catch(function () { done(false); });
   }
@@ -57593,6 +57608,9 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
+    /* The quiet refresh after a crossing (§416): the same fetch, dropped
+       rather than applied if anything on the page would be lost. */
+    refresh: function (done) { rebase(done, true); },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`
@@ -69337,6 +69355,25 @@ var SYNC = (function () {
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
+        /* §416: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+           "yes add the quiet refresh when crossing"). A press that is a paint
+           shows what this tab already holds; behind it, anything waiting is
+           saved first, then the server's copy is asked for and the page
+           redrawn only if it differs. A save that is refused or fails takes
+           nothing from the server — that is the work §184's banner offers to
+           put back — and SYNC.refresh drops the answer if a hand has since
+           touched the page. `window.__smpRefresh` counts landings, for the
+           check alone. */
+        var quietly = function () {
+          if (typeof SYNC === "undefined" || !SYNC.refresh || !SYNC.saveNow) return;
+          SYNC.saveNow(function (how) {
+            if (how !== "saved" && how !== "clean") return;
+            SYNC.refresh(function (ok, changed) {
+              if (ok) window.__smpRefresh = (window.__smpRefresh || 0) + 1;
+              if (ok && changed && typeof paint === "function") paint();
+            });
+          });
+        };
         /* §415: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
            ITSELF (Islam: "when moving between client settings and strategy
            the strategy page loads"). The client's settings, a module's
@@ -69354,6 +69391,7 @@ var SYNC = (function () {
           setScope(null);
           current = null; currentSub = null;
           paint(); window.scrollTo(0, 0);
+          quietly();
           return;
         }
         if (cross && typeof current !== "undefined" &&
@@ -69364,6 +69402,7 @@ var SYNC = (function () {
             setScope(cross);
             current = "setup"; currentSub = k;
             paint(); window.scrollTo(0, 0);
+            quietly();
             return;
           }
         }

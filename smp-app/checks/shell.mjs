@@ -607,10 +607,24 @@ await section("3b \u00b7 the client's own settings wear the client's bar (\u00a7
      cannot survive a document. Both ends (§94.2). */
   await open("/raya-trade/setup/people");
   await page.evaluate(() => { window.__stay = 3; });
+  /* §416: AND BEHIND THE PRESS THE PAGE QUIETLY CATCHES UP. A change made on
+     the server while the tab was open — here the cycle's name, written as if
+     by somebody else — must be on the page once the crossing has settled,
+     WITHOUT the page being rebuilt. Both ends: the tab did not hold it before
+     the press, or "it holds it after" proves nothing (§113.8). */
+  const cycleWas = (await owner.query("select name from review where tenant_id = $1", [tenantId])).rows[0].name;
+  const cycleMark = "Refreshed-" + Date.now();
+  await owner.query("update review set name = $1 where tenant_id = $2", [cycleMark, tenantId]);
+  const heldBefore = await page.evaluate(() => typeof REVIEW !== "undefined" && REVIEW.name);
   if (await pressTrail("/raya-trade/strategy")) await page.waitForURL((u) => /^\/raya-trade\/strategy\/(?!setup)/.test(u.pathname), { timeout: 8000 }).catch(() => {});
+  await page.waitForFunction(() => (window.__smpRefresh || 0) >= 1, null, { timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(400);
   b = await bar();
   check(await page.evaluate(() => window.__stay === 3), "Client settings → Strategy is a press, not a page load (§415)", "the page was rebuilt");
+  const heldAfter = await page.evaluate(() => typeof REVIEW !== "undefined" && REVIEW.name);
+  check(heldBefore !== cycleMark && heldAfter === cycleMark,
+        "…and behind it the page quietly took the server's newer copy (§416)", JSON.stringify({ heldBefore, heldAfter }));
+  await owner.query("update review set name = $1 where tenant_id = $2", [cycleWas, tenantId]);
   check(/^\/raya-trade\/strategy\/(?!setup)/.test(path()) && !b.scope && b.row === true && b.where === "Strategy",
         "…landing on Strategy's own pages, wearing its navigation", path() + " / " + JSON.stringify(b));
   await page.evaluate(() => { window.__stay = 4; });

@@ -244,6 +244,25 @@
         /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
            same one the rail rows made: one document, one attribute. */
         var cross = /^cross:/.test(go) ? go.slice(6) : null;
+        /* §416: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+           "yes add the quiet refresh when crossing"). A press that is a paint
+           shows what this tab already holds; behind it, anything waiting is
+           saved first, then the server's copy is asked for and the page
+           redrawn only if it differs. A save that is refused or fails takes
+           nothing from the server — that is the work §184's banner offers to
+           put back — and SYNC.refresh drops the answer if a hand has since
+           touched the page. `window.__smpRefresh` counts landings, for the
+           check alone. */
+        var quietly = function () {
+          if (typeof SYNC === "undefined" || !SYNC.refresh || !SYNC.saveNow) return;
+          SYNC.saveNow(function (how) {
+            if (how !== "saved" && how !== "clean") return;
+            SYNC.refresh(function (ok, changed) {
+              if (ok) window.__smpRefresh = (window.__smpRefresh || 0) + 1;
+              if (ok && changed && typeof paint === "function") paint();
+            });
+          });
+        };
         /* §415: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
            ITSELF (Islam: "when moving between client settings and strategy
            the strategy page loads"). The client's settings, a module's
@@ -261,6 +280,7 @@
           setScope(null);
           current = null; currentSub = null;
           paint(); window.scrollTo(0, 0);
+          quietly();
           return;
         }
         if (cross && typeof current !== "undefined" &&
@@ -271,6 +291,7 @@
             setScope(cross);
             current = "setup"; currentSub = k;
             paint(); window.scrollTo(0, 0);
+            quietly();
             return;
           }
         }

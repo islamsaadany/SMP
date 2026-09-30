@@ -1099,9 +1099,22 @@ var SYNC = (function () {
      fetch that fails leaves the tab exactly as it was and answers false —
      the switch still happens, judged correctly (§185), on the old
      baseline: the honest fallback, never a blocked way home (§209). */
-  function rebase(done) {
+  function rebase(done, quiet) {
     done = done || function () {};
     if (!live || saving) return done(false);
+    /* §416: THE QUIET REFRESH ON A CROSSING asks the same thing and takes the
+       server's answer ONLY IF NOTHING HERE WOULD BE LOST. The view switch
+       rebases after its own flush and may overwrite; a quiet refresh must
+       never — so if a change has been made since the flush, or a hand is in
+       a field (a bound field writes on blur into the object it was drawn
+       from, and hydrate replaces that object, §35), the answer is dropped
+       and the page keeps what it has. The next crossing asks again. */
+    var busy = function () {
+      if (serialize() !== lastSaved) return true;
+      var a = document.activeElement;
+      return !!(a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)));
+    };
+    if (quiet && busy()) return done(false);
     fetch(withClient("/api/state"), { cache: "no-store" })
       .then(function (r) {
         if (r.status === 401 || r.status === 403) { cacheWipe(); location.replace(doorUrl()); throw new Error("sign in"); }
@@ -1110,9 +1123,11 @@ var SYNC = (function () {
       })
       .then(function (data) {
         if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+        if (quiet && busy()) return done(false);
+        var before = lastSaved;
         hydrate(data.state);
         lastSaved = serialize();
-        done(true);
+        done(true, lastSaved !== before);
       })
       .catch(function () { done(false); });
   }
@@ -1149,6 +1164,9 @@ var SYNC = (function () {
     /* Take the server's current graph as the tab's new truth (§237). The
        caller is the viewer switch and nothing else schedules it. */
     rebase: function (done) { rebase(done); },
+    /* The quiet refresh after a crossing (§416): the same fetch, dropped
+       rather than applied if anything on the page would be lost. */
+    refresh: function (done) { rebase(done, true); },
     /* WHO THE SCREEN IS BEING DRAWN FOR (§383). The save has carried the
        simulated person since §185; a module that READS a person's data has
        the same question, and it must have the SAME answer — `actingAs()`

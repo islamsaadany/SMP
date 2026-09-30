@@ -10656,7 +10656,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 — **§438: a business unit says how it plans in Client set-up.** The Business units step gains the functions row's own *plans in* dropdown (Pillars · Projects · Objectives & actions), Pillars by default and stored as an absence; on a client with a plan it goes through `switchPlanWay("unit")` (warning, hide and keep), otherwise it rides the flow's answer and `__smpShape` writes it after the carry. `setup-live-rows.py` §6 red 7, `setup-shape.mjs` §10 red 2 from the sources. On the branch, not merged.*
+*Last Updated: 2026-09-30 — **§438: a business unit says how it plans in Client set-up.** The Business units step gains the functions row's own *plans in* dropdown (Pillars · Projects · Objectives & actions), Pillars by default and stored as an absence; on a client with a plan it goes through `switchPlanWay("unit")` (warning, hide and keep), otherwise it rides the flow's answer and `__smpShape` writes it after the carry. `setup-live-rows.py` §6 red 7, `setup-shape.mjs` §10 red 2 from the sources. Merged to `main` 2026-09-30 on Islam's word.*
 
 *Earlier: 2026-09-30 — **§437: a supporting function's key objectives are a tick on its first section.** Back on the functions' row of Client set-up › Structure beside the Description, on by default (stored levels and the fallback already list `keyobj`). Off hides AND stops counting through one rule, `fnKoCounted()`: no Reporting ask, and the headline falls to the projects (`capPerf`) or pillars (`unitPillars`). Objectives-and-actions functions and every non-function untouched. `setup-live-rows.py` §5, red 1 / 1 from the sources. On the branch, not merged.*
 

@@ -140,6 +140,8 @@ try {
       .forEach((m) => { if (m.actual == null || m.actual === "") unrep.push(k + ":" + (m.id || m.name)); });
   });
   check(unrep.length === 0, "every objective and measure has a reported figure", unrep.slice(0, 6));
+  const noSW = Object.entries(back.functions).filter(([, f]) => !((f.swot || {}).s || []).length || !((f.swot || {}).w || []).length).map(([k]) => k);
+  check(noSW.length === 0, "every function has strengths and weaknesses", noSW);
   check(back.history.length >= 3 && back.archives.length >= 1, "three closed periods and an archived cycle",
     { history: back.history.length, archives: back.archives.length });
   const unsub = Object.keys(back.units).filter((k) => !back.review.submitted[k]);

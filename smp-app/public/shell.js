@@ -11913,6 +11913,13 @@ function rowReads(x){
      ever asked to explain it and Submit let it through unexplained. */
   if (x.kind === "tactic") return tacticProgress(x.obj);
   if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
+  /* §416: AND AN ACTION, read exactly as a milestone is. It fell through to
+     `measureScore`, which an action (no target) always answers null — so an
+     action that was due and behind never asked for a note and Submit let it
+     through unexplained, where a milestone in the same state is stopped.
+     Islam, 2026-09-30: "let's fix the actions that ask for a note". §414 gave
+     `rowAnswered` the same case; the two readers of one row now agree. */
+  if (x.kind === "action") return statusReads(x.obj);
   /* §343: and a breakdown cell reads its own score — NULL on an indicator
      column, which is what makes "a Mix figure can never be at risk" true
      rather than merely stated: the note rule asks this and nothing else. */

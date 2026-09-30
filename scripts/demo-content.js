@@ -269,7 +269,8 @@ function objectivesFunctions(g) {
     A("fin-A2", "Automate the average-debt utilisation report", "Abd El Rahman Wazir", "Apr 2026", "done"),
     A("fin-A3", "Collections playbook for accounts over 90 days", "Sana Debs", "May 2026", "wip", 70,
       "Distribution units are on it; B2C follows in July."),
-    A("fin-A4", "Rolling quarterly forecast in place of the annual re-forecast", "Abd El Rahman Wazir", "Jun 2026", "wip", 60),
+    A("fin-A4", "Rolling quarterly forecast in place of the annual re-forecast", "Abd El Rahman Wazir", "Jun 2026", "wip", 60,
+      "The model is built; two units still submit their inputs by spreadsheet, so the first rolling cycle runs in Q3."),
     A("fin-A5", "Consolidate three credit facilities into one", "Sana Debs", "Sep 2026"),
     A("fin-A6", "Working-capital targets set per unit for 2027", "Abd El Rahman Wazir", "Nov 2026"),
   ];

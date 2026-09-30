@@ -339,6 +339,29 @@ def main():
            owed.get("gaps", 0) >= 2 and sorted(owed.get("missing") or []) == ["due", "owner"], owed)
         ck("and Submit says so", "missing in the plan" in (owed.get("refusal") or ""), owed.get("refusal"))
 
+        print("\n§7b an action that is behind asks for a note, as a milestone does (§416)")
+        # Islam, 2026-09-30: *"let's fix the actions that ask for a note"*. An
+        # action read through `measureScore` always answered null, so a due and
+        # behind action never asked. BOTH ENDS (§94.2): asked with no note,
+        # cleared by one, and never asked of an action whose date has not come.
+        behind = ev(pg, """(k)=>{
+          var a = addAction(k); a.name = "Payroll audit"; a.owner = "Amr Hassan";
+          a.due = "Mar 26"; a.status = "wip"; a.pct = 30;
+          var b = addAction(k); b.name = "Next year's grading review"; b.owner = "Amr Hassan";
+          b.due = "Dec 26"; b.status = "wip"; b.pct = 10;
+          var ids = function(){ return fnMissingNotes("fn:" + k).map(function(x){ return x.id; }); };
+          var before = ids(), refusal = submitRefusal("fn:" + k);
+          a.note = "Waiting on the payroll system export, due in April.";
+          var after = ids();
+          return { a: a.id, b: b.id, before: before, after: after, refusal: refusal };
+        }""", {}, FK)
+        ck("a due action at 30% with no note is asked for one",
+           behind.get("a") in (behind.get("before") or []), behind)
+        ck("and Submit says a figure has no note", "no note" in (behind.get("refusal") or ""), behind.get("refusal"))
+        ck("a note clears it", behind.get("a") not in (behind.get("after") or []), behind)
+        ck("and an action not yet due is never asked",
+           behind.get("b") not in (behind.get("before") or []), behind)
+
         print("\n§8 the plan can leave and come back (§22)")
         wb = ev(pg, """(k)=>{
           var h = fnOwnHolder(k), wb = capPlanWorkbook(h), sh = {};

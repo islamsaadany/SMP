@@ -26,6 +26,7 @@ import { spawn } from "node:child_process";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { join } from "node:path";
 import { chromium } from "playwright-core";
+import { DEFAULT_MODULE } from "../lib/modules.ts";
 import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
 import { withTenant } from "../lib/tenant.ts";
@@ -85,7 +86,15 @@ try {
   await page.waitForSelector(".gate[data-hydrated]", { state: "attached", timeout: 20000 });
   await page.fill("#user", "office@forefront.example");
   await page.fill("#password", DEV_PASSWORD);
-  await Promise.all([page.waitForURL(BASE + "/" + SLUG), page.click("#loginForm button[type=submit]")]);
+  /* WAIT FOR WHERE THE SIGN-IN LANDS, NOT FOR ONE ADDRESS (§365). §362 made
+     `/<client>` REDIRECT into the first module the person may open, so an
+     exact match never arrives and this file died rather than reporting
+     (§215). door-landing.mjs's own predicate, and it must name the MODULE:
+     `/<client>/sign-in` starts with `/<client>` too, so the looser form is
+     satisfied by the page you have not left (§113.8). */
+  await Promise.all([
+    page.waitForURL((u) => u.pathname.startsWith("/" + SLUG + "/" + DEFAULT_MODULE), { timeout: 20000 }),
+    page.click("#loginForm button[type=submit]")]);
   await page.goto(BASE + "/" + SLUG + "/mobile/strategy", { waitUntil: "networkidle" });
   await page.waitForFunction(() => !document.documentElement.classList.contains("booting"), null, { timeout: 25000 });
 

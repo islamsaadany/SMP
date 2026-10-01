@@ -145,7 +145,9 @@ def main():
                   pairs:[...document.querySelectorAll('.pair i')].length};
         }""")
         ck("the measures table names the annual target and the YTD actual",
-           t["m"] == ["#","Measure","Dir.","Annual target","Compile","YTD actual","Progress"], t["m"])
+           # §395: the second heading is the client's word for one measure,
+           # asked of the page — every other heading still a literal (§218).
+           t["m"] == ["#", pg.evaluate("() => L1('measure')"),"Dir.","Annual target","Compile","YTD actual","Progress"], t["m"])
         ck("...and every row still fills it", set(t["mCells"]) == {7}, t["mCells"])
         # §248 gave this table an Outcome column and renamed its figure to match
         # the measures table above it -- "delivery" is wrong for a row measured

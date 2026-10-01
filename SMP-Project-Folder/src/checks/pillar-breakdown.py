@@ -83,7 +83,7 @@ MAKE = """() => {
     r["t_"+b.cols[0].id]=d[1]; r["a_"+b.cols[0].id]=d[2];
     r["t_"+c2.id]=d[3]; r["a_"+c2.id]=d[4];
     r["t_"+c3.id]=d[5]; r["a_"+c3.id]=d[6]; });
-  RAIL["unit:mobile"] = p.code;
+  RAIL["unit:mobile"] = p.id;
   return { code: p.code, cols: b.cols.map(c => c.id) };
 }"""
 
@@ -96,7 +96,7 @@ with sync_playwright() as pw:
 
     print("\n1 · a pillar without one is untouched, and one with it draws it")
     # BEFORE anything is made: the pane a breakdown would be on.
-    pg.evaluate("()=>{ current='mobile'; RAIL['unit:mobile']=UNITS['mobile'].items[1].code; paint(); }")
+    pg.evaluate("()=>{ current='mobile'; RAIL['unit:mobile']=UNITS['mobile'].items[1].id; paint(); }")
     pg.wait_for_timeout(300)
     click(pg, "[data-s='strategy']"); click(pg, "[data-sub2='plan']")
     heads = lambda: pg.evaluate("""()=>[...document.querySelectorAll('#panel h4.mini, #panel h5.mini')]
@@ -111,12 +111,12 @@ with sync_playwright() as pw:
     ok("...and with one it draws its own section", 
        any("CATEGORIES" in h.upper() for h in after), after)
     # the OTHER pillar, in the same run
-    pg.evaluate("()=>{ RAIL['unit:mobile']=UNITS['mobile'].items[0].code; paint(); }")
+    pg.evaluate("()=>{ RAIL['unit:mobile']=UNITS['mobile'].items[0].id; paint(); }")
     pg.wait_for_timeout(350)
     other = heads()
     ok("the pillar beside it still says nothing about one",
        not any("CATEGORIES" in h.upper() for h in other), other)
-    pg.evaluate("()=>{ RAIL['unit:mobile']=UNITS['mobile'].items[1].code; paint(); }")
+    pg.evaluate("()=>{ RAIL['unit:mobile']=UNITS['mobile'].items[1].id; paint(); }")
     pg.wait_for_timeout(300)
 
     print("\n2 · the pen builds it, and every press reaches the stored plan")

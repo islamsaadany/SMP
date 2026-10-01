@@ -32,10 +32,12 @@
        directly: no webfont, a small type scale, and shape carried by radius
        rather than by shadow. */
     /* The fallback stack, and what every embedded face falls back TO. Never
-       read directly by a rule — rules read --sans, which is set on the font
-       axis below. */
+       read directly by a rule — rules read --sans. */
     --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
-    --sans:var(--sys-sans);
+    /* ONE FACE, EVERYWHERE (§402). Islam: *"remove the font button and keep
+       the font source sans across the platform."* The system stack stays as
+       what a face that fails to decode falls back to, never as a choice. */
+    --sans:'Source Sans 3',var(--sys-sans);
     /* The mono stack stays a system stack. It carries person keys and unit
        codes — a dozen short strings — and a second embedded family to style
        those would be 40 KB for nothing. */
@@ -67,22 +69,8 @@
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
 
-  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
-     Its own axis for now, independent of the palette, so the four faces can be
-     compared IN the real product rather than from a specimen sheet. Islam:
-     *"B first"* — try them all, then settle which face belongs to which
-     palette and collapse the axis into it, at which point the faces nobody
-     picked come out of the file.
-
-     Each face names the system stack after it, so a face that fails to decode
-     degrades to the system font rather than to a default serif. Absence of the
-     attribute is the system stack, which is why there is no [data-font="system"]
-     block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§157). The other three
-     went with their .woff2 files rather than being left here unreachable — a
-     rule for a face the product no longer carries is exactly what §24 is
-     about, and the next reader would have no way to tell it was dead. */
-  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  /* THE FONT AXIS (§38.8, §157) IS GONE (§402): Source Sans 3 is --sans
+     above, for everybody, and there is no switch to answer. */
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every
@@ -135,7 +123,7 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -158,7 +146,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42;
+    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -190,7 +178,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -210,7 +198,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A;
+    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
@@ -530,36 +518,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
-     Islam picked the solid fill of three drawn options: the volume the Report
-     button had, moved onto the tab that replaces it. Unmistakable while you
-     are in it, which is the point — everything typed there is going to the
-     office.
-
-     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
-     the ink that survives on it. Never `--cta` as type on a light ground and
-     never white on the bright half, which is §38.4's trap in both
-     directions.
-
-     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
-     wins without an !important — the mistake §40 recorded, where an enforced
-     rule went on winning after the argument had changed. */
-  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
-     *"the reporting button should always become orange even if it's not open,
-     and it's appearing as long as the cycle is open."* The first build gave
-     the orange to the word when unselected and the fill only on selection,
-     which made it quiet exactly when somebody needs to notice it — the old
-     Report button was solid at all times, and that is the volume being moved
-     rather than a new one being added (§41's budget: the tab is drawn only
-     while a cycle is open, for somebody who may report).
-
-     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
-     never changes when you are standing on it stops answering "where am I".
-     `--cta-hover` is that half and is declared for every palette beside
-     `--cta`, so this needs no new token and no literal (§25). */
-  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
-  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
+  /* The main tab row, Reporting's orange fill included, lives in
+     arrange.css with §409. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -806,3 +766,35 @@
 }
 .clientback:hover,.clientback:focus-visible{ border-color:var(--gold-deep); outline:none }
 .clientback i{ font-style:normal; font-weight:400; color:var(--ink-3); font-size:12px }
+/* ── THE CLIENT'S OWN SETTINGS WEAR THE CLIENT'S BAR (§362, spec 058) ────
+   `data-client-settings` is written on the root by paint() and by nothing
+   else (shell.html clientBar): the pages behind it belong to no module, so
+   the module's navigation is not drawn over them.
+
+   WHY THESE THREE AND NOT A CLASS PER CONTROL. Everything in `nav.units` is a
+   way of choosing which part of a MODULE you are reading — the house into its
+   welcome, the group, the units and functions, the gear into that module's
+   Setup — and the viewer strip is *looking as somebody in this client*, which
+   is a question about a module's pages and not about how the client was set
+   up. Standing down the two CONTAINERS is what makes a control added to
+   either covered the day it is added (§104.7).
+
+   `display:none`, never opacity or a width: a control hidden by paint alone
+   still takes the keyboard and still answers every DOM probe (§3.2, §70).
+   And the row goes as a WHOLE — `nav.units` carries the tenant's own
+   `--panel` ground and a border, so emptying `#units` and leaving the wrapper
+   would draw a navy stripe with nothing in it (§28's rule for an empty
+   heading, one element out). */
+html[data-client-settings] nav.units,
+html[data-client-settings] .viewer { display:none; }
+/* The way back says what it does first. `change` is the word for a control
+   that NAMES the client you are in; here it names the act, so the second half
+   would be saying something the first half already did (§87). */
+.clientback[data-saveclose] i{ display:none }
+/* THE CLIENT'S MARK (§362). Sized like the theme and font controls beside it
+   rather than like the deck's lockup — this is a bar, and a mark taller than
+   the line it sits on is what pushes the whole chrome down a row. `contain`,
+   because a client's mark is whatever shape they uploaded and a stretched one
+   is worse than a small one (§50's own rule for a slide picture). */
+.clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
+             flex-shrink:0; align-self:center; display:block }

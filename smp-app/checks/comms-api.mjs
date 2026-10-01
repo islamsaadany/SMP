@@ -50,6 +50,7 @@
 import { spawn } from "node:child_process";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { chromium } from "playwright-core";
+import { DEFAULT_MODULE } from "../lib/modules.ts";
 import { join } from "node:path";
 import { createRequire } from "node:module";
 import pg from "pg";
@@ -305,7 +306,15 @@ try {
     await page.waitForSelector(".gate[data-hydrated]", { state: "attached", timeout: 15000 });
     await page.fill("#user", "mobhead@raya.example");
     await page.fill("#password", DEV_PASSWORD);
-    await Promise.all([page.waitForURL(BASE + "/" + SLUG), page.click("#loginForm button[type=submit]")]);
+    /* WAIT FOR WHERE THE SIGN-IN LANDS, NOT FOR ONE ADDRESS (§365). §362 made
+       `/<client>` REDIRECT into the first module the person may open, so an
+       exact match on it never arrives and this section hung for thirty
+       seconds and died rather than reporting (§215). The predicate is
+       door-landing.mjs's own — the client's own path, wherever inside it the
+       redirect settles — so the next module to lead does not break it. */
+    await Promise.all([
+      page.waitForURL((u) => u.pathname.startsWith("/" + SLUG + "/" + DEFAULT_MODULE), { timeout: 20000 }),
+      page.click("#loginForm button[type=submit]")]);
     /* `/<client>` is the LANDING (§315), not the platform — a React page with
        no shell on it, so no corner and no `SYNC`. The platform is behind
        *Continue*, and that is where this section's subject lives. */

@@ -47,6 +47,7 @@
 import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { releaseStamp } from "./release-stamp.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 /* SMP_FROZEN_SW points it at a doctored copy, so the guards below can be
@@ -82,6 +83,13 @@ const head =
   "   person's page served to the next. This worker STORES NOTHING and has no\n" +
   "   fetch handler at all — the browser goes to the network for everything. */\n" +
   "\n" +
+  /* THE RELEASE STAMP (§397): the line that makes /sw.js differ between two
+     releases, which is the only way an open tab learns of one and is offered
+     §258's reload. Built last in `npm run build`, after every generator that
+     writes what it hashes. SMP_BREAK=no-stamp leaves it out, so the check can
+     be proved able to fail. */
+  (process.env.SMP_BREAK === "no-stamp" ? "" :
+    "/* release " + releaseStamp() + " — changes whenever a file a tab holds changes (§397) */\n\n") +
   "self.addEventListener(\"install\", () => self.skipWaiting());\n" +
   "\n" +
   "/* EVERY cache, not the ones this file knows the names of: what has to go is\n" +

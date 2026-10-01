@@ -255,7 +255,7 @@ with sync_playwright() as pw:
       const m = UNITS.mobile.items[0].measures[0];
       m.target = ""; delete m.target3y; delete m.pend;
       current = "mobile"; currentSub = "strategy"; CURSEC.strategy = "plan";
-      RAIL['mobile'] = UNITS.mobile.items[0].code || RAIL['mobile'];
+      RAIL['unit:mobile'] = UNITS.mobile.items[0].id;
       EDIT_PAGE['plan'] = true; paint();
     }""")
     pg.wait_for_timeout(700)
@@ -300,12 +300,12 @@ with sync_playwright() as pw:
     pg.evaluate("""() => {
       const m = GROUP.keyObjectives[0];
       m.target = ""; delete m.target3y; delete m.pend;
-      /* THE GROUP'S FOUNDATION IS A TAB, NOT A SECTION OF ONE. A unit reaches
-         it through Strategy › Overview; the group carries Performance ·
-         Foundation · Focus · Temple · Weighting of its own, so asking for
-         "strategy" here lands silently back on Performance and the check
-         measures a page with no objectives table on it at all (§50.6). */
-      current = "group"; currentSub = "foundation";
+      /* SINCE §428 THE GROUP'S FOUNDATION IS A SECTION OF ITS OWN STRATEGY
+         TAB (Foundation · SWOT · Plan), exactly as a unit's is. Before that
+         it was a tab of its own and asking for "strategy" landed silently
+         back on Performance (§50.6); now asking for the old "foundation" tab
+         does the same, so the address is the section's (§214.3). */
+      current = "group"; currentSub = "strategy"; CURSEC.strategy = "found";
       EDIT_PAGE['foundation'] = true; paint();
     }""")
     pg.wait_for_timeout(600)
@@ -434,7 +434,11 @@ with sync_playwright() as pw:
       return { u: u, joined: joined, kept: kept };
     }""")
     ck("an outcome holding only a unit still reads it", oc["u"] == "%", oc)
-    ck("...a number joins it the plan's way", oc["joined"] == "6 M EGP", oc)
+    # §405.1: REWRITTEN, never loosened (§218). "The plan's way" is what the
+    # pen's own unit picker writes (setTargetUnit, TIGHT_UNITS): a scaled
+    # currency is ONE token, "6M EGP" — the outcome picker now agrees with it
+    # instead of guessing a space (§53.5, §231's "the product was right").
+    ck("...a number joins it the plan's way", oc["joined"] == "6M EGP", oc)
     # §251 UNIFIED THE TWO READERS, and this is the behaviour that moved: the
     # outcome used to drop prose on the floor when a unit was picked. It now
     # keeps it, which is what the measures column has always done.

@@ -1,0 +1,3817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forefront — Strategy Management Platform</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.png" sizes="32x32">
+<!--
+  FOREFRONT'S OWN PLATFORM (spec 042, revision 2 — Islam, 2026-08-29:
+  "the page you are showing should be just for login ... and the rest should be
+  inside the platform").
+
+  index.html is the DOOR and does one thing. This is what it hands you to: a
+  platform with its own chrome and its own navigation, holding the three pages
+  that are Forefront's rather than a client's.
+
+  IT IS NOT BUILT FROM src/. Neither is the door — both are hand-written pages
+  served as they are, and only the CLIENT's platform is assembled by build.py.
+  Its stylesheet is its own for the same reason: the door is a wall and a card,
+  this is a chrome and tables, and copying 25KB of the one into the other
+  carries rules neither needs (constitution VI: follow what the product does,
+  and the product has two kinds of page here).
+-->
+<style>
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    /* --ink-3 IS SET AGAINST THE QUIETEST GROUND IT SITS ON, not the whitest
+       (§38.5, and _shared.css records the same lesson): #6E7A90 cleared
+       nothing — 4.33 on white, 4.01 on the page's own ground and 3.79 on
+       --surface-2 — and it is the colour of the card's industry line, the
+       name in the top row, every note and every unlit chip. #5E6E85 is the
+       client platform's own value, so this is one vocabulary rather than two
+       greys a shade apart (§53.5): 5.19 / 4.80 / 4.54. */
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    /* Forefront's own, measured before use (constitution XIII):
+       #0F2C69 carries white at 13.25:1 · #F5A623 carries #231500 at 9.04:1
+       and is 2.03:1 as TYPE on white, so words take #9C5D08 (5.27:1). */
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  /* THE SAME BLOCK AGAIN, DELIBERATELY, AND IT IS WHY --ff-tx WAS ADDED
+     TWICE AND STILL DID NOTHING HERE: a token defined only in the media query
+     is absent the moment somebody chooses a theme explicitly, which is exactly
+     what this check does. Complete blocks, never a base plus overrides —
+     _shared.css records the same rule, and v3.0's zebra stripe is what
+     happens without it. */
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+  /* NOTHING IS DRAWN UNTIL THE SERVER HAS ANSWERED (§94.10's rule): a platform
+     that paints a page and then corrects it has shown somebody a screen that
+     was not theirs. */
+  body:not(.ready) .wrap{ visibility:hidden }
+
+  /* ── the chrome: two lines, as a client's platform has (§2.9) ── */
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  /* THE MARK IS TYPE, AND --ff IS A FILL (§38.4, the seventh time). It was
+     `color:var(--ff)`, which is right in light — #0F2C69 on white is 13.25 —
+     and in dark that token becomes the navy the NAVIGATION BAR is painted in:
+     #0D2350 on #1A1F29 is 1.08, so Forefront's own name was invisible on
+     Forefront's own platform. A fill and a word need two tokens, declared
+     together (§94.8's --cta/--cta-ink). --ff-tx is 6.94 dark. */
+  .top .mk{ font:700 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px }
+  .nav button{ background:transparent; border:0; color:var(--ff-quiet);
+    font:600 13.5px/1 inherit; padding:13px 14px; cursor:pointer;
+    border-bottom:3px solid transparent }
+  .nav button:hover{ color:var(--ff-ink) }
+  .nav button.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 18px 70px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:18px }
+  .ptitle h1{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+
+  .btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit; cursor:pointer }
+  .btn:hover:not(:disabled){ border-color:var(--amber-tx) }
+  .btn:disabled{ opacity:.45; cursor:default }
+  /* A HELD BUTTON LOOKS HELD (§358.12). Islam's A, picked from four drawn
+     side by side and AGAINST the recommendation, with the cost measured and in
+     front of him — recorded as his rather than overwritten (Principle II).
+     THE COST IS THAT THE LABEL STOPS BEING READABLE: the fade composites the
+     fill and the words together, so on this filled button they go from 8.79 to
+     2.13 light and 2.82 dark, against a 4.5 floor. What carries the meaning
+     instead is the hover and the press — and a HELD control answers both
+     where a `disabled` one answers neither, which is the whole reason this is
+     `aria-disabled` and never `disabled` (§221, §163).
+     SO `cursor` IS DELIBERATELY NOT SET, unlike `:disabled` one line above:
+     the button is pressable, pressing it says what is missing, and a default
+     cursor would be the one part of this that is untrue. The hover border is
+     left alone for the same reason (rule 1b — it was not asked for, and it
+     is honest: this button IS alive). One control wears it today; any held
+     control added later inherits it, which is the rule rather than an accident. */
+  .btn[aria-disabled="true"]{ opacity:.45 }
+  .btn.solid{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .btn.amber{ background:var(--amber); border-color:var(--amber); color:var(--amber-ink) }
+  .fld{ width:100%; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+    border-radius:8px; padding:8px 11px; font:400 14px/1.5 inherit }
+  .lab{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px }
+
+  /* ── client cards ─────────────────────────────────────────── */
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  /* ── ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a) ──────────────────
+     Islam, of two behaviours drawn side by side: "2". The card's name is
+     not pressable; every way into a client names a module, so nothing has
+     to decide which one the top would open. The card stopped being a
+     <button> for it — a button cannot hold buttons — so the identity block
+     and the rows are its two children and the padding moved onto them. */
+  /* ── A MARK, NOT A SENTENCE — AND TIGHTER (§368) ──────────────────
+     Islam: "we don't needs notes that take 2 lines we can just have a
+     notificaiton here if something is new to check ... to keep it neat and
+     clean nad let's make it compact." Option A of a signed-off mockup
+     (design-mockups/client-card-rows/2026-09-17_a-mark-not-a-sentence.html),
+     with the tighter rows he ticked on it.
+
+     `min-height` GOES FROM THE CARD AND STAYS ON `.ccard.add`, which is the
+     one card whose whole height comes from it: it is a centred dashed box
+     holding four words, and on a platform with no clients yet it is alone in
+     its row with nothing to be stretched against (§317's own empty state).
+     Every other card is as tall as it needs to be, and the grid still levels
+     a row against its tallest. */
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); display:flex; flex-direction:column;
+    min-height:0; font:inherit; color:inherit; box-shadow:var(--shadow) }
+  .ccard:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard.listed{ opacity:.72 }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:5px; padding:13px 14px }
+  .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:6px 14px;
+    font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
+    border:0; border-bottom:1px solid var(--line); cursor:pointer }
+  .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
+  /* AND THE TAIL MAY NEVER WRAP, which is the two-line row he photographed:
+     this had no `flex:none`, so the sentence that used to sit beside it
+     squeezed the two-word state until it broke. The sentence is gone, and
+     the guard stays — a mark is a mark on one line whatever ends up next to
+     it, and a wrapped one costs the whole grid a row of height. */
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto;
+    flex:none; white-space:nowrap }
+  /* The two marks that mean something is BROKEN rather than busy, in the
+     warning ink (--warn, measured for words on this surface); a count is not
+     an alarm however large it is, so it stays the row's quiet ink at the
+     weight that lets a figure be picked out of a column of names. */
+  .mrow i.alarm{ color:var(--warn); font-weight:600 }
+  .mrow i.due{ color:var(--ink-2); font-weight:600 }
+  .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
+  .ccard.add{ cursor:pointer }
+  .ccard.add:hover, .ccard.add:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .ccard .cmark{ width:30px; height:30px; border-radius:8px; background:var(--ff); color:var(--amber);
+    font:700 11px/30px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  /* A client that has a mark wears it on its card — the same picture its
+     door wears (§313.36), so the two cannot disagree; a light plate under it
+     because a PNG cannot be recoloured (§52). Initials until then.
+     ITS HEIGHT FOLLOWS THE INITIALS' (§368): the mockup could only draw the
+     initials, and leaving this at 36 would have made a client with a logo
+     taller than one without — two card heights in one row for no reason
+     anybody could read. */
+  .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
+  .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+  .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
+  .markrow .none{ font-size:13px; color:var(--ink-3) }
+  .ccard h2{ margin:0; font-size:16px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
+  .ccard.demo{ background:var(--amber-wash); border-color:var(--amber) }
+  .ccard.add{ align-items:center; justify-content:center; border-style:dashed; font-weight:600;
+    padding:15px; color:var(--ink-3) }
+  /* ONE NUMBER FOR BOTH CARDS THAT HOLD NOTHING REAL (§371). The Add card's
+     own height, shared rather than copied: the waiting card is the same
+     question — how tall is a card in this grid before there is a client in
+     it — and two spellings of one answer is how they come to differ. */
+  .ccard.add, .ccard.skel{ min-height:152px }
+  /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ──────────
+     Islam: "the demo should be a separate client on the platform outside
+     beside the clients." It was IN the grid — third across, with the way to
+     add a client after it — so the page counted it as one, and two things
+     followed that nobody chose: the empty-state line reads a count that
+     included it, and the box saying "Search clients" found it.
+
+     THE DEVICE IS THE PAGE'S OWN and nothing here is new: a hairline with an
+     uppercase key on it, which is how every other surface separates one kind
+     of thing from another (§53.5). The card keeps the amber wash and the Demo
+     tag it already wore — what changed is where it is drawn. AND IT KEEPS THE
+     GRID'S OWN TRACK WIDTH: a card grown to the full page would read as more
+     important than the clients above it, which is the opposite of what
+     setting it apart says. */
+  .apart{ margin-top:26px; padding-top:14px; border-top:1px solid var(--line) }
+  .apart > .akey{ display:block; margin-bottom:12px;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface);
+    /* A SPAN WITH TEXT IN IT SHOWS THE TEXT CURSOR (§361). This chip is a
+       <span role="button">, so with no cursor of its own the pointer becomes
+       the I-beam over the one control that opens a client — and `.cback`
+       directly below, built the same way for the same kind of act, has
+       carried `cursor:pointer` since it was written. One of the pair was
+       given it and the other was not. */
+    cursor:pointer }
+  .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.open{ color:var(--good); background:var(--good-bg); border-color:var(--good) }
+  .tag.none{ color:var(--warn); background:var(--warn-bg); border-color:var(--warn) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+
+  /* ── AN ARCHIVED CLIENT'S CARD (§323) ──────────────────────────────
+     The card it always was, quieter, and with no door. A dashed edge says
+     "set aside" the way the Add card's dashed edge already says "not yet a
+     client", so the page keeps one vocabulary rather than gaining a second
+     (§53.5). It is never `disabled` in the markup for the LOOK — it is
+     disabled because there is genuinely nothing behind it: their address is
+     closed, and a card that still opened would promise something that does
+     not work (§61, §96). */
+  .ccard.arch{ opacity:.72; border-style:dashed; background:var(--surface-2) }
+  .ccard.arch:hover{ border-color:var(--line) }
+
+  /* ── THE CARD BEFORE THERE IS A CLIENT IN IT (§371) ─────────────────
+     §369 took the console's boot from three round trips to one and left the
+     silence: the bar stands up, the body is hidden, and for about 740ms —
+     seconds on a cold function — the window looks open and dead. What fills
+     it is the answer the CLIENT platform already gives while it waits
+     (§94.10), chosen by Islam over the page's own words.
+
+     IT WEARS NOTHING IT WILL HAVE TO CHANGE, which is that section's whole
+     rule: no name, no mark, no tenant's colour, no figure. Two greys the
+     page already declares (§25 — never a literal), in the shape the real
+     card has, so what arrives replaces a block with the thing that block
+     stood for rather than rearranging the page around it.
+
+     AND IT SAYS NOTHING THAT WOULD MAKE IT LOOK PRESSABLE, by construction
+     rather than by a rule: `.ccard` declares no hover of its own (the two
+     that exist are scoped to `.add` and to `.mrow`), and `:focus-visible`
+     cannot reach a `div` that takes no tabindex. A `pointer-events:none`
+     was written here first and REMOVED on measuring it — nothing behaves
+     differently with or without it, and a line that fixes nothing is one
+     the next reader takes for load-bearing (§298.2, §24). */
+  .ccard.skel .sk-mark{ width:30px; height:30px; border-radius:8px; background:var(--line) }
+  /* THE BARS ARE THE LENGTH OF THE THINGS THEY STAND FOR, which is what the
+     signed-off shot has and what the first build lost: `.ctop` is a column
+     flex, so a bar with no width STRETCHES and three cards read as three
+     long rules rather than a name over an industry. A share of the card
+     rather than a pixel count, because the grid's columns are `1fr` and a
+     fixed bar would sit differently in a wide row and a narrow one. */
+  .ccard.skel .sk-line{ width:62%; height:10px; border-radius:5px; background:var(--line) }
+  .ccard.skel .sk-line.thin{ width:42%; height:8px; background:var(--surface-2) }
+  /* AND THE HAIRLINE SITS WHERE THE REAL CARD'S SITS — under the name block,
+     with the module rows below it. `.mods` carries `margin-top:auto`, which
+     on a card holding nothing drives the line to the very bottom edge, where
+     it disappears into the card's own border (measured: invisible in the
+     shot). The space below it is the 152px above, which is the room those
+     rows will take. */
+  .ccard.skel .mods{ margin-top:0 }
+  /* AND WHOEVER ARCHIVED IT IS AN EMAIL, WHICH IS LONGER THAN THE CARD
+     (§88's own answer, on a card rather than a table row): one line, clipped
+     where it does not fit, the whole of it one hover away. Measured — 
+     `islam.saadany@forefront.consulting` runs 4px past a 232px card, and this
+     is a `ui-monospace` string with no space in it, so it cannot wrap its way
+     out (§158: fit, never "and it overflows"). */
+  .tag.arch{ color:var(--ink-3); border-color:var(--line); background:var(--surface);
+    max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  /* BRING BACK TAKES THE CORNER SETTINGS HOLDS on a live card, because on an
+     archived client it is what Settings was: the one thing you came to the
+     card to do. */
+  .cback{ font:600 10px/1.6 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-2); background:var(--surface);
+    border:1px solid var(--line); border-radius:7px; padding:2px 8px; cursor:pointer }
+  .cback:hover, .cback:focus-visible{ border-color:var(--amber-tx); outline:none }
+  /* TWO CONTROLS, SO THEY NEED A ROW: `.ccfg` is absolute and a second
+     absolute chip would sit on top of it. The wrapper is what is positioned
+     and the chips sit in it, so a third one later costs no arithmetic. */
+  .cacts{ position:absolute; top:11px; right:11px; display:flex; gap:5px; align-items:center }
+  .cacts .ccfg{ position:static; top:auto; right:auto }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+
+  /* ── tables ───────────────────────────────────────────────── */
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.09em;
+    text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  /* The seats cell is the one that wraps: it holds a list that grows with the
+     clients somebody is on, and clipping it hides the fact the column is for. */
+  td.seats{ white-space:normal; min-width:250px }
+  /* A FIELD IN A TABLE CELL NEEDS A DEFINITE WIDTH AND min-width:0 (§110.8).
+     `max-width:100%` resolves against a containing block an auto-layout table
+     has not settled, so the browser treats it as none and the box grows the
+     column; a px cap does nothing either. These two are what stop the row
+     widening the moment the page is drawn. */
+  table .fld{ width:100%; min-width:0; padding:5px 7px; font-size:13px }
+  table td:first-child .fld{ min-width:120px }
+  table .fld.mono{ font-family:ui-monospace, SFMono-Regular, monospace; font-size:12.5px;
+    min-width:210px }
+  td.seats .tag{ display:inline-block; margin:2px 3px 2px 0 }
+  .mono{ font:400 13px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2) }
+  .muted{ color:var(--ink-3) }
+
+  /* a cell of two or three states, as §37's matrix has */
+  .cell{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .cell button{ border:0; border-right:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+    font:600 10.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; padding:5px 9px; cursor:pointer }
+  .cell button:last-child{ border-right:0 }
+  .cell button.on{ background:var(--ff); color:var(--ff-ink) }
+  .cell button.on.hi{ background:var(--amber); color:var(--amber-ink) }
+  .cell.locked button{ cursor:default }
+
+  .row{ display:flex; gap:9px; margin-top:14px; flex-wrap:wrap; align-items:center }
+  .row .fld{ flex:1 1 170px; min-width:0 }
+  /* ── WHICH MODULES A CLIENT HAS (spec 046 §4.5) ────────────────────
+     The ROWS are the team list's own — .teamrow, .who .nm/.em, .sp, .tag,
+     .btn, .note — so this section adds no vocabulary to the drawer (§53.5).
+     All that is here is what puts them in a band of their own, which is the
+     only thing about it that is new. */
+  .band{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:14px 16px 4px; margin:0 0 20px }
+  .band .teamrow:last-of-type{ border-bottom:0 }
+  .cfg{ display:grid; grid-template-columns:1.05fr .95fr; gap:26px }
+  .rowset{ display:grid; gap:13px }
+  .teamrow{ display:flex; align-items:center; gap:10px; padding:9px 0;
+    border-bottom:1px solid var(--line-soft) }
+  .teamrow .who .nm{ font-weight:600; font-size:14px }
+  .teamrow .who .em{ color:var(--ink-3); font-size:12.5px }
+  .teamrow .sp{ flex-wrap:wrap; justify-content:flex-end }
+  .asrow{ display:inline-flex; align-items:center; gap:6px }
+  .asrow .aslab{ font:600 9.5px/1.4 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap }
+  .asrow .fld{ width:auto; max-width:230px; padding:4px 6px; font-size:12px }
+  .teamrow .sp{ margin-left:auto; display:flex; gap:7px; align-items:center }
+  .said{ margin:12px 0 0; font-size:13.5px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px }
+  .said b{ font-family:ui-monospace, SFMono-Regular, monospace }
+  .err{ margin:12px 0 0; font-size:13.5px; color:var(--bad); background:var(--bad-bg);
+    border:1px solid var(--bad); border-radius:8px; padding:9px 11px }
+  .note{ margin:14px 0 0; font-size:13px; color:var(--ink-3) }
+  @media (max-width:820px){ .cfg{ grid-template-columns:1fr } }
+
+  /* ── THE TWO PIECES OF SET-UP THIS PAGE STILL DRAWS (§360, spec 057) ──
+     The flow moved into the client platform (client-setup.js); what is
+     left here is adding a client and ending an archived one, in this
+     page's tokens. The markup is the module's, so the classes are its. */
+  .csetup .lab{ margin-bottom:6px }
+  .csetup .rowset{ max-width:640px }
+  .csetup .cssaid{ margin:12px 0 0; font-size:13.5px; border-radius:8px; padding:9px 11px }
+  .csetup .cssaid.said{ background:var(--surface-2); border:1px solid var(--line) }
+  .csetup .cssaid.err{ color:var(--bad); background:var(--bad-bg); border:1px solid var(--bad) }
+  .wzq{ font-size:20px; font-weight:600; margin:7px 0 4px; text-wrap:balance }
+  .wzwhy{ color:var(--ink-3); font-size:13.5px; margin:14px 0 0; max-width:62ch }
+  .wzempty{ color:var(--ink-3); font-size:13.5px; font-style:italic; margin:0 }
+  .wzfoot{ display:flex; align-items:center; gap:9px; margin-top:22px; padding-top:15px;
+    border-top:1px solid var(--line); flex-wrap:wrap }
+  .wzfnote{ margin-left:auto; color:var(--ink-3); font-size:12.5px }
+
+  /* ── ENDING A CLIENT (§323) ─────────────────────────────────────────
+     §273.4's shape, which Islam chose for the reporting cycle: the
+     destructive act in its own block, behind a rule, under a heading, so
+     nobody arrives at it by tabbing down the form. Settings is already the
+     door — a door is only a guard if the dangerous thing is behind it. */
+  .wzend{ margin-top:26px; padding-top:16px; border-top:1px solid var(--line); max-width:560px }
+  .wzendkey{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin-bottom:8px }
+  .wzendwhy{ margin:0 0 12px; font-size:13px; color:var(--ink-3); max-width:62ch }
+  .wzendrow{ display:flex; align-items:center; gap:9px; flex-wrap:wrap }
+
+  /* THE WORD IS RED AND THE BUTTON IS NOT (§41's budget): --bad as a fill
+     would be the loudest thing on a page whose one accent is the amber. The
+     FILL is kept for the confirmation, where the volume belongs — and a fill
+     and a word are TWO tokens, declared together (§38.4, §94.8's
+     --cta/--cta-ink), because the first build of this wrote `color:#fff` and
+     measured 2.90:1. 6.28 light, 6.35 dark. */
+  .btn.risk{ color:var(--bad); border-color:var(--bad) }
+  .btn.risk:hover:not(:disabled){ background:var(--bad-bg); border-color:var(--bad) }
+  .btn.risksolid{ background:var(--bad); border-color:var(--bad); color:var(--bad-ink) }
+
+  /* The question is asked IN the block rather than over the page: there is no
+     dialog anywhere on this page, and one act does not earn the first (§2b). */
+  .wzask{ border:1px solid var(--bad); background:var(--bad-bg); border-radius:9px;
+    padding:13px 14px }
+  .wzask p{ margin:0 0 11px; font-size:13.5px; color:var(--ink) }
+  .wzask .goes{ margin:0 0 11px; font:400 12.5px/1.7 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-2) }
+  .wzask label{ display:block; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); margin:0 0 6px }
+  .wzask .fld{ background:var(--surface) }
+  .wzask .row{ display:flex; align-items:center; gap:9px; margin-top:12px; flex-wrap:wrap }
+
+  /* An archived client's flow says so BEFORE anything else: the fields below
+     are read-only, and a page that did not say why would read as broken
+     (§45.2). */
+  .wzarched{ border:1px solid var(--line); background:var(--surface-2); border-radius:9px;
+    padding:11px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .wzarched b{ color:var(--ink) }
+
+  /* the searchable standard list */
+  .wzpick{ position:relative }
+  .wzpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); max-height:270px; overflow-y:auto; padding:5px }
+  .wzpanel .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .wzpanel .opt{ display:block; width:100%; text-align:left; border:0; background:transparent;
+    color:var(--ink); font:inherit; font-size:13.5px; padding:6px 9px; border-radius:6px;
+    cursor:pointer }
+  .wzpanel .opt:hover, .wzpanel .opt:focus-visible{ background:var(--surface-2); outline:none }
+  .wzpanel .opt[aria-selected="true"]{ background:var(--amber-wash); color:var(--amber-tx);
+    font-weight:600 }
+  .wzpanel .nohit{ padding:10px 9px; color:var(--ink-3); font-size:13px; font-style:italic }
+
+  /* the size band */
+  .wzband{ display:flex; flex-wrap:wrap; gap:6px }
+  .wzband button{ border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+    border-radius:8px; padding:6px 11px; font:600 12.5px/1.5 inherit; cursor:pointer;
+    display:flex; flex-direction:column; gap:1px; align-items:flex-start }
+  .wzband button:hover{ border-color:var(--amber-tx) }
+  .wzband button[aria-pressed="true"]{ border-color:var(--amber); background:var(--amber-wash);
+    color:var(--ink) }
+  .wzband .ppl{ font:400 11px/1.3 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3);
+    font-variant-numeric:tabular-nums }
+  .wzband button[aria-pressed="true"] .ppl{ color:var(--amber-tx) }
+  /* ── The consulting memory (spec 045) ────────────────────────────
+     FOUR SHAPES, and each is an existing one put to a new use rather than a
+     new look: the filter row is .ptitle's own flex row, an entry row is
+     .teamrow one level richer, the reading view is the card border and radius
+     the client cards already wear, and the form is .lab over .fld like every
+     other form on this platform. Nothing here introduces a colour. */
+  .filters{ display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:16px }
+  .filters .fld{ width:auto; flex:0 1 230px; min-width:0 }
+  .filters .fld.search{ flex:1 1 280px }
+  .count{ margin-left:auto; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3) }
+
+  .elist{ display:flex; flex-direction:column; border-top:1px solid var(--line) }
+  .erow{ display:flex; gap:14px; align-items:flex-start; width:100%; text-align:left;
+    padding:13px 10px; border:0; border-bottom:1px solid var(--line-soft);
+    background:transparent; color:inherit; font:inherit; cursor:pointer }
+  .erow:hover, .erow:focus-visible{ background:var(--surface-2); outline:none }
+  .erow .body{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; gap:3px }
+  .erow h3{ margin:0; font-size:15px; font-weight:600; line-height:1.35 }
+  .erow .snip{ margin:0; font-size:13.5px; color:var(--ink-2); line-height:1.5;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+  /* THE FACT LINE IS ONE LINE OF KEYS — client · industry · author · when.
+     It is what a reader runs an eye down, so it is one size and one colour,
+     or the eye has to decide which half matters on every row (§88). */
+  .erow .facts{ font:400 12px/1.5 ui-monospace, SFMono-Regular, monospace;
+    color:var(--ink-3); overflow-wrap:anywhere }
+  .erow .facts b{ font-weight:600; color:var(--ink-2) }
+
+  .ecard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:20px 22px; max-width:760px }
+  .ecard h2{ margin:0 0 4px; font-size:21px; font-weight:600; line-height:1.3 }
+  .ecard .facts{ font:400 12.5px/1.6 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .ecard .facts b{ font-weight:600; color:var(--ink-2) }
+  .etags{ display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:11px }
+  .qa{ margin-top:22px; display:flex; flex-direction:column; gap:18px }
+  .qa h3{ margin:0 0 5px; font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3) }
+  .qa p{ margin:0; font-size:14.5px; line-height:1.62; color:var(--ink); max-width:62ch;
+    white-space:pre-line }
+  /* THE AUTHOR IS THE POINT OF THE PAGE (decision 3), so it is a block and not
+     a byline: what a reader does with an insight is go and ask the person who
+     wrote it. */
+  .byline{ margin-top:24px; padding-top:15px; border-top:1px solid var(--line);
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+  .byline .who{ display:flex; flex-direction:column; gap:1px; min-width:0 }
+  .byline .who .nm{ font-weight:600; font-size:14.5px }
+  .byline .who .em{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-3) }
+  .byline .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap }
+
+  /* ── THE DOCUMENT ROOM (spec 053) ────────────────────────────────
+     THREE RULES, and that is the whole of what this page gains: the list is
+     .filters + .count + .elist + .erow, the editor is .ecard + .lab + .fld,
+     the dangerous pair is .apart + .teamrow, and every button is .btn — all
+     of them declared above for the consulting memory and the set-up flow
+     (§53.5). What is new is a category that can be pressed, a strip for the
+     file, and the row that holds them. */
+  .catpick{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:3px 8px;
+    color:var(--ink-2); background:var(--surface-2); cursor:pointer }
+  .catpick[aria-pressed="true"]{ color:var(--amber-tx); border-color:var(--amber);
+    background:var(--surface) }
+  /* A chip must answer the pointer in BOTH states, or the lit one reads as
+     something that has stopped being a control (§41.4 recorded exactly this:
+     a new pressed style with no hover beside it goes silent under the mouse).
+     The edge moves and the ground does not, so a pressed chip does not lose
+     the one thing saying it is pressed. */
+  .catpick:hover, .catpick:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .catrow{ display:flex; gap:7px; flex-wrap:wrap }
+
+  /* ── WHO CAN SEE ONE REPORT (spec 046 §4.10) ─────────────────────────
+     Four rule families, verbatim from the mockup signed off on 15 September
+     (design-mockups/insights/2026-09-15_report-visibility.html), which is
+     itself built out of the rules above.
+
+     THE STRIP is .filestrip's shape with a SOLID border rather than a dashed
+     one: it is a field among the others, and dashed is how the file row says
+     something can be dragged onto it.
+
+     THE PANEL is .wzpanel's box with .gp's headings and .opt's rows — the
+     set-up flow's picker, which is itself the client platform's own
+     searchable list one surface over (§130.1, §295.1). What is new is the
+     head (a search and the two words) and the tick.
+
+     THE MARK ON A ROW NEEDS NO RULE AT ALL: a narrowed report wears the
+     plain .tag, and only `Nobody` takes an alarm. Drawn amber first and the
+     render caught it — .tag.none (Draft) is already amber, so two meanings
+     landed in one colour in one slot (§87's twins, §41's budget).
+     --bad on --bad-bg measures 5.51 light and 5.28 dark in THIS palette;
+     §62's 4.41 is the client platform's and is not a measurement of this one
+     (§303's shape). */
+  .tag.shut{ color:var(--bad); background:var(--bad-bg); border-color:var(--bad) }
+  .seen{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    border:1px solid var(--line); border-radius:9px; padding:10px 12px; background:var(--surface) }
+  .seen .who{ min-width:0; display:flex; gap:6px; flex-wrap:wrap; align-items:center }
+  .seen .all{ font-size:13.5px; color:var(--ink-2) }
+  .seen .none{ font-size:13.5px; color:var(--bad); font-weight:600 }
+  .seen .sp{ margin-left:auto; display:flex; gap:8px }
+  .tickwrap{ position:relative }
+  .tickpanel{ position:absolute; left:0; right:0; top:calc(100% + 4px); z-index:5;
+    background:var(--surface); border:1px solid var(--line); border-radius:9px;
+    box-shadow:var(--shadow); overflow:hidden }
+  .tickhead{ display:flex; gap:8px; align-items:center; padding:9px 9px 8px;
+    border-bottom:1px solid var(--line-soft); flex-wrap:wrap }
+  .tickhead .fld{ flex:1 1 180px; min-width:0; padding:6px 9px; font-size:13.5px }
+  .tickhead .lnk{ border:0; background:transparent; padding:2px 4px; cursor:pointer;
+    font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--ff-tx); text-decoration:underline;
+    text-underline-offset:3px }
+  .tickhead .lnk:hover, .tickhead .lnk:focus-visible{ color:var(--ink); outline:none }
+  .ticklist{ max-height:236px; overflow-y:auto; padding:5px }
+  .ticklist .gp{ font:600 10px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3); padding:9px 9px 5px }
+  .tick{ display:flex; gap:9px; align-items:center; width:100%; text-align:left; border:0;
+    background:transparent; color:var(--ink); font:inherit; font-size:13.5px;
+    padding:6px 9px; border-radius:6px; cursor:pointer }
+  .tick:hover, .tick:focus-visible{ background:var(--surface-2); outline:none }
+  .tick .bx{ flex:none; width:15px; height:15px; border-radius:4px; border:1.5px solid var(--line);
+    display:grid; place-items:center; background:var(--surface) }
+  .tick .bx svg{ width:11px; height:11px; display:none }
+  .tick[aria-pressed="true"] .bx{ border-color:var(--amber); background:var(--amber) }
+  .tick[aria-pressed="true"] .bx svg{ display:block; color:var(--amber-ink) }
+  .tick[aria-pressed="true"]{ font-weight:600 }
+  .tickfoot{ border-top:1px solid var(--line-soft); padding:8px 11px 9px;
+    font-size:12.5px; color:var(--ink-3) }
+  .tickfoot b{ color:var(--ink); font-weight:600 }
+  /* A bordered strip and not a card: the file is one field among the others,
+     and a card would rank it above the title. Dashed, because until something
+     is dropped on it there is nothing there — the same thing the Add card's
+     dashed edge says one page over. */
+  /* `.filestrip` AND NOT `.drop`: the debrief's own Drop button is a
+     `.btn drop` (§65.9 — a class name is one global namespace), so a bare
+     `.drop` here would have put a dashed box and 14px of padding round a
+     small remove control one page over, where nothing would have looked at
+     it. Found by grepping the name before trusting it. */
+  .filestrip{ display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    border:1px dashed var(--line); border-radius:9px; padding:12px 14px; background:var(--surface) }
+  .filestrip .fname{ font:400 12.5px/1.5 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    min-width:0; overflow-wrap:anywhere }
+  .filestrip .sp{ margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+
+  .wiz{ max-width:720px }
+  .wq{ margin-bottom:17px }
+  .wq textarea.fld{ min-height:74px; resize:vertical; font-size:14px }
+  .wpair{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:17px }
+  .wpair > div{ flex:1 1 220px; min-width:0 }
+  .prompt{ margin:0; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:8px; padding:13px 15px; overflow-x:auto;
+    font:400 12.5px/1.65 ui-monospace, SFMono-Regular, monospace; color:var(--ink-2);
+    white-space:pre-wrap }
+  .wacts{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:14px }
+  .pastebox{ min-height:150px; resize:vertical;
+    font:400 13px/1.6 ui-monospace, SFMono-Regular, monospace }
+
+  .found{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--good-bg); border:1px solid var(--good); border-radius:8px;
+    padding:10px 13px; margin-bottom:18px; font-size:13.5px; color:var(--ink-2) }
+  .found b{ color:var(--good) }
+  .found .sp{ margin-left:auto; display:flex; gap:8px }
+  .drafts{ display:flex; flex-direction:column; gap:14px; max-width:760px }
+  .dcard{ border:1px solid var(--line); border-radius:12px; background:var(--surface);
+    box-shadow:var(--shadow); padding:15px 17px }
+  .dhead{ display:flex; gap:9px; align-items:center; flex-wrap:wrap; margin-bottom:11px }
+  .dhead .fld{ flex:1 1 240px; min-width:0; font-weight:600 }
+  .dhead select.fld{ flex:0 0 auto; width:auto; font-weight:400 }
+  .dhead .drop{ margin-left:auto; color:var(--ink-3) }
+  .dhead .drop:hover{ border-color:var(--bad); color:var(--bad) }
+  .dq{ margin-bottom:11px }
+  .dq:last-child{ margin-bottom:0 }
+  .dq textarea.fld{ min-height:56px; resize:vertical; font-size:13.5px }
+  /* A BLOCK THAT COULD NOT BE READ IS SHOWN, NEVER DROPPED (§184): what came
+     back is somebody's own words, so the one thing the platform may not do
+     with it is lose it quietly. */
+  .dcard.raw{ border-color:var(--warn); background:var(--warn-bg) }
+  .dcard.raw .rawnote{ font-size:13px; color:var(--warn); margin:0 0 10px }
+
+  .empty{ border:1px dashed var(--line); border-radius:12px; padding:34px 24px;
+    text-align:center; color:var(--ink-3); background:var(--surface) }
+  .empty b{ display:block; color:var(--ink); font-size:16px; margin-bottom:6px }
+  .empty .btn{ margin-top:16px }
+  .askbox{ margin-bottom:16px }
+  .askrow{ display:flex; gap:9px; flex-wrap:wrap }
+  .askrow .fld{ flex:1 1 380px; min-width:0 }
+  .askout{ margin-top:11px; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:13px 15px }
+  .askreply{ margin:0; font-size:14.5px; line-height:1.62; max-width:62ch; white-space:pre-line }
+  .asksrc{ margin-top:12px; display:flex; gap:7px; align-items:center; flex-wrap:wrap }
+  .asksrc .lab{ margin:0 }
+  .asksrc button.tag{ cursor:pointer }
+  .asksrc button.tag:hover{ border-color:var(--amber-tx) }
+  @media (max-width:700px){ .erow{ flex-direction:column; gap:8px } .count{ margin-left:0 } }
+
+  /* ── The strategy frameworks library (spec 052) ───────────────────
+     Every class here is prefixed `fw`, because a class name is one global
+     namespace and this page already holds .tag, .cell, .row and .band
+     (§65.9). Nothing below is a new colour or a new shape: the box and the
+     list are .band's border, radius and shadow; the chips are the only new
+     form, and they are a pill because a filter you turn on and off is not a
+     tag. Phase A draws no Ask and no Add, so there is no CSS here for
+     either — a rule with no markup is one the next reader takes for
+     load-bearing (§24). */
+  .fwbox{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    padding:13px; box-shadow:var(--shadow) }
+  .fwbox .fld{ width:100% }
+  .fwchips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:13px }
+  .fwchip{ font:600 12px/1 inherit; border:1px solid var(--line); background:var(--surface);
+    color:var(--ink-2); border-radius:999px; padding:6px 11px; cursor:pointer; white-space:nowrap }
+  .fwchip:hover{ border-color:var(--amber-tx) }
+  .fwchip.on{ background:var(--ff); border-color:var(--ff); color:var(--ff-ink) }
+  .fwchip i{ font-style:normal; color:var(--ink-3); margin-left:5px; font-size:11px }
+  .fwchip.on i{ color:var(--ff-quiet) }
+  .fwcount{ margin:16px 0 9px; font-size:13px; color:var(--ink-3) }
+  .fwlist{ border:1px solid var(--line); border-radius:11px; background:var(--surface);
+    overflow:hidden; box-shadow:var(--shadow) }
+  .fwrow{ display:block; width:100%; text-align:left; border:0;
+    border-bottom:1px solid var(--line-soft); background:var(--surface); color:var(--ink);
+    padding:12px 15px; cursor:pointer; font:inherit }
+  .fwrow:last-child{ border-bottom:0 }
+  /* AN AUTHOR `display` BEATS `[hidden]`, MEASURED RATHER THAN REASONED ABOUT
+     (§93.11). The filter sets `row.hidden = true`, and with `display:block`
+     above it the browser goes on drawing the row: the count said "12 of 80"
+     over eighty visible rows, which is the worst shape a filter can take —
+     it looks like it worked. The check found it by asking which rows are
+     VISIBLE rather than which carry the attribute (§94.8). */
+  .fwrow[hidden]{ display:none }
+  .fwrow:hover, .fwrow:focus-visible{ background:var(--surface-2); outline:none }
+  .fwrow .hd{ display:flex; gap:9px; align-items:baseline; flex-wrap:wrap }
+  .fwrow .nm{ font-weight:600; font-size:14.5px }
+  .fwrow .pp{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  .fwsec{ margin-top:18px }
+  .fwsec h3{ margin:0 0 5px; font-size:14px; font-weight:600 }
+  .fwsec p{ margin:0; font-size:14px; color:var(--ink-2); white-space:pre-line }
+  .fwgrid{ display:grid; grid-template-columns:1fr 1fr; gap:18px }
+  @media (max-width:820px){ .fwgrid{ grid-template-columns:1fr } }
+  /* ASKING IT: one field under the switch, and the answer in place under the
+     box rather than on a page of its own — the question and what it produced
+     read together, and the way back to searching is the switch you came in
+     by. */
+  .fwask{ display:flex; gap:9px; margin-top:11px; align-items:flex-start }
+  .fwask .fld{ flex:1 1 220px; min-width:0 }
+  .fwans{ background:var(--surface-2); border:1px solid var(--line); border-radius:11px;
+    padding:15px; margin-top:13px }
+  .fwans > p{ margin:0 0 4px; font-size:14px; color:var(--ink-2); white-space:pre-line }
+  /* EVERY SOURCE IS A DOOR, which is the memory's own rule for the memory's
+     own reason: the next step is to go and read it. */
+  .fwcite{ display:block; width:100%; text-align:left; margin-top:9px; border:1px solid var(--line);
+    border-radius:9px; background:var(--surface); padding:11px 13px; cursor:pointer;
+    font:inherit; color:var(--ink) }
+  .fwcite:hover, .fwcite:focus-visible{ border-color:var(--amber-tx); outline:none }
+  .fwcite .nm{ font-weight:600; font-size:14px }
+  .fwcite .wy{ margin:4px 0 0; font-size:13px; color:var(--ink-3) }
+  /* THE DRAFT SAYS IT IS ONE, in the amber this page already uses for a thing
+     that is not settled yet — and it is the whole of decision 3 made visible:
+     what is on screen is not in the library. */
+  .fwdraft{ background:var(--amber-wash); border:1px solid var(--amber); border-radius:10px;
+    padding:11px 13px; font-size:13.5px; color:var(--amber-tx); font-weight:600; margin-bottom:15px }
+  .fwfields{ display:grid; gap:13px }
+  .fwfields .fld{ width:100% }
+  .fwfields textarea.fld{ resize:vertical; min-height:62px }
+  /* A DECLINE IS NOT AN ERROR (§168, §190): nothing has gone wrong, the
+     assistant has answered honestly, and the next thing to do is on the
+     screen — so it wears the warning ground rather than the alarm one. */
+  .fwdecl{ background:var(--warn-bg); border:1px solid var(--warn); border-radius:10px;
+    padding:13px; font-size:14px; color:var(--warn) }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="mk">FOREFRONT</span><span class="nm">Platform</span>
+  <span class="right"><span id="who"></span>
+    <button class="btn" id="signout" type="button">Sign out</button></span>
+</div>
+<nav class="nav" id="nav"></nav>
+<div class="wrap" id="page"></div>
+
+<!-- The debrief splitter (spec 045). Its own file, because node's own check
+     requires the SAME BYTES this page runs (checks/memory-split.mjs) rather
+     than a second copy that could drift — it is the one piece of the memory
+     with a wrong answer available to it. scripts/build-shell.mjs puts it at
+     this address and refuses the build if this tag ever goes. -->
+<script src="/memory-split.js"></script>
+<!-- The client set-up flow (§360, spec 057): one file for this page and the
+     client platform, generated to this address by scripts/build-shell.mjs,
+     which refuses the build if this tag ever goes. -->
+<script src="/client-setup.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ── One shape for every request (§71's rule: three callers with the same
+     six lines is where a typo lives in exactly one of them). ───────── */
+  function send(path, body) {
+    return fetch(path, { method: "POST", cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body) })
+      .then(function (r) {
+        /* NOT SIGNED IN IS NOT AN ERROR MESSAGE, it is the door. */
+        if (r.status === 401 || r.status === 403) {
+          return r.json().then(function (j) {
+            if (j && j.auth) { location.replace("/"); throw new Error("sign in"); }
+            return j;
+          });
+        }
+        return r.json();
+      });
+  }
+  /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
+     401-is-the-door rule above is not written twice for it. */
+  function post(body) { return send("/api/platform", body); }
+  function mpost(body) { return send("/api/memory", body); }
+  function fpost(body) { return send("/api/frameworks", body); }
+
+  var page = document.getElementById("page");
+  var nav = document.getElementById("nav");
+  var TAB = "clients";
+  var ME = null;
+  /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
+     (§369). Declared here rather than left to hoist, because a second `var` of
+     one name in this scope is one binding and the later one wins in silence
+     (§56.7) — grepped, and this is the only pair. */
+  var BOOTCARDS = null;
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    /* textContent, never innerHTML: every name here is typed by a person. */
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function clear() { page.textContent = ""; }
+  function say(msg, bad) {
+    var p = el("p", bad ? "err" : "said", msg);
+    page.appendChild(p);
+    return p;
+  }
+  function title(text, right) {
+    var h = el("div", "ptitle");
+    h.appendChild(el("h1", null, text));
+    if (right) { right.className = "right"; h.appendChild(right); }
+    page.appendChild(h);
+    return h;
+  }
+  /* A COUNT AND ITS NOUN (§323). The client platform has a `plural` helper
+     and this page does not — and it is not borrowed, because that one is
+     wired to the tenant's own labels and this page has none. Irregular
+     plurals are passed in rather than guessed at: "persons" and
+     "capabilitys" are what a rule that appends an "s" produces (§107.8's
+     trap, on the other side of the switch). */
+  function nOf(n, one, many) {
+    return n + " " + (n === 1 ? one : (many || one + "s"));
+  }
+  function initials(name) {
+    var w = String(name || "?").trim().split(/\s+/);
+    return (w.length > 1 ? w[0].charAt(0) + w[1].charAt(0) : w[0].slice(0, 2)).toUpperCase();
+  }
+
+  /* ── The navigation is drawn from what this account may open ─────
+     A tab that always refuses is worse than no tab (§45.2), so the row is
+     built after `me` answers rather than written into the markup. */
+  function drawNav() {
+    nav.textContent = "";
+    /* MEMORY IS THE FIRST TAB HERE WITH NO GATE, and that is decision 1 of
+       spec 045 rather than an oversight: every consultant reads every
+       insight, which is what makes it a memory rather than a filing cabinet.
+       The boundary it does keep is on the server — a client's own account
+       never reaches /api/memory — and it is checked there. */
+    var tabs = [["clients", "Clients", true],
+                ["consultants", "Consultants", ME.canConsultants],
+                ["access", "Who sees what", ME.canAccess],
+                ["memory", "Memory", true],
+                /* FRAMEWORKS IS UNGATED FOR THE MEMORY'S OWN REASON (spec 052,
+                   decision 1): every consultant reads the whole library, and
+                   only an admin adds to it — which is a gate on the ACT, asked
+                   on the server, never a gate on the tab. */
+                ["frameworks", "Frameworks", true]];
+    tabs.forEach(function (t) {
+      if (!t[2]) return;
+      var b = el("button", TAB === t[0] ? "on" : null, t[1]);
+      b.type = "button";
+      b.setAttribute("data-tab", t[0]);
+      b.addEventListener("click", function () { go(t[0]); });
+      nav.appendChild(b);
+    });
+  }
+
+  function go(tab) {
+    TAB = tab;
+    MEM.view = "list";
+    FW.view = "list";
+    drawNav();
+    clear();
+    return redraw();
+  }
+
+  /* ── A SILENT REFRESH (§313.28) ───────────────────────────────────
+     Islam: "this page needs silent refresh." Every control here ended in a
+     full redraw that CLEARED the page first and put "Reading…" in its place,
+     so pressing a seat blanked the whole pane and rebuilt it — a flash, a
+     scroll jump, and the row you were working on gone from under the pointer.
+
+     The page is built into a DETACHED node and swapped in when it is ready,
+     so nothing empty is ever on screen; the scroll position is put back
+     because a swap is not a navigation. §71.2's rule — never a repaint under
+     a working hand — applied to the one page that had no other way to update
+     itself. */
+  function redraw() {
+    if (TAB === "clients") return drawClients();
+    if (TAB === "consultants") return drawConsultants();
+    if (TAB === "access") return drawAccess();
+    if (TAB === "memory") return drawMemory();
+    if (TAB === "frameworks") return drawFrameworks();
+  }
+
+  /* `quiet` is passed by every control that is UPDATING what is already on
+     screen, as opposed to arriving at it. Arriving still says "Reading…",
+     because then there is nothing to keep. */
+  function lead(quiet, msg) {
+    if (quiet) return;
+    clear();
+    page.appendChild(el("p", "muted", msg));
+  }
+
+  /* Built detached, swapped in one move, scroll restored — so the page never
+     holds an empty frame and the row under the pointer does not move. */
+  function settle(build) {
+    var y = window.scrollY;
+    var next = document.createElement("div");
+    var was = page;
+    page = next;
+    try { build(); } finally { page = was; }
+    page.textContent = "";
+    while (next.firstChild) page.appendChild(next.firstChild);
+    window.scrollTo(0, y);
+  }
+
+  /* ════ The consulting memory (spec 045) ══════════════════════════════
+     Forefront's own, never a client's: an insight from one client is worth
+     having BECAUSE it helps on the next, which is the one place on this
+     platform where crossing clients is the point. Four states — the list,
+     reading one, adding one, and a period debrief with the drafts it
+     produces — drawn in the page's own classes.
+
+     THE PAGE DERIVES NO RULE. `mine` arrives on every row, computed by the
+     server, exactly as `mine` on a client card already is: one answer, not
+     two (§53.5), and the server asks again when the press lands (§48.2). */
+  var MEM = { view: "list", entry: null, filters: { q: "", client: "", industry: "", kind: "" },
+              draft: null, deb: null, drafts: null };
+  var KINDS = [["practice", "Practice"], ["hiccup", "Hiccup"], ["lesson", "Lesson"]];
+  /* The four questions, named ONCE — the form, the reading view and the
+     debrief's drafts all walk this list (§104.7). */
+  var QS = [["happened", "What happened"], ["did", "What we did"],
+            ["came_of_it", "What came of it"], ["next_person", "What the next person should know"]];
+  var kindWord = function (k) {
+    for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === k) return KINDS[i][1];
+    return "Lesson";
+  };
+  var whenWord = function (iso) {
+    var d = new Date(iso);
+    return isNaN(d) ? "" : d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  function memGo(view, extra) {
+    MEM.view = view;
+    if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) MEM[k] = extra[k];
+    return drawMemory();
+  }
+
+  function drawMemory() {
+    if (MEM.view === "entry") return drawMemEntry();
+    if (MEM.view === "wiz") return drawMemForm();
+    if (MEM.view === "deb") return drawDebrief();
+    if (MEM.view === "drafts") return drawDrafts();
+    return drawMemList();
+  }
+
+  /* ── The list ──────────────────────────────────────────────────── */
+  function drawMemList(quiet) {
+    lead(quiet, "Reading…");
+    var f = MEM.filters;
+    return mpost({ action: "list", q: f.q, client: f.client, industry: f.industry, kind: f.kind })
+      .then(function (j) {
+        if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the memory.", true); return; }
+        MEM.clientNames = {};
+        (j.clients || []).forEach(function (c) { MEM.clientNames[c.key] = c.name; });
+        settle(function () {
+          var right = el("span");
+          var add = el("button", "btn", "Add one insight");
+          add.type = "button";
+          add.addEventListener("click", function () { memGo("wiz", { draft: null }); });
+          var deb = el("button", "btn amber", "Write up a period");
+          deb.type = "button";
+          deb.addEventListener("click", function () { memGo("deb", { deb: null }); });
+          right.appendChild(add); right.appendChild(deb);
+          title("Memory", right);
+
+          /* NOTHING YET — the one sentence on the page, and it is a fact the
+             screen does not otherwise state rather than a description of
+             itself (rule 1b-ii, §45.2). Drawn only when the memory is empty
+             and nothing is being filtered, or "no insights match" would read
+             as "there are none". */
+          var filtering = !!(f.q || f.client || f.industry || f.kind);
+          if (!j.entries.length && !filtering) {
+            var box = el("div", "empty");
+            box.appendChild(el("b", null, "Nothing here yet"));
+            box.appendChild(document.createTextNode(
+              "Every insight names the client it came from and the person who wrote it."));
+            var first = el("button", "btn amber", "Write up a period");
+            first.type = "button";
+            first.addEventListener("click", function () { memGo("deb", { deb: null }); });
+            box.appendChild(first);
+            page.appendChild(box);
+            return;
+          }
+
+          page.appendChild(memAskBox());
+          page.appendChild(memFilters(j));
+          if (!j.entries.length) { page.appendChild(el("p", "muted", "Nothing matches that.")); return; }
+          var list = el("div", "elist");
+          j.entries.forEach(function (e) { list.appendChild(memRow(e)); });
+          page.appendChild(list);
+        });
+      });
+  }
+
+  /* ASK IT — on the page the insights are on, never a corner of its own
+     (§32: a door behind a door). It writes nothing: what somebody went looking
+     for is not part of the record. */
+  function memAskBox() {
+    var box = el("div", "askbox");
+    var row = el("div", "askrow");
+    var q = el("input", "fld");
+    q.type = "text";
+    q.id = "m-ask";
+    q.placeholder = "Ask the memory — “we have hit this before, what happened?”";
+    var go = el("button", "btn solid", "Ask");
+    go.type = "button";
+    var out = el("div", "askout");
+    out.hidden = true;
+    function run() {
+      var text = q.value.trim();
+      if (!text) return;
+      go.disabled = true;
+      out.hidden = false;
+      out.textContent = "";
+      out.appendChild(el("p", "muted", "Reading the memory…"));
+      mpost({ action: "ask", question: text }).then(function (r) {
+        go.disabled = false;
+        out.textContent = "";
+        if (!r || !r.ok) { out.appendChild(el("p", "muted", (r && r.error) || "The memory could not be asked.")); return; }
+        if (r.why) { out.appendChild(el("p", "muted", r.why)); return; }
+        out.appendChild(el("p", "askreply", r.reply));
+        /* EVERY ANSWER NAMES ITS SOURCES, and they are DOORS: the next step is
+           to open the insight and go and ask whoever wrote it. */
+        if ((r.sources || []).length) {
+          var sp = el("div", "asksrc");
+          sp.appendChild(el("span", "lab", "From"));
+          r.sources.forEach(function (src) {
+            var b = el("button", "tag", src.title + " · " + src.author);
+            b.type = "button";
+            b.addEventListener("click", function () { memGo("entry", { entry: src.id }); });
+            sp.appendChild(b);
+          });
+          out.appendChild(sp);
+        } else if (r.answered) {
+          /* An answer that cites nothing is one nobody can act on — said,
+             rather than drawn as though it were sourced (§124). */
+          out.appendChild(el("p", "muted", "It named no insight for that — treat it carefully."));
+        }
+      });
+    }
+    go.addEventListener("click", run);
+    q.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
+    row.appendChild(q); row.appendChild(go);
+    box.appendChild(row); box.appendChild(out);
+    return box;
+  }
+
+  function memFilters(j) {
+    var f = MEM.filters, row = el("div", "filters");
+    var q = el("input", "fld search");
+    q.type = "search"; q.value = f.q;
+    q.placeholder = "Search insights — title, body, client";
+    /* TYPING NEVER REPAINTS (§35). The search runs when the box is left or
+       Enter is pressed, so the field being typed into is never replaced. */
+    q.addEventListener("change", function () { f.q = q.value.trim(); drawMemList(true); });
+    row.appendChild(q);
+
+    row.appendChild(memPick(j.clients.map(function (c) { return [c.key, c.name]; }),
+      "Every client", f.client, function (v) { f.client = v; drawMemList(true); }));
+    row.appendChild(memPick(j.industries.map(function (i) { return [i, i]; }),
+      "Every industry", f.industry, function (v) { f.industry = v; drawMemList(true); }));
+
+    var cell = el("span", "cell");
+    cell.setAttribute("role", "group");
+    cell.setAttribute("aria-label", "Kind");
+    [["", "All"]].concat(KINDS).forEach(function (k) {
+      var b = el("button", f.kind === k[0] ? "on" : null, k[1]);
+      b.type = "button";
+      b.addEventListener("click", function () { f.kind = k[0]; drawMemList(true); });
+      cell.appendChild(b);
+    });
+    row.appendChild(cell);
+    row.appendChild(el("span", "count", j.entries.length + (j.entries.length === 1 ? " insight" : " insights")));
+    return row;
+  }
+
+  /* The filters offer what the MEMORY holds, never every client on the
+     platform: a picker whose every option empties the page is not a choice
+     (§61). */
+  function memPick(pairs, all, value, onPick) {
+    var sel = el("select", "fld");
+    sel.setAttribute("aria-label", all);
+    var opts = [["", all]].concat(pairs);
+    opts.forEach(function (o) {
+      var op = el("option", null, o[1]);
+      op.value = o[0];
+      if (o[0] === value) op.selected = true;
+      sel.appendChild(op);
+    });
+    sel.addEventListener("change", function () { onPick(sel.value); });
+    return sel;
+  }
+
+  function memRow(e) {
+    var b = el("button", "erow");
+    b.type = "button";
+    b.appendChild(el("span", "tag " + e.kind, kindWord(e.kind)));
+    var body = el("span", "body");
+    body.appendChild(el("h3", null, e.title));
+    var snip = memSnip(e);
+    if (snip) body.appendChild(el("p", "snip", snip));
+    var facts = el("span", "facts");
+    facts.appendChild(el("b", null, e.clientName));
+    facts.appendChild(document.createTextNode(
+      (e.industry ? " · " + e.industry : "") + " · " + e.author + " · " + whenWord(e.when)));
+    body.appendChild(facts);
+    b.appendChild(body);
+    b.addEventListener("click", function () { memGo("entry", { entry: e.id }); });
+    return b;
+  }
+  /* The snippet is the first answer that has anything in it — a one-line
+     insight has to look like a finished row, not a broken one (§245). */
+  function memSnip(e) {
+    for (var i = 0; i < QS.length; i++) if (String(e[QS[i][0]] || "").trim()) return e[QS[i][0]];
+    return "";
+  }
+
+  /* ── Reading one ───────────────────────────────────────────────── */
+  function drawMemEntry() {
+    lead(false, "Reading…");
+    return mpost({ action: "one", id: MEM.entry }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "That insight is no longer here.", true); return; }
+      var e = j.entry;
+      settle(function () {
+        var back = el("button", "btn", "Back to the list");
+        back.type = "button";
+        back.addEventListener("click", function () { memGo("list"); });
+        title("Memory", (function () { var r = el("span"); r.appendChild(back); return r; }()));
+
+        var card = el("article", "ecard");
+        var tags = el("div", "etags");
+        tags.appendChild(el("span", "tag " + e.kind, kindWord(e.kind)));
+        tags.appendChild(el("span", "tag", e.clientName));
+        if (e.industry) tags.appendChild(el("span", "tag", e.industry));
+        card.appendChild(tags);
+        card.appendChild(el("h2", null, e.title));
+        var facts = el("p", "facts");
+        facts.appendChild(el("b", null, whenWord(e.when)));
+        if (e.occurred) facts.appendChild(document.createTextNode(" · " + e.occurred));
+        card.appendChild(facts);
+
+        var qa = el("div", "qa");
+        var any = false;
+        QS.forEach(function (q) {
+          var v = String(e[q[0]] || "").trim();
+          if (!v) return;             /* an unanswered question is not a heading over nothing */
+          any = true;
+          var d = el("div");
+          d.appendChild(el("h3", null, q[1]));
+          d.appendChild(el("p", null, v));
+          qa.appendChild(d);
+        });
+        if (any) card.appendChild(qa);
+
+        /* THE AUTHOR IS WHAT A READER ACTS ON (decision 3): the name, the
+           address, and a way to write to them. */
+        var by = el("div", "byline");
+        var who = el("span", "who");
+        who.appendChild(el("span", "nm", e.author));
+        who.appendChild(el("span", "em", e.authorEmail));
+        by.appendChild(who);
+        var sp = el("span", "sp");
+        var ask = el("a", "btn", "Ask " + String(e.author || "").split(/\s+/)[0]);
+        ask.href = "mailto:" + e.authorEmail + "?subject=" + encodeURIComponent(e.title);
+        sp.appendChild(ask);
+        if (e.mine) {
+          var ed = el("button", "btn", "Edit");
+          ed.type = "button";
+          ed.addEventListener("click", function () { memGo("wiz", { draft: e }); });
+          sp.appendChild(ed);
+          var rm = el("button", "btn", "Remove");
+          rm.type = "button";
+          rm.addEventListener("click", function () { memDrop(rm, e); });
+          sp.appendChild(rm);
+        }
+        by.appendChild(sp);
+        card.appendChild(by);
+        page.appendChild(card);
+      });
+    });
+  }
+
+  /* REMOVING ONE IS THE ONE IRREVERSIBLE ACT HERE, and it asks twice.
+     NOT `confirm()` — a browser dialog can be silenced permanently on some
+     other site and this is the press that must not go through unseen (§95) —
+     and not a modal either, because this page has no dialog machinery at all
+     and building some for one button is furniture (§2b). The button says what
+     the second press does, which is the smallest thing that works and cannot
+     be switched off. */
+  function memDrop(btn, e) {
+    if (btn.dataset.armed !== "1") {
+      btn.dataset.armed = "1";
+      btn.textContent = "Remove it — this cannot be undone";
+      btn.classList.add("amber");
+      return;
+    }
+    btn.disabled = true;
+    mpost({ action: "drop", id: e.id }).then(function (j) {
+      if (!j || !j.ok) { btn.disabled = false; say((j && j.error) || "It could not be removed.", true); return; }
+      memGo("list");
+    });
+  }
+
+  /* The prompt for ONE insight: the four questions with the client already in
+     them. Built here rather than on the server because it is made of what the
+     page already holds, and asking for it would be a request to learn nothing
+     new (§98). */
+  function onePrompt(csel, clients) {
+    var c = clientPhrase(clientNamed(clients, csel.value));
+    return "I am writing up one consulting insight for my firm's memory, about\n" +
+      c + ".\n\n" +
+      "Ask me these four questions, one at a time, and wait for my answer\n" +
+      "before asking the next:\n\n" +
+      "  1. What happened?\n" +
+      "  2. What did we do?\n" +
+      "  3. What came of it?\n" +
+      "  4. What should the next person know?\n\n" +
+      "Then write my answers back as four short paragraphs under those four\n" +
+      "headings, in my own words, and nothing else.";
+  }
+
+  /* ── Adding or correcting one ──────────────────────────────────── */
+  function drawMemForm() {
+    var e = MEM.draft || {};
+    var editing = !!e.id;
+    lead(false, "Reading…");
+    /* THE CLIENT LIST IS THE CARDS' OWN, not the memory's: this is the one
+       picker that must offer a client nothing has been written about yet, so
+       it cannot come from the list endpoint like the filters do. `cards` has
+       already dropped the retired ones (visibleClients); the worked example is
+       dropped here, because it is not an engagement anybody learned anything
+       on (§317). */
+    return post({ action: "cards" }).then(function (j) {
+      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
+      settle(function () {
+        var right = el("span");
+        var cancel = el("button", "btn", "Cancel");
+        cancel.type = "button";
+        cancel.addEventListener("click", function () { memGo(editing ? "entry" : "list"); });
+        var save = el("button", "btn amber", "Save");
+        save.type = "button";
+        right.appendChild(cancel); right.appendChild(save);
+        title(editing ? "Edit an insight" : "Add an insight", right);
+
+        var wiz = el("div", "wiz");
+        var fields = {};
+
+        var pair = el("div", "wpair");
+        var cbox = el("div");
+        cbox.appendChild(labFor("m-client", "Client"));
+        var csel = el("select", "fld");
+        csel.id = "m-client";
+        if (editing) { csel.disabled = true; }
+        clients.forEach(function (c) {
+          var op = el("option", null, c.name);
+          op.value = c.key;
+          if (c.key === (e.client || "")) op.selected = true;
+          csel.appendChild(op);
+        });
+        cbox.appendChild(csel); pair.appendChild(cbox);
+
+        var kbox = el("div");
+        kbox.appendChild(labFor("m-kind", "Kind"));
+        var ksel = el("select", "fld");
+        ksel.id = "m-kind";
+        KINDS.forEach(function (k) {
+          var op = el("option", null, k[1]);
+          op.value = k[0];
+          if (k[0] === (e.kind || "lesson")) op.selected = true;
+          ksel.appendChild(op);
+        });
+        kbox.appendChild(ksel); pair.appendChild(kbox);
+
+        var wbox = el("div");
+        wbox.appendChild(labFor("m-when", "When it happened"));
+        var wfld = el("input", "fld");
+        wfld.id = "m-when"; wfld.type = "text"; wfld.value = e.occurred || "";
+        wbox.appendChild(wfld); pair.appendChild(wbox);
+        wiz.appendChild(pair);
+
+        var tq = el("div", "wq");
+        tq.appendChild(labFor("m-title", "Title"));
+        var tfld = el("input", "fld");
+        tfld.id = "m-title"; tfld.type = "text"; tfld.value = e.title || "";
+        tq.appendChild(tfld); wiz.appendChild(tq);
+
+        QS.forEach(function (q) {
+          var box = el("div", "wq");
+          box.appendChild(labFor("m-" + q[0], q[1]));
+          var ta = el("textarea", "fld");
+          ta.id = "m-" + q[0];
+          ta.value = e[q[0]] || "";
+          box.appendChild(ta);
+          fields[q[0]] = ta;
+          wiz.appendChild(box);
+        });
+
+        wiz.appendChild(el("p", "note", "A title and a client are enough to save. The rest can wait."));
+
+        /* The other way to finish it — under a rule, because it is not the
+           next step of the form but an alternative to filling it in (§317's
+           own .apart device). */
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Or answer it out loud"));
+        var pre = el("pre", "prompt", onePrompt(csel, clients));
+        apart.appendChild(pre);
+        var acts = el("div", "wacts");
+        acts.appendChild(copyBtn(function () { return pre.textContent; }));
+        acts.appendChild(el("span", "muted", "Paste it back into the boxes above."));
+        apart.appendChild(acts);
+        /* the same, one screen over (§53.5) */
+        var follow1 = function () { pre.textContent = onePrompt(csel, clients); };
+        csel.addEventListener("input", follow1);
+        csel.addEventListener("change", follow1);
+        wiz.appendChild(apart);
+        page.appendChild(wiz);
+
+        save.addEventListener("click", function () {
+          var body = { action: "save", client: csel.value, kind: ksel.value,
+                       title: tfld.value, occurred: wfld.value };
+          if (editing) body.id = e.id;
+          QS.forEach(function (q) { body[q[0]] = fields[q[0]].value; });
+          save.disabled = true;
+          mpost(body).then(function (r) {
+            save.disabled = false;
+            if (!r || !r.ok) { say((r && r.error) || "It could not be saved.", true); return; }
+            memGo(editing ? "entry" : "list", { entry: r.id });
+          });
+        });
+      });
+    });
+  }
+
+  function labFor(id, text) {
+    var l = el("label", "lab", text);
+    l.setAttribute("for", id);
+    return l;
+  }
+  function copyBtn(text) {
+    var b = el("button", "btn solid", "Copy the prompt");
+    b.type = "button";
+    b.addEventListener("click", function () {
+      var done = function () {
+        b.textContent = "Copied";
+        setTimeout(function () { b.textContent = "Copy the prompt"; }, 1600);
+      };
+      /* execCommand is the path that actually runs from a plain http origin
+         (§93.6): navigator.clipboard needs a secure context. */
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text()).then(done, done);
+      else {
+        var ta = document.createElement("textarea");
+        ta.value = text();
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (err) { /* nothing to do */ }
+        document.body.removeChild(ta);
+        done();
+      }
+    });
+    return b;
+  }
+  function clientNamed(clients, key) {
+    for (var i = 0; i < clients.length; i++) if (clients[i].key === key) return clients[i];
+    return null;
+  }
+  function clientPhrase(c) {
+    if (!c) return "this client";
+    return c.name + (c.industry ? " (" + c.industry + ")" : "");
+  }
+
+  /* ── A period debrief, and what comes back ─────────────────────
+     THE MAIN DOOR (Islam: "it will not be case by case usually it would be a
+     period of time to share"). One conversation, several insights: the page
+     writes a prompt carrying the client and the period, the consultant talks
+     it through with whatever assistant they use, and pastes the whole answer
+     back in one box.
+
+     NOTHING IS STORED UNTIL SOMEBODY HAS READ IT. The prompt forbids
+     invention — "use my words, not yours; if I only half answered, leave that
+     line out" — and the platform CANNOT TELL a paragraph somebody said from
+     one a model completed, so the drafts screen is not politeness: it is the
+     only place that judgement can happen. */
+  function drawDebrief() {
+    lead(false, "Reading…");
+    return post({ action: "cards" }).then(function (j) {
+      var clients = ((j && j.cards) || []).filter(function (c) { return c.kind !== "demo"; });
+      var d = MEM.deb || { client: (clients[0] || {}).key || "", from: "", to: "", paste: "" };
+      settle(function () {
+        var right = el("span");
+        var cancel = el("button", "btn", "Cancel");
+        cancel.type = "button";
+        cancel.addEventListener("click", function () { memGo("list", { deb: null }); });
+        right.appendChild(cancel);
+        title("Write up a period", right);
+
+        var wiz = el("div", "wiz");
+        var pair = el("div", "wpair");
+        var csel = el("select", "fld");
+        csel.id = "d-client";
+        clients.forEach(function (c) {
+          var op = el("option", null, c.name);
+          op.value = c.key;
+          if (c.key === d.client) op.selected = true;
+          csel.appendChild(op);
+        });
+        pair.appendChild(boxed("d-client", "Client", csel));
+        var from = el("input", "fld"); from.id = "d-from"; from.type = "text"; from.value = d.from;
+        from.placeholder = "1 August 2026";
+        pair.appendChild(boxed("d-from", "From", from));
+        var to = el("input", "fld"); to.id = "d-to"; to.type = "text"; to.value = d.to;
+        to.placeholder = "11 September 2026";
+        pair.appendChild(boxed("d-to", "To", to));
+        wiz.appendChild(pair);
+
+        wiz.appendChild(el("span", "lab", "Take this to your assistant and talk it through"));
+        var pre = el("pre", "prompt", debPrompt(csel, clients, from, to));
+        wiz.appendChild(pre);
+        var acts = el("div", "wacts");
+        acts.appendChild(copyBtn(function () { return pre.textContent; }));
+        wiz.appendChild(acts);
+        /* THE PROMPT FOLLOWS AS YOU TYPE, and `input` is right here where it
+           would be wrong almost anywhere else in this product: §35's rule is
+           that typing must not REPAINT, and this repaints nothing — it writes
+           into one <pre> that nobody is typing into, which is the
+           write-into-the-node pattern §63 and §193 already use.
+
+           On `change` it went stale in the one way that matters: `change`
+           fires on BLUR, so somebody who filled in the end date and reached
+           straight for Copy the prompt would have copied a prompt with no end
+           date in it. Measured — the period read "covering 1 August 2026"
+           with 11 September plainly in the box beside it. */
+        [csel, from, to].forEach(function (f) {
+          var follow = function () { pre.textContent = debPrompt(csel, clients, from, to); };
+          f.addEventListener("input", follow);
+          f.addEventListener("change", follow);
+        });
+
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Then paste what came back"));
+        var paste = el("textarea", "fld pastebox");
+        paste.id = "d-paste";
+        paste.value = d.paste;
+        paste.placeholder = "Paste the whole answer here — every block at once.";
+        apart.appendChild(paste);
+        var pacts = el("div", "wacts");
+        var read = el("button", "btn amber", "Read what came back");
+        read.type = "button";
+        read.addEventListener("click", function () {
+          var text = paste.value;
+          if (!text.trim()) { say("There is nothing pasted in yet.", true); return; }
+          var out = window.MemorySplit.split(text);
+          if (!out.entries.length && !out.unread.length) { say("There is nothing pasted in yet.", true); return; }
+          memGo("drafts", {
+            /* the NAME is carried with the key: on a first debrief the list
+               endpoint has never heard of this client, so MEM.clientNames is
+               empty and the strip would read a slug (§124) */
+            deb: { client: csel.value, clientName: csel.options[csel.selectedIndex].textContent,
+                   from: from.value, to: to.value, paste: text },
+            drafts: out.entries.map(function (e) { return e; })
+              .concat(out.unread.map(function (t) { return rawDraft(t); }))
+          });
+        });
+        pacts.appendChild(read);
+        pacts.appendChild(el("span", "muted", "Nothing is saved until you have read them."));
+        apart.appendChild(pacts);
+        wiz.appendChild(apart);
+        page.appendChild(wiz);
+      });
+    });
+  }
+
+  function boxed(id, label, control) {
+    var d = el("div");
+    d.appendChild(labFor(id, label));
+    d.appendChild(control);
+    return d;
+  }
+  function rawDraft(text) {
+    /* A BLOCK IT COULD NOT READ COMES BACK WHOLE (§184). It has no title —
+       which is the one thing a person can add — so it is shown in the warning
+       ground with its words in the first box rather than dropped. */
+    return { kind: "lesson", kindGuessed: true, title: "", occurred: "",
+             happened: text, did: "", came_of_it: "", next_person: "", raw: true };
+  }
+  function periodWord(from, to) {
+    var f = String(from.value || "").trim(), t = String(to.value || "").trim();
+    if (f && t) return f + " to " + t;
+    return f || t || "";
+  }
+  function debPrompt(csel, clients, from, to) {
+    var c = clientPhrase(clientNamed(clients, csel.value));
+    var p = periodWord(from, to);
+    return "I have just finished a period of work at " + c + (p ? ",\ncovering " + p : "") + ". Help me write up what we learned\n" +
+      "from it, for my firm's consulting memory.\n\n" +
+      "Interview me. Ask ONE question at a time and wait for my answer before\n" +
+      "asking the next one.\n\n" +
+      "Start by asking me to walk you through the period — what we worked on and\n" +
+      "what stands out. Then draw out, one at a time:\n\n" +
+      "  · what went better than we expected, and why\n" +
+      "  · what went wrong, or cost us time\n" +
+      "  · what I know now that I did not know at the start\n" +
+      "  · anything I would warn the next consultant about\n\n" +
+      "For each thing I raise, ask me what happened, what we did, what came of\n" +
+      "it, and what the next person should know. Push back when my answer is\n" +
+      "vague, and do not move on until it would make sense to somebody who was\n" +
+      "not there.\n\n" +
+      "When I say I am done, write every item back in exactly this shape, and\n" +
+      "nothing else — no summary, no preamble:\n\n" +
+      "===\n" +
+      "KIND: hiccup | practice | lesson\n" +
+      "TITLE: one line, the thing itself\n" +
+      (p ? "WHEN: " + p + "\n" : "") +
+      "WHAT HAPPENED: ...\n" +
+      "WHAT WE DID: ...\n" +
+      "WHAT CAME OF IT: ...\n" +
+      "WHAT THE NEXT PERSON SHOULD KNOW: ...\n" +
+      "===\n\n" +
+      "Repeat that block for each item. Use my words, not yours. If I only half\n" +
+      "answered something, leave that line out rather than filling it in.";
+  }
+
+  /* ── What came back ────────────────────────────────────────────── */
+  function drawDrafts() {
+    var d = MEM.deb || {}, drafts = MEM.drafts || [];
+    settle(function () {
+      var right = el("span");
+      var back = el("button", "btn", "Back");
+      back.type = "button";
+      back.addEventListener("click", function () { memGo("deb"); });
+      var save = el("button", "btn amber", "Save all " + drafts.length);
+      save.type = "button";
+      right.appendChild(back); right.appendChild(save);
+      title("What came back", right);
+
+      if (!drafts.length) {
+        page.appendChild(el("p", "muted", "Nothing left to save — go back and paste it again."));
+        return;
+      }
+
+      /* THE COUNT AND THE ROWS ARE ONE LIST (§108.1): what was read and what
+         was not are said separately, because four found over three that
+         parsed is the badge people report as a bug. */
+      var read = drafts.filter(function (x) { return !x.raw; }).length;
+      var raw = drafts.length - read;
+      var found = el("p", "found");
+      var b = el("b", null, read + (read === 1 ? " insight read" : " insights read"));
+      found.appendChild(b);
+      found.appendChild(document.createTextNode(
+        (raw ? ", and " + raw + (raw === 1 ? " block it could not" : " blocks it could not") : "") +
+        " · " + (clientNameOf(d.client) || d.client) + (periodOf(d) ? " · " + periodOf(d) : "")));
+      var sp = el("span", "sp");
+      KINDS.forEach(function (k) {
+        var n = drafts.filter(function (x) { return !x.raw && x.kind === k[0]; }).length;
+        if (n) sp.appendChild(el("span", "tag " + k[0], n + " " + (n === 1 ? k[1].toLowerCase() : k[1].toLowerCase() + "s")));
+      });
+      found.appendChild(sp);
+      page.appendChild(found);
+
+      var list = el("div", "drafts");
+      drafts.forEach(function (dr) { list.appendChild(draftCard(dr, drafts, list)); });
+      page.appendChild(list);
+
+      save.addEventListener("click", function () {
+        var missing = -1;
+        for (var i = 0; i < drafts.length; i++) if (!String(drafts[i].title || "").trim()) { missing = i; break; }
+        if (missing >= 0) { say("Give number " + (missing + 1) + " a title before saving.", true); return; }
+        save.disabled = true;
+        mpost({ action: "saveMany", client: d.client, entries: drafts }).then(function (r) {
+          save.disabled = false;
+          if (!r || !r.ok) { say((r && r.error) || "They could not be saved.", true); return; }
+          memGo("list", { deb: null, drafts: null });
+        });
+      });
+    });
+  }
+
+  function clientNameOf(key) {
+    return (MEM.deb && MEM.deb.client === key && MEM.deb.clientName) || (MEM.clientNames || {})[key] || key;
+  }
+  function periodOf(d) {
+    var f = String(d.from || "").trim(), t = String(d.to || "").trim();
+    return f && t ? f + " to " + t : (f || t || "");
+  }
+
+  /* A DRAFT EDITS IN PLACE AND NOTHING REPAINTS (§71.2): these boxes are being
+     read and corrected, and a repaint under a working hand is how half a
+     correction disappears. Only DROP redraws, because a row leaving changes
+     the count above it. */
+  function draftCard(dr, drafts, list) {
+    var card = el("article", "dcard" + (dr.raw ? " raw" : ""));
+    if (dr.raw) card.appendChild(el("p", "rawnote",
+      "This one did not come back in the shape the prompt asked for — check it, or save it as it stands."));
+    var head = el("div", "dhead");
+    var ksel = el("select", "fld");
+    ksel.setAttribute("aria-label", "Kind");
+    KINDS.forEach(function (k) {
+      var op = el("option", null, k[1]);
+      op.value = k[0];
+      if (k[0] === dr.kind) op.selected = true;
+      ksel.appendChild(op);
+    });
+    ksel.addEventListener("change", function () { dr.kind = ksel.value; });
+    head.appendChild(ksel);
+    var tfld = el("input", "fld");
+    tfld.type = "text";
+    tfld.setAttribute("aria-label", "Title");
+    tfld.value = dr.title || "";
+    if (!dr.title) tfld.placeholder = "Give it a title";
+    tfld.addEventListener("change", function () { dr.title = tfld.value; });
+    head.appendChild(tfld);
+    var drop = el("button", "btn drop", "Drop");
+    drop.type = "button";
+    drop.addEventListener("click", function () {
+      var at = drafts.indexOf(dr);
+      if (at >= 0) drafts.splice(at, 1);
+      drawDrafts();
+    });
+    head.appendChild(drop);
+    card.appendChild(head);
+
+    QS.forEach(function (q) {
+      var box = el("div", "dq");
+      box.appendChild(el("label", "lab", q[1]));
+      var ta = el("textarea", "fld");
+      ta.value = dr[q[0]] || "";
+      ta.addEventListener("change", function () { dr[q[0]] = ta.value; });
+      box.appendChild(ta);
+      card.appendChild(box);
+    });
+    return card;
+  }
+
+  /* ── Clients ─────────────────────────────────────────────────── */
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
+     §369 measured the silence and did not fill it: one round trip, about
+     740ms warm and seconds on a cold function, with the bar standing up
+     over a hidden body — a window that looks open, answers nothing, and
+     says nothing about either. Islam chose the grey skeleton over the
+     page's own words, from two shot out of the real page
+     (design-mockups/console-loading/).
+
+     IT IS DRAWN BEFORE THE ANSWER, which is the one thing the gate above
+     was stopping — and it is safe to draw for precisely the reason that
+     gate exists: it holds no name, no mark, no colour of anybody's and no
+     figure, so nothing here can turn out to have been somebody else's
+     screen (§94.10).
+
+     THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX. That box filters the
+     grid it is drawn beside, so one drawn over placeholders would take a
+     word and hide three grey blocks (§61: a control with nothing to act on
+     is not a choice). It arrives with the cards, where `drawClients`
+     builds it — which is also why this draws the title WITHOUT a right-hand
+     group rather than an empty one.
+
+     THREE IS A GUESS, AND IT IS THE COST ISLAM TOOK WITH IT NAMED: a
+     console with seven clients shows three and then seven. It is not
+     remembered from the last visit, because a count kept per device is a
+     second thing that has to stay true and §94.10 refused that same trade
+     for the branding it was about.
+
+     `aria-hidden` BECAUSE IT SAYS NOTHING. Three empty boxes read out one
+     after another is noise, and what a screen reader gets here is what it
+     gets today: the page, and then the cards when they land. */
+  function drawWaiting() {
+    title("Clients");
+    var grid = el("div", "cards");
+    grid.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) {
+      var c = el("div", "ccard skel");
+      var top = el("div", "ctop");
+      top.appendChild(el("div", "sk-mark"));
+      top.appendChild(el("div", "sk-line"));
+      top.appendChild(el("div", "sk-line thin"));
+      c.appendChild(top);
+      /* The hairline the real card draws above its module rows, so the two
+         shapes end the same way rather than the line appearing on arrival. */
+      c.appendChild(el("div", "mods"));
+      grid.appendChild(c);
+    }
+    page.appendChild(grid);
+    document.body.classList.add("ready");
+  }
+
+  function drawClients() {
+    /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
+       A client whose register cannot place this account refuses and lands
+       them on the cards, because the cards are beside the configuration that
+       answers it. Said BEFORE the title, so it is the first thing read rather
+       than a line under a grid of cards; taken once and cleared, or it would
+       reappear on every visit long after the mapping was corrected. */
+    var why = null;
+    try {
+      why = sessionStorage.getItem("smp.client.why");
+      if (why) sessionStorage.removeItem("smp.client.why");
+    } catch (e) { /* no storage is simply no sentence */ }
+    if (why) say(why, true);
+
+    /* Made here and appended after the title, so the search's own handler
+       closes over the element it filters rather than over a hoisted blank.
+
+       AND IT IS NAMED. The band below it is a card grid too and rightly wears
+       the same `.cards` rule (§53.5), so a selector reading `.cards` reaches
+       both — which is how something written later comes to mean "the client
+       grid" and quietly include the worked example. `data-grid` is what a
+       check or a rule addresses; the class stays about the layout. The new
+       check's own first run found this, by going red on it. */
+    var grid = el("div", "cards");
+    grid.dataset.grid = "clients";
+
+    var right = el("div");
+    var search = el("input", "fld");
+    search.placeholder = "Search clients"; search.style.width = "190px";
+    /* TYPING NEVER REPAINTS (constitution XV): the cards are hidden in place.
+       SCOPED TO THE CLIENT GRID (§317): the box says "Search clients", so with
+       the worked example out of that grid it is no longer among the things it
+       searches. That is a change and it is the honest one — today typing
+       "demo" finds it. */
+    search.addEventListener("input", function () {
+      var q = search.value.trim().toLowerCase();
+      Array.prototype.forEach.call(grid.querySelectorAll(".ccard[data-name]"), function (c) {
+        c.hidden = !!q && c.dataset.name.indexOf(q) < 0;
+      });
+    });
+    right.appendChild(search);
+    title("Clients", right);
+
+    page.appendChild(grid);
+    grid.appendChild(el("p", "muted", "Reading your clients…"));
+
+    /* THE BOOT'S OWN ANSWER, ONCE (§369). The boot asks `cards` to learn what
+       the navigation may offer, and this asked the identical question again a
+       round trip later — the heaviest question in the page, which opens a
+       connection per client to read its units, its plan and its cycle. Handed
+       over rather than asked twice.
+       IT IS ONE-SHOT AND MUST BE: `go("clients")` is pressed from six other
+       places — after adding a client, on the way back out of one, after
+       archiving — and every one of those has to read the list AGAIN, or the
+       grid draws a client that has just been archived (§48.2: a value is read
+       at press time, never trusted from the render that drew the button). */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
+      grid.textContent = "";
+      if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
+      /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§313.18, §61) ──
+         This RETURNED on an empty list, before the Add card was appended — so
+         the one person who can create a client was the one shown a dead end,
+         and the sentence it showed them said to ask the platform's super
+         user, which is who they are. §61's trap in its purest form: the only
+         way to get a client is to add one, and the control that adds one was
+         hidden precisely when there were none.
+
+         AND THE EMPTY STATE SAYS WHAT THIS READER CAN DO ABOUT IT. Somebody
+         who may add one is told to; somebody who may not is told who to ask.
+         A refusal names the place that can fix it (§16.7), and for these two
+         people that is not the same place. */
+      /* ── THE WORKED EXAMPLE IS NOT ONE OF THE CLIENTS (§317) ────────
+         Split by what the tenant IS, never by its name: `kind` is the
+         column the server already sorts on, and a key spelled "demo" is a
+         client's key like any other. Everything else about it is unchanged
+         — same card, same amber, same Demo tag, same door. */
+      var clients = j.cards.filter(function (c) { return c.kind !== "demo"; });
+      var demos = j.cards.filter(function (c) { return c.kind === "demo"; });
+
+      clients.forEach(function (c) { grid.appendChild(cardFor(c)); });
+      if (j.canAdd) grid.appendChild(addCard());
+      /* AND THE COUNT IS A COUNT OF CLIENTS. It read `j.cards.length`, which
+         includes the demo — so on a platform seeded with the worked example
+         and no clients, the sentence below never drew and the one person who
+         could add one was shown a single amber card and no way in: §61's
+         trap the empty state was written to close, by a road it did not
+         cover. */
+      if (!clients.length) {
+        say(j.canAdd
+          ? "No clients yet. Add the first one — it is created with its own name and nothing else."
+          : "No client has been given to this account yet. Ask the platform's super user.");
+      }
+
+      /* Drawn only when there is one (§61): a heading over an empty band is
+         furniture, and a platform with no demo seeded has nothing to say. */
+      if (demos.length) {
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "The worked example"));
+        var dgrid = el("div", "cards");
+        demos.forEach(function (c) { dgrid.appendChild(cardFor(c)); });
+        apart.appendChild(dgrid);
+        page.appendChild(apart);
+      }
+
+      /* ── ARCHIVED CLIENTS (§323) ────────────────────────────────────
+         The page's OWN band — the one the worked example sits in — rather
+         than a second answer to "a row under the grid" (§53.5).
+
+         A CLIENT THAT SIMPLY VANISHED COULD NEVER COME BACK: the only route
+         would be through a card that is no longer drawn (§61). That is the
+         whole reason this band exists, and it is also where Delete becomes
+         reachable, so being archived is a real step rather than a hidden
+         state.
+
+         Drawn only when there is one, like the band above it: a heading over
+         an empty band is furniture, and a platform with nothing archived has
+         nothing to say. The server has already decided WHO sees this — it
+         sends the list only to somebody who can bring one back, so there is
+         no second answer here (§42). */
+      if (j.archived && j.archived.length) {
+        var arch = el("div", "apart");
+        arch.appendChild(el("span", "akey", "Archived"));
+        var agrid = el("div", "cards");
+        agrid.dataset.grid = "archived";
+        j.archived.forEach(function (c) { agrid.appendChild(archCardFor(c)); });
+        arch.appendChild(agrid);
+        page.appendChild(arch);
+      }
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      grid.textContent = ""; say("Could not reach the server.", true);
+    });
+  }
+
+  /* ONLY THE ROWS OPEN (§320.3, spec 046 §4.6a). Islam, of two behaviours
+     drawn side by side: "2" — the card's name is not pressable and every way
+     into a client names a module, so there is never a question of which one
+     the top would open. The card is a DIV holding two things: the identity
+     block, and a button per module this client has.
+
+     THE MODULE'S OWN STATE MOVED OUT OF THE FOOT WITH IT. `cycle open`,
+     `no plan yet` and `not answering` are all Strategy's answers about this
+     client, so with a Strategy row to carry them the foot would have said
+     each twice (§87). The seat, the unit count and Demo stay: they are the
+     client's and the spine's, not a module's.
+
+     The rows come from the server (lib/modules.ts moduleRows), so the console
+     cannot spell a module differently from the switch or from Setup. */
+  function cardFor(c) {
+    var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
+    b.dataset.client = c.key;
+    b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
+    var top = el("div", "ctop");
+    if (c.mark) {
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+    } else {
+      top.appendChild(el("div", "cmark", initials(c.name)));
+    }
+    top.appendChild(el("h2", null, c.name));
+    if (c.industry) top.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
+    if (c.kind === "demo") tag("Demo", "demo");
+    /* THE SEAT IS WHAT THIS CARD SAYS ABOUT THIS PERSON — the thing they came
+       to know, and the thing that decides what they can do when they arrive. */
+    if (c.seat) tag(c.seat === "super" ? "Super user" : "SMO team", "seat");
+    if (c.units != null && c.units > 0) tag(c.units + (c.units === 1 ? " unit" : " units"));
+    if (!c.canOpen) tag("Listed only");
+    top.appendChild(foot);
+    b.appendChild(top);
+
+    /* A CLIENT THIS PERSON MAY NOT OPEN GETS NO ROWS AT ALL — there is no way
+       in, so there is nothing to draw (§61); "Listed only" already says it. */
+    if (c.canOpen && c.modules && c.modules.length) {
+      var mods = el("div", "mods");
+      c.modules.forEach(function (m) {
+        var r = el("button", "mrow");
+        r.type = "button";
+        r.dataset.module = m.key;
+        r.appendChild(document.createTextNode(m.label));
+        /* THE MARK (§368): what this module says is OUTSTANDING on this
+           client, in the fewest words, and NOTHING when nothing is — which
+           is where the compactness comes from. It replaces the pair that
+           was here, a full sentence (the client's chosen landing line) and
+           the card's own health word, which on a running cycle said the
+           same fact twice and could not fit on one line.
+           Both come from the server (lib/modules.ts), so the page decides
+           nothing: `alarm` is the module's own word for *broken rather than
+           busy* and `tip` is the whole sentence for the hover. */
+        if (m.mark) {
+          var mk = el("i", m.alarm ? "alarm" : "due", m.mark);
+          if (m.tip) mk.title = m.tip;
+          r.appendChild(mk);
+        }
+        /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's
+           own page (spec 053; the flag is the server's, lib/modules.ts). The
+           client's read-only library is one press further in, from there —
+           this is the one module whose work is on our side, and landing a
+           consultant on the page where they can do nothing would be §61 with
+           the sign reversed. */
+        r.addEventListener("click", function () {
+          if (m.room) return drawLibrary(c.key, m.key, c.name, m.label);
+          location.assign("/" + c.key + "/" + m.key);
+        });
+        mods.appendChild(r);
+      });
+      b.appendChild(mods);
+    }
+
+    if (c.canConfig) {
+      var cog = el("span", "ccfg", "Settings");
+      cog.setAttribute("role", "button"); cog.tabIndex = 0;
+      /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
+         client at /<client>/setup, in its own chrome — Getting started at the
+         top of that rail until it is done, the register and the organisation
+         under it. Nothing between the card and the client. */
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); location.assign("/" + c.key + "/setup"); };
+      cog.addEventListener("click", open);
+      cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+      b.appendChild(cog);
+    }
+    return b;
+  }
+
+  /* ── AN ARCHIVED CLIENT'S CARD (§323) ──────────────────────────────
+     Everything the live card says about a client is about a client somebody
+     is working in — a seat, a cycle, a count of units — and none of it is
+     true of one that has been set aside, so this says the two things that
+     ARE: when it was archived and who did it. A card that carried the live
+     tags would read as a client you could still open.
+
+     IT HAS NO DOOR. Their address is already closed, so a press that
+     navigated there would land on "that client is not available" — §61 from
+     the other side: a control that leads somewhere refusing is worse than no
+     control. `disabled` because there is nothing behind it, not for the look.
+
+     AND THE DATE IS THE READER'S, never the database's spelling: an ISO
+     timestamp is a fact about storage. An unreadable or missing one says
+     nothing at all rather than printing "Invalid Date" (§35, §15.1). */
+  function archDate(v) {
+    if (!v) return "";
+    var d = new Date(v);
+    if (isNaN(d.getTime())) return "";
+    try {
+      return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) { return ""; }
+  }
+
+  function archCardFor(c) {
+    var b = el("button", "ccard arch");
+    b.type = "button";
+    b.disabled = true;
+    b.dataset.client = c.key;
+    b.dataset.arch = "1";
+    if (c.mark) {
+      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+    } else {
+      b.appendChild(el("div", "cmark", initials(c.name)));
+    }
+    b.appendChild(el("h2", null, c.name));
+    if (c.industry) b.appendChild(el("p", "ind", c.industry));
+    var foot = el("div", "foot");
+    var when = archDate(c.at);
+    foot.appendChild(el("span", "tag arch", when ? "Archived " + when : "Archived"));
+    if (c.by) {
+      var who = el("span", "tag arch", c.by);
+      who.title = "Archived by " + c.by;   /* clipped above, so the whole of it is here */
+      foot.appendChild(who);
+    }
+    b.appendChild(foot);
+
+    /* TWO CONTROLS, AND THE SECOND IS WHY THE FIRST IS NOT ENOUGH.
+       Bring back is the ordinary thing to want from this band, so it is here
+       rather than three presses away. Settings is the ONLY route to Deleting
+       — that block lives on an archived client and nowhere else — so a card
+       carrying Bring back alone would put the one irreversible act behind a
+       screen with no door to it (§61). The check for this file found that by
+       going red on it.
+
+       Bring back is ONE function shared with the block inside (§53.5), never
+       a second copy of the request. */
+    if (c.canConfig) {
+      var acts = el("div", "cacts");
+      var back = el("span", "cback", "Bring back");
+      back.setAttribute("role", "button"); back.tabIndex = 0;
+      var go = function (e) { e.stopPropagation(); e.preventDefault(); bringBack(c.key, c.name); };
+      back.addEventListener("click", go);
+      back.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go(e); });
+      acts.appendChild(back);
+
+      var cog = el("span", "ccfg", "Settings");
+      cog.setAttribute("role", "button"); cog.tabIndex = 0;
+      /* ON THIS PAGE, not the client's (§360): an archived client's address
+         is closed, so its two acts — bringing it back and deleting it — are
+         the one screen the console still draws for a client. */
+      var open = function (e) { e.stopPropagation(); e.preventDefault(); drawArchived(c.key); };
+      cog.addEventListener("click", open);
+      cog.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") open(e); });
+      acts.appendChild(cog);
+      b.appendChild(acts);
+    }
+    return b;
+  }
+
+  /* ONE REQUEST, BOTH DIRECTIONS AND BOTH SURFACES (§53.5): the band's Bring
+     back and the block's Bring back are this, and the block's Archive is this
+     with `on` true. A refusal is SAID — a control that silently does nothing
+     is the shape this project keeps recording (§32, §171). */
+  function setArchived(key, on) {
+    return post({ action: "archiveClient", key: key, on: !!on });
+  }
+  function bringBack(key, name) {
+    setArchived(key, false).then(function (j) {
+      if (!j.ok) { say(j.error || "Could not bring " + name + " back.", true); return; }
+      /* `go("clients")`, NEVER `drawClients()` — the first build called the
+         renderer directly and `drawClients` does not CLEAR the page, so it
+         appended a whole second copy underneath the first and the Archived
+         band the press had just emptied was still sitting there, above a grid
+         that now held the client twice. §100.2's family: whoever redraws a
+         page is the one that clears it, and on this page that is `go`. Found
+         by the check going red on "the band is gone" while every assertion
+         about the grid passed. */
+      go("clients");
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      say("Could not reach the server.", true);
+    });
+  }
+
+  function addCard() {
+    var b = el("button", "ccard add", "+ Add a client");
+    b.type = "button";
+    b.addEventListener("click", function () { drawNewClient(); });
+    return b;
+  }
+
+  /* ── SETTING A CLIENT UP IS INSIDE THE CLIENT NOW (§360, spec 057) ───
+     Islam: *"the client either we open a module or we go to the client
+     settings page where we find a rail with the client settings"* — and, of
+     which chrome draws that rail, "A": the client platform's own Setup.
+     So Settings on a card OPENS /<client>/setup, and the flow that lived
+     here for §322–§352 is client-setup.js, served at /client-setup.js and
+     mounted by the platform on its Getting started page. §322's reason for
+     the outside flow is kept whole — Settings is still pressed from here
+     before anybody at the client has signed in — only the chrome changed.
+
+     TWO PIECES STAY ON THIS PAGE, from that same module, because a client's
+     own address cannot draw them: creating a client, which has no address
+     until it exists (the first step, then straight into the client's own
+     Getting started), and ending an archived one, whose address is closed
+     (§323: bring back and delete, from the archived band's Settings). */
+  function drawNewClient(){
+    clear();
+    var right = el("div");
+    var leave = el("button", "btn", "Cancel");
+    leave.type = "button";
+    leave.addEventListener("click", function () { go("clients"); });
+    right.appendChild(leave);
+    title("Add a client", right);
+    var host = el("div", "csetup");
+    page.appendChild(host);
+    CLIENTSETUP.mountCreate(host, { door: "/" });
+  }
+
+  /* ════ THE DOCUMENT ROOM (spec 053) ══════════════════════════════════
+     Where a client's library is published from. Forefront's side of Insights
+     and Processes — the client's own page reads, and this is the only place
+     anything is written (spec 046 decision #9).
+
+     ONE SCREEN AND ONE CARD, which is what the mockup Islam signed off draws
+     (design-mockups/insights/2026-09-13_…): a list you search, and one report
+     open. There is no third view, because the only things you do to a report
+     are edit it, publish it and take it back.
+
+     EVERY RULE IS THE SERVER'S. The buttons drawn here are what somebody may
+     press; whether a press lands is asked again when it does (§42, §48.2), so
+     a stale page can be wrong about what is offered and never about what
+     happens. */
+  var LIB = { key: "", kind: "insights", client: "", label: "", items: null, cats: [],
+              one: null, q: "", cat: "", state: "", busy: false };
+
+  function drawLibrary(key, kind, client, label) {
+    LIB.key = key; LIB.kind = kind; LIB.client = client; LIB.label = label || "Library";
+    LIB.one = null; LIB.q = ""; LIB.cat = ""; LIB.state = "";
+    return loadLibrary(false);
+  }
+
+  function loadLibrary(quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "library", key: LIB.key, kind: LIB.kind,
+                  q: LIB.q, category: LIB.cat, state: LIB.state }).then(function (j) {
+      if (!j || !j.ok) { clear(); return say((j && j.error) || "That library could not be read.", true); }
+      LIB.items = j.items || [];
+      LIB.cats = j.categories || [];
+      /* THIS CLIENT'S OWN UNITS AND FUNCTIONS, for the ticking panel. They
+         ride the list's answer rather than a second request, so the panel
+         never opens onto a list it is still waiting for (§45.2). */
+      LIB.places = j.places || [];
+      /* Reading one keeps it open across a refresh, so publishing a report
+         does not throw you back to the list you were working in (§71.2). */
+      if (LIB.one) {
+        var still = LIB.items.filter(function (x) { return x.id === LIB.one.id; })[0];
+        LIB.one = still || null;
+      }
+      settle(LIB.one ? paintOneReport : paintLibrary);
+    });
+  }
+
+  /* THE PLACES A STORED LIST NAMES, in words. A key the client no longer has
+     — a unit retired since the report was narrowed — is drawn as the KEY
+     rather than dropped: it is still doing work in the stored row, and a list
+     that quietly showed two names for three entries would be lying about
+     who can read it (§35, §96.2). */
+  function seenNames(seen) {
+    return (seen || []).map(function (at) {
+      var hit = (LIB.places || []).filter(function (p) { return p.at === at; })[0];
+      return hit ? hit.label : at;
+    });
+  }
+
+  /* The fact line, one place, so the list and the card cannot say a report's
+     size one way and its date another. */
+  function factsOf(it) {
+    var bits = [];
+    if (it.categories && it.categories.length) bits.push(it.categories.join(" · "));
+    if (it.reportDate) bits.push(it.reportDate);
+    bits.push("v" + it.version);
+    if (it.sizeLabel) bits.push(it.sizeLabel);
+    bits.push(it.state === "published"
+      ? it.downloads + (it.downloads === 1 ? " download" : " downloads")
+      : "not published");
+    return bits.join(" · ");
+  }
+
+  function libraryHead(where) {
+    var t = el("div", "ptitle");
+    var back = el("button", "btn", "‹ Clients");
+    back.type = "button";
+    back.addEventListener("click", function () { go("clients"); });
+    t.appendChild(back);
+    t.appendChild(el("h1", null, LIB.label));
+    t.appendChild(el("span", "tag", LIB.client));
+    var right = el("span", "right");
+    if (where === "list") {
+      var add = el("button", "btn solid", "Publish a report");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        LIB.one = { id: "", title: "", summary: "", categories: [], reportDate: "",
+                    state: "draft", version: 1, fileName: "", sizeLabel: "", downloads: 0, hasFile: false };
+        settle(paintOneReport);
+      });
+      right.appendChild(add);
+    }
+    t.appendChild(right);
+    return t;
+  }
+
+  function paintLibrary() {
+    page.appendChild(libraryHead("list"));
+
+    var f = el("div", "filters");
+    var q = el("input", "fld search"); q.type = "search"; q.placeholder = "Search reports…"; q.value = LIB.q;
+    /* Typing does not refetch on every keystroke; Enter and the blur do
+       (§35 — a list that rebuilds under a typing hand is the fault §71.2
+       names, and this one costs a round trip as well). */
+    var run = function () { if (q.value !== LIB.q) { LIB.q = q.value; loadLibrary(true); } };
+    q.addEventListener("change", run);
+    q.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); run(); } });
+    f.appendChild(q);
+
+    var cat = el("select", "fld");
+    [["", "Every category"]].concat(LIB.cats.map(function (c) { return [c, c]; })).forEach(function (o) {
+      var op = el("option", null, o[1]); op.value = o[0]; if (LIB.cat === o[0]) op.selected = true; cat.appendChild(op);
+    });
+    cat.addEventListener("change", function () { LIB.cat = cat.value; loadLibrary(true); });
+    f.appendChild(cat);
+
+    var st = el("select", "fld");
+    [["", "Published and drafts"], ["published", "Published"], ["draft", "Drafts"]].forEach(function (o) {
+      var op = el("option", null, o[1]); op.value = o[0]; if (LIB.state === o[0]) op.selected = true; st.appendChild(op);
+    });
+    st.addEventListener("change", function () { LIB.state = st.value; loadLibrary(true); });
+    f.appendChild(st);
+
+    f.appendChild(el("span", "count", LIB.items.length + (LIB.items.length === 1 ? " report" : " reports")));
+    page.appendChild(f);
+
+    if (!LIB.items.length) {
+      /* THREE EMPTY STATES AND NOT ONE (§105's rule): an empty state
+         describes THIS filter, never the whole library. */
+      var why = (LIB.q || LIB.cat || LIB.state)
+        ? "No reports match. Try clearing the search, or a different category."
+        : "Nothing has been published to " + LIB.client + " yet. Press “Publish a report” to put the first one up.";
+      page.appendChild(el("p", "muted", why));
+      return;
+    }
+
+    var list = el("div", "elist");
+    LIB.items.forEach(function (it) {
+      var r = el("button", "erow"); r.type = "button";
+      var body = el("span", "body");
+      body.appendChild(el("h3", null, it.title));
+      if (it.summary) body.appendChild(el("p", "snip", it.summary));
+      body.appendChild(el("span", "facts", factsOf(it)));
+      r.appendChild(body);
+      /* ONLY A DRAFT CARRIES A TAG. Published is the normal case, and marking
+         it would spend the page's accent on the state that needs no attention
+         (§41's budget, and the mockup's own note). */
+      if (it.state !== "published") r.appendChild(el("span", "tag none", "Draft"));
+      /* AND WHO MAY SEE IT, BY THE SAME RULE (spec 046 §4.10): only the
+         exception carries a mark, so a report everybody can see wears
+         nothing. The words are the SERVER's (`seenLabel`), so the list and
+         the card cannot describe one report's reach two ways.
+
+         IT TAKES NO ACCENT, and that was found by drawing it: amber beside
+         the amber Draft tag put two meanings in one colour in one slot
+         (§87's twins, §41's budget). Nobody keeps an alarm, because a
+         published report nobody can open is the one state here that is
+         genuinely wrong-looking. The names go on the hover — the row has no
+         width for three of them without taking a second line (§88). */
+      if (it.seenLabel) {
+        var lim = el("span", it.seen && !it.seen.length ? "tag shut" : "tag", it.seenLabel);
+        if (it.seen && it.seen.length) lim.title = seenNames(it.seen).join(" · ");
+        r.appendChild(lim);
+      }
+      r.addEventListener("click", function () { LIB.one = it; settle(paintOneReport); });
+      list.appendChild(r);
+    });
+    page.appendChild(list);
+  }
+
+  /* ── ONE REPORT ───────────────────────────────────────────────────────
+     The card the mockup's frame 02 draws: what it says, what it is filed
+     under, which file it is, and — in a block of its own behind a rule — the
+     two acts that cannot be undone (§273.4's shape, chosen once for closing a
+     cycle and again for archiving a client).
+
+     NOTHING HERE IS A SECOND COPY OF A RULE. Every button is drawn from what
+     the SERVER said about this report — `hasFile`, `state`, `version` — and
+     every press asks again when it lands (§42, §48.2), so a page left open
+     while somebody else publishes is wrong about what is offered and never
+     about what happens.
+
+     AND IT DOES NOT REPAINT UNDER A TYPING HAND (§71.2, §194): the fields are
+     read at the moment of the press rather than written back on every
+     keystroke, and only an act that CHANGES the report redraws the card. */
+  function paintOneReport() {
+    var it = LIB.one;
+    var isNew = !it.id;
+    page.appendChild(libraryHead("one"));
+
+    var card = el("div", "ecard");
+
+    /* The two marks, and only what is true: a published report says nothing
+       about being published, because that is the ordinary state and marking
+       it would spend the page's accent on the half that needs no attention
+       (§41's budget). The version is always drawn, because it is the one
+       number on this card that means something on its own. */
+    var tags = el("div", "etags");
+    if (it.state !== "published") tags.appendChild(el("span", "tag none", "Draft"));
+    tags.appendChild(el("span", "tag", "v" + (it.version || 1)));
+    card.appendChild(tags);
+    card.appendChild(el("h2", null, it.title || "A new report"));
+
+    var set = el("div", "rowset");
+    set.style.marginTop = "18px";
+
+    var tb = el("div");
+    tb.appendChild(labFor("lib-title", "Title"));
+    var title = el("input", "fld"); title.id = "lib-title"; title.value = it.title || "";
+    tb.appendChild(title); set.appendChild(tb);
+
+    var sb = el("div");
+    sb.appendChild(labFor("lib-sum", "Summary"));
+    var sum = el("textarea", "fld"); sum.id = "lib-sum"; sum.rows = 2; sum.value = it.summary || "";
+    sb.appendChild(sum); set.appendChild(sb);
+
+    /* THE CATEGORIES ARE THE ONE LIST THE SERVER SENT (spec 053 §4.4: one
+       list for every client, for now), so a category invented here would be
+       refused on save — which is why they are chips off that list and not a
+       box somebody types into. `aria-pressed` is what a toggle already
+       means, so the lit state needs no second attribute. */
+    var picked = (it.categories || []).slice();
+    var cb = el("div");
+    cb.appendChild(el("span", "lab", "Categories"));
+    var crow = el("div", "catrow");
+    LIB.cats.forEach(function (c) {
+      var chip = el("button", "catpick", c);
+      chip.type = "button";
+      chip.setAttribute("aria-pressed", picked.indexOf(c) >= 0 ? "true" : "false");
+      chip.addEventListener("click", function () {
+        var at = picked.indexOf(c);
+        if (at >= 0) picked.splice(at, 1); else picked.push(c);
+        chip.setAttribute("aria-pressed", at >= 0 ? "false" : "true");
+      });
+      crow.appendChild(chip);
+    });
+    cb.appendChild(crow); set.appendChild(cb);
+
+    /* ── WHO CAN SEE IT (spec 046 §4.10, reversing decision 15) ───────────
+       A field on the report, in the same block as its title, its summary,
+       its categories and its file — because that is where the report is
+       already being described. A visibility PAGE listing every report would
+       be a second copy of this list sitting somewhere else.
+
+       THE ABSENCE OF A LIST IS EVERYONE, so there is no on/off switch beside
+       it: a switch would be a second way to say the same thing and the two
+       could disagree (§110's pair). `seen` is null for everyone, an array
+       for exactly those places, and [] for nobody.
+
+       IT SAVES ON ITS OWN, ON `Done`, and never with the title: narrowing a
+       report is not editing its words, so correcting a typo cannot
+       re-assert who may read it. */
+    var seen = it.seen === null || it.seen === undefined ? null : it.seen.slice();
+    var sb2 = el("div");
+    sb2.appendChild(el("span", "lab", "Who can see it"));
+    var wrap = el("div", "tickwrap");
+    var strip = el("div", "seen");
+    var panel = null;
+
+    function drawStrip() {
+      strip.innerHTML = "";
+      var who = el("span", "who");
+      if (seen === null) who.appendChild(el("span", "all", "Everyone at " + LIB.client));
+      else if (!seen.length) who.appendChild(el("span", "none", "Nobody can open this report"));
+      else seenNames(seen).forEach(function (n) { who.appendChild(el("span", "tag", n)); });
+      strip.appendChild(who);
+      var sp = el("span", "sp");
+      var b = el("button", "btn", panel ? "Done" : (seen === null ? "Narrow it…" : "Change"));
+      b.type = "button";
+      b.addEventListener("click", function () { panel ? closePanel(true) : openPanel(); });
+      sp.appendChild(b); strip.appendChild(sp);
+    }
+
+    /* SAVED WHEN THE PANEL CLOSES AND ONLY IF SOMETHING MOVED, so opening it
+       to look and pressing Done writes nothing (§50.6's habit — a reader that
+       creates what it looked for puts a phantom change into every save). */
+    var wasSeen = JSON.stringify(seen);
+    function closePanel(save) {
+      if (panel) { panel.remove(); panel = null; }
+      drawStrip();
+      if (!save || JSON.stringify(seen) === wasSeen) return;
+      if (!it.id) return;
+      wasSeen = JSON.stringify(seen);
+      lead(true, "Saving…");
+      post({ action: "librarySeen", key: LIB.key, id: it.id, seen: seen }).then(function (j) {
+        if (!j || !j.ok) return say((j && j.error) || "That could not be saved.", true);
+        loadLibrary(true);
+      });
+    }
+
+    function openPanel() {
+      panel = el("div", "tickpanel");
+      var head = el("div", "tickhead");
+      var find = el("input", "fld"); find.type = "search";
+      find.placeholder = "Search departments…";
+      find.setAttribute("aria-label", "Search departments");
+      head.appendChild(find);
+
+      /* ALL HANDS IT BACK TO EVERYONE — it does NOT tick every place. Ticking
+         today's eighteen would EXCLUDE a unit created next month, silently,
+         and nobody would ever connect the missing unit to a tick list filled
+         in a year earlier. The panel says so in its own foot rather than
+         leaving it to be discovered (§35, §124). */
+      var all = el("button", "lnk", "All"); all.type = "button";
+      all.addEventListener("click", function () { seen = null; rows(); drawStrip(); });
+      var none = el("button", "lnk", "None"); none.type = "button";
+      none.addEventListener("click", function () { seen = []; rows(); drawStrip(); });
+      head.appendChild(all); head.appendChild(none);
+      panel.appendChild(head);
+
+      var list = el("div", "ticklist");
+      panel.appendChild(list);
+      var foot = el("div", "tickfoot");
+      foot.appendChild(el("b", null, "All"));
+      foot.appendChild(document.createTextNode(
+        " hands it back to everyone, including a department added later — it does not tick these " +
+        LIB.places.length + "."));
+      panel.appendChild(foot);
+
+      /* THE FILTER HIDES ROWS IN PLACE AND NEVER REPAINTS (§35, §108.13):
+         rebuilding the list would replace the box being typed into. */
+      function rows() {
+        list.innerHTML = "";
+        var kinds = [["unit", "Business units"], ["fn", "Supporting functions"]];
+        kinds.forEach(function (k) {
+          var mine = LIB.places.filter(function (p) { return p.kind === k[0]; });
+          if (!mine.length) return;
+          var gp = el("div", "gp", k[1]);
+          list.appendChild(gp);
+          mine.forEach(function (p) {
+            var on = seen !== null && seen.indexOf(p.at) >= 0;
+            var b = el("button", "tick"); b.type = "button";
+            b.setAttribute("aria-pressed", on ? "true" : "false");
+            /* DRAWN, NEVER A TEXT CHARACTER — the tick mark is outside the
+               latin subsets this platform embeds and would ship as a blank
+               box (§52, §120.2, §130.1). */
+            var bx = el("span", "bx");
+            bx.innerHTML = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1.6 6.3 4.4 9 10.4 3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+            b.appendChild(bx);
+            b.appendChild(document.createTextNode(p.label));
+            b.setAttribute("data-at", p.at);
+            b.addEventListener("click", function () {
+              /* TICKING ONE ON A REPORT EVERYBODY CAN SEE STARTS THE LIST at
+                 that one place, rather than at eighteen minus one: the act is
+                 "only these", not "everyone except". */
+              if (seen === null) seen = [];
+              var at = seen.indexOf(p.at);
+              if (at >= 0) seen.splice(at, 1); else seen.push(p.at);
+              b.setAttribute("aria-pressed", at >= 0 ? "false" : "true");
+              drawStrip();
+            });
+            list.appendChild(b);
+          });
+        });
+      }
+      rows();
+
+      find.addEventListener("input", function () {
+        var q = find.value.trim().toLowerCase();
+        var gp = null, any = false;
+        Array.prototype.forEach.call(list.children, function (n) {
+          if (n.className === "gp") {
+            /* A GROUP WITH NOTHING LEFT IN IT GOES WITH ITS ROWS, or the
+               panel reads as two headings over one name. Settled when the
+               NEXT heading arrives, and again at the end for the last. */
+            if (gp) gp.hidden = !any;
+            gp = n; any = false; return;
+          }
+          var hit = !q || n.textContent.toLowerCase().indexOf(q) >= 0;
+          n.hidden = !hit;
+          if (hit) any = true;
+        });
+        if (gp) gp.hidden = !any;
+      });
+
+      wrap.appendChild(panel);
+      drawStrip();
+      find.focus();
+    }
+
+    drawStrip();
+    wrap.appendChild(strip);
+    sb2.appendChild(wrap);
+    /* A REPORT WITH NO ID YET HAS NOTHING TO NARROW AGAINST, so it says what
+       has to happen first rather than failing at the press — the file strip's
+       own answer one field up (§61, §221). */
+    if (isNew) {
+      var n = el("p", "note", "Save it first, then choose who can see it. New reports start open to everyone.");
+      sb2.appendChild(n);
+    }
+    set.appendChild(sb2);
+
+    var pair = el("div", "wpair");
+    var db = el("div");
+    db.appendChild(labFor("lib-date", "Report date"));
+    var date = el("input", "fld"); date.id = "lib-date"; date.type = "date"; date.value = it.reportDate || "";
+    db.appendChild(date); pair.appendChild(db);
+
+    /* THE FILE STRIP. A report with no file yet says so rather than drawing
+       an empty box: there is one act here and its word says which it is
+       (§124).
+
+       AND IT IS LIVE ON A REPORT THAT HAS NEVER BEEN SAVED (§358). It used to
+       be switched off with the strip saying "save it first", because the store
+       path is built from the report's own id and a report with no row has no
+       id for a piece to be written against. That is still true of the SERVER
+       and was never true of the person: `sendFile` saves the draft itself when
+       there is no row, exactly as Publish two rows below has always saved the
+       form before publishing (§53.5 — one press over several requests is this
+       card's own idiom, and the file button was the one place it was not
+       applied). Attaching is the ordinary act; saving a draft and publishing
+       are the two ways of finishing, and neither stands in front of it. */
+    var fb = el("div");
+    fb.appendChild(el("span", "lab", "The file"));
+    var drop = el("div", "filestrip");
+    drop.appendChild(el("span", "fname", it.hasFile
+      ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "")
+      : "No file yet."));
+    var fsp = el("span", "sp");
+    var pick = el("input"); pick.type = "file"; pick.accept = "application/pdf,.pdf";
+    pick.style.display = "none";
+    var fbtn = el("button", "btn", it.hasFile ? "Replace" : "Add the file");
+    fbtn.type = "button";
+    fbtn.addEventListener("click", function () { pick.click(); });
+    pick.addEventListener("change", function () {
+      var f = pick.files && pick.files[0];
+      if (f) sendFile(f, drop, fbtn);
+    });
+    fsp.appendChild(fbtn); fsp.appendChild(pick);
+    drop.appendChild(fsp);
+    fb.appendChild(drop); pair.appendChild(fb);
+    set.appendChild(pair);
+
+    set.appendChild(el("p", "note",
+      "Replacing the file keeps the same link and the same download count, and moves it to the next version. " +
+      "What the old file said is not kept."));
+    card.appendChild(set);
+
+    /* ── WHAT IS TRUE, THEN WHAT YOU MAY DO (§144's shape) ─────────── */
+    var by = el("div", "byline");
+    var who = el("span", "who");
+    who.appendChild(el("span", "nm", it.state === "published"
+      ? "Published to " + LIB.client
+      : (isNew ? "Not saved yet" : "Not published yet")));
+    /* A stamp that is not there SAYS nothing rather than printing a nought
+       or an empty date (§35). */
+    var stamp = "";
+    if (it.publishedAt) stamp = "published " + stampDay(it.publishedAt) + (it.publishedBy ? " by " + it.publishedBy : "");
+    else if (!isNew && it.hasFile) stamp = it.downloads + (it.downloads === 1 ? " download" : " downloads") + " so far";
+    if (stamp) who.appendChild(el("span", "em", stamp));
+    by.appendChild(who);
+
+    var sp = el("span", "sp");
+    var save = el("button", "btn", isNew ? "Save the draft" : "Save");
+    save.type = "button";
+    save.addEventListener("click", function () { saveReport(false); });
+    sp.appendChild(save);
+
+    if (it.state === "published") {
+      var back = el("button", "btn", "Back to the list");
+      back.type = "button";
+      back.addEventListener("click", function () { LIB.one = null; settle(paintLibrary); });
+      sp.appendChild(back);
+    } else {
+      /* PUBLISH IS THE LOUD ONE and it is HELD rather than absent while
+         there is nothing to publish — `aria-disabled`, so the reason under it
+         can still be reached (§221, §163). A report with no file would go
+         into the client's library as a row with no way to open it (§61). */
+      var pub = el("button", "btn amber", "Publish to " + LIB.client);
+      pub.type = "button";
+      /* ONE GATE NOW, AND IT IS THE ONE ABOUT THE REPORT (§358). The `isNew`
+         arm said "Save it first", which was the machinery's reason rather than
+         the report's — and it is unreachable anyway, because a report with no
+         row has no file either, so `!it.hasFile` already covers it. What
+         survives is the only refusal a reader would recognise. */
+      if (!it.hasFile) {
+        pub.setAttribute("aria-disabled", "true");
+        pub.title = "Add the file first — a report with nothing to open is not a report.";
+      }
+      pub.addEventListener("click", function () {
+        if (pub.getAttribute("aria-disabled") === "true") { say(pub.title, true); return; }
+        saveReport(true);
+      });
+      sp.appendChild(pub);
+    }
+    by.appendChild(sp);
+    card.appendChild(by);
+
+    if (!isNew) card.appendChild(endOfReport(it));
+    page.appendChild(card);
+
+    /* Read at the moment of the press, never written back on every keystroke
+       (§35: a field commits on blur, and this card has no other writer). */
+    function draft() {
+      return { title: title.value, summary: sum.value,
+               categories: picked.slice(), reportDate: date.value };
+    }
+
+    function saveReport(thenPublish) {
+      var d = draft();
+      if (!d.title.trim()) { say("A report needs a title.", true); return; }
+      if (LIB.busy) return;
+      LIB.busy = true;
+      save.disabled = true;
+      var body = { action: "librarySave", key: LIB.key, kind: LIB.kind,
+                   title: d.title, summary: d.summary, categories: d.categories, reportDate: d.reportDate };
+      if (it.id) body.id = it.id;
+      post(body).then(function (j) {
+        if (!j || !j.ok) { LIB.busy = false; save.disabled = false; say((j && j.error) || "It could not be saved.", true); return; }
+        LIB.one = j.item;
+        if (!thenPublish) { LIB.busy = false; return loadLibrary(true); }
+        return post({ action: "libraryState", key: LIB.key, kind: LIB.kind, id: j.item.id, state: "published" })
+          .then(function (p) {
+            LIB.busy = false;
+            if (!p || !p.ok) { save.disabled = false; settle(paintOneReport); say((p && p.error) || "It was saved and not published.", true); return; }
+            LIB.one = p.item;
+            return loadLibrary(true);
+          });
+      }).catch(function (e) {
+        LIB.busy = false; save.disabled = false;
+        if (String(e.message) === "sign in") return;
+        say("Could not reach the server. Nothing was saved.", true);
+      });
+    }
+
+    /* ── THE FILE, IN PIECES (spec 053 §4.3) ────────────────────────
+       Begin, one request per piece, finish — every one of them authorised on
+       the server, which is why the browser holds no address of its own
+       (§261's rule, carried). The word on the button IS the progress: a bar
+       would be a second thing to keep in step with a count that already
+       says it. */
+    function sendFile(f, strip, btn) {
+      if (LIB.busy) return;
+
+      /* THE ROW FIRST, WHERE THERE IS NOT ONE YET (§358). The store path is
+         built on the server from the report's own id and is never sent by a
+         browser, so a piece cannot be written against a report that has no
+         row. That is the whole of why this used to be two acts — and it is a
+         fact about the SERVER, so it is answered here rather than by asking
+         the person to press something first.
+
+         THE TITLE IS THE ONE THING THAT MUST BE THERE, and it is the same
+         rule `librarySave` already enforces: a draft with no title is a row
+         nobody can pick out of the list. SAID AND FOCUSED rather than refused
+         at the press, because the thing that is missing is one field on this
+         very card (§221, §61). */
+      var d = draft();
+      if (!it.id && !d.title.trim()) {
+        say("A report needs a title.", true);
+        try { title.focus(); } catch (e) {}
+        return;
+      }
+
+      var was = btn.textContent;
+      var nameCell = strip.querySelector(".fname");
+      /* Set only once the row exists, so a card whose save failed is redrawn
+         to say what is actually stored rather than left claiming "Not saved
+         yet" over a draft that is now in the list (§96). */
+      var made = false;
+      LIB.busy = true; btn.disabled = true; btn.textContent = "Reading…";
+
+      var fail = function (msg) {
+        LIB.busy = false; btn.disabled = false; btn.textContent = was;
+        nameCell.textContent = it.hasFile ? it.fileName + (it.sizeLabel ? " · " + it.sizeLabel : "") : "No file yet.";
+        say(msg, true);
+        if (made) settle(paintOneReport);
+      };
+
+      /* `it` AND `LIB.one` BOTH, or the pieces are addressed to an id the
+         card does not hold: `it` is what the rest of this function reads and
+         `LIB.one` is what a repaint draws (§48). */
+      var haveRow = it.id ? Promise.resolve(true)
+        : post({ action: "librarySave", key: LIB.key, kind: LIB.kind,
+                 title: d.title, summary: d.summary,
+                 categories: d.categories, reportDate: d.reportDate })
+            .then(function (j) {
+              if (!j || !j.ok) { fail((j && j.error) || "It could not be saved, so the file was not sent."); return false; }
+              it = LIB.one = j.item;
+              made = true;
+              return true;
+            });
+
+      haveRow.then(function (go) {
+        if (!go) return;
+        return post({ action: "libraryUploadBegin", key: LIB.key, kind: LIB.kind,
+             id: it.id, name: f.name, bytes: f.size }).then(function (b) {
+        if (!b || !b.ok) { fail((b && b.error) || "The upload could not be started."); return; }
+        var piece = b.piece || (3 * 1024 * 1024);
+        var total = Math.max(1, Math.ceil(f.size / piece));
+        var parts = [];
+        var q = "/api/platform/file?client=" + encodeURIComponent(LIB.key) +
+                "&kind=" + encodeURIComponent(LIB.kind) +
+                "&id=" + encodeURIComponent(it.id) +
+                "&name=" + encodeURIComponent(f.name) +
+                "&path=" + encodeURIComponent(b.path) +
+                "&storeKey=" + encodeURIComponent(b.storeKey) +
+                "&uploadId=" + encodeURIComponent(b.uploadId);
+
+        /* One piece at a time, in order. Several at once would be faster and
+           would mean a failure halfway leaves pieces written for an upload
+           nobody is going to finish; the store keeps nothing until finish is
+           called either way, and this is the version that can say which
+           piece it was on. */
+        var step = function (n) {
+          if (n > total) {
+            btn.textContent = "Finishing…";
+            return post({ action: "libraryUploadFinish", key: LIB.key, kind: LIB.kind,
+                          id: it.id, name: f.name, bytes: f.size,
+                          path: b.path, parts: parts,
+                          uploadId: b.uploadId, storeKey: b.storeKey })
+              .then(function (d) {
+                LIB.busy = false; btn.disabled = false; btn.textContent = was;
+                if (!d || !d.ok) { fail((d && d.error) || "The file could not be finished."); return; }
+                LIB.one = d.item;
+                return loadLibrary(true);
+              });
+          }
+          btn.textContent = total > 1 ? "Sending " + n + " of " + total + "…" : "Sending…";
+          var slice = f.slice((n - 1) * piece, Math.min(f.size, n * piece));
+          return fetch(q + "&n=" + n, { method: "POST", cache: "no-store",
+                                        headers: { "Content-Type": "application/octet-stream" },
+                                        body: slice })
+            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              if (!r || !r.ok) { fail((r && r.error) || "That piece was refused."); return; }
+              parts.push({ partNumber: r.partNumber, etag: r.etag });
+              return step(n + 1);
+            });
+        };
+        return step(1);
+      });
+      }).catch(function (e) {
+        if (String(e.message) === "sign in") return;
+        fail("Could not reach the server. The file was not uploaded.");
+      });
+    }
+  }
+
+  /* A stamp read the way every other date on this platform reads (§239.3's
+     own lesson about two-digit years, one screen over): the browser's own
+     month names, three letters, never a locale's "Sept". */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  function stampDay(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
+  }
+
+  /* ── TAKING ONE BACK (spec 053 §4.8) ─────────────────────────────────
+     §323's block, because the decision is the same one: the two acts with no
+     way back live under a rule, at the foot, each saying in its own line what
+     it does — rather than a dead control somebody presses to find out.
+
+     WITHDRAW IS NOT A DELETE AND DELETE IS REFUSED UNTIL IT HAS HAPPENED,
+     which is the guard rather than a second confirmation: nobody deletes a
+     report a client is still reading, and the SERVER refuses it in the same
+     words (§42). */
+  function endOfReport(it) {
+    var apart = el("div", "apart");
+    apart.appendChild(el("span", "akey lab", "Taking it back"));
+
+    var pub = it.state === "published";
+
+    /* `div`, NOT `span`, and it was found by looking (§311's own fault: a name
+       running into its own sub-line). `.byline .who` is a flex column, so
+       spans stack inside it; `.teamrow .who` is not, and every other row that
+       uses it builds blocks. Following what the neighbours already do rather
+       than giving the shared rule a column it has never needed — which would
+       be a restyle of screens nobody asked about (§267.1, rule 1b). */
+    var w = el("div", "teamrow");
+    var ww = el("div", "who");
+    ww.appendChild(el("div", "nm", "Withdraw"));
+    ww.appendChild(el("div", "em", pub
+      ? "Leaves " + LIB.client + "'s library. Its address answers not found, so nobody is told it ever existed. Nothing is lost and it can go back out."
+      : "Nothing to withdraw — this report is a draft, so it is not in " + LIB.client + "'s library."));
+    w.appendChild(ww);
+    var wsp = el("div", "sp");
+    var wb = el("button", "btn", "Withdraw");
+    wb.type = "button";
+    wb.disabled = !pub;
+    wb.addEventListener("click", function () {
+      if (LIB.busy) return;
+      LIB.busy = true; wb.disabled = true; wb.textContent = "Withdrawing…";
+      post({ action: "libraryState", key: LIB.key, kind: LIB.kind, id: it.id, state: "draft" })
+        .then(function (j) {
+          LIB.busy = false;
+          if (!j || !j.ok) { wb.disabled = false; wb.textContent = "Withdraw"; say((j && j.error) || "It was not withdrawn.", true); return; }
+          LIB.one = j.item;
+          return loadLibrary(true);
+        }).catch(function (e) {
+          LIB.busy = false; wb.disabled = false; wb.textContent = "Withdraw";
+          if (String(e.message) === "sign in") return;
+          say("Could not reach the server.", true);
+        });
+    });
+    wsp.appendChild(wb); w.appendChild(wsp);
+    apart.appendChild(w);
+
+    var d = el("div", "teamrow");
+    var dw = el("div", "who");
+    dw.appendChild(el("div", "nm", "Delete"));
+    dw.appendChild(el("div", "em", pub
+      ? "Withdraw first — nobody may delete a report a client is still reading."
+      : "Ends it. The file goes with it, and there is nothing to restore from."));
+    d.appendChild(dw);
+    var dsp = el("div", "sp");
+    var dbtn = el("button", "btn risk", "Delete…");
+    dbtn.type = "button";
+    dbtn.disabled = pub;
+    /* THE ASK IS WHERE THE BUTTON WAS (§323): no dialog anywhere on this
+       page, and one act does not earn the first. It NAMES the report,
+       because the way this goes wrong is pressing it on the wrong row. */
+    dbtn.addEventListener("click", function () { askDeleteReport(apart, d, it); });
+    dsp.appendChild(dbtn); d.appendChild(dsp);
+    apart.appendChild(d);
+
+    return apart;
+  }
+
+  function askDeleteReport(apart, row, it) {
+    row.textContent = "";
+    var q = el("div", "wzask");
+    var p = el("p");
+    p.appendChild(document.createTextNode("Delete "));
+    p.appendChild(el("b", null, it.title));
+    p.appendChild(document.createTextNode("?"));
+    q.appendChild(p);
+    var goes = el("p", "goes");
+    goes.appendChild(document.createTextNode("The report goes."));
+    goes.appendChild(el("br"));
+    goes.appendChild(document.createTextNode(it.hasFile ? "The file goes with it." : "There is no file on it."));
+    goes.appendChild(el("br"));
+    goes.appendChild(document.createTextNode("There is nothing to restore from."));
+    q.appendChild(goes);
+    var acts = el("div", "row");
+    var yes = el("button", "btn risksolid", "Delete it");
+    yes.type = "button";
+    var no2 = el("button", "btn", "Cancel");
+    no2.type = "button";
+    no2.addEventListener("click", function () { settle(paintOneReport); });
+    yes.addEventListener("click", function () {
+      yes.disabled = true; no2.disabled = true; yes.textContent = "Deleting…";
+      post({ action: "libraryDelete", key: LIB.key, kind: LIB.kind, id: it.id }).then(function (j) {
+        if (!j || !j.ok) {
+          yes.disabled = false; no2.disabled = false; yes.textContent = "Delete it";
+          var bad = el("p", "wzendwhy", (j && j.error) || "It was not deleted.");
+          bad.style.color = "var(--bad)";
+          q.appendChild(bad);
+          return;
+        }
+        /* Landing on the list, which is the record of what is there now
+           rather than a card for a report that has just gone (§144). And the
+           store's own answer is worth saying: a row removed while its file
+           stayed is not a failure of this press, and it is not silence
+           either (§171). */
+        LIB.one = null;
+        return loadLibrary(true).then(function () {
+          if (j.fileRemoved === false) say("The report is gone. The file store would not remove its file — nothing is reachable through the platform.", true);
+        });
+      }).catch(function (e) {
+        yes.disabled = false; no2.disabled = false; yes.textContent = "Delete it";
+        if (String(e.message) === "sign in") return;
+        var bad2 = el("p", "wzendwhy", "Could not reach the server.");
+        bad2.style.color = "var(--bad)";
+        q.appendChild(bad2);
+      });
+    });
+    acts.appendChild(yes); acts.appendChild(no2);
+    q.appendChild(acts);
+    row.appendChild(q);
+  }
+
+  function drawArchived(key){
+    lead(false, "Reading…");
+    return post({ action:"client", key:key }).then(function (j) {
+      if (!j.ok) { clear(); say(j.error || "Could not open that client.", true); return; }
+      clear();
+      var right = el("div");
+      var leave = el("button", "btn", "Back to clients");
+      leave.type = "button";
+      leave.addEventListener("click", function () { go("clients"); });
+      right.appendChild(leave);
+      title(j.client.name, right);
+      /* AN ARCHIVED CLIENT SAYS SO FIRST (§323): whichever block somebody
+         came for, the state has to explain itself before the controls. */
+      var ab = el("div", "wzarched");
+      ab.appendChild(document.createTextNode("This client is "));
+      ab.appendChild(el("b", null, "archived"));
+      var when = archDate(j.client.archived_at);
+      ab.appendChild(document.createTextNode(
+        ". " + (when ? "Archived " + when : "Archived") +
+        (j.client.archived_by ? " by " + j.client.archived_by : "") +
+        ". Their link is closed, and nothing inside can be changed until they are brought back."));
+      page.appendChild(ab);
+      var host = el("div", "csetup");
+      page.appendChild(host);
+      CLIENTSETUP.mountArchived(host, key, { read: j, door: "/", go: function () { go("clients"); } });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  /* ── Consultants ─────────────────────────────────────────────── */
+  function drawConsultants(quiet) {
+    lead(quiet, "Reading…");
+    return post({ action: "consultants" }).then(function (j) {
+      if (!j.ok) { clear(); say(j.error || "Could not read the list.", true); return; }
+      settle(function () {
+      title("Consultants");
+
+      var box = el("div", "tscroll");
+      var t = el("table");
+      var head = el("tr");
+      ["Name", "Email", "Platform", "Clients and seats", "Password", ""].forEach(function (h) {
+        head.appendChild(el("th", null, h));
+      });
+      var thead = el("thead"); thead.appendChild(head); t.appendChild(thead);
+      var body = el("tbody");
+      j.people.forEach(function (p) { body.appendChild(consultantRow(p, j)); });
+      t.appendChild(body);
+      box.appendChild(t);
+      page.appendChild(box);
+
+      if (j.canEdit) {
+        var row = el("div", "row");
+        var name = el("input", "fld"); name.placeholder = "Name";
+        var mail = el("input", "fld"); mail.placeholder = "name@forefront.consulting";
+        var add = el("button", "btn amber", "Add a consultant");
+        add.type = "button";
+        add.addEventListener("click", function () {
+          post({ action: "saveConsultant", email: mail.value.trim(), name: name.value.trim() })
+            .then(function (r) {
+              if (!r.ok) { say(r.error || "Not added.", true); return; }
+              drawConsultants(true);
+              if (r.password) {
+                var s = say("");
+                s.appendChild(document.createTextNode("Temporary password for " + mail.value.trim() + ": "));
+                s.appendChild(el("b", null, r.password));
+                s.appendChild(document.createTextNode(" — they must change it on first use."));
+              }
+            });
+        });
+        row.appendChild(name); row.appendChild(mail); row.appendChild(add);
+        page.appendChild(row);
+      }
+      page.appendChild(el("p", "note",
+        "The seats are read here and set on each client's own configuration — " +
+        "one place writes them. Somebody on no client can sign in and has " +
+        "nothing to open, which is what a new joiner looks like."));
+      });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  function consultantRow(p, j) {
+    var tr = el("tr");
+
+    /* ── THE NAME AND THE ADDRESS ARE EDITABLE (§313.27) ────────────
+       Islam: "I need to edit the consultants names and emails as well." Two
+       fields on the row rather than a dialog, because there are two of them
+       and one row is not a form (§116's argument runs the other way at this
+       size: the register moved to a dialog because NINE fields in a 158px
+       cell collided; two do not).
+
+       COMMITTED ON `change`, which for a text box means on blur — so the
+       value is written by moving away from it, and there is no Save to
+       forget. The row updates quietly afterwards, or the field being typed
+       into would be replaced under the hand (§35, §71.2).
+
+       AND THE ADDRESS IS THE SIGN-IN, so changing it ends that person's
+       sessions and is said on the page rather than left to be discovered. */
+    var edit = j.canEdit;
+    var nameTd = el("td");
+    if (edit) {
+      var nm = el("input", "fld");
+      nm.value = p.name || "";
+      nm.placeholder = "Name";
+      nm.addEventListener("change", function () {
+        var v = nm.value.trim();
+        if (v === (p.name || "")) return;
+        post({ action: "saveConsultant", email: p.email, name: v })
+          .then(function (r) { r.ok ? drawConsultants(true)
+                                    : say(r.error || "Not changed.", true); });
+      });
+      nameTd.appendChild(nm);
+    } else {
+      nameTd.textContent = p.name || "—";
+    }
+    /* A RETIRED ROW SAYS SO (§35, §124, §338). Nothing else on this line
+       differs — same name, same address, same seats — so without this the
+       one state that stops somebody signing in is invisible, and Delete
+       appears beside rows that look exactly like the ones it does not. */
+    if (p.status === "retired") nameTd.appendChild(el("span", "tag", "Retired"));
+    tr.appendChild(nameTd);
+
+    var mailTd = el("td", "mono");
+    if (edit) {
+      var em = el("input", "fld mono");
+      em.value = p.email;
+      em.addEventListener("change", function () {
+        var v = em.value.trim().toLowerCase();
+        if (!v || v === p.email) { em.value = p.email; return; }
+        post({ action: "saveConsultant", email: p.email, newEmail: v })
+          .then(function (r) {
+            if (!r.ok) { em.value = p.email; say(r.error || "Not changed.", true); return; }
+            /* SAID AFTER THE REDRAW THAT REPORTS IT (§63). Said before, the
+               sentence is appended to a page `settle()` is about to replace —
+               so the rename lands, the outcome is written, and a moment later
+               it is gone, which reads exactly like nothing happened. */
+            drawConsultants(true).then(function () {
+              say(v + " signs in with that address now. Any tab they had open " +
+                  "has been signed out — the old address no longer exists.");
+            });
+          });
+      });
+      mailTd.appendChild(em);
+    } else {
+      mailTd.textContent = p.email;
+    }
+    tr.appendChild(mailTd);
+
+    /* ── SUPER USER, IN A COLUMN THAT SAYS WHERE (Islam, option B) ──
+       The role was always here and read "Platform admin: Yes", which is not
+       the word Islam uses for it: "I'm the super user of the platform."
+
+       AND THE WORD ALONE WOULD HAVE COLLIDED. `Super user` already means the
+       top seat on a CLIENT (§89), and the column immediately to the right of
+       this one reads "Raya Trade · Super user" — so the column carries the
+       WHERE and the chip carries the WHAT, and the row reads across as
+       Platform · Super user, Raya Trade · Super user. One word for one
+       standing, qualified by where it is held (§87's twins, avoided rather
+       than discovered).
+
+       THE KEY DOES NOT MOVE: `is_admin`, `canSetAdmin` and `saveConsultant`
+       keep their spelling, because renaming a stored field is a migration for
+       a word nobody reads (§30.2, §58). */
+    var adminTd = el("td");
+    var cell = el("span", "cell" + (j.canSetAdmin && p.email !== j.me ? "" : " locked"));
+    var yes = el("button", null, "Super user");
+    yes.type = "button";
+    if (p.isAdmin) yes.className = "on hi";
+    if (j.canSetAdmin && p.email !== j.me) {
+      yes.title = "Adding clients and consultants, and setting Who sees what";
+      yes.addEventListener("click", function () {
+        post({ action: "saveConsultant", email: p.email, isAdmin: !p.isAdmin })
+          .then(function (r) { r.ok ? drawConsultants(true) : say(r.error || "Not changed.", true); });
+      });
+    } else if (p.email === j.me) {
+      /* NOBODY CHANGES THEIR OWN STANDING, which is also what stops the
+         platform's last super user locking themselves out of it. */
+      yes.title = "You cannot change your own standing — somebody else with this role does it.";
+    }
+    cell.appendChild(yes);
+    adminTd.appendChild(cell);
+    tr.appendChild(adminTd);
+
+    var seatsTd = el("td", "seats");
+    if (!p.seats || !p.seats.length) seatsTd.appendChild(el("span", "muted", "On no client yet"));
+    else p.seats.forEach(function (s) {
+      seatsTd.appendChild(el("span", "tag",
+        s.client + " · " + (s.seat === "super" ? "Super user" : "SMO team")));
+    });
+    tr.appendChild(seatsTd);
+
+    tr.appendChild(el("td", null, p.password === "none" ? "—"
+      : p.password === "temporary" ? "Temporary" : "Set"));
+
+    var act = el("td");
+    if (j.canEdit && p.email !== j.me && !p.isAdmin) {
+      var b = el("button", "btn", "Issue password");
+      b.type = "button";
+      b.addEventListener("click", function () {
+        b.disabled = true;
+        post({ action: "issuePassword", email: p.email }).then(function (r) {
+          b.disabled = false;
+          if (!r.ok) { say(r.error || "Not issued.", true); return; }
+          var s = say("");
+          s.appendChild(document.createTextNode("Temporary password for " + p.email + ": "));
+          s.appendChild(el("b", null, r.password));
+          s.appendChild(document.createTextNode(" — said once, and stored nowhere in the clear."));
+        });
+      });
+      act.appendChild(b);
+    }
+    /* TAKING SOMEBODY OFF THE LIST (§338). Islam: "allow me to delete a
+       consultants from a user" — two accounts one letter apart and the list
+       was ADD-ONLY, with retiring half built and never drawn (§61).
+
+       RETIRE IS DRAWN FIRST AND DELETE ONLY ON A RETIRED ROW, which is
+       §323's shape for a client and its reason: the two presses are
+       separated by a state somebody chose, so nobody is deleted while they
+       can still sign in. Both are asked of the SERVER (canRetire /
+       canDelete), never re-derived here, or the row offers what the next
+       request refuses (§42, §337's own fault). */
+    if (p.canRetire) {
+      var back = p.status === "retired";
+      var rb = el("button", "btn", back ? "Bring back" : "Retire");
+      rb.type = "button";
+      rb.title = back ? "Let them sign in again."
+        : "Ends their sessions and stops them signing in. Their seats stay on the record.";
+      rb.addEventListener("click", function () {
+        rb.disabled = true;
+        post({ action: "saveConsultant", email: p.email, status: back ? "active" : "retired" })
+          .then(function (r) {
+            if (!r.ok) { rb.disabled = false; say(r.error || "Not changed.", true); return; }
+            drawConsultants(true);
+          });
+      });
+      act.appendChild(rb);
+    }
+    if (p.canDelete) {
+      var db = el("button", "btn risk", "Delete");
+      db.type = "button";
+      db.title = "Removes the account for good. Offered only once they are retired and on no client.";
+      db.addEventListener("click", function () {
+        /* ASKED IN PLACE, AND THE ASK NAMES WHO (§89, §95, §186). Never the
+           browser's own dialog — §273.3 took the last one of those out of
+           the product — and never a modal either: this is one row of a
+           table, so the question belongs in the row it is about. The
+           failure mode is landing on the wrong line, which is exactly what
+           a confirmation naming nobody catches none of. */
+        act.textContent = "";
+        act.appendChild(el("span", "muted", "Delete " + (p.name || p.email) + "?"));
+        var yes = el("button", "btn risksolid", "Delete for ever");
+        yes.type = "button";
+        var no = el("button", "btn", "Cancel");
+        no.type = "button";
+        no.addEventListener("click", function () { drawConsultants(true); });
+        yes.addEventListener("click", function () {
+          yes.disabled = true; no.disabled = true; yes.textContent = "Deleting…";
+          post({ action: "deleteConsultant", email: p.email }).then(function (r) {
+            if (!r.ok) { say(r.error || "Not deleted.", true); drawConsultants(true); return; }
+            drawConsultants(true);
+          });
+        });
+        act.appendChild(yes); act.appendChild(no);
+      });
+      act.appendChild(db);
+    }
+    tr.appendChild(act);
+    return tr;
+  }
+
+  /* ── Who sees what ───────────────────────────────────────────── */
+  function drawAccess() {
+    page.appendChild(el("p", "muted", "Reading…"));
+    post({ action: "access" }).then(function (j) {
+      clear();
+      if (!j.ok) { say(j.error || "Could not read the table.", true); return; }
+      title("Who sees what");
+      page.appendChild(el("p", "note",
+        "What somebody may do INSIDE a client is the seat they hold on it, set " +
+        "on that client's configuration. What is here is the rest — and it is " +
+        "asked of everybody who is not the platform's super user."));
+
+      var box = el("div", "tscroll");
+      var t = el("table");
+      var thead = el("thead"), head = el("tr");
+      head.appendChild(el("th", null, "Everybody who is not the super user"));
+      j.areas.forEach(function (a) { head.appendChild(el("th", null, a.name)); });
+      thead.appendChild(head); t.appendChild(thead);
+
+      var body = el("tbody"), tr = el("tr");
+      tr.appendChild(el("td", null, "Every consultant, whatever seats they hold"));
+      j.areas.forEach(function (a) {
+        var td = el("td");
+        var now = Object.prototype.hasOwnProperty.call(j.stored, a.key) ? j.stored[a.key] : j.defaults[a.key];
+        var cell = el("span", "cell" + (j.canEdit ? "" : " locked"));
+        a.states.forEach(function (st) {
+          if (st === "none" && a.states.length > 2) return;   /* nothing lit IS none (§37) */
+          var b = el("button", null, st === "yes" ? "Yes" : st.charAt(0).toUpperCase() + st.slice(1));
+          b.type = "button";
+          b.title = a.note;
+          if (now === st) b.className = "on" + (st === "edit" || st === "open" || st === "yes" ? " hi" : "");
+          if (j.canEdit) {
+            b.addEventListener("click", function () {
+              /* Pressing the lit one puts the cell back to nothing: the third
+                 state is the absence of the others (§37). */
+              var next = now === st ? (a.states[0] === "hidden" ? "hidden" : "none") : st;
+              post({ action: "saveAccess", area: a.key, grant: next })
+                .then(function (r) { r.ok ? drawAccess() : say(r.error || "Not saved.", true); });
+            });
+          }
+          cell.appendChild(b);
+        });
+        td.appendChild(cell);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr); t.appendChild(body);
+      box.appendChild(t);
+      page.appendChild(box);
+      page.appendChild(el("p", "note", "Nothing lit means nothing at all."));
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  /* ════ The strategy frameworks library (spec 052) ════════════════════
+     Forefront's own, outside every client, beside the memory — and the one
+     table on this platform that names no client at all: a framework is about
+     nobody.
+
+     ASKING IT IS PHASE C and is not drawn as a control that does nothing
+     (§61). ADDING one is here, and it is an admin's: `canAdd` comes from the
+     server with the list and is never worked out on this page (§42). */
+  var FW = { view: "list", one: null, q: "", section: "", rows: null, sections: null,
+             canAdd: false, add: null, said: "",
+             /* Asking rides in the SAME box as searching, switched — decision
+                2, and one field rather than a box with a quieter line under
+                it. The answer lives on FW, so opening a framework it named
+                and pressing back finds it still there. */
+             mode: "search", question: "", answer: null, asking: false };
+
+  /* THE DRAFT'S OWN STATE, minted fresh on every press of Add rather than
+     kept between visits: a half-typed name from last week reappearing under
+     an empty draft is the shape nobody can tell from a bug. */
+  function fwAddState() {
+    return { how: "name", name: "", source: "", draft: null, why: "", busy: false };
+  }
+
+  /* The nine, named ONCE, in the order the detail page reads them — the
+     reading view walks this list, so a tenth field is one edit (§104.7). */
+  var FWFIELDS = [["purpose", "Purpose"], ["keyQuestions", "Key questions it answers"],
+                  ["whenToUse", "When to use it"], ["whenNotToUse", "When not to use it"],
+                  ["inputsRequired", "Inputs required"], ["outputs", "Outputs"],
+                  ["executiveExample", "Executive example"],
+                  ["consultantUseCase", "Consultant use case"],
+                  ["facilitationTips", "Facilitation tips"]];
+  /* The two that read side by side, because they are a pair and a reader
+     compares them. */
+  var FWPAIRS = { whenToUse: "whenNotToUse", inputsRequired: "outputs" };
+
+  function fwGo(view, extra) {
+    FW.view = view;
+    if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) FW[k] = extra[k];
+    return drawFrameworks();
+  }
+
+  function drawFrameworks() {
+    if (FW.view === "one") return drawFwOne();
+    if (FW.view === "add") return drawFwAdd();
+    return drawFwList();
+  }
+
+  /* ── The list ──────────────────────────────────────────────────────
+     The whole library arrives in one answer and the searching happens here,
+     which is a decision rather than a shortcut: 80 rows is small, they are
+     already on the page, and a round trip per keystroke would be slower AND
+     would replace the box being typed into (constitution XV). */
+  function drawFwList(quiet) {
+    lead(quiet, "Reading…");
+    return fpost({ action: "list" }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read the library.", true); return; }
+      FW.rows = j.frameworks || [];
+      FW.sections = j.sections || [];
+      FW.canAdd = !!j.canAdd;
+      settle(function () { fwPaint(); });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  function fwPaint() {
+    /* DRAWN FOR AN ADMIN AND FOR NOBODY ELSE — never drawn disabled, because
+       a control that refuses everybody who can see it is furniture (§94.15),
+       and the sentence explaining it would be on a page the reader can do
+       nothing about. */
+    var right = null;
+    if (FW.canAdd) {
+      right = el("span");
+      var add = el("button", "btn amber", "+ Add a framework");
+      add.type = "button";
+      add.addEventListener("click", function () { fwGo("add", { add: fwAddState() }); });
+      right.appendChild(add);
+    }
+    title("Frameworks", right);
+
+    var box = el("div", "fwbox");
+
+    /* ONE BOX, TWO QUESTIONS, SWITCHED (decision 2). Searching narrows what is
+       already on the page; asking sends the library to the assistant. They are
+       different enough that one field answering both by guessing would be a
+       control nobody can predict — and near enough that two boxes stacked would
+       be two things to read before typing. */
+    var cell = el("div", "cell");
+    [["search", "Search"], ["ask", "Ask it"]].forEach(function (w) {
+      var t = el("button", FW.mode === w[0] ? "on" : null, w[1]);
+      t.type = "button";
+      t.setAttribute("aria-pressed", FW.mode === w[0] ? "true" : "false");
+      t.addEventListener("click", function () {
+        if (FW.mode === w[0]) return;
+        FW.mode = w[0];
+        fwRepaint();
+      });
+      cell.appendChild(t);
+    });
+    box.appendChild(cell);
+
+    var asking = FW.mode === "ask";
+    var field = el("div", "fwask");
+    var search = el("input", "fld");
+    search.type = asking ? "text" : "search";
+    search.placeholder = asking
+      ? "What are you trying to work out?"
+      : "Search " + FW.rows.length + " frameworks — by name, purpose or when to use it";
+    search.value = asking ? FW.question : FW.q;
+    field.appendChild(search);
+    box.appendChild(field);
+
+    var chips = el("div", "fwchips");
+    if (!asking) box.appendChild(chips);
+    page.appendChild(box);
+
+    var count = el("p", "fwcount");
+    var list = el("div", "fwlist");
+
+    if (asking) {
+      var go = el("button", "btn solid", FW.asking ? "Asking…" : "Ask");
+      go.type = "button";
+      if (FW.asking) go.disabled = true;
+      field.appendChild(go);
+      go.addEventListener("click", function () { fwAsk(search.value); });
+      /* Enter asks, because a single field with a button beside it is a form
+         in every way but the tag, and pressing Enter in one is what people do. */
+      search.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); fwAsk(search.value); }
+      });
+
+      if (FW.answer) {
+        var ans = el("div", "fwans");
+        ans.appendChild(el("p", null, FW.answer.reply));
+        (FW.answer.sources || []).forEach(function (sc2) {
+          var cite = el("button", "fwcite");
+          cite.type = "button";
+          cite.appendChild(el("span", "nm", sc2.name));
+          /* THE FRAMEWORK'S OWN WORDS FOR WHAT IT IS FOR. The mockup drew a
+             sentence written about THIS question instead, which is a second
+             field in the answer's shape and is recorded as not built rather
+             than quietly dropped (tasks.md C4). */
+          if (sc2.purpose) cite.appendChild(el("p", "wy", sc2.purpose));
+          cite.addEventListener("click", function () { fwGo("one", { one: sc2.id }); });
+          ans.appendChild(cite);
+        });
+        /* THE DOOR IS ON THE DECLINE AND ONLY ON IT, and only for somebody who
+           can walk through it — which is the third way in, and why the page
+           carries two add buttons rather than three. */
+        if (!FW.answer.answered && FW.canAdd) {
+          var row2 = el("div", "row");
+          row2.style.marginTop = "13px";
+          var addit = el("button", "btn amber", "Add it to the library →");
+          addit.type = "button";
+          addit.addEventListener("click", function () {
+            var a = fwAddState();
+            /* WHAT THEY ASKED IS NOT WHAT THE FRAMEWORK IS CALLED, so it does
+               not become the name: a question typed into a name box would be
+               drafted as though it were a title (§96.2). */
+            fwGo("add", { add: a });
+          });
+          row2.appendChild(addit);
+          ans.appendChild(row2);
+        }
+        page.appendChild(ans);
+      }
+      page.appendChild(el("p", "note",
+        "Answers come only from the library. It will not reach for something that is not in it."));
+      search.addEventListener("change", function () { FW.question = search.value; });
+      return;
+    }
+
+    page.appendChild(count);
+    page.appendChild(list);
+
+    /* Every row carries what it is searched on, lowercased once here rather
+       than on every keystroke — the same five fields the server sends and,
+       not by coincidence, the five that decide whether this is the right
+       tool. */
+    FW.rows.forEach(function (f) {
+      var b = el("button", "fwrow");
+      b.type = "button";
+      b.dataset.hay = [f.name, f.section, f.purpose, f.keyQuestions, f.whenToUse]
+        .join(" ").toLowerCase();
+      b.dataset.section = f.section;
+      var hd = el("div", "hd");
+      hd.appendChild(el("span", "nm", f.name));
+      hd.appendChild(el("span", "tag", f.section));
+      b.appendChild(hd);
+      if (f.purpose) b.appendChild(el("p", "pp", f.purpose));
+      b.addEventListener("click", function () { fwGo("one", { one: f.id }); });
+      list.appendChild(b);
+    });
+
+    /* ONE FILTER, asked by the box and by the chips (§53.5) — two that
+       narrowed the same list separately is how they come to disagree. It
+       hides rows in place and writes the count INTO its node; nothing here
+       repaints, so the cursor stays where it is typing (§63, constitution XV). */
+    function apply() {
+      var q = FW.q.trim().toLowerCase();
+      var shown = 0;
+      Array.prototype.forEach.call(list.querySelectorAll(".fwrow"), function (r) {
+        var hide = (!!q && r.dataset.hay.indexOf(q) < 0) ||
+                   (!!FW.section && r.dataset.section !== FW.section);
+        r.hidden = hide;
+        if (!hide) shown++;
+      });
+      Array.prototype.forEach.call(chips.querySelectorAll(".fwchip"), function (c) {
+        c.classList.toggle("on", (c.dataset.section || "") === FW.section);
+        c.setAttribute("aria-pressed", (c.dataset.section || "") === FW.section ? "true" : "false");
+      });
+      /* IT SAYS WHAT IT FOUND, and when it found nothing it says that rather
+         than leaving an empty box to be read as a page that failed (§45.2). */
+      count.textContent = !shown ? "Nothing matches that."
+        : shown === FW.rows.length ? nOf(shown, "framework")
+        : nOf(shown, "framework") + " of " + FW.rows.length;
+    }
+
+    var all = el("button", "fwchip", "All");
+    all.type = "button"; all.dataset.section = "";
+    all.appendChild(el("i", null, String(FW.rows.length)));
+    all.addEventListener("click", function () { FW.section = ""; apply(); });
+    chips.appendChild(all);
+    FW.sections.forEach(function (sc) {
+      var c = el("button", "fwchip", sc.section);
+      c.type = "button"; c.dataset.section = sc.section;
+      c.appendChild(el("i", null, String(sc.n)));
+      /* Pressing the lit one clears it, which is what aria-pressed already
+         means and the only way back to "All" without reaching for it. */
+      c.addEventListener("click", function () {
+        FW.section = FW.section === sc.section ? "" : sc.section;
+        apply();
+      });
+      chips.appendChild(c);
+    });
+
+    search.addEventListener("input", function () { FW.q = search.value; apply(); });
+    apply();
+  }
+
+  /* The rows are already here, so a redraw of the list is a redraw and never
+     a second read of the library (§98). */
+  function fwRepaint() { settle(function () { fwPaint(); }); }
+
+  function fwAsk(q) {
+    q = String(q || "").trim();
+    FW.question = q;
+    if (!q) { say("Ask it something first.", true); return; }
+    if (FW.asking) return;
+    FW.asking = true;
+    /* THE OLD ANSWER GOES WITH THE OLD QUESTION. Leaving it standing under a
+       box being asked something else is an answer to a question nobody can
+       see (§45.2, reversed). */
+    FW.answer = null;
+    fwRepaint();
+    fpost({ action: "ask", question: q }).then(function (j) {
+      FW.asking = false;
+      if (!j || !j.ok) { fwRepaint(); say((j && j.error) || "Could not ask it.", true); return; }
+      /* `why` is the plumbing failing rather than the library not covering it
+         — two different errands, said differently (§123). */
+      if (j.why) { fwRepaint(); say(j.why, true); return; }
+      FW.answer = { answered: !!j.answered, reply: String(j.reply || ""), sources: j.sources || [] };
+      fwRepaint();
+    }).catch(function (e) {
+      FW.asking = false;
+      if (String(e.message) === "sign in") return;
+      fwRepaint(); say("Could not reach the server.", true);
+    });
+  }
+
+  /* ── One framework ─────────────────────────────────────────────────
+     In place behind a way back, which is this page's own idiom for going
+     into a thing (the client card does it) — and nine sections of prose is
+     more than a dialog should hold. */
+  function drawFwOne() {
+    clear();
+    page.appendChild(el("p", "muted", "Reading…"));
+    return fpost({ action: "one", id: FW.one }).then(function (j) {
+      if (!j || !j.ok) { clear(); say((j && j.error) || "Could not read that framework.", true); return; }
+      var f = j.framework;
+      settle(function () {
+        /* TAKEN ONCE AND CLEARED, or it reappears every time this framework
+           is opened, long after it was added (§313.32's own rule, one page
+           over). */
+        if (FW.said) { say(FW.said); FW.said = ""; }
+        var back = el("div");
+        var b = el("button", "cback", "← ALL FRAMEWORKS");
+        b.type = "button";
+        b.addEventListener("click", function () { fwGo("list"); });
+        back.appendChild(b);
+        back.style.marginBottom = "13px";
+        page.appendChild(back);
+
+        var right = el("div");
+        right.appendChild(el("span", "tag", f.section));
+        title(f.name, right);
+
+        var band = el("div", "band");
+        var done = {};
+        FWFIELDS.forEach(function (pair) {
+          var key = pair[0];
+          if (done[key]) return;
+          var mate = FWPAIRS[key];
+          if (mate) {
+            var g = el("div", "fwsec fwgrid");
+            [[key, pair[1]], [mate, fwLabel(mate)]].forEach(function (side) {
+              var d = el("div");
+              d.appendChild(el("h3", null, side[1]));
+              d.appendChild(el("p", null, f[side[0]] || "—"));
+              g.appendChild(d);
+              done[side[0]] = true;
+            });
+            band.appendChild(g);
+            return;
+          }
+          var sec = el("div", "fwsec");
+          sec.appendChild(el("h3", null, pair[1]));
+          sec.appendChild(el("p", null, f[key] || "—"));
+          band.appendChild(sec);
+          done[key] = true;
+        });
+
+        /* WHERE IT CAME FROM, and an absent author is an absence rather than
+           a person invented to fill it (§35). */
+        var apart = el("div", "apart");
+        apart.appendChild(el("span", "akey", "Where this came from"));
+        apart.appendChild(el("p", "note", f.addedBy
+          ? "Added by " + f.addedBy + (f.when ? " · " + whenWord(f.when) : "")
+          : "Came with the library. Nobody here has edited it."));
+        apart.querySelector(".note").style.margin = "0";
+        band.appendChild(apart);
+        page.appendChild(band);
+      });
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
+  /* ── Adding one ────────────────────────────────────────────────────
+     TWO WAYS IN AND ONE SCREEN. By name, for a framework the model genuinely
+     knows; by pasted source, for everything else — including Forefront's own,
+     which no model has ever read. The mockup drew both panels at once because
+     a still cannot show a switch flipping; what is built is the switch, which
+     is the control the drawing itself carries.
+
+     NOTHING HERE WRITES UNTIL THE PRESS. `draft` touches no table and `save`
+     is a separate action, which is decision 3 and the whole reason the extra
+     step exists: a plausible invention sitting among eighty real frameworks
+     is quoted to a client under Forefront's name. */
+  function drawFwAdd() {
+    var A = FW.add || (FW.add = fwAddState());
+    /* BUILT DETACHED AND SWAPPED, which keeps the scroll: the draft panel is
+       eleven fields tall, and every press redraws it — a jump to the top on
+       pressing Save loses the place at the one moment it matters. */
+    settle(function () { fwAddBody(A); });
+  }
+
+  function fwAddBody(A) {
+    var back = el("div");
+    var b = el("button", "cback", "← ALL FRAMEWORKS");
+    b.type = "button";
+    b.addEventListener("click", function () { fwGo("list", { add: null }); });
+    back.appendChild(b);
+    back.style.marginBottom = "13px";
+    page.appendChild(back);
+    title("Add a framework");
+
+    if (A.draft) return fwDraftPanel(A);
+
+    var band = el("div", "band");
+
+    /* The page's own segmented pair, never a second one (§53.5). Switching
+       KEEPS what is in the other box: somebody who typed a name, was declined
+       and reached for the source has not thrown the name away. */
+    var cell = el("div", "cell");
+    [["name", "By name"], ["source", "Paste the source"]].forEach(function (w) {
+      var t = el("button", A.how === w[0] ? "on" : null, w[1]);
+      t.type = "button";
+      t.setAttribute("aria-pressed", A.how === w[0] ? "true" : "false");
+      t.addEventListener("click", function () {
+        if (A.how === w[0]) return;
+        A.how = w[0];
+        /* A DECLINE BELONGS TO THE ASK THAT PRODUCED IT. Carrying it across
+           the switch would leave "I do not know that one" standing over a
+           box holding the source that answers it (§45.2, reversed). */
+        A.why = "";
+        drawFwAdd();
+      });
+      cell.appendChild(t);
+    });
+    band.appendChild(cell);
+
+    var wrap = el("div");
+    wrap.style.marginTop = "15px";
+    var fld;
+    if (A.how === "name") {
+      wrap.appendChild(el("label", "lab", "The framework's name"));
+      fld = el("input", "fld");
+      fld.type = "text";
+      fld.value = A.name;
+      fld.placeholder = "Blue Ocean Strategy (Kim and Mauborgne)";
+      fld.addEventListener("change", function () { A.name = fld.value; });
+    } else {
+      wrap.appendChild(el("label", "lab", "Paste a chapter, a page, or your own notes"));
+      fld = el("textarea", "fld");
+      fld.rows = 7;
+      fld.value = A.source;
+      fld.addEventListener("change", function () { A.source = fld.value; });
+    }
+    fld.style.width = "100%";
+    wrap.appendChild(fld);
+    band.appendChild(wrap);
+
+    band.appendChild(el("p", "note", A.how === "name"
+      ? "It will draft the eleven fields from what it knows, and you read them before "
+        + "anything is saved. If it does not know the framework well enough it will say so "
+        + "rather than invent one — paste the source instead."
+      : "It will turn what you paste into the eleven fields and add nothing the material "
+        + "does not say. Works for anything, including a framework of ours that no model "
+        + "has read."));
+
+    /* THE DECLINE, IN THE ASSISTANT'S OWN WORDS and with the other door on
+       it: which framework it does not know is exactly what tells the admin
+       whether to paste the source or check the spelling (§125's rule with
+       the sign reversed — here the decline IS the useful answer). */
+    if (A.why) {
+      var d = el("div", "fwdecl", A.why);
+      d.style.marginTop = "15px";
+      band.appendChild(d);
+      if (A.how === "name") {
+        var go = el("button", "btn solid", "Paste the source instead →");
+        go.type = "button";
+        go.addEventListener("click", function () { A.how = "source"; A.why = ""; drawFwAdd(); });
+        var r2 = el("div", "row");
+        r2.style.marginTop = "15px";
+        r2.appendChild(go);
+        band.appendChild(r2);
+      }
+    }
+
+    var row = el("div", "row");
+    row.style.marginTop = "15px";
+    var go2 = el("button", "btn solid", A.busy ? "Drafting…" : "Draft it");
+    go2.type = "button";
+    if (A.busy) go2.disabled = true;
+    go2.addEventListener("click", function () {
+      /* THE FIELD IS COMMITTED BEFORE THE PRESS (§219): these write on
+         `change`, which is on BLUR, and a mouse reaching for the button
+         usually blurs on the way — usually is what makes it a bug. */
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      var name = String(A.name || "").trim(), source = String(A.source || "").trim();
+      if (A.how === "name" ? !name : !source) {
+        say(A.how === "name" ? "Give it a name first." : "Paste something first.", true);
+        return;
+      }
+      A.busy = true; A.why = ""; drawFwAdd();
+      fpost({ action: "draft", name: name, source: A.how === "source" ? source : "" })
+        .then(function (j) {
+          A.busy = false;
+          if (!j || !j.ok) { drawFwAdd(); say((j && j.error) || "Could not draft it.", true); return; }
+          if (!j.drafted) { A.why = j.why || "It could not draft that one."; drawFwAdd(); return; }
+          A.draft = j.draft || {};
+          if (!A.draft.name && name) A.draft.name = name;
+          drawFwAdd();
+        })
+        .catch(function (e) {
+          A.busy = false;
+          if (String(e.message) === "sign in") return;
+          drawFwAdd(); say("Could not reach the server.", true);
+        });
+    });
+    row.appendChild(go2);
+    var cancel = el("button", "btn", "Cancel");
+    cancel.type = "button";
+    cancel.addEventListener("click", function () { fwGo("list", { add: null }); });
+    row.appendChild(cancel);
+    band.appendChild(row);
+
+    page.appendChild(band);
+  }
+
+  /* The draft, every field editable and nothing repainting under a working
+     hand (§71.2) — the console's own idiom, and the memory's draft card
+     one page up does exactly this. */
+  function fwDraftPanel(A) {
+    page.appendChild(el("div", "fwdraft",
+      "This is a draft. Read it before you save it — nothing is in the library yet."));
+
+    var band = el("div", "band");
+    var fields = el("div", "fwfields");
+
+    var nm = el("div");
+    nm.appendChild(el("label", "lab", "Name"));
+    var nmf = el("input", "fld");
+    nmf.type = "text";
+    nmf.value = A.draft.name || "";
+    nmf.addEventListener("change", function () { A.draft.name = nmf.value; });
+    nm.appendChild(nmf);
+    fields.appendChild(nm);
+
+    /* A PICKER OVER WHAT EXISTS, which is decision 1 on the screen: the eight
+       are fixed, so there is nothing here that makes a ninth. An empty one is
+       a real option, because the draft drops a section the model invented and
+       the admin is the one who then says which. */
+    var sc = el("div");
+    sc.appendChild(el("label", "lab", "Section"));
+    var ssel = el("select", "fld");
+    var none = el("option", null, "— which section?");
+    none.value = "";
+    ssel.appendChild(none);
+    (FW.sections || []).forEach(function (s2) {
+      var op = el("option", null, s2.section);
+      op.value = s2.section;
+      if (s2.section === A.draft.section) op.selected = true;
+      ssel.appendChild(op);
+    });
+    ssel.addEventListener("change", function () { A.draft.section = ssel.value; });
+    sc.appendChild(ssel);
+    fields.appendChild(sc);
+
+    /* The nine, in the reading view's own order and pairing (§53.5): what is
+       corrected here reads back in the same shape it will be read in. */
+    var done = {};
+    FWFIELDS.forEach(function (pair) {
+      var key = pair[0];
+      if (done[key]) return;
+      var mate = FWPAIRS[key];
+      var host = mate ? el("div", "fwgrid") : el("div");
+      [[key, pair[1]]].concat(mate ? [[mate, fwLabel(mate)]] : []).forEach(function (side) {
+        var box = mate ? el("div") : host;
+        box.appendChild(el("label", "lab", side[1]));
+        var ta = el("textarea", "fld");
+        ta.rows = 2;
+        ta.value = A.draft[side[0]] || "";
+        (function (k) { ta.addEventListener("change", function () { A.draft[k] = ta.value; }); })(side[0]);
+        box.appendChild(ta);
+        if (mate) host.appendChild(box);
+        done[side[0]] = true;
+      });
+      fields.appendChild(host);
+    });
+    band.appendChild(fields);
+
+    var row = el("div", "row");
+    row.style.marginTop = "18px";
+    var save = el("button", "btn amber", A.busy ? "Saving…" : "Save to the library");
+    save.type = "button";
+    if (A.busy) save.disabled = true;
+    save.addEventListener("click", function () {
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      A.busy = true; drawFwAdd();
+      fpost({ action: "save", draft: A.draft }).then(function (j) {
+        A.busy = false;
+        if (!j || !j.ok) { drawFwAdd(); say((j && j.error) || "Not saved.", true); return; }
+        /* IT LANDS ON THE THING IT JUST MADE, which is this page's own answer
+           to "did that work" — a sentence saying saved over the form that
+           still holds the draft is one press from saving it twice (§136).
+           The word travels on FW rather than being said here, because
+           `drawFwOne` clears and rebuilds: a `say()` appended now is appended
+           to a frame about to be replaced (§63). */
+        fwGo("one", { one: j.id, add: null, said: "Added to the library." });
+      }).catch(function (e) {
+        A.busy = false;
+        if (String(e.message) === "sign in") return;
+        drawFwAdd(); say("Could not reach the server.", true);
+      });
+    });
+    row.appendChild(save);
+    var drop = el("button", "btn", "Discard");
+    drop.type = "button";
+    drop.addEventListener("click", function () {
+      /* NOTHING WAS WRITTEN, so there is nothing to take back and no
+         confirmation to ask for — saying "are you sure" over an unsaved
+         draft teaches people to press through the ones that matter. */
+      A.draft = null; A.why = ""; drawFwAdd();
+    });
+    row.appendChild(drop);
+    var note = el("span", "muted", "Saved as added by you, today.");
+    note.style.fontSize = "12.5px";
+    row.appendChild(note);
+    band.appendChild(row);
+
+    page.appendChild(band);
+  }
+
+  function fwLabel(key) {
+    for (var i = 0; i < FWFIELDS.length; i++) if (FWFIELDS[i][0] === key) return FWFIELDS[i][1];
+    return key;
+  }
+
+  document.getElementById("signout").addEventListener("click", function () {
+    fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
+  });
+
+  /* ── Boot ──────────────────────────────────────────────────────
+     BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not
+     active on opening I need to click anyway to start accepting clicks on the
+     cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
+     because the two are indistinguishable from outside: `.top` is drawn
+     OUTSIDE `.wrap`, so the bar stands up with Forefront's name and a Sign out
+     button over a body that `body:not(.ready)` has hidden — a window that
+     looks open, answers nothing, and says nothing about either.
+
+     Measured at 600ms a round trip, which is production's own shape: the
+     requests went out as `me` → `cards` → `cards`, THREE sequential trips for
+     one page load with the last two the SAME request; the bar was up and dead
+     for 1,255ms, the page then appeared titled and empty, and the cards landed
+     at 1,872. A click inside that window hits BODY — `elementFromPoint` where
+     a card will be, every 100ms of it — so the press he spends is the one that
+     happens to land after the page became ready.
+
+     Nothing in `cards` reads `me`'s ANSWER — the session is the cookie both
+     already carry — so they were sequential for no reason but the order they
+     were written in, and `drawClients()` asked the second one over again. One
+     trip now. The cost, stated: a signed-out visitor sends one `cards` that is
+     thrown away, and they are being redirected anyway.
+
+     IT IS NOT §368's, established before it was blamed (§303): the same probe
+     against the build before that section reports 1,259ms to 1,255. It is the
+     boot's own shape, and §359.4 made the second trip heavier by giving
+     `cards` a per-client read.
+
+     WHAT IS LEFT IS ONE ROUND TRIP OF THE SAME SILENCE, and it is not fixed
+     here. A first draft of this comment said the grid "already says Reading
+     your clients… and this gate hides it", and MEASURING IT SAID OTHERWISE:
+     lifting the gate alone produces a picture byte-identical to today's,
+     because `drawClients()` BUILDS that sentence and is not called until the
+     answer lands — there is nothing behind the gate to reveal. Corrected
+     rather than left standing (§124).
+     So saying anything at all means DRAWING before the answer, which is a
+     decision about what a loading page looks like: the page's own title,
+     search and sentence drawn early (whose cost is that `drawNav()` reads the
+     answer, so the tab row lands a beat later — measured, an early
+     `go("clients")` throws on a null ME), or §94.10's grey skeleton, whose
+     RULE the gate above cites and whose treatment this page never took. Both
+     shot out of the real page and put to Islam
+     (design-mockups/console-loading/), never ridden in behind a repair
+     (rule 1b, 1c).
+
+     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
+     `drawWaiting()` above, and the window is no longer silent — which is why
+     two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
+     than loosened: they recorded this state on purpose so that the day it
+     moved they would go red (§214.3, §218). */
+  drawWaiting();
+  Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
+    var j = r[0], c = r[1];
+    if (!j || !j.ok) { location.replace("/"); return; }
+    ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
+           canConsultants: true, canAccess: !!j.account.isAdmin };
+    /* What the navigation may show is asked of the same rules the pages ask —
+       `cards` answers it for this account, so the row cannot offer a page the
+       next request refuses. */
+    if (c && c.ok) {
+      ME.canConsultants = !!c.canConsultants;
+      ME.canAccess = !!c.canAccess;
+      BOOTCARDS = c;
+    }
+    /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+       after renaming the column is exactly the twins this rename avoided. */
+    document.getElementById("who").textContent =
+      ME.name + (ME.isAdmin ? " · Super user" : "");
+    document.body.classList.add("ready");
+    go("clients");
+  }).catch(function (e) {
+    if (String(e.message) === "sign in") return;
+    document.body.classList.add("ready");
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
+       skeleton is a promise that something is arriving, and `say` APPENDS —
+       so without this the sentence lands under three grey cards still
+       saying it is on its way. The happy path needs no such line, because
+       `go` clears the page itself. */
+    clear();
+    say("Could not reach the server.", true);
+  });
+})();
+</script>
+</body>
+</html>

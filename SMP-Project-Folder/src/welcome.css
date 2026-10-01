@@ -7,28 +7,14 @@
 
    LAYERING: above the chat dock (45) — its row on this screen IS the door —
    and below the tour (70), which the intro-round card hands the screen to. */
-.welcomeover { position:fixed; inset:0; z-index:60; overflow:auto;
+/* HOME IS A PAGE INSIDE THE CHROME (§400), not a screen over it: it starts
+   under the sticky chrome, so the navigation above stays on screen and is
+   the way on — and it sits BELOW the chrome's own layer (9), or a menu
+   opened from the trail would drop behind it. */
+.welcomeover { position:fixed; inset:0; top:var(--chrome-h, 0px); z-index:8; overflow:auto;
                background:var(--ground); color:var(--ink);
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
-
-/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
-   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
-   the hero's navy, so it takes the page's own ink — the drawing that put it
-   here first wore `--panel-ink` inherited from the hero and measured as a
-   pale label on a pale ground, which is §38.5's fault in a mockup rather than
-   in the product. Right-aligned: it is the one thing on this screen that is
-   about the screen rather than about the person being greeted, so it keeps
-   out of the greeting's reading line. */
-.welcomeover .wviewbar { display:flex; justify-content:flex-end;
-  align-items:center; gap:9px; margin:0 0 12px; }
-.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
-  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
-/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
-   hides the native one in place, so both are sized here — never the button
-   alone, or a tenant with five people gets an unstyled dropdown. */
-.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
-  font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
 /* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
@@ -116,34 +102,6 @@
 .welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
   color:var(--cta-ink); }
 .welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
-/* ── THE WAY OUT (§159) ──────────────────────────────────────────────────
-   It was a text link at the foot of the LEFT COLUMN, which is three faults at
-   once: it is the only exit (there is no ×, no Escape, no click-outside), it
-   was the quietest thing on a screen holding three bordered buttons and one
-   solid fill, and it read as the end of the "Waiting on you" list rather than
-   the way past the screen. Below 960px it was not even last — the columns
-   stack, so 411px of side column sat AFTER the way out at 900px wide.
-
-   One bar across both columns answers all three: a real control, spanning the
-   grid so its scope is the screen, and last at every width. It wears the wide
-   row shape .wpages already uses (§53.5) and spends none of §41's accent —
-   except on the one screen where there is no other act to spend it on. */
-.welcomeover .wexit { margin-top:22px; width:100%; display:flex;
-  align-items:center; justify-content:space-between; gap:16px; cursor:pointer;
-  text-align:left; font:inherit; padding:17px 22px; border-radius:var(--r);
-  border:1px solid var(--line); background:var(--surface); color:var(--stone); }
-.welcomeover .wexit .wexlab { font-size:15px; font-weight:800; letter-spacing:-.01em; }
-.welcomeover .wexit .wgo { font-family:var(--mono); font-size:var(--fs-lead);
-  color:var(--gold-deep); }
-.welcomeover .wexit:hover { border-color:var(--gold-deep); }
-.welcomeover .wexit:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-/* PROMOTED ONLY WHEN IT IS THE ONLY ACT (§41, §45.2): with nothing waiting
-   there is no CTA on the screen, so the exit takes the fill — its own class,
-   because .wcta means "an action row shouts" and this is not an action row. */
-.welcomeover .wexit.wloud { background:var(--cta); border-color:var(--cta);
-  color:var(--cta-ink); }
-.welcomeover .wexit.wloud .wgo { color:var(--cta-ink); }
-.welcomeover .wexit.wloud:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
 
 /* ── The side column ────────────────────────────────────────────────────── */
 .welcomeover .wside { display:flex; flex-direction:column; gap:22px; }

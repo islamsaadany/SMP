@@ -1,0 +1,329 @@
+<title>SMP Plan Page Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ---- SMP's own house palette (Forefront, from _shared.css), unchanged ---- */
+:root{
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-hover:#24487A; --panel-accent:#E6C65C;
+  --stone:#16325C; --stone-soft:#24487A;
+  --gold:#C9A24D; --gold-deep:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --none:#676C73;
+  --attn-bg:#F7EFD6; --over-bg:#FBF6E9; --over-line:#E8D9AE;
+  --zebra:#F5F7FA; --cta:#A4512C; --cta-ink:#FFFFFF;
+  --doc-bg:#E4E7EC;
+  /* the new rules: five sizes, four steps, three roundings */
+  --t-xs:12px; --t-sm:14px; --t-md:16px; --t-lg:22px; --t-xl:30px;
+  --s1:8px; --s2:16px; --s3:24px; --s4:40px;
+  --r-sm:6px; --r-md:12px; --r-pill:999px;
+  --title:"Source Serif 4","Iowan Old Style",Georgia,serif;
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --shadow:0 1px 2px rgba(22,50,92,.05),0 1px 3px rgba(22,50,92,.07);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
+  --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#8E97A3;
+  --attn-bg:#332C16; --over-bg:#332C16; --over-line:#4A3F1E; --zebra:#212630; --cta:#E1935F; --cta-ink:#14161A; --doc-bg:#0B0C0F;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
+  --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#8E97A3;
+  --attn-bg:#332C16; --over-bg:#332C16; --over-line:#4A3F1E; --zebra:#212630; --cta:#E1935F; --cta-ink:#14161A; --doc-bg:#0B0C0F;
+}
+*{box-sizing:border-box}
+body{background:var(--doc-bg);color:var(--ink);font-family:var(--sans);font-size:var(--t-sm);-webkit-font-smoothing:antialiased;padding-inline:16px;padding-block:32px 64px}
+.doc{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s4)}
+.doc h1{font-family:var(--title);font-weight:600;font-size:var(--t-xl);margin:0;text-wrap:balance}
+.doc .lede{margin:8px 0 0;color:var(--ink-2);font-size:var(--t-md);max-width:72ch;line-height:1.5}
+.label{font-size:var(--t-xs);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-deep)}
+.frame{overflow-x:auto;border-radius:var(--r-md);box-shadow:0 8px 30px rgba(22,50,92,.14)}
+
+/* font choice strip */
+.fonts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s2)}
+.fopt{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s3)}
+.fopt.pick{border-color:var(--stone);box-shadow:inset 3px 0 0 var(--gold)}
+.fopt .sample{font-size:26px;line-height:1.2;color:var(--ink);margin:10px 0 6px}
+.fopt .amp{font-size:64px;line-height:1;color:var(--stone);margin-top:6px}
+.fopt .why{color:var(--ink-2);font-size:var(--t-sm);line-height:1.5}
+.f1{font-family:"Source Serif 4",Georgia,serif;font-weight:600}
+.f2{font-family:"IBM Plex Serif",Georgia,serif;font-weight:600}
+.f3{font-family:"IBM Plex Sans",system-ui,sans-serif;font-weight:600}
+
+/* ================= the proposed Plan page ================= */
+.app{min-width:1180px;background:var(--ground);font-size:var(--t-sm);line-height:1.45;color:var(--ink)}
+/* line 1: brand + viewer */
+.top{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-family:var(--title);font-weight:600;font-size:17px}
+.brand span{color:var(--ink-3);font-size:var(--t-xs);font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.viewer{display:flex;align-items:center;gap:10px;color:var(--ink-3);font-size:var(--t-sm)}
+.viewer .who{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-pill);color:var(--ink);font-weight:600}
+.viewer .role{font-size:var(--t-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep)}
+/* line 2: destinations, horizontal, navy */
+.dest{height:52px;display:flex;align-items:stretch;background:var(--panel);padding:0 28px;gap:4px}
+.dest a,.dest button{display:flex;align-items:center;padding:0 12px;color:var(--panel-quiet);text-decoration:none;font:500 var(--t-sm)/1 var(--sans);background:none;border:0;cursor:pointer;border-bottom:3px solid transparent;border-top:3px solid transparent;white-space:nowrap}
+.dest a:hover{color:#fff}
+.dest a.on{color:var(--panel-ink);font-weight:700;border-bottom-color:var(--gold)}
+.dest .grp{color:var(--panel-ink);font-weight:600}
+.dest .sep{width:1px;background:rgba(255,255,255,.14);margin:12px 8px}
+.seg{flex:none;display:flex;align-self:center;border:1px solid rgba(255,255,255,.22);border-radius:var(--r-sm);overflow:hidden;height:32px}
+.seg span{display:flex;align-items:center;padding:0 12px;color:var(--panel-quiet);font-size:var(--t-sm);font-weight:500}
+.seg span+span{box-shadow:inset 1px 0 0 rgba(255,255,255,.22)}
+.seg span.on{background:var(--panel-hover);color:#fff;font-weight:600}
+.dest .gear{margin-left:auto}
+.dest svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8}
+/* page header */
+.phead{background:var(--surface);border-bottom:1px solid var(--line);padding:var(--s3) 28px 0}
+.phead .eyebrow{font-size:var(--t-xs);font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-deep)}
+.phead h2{font-family:var(--title);font-weight:600;font-size:var(--t-xl);margin:2px 0 var(--s2);line-height:1.1}
+.tabs{display:flex;gap:var(--s3)}
+.tabs a{padding:10px 0 12px;color:var(--ink-3);text-decoration:none;font-weight:600;border-bottom:3px solid transparent;display:flex;align-items:center;gap:8px}
+.tabs a.on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs .rep{color:var(--cta)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cta)}
+/* sections line */
+.secline{display:flex;align-items:center;justify-content:space-between;padding:var(--s2) 28px}
+.secs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:4px}
+.secs a{padding:6px 16px;border-radius:var(--r-pill);color:var(--ink-2);text-decoration:none;font-weight:600}
+.secs a.on{background:var(--panel);color:var(--panel-ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 var(--t-sm)/1 var(--sans);cursor:pointer}
+.btn:hover{border-color:var(--stone-soft)}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+/* the work area */
+.work{display:grid;grid-template-columns:224px minmax(0,1fr);gap:var(--s3);padding:0 28px var(--s4);align-items:start}
+/* the pillar rail: navy header, equal cards under it */
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
+.rail .rh{display:flex;align-items:center;justify-content:space-between;background:var(--panel);color:var(--panel-ink);padding:12px var(--s2);font-size:var(--t-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.rail .rh span{color:var(--panel-accent)}
+.rail .list{display:grid;gap:var(--s1);padding:var(--s1)}
+.pc{display:grid;grid-template-rows:auto 1fr auto;height:112px;text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;cursor:pointer;font:inherit;color:inherit}
+.pc:hover{border-color:var(--stone-soft)}
+.pc.on{background:var(--surface-2);border-color:var(--line);box-shadow:inset 4px 0 0 var(--gold)}
+.pc .c{font-size:var(--t-xs);font-weight:700;color:var(--gold-deep);letter-spacing:.06em}
+.pc .t{font-weight:600;margin-top:2px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pc .m{font-size:var(--t-xs);color:var(--ink-3)}
+/* the pillar card */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--shadow);overflow:hidden}
+.card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s2);padding:var(--s3);border-bottom:1px solid var(--line)}
+.card-h .c{font-size:var(--t-xs);font-weight:700;color:var(--gold-deep);letter-spacing:.06em}
+.card-h h3{font-family:var(--title);font-weight:600;font-size:var(--t-lg);margin:2px 0 0;line-height:1.2}
+.meta{margin-top:6px;color:var(--ink-3)}
+.meta b{color:var(--ink);font-weight:600}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:var(--r-pill);background:var(--over-bg);border:1px solid var(--over-line);color:var(--gold-deep);font-size:var(--t-xs);font-weight:700;letter-spacing:.04em}
+.block{padding:var(--s3)}
+.block + .block{border-top:1px solid var(--line)}
+.bh{display:flex;align-items:baseline;gap:var(--s1);margin-bottom:12px}
+.bh h4{margin:0;font-size:var(--t-md);font-weight:600}
+.bh span{color:var(--ink-3)}
+/* tables: every line kept visible */
+.tw{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:var(--t-sm)}
+th{background:var(--panel);color:var(--panel-ink);font-weight:700;font-size:var(--t-xs);letter-spacing:.08em;text-transform:uppercase;text-align:left;padding:10px;white-space:nowrap;border-right:1px solid rgba(255,255,255,.16)}
+th:last-child{border-right:0}
+td{padding:10px;border-top:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top}
+td:last-child{border-right:0}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td.n,th.n{width:44px;color:var(--ink-3);text-align:center}
+th.n{color:var(--panel-quiet)}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+td.ctr,th.ctr{text-align:center}
+.tac td:nth-child(2){font-weight:600}
+.tac td:nth-child(5),.tac td:last-child{white-space:nowrap}
+.tac th:last-child{width:1%}
+.none{color:var(--none)}
+/* quarters — exactly today's three states */
+.qs{display:inline-flex;gap:3px}
+.qs i{width:18px;height:18px;border-radius:var(--r-sm);font-style:normal;font-size:10px;display:flex;align-items:center;justify-content:center;border:1px dashed var(--line);color:var(--none);background:none;font-weight:400}
+.qs i.on{background:var(--attn-bg);border:1px solid var(--stone-soft);color:var(--stone);font-weight:700}
+.qs i.on.past{background:var(--over-bg);border-color:var(--over-line);color:var(--gold-deep);font-weight:700}
+
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--s2)}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--s3)}
+.note h3{font-family:var(--title);font-weight:600;font-size:var(--t-lg);margin:0 0 var(--s1)}
+.note ul{margin:0;padding-left:18px;line-height:1.55}
+.note li+li{margin-top:6px}
+@media (prefers-reduced-motion:no-preference){.pc,.btn{transition:border-color .15s,background .15s}}
+/* ---- round 3 ---- */
+.opts{display:grid;gap:var(--s3)}
+.opt{display:grid;gap:12px}
+.opt-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.opt-h h3{margin:0;font-family:var(--title);font-weight:600;font-size:var(--t-lg)}
+.opt-h .rec{font-size:var(--t-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);border:1px solid var(--over-line);background:var(--over-bg);border-radius:var(--r-pill);padding:3px 10px}
+.opt p{margin:0;color:var(--ink-2);max-width:90ch;line-height:1.5}
+.opt p b{color:var(--ink)}
+.pair{display:grid;gap:12px}
+.cap2{font-size:var(--t-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.mini{min-width:1180px;background:var(--ground);position:relative}
+.mini .peek{height:70px;padding:var(--s2) 28px 0;display:grid;grid-template-columns:224px 1fr;gap:var(--s3);overflow:hidden}
+.mini .peek div{border:1px solid var(--line);border-bottom:0;border-radius:var(--r-md) var(--r-md) 0 0;background:var(--surface)}
+.mini .peek div:first-child{background:linear-gradient(var(--panel) 0 42px,var(--surface) 42px)}
+.mini{position:relative}.ruler{position:absolute;right:12px;bottom:12px;z-index:2;font-size:var(--t-xs);font-weight:700;color:var(--ink-3);background:var(--surface);border:1px solid var(--line);border-radius:var(--r-pill);padding:2px 10px}
+/* folded nav: switcher in the top line */
+.switch{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);font-weight:600;color:var(--ink)}
+.switch small{color:var(--ink-3);font-weight:500;font-size:var(--t-sm)}
+.pin{display:inline-grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--ink-2)}
+.pin svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
+.pin.on{background:var(--panel);border-color:var(--panel);color:var(--panel-ink)}
+.lft{display:flex;align-items:center;gap:var(--s2)}
+.dest.slim{height:52px}
+.scrolled{opacity:.9}
+/* header option A: one line title + tabs */
+.hA{background:var(--surface);border-bottom:1px solid var(--line);padding:0 28px;display:flex;align-items:flex-end;justify-content:space-between;height:64px}
+.hA .t{display:flex;align-items:baseline;gap:12px;padding-bottom:14px}
+.hA .t b{font-family:var(--title);font-weight:600;font-size:var(--t-lg)}
+.hA .t span{color:var(--ink-3);font-size:var(--t-sm)}
+.hA .tabs a{padding:0 0 14px}
+/* header option B: everything in one bar */
+.hbar{display:flex;align-items:stretch;gap:var(--s3);height:60px;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--line)}
+.hbar .t{display:flex;align-items:center;gap:10px;padding-right:var(--s3);border-right:1px solid var(--line)}
+.hbar .t b{font-family:var(--title);font-weight:600;font-size:var(--t-lg);line-height:1}
+.hbar .t span{font-size:var(--t-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep)}
+.hbar .tabs{align-items:stretch}
+.hbar .tabs a{padding:0;display:flex;align-items:center}
+.hbar .end{margin-left:auto;display:flex;align-items:center;gap:12px}
+.hbar .secs{padding:3px}
+.hbar .secs a{padding:5px 14px}
+/* header option C: no title at all */
+.hC{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);height:56px;padding:0 28px;background:var(--surface);border-bottom:1px solid var(--line)}
+.hC .l{display:flex;align-items:stretch;gap:var(--s3);height:100%}
+.hC .tabs a{padding:0;display:flex;align-items:center;height:100%}
+.hC .r{display:flex;align-items:center;gap:12px}
+.work.r3{padding-top:var(--s2)}
+.hb2{display:grid;grid-template-columns:auto 1fr auto;column-gap:var(--s3);padding:0 28px;background:var(--surface);border-bottom:1px solid var(--line)}
+.hb2 .t{grid-column:1;grid-row:1;display:flex;align-items:center;gap:10px;height:52px;padding-right:var(--s3);border-right:1px solid var(--line)}
+.hb2 .t b{font-family:var(--title);font-weight:600;font-size:var(--t-lg);line-height:1}
+.hb2 .t span{font-size:var(--t-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep)}
+.hb2 .tabs{grid-column:2;grid-row:1;align-items:stretch;height:52px}
+.hb2 .tabs a{padding:0;display:flex;align-items:center}
+.hb2 .secs{grid-column:2;grid-row:2;justify-self:start;align-self:center;margin:8px 0;padding:3px}
+.hb2 .secs a{padding:5px 14px}
+.hb2 .btn{grid-column:3;grid-row:2;align-self:center}
+.hb2::before{content:"";grid-column:1/-1;grid-row:2;border-top:1px solid var(--line);align-self:start}
+@media (max-width:760px){.hb2{grid-template-columns:1fr auto}.hb2 .t{border-right:0}.hb2 .tabs{grid-column:1/-1;grid-row:2}.hb2 .secs{grid-column:1;grid-row:3}.hb2 .btn{grid-column:2;grid-row:3}.hb2::before{display:none}}
+:root{--cta-on-panel:#F0A878;--nm:190px}
+.ubar{display:flex;align-items:stretch;gap:var(--s3);height:52px;padding:0 28px;background:var(--panel)}
+.ubar .t{width:var(--nm);flex:none;display:flex;align-items:center;gap:10px;border-right:1px solid rgba(255,255,255,.14)}
+.ubar .t b{font-family:var(--title);font-weight:600;font-size:var(--t-lg);line-height:1;color:var(--panel-ink)}
+.ubar .t b.sw{display:flex;align-items:center;gap:6px;padding:6px 10px;margin-left:-10px;border-radius:var(--r-sm);background:rgba(255,255,255,.08)}
+.ubar .t b.sw i{font-style:normal;font-size:12px;color:var(--panel-quiet)}
+.ubar .t span{font-size:var(--t-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--panel-accent)}
+.ubar .tabs{align-items:stretch}
+.ubar .tabs a{padding:0;display:flex;align-items:center;color:var(--panel-quiet);border-top:3px solid transparent}
+.ubar .tabs a.on{color:var(--panel-ink);border-bottom-color:var(--gold)}
+.ubar .tabs .rep{color:var(--cta-on-panel)}
+.ubar .dot{background:var(--cta-on-panel)}
+.sline{display:flex;align-items:center;justify-content:space-between;padding:8px 28px 8px calc(28px + var(--nm) + var(--s3));background:var(--surface);border-bottom:1px solid var(--line)}
+.sline .secs{padding:3px}.sline .secs a{padding:5px 14px}
+.dest.light{background:var(--surface-2);border-bottom:1px solid var(--line)}
+.dest.light a,.dest.light button{color:var(--ink-3)}
+.dest.light a:hover{color:var(--ink)}
+.dest.light a.on{color:var(--ink);border-bottom-color:var(--gold)}
+.dest.light .grp{color:var(--ink)}
+.dest.light .sep{background:var(--line)}
+.dest.light .seg{border-color:var(--line)}
+.dest.light .seg span{color:var(--ink-3)}
+.dest.light .seg span+span{box-shadow:inset 1px 0 0 var(--line)}
+.dest.light .seg span.on{background:var(--surface);color:var(--ink)}
+.stack{height:6px;background:var(--surface)}
+@media (max-width:760px){.ubar{height:auto;flex-wrap:wrap;padding:8px 16px;gap:8px 16px}.ubar .t{border-right:0;width:auto}.ubar .tabs{height:40px}.sline{padding:8px 16px}}
+</style>
+<main class="doc">
+  <header>
+    <div class="label">Mockup · round 5 · Strategy › Plan · Mobile</div>
+    <h1>The unit's own bar goes navy</h1>
+    <p class="lede">For somebody who is not the SMO, the line with the unit name and the main tabs is now the navy line, so the page still has a clear strong band at the top. Below it, the sections line stays white. Then the question you asked: what happens to today's navy row for the SMO, so the page does not end up with two navy bars on top of each other.</p>
+  </header>
+  <section class="opts"><div class="label">1 · Ashraf (BU owner, Mobile only)</div>
+  <div class="frame"><div class="app"><div class="top"><div class="brand"><b>Strategy Management Platform</b><span>Raya Trade</span></div><div class="viewer"><span class="who" style="border:0;padding:0">Ashraf Laithy</span><span class="role">BU owner · Mobile</span></div></div><div class="ubar"><div class="t"><b>Mobile</b><span>H1 2026</span></div><div class="tabs"><a href="#" class="on">Strategy</a><a href="#">Performance</a><a href="#" class="rep">Reporting <span class="dot" title="Not submitted yet"></span></a></div></div><div class="sline"><div class="secs"><a href="#">Foundation</a><a href="#">SWOT</a><a href="#">Drivers</a><a href="#" class="on">Plan</a></div><button class="btn" type="button"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</button></div><div class="work r3">
+          <aside class="rail">
+            <div class="rh">Pillars <span>4</span></div>
+            <div class="list">
+              <button class="pc on" type="button"><span class="c">MB01 · Capability</span><span class="t">Digital &amp; Data-Driven Operations</span><span class="m">4 measures · 5 tactics</span></button>
+              <button class="pc" type="button"><span class="c">MB02 · Direction</span><span class="t">Channel Preference &amp; Development</span><span class="m">4 measures · 4 tactics</span></button>
+              <button class="pc" type="button"><span class="c">MB03 · Direction</span><span class="t">Portfolio &amp; Value Chain Expansion</span><span class="m">8 measures · 7 tactics</span></button>
+              <button class="pc" type="button"><span class="c">MB04 · Direction</span><span class="t">Asset-Light Model Regional Expansion</span><span class="m">3 measures · 6 tactics</span></button>
+            </div>
+          </aside>
+
+          <article class="card">
+            <div class="card-h">
+              <div>
+                <div class="c">MB01</div>
+                <h3>Digital &amp; Data-Driven Operations</h3>
+                <div class="meta">Owner <b>Ramy Behairy</b></div>
+              </div>
+              <span class="tag">Capability</span>
+            </div>
+
+            <div class="block">
+              <div class="bh"><h4>Key measures</h4><span>4</span></div>
+              <div class="tw"><table>
+                <thead><tr><th class="n">#</th><th>Key measure</th><th class="ctr">Dir.</th><th>Target</th><th>Compiled</th></tr></thead>
+                <tbody>
+                  <tr><td class="n">1</td><td>Data duplicate rate</td><td class="ctr">≤</td><td class="num">1%</td><td>Latest</td></tr>
+                  <tr><td class="n">2</td><td>Orders processed digitally</td><td class="ctr">≥</td><td class="num">90%</td><td>Latest</td></tr>
+                  <tr><td class="n">3</td><td>App coverage rate</td><td class="ctr">≥</td><td class="num">50%</td><td>Latest</td></tr>
+                  <tr><td class="n">4</td><td>Dependency on automated reports</td><td class="ctr">≥</td><td class="num">90%</td><td>Latest</td></tr>
+                </tbody>
+              </table></div>
+            </div>
+
+            <div class="block">
+              <div class="bh"><h4>Tactics</h4><span>5</span></div>
+              <div class="tw"><table class="tac">
+                <thead><tr><th class="n">#</th><th>Tactic</th><th>Outcome</th><th>Target</th><th>Owner</th><th>Collabs.</th><th>Quarters</th></tr></thead>
+                <tbody>
+                  <tr><td class="n">1</td><td>Clean and standardize customer and SKU base</td><td>Duplicate customer and SKU records removed</td><td class="num">12,000 #</td><td>Ramy Behairy</td><td class="none">—</td><td><span class="qs"><i>1</i><i class="on past">2</i><i class="on">3</i><i>4</i></span></td></tr>
+                  <tr><td class="n">2</td><td>End-to-end order-to-cash digitization</td><td>Order-to-cash cycle time</td><td class="num">5 d</td><td>Mohamed Rizk</td><td class="none">—</td><td><span class="qs"><i>1</i><i class="on past">2</i><i class="on">3</i><i>4</i></span></td></tr>
+                  <tr><td class="n">3</td><td>Digitize sales reporting via Power BI</td><td>Management reports live on Power BI</td><td class="num">18 #</td><td>Ramy Behairy</td><td class="none">—</td><td><span class="qs"><i>1</i><i class="on past">2</i><i class="on">3</i><i>4</i></span></td></tr>
+                  <tr><td class="n">4</td><td>Scale Mobile Digital App across merchants</td><td>Merchants ordering through the app</td><td class="num">1,500 #</td><td>Ashraf Laithy</td><td class="none">—</td><td><span class="qs"><i>1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+                  <tr><td class="n">5</td><td>Data integration across business units</td><td>Business units on the shared data model</td><td class="num">5 #</td><td>Abdelhamid</td><td class="none">—</td><td><span class="qs"><i>1</i><i>2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+                </tbody>
+              </table></div>
+            </div>
+          </article>
+        </div></div></div></section>
+  <section class="opts"><div class="label">2 · What today's navy row becomes, for the SMO</div>
+  <div class="opt"><div class="opt-h"><h3>A · It turns light, the navy bar stays the unit's</h3><span class="rec">Recommended</span></div>
+  <p>The row of units becomes a quiet grey strip with dark words and the gold line under the current unit. Navy then means one thing for everybody: <b>the unit you are working in</b>. Ashraf and the SMO see the same navy bar, the SMO simply has one more strip above it. The pin still folds the strip away.</p>
+  <div class="frame"><div class="mini" data-m="a"><div class="top"><div class="lft"><div class="brand"><b>Strategy Management Platform</b><span>Raya Trade</span></div><span class="pin on" title="Navigation row shown — press to fold it"><svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></span></div><div class="viewer"><span>Viewing as</span><span class="who">Mohamed Essam — the group ▾</span><span class="role">Super user</span></div></div><nav class="dest light" aria-label="Destinations">
+          <button class="grp" type="button">Group ▾</button>
+          <div class="sep"></div>
+          <div class="seg"><span class="on">Units</span><span>Capabilities</span><span>Functions</span></div>
+          <div class="sep"></div>
+          <a href="#" class="on">Mobile</a><a href="#">Retail Stores</a><a href="#">B2B Ecomm</a><a href="#">Consumer Electronics</a><a href="#">Online Shop</a><a href="#">Corporate</a><a href="#">Care</a><a href="#">IT Dist.</a><a href="#">Logistics</a><a href="#">Nigeria</a>
+          <a href="#" class="gear" aria-label="Setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg></a>
+        </nav><div class="ubar"><div class="t"><b>Mobile</b><span>H1 2026</span></div><div class="tabs"><a href="#" class="on">Strategy</a><a href="#">Performance</a><a href="#" class="rep">Reporting <span class="dot" title="Not submitted yet"></span></a></div></div><div class="sline"><div class="secs"><a href="#">Foundation</a><a href="#">SWOT</a><a href="#">Drivers</a><a href="#" class="on">Plan</a></div><button class="btn" type="button"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</button></div><div class="peek"><div></div><div></div></div><span class="ruler" data-r="a">work area starts at 203px</span></div></div>
+  <p class="cap2">Folded (the SMO pressed the pin): the strip becomes the small switcher in the top line, and the page is exactly Ashraf's.</p>
+  <div class="frame"><div class="mini" data-m="a2"><div class="top"><div class="lft"><div class="brand"><b>Strategy Management Platform</b><span>Raya Trade</span></div><span class="switch"><small>Business units ›</small> Mobile ▾</span><span class="pin" title="Show the navigation row"><svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></span></div><div class="viewer"><span>Viewing as</span><span class="who">Mohamed Essam — the group ▾</span><span class="role">Super user</span></div></div><div class="ubar"><div class="t"><b>Mobile</b><span>H1 2026</span></div><div class="tabs"><a href="#" class="on">Strategy</a><a href="#">Performance</a><a href="#" class="rep">Reporting <span class="dot" title="Not submitted yet"></span></a></div></div><div class="sline"><div class="secs"><a href="#">Foundation</a><a href="#">SWOT</a><a href="#">Drivers</a><a href="#" class="on">Plan</a></div><button class="btn" type="button"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</button></div><div class="peek"><div></div><div></div></div><span class="ruler" data-r="a2">work area starts at 151px</span></div></div></div>
+  <div class="opt"><div class="opt-h"><h3>B · It disappears into the navy bar</h3></div>
+  <p>No row of units at all. The unit name in the navy bar becomes a switcher, "Mobile ▾", which opens the full list. The shortest page, but the SMO can no longer see every unit at a glance and switching takes two presses instead of one. The pin is no longer needed.</p>
+  <div class="frame"><div class="mini" data-m="b"><div class="top"><div class="lft"><div class="brand"><b>Strategy Management Platform</b><span>Raya Trade</span></div><span class="pin on" style="display:none" title="Navigation row shown — press to fold it"><svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></span></div><div class="viewer"><span>Viewing as</span><span class="who">Mohamed Essam — the group ▾</span><span class="role">Super user</span></div></div><div class="ubar"><div class="t"><b class="sw">Mobile <i>▾</i></b><span>H1 2026</span></div><div class="tabs"><a href="#" class="on">Strategy</a><a href="#">Performance</a><a href="#" class="rep">Reporting <span class="dot" title="Not submitted yet"></span></a></div></div><div class="sline"><div class="secs"><a href="#">Foundation</a><a href="#">SWOT</a><a href="#">Drivers</a><a href="#" class="on">Plan</a></div><button class="btn" type="button"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</button></div><div class="peek"><div></div><div></div></div><span class="ruler" data-r="b">work area starts at 151px</span></div></div></div>
+  <div class="opt"><div class="opt-h"><h3>C · Both stay navy</h3></div>
+  <p>Shown so you can see why it is not recommended: two navy bars stacked read as one heavy block, and the unit's own name gets lost in it.</p>
+  <div class="frame"><div class="mini" data-m="c"><div class="top"><div class="lft"><div class="brand"><b>Strategy Management Platform</b><span>Raya Trade</span></div><span class="pin on" title="Navigation row shown — press to fold it"><svg viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 15v5"/></svg></span></div><div class="viewer"><span>Viewing as</span><span class="who">Mohamed Essam — the group ▾</span><span class="role">Super user</span></div></div><nav class="dest" aria-label="Destinations">
+          <button class="grp" type="button">Group ▾</button>
+          <div class="sep"></div>
+          <div class="seg"><span class="on">Units</span><span>Capabilities</span><span>Functions</span></div>
+          <div class="sep"></div>
+          <a href="#" class="on">Mobile</a><a href="#">Retail Stores</a><a href="#">B2B Ecomm</a><a href="#">Consumer Electronics</a><a href="#">Online Shop</a><a href="#">Corporate</a><a href="#">Care</a><a href="#">IT Dist.</a><a href="#">Logistics</a><a href="#">Nigeria</a>
+          <a href="#" class="gear" aria-label="Setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg></a>
+        </nav><div class="ubar"><div class="t"><b>Mobile</b><span>H1 2026</span></div><div class="tabs"><a href="#" class="on">Strategy</a><a href="#">Performance</a><a href="#" class="rep">Reporting <span class="dot" title="Not submitted yet"></span></a></div></div><div class="sline"><div class="secs"><a href="#">Foundation</a><a href="#">SWOT</a><a href="#">Drivers</a><a href="#" class="on">Plan</a></div><button class="btn" type="button"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>Edit</button></div><div class="peek"><div></div><div></div></div><span class="ruler" data-r="c">work area starts at 203px</span></div></div></div>
+  </section>
+  <section class="notes">
+    <div class="note"><h3>Where the work starts</h3><ul id="gain"><li>Today: <b>299px</b>.</li><li>Ashraf, the SMO folded, and option B: <b>151px</b>.</li><li>The SMO with the strip showing (A or C): <b>203px</b>.</li><li>Making the bar navy costs nothing in height; it is the same bar as round 4, recoloured.</li></ul></div>
+    <div class="note"><h3>Small things in the navy bar</h3><ul>
+      <li>Tabs are pale on navy, the chosen one white with the gold line under it, like today's row of units.</li>
+      <li>Reporting keeps its orange, made lighter so it reads on navy.</li>
+      <li>"H1 2026" in the light gold used elsewhere on navy.</li></ul></div>
+    <div class="note"><h3>Decision for you</h3><ul><li>Today's navy row for the SMO: A, B or C?</li><li>Then I build it into the platform on the branch and show you before main.</li></ul></div>
+  </section>
+</main>

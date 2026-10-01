@@ -277,12 +277,21 @@ with sync_playwright() as p:
       typedUnit: joinTarget("", "8 M EGP", "M EGP"),
       lowercase: joinTarget("", "8 m egp", "M EGP"),
       spaced:    joinTarget("", "8  M  EGP", "M EGP"),
-      different: joinTarget("", "8 B EGP", "M EGP")
+      different: joinTarget("", "8 B EGP", "M EGP"),
+      // THE PLATFORM'S OWN SPELLING OF "8" IN THIS UNIT (§199.4, §254.1): a
+      // scaled currency is one token, so it is "8M EGP" today. Asserted as
+      // AGREEMENT with that rule rather than as a literal, because the literal
+      // "8 M EGP" this check first held went red the day the convention was
+      // applied, on a build doing exactly what was decided (§214.3, §218).
+      want:      "8" + (TIGHT_UNITS["M EGP"] ? "" : " ") + "M EGP"
     })""")
-    ok("the bare number still gets its unit", j.get("bare") == "8 M EGP", j)
-    ok("...and a unit already typed in is NOT added again", j.get("typedUnit") == "8 M EGP", j)
-    ok("...however it was spelled", j.get("lowercase") == "8 M EGP"
-       and j.get("spaced") == "8 M EGP", j)
+    W = j.get("want")
+    once = lambda v: isinstance(v, str) and v.count("EGP") == 1
+    ok("the bare number still gets its unit", j.get("bare") == W, j)
+    ok("...and a unit already typed in is NOT added again",
+       j.get("typedUnit") == W and once(j.get("typedUnit")), j)
+    ok("...however it was spelled", j.get("lowercase") == W
+       and j.get("spaced") == W, j)
     ok("...and a DIFFERENT unit is left exactly as typed, never rewritten",
        j.get("different") == "8 B EGP", j)
 

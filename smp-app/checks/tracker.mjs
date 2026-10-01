@@ -280,14 +280,27 @@ try {
   check("moving the date moves DUE and leaves the first date where it was", d2.due === "2026-09-16" && d2.firstDue === "2026-09-03", JSON.stringify(d2));
   check("...so the carried count is still two weeks at the 15th, not nought", carriedWeeks(d2.firstDue, TODAY) === 2, String(carriedWeeks(d2.firstDue, TODAY)));
   /* TWO DATES IN THIS SECTION WERE TYPED, AND THE CLOCK CAUGHT UP WITH ONE
-     (§13.9, §214.3): `2026-10-01` was a date in the future when it was
-     written and is THIS WEEK'S OWN THURSDAY now, so the grouping drew two
-     headings where the assertion counted three and this file had been four
-     red for ten days. They are relative to today now, far enough either side
-     of this week that neither can collide with it — which is the rule the
-     Portfolio check was given at §440 and this one was not. §442. */
-  const DAY = (n) => new Date(Date.parse(todayIn() + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10);
-  const BACK = DAY(-10), AHEAD = DAY(35);
+     (§13.9, §214.3): `2026-10-01` was a date in the future when it was written
+     and became a date in the past, so this file had been red for days on the
+     CALENDAR rather than on any commit — which is the rule the Portfolio check
+     was given at §440 and this one was not.
+
+     THEY ARE DERIVED FROM `TODAY` NOW, NOT FROM THE REAL CLOCK, and that is
+     the half the first fix got wrong: these documents are RENDERED as of the
+     fixed `TODAY`, so a date taken off the real clock puts the rows in one
+     calendar and the headings in another (§122.4's family, which is the fault
+     main found from the other side on the very same line). Derived from
+     `TODAY` they are the same two days that were typed — next week's Sunday
+     and the Thursday a fortnight out — and they are now fixed by
+     CONSTRUCTION, so the headings below can be named in words and stay true.
+     The one thing still read off the real clock is `realThu`, because §8's
+     rows were added through the product's own add path, which dates a new
+     line to this week's Thursday; the expectations dedupe on the WEEK, so a
+     real clock that lands in one of these two weeks costs a heading on both
+     sides and never only one. §442, combined with main's own fix at the
+     merge. */
+  const BACK = addDays(weekOf(TODAY).from, 7);
+  const AHEAD = thursdayOf(addDays(weekOf(TODAY).from, 14));
   const d3 = await asTenant(A, (c) => setFields(c, a1.id, { due: null }));
   check("clearing the date keeps the first date — a date taken away is not a reschedule to never", d3.due === null && d3.firstDue === "2026-09-03", JSON.stringify(d3));
   const d4 = await asTenant(A, (c) => setStatus(c, a1.id, "done", "noran"));
@@ -441,7 +454,28 @@ try {
      AGREEMENT that survives the clock moving rather than a string that goes
      stale in it (§94.8). §442. */
   check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
+    /* ONE NOTION OF TODAY, NOT TWO — which both sides found independently and
+       fixed at opposite ends of this one line. The page is rendered with
+       `today: TODAY` (a fixed 2026-09-15); main corrected the WORDS, which
+       asked `weekWord(t, todayIn())` and therefore answered about a different
+       day, and this branch corrected the DATES, which were typed and went
+       stale. Both halves are kept: the words read `TODAY` and the dates are
+       derived from it (above). */
     heads(byWeek).join("|") === [...new Set([realThu, BACK, AHEAD].map(thursdayOf))].sort().map((t) => weekWord(t, TODAY) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+  /* AND THE WORDS THEMSELVES, WHICH THE LINE ABOVE CANNOT SAY (§113.8). That
+     one is an AGREEMENT with `weekWord`, which is right for §53.5 — one
+     wording, two surfaces — and it is computed with the function the breaks
+     REPLACE, so both sides move together and it stays green on exactly the
+     build it is there to catch. These two headings are §356.16's decision in
+     words: two weeks have a WORD and every week after is its place in its
+     MONTH, never its number in the year. They are the only literals here, and
+     they are what goes red under `week-numbers` and `week-of-year` — and they
+     are LITERALS SAFELY, now that the dates they describe are derived from the
+     fixture's own fixed today rather than typed. (`realThu` is the real
+     clock's, so a THIRD heading is deliberately not named — it moves with the
+     week.) */
+  check("...and those words are the product's own decision — a week has a word, then its place in its month (§356.16)",
+    heads(byWeek).includes("Next week · 20 – 24 Sep") && heads(byWeek).includes("W1 Oct · 27 Sep – 1 Oct"), heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
   const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
   check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /data-value="status" class="on"/.test(cookied) && /data-group="status"/.test(cookied));

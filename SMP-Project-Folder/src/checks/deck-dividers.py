@@ -112,7 +112,10 @@ with sync_playwright() as p:
             ok(nxt is not None and not nxt["sect"],
                "%s is followed by content, not by another divider" % u["slides"][i]["anchor"])
         heads = [u["slides"][i]["head"].strip() for i in sect]
-        ok(heads == ["Foundation", "SWOT", "Strategic pillars", "Overall performance"],
+        # REWRITTEN, never loosened (§218): since §395 the third divider is
+        # "Strategic " + the client's own word for its pillars, asked of the page.
+        pw = pg.evaluate("() => 'Strategic ' + L('pillar','bu')")
+        ok(heads == ["Foundation", "SWOT", pw, "Overall performance"],
            "the four headings — %s" % heads)
 
         print("\n3 · the SWOT divider drops its four hues; the category slides keep theirs")
@@ -232,7 +235,12 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
 
     print("\n8 · the group's mark — the control writes, and Remove DELETES the key")
-    pg.evaluate("() => { closeDeck(); current='setup'; currentSub='brand'; paint(); }")
+    # REWRITTEN, NEVER LOOSENED (§218, §214.3): §357 absorbed Branding into the
+    # set-up flow's first step and deleted the `brand` def, so `currentSub='brand'`
+    # painted a page that no longer exists — and the group's mark is still drawn
+    # by the same `brandingBody()`, so what moved is where the walk lands, not
+    # the control. Everything asserted below is unchanged.
+    pg.evaluate("() => { closeDeck(); current='setup'; currentSub='start'; paint(); }")
     pg.wait_for_timeout(400)
     ok(pg.locator("input[data-glogo]").count() == 1, "one upload control on Branding")
     ok(pg.locator("[data-glogoclear]").count() == 0, "no Remove while there is no mark (§61)")
@@ -270,7 +278,7 @@ with sync_playwright() as p:
         ok(r[t]["sectFeet"] == 0, "%s — and no divider is (§259.1)" % t)
 
     print("\n10 · Remove puts it back")
-    pg.evaluate("() => { current='setup'; currentSub='brand'; paint(); }")
+    pg.evaluate("() => { current='setup'; currentSub='start'; paint(); }")
     pg.wait_for_timeout(300)
     if pg.locator("[data-glogoclear]").count():
         pg.locator("[data-glogoclear]").click()

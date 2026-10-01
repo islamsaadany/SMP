@@ -308,10 +308,13 @@ var PPTX_ROWS_PER_SLIDE = 11;
 /* A long table continues on its own next slide rather than shrinking to fit —
    the deck's own fit-pass argument (§51.10), decided by counting rather than
    measuring because a table row here has a fixed height by construction. */
-function pptxTableSlides(kicker, title, widths, head, rows){
-  var out = [];
-  for (var i = 0; i < rows.length || i === 0; i += PPTX_ROWS_PER_SLIDE) {
-    var part = rows.slice(i, i + PPTX_ROWS_PER_SLIDE);
+/* `per` is how many rows a slide holds when a caller knows its rows are
+   taller than one line (§415: a tactic carrying its requirements); absent,
+   it is the fixed count every table has always used. */
+function pptxTableSlides(kicker, title, widths, head, rows, per){
+  var out = [], n = per || PPTX_ROWS_PER_SLIDE;
+  for (var i = 0; i < rows.length || i === 0; i += n) {
+    var part = rows.slice(i, i + n);
     var t = i ? title + " (continued)" : title;
     out.push(pptxSlideXml(pptxHead(kicker, t).concat(part.length
       ? [pptxTable(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW }, widths, head, part)]
@@ -428,7 +431,7 @@ function pptxUnitSlides(u, kicker){
   slides.push(pptxSlideXml(fShapes));
 
   var kos = SMPRules.shown(u.keyObjectives);
-  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
+  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, labelWord("keyobj","bu"),
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
     kos.map(function(k){ return [k.name, orPend(k, "dir"), orPend(k, "target"), orPend(k, "target3y")]; })));
@@ -458,22 +461,34 @@ function pptxUnitSlides(u, kicker){
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
-  (u.items || []).forEach(function(p, pi){
+  /* §422: a plan section switched off leaves the plan out of its slides too. */
+  (planOn(u) ? (u.items || []) : []).forEach(function(p, pi){
     var code = (u.codePrefix || "") + (p.code || (pi + 1));
-    var pk = kicker + " · " + code;
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — Key measures",
+    /* §416: the plan download carries every direction — it is the plan —
+       and names the years each runs in beside its code. */
+    var pk = kicker + " · " + code + (yearsOn(p) ? " · " + yearsTag(p) : "");
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("measure","bu"),
       [5303520, 914400, 2346960, 2346960],
-      ["Measure", "Dir.", "Target", "Compiles"],
+      [labelWord("measure","group"), "Dir.", "Target", "Compiles"],
       SMPRules.shown(p.measures).map(function(m){
         return [m.name, orPend(m, "dir"), orPend(m, "target"), orPend(m, "compile")];
       })));
-    slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — " + labelWord("tactic","bu"),
       [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
-      ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
+      [labelWord("tactic","group"), "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       SMPRules.shown(p.tactics).map(function(t){
-        return [t.name, orPend(t, "owner"),
+        /* §415: what the tactic needs rides UNDER its name, as it does on
+           the Plan page (Islam: "B, plan download only") — the review deck
+           is about how the figures went and does not carry it. */
+        var rq = requirementsOn(t) ? reqsOf(t) : [];
+        return [rq.length ? { t:t.name, sub:detailWord("requirements", "many", t) + ": " + rq.join("  \u00b7  ") } : t.name,
+                orPend(t, "owner"),
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
-      })));
+      }),
+      /* A slide with requirements on it holds fewer rows, or the taller
+         rows run off the bottom of the slide. */
+      requirementsOn(p) && SMPRules.shown(p.tactics).some(function(t){ return reqsOf(t).length; })
+        ? 7 : undefined));
   });
   slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
@@ -501,7 +516,7 @@ function pptxFnSlides(fk){
     if (kos.length) shapes.push(pptxTable(7,
       { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
-      ["Key objective", "Dir.", "Target", "Weight"],
+      [labelWord("keyobj","group"), "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
         return [k.name, orPend(k, "dir"), orPend(k, "target"),
                 k.weight != null
@@ -509,9 +524,9 @@ function pptxFnSlides(fk){
                   : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
-    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
+    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, labelWord("project","bu"),
       [3931920, 1737360, 1188720, 1188720, 2865120],
-      ["Project", "Owner", "Start", "End", "Carries"],
+      [labelWord("project","group"), "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
         return [p.name, orPend(p, "owner"), orPend(p, "start"), orPend(p, "end"),
           plural(SMPRules.shown(p.deliverables).length, "deliverable") + " · " +

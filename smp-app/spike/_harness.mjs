@@ -133,22 +133,41 @@ export async function seedTwoTenants(owner) {
   return { A, B, order };
 }
 
-/* AN ENUMERATED COLUMN NAMES ITS OWN LEGAL VALUES, SO IT IS ASKED RATHER THAN
-   LISTED (§442.12, §104.7). This held two hand-written cases —
-   `swot_items.cat` and `access_grants.grant_` — and a third module's
-   `tracker_events.kind` broke it, which is the shape of a list somebody
-   forgets to add to. Postgres normalises `CHECK (col IN (…))` to
-   `(col = ANY (ARRAY['a'::text, …]))`, so `enumValues()` reads the first
-   literal out of the catalogue and the two named cases are DELETED with it
-   (§24) — asked of the SIMPLE form only, never of a conditional one like
-   `((c IS NULL) OR (c = ANY …))`, whose other branch is the answer and whose
-   column is nullable anyway. Measured: exactly three enumerated columns on a
-   tenant table are NOT NULL with no default, so this replaces a list of two
-   with a rule that already covers the third and the next one. */
+/* A VALUE THE COLUMN'S OWN CHECK ALLOWS, READ OFF THE CONSTRAINT (§365.2;
+   this branch found the same gap independently as §442.12 and main's answer
+   is the one kept, because it reads the bare `IN (…)` form as well).
+   This was two hand-written special cases — swot_items.cat and
+   access_grants.grant_ — and main's Internal Tracker then added two more
+   columns with an IN (...) CHECK, so the generic 'k' was refused and SIX of
+   the nine proofs went red on a healthy schema: the tenant isolation (S2),
+   the delete (S4), the door (S7), the carry (S8), the row write (S9) and the
+   Prisma wrapper (S6). Measured on origin/main's own build first (§303) —
+   identical there, so it is main's gap and not this merge's.
+
+   DERIVED, NEVER A LIST (§104.7): the first literal the constraint names is a
+   value it accepts by definition, so a table added tomorrow seeds the day it
+   is added. The two old special cases are DELETED rather than kept beside it,
+   because a rule with exceptions nobody re-reads is the list again (§24) —
+   and they are the proof it works: 's' and 'view' are exactly what this
+   derives for them. */
+function allowedByCheck(checks, name) {
+  for (const src of checks[name] || []) {
+    /* Postgres NORMALISES `IN (…)` to `= ANY (ARRAY[…])` in
+       pg_get_constraintdef, so reading the source means reading what it
+       stores and not what was typed — the first draft matched `IN (` and
+       therefore matched nothing at all, which looked exactly like the two
+       special cases having been deleted (§93.11's shape: ask the thing, do
+       not reason about it). Both forms, and only a MEMBERSHIP test: a
+       `btrim(title) <> ''` carries a literal too and it is the empty one. */
+    const m = /= ANY \(ARRAY\[([^\]]*)\]/.exec(src) || /\bIN \(([^)]*)\)/.exec(src);
+    if (m) { const lit = /'([^']+)'/.exec(m[1]); if (lit) return "'" + lit[1] + "'"; }
+  }
+  return null;
+}
 const PLACEHOLDER = { s: "'k'", w: "'w'" };
-function placeholder(col, table, enums) {
-  const en = enums && enums[table + "." + col.name];
-  if (en !== undefined) return "'" + en.replace(/'/g, "''") + "'";
+function placeholder(col, table, checks) {
+  const byCheck = checks && allowedByCheck(checks, col.name);
+  if (byCheck) return byCheck;
   const t = col.type;
   if (t === "text" || t.startsWith("character")) return "'k'";
   if (t === "integer" || t === "bigint" || t === "numeric" || t === "smallint") return "1";
@@ -156,17 +175,18 @@ function placeholder(col, table, enums) {
   if (t === "jsonb" || t === "json") return "'{}'";
   if (t.startsWith("timestamp")) return "now()";
   /* A DATE, A TIME AND A FLOAT ARE ORDINARY COLUMN TYPES AND THIS TABLE NAMED
-     NONE OF THEM (§442.12). `notes.met_on` is `date NOT NULL` with no default
-     (§357), so from the day Meeting Notes landed this threw on that one column
-     and took S2, S4 and S5 down with it — every table after `notes` in the FK
-     order went unwalked, which on the isolation proof means unproven rather
-     than merely unreported. §439 recorded it as somebody else's and left it.
-     The throw below is what made it findable at all and STAYS (§54.5): a
-     fixture that silently skipped the column would have seeded a row the
-     database refuses and blamed the product. What is fixed is the CLASS and
-     not the instance — `date`, `time` and the two floats, which together with
-     the branches above cover every type `db/schema.sql` uses today, so the
-     next NOT NULL column of any of them costs nothing (§104.7). */
+     NONE OF THEM. `notes.met_on` is `date NOT NULL` with no default (§357), so
+     from the day Meeting Notes landed this harness THREW on that one column and
+     took the proofs after it down with it — every table past `notes` in the FK
+     order went unwalked, which on the isolation proof (S2) means unproven rather
+     than merely unreported. Both sides found it: main as §365.2, this branch as
+     §442.12, each measured on main's own build first (§303), so it was main's
+     gap and not the merge's. The throw below is what made it findable at all and
+     STAYS (§54.5): a fixture that silently skipped the column would have seeded
+     a row the database refuses and blamed the product. What the branch adds to
+     main's `date` is the CLASS rather than the instance — `time` and the two
+     floats, which with the branches above cover every type `db/schema.sql` uses
+     today, so the next NOT NULL column of any of them costs nothing (§104.7). */
   if (t === "date") return "current_date";
   if (t.startsWith("time")) return "'00:00'";
   if (t === "real" || t === "double precision") return "1";
@@ -174,30 +194,22 @@ function placeholder(col, table, enums) {
   throw new Error("seed: no placeholder for " + table + "." + col.name + " " + t);
 }
 
-/* `{ "<table>.<column>": "<first legal value>" }` for every enumerated column
-   on a tenant table, read off the catalogue. */
-export async function enumValues(owner) {
-  const rows = (await owner.query(
-    "SELECT c.relname AS t, pg_get_constraintdef(f.oid) AS def FROM pg_constraint f " +
-    "JOIN pg_class c ON c.oid = f.conrelid JOIN pg_namespace n ON n.oid = c.relnamespace " +
-    "WHERE n.nspname = current_schema() AND f.contype = 'c'")).rows;
-  const out = {};
-  for (const r of rows) {
-    const m = /^CHECK \(\((\w+) = ANY \(ARRAY\['((?:[^']|'')*)'/.exec(r.def);
-    if (m) out[r.t + "." + m[1]] = m[2].replace(/''/g, "'");
-  }
-  return out;
-}
-
 export async function seedRows(owner, tenantId) {
   const tables = await tenantTables(owner);
-  const enums = await enumValues(owner);
-  const cols = {}, fks = {};
+  const cols = {}, fks = {}, checks = {};
   for (const t of tables) {
     cols[t] = (await owner.query(
       "SELECT a.attname AS name, format_type(a.atttypid, a.atttypmod) AS type, a.attnotnull AS notnull, " +
       "(a.atthasdef OR a.attidentity <> '') AS hasdef FROM pg_attribute a WHERE a.attrelid = $1::regclass " +
       "AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum", [t])).rows;
+    /* The CHECK constraints, by the column each one names — one query per
+       table, beside the columns, so placeholder() can ask. */
+    checks[t] = {};
+    for (const r of (await owner.query(
+      "SELECT pg_get_constraintdef(f.oid) AS src, " +
+      " (SELECT array_agg(attname::text) FROM unnest(f.conkey) k(attnum) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols " +
+      "FROM pg_constraint f WHERE f.conrelid = $1::regclass AND f.contype = 'c'", [t])).rows)
+      for (const c of (r.cols || [])) (checks[t][c] = checks[t][c] || []).push(r.src);
     fks[t] = (await owner.query(
       "SELECT f.conname, f.confrelid::regclass::text AS ref, " +
       " (SELECT array_agg(attname::text ORDER BY k.ord) FROM unnest(f.conkey) WITH ORDINALITY k(attnum, ord) JOIN pg_attribute a ON a.attrelid = f.conrelid AND a.attnum = k.attnum) AS cols, " +
@@ -236,7 +248,7 @@ export async function seedRows(owner, tenantId) {
     }
     for (const c of cols[t]) {
       if (row[c.name] !== undefined) continue;
-      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t, enums);
+      if (c.notnull && !c.hasdef) row[c.name] = placeholder(c, t, checks[t]);
     }
     const names = Object.keys(row);
     const ins = await owner.query("INSERT INTO " + t + " (" + names.join(", ") + ") VALUES (" + names.map((n) => row[n]).join(", ") + ") RETURNING *");

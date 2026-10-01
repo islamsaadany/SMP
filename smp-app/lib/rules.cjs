@@ -57,6 +57,18 @@
       note:"Accountable for one unit's strategy. Named on the unit itself." },
     { key:"custodian", name:"Strategy custodian", scope:"unitfn",
       note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
+    /* ── A CAPABILITY HAS SEATS OF ITS OWN (§412, RHI) ──────────────────
+       Islam: *"the capability has owner and custodian like business unit, and
+       the function is an option."* This REVERSES the 13 September decision
+       (§336) that a capability is owned through the function that holds it:
+       RHI's company-wide directions live in a capability no function holds,
+       and a capability nobody can be named on is one only the office can run.
+       The custodian is the Strategy custodian row, held AT the capability; the
+       owner is a row of its own because "Function head · Company Wide" names a
+       seat that does not exist. It ships with the Function head's grants, so a
+       capability owner starts exactly where a function head does. */
+    { key:"capowner", name:"Capability owner", scope:"cap",
+      note:"Accountable for one capability's strategy. Named on the capability itself, on Setup › Capabilities." },
     { key:"fnhead", name:"Function head", scope:"fn",
       note:"Runs a supporting function and the capabilities it owns." },
     /* ── TWO NAMED ROLES, READ OFF THE PLAN (§147.7, Islam 2026-08-28) ──
@@ -73,9 +85,38 @@
        role without the grant reads; the grant without the naming reaches
        nothing. */
     { key:"powner", name:"Project owner", scope:"fn",
-      note:"Named as a project's Owner on a supporting function. With Reporting opened on this row, they report that project — whole, and only it." },
+      note:"Named as a project's Owner on a supporting function, or on a business unit that plans in projects. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
+    /* ── AND THE ROW UNDER THE PILLAR WAS HERE, AND IS GONE (§384 → §387) ──
+       §384 added a **Tactic owner** row on Islam's ask — *"I believe we need
+       to add measures & tactics owners as roles so I can set their
+       accessability"* — shipped at none everywhere, his instruction rather
+       than a cautious default. It lasted two days and he took it off himself,
+       picking option A of two drawn: *the switch decides, and the row comes
+       off Roles & access.*
+
+       THE ARGUMENT IS THAT THE TWO CONTROLS ANSWERED ONE QUESTION AND COULD
+       DISAGREE ABOUT IT. Measured on the four states, the row is not consulted
+       at all while the switch is on, and the switch is what a tenant turns on
+       to mean *owners enter their own lines* — so the row could only ever say
+       no to something the switch had just said yes to, and it ships SHUT, so a
+       tenant turning the switch on would have found owners typing on a row
+       they had never opened. One control, one answer.
+
+       AND REMOVING IT MOVES NOBODY: 33 people × 36 page keys × 21 targets =
+       24,948 answers from `grantAtPage`, measured on a build with the
+       derivation taken out and compared row by row — **0 changed**. A tactic's
+       owner is `namedInUnit` (the walk reads every tactic's Owner through
+       `namedOn`), so the Contributor floor covers them exactly as it did
+       before §384, which is where the role came from in the first place.
+
+       WHAT SURVIVES IS §387's RULE, which is the better answer to what he
+       asked for: one question per subject — do I run this one? — deciding
+       both where somebody types and whether they get a second screen at all.
+       Recorded as a reversal rather than overwritten (Principle II): §384's
+       reasoning is right about a tactic's owner deriving nothing visible, and
+       what changed is that the switch turned out to be the visible control. */
     /* CONTRIBUTOR IS EVERYONE ELSE THE PLAN NAMES (§147.8, Islam): "contributor
        is someone whose name is on the project anywhere but that doesn't mean
        that he is a project owner", and "stakeholders are contributors". They
@@ -224,6 +265,10 @@
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
                  a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §412: a capability is judged in the FUNCTION columns (§334), so its
+       owner starts on the Function head's row, cell for cell. */
+    capowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW ON THE REPORTING CELLS, DELIBERATELY (§147.7): Islam's first
        condition is that the grant is MADE on this table — "1- is to be
        granted edit access in the roles & access setup" — so shipping edit
@@ -234,6 +279,10 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §384's `towner` row sat here and is gone (§387) — the defaults go with
+       the role, because a stored map is merged over these (§30.2) and a key
+       nothing reads is a column somebody sets for nothing. A tenant that has
+       written one keeps it in `access` harmlessly, read by no rule. */
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
@@ -326,6 +375,13 @@
        on the server (office by rule, §97's shape): who reads every person's
        changes is not a tick somebody could set on a bad afternoon. */
     { key:"c_history", area:"always", scope:"manage", label:"History",          note:"Who changed what, and put a value back" },
+    /* THE LANDING LINE (§359.4). `area:"always"` with the real gate in the
+       page def (the office) and on the server (a `setup` change): what a
+       module says about itself on the client landing is the office's, and
+       spec 046 §4.4's per-module Access table is where it will be granted
+       when that page lands (step 5) — a matrix cell today would be a second
+       answer to that question. */
+    { key:"c_landing", area:"always", scope:"manage", label:"Landing line",     note:"What this module says on the landing" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -354,7 +410,19 @@
     { key:"u_src",    area:"unit",   scope:"unit",   label:"Who enters", note:"Name who enters each of this unit's figures" },
     { key:"c_kb",     area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
     { key:"c_cycle",  area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
-    { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
+    /* §382: "Reporting", which is what the tab says and what the knowledge
+       base entry for this key has always been titled. It was "My reporting"
+       and was drawn on NO screen — since §37 the matrix shows AREAS — so the
+       word was free for the tab beside it, and this is one stale copy being
+       brought into step rather than a rename (§104.8). */
+    { key:"u_report", area:"unit", scope:"unit",  label:"Reporting",    note:"Enter this cycle's figures" },
+    /* §382: the lines the plan names this person on, wherever they are. NO
+       AREA, exactly as "Figures I report" has none: the permission is being
+       named, so there is no cell for it to sit in and no grant to consult —
+       `when` on the tab is the whole gate, and it asks whether this person
+       owns a line at all. */
+    { key:"c_mylines", area:"always", scope:"unit", label:"My reporting",
+      note:"Enter the lines the plan names you on" }
   ];
   var PAGE_AREA = {};
   PAGES.forEach(function (p) { PAGE_AREA[p.key] = p.area; });
@@ -376,12 +444,25 @@
          page, not by reading (§44, twice now). */
       focusOff: !!o.focusOff,
       naming: !!o.naming,
+      /* §382: REPORTING FOLLOWS THE OWNER COLUMN, and it is a switch because
+         turning it on MOVES who enters a figure — 26 tactics change hands on
+         Raya the moment it is set, and nobody chose that. Off, every rule
+         below answers exactly what it answered before, which is what makes
+         "nothing on Roles & access moves" true rather than aspirational.
+         Added HERE and in worldOf(), in the same edit as the rules that read
+         it (§102.4's trap). */
+      lineOwners: o.lineOwners === true,
       /* §147: a project's owner is a Contributor of its function, and the
          projects live on the capabilities — so the world has to carry them or
          namedInFn() reads an empty list and the floor never derives. §102.4's
          trap exactly: added here AND in worldOf(), in the same edit as the
          rule that reads it. */
-      capabilities: o.capabilities || []
+      capabilities: o.capabilities || [],
+      /* §387: the register, so `lineOwnerIsHere()` can ask whether a plan's
+         Owner column names anybody at all. Here AND in worldOf() (§102.4),
+         and on the server it is therefore the STORED register by
+         construction (§42.2). */
+      people: o.people || []
     };
   }
   /* A world built straight off a state graph — the shape the server holds. */
@@ -400,7 +481,11 @@
                   the same edit as the rule that reads it. */
                focusOff: (state.group || {}).focusOff,
                naming: (state.group || {}).naming,
-               capabilities: (state.group || {}).capabilities });
+               lineOwners: (state.group || {}).lineOwners,
+               capabilities: (state.group || {}).capabilities,
+               /* §387: not a group key — the register itself, which is why it
+                  reads off `state` rather than off `state.group`. */
+               people: state.people });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -448,6 +533,13 @@
       if (f.head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
       if (f.custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
     });
+    /* §412: a capability's own seats, read off the capability exactly as a
+       unit's are read off the unit (§33) -- one fact, one place. */
+    (w.capabilities || []).forEach(function (c) {
+      if (!c || !c.id) return;
+      if (c.head === p.key)      out.push({ role:"capowner",  at:"cap:" + c.id });
+      if (c.custodian === p.key) out.push({ role:"custodian", at:"cap:" + c.id });
+    });
 
     /* ── PROJECT OWNER AND PILLAR OWNER (§147.7) ──────────────────────
        Read off the plan's own Owner rows, exactly as a unit's head is read
@@ -482,14 +574,27 @@
       if (String(f.format) === "pillars") return;
       if ((f.projects || []).some(owns)) once("powner", "fn:" + k);
     });
+    /* §405: A BUSINESS UNIT CAN PLAN IN PROJECTS NOW, so its own projects'
+       owners are Project owners AT THE UNIT — and a unit that does, owes
+       nothing on its hidden pillars, so their owners derive nothing there.
+       The unit's own Reporting cell for this row ships at none, so nobody's
+       access moves until the office opens it. */
     w.unitKeys.forEach(function (k) {
-      if ((((w.units || {})[k] || {}).items || []).some(owns)) once("plowner", k);
+      var u = (w.units || {})[k] || {}, fm = String(u.format || "pillars");
+      if (fm === "projects") { if ((u.projects || []).some(owns)) once("powner", k); return; }
+      if (fm !== "pillars") return;
+      if ((u.items || []).some(owns)) once("plowner", k);
     });
     w.functionKeys.forEach(function (k) {
       var f = w.functions[k] || {};
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
+    /* §384 DERIVED A `towner` HERE AND §387 TOOK IT OUT — the whole role went
+       with the Roles & access row (see ROLES above). A tactic's owner is
+       `namedInUnit` by the floor below, exactly as they were before §384, and
+       what decides whether they enter their own lines is the tenant switch on
+       Setup › Reporting cycle. */
 
     /* THE FLOOR, AND WHICH OF THE TWO IT IS. Somebody attached to a unit and
        holding nothing else is a Contributor if a plan names them and an
@@ -503,6 +608,13 @@
        that stops naming them stops. Somebody attached and named on nothing now
        holds NOTHING — what they may see is NO_ROLE's floor, applied in
        grantIn() rather than dressed up as a role they never got (§93). */
+    /* §384 HAD TO EXEMPT ITS OWN ROLE FROM THIS TEST, AND THAT EXEMPTION GOES
+       WITH IT (§387). The test is `out.length` again — *holds no role at all*
+       — which is what it meant before a row deriving here could grant nothing:
+       a tactic owner named nowhere else is a Contributor exactly as they were,
+       rather than a role with every cell at none that quietly took away the
+       floor it stood on. Restored rather than left as a filter over a list the
+       value can no longer be in (§24). */
     if (!out.length && p.unit && namedInUnit(w, p, p.unit))
       out.push({ role:"contrib", at:p.unit });
     /* §147.8: THE SAME FLOOR ON A FUNCTION'S PROJECTS — for everyone the
@@ -585,9 +697,15 @@
   }
 
   function roleOwns(w, r, target) {
+    /* §412: a seat held AT the capability owns it and nothing else. Asked
+       before the capability resolves to its holder, or the seat would be
+       compared against the function and never match. The holder's own seats
+       still reach it below, because the function stays an option. */
+    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
+    if (at.indexOf("cap:") === 0) return false;
     if (String(target).indexOf("fn:") === 0) return at === target;
     if (at.indexOf("fn:") === 0) return false;
     if (r.role === "cceo") {
@@ -769,6 +887,35 @@
      answer "is this the office" without reading thirty tables to build one
      (§97.1). A responsibility role could never make somebody the office or the
      Super user, so nothing is missed by not looking for one. */
+  /* ── TWO KINDS OF FOREFRONT ROW, AND ONLY ONE IS OURS TO REWRITE
+     (spec 058 §3a.1, §362.2) ─────────────────────────────────
+     `officeRow` has marked them apart since §313.29 and nothing read the
+     difference, so the register and the authoriser both treated every marked
+     row as the platform's:
+
+       · MINTED (`ffrow`) — the platform built this row for a consultant who
+         was on nobody's register, and its `role` IS the seat, rewritten on
+         every request (§338's heal). Nothing about it is the client's, so the
+         register offers no picker and the save refuses the whole row.
+       · ADOPTED (`forefront` alone) — the CLIENT'S OWN person, marked because
+         their address matched exactly one active row (§313.32). `officeRow`
+         says so in its own words: *adopted, never rewritten*. Their role is
+         the client's and was typed on this register.
+
+     TAKEN AS ONE, the refusal froze a person the client entered: the day
+     their custodian joins the account team, their unit, their address and
+     their custodianship all stop being editable, and §96.2 forbids us to
+     rewrite what somebody else wrote. So the question is asked of the MINT,
+     never of the mark — here, because the screen draws from it and the server
+     refuses from it and two answers to one question is §42's drift.
+
+     A row carrying `ffrow` and no `forefront` cannot occur (the mint writes
+     both, §313.30) and is read as minted anyway: the mark is a claim about
+     where the row came from, and the safe reading of a half-written one is
+     the stricter. */
+  function isForefrontRow(p) { return !!(p && p.forefront); }
+  function isMintedRow(p) { return !!(p && p.ffrow); }
+
   function isSuperRole(k) { return k === "super"; }
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
   function isOffice(w, person) {
@@ -843,6 +990,13 @@
      an a_unit_other edit is the office's own wide grant, not a client role
      handing itself a neighbour's plan. */
   function mayAuthorPage(w, person, pageKey, target) {
+    /* §428: THE TOP LAYER'S OWN PLAN AND SWOT ARE THE OFFICE'S ALONE (Islam,
+       of the mockup: *"The SMO team writes it; nobody else holds the pen"*).
+       The group's CEO owns the group (ownsEveryPlace) and reports it, and
+       does not author it. */
+    if (target === "group" && isStrategyPage(pageKey)) {
+      return isOffice(w, person) && grantAtPage(w, person, pageKey, target) === "edit";
+    }
     if (isStrategyPage(pageKey) && !isOffice(w, person)) {
       var ownsIt = rolesOrFloor(w, person).some(function (r) {
         return roleOwns(w, r, target);
@@ -1441,8 +1595,14 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      nothing for a partial to be measured against, so it is not scored — the
      same answer §276 gives a Count that owes nothing yet, and the reason a
      December agreement sitting at 10% in Q2 does not mark its unit down. */
+  /* §419: WHAT IS STORED AND WHAT IS SAID PART HERE. RHI's word for a
+     finished row is "Completed", platform-wide, and it is the SHOWN word
+     only -- `ynJoin` still writes "Done", so a tab on the previous build, a
+     workbook downloaded last month and every closed cycle read exactly as
+     before (§96.2), and `ynState` reads either spelling. */
   var YN_TODO = "Not started", YN_WIP = "In progress", YN_DONE = "Done";
-  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE];
+  var YN_DONE_SHOWN = "Completed";
+  var YN_WORDS = [YN_TODO, YN_WIP, YN_DONE_SHOWN];
   function ynPct(n) {
     var p = parseFloat(String(n == null ? "" : n).replace(/[^0-9.\-]/g, ""));
     return isNaN(p) ? null : Math.max(0, Math.min(100, Math.round(p)));
@@ -1451,7 +1611,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = String(v == null ? "" : v).trim();
     if (!s) return { status: "", pct: null };
     var low = s.toLowerCase();
-    if (low === "yes" || low === "y" || low === "done") return { status: "done", pct: null };
+    if (low === "yes" || low === "y" || low === "done" || low === "completed") return { status: "done", pct: null };
     if (low === "no" || low === "n" || low === "not started")
       return { status: "todo", pct: null };
     /* "In progress" alone is a row halfway through a sentence: said, and not
@@ -1483,7 +1643,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      being rewritten (§96.2: what is stored is not touched). */
   function ynShown(v) {
     var st = ynState(v);
-    if (st.status === "done") return YN_DONE;
+    if (st.status === "done") return YN_DONE_SHOWN;
     if (st.status === "todo") return YN_TODO;
     if (st.status === "wip") return st.pct == null ? YN_WIP : YN_WIP + " \u00b7 " + st.pct + "%";
     return "";
@@ -1816,7 +1976,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (w.units || {})[target] || null;
   }
 
-  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead", "capowner"];
+
+  /* ── WHO REPORTS THE TOP LAYER'S OWN PLAN (§428) ─────────────────────
+     Islam, of the mockup: *"The SMO team and the top layer's CEO enter the
+     figures and press Submit"*, and *"ok for all, build it"*. A RULE and not
+     a matrix cell, for §37's reason: the answer is one pair of roles whatever
+     a tenant sets. The group's CEO reports and does not author (mayAuthorPage
+     keeps the pen the office's). */
+  function mayReportTop(w, person) {
+    if (!person) return false;
+    return personRoleKeys(w, person).some(function (k) { return isOfficeRole(k) || k === "gceo"; });
+  }
 
   function mayArrange(w, person, target) {
     if (!person || !target) return false;
@@ -1875,7 +2046,19 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        capability would be refused by the wrong column entirely. */
     var t = String(target);
     return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
-      ? (STRATEGY_PAIR[unitPage] || unitPage) : unitPage;
+      ? (STRATEGY_PAIR[unitPage] || unitPage)
+      /* §405: AND THE OTHER WAY. A business unit that plans in projects or
+         actions is drawn by the function's own pages, which ask `k_proj`,
+         `k_found` and `k_report` — asked of a unit those would consult the
+         FUNCTION columns, which a unit's head owns none of. So on a unit the
+         function's keys resolve to the unit's own, and nobody's access moves:
+         a unit's plan is judged by the unit's column whichever way it plans. */
+      : (UNIT_TARGET(t) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
+  }
+  var UNIT_PAIR = { k_found: "u_found", k_proj: "u_plan", k_report: "u_report" };
+  function UNIT_TARGET(t) {
+    return !!t && t !== "group" && t !== "undefined" && t !== "null" &&
+      t.indexOf("co:") !== 0 && t.indexOf("fn:") !== 0 && t.indexOf("cap:") !== 0;
   }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */
@@ -3029,6 +3212,35 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      THE FIELD IS NAMED ONCE and `lib/authorize.js` classifies it by this
      constant, for §234's reason. */
   var PRESENT_MINS = "presentMins";
+  /* ── THE LANDING LINE (§359.4, spec 056 §4.5) ─────────────────────
+     Which of its declared sentences each module says on the client landing,
+     keyed by module — `{ strategy: "waiting" }` — chosen on the module's own
+     Landing line page. The SENTENCES are declared beside the module
+     (smp-app/lib/modules.ts) and never here: nothing frozen can say what a
+     module has to say, and the server is the only reader that holds the
+     facts a line is made of. What is shared is the KEY and the reader, for
+     §234's reason: lib/authorize.js classifies the field by this constant and
+     lists it among the group's known keys, and the browser writes it through
+     this same name. Stored as an ABSENCE (§50.6): a module on its default
+     line holds no entry, and the last entry leaving deletes the map. */
+  var LANDING_PICK = "landing";
+  /* §360 (spec 057): whether the client's set-up has been pressed Done. ONE
+     key on the group, stored as an ABSENCE (§50.6): a client being set up
+     holds no entry, and "Done with set-up" writes `true`. The rail reads it
+     to move Getting started from the top of the client's Setup to the
+     bottom as Client set-up; lib/authorize.js classifies it `setup` by this
+     constant and lists it among the group's known keys (§234's reason). */
+  var SETUP_DONE = "setupDone";
+  function setupDone(group) { return !!(group && group[SETUP_DONE] === true); }
+  var NO_PICKS = Object.freeze({});
+  function landingPicks(group) {
+    var v = group && group[LANDING_PICK];
+    return (v && typeof v === "object" && !Array.isArray(v)) ? v : NO_PICKS;
+  }
+  function landingPick(group, module) {
+    var v = landingPicks(group)[module];
+    return (typeof v === "string" && v) ? v : "";
+  }
   /* Frozen and SHARED, for `NO_FLOW`'s reason: every tenant that has set no
      times is handed this same object, so one careless write would give them
      all a slot. */
@@ -3299,6 +3511,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      save is narrowed to their reach by mayReportRow() below. Adding a key
      here is what wires all of that at once, which is exactly the property
      §55 recorded this list for. */
+  /* §384 added the tactic's owner here and §387 took the role out entirely —
+     the switch decides who enters a line now, not a row on this table. */
   var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner"];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
@@ -3335,6 +3549,84 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return via.length > 0 && via.every(function (r) { return OWN_LINES_ONLY.indexOf(r) > -1; });
   }
 
+  /* ── REPORTING FOLLOWS THE OWNER COLUMN (§382, spec 062) ──────────
+     Islam: *"it's only for owners of tactics to report progress either on the
+     units they belong to but they are not the bu owner or the custodian or
+     report progress for other units that he doesn't belong to at all"*, and
+     *"contributor should not report, the owner only"*.
+
+     THE PLATFORM ALREADY DOES THIS ONCE. A figure with a named master is
+     entered by that person and by nobody else — no grant, no role, no
+     attachment; the whole permission is being named (§16.7's `canEnterFigure`
+     and the server's `sourceReporting`). This points the same idea at the
+     plan's own Owner column, which until now decided nothing at all.
+
+     IT IS A NAME, NEVER A KEY, AND THAT IS WHAT KEEPS IT SMALL. A figure set
+     resolves to a register key because the SET carries one; a plan's Owner is
+     a name the custodian picked (§130.1's decision: the name is stored, never
+     a key). So nothing here needs the register — `ownedBy()` asks the same
+     question `namedOn()` has always answered, with the collaborators left
+     out, and the refusal names the string the plan holds, which is what the
+     page shows.
+
+     AND THE SWITCH GUARDS BOTH DIRECTIONS AT ONCE. On: an owner gains their
+     lines and a collaborator loses a figure they never should have had. Off:
+     byte for byte what the product did yesterday. One decision, one sentence,
+     and a no-op until the tenant turns it on. */
+  function lineOwnersOn(w) { return !!(w && w.lineOwners); }
+  /* The name the plan holds, or "" — trimmed, because a stray space is not an
+     owner and a row whose Owner is whitespace must read as unowned (§104.10's
+     family: `String(null).trim()` is "null", so the null check comes first). */
+  function lineOwnerName(row) {
+    var v = row && row.owner;
+    return v == null ? "" : String(v).trim();
+  }
+  /* Is this person the OWNER of this row? `namedOn` with the collaborators
+     left out, so the two questions cannot drift apart (§53.5) and a change to
+     how a name is matched (§130.7's runs, a typed short name) reaches both. */
+  function ownedBy(row, person) {
+    return namedOn({ owner: lineOwnerName(row) }, person);
+  }
+  /* Does this row's figure belong to somebody other than the unit? Only while
+     the switch is on, and only where the plan actually names somebody. */
+  function lineOwned(w, row) {
+    return lineOwnersOn(w) && !!lineOwnerName(row);
+  }
+  /* ── AND DOES THE NAME REACH ANYBODY (§387) ────────────────────────
+     `lineOwned` asks whether the plan NAMES an owner; this asks whether that
+     name is somebody the register holds — and the two are not the same
+     question on any real tenant. Measured on the worked example: 83 tactics
+     name an owner and only 51 name a person, because a plan is typed by a
+     custodian and a register is filled from HR.
+
+     THE 32 THAT NAME NOBODY ARE THE WHOLE REASON THIS EXISTS. Without it the
+     switch hands those lines to a person who does not exist, so the unit
+     cannot enter them and neither can anybody else — measured, ONE of the 33
+     active people could, the SMO, on a row the office has no way of knowing
+     about (§61). With it, a line nobody owns is the unit's exactly as it was
+     before the switch was turned on.
+
+     THE REGISTER RIDES THE WORLD RATHER THAN BEING THREADED THROUGH, and the
+     reason is the guarantee rather than the line count: the server builds its
+     world from the STORED state and nothing else (`worldOf(stored)`), so a
+     save cannot put somebody on the register and claim their line in the same
+     request (§42.2) — where a parameter passed down five frames can be handed
+     the incoming register by a caller who does not know the difference. It is
+     §102.4's own instruction followed for the third time (`lineOwners` §382,
+     `capabilities` §147): named in W() AND in worldOf(), in the same edit as
+     the rule that reads it, or the reader sees undefined and answers the
+     default in silence.
+
+     `personActive` IS THE TEST, not mere presence: a retired person cannot
+     sign in, so a line they own is a line nobody can enter, which is the
+     state this exists to refuse. */
+  function lineOwnerIsHere(w, row) {
+    if (!lineOwnerName(row)) return false;
+    return ((w && w.people) || []).some(function (p) {
+      return personActive(p) && ownedBy(row, p);
+    });
+  }
+
   /* ── WHICH ROWS A BOUNDED ROLE REACHES (§147.7) ───────────────────
      One rule for both sides and every bounded role, because three copies of
      "is this row theirs" is how the screen and the server come to disagree
@@ -3351,6 +3643,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      · a CONTRIBUTOR (and the floor) reaches the rows that NAME them — the
        row's own owner or collaborators, or the project's stakeholder and
        collaborator lists (§147.8: "stakeholders are contributors"). */
+  /* §382's SWITCH CHANGES WHAT THE LAST TWO LINES MEAN, and it does it
+     somewhere else — corrected at the merge, because this paragraph opened
+     "§382 TAKES THE WORLD" and `boundedReach` takes no world: it described the
+     branch that section wrote and then removed, which is §104.8 exactly, a
+     comment stating an intention the code does not carry out. What is true is
+     that with the switch on, being NAMED stops being enough for a tactic's
+     figure and being the OWNER is the whole test — enforced at
+     `canEnterLine()` and at the server's `lineReporting`, never here — Islam's *"contributor should not report, the owner
+     only"*, which reverses §147.8's reading of "stakeholders are
+     contributors" for REPORTING and leaves it standing for everything else
+     (a collaborator still derives the role, still opens the unit, still reads
+     it; what goes is typing a figure on a line that is not theirs). */
   function boundedReach(person, roleKey, ctx) {
     ctx = ctx || {};
     if (roleKey === "powner")
@@ -3358,6 +3662,40 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
+    /* ── §384's `towner` BRANCH SAT HERE, AND THE CONTRADICTION WITH IT ──
+       That section gave a tactic's Owner a role and a branch; §382's switch
+       gave the same person a page. Both shipped, and the merge that brought
+       them together recorded the one combination that said two things: a
+       tenant opening the Tactic owner row AND turning the switch on read
+       *Reporting: edit* on the table and met a read-only row on the unit's
+       page — a screen saying yes where a page says no, which is the drift §42
+       exists to stop. It was raised rather than resolved, because picking one
+       was Islam's (rule 1b).
+
+       HE PICKED, AND HE PICKED THE SWITCH (§387, option A of two drawn): the
+       row comes off Roles & access and this branch goes with it. What decides
+       whether somebody enters a line is now one question asked once — do I run
+       this subject? — and it is asked at `canEnterLine()` on the screen and at
+       `lineReporting` on the server, the two places that were already deciding
+       it. The `ctx.tacticOwner` handle every caller was taught goes too (§24):
+       a field nothing reads is one the next reader takes for load-bearing. */
+    /* §382: MY REPORTING DELIBERATELY DOES NOT REACH THIS LINE, and saying so
+       is the point rather than leaving an absence. A branch here reading
+       "with the switch on, a bounded role reaches only what it OWNS" was
+       built and taken out again: nothing reaches it for a tactic — the
+       server groups a tactic's figure by its owner into `lineReporting` and
+       refuses a stranger there, and the browser refuses one at
+       `canEnterLine`'s single door — so the only rows it could ever have
+       narrowed are the OTHER kinds, and narrowing those reverses §227, where
+       Islam decided that being named a collaborator on a MILESTONE is a
+       reporting right. He asked about tactics; widening it to every row a
+       plan names is a redesign nobody asked for (rule 1b), and it would have
+       been invisible, because both checks stayed green with the branch
+       removed. Measured, not reasoned: 703 and 43 assertions, unmoved.
+
+       (At the merge: this says the SWITCH adds no branch here, and it stays
+       true — the branch above it belongs to §384's role and is a different
+       question.) */
     if (ctx.row && namedOn(ctx.row, person)) return true;
     return !!ctx.project &&
            (namedOn({ collaborators: ctx.project.stakeholders }, person) ||
@@ -3487,6 +3825,851 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return { projects: take };
   }
 
+  /* ══ 24 · REVENUE DRIVERS (spec 063) ════════════════════════════════
+     A business unit is handed a revenue number and builds the logic that
+     gets to it — how many stores, how many transactions, what basket — and
+     the strategy is then built to deliver that logic.
+
+     IT LIVES HERE AND NOT IN A MODULE OF ITS OWN, for the reason every rule
+     in this file lives here: the browser asks these functions to DRAW a
+     figure and the server asks them to judge a save, and two copies of an
+     arithmetic drift silently into two different revenue targets (§42,
+     §53.5). It is also why there is no second module beside this one —
+     `smp-app/lib/drivers.ts` was exactly that for a day and is deleted.
+
+     PORTED FROM ISLAM'S OWN TOOL, NEVER FROM A DESCRIPTION. That file is
+     kept unchanged at `specs/063-revenue-drivers/reference/` and
+     `smp-app/checks/drivers.mjs` RUNS ITS OWN FUNCTIONS in a sandbox beside
+     these and asserts the two agree on every channel, sub-channel, period
+     and every figure in the growth split (§94.8 — agreement, never a typed
+     number). A drift in either direction goes red with nobody editing it.
+
+     ── THE SHAPE ──────────────────────────────────────────────────────
+       unit.drivers = { mode:"rate"|"count", subs:[ sub ] }
+       sub          = { name, periods:[ period ] }
+       period       = { id, name, type:"base"|"season"|"increment",
+                        seasonId, drivers:[ driver ] }
+       driver       = { id, name, kind:"vol"|"val", unit:"n"|"%",
+                        base, up, upUnit:"%"|"#", note }
+       group.seasons = [ { id, name, start, end } ]
+
+     A CHANNEL IS A UNIT (spec 063 §4.1), so the tool's Master tab is what
+     the group and a company already are and no roll-up is invented. A
+     SUB-CHANNEL is a route to market whose driver logic genuinely differs —
+     an app has sessions and a call centre has agents, and no one set of
+     drivers describes both. A PERIOD is a slice of the year, and the slices
+     inside one sub-channel sum to twelve BY CONSTRUCTION (see
+     `driverMonths`), which is what stops a season being counted twice.
+
+     FLAT IS DERIVED, NEVER STORED. The tool carries a `flat` flag; here it
+     is `subs.length <= 1`, because a stored flag beside the list it
+     describes is §110's pair — two facts that can disagree, and only one of
+     them is the truth.
+
+     THE IDS ARE REAL AND THEY MATTER. `renumberUnit()` rewrites a key
+     objective's id BY POSITION on every load (§48), which is exactly why
+     spec 063 §4.3 puts the connection pointer on the OBJECTIVE rather than
+     on the driver row — and why a driver row carries a stable id of its
+     own: nothing renumbers `extra`, so an id minted here survives a row
+     being deleted above it. */
+
+  /* ── THE CLIENT'S STRUCTURE (§404) ────────────────────────────────────
+     Islam, of a client set up from nothing: *"when I start the setup of the
+     company we need to set the structure, the levels and the components in
+     each level from the start"*, and of the drawing, *"yes build it"*.
+
+     FOUR LEVELS AND NO MORE: the top (a group, a company, the client's own
+     word), an optional second layer (companies, divisions), then the business
+     units and the supporting functions. Each level carries a set of
+     COMPONENTS, ticked from one list, and each unit or function may be
+     adjusted afterwards (`over`, keyed by the platform's own target spelling:
+     "group", "co:<key>", a unit key, "fn:<key>").
+
+     STORED AS AN ABSENCE (§50.6) and read as EVERYTHING ON, which is Islam's
+     fifth answer: an existing client opens exactly as it does today. Switching
+     a component off HIDES it and never deletes what was written (his fourth),
+     so this is a view over the plan and never a change to it.
+
+     A READER THAT CREATES NOTHING (§42): every answer comes off a frozen
+     default, so asking cannot put a phantom change into a save. */
+  var STRUCTURE = "structure";
+  var STRUCT_COMPONENTS = ["brief", "purpose", "aspiration", "keyobj", "theme",
+                           "pillar", "capability", "values", "swot"];
+  var STRUCT_LEVELS = ["top", "mid", "bu", "fn", "cap"];
+  /* The TEMPLE is not a component (his first answer): it is a way of DRAWING
+     three that are, so it can only be on where all three are. Capabilities
+     join the drawing as its base when they are ticked, and do not block it. */
+  var TEMPLE_NEEDS = ["aspiration", "keyobj", "theme"];
+  /* §404.5 — WHAT A NEW CLIENT STARTS WITH (Islam, 2026-09-24: *"let's make
+     some defaults for the division/company it can have brief, purpose,
+     Aspiration, north star, pillars, and swot / for a bu / Brief, aspiration,
+     north star, pillars, swot"*). WRITTEN INTO A CLIENT AS IT IS BORN
+     (frozen.cjs's __smpBare), never read as the fallback for an unsaid
+     level: that fallback is still EVERYTHING ON, because a client set up
+     before this answer must open exactly as it does today (§404's fifth
+     answer). The top level and the functions keep that fallback too — only
+     the two levels named here have a default of their own. */
+  var STRUCT_NEW_CLIENT = {
+    mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
+    bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
+  };
+  function newClientStructure() {
+    return { mid: { on: STRUCT_NEW_CLIENT.mid.slice() },
+             bu:  { on: STRUCT_NEW_CLIENT.bu.slice() } };
+  }
+  function structureOf(group) {
+    var s = group && group[STRUCTURE];
+    return s && typeof s === "object" ? s : null;
+  }
+  function structLevelOf(target) {
+    var t = String(target || "");
+    if (!t || t === "group") return "top";
+    if (t.indexOf("co:") === 0) return "mid";
+    if (t.indexOf("fn:") === 0) return "fn";
+    /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
+       Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
+       office saves that card, the capability layer READS the functions'
+       answers (effLevel below), which is exactly what it carried before this
+       card existed — nothing moves for any client. */
+    if (t.indexOf("cap:") === 0) return "cap";
+    return "bu";
+  }
+  /* The level whose stored answers apply. The capability layer falls back to
+     the functions' while nobody has set it (§428). */
+  function effLevel(group, level) {
+    if (level !== "cap") return level;
+    var s = structureOf(group);
+    return s && s.cap && typeof s.cap === "object" ? "cap" : "fn";
+  }
+  /* §428 — WHETHER THIS CLIENT HAS CAPABILITIES. The "Carries capabilities"
+     tick left the top, second and unit cards; the Capabilities card answers
+     it now. Unsaid, it is what the Temple's base asked before today — the
+     top level carrying the capability component — so nothing moves. */
+  function capExists(group) {
+    var s = structureOf(group), c = s && s.cap;
+    if (c && typeof c.exists === "boolean") return c.exists;
+    return levelComponents(group, "top").indexOf("capability") >= 0;
+  }
+  /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
+     fifth answer says, with ONE exception: a supporting function's own S&W
+     (§399). That section is newer than the clients it would appear on, so
+     reading it as on for a client that never saved a Structure put a tab,
+     a slide and a sheet on Raya's functions that nobody there had chosen.
+     Islam, 2026-09-29: *"yes build it"* — off until the office ticks the
+     functions' SWOT on the Structure step. Hidden, never deleted: whatever
+     was written there is still stored and comes back when it is ticked.
+     The same list is what the Structure step shows and materialises on its
+     first press, so the step and the pages cannot disagree (§53.5). */
+  /* §428.2 — AND THE TOP LAYER'S OWN SWOT AND PLAN START OFF (Islam,
+     2026-09-30: *"what people might see different for the group should
+     start in the structuring page off so they shouldn't see it"*). §428
+     drew them as ON for every client that never saved the top card, which
+     put two empty sections on Raya's group page that nobody there chose.
+     Same shape as the functions' S&W: off until the office ticks them on
+     the Structure step. Nothing else at the top read "pillar" or "swot"
+     before §428, so no page a client already sees moves. */
+  var STRUCT_UNSAID = {
+    top: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot" && c !== "pillar"; }),
+    fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; })
+  };
+  function levelComponents(group, level) {
+    level = effLevel(group, level);
+    var s = structureOf(group), l = s && s[level];
+    return l && Array.isArray(l.on) ? l.on : (STRUCT_UNSAID[level] || STRUCT_COMPONENTS);
+  }
+  /* The one question every page asks. A per-item answer wins over the
+     level's; a component the platform does not know is ON, so a key added
+     tomorrow is never hidden by a list written before it existed (§30.2). */
+  /* A SUPPORTING FUNCTION CARRIES NO BRIEF AND NO THEMES (Islam, 2026-09-24:
+     *"supporting function shouldn't have themes, the function has no brief
+     and even the function owner is set in the registry so a function here
+     has no description needed"*). Not a default somebody may tick back on:
+     the brief is the "What it is" card, whose only facts are the name the
+     page already carries, a head the register already holds (§33) and a
+     definition he has ruled a function does not need. So it is NEVER on for
+     an `fn:` target, whatever is stored, and neither screen offers it.
+     A CAPABILITY is deliberately not reached: it shares the level
+     (structLevelOf) and keeps its own definition (§334). */
+  /* §404.2 (Islam, the same day): *"the functions still have the option of
+     planning and still have the pillars capabilities and values. it
+     shouldnt"* — a function's way of planning is chosen per function on the
+     Supporting functions step, so the structure's Pillars and Capabilities
+     components say nothing about one, and it carries no Values. None of the
+     three gates anything on a function's pages today (asked, not assumed),
+     so this changes what the set-up offers and nothing a client sees. */
+  /* §426 (Islam, 2026-09-29, of the Structure step beside a function's
+     Overview: *"A"*): PURPOSE AND ASPIRATION GO TOO. The step offered them
+     on the functions' row and nothing on a function's page ever drew either
+     — a function takes its purpose and aspiration from the business it
+     supports (§213) — so the two ticks did nothing. The row now offers what
+     a function's page can show: its objectives and its S&W. */
+  /* §436 (Islam, 2026-09-30: *"for functions … no need for key objectives
+     in the first section as this is already a way to plan"* and *"an
+     overview with a description if needed"*): KEY OBJECTIVES GO FROM A
+     STRUCTURE STEP — they belong to the way a function plans (objectives
+     and actions draws them on its plan, §430), so the step stops offering a
+     tick for them. WHAT A PROJECTS OR PILLARS FUNCTION'S OVERVIEW SHOWS IS
+     DELIBERATELY UNCHANGED: those objectives are what its Performance
+     headline is scored on (fnMemberScores → capKOScore), and hiding them
+     would leave an invisible list deciding a visible number — put to Islam
+     rather than decided here. So `keyobj` stays offered to the RULE and is
+     only left off the step's first section (client-setup's firstParts).
+     AND A DESCRIPTION COMES IN, as its own part `desc` rather than the
+     brief: every function level already stored lists "brief" (migration
+     019 wrote it for Raya, and a saved card copied it from the fallback)
+     while the brief was never offered here (§404.1), so reusing that key
+     would switch the card on for every existing client. `desc` is in no
+     stored list and not in STRUCT_COMPONENTS' fallback, so it is OFF until
+     the office ticks it — "if needed". It is offered on functions only. */
+  var STRUCT_NEVER_FN = ["brief", "purpose", "aspiration", "theme", "pillar", "capability", "values"];
+  var FN_DESC = "desc";
+  function compOffered(target, comp) {
+    var isFn = String(target || "").indexOf("fn:") === 0;
+    if (comp === FN_DESC) return isFn;
+    return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
+  }
+  /* The part that draws a function's or a capability's "What it is" card:
+     a capability keeps its brief (§334), a function asks its description. */
+  function descPart(target) {
+    return String(target || "").indexOf("fn:") === 0 ? FN_DESC : "brief";
+  }
+  /* §427 (Islam, 2026-09-30, of the audit of what each Structure tick
+     changes: *"A for 4,5,6,7"*, then *"leave them ticked off and greyed …
+     not able to tick on and off as it's not working"*): a company page has no
+     themes, no pillars and no SWOT, and a unit's Foundation draws no purpose,
+     no themes and no values. The Structure step went on offering all six, so
+     a tick there changed nothing on any page. They stay DRAWN — off, greyed
+     and unpressable — because a function's row lost its two (§426) by being
+     taken away and these are a different answer: the part exists on other
+     layers, it simply has no page on this one yet. Read as OFF everywhere,
+     whatever a client stored before today, so nothing can claim to show one. */
+  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["purpose", "theme", "values"] };
+  function compBuilt(target, comp) {
+    var n = STRUCT_NOT_BUILT[structLevelOf(target)];
+    return !(n && n.indexOf(comp) >= 0);
+  }
+  function compOn(group, target, comp) {
+    if (!compOffered(target, comp) || !compBuilt(target, comp)) return false;
+    if (STRUCT_COMPONENTS.indexOf(comp) < 0 && comp !== FN_DESC) return true;
+    var s = structureOf(group);
+    var o = s && s.over && s.over[String(target || "group")];
+    if (o && typeof o[comp] === "boolean") return o[comp];
+    return levelComponents(group, structLevelOf(target)).indexOf(comp) >= 0;
+  }
+  /* §413 — PLAN DETAILS (Islam, for RHI: a "Plan details" card on the
+     Structure step, four switches, OFF for every client until somebody turns
+     one on, so Raya is untouched). Stored as `structure.details`, and ONLY AN
+     EXPLICIT `true` TURNS ONE ON (§104's rule, not §102's): absent is off,
+     and a stale value cannot switch one on by accident. Off HIDES and never
+     forgets — a direction's overview text is kept whatever the switch says. */
+  /* §414 — "outcomes": several outcomes per tactic (RHI step 4), off for
+     every client until the office turns it on, so a tactic reads exactly as
+     it did everywhere else. */
+  /* §415 — "requirements": what each tactic needs (RHI step 5), a list of
+     short lines on the tactic, drawn under its name and in the plan
+     download; never scored, never counted as missing. Off hides and keeps. */
+  /* §416 — "years": Years 1 · 2 · 3 (RHI step 6). A direction marks the
+     years it runs in (`p.years`, absent = every year) and the plan stands in
+     one year at a time (`GROUP.planYear`, absent = Year 1), moved on only by
+     the office's yearly revision. A direction not running this year stays on
+     the Plan page, greyed, and is not asked, not owed and not scored. */
+  var PLAN_DETAILS = ["overview", "outcomes", "requirements", "years"];
+  var PLAN_YEAR = "planYear";
+  /* The year the plan stands in, 1-3. Absent, or anything outside 1-3, is
+     Year 1: a stored value nobody could have meant never moves the plan. */
+  function planYearOf(group) {
+    var n = group && group[PLAN_YEAR];
+    return (n === 2 || n === 3) ? n : 1;
+  }
+  /* The years a direction runs in, sorted and distinct; absent or empty is
+     all three, so a direction nobody marked runs every year. */
+  function pillarYears(p) {
+    var ys = p && Array.isArray(p.years) ? p.years.filter(function (y) { return y === 1 || y === 2 || y === 3; }) : [];
+    ys = ys.filter(function (y, i) { return ys.indexOf(y) === i; }).sort();
+    return ys.length ? ys : [1, 2, 3];
+  }
+  /* Whether a direction runs in the year the plan stands in. With the switch
+     off, every direction runs, whatever was stored (off hides and keeps). */
+  function runsNow(group, p, target) {
+    if (!planDetailOn(group, "years", target)) return true;
+    return pillarYears(p).indexOf(planYearOf(group)) >= 0;
+  }
+  /* §420 — EACH LAYER HAS ITS OWN SWITCHES (Islam, 2026-09-29: *"every
+     layer or area like units and functions should have their separate
+     options and switches"*). A layer's own answer is `structure[level]
+     .details[key]`, a real true or false; a layer that has not been set on
+     its own takes the client-wide `structure.details` (§413), so a client
+     who turned a detail on before this keeps it on everywhere until a layer
+     says otherwise — nothing moves by upgrading. Only an explicit `true`
+     turns one on either way (§104's rule). The layer is the subject's
+     (structLevelOf): a capability follows its holding function's layer. */
+  function planDetailOn(group, key, target) {
+    var s = structureOf(group);
+    if (!s) return false;
+    var l = s[effLevel(group, structLevelOf(target))], ld = l && l.details;
+    if (ld && typeof ld[key] === "boolean") return ld[key];
+    var d = s.details;
+    return !!(d && d[key] === true);
+  }
+  /* What each switch adds is a part with a name of its own, named per layer
+     like every other part (§418); years needs none. */
+  var DETAIL_NAMES = { overview: "overview", outcomes: "tacoutcome", requirements: "requirement" };
+  function templeOn(group, target) {
+    var level = structLevelOf(target);
+    if (level !== "top" && level !== "mid") return false;
+    var s = structureOf(group), l = s && s[level];
+    var want = l ? l.temple === true : level === "top";
+    return want && TEMPLE_NEEDS.every(function (c) { return compOn(group, target, c); });
+  }
+  /* Whether the second layer exists. Unsaid, it exists exactly when the
+     client holds a company, which is what every client set up before §404
+     already shows. Said, it is what the office said. */
+  function midExists(group, companies) {
+    var s = structureOf(group), m = s && s.mid;
+    if (m && typeof m.exists === "boolean") return m.exists;
+    return Object.keys(companies || {}).length > 0;
+  }
+  /* ── A LAYER'S THREE SECTIONS (§418) ───────────────────────────────
+     Islam: *"we structure things the way we already build them … 3 sections
+     and under each section he has components and for every section he can
+     choose the title of the section and the components and their names"*,
+     then *"the layer itself can be turned on or off as sometimes we don't have
+     the second layer"*, and, of the mockup, *"signed off, build it"*.
+
+     EVERY LAYER IS SET ON ITS OWN (his *"specially we are building it for
+     each layer on their own"*), so a title and a name are stored per level,
+     beside the component switches §404 already keeps there:
+       structure[level].found  = { on, title }   the first section
+       structure[level].swot   = { title, quads } the second; ON/OFF IS THE
+                                  `swot` COMPONENT §404 already stores, never
+                                  a second switch for one fact (§110's pair)
+       structure[level].plan   = { pillars, projects, objectives } titles,
+                                  one per way of planning
+       structure[level].words  = { key: { one, many } } this layer's names
+     ALL STORED AS AN ABSENCE (§50.6) and read as TODAY'S PRODUCT, so a client
+     nobody touches opens exactly as it did. The plan section has had a switch
+     since §422 (planOn below). */
+  function fnExists(group) {
+    var s = structureOf(group), f = s && s.fn;
+    return !(f && f.exists === false);
+  }
+  var SEC_FOUND_DEFAULT = { top: "Foundation", mid: "Foundation", bu: "Foundation", fn: "Overview", cap: "Overview" };
+  function levelBlock(group, level, part) {
+    var s = structureOf(group), l = s && s[effLevel(group, level)], b = l && l[part];
+    return b && typeof b === "object" ? b : null;
+  }
+  function foundOn(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "found");
+    return !(b && b.on === false);
+  }
+  function foundTitle(group, target) {
+    var lv = structLevelOf(target), b = levelBlock(group, lv, "found");
+    var t = b && typeof b.title === "string" ? b.title.trim() : "";
+    return t || SEC_FOUND_DEFAULT[lv];
+  }
+  /* The empty string means "the platform's own word", which is the client's
+     SWOT label for a business unit and S&W for a function (§399). */
+  function swotTitle(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "swot");
+    return b && typeof b.title === "string" ? b.title.trim() : "";
+  }
+  var SWOT_QUADS = ["s", "w", "o", "t"];
+  function swotQuads(group, target) {
+    var lv = structLevelOf(target), b = levelBlock(group, lv, "swot");
+    if (b && Array.isArray(b.quads)) {
+      var q = SWOT_QUADS.filter(function (x) { return b.quads.indexOf(x) >= 0; });
+      if (q.length) return q;
+    }
+    return (lv === "fn" || lv === "cap") ? ["s", "w"] : SWOT_QUADS.slice();
+  }
+  var PLAN_WAYS = ["pillars", "projects", "objectives"];
+  /* §422: THE PLAN SECTION HAS A SWITCH NOW (Islam, 2026-09-29: *"for the
+     top level make the plan section on and off as well and same for the BUs
+     and functions"*, and of Off, *"yes"* to: hidden on that layer's pages,
+     nothing written is lost, and a unit or function with its plan off has
+     nothing to report, so its Reporting tab and plan slides go and it leaves
+     the scores). Stored as an ABSENCE like the first section's (§50.6), so a
+     client nobody touches opens exactly as before. */
+  function planOn(group, target) {
+    var b = levelBlock(group, structLevelOf(target), "plan");
+    return !(b && b.on === false);
+  }
+  function planTitle(group, target, way) {
+    var b = levelBlock(group, structLevelOf(target), "plan");
+    var t = b && typeof b[way] === "string" ? b[way].trim() : "";
+    return t;
+  }
+  /* A name for THIS layer, or null for "use the client's own word" (LABELS,
+     Setup › Terminology), which is what every layer answered before §418. */
+  function layerWord(group, target, key, form) {
+    var b = levelBlock(group, structLevelOf(target), "words");
+    var w = b && b[key];
+    var v = w && typeof w[form] === "string" ? w[form].trim() : "";
+    return v || null;
+  }
+  /* What each part of a section is called when nobody has named it. Only the
+     parts that have no row on Setup › Terminology are here; the rest fall
+     back to LABELS, the client's own word, as they always have. */
+  var PART_DEFAULTS = {
+    strengths: ["Strength", "Strengths"], weaknesses: ["Weakness", "Weaknesses"],
+    opportunities: ["Opportunity", "Opportunities"], threats: ["Threat", "Threats"],
+    deliverable: ["Deliverable", "Deliverables"], outcome: ["Outcome", "Outcomes"],
+    milestone: ["Milestone", "Milestones"], action: ["Action", "Actions"],
+    overview: ["Overview", "Overviews"], tacoutcome: ["Outcome", "Outcomes"],
+    desc: ["Description", "Descriptions"],
+    requirement: ["Requirement", "Requirements"],
+    /* §422: the overview's three areas (§413), each nameable per layer. */
+    ovobj: ["Objective", "Objectives"], ovwhy: ["Why now", "Why now"],
+    ovrisk: ["Risks & mitigations", "Risks & mitigations"]
+  };
+  var OVERVIEW_AREAS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
+  var QUAD_KEYS = { s: "strengths", w: "weaknesses", o: "opportunities", t: "threats" };
+  var SEC_FOUND_PARTS = ["brief", "desc", "purpose", "aspiration", "keyobj", "theme", "values"];
+  var PLAN_PARTS = {
+    pillars: ["pillar", "measure", "tactic"],
+    projects: ["project", "deliverable", "outcome", "milestone"],
+    objectives: ["keyobj", "action"]
+  };
+
+  var DRIVERS = "drivers";          /* on a unit's extra   */
+  var SEASONS = "seasons";          /* on the group's extra */
+  /* WHETHER THE CLIENT USES REVENUE DRIVERS AT ALL (Islam, 2026-09-23: *"this
+     module it should have an on and off button"*; the office's, in Setup,
+     OFF for every client until somebody turns it on). ONLY AN EXPLICIT `true`
+     TURNS IT ON, which is the assistant's rule (§104) and not focus's
+     (§102): focus existed before its switch did, so absent had to mean on;
+     this did not, so absent means OFF and a stale value cannot switch it on
+     by accident. Stored as an ABSENCE (§50.6) — Off deletes the key. Off
+     HIDES and never forgets: every tree and every season is kept (§44). */
+  var DRIVERS_ON = "driversOn";
+  var DRIVER_LINK = "driver";       /* on a key objective or a measure */
+  var DRIVER_KINDS = ["vol", "val"];
+  var PERIOD_TYPES = ["base", "season", "increment"];
+  var CHANNEL_MODES = ["rate", "count"];
+  /* 365/12 and never 30: a season is a window of real days, so a month is
+     the average one. Ramadan 2026 is 31 days, which is 1.02 months. */
+  var MONTH_DAYS = 365 / 12;
+  var NO_SEASONS = Object.freeze([]);
+
+  /* READERS THAT CREATE NOTHING (§42, §50.6). A reader that mints the thing
+     it looked for puts a phantom change into every save and the first
+     non-office save is refused for ever — `branding()` cost this project
+     exactly that. Both hand back a shared frozen empty. */
+  function driversOn(group) { return !!group && group[DRIVERS_ON] === true; }
+  function seasonsOf(group) {
+    var a = group && group[SEASONS];
+    return Array.isArray(a) ? a : NO_SEASONS;
+  }
+  function driverChannel(unit) {
+    var c = unit && unit[DRIVERS];
+    return c && typeof c === "object" && Array.isArray(c.subs) ? c : null;
+  }
+  function driverFlat(ch) { return !ch || !ch.subs || ch.subs.length <= 1; }
+  function driverMode(ch) { return ch && ch.mode === "count" ? "count" : "rate"; }
+
+  /* A SEASON'S LENGTH, INCLUSIVE OF BOTH ENDS — 17 Feb to 19 Mar is 31 days
+     and not 30. An unreadable or backwards window is NOUGHT rather than a
+     negative or a throw: a season nobody has dated yet takes no days out of
+     the base year, which is the reading that leaves the tree adding up
+     (§93 — absent is never a number somebody could mistake for one). */
+  function seasonMonths(s) {
+    if (!s || !s.start || !s.end) return 0;
+    var a = new Date(s.start).getTime(), b = new Date(s.end).getTime();
+    if (!isFinite(a) || !isFinite(b) || b < a) return 0;
+    return (Math.round((b - a) / 86400000) + 1) / MONTH_DAYS;
+  }
+  function seasonById(seasons, id) {
+    var a = seasons || [];
+    for (var i = 0; i < a.length; i++) if (a[i] && a[i].id === id) return a[i];
+    return null;
+  }
+
+  /* A NEW SEASON'S ID IS ONE MORE THAN THE HIGHEST (§96.2, `driverMintId`'s
+     own rule one collection over): delete the middle of s1·s2·s3 and a
+     count-minted id collides with a season a unit's period still names, so
+     removing Ramadan would silently re-point every period that named it at
+     whatever was added next. */
+  function seasonMintId(group) {
+    var top = 0;
+    seasonsOf(group).forEach(function (s) {
+      var n = parseInt(String(s && s.id).replace(/^s/, ""), 10);
+      if (isFinite(n) && n > top) top = n;
+    });
+    return "s" + (top + 1);
+  }
+
+  /* WHICH UNITS STILL NAME A SEASON — the refusal behind Remove (§62: the
+     refusal is the feature, and it names what is in the way).
+
+     A season removed while a period names it does not corrupt anything —
+     `seasonById` answers null and `seasonMonths(null)` is 0, so the base year
+     gets its month back and the tree still adds up — and it leaves a period
+     on somebody's Drivers page reading an em-dash for ever, with no control
+     on that page able to say what it was. That is §61's dead end wearing a
+     clean save, so the removal is refused here and the units are NAMED.
+
+     It takes the units rather than reading a global, because this module is
+     run by the browser AND by Node with no collections of its own (§42). */
+  function seasonUsedBy(units, id) {
+    var out = [];
+    (units || []).forEach(function (u) {
+      var ch = driverChannel(u);
+      if (!ch) return;
+      var hit = (ch.subs || []).some(function (sub) {
+        return ((sub && sub.periods) || []).some(function (p) {
+          return p && p.type === "season" && String(p.seasonId) === String(id);
+        });
+      });
+      if (hit) out.push(u);
+    });
+    return out;
+  }
+
+  /* HOW MANY MONTHS A PERIOD STANDS FOR, and the three answers are three
+     different kinds of thing rather than three cases of one:
+
+       · a COUNT channel is not a rate at all — *Events per year 45* is
+         already the year, so multiplying by twelve would say 540 events;
+       · an INCREMENT carries its own *Months active* driver, because stores
+         opening through the year do not trade for all of it, and how long
+         they trade is a plan decision rather than a fact about the calendar;
+       · a BASE period is twelve months LESS the seasons used in its own
+         sub-channel — calculated and never typed, which is the one line
+         that makes a sub-channel's periods sum to twelve by construction.
+         Typing it would let somebody enter eleven and lose a month in
+         silence.
+
+     `Math.max(0, …)` is a floor and not a tidy-up: seasons totalling more
+     than a year is a mistake somebody can make, and a negative base period
+     would SUBTRACT revenue rather than reading as the nonsense it is. */
+  function driverMonths(seasons, ch, sub, p) {
+    if (driverMode(ch) === "count" || (p && p.type === "increment")) return 1;
+    if (p && p.type === "season") return seasonMonths(seasonById(seasons, p.seasonId));
+    var used = 0, list = (sub && sub.periods) || [];
+    for (var i = 0; i < list.length; i++)
+      if (list[i] && list[i].type === "season")
+        used += seasonMonths(seasonById(seasons, list[i].seasonId));
+    return Math.max(0, 12 - used);
+  }
+
+  /* What a driver reads at year one: plus-n adds, per cent scales. */
+  function driverYearOne(d) {
+    if (!d) return 0;
+    var base = Number(d.base) || 0, up = Number(d.up) || 0;
+    return d.upUnit === "#" ? base + up : base * (1 + up / 100);
+  }
+  /* What it contributes to the multiplication. A `%` driver divides by a
+     hundred first — that is how *Maturity factor 70%* and *Commission
+     retention 78%* work, and reading one raw multiplies a plan by seventy. */
+  function driverEffective(d, atYearOne) {
+    var v = atYearOne ? driverYearOne(d) : (Number(d && d.base) || 0);
+    return (d && d.unit === "%") ? v / 100 : v;
+  }
+  /* VOLUME AND VALUE ARE MULTIPLIED APART AND THEN TOGETHER, and keeping
+     them apart is the whole of why the growth split below is possible: with
+     one product there is no way to say how much of an increase was selling
+     more and how much was charging more. An empty side is 1 rather than 0 —
+     a period with no value driver is one whose value is unchanged, not one
+     worth nothing. */
+  function driverFactors(p, atYearOne) {
+    var vol = 1, val = 1, list = (p && p.drivers) || [];
+    for (var i = 0; i < list.length; i++) {
+      var d = list[i], v = driverEffective(d, atYearOne);
+      if (d && d.kind === "val") val *= v; else vol *= v;
+    }
+    return { vol: vol, val: val, rev: vol * val };
+  }
+
+  function driverZero() {
+    return { b0: 0, b1: 0, growth: 0, volEff: 0, valEff: 0, intEff: 0, newEff: 0 };
+  }
+  var FIG_KEYS = ["b0", "b1", "growth", "volEff", "valEff", "intEff", "newEff"];
+
+  /* ONE PERIOD'S FIGURES.
+
+     AN INCREMENT HAS NO BASELINE, and that is the point of it: new stores
+     did not trade last year, so every pound of it is new business. Giving it
+     a baseline of its own plan would report it as flat growth and lose the
+     one distinction a reviewer most needs.
+
+     THE SPLIT IS THE STANDARD DECOMPOSITION and the interaction term is not
+     a rounding artefact — selling 10% more at 10% more each is 21% more
+     revenue, and the extra 1% belongs to neither volume nor price. Dropping
+     it leaves the four parts not adding up to the growth they explain. */
+  function driverPeriod(seasons, ch, sub, p) {
+    var months = driverMonths(seasons, ch, sub, p);
+    var y = driverFactors(p, true), f;
+    if (p && p.type === "increment") {
+      var rev = y.rev * months;
+      f = { b0: 0, b1: rev, growth: rev, volEff: 0, valEff: 0, intEff: 0, newEff: rev };
+    } else {
+      var b = driverFactors(p, false);
+      f = {
+        b0: b.rev * months,
+        b1: y.rev * months,
+        growth: (y.rev - b.rev) * months,
+        volEff: (y.vol - b.vol) * b.val * months,
+        valEff: (y.val - b.val) * b.vol * months,
+        intEff: (y.vol - b.vol) * (y.val - b.val) * months,
+        newEff: 0
+      };
+    }
+    f.months = months;
+    return f;
+  }
+
+  /* THE ROLL-UP. Everything above a period ADDS, through one adder, so a
+     sub-channel's total and the unit's cannot be arrived at two ways
+     (§53.5). `months` is deliberately not summed — twelve months of base
+     and one of increment is not thirteen months of anything. */
+  function driverAdd(list, of) {
+    var t = driverZero();
+    (list || []).forEach(function (x) {
+      var c = of(x);
+      for (var i = 0; i < FIG_KEYS.length; i++) t[FIG_KEYS[i]] += c[FIG_KEYS[i]];
+    });
+    return t;
+  }
+  function driverSub(seasons, ch, sub) {
+    return driverAdd(sub && sub.periods, function (p) {
+      return driverPeriod(seasons, ch, sub, p);
+    });
+  }
+  function driverFigures(seasons, ch) {
+    return driverAdd(ch && ch.subs, function (sub) {
+      return driverSub(seasons, ch, sub);
+    });
+  }
+
+  /* WHAT A UNIT'S REVENUE TARGET IS (spec 063 §4.2). Islam: *"tree is the
+     main source."* The Year 1 figure IS the target, so nothing is typed and
+     nothing can disagree — the same shape `monthlyAnnual` already has one
+     level down, which is why that precedent was the one followed.
+
+     NULL WHERE THERE IS NO TREE, never nought: a unit whose tree has not
+     been built has no revenue target, which is a different fact from a
+     target of zero and must never be scored as one (§35, §93). */
+  function driverTarget(group, unit) {
+    var ch = driverChannel(unit);
+    if (!ch || !ch.subs.length) return null;
+    return driverFigures(seasonsOf(group), ch).b1;
+  }
+
+  /* WHERE THE GROWTH CAME FROM, which is the reading a review is for.
+
+     NOTHING IS A SHARE OF NOUGHT. A plan that does not grow gets no
+     percentages at all — dividing by a growth of zero is how a bridge comes
+     to read 100% volume on a plan that went backwards (an arithmetic answer
+     that is true and says something false). */
+  function driverBridge(f) {
+    var g = (f && f.growth) || 0;
+    function share(x) { return g ? (x / g) * 100 : 0; }
+    var v = share(f.volEff), p = share(f.valEff),
+        i = share(f.intEff), n = share(f.newEff), reading;
+    if (g <= 0) reading = "This plan does not grow on these assumptions. Check the uplifts before reading the split.";
+    else if (n >= 50) reading = "Over half the growth is revenue that does not exist yet. New stores, products and hubs carry execution and capital risk that growth on an existing base does not. Ask what the plan looks like if the openings slip a quarter.";
+    else if (v >= 60) reading = "Growth is volume-led — most of the increase is selling more on what is already there. Test it against capacity, coverage, working capital and headcount.";
+    else if (p >= 60) reading = "Growth is price-led — most of it is value per unit rather than quantity. Test it against pricing power, mix shift and elasticity.";
+    else reading = "Growth is spread across volume, price and new business, which is generally the more resilient shape. Confirm each has a named owner.";
+    return {
+      volume: f.volEff, price: f.valEff, interaction: f.intEff, newBusiness: f.newEff,
+      shares: g > 0 ? { volume: v, price: p, interaction: i, newBusiness: n } : null,
+      reading: reading
+    };
+  }
+
+  /* ── WHAT ACTUALLY HAPPENED (spec 063 §4.5a, §6.4) ──────────────────
+     Islam, asked which drivers are read from the work they connect to and
+     which are typed: *"what do oyu mean? they are all typed."* So every
+     driver carries its own reported figure and the connection exists to say
+     WHOSE WORK a moved driver belonged to, never to supply the number — which
+     is also the only reading that is arithmetically honest, because a measure
+     and the driver it answers to are usually different quantities (a
+     conversion rate against transactions per store-month).
+
+     NOT REPORTED IS NOT NOUGHT (§35, §93). A driver nobody has typed a figure
+     against reads at its PLANNED value, so it contributes no effect and the
+     period's actual is the part that has been reported rather than a number
+     dragged to zero by silence. */
+  function driverActual(d) {
+    if (!d) return null;
+    var v = d.actual;
+    if (v == null || v === "") return null;
+    var n = Number(v);
+    return isFinite(n) ? n : null;
+  }
+  function driverReported(ch) {
+    var subs = (ch && ch.subs) || [];
+    for (var i = 0; i < subs.length; i++) {
+      var ps = (subs[i] && subs[i].periods) || [];
+      for (var j = 0; j < ps.length; j++) {
+        var ds = (ps[j] && ps[j].drivers) || [];
+        for (var k = 0; k < ds.length; k++)
+          if (driverActual(ds[k]) != null) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ONE PERIOD, READ AGAINST WHAT HAPPENED — and every driver's effect is
+     measured with the ones ABOVE IT ALREADY AT THEIR ACTUAL.
+
+     THAT CASCADE IS THE WHOLE OF WHY THE COLUMN ADDS UP, and it is a decision
+     rather than an implementation detail. Measuring each driver against the
+     fully planned period is the obvious reading and it does NOT sum to the
+     period's own gap: the shortfalls interact, exactly as §4.2's growth split
+     needs its interaction term, and a breakdown that disagrees with the
+     headline it sits under is worse than none (§99.7, §264). Read down the
+     column in order, each row's effect is the money that row cost or earned
+     GIVEN what had already gone wrong above it, and the parts come to the
+     whole by construction.
+
+     `rev` IS THE PERIOD AT ITS REPORTED VALUES, which for an increment is the
+     whole of it (there is no baseline to compare against, §4.2) and for a
+     base or a season is the year-one multiplication with the reported figures
+     substituted in. */
+  function driverPeriodActual(seasons, ch, sub, p) {
+    var months = driverMonths(seasons, ch, sub, p);
+    var list = (p && p.drivers) || [];
+    /* Where each driver stands now: its reported figure if it has one, its
+       year-one plan if it has not. */
+    function at(i) {
+      var vol = 1, val = 1;
+      for (var k = 0; k < list.length; k++) {
+        var d = list[k], a = driverActual(d);
+        var raw = (k <= i && a != null) ? a : driverYearOne(d);
+        var v = (d && d.unit === "%") ? raw / 100 : raw;
+        if (d && d.kind === "val") val *= v; else vol *= v;
+      }
+      return vol * val * months;
+    }
+    var planned = at(-1), prev = planned, rows = [];
+    for (var i = 0; i < list.length; i++) {
+      var here = at(i), a = driverActual(list[i]);
+      rows.push({
+        driver: list[i],
+        planned: driverYearOne(list[i]),
+        actual: a,
+        reported: a != null,
+        effect: here - prev
+      });
+      prev = here;
+    }
+    return { months: months, planned: planned, actual: prev,
+             gap: prev - planned, rows: rows };
+  }
+  function driverActualAdd(list, of) {
+    var t = { planned: 0, actual: 0, gap: 0 };
+    (list || []).forEach(function (x) {
+      var c = of(x);
+      t.planned += c.planned; t.actual += c.actual; t.gap += c.gap;
+    });
+    return t;
+  }
+  function driverSubActual(seasons, ch, sub) {
+    return driverActualAdd(sub && sub.periods, function (p) {
+      return driverPeriodActual(seasons, ch, sub, p);
+    });
+  }
+  function driverActualFigures(seasons, ch) {
+    return driverActualAdd(ch && ch.subs, function (sub) {
+      return driverSubActual(seasons, ch, sub);
+    });
+  }
+  /* HOW THE REVENUE READ AGAINST WHAT THE TREE ARGUED FOR. Null where the
+     tree argues for nothing — a share of nought is not a hundred per cent
+     (§239.4's own guard, one arithmetic along). */
+  function driverScore(f) {
+    if (!f || !f.planned) return null;
+    return Math.round((f.actual / f.planned) * 100);
+  }
+
+  /* EVERY DRIVER IN A UNIT'S TREE, in reading order, each carrying where it
+     sits. ONE WALK, because the table, the connection picker, the review
+     reading and the count of unanswered rows are four readers of one list
+     and four walks are four chances to disagree (§104.7). */
+  function driverRows(unit) {
+    var ch = driverChannel(unit), out = [];
+    if (!ch) return out;
+    (ch.subs || []).forEach(function (sub) {
+      ((sub && sub.periods) || []).forEach(function (p) {
+        ((p && p.drivers) || []).forEach(function (d) {
+          if (d) out.push({ sub: sub, period: p, driver: d });
+        });
+      });
+    });
+    return out;
+  }
+  function driverById(unit, id) {
+    if (id == null || id === "") return null;
+    var rows = driverRows(unit);
+    for (var i = 0; i < rows.length; i++)
+      if (String(rows[i].driver.id) === String(id)) return rows[i];
+    return null;
+  }
+  /* A NEW ID IS ONE MORE THAN THE HIGHEST, never one more than the count
+     (§96.2, §316): delete the middle of 1·2·3 and a count-minted id
+     collides with a row still on the screen. */
+  function driverMintId(unit) {
+    var top = 0;
+    driverRows(unit).forEach(function (r) {
+      var n = parseInt(String(r.driver.id).replace(/^d/, ""), 10);
+      if (isFinite(n) && n > top) top = n;
+    });
+    return "d" + (top + 1);
+  }
+
+  /* WHAT A ROW ANSWERS TO, and the three states are the decision rather
+     than a rendering choice (spec 063 §6.2):
+
+       · CONNECTED  — an objective or measure carries this driver's id, so
+                      somebody is doing work the row moves with;
+       · ASSUMPTION — the row is deliberately marked as moving for a reason
+                      nobody is scored on (a price decision, a maturity
+                      ramp). §343's indicator column, one level along: the
+                      absence of a direction IS the signal, so there is no
+                      second switch to disagree with it;
+       · NOT YET    — nobody has said which, and it HOLDS NOTHING BACK
+                      (Islam, 2026-09-22: *"just say so"*). Which is why it
+                      is drawn in the quiet register and never in `--bad`:
+                      red on a value means *this is stopping something*
+                      everywhere else here, and a red word over something
+                      that stops nobody teaches people to stop reading the
+                      red (§214.4, §272).
+
+     THE POINTER FACES FROM THE OBJECTIVE TO THE DRIVER and never back
+     (§4.3). A unit's key objectives and pillar measures are renumbered BY
+     POSITION on every load, so a connection stored on the driver row would
+     silently re-point the moment somebody deleted an objective above it.
+     Stored the other way it travels with the row it belongs to. */
+  function driverLinkedIds(unit) {
+    var seen = {};
+    function take(list) {
+      (list || []).forEach(function (r) {
+        var v = r && r[DRIVER_LINK];
+        if (v != null && v !== "") seen[String(v)] = 1;
+      });
+    }
+    take(unit && unit.keyObjectives);
+    ((unit && unit.items) || []).forEach(function (p) { take(p && p.measures); });
+    return seen;
+  }
+  function driverState(unit, d) {
+    if (!d) return "notyet";
+    if (driverLinkedIds(unit)[String(d.id)]) return "linked";
+    return d.assume === true ? "assume" : "notyet";
+  }
+  /* THE ONES NOBODY HAS ANSWERED — counted so a screen can say so, and
+     deliberately NOT wired to anything that refuses a save. */
+  function driverUnanswered(unit) {
+    var n = 0, linked = driverLinkedIds(unit);
+    driverRows(unit).forEach(function (r) {
+      var d = r.driver;
+      if (!linked[String(d.id)] && d.assume !== true) n++;
+    });
+    return n;
+  }
+
   return {
     ROLES: ROLES, ROLE_KEYS: ROLE_KEYS,
     AREAS: AREAS, AREA_KEYS: AREA_KEYS,
@@ -3503,6 +4686,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
+    isForefrontRow: isForefrontRow, isMintedRow: isMintedRow,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf, strategyPageOf: strategyPageOf,
@@ -3526,7 +4710,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     bdAsked: bdAsked, bdAnswered: bdAnswered, bdReportFields: bdReportFields,
     YN_UNIT: YN_UNIT, isYesNo: isYesNo, ynUnitOf: ynUnitOf,
     ynAnswer: ynAnswer, ynScore: ynScore,
-    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_WORDS: YN_WORDS,
+    YN_TODO: YN_TODO, YN_WIP: YN_WIP, YN_DONE: YN_DONE, YN_DONE_SHOWN: YN_DONE_SHOWN, YN_WORDS: YN_WORDS,
     ynState: ynState, ynJoin: ynJoin, ynAnswered: ynAnswered,
     ynShown: ynShown, ynPct: ynPct,
     MONTH_NAMES: MONTH_NAMES, monthSet: monthSet, monthlySet: monthlySet,
@@ -3558,6 +4742,26 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     videoSlides: videoSlides, videoRoom: videoRoom, videoHeld: videoHeld,
     MASTER_FLOW: MASTER_FLOW, masterFlow: masterFlow,
     PRESENT_MINS: PRESENT_MINS, presentMinsMap: presentMinsMap,
+    LANDING_PICK: LANDING_PICK, landingPicks: landingPicks, landingPick: landingPick,
+    SETUP_DONE: SETUP_DONE, setupDone: setupDone,
+    STRUCTURE: STRUCTURE, STRUCT_COMPONENTS: STRUCT_COMPONENTS,
+    PLAN_DETAILS: PLAN_DETAILS, planDetailOn: planDetailOn, DETAIL_NAMES: DETAIL_NAMES,
+    PLAN_YEAR: PLAN_YEAR, planYearOf: planYearOf, pillarYears: pillarYears, runsNow: runsNow,
+    STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
+    STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
+    STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
+    FN_DESC: FN_DESC, descPart: descPart,
+    STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
+    structureOf: structureOf, structLevelOf: structLevelOf,
+    effLevel: effLevel, capExists: capExists, mayReportTop: mayReportTop,
+    levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
+    midExists: midExists,
+    fnExists: fnExists, foundOn: foundOn, foundTitle: foundTitle,
+    swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
+    PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
+    OVERVIEW_AREAS: OVERVIEW_AREAS,
+    PART_DEFAULTS: PART_DEFAULTS, QUAD_KEYS: QUAD_KEYS,
+    SEC_FOUND_PARTS: SEC_FOUND_PARTS, PLAN_PARTS: PLAN_PARTS,
     presentMins: presentMins, PRESENT_MIN_CHOICES: PRESENT_MIN_CHOICES,
     PLAN_FROM: PLAN_FROM, PLAN_TO: PLAN_TO,
     mayMasterPresent: mayMasterPresent,
@@ -3569,6 +4773,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
     boundedReach: boundedReach, mayReportRow: mayReportRow,
+    lineOwnersOn: lineOwnersOn, lineOwnerName: lineOwnerName,
+    lineOwnerIsHere: lineOwnerIsHere,
+    ownedBy: ownedBy, lineOwned: lineOwned,
     mayMarkDone: mayMarkDone,
     fillingRoles: fillingRoles, mayFillRow: mayFillRow,
     isSourced: isSourced, sourceRows: sourceRows, sourcesFor: sourcesFor,
@@ -3588,6 +4795,24 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     kbParas: kbParas, kbSame: kbSame,
     dissolvePlan: dissolvePlan,
     oneLine: oneLine, ONE_LINE_FIELDS: ONE_LINE_FIELDS,
-    PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
+    PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER,
+    /* Revenue drivers (spec 063) */
+    DRIVERS: DRIVERS, SEASONS: SEASONS, DRIVER_LINK: DRIVER_LINK,
+    DRIVERS_ON: DRIVERS_ON, driversOn: driversOn,
+    DRIVER_KINDS: DRIVER_KINDS, PERIOD_TYPES: PERIOD_TYPES,
+    CHANNEL_MODES: CHANNEL_MODES, MONTH_DAYS: MONTH_DAYS,
+    seasonsOf: seasonsOf, seasonMonths: seasonMonths, seasonById: seasonById,
+    seasonMintId: seasonMintId, seasonUsedBy: seasonUsedBy,
+    driverChannel: driverChannel, driverFlat: driverFlat, driverMode: driverMode,
+    driverMonths: driverMonths, driverYearOne: driverYearOne,
+    driverEffective: driverEffective, driverFactors: driverFactors,
+    driverPeriod: driverPeriod, driverSub: driverSub, driverFigures: driverFigures,
+    driverTarget: driverTarget, driverBridge: driverBridge,
+    driverRows: driverRows, driverById: driverById, driverMintId: driverMintId,
+    driverLinkedIds: driverLinkedIds, driverState: driverState,
+    driverUnanswered: driverUnanswered,
+    driverActual: driverActual, driverReported: driverReported,
+    driverPeriodActual: driverPeriodActual, driverSubActual: driverSubActual,
+    driverActualFigures: driverActualFigures, driverScore: driverScore
   };
 });

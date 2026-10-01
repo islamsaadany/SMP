@@ -82,7 +82,14 @@ with sync_playwright() as p:
 
     print("\n── 2 · a keyword finds a page whose NAME does not contain it ──")
     # The whole reason keywords exist: these words appear on no label.
-    for word, want in [("logo", "brand"), ("password", "people"), ("upload", "import"),
+    # ("logo", "brand") STOOD HERE and is REWRITTEN, never loosened (§218,
+    # §214.3): §360 absorbed Branding into the client set-up, so that def is
+    # gone and the mark-and-colours errand lands on Getting started — which,
+    # until the set-up is done, is the STRIP above this box and needs no
+    # finding (it is on screen, always). Once it is a row it is findable, and
+    # THAT is asserted where the done state is made (setup-per-module §7b).
+    # What this block is about survives whole: a word on no label finds its page.
+    for word, want in [("weighting", "units"), ("password", "people"), ("upload", "import"),
                        ("threshold", "bands"), ("permissions", "access"),
                        ("vocabulary", "labels"),
                        # §135.4: the Email page became Send an email's second
@@ -108,30 +115,52 @@ with sync_playwright() as p:
 
     print("\n── 4 · a match inside a FOLDED group is still found (§108.14) ──")
     type_q(pg, "")
-    # Fold the group that holds Branding, then search for it.
-    pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\\"look\\"]');
-                   if(h && !h.classList.contains('shut')) h.click();}""")
+    # THE GROUP IS FOUND, NEVER NAMED (§214.3, §94.8). This block folded
+    # `look` and searched for "logo", and §360 deleted that group outright —
+    # Branding is the client set-up's first step now — so the check DIED on a
+    # selector matching nothing rather than saying a decision had moved. What
+    # it is about is the RELATIONSHIP (a folded group's match is still found),
+    # so it takes whatever group the rail draws first and searches for that
+    # row's own label, which matches by construction: a page renamed or moved
+    # to another group cannot orphan it again.
+    # …AND NEVER THE GROUP HOLDING THE PAGE YOU ARE ON, which §47.7 refuses to
+    # fold: a rail that can hide the row saying where you are lies about it. A
+    # naive "the first group with rows" picks exactly that one, because the
+    # rail lands on its primary — so the pick skips any group holding `.on`.
+    grp = pg.evaluate("""()=>{const box=(g)=>document.querySelector('[data-railitems="'+g+'"]');
+      const h=[...document.querySelectorAll('.rgroup[data-railgrp]')].find(x=>{
+        const b=box(x.dataset.railgrp);
+        return !!b && !!b.querySelector('.ritem') && !b.querySelector('.ritem.on');});
+      if(!h) return null; const g=h.dataset.railgrp;
+      const it=box(g).querySelector('.ritem');
+      const lab=it.querySelector('.rilab')||it;
+      return { g:g, k:it.dataset.setupgo, lab:lab.textContent.trim() };}""")
+    ck("there is a group with rows in it to fold", bool(grp and grp["k"] and grp["lab"]), grp)
+    fold = ("()=>{const h=document.querySelector('.rgroup[data-railgrp=\"%s\"]');"
+            "if(h && !h.classList.contains('shut')) h.click();}" % grp["g"])
+    unfold = ("()=>{const h=document.querySelector('.rgroup[data-railgrp=\"%s\"]');"
+              "if(h && h.classList.contains('shut')) h.click();}" % grp["g"])
+    pg.evaluate(fold)
     pg.wait_for_timeout(300)
     ck("the group is folded and its rows are hidden",
-       "brand" not in shown(pg), shown(pg))
-    type_q(pg, "logo")
-    ck("searching still reveals the folded match", "brand" in shown(pg), shown(pg))
+       grp["k"] not in shown(pg), shown(pg))
+    type_q(pg, grp["lab"])
+    ck("searching still reveals the folded match", grp["k"] in shown(pg), shown(pg))
     ck("and its group heading is shown with it",
-       pg.eval_on_selector('.rgroup[data-railgrp="look"]', "e=>!e.hidden"))
+       pg.eval_on_selector('.rgroup[data-railgrp="%s"]' % grp["g"], "e=>!e.hidden"))
 
     print("\n── 5 · clearing puts the rail back exactly as it was found ──")
     type_q(pg, "")
     ck("the folded group is folded again, not left open",
-       "brand" not in shown(pg), shown(pg))
+       grp["k"] not in shown(pg), shown(pg))
     # THE NUMBER IS COUNTED, NOT WRITTEN DOWN (§135.4 removed a row from this
     # very group). A literal here fails the day somebody adds or moves a page,
     # which is a check reporting a change as a fault.
-    folded = pg.eval_on_selector_all('[data-railitems="look"] .ritem', "e=>e.length")
+    folded = pg.eval_on_selector_all('[data-railitems="%s"] .ritem' % grp["g"], "e=>e.length")
     ck("everything else is back", len(shown(pg)) == len(everything) - folded,
        (len(shown(pg)), len(everything)))
     # Put it back for the blocks below.
-    pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\\"look\\"]');
-                   if(h && h.classList.contains('shut')) h.click();}""")
+    pg.evaluate(unfold)
     pg.wait_for_timeout(250)
 
     print("\n── 6 · TYPING NEVER REPAINTS (§35) ──")
@@ -167,14 +196,53 @@ with sync_playwright() as p:
     ck("and it hides itself again", pg.eval_on_selector("[data-railqx]", "e=>e.hidden"))
 
     print("\n── 9 · arriving is the end of the errand ──")
-    type_q(pg, "logo")
-    pg.query_selector('.setuprail .ritem[data-setupgo="brand"]').click()
+    # THE ROW IS THE SEARCH'S OWN ANSWER, never a named page (§214.3): this
+    # pressed `brand`, which §360 deleted. It presses whatever the query finds
+    # and asserts the page that opens is THAT row's — an agreement, so the next
+    # page to be renamed or absorbed cannot orphan it (§94.8).
+    type_q(pg, "weighting")
+    hit = shown(pg)
+    ck("the query finds exactly one row to press", len(hit) == 1, hit)
+    want_lab = pg.eval_on_selector('.setuprail .ritem[data-setupgo="%s"] .rilab' % hit[0],
+                                   "e=>e.textContent.trim()")
+    pg.query_selector('.setuprail .ritem[data-setupgo="%s"]' % hit[0]).click()
     pg.wait_for_timeout(500)
     ck("the page opened", pg.eval_on_selector("#panel .setupttl", "e=>e.textContent.trim()")
-       == "Branding")
+       == want_lab, want_lab)
     ck("and the rail is no longer filtered",
        pg.eval_on_selector("[data-railq]", "e=>e.value") == "" and
        len(shown(pg)) == len(everything), (len(shown(pg)), len(everything)))
+
+    print("\n── 10 · the search reaches the rail on screen and nothing else (§359.2) ──")
+    # Served, Setup is two rails — a module's own and the client's — and a
+    # search in one must not find a page that lives in the other, or a match
+    # opens a page the rail is not drawing. The scope is the document's own
+    # attribute (shell.html setupScope), set here the way the served router
+    # sets it, and BOTH ENDS are asserted: the page absent from the wrong
+    # rail AND present in the right one, or a filter that finds nothing
+    # anywhere passes the first half (§94.2).
+    # Standing on a page of the rail being scoped, because the page decides
+    # the rail (research R2): scoped to Strategy while on Branding, the shell
+    # would correctly move the scope straight back.
+    pg.evaluate("()=>{currentSub='cycle'; document.documentElement.setAttribute('data-setup-scope','strategy'); paint();}")
+    pg.wait_for_timeout(400)
+    # BRANDING STOOD FOR "the client's page" HERE (§214.3): it is gone, so the
+    # client's side is named by a page that is still the client's — the
+    # register, whose errand is a password reset and which no module draws.
+    type_q(pg, "password")
+    ck("the People register (the client's) is not found from Strategy's rail", "people" not in shown(pg), shown(pg))
+    type_q(pg, "threshold")
+    ck("…and Scoring bands (Strategy's) is", shown(pg) == ["bands"], shown(pg))
+    pg.evaluate("()=>{currentSub='mainbu'; document.documentElement.setAttribute('data-setup-scope','client'); paint();}")
+    pg.wait_for_timeout(400)
+    type_q(pg, "password")
+    ck("from the client's rail the People register is found", "people" in shown(pg), shown(pg))
+    type_q(pg, "threshold")
+    ck("…and Scoring bands is not", "bands" not in shown(pg), shown(pg))
+    type_q(pg, "")
+    pg.evaluate("()=>{document.documentElement.removeAttribute('data-setup-scope'); paint();}")
+    pg.wait_for_timeout(300)
+    ck("unscoped again, the whole list is back (§94.2)", len(shown(pg)) == len(everything), len(shown(pg)))
 
     b.close()
 

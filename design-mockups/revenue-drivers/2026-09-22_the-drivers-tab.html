@@ -1,0 +1,871 @@
+<title>Revenue Drivers</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px;
+    --fs-body:14px; --fs-lead:17px; --fs-title:20px; --fs-big:34px; --track:.12em;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+    color-scheme:light;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+    --panel-accent:#E6C65C; --panel-hover:#24487A;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --stone:#16325C; --on-accent:#16325C;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --shadow-sm:0 1px 3px rgb(15 23 42/.06);
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --panel-accent:#E6C65C; --panel-hover:#1A2030;
+    --gold:#D9B665; --gold-deep:#C9A24D; --stone:#7FA3D8; --on-accent:#14161A;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --shadow-sm:0 1px 3px rgb(0 0 0/.35);
+  }}
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --panel-accent:#E6C65C; --panel-hover:#1A2030;
+    --gold:#D9B665; --gold-deep:#C9A24D; --stone:#7FA3D8; --on-accent:#14161A;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --shadow-sm:0 1px 3px rgb(0 0 0/.35);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+       font-size:var(--fs-body);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .page{max-width:1240px;margin:0 auto;padding-block:26px 64px;padding-left:16px;padding-right:16px}
+
+  /* ── the mockup's own voice, deliberately NOT the platform's ───────── */
+  .mk{border:1px dashed var(--line);border-radius:var(--r-md);background:var(--surface);
+      padding:18px 20px;margin:0 0 22px}
+  .mk h1{font-size:var(--fs-title);margin:0 0 4px;letter-spacing:-.01em}
+  .mk .kick{font-size:var(--fs-micro);letter-spacing:var(--track);text-transform:uppercase;
+            color:var(--gold-deep);font-weight:700;margin:0 0 6px}
+  .mk p{margin:8px 0 0;font-size:var(--fs-note);color:var(--ink-2);max-width:78ch}
+  .mk p.tight{margin-top:4px}
+  .mk ul{margin:8px 0 0;padding-left:18px;font-size:var(--fs-note);color:var(--ink-2);max-width:78ch}
+  .mk li{margin:3px 0}
+  .mk b{color:var(--ink)}
+  .warnbox{border:1px solid var(--attn);background:var(--attn-bg);color:var(--attn-tx);
+           border-radius:var(--r-sm);padding:11px 13px;font-size:var(--fs-small);margin:12px 0 0}
+  .warnbox b{color:inherit}
+  .ask{border-left:3px solid var(--gold);background:var(--surface-2);border-radius:0 var(--r-sm) var(--r-sm) 0;
+       padding:11px 14px;margin:12px 0 0;font-size:var(--fs-note)}
+  .ask b{display:block;font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;
+         color:var(--gold-deep);margin:0 0 4px}
+  .ask.done{border-left-color:var(--good);background:var(--good-bg)}
+  .ask.done b{color:var(--good-tx)}
+  .ask.done i{color:var(--good-tx);font-weight:600;font-style:normal}
+  .ask.flag{border-left-color:var(--attn);background:var(--attn-bg)}
+  .ask.flag b{color:var(--attn-tx)}
+  .screenlab{font-size:var(--fs-label);letter-spacing:var(--track);text-transform:uppercase;
+             font-weight:800;color:var(--ink-3);margin:34px 0 10px;display:flex;align-items:baseline;gap:10px}
+  .screenlab span{font-weight:400;letter-spacing:0;text-transform:none;font-size:var(--fs-note);color:var(--ink-3)}
+
+  /* ── platform chrome, as it is ─────────────────────────────────────── */
+  .app{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--ground);
+       box-shadow:var(--shadow-sm)}
+  .top{background:var(--panel);color:var(--panel-ink);padding:9px 18px;display:flex;
+       align-items:center;gap:14px;flex-wrap:wrap}
+  .top .brandname{font-weight:700;font-size:var(--fs-note);letter-spacing:-.01em}
+  .top .dests{display:flex;gap:2px;margin-left:8px;flex-wrap:wrap}
+  .top .dests button{font:inherit;font-size:var(--fs-small);font-weight:500;padding:4px 11px;
+       border:0;background:transparent;color:var(--panel-quiet);border-radius:var(--r-sm);cursor:default}
+  .top .dests button.on{background:var(--panel-hover);color:var(--panel-ink);font-weight:650}
+  .tabs{display:flex;gap:2px;padding:0 18px;background:var(--surface);border-bottom:1px solid var(--line);
+        flex-wrap:wrap}
+  .tabs button{font:inherit;font-size:var(--fs-small);font-weight:500;padding:9px 12px;border:0;
+       background:transparent;color:var(--ink-3);border-bottom:2px solid transparent;cursor:default}
+  .tabs button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--gold)}
+  .secrow{display:flex;gap:16px;padding:10px 18px 0;align-items:center;flex-wrap:wrap}
+  .secrow button{font:inherit;font-size:var(--fs-small);font-weight:500;border:0;background:transparent;
+       color:var(--ink-3);padding:3px 0;cursor:default;border-bottom:2px solid transparent}
+  .secrow button.on{color:var(--ink);font-weight:700;border-bottom-color:var(--gold)}
+  .secrow .new{display:inline-block;margin-left:5px;font-size:9px;letter-spacing:.1em;font-weight:800;
+       color:var(--on-accent);background:var(--panel-accent);border-radius:var(--r-pill);padding:1px 5px;
+       vertical-align:2px}
+  .body{padding:14px 18px 20px}
+
+  /* ── the headline strip ────────────────────────────────────────────── */
+  .strip{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .stile{flex:1 1 168px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+         padding:11px 13px}
+  .stile .k{font-size:var(--fs-micro);letter-spacing:var(--track);text-transform:uppercase;
+            color:var(--ink-3);font-weight:700}
+  .stile .v{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:3px;
+            font-variant-numeric:tabular-nums}
+  .stile .s{font-size:var(--fs-small);color:var(--ink-3);margin-top:1px}
+  .stile.lead{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold)}
+  .stile .v.up{color:var(--good-tx)}
+
+  /* ── the pane, the band, the table ─────────────────────────────────── */
+  .split{display:grid;grid-template-columns:196px 1fr;gap:14px}
+  @media (max-width:820px){ .split{grid-template-columns:1fr} }
+  .rail{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+        align-self:start;overflow:hidden}
+  .rail .rhead{background:var(--panel);color:var(--panel-ink);font-size:var(--fs-micro);
+       letter-spacing:var(--track);text-transform:uppercase;font-weight:700;padding:8px 12px}
+  .rail .ritem{padding:9px 12px;border-bottom:1px solid var(--line-soft);cursor:default}
+  .rail .ritem:last-child{border-bottom:0}
+  .rail .ritem.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+  .rail .rname{font-size:var(--fs-note);font-weight:600}
+  .rail .rsub{font-size:var(--fs-micro);color:var(--ink-3);margin-top:1px;
+              font-variant-numeric:tabular-nums}
+  .pane{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+        padding:0;overflow:hidden}
+  .pband{display:flex;align-items:center;gap:11px;background:var(--surface-2);
+         box-shadow:inset 3px 0 0 var(--gold);padding:13px 16px}
+  .pband-code{font:600 13px/1 var(--mono);color:var(--stone);letter-spacing:.05em}
+  .pband-name{font:650 19px/1.3 var(--sans);letter-spacing:-.012em}
+  .pband .tail{margin-left:auto;font-size:var(--fs-small);color:var(--ink-3);
+               font-variant-numeric:tabular-nums}
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:var(--fs-note);min-width:760px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  th+th,td+td{border-left:1px solid var(--line-soft)}
+  thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+           background:var(--panel);color:var(--panel-ink);white-space:nowrap;border-bottom:0}
+  thead th .subhd{display:block;font-size:.82em;font-weight:400;color:var(--panel-quiet);
+                  line-height:1.35;margin-top:1px;letter-spacing:0;text-transform:none}
+  tbody tr:nth-child(even) > td{background:var(--zebra)}
+  tbody tr:last-child td{border-bottom:0}
+  tr.dxband th{background:var(--panel);color:var(--panel-ink);text-align:left;
+       font:700 10.5px/1.35 var(--sans);letter-spacing:.11em;text-transform:uppercase;padding:10px 13px}
+  tr.dxband th em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;
+       font-size:11px;color:var(--panel-quiet);margin-left:10px}
+  tr.dxband:not(:first-child) th{border-top:14px solid var(--surface)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  th.num{text-align:right}
+  .why{display:block;font-size:12px;color:var(--ink-3);margin-top:3px;font-weight:400;
+       white-space:normal}
+  .dname{font-weight:600}
+  .kindchip{display:inline-block;font-size:var(--fs-micro);letter-spacing:.07em;text-transform:uppercase;
+       font-weight:700;border:1px solid var(--line);border-radius:var(--r-pill);padding:1px 7px;
+       color:var(--ink-2);white-space:nowrap}
+  .kindchip.val{border-color:var(--stone);color:var(--stone)}
+  .linked{color:var(--gold-deep);text-decoration:underline;text-underline-offset:2px;font-weight:600}
+  .assume{color:var(--ink-3);font-style:italic}
+  .missing{color:var(--bad);font-style:italic;font-size:12.5px}
+  /* NOT RED (decision 2). Red on a value means "this is holding something up"
+     everywhere else in the platform, and this holds nothing up. */
+  .notyet{color:var(--ink-3);font-style:italic;font-size:12.5px}
+  .pct{font-size:var(--fs-micro);color:var(--ink-3);display:block;margin-top:1px}
+  .good{color:var(--good-tx);font-weight:600}
+  .badv{color:var(--bad-tx);font-weight:600}
+  .paneact{display:flex;justify-content:flex-end;gap:8px;padding:10px 16px;background:var(--surface);
+           border-top:1px solid var(--line-soft)}
+  .penbtn{font:inherit;font-size:var(--fs-small);font-weight:600;border:1px solid var(--line);
+       background:transparent;color:var(--ink-2);border-radius:var(--r-sm);padding:5px 11px;cursor:default}
+  .foot{font-size:var(--fs-small);color:var(--ink-3);padding:0 18px 4px}
+  .bridge{display:flex;gap:2px;margin:10px 0 4px;border-radius:var(--r-sm);overflow:hidden;height:26px}
+  .bridge div{display:flex;align-items:center;justify-content:center;font-size:var(--fs-micro);
+       font-weight:700;color:var(--panel-ink);letter-spacing:.04em;white-space:nowrap;overflow:hidden}
+  .bkey{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--fs-small);color:var(--ink-3);margin:6px 0 0}
+  .bkey i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:0}
+</style>
+
+<div class="page">
+
+  <div class="mk">
+    <p class="kick">Mockup · not built · 22 September 2026</p>
+    <h1>Revenue drivers — the screens, as you settled them</h1>
+    <p>Three screens, drawn before anything is built, and <b>redrawn on your five answers of
+       22 September</b>. The arithmetic behind them <b>is</b> built and is proved against your own
+       tool, so every figure on this page is a real number out of your five-channel tree —
+       nothing is typed in to look plausible.</p>
+    <ul>
+      <li><b>Real</b> — every baseline, uplift, month count and total, and the whole growth split.</li>
+      <li><b>Invented, and marked where it appears</b> — the <i>actual</i> figures on screen 3
+          (nobody has reported against a tree yet, so there are none), and which rows are connected
+          to which objective.</li>
+    </ul>
+    <div class="warnbox">
+      <b>What I could not check.</b> This page is drawn from the platform's own colours, type sizes
+      and table styles, taken out of the live stylesheet. It is <b>not</b> a screenshot of the running
+      platform — the tool I normally use to drive it is not installed in this session. So the shapes
+      and colours are the product's; the exact pixel fit of a long table at a narrow window is not
+      proved until it is built.
+    </div>
+  </div>
+
+  <!-- ════════════════ SCREEN 1 ════════════════ -->
+  <div class="screenlab">Screen 1 <span>— where the tree lives, on a business unit that sells one way</span></div>
+
+  <div class="mk">
+    <div class="ask done">
+      <b>Decision 1 · where it sits — settled</b>
+      <i>"it's a tab beside the swot ok."</i> So it sits in Strategy's own row, between SWOT and
+      Plan, and a unit reads <i>who we are → where we stand → where the number comes from →
+      what we will do about it</i>. It uses the same permission the Plan already uses, so
+      nobody's access changes and no new column appears on Roles &amp; access.
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="top">
+      <span class="brandname">Raya Trade</span>
+      <div class="dests">
+        <button>Group ▾</button>
+        <button class="on">Retail</button>
+        <button>E-commerce</button>
+        <button>FMCG</button>
+        <button>B2B</button>
+        <button>Events</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="on">Strategy</button>
+      <button>Performance</button>
+      <button>Reporting</button>
+      <button>Insights</button>
+    </div>
+    <div class="secrow">
+      <button>Foundation</button>
+      <button>SWOT</button>
+      <button class="on">Drivers<span class="new">NEW</span></button>
+      <button>Plan</button>
+    </div>
+    <div class="body">
+
+      <div class="strip">
+        <div class="stile">
+          <div class="k">Baseline · last year</div>
+          <div class="v">125.0M</div>
+          <div class="s">EGP, delivered</div>
+        </div>
+        <div class="stile lead">
+          <div class="k">Year 1 · what the tree adds up to</div>
+          <div class="v">153.8M</div>
+          <div class="s">this is the revenue target</div>
+        </div>
+        <div class="stile">
+          <div class="k">Growth</div>
+          <div class="v up">+28.8M</div>
+          <div class="s">+23.0% on the baseline</div>
+        </div>
+        <div class="stile">
+          <div class="k">Of which new business</div>
+          <div class="v">53%</div>
+          <div class="s">15.3M from stores not open yet</div>
+        </div>
+      </div>
+
+      <div class="bridge" aria-hidden="true">
+        <div style="flex:0.91;background:var(--stone)">VOLUME</div>
+        <div style="flex:12.50;background:var(--gold-deep)">PRICE 12.5M · 43%</div>
+        <div style="flex:0.09;background:var(--none)"></div>
+        <div style="flex:15.31;background:var(--warn)">NEW BUSINESS 15.3M · 53%</div>
+      </div>
+      <div class="bkey">
+        <span><i style="background:var(--stone)"></i>Volume 0.9M · 3%</span>
+        <span><i style="background:var(--gold-deep)"></i>Price 12.5M · 43%</span>
+        <span><i style="background:var(--none)"></i>The two together 0.1M · 0%</span>
+        <span><i style="background:var(--warn)"></i>New business 15.3M · 53%</span>
+      </div>
+      <p class="foot" style="padding-left:0;margin:8px 0 16px">
+        More than half of Retail's growth is revenue that does not exist yet. That is a different
+        risk from growth on stores already trading, and the page says so rather than leaving it
+        to be worked out.
+      </p>
+
+      <div class="pane">
+        <div class="pband">
+          <span class="pband-code">RS</span>
+          <span class="pband-name">Retail</span>
+          <span class="tail">one route to market · 12 months accounted for</span>
+        </div>
+        <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:31%">Driver</th>
+              <th style="width:9%">Kind</th>
+              <th class="num" style="width:11%">Baseline</th>
+              <th class="num" style="width:10%">Uplift</th>
+              <th class="num" style="width:11%">Year 1</th>
+              <th style="width:28%">Answers to<span class="subhd">the objective or measure this belongs to</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="dxband"><th colspan="6">Base year — excluding seasons
+              <em>10.98 months · 106.7M → 117.4M</em></th></tr>
+            <tr>
+              <td><span class="dname">Number of stores</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">12</td>
+              <td class="num">—</td>
+              <td class="num">12</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Transactions per store-month</span>
+                  <span class="why">Mature-store monthly rate.</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">4,500</td>
+              <td class="num">—</td>
+              <td class="num">4,500</td>
+              <td><span class="linked">Footfall conversion</span>
+                  <span class="why">RS02 · a pillar measure</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Average basket</span>
+                  <span class="why">List price rise across the range from March.</span></td>
+              <td><span class="kindchip val">Value</span></td>
+              <td class="num">180</td>
+              <td class="num">+10%</td>
+              <td class="num">198</td>
+              <td><span class="assume">Assumption — not scored</span>
+                  <span class="why">a price decision, not work anybody does</span></td>
+            </tr>
+
+            <tr class="dxband"><th colspan="6">Ramadan season · 17 Feb – 19 Mar
+              <em>1.02 months · 18.3M → 21.1M</em></th></tr>
+            <tr>
+              <td><span class="dname">Number of stores</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">12</td>
+              <td class="num">—</td>
+              <td class="num">12</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Transactions per store-month</span>
+                  <span class="why">Roughly 1.4× a normal trading month.</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">6,500</td>
+              <td class="num">+5%</td>
+              <td class="num">6,825</td>
+              <td><span class="linked">Footfall conversion</span>
+                  <span class="why">RS02 · a pillar measure</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Average basket</span>
+                  <span class="why">Gifting and bulk purchase lift the basket well above the 180 annual average.</span></td>
+              <td><span class="kindchip val">Value</span></td>
+              <td class="num">230</td>
+              <td class="num">+10%</td>
+              <td class="num">253</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+
+            <tr class="dxband"><th colspan="6">New stores — 2026 openings
+              <em>no baseline · 0 → 15.3M · new business</em></th></tr>
+            <tr>
+              <td><span class="dname">New stores</span>
+                  <span class="why">Mall of Egypt, Zamalek, Alex Corniche — leases signed. Owner: Retail Director.</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">3</td>
+              <td><span class="linked">Three new stores trading by Q3</span>
+                  <span class="why">a key objective</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Months active</span>
+                  <span class="why">Staggered openings Feb–Jun, so nine months average.</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">9</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Transactions per store-month (mature)</span>
+                  <span class="why">Mature-store rate. The ramp is applied separately below.</span></td>
+              <td><span class="kindchip">Volume</span></td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">4,500</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Average basket</span></td>
+              <td><span class="kindchip val">Value</span></td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">180</td>
+              <td><span class="assume">Assumption — not scored</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Maturity factor</span>
+                  <span class="why">New stores trade below mature levels in year one.</span></td>
+              <td><span class="kindchip val">Value</span></td>
+              <td class="num">—</td>
+              <td class="num">—</td>
+              <td class="num">70%</td>
+              <td><span class="notyet">Nobody has said yet</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <div class="paneact">
+          <button class="penbtn">+ Add a driver</button>
+          <button class="penbtn">+ Add a period</button>
+          <button class="penbtn">Done editing</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mk">
+    <ul>
+      <li><b>The three kinds of period are the navy bands.</b> Base year, a season with its real dates,
+          and an increment that has no baseline at all. The band carries the months and the money,
+          so the page never asks you to add up the parts yourself.</li>
+      <li><b>The months are worked out, never typed.</b> The base year is twelve minus the seasons used
+          here, so the periods always come to twelve and can never overlap. Change Ramadan's dates once
+          and every base period in the client moves with it.</li>
+      <li><b>The why sits under the driver's name</b>, the way a tactic's description already does —
+          not in a column of its own, which would take about 150px off the driver name at every width.</li>
+      <li><b>Three states in the last column</b>, and the difference matters at review time:
+          <span class="linked">connected</span> to something somebody is working on,
+          <span class="assume">an assumption</span> that moves for a reason nobody is scored on, and
+          <span class="notyet">nobody has said yet</span> — outstanding, findable, and holding
+          nothing up.</li>
+    </ul>
+    <div class="ask done">
+      <b>Decision 2 · an unanswered row — settled</b>
+      <i>"just say so."</i> Nothing is held back.<br><br>
+      <b>Which changed the colour, and that is worth a line.</b> I had drawn <i>Nobody has said
+      yet</i> in red. Red on a value means <i>this is holding something up</i> everywhere else in
+      this platform — a missing figure, a gap that shuts Submit — so a red word over something that
+      holds nothing up teaches people to stop reading the red. It is the platform's quiet grey now:
+      still plainly outstanding, still findable, and stopping nobody.
+    </div>
+  </div>
+
+  <!-- ════════════════ SCREEN 2 ════════════════ -->
+  <div class="screenlab">Screen 2 <span>— a unit that sells several ways</span></div>
+
+  <div class="app">
+    <div class="top">
+      <span class="brandname">Raya Trade</span>
+      <div class="dests">
+        <button>Group ▾</button>
+        <button>Retail</button>
+        <button class="on">E-commerce</button>
+        <button>FMCG</button>
+        <button>B2B</button>
+        <button>Events</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="on">Strategy</button>
+      <button>Performance</button>
+      <button>Reporting</button>
+      <button>Insights</button>
+    </div>
+    <div class="secrow">
+      <button>Foundation</button>
+      <button>SWOT</button>
+      <button class="on">Drivers<span class="new">NEW</span></button>
+      <button>Plan</button>
+    </div>
+    <div class="body">
+
+      <div class="strip">
+        <div class="stile">
+          <div class="k">Baseline · last year</div>
+          <div class="v">13.5M</div>
+          <div class="s">EGP, delivered</div>
+        </div>
+        <div class="stile lead">
+          <div class="k">Year 1 · what the tree adds up to</div>
+          <div class="v">34.8M</div>
+          <div class="s">this is the revenue target</div>
+        </div>
+        <div class="stile">
+          <div class="k">Growth</div>
+          <div class="v up">+21.4M</div>
+          <div class="s">+158.4% on the baseline</div>
+        </div>
+        <div class="stile">
+          <div class="k">Of which new business</div>
+          <div class="v">59%</div>
+          <div class="s">12.6M from a dark store not open yet</div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="rail">
+          <div class="rhead">Routes to market</div>
+          <div class="ritem on">
+            <div class="rname">Own app</div>
+            <div class="rsub">7.2M → 26.1M</div>
+          </div>
+          <div class="ritem">
+            <div class="rname">Call centre</div>
+            <div class="rsub">2.4M → 3.0M</div>
+          </div>
+          <div class="ritem">
+            <div class="rname">Aggregators</div>
+            <div class="rsub">3.9M → 5.7M</div>
+          </div>
+        </div>
+
+        <div class="pane">
+          <div class="pband">
+            <span class="pband-code">EC1</span>
+            <span class="pband-name">Own app</span>
+            <span class="tail">7.2M → 26.1M · 12 months accounted for</span>
+          </div>
+          <div class="tblwrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:31%">Driver</th>
+                <th style="width:9%">Kind</th>
+                <th class="num" style="width:11%">Baseline</th>
+                <th class="num" style="width:10%">Uplift</th>
+                <th class="num" style="width:11%">Year 1</th>
+                <th style="width:28%">Answers to</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="dxband"><th colspan="6">Base year — excluding seasons
+                <em>10.98 months · 6.1M → 11.6M</em></th></tr>
+              <tr>
+                <td><span class="dname">Sessions per month</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">62,000</td>
+                <td class="num">+40%</td>
+                <td class="num">86,800</td>
+                <td><span class="linked">Traffic to the app</span>
+                    <span class="why">EC01 · a pillar measure</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Conversion rate</span>
+                    <span class="why">New checkout flow launching Q2. Category benchmark is 2.4%.</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">2.0%</td>
+                <td class="num">+25%</td>
+                <td class="num">2.5%</td>
+                <td><span class="linked">Checkout completion</span>
+                    <span class="why">EC02 · a pillar measure</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Average order value</span></td>
+                <td><span class="kindchip val">Value</span></td>
+                <td class="num">450</td>
+                <td class="num">+8%</td>
+                <td class="num">486</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+
+              <tr class="dxband"><th colspan="6">Ramadan season · 17 Feb – 19 Mar
+                <em>1.02 months · 1.0M → 1.9M</em></th></tr>
+              <tr>
+                <td><span class="dname">Sessions per month</span>
+                    <span class="why">About 1.4× a normal month. Traffic peaks before Eid.</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">88,000</td>
+                <td class="num">+40%</td>
+                <td class="num">123,200</td>
+                <td><span class="linked">Traffic to the app</span>
+                    <span class="why">EC01 · a pillar measure</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Conversion rate</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">2.2%</td>
+                <td class="num">+25%</td>
+                <td class="num">2.75%</td>
+                <td><span class="linked">Checkout completion</span>
+                    <span class="why">EC02 · a pillar measure</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Average order value</span>
+                    <span class="why">Gifting and multi-item baskets.</span></td>
+                <td><span class="kindchip val">Value</span></td>
+                <td class="num">520</td>
+                <td class="num">+8%</td>
+                <td class="num">561.60</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+
+              <tr class="dxband"><th colspan="6">New hubs — dark stores
+                <em>no baseline · 0 → 12.6M · new business</em></th></tr>
+              <tr>
+                <td><span class="dname">Dark stores</span>
+                    <span class="why">Alexandria — an area not currently served. Capacity added where we already deliver belongs as an uplift on the base table.</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">1</td>
+                <td><span class="linked">Alexandria hub live</span>
+                    <span class="why">a key objective</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Months active</span>
+                    <span class="why">Live from May.</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">8</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Orders per store-month (mature)</span>
+                    <span class="why">Ops throughput ceiling, not a forecast. Cross-check against unserved-area sessions that currently bounce.</span></td>
+                <td><span class="kindchip">Volume</span></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">5,000</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Average order value</span></td>
+                <td><span class="kindchip val">Value</span></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">450</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+              <tr>
+                <td><span class="dname">Maturity factor</span>
+                    <span class="why">Throughput ramps as the catchment learns we deliver there.</span></td>
+                <td><span class="kindchip val">Value</span></td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">70%</td>
+                <td><span class="assume">Assumption — not scored</span></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="paneact">
+            <button class="penbtn">+ Add a driver</button>
+            <button class="penbtn">+ Add a period</button>
+            <button class="penbtn">Done editing</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="mk">
+    <ul>
+      <li><b>The routes sit in the rail</b> — the same rail a unit's pillars already sit in, so this is
+          not a new shape to learn. Retail has one route, so it gets no rail at all: a list of one
+          beside a pane with the same name on it says the name twice.</li>
+      <li><b>Each route is a tree of its own</b> and they add up. The seasons are the client's, defined
+          once, and used by name here.</li>
+    </ul>
+  </div>
+
+  <!-- ════════════════ SCREEN 3 ════════════════ -->
+  <div class="screenlab">Screen 3 <span>— the review reading: did the money show up, and which assumption failed</span></div>
+
+  <div class="mk">
+    <p>This is the screen the whole thing is for. <b>The figures in the "actual" column on this
+       screen are invented</b> — nobody has reported against a tree yet — but they are run through the
+       same arithmetic, so the totals are real arithmetic on made-up inputs. The story they tell is
+       the one you described: a unit can do everything it said it would and still miss the number.</p>
+  </div>
+
+  <div class="app">
+    <div class="top">
+      <span class="brandname">Raya Trade</span>
+      <div class="dests">
+        <button>Group ▾</button>
+        <button class="on">Retail</button>
+        <button>E-commerce</button>
+        <button>FMCG</button>
+        <button>B2B</button>
+        <button>Events</button>
+      </div>
+    </div>
+    <div class="tabs">
+      <button>Strategy</button>
+      <button class="on">Performance</button>
+      <button>Reporting</button>
+      <button>Insights</button>
+    </div>
+    <div class="secrow">
+      <button>Strategy</button>
+      <button class="on">Revenue drivers<span class="new">NEW</span></button>
+    </div>
+    <div class="body">
+
+      <div class="strip">
+        <div class="stile">
+          <div class="k">Strategy performance</div>
+          <div class="v" style="color:var(--good-tx)">94%</div>
+          <div class="s">we did what we said we would do · in the Strategy section</div>
+        </div>
+        <div class="stile lead">
+          <div class="k">Revenue performance</div>
+          <div class="v" style="color:var(--bad-tx)">90%</div>
+          <div class="s">138.5M against 153.8M</div>
+        </div>
+        <div class="stile">
+          <div class="k">Shortfall</div>
+          <div class="v" style="color:var(--bad-tx)">−15.4M</div>
+          <div class="s">EGP</div>
+        </div>
+      </div>
+
+      <div class="warnbox" style="margin:0 0 16px">
+        <b>The plan was delivered and the money was not.</b> Two assumptions moved: everyday
+        transactions per store came in 9% under, and one of the three new stores opened two months
+        late. Neither is a tactic anybody failed to do.
+      </div>
+
+      <div class="pane">
+        <div class="pband">
+          <span class="pband-code">RS</span>
+          <span class="pband-name">Where the 15.4M went</span>
+        </div>
+        <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:30%">Driver</th>
+              <th class="num" style="width:12%">Planned</th>
+              <th class="num" style="width:12%">Actual</th>
+              <th class="num" style="width:16%">Effect on revenue</th>
+              <th style="width:30%">Answers to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="dxband"><th colspan="5">Base year — excluding seasons
+              <em>planned 117.4M · actual 108.6M · −8.8M</em></th></tr>
+            <tr>
+              <td><span class="dname">Transactions per store-month</span>
+                  <span class="why">Assumed the mature-store rate held. It did not — traffic softened from April.</span></td>
+              <td class="num">4,500</td>
+              <td class="num">4,100</td>
+              <td class="num"><span class="badv">−10.4M</span><span class="pct">9% under</span></td>
+              <td><span class="linked">Footfall conversion</span>
+                  <span class="why">reported at 96% — the work was done</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Average basket</span></td>
+              <td class="num">198</td>
+              <td class="num">201</td>
+              <td class="num"><span class="good">+1.6M</span><span class="pct">1.5% over</span></td>
+              <td><span class="assume">Assumption</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Number of stores</span></td>
+              <td class="num">12</td>
+              <td class="num">12</td>
+              <td class="num">—</td>
+              <td><span class="assume">Assumption</span></td>
+            </tr>
+
+            <tr class="dxband"><th colspan="5">Ramadan season
+              <em>planned 21.1M · actual 21.9M · +0.8M</em></th></tr>
+            <tr>
+              <td><span class="dname">Transactions per store-month</span>
+                  <span class="why">The season ran harder than assumed.</span></td>
+              <td class="num">6,825</td>
+              <td class="num">7,200</td>
+              <td class="num"><span class="good">+1.2M</span><span class="pct">5.5% over</span></td>
+              <td><span class="linked">Footfall conversion</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Average basket</span></td>
+              <td class="num">253</td>
+              <td class="num">249</td>
+              <td class="num"><span class="badv">−0.4M</span><span class="pct">1.6% under</span></td>
+              <td><span class="assume">Assumption</span></td>
+            </tr>
+
+            <tr class="dxband"><th colspan="5">New stores — 2026 openings
+              <em>planned 15.3M · actual 7.9M · −7.4M</em></th></tr>
+            <tr>
+              <td><span class="dname">New stores</span>
+                  <span class="why">Alex Corniche did not open — the lease completed in November.</span></td>
+              <td class="num">3</td>
+              <td class="num">2</td>
+              <td class="num"><span class="badv">−5.1M</span><span class="pct">one short</span></td>
+              <td><span class="linked">Three new stores trading by Q3</span>
+                  <span class="why">reported at 67% — two of three</span></td>
+            </tr>
+            <tr>
+              <td><span class="dname">Months active</span>
+                  <span class="why">Both openings ran late against the Feb–Jun plan.</span></td>
+              <td class="num">9</td>
+              <td class="num">7</td>
+              <td class="num"><span class="badv">−2.3M</span><span class="pct">two months short</span></td>
+              <td><span class="assume">Assumption</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <p class="foot" style="padding:14px 0 0">
+        Rows the unit is scored on are underlined; the rest moved for reasons nobody was measured
+        against. <b>Footfall conversion reported 96%</b> and still cost 10.4M, because the plan assumed
+        a rate the base year never produced — which is the conversation this page exists to start.
+      </p>
+
+    </div>
+  </div>
+
+  <div class="mk">
+    <div class="ask done">
+      <b>Decision 3 · where this reading lives — settled</b>
+      <i>"the perfomance shall split to strategy and revenue driver."</i> So Performance gains two
+      sections, and this is the second of them.<br><br>
+      <b>Each section still carries both numbers</b>, which is the one thing the split must not cost:
+      the whole value is reading them beside each other, so the headline strip shows 94% and 90%
+      whichever section you are standing in, and the section row is how you cross.
+    </div>
+    <div class="ask done">
+      <b>Decision 4 · who types a driver's actual — settled</b>
+      <i>"what do oyu mean? they are all typed."</i> Every driver's actual is typed by the office.
+      <b>That corrects me, not you</b> — you only ever answered about the unconnected rows, and I
+      wrote down that a connected row would read itself from the measure. It was my inference and
+      it was wrong twice over: a measure and the driver beside it are usually different
+      quantities anyway, which is exactly why this screen can say <i>the measure reported 96% and
+      still cost 10.4M</i>.<br><br>
+      <b>So the connection does no filling at all — it is only for reading.</b> One cost, named
+      rather than found later: where a measure's target genuinely IS a driver's Year 1 figure, the
+      same number gets typed in two places and the two can drift.
+    </div>
+    <div class="ask done">
+      <b>Decision 5 · the seasons page — settled</b>
+      <i>"ok."</i> Defined once for the client, a name and two dates, in Setup beside the reporting
+      cycle. Change Ramadan's dates once and every base period in the client moves with it.
+    </div>
+    <div class="ask flag">
+      <b>One thing to say, not a question</b>
+      A section called <b>Strategy</b> under Performance sits one row below a tab called
+      <b>Strategy</b>. Two levels, one word — the tab is what we plan, the section is how it went.
+      I have used your words. If it reads oddly on the screen, <b>Delivery</b> is the alternative
+      and it is one word to change.
+    </div>
+  </div>
+
+  <div class="mk">
+    <p class="kick">What happens next</p>
+    <p>All five are settled, so these screens are what gets built. The arithmetic already is, and
+       it is checked against your own tool on all five channels — every period, every roll-up and
+       the growth split, 59 checks with nothing typed in by hand.</p>
+    <p><b>What is still open is not about the screens.</b> The tree is copied forward each cycle
+       and the new baseline is last year's achievement, typed — so the store has to hold more than
+       one year without the copy becoming a second source of the truth. That is the next thing I
+       work out, and it changes nothing you have seen here.</p>
+  </div>
+
+</div>

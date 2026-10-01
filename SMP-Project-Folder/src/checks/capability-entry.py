@@ -191,7 +191,13 @@ def main():
         # "not a real subject" for a capability, so the one page that is
         # somebody's whole project said nothing while the board counted it.
 
-        ck("...and so do its sections", capSecs == fnSecs and len(capSecs) == 2,
+        # §399 gave a supporting function an S&W section between its Overview
+        # and its work, and a capability is drawn by the same pages — so the
+        # count this asserted (two) was a literal that decision moved (§214.3).
+        # REWRITTEN, never loosened (§218): the AGREEMENT is the claim, and it
+        # still has to open on the Overview and end on the work.
+        ck("...and so do its sections", capSecs == fnSecs and len(capSecs) >= 2 and
+           capSecs[0] == "Overview" and capSecs[-1] == fnSecs[-1],
            "%s / %s" % (capSecs, fnSecs))
 
         # ── 4 · the Overview says what the thing is ────────────────────────

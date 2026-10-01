@@ -17,7 +17,14 @@
    renders as the character — so nothing that displays normally changes; only a
    payload is neutralised. Verified: esc()'s output is only ever concatenated
    into innerHTML, never compared, stored as a key, or read back. */
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+/* ESCAPING TWICE IS A SECOND FAULT, NOT A SECOND SAFETY (§395). A client's
+   own words reach the page through L(), which escapes them, and some of those
+   words are then handed to a helper that escapes again (a search box's
+   placeholder, a hover, a column key) — so a word holding "&" or an apostrophe
+   showed its entity. The five entities THIS function writes are left as they
+   are; every other "&" is still escaped. Still safe: those five decode to
+   text, never to markup, so nothing written through here can open a tag. */
+function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
@@ -164,7 +171,7 @@ function plus(id, label){
    a row. */
 function deliveryLine(ex, pl, whose){
   if (ex == null || pl == null || !pl)
-    return "No tactic " + (whose || "anywhere in the group") +
+    return "No " + L1("tactic") + " " + (whose || "anywhere in the group") +
            " has a plan against it yet, so there is nothing to deliver against.";
   var r = Math.round(ex / pl * 100);
   var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
@@ -210,12 +217,18 @@ function drillCard(title, val, opts){
    the dot, and at 3.77:1 it was not readable as a figure. */
 function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
-function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
+/* `execHtml` (§391) replaces the execution box's body for a subject whose
+   execution is not "delivered against planned" — a function planning in
+   projects or objectives reports a completion figure, and drawing it as
+   "Planned 100%" would state a plan nobody made. Absent, nothing changes. */
+function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip, execHtml){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
   var eid = execDrill ? modalFor(ctx + " \u2014 execution", "Where the execution figure comes from", execDrill) : null;
 
   var execBody;
-  if (exec == null || planned == null || planned === 0) {
+  if (execHtml != null) {
+    execBody = execHtml;
+  } else if (exec == null || planned == null || planned === 0) {
     execBody = '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
                '<span class="ratio-l">no plan</span>';
   } else {
@@ -468,6 +481,33 @@ function compileCell(c){
    on Report and the scoring colours (§41's budget). And the key carries NO
    opacity — the mockup's `.85` took `--ink-3` from 5.1:1 to about 4.4 at
    10px, which is §38.5 walked into while quoting it. */
+/* §415 — WHAT A TACTIC NEEDS, UNDER ITS NAME (Islam, of two drawn: "B").
+   Under the name rather than a column of its own because a column cost the
+   Tactic and Outcome columns a fifth of their width on every row, while this
+   costs nothing and makes only the tactics that have requirements taller.
+   The reported note's own shape (§255) — a small key over a rule — so a
+   second kind of aside does not bring a second vocabulary (§53.5).
+
+   WITH THE PEN OPEN IT IS A BOX, ONE LINE PER ITEM, AND ENTER IS A NEWLINE:
+   it is a list, not a title, so it carries no `.grow` and §229's Enter-commits
+   never reaches it; the shell's textarea branch still sizes it to what is in
+   it. Drawn with the pen open whether or not it holds anything (§61 — the box
+   is the only way to write the first one); read mode draws nothing when there
+   is nothing (§15.1). */
+function reqsCell(t, ed){
+  if (!requirementsOn(t)) return "";
+  var a = reqsOf(t);
+  if (ed) {
+    var i = FIELDS.push(function(v){ setReqs(t, v); }) - 1;
+    return '<label class="reqbox"><span class="repkey">' + DW("requirements", "many", t) + '</span>' +
+      '<textarea class="fld reqfld" data-fld="' + i + '" rows="1" placeholder="One per line">' +
+      esc(a.join("\n")) + '</textarea></label>';
+  }
+  if (!a.length) return "";
+  return '<span class="repnote reqnote"><span class="repkey">' + DW("requirements", "many", t) + '</span>' +
+    '<ul class="reqs">' + a.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") +
+    '</ul></span>';
+}
 function repNote(row){
   /* `notetext` is the break rule and nothing else (§271): a note may be
      several lines now, and this shape prints one under a row's name while
@@ -544,7 +584,7 @@ function measureHead(unscored){
   /* §239: "Annual target" says outright that it is the year's number, which
      is what makes the quiet figure beside the actual make sense. And "YTD
      actual" replaces a hardcoded "H1 actual" that read H1 in every cycle. */
-  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
+  return '<thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th><th class="cc">Dir.</th><th class="cc">Annual target</th>' +
     '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">YTD actual</th><th class="cc">Progress</th>') +
     '</tr></thead>';
 }
@@ -763,6 +803,85 @@ function outcomeTargetShown(t){
   return SMPRules.isYesNo(t.outTarget) ? "Yes / No" : String(t.outTarget);
 }
 
+/* ── SEVERAL OUTCOMES PER TACTIC, DRAWN (§414) ─────────────────────────
+   Each extra outcome is a sub-line under its tactic holding only what differs
+   per outcome — its name and its target (and, on Reporting and Performance,
+   its figure). Everything the outcomes SHARE — the tactic, its owner, its
+   collaborators, its quarters — spans the lines with `rowspan`, so a tactic
+   still reads as one thing (the signed-off mockup). A tactic with ONE outcome
+   carries no tag and no sub-line: byte-for-byte what it was.
+
+   THE STRIPE: the tables stripe by `nth-child`, so a sub-line would shift the
+   parity of every row below it. An odd number of sub-lines is followed by an
+   empty hidden row (`tr.opad`) so the next tactic keeps its stripe, and the
+   sub-lines take their tactic's ground through the sibling rules in
+   arrange.css. */
+function otag(id){ return '<span class="otag">' + esc(id) + '</span>'; }
+/* An extra outcome in the shape the first one's readers take — so
+   `outcomeShown`, `outcomeCell` and `outcomeOf` serve it unchanged (§53.5). */
+function exAsT(t, x){
+  return { outcome: x.outcome, outTarget: x.outTarget, outDir: x.outDir,
+           outCompile: x.outCompile, outActual: (t.outActs || {})[x.id] };
+}
+/* One outcome's YTD cell on Performance: its figure against what is due so
+   far, and its own score beside it, quieter than the average. */
+function outFigCell(t, x){
+  var o = outcomeOf(x), share = tacticShare(t);
+  if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
+  var shown = outcomeShown(x);
+  if (shown == null) {
+    var b = measureDueLabel(o, share);
+    return '<td class="cc"><span class="pill none">Not reported</span>' +
+      (b ? '<span class="why" style="margin:2px 0 0">due at ' + esc(b) + '</span>' : '') + '</td>';
+  }
+  var bp = benchBeside(o, share), sc = oneOutcomeScore(t, o);
+  return '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
+    (bp ? ' <i>/ ' + esc(bp) + '</i>' : '') +
+    (sc != null ? '<span class="oscore">&middot; ' + pct(sc) + '</span>' : '') + '</span></td>';
+}
+function outRowspan(n){ return n ? ' rowspan="' + (n + 1) + '"' : ''; }
+function outPad(n){ return n % 2 ? '<tr class="opad" hidden></tr>' : ''; }
+function outSubCls(t){ return SMPRules.isHidden(t) ? 'osub hiddenrow' : 'osub'; }
+/* Offered in the pen only, only with the switch on, and only under a tactic
+   whose FIRST outcome has a target — the first outcome decides whether the
+   tactic is measured by outcomes at all, so an extra added under one that is
+   not would be stored and read by nothing (§61). */
+function outAddBtn(t){
+  if (!outcomesOn(t) || !outcomeOf(t)) return '';
+  return '<button class="linkbu outadd" data-outadd="' + esc(t.id) + '">+ Add an outcome</button>';
+}
+function outOffBtn(t, id){
+  return '<button class="xbtn" data-outoff="' + esc(t.id) + '|' + esc(id) +
+    '" title="Remove this outcome" aria-label="Remove this outcome">&times;</button>';
+}
+/* The plan's sub-lines. `tdCls` is the class the tactic's own target cell
+   wears, so the column folds and centres exactly as the first line does. */
+function planOutRows(t, ed, tdCls){
+  var ex = tacticExtras(t);
+  if (!ex.length) return '';
+  return ex.map(function(x, k){
+    var last = k === ex.length - 1;
+    var emptyName = !x.outcome || !String(x.outcome).trim();
+    var emptyTgt = SMPRules.gapEmpty("outTarget", x);
+    var name = ed
+      ? bxkey(detailWord("outcomes", "one", t)) + otag(x.id) + outOffBtn(t, x.id) +
+        textOr("plan", x.outcome || "", emptyName ? "gapwalk" : "",
+               function(v){ setOr(x, "outcome", v); }) +
+        (last ? outAddBtn(t) : '')
+      : otag(x.id) + (emptyName ? '<span class="missing">Missing</span>'
+                                : '<b>' + esc(x.outcome) + '</b>') +
+        /* the same fold the first line has below 880 (§249) */
+        '<span class="subhd narrowtgt">' + (emptyTgt ? '<span class="missing">Missing</span>'
+          : SMPRules.isYesNo(x.outTarget) ? tgtShown(x.outTarget)
+          : esc(x.outDir || "\u2265") + ' ' + esc(x.outTarget)) + '</span>';
+    var tgt = ed
+      ? outcomeEdit(x, null, emptyTgt ? "gapwalk" : "", false)
+      : (emptyTgt ? '<span class="missing">Missing</span>' : tgtShown(x.outTarget));
+    return '<tr class="' + outSubCls(t) + '"><td>' + name + '</td>' +
+      '<td class="' + (ed ? 'tgtcell' : tdCls) + '">' + tgt + '</td></tr>';
+  }).join('') + outPad(ex.length);
+}
+
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
@@ -783,8 +902,10 @@ function tacticRows(ts, unitKey){
     var benchPair = oc && outcomeOf(t) ? benchBeside(outcomeOf(t), tacticShare(t)) : bench;
     var r = tacticProgress(t);
     var shown = oc ? outcomeShown(t) : (t.actual == null ? null : t.actual + "%");
-    var status = t.status === "Done" ? '<span class="pill good">Done</span>'
-                                     : '<span class="pill warn">' + esc(t.status) + '</span>';
+    /* §419: the word is derived, never read off `t.status` (RHI's words). */
+    var sk = tacticStatusKey(t);
+    var status = '<span class="pill ' + ({done:"good", wip:"warn", late:"bad", notdue:"kind", todo:"none"})[sk] +
+                 '">' + esc(TACTIC_WORDS[sk]) + '</span>';
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     /* §239: BOTH HALVES ARE PER CENTS of this tactic's own plan and the sign
@@ -792,39 +913,57 @@ function tacticRows(ts, unitKey){
        cell has always printed "due at 50%" WITH the sign in its unreported
        state, so one cell spelt one unit two ways. */
     var tail = !due
-      ? '<td class="cc" colspan="2"><span class="pill kind">Not yet due</span></td>'
+      /* §419.1: Status already says "Not due"; the second pill said it twice. */
+      ? '<td class="cc" colspan="2"></td>'
       : !tacticAnswered(t)
       ? '<td class="cc" colspan="2"><span class="pill none">Not reported</span>' +
         (bench ? '<span class="why" style="margin:2px 0 0">due at ' + esc(bench) + '</span>' : '') + '</td>'
       : '<td class="num"><span class="pair"><b>' + esc(shown) + '</b>' +
         (benchPair ? ' <i>/ ' + esc(benchPair) + '</i>' : '') + '</span></td>' +
         '<td class="num final" style="color:' + bandInk(r) + '">' + pct(r) + '</td>';
+    /* §414: SEVERAL OUTCOMES. Each outcome's figure, its benchmark and its
+       own score sit on its own line; Progress spans them and is the AVERAGE,
+       saying so, because a number that is an average of two others and does
+       not say so reads as a third measurement. */
+    var nEx = scoredExtras(t).length, rs = outRowspan(nEx), subs = '';
+    if (nEx) {
+      var lines = [t].concat(scoredExtras(t).map(function(x){ return exAsT(t, x); }));
+      var figs = lines.map(function(x){ return outFigCell(t, x); });
+      tail = !due ? '<td class="cc" colspan="2"' + rs + '></td>'
+        : figs[0] + '<td class="num final"' + rs + ' style="color:' + bandInk(r) + '">' +
+          (r == null ? '<span class="why">&mdash;</span>'
+                     : pct(r) + '<span class="oavg">average of ' + lines.length + '</span>') + '</td>';
+      subs = scoredExtras(t).map(function(x, k){
+        return '<tr class="' + outSubCls(t) + '"><td>' + otag(x.id) + outcomeCell(x) + '</td>' +
+          (due ? figs[k + 1] : '') + '</tr>';
+      }).join('') + outPad(nEx);
+    }
     return '<tr data-oi="' + i + '"' +
       /* §252: `tacticAnswered`, or a row answered through its outcome is
          dimmed as though nobody had reported it -- while the two cells at the
          end of that same row print the figure and its score. */
       (SMPRules.isHidden(t) ? ' class="hiddenrow"'
-        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx">' +
+        : due && tacticAnswered(t) ? '' : ' class="notdue"') + '><td class="idx"' + rs + '>' +
       (on ? handle("Reorder " + t.name) : '') +
       /* §248: the NAME carries the weight now, because the description sits
          under it — two greys at one weight run together as a single block.
          And the outcome leaves this cell for a column of its own: it is what
          the figure beside it is measured against, so it belongs on the line,
          not tucked under a name where it cannot be scanned. */
-      '<span class="idx-n">' + (i+1) + '</span></td><td><b class="tacname">' +
+      '<span class="idx-n">' + (i+1) + '</span></td><td' + rs + '><b class="tacname">' +
       esc(t.name) + '</b>' + hidChip(t) +
       (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '') +
       /* §255: the description stays a plain grey — it is the plan's, and the
          name above it is what it belongs to. The NOTE is the one line in this
          cell that was written this cycle, so it is the one that says so. */
       repNote(t) + '</td>' +
-      '<td>' + outcomeCell(t) + '</td>' +
-      '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
-      '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
+      '<td>' + (nEx ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      '<td' + rs + '>' + esc(t.owner) + '</td><td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+      '<td' + rs + '>' + qs(t) + '</td><td class="cc"' + rs + '>' + status + '</td>' + tail + '</tr>' + subs;
   }).join("");
 }
 function tacticHead(){
-  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Outcome</th>' +
+  return '<thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th><th>' + DW("outcomes", "one") + '</th>' +
     '<th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
     /* §239: VARIANCE GOES -- the pair beside it already shows it, and the
        column was spending width to restate a subtraction. "Of plan" becomes
@@ -1053,7 +1192,7 @@ function scorePair(perf, ex, pl, nMeasures, nScored, hi, lo){
     '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-      '<div class="minirow"><div><em>Measures</em><b>' + nMeasures + '</b>' +
+      '<div class="minirow"><div><em>' + L("measure") + '</em><b>' + nMeasures + '</b>' +
           (nScored < nMeasures ? '<em class="sub-n">' + nScored + ' scored</em>' : '') + '</div>' +
         '<div><em>Highest</em><b style="color:' + bandInk(hi) + '">' +
           pct(hi) + '</b></div>' +
@@ -1107,14 +1246,14 @@ function pillarList(u){
     '<div class="pheadwrap"><div class="phead" style="' + pgrid(on) + '">' +
       (on ? '<span></span>' : '') +
       '<span class="hfirst">' + L("pillar","bu") + allToggle() + '</span>' +
-      '<span>Kind</span><span>Theme</span><span>Owner</span>' +
+      '<span>Kind</span><span>' + L1("theme") + '</span><span>Owner</span>' +
       '<span class="num">Perform.</span><span class="num">Execution</span>' +
       '<span class="num">Var.</span><span></span></div></div>' +
     '<div class="sortable" data-item=".prow-wrap" data-kind="pillars" data-u="' + u.ukey + '">' +
       u.items.map(function(it, i){ return pillarRow(it, i, u); }).join("") + '</div>' +
     '<div class="ptotal" style="' + pgrid(on) + '">' +
       (on ? '<span></span>' : '') +
-      '<span>' + esc(u.name) + '<span class="tsub">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() + '</span></span>' +
+      '<span>' + esc(u.name) + '<span class="tsub">' + u.items.length + ' ' + L("pillar","bu") + '</span></span>' +
       '<span></span><span></span><span></span>' +
       '<span class="num">' + pct(unitPillars(u)) + '</span>' +
       '<span class="num">' + pct(unitRatio(u)) + '</span>' +
@@ -1132,22 +1271,21 @@ function pillarList(u){
    figure as a third headline, and unitPillars() has been computing it since
    the scoring model existed — it was in the rail's footer as a bare number.
    The decision that changed is where it is SHOWN, not what it means. */
-var TIP_PERF = "Performance scores this unit's own Key Objectives \u2014 each actual against its target, averaged. It is NOT a roll-up of its pillars' key measures: those average to their own figure, shown beside this one, and the two are meant to be comparable rather than the same number.";
+function TIP_PERF(){ return "Performance scores this unit's own " + L("keyobj") + " \u2014 each actual against its target, averaged. It is NOT a roll-up of its " + L("pillar") + "' " + L("measure") + ": those average to their own figure, shown beside this one, and the two are meant to be comparable rather than the same number."; }
 /* A FUNCTION, not a string. Every other TIP_ is a constant because it names no
    tenant-specific thing; this one names the tenant's word for a pillar, and a
    constant would freeze whatever LABELS held when the file loaded — before
    hydration on a deployed tenant, so it would say "Pillars" for a client who
    calls them Directions (§30.2's shape, in prose). */
 function tipPillars(){
-  var w = L("pillar", "bu").toLowerCase().replace(/s$/, "");
-  return "The mean of every " + esc(w) + "'s own performance \u2014 each one being " +
-    "its key measures scored against their targets, averaged. It says how the work " +
-    "the unit set itself is going, one level below the Key Objectives it is judged " +
+  return "The mean of every " + L1("pillar") + "'s own performance \u2014 each one being " +
+    "its " + L("measure") + " scored against their targets, averaged. It says how the work " +
+    "the unit set itself is going, one level below the " + L("keyobj") + " it is judged " +
     "on, and the two are meant to be comparable rather than the same number.";
 }
-var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 each tactic's percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans.";
-var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
-var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
+function TIP_EXEC(){ return "Execution scores the " + L("tactic") + " under this unit's " + L("pillar") + " \u2014 each " + L1("tactic") + "'s percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans."; }
+function TIP_THEME(){ return "Performance and execution across every " + L1("pillar") + " carrying this " + L1("theme") + ", in every " + L1("unitword") + "."; }
+function TIP_CAP(){ return "Group " + L("capability") + " are " + L("pillar") + " in their own right: performance from their " + L("measure") + ", execution from their " + L("tactic") + "."; }
 
 /* THE COLOURS MOVE BEHIND A BUTTON (§163) ─────────────────────────────
    It was a full-width bar reading "READING THE COLOURS" with every band spelt
@@ -1341,7 +1479,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -1431,13 +1569,14 @@ function unitsTable(keys){
     return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
       (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
       '<td class="num">' + u.weight + '%</td>' +
-      '<td class="num">' + u.items.length + '</td>' +
+      /* §405: a unit that plans otherwise counts no pillars. */
+      '<td class="num">' + (unitOwnWay(u) ? '&mdash;' : u.items.length) + '</td>' +
       '<td class="num">' + pct(r) + '</td>' +
       '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
       '<td class="num final" style="color:' + bandInk(ko) + '">' + pct(ko) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
+    '<th style="width:30%">' + L1("unitword") + '</th><th class="num">Weight</th>' +
     '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
     '<th class="num">Var.</th><th class="num">Objectives</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>';
@@ -1465,7 +1604,7 @@ function capsTable(){
       '<td class="num final" style="color:' + bandInk(perf) + '">' + pct(perf) + '</td></tr>';
   }).join("");
   return '<div class="cfg"><table><thead><tr>' +
-    '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th class="num">' + L("project") + '</th>' +
     '<th class="cc">Milestones</th><th class="num">Performance</th>' +
     '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
     '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
@@ -1710,7 +1849,7 @@ function renderWeighting(){
     return '<span class="why fw">' + (sv == null ? "share \u2014" : "share " + Math.round(sv) + "%") + '</span>';
   };
 
-  var head = '<tr><th>Business unit</th>' + f.map(function(x){
+  var head = '<tr><th>' + L1("unitword") + '</th>' + f.map(function(x){
       var kindNote = x.kind === "derived" ? "derived" : x.kind === "judgement" ? "set by hand" : "estimated";
       return '<th><div class="factor-h"><b>' + esc(x.name) + '</b><span>' + esc(x.basis) +
              '<br>' + kindNote + ' &middot; weight ' + x.weight + '%</span></div></th>';
@@ -1774,13 +1913,13 @@ function renderWeighting(){
     '<tfoot><tr><td>Always totals</td>' + f.map(function(){ return '<td></td>'; }).join("") +
     '<td class="num">100%</td></tr></tfoot></table></div>';
 
-  return section("", "Business unit weighting",
+  return section("", L1("unitword") + " weighting",
       res.entered ? null
         : "No factor values have been entered yet, so every business unit counts " +
           "equally in the group compile. Press Edit and fill the table to weight them.",
       '<div class="cfgwrap open">' +
         '<div class="cfg-bar">' +
-          '<span class="cfg-lab">' + liveRows.length + ' business units' +
+          '<span class="cfg-lab">' + plural(liveRows.length, L1("unitword"), L("unitword")) +
             (retired ? ' &middot; ' + retired + ' retired, excluded' : '') + '</span>' +
           (grant("g_weight") === "edit"
             ? '<button class="editbtn" data-edit="weights">' + (EDITING.weights ? "Done" : "Edit") + '</button>'
@@ -1802,38 +1941,52 @@ function renderWeighting(){
 function unitCards(keys){
   return keys.map(function(k){
     var u = UNITS[k];
-    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
+    var pd = miniTable([L1("keyobj"),"Direction","Target","H1 actual","Progress"],
       u.keyObjectives.map(function(m){
         /* §264: the score, so the rows add up to the "Headline:" line below. */
         return '<tr><td>' + esc(m.name) + '</td><td class="num">' + dirCell(m.dir) + '</td>' +
           '<td class="num">' + tgtShown(m.target) + '</td><td class="num">' + figShown(m) +
           '</td><td class="num">' + pct(measureScore(m)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its ' + L("keyobj") + '. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
-      '<h4 class="mini">Pillars beneath</h4>' +
-      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
-                          : ["Pillar","Theme","Performance","Of plan"],
-        u.items.map(function(it, i){
+      (unitOwnWay(u)
+        /* §405: its pillars are hidden and kept; what explains its number is
+           the way it plans, said in one line rather than an empty table. */
+        ? '<p class="sub">Plans in <b>' + esc(unitPlanWord(unitFormat(u))) + '</b> (' +
+            unitPlanCount(k) + '), not ' + L("pillar") + '.</p>'
+        : '<h4 class="mini">' + L("pillar") + ' beneath</h4>' +
+      miniTable(SHOW_KIND ? [L1("pillar"),"Kind",L1("theme"),"Performance","Of plan"]
+                          : [L1("pillar"),L1("theme"),"Performance","Of plan"],
+        itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
           return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
             (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
             '<td><span class="pill theme">' + it.theme + '</span></td>' +
             '<td class="num">' + pillarPerf(it) + '%</td>' +
             '<td class="num">' + pillarRatio(it) + '%</td></tr>';
         }).join("")) +
-      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
-    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
-      u.items.map(function(it, i){
+      '<p class="sub">The ' + L("pillar") + ' explain the number rather than produce it &mdash; the headline above is the ' + L("keyobj") + '.</p>');
+    var ed = unitOwnWay(u)
+      ? '<p class="sub">Execution <b>' + pct(unitExec(u)) + '</b> across its ' +
+          esc(unitPlanWord(unitFormat(u)).toLowerCase()) + '.</p>'
+      : miniTable([L1("pillar"),"Delivered","Planned","Variance"],
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
           '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
-      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
+      '<p class="sub">Mean across the unit\'s ' + L("pillar") + ': <b>' + unitExec(u) + '%</b> against <b>' +
       unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
       splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
+        u.weight + "% weight &middot; " + unitPlanCountWord(k) + (u.real ? "" : " &middot; illustrative"),
         unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
-        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
+        arranging("group") ? handle("Reorder " + u.name) : '',
+        /* §405: its execution is already a reading against what was due, so
+           a "Planned 100%" beside it would be a number nobody planned. */
+        unitOwnWay(u) ? (unitExec(u) == null
+          ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div><span class="ratio-l">nothing reported</span>'
+          : '<div class="ratio">' + unitExec(u) + '<small>%</small></div><span class="ratio-l">of its ' +
+            (unitFormat(u) === "objectives" ? "actions" : "milestones") + '</span>') : null) + '</div>';
   }).join("");
 }
 
@@ -1860,16 +2013,21 @@ function renderCompanyPerformance(coKey){
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
-  var keys = companyUnitKeys(ck);
-  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
-    ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>; until one does, there is nothing here to read.</div>';
+  var keys = companyUnitKeys(ck), fks = companyFnKeys(ck);
+  if (!keys.length && !fks.length) return '<div class="note"><b>' + esc(co.name) +
+    ' holds nothing yet.</b> A unit belongs to a company on ' +
+    '<b>Setup \u2192 ' + L("unitword","bu") + '</b>, and a supporting function on ' +
+    '<b>Setup \u2192 Functions</b>; until one does, there is nothing here to read.</div>';
+  /* §391: a company that holds functions reads them into its figures, and the
+     page says so — its headline cards stop being "Business units — …" because
+     they no longer are. With none, everything below is exactly what it was. */
+  if (fks.length) return renderCompanyWithFunctions(ck, co, keys, fks);
 
   var perf = companyObjectives(ck), ex = companyExec(ck),
       pl = companyPlan(ck), r = companyRatio(ck);
   var share = companyWeight(ck);
 
-  var perfDrill = miniTable(["Business unit", "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
+  var perfDrill = miniTable([L1("unitword"), "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1885,7 +2043,7 @@ function renderCompanyPerformance(coKey){
     'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
     'on the group\u2019s <b>Weighting</b> tab.</p>';
 
-  var execDrill = miniTable(["Business unit", "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
+  var execDrill = miniTable([L1("unitword"), "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
     keys.map(function(k){
       var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1899,23 +2057,23 @@ function renderCompanyPerformance(coKey){
     '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
-    '<p class="sub">Tactic completion under every pillar in these units, weighted identically ' +
-    'to performance. The planned line is derived from each tactic\u2019s quarter span, never ' +
+    '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
+    'to performance. The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
   var head = '<div class="scores">' +
-    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), perf, {
+    drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), perf, {
       primary: true,
       sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
-        ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
+        ", each on its own " + L("keyobj","bu") + ". " + esc(co.name) +
         " has no scorecard of its own \u2014 what it has is a reading of what it holds.",
       drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
       modalSub: "Weighted across the units in this company"
     }) +
-    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), r, {
+    drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), r, {
       sub: deliveryLine(ex, pl, "in these units"),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
-      modalSub: "Weighted compile of tactic delivery, as a share of plan"
+      modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
     }) +
     drillCard("Share of the group" + tip("What these units together are worth at group level, " +
         "before this company's own figures are re-normalised. It is the one number that only " +
@@ -1932,7 +2090,100 @@ function renderCompanyPerformance(coKey){
     section("", L("unitword","bu"), null,
       GVIEW.units === "table" ? unitsTable(keys)
         : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units"));
+      TIP_PERF(), viewToggle("units"));
+}
+
+/* ── A COMPANY THAT HOLDS SUPPORTING FUNCTIONS (§391) ───────────────────
+   Settled from a mockup drawn out of this very page: the same three cards,
+   the units' section unchanged, and a Supporting functions section under it
+   drawing each function with the card a unit wears. The drill says how every
+   member's share was reached, because a weight nobody can trace is a weight
+   nobody can defend. */
+function fnCompanyCard(fk, ck, share){
+  var f = FUNCTIONS[fk], sc = fnMemberScores(fk), co = COMPANIES[ck];
+  var w = Math.round(share.w * 10) / 10;
+  var sub = w + "% of " + esc(co.name) + (share.set ? "" : " (weight left blank)") +
+    " &middot; " + L1("fnword");
+  var name = '<button class="linkbu" data-go="fn:' + esc(fk) + '">' + esc(f.name) + '</button>';
+  if (fnPlansInPillars(f)) {
+    var u = unitLike("fn:" + fk);
+    return '<div class="gwrap">' + splitCard(name, sub, sc.perf, unitExec(u), unitPlan(u),
+      "", "", f.name, "") + '</div>';
+  }
+  var t = fnPlansInObjectives(f) ? fnActionsTally(fk) : (fnHolders(fk)[0] ? capExec(fnHolders(fk)[0]) : null);
+  var word = fnPlansInObjectives(f) ? "actions" : "milestones";
+  var body = (t && t.pct != null)
+    ? '<div class="ratio">' + t.pct + '<small>%</small></div><span class="ratio-l">complete</span>' +
+      '<dl class="led"><dt>Done</dt><dd>' + t.done + '</dd><dt>In progress</dt><dd>' + t.wip +
+      '</dd><dt>Of</dt><dd>' + t.total + ' ' + word + '</dd></dl>'
+    : '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
+      '<span class="ratio-l">nothing reported</span>';
+  return '<div class="gwrap">' + splitCard(name, sub, sc.perf, null, null, "", "", f.name, "", body) + '</div>';
+}
+function renderCompanyWithFunctions(ck, co, keys, fks){
+  var shares = companyShares(ck);
+  var perf = companyObjectives(ck), r = companyRatio(ck), share = companyWeight(ck);
+  var nameOf = function(s){ return s.unit ? UNITS[s.unit].name : FUNCTIONS[s.fn].name; };
+  var how = function(s){
+    if (s.unit) return (UNITS[s.unit].weight || 0) + "% of the group";
+    return s.set ? "weight set on Setup" : "weight left blank";
+  };
+  var drill = function(which){
+    var tot = 0;
+    var rows = shares.map(function(s){
+      var v = s.unit ? (which === "perf" ? unitObjectives(UNITS[s.unit]) : unitRatio(UNITS[s.unit]))
+                     : fnMemberScores(s.fn)[which];
+      var w = Math.round(s.w * 10) / 10;
+      return '<tr><td><b>' + esc(nameOf(s)) + '</b><span class="why" style="margin:0;display:block">' +
+          how(s) + '</span></td>' +
+        '<td>' + (s.unit ? L1("unitword") : L1("fnword")) + '</td>' +
+        '<td class="num">' + pct(v) + '</td><td class="num">' + w + '%</td>' +
+        '<td class="num">' + (v == null ? "&mdash;" : (Math.round(v * w) / 100).toFixed(1)) + '</td></tr>';
+    }).join("");
+    return miniTable(["Part of " + esc(co.name), "Kind",
+        which === "perf" ? "Performance" : "Execution", "Weight in " + esc(co.name), "Contribution"],
+      rows + '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td><td></td>' +
+        '<td class="num">100%</td><td class="num"><b>' + pct(which === "perf" ? perf : r) + '</b></td></tr>') +
+      '<p class="sub">The functions take their share first: a weight set on Setup is used as ' +
+      'given, a blank takes the average of the weights that are set, and with none set each ' +
+      'function counts as one equal member. ' + (keys.length
+        ? 'The units share what is left in proportion to the weights they carry at group level.'
+        : '') + '</p>';
+  };
+  var parts = plural(keys.length, "unit") + " and " +
+    plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name);
+  var head = '<div class="scores">' +
+    drillCard("Performance" + tip(TIP_PERF()), perf, {
+      primary: true,
+      sub: "The " + (keys.length ? parts : plural(fks.length, L1("fnword"), L("fnword")) + " in " + esc(co.name)) +
+        ", each on its own " + L("keyobj") + ", weighted.",
+      drill: drill("perf"), modalTitle: esc(co.name) + " — performance",
+      modalSub: "Weighted across everything this company holds"
+    }) +
+    drillCard("Execution" + tip(TIP_EXEC()), r, {
+      sub: "Each part’s own execution figure, weighted as in performance.",
+      drill: drill("exec"), modalTitle: esc(co.name) + " — execution",
+      modalSub: "Weighted across everything this company holds"
+    }) +
+    (keys.length ? drillCard("Share of the group" + tip("What these units together are worth at group level. " +
+        L("fnword") + " carry no group weight, so they are not in this number."), share, {
+      plain: true, pill: "of the group",
+      sub: plural(keys.length, "unit") + " of the group’s " + activeKeys().length +
+        ", carrying <b>" + share + "%</b> of its weight between them. Functions carry no group " +
+        "weight, so they are not in this number.",
+      drill: drill("perf"), modalTitle: esc(co.name) + " — weight",
+      modalSub: "Where this company's share comes from"
+    }) : '') +
+  '</div>';
+  var byFn = {};
+  shares.forEach(function(s){ if (s.fn) byFn[s.fn] = s; });
+  return perfActs("") + head +
+    (keys.length ? section("", L("unitword","bu"), null,
+      GVIEW.units === "table" ? unitsTable(keys)
+        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
+      TIP_PERF(), viewToggle("units")) : '') +
+    section("", L("fnword"), null,
+      '<div class="gauges g3">' + fks.map(function(k){ return fnCompanyCard(k, ck, byFn[k]); }).join("") + '</div>');
 }
 
 function renderGroupPerformance(){
@@ -1954,7 +2205,7 @@ function renderGroupPerformance(){
     '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
       pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
-  var perfDrill = miniTable(["Business unit","Objectives performance","Weight","Weighted contribution"],
+  var perfDrill = miniTable([L1("unitword"),"Objectives performance","Weight","Weighted contribution"],
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1964,9 +2215,9 @@ function renderGroupPerformance(){
     }).join("") +
     '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td><td class="num">100%</td>' +
     '<td class="num"><b>' + groupUnitsObjectives() + '%</b></td></tr>') +
-    '<p class="sub">Each unit\'s own Key Objectives &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
+    '<p class="sub">Each unit\'s own ' + L("keyobj") + ' &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
 
-  var execDrill = miniTable(["Business unit","Of plan","Weight","Delivered","Planned","Variance"],
+  var execDrill = miniTable([L1("unitword"),"Of plan","Weight","Delivered","Planned","Variance"],
     keys.map(function(k){
       var u = UNITS[k];
       return '<tr><td><b>' + esc(u.name) + '</b></td>' +
@@ -1981,21 +2232,21 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">Tactic completion under every unit\'s pillars, weighted identically to performance. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
 
   var themes = GROUP.themes.map(function(t, ti){
     var st = themeStats(t.ab);
-    var pd = miniTable(["Business unit", L("pillar","bu"), "Performance"],
+    var pd = miniTable([L1("unitword"), L("pillar","bu"), "Performance"],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
           '<td class="num final" style="color:' + bandInk(pillarPerf(x.it)) + '">' + pillarPerf(x.it) + '%</td></tr>';
       }).join("")) +
-      '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu").toLowerCase() +
-      ' carrying this theme, in <b>' + st.units.length + '</b> business units: <b>' + st.perf + '%</b>.</p>';
-    var ed = miniTable(["Business unit", L("pillar","bu"), "Delivered", "Planned", "Var."],
+      '<p class="sub">Mean across <b>' + st.list.length + '</b> ' + L("pillar","bu") +
+      ' carrying this ' + L1("theme") + ', in <b>' + st.units.length + '</b> ' + L("unitword") + ': <b>' + st.perf + '%</b>.</p>';
+    var ed = miniTable([L1("unitword"), L("pillar","bu"), "Delivered", "Planned", "Var."],
       st.list.map(function(x){
         return '<tr><td>' + esc(x.unit) + '</td><td>' + x.code + ' ' + esc(x.it.name) + '</td>' +
           '<td class="num">' + pillarExec(x.it) + '%</td><td class="num">' + pillarPlan(x.it) + '%</td>' +
@@ -2005,7 +2256,7 @@ function renderGroupPerformance(){
       '%</b> planned &mdash; <b>' + Math.round(st.exec / st.plan * 100) + '%</b> of plan.</p>';
     return '<div class="gwrap" data-oi="' + ti + '">' +
       splitCard('<span class="pill theme">' + t.ab + '</span> ' + esc(t.name),
-        st.list.length + " " + L("pillar","bu").toLowerCase() + " &middot; " + st.units.length + " units",
+        st.list.length + " " + L("pillar","bu") + " &middot; " + st.units.length + " units",
         st.perf, st.exec, st.plan, pd, ed, t.name,
         arranging("group") ? handle("Reorder " + t.name) : '') + '</div>';
   }).join("");
@@ -2023,8 +2274,8 @@ function renderGroupPerformance(){
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
       (ko == null
-        ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
-        : miniTable(["#","Key objective","Direction","Target","Actual","Progress"],
+        ? '<p class="sub">No ' + L("keyobj") + ' of its own. This ' + L1("capability") + ' is judged by its ' + L("project") + '.</p>'
+        : miniTable(["#",L1("keyobj"),"Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
               /* §264: the score, so the rows agree with the "Weighted across N
                  objectives" line below, which is capKO()'s own figure. */
@@ -2036,7 +2287,7 @@ function renderGroupPerformance(){
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
           '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
-      miniTable(["#","Project","Deliverables","Outcomes","Performance"],
+      miniTable(["#",L1("project"),L("deliverable"),L("outcome"),"Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
             '<td class="num">' + pct(projDeliverySide(p)) + '</td>' +
@@ -2044,7 +2295,7 @@ function renderGroupPerformance(){
             '<td class="num final" style="color:' + bandInk(projPerf(p)) + '">' + pct(projPerf(p)) + '</td></tr>';
         }).join("")) +
       '<p class="sub">Half from the deliverables side, half from the outcomes side, per side rather than per row.</p>';
-    var ed = miniTable(["#","Project","Completed","In progress","Not started"],
+    var ed = miniTable(["#",L1("project"),"Completed","In progress","Not started"],
         c.projects.map(function(p, i){
           var m = projMilestones(p);
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
@@ -2052,7 +2303,7 @@ function renderGroupPerformance(){
             '<td class="num">' + m.todo + '</td></tr>';
         }).join("")) +
       '<p class="sub"><b>' + ce.done + '</b> of <b>' + ce.total +
-      '</b> milestones completed across <b>' + c.projects.length + '</b> projects.</p>';
+      '</b> milestones completed across <b>' + c.projects.length + '</b> ' + L("project") + '.</p>';
     /* §16.6, settled by mock-capcard option 2: the same two-box card a business
        unit carries. The dial reads project performance; the right box holds the
        milestones that produce its execution — the workings behind the number,
@@ -2066,7 +2317,7 @@ function renderGroupPerformance(){
     var fnHeadName = fn && personName(fn.head);
     var sub = (fn ? esc(fn.name) +
         (fnHeadName && fnHeadName !== fn.name ? " &middot; " + esc(fnHeadName) : "") + " &middot; " : "") +
-      c.projects.length + " project" + (c.projects.length === 1 ? "" : "s");
+      plural(c.projects.length, L1("project"), L("project"));
     var msBody = !ce.total
       ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
         '<span class="ratio-l">no milestones</span>'
@@ -2075,7 +2326,7 @@ function renderGroupPerformance(){
         '<dl class="led">' +
           '<dt>In progress</dt><dd>' + ce.wip + '</dd>' +
           '<dt>Not started</dt><dd>' + ce.todo + '</dd>' +
-          '<dt>Projects</dt><dd>' + c.projects.length + '</dd>' +
+          '<dt>' + L("project") + '</dt><dd>' + c.projects.length + '</dd>' +
         '</dl>';
     return '<div class="gwrap" data-oi="' + ci + '"><div class="gcard">' +
       '<div class="card-head">' + (arranging("group") ? handle("Reorder " + c.name) : '') +
@@ -2085,8 +2336,8 @@ function renderGroupPerformance(){
         '<div class="box-obj"><div class="boxlabel"><span>Performance</span>' +
           plus(pid, "Performance breakdown for " + c.name) + '</div>' +
           gauge(perf, "") + '</div>' +
-        '<div class="box-exec"><div class="boxlabel"><span>Milestones</span>' +
-          plus(eid, "Milestones behind " + c.name) + '</div>' +
+        '<div class="box-exec"><div class="boxlabel"><span>' + L("milestone") + '</span>' +
+          plus(eid, labelWord("milestone", "bu") + " behind " + c.name) + '</div>' +
           msBody + '</div>' +
       '</div></div></div>';
   }).join("");
@@ -2131,35 +2382,60 @@ function whereNext(keys){
     }).join("") + '</div>';
 }
 
+  /* §428: THE TOP LAYER'S OWN PLAN, SCORED BESIDE THE UNITS AND NOT MIXED
+     IN. Islam, of the mockup: *"its own score, beside the units' score — not
+     mixed in"*. The figure is the same one a unit's pillars card draws
+     (`unitPillars`, over the top layer's own view), so nothing new is
+     computed (§53.5), and it is drawn only where the top layer HAS a plan —
+     every existing client's page is byte for byte what it was. */
+  function topPlanCard(){
+    if (!topHasPlan() || !planOn("group")) return "";
+    var tu = topAsUnit(), items = itemsNow(tu);
+    var drill = miniTable(["#", L1("pillar"), "Performance", "Delivered", "Planned"],
+      items.map(function(p, i){
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(pillarCode(tu, i) + " " + (p.name || "")) + '</td>' +
+          '<td class="num final" style="color:' + bandInk(pillarPerf(p)) + '">' + pct(pillarPerf(p)) + '</td>' +
+          '<td class="num">' + pct(pillarExec(p)) + '</td><td class="num">' + pct(pillarPlan(p)) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
+      'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
+      sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
+      drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
+      modalSub: "The top layer’s own plan, kept apart from the units"
+    });
+  }
+
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
-        drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
+        drillCard("Group " + L("keyobj") + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the " + L("unitword") + "."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
              set." — a data-quality note where the reader wanted to know what
              the number IS (§156). The count stays, because it is the size of
              the thing being scored. */
           primary: true, sub: "The group\u2019s own <b>" + GROUP.keyObjectives.length +
             "</b> objectives, each scored against its target.",
-          drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
+          drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
-        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+        topPlanCard() +
+        drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
              It used to print all ten unit weights — "21 / 14 / 10 / 15 / 8 /
              6 / 6 / 7 / 8 / 5" — which is a derivation nobody can use at a
              glance and which grows with the business. "How this is
              calculated →" is two lines below and opens exactly that. */
-          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> business units\u2019 own " +
-            L("keyobj","bu").toLowerCase() + ", weighted by size.",
+          primary: true, sub: "All <b>" + UNIT_KEYS.length + "</b> " + L("unitword") + "\u2019 own " +
+            L("keyobj","bu") + ", weighted by size.",
           drill: perfDrill, modalTitle: L("unitword","bu") + " \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
-        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
+        drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), groupRatio(), {
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
-          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
+          drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         }) +
       '</div>' + whereNext(UNIT_KEYS)) });
 
@@ -2173,25 +2449,29 @@ function whereNext(keys){
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)
-        : arrangeBar("business units", UNIT_KEYS.length) +
+        : arrangeBar(L("unitword"), UNIT_KEYS.length) +
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
-      TIP_PERF, viewToggle("units")) });
+      TIP_PERF(), viewToggle("units")) });
 
-  SECS.push({ t: "Group themes", h: section("", "Group themes",
+  SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
       null,
       arrangeBar("themes", GROUP.themes.length) +
-      '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME) });
+      '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
-  SECS.push({ t: "Group capabilities", h: section("", "Group capabilities",
+  SECS.push({ t: "Group " + L("capability"), h: section("", "Group " + L("capability"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
         : arrangeBar("capabilities", GROUP.capabilities.length) +
           '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
-      TIP_CAP, viewToggle("caps")) });
+      TIP_CAP(), viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
-  return perfActs(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
+  /* §428: the top layer's own review deck — its SWOT and its pillars — is
+     presented from here once it has a plan, through the one menu every
+     subject uses (§53.5). No plan, no menu: the page is what it was. */
+  var topDeck = topHasPlan() && planOn("group") ? presentMenu("unit", "group") : "";
+  return perfActs(topDeck + arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
 }
 var GROUP_SECTIONS = [], GSEC = 0;
 
@@ -2207,7 +2487,7 @@ function templeTables(){
   var editing = EDIT_PAGE.temple;
 
   var stmt =
-    '<h4 class="mini">' + L("aspiration","group") + '</h4>' +
+    '<h4 class="mini">' + L1("aspiration") + '</h4>' +
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
@@ -2265,16 +2545,16 @@ function templeTables(){
 
     '<h4 class="mini">' + L("theme","group") + '</h4>' +
     '<div class="cfg"><table><thead><tr><th class="idx">#</th><th class="cc" style="width:9%">Code</th>' +
-      '<th style="width:24%">Name</th><th>Note</th><th class="cc">Pillars</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a theme") +
+      '<th style="width:24%">Name</th><th>Note</th><th class="cc">' + L("pillar") + '</th><th class="cc"></th>' +
+      '</tr></thead><tbody>' + themeRows + '</tbody></table></div>' + add("theme", "Add a " + L1("theme")) +
 
-    '<h4 class="mini">' + L("pillar","group") + '</h4>' +
-    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">Capability</th>' +
-      '<th>Definition</th><th class="cc">Measures</th><th class="cc">Tactics</th><th class="cc"></th>' +
-      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a capability") +
+    '<h4 class="mini">' + L("capability") + '</h4>' +
+    '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:24%">' + L1("capability") + '</th>' +
+      '<th>Definition</th><th class="cc">' + L("measure") + '</th><th class="cc">' + L("tactic") + '</th><th class="cc"></th>' +
+      '</tr></thead><tbody>' + capRows + '</tbody></table></div>' + add("cap", "Add a " + L1("capability")) +
 
-    '<div class="note"><b>A theme in use cannot be removed.</b> Its code is what every pillar points at; ' +
-    'renaming one carries its pillars with it, and deleting one would leave them pointing at nothing.</div>' +
+    '<div class="note"><b>A ' + L1("theme") + ' in use cannot be removed.</b> Its code is what every ' + L1("pillar") + ' points at; ' +
+    'renaming one carries its ' + L("pillar") + ' with it, and deleting one would leave them pointing at nothing.</div>' +
   '</div>';
 }
 
@@ -2310,11 +2590,15 @@ function renderTemple(){
     '<div class="pillars">' + GROUP.themes.map(function(p){
       return '<div class="pillar"><span>' + esc(p.ab) + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note || "") + '</em></div>';
     }).join("") + '</div>' +
-    '<div class="stylobate"><div class="base-head">' + L("pillar","group") + ' &mdash; cross-cutting, no theme</div><div class="base-grid">' +
+    /* §404: THE BASE IS THE CAPABILITY COMPONENT. The Temple draws from what
+       the top level carries, and a client that switched capabilities off at
+       the top is not shown a base with nothing it chose to put there. */
+    (!SMPRules.capExists(GROUP) ? '</div>' :
+    '<div class="stylobate"><div class="base-head">' + L("capability") + ' &mdash; cross-cutting, no ' + L1("theme") + '</div><div class="base-grid">' +
       GROUP.capabilities.map(function(c){
         return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
-          '<span>' + c.projects.length + ' project' + (c.projects.length === 1 ? '' : 's') +
-            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' key objectives' : '') +
+          '<span>' + plural(c.projects.length, L1("project"), L("project")) +
+            (c.keyObjectives.length ? ' &middot; ' + c.keyObjectives.length + ' ' + L("keyobj") : '') +
             '</span></summary>' +
           '<div class="encard-body"><p>' + esc(c.def) + '</p><ul>' +
           c.projects.map(function(p){
@@ -2322,7 +2606,7 @@ function renderTemple(){
               ' deliverables, ' + p.outcomes.length + ' outcomes, ' + p.milestones.length + ' milestones</span></li>';
           }).join("") + '</ul></div></details>';
       }).join("") +
-    '</div></div></div>';
+    '</div></div></div>');
 }
 
 function renderGroupFoundation(){
@@ -2340,37 +2624,56 @@ function renderGroupFoundation(){
      clauses, purpose, aspiration or values for anyone including the SMO. */
   /* Same first-line fix as the unit's (§129's audit): the lead opens with
      the pen, a line can be removed, and the first one can be written. */
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return foundationBody(GROUP, "group", gpg);
+}
+
+/* §404: THE SECOND LAYER HAS A FOUNDATION OF ITS OWN (Islam: *"they can have
+   their own components as well like the company or the group if needed"*).
+   It is the GROUP's page drawn over a company's own record, never a second
+   builder (§53.5) — one page, two owners. The record rides the group's extra
+   (`GROUP.coFound[<company key>]`, no migration) and is judged exactly as the
+   group's own strategy is, so the office authors it and nobody else. */
+function renderCompanyFoundation(){
+  var k = String(TARGET || "").slice(3);
+  var gpg = authoring("foundation", "g_found") ? "foundation" : null;
+  var o = gpg ? coFoundWritable(k) : coFoundOf(k);
+  return foundationBody(o, "co:" + k, gpg);
+}
+
+function foundationBody(o, tgt, gpg){
+  /* §404: every block is a component the office may switch off. */
+  var on = function(c){ return compOn(tgt, c); };
+  return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c, ci){
+      (o.clauses || []).map(function(c, ci){
         return '<div class="clause"><dt>' +
           (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
+          (gpg ? '<button class="xbtn" data-clauserm="' + esc(tgt) + '|' + ci +
             '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
-      '</div>' +
+      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
+      '</div>' : '') +
       '<div class="fcol">' +
-        '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
-        '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
-          function(v){ GROUP.mission = v; }) + '</p></div>' +
-        aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
-          true, GROUP) +
+        (on("purpose") ? '<div class="card"><h2 class="sec first">' + L1("purpose") + '</h2>' +
+        '<p class="statement">' + fieldOr(gpg, o.mission, "big-field",
+          function(v){ o.mission = v; }) + '</p></div>' : '') +
+        aspirationCard(L1("aspiration"), o.aspiration, o.endInMind, o.keyObjectives || [], "foundation",
+          function(v){ o.aspiration = v; }, function(v){ o.endInMind = v; }, "g_found",
+          true, o, tgt) +
       '</div>' +
     '</div>' +
-    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
+    koBand(o.keyObjectives || [], "foundation", "g_found", o, true, tgt) +
 
-    '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
+    (!on("values") ? '' : '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
-      (GROUP.values || []).map(function(v){
+      (o.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
-    '</div></div>';
+    '</div></div>');
 }
 
 /* ── UNIT · Performance (pillars live here) ──────────────────────── */
@@ -2429,8 +2732,14 @@ function focusStrip(u){
 }
 
 function renderUnitPerformance(u){
+  /* §405: A UNIT THAT DOES NOT PLAN IN PILLARS IS DRAWN BY THE FUNCTION
+     PAGES — the same one branch spec 010 put at the top of every function page
+     the other way round. Its holder is `u:<key>`. */
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? fnObjPerformance("u:" + u.ukey) : renderFnPerformance("u:" + u.ukey);
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
+  var pOn = planOn(u);
   /* §264: the same two questions the pillar card had. The membership comes from
      `scorableKOs()` — koScore()'s own list — so the Highest can never name an
      objective the headline above it left out, and the figure is the SCORE the
@@ -2449,7 +2758,7 @@ function renderUnitPerformance(u){
      this page scores — so the breakdown opens from the headline rather than
      making someone go and find it. Same drill-down the group page offers. */
   var koDrill =
-    '<p class="sub" style="margin:0 0 14px">' + TIP_PERF + '</p>' +
+    '<p class="sub" style="margin:0 0 14px">' + TIP_PERF() + '</p>' +
     miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
       u.keyObjectives.map(function(m, i){
         var w = ws ? Math.round(ws[i] * 10) / 10 : null;
@@ -2493,15 +2802,15 @@ function renderUnitPerformance(u){
      Nothing new is computed. unitPillars() has existed since the scoring model
      did; only the highest and lowest are worked out here, exactly as the key
      objectives card does. */
-  var pps = u.items.map(pillarPerf).filter(function(v){ return v != null && !isNaN(v); });
+  var pps = itemsNow(u).map(pillarPerf).filter(function(v){ return v != null && !isNaN(v); });
   var pl = unitPillars(u);
   var plHi = pps.length ? Math.max.apply(null, pps) : null;
   var plLo = pps.length ? Math.min.apply(null, pps) : null;
   var plWord = L("pillar", "bu");
   var plDrill =
     '<p class="sub" style="margin:0 0 14px">' + tipPillars() + '</p>' +
-    miniTable(["#", plWord, "Measures", "Scored", "Performance"],
-      u.items.map(function(it, i){
+    miniTable(["#", plWord, L("measure"), "Scored", "Performance"],
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         var pp = pillarPerf(it), carrier = pillarCarrier(it);
         /* A pillar handed to a function is scored by ITS pillars, not by
            measures of its own (§59) — so the count would read 0 beside a real
@@ -2515,15 +2824,15 @@ function renderUnitPerformance(u){
           '<td class="num">' + ms + '</td><td class="num">' + sc + '</td>' +
           '<td class="num final" style="color:' + bandInk(pp) + '">' + pct(pp) + '</td></tr>';
       }).join("")) +
-    '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
-    plWord.toLowerCase() + ' with something scored: <b>' + pct(pl) + '</b>. ' +
-    'A ' + plWord.toLowerCase().replace(/s$/, "") + ' with no reported measure is left out ' +
+    '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + itemsNow(u).length + '</b> ' +
+    plWord + ' with something scored: <b>' + pct(pl) + '</b>. ' +
+    'A ' + L1("pillar") + ' with no reported measure is left out ' +
     'rather than counted as zero: nothing reported is not the same as nothing achieved.</p>';
 
   var exDrill =
-    '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC + '</p>' +
+    '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC() + '</p>' +
     miniTable(["#", L("pillar","bu"), "Delivered", "Planned", "Of plan", "Var."],
-      u.items.map(function(it, i){
+      itemsNow(u).map(function(it){ var i = u.items.indexOf(it);  /* §416 */
         var pr = pillarRatio(it);
         return '<tr><td class="idx">' + (i+1) + '</td><td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
           '<td class="num">' + pillarExec(it) + '%</td><td class="num">' + pillarPlan(it) + '%</td>' +
@@ -2531,13 +2840,13 @@ function renderUnitPerformance(u){
           '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
       }).join("")) +
     '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
-    '%</b> planned across <b>' + u.items.length + '</b> ' + L("pillar","bu").toLowerCase() +
-    ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+    '%</b> planned across <b>' + itemsNow(u).length + '</b> ' + L("pillar","bu") +
+    ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
-  var plId = modalFor(esc(u.name) + " &mdash; " + plWord.toLowerCase() + " performance",
-    "What each " + plWord.toLowerCase().replace(/s$/, "") + "'s own measures average to", plDrill);
-  var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
+  var plId = modalFor(esc(u.name) + " &mdash; " + plWord + " performance",
+    "What each " + L1("pillar") + "'s own measures average to", plDrill);
+  var exId = modalFor(esc(u.name) + " &mdash; execution performance", L1("tactic") + " delivery across the unit's " + L("pillar"), exDrill);
 
   /* ── THE ACTIONS STAY IN THE LEGEND, AND THE LEGEND GETS QUIETER
      (§94.9, REVERSING §94.8's first half the same day) ───────────────
@@ -2565,7 +2874,7 @@ function renderUnitPerformance(u){
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
           deltaTag(u.ukey) +
-          '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu").toLowerCase() + ' &rarr;</button></div>' +
+          '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu") + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
           '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
@@ -2574,11 +2883,14 @@ function renderUnitPerformance(u){
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
+      /* §422: a plan switched off scores nothing, so its two cards go and
+         the objectives stand alone. */
+      (!pOn ? '' : (
       '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
-            plWord.toLowerCase() + ' &rarr;</button></div>' +
+            plWord + ' &rarr;</button></div>' +
         '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
           '<div><em>Highest</em><b style="color:' + bandInk(plHi) + '">' +
             pct(plHi) + '</b></div>' +
@@ -2591,7 +2903,13 @@ function renderUnitPerformance(u){
           '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
         '<div class="minirow"><div><em>Delivered</em><b>' + pct(unitExec(u)) + '</b></div>' +
           '<div><em>Planned</em><b>' + pct(unitPlan(u)) + '</b></div>' +
-          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
+          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>')) +
+      /* ── AND THE REVENUE NUMBER BESIDE THEM (spec 063 §6.3) ────────
+         §6.3's one promise: each section carries BOTH headline numbers, so
+         whichever you are standing in you can see the other and cross. Drawn
+         only where there is a tree, so a unit with none reads exactly the
+         three cards it read yesterday. */
+      drvScoreCard(u) +
     '</div>' +
 
     focusStrip(u) +
@@ -2604,7 +2922,7 @@ function renderUnitPerformance(u){
     /* The arrange hint went with the button (§63.3): reordering is decided on
        the plan now, and a hint on a page with no control is a hint about
        something you cannot do from here. */
-    section("", "", null, unitPerfRail(u));
+    (pOn ? section("", "", null, unitPerfRail(u)) : planOffNote());
 }
 
 /* ── Foundation ────────────────────────────────────────────────────
@@ -2740,13 +3058,23 @@ function paneActs(page, acKey){
    `strategyPageOf()` exists to answer (§53.5). What varies per side and is
    NOT an access question is the render page: a unit's Foundation is
    `foundation`, a function's Overview is `capfoundation` (§213). */
+/* `drivers` NAMES `plan` FOR ITS RENDER PAGE TOO, and that is deliberate
+   rather than a shortcut: §269 made the edit mode the TAB's, so one press of
+   Edit opens the tree and the plan together, and a page key of its own would
+   be a second flag that could disagree with the first (§268's own finding,
+   which is exactly what this table exists to stop). */
 var SEC_PENS = {
-  found: { unit: "foundation", fn: "capfoundation", ac: "u_found" },
-  swot:  { unit: "analysis",                        ac: "u_anal"  },
-  plan:  { unit: "plan",       fn: "plan",          ac: "u_plan"  },
-  proj:  { unit: "plan",       fn: "plan",          ac: "u_plan"  }
+  found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
+  swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
+  drivers: { unit: "plan",                            ac: "u_plan"  },
+  plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
+  proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
 };
+/* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
+   page and grant (g_found), and its SWOT and Plan take the unit's. */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"] };
 function secPagePair(sec){
+  if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
   var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
@@ -2796,7 +3124,7 @@ function secPagePair(sec){
    otherwise open it twice. */
 function secPagesOpen(){
   var seen = {}, out = [];
-  Object.keys(SEC_PENS).forEach(function(k){
+  Object.keys(TARGET === "group" ? SEC_PENS_TOP : SEC_PENS).forEach(function(k){
     var p = secPagePair(k);
     if (!p || seen[p[0]] || !mayAuthor(p[1])) return;
     seen[p[0]] = 1;
@@ -4731,7 +5059,8 @@ function koSettle(entry){
     var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
     if (n && +n[1] > top) top = +n[1];
   });
-  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = "group-KO" + (++top); });
+  var pre = koPrefixOf(o);
+  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = pre + "-KO" + (++top); });
 }
 
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
@@ -4751,8 +5080,23 @@ function koSettle(entry){
    this is. It is passed rather than inferred from `isGroup`, because a unit
    also has to be renumbered afterwards and a boolean cannot say which unit
    (§96). */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner, target){
   var editing = authoring(page, acKey), pg = editing ? page : null;
+  /* §404: THE CARD CARRIES TWO COMPONENTS, the aspiration and the North Star
+     (the key objectives), and either may be switched off on its own. Off is a
+     VIEW, never a deletion — the fields stay stored and come back when the
+     component does. With the aspiration off the card still carries the
+     objectives in reading mode, headed by their own word; with both off, or
+     the aspiration off while the objectives are being written in the band,
+     there is nothing left to draw. */
+  var tgt = target || (isGroup ? "group" : (owner && owner.ukey)) || "group";
+  var aspOn = compOn(tgt, "aspiration"), koOn = compOn(tgt, "keyobj");
+  if (!aspOn) {
+    if (!koOn || editing) return '';
+    return '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
+      '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
+      koBlock(objectives, page, acKey, owner, isGroup, false) + '</div>';
+  }
   /* §268: THE PEN STAYS FOR THE GROUP AND GOES FOR A UNIT, and `isGroup` says
      exactly why rather than merely which: the group's Foundation is a TAB of
      its own with no section line to move onto, and a unit's is a SECTION of
@@ -4760,9 +5104,13 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
      goes with it — it is `position:relative` plus 34px of right padding held
      open for a pen, and holding that gap for a control that is not there is
      what §24 is about. */
-  return '<div class="card' + (isGroup ? ' hoverpen' : '') +
+  /* §428: the top layer's Foundation is a SECTION of its Strategy tab now,
+     so its pen is on the section line, as a unit's is; a company keeps its
+     own, having no line. */
+  var ownPen = isGroup && tgt !== "group";
+  return '<div class="card' + (ownPen ? ' hoverpen' : '') +
     '"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
-    (isGroup ? penBtn(page, acKey) : '') +
+    (ownPen ? penBtn(page, acKey) : '') +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
           inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
@@ -4802,7 +5150,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        was asked about: "Who we are" and the aspiration statement are short
        prose and read BETTER side by side. Stacking everything would push the
        table further down the page to solve a problem it does not have. */
-    (editing ? '' : '<div class="divide"></div>' +
+    (editing || !koOn ? '' : '<div class="divide"></div>' +
       koBlock(objectives, page, acKey, owner, isGroup, false)) +
   '</div>';
 }
@@ -4824,7 +5172,9 @@ function koBlock(objectives, page, acKey, owner, isGroup, editing){
    leaving modes, so the band has to be able to decide for itself that this page
    is no longer open to whoever is now looking at it. Nothing is drawn at all
    when it is not — the band exists only while the pen is on. */
-function koBand(objectives, page, acKey, owner, isGroup){
+function koBand(objectives, page, acKey, owner, isGroup, target){
+  /* §404: the North Star switched off draws no band either. */
+  if (!compOn(target || (isGroup ? "group" : ((owner && owner.ukey) || "group")), "keyobj")) return '';
   /* §145: the band also opens for the fill grant — koEdit's gap cells then
      draw only the blanks, and Add/Remove stay gated on authoring alone. */
   if (!authoring(page, acKey) && !filling(page, acKey)) return '';
@@ -4844,7 +5194,8 @@ function renderUnitFoundation(u){
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+    '<div class="fgrid">' + (compOn(u.ukey, "brief")
+      ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
         return '<div class="clause"><dt>' +
@@ -4855,10 +5206,10 @@ function renderUnitFoundation(u){
           '</dd></div>';
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' +
-      aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+        '">+ Add a line</button></div>' : '') + '</div>' : '') +
+      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u) +
+        false, u, u.ukey) +
     '</div>' +
     koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
@@ -4867,18 +5218,43 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
+  return swotBoxes(u, SMPRules.swotQuads(GROUP, u.ukey), "analysis", "u_anal");
+}
+/* ── A SUPPORTING FUNCTION'S S&W (§399) ────────────────────────────
+   Islam: *"We need to add Strengths and weakness for the supporting
+   functions"*, then *"like the tabs of the BUs"* and *"make it S&W"*. It
+   REVERSES half of §213 for these two lists: opportunities and threats are
+   about the market and stay the business's, while what a function is good and
+   bad at is the function's own. Every format (pillars, projects, objectives),
+   because it is a fact about the function and not about how it plans.
+
+   THE UNIT'S OWN BOXES, TWO OF FOUR (§53.5) — one builder, so a function's
+   S&W and a unit's SWOT cannot drift into two looks. The page is the
+   Overview's (`capfoundation`, `k_found`): the same grant, so one Edit opens
+   both and nobody's rights move. Stored on `FUNCTIONS[k].swot`, the field a
+   pillars function already carries, so a pillars function's uploaded s/w
+   show here at once and its o/t are kept untouched (§96.2). No migration:
+   a function's unmapped keys ride `functions.extra`. */
+function renderFnSW(t){
+  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var f = FUNCTIONS[fk];
+  if (!f) return "";
+  var sw = f.swot || FN_NO_SWOT;
+  return swotBoxes({ ukey:"fn:" + fk, swot:sw }, SMPRules.swotQuads(GROUP, "fn:" + fk), "capfoundation", "k_found");
+}
+function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
      had put here and an empty quadrant offered nothing at all — so a SWOT
      could only ever ARRIVE, never start. Add per quadrant, remove per line,
      both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring("analysis", "u_anal");
+    var ed = authoring(page, ac);
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
           (ed
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
+            ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
               '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
               '" title="Remove this line" aria-label="Remove this line">&times;</button>'
             : '<span>' + esc(x) + '</span>') + '</li>';
@@ -4890,9 +5266,538 @@ function renderUnitAnalysis(u){
      tablet meant `visibility:hidden` until the box itself happened to be
      tapped — §70's own finding, fixed for the plan PANE in August and left on
      the cards. */
+  /* §418: each box is named by its layer (Structure), the platform's word
+     otherwise; which boxes are drawn is the layer's too (swotQuads). */
   return '<div class="swot">' +
-    box("s","s","Strengths") + box("w","w","Weaknesses") +
-    box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
+    quads.map(function(q){ return box(q, q, L(SMPRules.QUAD_KEYS[q])); }).join("") + '</div>';
+}
+
+/* ── UNIT · Strategy · Drivers (spec 063, §6.1) ─────────────────────
+   Islam: *"it's a tab beside the swot ok"* — so a SECTION of Strategy's own
+   row, between SWOT and Plan, and a unit reads left to right: who we are,
+   where we stand, where the number comes from, what we will do about it.
+
+   IT ASKS `u_plan`'S GRANT AND OWNS NO PAGE KEY OF ITS OWN, which is what
+   keeps the promise that nobody's access moves and no column appears on
+   Roles & access: `SEC_PENS.drivers` names `plan` for its render page too, so
+   one press of Edit opens the tree and the plan together (§269 — the mode is
+   the TAB's) and there is no second flag to disagree with the first.
+
+   EVERY FIGURE ON IT IS `lib/rules.js`'s, NEVER COMPUTED HERE. The months, the
+   year-one value, the period totals and the growth split are the same
+   functions `api/state.js` runs and `smp-app/checks/drivers.mjs` proves
+   against Islam's own tool — a second arithmetic on the screen is a second
+   revenue target (§42, §53.5). */
+
+/* Money at the scale a plan is read at. The tree's own figures are the
+   multiplication of counts and prices, so they arrive at full precision and
+   are drawn at the magnitude the review speaks in — 125.02M, never
+   125,018,400 (§254.1's own reason, one table along). */
+function drvMoney(v, ref){
+  if (v == null || !isFinite(v)) return "&mdash;";
+  /* A TRUE MINUS SIGN, never a hyphen: these sit in tabular figures beside
+     one another, and U+002D is a dash the width of a letter in a column of
+     digits that are all the width of a digit. */
+  var a = Math.abs(v), s = v < 0 ? "\u2212" : "";
+  /* ONE LINE, ONE SCALE. `ref` is the figure the others on its line are read
+     against, so a period argued in millions does not report its gap in
+     thousands — "argued 21.12M · delivered 21.93M · +808.1K" is three numbers
+     a reader has to rescale in their head before they can be compared, which
+     is the one thing a summary line must not ask for. */
+  var m = Math.abs(ref == null ? v : ref);
+  if (m >= 1e9) return s + (a / 1e9).toFixed(2) + "B";
+  if (m >= 1e6) return s + (a / 1e6).toFixed(2) + "M";
+  if (m >= 1e3) return s + (a / 1e3).toFixed(1) + "K";
+  return s + (Math.round(a * 100) / 100);
+}
+/* A driver's own value, which is a COUNT or a PRICE or a per cent and never a
+   sum of money — so it keeps its separators and its unit rather than being
+   scaled (4,500 transactions is not 4.5K of anything). */
+function drvVal(v, unit){
+  if (v == null || !isFinite(v)) return "&mdash;";
+  var r = Math.round(v * 100) / 100;
+  return (unit === "%" ? r + "%" : String(r).replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+}
+function drvMonths(m){ return (Math.round(m * 100) / 100) + " months"; }
+/* A SEASON'S DATES READ THE WAY EVERY OTHER DATE IN THIS PRODUCT READS.
+   `2026-02-17` is what a date input stores and what the arithmetic needs; it
+   is not what a band says. `17 Feb` reads one way in every country, where
+   17/02/26 and 02/17/26 do not (§177's own reason for the month picker), and
+   the year is said once at the end rather than on both halves. */
+function drvDay(iso, withYear){
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ""));
+  if (!m) return esc(iso || "");
+  var mi = +m[2] - 1;
+  if (mi < 0 || mi > 11) return esc(iso);
+  return (+m[3]) + " " + MONTH_ABB[mi] + (withYear ? " " + m[1] : "");
+}
+
+/* WHAT A PERIOD'S BAND SAYS, and the three kinds say three different things
+   because they ARE three different things (§4.2): a base year carries the
+   months it has left after its own seasons, a season carries its real dates,
+   and an increment has no baseline at all — so saying "0 →" there would be
+   claiming a comparison nobody made. */
+function drvBandLine(seasons, ch, sub, p, f){
+  var ms = drvMonths(f.months);
+  if (p.type === "increment")
+    return 'no baseline &middot; ' + drvMoney(f.b1) + ' &middot; new business';
+  if (p.type === "season") {
+    var s = SMPRules.seasonById(seasons, p.seasonId);
+    return (s && s.start && s.end
+      ? drvDay(s.start) + ' &ndash; ' + drvDay(s.end, true) + ' &middot; ' : '') +
+      ms + ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1);
+  }
+  return ms + ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1, f.b0);
+}
+
+/* EVERY PLACE A DRIVER CAN ANSWER TO, in the unit's own reading order: its key
+   objectives first, then each pillar's measures under the pillar's name. One
+   walk, so the picker and the column below it cannot list different things. */
+function drvAnswerables(u){
+  var out = [];
+  (u.keyObjectives || []).forEach(function(r){
+    if (r && r.name) out.push({ row:r, name:r.name, where:"a " + L1("keyobj") });
+  });
+  (u.items || []).forEach(function(p, pi){
+    (p.measures || []).forEach(function(m){
+      if (m && m.name)
+        out.push({ row:m, name:m.name, where:esc(pillarCode(u, pi)) + " &middot; a " + L1("pillar") + " " + L1("measure") });
+    });
+  });
+  return out;
+}
+/* WHAT A DRIVER ANSWERS TO, READ AND NEVER STORED ON THE DRIVER (§4.3). A
+   unit's objectives and measures are renumbered BY POSITION on every load
+   (§48), so a connection stored the other way round would silently re-point
+   the moment somebody deleted an objective above it. */
+function drvAnsweredBy(u, d){
+  var all = drvAnswerables(u), id = String(d && d.id);
+  for (var i = 0; i < all.length; i++)
+    if (all[i].row[SMPRules.DRIVER_LINK] != null &&
+        String(all[i].row[SMPRules.DRIVER_LINK]) === id) return all[i];
+  return null;
+}
+
+/* THE LAST COLUMN, AND ITS THREE STATES ARE THE DECISION (§6.2). Islam, of a
+   driver nobody has connected: *"just say so."* So it is the QUIET register
+   and never the platform's red `Missing` — red on a value means *this is
+   holding something up* everywhere else here, and a red word over something
+   that stops nobody teaches people to stop reading the red (§214.4, §272).
+
+   THE CONTROL WRITES ONTO THE OBJECTIVE, WHICH IS WHERE THE POINTER LIVES.
+   It is drawn in this column because this is the column that SHOWS the state
+   — a picker on the objectives table would take about 150px off the objective
+   name at every width for a field most rows never use (§278.3's own
+   measurement, one table over) — but nothing about §4.3 moves: the select's
+   handler clears the id from every row that holds it and writes it onto the
+   one that was picked. */
+function drvAnswerCell(u, d, ed){
+  var hit = drvAnsweredBy(u, d);
+  var read = hit
+    ? '<span class="linked">' + esc(hit.name) + '</span><span class="why">' + hit.where + '</span>'
+    : d.assume === true
+      ? '<span class="assume">Assumption &mdash; not scored</span>'
+      : '<span class="notyet">Nobody has said yet</span>';
+  if (!ed) return read;
+  var opts = [{ v:"", label:"Nobody has said yet" },
+              { v:"assume", label:"Assumption — not scored" }];
+  var all = drvAnswerables(u);
+  if (all.length) opts.push({ group:"Answers to", items: all.map(function(x, i){
+    return { v:"r" + i, label:x.name };
+  }) });
+  var cur = hit ? "r" + all.indexOf(hit) : (d.assume === true ? "assume" : "");
+  return '<select class="fld drvans" data-drvans="' + esc(u.ukey) + '|' + esc(d.id) + '">' +
+    optionsHtml(opts, function(v){ return v === cur; }) + '</select>';
+}
+
+/* ── ONE SUB-CHANNEL'S TABLE ────────────────────────────────────────
+   Six columns, and the WHY sits under the driver's name rather than in a
+   column of its own — the way a tactic's description already does (§248), and
+   for the same measured reason: a Note column takes about 150px off the name
+   at every width, which is the one column that has to be readable.
+
+   THE BAND IS `tr.dxband`, the platform's own in-table band (§99), so a
+   period is opened the way a project's two halves already are and this table
+   adds no vocabulary of its own (§53.5). */
+function drvSubTable(u, seasons, ch, sub, si, ed){
+  var head = '<thead><tr>' +
+    '<th style="width:31%">Driver</th>' +
+    '<th style="width:9%">Kind</th>' +
+    '<th class="num" style="width:11%">Baseline</th>' +
+    '<th class="num" style="width:10%">Uplift</th>' +
+    '<th class="num" style="width:11%">Year 1</th>' +
+    /* THE REPORTED FIGURE IS TYPED HERE, beside the number it is read against
+       (§4.5a, Islam: *"they are all typed"*) — one page writes the tree and
+       what happened to it, so there is one place to look and one writer. It
+       is drawn while the pen is open and as a value when it is shut, and a
+       row nobody has typed against reads NOT REPORTED rather than nought
+       (§35, §93). */
+    '<th class="num" style="width:10%">Actual' +
+      (ed ? '' : '<span class="subhd">what happened</span>') + '</th>' +
+    '<th style="width:22%">Answers to' +
+      (ed ? '' : '<span class="subhd">the ' + L1("keyobj") + ' or ' + L1("measure") + ' this belongs to</span>') +
+    '</th></tr></thead>';
+  var body = (sub.periods || []).map(function(p, pi){
+    var at = esc(u.ukey) + '|' + si + '|' + pi;
+    var f = SMPRules.driverPeriod(seasons, ch, sub, p);
+    var inc = p.type === "increment";
+    var rows = (p.drivers || []).map(function(d){
+      var one = SMPRules.driverYearOne(d);
+      return '<tr>' +
+        '<td><span class="dname">' +
+          (ed ? textOr("plan", d.name || "", "grow", function(v){ d.name = v; })
+              : esc(d.name || "")) + '</span>' +
+          (ed || d.note
+            ? '<span class="why">' +
+              (ed ? textOr("plan", d.note || "", "grow", function(v){
+                      if (v) d.note = v; else delete d.note; })
+                  : esc(d.note)) + '</span>'
+            : '') + '</td>' +
+        '<td>' + (ed
+          ? selectOr("plan", d.kind === "val" ? "val" : "vol",
+              [{ v:"vol", label:"Volume" }, { v:"val", label:"Value" }], "",
+              function(v){ d.kind = v; })
+          : '<span class="kindchip' + (d.kind === "val" ? " val" : "") + '">' +
+            (d.kind === "val" ? "Value" : "Volume") + '</span>') + '</td>' +
+        /* AN INCREMENT HAS NO BASELINE AND NO UPLIFT, and the cells say so
+           rather than offering boxes that feed nothing: `driverPeriod()`
+           reads only the year-one value there, so a number typed into a
+           baseline would be stored, drawn and silently ignored (§96). */
+        '<td class="num">' + (inc ? '&mdash;' : (ed
+          ? inputOr("plan", d.base == null ? "" : d.base, "num",
+              function(v){ d.base = v === "" ? 0 : Number(v); })
+          : drvVal(Number(d.base) || 0, d.unit))) + '</td>' +
+        '<td class="num">' + (inc ? '&mdash;' : (ed
+          ? inputOr("plan", d.up == null ? "" : d.up, "num",
+              function(v){ d.up = v === "" ? 0 : Number(v); }) +
+            selectOr("plan", d.upUnit === "#" ? "#" : "%",
+              [{ v:"%", label:"%" }, { v:"#", label:"+n" }], "",
+              function(v){ d.upUnit = v; })
+          : (Number(d.up) ? (d.upUnit === "#" ? "+" + drvVal(Number(d.up))
+                                              : "+" + Number(d.up) + "%")
+                          : '&mdash;'))) + '</td>' +
+        '<td class="num">' + drvVal(inc ? Number(d.base) || 0 : one, d.unit) + '</td>' +
+        '<td class="num">' + (ed
+          ? inputOr("plan", d.actual == null ? "" : d.actual, "num", function(v){
+              /* STORED AS AN ABSENCE (§50.6): an emptied box is a figure
+                 nobody has reported, which is a different fact from a
+                 reported nought and must never be scored as one. */
+              if (v === "" || v == null) delete d.actual; else d.actual = Number(v);
+            })
+          : (SMPRules.driverActual(d) == null
+              ? '<span class="notyet">not reported</span>'
+              : drvVal(SMPRules.driverActual(d), d.unit))) + '</td>' +
+        '<td>' + drvAnswerCell(u, d, ed) + '</td>' +
+        (ed ? '<td class="xcell"><button class="xbtn" data-drvrm="' + esc(u.ukey) + '|' +
+          esc(d.id) + '" title="Remove this driver" aria-label="Remove this driver">' +
+          '&times;</button></td>' : '') + '</tr>';
+    }).join("");
+    return '<tr class="dxband"><th colspan="' + (ed ? 8 : 7) + '">' +
+        esc(p.name || "Period") + '<em>' + drvBandLine(seasons, ch, sub, p, f) + '</em>' +
+        (ed ? '<span class="dxacts">' +
+          '<button class="linkbu" data-drvadd="' + at + '">+ Add a driver</button>' +
+          '<button class="linkbu" data-drvprm="' + at + '">Remove this period</button>' +
+          '</span>' : '') +
+      '</th></tr>' + rows;
+  }).join("");
+  return '<div class="scroll"><table class="drvtbl">' + head +
+    '<tbody>' + body + '</tbody></table></div>';
+}
+
+function drvRailKey(u){ return "drv:" + u.ukey; }
+/* A CHANNEL WITH ONE ROUTE DRAWS NO RAIL, and `flat` is DERIVED from the list
+   rather than stored beside it (§110's pair): two facts that can disagree
+   about the same thing is how a rail comes to be drawn over one row. */
+function drvRailPick(ch, u){
+  var want = RAIL[drvRailKey(u)], subs = ch.subs || [];
+  for (var i = 0; i < subs.length; i++) if (subs[i].name === want) return i;
+  return 0;
+}
+
+/* WHAT THE TREE ADDS UP TO, on the pane's own band. The unit's revenue target
+   IS this figure (§4.2, Islam: *"tree is the main source"*), so the band says
+   the number the plan is built to rather than making somebody add the periods
+   up themselves. */
+function drvPaneBand(u, ch, sub, f, flat){
+  var tail = (flat ? 'one route to market' : plural((sub.periods || []).length, "period")) +
+    ' &middot; ' + drvMoney(f.b0) + ' &rarr; ' + drvMoney(f.b1, f.b0);
+  return pillarBand(u.codePrefix || "", flat ? u.name : sub.name,
+    '<span class="why" style="margin:0">' + tail + '</span>');
+}
+
+/* ── WHAT CAN BE ADDED, AND ONLY WHAT CAN (§61) ─────────────────────
+   A SECOND BASE PERIOD WOULD DOUBLE THE PLAN, silently. `driverMonths()`
+   gives every base period twelve months less the seasons used in its own
+   sub-channel, so two of them are two full years of revenue added together —
+   an arithmetic answer that is true and says something false. The same holds
+   one step down for a season already phased here.
+
+   So the control OFFERS ONLY THE LEGAL ONES rather than accepting anything
+   and refusing it afterwards: one select, narrowed to what this sub-channel
+   does not already have, absent entirely when there is nothing left to add.
+   A client with no seasons is told where they are set rather than shown an
+   empty list (§16.7). */
+function drvPaneActs(u, ch, sub, si, seasons, flat){
+  var used = {}, hasBase = false;
+  (sub.periods || []).forEach(function(p){
+    if (p.type === "base") hasBase = true;
+    if (p.type === "season" && p.seasonId) used[p.seasonId] = 1;
+  });
+  var opts = [{ v:"", label:"+ Add a period\u2026" }];
+  if (!hasBase) opts.push({ v:"base", label:"The base year" });
+  var free = (seasons || []).filter(function(s){ return s && s.id && !used[s.id]; });
+  if (free.length) opts.push({ group:"A season", items: free.map(function(s){
+    return { v:"s:" + s.id, label:s.name || s.id }; }) });
+  opts.push({ v:"increment", label:"Something new \u2014 no baseline" });
+
+  return '<div class="paneact drvact">' +
+    '<select class="fld drvadd" data-drvpnew="' + esc(u.ukey) + '|' + si + '">' +
+      optionsHtml(opts, function(v){ return v === ""; }) + '</select>' +
+    /* A COUNT CHANNEL IS NOT A RATE AT ALL (§4.2): *Events per year 45* is
+       already the year, so the months never multiply it. It is a fact about
+       the whole channel, which is why it sits here once rather than on each
+       route. */
+    '<select class="fld drvmode" data-drvmode="' + esc(u.ukey) + '">' +
+      optionsHtml([{ v:"rate", label:"Read as a monthly rate" },
+                   { v:"count", label:"Read as a yearly count" }],
+        function(v){ return v === SMPRules.driverMode(ch); }) + '</select>' +
+    '<button class="editbtn" data-drvsnew="' + esc(u.ukey) + '">+ Add a route</button>' +
+    (flat ? '' : '<button class="editbtn" data-drvsrm="' + esc(u.ukey) + '|' + si +
+      '">Remove this route</button>') +
+    (!free.length && !(seasons || []).length
+      ? '<span class="why" style="margin:0">Seasons are set once for the client on ' +
+        '<b>Setup \u2192 Seasons</b>.</span>' : '') + '</div>';
+}
+
+function renderUnitDrivers(u){
+  var seasons = SMPRules.seasonsOf(GROUP), ch = SMPRules.driverChannel(u);
+  var ed = authoring("plan", "u_plan");
+
+  /* AN EMPTY TREE IS WHERE THE FIRST ONE GOES (§61, §129's audit). The button
+     asks `mayEditPlan()` ITSELF, because on an empty page there is no pen for
+     it to be gated by — the control's anchor is the thing that does not exist
+     yet — and a unit whose office has not built a tree reads a sentence rather
+     than a blank pane (§45.2). */
+  if (!ch || !(ch.subs || []).length)
+    return '<div class="bempty">' +
+      '<b>' + esc(u.name) + ' has no revenue tree yet.</b>' +
+      (typeof mayEditPlan === "function" && mayEditPlan()
+        ? '<p>A tree is how a revenue number is argued: how many stores, how ' +
+          'many transactions, what basket &mdash; so the plan beside it can be ' +
+          'built to deliver the logic rather than to hit a figure nobody broke ' +
+          'down.</p>' +
+          '<div class="row"><button class="bprim" data-drvnew="' + esc(u.ukey) +
+            '">Start the tree</button>' +
+          '<span class="alt">the seasons it phases by are the client\'s, on ' +
+            '<b>Setup → Seasons</b>.</span></div>'
+        : '<p>The revenue tree is built by the SMO, on this page.</p>') + '</div>';
+
+  var flat = SMPRules.driverFlat(ch), subs = ch.subs;
+  var si = flat ? 0 : drvRailPick(ch, u), sub = subs[si];
+  var fig = SMPRules.driverFigures(seasons, ch);
+  var subFig = SMPRules.driverSub(seasons, ch, sub);
+  var open = SMPRules.driverUnanswered(u);
+
+  /* THE TOTAL LINE IS DRAWN ONCE, ABOVE EVERYTHING, and it is the whole
+     channel rather than the sub-channel on screen — a figure that changed
+     when you clicked a rail row would be a second reading of the same
+     question (§108.1's miscount, from the other side). */
+  var head = '<div class="drvtot">' +
+    '<span class="drvtot-n">' + drvMoney(fig.b1) + '</span>' +
+    '<span class="drvtot-w">the revenue this tree argues for &middot; ' +
+      drvMoney(fig.b0, fig.b1) + ' last year &middot; ' +
+      (fig.growth >= 0 ? '+' : '') + drvMoney(fig.growth, fig.b1) + ' of growth</span>' +
+    /* NOT A COUNT OF GAPS AND NOT IN RED. An unanswered connection holds
+       nothing up (Islam: *"just say so"*), so it is a fact in the quiet
+       register beside the number and joins no total that refuses a save
+       (§214.4, §272). */
+    (open ? '<span class="drvtot-open">' + plural(open, "driver") +
+      ' nobody has connected yet</span>' : '') + '</div>';
+
+  var pane = '<div class="pane">' + drvPaneBand(u, ch, sub, subFig, flat) +
+    drvSubTable(u, seasons, ch, sub, si, ed) +
+    (ed ? drvPaneActs(u, ch, sub, si, seasons, flat) : '') + '</div>';
+
+  if (flat) return head + pane;
+
+  var rows = subs.map(function(s, i){
+    var f = SMPRules.driverSub(seasons, ch, s);
+    return '<button class="ritem' + (i === si ? " on" : "") + '" data-drail="' +
+      esc(u.ukey) + '|' + esc(s.name) + '">' +
+      railName("", s.name) +
+      (RAIL_TERSE ? '' : '<span class="rsub">' +
+        plural((s.periods || []).length, "period") + ' &middot; ' +
+        drvMoney(f.b1) + '</span>') + '</button>';
+  }).join("");
+  return head + '<div class="split"><div class="rail">' +
+    railHead("Routes to market", subs.length) + rows +
+    '</div>' + pane + '</div>';
+}
+
+
+/* ── UNIT · Performance · Revenue drivers (spec 063 §6.3) ────────────
+   Islam: *"the perfomance shall split to strategy and revenue driver."*
+
+   WHY THE SPLIT IS WORTH A SECTION ROW rather than a fourth card: the two
+   readings answer different questions and can disagree — the plan was
+   delivered and the money was not — and §1's whole argument is that they are
+   worth reading BESIDE each other. Which is why each section carries the
+   other's headline: the Strategy section gains a revenue card, this one names
+   the execution figure, and the row is how you cross.
+
+   §63 IS NOT REVERSED. That section removed a Reporting *section* from inside
+   Performance on Islam's own point that *"performance is a result of
+   reporting, so having inside performance 2 buttons performance and reporting
+   doesn't make sense"* — two siblings repeating the tab's own word. These two
+   are different readings and neither repeats the tab.
+
+   NOTHING HERE COMPUTES ANYTHING. Every figure is `lib/rules.js`'s, which is
+   the same arithmetic `api/state.js` judges a save with and
+   `smp-app/checks/drivers.mjs` proves against Islam's own tool. */
+
+/* Is there anything to read at all — and the two halves are different facts
+   (§93): a unit with no tree has no revenue reading, and a unit with a tree
+   nobody has reported against has one that is honestly empty. */
+function drvHasTree(u){
+  var ch = SMPRules.driverChannel(u);
+  return !!(ch && (ch.subs || []).length);
+}
+/* WHAT PERFORMANCE SHOWS: a tree, AND the client having the switch on. The
+   one gate both the section and the score card ask, so Off cannot leave one
+   of them standing. */
+function drvShown(u){ return driversOn() && drvHasTree(u); }
+function drvReadingFigures(u){
+  var ch = SMPRules.driverChannel(u);
+  if (!ch || !(ch.subs || []).length) return null;
+  var se = SMPRules.seasonsOf(GROUP);
+  return { ch:ch, seasons:se,
+           reported: SMPRules.driverReported(ch),
+           f: SMPRules.driverActualFigures(se, ch) };
+}
+
+/* THE REVENUE CARD, drawn on the Strategy section so the two numbers are
+   read together (§6.3). It is `.card tight`, the same shape the three beside
+   it already are — a card of its own design would read as a different kind of
+   fact (§53.5). */
+function drvScoreCard(u){
+  if (!drvShown(u)) return "";
+  var r = drvReadingFigures(u);
+  if (!r) return "";
+  var s = r.reported ? SMPRules.driverScore(r.f) : null;
+  return '<div class="card tight"><div class="score-h"><h4>Revenue performance</h4>' +
+    (s == null ? '<span class="pill">Not reported</span>'
+               : '<span class="pill ' + band(s) + '">' + bandWord(s) + '</span>') + '</div>' +
+    '<div class="headline"><span class="big" style="color:' + bandInk(s) + '">' +
+      pctBig(s) + '</span>' +
+      '<button class="drill" data-sub2="perfdrv">See where it went &rarr;</button></div>' +
+    '<div class="minirow"><div><em>Argued for</em><b>' + drvMoney(r.f.planned) + '</b></div>' +
+      '<div><em>Delivered</em><b>' + (r.reported ? drvMoney(r.f.actual) : '&mdash;') + '</b></div>' +
+      '<div><em>Gap</em><b style="color:' + (r.reported ? bandInk(s) : 'inherit') + '">' +
+        (r.reported ? (r.f.gap >= 0 ? '+' : '') + drvMoney(r.f.gap, r.f.planned) : '&mdash;') +
+      '</b></div></div></div>';
+}
+
+function renderUnitRevenue(u){
+  var r = drvReadingFigures(u);
+  /* A UNIT WITH NO TREE NEVER REACHES THIS — the section's own `when` is what
+     keeps the row from appearing at all — so this is the belt for a target
+     that arrived some other way, and it points at the page that fills it
+     rather than at nothing (§61). */
+  if (!r) return '<div class="bempty"><b>' + esc(u.name) +
+    ' has no revenue tree yet.</b><p>A tree is built on ' +
+    '<b>Strategy → Drivers</b>, and this page reads what happened against it.</p></div>';
+
+  var ch = r.ch, se = r.seasons, f = r.f, s = r.reported ? SMPRules.driverScore(f) : null;
+  var ex = unitRatio(u);
+
+  /* THE STRIP CARRIES THE OTHER SECTION'S NUMBER AND SAYS WHERE IT LIVES —
+     §6.3's promise, and the sub-line is what stops it reading as a second,
+     different execution figure (§87's twins). */
+  var strip = '<div class="scores">' +
+    '<div class="card tight"><div class="score-h"><h4>Strategy performance</h4>' +
+      '<span class="pill ' + band(ex) + '">' + bandWord(ex) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(ex) + '">' +
+        pctBig(ex) + '</span>' +
+        '<button class="drill" data-sub2="perfstrat">Read it &rarr;</button></div>' +
+      '<div class="minirow"><div><em>We did what we said we would do</em>' +
+        '<b>' + pct(unitExec(u)) + ' of ' + pct(unitPlan(u)) + ' planned</b></div></div></div>' +
+    '<div class="card tight primary"><div class="score-h"><h4>Revenue performance</h4>' +
+      (s == null ? '<span class="pill">Not reported</span>'
+                 : '<span class="pill ' + band(s) + '">' + bandWord(s) + '</span>') + '</div>' +
+      '<div class="headline"><span class="big" style="color:' + bandInk(s) + '">' +
+        pctBig(s) + '</span></div>' +
+      '<div class="minirow"><div><em>Argued for</em><b>' + drvMoney(f.planned) + '</b></div>' +
+        '<div><em>Delivered</em><b>' + (r.reported ? drvMoney(f.actual) : '&mdash;') + '</b></div>' +
+        '<div><em>Gap</em><b style="color:' + (r.reported ? bandInk(s) : 'inherit') + '">' +
+          (r.reported ? (f.gap >= 0 ? '+' : '') + drvMoney(f.gap, f.planned) : '&mdash;') + '</b></div>' +
+      '</div></div>' + '</div>';
+
+  /* NOTHING REPORTED IS SAID, NEVER DRAWN AS NOUGHT (§35, §45.2). A page of
+     em-dashes under a heading reads as a feature that failed rather than as a
+     cycle nobody has typed into yet. */
+  if (!r.reported) return strip +
+    '<div class="bempty"><b>Nothing has been reported against this tree yet.</b>' +
+    '<p>Every driver\'s figure is typed on <b>Strategy → Drivers</b>, beside the ' +
+    'number the plan argued for. Once they are in, this page says where the ' +
+    'money went and which work each moved driver belonged to.</p></div>';
+
+  var panes = (ch.subs || []).map(function(sub){
+    var sf = SMPRules.driverSubActual(se, ch, sub);
+    var body = (sub.periods || []).map(function(p){
+      var a = SMPRules.driverPeriodActual(se, ch, sub, p);
+      var rows = a.rows.map(function(x){
+        var d = x.driver, hit = drvAnsweredBy(u, d);
+        /* EFFECT AND ACTUAL ARE TWO DIFFERENT SILENCES. A row nobody typed
+           against has no actual and therefore no effect, and both cells say
+           so rather than one of them printing a nought that reads as "this
+           cost nothing" (§35). */
+        return '<tr' + (x.reported ? '' : ' class="drvquiet"') + '>' +
+          '<td><span class="dname">' + esc(d.name || "") + '</span>' +
+          (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
+          '<td class="num">' + drvVal(x.planned, d.unit) + '</td>' +
+          '<td class="num">' + (x.reported ? drvVal(x.actual, d.unit)
+            : '<span class="notyet">not reported</span>') + '</td>' +
+          '<td class="num">' + (!x.reported || Math.abs(x.effect) < 1
+            ? '&mdash;'
+            : '<span class="' + (x.effect < 0 ? "drvdown" : "drvup") + '">' +
+              (x.effect > 0 ? '+' : '') + drvMoney(x.effect, a.planned) + '</span>') + '</td>' +
+          '<td>' + (hit
+            ? '<span class="linked">' + esc(hit.name) + '</span>' +
+              '<span class="why">' + hit.where + '</span>'
+            : d.assume === true
+              ? '<span class="assume">Assumption</span>'
+              : '<span class="notyet">Nobody has said yet</span>') + '</td></tr>';
+      }).join("");
+      return '<tr class="dxband"><th colspan="5">' + esc(p.name || "Period") +
+        '<em>argued ' + drvMoney(a.planned) + ' &middot; delivered ' +
+        drvMoney(a.actual, a.planned) + ' &middot; ' + (a.gap >= 0 ? '+' : '') +
+        drvMoney(a.gap, a.planned) + '</em></th></tr>' + rows;
+    }).join("");
+    return '<div class="pane">' +
+      pillarBand(u.codePrefix || "", SMPRules.driverFlat(ch)
+          ? "Where the " + drvMoney(Math.abs(f.gap)) + " went" : sub.name,
+        '<span class="why" style="margin:0">' + drvMoney(sf.planned) + ' &rarr; ' +
+          drvMoney(sf.actual, sf.planned) + '</span>') +
+      '<div class="scroll"><table class="drvtbl"><thead><tr>' +
+        '<th style="width:30%">Driver</th>' +
+        '<th class="num" style="width:12%">Planned</th>' +
+        '<th class="num" style="width:12%">Actual</th>' +
+        '<th class="num" style="width:16%">Effect on revenue</th>' +
+        '<th style="width:30%">Answers to</th></tr></thead>' +
+        '<tbody>' + body + '</tbody></table></div></div>';
+  }).join("");
+
+  /* THE FOOTNOTE IS THE WHOLE POINT OF THE PAGE, and it is the product's own
+     sentence rather than a reading of these particular figures — the platform
+     cannot know why a driver moved, and saying so in the product's voice is
+     what keeps it honest on every tenant (§35, §124). */
+  return strip + panes +
+    '<p class="sub" style="margin:16px 0 0">A row that answers to something is ' +
+    'work somebody is measured on; the rest moved for reasons nobody was ' +
+    'measured against. The two readings can disagree &mdash; a unit can deliver ' +
+    'every tactic it committed to and still miss the number, because the plan ' +
+    'assumed a rate the base year never produced. That is the conversation this ' +
+    'page exists to start.</p>';
 }
 
 /* ── GROUP · Focus board ────────────────────────────────────────────
@@ -4933,7 +5838,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : '<span class="why" style="margin:3px 0 0">' +
                         (String(sub.key).indexOf("cap:") === 0
-                          ? 'capability' : 'supporting function') + '</span>') +
+                          ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
@@ -5051,29 +5956,17 @@ function reportBar(target){
 
    Only this unit's items, only what this cycle asks for, and no plan editing:
    a target cannot be moved from the screen where it is being reported against. */
-function renderReport(u){
-  var may = canReport(u.ukey);
-  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
-     contributor limited to their own lines does neither — the server refuses
-     both, so the screen does not offer them (spec 006 §7.2). */
-  var mayAll = canSpeakFor(u.ukey);
-  var c = reportedCount(u);
-  var subd = !!REVIEW.submitted[u.ukey];
-  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
-
-  if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
-      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
-  }
-
-  /* One cell shape for every reportable row, so a measure and a tactic are
-     entered the same way even though they mean different things. */
-  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
-     plainly a percentage and a revenue measure is plainly billions of EGP. The
-     number alone goes in the field \u2014 actuals are stored with their unit, and
-     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
-     save so nothing downstream sees a bare number. */
-  var entry = function(x){
+/* ── ONE CELL FOR EVERY REPORTABLE ROW, ON BOTH PAGES (§345) ───────────
+   Lifted out of `renderReport` unchanged when My reporting gained the same
+   rows: a tactic entered by its owner and a tactic entered by its unit must
+   be the SAME control, or the two pages drift the way §211 and §213 each
+   cost a day to undo (§53.5). `subj` is the subject the row belongs to —
+   written into the field as `data-repu`, which the shell's one handler has
+   read since "Figures I report" existed, so a row from another unit resolves
+   against its OWN plan rather than the page you are standing on. `where`
+   says which page is asking, which is the only thing the two answer
+   differently (§345: one door). */
+function repEntry(subj, x, where){
     var isT = x.kind === "tactic";
     /* §248: a tactic measured by its OUTCOME is asked for the outcome's
        figure, in the outcome's own unit, and stores it in `outActual` — never
@@ -5106,7 +5999,7 @@ function renderReport(u){
        named on (spec 006 §7.2); a figure with a SOURCE is entered by that
        source and by nobody in the unit (§16.7). Both are refused by the
        server, so neither is offered here. */
-    if (!canEnterFigure(u.ukey, x)) {
+    if (!canEnterFigure(subj, x, where)) {
       var src = srcOf(x), lab = src ? srcLabel(x) : "";
       /* §300: a yes/no figure is READ through `ynShown`, so a row holding a
          tenant's old `Yes` reads in the words the control now offers without
@@ -5119,13 +6012,73 @@ function renderReport(u){
     /* §300: the status picker and its per-cent box, which are §104's own pair
        (`ynBoxes`) rather than a control of this table's — Islam: *"for the
        inprogress and the % we used ot have them 2 stached boxes not one"*. */
-    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld);
+    if (ynRow) return ynBoxes(x.id, "rep", cur, x.obj.name, fld, subj);
     return '<span class="entry' + (has ? " filled" : "") + '">' +
-      '<input class="field" data-rep="' + x.id + '" data-fld="' + fld +
+      '<input class="field" data-rep="' + x.id + '" data-repu="' + esc(subj) +
+      '" data-fld="' + fld +
       '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
       (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
-  };
+  }
+
+/* §414: THE BOX FOR A SECOND OR LATER OUTCOME. The same box `repEntry` draws
+   for the first, in the outcome's own unit, writing `outActs[<id>]` through
+   the same handler — the field is named `outActs:<id>` so the handler knows
+   which outcome it is for. A yes/no outcome gets §300's two halves. */
+function repEntryExtra(subj, x, ex, where){
+  var t = x.obj, o = extraOutcomeOf(t, ex);
+  if (!o) return '<span class="missing">Missing</span>';
+  var cur = (t.outActs || {})[ex.id], has = cur != null && cur !== "";
+  var fld = "outActs:" + ex.id, yn = SMPRules.isYesNo(o.target);
+  var unit = splitTarget(o.target).unit;
+  var label = t.name + " \u2014 " + (ex.outcome || ex.id);
+  if (!canEnterFigure(subj, x, where))
+    return '<span class="mono">' + (has ? esc(yn ? SMPRules.ynShown(cur) : unitTight(cur))
+                                        : "\u2014") + '</span>';
+  if (yn) return ynBoxes(x.id, "rep", cur, label, fld, subj);
+  var shown = has ? (splitTarget(unitTight(cur)).value || String(cur)) : "";
+  return '<span class="entry' + (has ? " filled" : "") + '">' +
+    '<input class="field" data-rep="' + x.id + '" data-repu="' + esc(subj) +
+    '" data-fld="' + esc(fld) + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
+    '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
+    (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
+}
+/* §414: an outcome's target cell on Reporting — what it is measured against
+   now, and the whole it is a part of. */
+function repOutTarget(t, x){
+  var o = outcomeOf(x);
+  if (!o) return '<span class="nobody">&mdash;</span>';
+  var bench = measureDueLabel(o, tacticShare(t)), whole = outcomeTargetShown(x);
+  return (bench ? esc(bench) : '<span class="nobody">&mdash;</span>') +
+    (whole && whole !== bench && !SMPRules.isYesNo(x.outTarget)
+      ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
+}
+
+function renderReport(u){
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
+  var may = canReport(u.ukey);
+  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
+     contributor limited to their own lines does neither — the server refuses
+     both, so the screen does not offer them (spec 006 §7.2). */
+  var mayAll = canSpeakFor(u.ukey);
+  var c = reportedCount(u);
+  var subd = !!REVIEW.submitted[u.ukey];
+  var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
+
+  if (REVIEW.state !== "open") {
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
+      'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
+  }
+
+  /* One cell shape for every reportable row, so a measure and a tactic are
+     entered the same way even though they mean different things. */
+  /* The box carries the measure's own unit as a fixed suffix, so a tactic is
+     plainly a percentage and a revenue measure is plainly billions of EGP. The
+     number alone goes in the field \u2014 actuals are stored with their unit, and
+     showing "28%" beside a "%" suffix reads as 28% %. The unit is rejoined on
+     save so nothing downstream sees a bare number. */
+  var entry = function(x){ return repEntry(u.ukey, x, "unit"); };
   /* §343: THE BOX FOR ONE CELL OF A BREAKDOWN. It is `entry`'s shape rather
      than `entry` itself, because every branch in that function is about a
      field on the row (`actual` / `outActual`, the yes/no pair, a sourced
@@ -5241,7 +6194,7 @@ function renderReport(u){
 
     var mTable = ms.length
       ? '<h4 class="mini">' + L("measure","bu") + '</h4>' +
-        miniTable(["#", "Measure", "Dir.", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", L1("measure"), "Dir.", REP_TGT_HEAD, "Reported", "Note"],
           ms.map(function(x, i){
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
               '<td class="idx">' + (i+1) + '</td>' +
@@ -5254,22 +6207,37 @@ function renderReport(u){
       : "";
 
     var tTable = ts.length
-      ? '<h4 class="mini">Tactics</h4>' +
+      ? '<h4 class="mini">' + L("tactic") + '</h4>' +
         /* §248: the Outcome takes a column here too, so somebody entering a
            figure can see what they are being measured against without leaving
            the page. It is a PLAN fact, so a row outside this cycle still shows
            its outcome — the cycle decides what is asked for, not what the plan
            says. */
-        miniTable(["#", "Tactic", "Outcome", "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
+        miniTable(["#", L1("tactic"), DW("outcomes", "one"), "Owner", "Quarters", REP_TGT_HEAD, "Reported", "Note"],
           ts.map(function(x, i){
-            var nameCell = '<td><b class="tacname">' + esc(x.obj.name) + '</b>' +
+            /* §414: one line per outcome; the tactic, its owner, its
+               quarters and its ONE note span them (the note is the tactic's,
+               as it always was). */
+            var xs = scoredExtras(x.obj), nEx = xs.length, rs = outRowspan(nEx);
+            var nameCell = '<td' + rs + '><b class="tacname">' + esc(x.obj.name) + '</b>' +
               (x.obj.description ? '<span class="why">' + esc(x.obj.description) + '</span>' : '') +
-              '</td><td>' + outcomeCell(x.obj) + '</td>';
+              '</td><td>' + (nEx ? otag("O1") : '') + outcomeCell(x.obj) + '</td>';
+            var subs = function(asked){
+              return xs.map(function(ex){
+                var pt = exAsT(x.obj, ex);
+                return '<tr class="' + outSubCls(x.obj) + (asked ? '' : ' notdue') + '">' +
+                  '<td>' + otag(ex.id) + outcomeCell(pt) + '</td>' +
+                  (asked ? '<td class="num">' + repOutTarget(x.obj, pt) + '</td>' +
+                           '<td class="cc">' + repEntryExtra(u.ukey, x, ex, "unit") + '</td>' : '') +
+                  '</tr>';
+              }).join('') + outPad(nEx);
+            };
             if (!x.asked) {
-              return '<tr class="notdue"><td class="idx">' + (i+1) + '</td>' +
-                nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
-                '<td>' + qs(x.obj) + '</td>' +
-                '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 outside this cycle</span></td></tr>';
+              return '<tr class="notdue"><td class="idx"' + rs + '>' + (i+1) + '</td>' +
+                nameCell + '<td' + rs + '>' + esc(x.obj.owner) + '</td>' +
+                '<td' + rs + '>' + qs(x.obj) + '</td>' +
+                '<td colspan="3" class="cc"' + rs + '><span class="pill kind">Not asked \u2014 outside this cycle</span></td></tr>' +
+                subs(false);
             }
             /* WHAT THIS ROW IS MEASURED AGAINST RIGHT NOW. An outcome answers
                with its own target — prorated where it compiles by Sum, whole
@@ -5280,9 +6248,9 @@ function renderReport(u){
             var whole = onOutcome(x.obj) || outcomeOf(x.obj)
               ? outcomeTargetShown(x.obj) : null;
             return '<tr' + (needsNote(x) ? ' class="wantnote"' : '') + '>' +
-              '<td class="idx">' + (i+1) + '</td>' +
-              nameCell + '<td>' + esc(x.obj.owner) + '</td>' +
-              '<td>' + qs(x.obj) + '</td>' +
+              '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
+              nameCell + '<td' + rs + '>' + esc(x.obj.owner) + '</td>' +
+              '<td' + rs + '>' + qs(x.obj) + '</td>' +
               /* §300: a yes/no row's benchmark is a per cent of its own window,
                  and the whole it is a part of is the word "Yes / No" — "50% of
                  Yes / No" is not a sentence anybody reads, so the second line
@@ -5292,7 +6260,7 @@ function renderReport(u){
                   ? '<span class="subhd">of ' + esc(whole) + '</span>' : '') +
                 '</td>' +
               '<td class="cc">' + entry(x) + '</td>' +
-              '<td class="notecol">' + noteCell(x) + '</td></tr>';
+              '<td class="notecol"' + rs + '>' + noteCell(x) + '</td></tr>' + subs(true);
           }).join(""))
       : "";
 
@@ -5335,10 +6303,10 @@ function renderReport(u){
        other surface honours it; this one printed "Direction" straight from the
        data and was the last place in the product still saying it. */
     return pillarBand(pillarCode(u, pi), p.name,
-        '<span class="pband-n">' + ms.length + ' measures &middot; ' +
+        '<span class="pband-n">' + plural(ms.length, L1("measure"), L("measure")) + ' &middot; ' +
         (bds.length ? bds.length + ' ' + esc(SMPRules.bdName(p).toLowerCase()) +
                       ' figures &middot; ' : '') +
-        askedT.length + ' tactics asked' +
+        plural(askedT.length, L1("tactic"), L("tactic")) + ' asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
@@ -5370,9 +6338,16 @@ function renderReport(u){
   };
 
   var sel = unitRailPick(u);
+  /* §416: a direction that does not run this year is not asked for, so the
+     page does not OPEN on one — unless somebody pressed it, in which case
+     it says why there is nothing to enter (§35). */
+  if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
+    var firstNow = u.items.filter(runsNow)[0];
+    if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
+  }
   var pillars;
   if (!sel) {
-    pillars = '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
+    pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -5388,26 +6363,31 @@ function renderReport(u){
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
-      var e = owedAt["p:" + (p.code || pi)], owes = e && e.count > 0;
-      var sub = t.total === 0 ? 'Not asked this cycle'
+      var e = owedAt["p:" + (p.id || pi)], owes = e && e.count > 0;
+      var now = runsNow(p);
+      var sub = !now ? yearsLater(p)
+              : t.total === 0 ? 'Not asked this cycle'
               : t.done >= t.total ? 'Complete'
               : (t.total - t.done) + ' still to enter';
-      return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
-          esc(u.ukey) + '|' + esc(p.code) + '">' +
-        railName(code, p.name) +
+      return '<button class="ritem' + (pillarRailId(p) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
+          esc(u.ukey) + '|' + esc(pillarRailId(p)) + '">' +
+        railName(code, p.name) + yearsTagHtml(p) +
         /* AND THE TALLY STOPS READING AS FINISHED. Green is the platform's
            word for "nothing left here", and on a pillar owing a note it was
            saying it over the one row holding the whole report up. */
+        (!now ? '<span class="rnum">&mdash;</span>' :
         '<span class="rnum"><span class="rtally' +
           (t.total && t.done >= t.total && !owes ? " full" : "") + '">' +
-          t.done + '/' + t.total + '</span></span>' +
-        railSub(owes ? "" : sub,
-                owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>' : "") +
+          t.done + '/' + t.total + '</span></span>') +
+        railSub(owes || !now ? "" : sub,
+                owes ? '<span class="missing">' + esc(blockWords(e)) + '</span>'
+                : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
     var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
-    var pane = reportPillarPane(sel, u.items.indexOf(sel));
+    var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
+      : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
     pillars = railWorthIt(u.items)
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
@@ -5425,7 +6405,7 @@ function renderReport(u){
       var t = pillarTally(p);
       return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
                done:t.done, total:t.total };
-    }), L("pillar","bu").toLowerCase()));
+    }), L("pillar","bu")));
   var bar = "";
 
   var summary =
@@ -5468,8 +6448,10 @@ function renderReport(u){
      reportBar() counts all four and says where each one is. */
   return waitingNote + reportBar(u.ukey) +
     bar +
-    section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +
-    section("", L("pillar","bu") + " &mdash; measures and tactics", null, pillars) +
+    /* §428: the top layer's own report asks its pillars alone — its key
+       objectives are the group's Foundation, not figures entered here. */
+    (u.topLayer ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
 
@@ -5486,9 +6468,9 @@ function capHead(c){
   return '<div class="caphdr">' +
     '<div><div class="capname">' + esc(c.name) + '</div>' +
       '<div class="why" style="margin:3px 0 0">' +
-        'Supporting function ' + esc(f ? f.name : "\u2014") +
+        L1("fnword") + ' ' + esc(f ? f.name : "\u2014") +
         (f ? ' &middot; ' + esc(functionPeople(c.fn).map(personName).join(", ")) : '') +
-        ' &middot; scored by the group, not by a business unit</div></div>' +
+        ' &middot; scored by the group, not by a ' + L1("unitword") + '</div></div>' +
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
@@ -5651,6 +6633,9 @@ function capsShown(subject) {
      the sort is dead code (§24). What §310 was for is answered where the
      answer now belongs — in `entryDest`, which opens the capability holding
      their project rather than a function page with nothing of theirs on it. */
+  /* §405: a business unit that does not plan in pillars holds its own work
+     exactly as a function does — one holder, addressed `u:<key>`. */
+  if (isUnitHolderId(target)) return unitHolders(subjKey(target));
   return fnHolders(target.slice(3));
 }
 /* THREE PAGES OF FOUR, AND THE FOURTH IS A DECISION (§53.5: where the two
@@ -5708,9 +6693,18 @@ function railWorthIt(list){ return (list || []).length >= 1; }
    the capability's Projects rail each built this string themselves — the shape
    §59.3 was bitten by, where the same question answered in two places meant
    fixing one of them changed nothing. */
-function railName(code, name){
-  return (code ? '<span class="rcode">' + esc(code) + '</span>' : '') +
-    '<b>' + esc(name) + '</b>';
+function railName(code, name, kind){
+  /* §410: THE KIND RIDES BESIDE THE CODE, in the detail state only. Islam,
+     of the rail: "keep the button of showing and removing the details …
+     that hides the measure and tactic and the type is it capability or
+     direction." Terse is the code and the name; detail puts the kind on the
+     code's own line rather than at the head of the counts, so a card reads
+     top to bottom: what it is, what it is called, what it holds. Guarded on
+     the VALUE (§324): a pillar nobody has marked says nothing. */
+  var k = (kind && SHOW_KIND && !RAIL_TERSE)
+    ? ' <span class="rkind">&middot; ' + esc(kind) + '</span>' : '';
+  return (code ? '<span class="rcode">' + esc(code) + k + '</span>' : '') +
+    '<b title="' + esc(name) + '">' + esc(name) + '</b>';
 }
 /* The header, and the control that drops every row's small line. A SCREEN
    PREFERENCE, so it lives in localStorage beside the theme and the People
@@ -5800,9 +6794,9 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
         esc(opts.capId || "") + '">' + rows + '</div>'
     : rows;
   return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
-    railHead("Projects", list.length) + body +
+    railHead(L("project"), list.length) + body +
     (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
-      esc(opts.capId) + '">+ Add a project</button>' +
+      esc(opts.capId) + '">+ Add a ' + L1("project") + '</button>' +
       /* §334: AND THE SECOND DOOR TO A CAPABILITY, where the projects are.
          Islam: *"the ability to turn functional projects to a capability."*
          Setup › Capabilities is the home he chose; this is the door beside the
@@ -5812,7 +6806,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          promote. */
       (opts.promote
         ? '<button class="linkbu" data-cappromo="' + esc(opts.promote) +
-          '">Make a capability\u2026</button>' : '') +
+          '">Make a ' + L1("capability") + '\u2026</button>' : '') +
       '</div>' : '') +
     (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
@@ -5847,7 +6841,9 @@ function splitOrPane(list, sel, rail, pane){
    THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
-var DX_HEADING = "Deliverables and outcomes";
+/* §418: named by the layer being drawn (Structure's plan section), so it
+   is asked when the pane is built rather than fixed at load. */
+function dxHeading(){ return L("deliverable") + " and " + L("outcome").toLowerCase(); }
 /* ── WHAT THE SCORE COLUMN IS CALLED (§104.9) ─────────────────────────
    The two tables read their last column from two different numbers, so they
    say two different words. A deliverable or an outcome answers "how well" --
@@ -6118,11 +7114,11 @@ function overrunNote(p){
    Three readings, side by side, never folded into one. Key objectives is
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
-  var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+  var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
   var cards = [];
   if (ko != null) {
     cards.push('<div class="card tight primary-card">' +
-      '<div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>' +
+      '<div class="score-h"><h4>' + L("keyobj") + ' <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
       '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
@@ -6131,12 +7127,12 @@ function capScoreCards(c){
           ' / ' + c.keyObjectives.length + '</b></div></div></div>');
   }
   cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
-    '<div class="score-h"><h4>Project performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
+    '<div class="score-h"><h4>' + L1("project") + ' performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
-    '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
-      '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
-      '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
+    '<div class="minirow"><div><em>' + L("deliverable") + '</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
+      '<div><em>' + L("outcome") + '</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
+      '<div><em>' + L("project") + '</em><b>' + c.projects.length + '</b></div></div></div>');
   /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§106). An In
      progress milestone with no per-cent LEAVES the average rather than
      counting as nought (§104.10) -- honest, and silent, so the figure rises
@@ -6159,7 +7155,7 @@ function capScoreCards(c){
 
 function capKOTable(c){
   if (!c.keyObjectives.length) return "";
-  return '<h4 class="mini">Key objectives</h4>' +
+  return '<h4 class="mini">' + L("keyobj") + '</h4>' +
     miniTable(["#","Objective","Weight","Dir.","Target","Reported","Score"],
       c.keyObjectives.map(function(m, i){
         /* §264: the column is headed Score, and the score is the derived one —
@@ -6227,9 +7223,9 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
-    '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
+    '<h4 class="mini">' + dxHeading() + '</h4>' +
+    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Target","Status",DX_PCT], dxr) +
+    '<h4 class="mini">' + L("milestone") + ' <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
     miniTable(["#","Milestone","Owner","Collabs.","Due date","Status",MS_PCT], mRows);
 }
 
@@ -6248,13 +7244,17 @@ function fnNothingBehind(subject){
   var t = holderTarget(subject);
   if (isCapTarget(t)) {
     var c = capById(capKeyOf(t));
-    return '<div class="note">' + esc(c ? c.name : "This capability") +
+    return '<div class="note">' + (c ? esc(c.name) : "This " + L1("capability")) +
       ' has nothing in it yet.' + (mayAuthor("k_found", t)
         ? ' <button class="linkbu" data-rowadd="project|' + esc(c ? c.id : "") +
-          '">Add its first project</button> &mdash; or make one of a function\u2019s ' +
-          'own projects a capability from that function\u2019s Projects page.'
+          '">Add its first ' + L1("project") + '</button> &mdash; or make one of a function\u2019s ' +
+          'own ' + L("project") + ' a ' + L1("capability") + ' from that function\u2019s ' + L("project") + ' page.'
         : '') + '</div>';
   }
+  /* §405: a unit's own holder is never empty in this sense — its page draws
+     the empty state of the format it plans in — so this is only reached if
+     the unit itself has gone. Say nothing wrong rather than name a function. */
+  if (isUnitHolderId(t)) return '<div class="note">Nothing here yet.</div>';
   var fk = t.slice(3), f = FUNCTIONS[fk];
   /* §334: WHAT THIS STATE MEANS CHANGED, SO THE SENTENCE DID. It used to be
      "this function improves no capability yet", which was the only way a
@@ -6270,19 +7270,19 @@ function fnNothingBehind(subject){
      on the click, because this note has no pen to gate it. */
   var held = capsOfFunction(fk);
   return '<div class="note">' + esc(f ? f.name : "This function") +
-    ' has no projects of its own yet. ' +
+    ' has no ' + L("project") + ' of its own yet. ' +
     (held.length
       ? 'Its work sits in ' + (held.length === 1
-          ? esc(held[0].name) + ', which has an entry of its own on <b>Capabilities</b>.'
-          : plural(held.length, "capability", "capabilities") +
-            ', each with an entry of its own on <b>Capabilities</b>.') + ' '
+          ? esc(held[0].name) + ', which has an entry of its own on <b>' + L("capability") + '</b>.'
+          : plural(held.length, L1("capability"), L("capability")) +
+            ', each with an entry of its own on <b>' + L("capability") + '</b>.') + ' '
       : '') +
     (mayAuthor("k_found", "fn:" + fk)
       ? '<button class="linkbu" data-rowadd="project|fn:' + esc(fk) +
-        '">Add its first project</button> &mdash; or set this function to plan in ' +
-        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Supporting functions</b>.'
-      : 'Set this function to plan in ' + L("pillar", "bu").toLowerCase() +
-        ' on <b>Setup \u2192 Supporting functions</b>.') + '</div>';
+        '">Add its first ' + L1("project") + '</button> &mdash; or set this function to plan in ' +
+        L("pillar", "bu") + ' on <b>Setup \u2192 ' + L("fnword") + '</b>.'
+      : 'Set this function to plan in ' + L("pillar", "bu") +
+        ' on <b>Setup \u2192 ' + L("fnword") + '</b>.') + '</div>';
 }
 
 function renderFnPerformance(fnKey){
@@ -6324,12 +7324,19 @@ function renderFnPerformance(fnKey){
      1372 — a unit's pixels exactly, which is the assertion the check makes
      (AGREEMENT, never a coordinate — §94.8, §53.5). */
   if (!caps.length) return fnNothingBehind(target);
-  return perfActs(presentMenu(isCapTarget(target) ? "cap" : "fn",
-                              isCapTarget(target) ? capKeyOf(target) : fk)) +
+  /* §422: a plan switched off shows each holder's objectives and nothing the
+     plan would have scored. */
+  if (!planOn(target)) return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
+      : presentMenu(isCapTarget(target) ? "cap" : "fn", isCapTarget(target) ? capKeyOf(target) : fk)) +
+    caps.map(function(c){ return '<div class="capbody">' + capKOTable(c) + '</div>'; }).join("") +
+    planOffNote();
+  return perfActs(isUnitHolderId(target) ? presentMenu("unit", subjKey(target))
+    : presentMenu(isCapTarget(target) ? "cap" : "fn",
+                  isCapTarget(target) ? capKeyOf(target) : fk)) +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
-      '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
+      '<div class="note">No ' + L("project") + ' yet. Nothing to report until there are.</div></div>';
     /* And the same rail a unit's Performance page carries: the score on the
        right, execution and the owner underneath, and a footer that STATES the
        summary rather than captioning the column ("83% across 4 · execution
@@ -6343,7 +7350,7 @@ function renderFnPerformance(fnKey){
       function(p){ var m = projMilestones(p);
         return 'execution ' + m.done + ' of ' + m.total +
           (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
-      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, "project") +
+      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, L1("project"), L("project")) +
         ' &middot; execution ' + pct(ce.pct),
       function(p){ return projCode(holderCodeOwner(c), p); });
     return '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -6670,7 +7677,7 @@ function projPlanBody(p, subject){
            a unit and a function are the same product). The id alone is the
            address — holderOfProjectId() resolves the holder at press time. */
         '<button class="rmplan" data-rmrow="project|' + esc(p.id) +
-          '">Remove this project</button>' +
+          '">Remove this ' + L1("project") + '</button>' +
         (acts ? '<span class="pband-r">' + acts + '</span>' : '') + '</div>'
     /* §192: the pending count left this slot for the totals row above — it
        was the SUBJECT's number on one pillar's band, printing under the fill
@@ -6678,10 +7685,10 @@ function projPlanBody(p, subject){
     : pillarBand(projCode(fk, p), p.name) + acts;
   return band +
     projFrontMatter(p, ed) +
-    '<h4 class="mini">' + DX_HEADING +
-      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
-    '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
+    '<h4 class="mini">' + dxHeading() +
+      ' <em>\u2014 what the ' + L1("project") + ' hands over, and what it is meant to change</em></h4>' +
+    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Direction","Target"], dxr) +
+    '<h4 class="mini">' + L("milestone") + ' <em>\u2014 the timeline as planned</em></h4>' +
     /* NAME, THEN DESCRIPTION (§103). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
        short name and explained by a line under it -- and only the LABEL
@@ -6764,18 +7771,56 @@ function fnObjPlanBody(fk, ed){
   (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
       '<button class="linkbu" data-rowadd="action|' + esc(fk) + '">Add an action</button>' +
     '</td></tr>' : '');
-  return '<h4 class="mini">Actions <em>— the work, and when it is due</em></h4>' +
+  return '<h4 class="mini">' + L("action") + ' <em>— the work, and when it is due</em></h4>' +
     miniTable(["#","Action","Owner","Due"], rows);
+}
+/* §430: THE PLAN IS THE WHOLE PLAN — the objectives, then the actions.
+   Islam, of Finance's Plan reading as six tasks with no targets: *"a function
+   PLANNING in objectives and actions get their objectives and actions in the
+   plan tab not the overview tab"*, then the mockup (design-mockups/
+   objectives-on-the-plan) signed off. The Overview stops drawing them for this
+   form (`holderOverview`), so the objectives keep ONE authoring surface and it
+   is this one, under the Plan's own pen: k_found and k_proj are one area on
+   the server (authorize.js, the gapFill case), so a hand that may write the
+   actions may write these and nothing is offered that a save refuses (§42).
+
+   A UNIT PLANNING THIS WAY (§405) READS THEM HERE AND WRITES THEM WHERE IT
+   ALWAYS HAS: a unit's objectives carry a three-year target and are the
+   unit's Foundation, whose editor Islam asked to be left alone ("don't touch
+   the unit side", §226). Drawn here read-only, so its Plan is also the whole
+   plan without a second editor for one list. */
+function fnObjKoBlock(fk, ed){
+  var unit = isUnitHolderId(fk);
+  if (!unit && ed) {
+    var h = fnOwnHolderWritable(fk);
+    return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+      capKoEdit({ id: "fn:" + fk, keyObjectives: h.keyObjectives }, "plan", "k_proj");
+  }
+  var list = SMPRules.shown((fnOwnHolder(fk) || {}).keyObjectives || []);
+  if (!list.length) return '';
+  var rows = list.map(function(m, i){
+    return '<tr><td class="idx"><span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + (m.weight == null || m.weight === "" ? "&mdash;" : esc(m.weight) + "%") + '</td>' +
+      '<td class="cc">' + esc(m.dir || "") + '</td>' +
+      '<td class="cc">' + esc(unitTight(m.target)) + '</td>' +
+      '<td class="cc">' + esc(m.compile || "") + '</td></tr>';
+  }).join("");
+  return '<h4 class="mini">' + L("keyobj") + '</h4>' +
+    miniTable(["#", "Objective", "Weight", "Dir.", "Target", "Compiled"], rows);
 }
 function fnObjPlan(fk){
   var ed = projEditing(), list = fnActions(fk);
+  var kos = isUnitHolderId(fk) ? [] : ((fnOwnHolder(fk) || {}).keyObjectives || []);
   /* §61: a function with no action yet is where the first one goes. The empty
      state has to say so and the pen has to be reachable, or the page is
-     readable and unstartable — §129's audit found that five times. */
+     readable and unstartable — §129's audit found that five times. §430: and
+     the objectives' own gaps are owed HERE now, where their fields are. */
   var owed = list.reduce(function(n, a){
-    return n + SMPRules.gapMissing("action", a).length; }, 0);
-  return fillBarOr("plan", "k_proj", owed, "the actions") +
-    '<div class="capbody">' + paneActs("plan", "u_plan") +
+    return n + SMPRules.gapMissing("action", a).length; }, 0) +
+    kos.reduce(function(n, m){ return n + SMPRules.gapMissing("capko", m).length; }, 0);
+  return fillBarOr("plan", "k_proj", owed, "the plan") +
+    '<div class="capbody">' + paneActs("plan", "u_plan") + fnObjKoBlock(fk, ed || filling("plan", "k_proj")) +
     (!list.length && !ed
       ? '<div class="note"><b>No actions yet.</b> The SMO adds them from the ' +
         'pen on this page, or they arrive with an upload.</div>'
@@ -6795,13 +7840,13 @@ function fnObjCards(fk){
         '<div><em>Highest</em><b>' + objSpread(objs).hi + '</b></div>' +
         '<div><em>Lowest</em><b>' + objSpread(objs).lo + '</b></div></div></div>' +
     '<div class="card tight">' +
-      '<div class="score-h"><h4>Actions</h4>' +
+      '<div class="score-h"><h4>' + L("action") + '</h4>' +
         '<span class="pill ' + band(ac.pct) + '">' + bandWord(ac.pct) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ac.pct) + '">' + pctBig(ac.pct) + '</span>' +
         '<span class="ofplan">' + ac.done + ' of ' + ac.total + ' done' +
           (ac.pending ? ' &middot; <span class="missing">' + ac.pending +
             ' not counted yet</span>' : '') + '</span></div>' +
-      '<div class="minirow"><div><em>Actions</em><b>' + ac.total + '</b></div>' +
+      '<div class="minirow"><div><em>' + L("action") + '</em><b>' + ac.total + '</b></div>' +
         '<div><em>Done</em><b>' + ac.done + '</b></div>' +
         '<div><em>In progress</em><b>' + ac.wip + '</b></div></div></div></div>';
 }
@@ -6827,11 +7872,17 @@ function fnObjPerfTables(fk){
         : quiet ? notDueCell() : (v == null ? "&mdash;" : v + "%")) + '</td></tr>';
   }).join("");
   return capKOTable(h) +
-    '<h4 class="mini">Actions</h4>' +
+    '<h4 class="mini">' + L("action") + '</h4>' +
     miniTable(["#","Action","Owner","Due",  "Status", MS_PCT], aRows);
 }
+/* §422: said where a plan switched off would have been scored. */
+function planOffNote(){
+  return '<div class="note" data-planoff="1">The plan section is switched off for this layer, so there is nothing to score. Nothing entered is lost.</div>';
+}
 function fnObjPerformance(fk){
-  return perfActs(presentMenu("fn", fk)) +
+  if (!planOn(holderTarget(fk))) return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) + planOffNote();
+  /* §405: a unit planning this way presents as the UNIT it is. */
+  return perfActs(isUnitHolderId(fk) ? presentMenu("unit", subjKey(fk)) : presentMenu("fn", fk)) +
     '<div class="capbody">' + fnObjCards(fk) + fnObjPerfTables(fk) + '</div>';
 }
 /* REPORTING: the figures, and nothing about the plan. The objectives are
@@ -6839,7 +7890,9 @@ function fnObjPerformance(fk){
    way a milestone already is — the same three controls, so one row shape and
    one set of handlers (§53.5, §104.10). */
 function fnObjReportBody(fk){
-  var target = "fn:" + fk;
+  /* §405: the holder's own target — `u:<key>` for a unit — so the row gate
+     asks the unit's column, never a function's. */
+  var target = holderTarget(fk);
   var h = fnOwnHolder(fk) || { keyObjectives: [] };
   var mayRow = function(o){ return canReportFnRow(target, null, o); };
   var kRows = SMPRules.shown(h.keyObjectives).map(function(m, i){
@@ -6867,12 +7920,14 @@ function fnObjReportBody(fk){
   }).join("");
   return (kRows ? '<h4 class="mini">Objectives</h4>' +
       miniTable(["#","Objective","Dir.","Target","Reported","Progress","Note"], kRows) : "") +
-    (aRows ? '<h4 class="mini">Actions</h4>' +
+    (aRows ? '<h4 class="mini">' + L("action") + '</h4>' +
       miniTable(["#","Action","Due","Status",MS_PCT,"Note"], aRows) : "");
 }
 
 function renderFnObjReport(fk){
-  var target = "fn:" + fk;
+  /* §405: REVIEW, the chrome and Submit are keyed by the SUBJECT — the bare
+     unit key for a unit, `fn:<key>` for a function (§48). */
+  var target = subjKey(holderTarget(fk));
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -6917,7 +7972,7 @@ function renderFnProjects(fnKey){
        carries the Add button instead — an empty state that says what would
        fill it AND lets you fill it. */
     if (!sel) return '<div class="capbody"><div class="note">' +
-      'No projects yet.' + (ed
+      'No ' + L("project") + ' yet.' + (ed
         ? ' <button class="linkbu" data-rowadd="project|' + esc(c.id) +
           '">Add the first one</button>'
         : '') + '</div></div>';
@@ -7006,9 +8061,15 @@ function capEntryBox(x, unit, may, label){
    AND THE NUMBER IS ASKED FOR WHERE IT IS OWED: an In progress with no
    per-cent is not an answer (§104.10), so the box carries `needsPct()`, the
    same mark the projects page puts on a milestone in that state. */
-function ynBoxes(id, hook, cur, label, fld){
+function ynBoxes(id, hook, cur, label, fld, subj){
   var st = SMPRules.ynState(cur), keys = ["todo", "wip", "done"];
+  /* §345: the subject rides with the row, for the same reason it does on the
+     box beside it — a yes/no line drawn on My reporting belongs to another
+     unit, and without it the shell's handler resolves the row against the page
+     you are standing on and writes nothing (§183's silent discard). Absent on
+     the unit's own page, where the handler falls back to `current`. */
   var at = ' data-' + hook + '="' + esc(id) + '"' +
+    (subj ? ' data-repu="' + esc(subj) + '"' : '') +
     (fld ? ' data-fld="' + esc(fld) + '"' : '') + ' data-unit=""';
   var pick = '<select class="fld selbox ynpick"' + at +
     ' data-ynpart="status" aria-label="Report ' + esc(label) + '">' +
@@ -7118,9 +8179,9 @@ function projReportBody(p, subject){
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>' +
       /* §301: the finished mark, on the project it is about. */
       doneCtl(fk, p.id, p.owner, projCode(fk, p))) +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
-    '<h4 class="mini">Milestones</h4>' +
+    '<h4 class="mini">' + dxHeading() + '</h4>' +
+    miniTable(["#",L("deliverable") + " &amp; " + L("outcome").toLowerCase(),"Type","Target","Status",DX_PCT,"Note"], dxr) +
+    '<h4 class="mini">' + L("milestone") + '</h4>' +
     miniTable(["#","Milestone","Due date","Status",MS_PCT,"Note"], mRows);
 }
 
@@ -7147,10 +8208,10 @@ function capReportBody(c){
   }).join("");
   var sel = railPick(c);
   var koBlock = c.keyObjectives.length
-    ? '<h4 class="mini">Key objectives</h4>' +
+    ? '<h4 class="mini">' + L("keyobj") + '</h4>' +
       miniTable(["#","Objective","Dir.",REP_TGT_HEAD,"Reported","Note"], kRows)
     : '';
-  if (!sel) return koBlock + '<div class="note">No projects to report on.</div>';
+  if (!sel) return koBlock + '<div class="note">No ' + L("project") + ' to report on.</div>';
   /* §279: the same mark the unit's rail carries, off the same map — this
      side's rail had exactly the unit's fault and no banner above it either. */
   var owedAt = {};
@@ -7211,7 +8272,7 @@ function renderFnReport(fnKey){
      sent, the tab still saying *not submitted yet*, and the board still
      asking (§48, §53.5 — the comment above is right that a second key shape
      means a second answer everywhere, which is what this was). */
-  var fnKeyTarget = target;
+  var fnKeyTarget = subjKey(target);
   var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   /* The same box the unit's report publishes (§150, §53.5) — one builder, so
      the two sides cannot explain the same state differently. */
@@ -7265,16 +8326,24 @@ function renderFnReport(fnKey){
    they group by kind \u2014 a Direction and a Capability are different things and
    the rail says so. */
 function unitRailKey(u){ return "unit:" + u.ukey; }
+/* §393 WHICH PILLAR THE RAIL MEANS IS ITS ROW ID, NEVER ITS CODE. A pillar
+   added with the pen is minted `code: ""` (addPillar) and nothing fills it in
+   on a tenant's saved plan, so every hand-added pillar shared ONE rail key:
+   all of them lit at once and pressing any opened the first. The code is
+   what the plan arrived with and nothing makes it unique; the id is the
+   row's address everywhere else (§48, §191). The code is the fallback only
+   for a row with no id, which renumberUnit() and mintRowId() never leave. */
+function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
   var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
-    if (list[i].code === want) { railShow(k, list[i].code); return list[i]; }
+    if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
   var mine = railMine(u.ukey, list, function(p){ return p.owner; });
   var pick = mine || list[0];
-  railShow(k, pick.code);
+  railShow(k, pillarRailId(pick));
   return pick;
 }
 function unitRailFor(u, sel){
@@ -7296,9 +8365,9 @@ function unitRailFor(u, sel){
        pillar 01 and the next called it MB01.
 
        So the DISPLAY moves to pillarCode() and the data attribute does NOT:
-       `data-urail` is the rail's selection key and unitRailPick() matches on
-       `it.code`. Change that and the rail stops being able to find the pillar
-       it just selected. */
+       `data-urail` is the rail's selection key. Since §393 that key is the
+       pillar's ROW ID (pillarRailId), not its stored code: a code can be empty
+       or shared, and a shared key lights every row that has it. */
     /* §145.12: which pillar owes what, for the people who can act on it —
        drawn only while it owes something (§41's budget), and rewritten in
        place as fills land (gapBandRefresh finds it by data-rgap). */
@@ -7317,14 +8386,14 @@ function unitRailFor(u, sel){
       (it.measures || []).forEach(function(m){ empt += SMPRules.gapEmptyFields("measure", m).length; });
       (it.tactics  || []).forEach(function(x){ empt += SMPRules.gapEmptyFields("tactic", x).length; });
     }
-    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
+    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (runsNow(it) ? "" : " later") + '" data-urail="' +
+        esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
         (on ? handle("Reorder " + it.name) : '') +
-        railName(pillarCode(u, i), it.name) +
-        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.code || String(i)) +
+        railName(pillarCode(u, i), it.name, it.kind) + yearsTagHtml(it) +
+        (gaps ? '<span class="rgap" data-rgap="p:' + esc(it.id || String(i)) +
           '" title="' + plural(gaps, "missing element") + ' — the fill grant can close them">' +
           gaps + ' Missing</span>'
-        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.code || String(i)) +
+        : empt ? '<span class="rgap req" data-rgap="p:' + esc(it.id || String(i)) +
           '" title="' + plural(empt, "empty field") + ' you can fill in">' +
           empt + ' empty</span>' : '') +
         /* Both counts, both labelled, on one line. It used to put the tactics
@@ -7337,10 +8406,14 @@ function unitRailFor(u, sel){
            one of them only is how a unit comes to be fine differently on two
            of its own pages (§53.5). Guarded on the VALUE: a pillar nobody has
            marked yet says nothing rather than opening with a separator. */
-        railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-          plural(it.measures.length, "measure") +
-          ' &middot; ' + plural(it.tactics.length, "tactic") +
-          (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+        /* §410: the kind moved beside the code, and the OWNER left the plan
+           rail (Islam: "remove the owner not needed here") — it is on the
+           pillar's own page, one press away. */
+        /* §416: when it runs is not detail — it is why the row is grey — so
+           it rides as the half of the line a collapsed rail keeps (§119). */
+        railSub(runsNow(it) ? plural(it.measures.length, L1("measure"), L("measure")) +
+          ' &middot; ' + plural(it.tactics.length, L1("tactic"), L("tactic")) : "",
+          runsNow(it) ? "" : esc(yearsLater(it))) +
       '</button>';
   }).join("");
   /* No footer. It said "Figure shown is key measures", explaining a number
@@ -7355,7 +8428,7 @@ function unitRailFor(u, sel){
        (§53.5) and the two rails drifting is what that rule exists to stop. */
     (EDIT_PAGE.plan && mayEditPlan()
       ? '<div class="railadd"><button class="linkbu" data-rowadd="pillar|' +
-        esc(u.ukey) + '">+ Add a ' + L("pillar","bu").toLowerCase().replace(/s$/, "") +
+        esc(u.ukey) + '">+ Add a ' + L1("pillar") +
         '</button></div>'
       : '') + '</div>';
 }
@@ -7553,12 +8626,104 @@ function ownStateChip(target, list, word){
    tallies and the finished mark — things about how the pillar is GOING — and
    the kind is a fact about what the pillar IS, which is the same kind of fact
    as the code two inches to its left. */
-function pillarBand(code, name, right, kind){
-  return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
+/* ── YEARS 1 · 2 · 3 (§416) ─────────────────────────────────────────
+   The three marks a direction wears once the Plan details switch is on: the
+   years it runs in lit, the year the plan stands in ringed. The quarter
+   marks' own shape (`qs`), because a year is the same kind of fact one scale
+   up (§53.5). Nothing is drawn with the switch off. */
+function yearsMarks(it){
+  if (!yearsOn(it)) return "";
+  var ys = pillarYears(it), now = planYear(), out = "";
+  for (var y = 1; y <= 3; y++)
+    out += '<i class="' + (ys.indexOf(y) >= 0 ? "on" : "") + (y === now ? " now" : "") +
+      '" title="' + esc(planYearLabel(y)) + (ys.indexOf(y) >= 0 ? " — runs" : " — does not run") +
+      (y === now ? " · the plan is here" : "") + '">' + y + '</i>';
+  return '<span class="yrbox"><span class="yk">Years</span><span class="qs yrs">' + out + '</span></span>';
+}
+/* The same three, pressable behind the pen. By the pillar's id through
+   `unitLikeWritable()` (§48.2) — the resolver Remove already uses. */
+function yearsEdit(ukey, it){
+  var ys = pillarYears(it), now = planYear(), out = "";
+  for (var y = 1; y <= 3; y++) {
+    var on = ys.indexOf(y) >= 0;
+    out += '<button class="qtog' + (on ? " on" : "") + (y === now ? " now" : "") +
+      '" data-pyear="' + esc(ukey) + '|' + esc(it.id) + '|' + y + '" title="' +
+      esc(planYearLabel(y)) + (on ? (ys.length === 1 ? " — the only year it runs" : " — runs; press to take it out")
+                                   : " — press to add") + '">' + y + '</button>';
+  }
+  return '<span class="qs qs-edit yrs">' + out + '</span>';
+}
+/* Why a direction is greyed, on its own pane, in words (§35). */
+function yearsLine(it){
+  if (!yearsOn(it) || runsNow(it)) return "";
+  var ys = pillarYears(it);
+  return '<div class="yrline">Runs in Year ' + ys.join(" and Year ") +
+    '. It is not asked for in reporting and not scored until then.</div>';
+}
+/* The short tag in a rail row, and the greyed row's reason under it. */
+function yearsTagHtml(it){
+  return yearsOn(it) ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
+}
+function pillarBand(code, name, right, kind, cls){
+  /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
+     reaches: no gold edge, and the kind as a tag at the far end. Every other
+     band is untouched until it is asked about (rule 1c). */
+  return '<div class="pband' + (cls ? ' ' + cls : '') + '"><span class="pband-code">' + esc(code) + '</span>' +
     '<span class="pband-name">' + esc(name) + '</span>' +
     (kind ? kindPill({ kind: kind }) : '') +
     (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
 }
+/* ── THE DIRECTION OVERVIEW (§413) ───────────────────────────────────
+   Islam, for RHI: a direction carries its Objective, Why now, and Risks &
+   mitigations as plain text; its key measures and tactics are the tables
+   below it, so they are not typed a second time. Drawn only while the Plan
+   details switch is on (Client set-up › Structure), so a client that never turns it
+   on sees nothing change.
+
+   FOLDED UNTIL PRESSED (his: *"it needs to be expandable and collapsable not
+   always visible"*), with the start of the Objective on the folded line so
+   what is inside can be told without opening it (*"keep the objective
+   preview"*). A real `<details>`, never a flag and a handler (§296): the
+   browser keeps the state while the page stands, and DOV_OPEN carries it
+   across a repaint, keyed by the pillar's ID (§48).
+
+   NOT A GAP (his *"No"*): empty boxes are optional text, like a
+   description, so nothing here joins a count. Reading with all three empty
+   draws nothing at all; with the pen open the block is always there, or the
+   first word could never be written (§61). Written by the office alone,
+   because these are plan fields and the plan's pen is the office's (§94). */
+var DOV_OPEN = {};
+/* §422: the second entry is the area's key; its name is the layer's (ovArea). */
+var DOV_FIELDS = [["ovObj", "ovobj"], ["ovWhy", "ovwhy"], ["ovRisk", "ovrisk"]];
+function dirOverview(it, ed){
+  if (!planDetailOn("overview", it)) return "";
+  var any = DOV_FIELDS.some(function(f){ return String(it[f[0]] || "").trim(); });
+  if (!ed && !any) return "";
+  var peek = String(it.ovObj || "").trim();
+  return '<details class="dov" data-dov="' + esc(it.id) + '"' + (DOV_OPEN[it.id] ? ' open' : '') + '>' +
+    '<summary><span class="dovcar" aria-hidden="true"></span><span class="dovt">' + DW("overview", "one", it) + '</span>' +
+    (peek ? '<span class="dovpeek">' + esc(SMPRules.oneLine(peek)) + '</span>' : '') + '</summary>' +
+    '<div class="dovw">' + DOV_FIELDS.map(function(f){
+      var v = it[f[0]] || "";
+      return '<div class="dovc"><div class="dovk">' + ovArea(f[1], it) + '</div>' +
+        (ed ? fieldOr("plan", v, "dovta", function(x){
+                var t = String(x == null ? "" : x);
+                if (t.trim()) it[f[0]] = t; else delete it[f[0]];
+              })
+            : (String(v).trim() ? '<div class="dovv">' + esc(v) + '</div>' : '<div class="dovv dovnone">&mdash;</div>')) +
+        '</div>';
+    }).join("") + '</div></details>';
+}
+/* The fold's state survives a repaint. `toggle` does not bubble, so it is
+   heard in the capture phase, armed once at load (§24, §47.2). */
+if (typeof document !== "undefined") document.addEventListener("toggle", function(e){
+  var d = e.target;
+  if (d && d.matches && d.matches("details.dov")) {
+    if (d.open) DOV_OPEN[d.getAttribute("data-dov")] = true;
+    else delete DOV_OPEN[d.getAttribute("data-dov")];
+  }
+}, true);
+
 function unitPlanBody(it, u, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
@@ -7600,6 +8765,11 @@ function unitPlanBody(it, u, railed){
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
   var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
+     nothing here — `row` is the real object — so reading `ctx.row.owner`
+     would have worked today and stopped working the day a key measure gains
+     an Owner of its own, which is the next thing drawn. Named, so the reach
+     cannot be read off a field two row kinds share (see boundedReach). */
   /* §201.2: does this table carry a Unit column right now? The office's pen
      always; a filler's only while some row has a missing unit to offer. */
   var unitCol = !ed && it.measures.some(function(m){
@@ -7733,7 +8903,7 @@ function unitPlanBody(it, u, railed){
                dropping it leaves the control anonymous — visibly to anybody
                meeting an empty picker, and completely to a screen reader. The
                word moves onto the control rather than back onto the page. */
-            "Collaborators on this tactic"); } });
+            "Collaborators on this " + L1("tactic")); } });
     /* Quarters (§145): only a tactic naming NO quarter is a gap, and while
        its fill is pending the four stay the filler's — read mode carries
        the same chip and tick every other pending value wears. */
@@ -7751,10 +8921,12 @@ function unitPlanBody(it, u, railed){
         tgtOpen = true;
         return outcomeEdit(t, set, pendCls, !ed);
       } });
-    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx">' +
+    /* §414: the shared cells span the extra outcomes' sub-lines. */
+    var nEx = tacticExtras(t).length, rs = outRowspan(nEx);
+    return '<tr data-oi="' + i + '"' + hidCls(t) + '><td class="idx"' + rs + '>' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? bxkey("Tactic") : '') +
+      '<td' + rs + '>' + (ed ? bxkey(L1("tactic")) : '') +
         (ed ? textOr("plan", t.name, "", function(v){ t.name = v; })
             : '<b class="tacname">' + esc(t.name) + '</b>') +
         (ed ? eyeBtn(t, "plan", "u_plan") : hidChip(t)) +
@@ -7772,6 +8944,8 @@ function unitPlanBody(it, u, railed){
         (ed ? bxkey("Description") + textOr("plan", t.description || "", "tacdesc",
                      function(v){ setOr(t, "description", v); })
             : (t.description ? '<span class="why">' + esc(t.description) + '</span>' : '')) +
+        /* §415: what the tactic needs, under the description. */
+        reqsCell(t, ed) +
         /* §267: AND THE TAIL, when the window is too narrow for it to be two
            columns. The same two controls, in a strip on their own line — the
            width that buys goes straight to the two prose columns above it,
@@ -7780,7 +8954,7 @@ function unitPlanBody(it, u, railed){
            control carries its own name (`aria-label`, above and in qsEdit). */
         (fold ? '<div class="tacfold">' +
                   '<span class="collabs">' + bxkey("Collabs.") + collabsHtml + '</span>' +
-                  '<span role="group" aria-label="Quarters this tactic runs in">' +
+                  '<span role="group" aria-label="Quarters this ' + L1("tactic") + ' runs in">' +
                   bxkey("Quarters") + quartersHtml + '</span></div>' : '') +
         '</td>' +
       /* WHAT IT SHOULD PRODUCE (§248), AND IT IS OWED (§249, reversing that
@@ -7792,7 +8966,8 @@ function unitPlanBody(it, u, railed){
          definition and runs off the end — and it is a counted gap now, so the
          CONTROL is the hook's while the lifecycle, the red word and the walk
          mark stay gapCell's. §130.1's shape exactly, for its reason. */
-      '<td>' + (ed ? bxkey("Outcome") : '') + gapCell("plan", "u_plan", t, "outcome", {
+      '<td>' + (ed ? bxkey(detailWord("outcomes", "one", t)) : '') + (nEx ? otag("O1") : '') +
+        gapCell("plan", "u_plan", t, "outcome", {
         /* §228.2: NAMING THE KIND IS WHAT KEEPS THE TWO LISTS ONE. Without
            it the cell opens to a filler whatever the shared list says, so a
            later decision to stop counting these would leave the box open and
@@ -7802,6 +8977,8 @@ function unitPlanBody(it, u, railed){
         control: function(set, pendCls){
           return textOr("plan", t.outcome || "", pendCls || "", set);
         } }) +
+        /* §414: the way to a second outcome, under the last one. */
+        (ed && !nEx ? outAddBtn(t) : '') +
         /* The same double-render as the description one column left: below
            880 the Target column goes and its value appears here instead,
            because seven columns still run 44px past a 515px pane and §158
@@ -7835,7 +9012,7 @@ function unitPlanBody(it, u, railed){
          the read-mode Missing word; the control hook renders the register-
          fed picker — an owner is PICKED, not typed, in the pen and in fill
          mode alike. */
-      '<td>' + gapCell("plan", "u_plan", t, "owner", {
+      '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
         control: function(set, pendCls){
@@ -7844,8 +9021,9 @@ function unitPlanBody(it, u, railed){
         } }) + '</td>' +
       /* §267: and the tail's own two columns, wherever the window still has
          room for them. Folded, they are already drawn above. */
-      (fold ? '' : '<td class="collabs">' + collabsHtml + '</td>' +
-                   '<td>' + quartersHtml + '</td>') + '</tr>' +
+      (fold ? '' : '<td class="collabs"' + rs + '>' + collabsHtml + '</td>' +
+                   '<td' + rs + '>' + quartersHtml + '</td>') + '</tr>' +
+      planOutRows(t, ed, tgtOpen ? 'tgtcell' : 'tgtcol num') +
       /* §278 MERGED WITH §267: the drawer spans whatever the table currently
          IS. `fold` decides how many columns this row has, so the full-width
          row under it has to read the same answer or it runs two cells past the
@@ -7891,7 +9069,7 @@ function unitPlanBody(it, u, railed){
            weight; these are quiet words (mockup, signed off 2026-09-01). */
         (ed ? '<button class="rmplan" data-rmrow="pillar|' + esc(u.ukey) +
               '|' + esc(it.id) + '">Remove this ' +
-              esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+              esc(L1("pillar")) +
               '</button>' : '') +
         /* §268: THE PEN IS ON THE SECTION LINE, WHICH PINS HIGHER THAN THIS
            HEAD DOES. §194 put it here so the way to save survived scrolling;
@@ -7899,7 +9077,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, "", it.kind) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name, yearsMarks(it), it.kind, "planband") + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -7961,8 +9139,15 @@ function unitPlanBody(it, u, railed){
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +
           '</div></div>' +
+          /* §416: the years it runs in, beside the owner and the kind. */
+          (yearsOn(it) ? '<div class="pfrow"><em>Runs in</em><div class="pfval">' +
+            yearsEdit(u.ukey, it) + '</div></div>' : '') +
         '</div></div>'
       : '') +
+    yearsLine(it) +
+    /* §413: the direction overview, under the name (reading) or under the
+       owner and kind (the pen) — above Key measures either way. */
+    dirOverview(it, ed) +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
        there is no notes under the pillars"). Mobile's first pillar carried
@@ -7996,15 +9181,19 @@ function unitPlanBody(it, u, railed){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
+    /* §410: THE COUNT, NOT A SENTENCE (1b-ii, and Islam's approved restyle).
+       The grey clause said what the columns already say; the number beside the
+       heading is the one fact the heading did not. */
+    '<h4 class="mini">' + L("measure") + ' <span class="hn">' + it.measures.length + '</span></h4>' +
     /* §199.5: the Unit heading appears only with the pen, because the column
        under it does — and `addRow`'s span has to follow, or the Add row stops
        reaching the end of the table the moment somebody opens the pen. */
-    miniTable((ed || unitCol) ? ["#","Measure","Dir.","Unit","Target","Compiled"]
-                 : ["#","Measure","Dir.","Target","Compiled"],
-      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a measure"), sortAttr("measures")) +
+    miniTable((ed || unitCol) ? ["#",L1("measure"),"Dir.","Unit","Target","Compiled"]
+                 : ["#",L1("measure"),"Dir.","Target","Compiled"],
+      mRows + addRow((ed || unitCol) ? 6 : 5, "measure", "Add a " + L1("measure")), sortAttr("measures")) +
     bdPlanSection(it, u, pi, ed) +
-    '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
+    /* …and a rule above it, so the two blocks read as two blocks of one card. */
+    '<h4 class="mini blockrule">' + L("tactic") + ' <span class="hn">' + it.tactics.length + '</span></h4>' +
     /* §248: Description and Outcome are stored on every tactic and the upload
        has written both since the template existed — the description was
        displayed on NO screen at all and the outcome only as a grey line under
@@ -8019,12 +9208,22 @@ function unitPlanBody(it, u, railed){
        haeders"*. `fold` is read here, where the row builder read it, so the
        head, the rows and the Add row's span can never disagree about how wide
        the table is. */
-    miniTable(["#","Tactic","Outcome",{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
+    miniTable(["#",L1("tactic"),DW("outcomes", "one", it),{h:"Target", cls: ed ? "" : "tgtcol"},"Owner"]
                 .concat(fold ? [] : ["Collabs.","Quarters"]),
-      tRows + addRow(fold ? 4 : 6, "tactic", "Add a tactic"),
+      tRows + addRow(fold ? 4 : 6, "tactic", "Add a " + L1("tactic")),
       sortAttr("tactics"), "tactable");
 }
+/* §405: the way a real business unit plans when it is not pillars, or null.
+   Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
+   function and must keep reaching the pillars pages. */
+function unitWayOf(u){
+  if (!u || !u.ukey || UNITS[u.ukey] !== u) return null;
+  var f = unitFormat(u);
+  return f === "pillars" ? null : f;
+}
 function renderUnitPlan(u){
+  var uw = unitWayOf(u);
+  if (uw) return uw === "objectives" ? fnObjPlan("u:" + u.ukey) : renderFnProjects("u:" + u.ukey);
   var sel = unitRailPick(u);
   /* AN EMPTY PAGE HAS TO SAY WHAT WOULD FILL IT (§61). This said "This unit"
      on a supporting function's own page — and only ever appeared there,
@@ -8053,16 +9252,26 @@ function renderUnitPlan(u){
      does. And the page it points at is named CORRECTLY: this sentence said
      "Setup → Import & plans" and the page has been called Import & archives
      for as long as it has existed (§104.8). */
+  /* §428: THE TOP LAYER'S EMPTY PLAN OFFERS ONE ROUTE. The guided builder and
+     the workbook both address a unit or a function by name and neither knows
+     the top layer, so offering them would be two doors onto nothing (§61).
+     The first pillar is added here, by the office, like any other row. */
+  if (!sel && u.topLayer) return '<div class="bempty">' +
+    '<b>' + esc(u.name) + ' has no plan of its own yet.</b>' +
+    (typeof mayEditPlan === "function" && mayEditPlan()
+      ? '<div class="row"><button class="bprim" data-rowadd="pillar|' + esc(u.ukey) +
+          '">Add the first ' + esc(L1("pillar")) + '</button></div>'
+      : '<p>The SMO team writes it.</p>') + '</div>';
   if (!sel) return '<div class="bempty">' +
     '<b>' + esc(u.name) + ' has no plan yet.</b>' +
     (typeof mayEditPlan === "function" && mayEditPlan()
       ? '<p>Build it here and the platform walks you through it section by section &mdash; ' +
-          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu").toLowerCase()) +
-          ', their measures and their tactics.</p>' +
+          'the foundation, the SWOT, then the ' + esc(L("pillar", "bu")) +
+          ', their ' + L("measure") + ' and their ' + L("tactic") + '.</p>' +
         '<div class="row"><button class="bprim" data-buildplan="' + esc(u.ukey) + '">' +
           'Build the plan</button>' +
         '<span class="alt">or <button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-          '">add the first ' + esc(L("pillar", "bu").toLowerCase().replace(/s$/, "")) +
+          '">add the first ' + esc(L1("pillar")) +
           '</button> yourself, or upload a file on <b>Setup \u2192 Import &amp; archives</b>.</span>' +
         '</div>'
       : '<p>A plan arrives as a file: <b>Setup \u2192 Import &amp; archives</b>, the pillars ' +
@@ -8112,15 +9321,15 @@ function renderUnitPlan(u){
         return a + SMPRules.gapMissing("measure", m).length; }, 0) +
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
-      "this " + L("pillar","bu").toLowerCase().replace(/s$/, "")) +
+      "this " + L1("pillar")) +
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
+      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
         ' &middot; drag by the handle to reorder, here and inside each ' +
-        L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
+        L1("pillar") + '</p>' : '') +
     (railWorthIt(u.items)
-      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+      ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), sel.code) + '>' +
+      : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitPlanBody(sel, u, false) + '</div>');
 }
 
@@ -8189,9 +9398,18 @@ function holderOverview(subject){
      value cannot be seen. Reading mode keeps the card, because the objectives
      belong beside what the thing is when you are READING it. */
   var fl = filling("capfoundation", "k_found");
+  /* §404: THE TWO CARDS ARE TWO COMPONENTS — the brief ("What it is") and the
+     North Star (key objectives). Off hides the card and forgets nothing. */
+  /* §430: a function planning in objectives and actions holds its objectives
+     on its PLAN (fnObjKoBlock), so the Overview is the brief alone. */
+  /* §436: a function's "What it is" card answers its description (off until
+     the office ticks it on the Structure step); a capability's, its brief. */
+  var briefOn = compOn(t, SMPRules.descPart(t)),
+      koOn = compOn(t, "keyobj") && !(!isCap && fnPlansInObjectives(f));
+  if (!briefOn && !koOn) return "";
   var judged = isCap
-    ? (capPlansInPillars(c) ? esc(L("pillar","bu").toLowerCase()) : "projects")
-    : (fnPlansInPillars(f) ? esc(L("pillar","bu").toLowerCase()) : "projects");
+    ? (capPlansInPillars(c) ? esc(L("pillar","bu")) : L("project"))
+    : (fnPlansInPillars(f) ? esc(L("pillar","bu")) : L("project"));
   var koCard = '<div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
       '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
       ((ed || fl)
@@ -8202,16 +9420,17 @@ function holderOverview(subject){
                capability rather than a function where it is one. One page,
                true sentences, never one that is wrong on half of it
                (§104.8). */
-            "None. This " + (isCap ? "capability" : "function") +
+            "None. This " + (isCap ? L1("capability") : L1("fnword")) +
             " is judged by its " + judged + "."));
   /* §268: THE EDIT BAR IS ON THE SECTION LINE. */
   return fillBarOr("capfoundation", "k_found",
-      list.reduce(function(a, m){
+      (koOn ? list : []).reduce(function(a, m){
         return a + SMPRules.gapMissing("capko", m).length; }, 0),
       "the overview") +
     '<div class="fgrid">' +
+      (!briefOn ? '' :
       '<div class="card"><h2 class="sec first">What it is</h2><dl style="margin:0">' +
-        '<div class="clause"><dt>' + (isCap ? 'Capability' : 'Function') + '</dt><dd>' +
+        '<div class="clause"><dt>' + (isCap ? L1("capability") : L1("fnword")) + '</dt><dd>' +
           esc(isCap ? c.name : f.name) + '</dd></div>' +
         /* §226: LED BY OPENS, FOR THE OFFICE (Islam: "led by by office ok").
            The picker is Setup's own assignPicker writing the SAME head pointer
@@ -8244,10 +9463,10 @@ function holderOverview(subject){
           gapCell("capfoundation", "k_found", (isCap ? c : f), "def",
                   { kind:"area", readEmpty:"&mdash;", fillKind:"cap" }) +
         '</dd></div>' +
-      '</dl></div>' +
-      ((ed || fl) ? '' : '<div class="card">' + koCard + '</div>') +
+      '</dl></div>') +
+      ((ed || fl || !koOn) ? '' : '<div class="card">' + koCard + '</div>') +
     '</div>' +
-    ((ed || fl) ? '<div class="card koband">' + koCard + '</div>' : '');
+    ((ed || fl) && koOn ? '<div class="card koband">' + koCard + '</div>' : '');
 }
 /* §334: AND THE TRANSITIONAL BRANCH IS GONE. §326's own comment named it —
    *"a function still CARRYING a capability keeps today's rendering underneath,
@@ -8497,12 +9716,17 @@ function capKoTarget(c){
   if (id.indexOf("fn:") === 0) return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
-function capKoEdit(c){
-  var pg = "capfoundation";
+/* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
+   pair, as it always has; a function planning in objectives and actions draws
+   this same table on its PLAN, under the Plan's pen (Islam, 2026-09-30: "a
+   function PLANNING in objectives and actions get their objectives and
+   actions in the plan tab"). One editor, two pages that never both hold it. */
+function capKoEdit(c, pgIn, acIn){
+  var pg = pgIn || "capfoundation", ac = acIn || "k_found";
   /* §145: the four gap-fillable columns through gapCell; the NAME, Remove
      and Add stay the author's — a fill-mode render draws them read-only or
      not at all. */
-  var ed = authoring(pg, "k_found");
+  var ed = authoring(pg, ac);
   /* §226: the same three answers the unit's table got and this one never did —
      the NAME is prose and wraps (§189's textOr; a function's objective titles
      clipped at 101px in the card this table used to edit inside), the UNIT is
@@ -8528,26 +9752,26 @@ function capKoEdit(c){
       return '<tr data-oi="' + i + '"' + hidCls(m) + '>' + idxCell(i, arr, m.name) +
         '<td>' + textOr(ed ? pg : null, m.name, "", function(v){ m.name = v; }) +
         (ed ? '' : hidChip(m)) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "dir",
+        '<td class="cc">' + gapCell(pg, ac, m, "dir",
           { kind:"select", opts:["≥", "≤"] }) + '</td>' +
         /* §251: always drawn, on both function formats — this table and the
            unit's are one cell asking one question (§53.5). */
         '<td class="cc">' + (ed
           ? selectOr(pg, targetUnitOf(m), targetUnitOpts(targetUnitOf(m)), "",
               function(v){ setTargetUnitAndRepaint(m, v); })
-          : (fillUnitCell(pg, "k_found", m) || esc(targetUnitOf(m)))) + '</td>' +
+          : (fillUnitCell(pg, ac, m) || esc(targetUnitOf(m)))) + '</td>' +
         /* §278: a supporting function's objectives get the same drawer as a
            unit's, because they are the same cell asking the same question —
            Islam's "all four". */
         monthlyTgtCell("cc", m, "monthly",
-          gapCell(pg, "k_found", m, "target",
+          gapCell(pg, ac, m, "target",
           { kind:"input", cls:"mono", parse: unitInherit(m) }),
           ed && !isYesNoRow(m)) +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "compile",
+        '<td class="cc">' + gapCell(pg, ac, m, "compile",
           { kind:"select", opts:SMPRules.COMPILES }) + '</td>' +
-        '<td class="cc">' + gapCell(pg, "k_found", m, "weight",
+        '<td class="cc">' + gapCell(pg, ac, m, "weight",
           { kind:"input", cls:"mono", num:true }) + '</td>' +
-        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, "k_found") +
+        '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
         (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
@@ -8568,22 +9792,26 @@ function capKoEdit(c){
    selects rather than drags, which is why the handle is separate. */
 function unitPerfRail(u){
   var sel = unitRailPick(u);
-  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() + ' yet.</div>';
+  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
   var rows = u.items.map(function(it, i){
-    var perf = pillarPerf(it), r = pillarRatio(it);
-    return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
-      esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
+    /* §416: a direction that does not run this year is not scored, so its
+       rail row reads a dash and says when it runs rather than a figure. */
+    var now = runsNow(it);
+    var perf = now ? pillarPerf(it) : null, r = pillarRatio(it);
+    return '<button class="ritem' + (pillarRailId(it) === pillarRailId(sel) ? " on" : "") + (now ? "" : " later") + '" data-urail="' +
+      esc(u.ukey) + '|' + esc(pillarRailId(it)) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
-      railName(pillarCode(u, i), it.name) +
+      railName(pillarCode(u, i), it.name) + yearsTagHtml(it) +
       '<span class="rnum" style="color:' + bandInk(perf) + ';font-weight:700">' + pct(perf) + '</span>' +
       /* §324: guarded on the VALUE and not only on the flag. A pillar added
          on the platform has no kind until somebody picks one, and the bare
          flag test printed " &middot; execution 45%" — a separator pointing at
          nothing, which is the fault `pillarMeta` was already written to avoid
          one screen over. */
-      railSub((SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
-        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+      railSub(now ? (SHOW_KIND && it.kind ? esc(it.kind) + ' &middot; ' : '') +
+        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '') : "",
+        now ? "" : esc(yearsLater(it))) +
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
@@ -8596,7 +9824,7 @@ function unitPerfRail(u){
        items. A handle that renders is a feature that looks built (§51.11). The
        CONTAINER says what it holds now, so the two cannot disagree. */
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
-    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
+    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
   return railWorthIt(u.items)
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
@@ -8627,8 +9855,9 @@ function unitPerfPane(it, u, railed){
     /* §343: a scored breakdown column is one of the numbers this pillar is
        judged on, so it is counted here too — "Measures 4" over an average of
        five is the card disagreeing with itself. */
-    scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
-              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) +
+    yearsLine(it) +
+    (runsNow(it) ? scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
+              it.measures.length + bdsc.length, sp.n, sp.hi, sp.lo) : '') +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
       '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +

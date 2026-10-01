@@ -137,6 +137,11 @@ function deckHtmlFor(target){
   if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
+  /* §405: a unit that plans in projects or in objectives and actions gets the
+     function's deck, over its own holder — Islam's fourth answer, *"use the
+     existing function versions"*. */
+  var ou = UNITS[subjKey(t)];
+  if (ou && unitWayOf(ou)) return deckSlidesFn("u:" + subjKey(t));
   var u = unitLike(t);
   return u ? deckSlides(u) : "";
 }
@@ -191,9 +196,110 @@ function deckAnchors(kind, key){
    rather than a new cost: a picture placed after a slide that is no longer
    drawn lands at the end of the deck instead of being dropped. */
 
+/* §405: the aim slides, lifted out of deckSlides so a unit that plans in
+   projects or objectives presents its aspiration too (§53.5: one builder). */
+function unitAimSlides(u){
+  var S = [];
+  var fnAim = !!u.fnKey;
+  var aimNear = fnAim || SHOW_KO_THIS_YEAR;
+  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
+     so the this year column to come after the obcejtives."* The eye meets the
+     number being worked towards this cycle before the horizon it heads for —
+     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
+     shifts and the slide still renders perfectly (§243's own note). */
+  /* §404: the aspiration and the North Star are components; off draws nothing. */
+  /* §428: the top layer's own deck carries no aim slide — its aspiration and
+     objectives are the group's Foundation, shown on its own tab, and its
+     unit-shaped view holds neither (topAsUnit). */
+  var aimAsp = !fnAim && !u.topLayer && compOn(u.ukey, "aspiration"), aimKo = !u.topLayer && compOn(u.ukey, "keyobj");
+  var aimRows = !aimKo ? "" : SMPRules.shown(u.keyObjectives).map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      (aimNear
+        ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        : '') +
+      (fnAim ? '' : '<td class="num big3">' +
+        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
+  }).join("");
+  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
+     slide and the objectives reading, so its test is the aim slide's own —
+     a divider standing over nothing is the blank page that section removed,
+     with a heading on it.
+
+     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
+     weight and no 3-year target (§243), so on a function the divider names
+     one thing rather than printing a horizon that appears nowhere after it. */
+  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
+  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
+  if (aimRows || aimAsp)
+    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
+      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
+      foundCells));
+
+  if (aimRows || aimAsp) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
+    '><h2>What we are aiming at</h2>' +
+    (!aimAsp ? '' :
+      '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
+      '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
+      (u.endInMind
+        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
+        : '') + '</div>') +
+    (aimRows
+      ? '<div class="aimbottom">' +
+          (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
+          '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+          (aimNear ? '<th class="num">This year</th>' : '') +
+          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
+          '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
+        '</div>'
+      : '') +
+    '</section>');
+
+  return S;
+}
+/* §405: the SWOT section, lifted out of deckSlides for the same reason. */
+function unitSwotSlides(u){
+  var S = [];
+  if (!u.fnKey && compOn(u.ukey, "swot")) {
+    /* §418: the boxes this layer carries, under the layer's own names. */
+    var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
+    var sw = SMPRules.swotQuads(GROUP, u.ukey).map(function(q){
+      return [q, LTraw(u.ukey, SMPRules.QUAD_KEYS[q]), hues[q]]; });
+    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
+       measurement rather than taste. On the blue the four scoring colours
+       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
+       Opportunities, which was drawn in `--panel` itself and would be
+       invisible against its own ground. Keeping them would mean inventing
+       four colours for one slide; the words under the counts already say
+       which is which, and the four category slides that follow keep their
+       own hues untouched. `.seccell.t-*` had no other user and is deleted
+       with them (§24). It is also what §254.5 settled for the pillar cards:
+       one accent across a row, never one per card (§41's budget). */
+    S.push(sectSlide("swothead", "After the SWOT title page",
+      SMPRules.swotTitle(GROUP, u.ukey) || LTraw(u.ukey, "swot"),
+      "Where " + (u.topLayer ? u.name : "this unit") + " is strong, exposed, and what the market is offering it.",
+      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
+    sw.forEach(function(x, xi){
+      var items = (u.swot[x[0]] || []).map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("");
+      /* The LAST category keeps the old key "swot", which stored slides
+         already name (§236.3). */
+      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
+        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
+                              : anch("swot" + x[0], "After " + x[1])) +
+        '><h2>' + esc(x[1]) + '</h2>' +
+        '<ol class="dswot">' + items + '</ol></section>');
+    });
+  }
+
+  return S;
+}
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
+  /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
+  var pOn = planOn(u);
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
@@ -242,55 +348,7 @@ function deckSlides(u){
 
      A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
      asserted, because a unit authors both. */
-  var fnAim = !!u.fnKey;
-  var aimNear = fnAim || SHOW_KO_THIS_YEAR;
-  /* §254.9: THIS YEAR COMES FIRST. Islam: *"flip this year column with the 2027
-     so the this year column to come after the obcejtives."* The eye meets the
-     number being worked towards this cycle before the horizon it heads for —
-     and THE HEADER AND THE ROW ARE SWAPPED TOGETHER, or every cell after them
-     shifts and the slide still renders perfectly (§243's own note). */
-  var aimRows = SMPRules.shown(u.keyObjectives).map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-      (aimNear
-        ? '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>'
-        : '') +
-      (fnAim ? '' : '<td class="num big3">' +
-        (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td>') + '</tr>';
-  }).join("");
-  /* THE DIVIDER IS DRAWN ONLY IF THE SECTION IS (§253). It opens the aim
-     slide and the objectives reading, so its test is the aim slide's own —
-     a divider standing over nothing is the blank page that section removed,
-     with a heading on it.
-
-     THE HORIZON CELL IS A UNIT'S. A supporting function's objectives carry a
-     weight and no 3-year target (§243), so on a function the divider names
-     one thing rather than printing a horizon that appears nowhere after it. */
-  var foundCells = [[SMPRules.shown(u.keyObjectives).length, L("keyobj","bu")]];
-  if (!fnAim && GROUP.horizon) foundCells.push([GROUP.horizon, "Horizon"]);
-  if (aimRows || !fnAim)
-    S.push(sectSlide("sfound", "After the Foundation divider", "Foundation",
-      "What " + (u.fnKey ? u.name : "this unit") + " is aiming at, and the objectives it is judged on.",
-      foundCells));
-
-  if (aimRows || !fnAim) S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
-    '><h2>What we are aiming at</h2>' +
-    (fnAim ? '' :
-      '<div class="aimtop"><div><span class="dlab">' + L("aspiration","bu") + '</span>' +
-      '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
-      (u.endInMind
-        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
-        : '') + '</div>') +
-    (aimRows
-      ? '<div class="aimbottom">' +
-          (fnAim ? '' : '<span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>') +
-          '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-          (aimNear ? '<th class="num">This year</th>' : '') +
-          (fnAim ? '' : '<th class="num">' + horizonColLabel() + '</th>') +
-          '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
-        '</div>'
-      : '') +
-    '</section>');
+  S = S.concat(unitAimSlides(u));
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -331,7 +389,7 @@ function deckSlides(u){
      slide explains a reading it is not showing. */
   var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where ' + (u.fnKey ? esc(u.name) : "the unit") + ' stands</h2>' +
+    '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
       (koShown
         ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
@@ -341,7 +399,7 @@ function deckSlides(u){
         : '') +
       '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
         '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + u.items.length + ' ' + esc(L("pillar","bu").toLowerCase()) +
+        '<span class="headsub">' + itemsNow(u).length + ' ' + esc(L("pillar","bu")) +
           ', by their measures</span></div>' +
       '<div class="headcell"><span class="dlab">Execution performance</span>' +
         '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
@@ -380,7 +438,8 @@ function deckSlides(u){
       '<td class="num">' + figVsDue(m) + '</td>' +
       '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td></tr>';
   }).join("");
-  if (oRows) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
+  /* §404: a switched-off North Star draws no slide. */
+  if (oRows && compOn(u.ukey, "keyobj")) S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
     '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Annual target</th><th class="num">Actual</th>' +
@@ -402,35 +461,13 @@ function deckSlides(u){
      MAIN'S §236.3 IS KEPT WHOLE INSIDE THE GATE: every fixed slide carries an
      anchor, so every gap between two originals is a place a picture can live.
      A function simply has no such gaps here, because it has no such slides. */
-  if (!u.fnKey) {
-    var sw = [["s","Strengths","good"],["w","Weaknesses","bad"],
-              ["o","Opportunities","stone"],["t","Threats","warn"]];
-    /* ONE RULE ACROSS THE ROW, NOT A HUE PER CELL (§259.1), and it is a
-       measurement rather than taste. On the blue the four scoring colours
-       read 2.55 : 2.26 : 3.49 : 1.00 against it — the last being
-       Opportunities, which was drawn in `--panel` itself and would be
-       invisible against its own ground. Keeping them would mean inventing
-       four colours for one slide; the words under the counts already say
-       which is which, and the four category slides that follow keep their
-       own hues untouched. `.seccell.t-*` had no other user and is deleted
-       with them (§24). It is also what §254.5 settled for the pillar cards:
-       one accent across a row, never one per card (§41's budget). */
-    S.push(sectSlide("swothead", "After the SWOT title page", "SWOT",
-      "Where this unit is strong, exposed, and what the market is offering it.",
-      sw.map(function(x){ return [(u.swot[x[0]] || []).length, x[1]]; })));
-    sw.forEach(function(x, xi){
-      var items = (u.swot[x[0]] || []).map(function(t, i){
-        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
-      }).join("");
-      /* The LAST category keeps the old key "swot", which stored slides
-         already name (§236.3). */
-      S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-        (xi === sw.length - 1 ? anch("swot", "After the SWOT section")
-                              : anch("swot" + x[0], "After " + x[1])) +
-        '><h2>' + x[1] + '</h2>' +
-        '<ol class="dswot">' + items + '</ol></section>');
-    });
-  }
+  /* §399: A FUNCTION HAS ITS OWN S&W NOW — strengths and weaknesses, never
+     the market's two, which stay the business's. One slide, and only when it
+     has something on it (§253: a table with no rows is not a slide).
+     §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
+     side of the switch. */
+  if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
+  S = S.concat(unitSwotSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -455,7 +492,10 @@ function deckSlides(u){
   var pNames = u.items.map(function(p, i){
     return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') + '</div>';
+      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
+      /* §416: the years each direction runs in, and a later one says when. */
+      (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
+      '</div>';
   }).join("");
   /* THE ROLL-CALL STAYS WHITE AND TAKES A DIVIDER IN FRONT OF IT — Islam's
      B, chosen from two drawn in the real deck: *"the pillars page stay the
@@ -463,14 +503,14 @@ function deckSlides(u){
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  if (u.items.length)
-    S.push(sectSlide("spillars", "After the Strategic pillars divider",
-      "Strategic " + L("pillar","bu").toLowerCase(),
-      "The " + u.items.length + " " + L("pillar","bu").toLowerCase() +
-        " " + (u.fnKey ? u.name : "this unit") + " committed to, and how each is going.", null));
+  if (pOn && u.items.length)
+    S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
+      "Strategic " + L("pillar","bu"),
+      "The " + u.items.length + " " + L("pillar","bu") +
+        " " + (u.fnKey || u.topLayer ? u.name : "this unit") + " committed to, and how each is going.", null));
 
-  if (u.items.length) S.push('<section class="dslide"' +
-    anch("pillarnames", "After the " + L("pillar","bu").toLowerCase() + " names") +
+  if (pOn && u.items.length) S.push('<section class="dslide"' +
+    anch("pillarnames", "After the " + L("pillar","bu") + " names") +
     '><h2>' + L("pillar","bu") + '</h2>' +
     '<div class="pcards" style="--n:' + u.items.length +
       ';--c:' + pillarCols(u.items.length) +
@@ -479,6 +519,11 @@ function deckSlides(u){
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
+    /* §416: a direction that does not run this year is listed, not scored. */
+    if (!runsNow(p)) return '<tr class="later"><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+      '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
+      '<span class="dsub">' + esc(yearsLater(p)) + '</span></td>' +
+      '<td class="num">&mdash;</td><td class="num">&mdash;</td></tr>';
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
       '<b><span class="dcode">' + pillarCode(u, i) + '</span> ' + esc(p.name) + '</b>' +
@@ -492,27 +537,61 @@ function deckSlides(u){
      scoring table takes the deck's OWN existing phrasing, the one the
      objectives table has always worn, rather than a new form of words. */
   var pillarScoreSlide = '<section class="dslide"' +
-    anch("pillars", "After the " + L("pillar","bu").toLowerCase() + " overview") +
+    anch("pillars", "After the " + L("pillar","bu") + " overview") +
     '><h2>' + L("pillar","bu") + ' &mdash; where we stand</h2>' +
-    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Pillar</th>' +
-    '<th class="num">Measures</th><th class="num">Execution</th></tr></thead>' +
+    '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("pillar") + '</th>' +
+    '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>';
 
-  u.items.forEach(function(p, pi){
+  (pOn ? u.items : []).forEach(function(p, pi){
+    /* §416: and it gets no slides of its own until its year comes. */
+    if (!runsNow(p)) return;
     var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
     S.push('<section class="dslide d-cover"' +
       anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
       sec(pillarCode(u, pi), p.name) +
       '><span class="seclab">' + esc(p.kind) +
-      ' &middot; theme ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
+      ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
       '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
         esc(p.name) + '</h1>' +
       (p.sub ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
       '<div class="coverrule"></div><div class="leadstats">' +
-        '<div><span class="dlab">Key measures</span><b class="' + dBand(pillarPerf(p)) + '">' +
+        '<div><span class="dlab">' + L("measure") + '</span><b class="' + dBand(pillarPerf(p)) + '">' +
           dPct(pillarPerf(p)) + '</b></div>' +
         '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
       '</div></section>');
+
+    /* ── THE DIRECTION'S OVERVIEW, ONE SLIDE AFTER ITS TITLE (§413) ────
+       Islam, of the mockup: "approved, keep the objective preview, build it".
+       Drawn only while the client's Structure carries the Direction overview
+       AND this direction has something in it: an empty slide on a projector
+       says the plan owes an answer nobody asked it for (§253, §45.2). The
+       right-hand panel is READ from the direction's own tables, never typed a
+       second time (§53.5). */
+    if (planDetailOn("overview", p) && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
+      var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
+        return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
+      }).join("");
+      var ovTs = SMPRules.shown(p.tactics || []).slice(0, 5).map(function(t){
+        return '<div class="row"><span>' + esc(t.name) + '</span><i>' + esc(t.owner || "") + '</i></div>';
+      }).join("");
+      var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+      S.push('<section class="dslide dovs"' +
+        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
+        deckPillarHead(u, p, pi, DW("overview", "one", p)) +
+        '<div class="obody"><div>' +
+          (String(p.ovObj || "").trim() ? '<div class="ok">' + ovArea("ovobj", p) + '</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+          '<div class="two">' +
+            (String(p.ovWhy || "").trim() ? '<div><div class="ok">' + ovArea("ovwhy", p) + '</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+            (ovRisks.length ? '<div><div class="ok">' + ovArea("ovrisk", p) + '</div><ul>' +
+              ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
+          '</div></div>' +
+          ((ovMs || ovTs) ? '<div class="side">' +
+            (ovMs ? '<div><div class="ok">' + L("measure") + '</div>' + ovMs + '</div>' : '') +
+            (ovTs ? '<div><div class="ok">' + L("tactic") + '</div>' + ovTs + '</div>' : '') +
+          '</div>' : '') +
+        '</div></section>');
+    }
 
     var mRows = SMPRules.shown(p.measures).map(function(m, i){
       return '<tr><td class="idx">' + (i+1) + '</td>' +
@@ -528,9 +607,9 @@ function deckSlides(u){
        clear of the tactics anchor below ("p" + code), which stored slides
        already name. */
     if (mRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
-      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — key measures") + '>' +
-      deckPillarHead(u, p, pi, "Key measures") +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>' +
+      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — " + labelWord("measure","bu")) + '>' +
+      deckPillarHead(u, p, pi, L("measure")) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th>' +
       '<th class="num">Annual target</th><th class="num">Actual</th>' +
       '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
 
@@ -608,14 +687,18 @@ function deckSlides(u){
        unmeasurable row, so a review could not tell "nobody has entered this"
        from "there is nothing to enter" (§35). */
     var tRows = SMPRules.shown(p.tactics).map(function(t, i){
-      var lead = '<td class="idx">' + (i+1) + '</td>' +
-        '<td class="lead">' + esc(t.name) + '</td>' +
-        '<td>' + outcomeCell(t) + '</td>' +
-        '<td>' + esc(t.owner) + '</td>' +
-        '<td class="collabs">' + collabCell(t) + '</td>' +
-        '<td class="cc">' + qs(t) + '</td>';
-      var note = t.note ? '<td class="dnote">' + esc(t.note) + '</td>'
-                        : '<td class="dnote empty">&mdash;</td>';
+      /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
+         each outcome takes a line of its own, as on the page behind it. */
+      var xs = scoredExtras(t), rs = outRowspan(xs.length);
+      var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
+        '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
+        '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+        '<td' + rs + '>' + esc(t.owner) + '</td>' +
+        '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+        '<td class="cc"' + rs + '>' + qs(t) + '</td>';
+      var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
+                        : '<td class="dnote empty"' + rs + '>&mdash;</td>';
+      if (xs.length) return deckOutRows(t, lead, note, xs, rs);
       /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
          normally it has the comment of not due this cycle anyway."* The cell
          already says it in words, and dimming says it a second time in a way
@@ -643,13 +726,49 @@ function deckSlides(u){
     }).join("");
     if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
       anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
-      deckPillarHead(u, p, pi, "Tactics") +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th>' +
-      '<th>Outcome</th><th>Owner</th>' +
+      deckPillarHead(u, p, pi, L("tactic")) +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
+      '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
       '<th>Collabs.</th>' +
       '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
+
+  /* §414: a tactic with several outcomes on the review deck — one line per
+     outcome with its own figure against its own benchmark, and the tactic's
+     Progress as their average, spanning the lines. `deckFitPass()` moves a
+     tactic's lines as one group, so a continuation never splits them. */
+  function deckOutFig(t, x){
+    var o = outcomeOf(x);
+    if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
+    var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
+    if (shown == null)
+      return '<td class="cc">Not reported' +
+        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + esc(shown) + '</b>' +
+      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+  }
+  function deckOutRows(t, lead, note, xs, rs){
+    var due = tacticDue(t), sub = outSubCls(t), out;
+    if (!due) {
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      xs.forEach(function(x){
+        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
+      });
+      return out + outPad(xs.length);
+    }
+    var r = tacticProgress(t);
+    var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
+                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
+    prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
+    out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
+    xs.forEach(function(x){
+      var e = exAsT(t, x);
+      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
+        deckOutFig(t, e) + '</tr>';
+    });
+    return out + outPad(xs.length);
+  }
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
      Islam: *"make the notes and achievements slide optional and they can add
@@ -700,10 +819,10 @@ function deckSlides(u){
      slide always draws, so there is always something behind this. */
   S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
-    "Where the " + L("pillar","bu").toLowerCase() + " stand, where " +
+    "Where the " + L("pillar","bu") + " stand, where " +
       (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
     null));
-  if (u.items.length) S.push(pillarScoreSlide);
+  if (pOn && u.items.length) S.push(pillarScoreSlide);
   S.push(standSlide);
   if (noteSlide) S.push(noteSlide);
 
@@ -758,7 +877,7 @@ function deckPillarHead(u, p, pi, which){
        The figures are unchanged: `pillarExec` and `pillarPlan` are still what
        Execution is computed from, and are still explained in words on "Where
        the unit stands", which he looked at and kept. */
-    '<div class="dstats"><span><i>Measures</i><b class="' + dBand(pillarPerf(p)) + '">' +
+    '<div class="dstats"><span><i>' + L("measure") + '</i><b class="' + dBand(pillarPerf(p)) + '">' +
       dPct(pillarPerf(p)) + '</b></span>' +
     '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
 }
@@ -768,6 +887,34 @@ function deckPillarHead(u, p, pi, which){
    tactics. One system — a function's review must read as the same product as
    a unit's, which is why every slide reuses the unit deck's shapes. */
 
+/* ── A SUPPORTING FUNCTION'S S&W ON ONE SLIDE (§399) ─────────────────
+   Two columns, the unit SWOT's own list and its own two hues, so a function's
+   slide reads as the same thing a unit's does (§53.5). Blank lines are not
+   items (§246's whitespace rule). No slide at all when both lists are empty. */
+function fnSWSlide(f){
+  if (!f) return "";
+  var sw = f.swot || {};
+  /* §418: which boxes, what they are called and what the slide is called are
+     the functions layer's (Structure); unset, it is today's two. */
+  var fk = Object.keys(FUNCTIONS).filter(function(k){ return FUNCTIONS[k] === f; })[0] || "";
+  var tg = "fn:" + fk, hues = { s:"good", w:"bad", o:"stone", t:"warn" };
+  var quads = SMPRules.swotQuads(GROUP, tg);
+  var title = esc(SMPRules.swotTitle(GROUP, tg)) || "Strengths &amp; Weaknesses";
+  var col = function(key, title, hue){
+    var items = (sw[key] || []).filter(function(t){ return String(t || "").trim(); });
+    return '<div class="dswcol t-' + hue + '"><h3>' + title + '</h3>' +
+      (items.length ? '<ol class="dswot">' + items.map(function(t, i){
+        return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+      }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
+  };
+  var any = quads.some(function(k){
+    return (sw[k] || []).some(function(t){ return String(t || "").trim(); }); });
+  if (!any) return "";
+  return '<section class="dslide d-fnsw"' + anch("fnsw", "After Strengths & Weaknesses") + '>' +
+    '<h2>' + title + '</h2><div class="dswgrid">' +
+    quads.map(function(q){ return col(q, LT(tg, SMPRules.QUAD_KEYS[q]), hues[q]); }).join("") +
+    '</div></section>';
+}
 function deckSlidesFn(subject){
   /* §326: the function's OWN work — the same list its four pages draw, so the
      projector cannot show a deck the screen does not (§53.5).
@@ -777,11 +924,14 @@ function deckSlidesFn(subject){
      the holder from it; a second deck builder for the second kind is what
      §296 and §305 each measured the cost of and refused. */
   var target = holderTarget(subject), isCap = isCapTarget(target);
+  /* §405: a unit that is not planned in pillars reads this deck too. */
+  var isUnit = isUnitHolderId(target);
   var cap = isCap ? capById(capKeyOf(target)) : null;
-  var fk = isCap ? (cap && cap.fn) : fnKeyOf(target);
-  var f = isCap ? cap : FUNCTIONS[fk];
+  var fk = isCap ? (cap && cap.fn) : isUnit ? null : fnKeyOf(target);
+  var f = isCap ? cap : isUnit ? UNITS[subjKey(target)] : FUNCTIONS[fk];
+  var noteKey = isUnit ? subjKey(target) : "fn:" + fk;
   var caps = capsShown(target);
-  var realCaps = isCap ? [] : capsOfFunction(fk);
+  var realCaps = (isCap || isUnit) ? [] : capsOfFunction(fk);
   /* §342: a function that plans in objectives and actions. The deck is the
      same deck — one builder, because a second one is what §296 and §305 each
      measured the cost of and refused — and what changes is the ONE slide that
@@ -801,8 +951,8 @@ function deckSlidesFn(subject){
        first slide in front of a room is Islam's complaint at its loudest. The
        capability wording survives for a function that really carries one. */
     '<p class="coversub">' + (realCaps.length
-      ? 'Capability review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
-        realCaps.length + (realCaps.length === 1 ? ' capability' : ' capabilities')
+      ? L1("capability") + ' review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
+        realCaps.length + ' ' + (realCaps.length === 1 ? L1("capability") : L("capability"))
       : 'Review &middot; ' + esc(REVIEW.name) + ' &middot; ' +
         (objMode
           /* §342: the cover says what the deck holds, which is the whole of
@@ -812,6 +962,12 @@ function deckSlidesFn(subject){
               return a2.concat(c.actions || []); }, [])).length, "action")
           : plural(caps.reduce(function(n, c){
               return n + ((c.projects || []).length); }, 0), "project"))) + '</p></section>');
+
+  /* §399: the function's S&W, right after its cover, where a unit's SWOT
+     sits after its foundation. Never on a capability's own deck. */
+  if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
+  /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
+  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -829,15 +985,15 @@ function deckSlidesFn(subject){
     if (!c.own)
     S.push('<section class="dslide d-cover"' + anch("cap" + c.id + "c", "After " + c.name + " — cover") +
       sec(secTwo(c.name), c.name) +
-      '><span class="seclab">Capability &middot; ' +
+      '><span class="seclab">' + L1("capability") + ' &middot; ' +
         esc(f.name) + '</span>' +
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
         (SMPRules.shown(c.keyObjectives).length
-          ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
+          ? '<div><span class="dlab">' + L("keyobj") + '</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
-        '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
+        '<div><span class="dlab">' + L1("project") + ' performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
@@ -851,8 +1007,8 @@ function deckSlidesFn(subject){
           '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
-      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — key objectives") +
-        '><h2>Key objectives &mdash; where we stand' +
+      S.push('<section class="dslide"' + anch("cap" + c.id + "k", "After " + c.name + " — " + labelWord("keyobj","bu")) +
+        '><h2>' + L("keyobj") + ' &mdash; where we stand' +
         '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
         '<th class="num">Weight</th><th class="num">Annual target</th>' +
@@ -860,6 +1016,8 @@ function deckSlidesFn(subject){
         '<tbody>' + kRows + '</tbody></table></section>');
     }
 
+    /* §422: a plan switched off draws its objectives and no plan slides. */
+    if (!planOn(target)) return;
     if (objMode) {
       var acts = SMPRules.shown(c.actions);
       var aRows = acts.map(function(a3, i){
@@ -898,12 +1056,12 @@ function deckSlidesFn(subject){
         '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
-    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 projects") +
-      '><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
-      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Project</th>' +
+    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 " + labelWord("project","bu")) +
+      '><h2>' + L("project") + '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>' + L1("project") + '</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
-      '<tbody>' + (pRows || '<tr><td colspan="6">No projects yet.</td></tr>') + '</tbody></table>' +
+      '<tbody>' + (pRows || '<tr><td colspan="6">No ' + L("project") + ' yet.</td></tr>') + '</tbody></table>' +
       '<p class="headfoot">Performance is half deliverables, half outcomes, per side. Milestones are completed of total.</p></section>');
 
     c.projects.forEach(function(p){
@@ -982,7 +1140,7 @@ function deckSlidesFn(subject){
           /* §227: the same cell the deck's tactic tables carry (§50). */
           '<td class="collabs">' + collabCell(m) + '</td>' +
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
-          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
+          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the ' + L1("project") + ' ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
           '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
@@ -1003,10 +1161,10 @@ function deckSlidesFn(subject){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
-  var fnote = cycleNote("fn:" + fk);
+  var fnote = cycleNote(noteKey);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
-    '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + fk + '">' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="' + esc(noteKey) + '">' +
       esc(fnote) + '</div>' +
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');
@@ -1919,7 +2077,12 @@ function deckFitPass(deck){
         s.parentNode.insertBefore(next, s.nextSibling);
       }
       var ntb = next.querySelector("tbody");
-      ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
+      /* §414: a tactic's outcome lines (and the hidden row that keeps the
+         stripe) travel WITH the row whose cells span them, never alone. */
+      var n = 1;
+      while (n < tb.rows.length && /\b(osub|opad)\b/.test(tb.rows[tb.rows.length - n].className)) n++;
+      if (n >= tb.rows.length) { s.classList.remove("on"); return; }
+      for (var k = 0; k < n; k++) ntb.insertBefore(tb.rows[tb.rows.length - 1], ntb.firstChild);
       changed = true;
       s.classList.remove("on");
     });

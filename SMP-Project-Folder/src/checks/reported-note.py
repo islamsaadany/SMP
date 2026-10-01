@@ -159,7 +159,9 @@ with sync_playwright() as p:
     ck("no page error", not errs, errs[:2])
 
     print("\n2 · the key measures table answers the same way (§53.5)")
-    mea = pg.evaluate(READ, "Measure")
+    # §395: the column is headed by the client's word for one measure, asked of
+    # the page rather than held as a literal (§218).
+    mea = pg.evaluate(READ, pg.evaluate("() => L1('measure')"))
     ck("the key measures table is on the page", mea and len(mea["rows"]) == 2,
        mea and len(mea["rows"]))
     # ASSERTED AS AGREEMENT, NEVER AS A LITERAL (§94.8): a deliberate change

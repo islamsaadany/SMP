@@ -10,15 +10,18 @@
    wanted. The categories are the module's navigation (spec 046 §4.6) and the
    search is a GET form, so the address carries the filter: a filtered library
    is a link somebody can send, Back works, and the shell's `script-src 'self'`
-   policy has nothing to admit (modules/trial made the same call for the same
+   policy has nothing to admit (the trial module made the same call for the
+   same
    reason).
 
    THE STYLESHEET IS THE ONE SIGNED OFF, verbatim from
    design-mockups/insights/2026-09-13_library-and-publishing-room.html (rule
-   1c), which is itself the trial module's token block extended with a list. */
+   1c), which is itself the trial module's token block extended with a list
+   — that module is gone (§363) and its block lives on here. */
 import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
-import { listItems, shape, CATEGORIES, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
+import { listItems, shape, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
+import { categoriesFor } from "../../lib/library-viewer.ts";
 import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 
@@ -68,7 +71,8 @@ export function factLine(it: Item): string {
   return bits.join(" &middot; ");
 }
 
-/* THE SWITCHER IS the trial module's, and the module menu behind it is
+/* THE SWITCHER IS the trial module's, carried here when that module went
+   (§363), and the module menu behind it is
    lib/modules.ts's — a module that drew its own would be the second place a
    module's name is spelt (§53.5). It is also this page's way back. */
 function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
@@ -128,6 +132,98 @@ h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 @media (max-width:560px){.item{flex-direction:column;gap:9px}}
 `;
 
+/* ── THE ROWS, AND THE ROWS ALONE (§376) ──────────────────────────────
+   The reports as a list, or the honest sentence for a list that is empty —
+   asked for by this module's own page AND by the Insights tab inside the
+   platform, which is the whole of why it is a function rather than an
+   expression inside the document.
+
+   WHAT IS SHARED IS THE PART THAT WOULD HURT IF IT DRIFTED: a report's
+   title, its summary, its fact line, its download, and the THREE different
+   reasons a list can be empty. Those are the product's own answers about a
+   report and there must be one of each (§53.5).
+
+   WHAT IS DELIBERATELY NOT SHARED IS THE CHROME AROUND THEM. Here the
+   categories are links and the search is a GET form, because the address
+   carries the filter and a filtered library is a link somebody can send;
+   in the tab the categories are the section row and the search re-asks,
+   because a form that navigates would take the platform's own page with
+   it. §53.5 is about one ANSWER to one question, never about one lump of
+   markup — and the question those two differ on is "how does this host
+   navigate", which genuinely has two answers.
+
+   `read` IS NOT `items.length` AND THE TWO SAY DIFFERENT THINGS (§93,
+   §231.4): a library that could not be read is not a library with nothing
+   in it, and counting an error as absence tells a client that Forefront
+   has published nothing. */
+/* ── READ ONCE, FOR EITHER HOST (§376) ────────────────────────────────
+   The library as this viewer may see it. Its own function because the tab
+   asks for exactly what the page asks for — and because the narrowing is
+   the one thing that must not differ between them: a report kept off
+   somebody's page and listed in their tab would be spec 053's rule undone
+   by the surface that came second.
+
+   A FAILED READ IS `read:false`, NEVER AN EMPTY LIST (§93). */
+export async function readLibrary(
+  tenantId: string, slug: string, ask: Ask, viewer: Viewer,
+): Promise<{ items: Item[]; read: boolean }> {
+  const q = oneLine(ask.q).slice(0, 120);
+  const category = normalizeCategories(ask.category)[0] || "";
+  let rows: any[] | null = null;
+  try {
+    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
+  } catch (e) {
+    console.error("insights: reading " + slug + "'s library:", (e as Error).message);
+  }
+  return { items: (rows || []).map((r) => shape(r, true) as Item), read: rows !== null };
+}
+
+/* ── THE TAB'S ANSWER (§376) ──────────────────────────────────────────
+   The rows the platform's Insights tab drops into its pane, as JSON so the
+   count can be drawn beside the search box without the shell counting
+   nodes — which would read an empty state as nought reports and an
+   unreadable library as nought as well (§93 again, one layer out).
+
+   THE HTML IS THE MODULE'S OWN, so the tab cannot spell a report's date or
+   its size differently from the page (§53.5). */
+export async function libraryFragment(
+  slug: string, tenantId: string, tenantName: string, ask: Ask, viewer: Viewer,
+): Promise<{ ok: true; html: string; count: number; read: boolean }> {
+  const q = oneLine(ask.q).slice(0, 120);
+  const category = normalizeCategories(ask.category)[0] || "";
+  const { items, read } = await readLibrary(tenantId, slug, ask, viewer);
+  return { ok: true, html: libraryRows(slug, items, read, q, category, tenantName), count: items.length, read };
+}
+
+export function libraryRows(
+  slug: string, items: Item[], read: boolean, q: string, category: string, tenantName: string,
+): string {
+  if (items.length)
+    return '<div class="list">' + items.map((it) =>
+      '<div class="item"><span class="body">' +
+      "<h3>" + esc(it.title) + "</h3>" +
+      (it.summary ? "<p>" + esc(it.summary) + "</p>" : "") +
+      '<span class="facts">' + factLine(it) + "</span>" +
+      "</span>" +
+      (it.hasFile
+        ? '<a class="dl" href="' + esc(clientHref(slug, "insights", it.id + "/file")) + '">Download</a>'
+        /* A report with nothing attached says so rather than drawing a
+           button that would answer "not found" (§61). */
+        : '<span class="nofile">No file yet</span>') +
+      "</div>").join("") + "</div>";
+  return '<div class="none">' + (
+    !read
+      ? "<b>This library could not be read just now.</b>Nothing has been lost. Try again in a moment."
+    : q || category
+      ? "<b>No reports match.</b>Try clearing the search, or choosing a different category."
+      /* IT SAYS WHO, because the client cannot fix it themselves and a
+         screen saying only "nothing here" reads as a fault rather than as
+         a beginning (§45.2). */
+      : "<b>Nothing has been published here yet.</b>Research, market reports and analysis written for " +
+        esc(tenantName) + " will appear here. Forefront publishes them."
+  ) + "</div>";
+}
+
 export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
@@ -136,17 +232,18 @@ export async function insightsDocument(
   const q = oneLine(ask.q).slice(0, 120);
   const category = normalizeCategories(ask.category)[0] || "";
   const bar = await barFor(tenantId);
+  /* THE CHECK'S BREAK (constitution XVI), carried here from the trial module
+     when that module went (§363): a build whose page stopped naming THIS
+     client — the one thing a module drawn per client has to get right, and
+     the thing a static page would satisfy every other assertion about —
+     must turn checks/modules.mjs red before its green run is believed
+     (§94.5). Never set on a deployment. */
+  const named = process.env.SMP_BREAK === "static-hello" ? "this client" : tenantName;
 
   /* A LIBRARY THAT COULD NOT BE READ IS NOT AN EMPTY ONE (§35, §93: counting
      an error as absence reports everybody as having none). The two states say
      different things, and neither of them says "nothing has been published". */
-  let rows: any[] | null = null;
-  try {
-    rows = await withTenant(tenantId, (c) => listItems(c, { kind: "insights", forClient: true, q, category, viewer }));
-  } catch (e) {
-    console.error("insights: reading " + slug + "'s library:", (e as Error).message);
-  }
-  const items: Item[] = (rows || []).map((r) => shape(r, true) as Item);
+  const { items, read } = await readLibrary(tenantId, slug, ask, viewer);
 
   const here = clientHref(slug, "insights", "");
   const catHref = (c: string) => {
@@ -157,19 +254,40 @@ export async function insightsDocument(
     return here + (s ? "?" + s : "");
   };
 
-  /* THE CATEGORIES ARE NOT DRAWN OVER AN EMPTY LIBRARY. A row of filters that
-     can only ever return nothing is furniture (§94.15) — but they ARE drawn
-     when a filter is what emptied the list, or there would be no way back to
-     the reports (§61). */
-  const anyShelf = items.length > 0 || !!q || !!category;
+  /* A FILTER IS DRAWN ONLY WHERE THERE IS THAT TYPE OF REPORT (§385). Islam:
+     *"the filters of the reports should appear only if there is this type of
+     report."* It was the module's whole list, so a client with nothing
+     published met five filters that could only ever return nothing — §94.15's
+     furniture and §61's control with nothing behind it, on the first screen
+     they open.
+
+     THE SAME ANSWER THE TAB IS STAMPED WITH (lib/library-viewer.ts), never a
+     second reading of the same shelf: the two hosts draw this row from one
+     function, or one of them would eventually offer a category the other
+     refuses (§53.5).
+
+     IT ASKS THE LIBRARY AND NOT THE SEARCH, which is why it is not `items`:
+     the row says what has been published, so it is the same row whatever is
+     typed — a filter row that rearranged itself as you typed would be a worse
+     screen than the one this replaces.
+
+     THE ROW IS STILL DRAWN WHEN A FILTER IS WHAT EMPTIED THE LIST, or there
+     would be no way back to the reports (§61) — All is always in it. */
+  const present = await categoriesFor(tenantId, viewer);
+  const anyShelf = present.length > 0 || !!q || !!category;
   const cats = !anyShelf ? "" :
     '<nav class="cats" aria-label="Categories">' +
     ['<a href="' + esc(catHref("")) + '"' + (category ? "" : ' aria-current="true"') + ">All</a>"]
-      .concat(CATEGORIES.map((c) =>
+      .concat(present.map((c) =>
         '<a href="' + esc(catHref(c)) + '"' + (category === c ? ' aria-current="true"' : "") + ">" + esc(c) + "</a>"))
       .join("") + "</nav>";
 
-  const tools = !anyShelf ? "" :
+  /* THE SEARCH BOX KEEPS ITS OWN QUESTION, which is not the row's: it is
+     drawn where there is something to search, and the categories where there
+     is something to filter by. A library of five reports under no category at
+     all has a search box and no filters, and that is the honest pair. */
+  const anyReports = items.length > 0 || !!q || !!category;
+  const tools = !anyReports ? "" :
     '<div class="tools">' +
     '<form method="get" action="' + esc(here) + '" role="search">' +
     (category ? '<input type="hidden" name="category" value="' + esc(category) + '">' : "") +
@@ -178,41 +296,17 @@ export async function insightsDocument(
     "</form>" +
     '<span class="cnt">' + esc(plural(items.length, "report", "reports")) + "</span></div>";
 
-  const list = items.length
-    ? '<div class="list">' + items.map((it) =>
-        '<div class="item"><span class="body">' +
-        "<h3>" + esc(it.title) + "</h3>" +
-        (it.summary ? "<p>" + esc(it.summary) + "</p>" : "") +
-        '<span class="facts">' + factLine(it) + "</span>" +
-        "</span>" +
-        (it.hasFile
-          ? '<a class="dl" href="' + esc(clientHref(slug, "insights", it.id + "/file")) + '">Download</a>'
-          /* A report with nothing attached says so rather than drawing a
-             button that would answer "not found" (§61). */
-          : '<span class="nofile">No file yet</span>') +
-        "</div>").join("")
-      + "</div>"
-    : '<div class="none">' + (
-        rows === null
-          ? "<b>This library could not be read just now.</b>Nothing has been lost. Try again in a moment."
-        : q || category
-          ? "<b>No reports match.</b>Try clearing the search, or choosing a different category."
-          /* IT SAYS WHO, because the client cannot fix it themselves and a
-             screen saying only "nothing here" reads as a fault rather than as
-             a beginning (§45.2). */
-          : "<b>Nothing has been published here yet.</b>Research, market reports and analysis written for " +
-            esc(tenantName) + " will appear here. Forefront publishes them."
-      ) + "</div>";
+  const list = libraryRows(slug, items, read, q, category, tenantName);
 
   return "<!doctype html>\n<html lang='en' data-module='insights'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
-    "<title>" + esc(tenantName) + " &mdash; Insights</title>\n" +
+    "<title>" + esc(named) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
     "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n<body>\n" +
     '<header class="bar">' + switcher(slug, have, "insights") +
     "<h1>Strategy Management Platform</h1>" +
-    '<span class="org">&middot; ' + esc(tenantName) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +
+    '<span class="org">&middot; ' + esc(named) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +
     '<main class="pg">\n<h2 class="pt">' + esc(MODULE_DEF.insights.label) + "</h2>\n" +
     cats + tools + list +
     "\n</main>\n</body>\n</html>\n";

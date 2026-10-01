@@ -127,11 +127,29 @@ if os.environ.get("SMP_BASE"):
     def _open(self, **kw):
         ctx = self.context
         if id(ctx) not in _signed:
+            # THE WELCOME IS OFFERED AGAIN ON EVERY DEEP ADDRESS (§360), once
+            # a browser session, and it stands the page behind it down — so a
+            # check that presses the switcher under it waits thirty seconds
+            # on a control the overlay holds inert. Every served context is
+            # born having seen it, through welcome.js's own memory; the check
+            # whose subject IS the welcome serves its own stub (own-server) and
+            # never comes through here.
+            try: ctx.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1')}catch(e){}")
+            except Exception: pass
             _goto(self, _BASE + "/raya-trade/sign-in", wait_until="networkidle")
             self.wait_for_selector(".gate[data-hydrated]", state="attached", timeout=20000)
             self.fill("#user", _EMAIL); self.fill("#password", _PW)
             self.click("#loginForm button[type=submit]")
-            self.wait_for_url("**/raya-trade", timeout=20000)
+            # §360: a sign-in lands INSIDE the first module the person may
+            # open (/raya-trade/strategy/…), never on a landing of its own —
+            # the bare address is a redirect now, so the wait is for the
+            # module's address, which is what the shell then rewrites.
+            self.wait_for_url(_re.compile(r"/raya-trade/(?!sign-in)[a-z]"), timeout=20000)
+            # and let the shell BOOT there before asking for the home address:
+            # the module's address is rewritten once more as the shell lands
+            # (§173), and a goto issued under that navigation is ABORTED
+            try: self.wait_for_function("!document.documentElement.classList.contains('booting')", timeout=25000)
+            except Exception: pass
             _signed.add(id(ctx))
         r = _goto(self, _BASE + _HOME, **kw)
         # The boot is a fetch now, not a parse: wait for the shell to have

@@ -4073,6 +4073,86 @@ console.log("\n39 \u00b7 how long each subject has to present (\u00a7340)");
         r.ok, (r.refusals || []).join(" / "));
 })();
 
+/* ── 40a · the landing line is the office's (§359.4, spec 056 §4.5) ──
+   Which sentence a module says on the client landing rides the group under
+   SMPRules.LANDING_PICK and is classified `setup`. BOTH ENDS, and the two
+   edits that must go together falsified separately (§259.2): classified but
+   absent from `gExtra` the unknown sweep adds a SECOND entry; swept but not
+   classified there is no entry at all — the change is INVISIBLE, which does
+   not refuse the save, it ALLOWS it, to everybody. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const PICK = R.LANDING_PICK;
+  check("\u00a7359.4: the key is the shared module's own", PICK === "landing", PICK);
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  if (!(UK && CUST)) { check("\u00a7359.4: the seed holds a custodian to test with", false, ""); return; }
+  const SET = function (i) { i.group[PICK] = { strategy: "waiting" }; };
+  let r = fromStored(SEED, "smo", SET);
+  check("\u00a7359.4: the office picks a module's landing line", r.ok, (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7359.4: a change to it is classified `setup` and nothing else",
+        kinds.length === 1 && kinds[0] === "setup",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+  r = fromStored(SEED, CUST, SET);
+  check("\u00a7359.4 REFUSED: a custodian cannot pick it", !r.ok, "was ALLOWED");
+  check("\u00a7359.4: and the refusal names the landing line",
+        !r.ok && /landing line/.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
+  /* CLEARING IS THE SAME ACT (\u00a750.6): the default deletes the key */
+  const set = clone(SEED); set.group[PICK] = { strategy: "waiting" };
+  r = fromStored(set, CUST, function (i) { delete i.group[PICK]; });
+  check("\u00a7359.4 REFUSED: nor put it back to the default", !r.ok, "was ALLOWED");
+  r = fromStored(set, "smo", function (i) { delete i.group[PICK]; });
+  check("\u00a7359.4: the office puts it back to the default", r.ok, (r.refusals || []).join(" / "));
+  /* a second module's pick beside the first is still one sentence */
+  r = fromStored(set, "smo", function (i) { i.group[PICK] = { strategy: "waiting", insights: "latest" }; });
+  check("\u00a7359.4: two modules' picks travel as one change",
+        r.ok && (r.changes || []).length === 1, JSON.stringify((r.changes || []).map(function (c) { return c.kind; })));
+})();
+
+/* ── 40b · a module's grant is the matrix's own write (§359.5, spec 056 §4.4) ──
+   Insights' Access page writes ACCESS[role].a_insights — a key lib/rules.js
+   does not name, because the module declares it (smp-app/lib/modules.ts) and
+   the frozen product must not carry a copy (§335). The authoriser sees the
+   `access` part change and classifies it `access`, the Super user's alone
+   (§89): BOTH ENDS, the SMO team refused with the others, because the team
+   holds Setup at edit and this is the one Setup page that is not theirs. */
+(function () {
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+  const UK = Object.keys(SEED.units)[0];
+  const CUST = SEED.unitRoles && SEED.unitRoles[UK] && SEED.unitRoles[UK].custodian;
+  if (!(UK && CUST)) { check("\u00a7359.5: the seed holds a custodian to test with", false, ""); return; }
+  const SHUT = function (i) { (i.access.owner = i.access.owner || {}).a_insights = "none"; };
+  let r = fromStored(SEED, "smo", SHUT);
+  check("\u00a7359.5: the Super user shuts a module to a role", r.ok, (r.refusals || []).join(" / "));
+  const kinds = (r.changes || []).map(function (c) { return c.kind; });
+  check("\u00a7359.5: a change to a module's grant is classified `access` and nothing else",
+        kinds.length === 1 && kinds[0] === "access",
+        kinds.join(",") || "(nothing \u2014 the change was invisible)");
+  r = fromStored(SEED, CUST, SHUT);
+  check("\u00a7359.5 REFUSED: a custodian cannot", !r.ok, "was ALLOWED");
+  /* the SMO team: the seed's first person holding it, or one made to */
+  const team = clone(SEED);
+  const tp = team.people.find(function (p) { return p.role === "smoteam"; }) ||
+             (function () { const p = team.people.find(function (x) { return x.key === CUST; }); p.role = "smoteam"; return p; })();
+  r = fromStored(team, tp.key, SHUT);
+  check("\u00a7359.5 REFUSED: nor the SMO team \u2014 the matrix is the Super user's whatever page it is written from (\u00a789)", !r.ok, "was ALLOWED");
+  check("\u00a7359.5: and the refusal says who may do what",
+        !r.ok && /who may do what|access/i.test((r.refusals || []).join(" ")), (r.refusals || []).join(" / "));
+  /* OPENING IT AGAIN DELETES THE KEY (\u00a750.6) and is the same act */
+  const shut = clone(SEED); SHUT(shut);
+  r = fromStored(shut, "smo", function (i) { delete i.access.owner.a_insights; });
+  check("\u00a7359.5: the Super user opens it again (the key deleted)", r.ok && (r.changes || []).length === 1 && r.changes[0].kind === "access", (r.refusals || []).join(" / "));
+  r = fromStored(shut, CUST, function (i) { delete i.access.owner.a_insights; });
+  check("\u00a7359.5 REFUSED: a custodian cannot open it either", !r.ok, "was ALLOWED");
+})();
+
 /* ── 40 · a pillar's breakdown is two halves at once (§343) ────────────
    ITS TARGETS ARE THE PLAN AND ITS FIGURES ARE THE REPORT, in one object on
    one row — so the danger is not that the rule is wrong but that the split
@@ -4100,7 +4180,7 @@ console.log("\n40 · a pillar's breakdown (§343)");
   function kinds(mutate) {
     const inc = clone(base);
     mutate(inc.units[UK].items[0].breakdown);
-    return (A.collect(base, inc, W(base)) || []);
+    return (A.collect(base, inc, R.worldOf(base)) || []);
   }
   const fig = kinds(function (b) { b.rows[1].a_c1 = "27%"; });
   check("§343: a category's FIGURE is reporting",
@@ -4124,7 +4204,7 @@ console.log("\n40 · a pillar's breakdown (§343)");
         nm.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
   const gone = (function () {
     const inc = clone(base); delete inc.units[UK].items[0].breakdown;
-    return (A.collect(base, inc, W(base)) || []);
+    return (A.collect(base, inc, R.worldOf(base)) || []);
   })();
   check("§343: taking the whole breakdown away is the plan",
         gone.some(function (c) { return c.kind === "unitPlan"; }),
@@ -4154,6 +4234,922 @@ console.log("\n40 · a pillar's breakdown (§343)");
   check("§343: the office moves the target",
         from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).ok,
         (from("smo", function (b) { b.rows[0].t_c1 = "9%"; }).refusals || []).join(" / "));
+})();
+
+/* ── 41 · the client's set-up mark (§360, spec 057) ──────────────────────
+   "Done with set-up" writes ONE key on the group (SMPRules.SETUP_DONE) and
+   the Setup rail reads it to move Getting started to the bottom as Client
+   set-up. It is SETUP — the office's — and the two server edits go together
+   (§259.2): classified, or the change is INVISIBLE and therefore allowed to
+   everybody; and in the group's known list, or it reaches the unknown sweep
+   under a sentence naming the whole group. BOTH ENDS: the office may, the
+   custodian may not, and neither direction is `unknown`. */
+console.log("\n41 · the client's set-up mark (§360)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const KEY = R.SETUP_DONE;
+  check("§360: the key is the shared rule's, never a literal here", typeof KEY === "string" && KEY.length > 0, String(KEY));
+  const base = clone(SEED);
+  delete base.group[KEY];
+  function marked(v) { const inc = clone(base); if (v == null) delete inc.group[KEY]; else inc.group[KEY] = v; return inc; }
+  const set = (A.collect(base, marked(true), W(base)) || []);
+  check("§360: marking the set-up done classifies as SETUP",
+        set.length > 0 && set.every(function (c) { return c.kind === "setup"; }),
+        set.map(function (c) { return c.kind; }).join(",") || "(nothing classified — INVISIBLE, so allowed to everybody)");
+  const doneBase = marked(true);
+  const cleared = (A.collect(doneBase, marked(null), W(doneBase)) || []);
+  check("§360: ...and so does taking the mark off (stored as an absence, §50.6)",
+        cleared.length > 0 && cleared.every(function (c) { return c.kind === "setup"; }),
+        cleared.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  check("§360: neither direction reaches the unknown sweep (§191)",
+        !set.concat(cleared).some(function (c) { return c.kind === "unknown"; }), "ok");
+  const office = A.authorize(base, marked(true), personOf(base, "smo"));
+  check("§360: the office marks the set-up done", office.ok, (office.refusals || []).join(" / "));
+  if (custKey) {
+    const cust = A.authorize(base, marked(true), personOf(base, custKey));
+    check("§360 REFUSED: a unit's custodian may not", !cust.ok, "was ALLOWED");
+    check("§360: ...and the refusal names Setup (§16.7)",
+          !cust.ok && (cust.refusals || []).join(" ").toLowerCase().indexOf("setup") > -1,
+          (cust.refusals || []).join(" / "));
+  }
+  /* the mark is not swept up by a save that carries it unchanged (§42's
+     phantom change: a reader that created what it looked for) */
+  const same = (A.collect(doneBase, clone(doneBase), W(doneBase)) || []);
+  check("§360: a save carrying the mark unchanged classifies nothing about it",
+        !same.some(function (c) { return /set-up/.test(String(c.what || c.label || "")); }), same.map(function (c) { return c.kind; }).join(","));
+})();
+
+/* ── 42 · the two kinds of Forefront row (spec 058 §3a.1, §362.2) ───────
+   `officeRow` marks a consultant's register row two ways and until today the
+   authoriser read only the mark: a row the platform BUILT (`ffrow`) and one
+   it merely ADOPTED because an address matched (§313.32) were refused alike,
+   which froze a person the CLIENT entered — their unit, their address and
+   their role — from the day their holder joined the account team.
+
+   THE STATE IS MADE (§255): the seed carries no Forefront row at all, so
+   every assertion here would pass on a build that had lost the distinction
+   entirely. BOTH ENDS every time (§94.2) — minted refused beside adopted
+   allowed — or a build that simply stopped refusing anything passes half. */
+console.log("\n42 · the two kinds of Forefront row (spec 058)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  /* Two rows, made from real people so nothing else about them is odd. */
+  const base = clone(SEED);
+  const rows = (base.people || []).filter(function (p) { return !p.forefront; });
+  const MINT = rows[0], ADOPT = rows[1];
+  check("§362.2: the fixture found two ordinary rows to mark",
+        !!(MINT && ADOPT && MINT.key !== ADOPT.key), String(rows.length));
+  if (!MINT || !ADOPT) return;
+  MINT.forefront = true; MINT.ffrow = true;
+  ADOPT.forefront = true;               /* adopted — never `ffrow` */
+
+  const edit = function (who, key, f) {
+    const inc = clone(base);
+    f(inc.people.filter(function (p) { return p.key === key; })[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+  const kinds = function (key, f) {
+    const inc = clone(base);
+    f(inc.people.filter(function (p) { return p.key === key; })[0]);
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  };
+
+  /* — the minted row is the platform's, whole — */
+  check("§362.2: renaming a MINTED row classifies as officeRow",
+        kinds(MINT.key, function (p) { p.name = p.name + " X"; }).indexOf("officeRow") > -1,
+        kinds(MINT.key, function (p) { p.name = p.name + " X"; }).join(","));
+  const mintOffice = edit("smo", MINT.key, function (p) { p.name = p.name + " X"; });
+  check("§362.2 REFUSED: ...and the OFFICE is refused it too",
+        !mintOffice.ok, "was ALLOWED");
+  check("§362.2: ...and the refusal says where it is set (§16.7)",
+        !mintOffice.ok && (mintOffice.refusals || []).join(" ").toLowerCase().indexOf("forefront") > -1,
+        (mintOffice.refusals || []).join(" / "));
+
+  /* — the adopted row is the client's own person again — */
+  const adoptKinds = kinds(ADOPT.key, function (p) { p.name = p.name + " X"; });
+  check("§362.2: renaming an ADOPTED row is ordinary setup, never officeRow",
+        adoptKinds.indexOf("officeRow") < 0 && adoptKinds.indexOf("setup") > -1,
+        adoptKinds.join(",") || "(nothing classified)");
+  check("§362.2: ...so the office may correct it",
+        edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).ok,
+        (edit("smo", ADOPT.key, function (p) { p.name = p.name + " X"; }).refusals || []).join(" / "));
+  if (custKey)
+    check("§362.2 REFUSED: ...and a unit's custodian still may not (a re-housing, never a widening)",
+          !edit(custKey, ADOPT.key, function (p) { p.name = p.name + " X"; }).ok, "was ALLOWED");
+
+  /* — the marks themselves are the platform's on BOTH kinds — */
+  const cleared = kinds(ADOPT.key, function (p) { delete p.forefront; });
+  check("§362.2: clearing the mark on an adopted row is officeRow",
+        cleared.indexOf("officeRow") > -1, cleared.join(",") || "(nothing classified — INVISIBLE)");
+  check("§362.2 REFUSED: ...and the office may not clear it either",
+        !edit("smo", ADOPT.key, function (p) { delete p.forefront; }).ok, "was ALLOWED");
+
+  /* — and nothing is swept up by a save that carries them unchanged (§42) — */
+  const quiet = (A.collect(base, clone(base), W(base)) || []);
+  check("§362.2: a save carrying both rows unchanged classifies nothing",
+        !quiet.some(function (c) { return c.kind === "officeRow"; }),
+        quiet.map(function (c) { return c.kind; }).join(","));
+})();
+
+/* ── 43 · MY REPORTING: the owner of a line enters it (§382, spec 062) ──
+   THE SERVER IS THE HALF THAT DECIDES (§42), and until this section it had
+   none: `scripts/test-my-reporting.js` asks the SCREEN, and every narrowing
+   it measures is `canEnterLine`'s one door — so falsifying the shared rule's
+   own branch left that file entirely GREEN (§54.5). A rule with no assertion
+   is a rule somebody deletes next month.
+
+   THE STATE IS MADE, TWICE OVER (§255). The switch ships off, so the seed
+   cannot exercise any of this; and every collaborator in the worked example
+   is a bare first name, which `nameRuns()`'s two-word floor matches to NOBODY
+   (§130.7) — so a fixture using them would watch a refusal that was already a
+   refusal and call the narrowing proved.
+
+   BOTH ENDS EVERY TIME (§94.2): with the switch OFF the server must classify
+   and answer byte for byte what it answered before, or "nothing anybody holds
+   moves" is a promise rather than a measurement. */
+console.log("\n43 · my reporting (spec 062)");
+(function () {
+  const base = clone(SEED);
+  const uk = base.unitKeys[0];
+  const unit = base.units[uk];
+  const pil = (unit.items || [])[0];
+  const tac = ((pil || {}).tactics || [])[0];
+  check("§382: the fixture found a tactic to own", !!tac, uk);
+  if (!tac) return;
+
+  /* An owner the register recognises, and somebody else who is NOT. */
+  const owner = base.people.filter(function (p) {
+    return p.key !== "smo" && p.key !== (base.unitRoles[uk] || {}).head &&
+           p.key !== (base.unitRoles[uk] || {}).custodian;
+  })[0];
+  /* THE COLLABORATOR MUST HOLD NOTHING ELSE, or the Contributor floor is never
+     reached at all — `personRoles()` derives it only for somebody with no
+     other role (§147.8's own condition), so a person who happens to own a
+     project somewhere else would be refused for a different reason entirely
+     and the switch would look load-bearing when it was not. */
+  const other = base.people.filter(function (p) {
+    return p.key !== owner.key && !R.personRoles(R.worldOf(base), p).length;
+  })[0];
+  check("§382: ...and somebody holding nothing at all, to be the collaborator",
+        !!(owner && other && owner.key !== other.key),
+        other ? other.key : "(nobody on the register holds no role)");
+  if (!owner || !other) return;
+
+  base.group.lineOwners = true;
+  tac.owner = owner.name;
+  owner.unit = uk; other.unit = uk;
+  base.review = base.review || {}; base.review.state = "open";
+
+  const say = function (f) { const inc = clone(base); f(inc); return inc; };
+  const at = function (inc) {
+    return inc.units[uk].items[0].tactics[0];
+  };
+  const kindsOf = function (inc, who) {
+    return (A.collect(base, inc, R.worldOf(base)) || [])
+             .map(function (c) { return c.kind + ":" + (c.what || ""); });
+  };
+  const verdict = function (inc, who) {
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  /* — the figure, classified as its own kind and NAMED — */
+  const figure = say(function (i) { at(i).actual = "42"; });
+  const ks = kindsOf(figure);
+  check("§382: a tactic's figure classifies as lineReporting",
+        ks.some(function (k) { return k.indexOf("lineReporting:") === 0; }),
+        ks.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+  check("§382: ...and the entry NAMES whose line it is (§16.7)",
+        ks.some(function (k) { return k.indexOf(owner.name) > -1; }), ks.join(" / "));
+
+  check("§382: the owner enters their own line", verdict(figure, owner.key).ok,
+        (verdict(figure, owner.key).refusals || []).join(" / "));
+  check("§382 REFUSED: somebody else does not", !verdict(figure, other.key).ok,
+        "was ALLOWED");
+  check("§382: ...and the refusal names the owner rather than a rule number",
+        (verdict(figure, other.key).refusals || []).join(" ").indexOf(owner.name) > -1,
+        (verdict(figure, other.key).refusals || []).join(" / "));
+  check("§382: the office still enters it", verdict(figure, "smo").ok,
+        (verdict(figure, "smo").refusals || []).join(" / "));
+
+  /* — a LOCKED cycle refuses it, like every other figure — */
+  (function () {
+    const shut = clone(base); shut.cycle = shut.cycle || {}; shut.cycle.locked = true;
+    const inc = clone(shut); inc.units[uk].items[0].tactics[0].actual = "42";
+    check("§382 REFUSED: a locked cycle takes nothing, owner or not",
+          !A.authorize(shut, inc, personOf(shut, owner.key)).ok, "was ALLOWED");
+  })();
+
+  /* — THE BRANCH THE SCREEN'S OWN CHECK CANNOT REACH: a COLLABORATOR.
+       `canEnterLine` refuses them at the door in the browser, so removing
+       this narrowing leaves that file green — the server has no such door,
+       and this is where "contributor should not report, the owner only"
+       is actually enforced. Both ends, with the switch as the only
+       difference between them. — */
+  (function () {
+    const withColl = clone(base);
+    const t = withColl.units[uk].items[0].tactics[0];
+    t.owner = owner.name;
+    t.collaborators = [other.name];
+    withColl.access = withColl.access || {};
+    withColl.access.contrib = withColl.access.contrib || {};
+    withColl.access.contrib.a_unit_own = "edit";
+    const post = function (st) {
+      const inc = clone(st); inc.units[uk].items[0].tactics[0].actual = "7";
+      return A.authorize(st, inc, personOf(st, other.key));
+    };
+    check("§382: the fixture made a collaborator the register recognises",
+          R.namedOn({ owner: "", collaborators: [other.name] }, other), other.name);
+
+    const off = clone(withColl); delete off.group.lineOwners;
+    check("§382: with the switch OFF a named collaborator enters it, as today",
+          post(off).ok, (post(off).refusals || []).join(" / "));
+    check("§382 REFUSED: with it ON only the owner does",
+          !post(withColl).ok, "was ALLOWED");
+  })();
+
+  /* — the lock is a draft of YOUR OWN lines and nobody else's — */
+  (function () {
+    const key = uk + "|" + owner.key;
+    const mine = say(function (i) {
+      i.review.lines = {}; i.review.lines[key] = { by: owner.key, at: "2026-09-20" };
+    });
+    const lk = kindsOf(mine);
+    check("§382: saving your lines as a draft classifies as lineDone",
+          lk.some(function (k) { return k.indexOf("lineDone:") === 0; }),
+          lk.join(" / ") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§382: ...and you may", verdict(mine, owner.key).ok,
+          (verdict(mine, owner.key).refusals || []).join(" / "));
+
+    const theirs = say(function (i) {
+      i.review.lines = {}; i.review.lines[uk + "|" + other.key] = { by: other.key, at: "2026-09-20" };
+    });
+    check("§382 REFUSED: saving somebody ELSE's lines is not yours to do",
+          !verdict(theirs, owner.key).ok, "was ALLOWED");
+    check("§382: ...and the review map travels per key, never whole (§234)",
+          (R.REVIEW_PER_TARGET || require("../lib/graph-diff.js").REVIEW_PER_TARGET || [])
+            .indexOf("lines") > -1,
+          JSON.stringify(require("../lib/graph-diff.js").REVIEW_PER_TARGET));
+  })();
+
+  /* — THE SWITCH IS THE OFFICE'S, AND BOTH EDITS GO TOGETHER (§259.2).
+       Classified but unswept adds a second entry; swept but unclassified is
+       INVISIBLE and therefore allowed to everybody, which is the dangerous
+       direction and the one a presence-only assertion misses. — */
+  (function () {
+    const flip = clone(SEED); flip.group.lineOwners = true;
+    const fk = (A.collect(SEED, flip, R.worldOf(SEED)) || [])
+                 .map(function (c) { return c.kind; });
+    check("§382: turning the switch on classifies as setup",
+          fk.indexOf("setup") > -1,
+          fk.join(",") || "(nothing classified — INVISIBLE, and therefore ALLOWED)");
+    check("§382: ...and it is the office's",
+          A.authorize(SEED, flip, personOf(SEED, "smo")).ok,
+          (A.authorize(SEED, flip, personOf(SEED, "smo")).refusals || []).join(" / "));
+    if (custKey)
+      check("§382 REFUSED: ...and a unit's custodian may not set it",
+            !A.authorize(SEED, flip, personOf(SEED, custKey)).ok, "was ALLOWED");
+    /* AND EXACTLY ONCE. The other half of §259.2, which no verdict can see:
+       classified-and-unswept is refused to the same people and classifies
+       TWICE — `setup:whether tactic owners enter their own lines` beside
+       `unknown:the group's lineOwners` — so the change log gains a phantom
+       row and a refusal names the stored field rather than the control that
+       sets it (§16.7). Measured; both people answer the same either way. */
+    check("§382: ...and exactly once, never as setup AND unknown (§259.2)",
+          fk.length === 1,
+          (A.collect(SEED, flip, R.worldOf(SEED)) || [])
+            .map(function (c) { return c.kind + ":" + c.what; }).join(" / "));
+  })();
+
+  /* — AND WITH IT OFF, NOTHING MOVES. The whole promise of the switch. — */
+  (function () {
+    const off = clone(base); delete off.group.lineOwners;
+    const inc = clone(off); inc.units[uk].items[0].tactics[0].actual = "42";
+    const ks2 = (A.collect(off, inc, R.worldOf(off)) || [])
+                  .map(function (c) { return c.kind; });
+    check("§382: with the switch off a tactic's figure is unitReporting as before",
+          ks2.indexOf("unitReporting") > -1 && ks2.indexOf("lineReporting") < 0,
+          ks2.join(","));
+  })();
+
+  /* — §387: AND A NAME THAT REACHES NOBODY IS NOT AN OWNER —
+     `lineOwned` asks whether the plan NAMES somebody; `lineOwnerIsHere` asks
+     whether the register holds them. 32 of the worked example's 83 tactics
+     answer yes to the first and no to the second, because a plan is typed by a
+     custodian and a register is filled from HR. Classified as its owner's,
+     such a row is refused to EVERYBODY — `lineReporting` admits the owner
+     alone by name and there is nobody to be them — so the unit could not enter
+     its own figure and neither could anybody else but the office (§61).
+
+     BOTH ENDS, OR THE FIRST HALF IS SATISFIED BY A BUILD THAT CLASSIFIED
+     NOTHING AS `lineReporting` AT ALL (§94.2): the unmatched name falls to the
+     unit, and the MATCHED one beside it still does not. */
+  (function () {
+    const w = R.worldOf(base);
+    check("§387: the fixture's owner is somebody the register holds",
+          R.lineOwnerIsHere(w, { owner: owner.name }), owner.name);
+    check("§387: ...and a bare first name is not (§130.7's two-word floor)",
+          !R.lineOwnerIsHere(w, { owner: "Abdelrahim" }));
+
+    const orphan = clone(base);
+    orphan.units[uk].items[0].tactics[0].owner = "Abdelrahim";
+    const inc = clone(orphan); inc.units[uk].items[0].tactics[0].actual = "42";
+    const ks3 = (A.collect(orphan, inc, R.worldOf(orphan)) || [])
+                  .map(function (c) { return c.kind; });
+    check("§387: a line whose owner names nobody is the unit's figure",
+          ks3.indexOf("unitReporting") > -1 && ks3.indexOf("lineReporting") < 0,
+          ks3.join(","));
+    const cust = (base.unitRoles[uk] || {}).custodian;
+    if (cust)
+      check("§387: ...so the unit's custodian enters it",
+            A.authorize(orphan, inc, personOf(orphan, cust)).ok,
+            (A.authorize(orphan, inc, personOf(orphan, cust)).refusals || []).join(" / "));
+    const named = clone(base);
+    const inc2 = clone(named); inc2.units[uk].items[0].tactics[0].actual = "42";
+    check("§387 REFUSED: ...and a line whose owner IS on the register is still theirs",
+          cust ? !A.authorize(named, inc2, personOf(named, cust)).ok : true,
+          "was ALLOWED");
+  })();
+})();
+
+/* ── 44 · REVENUE DRIVERS (spec 063) ─────────────────────────────────
+   THE STATE IS MADE (§255): the seed carries no driver tree and no seasons
+   at all, so every assertion here would pass on a build that had lost the
+   feature entirely.
+
+   THE TWO EDITS GO TOGETHER AND ARE FALSIFIED SEPARATELY (§259.2). A field
+   that is CLASSIFIED but not SWEPT produces a second, unattributable entry;
+   a field that is SWEPT but not classified is INVISIBLE to this file and
+   therefore ALLOWED TO EVERYBODY, which is the dangerous direction and the
+   one that has shipped here before (§191). Both are asserted.
+
+   AND THE CANONICAL COMPARE IS ITS OWN ASSERTION, not a detail: the tree is
+   a deeply nested object in a jsonb column and Postgres hands keys back in
+   its own order (§145, §249.3). Compared order-sensitively an UNTOUCHED tree
+   reads as a change, and since this kind is office-only that refuses every
+   save by everybody else in the tenant, for ever. */
+console.log("\n44 · revenue drivers (spec 063)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const base = clone(SEED);
+  const TREE = {
+    mode: "rate",
+    subs: [{
+      name: "Retail",
+      periods: [{
+        name: "Base year", type: "base",
+        drivers: [
+          { id: "d1", name: "Stores", kind: "vol", unit: "n", base: 12, up: 0, upUnit: "%", note: "" },
+          { id: "d2", name: "Basket", kind: "val", unit: "n", base: 180, up: 10, upUnit: "%", note: "List rise." }
+        ]
+      }]
+    }]
+  };
+  base.units[UNIT][R.DRIVERS] = clone(TREE);
+  base.group[R.SEASONS] = [{ id: "ramadan", name: "Ramadan", start: "2026-02-17", end: "2026-03-19" }];
+  /* The base is OFF, stated rather than inherited: the demo seed ships the
+     switch ON (it is the worked example of the feature), so a base taken
+     from it as-is makes "switching it on" a no-op that classifies nothing
+     and reads as a refusal gap (§94.5 — found the day the seed gained it). */
+  delete base.group[R.DRIVERS_ON];
+
+  const kinds = function (f) {
+    const inc = clone(base); f(inc);
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  };
+  const verdict = function (who, f) {
+    const inc = clone(base); f(inc);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  check("§063: the fixture really carries a tree and a season",
+        !!R.driverChannel(base.units[UNIT]) && R.seasonsOf(base.group).length === 1);
+
+  /* — a save that changes nothing classifies nothing (§42's branding fault) — */
+  const quiet = (A.collect(base, clone(base), W(base)) || []).map(function (c) { return c.kind; });
+  check("§063: a save carrying the tree and the seasons unchanged classifies NOTHING",
+        quiet.indexOf("unitDrivers") < 0 && quiet.indexOf("seasons") < 0,
+        quiet.join(",") || "(nothing)");
+
+  /* — AND IT STILL CLASSIFIES NOTHING WHEN THE KEYS COME BACK REORDERED,
+       which is what a jsonb round trip does and what `same()` cannot see — */
+  const reordered = clone(base);
+  (function reorder(v) {
+    if (Array.isArray(v)) return v.map(reorder);
+    if (v && typeof v === "object") {
+      const out = {};
+      Object.keys(v).sort().reverse().forEach(function (k) { out[k] = reorder(v[k]); });
+      return out;
+    }
+    return v;
+  });
+  const flip = function (v) {
+    if (Array.isArray(v)) return v.map(flip);
+    if (v && typeof v === "object") {
+      const out = {};
+      Object.keys(v).sort().reverse().forEach(function (k) { out[k] = flip(v[k]); });
+      return out;
+    }
+    return v;
+  };
+  reordered.units[UNIT][R.DRIVERS] = flip(base.units[UNIT][R.DRIVERS]);
+  reordered.group[R.SEASONS] = flip(base.group[R.SEASONS]);
+  const spun = (A.collect(base, reordered, W(base)) || []).map(function (c) { return c.kind; });
+  check("§063: ...and still nothing when Postgres hands the keys back in another order",
+        spun.indexOf("unitDrivers") < 0 && spun.indexOf("seasons") < 0,
+        spun.join(",") || "(nothing)");
+  check("§063: ...and the fixture really did reorder something",
+        JSON.stringify(reordered.units[UNIT][R.DRIVERS]) !== JSON.stringify(base.units[UNIT][R.DRIVERS]));
+
+  /* — the tree: classified as its own kind, and once — */
+  const treeKinds = kinds(function (s) { s.units[UNIT][R.DRIVERS].subs[0].periods[0].drivers[0].base = 14; });
+  check("§063: changing a driver classifies as unitDrivers",
+        treeKinds.indexOf("unitDrivers") > -1,
+        treeKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§063: ...and exactly once, never as a second unattributable entry",
+        treeKinds.filter(function (k) { return k === "unitDrivers"; }).length === 1 &&
+        treeKinds.indexOf("unknown") < 0 && treeKinds.indexOf("setup") < 0,
+        treeKinds.join(","));
+
+  /* — BOTH ENDS on who may (§94.2) — */
+  check("§063: the office builds the trees",
+        verdict("smo", function (s) { s.units[UNIT][R.DRIVERS].subs[0].periods[0].drivers[0].base = 14; }).ok,
+        (verdict("smo", function (s) { s.units[UNIT][R.DRIVERS].subs[0].periods[0].drivers[0].base = 14; }).refusals || []).join(" / "));
+  const headTree = verdict(headKey, function (s) { s.units[UNIT][R.DRIVERS].subs[0].periods[0].drivers[0].base = 14; });
+  check("§063 REFUSED: ...and the unit's own head does not",
+        !headTree.ok, "was ALLOWED");
+  check("§063: ...and the refusal names Drivers rather than Setup or the plan (§16.7)",
+        !headTree.ok && (headTree.refusals || []).join(" ").indexOf("Drivers") > -1,
+        (headTree.refusals || []).join(" / "));
+  if (custKey)
+    check("§063 REFUSED: ...nor the unit's custodian",
+          !verdict(custKey, function (s) { s.units[UNIT][R.DRIVERS].subs[0].periods[0].drivers[0].base = 14; }).ok,
+          "was ALLOWED");
+
+  /* — adding and removing a tree, not only editing one — */
+  check("§063: giving a unit its first tree is the same kind",
+        kinds(function (s) { s.units[OTHER][R.DRIVERS] = clone(TREE); }).indexOf("unitDrivers") > -1,
+        kinds(function (s) { s.units[OTHER][R.DRIVERS] = clone(TREE); }).join(","));
+  check("§063: ...and taking one away is too",
+        kinds(function (s) { delete s.units[UNIT][R.DRIVERS]; }).indexOf("unitDrivers") > -1,
+        kinds(function (s) { delete s.units[UNIT][R.DRIVERS]; }).join(","));
+
+  /* — the seasons: the group's, its own kind, the office's — */
+  const seaKinds = kinds(function (s) { s.group[R.SEASONS][0].end = "2026-03-20"; });
+  check("§063: moving a season classifies as seasons",
+        seaKinds.indexOf("seasons") > -1,
+        seaKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§063: ...and exactly once, never also as unknown",
+        seaKinds.filter(function (k) { return k === "seasons"; }).length === 1 &&
+        seaKinds.indexOf("unknown") < 0,
+        seaKinds.join(","));
+  check("§063: the office sets the seasons",
+        verdict("smo", function (s) { s.group[R.SEASONS][0].end = "2026-03-20"; }).ok,
+        (verdict("smo", function (s) { s.group[R.SEASONS][0].end = "2026-03-20"; }).refusals || []).join(" / "));
+  const headSea = verdict(headKey, function (s) { s.group[R.SEASONS][0].end = "2026-03-20"; });
+  check("§063 REFUSED: ...and a unit head does not",
+        !headSea.ok, "was ALLOWED");
+  /* The page is Setup › Revenue drivers since the switch joined it (the
+     seasons table is its second half), so the refusal names THAT page. */
+  check("§063: ...and the refusal names the Revenue drivers page (§16.7)",
+        !headSea.ok && (headSea.refusals || []).join(" ").indexOf("Revenue drivers") > -1,
+        (headSea.refusals || []).join(" / "));
+
+  /* — THE CONNECTION IS A PLAN FIELD AND NEEDED NO EDIT, asserted rather
+       than assumed (§172): a key objective carrying `driver` falls to the
+       plan pass on its own, which is the office's, and a build that had
+       made it invisible would allow a unit head to re-point it. — */
+  const koBase = clone(base);
+
+  /* ADDING AND REMOVING ONE, which is what Setup → Seasons does and what
+     moving a date does not: the LIST changes rather than a value on a row
+     already in it. Both ends, because a build that classified the value and
+     left the list unclassified is INVISIBLE and therefore allowed to
+     everybody (§191, §259.2) — the shape this file has caught twice. */
+  const addSea = kinds(function (s) {
+    s.group[R.SEASONS].push({ id: "s9", name: "Peak", start: "2026-11-01", end: "2026-12-31" });
+  });
+  check("§063: adding a season classifies as seasons",
+        addSea.indexOf("seasons") > -1 && addSea.indexOf("unknown") < 0,
+        addSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  const rmSea = kinds(function (s) { s.group[R.SEASONS] = []; });
+  check("§063: and removing the last one classifies as seasons",
+        rmSea.indexOf("seasons") > -1 && rmSea.indexOf("unknown") < 0,
+        rmSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  /* AND THE KEY LEAVING ALTOGETHER IS THE SAME CHANGE (§50.6): the page
+     deletes `seasons` once its last row goes, so a build that only noticed
+     an array-to-array difference would let a unit head empty the client's
+     seasons and take every base year to twelve months. */
+  const gonSea = kinds(function (s) { delete s.group[R.SEASONS]; });
+  check("§063: and so is the key being deleted outright",
+        gonSea.indexOf("seasons") > -1 && gonSea.indexOf("unknown") < 0,
+        gonSea.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§063 REFUSED: a unit head may not add or remove a season either",
+        !verdict(headKey, function (s) {
+          s.group[R.SEASONS].push({ id: "s9", name: "Peak" });
+        }).ok &&
+        !verdict(headKey, function (s) { delete s.group[R.SEASONS]; }).ok,
+        "was ALLOWED");
+  check("§063: ...and the office may do both",
+        verdict("smo", function (s) {
+          s.group[R.SEASONS].push({ id: "s9", name: "Peak" });
+        }).ok &&
+        verdict("smo", function (s) { delete s.group[R.SEASONS]; }).ok,
+        (verdict("smo", function (s) { delete s.group[R.SEASONS]; }).refusals || []).join(" / "));
+  const ko = (koBase.units[UNIT].keyObjectives || [])[0];
+  check("§063: the fixture has a key objective to connect", !!ko);
+  if (ko) {
+    const linkKinds = (function () {
+      const inc = clone(koBase);
+      inc.units[UNIT].keyObjectives[0][R.DRIVER_LINK] = "d1";
+      return (A.collect(koBase, inc, W(koBase)) || []).map(function (c) { return c.kind; });
+    })();
+    check("§063: connecting an objective to a driver classifies as the unit's plan",
+          linkKinds.indexOf("unitPlan") > -1 && linkKinds.indexOf("unknown") < 0,
+          linkKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+    const headLink = A.authorize(koBase, (function () {
+      const inc = clone(koBase);
+      inc.units[UNIT].keyObjectives[0][R.DRIVER_LINK] = "d1";
+      return inc;
+    })(), personOf(koBase, headKey));
+    check("§063 REFUSED: ...and a unit head may not re-point it",
+          !headLink.ok, "was ALLOWED");
+  }
+
+  /* THE ON/OFF SWITCH (2026-09-23). Both ends (§94.2), and asserted by
+     setting it, clearing it and deleting it, because Off deletes the key
+     (§50.6) and a build that only noticed true-to-false would let a unit
+     head switch the whole thing off by removing it. */
+  const onKinds = kinds(function (s) { s.group[R.DRIVERS_ON] = true; });
+  check("§063: switching revenue drivers on classifies as seasons",
+        onKinds.indexOf("seasons") > -1 && onKinds.indexOf("unknown") < 0,
+        onKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  /* OFF is measured FROM a stored On, or deleting an absent key is a no-op
+     that passes on every build (§94.5, this file's own recorded trap). */
+  const onBase = clone(base); onBase.group[R.DRIVERS_ON] = true;
+  const offInc = clone(onBase); delete offInc.group[R.DRIVERS_ON];
+  const offKinds = (A.collect(onBase, offInc, W(onBase)) || []).map(function (c) { return c.kind; });
+  check("§063: and switching it off (the key deleted) is the same change",
+        offKinds.indexOf("seasons") > -1 && offKinds.indexOf("unknown") < 0,
+        offKinds.join(",") || "(nothing classified — INVISIBLE, so ALLOWED)");
+  check("§063 REFUSED: a unit head may not switch revenue drivers on",
+        !verdict(headKey, function (s) { s.group[R.DRIVERS_ON] = true; }).ok, "was ALLOWED");
+  check("§063: ...and the office may",
+        verdict("smo", function (s) { s.group[R.DRIVERS_ON] = true; }).ok,
+        (verdict("smo", function (s) { s.group[R.DRIVERS_ON] = true; }).refusals || []).join(" / "));
+  check("§063: only an explicit true is on, and absent is OFF",
+        R.driversOn({ driversOn: true }) === true && R.driversOn({}) === false &&
+        R.driversOn({ driversOn: "true" }) === false && R.driversOn(null) === false);
+})();
+
+/* ── §394: A CAPABILITY THAT PLANS IN PILLARS ───────────────────────
+   Every change inside one fell to the unknown sweep, which is the Super
+   user's alone: the SMO team could not add a pillar and the holding
+   function's head could not REPORT A FIGURE. Built from the raw seed (this
+   file's SEED re-wraps function projects, which is not this subject), and
+   asserted at BOTH ENDS, or a build that allowed everything passes (§94.2). */
+(function () {
+  const raw = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  const base = clone(raw);
+  const cap = base.group.capabilities[0];
+  const holder = cap.fn;
+  cap.format = "pillars"; delete cap.projects;
+  cap.items = [{ id: "cap-" + cap.id + "-P1", code: "", name: "Existing", sub: "", kind: "",
+                 theme: "", owner: "", tactics: [],
+                 measures: [{ id: "cap-" + cap.id + "-P1-M1", name: "M", target: "5",
+                              dir: ">=", compile: "Sum", actual: "" }] }];
+  let team = base.people.find(function (p) { return p.role === "smoteam"; });
+  if (!team) { team = base.people.find(function (p) { return p.key !== "smo" && p.role !== "super"; }); team.role = "smoteam"; }
+  const head = base.functions[holder].head;
+  const otherFn = Object.keys(base.functions).filter(function (k) {
+    return k !== holder && k !== "smo" && base.functions[k].head; })[0];
+  const outsider = base.functions[otherFn].head;
+  function run(who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  }
+  const addP = function (c) { c.items.push({ id: "x2", code: "", name: "New", sub: "", kind: "",
+    theme: "", owner: "", measures: [], tactics: [] }); };
+  const fig = function (c) { c.items[0].measures[0].actual = "3"; };
+  let v = run("smo", addP);
+  check("§394: the Super user adds a pillar to a pillars capability", v.ok, v.refusals.join(" / "));
+  v = run(team.key, addP);
+  check("§394: ...and so does the SMO team (was refused: 'only the SMO')", v.ok, v.refusals.join(" / "));
+  v = run(team.key, function (c) { c.items[0].name = "Renamed"; });
+  check("§394: the SMO team renames a pillar there", v.ok, v.refusals.join(" / "));
+  v = run(head, fig);
+  check("§394: the holding function's head REPORTS a figure there", v.ok, v.refusals.join(" / "));
+  v = run(head, addP);
+  check("§394 REFUSED: the head may not author the plan (the office's)", !v.ok, "was ALLOWED");
+  v = run(outsider, fig);
+  check("§394 REFUSED: another function's head may not report on it", !v.ok, "was ALLOWED");
+  const kinds = function (who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  };
+  const k1 = kinds("smo", addP);
+  check("§394: a pillar added is classified as a plan change, not unknown",
+        k1.indexOf("unknown") < 0 && k1.length > 0, k1.join(",") || "(nothing)");
+  const k2 = kinds("smo", function (c) { c.format = "projects"; });
+  check("§394: switching how it is planned is Setup",
+        k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
+})();
+
+/* ── 46 · the client's structure, and a company's own Foundation (§404) ──
+   The structure is SETUP (the office's); a company's Foundation is the
+   group's own strategy drawn over the company's record, so it is judged as
+   the group's is. Both ride the group's extra and both are compared
+   CANONICALLY, because jsonb hands object keys back in its own order (§145):
+   a save carrying either unchanged, with its keys reordered, classifies
+   nothing. BOTH ENDS: the office may, a custodian may not, neither is unknown. */
+console.log("\n46 · the client's structure (§404)");
+(function () {
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const KEY = R.STRUCTURE;
+  check("§404: the key is the shared rule's", typeof KEY === "string" && KEY.length > 0, String(KEY));
+  const base = clone(SEED); delete base.group[KEY]; delete base.group.coFound;
+  const ST = { bu: { on: ["brief", "aspiration", "keyobj", "pillar"] }, over: { x: { swot: false } } };
+  const inc = clone(base); inc.group[KEY] = ST;
+  const ks = (A.collect(base, inc, W(base)) || []);
+  check("§404: storing a structure classifies as SETUP",
+        ks.length > 0 && ks.every(function (c) { return c.kind === "setup"; }),
+        ks.map(function (c) { return c.kind; }).join(",") || "(nothing classified — INVISIBLE)");
+  const office = A.authorize(base, inc, personOf(base, "smo"));
+  check("§404: the office sets the structure", office.ok, (office.refusals || []).join(" / "));
+  if (custKey) {
+    const cust = A.authorize(base, inc, personOf(base, custKey));
+    check("§404 REFUSED: a custodian may not", !cust.ok, "was ALLOWED");
+  }
+  const stored = clone(base); stored.group[KEY] = ST;
+  const reordered = clone(base);
+  reordered.group[KEY] = { over: { x: { swot: false } }, bu: { on: ["brief", "aspiration", "keyobj", "pillar"] } };
+  const same = (A.collect(stored, reordered, W(stored)) || []);
+  check("§404: the same structure with its keys reordered is no change (jsonb, §145)", same.length === 0,
+        same.map(function (c) { return c.kind + ":" + (c.what || ""); }).join(","));
+  const coInc = clone(base); coInc.group.coFound = { dist: { aspiration: "Lead the region", keyObjectives: [] } };
+  const kc = (A.collect(base, coInc, W(base)) || []);
+  check("§404: a company's Foundation classifies as the group's own strategy",
+        kc.length > 0 && kc.every(function (c) { return c.kind === "group"; }),
+        kc.map(function (c) { return c.kind; }).join(",") || "(nothing classified)");
+  const offCo = A.authorize(base, coInc, personOf(base, "smo"));
+  check("§404: the office writes a company's Foundation", offCo.ok, (offCo.refusals || []).join(" / "));
+  if (custKey) {
+    const cc = A.authorize(base, coInc, personOf(base, custKey));
+    check("§404 REFUSED: a custodian may not", !cc.ok, "was ALLOWED");
+  }
+})();
+
+/* ── §399: A FUNCTION'S S&W ───────────────────────────────────────────────
+   Written by the office on every format, classified as the SWOT it is rather
+   than swept up as "a supporting function's settings" — both ends, or a build
+   that allowed everybody passes the first half. */
+(function () {
+  const fks = Object.keys(SEED.functions);
+  const proj = fks.filter(function (k) { return String(SEED.functions[k].format) !== "pillars" && SEED.functions[k].head; })[0];
+  const pil = fks.filter(function (k) { return String(SEED.functions[k].format) === "pillars"; })[0];
+  [proj, pil].forEach(function (fk) {
+    const put = function (inc) { inc.functions[fk].swot = { s: ["A strength"], w: ["A weakness"] }; };
+    allows("smo", put, "§399: the office writes " + fk + "'s S&W");
+    const head = SEED.functions[fk].head;
+    if (head && head !== "smo") refuses(head, put, "§399 REFUSED: " + fk + "'s own head may not (the Strategy half is the office's)");
+    refuses("own_mob", put, "§399 REFUSED: a business unit's owner may not write a function's S&W");
+    const inc = clone(SEED); put(inc);
+    const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+    check("§399: " + fk + "'s S&W is classified as its SWOT",
+          kinds.indexOf("unitAnalysis") > -1 && kinds.indexOf("unknown") < 0 && kinds.indexOf("setup") < 0,
+          kinds.join(",") || "(nothing)");
+  });
+})();
+
+/* ── §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN ──────────────────
+   Held by no function (company-wide), with `head` and `custodian` named on the
+   capability itself. BOTH ENDS (§94.2): the two seats report, somebody else
+   does not, the owner still may not rewrite the plan, and naming the seats is
+   the SMO's (Setup). */
+console.log("\n§412 · a capability's own owner and custodian");
+(function () {
+  const B = clone(SEED);
+  const cap = (B.group.capabilities || []).filter(function (c) { return (c.projects || []).length; })[0];
+  check("§412: the seed holds a capability with projects", !!cap);
+  if (!cap) return;
+  delete cap.fn; cap.head = "cfo"; cap.custodian = "rethead";
+  const T = "cap:" + cap.id, WB = R.worldOf(B);
+  const rolesOf = function (k) { return R.personRoles(WB, personOf(B, k)).map(function (r) { return r.role + "@" + r.at; }); };
+  check("§412: the owner derives Capability owner at the capability", rolesOf("cfo").indexOf("capowner@" + T) > -1, rolesOf("cfo").join(","));
+  check("§412: the custodian derives Custodian at the capability", rolesOf("rethead").indexOf("custodian@" + T) > -1, rolesOf("rethead").join(","));
+  let PI = -1, MI = -1;
+  cap.projects.forEach(function (pr, pi) { (pr.milestones || []).forEach(function (m, mi) {
+    if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; } }); });
+  check("§412: a milestone the fixture moves", PI > -1);
+  if (PI < 0) return;
+  function as(who, mutate) {
+    const inc = clone(B);
+    mutate(inc.group.capabilities.filter(function (c) { return c.id === cap.id; })[0]);
+    return A.authorize(B, inc, personOf(B, who));
+  }
+  const fig = function (c) { c.projects[PI].milestones[MI].status = "todo"; };
+  const brief = function (c) { c.projects[PI].brief = "rewritten by the fixture"; };
+  const seat = function (c) { c.head = "fn_hr"; };
+  let v = as("cfo", fig);      check("§412: the owner reports on their capability", v.ok, v.refusals.join(" / "));
+  v = as("rethead", fig);      check("§412: the custodian reports on it", v.ok, v.refusals.join(" / "));
+  v = as("fn_hr", fig);        check("§412 REFUSED: another function's head does not", !v.ok, "was ALLOWED");
+  v = as("own_b2b", fig);      check("§412 REFUSED: a unit custodian does not", !v.ok, "was ALLOWED");
+  v = as("cfo", brief);        check("§412 REFUSED: the owner cannot rewrite the plan (the office's, §94)", !v.ok, "was ALLOWED");
+  v = as("smo", seat);         check("§412: the office names the owner", v.ok, v.refusals.join(" / "));
+  v = as("cfo", seat);         check("§412 REFUSED: the owner cannot hand the seat on", !v.ok, "was ALLOWED");
+})();
+
+/* ── §413: A DIRECTION'S OVERVIEW IS THE OFFICE'S PLAN, AND ITS SWITCH SETUP ──
+   The three texts ride a pillar's `extra` like every other unknown key, so
+   they are PLAN (unitPlan) and nobody but the office writes them; the switch
+   on the group's structure is Setup. Both ends each (§94.2). */
+console.log("\n§413 · a direction's overview");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const text = function (inc) { inc.units[K].items[0].ovObj = "fixture objective"; };
+  const sw = function (inc) { inc.group.structure = { details: { overview: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  let v = as("smo", text);     check("§413: the office writes a direction's overview", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", text);     check("§413 REFUSED: a unit custodian does not (the plan is the office's)", !v.ok, "was ALLOWED");
+  v = as("smo", sw);           check("§413: the office turns the overview on", v.ok, v.refusals.join(" / "));
+  v = as("own_mob", sw);       check("§413 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §414: SEVERAL OUTCOMES PER TACTIC ──────────────────────────────────
+   The list of extras is PLAN (the office's, like the first outcome's target),
+   its switch is Setup, and a figure on an extra is REPORTING — so a
+   custodian may enter one and may not add, rename or re-target an outcome.
+   Both ends each (§94.2), and the figure is asserted to classify as
+   reporting and NOTHING else, or a widening would pass unseen. */
+console.log("\n§414 · several outcomes per tactic");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  tOf(B).outs = [{ id: "O2", outDir: "\u2265", outcome: "fixture outcome", outTarget: "90%" }];
+  const plan = function (inc) { tOf(inc).outs[0].outTarget = "80%"; };
+  const addOne = function (inc) { tOf(inc).outs.push({ id: "O3", outcome: "another" }); };
+  const fig = function (inc) { tOf(inc).outActs = { O2: "70%" }; };
+  const sw = function (inc) { inc.group.structure = { details: { outcomes: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  check("§414: the seed names somebody who reports for " + K, !!(rep && personOf(B, rep)), String(rep));
+  let v = as("smo", plan);   check("§414: the office re-targets an extra outcome", v.ok, v.refusals.join(" / "));
+  v = as("smo", addOne);     check("§414: the office adds one", v.ok, v.refusals.join(" / "));
+  v = as(rep, plan);         check("§414 REFUSED: the reporter cannot re-target it (plan)", !v.ok, "was ALLOWED");
+  v = as(rep, addOne);       check("§414 REFUSED: the reporter cannot add one", !v.ok, "was ALLOWED");
+  v = as(rep, fig);          check("§414: the reporter enters an extra outcome's figure", v.ok, v.refusals.join(" / "));
+  const inc = clone(B); fig(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§414: that figure classifies as reporting and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitReporting"; }), kinds.join(","));
+  v = as("smo", sw);         check("§414: the office turns several outcomes on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§414 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §415: A TACTIC'S REQUIREMENTS ─────────────────────────────────────
+   A note on the PLAN: the office writes it and a reporter cannot, and it
+   needed no server change — `reqs` is not a reporting field, so it falls to
+   the plan (§42's fall-through). Asserted rather than assumed (§172), both
+   ends (§94.2). */
+console.log("\n§415 · a tactic's requirements");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) {
+    return (B.units[k].items || []).some(function (p) { return (p.tactics || []).length; }); })[0];
+  const tOf = function (st) {
+    for (const p of st.units[K].items) if ((p.tactics || [])[0]) return p.tactics[0];
+  };
+  const write = function (inc) { tOf(inc).reqs = ["Two analysts", "Budget sign-off"]; };
+  const sw = function (inc) { inc.group.structure = { details: { requirements: true } }; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", write);  check("§415: the office writes a tactic's requirements", v.ok, v.refusals.join(" / "));
+  v = as(rep, write);        check("§415 REFUSED: the reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  const inc = clone(B); write(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§415: it classifies as the plan and nothing else",
+        kinds.length > 0 && kinds.every(function (x) { return x === "unitPlan"; }), kinds.join(","));
+  v = as("smo", sw);         check("§415: the office turns requirements on", v.ok, v.refusals.join(" / "));
+  v = as(rep, sw);           check("§415 REFUSED: nobody else sets the switch", !v.ok, "was ALLOWED");
+})();
+
+/* ── §416: YEARS 1 · 2 · 3 ──────────────────────────────────────────────
+   A direction's years are the plan (the pen's, not a reporter's), and the
+   year the plan stands in is the CYCLE — the office moves it at the yearly
+   revision and nobody else can. Both ends (§94.2), and the change must
+   classify ONCE as "cycle" rather than beside an unknown (§259.2). */
+console.log("\n§416 · years 1 · 2 · 3");
+(function () {
+  const B = clone(SEED);
+  const K = Object.keys(B.units).filter(function (k) { return (B.units[k].items || []).length; })[0];
+  const years = function (inc) { inc.units[K].items[0].years = [2, 3]; };
+  const move = function (inc) { inc.group.planYear = 2; };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const roles = (SEED.unitRoles || {})[K] || {};
+  const rep = roles.custodian || roles.head;
+  let v = as("smo", years);  check("§416: the office sets a direction's years", v.ok, v.refusals.join(" / "));
+  v = as(rep, years);        check("§416 REFUSED: a reporter cannot (it is the plan)", !v.ok, "was ALLOWED");
+  v = as("smo", move);       check("§416: the office moves the plan's year", v.ok, v.refusals.join(" / "));
+  v = as(rep, move);         check("§416 REFUSED: nobody else moves the plan's year", !v.ok, "was ALLOWED");
+  const inc = clone(B); move(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§416: the plan's year classifies once, as the cycle", kinds.length === 1 && kinds[0] === "cycle", kinds.join(","));
+})();
+
+/* ── §418–§422: EVERY STRUCTURE SWITCH IS THE OFFICE'S ────────────────────
+   Islam, 2026-09-29: *"make sure … the turning on and off of options is the
+   smo role not to confuse the clients with extra data later."* Every switch
+   and name built on the Structure step this week, one at a time: the Super
+   user and the SMO team may set it; a unit's owner, its custodian, a
+   function's head and the group CEO may not. BOTH ENDS each (§94.2), and each
+   asserted to classify as Setup and nothing else, so a widening shows. */
+console.log("\n§418–§422 · every structure switch is the office's");
+(function () {
+  const B = clone(SEED); delete B.group[R.STRUCTURE];
+  B.people = B.people.concat([{ key: "t422_team", name: "Testcase Office Two", role: "smoteam", unit: "group" }]);
+  const FK = Object.keys(B.functions).filter(function (k) { return B.functions[k].head; })[0];
+  const outsiders = ["mobhead", "own_mob", B.functions[FK].head, "ceo"];
+  const SW = {
+    "the plan section off (§422)":            { bu: { plan: { on: false } } },
+    "the first section off (§418)":           { fn: { found: { on: false } } },
+    "a section's title (§418)":               { bu: { plan: { pillars: "Roadmap" } } },
+    "the SWOT's boxes (§418)":                { fn: { swot: { quads: ["s"] } } },
+    "a layer's own name for a part (§418)":   { bu: { words: { pillar: { one: "Theme", many: "Themes" } } } },
+    "an overview area's name (§422)":         { bu: { words: { ovwhy: { one: "Why this matters" } } } },
+    "a layer's extra detail (§420)":          { fn: { details: { requirements: true } } },
+    "the functions' layer off (§418)":        { fn: { exists: false } },
+    "a component off (§404)":                 { fn: { on: ["purpose", "keyobj"] } }
+  };
+  Object.keys(SW).forEach(function (what) {
+    const inc = clone(B); inc.group[R.STRUCTURE] = SW[what];
+    const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+    check("§422: " + what + " classifies as Setup and nothing else",
+          kinds.length > 0 && kinds.every(function (k) { return k === "setup"; }), kinds.join(",") || "(INVISIBLE)");
+    ["smo", "t422_team"].forEach(function (who) {
+      const v = A.authorize(B, inc, personOf(B, who));
+      check("§422: the office (" + who + ") may set " + what, v.ok, (v.refusals || []).join(" / "));
+    });
+    outsiders.forEach(function (who) {
+      if (!personOf(B, who)) { check("§422: fixture person " + who + " exists", false, "missing"); return; }
+      const v = A.authorize(B, inc, personOf(B, who));
+      check("§422 REFUSED: " + who + " may not set " + what, !v.ok, "was ALLOWED");
+    });
+  });
+})();
+
+/* ── §428: THE TOP LAYER'S OWN PLAN ────────────────────────────────────────
+   Islam, of the mockup: *"ok for all, build it"*. The top layer's pillars,
+   key measures and tactics ride `group.items`, its SWOT `group.swot`; the
+   plan is written by the SMO team alone, and reported by the office and the
+   group CEO. BOTH ENDS each (§94.2): the CEO may report and may not author, a
+   unit head may do neither, and the Capabilities card's switch is Setup. */
+console.log("\n§428 · the top layer's own plan");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([{ key: "t428_team", name: "Testcase Office Four", role: "smoteam", unit: "group" }]);
+  B.group.items = [{ id: "group-P1", code: "GR01", name: "Grow the group", sub: "", kind: "", theme: "", owner: "",
+    measures: [{ id: "group-P1-M1", name: "Group revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+    tactics: [{ id: "group-P1-T1", name: "Open the hub", q1: true, q2: true, q3: true, q4: true, status: "", actual: "" }] }];
+  B.group.swot = { s: ["Scale"], w: [], o: [], t: [] };
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  const addPillar = function (inc) { inc.group.items.push({ id: "group-P2", code: "", name: "New", sub: "", kind: "", theme: "", owner: "", measures: [], tactics: [] }); };
+  const rename   = function (inc) { inc.group.items[0].name = "Grow the whole group"; };
+  const swot     = function (inc) { inc.group.swot.w.push("Slow"); };
+  const figure   = function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; };
+  const tactic   = function (inc) { inc.group.items[0].tactics[0].actual = "50"; };
+  const capOff   = function (inc) { inc.group[R.STRUCTURE] = { cap: { exists: false } }; };
+  [["adds a pillar", addPillar], ["renames a pillar", rename], ["writes the SWOT", swot]].forEach(function (x) {
+    ["smo", "t428_team"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428: the office (" + who + ") " + x[0], v.ok, (v.refusals || []).join(" / "));
+    });
+    ["ceo", "mobhead", "own_mob"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428 REFUSED: " + who + " " + x[0], !v.ok, "was ALLOWED");
+    });
+  });
+  [["reports a key measure", figure], ["reports a tactic", tactic]].forEach(function (x) {
+    ["smo", "t428_team", "ceo"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428: " + who + " " + x[0], v.ok, (v.refusals || []).join(" / "));
+    });
+    ["mobhead", "own_mob"].forEach(function (who) {
+      const v = as(who, x[1]); check("§428 REFUSED: " + who + " " + x[0], !v.ok, "was ALLOWED");
+    });
+  });
+  const inc = clone(B); figure(inc);
+  const kinds = A.collect(B, inc, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§428: a top-layer figure classifies as reporting and nothing else",
+        kinds.length === 1 && kinds[0] === "unitReporting", kinds.join(",") || "(INVISIBLE)");
+  const inc2 = clone(B); capOff(inc2);
+  const k2 = A.collect(B, inc2, A.worldOf ? A.worldOf(B) : B).map(function (c) { return c.kind; });
+  check("§428: the Capabilities card's switch classifies as Setup",
+        k2.length > 0 && k2.every(function (k) { return k === "setup"; }), k2.join(",") || "(INVISIBLE)");
+  let v = as("smo", capOff);  check("§428: the office sets the Capabilities card", v.ok, (v.refusals || []).join(" / "));
+  v = as("ceo", capOff);      check("§428 REFUSED: the CEO may not", !v.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

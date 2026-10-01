@@ -1,0 +1,18 @@
+/* The landing page draws the welcome screen (welcome.css) with LINKS where the
+   overlay had buttons, because on this stack a door is an address: these
+   three rules make an <a> wear the button's rules and nothing else. The fold
+   is a native <details>, so its caret keys on [open] rather than a class. */
+.welcomeover a.wbtn, .welcomeover a.wexit, .welcomeover a.wtbtn { text-decoration: none; box-sizing: border-box; }
+.welcomeover a.wbtn { display: inline-flex; align-items: center; }
+.welcomeover summary.wtoggle { list-style: none; }
+.welcomeover summary.wtoggle::-webkit-details-marker { display: none; }
+.welcomeover .wtour[open] .wtcar { transform: rotate(-90deg); }
+/* The holder for a page the next screen group carries (§61: a door must go
+   somewhere, and where it goes says so in words). */
+.holder { max-width: 640px; margin: 12vh auto 0; padding: 0 24px; color: var(--ink); font-family: var(--sans); }
+.holder h1 { font-family: var(--serif); font-size: 26px; margin: 0 0 10px; }
+.holder p { color: var(--ink-2); margin: 0 0 18px; }
+.holder a { color: var(--gold-deep); }
+.holder ul { padding-left: 18px; }
+.holder form { margin-top: 28px; }
+.holder button { font: inherit; font-size: var(--fs-small); background: none; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 6px 12px; color: var(--ink-2); cursor: pointer; }

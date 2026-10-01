@@ -36,7 +36,7 @@ DELETE FROM unit_clauses;
 -- `perf` in extra held pre-computed scores from before §5.1 — figures are
 -- derived on read and must not sit in the database at all.
 UPDATE units SET aspiration = '', end_in_mind = '', real = true,
-                 extra = extra - 'perf';
+                 extra = extra - 'perf' - 'drivers';
 
 -- ── Group foundation ────────────────────────────────────────────────────
 DELETE FROM group_clauses;
@@ -85,7 +85,7 @@ UPDATE org SET horizon = '';
 -- per tenant, so editing it here reaches every future deployment and no
 -- existing one — which is correct, because an existing tenant is never
 -- re-seeded and so never receives them.
-UPDATE org SET extra = extra - 'sets' - 'claims' - 'naming' - 'mainbus';
+UPDATE org SET extra = extra - 'sets' - 'claims' - 'naming' - 'mainbus' - 'seasons' - 'driversOn';
 
 -- ── Capability content (the names and their owning function stay) ───────
 DELETE FROM projects;                -- cascades deliverables, outcomes, milestones

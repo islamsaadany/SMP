@@ -1,4 +1,5 @@
-"""Archiving a client, and deleting one (§323, spec 047).
+"""Archiving a client, and deleting one (§323, spec 047 — and §360, spec 057,
+which moved the archiving act INTO the client).
 
 Islam: "we need an option to remove the client" — then, of the two acts drawn
 for him, "both, demo client is not removable, and the name is Archive not put
@@ -9,19 +10,28 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
 · WHAT THE PAGE POSTS, NOT WHAT IT DRAWS (§96). A button wired to nothing
   renders perfectly, so the stub RECORDS every request and the assertions are
   made against those bodies. It also HOLDS the state and flips it, so the
-  round trip — archive, see the band, bring back, see the grid — is driven
-  rather than staged.
+  round trip — the band, bring back, the grid — is driven rather than staged.
+
+· §360 MOVED THE ARCHIVE BLOCK OFF THIS PAGE (rewritten to the new truth,
+  never loosened — §218): a live client's Settings is a DOOR to the client's
+  own Setup rail, and the Archiving block sits on that rail's first step,
+  where only a served platform can draw it (client-setup.js archiveBlock
+  reads the registry). So the act itself is measured by smp-app's own
+  checks, and here the console is asserted to draw NEITHER block for a live
+  client — the door, and nothing between the card and it — while the
+  archived state is MADE by telling the stub (§255), because it is a state
+  the console can no longer reach on its own.
 
 · BOTH ENDS, EVERY TIME (§94.2). With nothing archived there is no band at
-  all; with something archived there is one. On a live client Delete is
-  ABSENT and Archive is present; on an archived one it is the other way
-  round. Asserting only the presences passes on a build that draws every
+  all; with something archived there is one. Delete is ABSENT on a live
+  client's card and on the console for one; on an archived client it is
+  drawn. Asserting only the presences passes on a build that draws every
   control always, which is the worse fault here.
 
 · DELETE IS REACHABLE FROM AN ARCHIVED CLIENT AND NOWHERE ELSE. That is the
-  guard rather than a second confirmation, so it is asserted as an absence on
-  a live client — the one assertion a build that "added a delete button"
-  would fail.
+  guard rather than a second confirmation — the archived card's Settings is
+  the one screen the console still draws for a client (§360), and it is
+  asserted as the only place the control exists.
 
 · THE NAME MUST MATCH EXACTLY. A near miss keeps the button shut; the exact
   name opens it; and what is POSTED carries the typed value, because the
@@ -32,21 +42,27 @@ WHAT THIS ASSERTS, AND WHY EACH ONE IS HERE.
   rather than as literals (§94.8) — a sentence typed into the page would pass
   a literal check and lie to the one person about to press this.
 
-· THE WORKED EXAMPLE DRAWS NEITHER BLOCK, and neither does somebody who is
-  not the platform's admin (§61: not drawn, rather than drawn and refusing).
+· THE WORKED EXAMPLE IS NEVER IN THE BAND, and somebody who is not the
+  platform's admin sees no band and no way back (§61: not drawn, rather than
+  drawn and refusing).
 
 · AND THE CONFIRMATION'S WORD IS READ (§38.4). Its first build was `#fff` on
   --bad — 2.90:1, measured — with a dark-mode override written outside its
-  media query, so it applied in LIGHT. Measured as PAINT in both palettes,
-  because that is the fault, not the class name.
+  media query, so it applied in LIGHT. Measured as PAINT in both palettes on
+  the one confirming button this page still draws (Delete), because that is
+  the fault, not the class name.
 
-EVERY PROBE DEGRADES (§215): this file drives two clients through four
+· THE MODULES BAND (§322.1, §11b before this) is on the client's own first
+  step now and is not on this page: measured there, not here.
+
+EVERY PROBE DEGRADES (§215): this file drives two clients through three
 screens, and a step that throws must report rather than take the count down
 with it.
 
 Run: SMP_CHROME=... python3 qa-run.py checks/client-archive.py
      SMP_PAGE=smp-app/shell/platform.html …   # the new stack's own copy
 """
+
 import copy, http.server, json, os, socketserver, threading
 from playwright.sync_api import sync_playwright
 
@@ -122,6 +138,24 @@ class Stub(http.server.SimpleHTTPRequestHandler):
         if path == "/__admin0":
             ADMIN[0] = False
             self._send("{}", "application/json"); return
+        # THE STATE IS MADE (§255, §360): archiving is pressed inside the
+        # client now, on a served platform, so the stub is told.
+        if path.startswith("/__archive/"):
+            row = WORLD.get(path.split("/", 2)[2])
+            if row and may_archive(row):
+                row["status"] = "retired"; row["archived_at"] = "2026-09-12T10:04:00.000Z"; row["archived_by"] = ME
+            self._send("{}", "application/json"); return
+        # ONE MODULE, TWO HOSTS (§360): the page loads the client set-up
+        # module; the copy served is the one that belongs to the page under
+        # test — smp-app/public's beside the generated page, the source
+        # beside the root one.
+        if path == "/client-setup.js":
+            src = (os.path.join(REPO, "smp-app", "public", "client-setup.js")
+                   if "smp-app" in os.path.abspath(PAGE).replace("\\", "/")
+                   else os.path.join(ROOT, "src", "client-setup.js"))
+            with open(src, encoding="utf-8") as f:
+                self._send(f.read(), "application/javascript; charset=utf-8")
+            return
         if path in ("/favicon.svg", "/favicon.png"):
             f = os.path.join(REPO, path.lstrip("/"))
             if os.path.exists(f):
@@ -134,7 +168,11 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(raw)
                 return
-        self.send_response(404); self.end_headers()
+        # EVERY OTHER ADDRESS IS A DOOR THE CONSOLE OPENED (§360): answered
+        # with a page naming the path, so a navigation is READ off
+        # location.pathname rather than inferred.
+        self._send('<!doctype html><html><head><title>landed</title></head>'
+                   '<body data-landed="%s"></body></html>' % path, "text/html; charset=utf-8")
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length", "0"))
@@ -177,7 +215,7 @@ class Stub(http.server.SimpleHTTPRequestHandler):
                        # live client's same band is asserted to have one).
                        "modules": ["strategy"], "offer": [
                            {"key": "strategy", "label": "Strategy", "note": "Plans, cycles and reviews.", "always": True},
-                           {"key": "trial", "label": "Trial", "note": "A module with a page of its own.", "always": False}]}
+                           {"key": "insights", "label": "Insights", "note": "A module with a page of its own.", "always": False}]}
         elif act == "archiveClient":
             row = WORLD.get(body.get("key"))
             if not row or not may_archive(row):
@@ -252,8 +290,25 @@ with sync_playwright() as p:
     errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
-    pg.goto(BASE + "/platform")
-    pg.wait_for_timeout(600)
+
+    def ev(js, default=None):
+        try:
+            return pg.evaluate(js)
+        except Exception as e:
+            print("    (probe: %s)" % str(e)[:90])
+            return default
+
+    def path():
+        return ev("()=>location.pathname")
+
+    def console():
+        pg.goto(BASE + "/platform"); pg.wait_for_timeout(600)
+
+    def archive(key):
+        """§255: the act is inside the client now; the console is TOLD."""
+        pg.evaluate("(k)=>fetch('/__archive/'+k)", key); pg.wait_for_timeout(250)
+
+    console()
 
     # ── 1 · WITH NOTHING ARCHIVED THERE IS NO BAND ──────────────────────
     print("\n§1 · nothing archived")
@@ -263,71 +318,23 @@ with sync_playwright() as p:
     heads = pg.eval_on_selector_all(".apart > .akey", "e => e.map(x => x.textContent)")
     ck("…so nothing on the page says Archived", "Archived" not in heads, heads)
 
-    # ── 2 · THE BLOCK IS IN SETTINGS, AND DELETE IS NOT ─────────────────
+    # ── 2 · A LIVE CLIENT'S SETTINGS IS A DOOR, AND NEITHER BLOCK IS HERE ─
+    # REWRITTEN TO THE NEW TRUTH (§218, §360): the Archiving block moved into
+    # the client's own Setup with the flow; on the console a live client's
+    # Settings draws nothing and LEAVES.
     print("\n§2 · a live client's Settings")
-    ck("the client's Settings opens the flow", open_settings(pg, "elabd-foods") and bool(q(pg, ".wzrail")))
-    ck("the Archiving block is at the foot of the first step", bool(q(pg, '[data-archive="ask"]')))
-    ck("…and Delete is NOT offered on a live client", q(pg, '[data-delete="ask"]') is None,
-       "archiving first is the guard (§323)")
-    ck("…nor is a way back, because it is not away", q(pg, "[data-unarchive]") is None)
-    ck("the flow does not say it is archived", q(pg, ".wzarched") is None)
-    kws = pg.eval_on_selector_all(".wzendkey", "e => e.map(x => x.textContent.trim())")
-    ck("one block, headed Archiving", kws == ["Archiving"], kws)
+    n_client = len([x for x in SENT if x.get("action") == "client"])
+    ck("the console draws no Archive control anywhere for a live client",
+       q(pg, '[data-archive="ask"]') is None and q(pg, '[data-delete="ask"]') is None and q(pg, "[data-unarchive]") is None)
+    ck("the client's Settings leaves for the client's own Setup rail",
+       open_settings(pg, "elabd-foods") and path() == "/elabd-foods/setup", path())
+    ck("…with nothing drawn on the console first — no flow, no read of the client",
+       len([x for x in SENT if x.get("action") == "client"]) == n_client)
 
-    # ── 3 · IT ASKS, AND CANCEL WRITES NOTHING ──────────────────────────
-    print("\n§3 · the question")
-    before = len([x for x in SENT if x.get("action") == "archiveClient"])
-    ck("pressing Archive asks rather than acts", press(pg, '[data-archive="ask"]') and bool(q(pg, '[data-ask="archive"]')))
-    asked = (q(pg, '[data-ask="archive"]').inner_text() if q(pg, '[data-ask="archive"]') else "")
-    ck("…and the question names the client", "ElAbd Foods" in asked, asked[:90])
-    ck("…nothing has been sent yet",
-       len([x for x in SENT if x.get("action") == "archiveClient"]) == before)
-    ck("Cancel puts the block back", press(pg, '[data-archive="cancel"]') and bool(q(pg, '[data-archive="ask"]')))
-    ck("…and still nothing sent",
-       len([x for x in SENT if x.get("action") == "archiveClient"]) == before)
-
-    # THE WORD ON THE CONFIRMATION IS READ (§38.4) — measured as PAINT, in
-    # both palettes, because this is the fault the mockup caught: a fill
-    # asked to carry type, and a dark rule with no theme around it.
-    print("\n§4 · the confirmation reads")
-    RATIO = """(sel)=>{
-      const el = document.querySelector(sel); if (!el) return null;
-      const f = v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); };
-      const lum = c => { const m = c.match(/[\\d.]+/g).map(Number); return .2126*f(m[0]) + .7152*f(m[1]) + .0722*f(m[2]); };
-      let n = el, bg = null;
-      while (n && n !== document.documentElement) {
-        const c = getComputedStyle(n).backgroundColor, m = c.match(/[\\d.]+/g);
-        if (m && (m.length < 4 || Number(m[3]) > 0)) { bg = c; break; }
-        n = n.parentElement;
-      }
-      const L1 = lum(getComputedStyle(el).color), L2 = lum(bg || 'rgb(255,255,255)');
-      return Math.round(((Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05))*100)/100;
-    }"""
-    for theme in ("light", "dark"):
-        pg.emulate_media(color_scheme=theme)
-        pg.wait_for_timeout(80)
-        if not q(pg, '[data-archive="do"]'):
-            press(pg, '[data-archive="ask"]')
-        r = pg.evaluate(RATIO, '[data-archive="do"]')
-        ck("the confirming button's word reads in " + theme,
-           isinstance(r, (int, float)) and r >= 4.5, r)
-    pg.emulate_media(color_scheme="light")
-    if q(pg, '[data-archive="cancel"]'):
-        press(pg, '[data-archive="cancel"]')
-
-    # ── 5 · ARCHIVING SENDS, AND LANDS ON THE RECORD ────────────────────
-    print("\n§5 · archiving")
-    press(pg, '[data-archive="ask"]')
-    ck("the confirmation is there", bool(q(pg, '[data-archive="do"]')))
-    press(pg, '[data-archive="do"]', 700)
-    sent = last("archiveClient")
-    ck("it posts archiveClient for this client",
-       bool(sent) and sent.get("key") == "elabd-foods", sent)
-    ck("…with on true", bool(sent) and sent.get("on") is True, sent)
-    ck("and it lands back on the clients page", bool(q(pg, '[data-grid="clients"]')))
-
-    # ── 6 · THE BAND, AND WHAT IT SAYS ──────────────────────────────────
-    print("\n§6 · the Archived band")
+    # ── 3 · THE BAND, AND WHAT IT SAYS ──────────────────────────────────
+    print("\n§3 · the Archived band")
+    archive("elabd-foods")
+    console()
     band = q(pg, '[data-grid="archived"]')
     ck("the Archived band is drawn", bool(band))
     heads = pg.eval_on_selector_all(".apart > .akey", "e => e.map(x => x.textContent)")
@@ -346,14 +353,15 @@ with sync_playwright() as p:
         ck("…and who did it", ME.lower() in low, txt.replace("\n", " · "))
         ck("the card has no door", card.get_attribute("disabled") is not None
            or pg.evaluate("(e)=>e.disabled", card) is True)
-        ck("…and carries Bring back", bool(q(pg, '[data-grid="archived"] .cback')))
+        ck("…and carries Bring back, and Settings", bool(q(pg, '[data-grid="archived"] .cback'))
+           and bool(q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"] .ccfg')))
         # AND THE LIVE TAGS ARE GONE: a seat or an open cycle on a card
         # nobody can open reads as a client you could still walk into.
         ck("…and none of the live tags", "Cycle open" not in txt and "Super user" not in txt,
            txt.replace("\n", " · "))
 
-    # ── 7 · BRING BACK, FROM THE CARD ───────────────────────────────────
-    print("\n§7 · bringing them back from the band")
+    # ── 4 · BRING BACK, FROM THE CARD ───────────────────────────────────
+    print("\n§4 · bringing them back from the band")
     n_before = len([x for x in SENT if x.get("action") == "archiveClient"])
     press(pg, '[data-grid="archived"] .cback', 700)
     sent = last("archiveClient")
@@ -367,38 +375,43 @@ with sync_playwright() as p:
         '()=>{var c=document.querySelector(\'[data-grid="clients"] .ccard[data-client="elabd-foods"]\');'
         'return !!c && !c.disabled;}') is True)
 
-    # ── 8 · THE BAND SURVIVES A FRESH VISIT ─────────────────────────────
-    print("\n§8 · a fresh visit")
-    open_settings(pg, "elabd-foods")
-    press(pg, '[data-archive="ask"]')
-    press(pg, '[data-archive="do"]', 700)
+    # ── 5 · THE BAND SURVIVES A FRESH VISIT ─────────────────────────────
+    print("\n§5 · a fresh visit")
+    archive("elabd-foods")
     pg.goto(BASE + "/platform"); pg.wait_for_timeout(550)
     ck("the band is drawn on a page loaded from cold",
        bool(q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"]')))
 
-    # ── 9 · THE WORKED EXAMPLE IS NEITHER ────────────────────────────────
-    print("\n§9 · the worked example")
-    ck("the demo's Settings opens", open_settings(pg, "demo") and bool(q(pg, ".wzrail")))
-    ck("…and draws no Archiving block", q(pg, '[data-archive="ask"]') is None,
+    # ── 6 · THE WORKED EXAMPLE IS NEITHER ────────────────────────────────
+    print("\n§6 · the worked example")
+    archive("demo")
+    console()
+    # The demo sits in its own band under the grid (§317), never in the
+    # archived one: the server refuses to archive it, and the stub answers
+    # as the rules module does.
+    ck("told to archive the demo, it is still drawn as the worked example and never in the Archived band",
+       bool(q(pg, '.ccard[data-client="demo"]')) and
+       q(pg, '[data-grid="archived"] .ccard[data-client="demo"]') is None,
        "Islam: the demo client is not removable")
-    ck("…and no Delete", q(pg, '[data-delete="ask"]') is None)
-    kws = pg.eval_on_selector_all(".wzendkey", "e => e.map(x => x.textContent.trim())")
-    ck("…no ending block at all", kws == [], kws)
+    ck("…and its Settings is the same door as any client's",
+       open_settings(pg, "demo") and path() == "/demo/setup", path())
 
-    # ── 10 · DELETING, FROM AN ARCHIVED CLIENT ──────────────────────────
-    print("\n§10 · deleting")
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(550)
+    # ── 7 · DELETING, FROM AN ARCHIVED CLIENT'S SETTINGS ─────────────────
+    # REWRITTEN (§218, §360): the archived piece is drawn ON THIS PAGE by
+    # client-setup.js `mountArchived` — bring back, then delete — and it is
+    # the one screen the console still draws for a client.
+    print("\n§7 · deleting")
+    console()
     cfg = q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"] .ccfg')
     ck("an archived card carries Settings as well as Bring back", bool(cfg),
        "without it Delete is unreachable — §61, and this assertion found that")
     opened = False
     if cfg:
-        cfg.click(); pg.wait_for_timeout(500)
-        opened = bool(q(pg, ".wzarched"))
-    ck("…and it opens the flow, saying the client is archived", opened)
+        cfg.click(); pg.wait_for_timeout(600)
+        opened = bool(q(pg, ".wzarched")) and path() == "/platform"
+    ck("…and it STAYS here, saying the client is archived", opened, path())
 
     if opened:
-        ck("it says it is archived, before the fields", bool(q(pg, ".wzarched")))
         said = q(pg, ".wzarched").inner_text()
         ck("…naming when and who", "Sep" in said and ME in said, said[:110])
         kws = pg.eval_on_selector_all(".wzendkey", "e => e.map(x => x.textContent.trim())")
@@ -407,27 +420,9 @@ with sync_playwright() as p:
         ck("Bring back is offered", bool(q(pg, "[data-unarchive]")))
         ck("…and so is Delete", bool(q(pg, '[data-delete="ask"]')))
         ck("Archive is not offered twice", q(pg, '[data-archive="ask"]') is None)
-        ck("the fields are read-only", pg.eval_on_selector_all(
-            ".rowset input.fld", "e => e.every(x => x.readOnly)") is True)
-        # AND EVERY OTHER CONTROL IS DISABLED, NOT MERELY INERT (§220, §61).
-        # `canEdit` had never been false in this product — mayConfigureClient
-        # IS mayReadConfig — so the read-only path had never once been drawn,
-        # and archiving is what makes it real. A band that lights under the
-        # pointer and stores nothing is §96 with a cursor on it.
-        ck("…and so is the size band", pg.eval_on_selector_all(
-            ".wzband button", "e => e.length > 0 && e.every(x => x.disabled)") is True)
-        # THE SUMMARY OFFERS NO DOOR INTO A CLIENT WHOSE DOOR IS SHUT: it would
-        # land on "that client is not available" (§61). Both ends — the way
-        # back to the clients page is still there.
-        goStep = pg.query_selector_all(".wzstep")
-        if goStep:
-            goStep[-1].click(); pg.wait_for_timeout(400)
-            doors = pg.eval_on_selector_all(".wzdoor .dn", "e => e.map(x => x.textContent.trim())")
-            ck("the summary offers no way into an archived client",
-               "Open the platform" not in doors, doors)
-            ck("…and still offers the way back", "Back to clients" in doors, doors)
-            pg.query_selector_all(".wzstep")[0].click(); pg.wait_for_timeout(400)
-            press(pg, '[data-delete="ask"]')
+        ck("and no set-up flow, no fields: an archived client is not edited here (§323)",
+           q(pg, ".wzstep") is None and q(pg, ".rowset") is None)
+        ck("…with the way back to the clients page", bool(pg.query_selector("text=Back to clients")))
 
         press(pg, '[data-delete="ask"]')
         ask = q(pg, '[data-ask="delete"]')
@@ -443,10 +438,38 @@ with sync_playwright() as p:
             ck("…and saying there is no way back",
                "cannot be undone" in ask.inner_text().lower(), ask.inner_text()[:110])
 
+            # THE WORD ON THE CONFIRMATION IS READ (§38.4) — measured as PAINT,
+            # in both palettes, because this is the fault the mockup caught: a
+            # fill asked to carry type, and a dark rule with no theme around it.
+            RATIO = """(sel)=>{
+              const el = document.querySelector(sel); if (!el) return null;
+              const f = v => { v/=255; return v <= .03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); };
+              const lum = c => { const m = c.match(/[\\d.]+/g).map(Number); return .2126*f(m[0]) + .7152*f(m[1]) + .0722*f(m[2]); };
+              let n = el, bg = null;
+              while (n && n !== document.documentElement) {
+                const c = getComputedStyle(n).backgroundColor, m = c.match(/[\\d.]+/g);
+                if (m && (m.length < 4 || Number(m[3]) > 0)) { bg = c; break; }
+                n = n.parentElement;
+              }
+              const L1 = lum(getComputedStyle(el).color), L2 = lum(bg || 'rgb(255,255,255)');
+              return Math.round(((Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05))*100)/100;
+            }"""
+            for theme in ("light", "dark"):
+                pg.emulate_media(color_scheme=theme)
+                pg.wait_for_timeout(80)
+                r = ev("(" + RATIO + ")('[data-delete=\"do\"]')")
+                ck("the confirming button's word reads in " + theme,
+                   isinstance(r, (int, float)) and r >= 4.5, r)
+            pg.emulate_media(color_scheme="light")
+
             btn = q(pg, '[data-delete="do"]')
             ck("the button starts shut", bool(btn) and btn.is_disabled())
             box = q(pg, "[data-confirm]")
             ck("the name is asked for", bool(box))
+            ck("Cancel puts the block back, sending nothing",
+               press(pg, '[data-delete="cancel"]') and bool(q(pg, '[data-delete="ask"]')) and last("deleteClient") is None)
+            press(pg, '[data-delete="ask"]')
+            btn = q(pg, '[data-delete="do"]'); box = q(pg, "[data-confirm]")
             if box and btn:
                 box.fill("ElAbd Food"); pg.wait_for_timeout(120)
                 ck("a near miss keeps it shut", btn.is_disabled(), "ElAbd Food")
@@ -458,68 +481,44 @@ with sync_playwright() as p:
                 sent = last("deleteClient")
                 ck("it posts deleteClient", bool(sent) and sent.get("key") == "elabd-foods", sent)
                 ck("…carrying the typed name", bool(sent) and sent.get("confirm") == "ElAbd Foods", sent)
-                ck("and it lands on the clients page", bool(q(pg, '[data-grid="clients"]')))
+                ck("and it lands on the clients page", bool(q(pg, '[data-grid="clients"]')) and path() == "/platform")
                 ck("…with the client gone from both bands",
                    q(pg, '.ccard[data-client="elabd-foods"]') is None)
 
-    # ── 11b · THE MODULES BAND ON AN ARCHIVED CLIENT (§322.1, §323) ─────
-    #
-    #  §322.1 carried §320.4's band onto this flow, and §323's rule is that an
-    #  archived client is READ and not edited — so the band has to obey it too,
-    #  or one screen says the client is closed while a control on it still
-    #  writes. The server refuses the same request (`setModules` names the
-    #  state), and this is the screen's half of that pair (§42).
-    #
-    #  BOTH ENDS (§94.2): "no buttons" is satisfied perfectly by a band that is
-    #  not drawn at all, so the LIVE client's same band is asserted to carry one
-    #  immediately before.
-    print("\n§11b · modules, once a client is archived")
+    # ── 8 · BRING BACK, FROM THE ARCHIVED SETTINGS ──────────────────────
+    print("\n§8 · bringing them back from Settings")
     WORLD["elabd-foods"] = copy.deepcopy(LIVE)
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
+    archive("elabd-foods")
+    console()
+    n_before = len([x for x in SENT if x.get("action") == "archiveClient"])
     if open_settings(pg, "elabd-foods"):
-        live_rows = pg.eval_on_selector_all(
-            ".band .teamrow", "els => els.map(e => !!e.querySelector('button'))")
-        ck("a live client's band offers a control",
-           isinstance(live_rows, list) and True in live_rows, live_rows)
-        press(pg, '[data-archive="ask"]')
-        press(pg, '[data-archive="do"]', 700)
-        pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
-        if open_settings(pg, "elabd-foods"):
-            arch_rows = pg.eval_on_selector_all(
-                ".band .teamrow", "els => els.map(e => !!e.querySelector('button'))")
-            ck("…and an archived one's band is still drawn",
-               isinstance(arch_rows, list) and len(arch_rows) == len(live_rows), arch_rows)
-            ck("…with no control on any row",
-               isinstance(arch_rows, list) and True not in arch_rows, arch_rows)
+        press(pg, "[data-unarchive]", 800)
+        sent = last("archiveClient")
+        ck("Bring back in the block posts archiveClient with on false",
+           len([x for x in SENT if x.get("action") == "archiveClient"]) > n_before and bool(sent)
+           and sent.get("key") == "elabd-foods" and sent.get("on") is False, sent)
+        ck("…and lands on the clients page with the client live again",
+           bool(q(pg, '[data-grid="clients"] .ccard[data-client="elabd-foods"]')) and q(pg, '[data-grid="archived"]') is None)
 
-    # ── 11 · SOMEBODY WHO IS NOT THE PLATFORM'S ADMIN ───────────────────
+    # ── 9 · SOMEBODY WHO IS NOT THE PLATFORM'S ADMIN ────────────────────
     #  §94.2's other end, and the one that matters most here: adding a client
     #  can be handed to a consultant through the access table and removing one
-    #  cannot, so for them there must be no block, no band and no card control
-    #  — not a greyed one, which invites a press and then explains itself.
-    print("\n§12 · not the admin")
-    # put a client away first, as the admin, so the band has something in it
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
+    #  cannot, so for them there must be no band and no card control — not a
+    #  greyed one, which invites a press and then explains itself.
+    print("\n§9 · not the admin")
     WORLD["elabd-foods"] = copy.deepcopy(LIVE)
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(500)
-    open_settings(pg, "elabd-foods")
-    press(pg, '[data-archive="ask"]')
-    press(pg, '[data-archive="do"]', 700)
+    archive("elabd-foods")
+    console()
     ck("(fixture) a client is archived", bool(q(pg, '[data-grid="archived"]')))
     pg.evaluate("()=>fetch('/__admin0')"); pg.wait_for_timeout(200)
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(600)
+    console()
     ck("no Archived band for them", q(pg, '[data-grid="archived"]') is None,
        "a row of clients they can do nothing with is furniture (§94.15)")
-    ck("…and no way to bring one back", q(pg, ".cback") is None)
-    opened = open_settings(pg, "demo") or open_settings(pg, "elabd-foods")
-    if opened:
-        kws = pg.eval_on_selector_all(".wzendkey", "e => e.map(x => x.textContent.trim())")
-        ck("…and no ending block inside a client either", kws == [], kws)
-        ck("…no Archive control", q(pg, '[data-archive="ask"]') is None)
-        ck("…no Delete control", q(pg, '[data-delete="ask"]') is None)
+    ck("…and no way to bring one back, and no Delete anywhere",
+       q(pg, ".cback") is None and q(pg, "[data-unarchive]") is None and q(pg, '[data-delete="ask"]') is None)
 
-    # ── 13 · the console ────────────────────────────────────────────────
-    print("\n§13 · the console")
+    # ── 10 · the console ────────────────────────────────────────────────
+    print("\n§10 · the console")
     ck("no page errors", not errs, errs[:3])
 
     b.close()

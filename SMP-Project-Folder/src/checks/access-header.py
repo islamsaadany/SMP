@@ -142,16 +142,54 @@ with sync_playwright() as p:
     # function page", which nothing in the product ever does — and it made a
     # function head look as though they reached `a_unit_own`.
     print("\n4 · every cell offered is a cell that can be reached")
+    # §405: A BUSINESS UNIT MAY PLAN IN PROJECTS, so a project owner can hold
+    # the role ON A UNIT and the own-unit columns are live for that row. The
+    # worked example has no such unit, so the state is MADE (§255) and put
+    # back after, or this section measures a register that cannot show it.
+    made = pg.evaluate("""()=>{
+      const k = UNIT_KEYS[0], u = UNITS[k], p = PEOPLE.find(x => x.name);
+      window.__ahWas = { k: k, format: u.format, projects: u.projects };
+      u.format = "projects";
+      u.projects = [{ id: "u:" + k + "-P1", name: "Probe project", owner: p.name,
+                      deliverables: [], outcomes: [], milestones: [] }];
+      return (SMPRules.personRoles(world(), p) || [])
+        .some(r => r.role === "powner" && r.at === k); }""")
+    ck("a unit that plans in projects makes its project owner a Project owner there", made)
     reach = pg.evaluate("""()=>{
       const R = SMPRules, w = world();
+      /* §334 MADE A CAPABILITY A DESTINATION, judged in the FUNCTION columns,
+         and §412 gave it a seat of its own — so a capability is a target this
+         sweep has to ask about too, or a role held AT a capability reads as
+         reaching none of the columns it plainly reaches (§214.3). */
+      const CAPS = (GROUP.capabilities || []).map(c => 'cap:' + c.id);
       const pairs = [['unit', UNIT_KEYS], ['unit_strat', UNIT_KEYS],
-                     ['fn', FUNCTION_KEYS.map(k=>'fn:'+k)],
-                     ['fn_strat', FUNCTION_KEYS.map(k=>'fn:'+k)]];
+                     ['fn', FUNCTION_KEYS.map(k=>'fn:'+k).concat(CAPS)],
+                     ['fn_strat', FUNCTION_KEYS.map(k=>'fn:'+k).concat(CAPS)]];
       /* Granted roles say where they may sit; the derived ones never can —
          `roleWheres()` falls through to "every unit" for them, which is simply
          untrue — so their places come from what `personRoles()` actually
-         mints on this register. */
-      const DERIVED = {powner:1, plowner:1, contrib:1};
+         mints on this register.
+
+         DERIVED, NEVER LISTED (§104.7, §214.3). This was `{powner, plowner,
+         contrib}` written out by hand, so §384's Tactic owner — derived the
+         same way, and held on a pillars FUNCTION as well as a unit — fell
+         through to `roleWheres()`, was told it sits on every unit and nowhere
+         else, and was reported as offering two function columns it cannot
+         reach. The check was right about the RULE and wrong about the role,
+         which is the shape a literal takes when the world moves past it.
+
+         THAT ROLE LASTED TWO DAYS (§387 took it off the table again), and
+         the line stays exactly as it is — which is the whole argument for
+         having written it this way. A literal would have had to be edited
+         twice: once when the role arrived and once when it left.
+
+         The property is the one that made those three special in the first
+         place: a role nobody can GRANT has no grantable places, so its places
+         have to come from the register. That is `roleIsGrantable()`'s own
+         question — it refuses exactly the own-lines roles — so a fifth one
+         added tomorrow is judged the day it lands. */
+      const DERIVED = {};
+      (R.ROLES || []).forEach(r => { if (R.isOwnLinesRole(r.key)) DERIVED[r.key] = 1; });
       const derived = {};
       PEOPLE.forEach(p => { (R.personRoles(w, p) || []).forEach(r => {
         (derived[r.role] = derived[r.role] || {})[r.at] = 1; }); });
@@ -211,10 +249,17 @@ with sync_playwright() as p:
     # The general assertion above covers these, and they are written out as
     # well because the report they came from is worth keeping legible — and
     # because the third is one where the derivation disagreed with him.
+    pg.evaluate("""()=>{ const w = window.__ahWas; if (!w) return;
+      const u = UNITS[w.k];
+      if (w.format === undefined) delete u.format; else u.format = w.format;
+      if (w.projects === undefined) delete u.projects; else u.projects = w.projects; }""")
     print("\n5 · the pairs that were reported")
-    ck("a project owner is offered no OWN business unit column",
-       not offered["Project owner"]["a_unit_own"]
-       and not offered["Project owner"]["a_unit_own_strat"])
+    # §405 REVERSES THIS PAIR, REWRITTEN RATHER THAN DELETED (§218): a project
+    # owner used to be unable to hold anything on a unit, so the own-unit
+    # columns were dashed; since a unit may plan in projects they are offered.
+    ck("a project owner IS offered the OWN business unit columns (§405)",
+       offered["Project owner"]["a_unit_own"]
+       and offered["Project owner"]["a_unit_own_strat"])
     ck("a BU owner is offered no OWN supporting function column",
        not offered["BU owner"]["a_fn_own"]
        and not offered["BU owner"]["a_fn_own_strat"])

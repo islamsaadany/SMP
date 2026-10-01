@@ -67,6 +67,10 @@ export async function save(tenantId: string, person: Actor, body: SaveBody): Pro
     const applied = D.applyChanges(JSON.parse(JSON.stringify(onto)), body.changes);
     if (!applied.ok) return { code: 400 as const, body: { ok: false as const, error: applied.error } };
     const incoming = applied.state;
+    /* `done-dropped` (checks/door-landing.mjs, §360): the set-up's Done mark
+       is applied on screen and never reaches the store — the page says the
+       client is set up and the next paint says it is not. */
+    if (brk === "done-dropped" && incoming && incoming.group) delete incoming.group[R.SETUP_DONE];
     const verdict = authorize(stored, incoming, acting);
     if (!verdict.ok) {
       const refused = brk === "bare-refusal" ? verdict.refused.map((r: any) => ({ why: r.why, kind: r.kind, target: r.target })) : verdict.refused;

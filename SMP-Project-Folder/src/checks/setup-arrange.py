@@ -83,9 +83,12 @@ def go(b, page_name, who=None):
     pg.evaluate("""() => { var g = document.querySelector('button[title="Setup"]');
                            if (g) g.click(); }""")
     pg.wait_for_timeout(450)
-    pg.evaluate("""(n) => { var b = [].filter.call(
-        document.querySelectorAll('.setuprail button'),
-        x => x.textContent.indexOf(n) >= 0)[0]; if (b) b.click(); }""", page_name)
+    # §392: a page whose name is the client's word is found by its KEY ("@key"),
+    # because the rail now says whatever Terminology says (Divisions, Sectors…).
+    pg.evaluate("""(n) => { var b = n.charAt(0) === '@'
+        ? document.querySelector('.setuprail [data-setupgo="' + n.slice(1) + '"]')
+        : [].filter.call(document.querySelectorAll('.setuprail button'),
+            x => x.textContent.indexOf(n) >= 0)[0]; if (b) b.click(); }""", page_name)
     pg.wait_for_timeout(500)
     return pg
 
@@ -139,7 +142,9 @@ with sync_playwright() as p:
         pagePen: document.querySelectorAll('[data-edit="units"]').length,
         eraser: document.querySelectorAll('[data-clearmenu]').length,
         arrange: document.querySelectorAll('[data-setarrange="units"]').length,
-        pills: t.querySelectorAll('tbody .pill').length,
+        /* §405: the Plans in column wears a pill of its own, so the STATUS
+           pill is the one in the status cell (good or none). */
+        pills: t.querySelectorAll('tbody .pill.good, tbody .pill.none').length,
         tables: document.querySelectorAll('.setuppane table').length,
         marks: (document.querySelector('.setuppane') || {}).innerHTML &&
                /Unit marks/.test(document.querySelector('.setuppane').innerHTML),
@@ -411,7 +416,7 @@ with sync_playwright() as p:
 
     # ══ 7. COMPANIES: THE MENU, AND THE REFUSAL INSIDE IT ═══════════════
     head("7 · Companies — two entries, and the refusal names what is in the way")
-    pg = go(b, "Companies")
+    pg = go(b, "@companies")
     co = ev(pg, """() => ({
       kebabs: document.querySelectorAll('[data-comenu]').length,
       keys: COMPANY_KEYS.length,
@@ -443,7 +448,10 @@ with sync_playwright() as p:
     # §62: the entry stays LIVE and the press names what is in the way, which
     # a dotted chip in the row could never do.
     ck("pressing Retire names the units in the way",
-       isinstance(ref, str) and "cannot be retired" in ref and "business unit" in ref, ref[:120])
+       # §395 put the client's own word in that sentence ("Business units"),
+       # so the unit word is asked of the page rather than typed (§214.3, §218).
+       isinstance(ref, str) and "cannot be retired" in ref and
+       str(ev(pg, "() => L('unitword','bu')") or "\x00").lower() in ref.lower(), ref[:120])
     pg.close()
     b.close()
 

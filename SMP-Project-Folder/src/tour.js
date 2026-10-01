@@ -265,15 +265,15 @@ var TOUR = (function(){
           targets:["$sec", "#panel"],
           title:function(at){ return isFnPlace(at) ? "Strategy › Overview" : "Strategy › Foundation"; },
           body:function(at){ return isFnPlace(at)
-            ? "What this function is here to do, and the capabilities it owns."
-            : "Who the unit is: the aspiration, and the " + L("keyobj","bu").toLowerCase() +
+            ? "What this function is here to do, and the " + L("capability") + " it owns."
+            : "Who the unit is: the aspiration, and the " + L("keyobj","bu") +
               " it is judged on."; } },
 
         { dest:"$own", tab:"strategy", sec:"swot",
           targets:["$sec", "#panel"],
           title:"Strategy › SWOT",
-          body:"The reasoning the plan was built from — strengths, weaknesses, " +
-               "opportunities, threats. The pillars answer what this table says." },
+          body:function(){ return "The reasoning the plan was built from — strengths, weaknesses, " +
+               "opportunities, threats. The " + L("pillar") + " answer what this table says."; } },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$sec", "#panel .split > .rail"],
@@ -287,10 +287,10 @@ var TOUR = (function(){
              So every sentence is written to take the label EXACTLY as it
              is given, and none of them makes it singular or plural. */
           title:function(at){ return isFnPlace(at)
-            ? "Strategy › Projects"
+            ? "Strategy › " + L("project")
             : "Strategy › Plan — " + L("pillar","bu"); },
           body:function(at){ return isFnPlace(at)
-            ? "The work itself. Each project on this rail holds the deliverables it hands " +
+            ? "The work itself. Each " + L1("project") + " on this rail holds the deliverables it hands " +
               "over, the outcomes it is meant to change, and the milestones along the way."
             : L("pillar","bu") + " sit on this rail, and each one holds the measures your " +
               "unit is scored on and the tactics that deliver them."; } },
@@ -392,23 +392,23 @@ var TOUR = (function(){
           targets:["$sec", "#panel"],
           title:"What you are judged on",
           body:function(at){ return isFnPlace(at)
-            ? "What this function is here to do, and the capabilities it owns. Everything " +
+            ? "What this function is here to do, and the " + L("capability") + " it owns. Everything " +
               "further in exists to move these."
-            : "The aspiration, and the " + L("keyobj","bu").toLowerCase() + " underneath it. " +
+            : "The aspiration, and the " + L("keyobj","bu") + " underneath it. " +
               "These are what your score is built from — everything further in exists to " +
               "move them."; } },
 
         { dest:"$own", tab:"strategy", sec:"swot",
           targets:["$sec", "#panel"],
           title:"The reasoning behind the plan",
-          body:"Strengths, weaknesses, opportunities and threats — the case the pillars were " +
-               "chosen to answer. Worth a look when a pillar stops making sense." },
+          body:function(){ return "Strengths, weaknesses, opportunities and threats — the case the " +
+               L("pillar") + " were chosen to answer. Worth a look when one of them stops making sense."; } },
 
         { dest:"$own", tab:"strategy", sec:"plan",
           targets:["$sec", "#panel .split > .rail"],
           title:function(at){ return isFnPlace(at) ? "The work itself" : "The plan itself"; },
           body:function(at){ return isFnPlace(at)
-            ? "Each project on this rail holds what it hands over and what it is meant to " +
+            ? "Each " + L1("project") + " on this rail holds what it hands over and what it is meant to " +
               "change. The strategy office authors this; you are accountable for it landing."
             : L("pillar","bu") + " sit on this rail, each holding the measures it is scored " +
               "on and the work that delivers them. The strategy office authors this; you are " +

@@ -41,7 +41,7 @@
     },
     {
      "h": "Three of the roles are read off the plan",
-     "p": "<b>Project owner</b>, <b>Pillars owner</b> and <b>Contributor</b> are never granted by hand — being named on the plan is the role. Whoever is named a project’s Owner is its project owner; whoever is named a pillars’s is its pillars owner; everybody else a plan names — a collaborator, a stakeholder, a milestone’s owner — is a contributor. Each still needs its <b>Reporting</b> cell opened before it reports anything, and then it reaches only its own lines: the project, the pillars, or the rows that name the person. None of the three ever submits, because submitting speaks for the whole subject."
+     "p": "<b>Project owner</b>, <b>Pillar owner</b> and <b>Contributor</b> are never granted by hand — being named on the plan is the role. Whoever is named a project’s Owner is its project owner; whoever is named a Pillar’s is its Pillar owner; everybody else a plan names — a collaborator, a stakeholder, a milestone’s owner — is a contributor. Each still needs its <b>Reporting</b> cell opened before it reports anything, and then it reaches only its own lines: the project, the Pillar, or the rows that name the person. None of the three ever submits, because submitting speaks for the whole subject."
     },
     {
      "h": "Own is not a setting",
@@ -113,7 +113,7 @@
     },
     {
      "h": "One label, two places",
-     "p": "A level can read differently at group and at business unit — what the group calls a pillars a unit may call something else — and both are set on the Labels page."
+     "p": "A level can read differently at group and at business unit — what the group calls a Pillar a unit may call something else — and both are set on the Labels page."
     },
     {
      "h": "No collisions",
@@ -131,7 +131,7 @@
   },
   {
    "id": "kb:units",
-   "title": "Business units and supporting functions",
+   "title": "Business units and Supporting Functions",
    "blocks": [
     {
      "h": "The short name is for the navigation only",
@@ -139,15 +139,15 @@
     },
     {
      "h": "A function is not a small unit",
-     "p": "A function carries <b>no plan, no weight and no pillars</b> — it improves a cross-cutting capability the whole group depends on. The <b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers its pillars."
+     "p": "A function carries <b>no plan, no weight and no Pillar</b> — it improves a cross-cutting capability the whole group depends on. The <b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers its Pillar."
     },
     {
      "h": "Retired, never deleted",
      "p": "A unit or a function is <b>retired</b>, not removed: it carries reported history, and deleting it would rewrite what was already said. <b>The custodian slot is optional</b> — where the head does the work themselves they already have access as head."
     },
     {
-     "h": "One function each",
-     "p": "A function may hold several capabilities, which is why a custodian is named after the function and never after a capability: naming someone after one breaks the moment a second is assigned."
+     "h": "A capability's owner",
+     "p": "A capability has an <b>owner</b> and a <b>custodian</b> of its own, named on Setup › Capabilities, like a business unit. The function that holds it is optional; where one does, that function's head and custodian reach it too."
     }
    ]
   },
@@ -627,7 +627,7 @@
    "blocks": [
     {
      "h": "The function is the destination, not the capability",
-     "p": "The navigation offers <b>supporting functions</b> — Finance, HR, Marketing — and the capabilities each one carries are named inside its pages. A function may carry more than one (Marketing carries two), the Strategy custodian is named after the function, and the capabilities themselves already appear in the temple. Listing capabilities in the row would name the work where the organisation belongs."
+     "p": "The navigation offers <b>supporting functions</b> — Finance, HR, Marketing — and the capabilities each one carries are named inside its pages. A function may carry more than one (Marketing carries two), each capability names its own owner and custodian, and the capabilities themselves already appear in the temple. Listing capabilities in the row would name the work where the organisation belongs."
     },
     {
      "h": "What a capability is",
@@ -692,8 +692,8 @@
      "p": "Cross-cutting work the whole group depends on, improved by a supporting function through enhancement projects. It is <b>not</b> a pillar one level up: it belongs to no business unit and no unit is accountable for it."
     },
     {
-     "h": "One function each",
-     "p": "A capability is allocated to exactly one function. A function may hold several — which is why custodians are named after the function."
+     "h": "An owner of its own",
+     "p": "A capability has its own owner and custodian. It may be held by one function, or by none — a company-wide capability. A function may hold several."
     },
     {
      "h": "Capability delivery reads separately",
@@ -1412,7 +1412,7 @@
    "id": "branding",
    "group": "Strategy Office questions",
    "q": "How do I set the colours and the logo?",
-   "a": "Go to Setup › Branding for both. The two colours are the accent and the navigation bar, and everything else is worked out from them.|The group's mark sits above them: it is shown on any review deck whose subject has no mark of its own — a business unit that has not uploaded one, and every supporting function, which never has one.|A business unit's own mark is uploaded separately, on Setup › Business units.|Marks must be PNG with a transparent background. SVG is not accepted, for security reasons, and a mark with white behind it paints a box around itself on a dark slide.",
+   "a": "Go to Setup › Client set-up (it reads Getting started until the set-up is finished) — the mark and the colours are on its first step. The two colours are the accent and the navigation bar, and everything else is worked out from them.|The group's mark sits above them: it is shown on any review deck whose subject has no mark of its own — a business unit that has not uploaded one, and every supporting function, which never has one.|A business unit's own mark is uploaded separately, on Setup › Business units.|Marks must be PNG with a transparent background. SVG is not accepted, for security reasons, and a mark with white behind it paints a box around itself on a dark slide.",
    "who": "office"
   },
   {

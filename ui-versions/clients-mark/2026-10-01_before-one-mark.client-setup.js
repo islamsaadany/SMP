@@ -887,15 +887,9 @@ var CLIENTSETUP = (function () {
 
   /* The mark on this client's door (§313.36): PNG only, shrunk here on a
      transparent canvas, written the moment it is picked. */
-  /* §460: the decks read the same mark, so a change here reaches the open
-     platform at once rather than on the next sign-in. */
-  /* The console's copy of this flow has no labels (it runs outside the
-     platform), so the platform's word is asked for only where it exists. */
-  function word(k, d){ return typeof labelWord === "function" ? labelWord(k, "group") : d; }
-  function tellShell(v){ if (typeof SYNC !== "undefined" && SYNC.setClientMark) SYNC.setClientMark(v); }
   function markBlock(c){
     var mk = el("div", "wzmark");
-    mk.appendChild(el("span", "lab", "The client's mark"));
+    mk.appendChild(el("span", "lab", "Mark on this client's door"));
     var mrow = el("div", "markrow");
     var preview = el("img"); preview.alt = "";
     var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
@@ -913,7 +907,7 @@ var CLIENTSETUP = (function () {
       var drop = el("button", "btn", "Remove"); drop.type = "button";
       drop.hidden = !c.mark;
       drop.addEventListener("click", function () {
-        saveReg({ mark:"" }, function () { c.mark = null; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+        saveReg({ mark:"" }, function () { c.mark = null; show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
       });
       file.addEventListener("change", function () {
         var f = file.files && file.files[0];
@@ -931,7 +925,7 @@ var CLIENTSETUP = (function () {
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           var out = cv.toDataURL("image/png");
           if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          saveReg({ mark:out }, function () { c.mark = out; tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; });
+          saveReg({ mark:out }, function () { c.mark = out; show(out); drop.hidden = false; choose.textContent = "Replace"; });
         };
         img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
         img.src = url;
@@ -939,10 +933,7 @@ var CLIENTSETUP = (function () {
       mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
     }
     mk.appendChild(mrow);
-    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at, " +
-      "and on the presentations: large on the cover and small in the footer of every slide, for any " +
-      word("unitword", "business unit") + " without a mark of its own and every " + word("fnword", "supporting function") +
-      ". PNG only, with a transparent background."));
+    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at."));
     return mk;
   }
 

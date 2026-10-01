@@ -61191,3 +61191,18 @@ Islam: *"we need to bring this Process module with all it's data and deisgn even
 **THE OLD DATA**: `scripts/carry-ffprocess.mjs` copies one old workspace into a client's empty one — everything that workspace reaches by foreign key, ids kept, in one transaction, old users mapped to existing accounts by email — and refuses a workspace that already holds data. Behind a production-only deploy switch (`SMP_CARRY_FFPROCESS` = the old workspace's id or name, `FFPROCESS_DATABASE_URL` in Vercel), and a switch left on logs *turn it off* rather than failing the build (§317.9). Proved on a local copy built in the old shape: dry-run counts exact, a self-referencing manager and a parent/branch cycle carried, a matched user mapped, a second run refused; and the deploy path run with the switch on against an already-carried workspace, which logged and exited 0.
 
 **RECORDED, NOT DONE**: adding a person directly in Processes (not on the register) is still allowed — Islam's call.
+
+## §460 — One mark, the client's (2026-10-01)
+
+Islam, of Client set-up's first step showing *Mark on this client's door* and *The group's mark* one above the other: *"why is there a mark on the door and the groups mark.?"* — and then *"yes keep them as one and name the client's mark and for now keep the ones in the mark on the door."*
+
+**Why there were two.** §313.36 put the door's mark on the client's REGISTRY row, because the sign-in page has to show it before anybody is signed in and nothing inside the client can be read then. §259.2 put the deck's fallback mark in the client's own graph (`org.extra.logo`). Two stores for one picture, and on RHI they had already diverged — the group mark held a slide screenshot.
+
+**What changed.** The registry row is the one store. `personFor()` (smp-app/lib/state-api.ts) hands the mark to the shell as `person.clientMark`; `sync.js` keeps it OUTSIDE the graph (a graph field would be a second copy every save carries and the server must judge, §42) and exports `clientMark()`/`setClientMark()`; `groupLogo()` reads it on a served page. A stored `GROUP.logo` is left where it is and no longer read on a served page — hidden, not destroyed (§44). Only a page with no server reads `GROUP.logo`: the baked file, and the contingency copy (§306), which now writes the client's mark into its own graph clone so a backup deck keeps the cover mark.
+
+**The page.** The *Group's mark* section is deleted from `brandingBody()` (§24) — and the deletion first left a bare `return` on its own line, which returns nothing and took the colour controls with it (§94.15's own trap, caught by `client-setup.py`). The door block is renamed *The client's mark* and its note says both places it is worn. Replacing it in the set-up flow updates the open shell at once. Content agreed in chat; no visual design was added, so no mockup was owed (1c, 2026-09-23).
+
+**Checks.** `deck-dividers.py` §8/§10 and `client-setup.py` §3 REWRITTEN, never loosened (§218): no second upload (with the colour controls asserted present as the control), a subject with no mark of its own wears the client's mark when served, and a stored group mark is not read. Falsified from the SOURCES (§276): with `groupLogo()` reading `GROUP.logo` again, 2 red. `contingency.py` 0 failures, full `qa.py` ERRORS none, `built-in-step` all good. **Unrun here** (§54.5): `smp-app` checks and `tsc` — no `node_modules` in this session; `door-landing.mjs` asserts the door's own mark and its subject is untouched.
+
+**Recorded, not done.** The authoriser still classifies `GROUP.logo` (dormant). The console's client card and the door keep reading the registry exactly as before.
+

@@ -258,6 +258,12 @@ var CONT = (function () {
         });
 
         var g = SYNC.graph();
+        /* §460: the copy has no server to ask for the client's mark, so the
+           mark the decks wear goes INTO the copy's own graph — on a clone, or
+           this tab's next save would carry it as a change. */
+        if (SYNC.clientMark && SYNC.clientMark()) {
+          g = Object.assign({}, g, { group: Object.assign({}, g.group, { logo: SYNC.clientMark() }) });
+        }
         /* `</` inside a script block ENDS it wherever it appears, so the one
            sequence that can break out is escaped. JSON reads `<\/` as `</`,
            so nothing about the data changes. */

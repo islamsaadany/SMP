@@ -20,7 +20,7 @@ import { save, type SaveBody, type SaveResult } from "./save.ts";
 
 const R = createRequire(import.meta.url)("./rules.cjs");
 
-export type Person = { key: string; name: string; role: string; email: string; kind: SessionUser["kind"]; mustChange: false; clientName: string; cards: boolean };
+export type Person = { key: string; name: string; role: string; email: string; kind: SessionUser["kind"]; mustChange: false; clientName: string; clientMark: string; cards: boolean };
 export type Answer = { code: number; body: Record<string, unknown> };
 
 /* ── THE OFFICE ARRIVES ON THE REGISTER (§313.29–§313.32, ported) ────────
@@ -151,7 +151,14 @@ export async function personFor(r: Resolved): Promise<Person> {
   if (!key) throw new NoPerson("You are signed in, but you are not on this client's register. Ask the SMO to place you.");
   const seatRole = r.seat === "super" || r.seat === "smoteam" ? r.seat : "";
   return { key, name: r.user.name, role: seatRole, email: r.user.email, kind: r.user.kind, mustChange: false,
-           clientName: r.tenant.name, cards: r.user.kind !== "client" };
+           clientName: r.tenant.name,
+           /* §460: THE CLIENT'S MARK IS ONE PICTURE. It is the mark on this
+              client's door (§313.36, the registry row) and the decks wear it
+              too, so the shell is handed it here rather than keeping a second
+              upload inside the graph (§53.5). Already public: the door shows it
+              before anybody signs in. */
+           clientMark: r.tenant.mark || "",
+           cards: r.user.kind !== "client" };
 }
 
 function within(q: URLSearchParams, name: string): string | null {

@@ -1590,12 +1590,41 @@ function brandingBody(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* §460: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
-     client's, set in the block above this one on Client set-up (the door's,
-     §313.36) and worn by the decks through groupLogo(). Deleted rather than
-     hidden (§24); a stored GROUP.logo is left where it is and simply no
-     longer read on a served page. */
-  return "" +
+  /* ── THE GROUP'S MARK (§259) ─────────────────────────────
+     FIRST on the page, deliberately. A mark is the most concrete thing a
+     tenant has, and the three colour sections under it are one argument
+     read in order (the two colours, what follows from them, whether it is
+     readable) — dropping the mark into the middle of that would break the
+     only sequence on the page.
+
+     THE UNIT MARKS' OWN SHAPE (§52.9), not a second one: a preview, the
+     two controls, and the note that says what may be uploaded. Nothing to
+     hold apart, so no table — there is one row and one row is not a list. */
+  var gm = groupLogo();
+  var markBlock = section("", "The group’s mark", null,
+    '<p class="why" style="margin:0 0 14px">Shown on any deck that has no mark of its own — ' +
+      'a ' + L1("unitword") + ' whose own mark has not been uploaded, and every ' + L1("fnword") + ', ' +
+      'which never has one. Large on the cover, small in the footer of every other slide. ' +
+      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints ' +
+      'a box around itself on a dark slide.</p>' +
+    '<div class="gmarkrow">' +
+      (gm
+        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(gm) + '" alt="' +
+            esc(GROUP.org) + '"></span>'
+        : '<span class="why" style="margin:0">No mark — a deck with none shows the ' +
+            'subject’s name instead, which costs nothing.</span>') +
+      (mayEdit
+        ? '<div class="rowacts">' +
+            '<label class="linkbu umarkpick">' + (gm ? "Replace" : "Upload") +
+              '<input type="file" accept="image/png" data-glogo="1" hidden></label>' +
+            (gm ? '<button class="linkbu" data-glogoclear="1">Remove</button>' : '') +
+          '</div>'
+        : '<span class="why" style="margin:0">SMO</span>') +
+    '</div>' +
+    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
+
+  return markBlock +
+
     section("", "The tenant’s colours",
       null,
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +

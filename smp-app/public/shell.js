@@ -64617,9 +64617,13 @@ var SYNC = (function () {
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     /* The focus feature's switch (§102). `this`, never a closure over the
        element, for the reason stated three lines down. */
-    var fsw = document.querySelector("[data-focusswitch]");
-    if (fsw) fsw.addEventListener("click", function(){
-      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    /* §441.1: BOTH halves. A `querySelector` wired the first match only, so
+       since the switch became an On|Off pair (§130.5) pressing Off did
+       nothing at all — Islam: *"can't turn off"*. */
+    document.querySelectorAll("[data-focusswitch]").forEach(function(fsw){
+      fsw.addEventListener("click", function(){
+        setFocusOn(this.dataset.focusswitch === "1"); paint();
+      });
     });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever

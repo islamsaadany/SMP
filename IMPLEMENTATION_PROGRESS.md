@@ -1317,6 +1317,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-01 — §441.1: the Off button on Focus measures works
+
+Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §441, which is on the branch and reaches the live site when it is merged.
+
 ## 2026-10-01 — the company page follows its own Structure (§441)
 
 Four from Islam on the company page. The Performance page's Themes section now shows only while Themes are ticked on for the top layer, and its capabilities section only while capabilities are on — called by the client's own word ("Capabilities"), never "Group capabilities". A company with its own pillars opens on Strategy › Pillars; a group with no plan still opens on Performance, so Raya's group page is unchanged. The Focus tab disappears when Focus measures are switched off (the switch stays on Setup › Focus measures), and the company's own pillars are a place to mark on Setup › Focus measures and show on the Focus board. Nothing stored moves. `single-company.py` gains §441, red 5 with the changes taken out. On the branch, not merged.

@@ -172,9 +172,15 @@ with sync_playwright() as p:
     mk = safe(pg, "()=>{var m=GROUP.items[0].measures[0]; if(!m) return null; CYCLE.focus[m.id]=true; return m.name}")
     ck("…a marked company measure is on the Focus board", bool(mk) and mk in (safe(pg, "()=>renderFocusBoard()") or ""), mk)
     ck("Focus on: the tab is there", "focus" in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
-    safe(pg, "()=>setFocusOn(false)")
+    # §441.1: through the REAL control on Setup › Focus measures — the Off
+    # half was wired to nothing, so a direct setFocusOn() call passed here.
+    safe(pg, "()=>{ current='setup'; currentSub='focusset'; paint(); }"); pg.wait_for_timeout(250)
+    press(pg, "[data-focusswitch='0']"); pg.wait_for_timeout(200)
+    ck("pressing Off on Setup › Focus measures turns it off", safe(pg, "()=>GROUP.focusOff") is True)
     ck("Focus off: the tab is gone", "focus" not in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
-    safe(pg, "()=>setFocusOn(true)")
+    press(pg, "[data-focusswitch='1']"); pg.wait_for_timeout(200)
+    ck("…and pressing On brings it back", safe(pg, "()=>GROUP.focusOff") is None)
+    safe(pg, "()=>{ current='group'; paint(); }")
 
     # ── 3. A direction owner reports their own direction ─────────────
     who = safe(pg, """()=>{var p=GROUP.items[0]; var q=PEOPLE.filter(x=>x.active!==false && !SMPRules.mayReportTop(world(),x) && !SMPRules.isOfficeRole((x.role||''))&& x.name && x.name.split(' ').length>1)[0]; if(!q) return null; p.owner=q.name; GROUP.items.slice(1).forEach(o=>{ if(o.owner===q.name) o.owner=''; }); return q.key}""")

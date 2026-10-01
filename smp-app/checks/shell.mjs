@@ -816,8 +816,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const p = await place();
     check(p[0] === "mobile" && p[1] === "copilot" && p[2] === "foundation", "the address opens Mobile's Copilot, Foundation section", JSON.stringify(p));
     const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
-    const ri = tabs.indexOf("report"), ci = tabs.indexOf("copilot");
-    check(ci >= 0 && (ri < 0 || ci === ri + 1), "the Copilot tab sits right after Reporting", tabs.join("|"));
+    const ci = tabs.indexOf("copilot");
+    check(ci >= 0 && ci === tabs.length - 1, "the Copilot tab is the last tab, after Reporting and Insights (Islam, 2026-10-01)", tabs.join("|"));
     const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).map((b) => b.textContent.trim()));
     check(["Foundation", "Analysis", "Directions", "Execution", "Advisory"].every((w) => secs.includes(w)), "…with its five sections", secs.join("|"));
     const rails = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => ({ t: r.getBoundingClientRect().top, h: r.querySelector("h3,.coprh,header") ? r.textContent.slice(0, 40) : r.textContent.slice(0, 40) })));
@@ -886,6 +886,46 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
   } finally {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+  }
+});
+
+await section("3g · turning a module on from inside the platform shows it at once (§441)", async () => {
+  /* Islam: "I turned on the module but nothing is appearing in the
+     navigation". The document carries which modules the client has, and
+     since §432 the move from settings to a module is a paint — so the switch
+     reloads the page once the server has taken it. Pressed through the real
+     control and then crossed the way he crossed, by the trail (§96). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+    await fresh(); await signIn("office@forefront.example");
+    let found = false;
+    for (const pg2 of ["/raya-trade/setup/start", "/raya-trade/setup/clientsetup", "/raya-trade/setup"]) {
+      await open(pg2);
+      if (await page.$(".teamrow[data-module='copilot'] button")) { found = true; break; }
+    }
+    check(found, "the client's settings draw the Copilot row with its switch");
+    if (!found) return;
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-copilot"))) !== "1", "…and before the press the page carries no Copilot");
+    await page.evaluate(() => { window.__sameDoc = 1; });
+    await page.click(".teamrow[data-module='copilot'] button");
+    await page.waitForFunction(() => !window.__sameDoc, null, { timeout: 15000 }).catch(() => {});
+    await booted();
+    check(await page.evaluate(() => !window.__sameDoc), "the press reloads the page once the server has it", "same document");
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-copilot"))) === "1", "…and the page it reloads to carries the Copilot");
+    const go = await page.$("nav.trail [data-trgo='/raya-trade/strategy']");
+    if (go) await page.evaluate(() => document.querySelector("nav.trail [data-trgo='/raya-trade/strategy']").click());
+    else await open("/raya-trade/strategy/mobile");
+    await page.waitForTimeout(800);
+    if (await page.evaluate(() => current === null || current === "group" || current === "setup")) {
+      await page.evaluate(() => { const b = document.querySelector("[data-u='mobile']"); if (b) b.click(); });
+      await page.waitForTimeout(600);
+    }
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
+    check(tabs.includes("copilot"), "…so crossing to Strategy shows the Copilot tab with no refresh by hand", tabs.join("|"));
+    check(tabs.indexOf("insights") >= 0 && tabs.indexOf("copilot") === tabs.length - 1, "…and it comes last, after Insights (Islam, 2026-10-01)", tabs.join("|"));
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]);
   }
 });
 

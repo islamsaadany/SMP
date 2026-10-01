@@ -450,9 +450,9 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -474,9 +474,9 @@
           return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     group: [
       /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
@@ -503,9 +503,9 @@
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
         render: function(){ return renderReport(topAsUnit()); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -592,9 +592,9 @@
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 

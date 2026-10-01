@@ -57549,6 +57549,28 @@ var CLIENTSETUP = (function () {
               post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
                 if (!r.ok) { mb.disabled = false; say(r.error || "Not changed.", true); return; }
                 reg.modules = r.modules || [];
+                /* §441: INSIDE THE PLATFORM THE PAGE IS BUILT FOR THE MODULES
+                   THE CLIENT HAD WHEN IT LOADED (Islam: "I turned on the
+                   module but nothing is appearing in the navigation"). The
+                   served document carries which modules this client has —
+                   the switcher, the Copilot tab, the reports' filters — and
+                   since §432 the move from settings to a module is a paint,
+                   not a load, so nothing would ever re-read it. One reload
+                   after the server has taken the change, with anything
+                   waiting saved first (§138), makes every one of them true
+                   at once. The console has no SYNC and no such stamps, and
+                   repaints its rows as before. */
+                if (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive() && SYNC.saveNow) {
+                  say("Done — reloading so the page shows it…");
+                  /* A save refused or failed keeps the page, or the reload
+                     would throw away the work §184's banner offers back. */
+                  SYNC.saveNow(function (how) {
+                    if (how === "saved" || how === "clean") { location.reload(); return; }
+                    paintRows();
+                    say("Turned " + (on ? "off" : "on") + ". Refresh the page once your other change is saved to see it.", true);
+                  });
+                  return;
+                }
                 paintRows();
               });
             });
@@ -60820,9 +60842,9 @@ var SYNC = (function () {
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -60844,9 +60866,9 @@ var SYNC = (function () {
           return !!(m && Array.isArray(m.on)) && SMPRules.foundOn(GROUP, t) &&
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     group: [
       /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
@@ -60873,9 +60895,9 @@ var SYNC = (function () {
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
         render: function(){ return renderReport(topAsUnit()); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -60962,9 +60984,9 @@ var SYNC = (function () {
         /* §422: a plan switched off has nothing to report (Islam's *"yes"*). */
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
-      COP_TAB,
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 

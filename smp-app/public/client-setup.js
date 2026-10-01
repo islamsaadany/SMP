@@ -974,6 +974,28 @@ var CLIENTSETUP = (function () {
               post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
                 if (!r.ok) { mb.disabled = false; say(r.error || "Not changed.", true); return; }
                 reg.modules = r.modules || [];
+                /* §441: INSIDE THE PLATFORM THE PAGE IS BUILT FOR THE MODULES
+                   THE CLIENT HAD WHEN IT LOADED (Islam: "I turned on the
+                   module but nothing is appearing in the navigation"). The
+                   served document carries which modules this client has —
+                   the switcher, the Copilot tab, the reports' filters — and
+                   since §432 the move from settings to a module is a paint,
+                   not a load, so nothing would ever re-read it. One reload
+                   after the server has taken the change, with anything
+                   waiting saved first (§138), makes every one of them true
+                   at once. The console has no SYNC and no such stamps, and
+                   repaints its rows as before. */
+                if (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive() && SYNC.saveNow) {
+                  say("Done — reloading so the page shows it…");
+                  /* A save refused or failed keeps the page, or the reload
+                     would throw away the work §184's banner offers back. */
+                  SYNC.saveNow(function (how) {
+                    if (how === "saved" || how === "clean") { location.reload(); return; }
+                    paintRows();
+                    say("Turned " + (on ? "off" : "on") + ". Refresh the page once your other change is saved to see it.", true);
+                  });
+                  return;
+                }
                 paintRows();
               });
             });

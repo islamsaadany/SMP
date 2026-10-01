@@ -126,7 +126,8 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat });
+    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat,
+    consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } });
 }
 
 /* A MODULE MAY BE WRITTEN TO (spec 054): the Internal Tracker's rows are

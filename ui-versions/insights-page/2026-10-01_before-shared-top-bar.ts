@@ -6,8 +6,8 @@
    (§42, §44). What the absence of buttons buys is that nobody is offered
    something they would be refused (§61).
 
-   NO SCRIPT OF ITS OWN, and it is not a limitation — it is what the shape
-   already wanted (the shared top bar's `/topbar.js` is the bar's, §444). The categories are the module's navigation (spec 046 §4.6) and the
+   NO SCRIPT AT ALL, and it is not a limitation — it is what the shape already
+   wanted. The categories are the module's navigation (spec 046 §4.6) and the
    search is a GET form, so the address carries the filter: a filtered library
    is a link somebody can send, Back works, and the shell's `script-src 'self'`
    policy has nothing to admit (the trial module made the same call for the
@@ -22,8 +22,7 @@ import { createRequire } from "node:module";
 import { withTenant } from "../../lib/tenant.ts";
 import { listItems, shape, normalizeCategories, oneLine, type Item, type Viewer } from "../../lib/library.ts";
 import { categoriesFor } from "../../lib/library-viewer.ts";
-import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
-import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopViewer } from "../../lib/topbar.ts";
+import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 
 /* THE MONTH IS THE PRODUCT'S OWN WORD, not the browser's (§53.5). The first
@@ -72,12 +71,41 @@ export function factLine(it: Item): string {
   return bits.join(" &middot; ");
 }
 
+/* THE SWITCHER IS the trial module's, carried here when that module went
+   (§363), and the module menu behind it is
+   lib/modules.ts's — a module that drew its own would be the second place a
+   module's name is spelt (§53.5). It is also this page's way back. */
+function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
+  const items = moduleMenu(have).map((m) =>
+    m.key === here
+      ? '<span class="mi on" aria-current="true">' + esc(m.label) + "<i>" + esc(m.note) + "</i></span>"
+      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) +
+        "<i>" + esc(m.note) + "</i></a>").join("");
+  return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
+    '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
+    '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
+    "</g></svg></summary><div class=\"mmenu\">" + items + "</div></details>";
+}
 
 const CSS = `
 *{box-sizing:border-box}
 :root{--bar:%BAR%;--ink:#141C2B;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--gold:#9C5D08}
 @media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--gold:#F5A623}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
+.bar h1{margin:0;font-size:14.5px;font-weight:600}
+.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
+.msw{position:relative;flex:none}
+.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
+.msw>summary::-webkit-details-marker{display:none}
+.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
+.msw svg{width:17px;height:17px;display:block}
+.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
+.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
+.mi.on{background:var(--ground);cursor:default}
+.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
 h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 .cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px}
@@ -200,9 +228,6 @@ export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
   slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask, viewer: Viewer,
-  /* §444: whose bar this is — a consultant gets the trail, and the office
-     may pick whose eyes the page is drawn through */
-  top: { consultant?: boolean; viewer?: TopViewer | null } = {},
 ): Promise<string> {
   const q = oneLine(ask.q).slice(0, 120);
   const category = normalizeCategories(ask.category)[0] || "";
@@ -278,8 +303,10 @@ export async function insightsDocument(
     "<title>" + esc(named) + " &mdash; Insights</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + "</style>\n</head>\n<body>\n" +
-    topBarHtml({ slug, tenantName: named, module: "insights", have, consultant: !!top.consultant, viewer: top.viewer }) + "\n" +
+    "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n<body>\n" +
+    '<header class="bar">' + switcher(slug, have, "insights") +
+    "<h1>Strategy Management Platform</h1>" +
+    '<span class="org">&middot; ' + esc(named) + " <b>&rsaquo; " + esc(MODULE_DEF.insights.label) + "</b></span></header>\n" +
     '<main class="pg">\n<h2 class="pt">' + esc(MODULE_DEF.insights.label) + "</h2>\n" +
     cats + tools + list +
     "\n</main>\n</body>\n</html>\n";

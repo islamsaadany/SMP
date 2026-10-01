@@ -46,9 +46,10 @@ import { offerable } from "../lib/modules.ts";
 import {
   rollUp, overall, behind, howFar, commitments, msState, hitOnTime,
   waitingSignOff, overdue, nobodyOn, signedOff, nextCheckpoint,
+  progressFromSubs,
 } from "../lib/portfolio.ts";
 import { planRows, oneActivity } from "../lib/portfolio-io.ts";
-import { todayIn, readableDay } from "../lib/day.ts";
+import { todayIn, readableDay, shortDay } from "../lib/day.ts";
 
 let ok = 0;
 const bad = [];
@@ -103,6 +104,16 @@ let A_ = null, B_ = null;
 try {
   await owner("SET search_path TO " + SCHEMA);
   const TODAY = todayIn();
+  /* AND A RUN THAT NEVER REACHED ITS `finally` LEFT ITS WORLD BEHIND
+     (§379.15, by a third road): the drops are in the `finally` and a run
+     killed before the `try` — a syntax error while this file is being
+     written — never runs them, so today's crashing runs left sixteen pairs
+     and `checks/memory-page.mjs` went 2 red naming a client it never made,
+     because the console's Memory page opens on the FIRST client BY NAME and
+     `RHI` sorts before `Raya Trade`. Anything of this file's own older than
+     an hour goes before we start; a concurrent run is untouched. */
+  await owner("DELETE FROM tenants WHERE key LIKE 'pf%' AND created_at < now() - interval '1 hour'")
+    .catch(() => {});
   const stamp = "pf" + Date.now().toString(36);
   const [{ id: A }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-a", "Raya Trade"]);
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-b", "RHI"]);
@@ -346,8 +357,17 @@ try {
   check("the status column says what the status MEANS, not only what it is called — *Done* beside *Completed* asks the reader to have been told the difference (§6.2, §87)",
     /Waiting to sign off/i.test(marks) && !/>DONE</.test(marks),
     (marks.match(/class="st [a-z]*">[^<]*/g) || []).join(" | "));
+  /* THE DATE IS DERIVED FROM `TODAY`, never typed (\u00a7379.11, \u00a7377):
+     written as `27 Feb 2027` this read a day that was 150 ahead when it was
+     written and is 149 ahead now, so the file went red on a correct build the
+     day the clock passed it \u2014 the same fault `checks/tracker.mjs` carried
+     for ten days, in a second file. What is asserted is the AGREEMENT with
+     `shortDay`, which is the function the page itself draws through
+     (\u00a794.8). */
+  const oneDay = shortDay(D(150), TODAY);
   check("a one-day commitment reads as one date, never '27 \u2013 27 Feb'",
-    /class="win">27 Feb 2027</.test(marks), (marks.match(/class="win">[^<]*/g) || []).join(" | "));
+    marks.includes('class="win">' + oneDay + "<") && !marks.includes(oneDay + " \u2013 " + oneDay),
+    oneDay + " \u2014 " + (marks.match(/class="win">[^<]*/g) || []).join(" | "));
   check("a span that crosses a year says BOTH years, or 'Sep \u2013 Feb 27' reads as though September were 2027 too",
     /Sep 26 \u2013 Feb 27/.test(marks), (marks.match(/class="win">[^<]*/g) || []).join(" | "));
   check("the two counts at the top are the rules' own", /waiting for sign-off/.test(marks) && /past their date|past its date/.test(marks));
@@ -407,10 +427,16 @@ try {
   const panelHtml = await opened.text();
   check("an activity opens a panel rather than a page (§4)", /class="act"/.test(panelHtml) && /Behavioural blueprint/.test(panelHtml));
   check("...carrying what it produces and what it is about", /documented set of behavioural pillars/.test(panelHtml));
+  /* REWRITTEN AT §380, NEVER LOOSENED (§214.3, §218): this held the read
+     panel's own wording and its `.w` cell, and the writing half draws the same
+     three facts in a cell a Lead can type into — so what is asserted is the
+     three STEPS, their weights, and that the figure is said to come from them,
+     in whatever shape the panel draws them for whoever is looking. */
   check("...its breakdown WITH the weights, beside the figure they add up to (§3 №2, §9.8)",
-    /Draft the pillars/.test(panelHtml) && /40%/.test(panelHtml) && /20%/.test(panelHtml) &&
-    /100% is these 3 by their weights/.test(panelHtml),
-    (panelHtml.match(/class="w">[^<]*/g) || []).join(" | "));
+    /Draft the pillars/.test(panelHtml) && /40/.test(panelHtml) && /20/.test(panelHtml) &&
+    /100%/.test(panelHtml) && /by their weights/.test(panelHtml) &&
+    /Nobody types it/.test(panelHtml),
+    (panelHtml.match(/class="(w|wt)">[^<]*/g) || []).join(" | "));
   check("...what it depends on and what it blocks, by number and name",
     /Depends on/.test(panelHtml) && /2\.1 Executive alignment workshop/.test(panelHtml) &&
     /Blocks/.test(panelHtml) && /2\.3 Blueprint review/.test(panelHtml));
@@ -427,8 +453,14 @@ try {
      "rate" — which the module switcher's own *Strategy* contains, so the
      first version of this reported a correct build broken (§100.3). */
   const labels = (panelHtml.match(/<em>([^<]*)<\/em>/g) || []).map((m) => m.slice(4, -5));
+  /* REWRITTEN AT §380, NEVER LOOSENED (§214.3, §218): the signed-off
+     writing drawing puts *A milestone* and *Billable* together under ONE label,
+     *Marks*, where the read panel had a `Billable` row of its own answering
+     *Yes* — so the word that carried the claim moved. THE CLAIM HAS NOT: it
+     is a flag, and no field on this panel asks for a rate, hours, an amount or
+     an invoice, which is what decision 2 actually settled. */
   check("...that it is billable, which is a flag and nothing else (§9.9 decision 2)",
-    /Billable/.test(panelHtml) && /class="mk">Yes</.test(panelHtml) &&
+    /class="mk">Billable</.test(panelHtml) &&
     !labels.some((l) => /rate|hours|amount|invoice|cost/i.test(l)), labels.join(" | "));
   check("...and that files are NOT built, said rather than drawn as an empty row (§9.4, §54.5)",
     /Files/.test(panelHtml) && /Not built yet/.test(panelHtml));
@@ -693,6 +725,350 @@ try {
     unread.status === 200 && /could not be read/.test(unread.html) && !/No projects yet/.test(unread.html));
   check("...and its counts read a dash rather than a nought",
     /class="v">\u2014</.test(unread.html), (unread.html.match(/class="v">[^<]*/g) || []).join(" | "));
+
+  /* ══ §11 · WRITING THE PLAN (§15, §380) ════════════════════════════ */
+  /* A PROJECT OF ITS OWN, so nothing here moves what §8–§10 measured
+     (§94.2) — and three audiences on it, because §15.7 is about which half
+     of one panel each of them sees and a file with only a Lead on it proves
+     the easy half (§113.8). */
+  section("§11 · writing the plan (§15)");
+  await person(A, "nadia", "Nadia Fouad", "none", 3);
+  const WP = await post(A, SEAT, { act: "start", name: "Operating model" });
+  const wproj = WP.json.id;
+  const mem = async (key, role) => owner(
+    "INSERT INTO portfolio_members (tenant_id, project_id, person_key, role) VALUES ($1,$2,$3,$4)",
+    [A, wproj, key, role]);
+  await mem("omar", "lead");
+  await mem("hend", "contributor");
+  await mem("nadia", "viewer");
+  const LEAD = OMAR, CONTRIB = HEND, VIEWER = { personKey: "nadia", seat: "none" };
+  /* THE QUERY GOES ON THE URL AND NEVER INTO A PATH SEGMENT: `rest` is what
+     the route matched, so `"plan?edit=1"` is a word this module does not draw
+     and comes back 302 to the landing (§96 from the harness's side -- the
+     redirect is the module behaving correctly, and every markup assertion
+     under it would have been measuring an empty body). */
+  const planOf = async (who, q) => {
+    const r = await serve({ ...args(A, [wproj, "plan"], who),
+      req: new Request("https://smp.example/raya-trade/portfolio/" + wproj + "/plan" + (q || "")) });
+    return { status: r.status, html: r.status === 200 ? await r.text() : "" };
+  };
+  const rowsOf = () => owner(
+    `SELECT 'phase' k, id, name, pos, NULL::uuid parent FROM portfolio_phases WHERE tenant_id=$1 AND project_id=$2
+     UNION ALL SELECT 'package', wp.id, wp.name, wp.pos, wp.phase_id FROM portfolio_work_packages wp
+       JOIN portfolio_phases ph ON ph.id=wp.phase_id WHERE wp.tenant_id=$1 AND ph.project_id=$2
+     UNION ALL SELECT 'activity', a.id, a.name, a.pos, COALESCE(a.work_package_id, a.phase_id) FROM portfolio_activities a
+       LEFT JOIN portfolio_work_packages w2 ON w2.id=a.work_package_id
+       LEFT JOIN portfolio_phases p1 ON p1.id=w2.phase_id
+       LEFT JOIN portfolio_phases p2 ON p2.id=a.phase_id
+      WHERE a.tenant_id=$1 AND COALESCE(p1.project_id,p2.project_id)=$2
+     ORDER BY 1, 4`, [A, wproj]);
+
+  /* ── the pen is the address, and the gate is on the RENDER ─────────── */
+  const readPage = await planOf(SEAT);
+  check("with the pen shut nothing on the plan is a box — a reader's page carries no writing code at all",
+    !/class="addr"/.test(readPage.html) && !/class="rowbu"/.test(readPage.html) &&
+    !/write\.js/.test(readPage.html), (readPage.html.match(/class="(addr|rowbu)"/g) || []).join(" | "));
+  const penPage = await planOf(SEAT, "?edit=1");
+  /* THE EMPTY PLAN'S PEN PAGE CARRIES THE ADD ROW AND NOT A ROW STRIP, which
+     is the product being right: there is nothing yet to move or remove. The
+     strip is asserted where rows exist, by the arrows below (§94.5). */
+  check("...and the pen opens it for a seat: the strip, the add row and the script",
+    /id="pen"/.test(penPage.html) && /class="addr/.test(penPage.html) &&
+    /write\.js/.test(penPage.html), String(penPage.status));
+  const leadPen = await planOf(LEAD, "?edit=1");
+  check("...and for the project's Lead — both ends (§6.2)",
+    /class="addr/.test(leadPen.html) && /id="pen"/.test(leadPen.html));
+  const conPen = await planOf(CONTRIB, "?edit=1");
+  check("A CONTRIBUTOR ASKING FOR `?edit=1` GETS THE READ PAGE: the mode cannot be reached by typing it (§61)",
+    conPen.status === 200 && !/class="addr/.test(conPen.html) && !/class="rowbu"/.test(conPen.html) &&
+    !/id="pen"/.test(conPen.html), (conPen.html.match(/class="(addr|rowbu)"|id="pen"/g) || []).join(" | "));
+  const viewPen = await planOf(VIEWER, "?edit=1");
+  check("...and so does a Viewer, who is where everybody lands (§7.4B)",
+    viewPen.status === 200 && !/class="addr/.test(viewPen.html) && !/id="pen"/.test(viewPen.html));
+  /* REWRITTEN BEFORE IT WAS BELIEVED: this had asked the PEN page for *press
+     Edit and name its first phase*, which is the sentence for somebody who may
+     build and has the pen SHUT — with it open the add row is drawn instead, so
+     the assertion was asking a correct build for a sentence it is right not to
+     say (§100.3). Three audiences, three answers, which is what can fail. */
+  check("AN EMPTY PLAN TELLS WHOEVER MAY WRITE ONE WHERE TO START, a reader nothing of the sort, and with the pen open it draws the add row instead of either (§45.2, §94.2)",
+    /name its first phase/i.test(readPage.html) &&
+    /Nothing has been broken down/.test(viewPen.html) && !/name its first phase/i.test(viewPen.html) &&
+    !/No plan yet/.test(penPage.html) && new RegExp('data-add="' + wproj + '"').test(penPage.html),
+    (readPage.html.match(/No plan yet[^<]*|Press Edit[^<]*/g) || []).join(" | ") + "  //  " +
+    (viewPen.html.match(/Nothing has been broken down[^<]*/) || [""])[0]);
+
+  /* ── adding: the kind is decided by WHERE (§15.3) ──────────────────── */
+  /* EVERY ROW THE FIXTURE READS BACK DEGRADES (§215): a break that refuses an
+     add, or renames a row, leaves one of these empty — and a throw here takes
+     every assertion after it with it, which is a run that DIED rather than
+     one that reported. The stand-in is a uuid nothing holds, so whatever asked
+     for it fails on its own line. */
+  const NONE = { id: "00000000-0000-4000-8000-000000000000", k: "", name: "", pos: -99, parent: null };
+  /* ...AND SO DOES EVERY SINGLE-ROW READ: a break that deletes a row the
+     fixture then asks about hands back no rows, and `rows[0].x` throws where
+     an empty object FAILS on its own line and lets the rest report. */
+  const one = async (sql, args) => (await owner(sql, args))[0] || {};
+  const row = (R, name) => R.find((x) => x.name === name) || NONE;
+  const add = (who, kind, parent, name) => post(A, who, { act: "add", id: wproj, kind, parent, name });
+  const a1 = await add(SEAT, "phase", wproj, "Design");
+  check("a phase is added by naming it, and the api answers with the plan DRAWN AGAIN (§356.12)",
+    a1.status === 200 && typeof a1.json?.body === "string" && /Design/.test(a1.json.body), JSON.stringify(a1.json).slice(0, 120));
+  let R = await rowsOf();
+  const phDesign = row(R, "Design");
+  check("...and it is in the DATABASE — a pen wired to nothing renders perfectly (§96)",
+    !!phDesign && phDesign.k === "phase", JSON.stringify(R));
+  await add(SEAT, "phase", wproj, "Build");
+  await add(SEAT, "package", phDesign.id, "Discovery");
+  R = await rowsOf();
+  const pkg = row(R, "Discovery");
+  check("a work package hangs off the phase it was typed under, never off the project",
+    !!pkg && pkg.k === "package" && pkg.parent === phDesign.id, JSON.stringify(pkg));
+  const phBuild = row(R, "Build");
+  check("...and APPENDED, which is §15.3's stated cost — no inserting in the middle",
+    phDesign.pos === 0 && phBuild.pos === 1, phDesign.pos + " / " + phBuild.pos);
+  await add(SEAT, "activity", pkg.id, "Interviews");
+  await add(SEAT, "activity", phBuild.id, "Pilot");
+  R = await rowsOf();
+  const actIn = row(R, "Interviews"), actOff = row(R, "Pilot");
+  check("AN ACTIVITY HANGS OFF EXACTLY ONE OF TWO PARENTS and which column is written is decided by what the parent IS (§7.6)",
+    actIn.parent === pkg.id && actOff.parent === phBuild.id, JSON.stringify([actIn, actOff]));
+  const nameless = await add(SEAT, "phase", wproj, "   ");
+  check("a row with no name is refused by a sentence, never by a constraint's name (§316.2)",
+    nameless.status === 400 && /needs a name/i.test(nameless.json?.why || ""), JSON.stringify(nameless.json));
+  const strayPhase = await add(SEAT, "package", proj.id, "Not its phase");
+  check("...and a parent on another project is refused as not on this one (§6)",
+    strayPhase.status === 400 && /not on this project/i.test(strayPhase.json?.why || ""), JSON.stringify(strayPhase.json));
+  const conAdd = await add(CONTRIB, "phase", wproj, "A contributor's phase");
+  check("building the plan is refused to a Contributor, in words — and the api is reached without the page (§42)",
+    conAdd.status === 403 && /Lead/.test(conAdd.json?.why || ""), JSON.stringify(conAdd.json));
+  check("...and nothing was written: a refusal that wrote a row is not a refusal",
+    !(await rowsOf()).some((x) => x.name === "A contributor's phase"));
+
+  /* ── the add rows say which kinds, where ──────────────────────────── */
+  const pen2 = await planOf(SEAT, "?edit=1");
+  const addrs = (pen2.html.match(/<div class="addr l\d" data-add="[^"]*" data-kind="[^"]*"/g) || [])
+    .map((m) => m.replace(/.*l(\d)" data-add="([^"]*)" data-kind="([^"]*)".*/, "$1:$2:$3"));
+  check("ONE ADD ROW AT THE FOOT OF EVERY CONTAINER, and one for the tree itself",
+    addrs.some((x) => x.startsWith("0:" + wproj + ":phase")) &&
+    addrs.some((x) => x === "2:" + pkg.id + ":activity") &&
+    addrs.some((x) => x.startsWith("1:" + phDesign.id + ":")), addrs.join(" | "));
+  check("A PHASE ALREADY HOLDING A WORK PACKAGE IS OFFERED ONLY ANOTHER ONE, or an activity beside it would number 1.1 twice (§3 №5)",
+    addrs.includes("1:" + phDesign.id + ":package") &&
+    !/data-add="" + phDesign.id + "" data-kind="activity"/.test(pen2.html) &&
+    addrs.includes("1:" + phBuild.id + ":activity"), addrs.join(" | "));
+
+  /* ── moving: the arrows and `mayMove` are ONE answer (§61) ─────────── */
+  const rowStrip = (html, id) => {
+    const m = html.match(new RegExp('data-row="' + id + '"[^>]*>(?:(?!class="r )[\\s\\S])*?</div>'));
+    return m ? m[0] : "";
+  };
+  const designStrip = rowStrip(pen2.html, phDesign.id), buildStrip = rowStrip(pen2.html, phBuild.id);
+  check("AN ARROW THAT CAN DO NOTHING IS NOT DRAWN — no move-up on the first row of its container, no move-down on the last (§94.15)",
+    !/data-mv="up"/.test(designStrip) && /data-mv="down"/.test(designStrip) &&
+    /data-mv="up"/.test(buildStrip) && !/data-mv="down"/.test(buildStrip),
+    (designStrip.match(/data-mv="\w+"/g) || []).join(",") + "  //  " + (buildStrip.match(/data-mv="\w+"/g) || []).join(","));
+  /* AND THE CONTAINER IS WHAT BOUNDS IT: `Pilot` is the only activity under
+     `Build`, so it has NEITHER arrow — a walk that stepped past the phase
+     above it would find `Workshops`' level and offer an up (§15.2: moving
+     across a container is re-parenting, which nothing here offers). */
+  const loneStrip = rowStrip(pen2.html, actOff.id);
+  check("A ROW ALONE IN ITS CONTAINER HAS NEITHER ARROW, however many rows at its level the plan holds elsewhere",
+    !/data-mv="up"/.test(loneStrip) && !/data-mv="down"/.test(loneStrip),
+    (loneStrip.match(/data-mv="\w+"/g) || []).join(","));
+  check("...and its space is kept, so the × does not move between rows (§302's family)",
+    (designStrip.match(/width:22px/g) || []).length === 1 && /class="rm"/.test(designStrip),
+    designStrip.slice(-200));
+  const up = await post(A, SEAT, { act: "move", id: wproj, kind: "phase", row: phBuild.id, dir: "up" });
+  check("a move reaches the DATABASE and the container is RENUMBERED, never nudged",
+    up.status === 200 && (await rowsOf()).find((x) => x.name === "Build")?.pos === 0 &&
+    (await rowsOf()).find((x) => x.name === "Design")?.pos === 1, JSON.stringify(await rowsOf()));
+  const nowhere = await post(A, SEAT, { act: "move", id: wproj, kind: "phase", row: phBuild.id, dir: "up" });
+  check("...and a move with nowhere to go is REFUSED, which is the same answer the page drew the arrow from (§53.5)",
+    nowhere.status === 400 && /nowhere/i.test(nowhere.json?.why || ""), JSON.stringify(nowhere.json));
+  await post(A, SEAT, { act: "move", id: wproj, kind: "phase", row: phBuild.id, dir: "down" });
+
+  /* ── removing is refused where it holds work (§15.6) ───────────────── */
+  const canRm = await post(A, SEAT, { act: "canremove", id: wproj, kind: "phase", row: phDesign.id });
+  check("A PHASE THAT HOLDS WORK IS REFUSED AND THE REFUSAL NAMES WHAT IS IN THE WAY (§62, §123)",
+    canRm.status === 200 && /cannot be removed while it holds work/.test(canRm.json?.why || "") &&
+    /Discovery/.test(canRm.json.why), JSON.stringify(canRm.json));
+  const rmFull = await post(A, SEAT, { act: "remove", id: wproj, kind: "phase", row: phDesign.id });
+  check("...refused at the press too, in the SAME words — the page's sentence and the api's are one sentence (§53.5)",
+    rmFull.status === 400 && /cannot be removed while it holds work/.test(rmFull.json?.why || ""), JSON.stringify(rmFull.json));
+  check("...and it is still there", (await rowsOf()).some((x) => x.id === phDesign.id));
+  await add(SEAT, "phase", wproj, "Sustain");
+  const phSustain = (await rowsOf()).find((x) => x.name === "Sustain") || { id: "00000000-0000-4000-8000-000000000000" };
+  const canRm2 = await post(A, SEAT, { act: "canremove", id: wproj, kind: "phase", row: phSustain.id });
+  check("A PHASE HOLDING NOTHING IS NOT REFUSED — both ends, or a build that refused every removal passes half (§94.2)",
+    canRm2.status === 200 && !canRm2.json.why && /no archive and no undo/.test(canRm2.json.after || ""),
+    JSON.stringify(canRm2.json));
+  const rmOk = await post(A, SEAT, { act: "remove", id: wproj, kind: "phase", row: phSustain.id });
+  check("...and the removal reaches the database",
+    rmOk.status === 200 && !(await rowsOf()).some((x) => x.id === phSustain.id), String(rmOk.status));
+  const conRm = await post(A, CONTRIB, { act: "remove", id: wproj, kind: "activity", row: actOff.id });
+  check("removing a row is refused to a Contributor, and the row stands",
+    conRm.status === 403 && (await rowsOf()).some((x) => x.id === actOff.id), JSON.stringify(conRm.json));
+
+  /* ── a row's own facts ───────────────────────────────────────────── */
+  const field = (who, kind, row, f, value) => post(A, who, { act: "field", id: wproj, kind, row, field: f, value });
+  await field(SEAT, "phase", phDesign.id, "name", "Design  and\n  discovery");
+  check("A NAME IS ONE LINE, closed up rather than stored with its breaks (§260)",
+    (await rowsOf()).find((x) => x.id === phDesign.id)?.name === "Design and discovery",
+    String((await rowsOf()).find((x) => x.id === phDesign.id)?.name));
+  await field(SEAT, "activity", actIn.id, "deliverables", "A findings pack.");
+  await field(SEAT, "activity", actIn.id, "assignee", "hend");
+  const back1 = await one(
+    "SELECT name, deliverables, assignee_key, assignee_name FROM portfolio_activities WHERE tenant_id=$1 AND id=$2",
+    [A, actIn.id]);
+  check("a field typed on the panel reaches the ROW, and the owner is stored as a KEY (§48, §130.9)",
+    back1.deliverables === "A findings pack." && back1.assignee_key === "hend", JSON.stringify(back1));
+  check("...with the stored NAME cleared beside it, or a row would draw the old person's name as its fallback (§288.1)",
+    back1.assignee_name === "", JSON.stringify(back1.assignee_name));
+  await field(SEAT, "activity", actIn.id, "weight", "40");
+  await field(SEAT, "activity", actIn.id, "weight", "");
+  check("AN EMPTIED WEIGHT IS AN ABSENCE AND NOT A NOUGHT (§50.6, §243): storing 0 would quietly re-weight every sibling",
+    (await one("SELECT weight FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id])).weight === null,
+    String((await one("SELECT weight FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id])).weight));
+  const badWeight = await field(SEAT, "activity", actIn.id, "weight", "140");
+  check("...and a share over 100 is refused in words", badWeight.status === 400 && /share/.test(badWeight.json?.why || ""), JSON.stringify(badWeight.json));
+  const noField = await field(SEAT, "activity", actIn.id, "status", "completed");
+  check("STATUS IS NOT A FIELD and the api says so: it is worked out, never picked from a list (§15.4)",
+    noField.status === 400 && /No such field/i.test(noField.json?.why || ""), JSON.stringify(noField.json));
+  await field(SEAT, "activity", actOff.id, "dependsOn", actIn.id);
+  const loop = await field(SEAT, "activity", actIn.id, "dependsOn", actOff.id);
+  check("A CHAIN THAT LOOPS IS REFUSED BEFORE IT IS STORED, rather than left for `cascade` to stop walking (§9.5)",
+    loop.status === 400 && /circle/i.test(loop.json?.why || ""), JSON.stringify(loop.json));
+  const self = await field(SEAT, "activity", actIn.id, "dependsOn", actIn.id);
+  check("...and an activity cannot wait for itself", self.status === 400, JSON.stringify(self.json));
+  await field(SEAT, "activity", actIn.id, "start", "2027-03-01");
+  await field(SEAT, "activity", actIn.id, "end", "2027-03-10");
+  const backWin = () => one(
+    "SELECT planned_start::text s, planned_end::text e FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id]);
+  check("the planned window reaches the row", (await backWin()).s === "2027-03-01" && (await backWin()).e === "2027-03-10", JSON.stringify(await backWin()));
+  const backwards = await field(SEAT, "activity", actIn.id, "end", "2027-02-01");
+  check("...and an end before its start is refused by a SENTENCE rather than by a constraint's name (§316.2)",
+    backwards.status === 400 && /cannot fall before/.test(backwards.json?.why || ""), JSON.stringify(backwards.json));
+  check("...and the stored window did not move", (await backWin()).e === "2027-03-10", JSON.stringify(await backWin()));
+  const conField = await field(CONTRIB, "activity", actIn.id, "name", "A contributor renamed it");
+  check("A CONTRIBUTOR WRITES NO FACT ON THE ROW (§15.7: *see the plan, write your own rows*)",
+    conField.status === 403 &&
+    (await one("SELECT name FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id])).name === "Interviews",
+    JSON.stringify(conField.json));
+
+  /* ── moving a date shows you first (§3 №4, §15.5) ──────────────────── */
+  await field(SEAT, "activity", actOff.id, "start", "2027-03-15");
+  await field(SEAT, "activity", actOff.id, "end", "2027-03-25");
+  const prev = await post(A, SEAT, { act: "preview", id: wproj, activity: actIn.id, end: "2027-03-17" });
+  check("MOVING AN END DATE PREVIEWS WHAT IT DRAGS, and the preview is the SERVER's because `cascade` is a rule (§53.5)",
+    prev.status === 200 && (prev.json?.shifts || []).length === 1 &&
+    prev.json.shifts[0].id === actOff.id && /depend/.test(prev.json.lede || ""), JSON.stringify(prev.json));
+  const strayShift = await post(A, SEAT,
+    { act: "movedate", id: wproj, activity: actIn.id, end: "2027-03-17", take: [actIn.id] });
+  check("...and a row NOBODY WAS SHOWN cannot ride in on the write (§42, the screen's promise is what must be kept)",
+    strayShift.status === 400 && /not on the list/i.test(strayShift.json?.why || ""), JSON.stringify(strayShift.json));
+  const moved = await post(A, SEAT,
+    { act: "movedate", id: wproj, activity: actIn.id, end: "2027-03-17", take: [actOff.id] });
+  const shifted = await one(
+    "SELECT planned_start::text s, planned_end::text e FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actOff.id]);
+  check("A SHIFTED ROW MOVES BOTH ITS DATES BY THE SAME DAYS, or moving only the start would COMPRESS the work",
+    moved.status === 200 && shifted.s === "2027-03-22" && shifted.e === "2027-04-01", JSON.stringify(shifted));
+  await field(SEAT, "activity", actOff.id, "start", "2027-03-15");
+  await field(SEAT, "activity", actOff.id, "end", "2027-03-25");
+  const left = await post(A, SEAT,
+    { act: "movedate", id: wproj, activity: actIn.id, end: "2027-03-20", take: [] });
+  check("...and UNTICKING LEAVES IT WHERE IT IS — both answers are real, which is why it is a ticking list (§15.5)",
+    left.status === 200 &&
+    (await one("SELECT planned_start::text s FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actOff.id])).s === "2027-03-15",
+    JSON.stringify(await backWin()));
+
+  /* ── the breakdown: the plan's steps, the report's statuses ───────── */
+  const sub = (who, body) => post(A, who, { id: wproj, activity: actIn.id, ...body });
+  const s1 = await sub(SEAT, { act: "subadd", name: "Book the interviews" });
+  const s2 = await sub(SEAT, { act: "subadd", name: "Run them" });
+  const subs = async () => owner(
+    "SELECT id, name, status, weight FROM portfolio_sub_activities WHERE tenant_id=$1 AND activity_id=$2 ORDER BY pos", [A, actIn.id]);
+  check("a step is added by naming it", s1.status === 200 && s2.status === 200 && (await subs()).length === 2, JSON.stringify(await subs()));
+  /* AND THE STEPS DEGRADE TOO (§215): with a break that stops a step being
+     added, `S[0].id` throws and takes the whole breakdown section with it. */
+  const S0 = await subs();
+  const S = [S0[0] || NONE, S0[1] || NONE];
+  const rep = await sub(CONTRIB, { act: "subfield", sub: S[0].id, field: "status", value: "done" });
+  check("THE PERSON THE ROW IS ASSIGNED TO REPORTS A STEP — which is read off the ROW, never off the membership (§6.2)",
+    rep.status === 200 && (await subs())[0]?.status === "done", JSON.stringify(rep.json));
+  const figure = async () => Number((await one(
+    "SELECT progress FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id])).progress);
+  check("...and the FIGURE is re-derived by `progressFromSubs` and by nothing else (§3 №3, §53.5's chokepoint)",
+    await figure() === progressFromSubs((await subs()).map((x) => ({ status: x.status, weight: x.weight }))),
+    String(await figure()));
+  const stamped = await one(
+    "SELECT actual_start::text s FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actIn.id]);
+  check("...and the REAL START is stamped the first time the figure leaves nought (§3 №2)", stamped.s === TODAY, JSON.stringify(stamped));
+  const conName = await sub(CONTRIB, { act: "subfield", sub: S[0].id, field: "weight", value: "70" });
+  check("A STEP'S NAME AND ITS WEIGHT ARE THE PLAN'S, NOT THE REPORT'S (§15.7) — the drawing's first draft let somebody re-weight their own work",
+    conName.status === 403 && (await subs())[0]?.weight === null, JSON.stringify(conName.json));
+  const leadWt = await sub(SEAT, { act: "subfield", sub: S[0].id, field: "weight", value: "70" });
+  check("...and a Lead writes it — both ends (§94.2)",
+    leadWt.status === 200 && Number((await subs())[0]?.weight) === 70, JSON.stringify(await subs()));
+  const strangerRep = await sub(VIEWER, { act: "subfield", sub: S[0].id, field: "status", value: "todo" });
+  check("a Viewer reports nothing at all, and the step stands",
+    strangerRep.status === 403 && (await subs())[0]?.status === "done", JSON.stringify(strangerRep.json));
+  const typed = await sub(CONTRIB, { act: "progress", value: "90" });
+  check("`manualProgressRefused` IS REACHABLE FROM THE API AND FROM NO CONTROL ON THE SCREEN, which is §15.4's own point",
+    typed.status === 400 && /comes from its breakdown/.test(typed.json?.why || ""), JSON.stringify(typed.json));
+  const openAct = await planOf(SEAT, "?edit=1&act=" + actIn.id);
+  check("...and the panel draws no box for it, rather than one the server refuses (§61)",
+    !/id="pct"/.test(openAct.html) && /by their weights/.test(openAct.html),
+    (openAct.html.match(/id="pct"/g) || []).join(","));
+  const freeAct = await planOf(SEAT, "?edit=1&act=" + actOff.id);
+  check("...where a row has NO breakdown the box IS drawn, because §3 №3's words are *refused when it would lie* — both ends",
+    /id="pct"/.test(freeAct.html), "");
+  const typedOk = await post(A, SEAT, { act: "progress", id: wproj, activity: actOff.id, value: "35" });
+  check("...and that figure reaches the row",
+    typedOk.status === 200 &&
+    Number((await one("SELECT progress FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, actOff.id])).progress) === 35,
+    JSON.stringify(typedOk.json));
+  const rmSub = await sub(SEAT, { act: "subremove", sub: S[1].id });
+  check("a step is removed and the figure follows it",
+    rmSub.status === 200 && (await subs()).length === 1 &&
+    await figure() === progressFromSubs((await subs()).map((x) => ({ status: x.status, weight: x.weight }))),
+    String(await figure()));
+
+  /* ── marking it done — the FIRST of the two steps (§3 №1, §6.5) ───── */
+  const doneBu = await planOf(CONTRIB, "?act=" + actIn.id);
+  check("THE PERSON DOING THE WORK GETS THE BREAKDOWN AND *MARK IT DONE* AND NOTHING ELSE (§7.4A)",
+    /id="mark"/.test(doneBu.html) && /data-sub=/.test(doneBu.html) &&
+    !/data-field="name"/.test(doneBu.html) && !/data-field="assignee"/.test(doneBu.html),
+    (doneBu.html.match(/data-field="[^"]*"/g) || []).join(" | "));
+  const viewPanel = await planOf(VIEWER, "?act=" + actIn.id);
+  check("...and a Viewer's panel carries no control at all — everybody lands at Viewer, which is the only default that fails closed (§7.4B)",
+    !/id="mark"/.test(viewPanel.html) && !/data-sub=/.test(viewPanel.html) &&
+    !/data-field=/.test(viewPanel.html) && /class="act"/.test(viewPanel.html),
+    (viewPanel.html.match(/data-(sub|field)=|id="mark"/g) || []).join(" | "));
+  const md = await post(A, CONTRIB, { act: "markdone", id: wproj, activity: actIn.id, done: "1" });
+  const stat = (id) => one(
+    "SELECT status, progress, actual_end::text e, signed_off_by b FROM portfolio_activities WHERE tenant_id=$1 AND id=$2", [A, id]);
+  check("whoever is doing the work marks it done", md.status === 200 && (await stat(actIn.id)).status === "done", JSON.stringify(await stat(actIn.id)));
+  check("...AND IT DOES NOT SIGN ITSELF OFF: the real end date is written at the SECOND step and by a Lead (§3 №1, §9.10)",
+    (await stat(actIn.id)).e === null && (await stat(actIn.id)).b === "", JSON.stringify(await stat(actIn.id)));
+  const undo = await post(A, CONTRIB, { act: "markdone", id: wproj, activity: actIn.id, done: "0" });
+  check("AND IT TURNS BOTH WAYS, which the drawing does not show and §61 requires — a one-way door is a trap",
+    undo.status === 200 && (await stat(actIn.id)).status !== "done", JSON.stringify(await stat(actIn.id)));
+  check("...and un-marking leaves the FIGURE where it is: *this is not finished* is not *this work was not done*",
+    (await stat(actIn.id)).progress === (await figure()), String(await figure()));
+  await post(A, CONTRIB, { act: "markdone", id: wproj, activity: actIn.id, done: "1" });
+  const strangerDone = await post(A, VIEWER, { act: "markdone", id: wproj, activity: actOff.id, done: "1" });
+  check("somebody the row does not name marks nothing done",
+    strangerDone.status === 403 && (await stat(actOff.id)).status !== "done", JSON.stringify(strangerDone.json));
+  await post(A, SEAT, { act: "signoff", id: wproj, activity: actIn.id, end: TODAY });
+  const afterOff = await post(A, CONTRIB, { act: "markdone", id: wproj, activity: actIn.id, done: "0" });
+  check("...and once a Lead has ACCEPTED it, un-marking is refused and named: reopening is the Lead's (§6.5)",
+    afterOff.status === 400 && /Lead/.test(afterOff.json?.why || ""), JSON.stringify(afterOff.json));
+
+  /* ── and a phase is renamed where it has no panel (§356.11) ────────── */
+  check("A PHASE AND A WORK PACKAGE CARRY NO PANEL, so the row itself is where its name is corrected — the tracker's own idiom, or a name set once could never be fixed (§61)",
+    new RegExp('data-row="' + phDesign.id + '" data-kind="phase"').test(pen2.html) &&
+    new RegExp('data-row="' + pkg.id + '" data-kind="package"').test(pen2.html),
+    (pen2.html.match(/data-kind="(phase|package)"/g) || []).join(" | "));
 } catch (e) {
   failed = true;
   console.log("\n  FAIL the check threw — " + (e && e.message ? e.message : String(e)));

@@ -215,20 +215,26 @@ function switcher(slug: string, have: ModuleKey[]): string {
    chrome, the switcher and the policy are settled once, and a page adds only
    its own stylesheet (`css`) and its own script (`js`). A second skeleton is
    how two screens of one module come to disagree about their own header. */
-export function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; bar: string; api?: string; css?: string; js?: string; body: string }): string {
+/* `attrs` IS WRITTEN ON `<body>` AND `api` IS NOT THE SAME THING: `api` also
+   serves the charter's own `app.js`, and a page that wants the address of the
+   api WITHOUT that script would otherwise have to take the script too (§53.5
+   from the other side — one argument, two decisions). The plan's writing half
+   uses `attrs`. */
+export function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; bar: string; api?: string; attrs?: string; css?: string; js?: string | string[]; body: string }): string {
   return "<!doctype html>\n<html lang='en' data-module='portfolio'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(a.tenantName) + " &mdash; " + esc(MODULE_DEF.portfolio.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(a.bar) + '">\n' +
     "<style>" + CSS.replace("%BAR%", a.bar) + (a.css || "") + brkCss() + "</style>\n</head>\n" +
-    "<body" + (a.api ? ' data-api="' + esc(a.api) + '"' : "") + ">\n" +
+    "<body" + (a.api ? ' data-api="' + esc(a.api) + '"' : "") + (a.attrs || "") + ">\n" +
     '<header class="bar">' + switcher(a.slug, a.have) +
     "<h1>" + esc(MODULE_DEF.portfolio.label) + "</h1>" +
     '<span class="org">&middot; <b>' + esc(a.tenantName) + "</b></span></header>\n" +
     a.body +
     (a.api ? '<script src="' + esc(clientHref(a.slug, "portfolio", "app.js")) + '"></script>\n' : "") +
-    (a.js ? '<script src="' + esc(a.js) + '"></script>\n' : "") +
+    (a.js ? (Array.isArray(a.js) ? a.js : [a.js])
+      .map((u) => '<script src="' + esc(u) + '"></script>\n').join("") : "") +
     "</body>\n</html>\n";
 }
 
@@ -686,6 +692,134 @@ export const PLAN_CSS = `
            font-size:13px; align-items:center; }
   .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; text-align:right; }
   .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+
+/* ══ WRITING IT (§15) ══════════════════════════════════════════════════ */
+/* CARRIED VERBATIM from the signed-off drawing
+   (design-mockups/portfolio/2026-09-30_plan-writing.html) less its
+   drawing-only blocks. Every token is one CSS above already declares and
+   nothing here re-declares .fld, .dlg, .card, .cbtns, .ghost,
+   .start or .btn — which is the drawing's own best hour (§65.9, §53.5):
+   its first draft declared .dlg for the dialog CARD, and .dlg on this
+   page is the OVERLAY, so the card inherited position:fixed; inset:0 and
+   measured 520x756 at the top-left with its header off screen. */
+
+/* EDIT MODE GIVES THE ROW A SEVENTH COLUMN rather than putting controls
+   INSIDE the prose columns, which is §267 exactly: five of seven holding
+   controls and the name paying for the window. */
+.pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px 92px; }
+.rowbu{ display:flex; gap:2px; justify-self:end; }
+.rowbu button{ width:22px; height:22px; padding:0; line-height:1;
+  background:none; border:1px solid transparent; border-radius:4px;
+  color:var(--ink-3); font-size:12px; }
+.rowbu button:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.rowbu button.rm:hover{ border-color:var(--bad); color:var(--bad-tx); }
+.rowbu svg{ display:block; width:12px; height:12px; margin:0 auto; fill:currentColor; }
+/* AND IT FOLDS UNDER THE NAME ON A NARROW WINDOW — found by RENDERING the
+   drawing rather than by reading it (§311.1): at 700px the seventh column
+   takes the row to 694px in a 662px box, and §158's rule is *fit, never and
+   it scrolls*. The read table already sits at its own edge there, so the
+   strip cannot be afforded a column of its own — §267's fold, one table
+   over. */
+@media (max-width:900px){
+  .pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px; }
+  .pl.ed .r .rowbu{ grid-column:2; justify-self:start; margin-top:4px; }
+  .pl.ed .head .edonly{ display:none!important; }
+}
+
+/* THE ADD ROW · one idiom for all three kinds (the tracker's own, §356). */
+.addr{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:7px 14px; border-top:1px solid var(--line-soft); background:var(--zebra); }
+.addr.l1{ padding-left:30px; } .addr.l2{ padding-left:46px; }
+/* THE KEY SIZES ITSELF — it was a 78px column to line up with #, and
+   *+ work package* broke across two lines in it (§311.1, found by looking).
+   Lining up with a column it does not belong to is not worth a wrapped
+   word. */
+.addr .ak{ font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); white-space:nowrap; flex:none;
+  background:none; border:1px solid transparent; border-radius:4px; padding:3px 7px; }
+.addr button.ak:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.addr button.ak[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold-deep); }
+.addr input{ flex:1 1 220px; min-width:0; font:inherit; font-size:13.5px;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:4px 9px; color:var(--ink); }
+.addr input::placeholder{ color:var(--ink-3); }
+.addr input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+
+/* One quiet line saying the numbers move, said once where it happens (§35). */
+.ednote{ font-size:12.5px; color:var(--ink-2); background:var(--attn-bg);
+  border-top:1px solid var(--line-soft); padding:6px 14px; }
+/* What a refusal says, in the server's own words, where the act was (§32,
+   §171, §190's *the dismiss under the box with the issue*). */
+.said{ font-size:13px; color:var(--bad-tx); background:var(--bad-bg);
+  border-top:1px solid var(--line-soft); padding:7px 14px; }
+.said:empty{ display:none; }
+
+/* A card a shade wider than the page's 440, MEASURED rather than guessed:
+   the shifts list is four columns and reads cramped under 500. */
+.card.wide{ max-width:520px; }
+.card .refuse{ font-size:13.5px; color:var(--bad-tx); background:var(--bad-bg);
+  border-radius:5px; padding:8px 11px; margin:0 0 12px; white-space:normal; }
+.shifts{ display:grid; gap:0; margin:4px 0 12px; }
+.shifts .sh{ display:grid; grid-template-columns:20px 46px minmax(0,1fr) auto;
+  gap:9px; align-items:center; font-size:13px; padding:5px 0;
+  border-top:1px solid var(--line-soft); }
+.shifts .sh .code{ font-size:12px; font-weight:700; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; }
+.shifts .sh .mv{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
+.shifts .sh .mv b{ color:var(--bad-tx); }
+.cbtns.apart{ justify-content:space-between; }
+
+/* A DAY IS SET THE WAY THE OFFICE'S OTHER MODULES SET ONE (§356.14, §357.4):
+   the word is a button and the press opens the browser's own picker, with the
+   native box clipped in place beside it rather than swapped in for the word —
+   so the day never reformats under the hand that pressed it, and a browser
+   that cannot open a picker shows the box instead (§61). */
+.daybu{ font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:3px 9px; color:var(--ink); }
+.daybu:hover{ border-color:var(--gold); }
+.dayw{ position:relative; display:inline-block; }
+.dayw input[type=date]{ position:absolute; left:0; bottom:0; width:1px; height:1px;
+  opacity:0; border:0; padding:0; pointer-events:none; }
+.two{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.two .to{ color:var(--ink-3); font-size:12.5px; }
+.tick{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2); }
+
+/* The breakdown, being written and being reported. AND IT IS wcell, NOT
+   cell — the fifth class the drawing collided with (§65.9): .cell is
+   Analytics' stat card on this same stylesheet, a border and a radius and
+   12px of padding, which drew a box round a value meant to be plain text.
+
+   THE STEP'S NAME AND ITS WEIGHT ARE THE PLAN'S, NOT THE REPORT'S (§15.7),
+   so the person the row is assigned to gets the status picker and reads the
+   other two — the drawing's first draft made all three boxes and quietly let
+   somebody reporting their own work re-weight it. */
+.sub .s.edit{ grid-template-columns:minmax(0,1fr) 128px 56px 22px; gap:8px; }
+.sub .s .fld{ padding:2px 7px; font-size:13px; }
+.sub .s .wcell{ min-width:0; display:block; font-size:13px; color:var(--ink-2); }
+.sub .s .wcell .wt{ font-variant-numeric:tabular-nums; color:var(--ink-3); }
+.sub .s select.fld{ font-size:12px; }
+.subadd{ display:grid; grid-template-columns:minmax(0,1fr) 128px 56px 22px;
+  gap:8px; align-items:center; padding:5px 0 0; }
+.derived{ font-size:12.5px; color:var(--ink-2); }
+.derived b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+/* The panel's own textarea is 64px tall by the page's rule above, which is
+   right for a charter field and two lines too many for a one-line name. */
+.act textarea.fld{ min-height:calc(3em + 14px); }
+
+/* Marking it done — the first of the two steps (§3 №1, §6.5). */
+.donebar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  border-top:1px solid var(--line-soft); margin-top:12px; padding-top:12px; }
+.donebar .why{ font-size:12.5px; color:var(--ink-2); margin:0; max-width:64ch; }
+
+/* HIDDEN ON A BOX WITH ITS OWN display HIDES NOTHING, and the drawing
+   walked into it for the third time in this repository (§298.2, §356.8):
+   .two, .tick and .dayw carry a display, so an author rule outranks
+   the browser's own [hidden]{display:none} — the Planned row drew the two
+   date buttons AND the read-only dates at once, which is exactly what it
+   looks like when a permission gate does nothing. */
+[hidden]{ display:none!important; }
 `;
 
 /* ══ Progress's own stylesheet (§9.10) ═════════════════════════════════ */

@@ -6170,3 +6170,73 @@ visual can be built until they are given.
 Analytics), so every screen of this module is agreed and the rule is paid. The
 list above is left as it read on the 20th rather than rewritten, because it is
 the record of what was true that day.
+
+---
+
+## Portfolio — writing a plan (2026-10-01, built)
+
+**Islam asked to start planning, which is the sign-off on the drawing published
+yesterday, and it is built.** Portfolio's sixth screen was never a screen of its
+own: it is the writing half of two that already existed — the plan's tree and an
+activity's panel — plus two dialogs. So all six now work.
+
+**What somebody can now do.** Press Edit on the plan and the tree opens: name a
+phase, a work package or an activity at the foot of whichever container it
+belongs in, move a row up or down among its own siblings, take one away, and
+type a row's facts on its panel — what it produces, who it is for, the days it
+runs, and the steps it breaks into. A phase or a work package is renamed by
+double-clicking its name on the row, because neither has a panel of its own.
+Press Done editing and it is back to reading.
+
+**There is no Save and there is no Cancel**, which is the platform's own way of
+working rather than a choice made here: a box writes when the cursor leaves it
+and the page comes straight back from the server, so there is nothing held in
+the browser to lose and nothing to remember to press.
+
+**Two things are refused rather than allowed quietly.** A phase or a work
+package that still holds work cannot be removed, and the refusal names what is
+in the way. And moving an end date shows you every row that moves with it
+before anything is written, as a list you can untick — a row you were not shown
+cannot be moved by the same press.
+
+**Who may do what.** Restructuring the plan is the office's and the project's
+Lead. The person a row is assigned to gets that row's breakdown and *Mark it
+done* and nothing else — they cannot rename a step or change what it is worth,
+which is the plan's. Everybody else reads. Asking for the pen by typing it into
+the address gets the reading page, and the api refuses the press as well, so
+neither half stands alone.
+
+**Marking work done does not sign it off.** That stays two steps: whoever did
+the work says it is finished, and a Lead agrees the date it really ended. The
+mark can be taken off again until then — the drawing did not say so, and a mark
+that cannot be undone is a trap for whoever pressed it by mistake.
+
+**One real fault, and it was the one line that writes.** Moving a date was
+refused on every press, because of how a number was handed to the database;
+everything that READ was correct, so it looked fine from every angle except
+actually doing it. Fixed, and the whole code searched for the same shape.
+
+**How it is proved.** 135 assertions on the rules with no browser and no
+database, and 184 driving the real server and reading every row back out of the
+database afterwards — never off the screen, because a control wired to nothing
+looks perfect. The two files were proved able to fail twelve and twenty-four
+ways, one break per decision, before either green run was believed. Three of
+those breaks had to be rewritten first: one broke the statement instead of
+reproducing the fault, and two killed the run rather than reporting, which is a
+clean-looking result from a run that stopped early.
+
+**And two faults in my own checking, both worth more than the feature.** My
+runner read the last line of the output and reported a clean run for one that
+had twenty-two failures — and what that hid is that the database role could not
+sign in, so every assertion about the tables and their fencing was dying one by
+one while the summary said all clear. And runs that crashed earlier in the day
+left test clients behind, which quietly moved what a different check was
+measuring; both files now clear their own leftovers before they start.
+
+**Everything else still green**: the whole app suite run one at a time after a
+real build — the tracker, meeting notes, insights, the modules, the door, the
+shell, state, storage, communications, uploads, the demo seed and the memory
+pages.
+
+**Still Islam's, and not started**: where *who is on a project* hangs, whether
+a Lead may name people onto one, and the merge to `main`.

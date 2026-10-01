@@ -50701,3 +50701,145 @@ splice (&sect;146.2); the merged result grepped for its own duplicate
 declarations (&sect;56.7, &sect;147.4, &sect;281); and the `sw.js` SHELL name
 confirmed against `origin/main` **immediately before the push** rather than at
 the start (&sect;94.16). **`main` is Islam's word, on that merge, every time.**
+
+---
+
+## §380 — PORTFOLIO: WRITING A PLAN, BUILT (2026-10-01, spec 060 §16)
+
+Islam, of the drawing §379 published — *"No I mean the plan in the porfiltio I
+wan to start planning I mean."* That is the sign-off, and the sixth screen is
+built. **§379 is left exactly as it was written** (Principle II): it is the
+argument the sign-off was given on, and this section is what shipped and where
+the two differ.
+
+**Of §379.9's four open questions, two are about the TEAM screen and stay
+open** (where *who is on a project* hangs, and whether a Lead may name people —
+both Islam's); **two the drawing already answered with a default and that
+default shipped** — no archive on a removed row and no undo — **and both are
+said in the dialog that does the removing**, so nobody meets either as a
+surprise (§124).
+
+### §380.1 — THE PEN IS AN ADDRESS, AND IT CARRIES THE GATE ONCE
+
+`?edit=1`, this page's own idiom (the view switch is two links already), so
+every control in edit mode is in the document **only for somebody the rules
+allow** (§61) and the api judges every press against the stored row whether or
+not a control was ever drawn (§42) — the check presses `add`, `field` and
+`remove` as a Contributor with no page in front of it, and each is refused by
+name.
+
+**AND THE FIRST BUILD ASKED THE SAME QUESTION SEVEN TIMES.** `a.edit &&
+a.build` was written at seven controls, and the falsification that removes the
+ADDRESS gate went **GREEN** over the other six — §54.5's fault, found by
+falsifying rather than by reading, and §53.5 exactly: one question, seven
+answers, and the harmless one is the one I broke. `edit` now carries the
+invariant, true only for somebody `mayBuildPlan` allows and enforced at the two
+places that build the page's arguments; `build` survives for the two things that
+are a **different** question — whether the Edit button is drawn at all, and what
+an empty plan says to somebody who could fill it. With that, the break reddens
+exactly its own three assertions.
+
+### §380.2 — EVERY WRITE ANSWERS WITH THE PLAN DRAWN AGAIN
+
+The tracker's own answer (§356.12): the api re-reads, re-rolls-up and returns
+`planBody` rendered, and the script swaps it in. **The browser holds no copy of
+the tree**, so it cannot disagree with the server about the numbering, which
+arrow a row may use, or where an add row goes — one request at a time, and what
+a hand is typing survives the swap.
+
+### §380.3 — ONE PRODUCT FAULT, AND IT WAS THE ONE STATEMENT THAT WRITES
+
+`moveDate` shifts a dependent row with `planned_start + $2`, and **a bound
+parameter arrives untyped**, so `date + unknown` is ambiguous between
+`date + integer` and `date + interval` and Postgres refused it outright:
+*operator is not unique*. **So moving a date was refused on every real press**,
+while the PREVIEW beside it and the *was this row shown* refusal (§42) were both
+perfectly green — **the two paths that READ were right and the one that WRITES
+could never run** (§96's family: a preview wired to a correct rule renders
+perfectly). Cast to `::int`; the whole tree grepped for the same shape and there
+is one. Found only because the check reads the row back from Postgres rather
+than off the screen — and the api answered 400 with the DATABASE's own words,
+which is §316.2 pointing at us.
+
+### §380.4 — WHAT THE DRAWING DOES NOT COVER, ANSWERED THREE WAYS
+
+**Marking done turns both ways.** The drawing shows only the pressing, and a
+mark that cannot be taken off is a one-way door: the person who pressed it by
+mistake would have to find a Lead to undo a thing that was never sent anywhere
+(§61). **Un-marking leaves the FIGURE where it is**, because *this is not
+finished* is not *this work was not done* — and once a Lead has **accepted** it,
+un-marking is refused and named, since reopening is theirs (§6.5).
+
+**A phase and a work package are renamed on the row, by double-click** — the
+tracker's own idiom (§356.11). Neither has a panel, so without it a name set
+once at the add row could never be corrected (§61).
+
+**And a phase's own weight has no control, which is said rather than drawn**:
+the rule and the api accept one already (`ROW_FIELDS.phase` carries it), so
+drawing a box for it is a visual decision nobody has signed off and the day it
+is drawn nothing else moves (rule 1c).
+
+### §380.5 — PROVED, AND THREE BREAKS TAUGHT THE FILE SOMETHING FIRST
+
+`checks/portfolio.mjs` **135/0**, red **twelve** ways — its new §8c asks the
+eight pure writing rules with **no browser and no database**, which is §8 of
+the spec in its own words, and `move-across` reddens the sibling walk that was
+wrong in the first build: it counted `kidsOf`, which answers ONE level down, so
+a phase holding a work package reported that package's first activity as its
+next sibling.
+
+`checks/portfolio-module.mjs` **184/0**, red **twenty-four** ways, every new
+break reddening its own assertions. **Both ends everywhere** (§94.2): the pen
+for a seat and for a Lead AND the read page for a Contributor and a Viewer; a
+refusal AND the write that must still land; a step's status reportable by
+whoever the row names AND its weight refused to them (§379.7).
+
+**`append-anywhere` written as a bare `0` broke the STATEMENT rather than
+reproducing the defect** — a SELECT with no rows to read on an empty container,
+so the INSERT returned nothing (§375: one proves the check runs, the other
+proves it is about something); it prepends with an aggregate now. **And
+`no-renumber` and `remove-anything` DIED rather than reporting** (§215), because
+a break that changes the order or deletes a row leaves a fixture read empty and
+`.find(…).name` throws: every row read, every single-row read and the steps list
+degrade now, and both breaks report 36 and 34 failures where they used to report
+7 and 5 and then stop.
+
+### §380.6 — AND TWO FAULTS IN MY OWN HARNESS, BOTH OLD RULES
+
+**My runner read `tail -1` and reported `135 passed, 0 failed` for a run that
+was `111 passed, 22 failed`** — the last line was a continuation of the FAILED
+list rather than the verdict (§298.3: *the tail is the verdict, never the
+count*, and here the tail was neither). **What it hid is worse than the
+number**: `smp_app` could not authenticate, so §9 and §10 — every constraint and
+every RLS policy — were dying one at a time while the suite reported clean.
+*A check that cannot connect reports no failures* (§54.5, §320.6b's family one
+layer out). The verdict is matched by its own shape now.
+
+**And a run that dies before its `finally` leaves its world behind** —
+§379.15 by a third road. Today's syntax-error runs never reached the drops, so
+sixteen tenant pairs stayed, and `checks/memory-page.mjs` went **2 red** naming
+a client it never created: the console's Memory page opens on the FIRST client
+BY NAME and `RHI` sorts before `Raya Trade`. §379.15 put the drops in the
+`finally`, which cannot help a run killed before the `try` — so both portfolio
+checks sweep anything of their OWN older than an hour before they start, which
+makes a crash clean up after itself on the next run and leaves a concurrent run
+untouched.
+
+### §380.7 — RECORDED, NOT DONE
+
+The team screen (§379.9 №1 and №2, both Islam's); a phase's weight control
+(§380.4); **nothing says who else is looking at the plan while it is being
+restructured**, which is the stated cost of having no Planning Mode (§379.1) and
+the same gap the tracker has; and **a two-hundred-row plan is built from the
+workbook and not here** (§9.3) — this screen is for writing one and correcting
+it, which is what the pen's one-request-per-field shape is sized for.
+
+**THE MERGE IS STILL ISLAM'S, ON THAT MERGE** — and the measurement at §379.17
+stands: `main` has moved 313 commits and is at §438, four of this branch's
+section numbers collide and must be renumbered BEFORE the merge by matched text
+in **both** spellings of `§` (§264.3, §336.1), the built file REBUILT rather
+than merged (§91), the four generators re-run with `generated-in-step` read
+after (§329), the carried `.cjs` modules re-carried (§335), `node --check sw.js`
+after the splice (§146.2), the merged result grepped for its own duplicate
+declarations (§56.7), and the SHELL name confirmed against `origin/main`
+immediately before the push (§94.16).

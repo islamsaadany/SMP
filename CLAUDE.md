@@ -8370,7 +8370,46 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # it lands. &sect;113.8's own rule: an assertion that
                                 # cannot fail is kept only where it is NAMED as the
                                 # control, and `modules/portfolio/page.ts` carries
-                                # the other half of that note beside `TABS`
+                                # the other half of that note beside `TABS`.
+                                # AND SINCE &sect;380 ITS &sect;11 WRITES THE PLAN (spec
+                                # 060 &sect;16): the pen is an ADDRESS and the gate is on
+                                # the RENDER, asserted at both ends &mdash; the strip, the
+                                # add rows and the script for a seat and for a Lead, and
+                                # a Contributor or a Viewer asking for `?edit=1` getting
+                                # the READ page (&sect;61), with the api pressed WITHOUT a
+                                # page in front of it and refused by name (&sect;42, the
+                                # half a drawn-control assertion cannot see). Every write
+                                # read back FROM POSTGRES and never off the screen
+                                # (&sect;96): a row's parent decided by what the parent IS,
+                                # rows APPENDED, a move RENUMBERING its container, a name
+                                # closed to one line (&sect;260), an emptied weight stored
+                                # as an ABSENCE (&sect;50.6), a chain that loops refused
+                                # before it is stored, a date preview whose list the write
+                                # is checked against, a step's status reportable by
+                                # whoever the row names AND its weight refused to them
+                                # (&sect;15.7), and marking done asserted NOT to sign
+                                # itself off and to turn BOTH ways (&sect;61). 184/0, red
+                                # TWENTY-FOUR ways. **AND THREE BREAKS TAUGHT IT
+                                # SOMETHING FIRST**: `pen-for-all` went GREEN because
+                                # `edit && build` was written at seven controls and the
+                                # address gate was the harmless one (&sect;54.5,
+                                # &sect;53.5 &mdash; `edit` carries the invariant now);
+                                # `append-anywhere` as a bare `0` left a SELECT with no
+                                # rows to read, so it broke the STATEMENT rather than
+                                # reproducing the defect (&sect;375); and `no-renumber`
+                                # and `remove-anything` DIED rather than reporting
+                                # (&sect;215), so every row read, every single-row read
+                                # and the steps list degrade. **It found ONE product
+                                # fault and it was the one statement that writes**:
+                                # `planned_start + $2` is `date + unknown`, ambiguous
+                                # between integer and interval, so moving a date was
+                                # refused on EVERY press while the preview beside it was
+                                # green (&sect;316.2 pointing at us). **AND IT SWEEPS ITS
+                                # OWN LEFTOVERS BEFORE IT STARTS** &mdash; a run killed
+                                # before the `try` never reaches the `finally`, and
+                                # today's syntax-error runs left sixteen tenant pairs,
+                                # which took `checks/memory-page.mjs` 2 red naming a
+                                # client it never made (&sect;379.15 by a third road)
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -8412,7 +8451,24 @@ node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # the arithmetic is 15), which is &sect;9.8's own lesson in
                                 # the check rather than in the drawing; it is asserted
                                 # beside the equally-weighted 50, so the number is pinned
-                                # by a difference and not only by itself
+                                # by a difference and not only by itself.
+                                # AND SINCE &sect;380 ITS &sect;8c ASKS THE WRITING RULES,
+                                # which are pure, so they belong here rather than only
+                                # inside the module check that drives them through the api
+                                # &mdash; both are worth having: this says the rule is
+                                # right, that one says the api asks it (&sect;42,
+                                # &sect;53.5). The three kinds named once; what a row
+                                # holds refused BY NAME and a row holding nothing NOT
+                                # (&sect;94.2); an arrow bounded by its CONTAINER, so a
+                                # phase's next sibling is a phase and never its own first
+                                # activity &mdash; which is the fault the first build made,
+                                # counting `kidsOf`, one level down (`move-across`, 1 red);
+                                # a status and a figure asserted NOT to be fields, because
+                                # they are worked out (&sect;15.4); a blank weight a real
+                                # answer and a share over 100 not (&sect;243, &sect;50.6);
+                                # every refusal a SENTENCE rather than a constraint's name
+                                # (&sect;316.2); and a name closed to one line with every
+                                # word kept (&sect;260). 135/0, red TWELVE ways
 node smp-app/checks/insights.mjs # the library, and who can see one report
                                 # (spec 053, &sect;355) &mdash; `npm run check:insights`,
                                 # needs a database. &sect;1b is the narrowing's PURE
@@ -9878,7 +9934,82 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 &mdash; **&sect;379: Portfolio &mdash; writing a
+*Last Updated: 2026-10-01 &mdash; **&sect;380: Portfolio &mdash; writing a
+plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;379 published
+&mdash; *"No I mean the plan in the porfiltio I wan to start planning I mean."*
+**THE SIXTH SCREEN WAS NEVER A SCREEN OF ITS OWN**: it is the writing half of
+two that already exist &mdash; the plan's tree and an activity's panel &mdash;
+plus the two dialogs writing needs, so all six of this module's screens now
+work. **&sect;379 IS LEFT EXACTLY AS IT WAS WRITTEN** (Principle II): it is the
+argument the sign-off was given on. Of its four open questions, two are the TEAM
+screen's and stay Islam's; two the drawing answered with a default and that
+default shipped &mdash; **no archive and no undo on a removed row, both said in
+the dialog that removes it** (&sect;124).
+**THE PEN IS AN ADDRESS AND IT CARRIES THE GATE ONCE.** `?edit=1` is this page's
+own idiom, so every control in edit mode is in the document only for somebody the
+rules allow (&sect;61) and the api judges every press against the stored row
+whether or not a control was drawn (&sect;42). **AND THE FIRST BUILD ASKED ONE
+QUESTION SEVEN TIMES**: `a.edit && a.build` at seven controls, so the
+falsification that removes the ADDRESS gate went **GREEN** over the other six
+&mdash; &sect;54.5 found by falsifying rather than reading, &sect;53.5 exactly,
+and the harmless copy was the one I broke. `edit` carries the invariant now, true
+only for somebody `mayBuildPlan` allows; `build` survives for the two things
+that are a different question (whether the Edit button is drawn at all, and what
+an empty plan says to somebody who could fill it).
+**EVERY WRITE ANSWERS WITH THE PLAN DRAWN AGAIN** &mdash; the tracker's own
+answer (&sect;356.12) &mdash; so the browser holds no copy of the tree and
+cannot disagree with the server about the numbering, which arrow a row may use,
+or where an add row goes.
+**ONE PRODUCT FAULT, AND IT WAS THE ONE STATEMENT THAT WRITES**:
+`planned_start + $2` is `date + unknown`, ambiguous between `date + integer` and
+`date + interval`, so Postgres refused it outright and **moving a date failed on
+every real press** while the PREVIEW beside it and the *was this row shown*
+refusal were both green &mdash; the two paths that READ were right and the one
+that WRITES could never run (&sect;96's family). Cast to `::int`, the tree
+grepped for the shape, and found only because the check reads the row back from
+Postgres rather than off the screen; the api answered 400 in the DATABASE's own
+words, which is &sect;316.2 pointing at us.
+**THREE THINGS THE DRAWING DOES NOT COVER, ANSWERED**: marking done **turns
+both ways** (a mark that cannot be taken off is a one-way door, &sect;61) and
+un-marking leaves the FIGURE where it is, because *this is not finished* is not
+*this work was not done*; a phase and a work package are **renamed on the row by
+double-click** (&sect;356.11's idiom &mdash; neither has a panel, so a name set
+once could never be corrected); and **a phase's own weight has no control, said
+rather than drawn**, the rule and the api accepting one already so nothing moves
+the day a box is.
+**PROVED**: rules **135/0** red TWELVE ways, with the new &sect;8c asking the
+eight pure writing rules with no browser and no database (&sect;8 of the spec in
+its own words) and `move-across` reddening the sibling walk the first build got
+wrong; module **184/0** red TWENTY-FOUR ways, both ends everywhere (&sect;94.2).
+**Three breaks taught the files something first**: `append-anywhere` as a bare
+`0` broke the STATEMENT rather than reproducing the defect (&sect;375), and
+`no-renumber` and `remove-anything` **DIED rather than reporting** (&sect;215),
+so every row read, every single-row read and the steps list degrade.
+**AND TWO FAULTS IN MY OWN HARNESS, BOTH WORTH MORE THAN THE FEATURE**: my
+runner read `tail -1` and reported `135 passed, 0 failed` for a run that was
+`111 passed, 22 failed` &mdash; the tail was a continuation of the FAILED list
+(&sect;298.3) &mdash; **and what it hid is that `smp_app` could not
+authenticate, so every constraint and every RLS assertion was dying one at a
+time while the suite read clean** (&sect;54.5). And **a run that dies before its
+`finally` leaves its world behind** (&sect;379.15 by a third road): today's
+syntax-error runs left sixteen tenant pairs and took `checks/memory-page.mjs` 2
+red naming a client it never made, so both portfolio checks sweep anything of
+their own older than an hour before they start. Whole app suite re-run serially
+after a real build: portfolio 135/0 &middot; module 184/0 &middot; modules 112/0
+&middot; insights 127/0 &middot; notes 170/0 &middot; tracker 228/0 &middot;
+memory 21/14/36/42/16 &middot; setup 33/0 &middot; deploy 5/0 &middot; standing
+7/0 &middot; room 10/0 &middot; demo 7/0 &middot; assistant 10/0 &middot; state
+92/0 &middot; door 70/0 &middot; shell 72/0 &middot; blob 23/23 &middot; comms
+47/47 &middot; upload 9/0 &middot; `generated-in-step` all clear &middot; `tsc`
+clean. **The frozen product is untouched**, so `sw.js` is NOT bumped.
+**RECORDED, NOT DONE**: the team screen (both halves Islam's); a phase's weight
+control; nothing says who else is looking at a plan while it is restructured,
+which is the stated cost of having no Planning Mode; and a two-hundred-row plan
+is built from the workbook and not here (&sect;9.3). **On the branch, not
+merged** &mdash; `main` is Islam's word, on that merge, and &sect;379.17's
+measurement of it stands.*
+
+*Earlier: 2026-09-30 &mdash; **&sect;379: Portfolio &mdash; writing a
 plan, DRAWN and not built (spec 060 &sect;15).** Five of Portfolio's six
 screens read and none of them writes; the sixth is not a screen the way the
 others were, it is the **writing half** of two that already exist &mdash; the

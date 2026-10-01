@@ -2372,9 +2372,10 @@ them (§54.5).
 ## 15 · Drawn, not built — writing a plan, 2026-09-30
 
 **Mockup:** `design-mockups/portfolio/2026-09-30_plan-writing.html`, published
-as an artifact and **awaiting sign-off**. Nothing in `smp-app/` is built from
-it. This section is the record of what it proposes and why, so the decisions
-can be argued before any of them is in code.
+as an artifact. **SIGNED OFF AND BUILT &mdash; see &sect;16**, which records what
+shipped and where it differs from this. This section is left exactly as it was
+written before any of it was in code (Principle II), because what was proposed
+and why is the argument the sign-off was given on.
 
 **&sect;12&ndash;&sect;14 built five of the six screens and every one of them
 READS.** The sixth is not a screen at all in the way the other five are: it is
@@ -2558,3 +2559,136 @@ describing an intention the code beneath it had stopped carrying out
 yet* in its what-is-not-built list. **A stale comment renders perfectly and
 nothing can go red on it**, which is why both are corrected in the same commit
 as the drawing rather than left for the slice that builds from it.
+
+## 16 · Built — writing a plan, 2026-10-01
+
+**Islam, of the drawing &sect;15 published:** *"No I mean the plan in the
+porfiltio I wan to start planning I mean."* That is the sign-off, and the
+sixth screen is built. **&sect;15 is the record of what was proposed and is
+left exactly as it was written** (Principle II); this section is what shipped,
+and where the two differ it says so.
+
+**Of &sect;15.9's four open questions, two are about the TEAM screen and are
+still open; two the drawing already answered with a default and that default
+is what shipped** &mdash; no archive on a removed row (&sect;15.6), and no undo
+(nothing else in the platform has one). Both are said in the dialog that does
+the removing, so nobody meets either as a surprise.
+
+### 16.1 &middot; The pen is an address, and it carries the gate
+
+`?edit=1`, which is this page's own idiom (the view switch is two links
+already). **It means every control in edit mode is in the document only for
+somebody the rules allow** (&sect;61), **and the api judges every press against
+the stored row whether or not the page drew a control for it** (&sect;42):
+`checks/portfolio-module.mjs` presses `add`, `field` and `remove` as a
+Contributor with no page in front of it and each is refused by name.
+
+**AND `edit` CARRIES THE GATE RATHER THAN ASKING IT AGAIN SEVEN TIMES.** The
+first build wrote `a.edit && a.build` at seven controls, and the falsification
+that removes the ADDRESS gate (`pen-for-all`) went **green** over the other six
+&mdash; &sect;54.5's own fault, found by falsifying rather than by reading
+(&sect;53.5: one question, seven answers, and the harmless one was the one
+broken). `edit` is now true only for somebody `mayBuildPlan` allows, enforced at
+the two places that build the page's arguments and nowhere below; `build`
+survives for the two things that are a different question &mdash; whether the
+Edit button is drawn at all, and what an empty plan says to somebody who could
+fill it. With that, the break reddens exactly its own three assertions.
+
+### 16.2 &middot; Every write answers with the plan drawn again
+
+The tracker's own answer (&sect;356.12): the api re-reads, re-rolls-up and
+returns `planBody` rendered, and the script swaps it in. **So the browser holds
+no copy of the tree** and cannot disagree with the server about the numbering,
+which arrow a row may use, or where an add row goes. One request at a time;
+what a hand is typing survives the swap.
+
+### 16.3 &middot; One product fault, and it was the one statement that writes
+
+`moveDate` shifts a dependent row with `planned_start + $2`, and **a bound
+parameter arrives untyped, so `date + unknown` is ambiguous between
+`date + integer` and `date + interval`** &mdash; Postgres refused it outright
+with *operator is not unique*. So **moving a date was refused on every real
+press**, while the PREVIEW beside it and the *was this row shown* refusal
+(&sect;42) were both perfectly green: the two paths that read were right and
+the one that writes could never run. Cast to `::int`. Found by the check, and
+only because the check reads the row back from Postgres rather than the
+screen (&sect;96) &mdash; the api answered 400 with the DATABASE's own words,
+which is also &sect;316.2 pointing at us.
+
+### 16.4 &middot; What the drawing does not cover, answered three ways
+
+1. **Marking done turns both ways.** The drawing shows only the pressing; a
+   mark that cannot be taken off is a one-way door, and the person who pressed
+   it by mistake would have to find a Lead to undo a thing that was never sent
+   anywhere (&sect;61). Un-marking leaves the FIGURE where it is, because *this
+   is not finished* is not *this work was not done* &mdash; and once a Lead has
+   ACCEPTED it, un-marking is refused and named, since reopening is theirs
+   (&sect;6.5).
+2. **A phase and a work package are renamed on the row, by double-click** &mdash;
+   the tracker's own idiom (&sect;356.11). Neither has a panel, so without it a
+   name set once at the add row could never be corrected (&sect;61).
+3. **A row's own WEIGHT has a box on the panel and a phase's has none**, which
+   is stated rather than drawn: giving a phase row a weight box is a visual
+   decision nobody has signed off, and the rule and the api accept one already
+   (`ROW_FIELDS.phase` carries it), so the day a control is drawn for it
+   nothing else has to move.
+
+### 16.5 &middot; How it is proved
+
+`checks/portfolio.mjs` **135/0**, red **twelve** ways &mdash; its new &sect;8c
+asks the eight pure writing rules with **no browser and no database**, which is
+&sect;8 of this spec in its own words, and `move-across` reddens the sibling
+walk that was wrong in the first build (it counted `kidsOf`, which answers one
+level down, so a phase holding a work package reported that package's first
+activity as its next sibling).
+
+`checks/portfolio-module.mjs` **184/0**, red **twenty-four** ways, every new
+break reddening its own assertions: `pen-for-all`, `append-anywhere`,
+`no-renumber`, `move-across`, `take-untrusted`, `weight-nought`,
+`report-writes-plan`, `mark-signs-off`, `one-way-done`, `remove-anything`.
+**Both ends everywhere** (&sect;94.2) &mdash; the pen for a seat and for a Lead
+AND the read page for a Contributor and a Viewer; a refusal AND the write that
+must still land; a step's status reportable by whoever the row names AND its
+weight refused to them (&sect;15.7).
+
+**Three of the breaks taught the file something before they worked.**
+`append-anywhere` written as a bare `0` left a SELECT with no rows to read on
+an empty container, so the INSERT returned nothing and the falsification broke
+the STATEMENT rather than reproducing the defect (&sect;375: one proves the
+check runs, the other proves it is about something) &mdash; it prepends with an
+aggregate now. And `no-renumber` and `remove-anything` **died rather than
+reporting** (&sect;215), because a break that changes the order or deletes a row
+leaves a fixture read empty and `.find(…).name` throws: every row read, every
+single-row read and the steps list degrade now.
+
+### 16.6 &middot; Two faults in my own harness, both old rules
+
+**My runner read `tail -1` and reported `135 passed, 0 failed` for a run that
+was `111 passed, 22 failed`** &mdash; the last line was a continuation of the
+FAILED list, not the verdict (&sect;298.3: *the tail is the verdict, never the
+count*, and here the tail was neither). What it hid is worse than the number:
+`smp_app` could not authenticate, so &sect;9 and &sect;10 &mdash; every
+constraint and every RLS policy &mdash; were dying one by one and the suite was
+reporting clean. *A check that cannot connect reports no failures* (&sect;54.5),
+and the verdict line is matched by its own shape now.
+
+**And a run that dies before its `finally` leaves its world behind**
+(&sect;379.15 by a third road): today's syntax-error runs never reached the
+drops, so sixteen tenant pairs stayed and `checks/memory-page.mjs` went **2
+red** naming a client it never created &mdash; the console's Memory page opens
+on the FIRST client BY NAME and `RHI` sorts before `Raya Trade`. Both portfolio
+checks now sweep anything of their own older than an hour before they start, so
+a crash cleans up after itself on the next run and a concurrent run is
+untouched.
+
+### 16.7 &middot; Recorded, not done
+
+- **The team screen is still &sect;15.9 №1 and №2**, and both are Islam's: where
+  *who is on a project* hangs, and whether a Lead may name people.
+- **A phase's weight has no control**, &sect;16.4 №3.
+- **Nothing says who else is looking at the plan while it is being
+  restructured**, which is the stated cost of having no Planning Mode
+  (&sect;15.1) and is the same gap the tracker has.
+- **A two-hundred-row plan is built from the workbook and not here**
+  (&sect;9.3): this is for writing one and correcting it, and that is what the
+  pen's one-request-per-field shape is sized for.

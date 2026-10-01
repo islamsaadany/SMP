@@ -54,6 +54,8 @@ import {
   kidsOf, weightsOf, meanPct, rollUp, overall, renumber,
   addDays, daysBetween, cascade,
   waitingSignOff, behind, overdue, nobodyOn, owed, nextCheckpoint,
+  KINDS, isKind, KIND_WORD, KIND_LVL, removeRefused, mayMove,
+  ROW_FIELDS, isRowField, weightRefused, dateRefused, windowRefused, oneLine, nameRefused,
 } from "../lib/portfolio.ts";
 
 let ok = 0;
@@ -317,6 +319,75 @@ check("monthly gives this month's day where it is still ahead", nextCheckpoint("
 check("...and next month's where it has passed", nextCheckpoint("monthly", 5, TODAY) === "2026-10-05", String(nextCheckpoint("monthly", 5, TODAY)));
 check("a day nobody could have chosen is refused rather than guessed at", nextCheckpoint("monthly", 30, TODAY) === null && nextCheckpoint("weekly", 9, TODAY) === null);
 
+/* ══ §8c · WRITING A PLAN — the rules, with no browser and no database ═ */
+/* §8 of the spec asks for the rules to be checked AS RULES, and these eight
+   are pure, so they belong beside their neighbours rather than only inside
+   `checks/portfolio-module.mjs`, which drives them through the api. Both are
+   worth having: this says the rule is right, that one says the api asks it
+   (§42, §53.5). */
+section("§8c · writing a plan: the rules (§15)");
+check("three kinds, named once, and a word for each (§53.5)",
+  KINDS.join(",") === "phase,package,activity" && KIND_WORD.package === "work package" &&
+  KIND_LVL.phase === 0 && KIND_LVL.package === 1 && KIND_LVL.activity === 2,
+  KINDS.join(",") + " / " + JSON.stringify(KIND_WORD));
+check("...and a word the api does not draw is not a kind — both ends (§94.2)",
+  isKind("phase") && isKind("activity") && !isKind("milestone") && !isKind("") && !isKind(null));
+
+/* A TREE TO ASK ABOUT, in `planRows`' own flat ordered shape (§5.2). */
+const T = [
+  { id: "p1", lvl: 0, name: "Design" },
+  { id: "w1", lvl: 1, name: "Discovery" },
+  { id: "a1", lvl: 2, name: "Interviews" },
+  { id: "a2", lvl: 2, name: "Workshops" },
+  { id: "p2", lvl: 0, name: "Build" },
+  { id: "a3", lvl: 2, name: "Pilot" },
+  { id: "p3", lvl: 0, name: "Sustain" },
+];
+check("A ROW THAT HOLDS WORK IS REFUSED AND THE REFUSAL NAMES WHAT (§15.6, §62, §123)",
+  /holds work/.test(removeRefused(T, "p1") || "") && /Discovery/.test(removeRefused(T, "p1") || "") &&
+  /holds work/.test(removeRefused(T, "w1") || ""), String(removeRefused(T, "p1")));
+check("...and one that holds nothing is NOT — both ends, or a build refusing every removal passes half (§94.2)",
+  removeRefused(T, "p3") === null && removeRefused(T, "a1") === null && removeRefused(T, "a3") === null,
+  String(removeRefused(T, "p3")));
+check("a row the plan does not hold is refused rather than answered yes",
+  removeRefused(T, "nope") !== null);
+
+check("AN ARROW THAT CAN DO NOTHING ANSWERS NO: first in its container has no up, last no down (§94.15)",
+  !mayMove(T, "p1", -1) && mayMove(T, "p1", 1) && mayMove(T, "p3", 1) === false && mayMove(T, "p3", -1),
+  [mayMove(T, "p1", -1), mayMove(T, "p1", 1), mayMove(T, "p3", -1), mayMove(T, "p3", 1)].join(","));
+check("...and a SIBLING is at the same level with nothing shallower crossed, so a phase's next phase is a phase and never its own first activity",
+  mayMove(T, "a1", 1) && !mayMove(T, "a2", 1) && !mayMove(T, "a3", 1) && !mayMove(T, "a3", -1),
+  [mayMove(T, "a1", 1), mayMove(T, "a2", 1), mayMove(T, "a3", -1), mayMove(T, "a3", 1)].join(","));
+check("...and a row that is not on the plan moves nowhere", !mayMove(T, "nope", 1) && !mayMove(T, "nope", -1));
+
+check("A STATUS AND A FIGURE ARE NOT FIELDS — they are worked out, so no box writes them (§15.4)",
+  !isRowField("activity", "status") && !isRowField("activity", "progress") &&
+  !ROW_FIELDS.activity.includes("status") && !ROW_FIELDS.activity.includes("progress"),
+  ROW_FIELDS.activity.join(","));
+check("...and a phase carries its name and its weight and nothing an activity carries (§9.8)",
+  isRowField("phase", "weight") && isRowField("phase", "name") &&
+  !isRowField("phase", "start") && !isRowField("phase", "assignee") &&
+  isRowField("activity", "start") && isRowField("activity", "assignee"),
+  ROW_FIELDS.phase.join(","));
+
+check("A BLANK WEIGHT IS A REAL ANSWER (§243, §50.6) and a share over 100 is not",
+  weightRefused("") === null && weightRefused("40") === null &&
+  /share/.test(weightRefused("140") || "") && /negative/.test(weightRefused("-1") || "") &&
+  /number/.test(weightRefused("a lot") || ""), String(weightRefused("140")));
+check("a date is a day or an absence, and a refusal is a SENTENCE rather than a constraint's name (§316.2)",
+  dateRefused("") === null && dateRefused("2027-03-01") === null &&
+  dateRefused("01/03/2027") !== null && dateRefused("2027-13-01") !== null,
+  String(dateRefused("01/03/2027")));
+check("...and an end before its start is refused while either alone is not (§94.2)",
+  windowRefused("2027-03-01", "2027-02-01") !== null &&
+  windowRefused("2027-03-01", "2027-03-01") === null &&
+  windowRefused(null, "2027-02-01") === null && windowRefused("2027-03-01", null) === null,
+  String(windowRefused("2027-03-01", "2027-02-01")));
+check("A NAME IS ONE LINE, closed up and every word kept (§260)",
+  oneLine("Design  and\n  discovery") === "Design and discovery" &&
+  oneLine("  trailing  ") === "trailing" && nameRefused("   ") !== null && nameRefused("x") === null,
+  oneLine("Design  and\n  discovery"));
+
 /* ══ the database ════════════════════════════════════════════════════ */
 const URL_ = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "";
 if (!URL_) {
@@ -360,6 +431,16 @@ const TABLES = ["portfolio_projects", "portfolio_members", "portfolio_phases", "
 let failed = false;
 try {
   await owner("SET search_path TO " + SCHEMA);
+  /* AND A RUN THAT NEVER REACHED ITS `finally` LEFT ITS WORLD BEHIND
+     (§379.15, by a third road): the drops are in the `finally` and a run
+     killed before the `try` — a syntax error while this file is being
+     written — never runs them, so today's crashing runs left sixteen pairs
+     and `checks/memory-page.mjs` went 2 red naming a client it never made,
+     because the console's Memory page opens on the FIRST client BY NAME and
+     `RHI` sorts before `Raya Trade`. Anything of this file's own older than
+     an hour goes before we start; a concurrent run is untouched. */
+  await owner("DELETE FROM tenants WHERE key LIKE 'pf%' AND created_at < now() - interval '1 hour'")
+    .catch(() => {});
   const stamp = "pf" + Date.now().toString(36);
   const [{ id: A }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-a", "Raya Trade"]);
   const [{ id: B }] = await owner("INSERT INTO tenants (key, name) VALUES ($1,$2) RETURNING id", [stamp + "-b", "RHI"]);

@@ -497,6 +497,146 @@ export function cascade(rows: readonly Dep[], id: string, newEnd: string): Shift
   return out;
 }
 
+/* ══ WRITING A PLAN (§15, spec 060) ═══════════════════════════════════ */
+
+/* THE THREE KINDS OF ROW, named once. The tree's own three levels wear two
+   names already — `lvl` 0/1/2 for the walkers, and a table each — so the
+   word a request carries is pinned here and the api, the queries and the
+   page all read it from one place rather than each spelling it (§53.5). */
+export const KINDS = ["phase", "package", "activity"] as const;
+export type Kind = (typeof KINDS)[number];
+export function isKind(s: unknown): s is Kind {
+  return typeof s === "string" && (KINDS as readonly string[]).includes(s);
+}
+export const KIND_WORD: Record<Kind, string> = {
+  phase: "phase", package: "work package", activity: "activity",
+};
+/* The level a kind sits at, which is what `kidsOf` and `renumber` read. */
+export const KIND_LVL: Record<Kind, Lvl> = { phase: 0, package: 1, activity: 2 };
+
+/* WHAT A ROW HOLDS IS WHY A REMOVAL IS REFUSED (§15.6, §62): a phase that
+   still holds work cannot go, and the refusal NAMES what is in the way
+   rather than leaving somebody to guess which of its children is the
+   problem (§123, §62's own shape). An activity holds a breakdown, which is
+   its own figure rather than another row of the plan, so it is removed with
+   it — a sub-activity has no life outside the activity it weighs.
+
+   ASKED OF THE ROWS BOTH SIDES ALREADY HOLD, so the page can say it before
+   the press and the server says it again after (§42: a screen that only
+   narrows a control has narrowed nothing). */
+export function removeRefused(rows: readonly Row[], id: string): string | null {
+  if (brk() === "remove-anything") return null;
+  const i = rows.findIndex((r) => r.id === id);
+  if (i < 0) return "That row is not on this plan.";
+  const r = rows[i];
+  if (r.lvl === 2) return null;
+  const kids = kidsOf(rows, i).map((j) => rows[j]);
+  if (!kids.length) return null;
+  /* The deepest thing under it is what the sentence names, because that is
+     what somebody has to move: a phase holding two work packages is
+     refused by naming the packages, not the twelve activities inside them. */
+  const word = kids.length === 1 ? KIND_WORD[kids[0].lvl === 1 ? "package" : "activity"]
+    : kids[0].lvl === 1 ? "work packages" : "activities";
+  return "This " + KIND_WORD[r.lvl === 0 ? "phase" : "package"] +
+    " cannot be removed while it holds work. " +
+    plainCount(kids.length, word) + " " + (kids.length === 1 ? "is" : "are") + " in it: " +
+    kids.map((k) => k.name || "").filter(Boolean).join(", ") + ".";
+}
+
+/* A count and its noun, where the noun is already inflected by the caller.
+   `plural()` is the shell's and takes a singular; this takes the word as
+   given, because `removeRefused` has already chosen between a singular and
+   an irregular plural one line above (§107.8: a label is never inflected
+   by adding an "s" — *activities* is not *activitys*). */
+function plainCount(n: number, word: string): string { return n + " " + word; }
+
+/* WHICH WAY A ROW CAN MOVE, asked once for the page and the server. An
+   arrow that can do nothing is not DRAWN (§94.15, §15.2) and a move with
+   nothing to swap is REFUSED, and those have to be one answer or the page
+   draws a control the server turns away (§61, §42).
+
+   IT IS WITHIN THE CONTAINER AND NEVER ACROSS ONE: the first activity of a
+   work package does not move up into the package above it, because that is
+   a different act — re-parenting — and nothing on this screen offers it. */
+export function mayMove(rows: readonly Row[], id: string, dir: -1 | 1): boolean {
+  const i = rows.findIndex((r) => r.id === id);
+  if (i < 0) return false;
+  const lvl = rows[i].lvl;
+  /* ONE WALK FOR BOTH DIRECTIONS: step until a row at this level turns up,
+     and stop at anything SHALLOWER, which is the edge of the container. A
+     deeper row is somebody else's child and is stepped over — the first
+     attempt at this counted `kidsOf`, which answers one level down and not
+     the whole subtree, so a phase holding a work package reported the
+     package's first activity as its next sibling. */
+  for (let k = i + dir; k >= 0 && k < rows.length; k += dir) {
+    if (rows[k].lvl < lvl && brk() !== "move-across") return false;
+    if (rows[k].lvl === lvl) return true;
+  }
+  return false;
+}
+
+/* THE FIELDS A ROW'S OWNER MAY WRITE, by kind — and the list is what the
+   api validates against, so a field name nobody drew is refused by name
+   rather than written (§42's fall-through, closed).
+
+   STATUS AND THE PER-CENT ARE DELIBERATELY NOT HERE (§15.4): both are
+   worked out — a status from the breakdown and the sign-off, a parent's
+   figure from its children by weight — so there is no box for either and no
+   field to carry one. `manualProgressRefused` is what turns a typed figure
+   away where a breakdown exists, and it is reachable from the api and the
+   workbook and from no control on this screen, which is the point. */
+export const ROW_FIELDS: Record<Kind, readonly string[]> = {
+  phase: ["name", "weight"],
+  package: ["name", "weight"],
+  activity: ["name", "weight", "description", "deliverables", "assignee",
+             "dependsOn", "milestone", "billable", "start", "end"],
+};
+export function isRowField(kind: Kind, field: unknown): boolean {
+  return typeof field === "string" && ROW_FIELDS[kind].includes(field);
+}
+
+/* A WEIGHT IS A NUMBER OR AN ABSENCE, and an absence is a real answer:
+   §243's rule, reused rather than re-decided — a blank counts as the
+   average of the weights that WERE set. So an emptied box DELETES the value
+   rather than storing nought, which would quietly re-weight its siblings
+   (§50.6). Returns the reason, or null. */
+export function weightRefused(v: string): string | null {
+  if (!v.trim()) return null;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return "A weight is a number, or empty for an equal share.";
+  if (n < 0) return "A weight cannot be negative.";
+  if (n > 100) return "A weight is a share, so it cannot be over 100.";
+  return null;
+}
+
+/* A PLANNED DATE IS A DAY OR AN ABSENCE, and the pair must stay in order —
+   the schema says so too (`portfolio_activity_window`), and a refusal in
+   the database's words would name a constraint rather than a reason
+   (§316.2). Checked here so the sentence is the person's (§123). */
+export function dateRefused(v: string): string | null {
+  if (!v) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return "That is not a day.";
+  if (Number.isNaN(Date.parse(v + "T00:00:00Z"))) return "That is not a day.";
+  return null;
+}
+export function windowRefused(start: string | null, end: string | null): string | null {
+  if (start && end && end < start) return "The end of a window cannot fall before its start.";
+  return null;
+}
+
+/* A NAME IS ONE LINE AND IS NEVER EMPTY (§260, §316): the schema refuses a
+   blank outright, so the sentence is written here rather than let through
+   to be answered by a constraint name. Line breaks are closed up for
+   `SMPRules.oneLine`'s own reason, one product over — a title is one line
+   of prose however long, and a box that keeps thirty blank lines renders as
+   a fault nobody can see until the pen is open. */
+export function oneLine(v: string): string {
+  return v.replace(/\s*\n\s*/g, " ").replace(/\s+/g, " ").trim();
+}
+export function nameRefused(v: string): string | null {
+  return oneLine(v) ? null : "It needs a name.";
+}
+
 /* ══ what is waiting on somebody (§9.13, §279) ════════════════════════ */
 
 /* THREE PREDICATES, NAMED ONCE, because Progress draws them as three

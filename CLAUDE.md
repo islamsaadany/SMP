@@ -10978,9 +10978,44 @@ own first failures were the CHECK.
 **RECORDED, NOT DONE**: the team screen (both halves Islam's); a phase's weight
 control; nothing says who else is looking at a plan while it is restructured,
 which is the stated cost of having no Planning Mode; and a two-hundred-row plan
-is built from the workbook and not here (&sect;9.3). **On the branch, not
-merged** &mdash; `main` is Islam's word, on that merge, and &sect;442.17's
-measurement of it stands.*
+is built from the workbook and not here (&sect;9.3).
+**&sect;443.1 &mdash; MERGED TO `main` 2026-10-01 on Islam's word**, with the
+renumber run first and the set **re-measured on the day** rather than read off
+&sect;442.17, which wrote it down when the branch held four of these sections
+and not five. **Ten conflicts, each COMBINED** (&sect;318.7) &mdash; and the two
+worth reading are the two where both sides found one fault independently: the
+spike's seeding harness (main's answer kept, because it reads the bare `IN (…)`
+form too, with this branch's `time` and float types added to it) and the
+tracker's week headings (main fixed the WORDS, this branch the DATES, both
+halves kept, 228 &rarr; **229 green**, which is the proof the combination is
+right rather than merely parseable). **AND THE RENUMBER SWEPT THE PROSE THAT
+DESCRIBES IT** &mdash; both copies of &sect;442.17's paragraph carried
+`&sect;376` and `&sect;379` and came out saying *this branch's &sect;439&ndash;
+&sect;442 … so they become &sect;439&ndash;&sect;442* (&sect;272.8's shape);
+both corrected, and both now say the count is taken against `origin/main` on the
+day. **One assertion REWRITTEN, never loosened** (&sect;443.1a): a module's page
+may serve a script from its OWN ORIGIN, which is what `script-src 'self'` means
+&mdash; what the policy forbids is the inline kind, and that is what is asserted
+now, at both ends, proved able to fail on an `onclick=` put back. **The frozen
+product is byte-identical to main's**, so `built-in-step.py` is all good,
+`generated-in-step` is all clear and **`sw.js` is NOT bumped** (&sect;91's
+trigger is the built file's bytes changing and they did not; the SHELL name was
+the same string on both refs, confirmed immediately before the push,
+&sect;94.16). **Run serially after a real build** (&sect;379.14), each verdict
+read by its own shape and never `tail -1` (&sect;380.6): twenty-six app checks
+green &mdash; portfolio 135/0, its module 197/0, modules 184/0, door 145/0, state
+92/0, shell 142/0, tracker 229/0, notes 170/0, insights 137/0, comms 47/47, blob
+23/23, memory 21 &middot; 14 &middot; 42 &middot; 36 and the rest &mdash; eight
+of the nine spike proofs with S2 walking **56** tenant tables isolated,
+`typecheck` **clean** (&sect;379.16: that `lib/prisma.ts` error was a missing
+`prisma generate`, not a fault), and the frozen whole-platform sweep **33
+viewers, ERRORS none**. **TWO REDS ARE `main`'s AND ARE LEFT AS `main`'s**
+(&sect;303, which settles whose a red is and not that somebody must clear it):
+`setup-shape` 45/2 and `frameworks-page` 1/14, both in files byte-identical to
+`origin/main` and about features this work never touched. **AND ONE THING IS
+FLAGGED RATHER THAN FIXED** (rule 1b): **`smp-app/.env.local` is TRACKED in
+git**, which this file's own pre-commit rule forbids by name &mdash; nothing is
+exposed today (a password-less local address) and the habit is what is wrong.*
 
 *Earlier: 2026-09-30 &mdash; **&sect;442: Portfolio &mdash; writing a
 plan, DRAWN and not built (spec 060 &sect;15).** Five of Portfolio's six

@@ -60140,3 +60140,131 @@ into something new.
 that builds its own request body is a check of the server, and the screen is
 the half nobody was measuring** — and this module had five read-only screens,
 so until today there was nothing on it a request could be wrong about.*
+
+---
+
+## §443.1 — THE MERGE WITH `main` (§438), AND THE ONE ASSERTION IT MOVED (2026-10-01)
+
+Islam: *"merge to main."*
+
+**`main` HAD MOVED 313 COMMITS AND WAS AT §438**, fetched and read before
+anything was merged (§313.37) — and **the expensive thing was still not there**:
+main holds no `modules/portfolio/`, so nobody had built these screens twice and
+the module is additive. `specs/060-portfolio/` is the SAME folder on both sides
+(main took §375, spec 060's first slice, weeks ago), so the spec extends rather
+than collides.
+
+**THE RENUMBER RAN BEFORE THE MERGE AND THE SET WAS RE-MEASURED RATHER THAN READ
+OFF THE RECORD.** main holds its own §376–§380 — spec 061's reports tab, an
+address as a value, an address taken whole, the working copy carrying the
+platform, and one blank template per way of planning — so this branch's five
+sections became **§439–§443**. §442.17 had written that collision down when the
+branch held FOUR such sections, and the branch then wrote a fifth: a sweep run
+from that reading would have left §380 still wearing main's number. *A
+measurement of a merge goes stale the moment the branch writes another section,
+so the count is taken against `origin/main` on the day of the merge.*
+
+**AND THE SWEEP SWEPT THE PROSE THAT DESCRIBES IT.** Both copies of that
+paragraph — the decisions log and CLAUDE.md's footer — carried `&sect;376` and
+`&sect;379`, so the renumber turned each into a sentence saying *this branch's
+§439–§442 … so they become §439–§442*: §272.8's shape, where the note recording a
+rule is eaten by the rule. Both corrected in place, and both now say that the
+count is taken on the day. **Provably scoped**: at the merge base not one of the
+files this branch touches carried a §376–§380 citation at all, so every one of
+the 216 in the tree was ours — and **all three spellings** were swept, the
+literal `§`, the `&sect;` entity and the `\u00a7` JS escape, the third appearing
+exactly twice (§264.3, §336.1, §340.4).
+
+**TEN CONFLICTS, EVERY ONE COMBINED RATHER THAN PICKED** (§318.7). The two worth
+reading are the two where both sides had found the same thing independently:
+
+* **`spike/_harness.mjs`** — main's §365.2 and this branch's §442.12 both
+  replaced the hand-written special cases for an enumerated column with a rule
+  that reads the constraint. **Main's is the one kept**, because it reads the bare
+  `IN (…)` form as well as Postgres's normalised `= ANY (ARRAY[…])`; what this
+  branch adds to it is the CLASS rather than the instance — `time` and the two
+  float types beside main's `date`, which with the branches above cover every
+  type `db/schema.sql` uses today (§104.7). This branch's own `enumValues()` is
+  its twin and had no caller left, so it is DELETED (§24).
+* **`checks/tracker.mjs`** — the same one line, fixed at opposite ends. The
+  documents are rendered as of a fixed `TODAY`; main corrected the WORDS, which
+  asked the real clock, and this branch corrected the DATES, which were typed and
+  went stale. **Both halves are kept**: the words read `TODAY` and the dates are
+  now DERIVED from it, which makes them the same two days that were typed and
+  fixed by CONSTRUCTION — and that is what lets main's new assertion name the two
+  headings in words and stay true, which is the only thing that goes red under
+  `week-numbers` and `week-of-year` (§113.8). 228 → **229 green**, which is the
+  proof the combination is right rather than merely parseable.
+
+The rest: `lib/modules.ts` takes main's `lines`/`mark` fields WITH
+`built: true`, and declares no line and no mark, **said rather than left as an
+absence** (§54.5) — both read `lib/landing-facts.ts`, which answers about the
+Strategy cycle and knows nothing about a delivery plan, so either would need
+facts of its own and that is a decision about what a consultant reads on a card
+(rule 1b); `modules/registry.ts` takes main's table WITHOUT the trial module
+main retired (§360) and WITH Portfolio, and the file's own stale sentence
+— *"Portfolio and Processes are words the address reserves and nothing more"* —
+is corrected in the same edit (§104.8); `package.json` keeps both sides' scripts;
+`checks/insights.mjs` keeps main's whole new §14 and drops its in-try fixture
+delete, because this branch moved that delete into the `finally` where a run that
+dies still clears its tenants (§94.2); `checks/modules.mjs` keeps this branch's
+UNBUILT generalisation and main's two Setup assertions; and the three record
+files read §375's amendment, then main's §375.1–§438, then §439–§443, with ONE
+"Last Updated" in CLAUDE.md.
+
+**§443.1a — AND ONE ASSERTION HAD TO BE REWRITTEN, NOT LOOSENED** (§218,
+§214.3). `checks/modules.mjs` asked that a module's document hold **no
+`<script`** of any kind. True of every module while none of them had behaviour,
+and red the day Portfolio served its own — *a check arguing with a decision
+rather than guarding one*, and arguing with the very route the policy exists to
+leave open: the shell's CSP is `script-src 'self'`, so an EXTERNAL script from
+this origin is allowed and only an inline one is silenced. What the policy
+forbids is what is asserted now — no `on…=` handler and no `<script>` with a
+body — **with both ends** (§94.2), because a module that stopped serving its
+behaviour at all would satisfy a bare absence perfectly (§113.8). Proved able to
+fail on the fault it is about: an `onclick=` put back on the module's own
+heading takes it 184/0 → 183/1 on exactly that assertion.
+
+**§443.1b — WHAT THE MERGED TREE MEASURES.** The frozen product is byte-identical
+to main's — this branch touches no source under `SMP-Project-Folder/src/` — so
+`checks/built-in-step.py` reports the shipped file byte-identical to what the
+merged sources build, **§91's trigger is not met and `sw.js` is NOT bumped**
+(the SHELL name is the same string on both refs, confirmed immediately before
+the push, §94.16), and `node --check sw.js` parses with exactly one
+`const SHELL` (§146.2). `checks/generated-in-step.mjs` **all clear**, and a scan
+of build.py's own concatenation finds the tree's only duplicated top-level
+declarations to be the six §281.1 deliberately leaves (§56.7, §147.4).
+Run serially after a real build (§379.14), each verdict read by its own shape
+and never by `tail -1` (§380.6): portfolio **135/0**, portfolio:module
+**197/0**, modules **184/0**, door **145/0**, state **92/0**, shell **142/0**,
+blob **23/23**, comms **47/47**, upload **9/0**, store **31/0**, view-as
+**20/0**, room **10/0**, deploy **5/0**, insights **137/0**, insights:tab
+**24/0**, drivers **99/0**, tracker **229/0**, notes **170/0**, standing
+**7/0**, demo **28/0**, assistant **10/0**, release **9/0**, frameworks
+**90/0**, memory **21 · 14 · 42 · 36**, eight of the nine spike proofs with S2
+walking **56** tenant tables isolated, `typecheck` **clean** (§379.16 — the
+`lib/prisma.ts` error was a missing `prisma generate` and not a fault), and the
+frozen whole-platform sweep **33 viewers, ERRORS none**.
+
+**TWO REDS ARE `main`'s AND ARE LEFT AS `main`'s** (§303, and §303 settles whose
+a red is rather than that somebody must clear it — §442.11's own note). Both are
+in files **byte-identical to `origin/main`**, about features this branch never
+touched, and this branch's whole contribution over main is the records, the
+Portfolio mockups, the Portfolio module and its two checks, plus small shared
+edits none of these two read: `checks/setup-shape.mjs` **45/2** on main's `desc`
+component (§436) and the top layer's structure (§428); and
+`checks/frameworks-page.mjs` **1/14**, every failure downstream of its FIRST
+probe — *Frameworks is in the console's nav* — on a console page, a nav builder
+and a check that are all three main's own bytes. **S8 is UNRUN rather than
+passing** and says so itself (§54.5): it wants a v2.0-shaped frozen database this
+container has not got, which §442.12 already recorded.
+
+**AND ONE THING IS FLAGGED RATHER THAN FIXED, BECAUSE IT IS MAIN'S AND IT IS NOT
+THIS ROUND'S** (rule 1b): **`smp-app/.env.local` IS TRACKED IN GIT**, arriving at
+main's §365, and CLAUDE.md's own pre-commit rule names that file by name — *no
+secrets committed (`.env.local`, tokens, keys)*. What it holds today is a
+password-less `127.0.0.1:55432` URL, so nothing is exposed; what is wrong is the
+habit, because the next person to point it at a real database commits that.
+Running the suite here needed the URL passed in the environment to override it,
+which is the shape of the problem in miniature.
+

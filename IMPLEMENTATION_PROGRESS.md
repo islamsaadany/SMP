@@ -9002,3 +9002,41 @@ product.
 
 197 assertions, proved able to fail twenty-six ways — one of those breaks puts
 Islam's screenshot back word for word.
+
+
+## Portfolio — merged to `main` (2026-10-01)
+
+**Islam: "merge to main."** Main had moved 313 commits underneath and was at
+§438; it still held nothing of Portfolio, so the module is additive. The five
+sections this branch wrote were renumbered §439–§443 before the merge, because
+main had taken those numbers for five other pieces of work.
+
+**Ten things overlapped and every one was combined rather than picked.** The two
+worth knowing about are the two where both sides had found the same fault on
+their own: the spike's seeding harness, where main's answer is the better one and
+is kept with one addition of ours, and the Internal Tracker's week headings,
+where main fixed the words and we fixed the dates — both halves kept, and the
+tracker's count went from 228 to 229, which is how we know the combination is
+right rather than merely tidy.
+
+**One check assertion had to be rewritten.** It asked that a module's page carry
+no script at all, which was true while no module had any behaviour and stopped
+being true the day Portfolio served its own. It now asks what the security
+policy actually forbids — nothing inline — and it was proved able to fail on
+that.
+
+**What was run on the merged tree, after a real build**, each result read on its
+own terms: the twenty-six app checks green (portfolio 135, its module 197,
+modules 184, door 145, state 92, shell 142, tracker 229, notes 170, insights
+137 and the rest), eight of the nine database proofs, the typecheck clean, and
+the whole frozen platform swept with no console error anywhere.
+
+**Two red checks are main's own and are left as main's**, established by their
+files being byte-for-byte main's and about features this work never touched: the
+set-up flow's shape check and the Frameworks console page.
+
+**And one thing is flagged for Islam rather than fixed here**: `smp-app/.env.local`
+is committed to the repository, which the project's own pre-commit rule forbids by
+name. Nothing is exposed today — it holds a local address with no password — but
+the next person to point it at a real database commits that too.
+

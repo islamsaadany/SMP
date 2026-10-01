@@ -9133,13 +9133,16 @@ errors. Both of this round's deliberate breaks were put back and watched to fail
 again, because a test you ran before a merge has not been run on what the merge
 produced.
 
-**One thing to know: nobody has been able to confirm the live site has picked
-this up.** The change is entirely in code that runs on the server behind the
-sign-in, so not one file a browser downloads has changed — the live site serves
-byte-for-byte what it served before, and there is nothing on it that says which
-build it is. It is almost certainly live; it cannot be proved from here. If
-anything looks wrong on the Portfolio plan page, a hard refresh is not the
-answer — tell me and I will look.
+**And it is live — confirmed.** I first wrote that it could not be confirmed,
+because nothing a browser downloads has changed, so the usual way of telling
+whether the live site has picked something up does not work here. That was the
+wrong conclusion: every page the site serves quietly carries a tag saying which
+build it came from, and that tag changed after the push and has stayed changed.
+The only thing pushed in that window was this work. So it is on the live site.
+
+Worth keeping, because it will come up again: from now on I can tell whether a
+release has landed even when the change is entirely in code that runs on the
+server, which is most of what a change to one of these modules is.
 
 ### What to go and check
 

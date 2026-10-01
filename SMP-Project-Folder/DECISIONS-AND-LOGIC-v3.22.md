@@ -60390,7 +60390,7 @@ offer, because `putBack` restores the value and not which key was pressed — to
 that row offers only *work package* once the phase holds one, so it cannot be
 reached from the state that produces it, and widening `putBack` to carry a control's
 own state is a decision about that helper rather than a defect fix (rule 1b).
-### §443.10 — THE MERGE WITH `main` (§444–§450), AND A DEPLOYMENT WITH NO WITNESS (2026-10-01)
+### §443.10 — THE MERGE WITH `main` (§444–§450), AND THE WITNESS I HAD WRITTEN OFF (2026-10-01)
 
 Islam: *"merge to main."* `main` had moved **23 commits** under this branch —
 §444's shared top bar, §445/§446's console card, and §447–§450's single-company
@@ -60444,19 +60444,43 @@ falsifications were re-run on the merged tree**, because one made before a merge
 proves nothing about the merged build (§94.5): **3 red each**, printing
 `DiscoveryDelivery` and `panel false · box false`.
 
-**AND THIS DEPLOYMENT HAS NO WITNESS, WHICH IS SAID RATHER THAN LEFT AS A
-SILENCE** (§375.2's precedent, §379.5's lesson with the sign reversed — that one
-recorded a limitation it had not measured, and the matching risk here is
-recording a success nobody has seen). The merge changes **no served static
-byte**: `shell.js` (4,262,973), `platform.css` (703,802) and `sw.js` (4,192)
-come back from the live site byte-identical to this tree's generated copies
-**and to what they served in the minute before the push**, and the door carries
-no build identifier at all (its assets sit under `/_next/static/immutable/`), so
-the two builds are indistinguishable from outside. What production gains is in
-server-rendered code behind the door. **Nobody here has seen production serve
-this commit**, and §108.17's rule is that delay does not settle it either — so
-`main`'s tip is left unique by construction and **the branch is deliberately NOT
-fast-forwarded** until somebody reads it.
+**AND THE WITNESS WAS THERE AND I HAD WRITTEN IT OFF — `data-dpl-id`.** The
+paragraph this replaces said *"nobody here has seen production serve this
+commit"*, on the sound-looking ground that the merge changes **no served static
+byte**: `shell.js` (4,262,973), `platform.css` (703,802) and `sw.js` (4,192) all
+come back byte-identical to this tree's generated copies **and to what they
+served in the minute before the push**, and the door's assets sit under
+`/_next/static/immutable/`, so the usual witnesses (§91.5, §367's own pair) are
+blind here by construction. **That much is true and the conclusion drawn from it
+was not.** Every document Vercel serves carries its **deployment id** on the
+`<html>` element, and two reads of the *same* door minutes apart came back the
+same 14,166 bytes with **different hashes** — found by diffing them rather than
+by looking for it:
+`dpl_HtbNYqUe1o3bsF32wChM5NG2Drnr` → `dpl_BoJdSzLBwFZShBnbHEvcua6NxKCg`, then
+**stable across three reads twenty seconds apart**. The only commits pushed in
+that window were this merge's, so **production has promoted a deployment of one
+of them, and both carry the fix**: §91.5's live read is satisfied, and the branch
+is fast-forwarded.
+
+*A witness does not have to be a file whose bytes changed — it has to be
+something the deployment stamps.* §91.5 names `sw.js` and §367 names `shell.js`
+and `platform.css` because those are what moved in the rounds that wrote them;
+all three are **proxies** for *did this build land*, and all three go blind the
+moment a round changes only server-rendered code — which is most of what a module
+round changes. `data-dpl-id` answers the question directly and works whether or
+not a served byte moved, so it is the witness to reach for first from now on.
+**The two-read method is the whole of it**: the id before the push is the
+baseline that separates a landed build from one that has not started, exactly as
+§380.2's pre-push byte count did, and §108.17's *delay is not proof* stops being
+the last word, because this is a measurement rather than a wait.
+
+**AND THE STOP HOOK ASKED FOR THE BRANCH PUSH WHILE THE HOLD WAS STILL ON**,
+which is §380.2's own situation and is recorded rather than quietly obeyed: it is
+a generic rule about unpushed work and §91 is a specific one about a deployment in
+flight. What settled it was not the hook but the reading above — *the hold ends
+when somebody measures, and the hook's asking is a reason to go and measure rather
+than a reason to push.* Had the id not moved, the honest answer would still have
+been to hold and say so.
 
 **AND TWO THINGS IN THE HARNESS COST TIME AND ARE WORTH A LINE EACH.** `qa.py`
 reads `build.py`'s **intermediate** (`src/strategy-management-platform.html`),

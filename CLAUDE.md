@@ -10921,7 +10921,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-10-01 &mdash; **&sect;443.10: the merge with `main`
-(&sect;444&ndash;&sect;450), and a deployment with no witness.** Islam: *"merge
+(&sect;444&ndash;&sect;450), and the witness I had written off.** Islam: *"merge
 to main."* `main` had moved **23 commits** under this branch &mdash; the shared
 top bar, the console card's logo and Settings mark, and the single-company work,
 from three other sessions &mdash; fetched and READ before anything was merged
@@ -10954,18 +10954,36 @@ clear, `tsc` clean COLD, main's own `single-company.py` all good and
 `platform-cards.py` 30/0, and the sweep **33 viewers / 243 destinations / ERRORS
 none** summed from the run's own lines (&sect;332) &mdash; **with both of this
 round's falsifications re-run there** (&sect;94.5), 3 red each, printing
-`DiscoveryDelivery` and `panel false &middot; box false`. **AND THIS DEPLOYMENT
-HAS NO WITNESS, SAID RATHER THAN LEFT AS A SILENCE** (&sect;375.2's precedent;
-&sect;379.5 with the sign reversed &mdash; that one recorded a limitation it had
-not measured, and the matching risk here is recording a success nobody has seen):
-the merge changes **no served static byte**, so `shell.js`, `platform.css` and
-`sw.js` come back from the live site byte-identical to this tree's generated
-copies **and to what they served the minute before the push**, and the door
-carries no build identifier at all (`/_next/static/immutable/`) &mdash; what
-production gains is server-rendered code behind the door. **Nobody here has seen
-production serve this commit**, and &sect;108.17 says delay does not settle it, so
-`main`'s tip is left unique and **the branch is deliberately NOT
-fast-forwarded**. **AND TWO HARNESS FACTS COST TIME**: `qa.py` reads `build.py`'s
+`DiscoveryDelivery` and `panel false &middot; box false`. **AND THE WITNESS WAS THERE AND I HAD
+WRITTEN IT OFF &mdash; `data-dpl-id`.** The sentence this replaces said *nobody
+here has seen production serve this commit*, on the sound-looking ground that the
+merge changes **no served static byte** &mdash; `shell.js`, `platform.css` and
+`sw.js` all come back byte-identical to this tree's generated copies AND to what
+they served the minute before the push, and the door's assets sit under
+`/_next/static/immutable/`, so &sect;91.5's and &sect;367's own witnesses are blind
+here **by construction**. That much is true and the conclusion drawn from it was
+not: **every document Vercel serves carries its deployment id on the `<html>`
+element**, and two reads of the same door minutes apart came back the same 14,166
+bytes with DIFFERENT hashes &mdash; found by diffing them rather than by looking
+for it &mdash; `dpl_HtbNYq&hellip;` &rarr; `dpl_BoJdSz&hellip;`, then **stable
+across three reads twenty seconds apart**. The only commits pushed in that window
+were this merge's and **both carry the fix**, so &sect;91.5 is satisfied and the
+branch is fast-forwarded. *A witness does not have to be a file whose bytes
+changed &mdash; it has to be something the deployment stamps*: `sw.js`,
+`shell.js` and `platform.css` are named in &sect;91.5 and &sect;367 because they
+are what moved in the rounds that wrote them, and all three are PROXIES for *did
+this build land* that go blind the moment a round changes only server-rendered
+code, which is most of what a module round changes. **Read `data-dpl-id` first
+from now on**, before the push for the baseline and after it for the answer, which
+is &sect;380.2's two-read method with a stamp in place of a byte count &mdash; and
+it is what takes &sect;108.17's *delay is not proof* off the table, because this is
+a measurement rather than a wait. **AND THE STOP HOOK ASKED FOR THE BRANCH PUSH
+WHILE THE HOLD WAS ON** (&sect;380.2's own situation, recorded rather than quietly
+obeyed): a generic rule about unpushed work against a specific one about a
+deployment in flight &mdash; and what settled it was the reading rather than the
+hook, because *the hook's asking is a reason to go and measure, never a reason to
+push*; had the id not moved, the honest answer would still have been to hold and
+say so. **AND TWO HARNESS FACTS COST TIME**: `qa.py` reads `build.py`'s
 untracked INTERMEDIATE, which `built-in-step.py` deletes in its own `finally`
 (working as designed), so running the guard and then the sweep makes the sweep die
 on `ERR_FILE_NOT_FOUND` &mdash; a file named and no cause; build first. And

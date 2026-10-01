@@ -475,8 +475,13 @@ try {
     (page.match(/<form/g) || []).length === 1);
   check("the file's path is nowhere in the document, which is §2's absence end to end",
     !page.includes("insights/" + a.id), "the blob path reached the page");
-  check("no script at all, so the shell's script-src has nothing to admit",
-    !/<script/i.test(page));
+  /* REWRITTEN, NEVER LOOSENED (§218, §444): "no script at all" was the claim
+     while the page carried none; the shared top bar loads ONE FILE, which the
+     shell's `script-src 'self'` admits — so what is asserted is still that
+     nothing INLINE needs to run, and that the one script is the bar's. */
+  check("no inline script, so the shell's script-src has nothing to admit but the bar's file",
+    (page.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => t === '<script src="/topbar.js"></script>') &&
+    (page.match(/<script/gi) || []).length === 1 && !/\son[a-z]+=/i.test(page));
   check("the module switcher is its way back out",
     page.includes('href="/client-a/strategy"'), "no way back to Strategy");
   check("a date is written the way the rest of the product writes one",

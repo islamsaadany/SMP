@@ -305,9 +305,14 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || (buExists() ? "Plan" : L("pillar", "bu")),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
+                    when: function(){ return planOn("group") && compOn("group", "pillar"); } },
+                  /* §447: with the units off the company page carries its
+                     capabilities as a section of their own. */
+                  { k:"caps", ac:"g_found", label:L("capability", "bu"),
+                    render: renderTopCaps,
+                    when: function(){ return !buExists() && SMPRules.capExists(GROUP) && capsReachable().length > 0; } }];
       } };
   }
   var SUBS = {
@@ -481,10 +486,15 @@
       topStrategyTab(true),
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       topStrategyTab(false),
-      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
+      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
+        /* §449: off means it disappears (§102); the switch stays on Setup. */
+        when: function(){ return focusOn(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
-      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      /* §447: the weighting sets how much each unit counts; with the units
+         off there is nothing for it to weight. */
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
+        when: function(){ return buExists(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -1367,7 +1377,9 @@
     var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
     if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    if (cs.length) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
+    /* §447: with the units off, capabilities are a section of the company
+       page and not a side of the row. */
+    if (cs.length && buExists()) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
     if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
@@ -1430,8 +1442,11 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
-    companiesReachable().forEach(function(ck){
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    /* §448: planned on the company, a division is read under Strategy ›
+       Performance rather than visited, so it leaves the navigation — unless
+       the group is out of reach, when the divisions are all there is. */
+    if (buExists() || !tops.length) companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });
@@ -2107,6 +2122,15 @@
        always has — on the tab marked primary (Performance). Strategy leading
        the row is where it sits, not where a session lands. */
     if (k === "group") {
+      /* §449: A TOP LAYER WITH PILLARS OF ITS OWN OPENS ON THEM (Islam:
+         "when I click on the company it should open by default on the
+         Pillars"). Only when the plan section is actually offered, so a
+         group whose plan is off still opens on Performance as before. */
+      var gs = d.filter(function(x){ return x.k === "strategy"; })[0];
+      if (gs) {
+        var gsecs = allowed(gs.sections(), t);
+        if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+      }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
     }
@@ -4377,6 +4401,16 @@
     document.querySelectorAll("[data-modal]").forEach(function(b){
       b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
     });
+    /* §447: a capability opened from the company page lands where its own
+       row would have landed it. */
+    document.querySelectorAll("[data-gocap]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.preventDefault();
+        if (!capsReachable().some(function(c){ return "cap:" + c.id === b.dataset.gocap; })) return;
+        leaveModes(); current = b.dataset.gocap; currentSub = entrySub(current);
+        paint(); window.scrollTo(0,0);
+      });
+    });
     document.querySelectorAll("[data-go]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation(); e.preventDefault();
@@ -4516,9 +4550,13 @@
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     /* The focus feature's switch (§102). `this`, never a closure over the
        element, for the reason stated three lines down. */
-    var fsw = document.querySelector("[data-focusswitch]");
-    if (fsw) fsw.addEventListener("click", function(){
-      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    /* §449.1: BOTH halves. A `querySelector` wired the first match only, so
+       since the switch became an On|Off pair (§130.5) pressing Off did
+       nothing at all — Islam: *"can't turn off"*. */
+    document.querySelectorAll("[data-focusswitch]").forEach(function(fsw){
+      fsw.addEventListener("click", function(){
+        setFocusOn(this.dataset.focusswitch === "1"); paint();
+      });
     });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever

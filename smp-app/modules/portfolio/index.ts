@@ -134,11 +134,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
     return await withTenant(a.tenantId, async (c) => {
       const role = await roleOn(c, first, a.personKey);
       if (!office && !role)
-        return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have,
+        return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant,
           "That project does not name you."), 404);
       const project = await oneProject(c, first);
       if (!project)
-        return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have,
+        return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant,
           "That project is not here."), 404);
 
       if (second === "plan") {
@@ -168,7 +168,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
            prints is a query for nothing (§98's own arithmetic). */
         const people = edit ? await registerFor(c) : [];
         return html(await planDocument({
-          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
           project, rows, names, today: todayIn(), view, act, actRow, role, office,
           edit, build, seat: office ? (a.seat as Who["seat"]) : "none",
           personKey: a.personKey, people,
@@ -185,24 +185,24 @@ export async function serve(a: ServeArgs): Promise<Response> {
         const seat: Who["seat"] = office ? (a.seat as Who["seat"]) : "none";
         if (second === "analytics")
           return html(await analyticsDocument({
-            slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+            slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
             project, rows, today: todayIn(), role, seat,
           }));
         const names = (await readNames(c)).short;
         return html(await progressDocument({
-          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+          slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
           project, rows, names, today: todayIn(), role, seat, personKey: a.personKey,
         }));
       }
 
       return html(await charterDocument({
-        slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+        slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
         charter: project, role, office, mayEdit: mayEditCharter(who(role)),
       }));
     });
     } catch (e) {
       console.error("portfolio: reading " + a.slug + "'s project:", (e as Error).message);
-      return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have,
+      return html(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant,
         "That project could not be read just now. Nothing has been lost \u2014 try again in a moment."), 503);
     }
   }
@@ -235,7 +235,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
     console.error("portfolio: reading " + a.slug + "'s projects:", (e as Error).message);
   }
   return html(await landingDocument({
-    slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+    slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
     seen, today, office, mayStart: mayStartProject(who(null)),
   }));
 }
@@ -361,7 +361,7 @@ async function act(c: Q, body: Record<string, unknown>, a: ServeArgs, office: bo
       const act = want && UUID.test(want) ? await oneActivity(c, id, want) : null;
       const names = (await readNames(c)).short;
       const args: PlanArgs = {
-        slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have,
+        slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant,
         project, rows, names, today, view: String(body.view || "") === "time" ? "time" : "list",
         act, actRow: act ? rows.find((r: Row) => r.id === act.id) || null : null,
         /* THE PEN IS OPEN ONLY FOR SOMEBODY WHO MAY BUILD, and the invariant

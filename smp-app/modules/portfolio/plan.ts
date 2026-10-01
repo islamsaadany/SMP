@@ -68,6 +68,7 @@ const at = (d: string) => Date.parse(d + "T00:00:00Z");
 
 /* ══ the shape the two views read ══════════════════════════════════════ */
 export type PlanArgs = {
+  consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
   slug: string; tenantId: string; tenantName: string; have: ModuleKey[];
   project: Project;
   rows: Row[];
@@ -762,7 +763,7 @@ export async function planDocument(a: PlanArgs): Promise<string> {
   if (brk() !== "no-elbows") js.push(clientHref(a.slug, "portfolio", "plan.js"));
   if (a.edit) js.push(clientHref(a.slug, "portfolio", "write.js"));
 
-  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
+  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
     css: PLAN_CSS, js: js.length ? js : undefined,
     /* THE PROJECT RIDES ON THE BODY, because every act the script posts is
        about this project and the api asks for it by name — written into

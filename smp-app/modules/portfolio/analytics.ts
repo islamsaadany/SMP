@@ -51,6 +51,7 @@ const at = (d: string) => Date.parse(d + "T00:00:00Z");
 const gap = (a: string, b: string) => Math.round((at(a) - at(b)) / DAY);
 
 export type AnalyticsArgs = {
+  consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
   slug: string; tenantId: string; tenantName: string; have: ModuleKey[];
   project: Project;
   rows: Row[];                  /* already rolled up */
@@ -184,6 +185,6 @@ export async function analyticsDocument(a: AnalyticsArgs): Promise<string> {
               esc(plural(SOON, "day")) + ".</p>") + "</div>\n") +
     "</main>\n";
 
-  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
+  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
     css: ANALYTICS_CSS, body });
 }

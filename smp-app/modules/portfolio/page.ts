@@ -19,7 +19,8 @@
    `checks/portfolio.mjs` proves and the same ones the drawings read, so this
    list cannot disagree with the pages behind it (§5.2). */
 import { barFor } from "../../lib/branding.ts";
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG } from "../../lib/topbar.ts";
 import {
   type Row, type Cadence, ROLE_WORD, type Role,
   rollUp, overall, owed, waitingSignOff, overdue, nobodyOn, behind, nextCheckpoint,
@@ -86,21 +87,6 @@ body{margin:0;background:var(--ground);color:var(--ink);
   font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 button{font:inherit;cursor:pointer}
 button:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
-
-/* the module chrome — the tracker's and Insights', class for class */
-.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
-.bar h1{margin:0;font-size:14.5px;font-weight:600}
-.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
-.msw{position:relative;flex:none}
-.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
-.msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
-.msw svg{width:17px;height:17px;display:block}
-.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
-.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
-.mi.on{background:var(--ground);cursor:default}
-.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 
 .wrap{max-width:1180px;margin:0 auto;padding:28px 16px 56px}
 .phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -199,18 +185,6 @@ textarea.fld{min-height:64px;resize:vertical}
 .ghost{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 13px;font-size:13px;color:var(--ink-2);font-weight:600}
 `;
 
-function switcher(slug: string, have: ModuleKey[]): string {
-  const items = moduleMenu(have).map((m) =>
-    m.key === "portfolio"
-      ? '<span class="mi on" aria-current="true">' + esc(m.label) + "<i>" + esc(m.note) + "</i></span>"
-      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) + "<i>" + esc(m.note) + "</i></a>").join("");
-  return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-    '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-    '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-    '</g></svg></summary><div class="mmenu">' + items + "</div></details>";
-}
-
 /* ONE SKELETON FOR EVERY PAGE THIS MODULE SERVES (§53.5): the palette, the
    chrome, the switcher and the policy are settled once, and a page adds only
    its own stylesheet (`css`) and its own script (`js`). A second skeleton is
@@ -220,17 +194,17 @@ function switcher(slug: string, have: ModuleKey[]): string {
    api WITHOUT that script would otherwise have to take the script too (§53.5
    from the other side — one argument, two decisions). The plan's writing half
    uses `attrs`. */
-export function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; bar: string; api?: string; attrs?: string; css?: string; js?: string | string[]; body: string }): string {
+export function skeleton(a: { slug: string; tenantName: string; have: ModuleKey[]; consultant?: boolean; bar: string; api?: string; attrs?: string; css?: string; js?: string | string[]; body: string }): string {
   return "<!doctype html>\n<html lang='en' data-module='portfolio'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(a.tenantName) + " &mdash; " + esc(MODULE_DEF.portfolio.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(a.bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", a.bar) + (a.css || "") + brkCss() + "</style>\n</head>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + CSS.replace("%BAR%", a.bar) + (a.css || "") + brkCss() + "</style>\n</head>\n" +
     "<body" + (a.api ? ' data-api="' + esc(a.api) + '"' : "") + (a.attrs || "") + ">\n" +
-    '<header class="bar">' + switcher(a.slug, a.have) +
-    "<h1>" + esc(MODULE_DEF.portfolio.label) + "</h1>" +
-    '<span class="org">&middot; <b>' + esc(a.tenantName) + "</b></span></header>\n" +
+    /* §444: Strategy's white top bar, the same on every module — the
+       navy bar and the four-square switcher it replaced are gone. */
+    topBarHtml({ slug: a.slug, tenantName: a.tenantName, module: "portfolio", have: a.have, consultant: !!a.consultant }) + "\n" +
     a.body +
     (a.api ? '<script src="' + esc(clientHref(a.slug, "portfolio", "app.js")) + '"></script>\n' : "") +
     (a.js ? (Array.isArray(a.js) ? a.js : [a.js])
@@ -312,6 +286,7 @@ function cell(k: string, v: string | number, lab: string, sub: string): string {
 }
 
 export type LandingArgs = {
+  consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
   slug: string; tenantId: string; tenantName: string; have: ModuleKey[];
   /* NULL is *it could not be read*, which is not an empty list (§35, §93,
      §231.4): an empty list is a statement about this client's data, and
@@ -374,7 +349,7 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
     (a.mayStart ? startDialog() : "") +
     "</main>\n";
 
-  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
+  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
     api: clientHref(a.slug, "portfolio", "api"), body });
 }
 
@@ -476,6 +451,7 @@ const SECTIONS: { head: string; rows: { f: string; lab: string; area?: boolean }
 ];
 
 export type CharterArgs = {
+  consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
   slug: string; tenantId: string; tenantName: string; have: ModuleKey[];
   charter: Charter; mayEdit: boolean; role: Role | null; office: boolean;
 };
@@ -503,14 +479,14 @@ export async function charterDocument(a: CharterArgs): Promise<string> {
       (who ? '<span class="word">You are here as ' + esc(who) + "</span>" : "") + "</div>\n" +
     tabs(a.slug, a.charter.id, "charter") +
     secs + "\n</main>\n";
-  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
+  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
     api: a.mayEdit ? clientHref(a.slug, "portfolio", "api") : undefined, body });
 }
 
 /* Nothing here for this viewer, in words, with the way back (§61). */
-export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], why: string): Promise<string> {
+export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], consultant: boolean, why: string): Promise<string> {
   const bar = await barFor(tenantId);
-  return skeleton({ slug, tenantName, have, bar,
+  return skeleton({ slug, tenantName, have, consultant, bar,
     body: '<main class="wrap"><div class="box"><p class="empty"><b>' + esc(why) + "</b><br>" +
       '<a href="' + esc(clientHref(slug, "portfolio", "")) + '">Back to the projects</a></p></div></main>\n' });
 }

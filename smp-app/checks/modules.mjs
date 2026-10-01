@@ -186,6 +186,10 @@ const argsFor = (module, rest) => ({
      a module the office alone may open (the Internal Tracker, spec 054) draws
      its page here rather than its refusal. */
   personKey: "islam", seat: "super",
+  /* ...and a CONSULTANT (§444): only Forefront's own people get the shared
+     bar's trail, which is where the module menu below lives. A client's own
+     person is asserted separately, in §5b. */
+  consultant: true, me: { personKey: "islam", seat: "super" },
 });
 const drawnBy = async (k, rest = []) => {
   const res = await serverFor(k)(argsFor(k, rest));
@@ -637,6 +641,30 @@ for (const k of OWN_PAGE) {
   check("...and any script it does serve comes from this origin, which is what `'self'` means — " + k,
     (doc.match(/<script[^>]*>/g) || []).every((t) => /\ssrc="\/[^"]*"/.test(t)),
     (doc.match(/<script[^>]*>/g) || []).join(" ") || "(no script — vacuously true)");
+  /* §444: and the one script the shared bar brings is a FILE with nothing
+     inside the tag, the both-ends half of main's rule above. */
+  check("...and no script carries a body, src or not — " + k,
+    (doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /<script\b[^>]*>\s*<\/script>/i.test(t)));
+  /* §444: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
+     steps, the theme switch and Sign out — and its script, or the menus and
+     the switch would be drawn and dead (§96). */
+  check("it wears the shared top bar, trail and all — " + k,
+    /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+  check("...and the navy module bar it replaces is gone — " + k,
+    !/class="bar"|class="msw"|class="mmenu"/.test(doc));
+  check("...and the page's dark colours answer the switch, not only the device — " + k,
+    /:root\[data-theme="dark"\]\{/.test(doc) && !/@media \(prefers-color-scheme:dark\)\{:root\{/.test(doc));
+  /* 5b · A CLIENT'S OWN PERSON (§444, Islam: "they don't get it it's only for
+     the consutlants"). No trail and no module menu — and still a way back
+     into their platform, or a page reached by its address is a room with no
+     door (§61). Both ends, or a build that dropped the trail for everybody
+     passes the first half (§94.2). */
+  const staff = await (await serverFor(k)({ ...argsFor(k, []), consultant: false })).text();
+  check("a client's own person gets no trail — " + k,
+    /<header class="tb">/.test(staff) && !/class="tbtrail"/.test(staff) && !/class="tbmenu"/.test(staff));
+  check("...and their way back is the product's name — " + k,
+    staff.includes('class="tbbrand" href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"') && /id="tbout"/.test(staff));
 }
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");

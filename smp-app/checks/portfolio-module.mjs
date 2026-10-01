@@ -1083,8 +1083,14 @@ try {
   const BP = await post(A, SEAT, { act: "start", name: "Press test" });
   const bproj = BP.json.id;
   const { createServer } = await import("node:http");
+  /* §444: the shared top bar loads /topbar.js, which the app serves from its
+     own route (app/topbar.js/route.ts) — served here from the same string, or
+     the browser is handed this harness's HTML and every page reports a
+     SyntaxError that the product does not have (§100.3). */
+  const { TOPBAR_SCRIPT } = await import("../lib/topbar.ts");
   const srv = createServer(async (rq, rs) => {
     try {
+      if (String(rq.url).split("?")[0] === "/topbar.js") { rs.writeHead(200, { "Content-Type": "application/javascript" }); rs.end(TOPBAR_SCRIPT); return; }
       const chunks = []; for await (const ch of rq) chunks.push(ch);
       const url = "http://smp.test" + rq.url;
       const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);

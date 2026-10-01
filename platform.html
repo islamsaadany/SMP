@@ -221,6 +221,13 @@
      taller than one without — two card heights in one row for no reason
      anybody could read. */
   .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
+  /* THE LOGO STANDS FOR THE NAME (Islam, 2026-10-01, signed-off mockup
+     design-mockups/client-card-logo/): a client with a mark shows the mark
+     alone, grown into the space the small mark and the name line shared
+     (30 + 5 gap + the name line = ~59px: 53px plus the plate's padding), so a card with a
+     logo and a card with initials stay one height. The name is the picture's
+     alt text and its hover, and data-name still carries it for the search. */
+  .ccard img.cmark.solo{ height:53px; max-width:180px; align-self:flex-start; border-radius:6px }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }
@@ -264,6 +271,13 @@
        given it and the other was not. */
     cursor:pointer }
   .ccfg:hover, .ccfg:focus-visible{ border-color:var(--amber-tx); outline:none }
+  /* SETTINGS IS A MARK, NOT A WORD (Islam, 2026-10-01, mockup
+     design-mockups/client-card-logo/2026-10-01_settings-as-icon.html): the
+     platform's own two-sliders mark (shell.html's ICON_MANAGE, chosen for the
+     Setup button), so one meaning has one picture everywhere. The word moves
+     to the hover and the accessible name. Bring back stays a word. */
+  .ccfg.ico{ width:26px; height:26px; padding:0; display:grid; place-items:center; box-sizing:border-box }
+  .ccfg.ico svg{ width:16px; height:16px; display:block }
   .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
     text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
     color:var(--ink-2); background:var(--surface-2) }
@@ -2019,17 +2033,27 @@
 
      The rows come from the server (lib/modules.ts moduleRows), so the console
      cannot spell a module differently from the switch or from Setup. */
+  /* The platform's Settings mark (shell.html ICON_MANAGE), drawn the same here. */
+  function settingsChip(name) {
+    var cog = el("span", "ccfg ico");
+    cog.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
+      '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
+    cog.title = "Settings";
+    cog.setAttribute("aria-label", "Settings for " + name);
+    return cog;
+  }
+
   function cardFor(c) {
     var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; top.appendChild(im);
     } else {
       top.appendChild(el("div", "cmark", initials(c.name)));
+      top.appendChild(el("h2", null, c.name));
     }
-    top.appendChild(el("h2", null, c.name));
     if (c.industry) top.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
@@ -2081,7 +2105,7 @@
     }
 
     if (c.canConfig) {
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
@@ -2126,11 +2150,11 @@
     b.dataset.client = c.key;
     b.dataset.arch = "1";
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; b.appendChild(im);
     } else {
       b.appendChild(el("div", "cmark", initials(c.name)));
+      b.appendChild(el("h2", null, c.name));
     }
-    b.appendChild(el("h2", null, c.name));
     if (c.industry) b.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var when = archDate(c.at);
@@ -2161,7 +2185,7 @@
       back.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go(e); });
       acts.appendChild(back);
 
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* ON THIS PAGE, not the client's (§360): an archived client's address
          is closed, so its two acts — bringing it back and deleting it — are

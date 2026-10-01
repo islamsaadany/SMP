@@ -1,0 +1,109 @@
+<title>Client Card Settings Icon</title>
+<style>
+/* Layout: today's three cards above, the proposal below, same grid and widths as the console */
+:root{
+  --ground:#F3F5F8; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5;
+  --ink:#1B2433; --ink-2:#3C475A; --ink-3:#5E6A7D;
+  --ff:#16325C; --amber:#F0A132; --amber-tx:#9A5A14; --note:#FFF6E8;
+  --sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14181F; --surface:#1C222B; --surface-2:#232A35; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C3CAD5; --ink-3:#98A2B2; --amber-tx:#F0B866; --note:#2A2418; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14181F; --surface:#1C222B; --surface-2:#232A35; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C3CAD5; --ink-3:#98A2B2; --amber-tx:#F0B866; --note:#2A2418; color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);margin:0}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:grid;gap:28px}
+h1{font-size:20px;margin:0;text-wrap:balance}
+.key{font:600 10.5px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:10px}
+.key::after{content:"";flex:1;border-top:1px solid var(--line)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.ccard{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.ctop{display:flex;flex-direction:column;gap:5px;padding:13px 14px}
+.set{position:absolute;top:10px;right:10px;font:600 10px/1 var(--mono);letter-spacing:.06em;
+  color:var(--amber-tx);border:1px solid var(--amber);border-radius:5px;padding:5px 7px;background:var(--surface)}
+.cmark{width:30px;height:30px;border-radius:8px;background:var(--ff);color:var(--amber);
+  font:700 11px/30px var(--mono);text-align:center;letter-spacing:.05em}
+.plate{background:#fff;border-radius:6px;display:inline-flex;align-items:center;align-self:flex-start;box-sizing:content-box}
+.plate.small{height:30px;padding:3px 7px}
+.plate.big{height:49px;padding:3px 7px;max-width:180px}
+.plate svg{height:100%;width:auto;display:block}
+.ccard h2{margin:0;font-size:16px;font-weight:600}
+.ind{margin:0;color:var(--ink-3);font-size:12.5px}
+.foot{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;border-radius:5px;
+  background:var(--surface-2);color:var(--ink-2)}
+.tag.seat{border:1px solid var(--ff);background:transparent;color:var(--ink-3)}
+.mods{margin-top:auto;border-top:1px solid var(--line)}
+.mrow{display:flex;padding:6px 14px;font-size:13px;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow i{margin-left:auto;font-style:normal;font-size:11.5px;color:var(--ink-3)}
+.note{background:var(--note);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px;line-height:1.55;max-width:70ch}
+.note ul{margin:6px 0 0;padding-left:18px}
+.hl{outline:2px dashed var(--amber);outline-offset:3px}
+.cog{position:absolute;top:10px;right:10px;width:26px;height:26px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--amber-tx);cursor:pointer}
+.cog:hover{border-color:var(--amber-tx)}
+.cog svg{width:16px;height:16px}
+.back{position:absolute;top:10px;right:42px;font:600 10px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--line);border-radius:7px;padding:7px 8px;background:var(--surface);color:var(--ink-2)}
+.ccard.arch .back{right:42px}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+
+<div class="wrap">
+  <h1>Client cards: Settings as an icon</h1>
+
+  <div class="key">Today</div>
+  <div class="cards" id="today"></div>
+
+  <div class="key">Proposed</div>
+  <div class="cards" id="proposed"></div>
+
+  <div class="key">Archived band (same change)</div>
+  <div class="cards" id="arch"></div>
+
+  <div class="note">
+    <b>What changes</b>
+    <ul>
+      <li>The word SETTINGS in the card's corner becomes a small square button with the two-sliders mark, the same mark the platform's own Setup button already wears.</li>
+      <li>Hovering it says "Settings", and a screen reader reads "Settings for Raya Trade". It opens the same page as today.</li>
+      <li>On an archived client, Bring back stays a word (it is the main thing to do there) and Settings beside it becomes the icon.</li>
+      <li>The square sits in the same corner, so nothing else on the card moves; the logo keeps more room to its right.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+var LOGO = {
+  elabd:'<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="#F2C9C9"/><text x="30" y="27" text-anchor="middle" font-family="Georgia,serif" font-size="13" fill="#7A2E2E">El Abd</text><text x="30" y="40" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#7A2E2E">since 1974</text></svg>',
+  raya:'<svg viewBox="0 0 150 30"><text x="0" y="22" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="22" fill="#1F3A73">RAYA</text><path d="M78 15 l8 -5 v10z M98 15 l-8 -5 v10z" fill="#1F3A73"/><text x="104" y="20" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#1F3A73">TRADE</text></svg>'
+};
+var C = [
+  {name:"El Abd", ind:"Food & Beverage", logo:"elabd", units:5, mods:[["Strategy","no plan yet"],["Internal Tracker",""]]},
+  {name:"RHI", ind:"Manufacturing", init:"RH", units:3, mods:[["Strategy",""]]},
+  {name:"Raya Trade", ind:"", logo:"raya", units:10, mods:[["Strategy",""],["Insights",""],["Trial",""]]}
+];
+var ICON='<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"><path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
+function card(c, proposed){
+  var m = c.logo
+    ? '<span class="plate '+(c.logo?'big':'small')+'" title="'+c.name+'" role="img" aria-label="'+c.name+'">'+LOGO[c.logo]+'</span>'
+    : '<div class="cmark">'+c.init+'</div>';
+  var name = c.logo ? '' : '<h2>'+c.name+'</h2>';
+  var ind = c.ind ? '<p class="ind">'+c.ind+'</p>' : '';
+  var rows = c.mods.map(function(r){return '<div class="mrow">'+r[0]+(r[1]?'<i>'+r[1]+'</i>':'')+'</div>';}).join('');
+  var set = proposed ? '<span class="cog hl" title="Settings" role="button" aria-label="Settings for '+c.name+'">'+ICON+'</span>' : '<span class="set">SETTINGS</span>';
+  if (c.arch) set = (proposed ? '<span class="back">Bring back</span>' : '<span class="back" style="right:92px">Bring back</span>') + set;
+  return '<div class="ccard'+(c.arch?' arch':'')+'">'+set+'<div class="ctop"><div class="ctop">'+m+name+ind+
+    '<div class="foot"><span class="tag seat">Super user</span><span class="tag">'+c.units+' units</span></div></div>'+
+    '<div class="mods">'+rows+'</div></div>';
+}
+document.getElementById("today").innerHTML = C.map(function(c){return card(c,false)}).join('');
+var A={name:"Old Co", ind:"", init:"OC", units:2, mods:[], arch:true};
+document.getElementById("arch").innerHTML = card(A,false)+card(A,true);
+document.getElementById("proposed").innerHTML = C.map(function(c){return card(c,true)}).join('');
+</script>

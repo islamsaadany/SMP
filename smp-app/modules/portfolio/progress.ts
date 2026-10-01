@@ -51,6 +51,7 @@ const at = (d: string) => Date.parse(d + "T00:00:00Z");
 const over = (a: string, b: string) => Math.round((at(a) - at(b)) / DAY);
 
 export type ProgressArgs = {
+  consultant?: boolean; /* §444: the shared top bar draws the trail for Forefront only */
   slug: string; tenantId: string; tenantName: string; have: ModuleKey[];
   project: Project;
   rows: Row[];                  /* already rolled up */
@@ -247,7 +248,7 @@ export async function progressDocument(a: ProgressArgs): Promise<string> {
           rowsOf(a, nums, off, "done", "Nothing has been signed off yet.", mayUndo))) +
     "</main>\n";
 
-  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
+  return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, consultant: !!a.consultant, bar,
     css: PROGRESS_CSS, api: clientHref(a.slug, "portfolio", "api"),
     js: clientHref(a.slug, "portfolio", "progress.js"), body });
 }

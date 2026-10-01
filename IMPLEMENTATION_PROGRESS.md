@@ -4,6 +4,13 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-01 — where the strategy is planned, and the divisions read under it (§448), on the branch, not merged.** On Client set-up › Structure the top card now asks where the strategy is planned: on the company or on the business units. It replaces the On/Off on the business units' card and stores the same answer, so nothing changes for a client already set up. Planned on the company, the navigation's top button reads Strategy and the division dropdown goes; each division with functions linked to it appears on Strategy › Performance's row beside the company, showing its reading from those functions only.
+
+**2026-09-30 — an Objectives & actions unit moves across too (§447.1), on the branch, not merged.** Switching business units off moved nothing on El Abd, because its units plan in objectives and actions and the move only copied pillars. Now each such unit arrives on the company page as one direction under its own name: its objectives become that direction's measures and its actions become its tactics, with every figure; an action's date becomes the quarter it falls in, and the date is kept. Units planning in Projects are still not moved. On El Abd: switch business units back on, then off again, to run the move.
+
+**2026-09-30 — one company, its directions on its own page (§447), on the branch, not merged.** Setup › Client set-up › Structure: the business units' card now has an On/Off. Pressing Off asks first; *Move them and switch off* copies every unit's directions onto the company page with all their figures, keeps each unit's old page (Foundation and SWOT) in the archive, and takes the units out of the navigation. The company page then holds the Foundation, the SWOT, the directions and the capabilities as separate sections; its Performance shows the directions averaged equally. Each direction's owner reports their own direction and cannot submit the company's report. Switching back on brings the units back as they were. Checked on the screen and on the server, and both checks fail when the change is removed. El Abd itself has not been switched — that is a press on the live client.
+**2026-10-01 — one top bar for every module (§444).** Built from the mockup Islam approved. Insights, the Internal Tracker and Meeting Notes now wear Strategy's own white top bar instead of their navy ones: *Platform › client ▾ › module ▾*, the theme switch and Sign out. *Viewing as* appears on Insights only, because that is the one module where who is looking changes what is shown. A client's own staff see no trail: just the product name with their company, the theme switch and Sign out. The console keeps its own bar and Strategy is untouched. Checked: the module, Tracker, Notes, Insights, shell and door checks; the bar drawn in light and dark at two widths. **Merged to `main` 2026-10-01.** Main had moved while this was built: Portfolio arrived, and it had taken section numbers §439–§443, so this round became §444. Portfolio came in still wearing the old navy bar, so the merge puts the same shared top bar on Portfolio's pages too, which is what "every module" means. After the merge every check is green, including the three Tracker checks that had been failing; main's own fix for the calendar cleared those.
+
 **2026-09-30 — a business unit says how it plans in Client set-up (§438), merged to main 2026-09-30.** The Business units step of Client set-up now has the same *plans in* dropdown every supporting function row already has: Pillars, Projects or Objectives & actions, starting at Pillars so nothing changes today. On a client that already holds a plan it works like the function row: a warning first, the old plan hidden and kept, and switching back brings it back. The same choice is still in the unit's Edit details on Setup › Business units. Checked in the browser and on the set-up flow's own answer; both checks fail when the change is removed.
 
 **2026-09-30 — The top layer gets its own plan, and capabilities get their own card (§428).** Built from the mockup Islam approved in full. The group now has a Strategy tab (Foundation, a SWOT, a Plan of pillars, key measures and tactics), which only the SMO team writes; an orange Reporting tab the office and the group CEO report through; a separate "own plan" card on Performance that leaves every existing number alone; the first row on the cycle board; and its own slides. The Structure step has a fifth card for capabilities (On/Off, a name, three sections, pillars or projects), and the "Carries capabilities" ticks are gone. Nothing changes for any client until someone adds a pillar or saves the card. Waiting on Islam: pushing to `main`.
@@ -1310,6 +1317,20 @@ away. Screen only: 527/0, 131/0, sweep clean. The editable `.pptx` of that deck
 is Islam's *"for now"* left open.
 
 ---
+
+## 2026-10-01 — §449.1: the Off button on Focus measures works
+
+Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §449, which is on the branch and reaches the live site when it is merged.
+
+## 2026-10-01 — the company page follows its own Structure (§449)
+
+Four from Islam on the company page. The Performance page's Themes section now shows only while Themes are ticked on for the top layer, and its capabilities section only while capabilities are on — called by the client's own word ("Capabilities"), never "Group capabilities". A company with its own pillars opens on Strategy › Pillars; a group with no plan still opens on Performance, so Raya's group page is unchanged. The Focus tab disappears when Focus measures are switched off (the switch stays on Setup › Focus measures), and the company's own pillars are a place to mark on Setup › Focus measures and show on the Focus board. Nothing stored moves. `single-company.py` gains §449, red 5 with the changes taken out. On the branch, not merged.
+
+---
+
+## 2026-10-01 — the company button names the layer (§448.1)
+
+Planned on the company, the top navigation button now reads the first layer's name from Structure (for example "Company") instead of "Strategy", so it no longer clashes with the Strategy tab under it. On the branch, not merged.
 
 ## Documentation sweep, 2026-09-05
 
@@ -8911,6 +8932,7 @@ The yearly revision stays one for the whole client. Checked with the new
 `checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
 Not on main.
 
+- **§450 (2026-10-01, on the branch):** on Client set-up › Structure, the two buttons for where the strategy is planned now sit under the question instead of at the far end of the line.
 
 ## Portfolio — writing a plan (2026-10-01, built)
 
@@ -9091,3 +9113,15 @@ the fix, printing the exact symptoms: `DiscoveryDelivery`, and `panel false`.
 another straight away — two rows. Name a work package, then type an activity's
 name into the row underneath it — it lands under the package. Open an activity and
 add two steps one after the other without reloading.
+### §445 — the logo stands for the name on a client card (2026-10-01)
+On the console's client cards, a client that has a logo now shows the logo on
+its own, bigger, in place of the name; a client without one still shows its
+initials and name, and every card in a row stays the same height. The name is
+still on the logo's hover and the search still finds it. Built from the mockup
+Islam approved. Not on main.
+
+### §446 — Settings on a client card is an icon (2026-10-01)
+The SETTINGS word in the corner of each client card on the console is now the
+platform's two-sliders Settings mark; the word shows on hover. On an archived
+client, Bring back stays a word. Built from the mockup Islam approved and merged
+to main.

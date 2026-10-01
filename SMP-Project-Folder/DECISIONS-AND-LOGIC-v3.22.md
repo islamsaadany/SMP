@@ -60390,3 +60390,277 @@ offer, because `putBack` restores the value and not which key was pressed — to
 that row offers only *work package* once the phase holds one, so it cannot be
 reached from the state that produces it, and widening `putBack` to carry a control's
 own state is a decision about that helper rather than a defect fix (rule 1b).
+## §444 — one top bar for every module (2026-10-01)
+
+Islam, with Strategy's top bar on screen: *"we need to maintain this top bar
+across all the modules as this would be the main navigation bar across all the
+module and clients."* Four answers before the mockup — *"1. only when it changes
+something 2. they don't get it it's onyl for the consutlants 3. console page as
+is 4. white, show mockup"* — and on the mockup
+(`design-mockups/top-bar-modules/2026-10-01_shared-top-bar.html`), *"ok build
+it"*.
+
+- **ONE BUILDER, `smp-app/lib/topbar.ts`**, drawn by every module that serves
+  its own document (Insights, Tracker, Notes). The navy module bars, the
+  four-square switcher and its CSS are DELETED from all three pages (§24); the
+  trail's two menus do that job, as they already do on Strategy (§400/§401).
+- **THE TRAIL IS FOR FOREFRONT'S CONSULTANTS ONLY.** `ServeArgs` gains
+  `consultant` (`user.kind !== "client"`, read by the route, never by a page)
+  and `me` (the signed-in seat, for who may simulate). A client's own staff get
+  the product name, their company, the theme switch and Sign out — what their
+  Strategy bar already shows. `SMP_BREAK=trail-for-staff` reddens it.
+- **VIEWING AS ONLY WHERE IT CHANGES WHAT IS SHOWN**: Insights, because a
+  report can be narrowed to places (§355). Not the Tracker or Notes, the
+  office's own lists, which read the same for everybody who can open them. The
+  list is drawn only for somebody who may simulate (§185's gate, the session's
+  seat), and the choice rides the address the route already narrows by (§383).
+- **NO INLINE SCRIPT** under `script-src 'self'`: the bar's behaviour is served
+  as `/topbar.js` from a Next route rather than from `public/`, which is
+  generated and watched by `generated-in-step`. The module checks were
+  rewritten, never loosened (§218): every `<script>` must have a `src` and an
+  empty body, and no `on*=` handler may appear.
+- **THE THEME SWITCH HAS TO REACH THE PAGE**: the modules' stylesheets answered
+  only `prefers-color-scheme`, so `themedCss()` restates each dark block under
+  `:root[data-theme="dark"]` and guards the media block with
+  `:root:not([data-theme="light"])` — the platform's own shape.
+- **WHAT THE CHECKS TAUGHT**: the Tracker and Notes browser harnesses serve
+  their own page and had to serve `/topbar.js` too, or the page threw on a 404;
+  and `font:inherit` in the bar's CSS tripped §356.14's guard, so it is
+  `font-family:inherit`.
+
+**Proved**: `check:modules` 181/0 and all nine `:red` breaks red (with
+`trail-for-staff`); Notes 170/0; Insights 137/0; shell 142/0; door 145/0;
+`generated-in-step` clear; `next build` green; typecheck clean but for
+`lib/prisma.ts`'s pre-existing error. **Recorded, not this work's**: three
+Tracker assertions (exact-date grouping, the names list width, row height) fail
+identically with this change stashed (§303) — likely the calendar, as in
+§385.10. Screen only: nothing stored, nothing migrated, no rule moved, no
+sign-out owed.
+
+### §444.1 — the merge, and the module that arrived wearing the old bar (2026-10-01)
+
+Islam: *"merge to main."* `main` had moved: Portfolio (spec 060), renumbered
+§376–§380 → §439–§443 by its own merge, so this round's §439 collided and was
+renumbered to §444 **before** the merge — the merge base held §439 nought times,
+so every citation renumbered was this branch's own (§264.3). Three conflicts,
+each combined rather than picked (§318.7): the two record files, and one
+assertion in `checks/modules.mjs` that both sides had rewritten towards the same
+rule — main's *every script is served from this origin* and this branch's
+*every script is a file with an empty body* now both stand.
+
+**PORTFOLIO ARRIVED WEARING THE NAVY BAR AND THE FOUR-SQUARE SWITCHER**, which
+is exactly what §444 removed from every other module — and the decision was
+*every module*, so the merge carries it there rather than leaving one module
+behind (§53.5). `skeleton()` draws `topBarHtml()`; `consultant` is threaded
+through the five page-argument types and `refusedDocument`; the `switcher()`
+builder and the `.bar`/`.msw`/`.mmenu` rules are DELETED (§24). Portfolio's
+palette was already three-state, so `themedCss()` was not needed.
+`checks/modules.mjs` §5 asserts the shared bar on every module that serves its
+own page and so caught this module by construction (Portfolio's page failed
+the bar assertion before the change). **And `checks/portfolio-module.mjs`'s
+harness had to learn `/topbar.js`** — it served its own HTML for that path, so
+the browser read a SyntaxError the product does not have (§100.3, the same
+lesson the Tracker and Notes harnesses taught one round earlier).
+
+Re-run on the merged tree: modules 208/0, Portfolio module 197/0, Portfolio
+135/0, Insights 137/0, Notes 170/0, Tracker 229/0 — the three reds recorded
+above are gone, cleared by main's own §379.11 calendar fix — shell 142/0, door
+145/0, `typecheck` clean, `built-in-step` all good. The frozen product is
+untouched on both sides, so `sw.js` is not bumped. Screen only: no sign-out
+owed.
+
+## §445 — a client's logo stands for its name on the console card (2026-10-01)
+
+Islam, of the console's client cards: *"I fixed this earlier where if the logo
+of the company is there the company name is removed and the logo takes the
+whole vertical space"* — the cards were drawing the small 30px logo AND the name
+under it. The earlier fix was not found anywhere in this repository's history,
+so it was rebuilt, from a mockup signed off first
+(`design-mockups/client-card-logo/2026-10-01_logo-replaces-name.html`).
+
+A client with a mark shows the mark ALONE, grown into the space the small mark,
+the gap and the name line shared (53px plus the plate's padding; the mockup
+drew 49 and measuring the built card against an initials card said 53 keeps
+the two one height — the mockup is the record of what was signed off, not of
+what was built). A client with no mark is unchanged: initials, then the name.
+The name is the picture's `alt` and its hover, and `data-name` still carries
+it, so the search finds a client by name either way. Both the live card and
+the archived band's card follow the rule, since they draw the same identity
+block. Screen only: nothing stored, nothing migrated, no rule moved.
+
+`checks/platform-cards.py` gains the section, both ends (the no-logo client
+keeps its name), on both copies of the console page; 27/0, red 2 under
+`--break=name-beside-logo`. Two checks that read a client's name off its `h2`
+(`multi-client.py`, `door-landing.mjs`) now read the logo's alt where there is
+one. `client-archive.py` (15 red) and `client-setup-outside.py` (29 red) are
+red identically on the build before this change and are not this work's.
+
+## §446 — Settings on a client card is the sliders mark, not a word (2026-10-01)
+
+Islam: *"can we make the settings page an icon rather than a word?"* — the
+SETTINGS chip in each console card's corner. Drawn first
+(`design-mockups/client-card-logo/2026-10-01_settings-as-icon.html`) and built
+on his word. The mark is the platform's own two-sliders (`ICON_MANAGE`,
+chosen 2026-08-23 for the Setup button), so one meaning has one picture
+everywhere, in a 26px square in the same corner; the word moves to the hover
+(`title`) and the accessible name (*"Settings for <client>"*). On an archived
+client, *Bring back* stays a word and only Settings beside it becomes the mark.
+One builder (`settingsChip`) for both cards. Screen only. `platform-cards.py`
+30/0 on both copies of the page, its pair check reading the chip's title where
+there is no text; `client-archive` (15) and `client-setup-outside` (29) red
+identically on the build before, as recorded at §445.
+
+## §447 — one company, its directions on its own page (2026-09-30)
+
+Islam, of El Abd: *"a client like elabd is a one company with multiple
+directions so I was thinking if it's a wrong company and the company has the
+multiple directions shouldn't it appear as 1 company and all the directions
+and the Foundation and the SWAT belongs to its page only without the
+navigation at the top and even the capabilities as well"*. Answered question
+by question — *"every page is 1 direction"*, *"kept in archive"*, *"yes
+equally"*, *"the capabilities should show the way it's set in the structure"*
+— drawn three times (`design-mockups/single-company/`), round 2 corrected by
+him (*"splitting the directions and the capabilities was a good choice whay
+did you join them again?"*), and round 3 signed off: *"ok build it"*.
+
+**THE BUSINESS-UNIT LAYER GETS THE FUNCTIONS' SWITCH** (§418's shape):
+`structure.bu.exists`, stored as an absence, read by ONE shared rule
+(`SMPRules.buExists`). Off, `activeKeys()` answers nothing — the navigation,
+the cards, the compile and the weighting all ask it, so it is one switch
+rather than ten — and the group's unit readings (`groupUnitsObjectives`,
+`groupExec`, `groupPlan`) average nothing, so a hidden unit cannot go on
+scoring a page it no longer appears on.
+
+**THE MOVE IS ASKED FIRST, IN THE CARD, BECAUSE IT COPIES FIGURES.** Pressing
+Off draws a question on the business units' card; *Move them and switch off*
+runs `buFoldIntoTop()`: every active pillars unit's pillars are COPIED onto
+the top layer's own plan (§428) with every figure, under fresh ids minted from
+the top layer's own list (an id is what a figure and a snapshot are keyed on,
+§48), each copy marked `fromUnit`/`fromId` so pressing twice copies nothing
+twice; a pillar with no Owner takes the unit's head, because the head of a
+one-direction page is that direction's owner; each unit's plan is archived
+once, with its Foundation and SWOT (*"kept in archive"*); and the top layer's
+pillars and SWOT components are switched on. **The units are left exactly as
+they were** — hidden, never deleted, and back the moment the layer is on
+again. The cost is stated: switching back on does not remove the copies from
+the company page; that is a deliberate decision rather than a guess about
+which copy somebody has been writing in.
+
+**THE COMPANY PAGE**: its Strategy tab holds the Foundation, the SWOT, the
+directions under the client's own word (`L("pillar","bu")` — *Strategic
+Directions* on El Abd), and **Capabilities as a section of its own**, one row
+per capability shown the way the Structure step sets it, with *Open* into its
+own pages — because the navigation row no longer carries a Capabilities side
+while the units are off. Performance leads with the directions card, each
+direction counting equally (`unitPillars`, the mean — *"yes equally"*), and
+drops the two unit cards, *Where to look next* and the units section.
+Weighting leaves the tab row: it weights units, and there are none.
+
+**A DIRECTION'S OWNER REPORTS THEIR OWN DIRECTION AND NEVER SUBMITS.** A rule
+beside `mayReportTop` (§428), for §37's reason: `SMPRules.ownsTopPillar` —
+true only while the units are off, since that is the only shape in which the
+top layer's pillars ARE the directions. The screen asks it in `canReport`,
+`canReportRow` (narrowed by the row's pillar owner) and keeps `canSpeakFor`
+on `mayReportTop`, so Submit, the note and the slides stay the office's and
+the CEO's. The server asks the same rule in `lib/authorize.js`'s group branch,
+row by row against the STORED top plan (§42). `topItems` and the group's
+structure join the world in `W()` AND `worldOf()` (§102.4).
+
+**VERIFIED.** `checks/single-company.py` 36/0, driving the real switch —
+question, Cancel, move — and asserting both ends; red **3** with the
+`activeKeys` gate out and **2** with the owner narrowing out, both from the
+SOURCES. `test-authorize.js` §447 **896/0**: own direction allowed, another's
+refused, renaming refused, submitting refused, the office still everywhere,
+and with the units ON the same person refused; red **1** with the row check
+out and **1** with the units gate out. **One gate is belt and braces and is
+said to be**: the `unitReporting` test in front of the row check changes no
+verdict when removed, because a submission carries no row ids and is refused
+further down either way. Neighbours green: structure, structure-sections,
+top-plan, client-setup, plan-switch, detail-layers, setup-live-rows,
+cycle-board, welcome, gap-fill, reporting-ytd-target, master-presentation;
+graph-diff 140/0, platform-rules 69/0, my-reporting 65/0; `qa.py` ERRORS none;
+`built-in-step` all good. **Not run in this session**: the served-stack
+database checks. **Recorded, not done**: El Abd's own move is a press on the
+live client, to be made by Islam or at his word, not by a migration.
+
+### §447.1 — a unit that plans in Objectives & actions becomes one direction (2026-09-30)
+
+Islam, testing §447 on El Abd: *"I made the swtich but nothign shofted to the
+company"*, then, asked how the units plan: *"the plans where in objectives and
+actions actually which in pillars shift to measures and tactics."* **THE SWITCH
+WORKED AND THE MOVE COPIED NOTHING**, because `buFoldIntoTop()` only read a
+unit's PILLARS and El Abd's direction-units plan in objectives & actions
+(§405) — their pillars are empty by construction. So such a unit now arrives
+as **one direction under its own name**, owner its head: its objectives become
+the direction's measures (name, direction, target, compile rule, figure,
+progress, note, hidden mark), its actions its tactics (name, owner, note,
+hidden mark). **An action is timed by a date and a tactic by quarters**, so the
+date becomes the ONE quarter it falls in, and the date is kept on the row as
+well so nothing written is lost (§96.2); done reads Done at 100, in progress
+reads WIP at its per-cent, not started reads 0. Its plan is archived once and
+the move is idempotent (`fromId: "u:<key>"`). **A unit planning in PROJECTS is
+still left where it is** — nobody has said what a project becomes on a
+direction. An objective's weight has nowhere to go (a measure has none), which
+is stated rather than discovered. On a client already switched off, the move
+runs by switching the layer back on and off again. `checks/single-company.py`
+MAKES an objectives unit (§255) and asserts the direction, its measures and its
+tactics — **4 red** with the branch taken out, from the sources (§276).
+
+## §448 — where the strategy is planned, and the divisions read under it (2026-10-01)
+
+Islam, of §447: *"if we turn the 3rd layer off, the company will appear and the
+directions appear inside it and outside we find only the functional plans or
+what? … we might have an initial button on the company level to say that we
+will plan on the company level or we will plan on the unit level"* — then *"yes
+agreed"*, **A** for the label, and **A** of the division mockup
+(`design-mockups/single-company/2026-10-01_division-performance.html`).
+
+**THE QUESTION REPLACES THE SWITCH.** The business-units card's On/Off said
+what disappears; the top card now asks **Where the strategy is planned — On the
+company / On the business units**. The store is §447's `structure.bu.exists`,
+so nothing moves for a client already set up (absent is "on the business
+units"). Choosing the company with units on the register asks first, in the
+card, and runs the same move; with no units at all it simply records the
+answer. The units' card keeps its contents while used and says *Not used* when
+not.
+
+**THE NAVIGATION'S TOP BUTTON READS STRATEGY** while the strategy is planned on
+the company — the client's own word was the client's name, and the functions
+beside it are the client's too. The division dropdown leaves the row: a
+division is read, not visited. (A person who cannot reach the group keeps the
+divisions, or they would reach nothing — §61.)
+
+**A DIVISION IS READ UNDER STRATEGY › PERFORMANCE**, one entry on the page's own
+section row after the company's, each drawing the division page itself so a
+figure cannot differ between the two (§53.5). With the units hidden a division
+holds only the functions linked to it — `companyUnitKeys()` answers nothing —
+so §391's arithmetic reads it from them alone. A division with no function
+linked is not listed. `checks/single-company.py` MAKES a division of two
+functions (§255): **5 red** with the change taken out, from the sources (§276).
+
+### §448.1 — the top button names the layer; the tab keeps "Strategy"
+
+Islam, of the clash §448 left (the navigation button and the company page's own tab both read *Strategy*): *"the name is strategy as it has the foundation and the swot and plan below it … name it Company as per the naming in the structure of the first layer?"* — then *"yes go ahead"*. Reverses §448's label A for the BUTTON only: it reads the first layer's word from Structure (`labelWord("topword","group")`) on both shapes, which is what it already read when the strategy is planned on the business units, so the two shapes stop differing. The tab under it stays *Strategy*, like a unit's. One line in `shell.html`; `checks/single-company.py` asserts the button names the layer and is not *Strategy* (§218, rewritten not loosened). Nothing stored moves.
+
+
+### §449 — the company page follows its own Structure
+
+Islam, of the El Abd company page: *"why do we have group themes while themes already are swtiched off on the structure … for the capabilities it should show the capabilities if it's swtiched on as well. and not named group cabilities just capbilities … when I click on the company it should open by default on the Pillars … for the focus tab I can't set it off and it's showing only the capabiliteis and functions not the pillars as well."* Aligned in plain words, then *"yes go ahead build all four"*.
+
+**The Performance page drew two sections nobody's setting reached.** *Group Themes* and *Group capabilities* were pushed unconditionally — the page disagreeing with the Structure step (§53.5). Themes are asked of `compOn("group","theme")`, capabilities of `SMPRules.capExists(GROUP)`, and the capabilities heading is `L("capability","bu")` with no "Group" before it. An unsaid Structure reads both on, so Raya's group page is unchanged.
+
+**A top layer with pillars of its own opens on them.** `entrySub("group")` landed on the `primary` tab (Performance), a rule set when the top layer had no plan. It now lands on Strategy › Plan whenever that section is offered (`planOn` and the pillar component); otherwise exactly as before (§428.2 keeps Raya's plan off).
+
+**Focus off now hides the Focus tab** (`when: focusOn()`), §102's own *"off means it disappears"* reaching the one surface it missed. The switch stays on Setup › Focus measures, so the way back is never removed (§61).
+
+**The top layer's pillars are markable.** `focusSubjects()` gains a `top` subject (only while the top layer carries a plan), `focusBands("group")` returns its pillars' bands from `topAsUnit()` — no empty Key objectives band, because the group's objectives are the Foundation's (topAsUnit's own note) — and the marking page's switch and the board list it first. A destination that is no longer offered (a unit hidden by the units-off switch) is corrected rather than marked. Nothing stored moves; marks are ids in `CYCLE.focus` as before.
+
+`checks/single-company.py` §449, both ends (Raya's shape before the fold: still Performance, Themes drawn, no "Group capabilities"); falsified from the sources, **5 red**. Neighbours green: focus-switch, top-plan, structure, structure-sections, division-functions, stay-put, welcome, nav-scroll, capability-entry.
+
+## §449.1 — Off on Focus measures was wired to nothing (2026-10-01)
+
+Islam, after §449: *"same issue in the focus page, can't turn off and the pillars doesn't appear."* **Measured, the Off half of the switch did nothing**: `shell.html` bound the click with `document.querySelector("[data-focusswitch]")`, which returns the FIRST match only — the On button — so since the switch became an On | Off pair (§130.5) pressing Off changed nothing, for every tenant. Both halves are wired now (`querySelectorAll`). **And `single-company.py` §449 could not have caught it**: it turned focus off with a direct `setFocusOn(false)` call, which passes on a build where the control is dead (§96). It presses the real Setup › Focus measures buttons now, Off and On, and reads `GROUP.focusOff` back; red with the old wiring put back. **The pillars half is §449 itself**: the company's pillars join the Focus page through `focusSubjects().top`, which is on the branch and not yet on `main`, so production still shows only capabilities and functions until the merge. `setup-header.py`'s one red ("a real table with a real head") reproduces on the build before §449 and is not this change. Screen only; nothing stored, nothing migrated.
+
+## §450 — The plan question's answer sits under it
+
+Islam, of Client set-up › Structure: *"the buttons needs to ocme under the question."* The two choices (*On the company* / *On the business units*) sat at the far right end of the line, away from the question they answer — `.stsech` is a space-between row, right for a section header with a switch at its end and wrong for a question. One modifier class (`stplanq`) stacks the row: the label, then the two buttons under it at its left edge, which is how the *Called* row directly above it already reads. Nothing stored, nothing migrated, no rule moved. `single-company.py` asserts the buttons are below the question and aligned to its left edge; 1 red with the stacking removed.

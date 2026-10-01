@@ -61126,3 +61126,5 @@ served app that the request the model received carries Mobile's own stored
 aspiration — read from the tenant, never a literal — and goes red (1) with the
 plan text removed from what the tab sends. `qa.py` ERRORS none,
 `check:modules` 230/0, `built-in-step` all good, typecheck clean.
+
+**Merged to `main` 2026-10-01 on Islam's word**: `main` had not moved, so a clean fast-forward; this record commit is on `main` alone so its SHA is on no other ref until production has served it (§91). No `api/`, `lib/` or `db/` rule moved, so no forced sign-out is owed.

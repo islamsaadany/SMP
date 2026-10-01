@@ -61,15 +61,16 @@ with sync_playwright() as p:
     # ── 1. The switch, pressed in Client set-up › Structure ──────────
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
     ck("Client set-up › Structure opens", ok)
-    ck("the business units' card carries an On/Off", safe(pg, "()=>!!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
-    press(pg, '[data-stsec="bu|layer"] button:nth-child(2)')
-    ck("pressing Off ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)
+    ck("§440 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
+    ck("…and the business units' card has no switch of its own", safe(pg, "()=>!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
+    press(pg, '[data-stplan] button:nth-child(1)')
+    ck("choosing the company ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)
     ck("…and changes nothing yet", safe(pg, "()=>buExists() && (GROUP.items||[]).length===0") is True)
     press(pg, '[data-buask-no]')
     ck("Cancel takes the question away and changes nothing",
        safe(pg, "()=>!document.querySelector('[data-buask]') && buExists() && (GROUP.items||[]).length===0") is True)
-    press(pg, '[data-stsec="bu|layer"] button:nth-child(2)')
-    ck("pressing Move them and switch off", press(pg, '[data-buask-go]'))
+    press(pg, '[data-stplan] button:nth-child(1)')
+    ck("pressing Move them and plan on the company", press(pg, '[data-buask-go]'))
     after = safe(pg, "()=>({exists:buExists(), top:(GROUP.items||[]).length, arch:ARCHIVES.length, units:activeKeys().length, kept:UNIT_KEYS.every(k=>UNITS[k].items!==undefined), topOn:SMPRules.levelComponents(GROUP,'top')})", {})
     ck("the layer is off", after.get("exists") is False, after)
     ck("every unit pillar is now on the company page", after.get("top") == (before.get("pillars") or 0) + 1, [after.get("top"), (before.get("pillars") or 0) + 1])
@@ -116,6 +117,31 @@ with sync_playwright() as p:
         ck("…and Open lands on the capability", safe(pg, "()=>String(current).indexOf('cap:')===0") is True)
     else:
         print("  note  no capability in this build, the Capabilities section is not measured")
+
+    # ── 2b. §440 the divisions, read under the company ─────────────
+    DIV = safe(pg, """()=>{var cs=activeCompanyKeys(); if(cs.length<2) return null; var ck=cs[0];
+      FUNCTION_KEYS.filter(k=>FUNCTIONS[k].active!==false).slice(0,2).forEach(k=>{FUNCTIONS[k].company=ck});
+      current='group'; currentSub='performance'; GSEC=0; paint(); return ck}""")
+    pg.wait_for_timeout(250)
+    ck("a division with two functions linked is MADE", bool(DIV), DIV)
+    if DIV:
+        nav = safe(pg, "()=>({dd:!!document.querySelector('#topsel'), top:[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())})", {})
+        ck("the navigation has no division dropdown", nav.get("dd") is False, nav)
+        ck("…and its top button reads Strategy", "Strategy" in (nav.get("top") or []), nav)
+        row = safe(pg, "()=>[...document.querySelectorAll('#secrow-in [data-sec]')].map(b=>b.textContent)", [])
+        ck("Performance's row leads with the company", bool(row) and row[0] == safe(pg, "()=>labelWord('topword','group')"), row)
+        dname = pg.evaluate("(ck)=>COMPANIES[ck].name", DIV)
+        ck("…and lists the division with functions", dname in row, [dname, row])
+        names = safe(pg, "()=>activeCompanyKeys().map(c=>[COMPANIES[c].name, companyFnKeys(c).length])", [])
+        ck("…every division with a function, and none without", [n for n, c in names if c] == [r for r in row if r in [n for n, _ in names]], [names, row])
+        i = row.index(dname) if dname in row else -1
+        press(pg, '#secrow-in [data-sec="%d"]' % i)
+        v = pg.evaluate("""(ck)=>{var d=document.querySelector('[data-divperf="'+ck+'"]'); if(!d) return null;
+          return {fns:d.querySelectorAll('[data-go^="fn:"]').length, units:companyUnitKeys(ck).length,
+                  head:(d.querySelector('.scores .final, .scores .big, .scores')||{}).textContent||'', perf:companyObjectives(ck), mix:companyMix(ck,'perf')}}""", DIV)
+        ck("pressing it draws the division's reading", bool(v), v)
+        ck("…one card per linked function, and no unit", bool(v) and v["fns"] == 2 and v["units"] == 0, v)
+        ck("…its figure scored from those functions alone", bool(v) and v["perf"] == v["mix"], v)
 
     # ── 3. A direction owner reports their own direction ─────────────
     who = safe(pg, """()=>{var p=GROUP.items[0]; var q=PEOPLE.filter(x=>x.active!==false && !SMPRules.mayReportTop(world(),x) && !SMPRules.isOfficeRole((x.role||''))&& x.name && x.name.split(' ').length>1)[0]; if(!q) return null; p.owner=q.name; GROUP.items.slice(1).forEach(o=>{ if(o.owner===q.name) o.owner=''; }); return q.key}""")

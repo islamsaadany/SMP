@@ -17561,6 +17561,9 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
    and the one he asked for. Its ACTIVE units only, the same as everywhere
    else: a retired unit keeps its record and stops appearing. */
 function companyUnitKeys(ck){
+  /* §440: with the strategy planned on the company the units are hidden, so a
+     division holds only the functions linked to it and is read from them. */
+  if (!buExists()) return [];
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
 /* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§391) ──
@@ -26944,7 +26947,7 @@ function whereNext(keys){
   }
 
   var SECS = [];
-  SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
+  SECS.push({ t: buExists() ? "Overall performance" : labelWord("topword", "group"), h: section("", "Overall performance", null,
       '<div class="scores">' +
         drillCard("Group " + L("keyobj") + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the " + L("unitword") + "."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
@@ -26976,6 +26979,18 @@ function whereNext(keys){
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
+
+  /* §440: THE DIVISIONS, READ UNDER THE COMPANY (Islam's A). Planned on the
+     company, a division is no longer a place you go; it is a reading of the
+     functions linked to it, one entry per division on this page's own row,
+     beside the company's. Its body is the division page itself, so a
+     division's figure can never differ between the two (§53.5). A division
+     with no function linked has nothing to read and is not listed. */
+  if (!buExists()) activeCompanyKeys().forEach(function(ck){
+    if (!companyFnKeys(ck).length || grantAt("g_perf", "co:" + ck) === "none") return;
+    var body = renderCompanyPerformance(ck);
+    SECS.push({ t: esc(COMPANIES[ck].name), h: '<div data-divperf="' + esc(ck) + '">' + body + '</div>' });
+  });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -58046,6 +58061,44 @@ var CLIENTSETUP = (function () {
     var top = card("Top level");
     top.appendChild(el("p", "lab", "Called"));
     namePick(top, "topword", TOP_NAMES, "one", ro);
+    /* §440: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
+       button on the company level to say that we will plan on the company
+       level or we will plan on the unit level"*, then *"yes agreed"*.) It
+       replaces §439's On/Off on the business-units card, which described what
+       disappears rather than the decision being made. The store is the same
+       `structure.bu.exists`, so nothing moves for a client already set up:
+       absent is "on the business units". Choosing the company with units on
+       the register asks first, here, because it copies their plans across. */
+    var ph = el("div", "stsech"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
+    var plan = segButtons([[false, "On the " + W("topword", "one", "Company").toLowerCase()],
+                           [true, "On the " + W("unitword", "many", "Business units").toLowerCase()]],
+      lv.bu.exists, function (v) {
+        if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
+        if (!UNIT_KEYS.length) { var n0 = structNow(); n0.bu.exists = false; structWrite(n0); return; }
+        BU_ASK = true; redraw();
+      });
+    plan.classList.add("stonoff"); plan.setAttribute("data-stplan", "1");
+    ph.appendChild(plan);
+    top.appendChild(ph);
+    if (BU_ASK && lv.bu.exists) {
+      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
+      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
+        "'s plan moves onto the " + W("topword", "one", "company").toLowerCase() + "'s own page as directions, with every figure, and each one's own page is kept in the archive. " +
+        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Choosing the " +
+        W("unitword", "many", "business units").toLowerCase() + " again brings them back as they were."));
+      var go = el("button", "btn amber", "Move them and plan on the " + W("topword", "one", "company").toLowerCase()); go.type = "button"; go.setAttribute("data-buask-go", "1");
+      go.onclick = function () {
+        BU_ASK = false;
+        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
+        var nx = structNow(); nx.bu.exists = false;
+        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
+        structWrite(nx);
+      };
+      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
+      no.onclick = function () { BU_ASK = false; redraw(); };
+      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
+      top.appendChild(ask);
+    }
     structLevel(top, lv, "top");
 
     /* §418: a layer the client does not have is switched off as a whole —
@@ -58061,42 +58114,17 @@ var CLIENTSETUP = (function () {
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
-    /* §439: THE BUSINESS-UNIT LAYER CAN BE SWITCHED OFF, for a client that
-       is one company with several directions (El Abd). Off moves each unit's
-       directions onto the company page — asked first, in the card, because
-       it copies figures and archives every unit's plan. On again brings the
-       units back exactly as they were; nothing is deleted either way. */
+    /* §439/§440: the business-unit card has no switch of its own; whether it
+       is used is answered on the top card ("Where the strategy is planned").
+       Not used, it says so and keeps everything. */
     var bu = card(W("unitword", "many", "Business units"));
     bu.setAttribute("data-stcard", "bu");
-    var bh = el("div", "stsech"); bh.appendChild(el("span", "lab", "This client has them"));
-    bh.appendChild(onOff(lv.bu.exists, function (v) {
-      if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
-      BU_ASK = true; redraw();
-    }, "bu|layer"));
-    bu.appendChild(bh);
-    if (BU_ASK && lv.bu.exists) {
-      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
-      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
-        "'s directions move onto the company page with every figure, and each one's own page — its Foundation and SWOT — is kept in the archive. " +
-        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Switching back on brings them back as they were."));
-      var go = el("button", "btn amber", "Move them and switch off"); go.type = "button"; go.setAttribute("data-buask-go", "1");
-      go.onclick = function () {
-        BU_ASK = false;
-        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
-        var nx = structNow(); nx.bu.exists = false;
-        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
-        structWrite(nx);
-      };
-      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
-      no.onclick = function () { BU_ASK = false; redraw(); };
-      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
-      bu.appendChild(ask);
-    }
     if (lv.bu.exists) {
       callBoxes(bu, "unitword", ro);
       structLevel(bu, lv, "bu");
       exceptBox(bu, "bu");
-    } else bu.appendChild(el("p", "sthid", "Off: the company page holds the directions, and the " +
+    } else bu.appendChild(el("p", "sthid", "Not used: the strategy is planned on the " +
+      W("topword", "one", "company").toLowerCase() + ". The " +
       W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
     var fn = card(W("fnword", "many", "Supporting functions"));
@@ -61463,8 +61491,11 @@ var SYNC = (function () {
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
-    companiesReachable().forEach(function(ck){
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: buExists() ? labelWord("topword","group") : "Strategy" });  /* §404: the client's own word; §440: "Strategy" when it is planned there */
+    /* §440: planned on the company, a division is read under Strategy ›
+       Performance rather than visited, so it leaves the navigation — unless
+       the group is out of reach, when the divisions are all there is. */
+    if (buExists() || !tops.length) companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });

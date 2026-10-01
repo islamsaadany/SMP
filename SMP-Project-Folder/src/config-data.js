@@ -10787,6 +10787,9 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
    and the one he asked for. Its ACTIVE units only, the same as everywhere
    else: a retired unit keeps its record and stops appearing. */
 function companyUnitKeys(ck){
+  /* §440: with the strategy planned on the company the units are hidden, so a
+     division holds only the functions linked to it and is read from them. */
+  if (!buExists()) return [];
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
 /* ── A SUPPORTING FUNCTION BELONGS TO A COMPANY, AND COUNTS IN IT (§391) ──

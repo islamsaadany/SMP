@@ -1440,8 +1440,11 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
-    companiesReachable().forEach(function(ck){
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: buExists() ? labelWord("topword","group") : "Strategy" });  /* §404: the client's own word; §440: "Strategy" when it is planned there */
+    /* §440: planned on the company, a division is read under Strategy ›
+       Performance rather than visited, so it leaves the navigation — unless
+       the group is out of reach, when the divisions are all there is. */
+    if (buExists() || !tops.length) companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });

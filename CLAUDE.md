@@ -10656,7 +10656,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-09-30 — **§439.1: an Objectives & actions unit moves across as one direction** — its objectives become the direction's measures and its actions its tactics (date → the quarter it falls in, date kept); Projects units still stay. `single-company.py` red 4 without it. On the branch, not merged.*
+*Last Updated: 2026-10-01 — **§440: where the strategy is planned** — the top card on Client set-up › Structure asks *On the company / On the business units* (same `structure.bu.exists` store, replacing the units card's On/Off); planned on the company the nav's top button reads Strategy, the division dropdown goes, and each division with linked functions is a section on Strategy › Performance read from those functions alone (`companyUnitKeys()` answers nothing). `single-company.py` red 5 without it. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§439.1: an Objectives & actions unit moves across as one direction** — its objectives become the direction's measures and its actions its tactics (date → the quarter it falls in, date kept); Projects units still stay. `single-company.py` red 4 without it. On the branch, not merged.*
 
 *Earlier: 2026-09-30 — **§439: one company, its directions on its own page.** The Structure step's business-unit card gets an On/Off (`structure.bu.exists`, `SMPRules.buExists`); Off asks first, then `buFoldIntoTop()` copies every unit's pillars onto the top layer's plan with their figures (fresh ids, `fromUnit` marks, never twice), archives each unit's plan, and hides the units (`activeKeys()` empty, group unit readings null). The company Strategy tab holds Foundation · SWOT · the directions · Capabilities (own section, the nav's Capabilities side dropped); Performance leads with the directions averaged equally. A direction's owner reports their own direction via `SMPRules.ownsTopPillar` on screen and server, never submits. `checks/single-company.py` red 3 / 2, `test-authorize.js` §439 red 1 / 1. On the branch, not merged.*
 

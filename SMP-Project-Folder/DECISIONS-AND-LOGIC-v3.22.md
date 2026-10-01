@@ -59140,3 +59140,35 @@ is stated rather than discovered. On a client already switched off, the move
 runs by switching the layer back on and off again. `checks/single-company.py`
 MAKES an objectives unit (§255) and asserts the direction, its measures and its
 tactics — **4 red** with the branch taken out, from the sources (§276).
+
+## §440 — where the strategy is planned, and the divisions read under it (2026-10-01)
+
+Islam, of §439: *"if we turn the 3rd layer off, the company will appear and the
+directions appear inside it and outside we find only the functional plans or
+what? … we might have an initial button on the company level to say that we
+will plan on the company level or we will plan on the unit level"* — then *"yes
+agreed"*, **A** for the label, and **A** of the division mockup
+(`design-mockups/single-company/2026-10-01_division-performance.html`).
+
+**THE QUESTION REPLACES THE SWITCH.** The business-units card's On/Off said
+what disappears; the top card now asks **Where the strategy is planned — On the
+company / On the business units**. The store is §439's `structure.bu.exists`,
+so nothing moves for a client already set up (absent is "on the business
+units"). Choosing the company with units on the register asks first, in the
+card, and runs the same move; with no units at all it simply records the
+answer. The units' card keeps its contents while used and says *Not used* when
+not.
+
+**THE NAVIGATION'S TOP BUTTON READS STRATEGY** while the strategy is planned on
+the company — the client's own word was the client's name, and the functions
+beside it are the client's too. The division dropdown leaves the row: a
+division is read, not visited. (A person who cannot reach the group keeps the
+divisions, or they would reach nothing — §61.)
+
+**A DIVISION IS READ UNDER STRATEGY › PERFORMANCE**, one entry on the page's own
+section row after the company's, each drawing the division page itself so a
+figure cannot differ between the two (§53.5). With the units hidden a division
+holds only the functions linked to it — `companyUnitKeys()` answers nothing —
+so §391's arithmetic reads it from them alone. A division with no function
+linked is not listed. `checks/single-company.py` MAKES a division of two
+functions (§255): **5 red** with the change taken out, from the sources (§276).

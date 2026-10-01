@@ -61128,3 +61128,54 @@ plan text removed from what the tab sends. `qa.py` ERRORS none,
 `check:modules` 230/0, `built-in-step` all good, typecheck clean.
 
 **Merged to `main` 2026-10-01 on Islam's word**: `main` had not moved, so a clean fast-forward; this record commit is on `main` alone so its SHA is on no other ref until production has served it (§91). No `api/`, `lib/` or `db/` rule moved, so no forced sign-out is owed.
+
+## §458 — the Copilot asks before it refines, the page stops scrolling, and a busy provider is tried harder (2026-10-01)
+
+Islam, using what §457 shipped: *"the page of the copilot is scrolling up with
+no need the scrolling is inside the chat"*; *"when I ask the chat to refine the
+aspiration or swot it needs first to fetch the outcome present already so we
+know what are we adjusting and ask me what I need to adjust. so it becomes more
+converstional"*; and a screenshot of the 503 *"high demand"* again, after
+§457's one retry. Aligned in chat first (rule 1b) and answered *"go, all five
+sections, let it write them, fallback ok"*.
+
+**§458.1 — THE PAGE SCROLLED 64px UNDER A PANE THAT ALREADY FITTED.** §453
+sized the pane to end 16px above the window's bottom and left the page its
+ordinary 80px foot (`--page-foot`), so the document was always 64px taller
+than the window — measured, `{"extra":64}` on the build before. A page sized
+to the window takes the small foot, as Setup's does (§167): `.wrap:has(.coppane)`
+takes `--pane-foot` and the pane ends that far from the bottom. Asserted in
+`checks/shell.mjs` §3f as *the page has nothing to scroll and the chat column
+ends on screen*, red 1 with the old stylesheet put back. Not a look change:
+nothing moves but the scroll that should not have been there.
+
+**§458.2 — REFINING WHAT ALREADY EXISTS STARTS WITH WHAT EXISTS.** One house
+rule in `lib/copilot-guidance.ts`, for all five sections (his answer): asked to
+refine, improve, rewrite, sharpen or review something the plan holds, the
+Copilot quotes it word for word from THE PLAN AS WRITTEN (§457's text), asks
+what to change, offers three or four quick replies **it writes to fit what it
+quoted** (his answer), and drafts nothing on that turn; if the plan holds
+nothing, it says so and offers the ways to start. A house rule, so it sits
+above Forefront's method from Copilot settings and survives any edit there.
+Red under `no-refine`.
+
+**§458.3 — A BUSY SPELL OUTLASTS 2.5 SECONDS.** §457 asked once more; the 503
+came back on both. Now three more asks at 2, 5 and 10 seconds, then the
+lighter model once (`GEMINI_FALLBACK_MODEL`, default `gemini-flash-lite-latest`
+— his *"fallback ok"*, cost stated: on a busy day an answer may come from the
+lighter model). Still only the "not now" statuses; a refusal of the question or
+the key is asked once. A fallback that itself fails tells the person about the
+busy main model, as before. `lib/assistant.cjs` gains an optional `model`
+(every other caller unchanged). Asserted: busy four times then the fallback
+answers, five asks with the last addressed to the fallback by name; always
+busy, exactly five asks. Red under `no-retry` and `no-fallback`.
+
+**§458.4 — THE ANSWER'S OWN FORMAT LEAKED ONTO THE SCREEN.** His *Working
+from* line ended `", "missing": "None.` — the model wrote its next JSON field
+inside this one. A string running on into `", "<one of our own field names>":`
+is cut there; ordinary quotes are kept (§96.2), asserted at both ends. Red
+under `keep-leak`.
+
+`check:copilot` 129/0, red 13 ways; `check:shell` 198/0; typecheck clean;
+`built-in-step` all good; `qa.py` ERRORS none. `sw.js` SHELL
+`v5.81-copilot-refine`.

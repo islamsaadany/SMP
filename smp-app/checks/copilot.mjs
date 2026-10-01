@@ -449,6 +449,8 @@ try {
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
       /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
+    check("...told to quote what the plan holds and ask what to change before refining it (§458)",
+      /REFINING WHAT ALREADY EXISTS/.test(sys) && /First quote in `reply` what THE PLAN AS WRITTEN holds/.test(sys));
     check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
@@ -522,6 +524,23 @@ try {
     const r2 = await call("POST", "api", { act: "say", id: ch.id, text: "Not a busy refusal" }, NORAN);
     check("...a refusal that is not 'busy' is asked once only, and said",
       seen.length === b1 + 1 && r2.j.messages[r2.j.messages.length - 1].part.kind === "failed", seen.length - b1 + " asks");
+    /* §458: busy four times, and the lighter model answers — five asks, the
+       last one to the fallback model by name in the address. */
+    NEXT = [{ status: 503 }, { status: 503 }, { status: 429 }, { status: 503 }, { answer: { reply: "From the lighter model." } }];
+    const bF = seen.length;
+    const rF = await call("POST", "api", { act: "say", id: ch.id, text: "Still busy" }, NORAN);
+    const aF = rF.j.messages[rF.j.messages.length - 1];
+    check("a provider busy four times is asked three more times and then the lighter model once — which answers (§458)",
+      seen.length === bF + 5 && /gemini-flash-lite-latest/.test(seen[seen.length - 1].url) && !/gemini-flash-lite-latest/.test(seen[seen.length - 2].url) &&
+      aF.part.kind === "answer" && aF.body === "From the lighter model.", seen.length - bF + " asks · " + (seen[seen.length - 1] || {}).url);
+    /* §458: the answer's own format never reaches the screen. Both ends: a
+       field that ran on into the next JSON key is cut, and a quote-comma-quote
+       that is not one of our keys is kept as written. */
+    NEXT = { answer: { reply: "Refined.", playback: { understood: "He said \"yes\", \"no\" and left", workingFrom: "The plan's aspiration (MENA expansion).\", \"missing\": \"None.", missing: "" } } };
+    const rL = await call("POST", "api", { act: "say", id: ch.id, text: "Leak test" }, NORAN);
+    const pL = rL.j.messages[rL.j.messages.length - 1].part.playback || {};
+    check("a playback line that ran on into the answer's next field is cut there (§458)", pL.workingFrom === "The plan's aspiration (MENA expansion).", JSON.stringify(pL.workingFrom));
+    check("...and ordinary quotes in what the model wrote are kept", pL.understood === 'He said "yes", "no" and left', JSON.stringify(pL.understood));
     NEXT = null;
 
     NEXT = { status: 500 };
@@ -532,7 +551,7 @@ try {
     check("when the AI fails, what was typed is kept and the product says so — never a pretend answer",
       s4.st === 200 && s4.j.messages.length === n0 + 2 && s4.j.messages[s4.j.messages.length - 2].body === "One more question" &&
       last4.part.kind === "failed" && /could not answer just now/.test(last4.body) && /send it again/.test(last4.body), JSON.stringify(last4));
-    check("...after exactly two asks — once, then once more, never a loop", seen.length === b2 + 2, seen.length - b2 + " asks");
+    check("...after exactly five asks — once, three more, then the lighter model once — never a loop (§458)", seen.length === b2 + 5, seen.length - b2 + " asks");
     delete process.env.GEMINI_API_KEY;
     const before = seen.length;
     const s5 = await call("POST", "api", { act: "say", id: ch.id, text: "And with no key?" }, NORAN);

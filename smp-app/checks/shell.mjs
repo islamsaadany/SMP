@@ -884,6 +884,12 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
         bottomGap: m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1 }; });
     let bx = await box();
     check(bx.h >= 47 && bx.h <= 52, "the box starts at one line", bx.h);
+    /* §458: Islam — "the page of the copilot is scrolling up with no need the
+       scrolling is inside the chat". The pane is sized to the window, so the
+       PAGE must have nothing to scroll; asserted with the chat itself able
+       to scroll or not, since a page that scrolls is the fault either way. */
+    const pg = await page.evaluate(() => ({ extra: document.documentElement.scrollHeight - innerHeight, chatEnds: (() => { const m = document.querySelector("[data-cop-main]"); return m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1; })() }));
+    check(pg.extra <= 1 && pg.chatEnds >= 0, "…and the page itself does not scroll — only the chat inside it does (§458)", JSON.stringify(pg));
     check(bx.sendIn && bx.svg && bx.sendWord === "", "…Send is the arrow icon inside the box, with no word", JSON.stringify(bx));
     check(bx.clipUnder && bx.clipWord.trim() === "", "…and the paperclip, with no word, sits beneath it", JSON.stringify(bx));
     /* Islam, 2026-10-01 (design-mockups/copilot-clip/): the clip in the MIDDLE

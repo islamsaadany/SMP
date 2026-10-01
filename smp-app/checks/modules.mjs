@@ -619,9 +619,24 @@ for (const k of OWN_PAGE) {
   /* The page is served under the shell's policy, which is `script-src 'self'`
      (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
      and never run, so the switcher is a <details> and this asserts it stays
-     one. */
+     one.
+
+     REWRITTEN, NEVER LOOSENED (§218, §214.3). It asked for no `<script` of any
+     kind, which was true of every module while none of them had behaviour and
+     went red the day Portfolio served its own — a check arguing with a
+     decision rather than guarding one, and arguing with the very route the
+     policy EXISTS to leave open. What the policy forbids is the INLINE kind:
+     an `onclick=` and a <script> with a body. A `<script src>` from this
+     origin is what `'self'` means, so it is asserted to be served that way
+     rather than asserted absent, which is the both-ends version of the same
+     rule (§94.2) — a module that stopped serving its behaviour at all would
+     satisfy a bare absence perfectly (§113.8). */
   check("nothing inline needs a script, or the policy would silence it — " + k,
-    !/<script|onclick=/i.test(doc));
+    !/\son[a-z]+\s*=/i.test(doc) && !/<script(?![^>]*\ssrc=)/i.test(doc),
+    (doc.match(/<script[^>]*>/g) || []).join(" "));
+  check("...and any script it does serve comes from this origin, which is what `'self'` means — " + k,
+    (doc.match(/<script[^>]*>/g) || []).every((t) => /\ssrc="\/[^"]*"/.test(t)),
+    (doc.match(/<script[^>]*>/g) || []).join(" ") || "(no script — vacuously true)");
 }
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");

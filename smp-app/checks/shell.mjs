@@ -943,11 +943,12 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
 
     /* §456 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
        tab opens nothing by itself, so a chat drawn as current after the press
-       is the link's doing; the switcher lists the Copilot now. */
+       is the link's doing; the switcher lists the Copilot now — asked of the
+       shared bar's module menu (main's §444), where it is the current item. */
     await open("/raya-trade/copilot");
     const lp = await page.evaluate(() => ({ rows: document.querySelectorAll("table tbody tr").length,
       link: (document.querySelector('a[href*="#cop=chat-"]') || {}).getAttribute ? document.querySelector('a[href*="#cop=chat-"]').getAttribute("href") : "",
-      sw: Array.from(document.querySelectorAll(".msw .mi")).map((x) => x.textContent) }));
+      sw: Array.from(document.querySelectorAll('.tbmod .tbmenu a[aria-current="true"]')).map((x) => x.textContent) }));
     check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
       "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§456)", JSON.stringify(lp));
     await page.click('a[href*="#cop=chat-"]');

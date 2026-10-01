@@ -61037,3 +61037,38 @@ links to itself): 181/0, red nine ways.
 spellings of one control (§53.5) worth folding into one builder; and the templates are
 downloaded blank (the department S&W template is not yet pre-filled with this client's
 units and functions, as the mockup's row 5 says).
+
+## §456.1 — the merge with `main`: renumbered first, and the Copilot's pages wear the shared bar (2026-10-01)
+
+Islam: *"merge to main."* `main` had moved far under this branch and taken
+§439–§450 for Portfolio, the shared top bar and single company, so the
+Copilot's sections were renumbered §439–§444 → §451–§456 **before** the merge,
+in all three spellings, descending; the shared base held none of those numbers,
+which is what makes the renumber provably this branch's own (§264.3). Spec 064
+was free on `main`.
+
+**THE ONE REAL MEETING IS MAIN'S §444, ONE TOP BAR FOR EVERY MODULE.** Its check
+asserts every module with a page of its own wears `lib/topbar.ts`'s bar, and the
+Copilot's page (§456) drew its own navy bar and four-square switcher — so the
+merged tree went 5 red on exactly that. The Copilot's `frame()` now draws
+`topBarHtml()` like Insights, with no Viewing as (main's §444 answer for an
+office-only module), and where you are inside the Copilot is a line under the
+bar, since the trail ends at the module. Two of this branch's own assertions
+asked the old switcher (`.msw`) and were **re-pointed, never loosened** (§218)
+to the bar's module menu: modules.mjs's *no door it does not have*, and
+shell.mjs's *the Copilot is in the switcher*.
+
+Conflicts, each by its rule: the route hands a module both `admin` (§456) and
+main's `consultant`/`me`; the registry lists both Portfolio and the Copilot; the
+three records combined, never picked (§318.7); the built file rebuilt (§91);
+`sw.js` taken from main and bumped past both to `v5.79` (§94.12).
+
+**Verified on the merged tree**: modules 230/0 red 9, copilot 121/0 red 9,
+shell 196/0, door 145/0, portfolio 135/0, portfolio module 207/0, insights
+137/0, state 92/0, tracker 229/0, notes 170/0, authoriser 896/0, change list
+140/0, `qa.py` ERRORS none, built-in-step and generated-in-step clear, release
+stamp clear, typecheck clean cold. `check:setup` (2 red: a `desc` word and the
+new-client top level) and `check:frameworks:page` (1/14) are red **identically
+on `origin/main`'s own worktree** and their files are untouched here (§303).
+Nothing about how a save is judged moved, so no forced sign-out is owed.
+

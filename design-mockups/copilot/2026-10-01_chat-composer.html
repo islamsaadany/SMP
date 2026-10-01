@@ -42,17 +42,18 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 .old .send{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;font:700 13px var(--sans);padding:8px 16px}
 .old .gap{height:120px;flex:none}
 /* PROPOSED */
-.new .foot{flex:none;padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.new .foot{flex:none;padding:8px 16px 10px;display:flex;flex-direction:column;gap:2px}
 .new .box,.new .under,.frame .ctx,.frame .head{flex:none}
-.box{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:border-color .12s}
+.box{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(23,27,34,.06);transition:border-color .12s}
 .box:focus-within{border-color:var(--gold-deep)}
 .box textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;background:transparent;color:var(--ink);
-  font:14px/20px var(--sans);padding:10px 48px 10px 12px;height:40px;max-height:200px;overflow-y:hidden}
-.box .send{position:absolute;right:7px;bottom:6px;width:28px;height:28px;border-radius:50%;border:0;background:var(--gold);color:var(--on-accent);display:grid;place-items:center;cursor:pointer}
-.box .send:disabled{background:var(--surface-2);color:var(--ink-3);cursor:default}
+  font:15px/22px var(--sans);padding:13px 46px 13px 14px;height:48px;max-height:210px;overflow-y:hidden}
+.box .send{position:absolute;right:8px;bottom:9px;width:30px;height:30px;border-radius:6px;border:0;background:none;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.box .send:hover:not(:disabled){background:var(--surface-2)}
+.box .send:disabled{color:var(--ink-3);opacity:.6;cursor:default}
 .box .send:focus-visible,.attach:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.under{display:flex;align-items:center;gap:10px}
-.attach{display:inline-grid;place-items:center;width:28px;height:28px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:6px;cursor:pointer}
+.under{display:flex;align-items:center;gap:8px;padding-inline:2px;min-height:26px}
+.attach{display:inline-grid;place-items:center;width:26px;height:26px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:6px;cursor:pointer}
 .attach:hover{background:var(--surface-2)}
 .hint{margin-left:auto;font-size:11px;color:var(--ink-3)}
 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
@@ -97,7 +98,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 
 <div class="wrap">
   <h1>Copilot chat: the composer</h1>
-  <p class="lede">Left is the chat as it is today. Below it is the proposal: the chats rail with Rename and Archive behind three dots, an Archived list, and the new chat box &mdash; it fills the window top to bottom, starts one line tall, Send sits inside it as an arrow, and the paperclip sits under it on the left. Everything in the proposal can be pressed.</p>
+  <p class="lede">Left is the chat as it is today. Below it is the proposal: the chats rail with Rename and Archive behind three dots, an Archived list, and the new chat box &mdash; it fills the window top to bottom, starts one line tall, Send sits inside it as Claude's return-arrow icon, and the paperclip sits under it on the left. Everything in the proposal can be pressed.</p>
 
   <div class="pair">
     <section>
@@ -146,7 +147,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
           <div class="box">
             <textarea id="newbox" rows="1" placeholder="Ask about Devices’s foundation…" aria-label="Message"></textarea>
             <button class="send" id="send" type="button" aria-label="Send" title="Send" disabled>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v7a3 3 0 0 1-3 3H5"/><path d="M9 11l-4 4 4 4"/></svg>
             </button>
           </div>
           <div class="under">
@@ -164,7 +165,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
   <div class="notes">
     <div class="note"><b>Fills the window</b>The chat reaches from below the tab row to the bottom of the screen. The messages scroll inside it, and the box stays pinned at the bottom.</div>
     <div class="note"><b>Grows as you type</b>One line to start, growing to about ten lines (200px). After that the box scrolls inside itself.</div>
-    <div class="note"><b>Send inside, Attach below</b>Send is the round arrow in the box's corner, greyed out while the box is empty. The paperclip is under the box on the left (no word, the name is on its hover), and attached files show as chips above the box, as they do today.</div>
+    <div class="note"><b>Send inside, Attach below</b>Send is the return-arrow icon in the box's bottom-right corner, as in Claude, greyed out while the box is empty. The paperclip is under the box on the left (no word, the name is on its hover), and attached files show as chips above the box, as they do today.</div>
     <div class="note"><b>Rename and Archive in the rail</b>Three dots on each chat: always shown on the open chat and on a touch screen, on hover for the rest. Rename turns the name into a box (Enter saves, Escape cancels). Archive takes the chat off the list; nothing is lost.</div>
     <div class="note"><b>Archived chats</b>At the foot of the rail, &ldquo;Archived &middot; N&rdquo; opens the archived list in the same rail. Anybody in the office can Restore a chat. Only the Super user sees Delete, and it asks once more in the row. Switch &ldquo;Look at it as&rdquo; above to see both.</div>
     <div class="note"><b>To decide: Enter</b>Drawn here as Enter sends and Shift+Enter makes a new line, as in Claude. Today Enter makes a new line and only the button sends.</div>
@@ -174,8 +175,8 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 <script>
 (function(){
   var t = document.getElementById("newbox"), s = document.getElementById("send");
-  function fit(){ t.style.height = "40px"; var h = Math.min(t.scrollHeight, 200); t.style.height = h + "px";
-    t.style.overflowY = t.scrollHeight > 200 ? "auto" : "hidden"; s.disabled = !t.value.trim(); }
+  function fit(){ t.style.height = "48px"; var h = Math.min(t.scrollHeight, 210); t.style.height = h + "px";
+    t.style.overflowY = t.scrollHeight > 210 ? "auto" : "hidden"; s.disabled = !t.value.trim(); }
   t.addEventListener("input", fit);
   t.addEventListener("keydown", function(e){ if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); t.value = ""; fit(); } });
   s.addEventListener("click", function(){ t.value = ""; fit(); t.focus(); });

@@ -61179,3 +61179,5 @@ under `keep-leak`.
 `check:copilot` 129/0, red 13 ways; `check:shell` 198/0; typecheck clean;
 `built-in-step` all good; `qa.py` ERRORS none. `sw.js` SHELL
 `v5.81-copilot-refine`.
+
+**Merged to `main` 2026-10-01 on Islam's word**: `main` had not moved, so a clean fast-forward; this record commit is on `main` alone so its SHA is on no other ref until production has served it (§91). No forced sign-out is owed: nothing about how a save is judged changed (spec 029).

@@ -10796,7 +10796,12 @@ body.presenting #buildband { display:none; }
    at the bottom of the screen; below 820px the rails stack and the page
    scrolls as it always did. */
 @media (min-width:821px){
-  .coppane { height:calc(100dvh - var(--cop-top, 260px) - 16px); min-height:420px; align-items:stretch; }
+  /* §458: the pane ends where the page ends. It took 16px and the page kept
+     its 80px foot (--page-foot), so the PAGE scrolled about 64px under a pane
+     that already fitted — the window moved and the chat did not. A page sized
+     to the window takes the small foot, as Setup's does (§167). */
+  .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
+  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
   .coprails { min-height:0; }
   .coprail { display:flex; flex-direction:column; min-height:0; }
   .coprail.copchats { flex:1 1 auto; }

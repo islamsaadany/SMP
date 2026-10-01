@@ -21,7 +21,15 @@ const A = need("./assistant.cjs") as {
 export const configured = (): boolean => A.configured();
 
 const str = (v: unknown) => (v == null ? "" : String(v));
-const clip = (v: unknown, n: number) => str(v).replace(/\s+/g, " ").trim().slice(0, n);
+/* THE ANSWER'S OWN FORMAT NEVER REACHES THE SCREEN (§458). Islam saw a
+   "Working from" line end in `", "missing": "None.` — the model had written
+   the next field of its JSON INSIDE this one. A string that runs on into
+   `", "<one of our own field names>":` is cut there; anything else is kept
+   exactly as written (§96.2). */
+const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|recommended";
+const LEAK = new RegExp('["\u201d]\\s*,\\s*"(?:' + OWN_KEYS + ')"\\s*:[\\s\\S]*$');
+export const unleak = (v: string) => (process.env.SMP_BREAK === "keep-leak" ? v : v.replace(LEAK, "").trim());
+const clip = (v: unknown, n: number) => unleak(str(v).replace(/\s+/g, " ").trim()).slice(0, n);
 
 /* A paste is longer than a thought: two thousand characters, or more than
    one blank-line-separated paragraph at eight hundred. Marked on the
@@ -83,7 +91,7 @@ export type Answer = {
    attached as the only names a source may carry. */
 export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string; part: Answer } | null {
   const j: any = raw && typeof raw === "object" ? raw : {};
-  const reply = str(j.reply).trim().slice(0, 8000);
+  const reply = unleak(str(j.reply).trim()).slice(0, 8000);
   const pb = j.playback && typeof j.playback === "object" ? j.playback : null;
   const playback = pb && (clip(pb.understood, 600) || clip(pb.workingFrom, 600) || clip(pb.missing, 600))
     ? { understood: clip(pb.understood, 600), workingFrom: clip(pb.workingFrom, 600), missing: clip(pb.missing, 600) } : null;
@@ -157,11 +165,21 @@ export type AskResult = { ok: true; reply: string; part: Answer } | { ok: false;
 /* The one call. A PDF rides as a document on the question; everything else
    is text in the corpus. The timeout is the drafting one — a draft is not a
    lookup (§134's own distinction) — and thinking is allowed. */
+const BUSY = new Set([429, 500, 502, 503, 504]);
+/* The pauses before each further ask (§458). SMP_COPILOT_RETRY_MS, when set,
+   replaces every one of them — the check sets it to 0 so a run takes no time. */
+const WAITS = [2000, 5000, 10000];
+const waitFor = (i: number) => { const n = Number(process.env.SMP_COPILOT_RETRY_MS); return process.env.SMP_COPILOT_RETRY_MS != null && Number.isFinite(n) && n >= 0 ? n : WAITS[i]; };
+/* The lighter model asked once when the main one stays busy. An override
+   for the day Google renames it; a fallback that is itself refused only
+   means the person is told about the busy main model, as before. */
+const fallbackModel = () => String(process.env.GEMINI_FALLBACK_MODEL || "gemini-flash-lite-latest").trim();
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
   const pdfParts = a.files.filter((f) => f.kind === "pdf" && f.bytes && f.bytes.length)
     .map((f) => ({ inlineData: { mimeType: "application/pdf", data: f.bytes!.toString("base64") } }));
-  const r = await A.askJson({
+  const call = (model?: string) => A.askJson({
     question: a.question,
     history: a.history,
     schema: SCHEMA,
@@ -173,7 +191,24 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
     think: true,
     maxOutput: 8192,
     timeoutMs: 55_000,
+    ...(model ? { model } : {}),
   });
+  /* A BUSY PROVIDER IS ASKED AGAIN BEFORE ANYBODY IS TOLD (§457, widened by
+     §458). Islam met the 503 "high demand" again after §457's single retry:
+     a busy spell lasts longer than 2.5 seconds. So three more asks, waiting
+     2, 5 and 10 seconds, and then the lighter model once (his "fallback ok").
+     Only the statuses that mean "not now" — a refusal of the question or the
+     key would only be repeated — and a busy answer comes back fast, so the
+     whole ladder stays well inside one request's life. */
+  const busy = (x: { ok: boolean }) => !x.ok && BUSY.has(Number((x as { status?: number }).status));
+  let r = await call();
+  if (busy(r) && process.env.SMP_BREAK !== "no-retry") {
+    for (let i = 0; i < WAITS.length && busy(r); i++) { await sleep(waitFor(i)); r = await call(); }
+    if (busy(r) && process.env.SMP_BREAK !== "no-fallback") {
+      const f = await call(fallbackModel());
+      if (f.ok) r = f;
+    }
+  }
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
   const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
   if (!shaped) return { ok: false, why: "the answer had nothing in it" };

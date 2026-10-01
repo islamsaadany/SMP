@@ -295,124 +295,7 @@ var COPILOT = (function(){
     } else if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) {
       line.push(REVIEW.name);
     }
-    var text = planText(place(), u);
-    return { line: line.join(" · ") + (text ? " · the plan's own text" : ""), detail: detail.join("\n"), text: text };
-  }
-
-  /* THE PLAN'S OWN WORDS (§457). Islam: the Copilot told him Mobile had no
-     Winning Aspiration while the Foundation plainly held one — because the
-     line above sent names and counts and never a sentence anybody wrote. Each
-     message now carries the place's written plan as the page shows it, read
-     off the same object the page renders (unitLike, so a function, a
-     capability and the group's own plan come too), hidden rows left out
-     exactly as every score leaves them out (§233). The chat's own section
-     goes FIRST, so the server's cap trims the far sections and never the one
-     being asked about. Nothing is stored from it. */
-  function clean(v){ return String(v == null ? "" : v).replace(/\s+/g, " ").trim(); }
-  /* Where the words live depends on the place: a unit's are on the unit; the
-     group's Foundation is GROUP's own (topAsUnit carries only its pillars and
-     SWOT); a supporting function or a capability that plans in projects or
-     actions is not unit-shaped at all, so its definition and objectives are
-     read off the function or capability and its work off its holders — the
-     list its own pages draw (fnHolders, §326, §342). */
-  function sourceOf(t, u){
-    var o = {}, k;
-    if (u) for (k in u) o[k] = u[k];
-    if (t === "group" && typeof GROUP !== "undefined" && GROUP) {
-      o.aspiration = GROUP.aspiration; o.endInMind = GROUP.endInMind;
-      o.clauses = GROUP.clauses; o.keyObjectives = GROUP.keyObjectives;
-    }
-    var holder = null;
-    try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") {
-        var fk = t.slice(3), F = FUNCTIONS[fk];
-        if (F) { if (!u) { o.def = F.def; o.keyObjectives = F.keyObjectives; } }
-        holder = typeof fnHolders === "function" ? fnHolders(fk) : [];
-      } else if (t.indexOf("cap:") === 0 && typeof capById === "function") {
-        var C = capById(t.slice(4));
-        if (C && !u) { o.def = C.def; o.keyObjectives = C.keyObjectives; holder = [C]; }
-      }
-    } catch (e) { holder = null; }
-    o.projects = []; o.actions = [];
-    (holder || []).forEach(function(h){
-      if (!h) return;
-      o.projects = o.projects.concat(h.projects || []);
-      o.actions = o.actions.concat(h.actions || []);
-      if (!o.def && h.def) o.def = h.def;
-    });
-    return o;
-  }
-  function planText(t, u0){
-    var u = sourceOf(t, u0);
-    var hid = function(r){ return SMPRules.isHidden && SMPRules.isHidden(r); };
-    var fig = function(r){
-      var b = [];
-      if (clean(r.dir) || clean(r.target)) b.push("target " + clean((r.dir || "") + " " + (r.target || "")));
-      if (clean(r.target3y)) b.push("3-year " + clean(r.target3y));
-      if (clean(r.actual)) b.push("reported " + clean(r.actual));
-      return b.length ? " (" + b.join(", ") + ")" : "";
-    };
-    var parts = {};
-    var f = [];
-    if (clean(u.aspiration)) f.push(lw("aspiration") + (typeof GROUP !== "undefined" && GROUP && GROUP.horizon ? " (horizon " + GROUP.horizon + ")" : "") + ": " + clean(u.aspiration));
-    if (clean(u.endInMind)) f.push("End in mind: " + clean(u.endInMind));
-    if (clean(u.def)) f.push("Definition: " + clean(u.def));
-    (u.clauses || []).forEach(function(c){ if (c && clean(c[1])) f.push(clean(c[0]) + ": " + clean(c[1])); });
-    var kos = (u.keyObjectives || []).filter(function(k){ return !hid(k) && clean(k.name); });
-    if (kos.length) f.push(lw("keyobj", true) + ":\n" + kos.map(function(k){ return "- " + clean(k.name) + fig(k); }).join("\n"));
-    if (f.length) parts.foundation = "FOUNDATION\n" + f.join("\n");
-    var sw = u.swot || {}, sn = { s:"Strengths", w:"Weaknesses", o:"Opportunities", t:"Threats" }, a = [];
-    ["s","w","o","t"].forEach(function(q){
-      var list = (sw[q] || []).map(function(x){ return clean(x && typeof x === "object" ? (x.text || x.name) : x); }).filter(Boolean);
-      if (list.length) a.push(sn[q] + ":\n" + list.map(function(x){ return "- " + x; }).join("\n"));
-    });
-    if (a.length) parts.analysis = "SWOT\n" + a.join("\n");
-    var items = [];
-    try { items = typeof itemsNow === "function" ? itemsNow(u) : (u.items || []); } catch (e) { items = u.items || []; }
-    var d = [], x = [];
-    items.forEach(function(p){
-      var head = (p.code ? p.code + " " : "") + clean(p.name) + (clean(p.owner) ? " (owner " + clean(p.owner) + ")" : "");
-      var ms = (p.measures || []).filter(function(m){ return !hid(m) && clean(m.name); });
-      d.push(head + (clean(p.sub) ? " — " + clean(p.sub) : "") + (ms.length ? "\n" + ms.map(function(m){ return "- " + clean(m.name) + fig(m); }).join("\n") : ""));
-      var ts = (p.tactics || []).filter(function(t){ return !hid(t) && clean(t.name); });
-      if (ts.length) x.push(head + "\n" + ts.map(function(t){
-        var qs = ["q1","q2","q3","q4"].filter(function(q){ return t[q]; }).map(function(q){ return q.toUpperCase(); }).join("/");
-        var b = [];
-        if (clean(t.owner)) b.push("owner " + clean(t.owner));
-        if (qs) b.push(qs);
-        if (clean(t.status)) b.push(clean(t.status));
-        if (clean(t.outcome)) b.push("outcome " + clean(t.outcome) + (clean(t.outTarget) ? " target " + clean(t.outTarget) : "") + (clean(t.outActual) ? " reported " + clean(t.outActual) : ""));
-        return "- " + clean(t.name) + (b.length ? " (" + b.join(", ") + ")" : "");
-      }).join("\n"));
-    });
-    (u.projects || []).filter(function(pr){ return pr && !hid(pr) && clean(pr.name); }).forEach(function(pr){
-      var b = [];
-      if (clean(pr.owner)) b.push("owner " + clean(pr.owner));
-      if (clean(pr.start) || clean(pr.end)) b.push(clean(pr.start) + " to " + clean(pr.end));
-      var rows = [];
-      if (clean(pr.brief)) rows.push("Brief: " + clean(pr.brief));
-      (pr.deliverables || []).filter(function(r){ return !hid(r) && clean(r.name); }).forEach(function(r){
-        rows.push("- deliverable: " + clean(r.name) + (clean(r.status) ? " (" + clean(r.status) + ")" : ""));
-      });
-      (pr.outcomes || []).filter(function(r){ return !hid(r) && clean(r.name); }).forEach(function(r){
-        rows.push("- outcome: " + clean(r.name) + fig(r));
-      });
-      (pr.milestones || []).filter(function(r){ return !hid(r) && clean(r.name); }).forEach(function(r){
-        rows.push("- milestone: " + clean(r.name) + (clean(r.finish) ? " due " + clean(r.finish) : "") + (clean(r.status) ? " (" + clean(r.status) + ")" : ""));
-      });
-      d.push("Project: " + clean(pr.name) + (b.length ? " (" + b.join(", ") + ")" : "") + (rows.length ? "\n" + rows.join("\n") : ""));
-    });
-    var acts = (u.actions || []).filter(function(r){ return r && !hid(r) && clean(r.name); });
-    if (acts.length) x.push("Actions\n" + acts.map(function(r){
-      var b = [];
-      ["owner","due","status"].forEach(function(k){ if (clean(r[k])) b.push(k + " " + clean(r[k])); });
-      return "- " + clean(r.name) + (b.length ? " (" + b.join(", ") + ")" : "");
-    }).join("\n"));
-    if (d.length) parts.directions = (items.length ? lw("pillar", true).toUpperCase() + " AND MEASURES" : "PROJECTS") + "\n" + d.join("\n");
-    if (x.length) parts.execution = "TACTICS\n" + x.join("\n");
-    var order = ["foundation","analysis","directions","execution"], sec = section();
-    if (order.indexOf(sec) > 0) order = [sec].concat(order.filter(function(k){ return k !== sec; }));
-    return order.filter(function(k){ return parts[k]; }).map(function(k){ return parts[k]; }).join("\n\n");
+    return { line: line.join(" · "), detail: detail.join("\n") };
   }
 
   function sizeWord(n){ return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
@@ -667,7 +550,7 @@ var COPILOT = (function(){
     PANE.pending = [];
     THINKING = id; SAY = ""; draw();
     post({ act:"say", id:id, text:text, fileIds: files.map(function(f){ return f.id; }),
-           context: ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : ""), placeWord: placeWord() }).then(function(x){
+           context: ctx.line + (ctx.detail ? "\n" + ctx.detail : ""), placeWord: placeWord() }).then(function(x){
       THINKING = null;
       if (x.st === 200 && x.j && x.j.ok) {
         if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; }

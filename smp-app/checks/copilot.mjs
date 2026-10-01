@@ -401,7 +401,7 @@ try {
     let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
       let j = null; try { j = JSON.parse(b); } catch { j = null; }
       seen.push({ url: req.url, key: req.headers["x-goog-api-key"], body: j });
-      const n = NEXT || { answer: { reply: "ok" } };
+      const n = (Array.isArray(NEXT) ? NEXT.shift() : NEXT) || { answer: { reply: "ok" } };
       if (n.status) { res.writeHead(n.status, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in refused" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(n.answer) }] } }] }));
@@ -410,6 +410,7 @@ try {
   await new Promise((r) => stand.listen(0, "127.0.0.1", r));
   process.env.GEMINI_ENDPOINT = "http://127.0.0.1:" + stand.address().port + "/models/";
   process.env.GEMINI_API_KEY = "stand-in-key";
+  process.env.SMP_COPILOT_RETRY_MS = "0";
   try {
     const ch = (await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis", title: "Q3 SWOT" }, NORAN)).j.chat;
     const b64 = (buf) => buf.toString("base64");
@@ -448,6 +449,8 @@ try {
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
       /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
+    check("...told to quote what the plan holds and ask what to change before refining it (§458)",
+      /REFINING WHAT ALREADY EXISTS/.test(sys) && /First quote in `reply` what THE PLAN AS WRITTEN holds/.test(sys));
     check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
@@ -498,13 +501,57 @@ try {
     const notPaste = await call("POST", "api", { act: "savePasted", id: ch.id, messageId: me.id, section: "analysis" }, NORAN);
     check("...and a message that was NOT pasted cannot be saved that way — judged on the stored row (§42)", notPaste.st === 400 && /not pasted/.test(notPaste.j.why));
 
+    /* §457: THE PLAN'S OWN WORDS REACH THE MODEL WHOLE. The tab now sends the
+       place's written plan, ~8,000 characters for a unit, and the old 6,000
+       cap would have cut the very sentence Islam asked about. */
+    NEXT = { answer: { reply: "Read it." } };
+    const longCtx = "Mobile · 4 pillars · the plan's own text\n\nTHE PLAN AS WRITTEN:\nFOUNDATION\nWinning Aspiration: " + "x".repeat(15000) + " ASPIRATION-END";
+    await call("POST", "api", { act: "say", id: ch.id, text: "Can we enhance the winning aspiration?", context: longCtx, placeWord: "Mobile" }, NORAN);
+    const sysL = seen[seen.length - 1].body.systemInstruction.parts.map((p) => p.text).join("");
+    check("the place's written plan reaches the model whole — a 15,000-character Foundation is not cut", /ASPIRATION-END/.test(sysL) && /THE PLAN AS WRITTEN/.test(sysL));
+
+    /* §457: A BUSY PROVIDER IS ASKED ONCE MORE. Both ends (§94.2): a 503 then
+       an answer gives the answer, from two asks; a refusal that is not "busy"
+       is asked once; and busy twice is a failure after exactly two asks. */
+    NEXT = [{ status: 503 }, { answer: { reply: "Second time lucky." } }];
+    const b0 = seen.length;
+    const r1 = await call("POST", "api", { act: "say", id: ch.id, text: "Busy then fine" }, NORAN);
+    const a1 = r1.j.messages[r1.j.messages.length - 1];
+    check("a 503 is asked again once, and the person sees the answer, not the refusal",
+      seen.length === b0 + 2 && a1.part.kind === "answer" && a1.body === "Second time lucky.", seen.length - b0 + " asks · " + JSON.stringify(a1).slice(0, 160));
+    NEXT = [{ status: 404 }, { answer: { reply: "never reached" } }];
+    const b1 = seen.length;
+    const r2 = await call("POST", "api", { act: "say", id: ch.id, text: "Not a busy refusal" }, NORAN);
+    check("...a refusal that is not 'busy' is asked once only, and said",
+      seen.length === b1 + 1 && r2.j.messages[r2.j.messages.length - 1].part.kind === "failed", seen.length - b1 + " asks");
+    /* §458: busy four times, and the lighter model answers — five asks, the
+       last one to the fallback model by name in the address. */
+    NEXT = [{ status: 503 }, { status: 503 }, { status: 429 }, { status: 503 }, { answer: { reply: "From the lighter model." } }];
+    const bF = seen.length;
+    const rF = await call("POST", "api", { act: "say", id: ch.id, text: "Still busy" }, NORAN);
+    const aF = rF.j.messages[rF.j.messages.length - 1];
+    check("a provider busy four times is asked three more times and then the lighter model once — which answers (§458)",
+      seen.length === bF + 5 && /gemini-flash-lite-latest/.test(seen[seen.length - 1].url) && !/gemini-flash-lite-latest/.test(seen[seen.length - 2].url) &&
+      aF.part.kind === "answer" && aF.body === "From the lighter model.", seen.length - bF + " asks · " + (seen[seen.length - 1] || {}).url);
+    /* §458: the answer's own format never reaches the screen. Both ends: a
+       field that ran on into the next JSON key is cut, and a quote-comma-quote
+       that is not one of our keys is kept as written. */
+    NEXT = { answer: { reply: "Refined.", playback: { understood: "He said \"yes\", \"no\" and left", workingFrom: "The plan's aspiration (MENA expansion).\", \"missing\": \"None.", missing: "" } } };
+    const rL = await call("POST", "api", { act: "say", id: ch.id, text: "Leak test" }, NORAN);
+    const pL = rL.j.messages[rL.j.messages.length - 1].part.playback || {};
+    check("a playback line that ran on into the answer's next field is cut there (§458)", pL.workingFrom === "The plan's aspiration (MENA expansion).", JSON.stringify(pL.workingFrom));
+    check("...and ordinary quotes in what the model wrote are kept", pL.understood === 'He said "yes", "no" and left', JSON.stringify(pL.understood));
+    NEXT = null;
+
     NEXT = { status: 500 };
+    const b2 = seen.length;
     const n0 = (await asTenant(A, (c) => messagesOf(c, ch.id))).length;
     const s4 = await call("POST", "api", { act: "say", id: ch.id, text: "One more question" }, NORAN);
     const last4 = s4.j.messages[s4.j.messages.length - 1];
     check("when the AI fails, what was typed is kept and the product says so — never a pretend answer",
       s4.st === 200 && s4.j.messages.length === n0 + 2 && s4.j.messages[s4.j.messages.length - 2].body === "One more question" &&
       last4.part.kind === "failed" && /could not answer just now/.test(last4.body) && /send it again/.test(last4.body), JSON.stringify(last4));
+    check("...after exactly five asks — once, three more, then the lighter model once — never a loop (§458)", seen.length === b2 + 5, seen.length - b2 + " asks");
     delete process.env.GEMINI_API_KEY;
     const before = seen.length;
     const s5 = await call("POST", "api", { act: "say", id: ch.id, text: "And with no key?" }, NORAN);
@@ -512,7 +559,7 @@ try {
     const chat5 = await call("GET", "chat", null, NORAN, "?id=" + ch.id);
     check("...and the chat reports that the AI is off", chat5.j.aiOn === false);
   } finally {
-    delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_ENDPOINT;
+    delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_ENDPOINT; delete process.env.SMP_COPILOT_RETRY_MS;
     await new Promise((r) => stand.close(r));
   }
 

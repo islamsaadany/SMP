@@ -274,7 +274,10 @@ const SCHEMA = {
      · `think`       — let the model reason. Default OFF, and §134 gives the
                        reason in its own words: "answering from a corpus that
                        is IN THE PROMPT is retrieval, not reasoning". That
-                       reasoning is exactly what does NOT hold for drafting. */
+                       reasoning is exactly what does NOT hold for drafting.
+     · `model`       — ask this model instead of the deployment's own, once
+                       (the Copilot's fallback when the main one is busy,
+                       §458). Optional, so every other caller is unchanged. */
 async function callModel(opts) {
   const kb = opts.kb || {};
   if (!configured()) return { ok: false, why: "no " + KEY_NAME + " is set on this deployment" };
@@ -353,7 +356,7 @@ async function callModel(opts) {
   const timer = setTimeout(function () { ctrl.abort(); }, opts.timeoutMs || TIMEOUT_MS);
   let res, text;
   try {
-    res = await fetch(endpoint() + encodeURIComponent(model()) + ":generateContent", {
+    res = await fetch(endpoint() + encodeURIComponent(opts.model || model()) + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey() },
       body: JSON.stringify(body),
@@ -399,7 +402,7 @@ async function callModel(opts) {
     }
     return { ok: false, status: res.status,
              why: "the assistant refused the request (" + res.status +
-                  (res.status === 404 ? ", model \"" + model() + "\"" : "") +
+                  (res.status === 404 ? ", model \"" + (opts.model || model()) + "\"" : "") +
                   (detail ? ": " + detail.slice(0, 200) : "") + ")" };
   }
 

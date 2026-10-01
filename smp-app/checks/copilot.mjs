@@ -35,9 +35,10 @@ import { deflateRawSync } from "node:zlib";
 import {
   SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor, copilotGrant,
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
+  partMemo,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
-import { isPasted, shapeAnswer, corpusOf } from "../lib/copilot-ask.ts";
+import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { methodFor } from "../lib/copilot-settings.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
@@ -138,6 +139,30 @@ check("each section's guidance carries the house rules; the roads only where the
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
+/* §460: the conversation fixes, A B C, each asked of the rule itself. */
+{
+  const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
+  const gi = guidanceFor("analysis", M, []);
+  check("§460 A: the method LEADS — it is sent before the answer rules and is not overruled by them",
+    gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("RULES FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
+  check("§460 A: a drafted item takes the method's shape — title, evidence, score — and a turn names the method part it follows",
+    /`title`[\s\S]*`evidence`[\s\S]*`score`/.test(gi) && /`following`/.test(gi));
+  check("§460 C: talk first — playback once, buttons only for a real question, no refine stop once they said what to change",
+    /TALK LIKE A CONSULTANT/.test(gi) && /PLAYBACK BEFORE PRODUCING, ONCE/.test(gi) && /leave `options` empty/.test(gi) && /ALREADY said what to change/.test(gi));
+  const sh2 = shapeAnswer({ reply: "Here is the internal half.", following: "Situational Analysis · SWOT",
+    draft: { title: "Mobile SWOT", groups: [{ title: "Strengths", items: [
+      { title: "Brand partnerships", text: "Samsung and Xiaomi deals.", evidence: "your message", score: "3 · Strong", source: "pasted" },
+      { title: "Title only", text: "" }, { text: "Plain line" }] }] } }, []);
+  const its = sh2 && sh2.part.draft.groups[0].items;
+  check("§460 A: an item keeps its title, evidence and score; a title alone becomes its text; a plain line stays plain",
+    its && its[0].title === "Brand partnerships" && its[0].evidence === "your message" && its[0].score === "3 · Strong" &&
+    its[1].text === "Title only" && !its[1].title && !its[2].title && !its[2].evidence && sh2.part.following === "Situational Analysis · SWOT", JSON.stringify(sh2 && sh2.part));
+  const memo = partMemo({ kind: "answer", following: "SWOT", options: [{ label: "Move to the market" }, { label: "Add one" }],
+    draft: { title: "Mobile SWOT", groups: [{ title: "Strengths", items: [{ title: "Brand partnerships", text: "Samsung deals.", score: "3 · Strong" }] }] } });
+  check("§460 B: the Copilot's own draft and the buttons it offered ride with its words into the next question",
+    /\[my draft "Mobile SWOT":/.test(memo) && /Brand partnerships — Samsung deals\. \(3 · Strong\)/.test(memo) && /\[options I offered: Move to the market · Add one\]/.test(memo), memo);
+  check("...and a part that is not an answer adds nothing", partMemo({ kind: "files" }) === "" && partMemo(null) === "");
+}
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,
   history: [], assumptions: ["Margins flat"], files: [{ name: "notes.docx", kind: "docx", text: "Share fell" }, { name: "deck.pdf", kind: "pdf", text: "" }] });
 check("what the model is sent names the place, what the platform shows, the assumptions and each file by name",
@@ -486,6 +511,21 @@ try {
     check("...and the earlier file, still by name — a file belongs to its chat", /=== FILE: notes\.docx ===/.test(sys2));
     check("...and the history holds what was said, the product's own lines left out",
       seen[seen.length - 1].body.contents.some((t) => t.role === "user" && (t.parts[0].text || "").startsWith("Refresh the SWOT from these")));
+
+    /* §460 B, on the wire: the Copilot's own earlier draft and buttons travel
+       with its words, so it builds on them rather than asking how to start. */
+    const aiTurn = seen[seen.length - 1].body.contents.find((t) => t.role === "model" && /I read your deck and notes/.test(t.parts[0].text || ""));
+    check("§460 B: the next ask carries the Copilot's own earlier draft and the buttons it offered",
+      !!aiTurn && /\[my draft "Mobile SWOT":/.test(aiTurn.parts[0].text) && /Share fell 4 points/.test(aiTurn.parts[0].text) &&
+      /\[options I offered: Assume for me · I'll send them\]/.test(aiTurn.parts[0].text), aiTurn && aiTurn.parts[0].text.slice(0, 300));
+    {
+      const hist = Array.from({ length: 30 }, (_, i) => ({ from_office: i % 2 === 1, body: "turn " + i }));
+      const before = seen.length;
+      NEXT = { answer: { reply: "ok" } };
+      await askCopilot({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "", question: "next", pasted: false, history: hist, assumptions: [], files: [] });
+      const sent = seen.length > before ? seen[seen.length - 1].body.contents : [];
+      check("§460 B: a long chat sends twenty earlier turns, not eight", sent.length === 21 && /turn 10/.test(sent[0].parts[0].text), sent.length + "");
+    }
 
     NEXT = { answer: { reply: "This is a market scan.", pastedBelongsTo: "analysis" } };
     const paste = "Market notes\n\n" + "The category grew in Q3. ".repeat(100);

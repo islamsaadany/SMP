@@ -432,16 +432,6 @@ var COPILOT = (function(){
     if (!s || s === "platform") return '';
     return ' <span class="copsrc' + (s === "assumed" ? " assumed" : "") + '">' + E(s === "pasted" ? "Pasted" : s === "assumed" ? "Assumed" : s) + '</span>';
   }
-  /* An item in the method's own shape (§460): a title and its score on one
-     line, the description under it, then what it rests on. An item with
-     none of that is the one line it always was. */
-  function itemHtml(it){
-    if (!it.title && !it.evidence && !it.score) return '<li>' + E(it.text) + srcTag(it.source) + '</li>';
-    return '<li class="copit">' +
-      (it.title || it.score ? '<div class="copith"><span>' + E(it.title || "") + '</span>' + (it.score ? '<span class="copscore">' + E(it.score) + '</span>' : '') + '</div>' : '') +
-      '<div>' + E(it.text) + '</div>' +
-      '<div class="copev">' + (it.evidence ? 'Evidence: ' + E(it.evidence) : '') + srcTag(it.source) + '</div></li>';
-  }
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
@@ -454,7 +444,7 @@ var COPILOT = (function(){
       h += '<div class="copdraft">' + (p.draft.title ? '<div class="copdt">' + E(p.draft.title) + '</div>' : '') +
         '<div class="copdg">' + p.draft.groups.map(function(g){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
-            g.items.map(itemHtml).join("") + '</ul></div>';
+            g.items.map(function(it){ return '<li>' + E(it.text) + srcTag(it.source) + '</li>'; }).join("") + '</ul></div>';
         }).join("") + '</div></div>';
     }
     if (p.assumptions && p.assumptions.length) h += '<div class="copassume"><b>Assumed</b> ' + p.assumptions.map(E).join(" · ") + '</div>';
@@ -471,9 +461,6 @@ var COPILOT = (function(){
           E(o.label) + (o.recommended ? ' <span class="coprec">(recommended)</span>' : '') + '</button>';
       }).join("") + '</div>';
     }
-    /* What part of the method this turn works through (§460): quiet, and
-       only when the model named one. */
-    if (p.following) h += '<div class="copfollow">Following: ' + E(p.following) + '</div>';
     return h;
   }
   function personHtml(m){

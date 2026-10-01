@@ -285,7 +285,11 @@ async function callModel(opts) {
     return { ok: false, why: opts.emptyWhy || "the knowledge base is empty" };
   }
 
-  const turns = (opts.history || []).slice(-8).map(function (m) {
+  /* How many earlier turns ride along: eight for the chat corner's short
+     answers, more where a caller asks (the Copilot, §460 B — a strategy
+     conversation runs long and loses its thread at eight). */
+  const keep = Math.max(1, Math.min(40, Number(opts.maxTurns) || 8));
+  const turns = (opts.history || []).slice(-keep).map(function (m) {
     return { role: m.from_office ? "model" : "user",
              parts: [{ text: String(m.body || "") }] };
   });

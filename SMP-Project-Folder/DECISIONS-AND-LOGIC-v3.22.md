@@ -61181,3 +61181,16 @@ under `keep-leak`.
 `v5.81-copilot-refine`.
 
 **Merged to `main` 2026-10-01 on Islam's word**: `main` had not moved, so a clean fast-forward; this record commit is on `main` alone so its SHA is on no other ref until production has served it (§91). No forced sign-out is owed: nothing about how a save is judged changed (spec 029).
+
+## §460 — the Copilot talks like a consultant, remembers what it drafted, and follows the method (2026-10-01)
+
+Islam, using it: *"the discussion is not clean and dynamic seems stupid. not getting the methodology"*. Measured before proposing: (1) the AI read the house rules first and Forefront's method LAST, under a line saying *the rules above win*, so the method was background rather than the lead; (2) only the last 8 turns travelled, and an AI turn travelled as its sentence alone, so the Copilot never saw the draft it had just written or the buttons it had just offered and restarted every few turns; (3) every turn was the same form — playback, missing, options — so a conversation read as a questionnaire; and (4) the SWOT method asks for a title, a description, evidence and a 1–4 score per item, while the answer could hold one line per item. A mockup of a reply before and after was published and signed off (*"go, build A B and C"*).
+
+**A — the method leads.** `guidanceFor()` now reads: who the Copilot is and how it talks, then the section, then Forefront's method *"which LEADS the conversation — follow its phases and their order"*, then the house rules as *rules for your answer*. Draft items take `title`, `text`, `evidence` and `score`; the answer names the part of the method it is working through (`following`), drawn as one quiet line under the answer.
+
+**B — memory.** 20 turns travel instead of 8 (`maxTurns`, other callers unchanged), and each AI turn carries a compact note of its own draft and the options it offered (`partMemo`, capped at 3,000 characters), so the Copilot builds on its own work.
+
+**C — talk first, boxes rarely.** Playback only on the first substantial draft; `missing` only when the work is genuinely blocked; options only for a real question with distinct answers. When the person has already said what to change, it drafts straight away (§458's ask-first stays for a vague refine).
+
+Nothing stored moves, nothing is migrated, no rule about who may use the Copilot changes. Proved: `check:copilot` 137/0, red on all 16 breaks with three new ones each failing only its own assertions (`method-last` 1, `words-only` 2, `short-memory` 1); `check:shell` 199/0 with a new assertion that a method-shaped item draws its title, score and evidence and the step line shows — red 1 with the line removed; frozen `qa.py` ERRORS none; typecheck clean. **Not built**: D (a visible step tracker) and E (saying when the lighter model answered). Numbered §460 because main took §459 for Processes while this was built.
+

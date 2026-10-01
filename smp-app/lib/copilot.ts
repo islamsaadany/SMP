@@ -208,13 +208,33 @@ export type ChatMaterial = {
   assumptions: string[];
   files: { name: string; kind: string; text: string; bytes: Buffer | null }[];
 };
+/* WHAT THE COPILOT SAID IS MORE THAN ITS WORDS (§460 B). It used to be
+   sent its own earlier turns as `body` alone, so the drafts it had made and
+   the buttons it had offered were gone by the next question — and it asked
+   again how to start. The draft and the options ride with the words now, as
+   compact text, capped so a long chat cannot outgrow the request. */
+export function partMemo(part: any): string {
+  if (process.env.SMP_BREAK === "words-only" || !part || part.kind !== "answer") return "";
+  const out: string[] = [];
+  const d = part.draft;
+  if (d && Array.isArray(d.groups) && d.groups.length) {
+    const lines = d.groups.map((g: any) => "  " + str(g.title) + ": " + (Array.isArray(g.items) ? g.items : []).map((it: any) =>
+      (it.title ? str(it.title) + " — " : "") + str(it.text) + (it.score ? " (" + str(it.score) + ")" : "")).join("; "));
+    out.push("[my draft" + (d.title ? " \"" + str(d.title) + "\"" : "") + ":\n" + lines.join("\n") + "]");
+  }
+  if (Array.isArray(part.options) && part.options.length) out.push("[options I offered: " + part.options.map((o: any) => str(o.label)).join(" · ") + "]");
+  if (part.following) out.push("[following: " + str(part.following) + "]");
+  const t = out.join("\n");
+  return t ? "\n" + (t.length > 3000 ? t.slice(0, 3000) + "…]" : t) : "";
+}
+
 export async function materialOf(c: Q, chatId: string, beforeId: string): Promise<ChatMaterial> {
   const h = await c.query("SELECT who, body, part FROM copilot_messages WHERE chat_id = $1 AND id < $2 ORDER BY id", [chatId, beforeId]);
   const history = h.rows
     .filter((x: any) => x.who === "person" || !x.part || x.part.kind === "answer")
     .map((x: any) => {
       const names = x.part && Array.isArray(x.part.files) ? x.part.files.map((f: any) => f.name) : [];
-      return { from_office: x.who === "ai", body: str(x.body) + (names.length ? "\n[attached: " + names.join(", ") + "]" : "") };
+      return { from_office: x.who === "ai", body: str(x.body) + (names.length ? "\n[attached: " + names.join(", ") + "]" : "") + (x.who === "ai" ? partMemo(x.part) : "") };
     });
   const ch = await c.query("SELECT assumptions FROM copilot_chats WHERE id = $1", [chatId]);
   const assumptions = Array.isArray(ch.rows[0]?.assumptions) ? ch.rows[0].assumptions.map(str) : [];

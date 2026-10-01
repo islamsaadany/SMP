@@ -26,7 +26,7 @@ const str = (v: unknown) => (v == null ? "" : String(v));
    the next field of its JSON INSIDE this one. A string that runs on into
    `", "<one of our own field names>":` is cut there; anything else is kept
    exactly as written (§96.2). */
-const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|recommended";
+const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|recommended|evidence|score|following";
 const LEAK = new RegExp('["\u201d]\\s*,\\s*"(?:' + OWN_KEYS + ')"\\s*:[\\s\\S]*$');
 export const unleak = (v: string) => (process.env.SMP_BREAK === "keep-leak" ? v : v.replace(LEAK, "").trim());
 const clip = (v: unknown, n: number) => unleak(str(v).replace(/\s+/g, " ").trim()).slice(0, n);
@@ -65,7 +65,7 @@ export const SCHEMA = {
               title: { type: "STRING" },
               items: {
                 type: "ARRAY",
-                items: { type: "OBJECT", properties: { text: { type: "STRING" }, source: { type: "STRING" } }, required: ["text"] },
+                items: { type: "OBJECT", properties: { title: { type: "STRING" }, text: { type: "STRING" }, evidence: { type: "STRING" }, score: { type: "STRING" }, source: { type: "STRING" } }, required: ["text"] },
               },
             },
           },
@@ -73,6 +73,7 @@ export const SCHEMA = {
       },
     },
     pastedBelongsTo: { type: "STRING", enum: [...SECTIONS] },
+    following: { type: "STRING" },
   },
   required: ["reply"],
 };
@@ -83,9 +84,15 @@ export type Answer = {
   missing: string[];
   options: { label: string; recommended: boolean }[];
   assumptions: string[];
-  draft: { title: string; groups: { title: string; items: { text: string; source: string }[] }[] } | null;
+  draft: { title: string; groups: { title: string; items: DraftItem[] }[] } | null;
   pastedBelongsTo: Section | null;
+  /* The method part this turn works through (§460), "" when none. */
+  following: string;
 };
+/* An item in the method's own shape (§460): title, description, evidence
+   and score are optional, because a method that asks for none of them is
+   answered by `text` alone. */
+export type DraftItem = { text: string; source: string; title?: string; evidence?: string; score?: string };
 
 /* The model's JSON into the screen's shape, with the files that were really
    attached as the only names a source may carry. */
@@ -116,7 +123,14 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
     const groups = j.draft.groups.slice(0, 12).map((g: any) => ({
       title: clip(g && g.title, 80),
       items: (Array.isArray(g && g.items) ? g.items : []).slice(0, 30)
-        .map((it: any) => ({ text: clip(it && it.text, 600), source: source(it && it.source) })).filter((it: any) => it.text),
+        .map((it: any) => {
+          const o: DraftItem = { text: clip(it && it.text, 600), source: source(it && it.source) };
+          const t = clip(it && it.title, 140), e = clip(it && it.evidence, 400), sc = clip(it && it.score, 40);
+          if (!o.text && t) { o.text = t; } else if (t) o.title = t;
+          if (e) o.evidence = e;
+          if (sc) o.score = sc;
+          return o;
+        }).filter((it: any) => it.text),
     })).filter((g: any) => g.items.length);
     if (groups.length) draft = { title: clip(j.draft.title, 120), groups };
   }
@@ -124,6 +138,7 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
   const part: Answer = {
     kind: "answer", playback, missing: list(j.missing, 8, 300), options,
     assumptions: list(j.assumptions, 10, 300), draft, pastedBelongsTo,
+    following: clip(j.following, 120),
   };
   if (!reply && !playback && !draft) return null;
   return { reply, part };
@@ -182,6 +197,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
   const call = (model?: string) => A.askJson({
     question: a.question,
     history: a.history,
+    maxTurns: process.env.SMP_BREAK === "short-memory" ? 8 : 20,
     schema: SCHEMA,
     needsCorpus: false,
     instruction: guidanceFor(a.section, a.method || "", a.templates || []),

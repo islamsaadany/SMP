@@ -10920,7 +10920,62 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 &mdash; **&sect;443.9: the add box keeps what it has
+*Last Updated: 2026-10-01 &mdash; **&sect;443.10: the merge with `main`
+(&sect;444&ndash;&sect;450), and a deployment with no witness.** Islam: *"merge
+to main."* `main` had moved **23 commits** under this branch &mdash; the shared
+top bar, the console card's logo and Settings mark, and the single-company work,
+from three other sessions &mdash; fetched and READ before anything was merged
+(&sect;4, &sect;91). **NO RENUMBER WAS OWED AND IT WAS MEASURED RATHER THAN
+ASSUMED** (&sect;264.3, &sect;336.1): main's commit says it took
+&sect;439&ndash;&sect;446, and **main's &sect;443 IS this branch's Portfolio
+section** &mdash; it holds &sect;443.1 through &sect;443.8, this branch's own
+sub-sections, carried there by &sect;443.1's merge &mdash; while **&sect;443.9 is
+free on main in all three spellings** (0 hits each). *A renumber is owed when a
+number collides, not when `main` has been busy.* **THE THREE PORTFOLIO FILES
+AUTO-MERGED AND WERE READ RATHER THAN BELIEVED** (&sect;313.37): both sides'
+lines are in the result, the duplicate top-level declaration scan over build.py's
+own concatenation is **identical to `origin/main`'s** so the merge introduced none
+(&sect;56.7, &sect;281), **and the three names main's diff appeared to delete are
+each re-declared exactly once** &mdash; main changed their bodies, which is the
+difference between a grep that reads a diff and one that reads the result. **THE
+THREE RECORD FILES WERE COMBINED, NEVER PICKED** (&sect;318.7), asserted line by
+line rather than eyeballed (&sect;356.17 &mdash; there is no `generated-in-step`
+for prose): **0 lost from ours, 0 from main's**, with exactly one declared edit,
+main's `*Last Updated:*` demoted to `*Earlier:*`. **THE FROZEN PRODUCT IS MAIN'S
+BYTE FOR BYTE**, so nothing was rebuilt and **no `sw.js` bump is owed**
+(&sect;91's trigger is the built file's bytes changing and they did not), one
+live `const SHELL` carrying main's own name; **and no forced sign-out is owed,
+read off the diff** (spec 029) &mdash; eight files, not one under `api/`, `lib/`
+or `db/`. **RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (&sect;365):
+portfolio module **207/0**, portfolio 135/0, modules 208/0, shell 142/0, door
+145/0, insights 137/0, notes 170/0, tracker 229/0, authoriser **896/0**, differ
+140/0, platform rules 69/0, `built-in-step` all good, `generated-in-step` all
+clear, `tsc` clean COLD, main's own `single-company.py` all good and
+`platform-cards.py` 30/0, and the sweep **33 viewers / 243 destinations / ERRORS
+none** summed from the run's own lines (&sect;332) &mdash; **with both of this
+round's falsifications re-run there** (&sect;94.5), 3 red each, printing
+`DiscoveryDelivery` and `panel false &middot; box false`. **AND THIS DEPLOYMENT
+HAS NO WITNESS, SAID RATHER THAN LEFT AS A SILENCE** (&sect;375.2's precedent;
+&sect;379.5 with the sign reversed &mdash; that one recorded a limitation it had
+not measured, and the matching risk here is recording a success nobody has seen):
+the merge changes **no served static byte**, so `shell.js`, `platform.css` and
+`sw.js` come back from the live site byte-identical to this tree's generated
+copies **and to what they served the minute before the push**, and the door
+carries no build identifier at all (`/_next/static/immutable/`) &mdash; what
+production gains is server-rendered code behind the door. **Nobody here has seen
+production serve this commit**, and &sect;108.17 says delay does not settle it, so
+`main`'s tip is left unique and **the branch is deliberately NOT
+fast-forwarded**. **AND TWO HARNESS FACTS COST TIME**: `qa.py` reads `build.py`'s
+untracked INTERMEDIATE, which `built-in-step.py` deletes in its own `finally`
+(working as designed), so running the guard and then the sweep makes the sweep die
+on `ERR_FILE_NOT_FOUND` &mdash; a file named and no cause; build first. And
+**`smp-app/.env.local` is tracked AND stale**, naming a port nothing here listens
+on, so `npm run build` fails with Prisma's *"Cannot resolve environment variable:
+DATABASE_URL"* &mdash; an error naming a variable that is plainly set, because the
+address behind it is what is wrong. Flagged rather than changed (rule 1b), and
+that file is committed, which this file's own pre-commit rule forbids by name.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443.9: the add box keeps what it has
 just used, and the panel shuts behind every write (spec 060 &sect;16).** Islam,
 building a plan on the built page: he could not add two things one after the
 other, could not add a second step to an activity, and asked what else was not

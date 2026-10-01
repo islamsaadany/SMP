@@ -9113,6 +9113,47 @@ the fix, printing the exact symptoms: `DiscoveryDelivery`, and `panel false`.
 another straight away — two rows. Name a work package, then type an activity's
 name into the row underneath it — it lands under the package. Open an activity and
 add two steps one after the other without reloading.
+## The two plan-building fixes are on main (2026-10-01, §443.10)
+
+The two fixes are merged and on `main`. Main had moved twenty-three commits under
+this branch while they were built — the shared top bar across the modules, the
+client card's logo and Settings mark, and the single-company work — so all of
+that came in first and everything was run again on the combined tree rather than
+on the branch.
+
+What the combining had to get right: the three record files each had both
+sessions writing in the same place, and both sides are kept whole — checked line
+by line, nothing lost from either. The three Portfolio files merged on their own
+and were read rather than trusted: both this round's fixes and the new top bar
+are in the result.
+
+Everything green on the combined tree, including every one of the other
+sessions' own checks at their own numbers, and the whole-platform sweep with no
+errors. Both of this round's deliberate breaks were put back and watched to fail
+again, because a test you ran before a merge has not been run on what the merge
+produced.
+
+**One thing to know: nobody has been able to confirm the live site has picked
+this up.** The change is entirely in code that runs on the server behind the
+sign-in, so not one file a browser downloads has changed — the live site serves
+byte-for-byte what it served before, and there is nothing on it that says which
+build it is. It is almost certainly live; it cannot be proved from here. If
+anything looks wrong on the Portfolio plan page, a hard refresh is not the
+answer — tell me and I will look.
+
+### What to go and check
+
+Open a client's Portfolio, open a project, press Edit on the plan.
+
+- Type a phase name and press Enter, then type another straight away — two
+  rows, not one name run into the other.
+- Name a work package, then type an activity's name into the row underneath it —
+  it lands under the package.
+- Open an activity and add two steps one after the other without reloading.
+- Then the screens the other sessions changed: the top bar across Insights, the
+  Tracker and Notes; the client cards on the console; and a company set up to
+  plan on the company rather than on its business units.
+
 ### §445 — the logo stands for the name on a client card (2026-10-01)
 On the console's client cards, a client that has a logo now shows the logo on
 its own, bigger, in place of the name; a client without one still shows its

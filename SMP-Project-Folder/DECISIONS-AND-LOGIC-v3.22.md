@@ -60390,6 +60390,86 @@ offer, because `putBack` restores the value and not which key was pressed — to
 that row offers only *work package* once the phase holds one, so it cannot be
 reached from the state that produces it, and widening `putBack` to carry a control's
 own state is a decision about that helper rather than a defect fix (rule 1b).
+### §443.10 — THE MERGE WITH `main` (§444–§450), AND A DEPLOYMENT WITH NO WITNESS (2026-10-01)
+
+Islam: *"merge to main."* `main` had moved **23 commits** under this branch —
+§444's shared top bar, §445/§446's console card, and §447–§450's single-company
+work, from three other sessions — so it was fetched and **read** before anything
+was merged (§4, §91).
+
+**NO RENUMBER WAS OWED, AND THAT WAS MEASURED RATHER THAN ASSUMED** (§264.3,
+§336.1). Main's own commit says it took §439–§446 and renumbered somebody else's
+§439–§442 to §447–§450 — but main's **§443 IS this branch's Portfolio section**,
+holding §443.1 through §443.8, which are this branch's own sub-sections carried
+there by §443.1's merge; and **§443.9 is free on main in all three spellings**
+(`§443.9`, `&sect;443.9`, `\u00a7443.9` — 0 hits each). So the number this branch
+wrote is still the number that belongs to it. *A renumber is owed when a number
+collides, not when `main` has been busy.*
+
+**THE THREE PORTFOLIO CODE FILES AUTO-MERGED AND WERE READ RATHER THAN BELIEVED**
+(§313.37): both sides' lines are in the result — this round's `act.open`,
+`body.open` and `BROWSER_BREAKS`, and main's `topbar.ts` import on the Portfolio
+page — and the duplicate top-level declaration scan over build.py's own
+concatenation is **identical to `origin/main`'s**, so the merge introduced none
+(§56.7, §281). **And the three names main's diff appeared to delete are each
+re-declared exactly once** (`groupExec`, `groupPlan`, `groupUnitsObjectives`):
+main changed their bodies, so nothing is stranded — which is the difference
+between a grep that reads a diff and one that reads the result.
+
+**THE THREE RECORD FILES WERE COMBINED, NEVER PICKED** (§318.7), and the combine
+is **asserted rather than eyeballed** (§356.17's own finding — either side taken
+whole drops the other session's round, and there is no `generated-in-step` for
+prose): every non-blank line of each side must survive, with exactly ONE
+declared edit — main's `*Last Updated:*` becoming `*Earlier:*`, which is
+CLAUDE.md's own newest-first convention. **0 lost from ours, 0 from main's.**
+
+**THE FROZEN PRODUCT IS MAIN'S, BYTE FOR BYTE**, so nothing was rebuilt and **no
+`sw.js` SHELL bump is owed** — §91's trigger is the built file's bytes changing
+and they did not — with one live `const SHELL` carrying main's own name (the
+other three matches being prose in that file's own comments, §383.2). **No
+forced sign-out is owed and it is read off the diff rather than assumed** (spec
+029): what this merge adds to `main` is eight files and not one of them is under
+`api/`, `lib/` or `db/`.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365): portfolio module
+**207/0** and portfolio rules 135/0; main's own modules 208/0, shell 142/0, door
+145/0, insights 137/0, notes 170/0, tracker 229/0; authoriser **896/0**, change
+list 140/0, platform rules 69/0; `built-in-step` all good and
+`generated-in-step` all clear; `tsc` clean with the cache removed first (§3);
+main's frozen `single-company.py` all good and `platform-cards.py` 30/0; and the
+whole-platform sweep **33 viewers / 243 destinations / ERRORS none**, summed
+from the run's own lines rather than quoted (§332) — which is what a merge
+changing no frozen byte must reproduce. **And both of this round's
+falsifications were re-run on the merged tree**, because one made before a merge
+proves nothing about the merged build (§94.5): **3 red each**, printing
+`DiscoveryDelivery` and `panel false · box false`.
+
+**AND THIS DEPLOYMENT HAS NO WITNESS, WHICH IS SAID RATHER THAN LEFT AS A
+SILENCE** (§375.2's precedent, §379.5's lesson with the sign reversed — that one
+recorded a limitation it had not measured, and the matching risk here is
+recording a success nobody has seen). The merge changes **no served static
+byte**: `shell.js` (4,262,973), `platform.css` (703,802) and `sw.js` (4,192)
+come back from the live site byte-identical to this tree's generated copies
+**and to what they served in the minute before the push**, and the door carries
+no build identifier at all (its assets sit under `/_next/static/immutable/`), so
+the two builds are indistinguishable from outside. What production gains is in
+server-rendered code behind the door. **Nobody here has seen production serve
+this commit**, and §108.17's rule is that delay does not settle it either — so
+`main`'s tip is left unique by construction and **the branch is deliberately NOT
+fast-forwarded** until somebody reads it.
+
+**AND TWO THINGS IN THE HARNESS COST TIME AND ARE WORTH A LINE EACH.** `qa.py`
+reads `build.py`'s **intermediate** (`src/strategy-management-platform.html`),
+which is untracked and which `built-in-step.py` deletes in its own `finally`
+(§94.2, working as designed) — so running the guard and then the sweep makes the
+sweep die on `ERR_FILE_NOT_FOUND`, which names a file and not a cause; build
+first. And **`smp-app/.env.local` is tracked AND stale**: it names a port no
+server in this container listens on, so `npm run build` fails with Prisma's
+*"Cannot resolve environment variable: DATABASE_URL"* — an error naming a
+variable that is plainly set, because the address behind it is the thing that is
+wrong. Flagged rather than changed (rule 1b); that file is also committed, which
+this project's own pre-commit rule forbids by name.
+
 ## §444 — one top bar for every module (2026-10-01)
 
 Islam, with Strategy's top bar on screen: *"we need to maintain this top bar

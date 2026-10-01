@@ -42,20 +42,20 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 .old .send{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;font:700 13px var(--sans);padding:8px 16px}
 .old .gap{height:120px;flex:none}
 /* PROPOSED */
-.new .foot{flex:none;padding:8px 16px 10px;display:flex;flex-direction:column;gap:2px}
+.new .foot{flex:none;padding:8px 16px 6px;display:flex;flex-direction:column;gap:0}
 .new .box,.new .under,.frame .ctx,.frame .head{flex:none}
 .box{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(23,27,34,.06);transition:border-color .12s}
 .box:focus-within{border-color:var(--gold-deep)}
 .box textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;background:transparent;color:var(--ink);
-  font:15px/22px var(--sans);padding:13px 46px 13px 14px;height:48px;max-height:210px;overflow-y:hidden}
+  font:15px/22px var(--sans);padding:13px 46px 13px 14px;height:48px;min-height:48px;max-height:210px;overflow-y:hidden}
 .box .send{position:absolute;right:8px;bottom:9px;width:30px;height:30px;border-radius:6px;border:0;background:none;color:var(--ink);display:grid;place-items:center;cursor:pointer}
 .box .send:hover:not(:disabled){background:var(--surface-2)}
 .box .send:disabled{color:var(--ink-3);opacity:.6;cursor:default}
 .box .send:focus-visible,.attach:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-.under{display:flex;align-items:center;gap:8px;padding-inline:2px;min-height:26px}
-.attach{display:inline-grid;place-items:center;width:26px;height:26px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:6px;cursor:pointer}
+.under{display:flex;align-items:center;gap:8px;padding:1px 6px 0 8px;height:22px}
+.attach{display:inline-grid;place-items:center;width:22px;height:22px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:5px;cursor:pointer}
 .attach:hover{background:var(--surface-2)}
-.hint{margin-left:auto;font-size:11px;color:var(--ink-3)}
+.hint{margin-left:auto;font-size:11px;line-height:1;color:var(--ink-3)}
 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .note{border-top:2px solid var(--gold);padding-top:8px;font-size:13px;color:var(--ink-2)}
 .note b{color:var(--ink);display:block;font-size:13px;margin-bottom:2px}
@@ -152,7 +152,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
           </div>
           <div class="under">
             <button class="attach" type="button" aria-label="Attach a file" title="Attach a file">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path data-clip d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg>
             </button>
             <span class="hint">Enter sends · Shift + Enter for a new line</span>
           </div>
@@ -175,12 +175,14 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 <script>
 (function(){
   var t = document.getElementById("newbox"), s = document.getElementById("send");
-  function fit(){ t.style.height = "48px"; var h = Math.min(t.scrollHeight, 210); t.style.height = h + "px";
-    t.style.overflowY = t.scrollHeight > 210 ? "auto" : "hidden"; s.disabled = !t.value.trim(); }
+  /* A page drawn before it is visible measures 0: never size below one line, and size again once it shows. */
+  function fit(){ t.style.height = "48px"; var sh = t.scrollHeight; var h = Math.max(48, Math.min(sh || 48, 210)); t.style.height = h + "px";
+    t.style.overflowY = sh > 210 ? "auto" : "hidden"; s.disabled = !t.value.trim(); }
   t.addEventListener("input", fit);
   t.addEventListener("keydown", function(e){ if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); t.value = ""; fit(); } });
   s.addEventListener("click", function(){ t.value = ""; fit(); t.focus(); });
-  fit();
+  fit(); window.addEventListener("resize", fit); window.addEventListener("load", fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(t);
 
   var chats = [
     {id:1,name:"Foundation draft",arch:false},

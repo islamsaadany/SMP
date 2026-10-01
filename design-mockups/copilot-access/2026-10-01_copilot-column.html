@@ -1,0 +1,59 @@
+<title>Copilot Access Column</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--panel:#16325C;--gold:#C9A24D;--gold-deep:#8A6B22;--sans:"Source Sans 3","Segoe UI",system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--panel:#0E1014;--gold:#D9B665;--gold-deep:#E6C65C;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--panel:#0E1014;--gold:#D9B665;--gold-deep:#E6C65C;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);margin:0;padding-inline:16px}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 48px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:24px;margin:0;text-wrap:balance}
+h2{font-size:17px;margin:0 0 6px}
+p{margin:0;max-width:70ch;color:var(--ink-2)}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{font:700 11px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep)}
+.shot{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+.shot img{display:block;max-width:none;width:100%;min-width:640px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+ul{margin:0;padding-left:20px;color:var(--ink-2)}
+li{margin:3px 0}
+</style>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <span class="tag">Strategy › Setup › Roles &amp; access</span>
+    <h1>A Copilot column on Roles &amp; access</h1>
+    <p>Drawn from the running platform. Everything outside the gold-tinted column is today's page, unchanged.</p>
+  </header>
+
+  <section class="frame">
+    <span class="tag">Today</span>
+    <div class="shot"><img src="matrix-before.png" alt="Roles and access today, ending at the Setup column"></div>
+  </section>
+
+  <section class="frame">
+    <span class="tag">Proposed</span>
+    <div class="shot"><img src="matrix-after.png" alt="Roles and access with a Copilot column last"></div>
+    <ul>
+      <li>Last column, <b>Copilot</b>, same two buttons as the others: <b>eye = view</b>, <b>pen = edit</b>. Neither lit = no Copilot tab.</li>
+      <li>Super user and SMO team start at <b>edit</b>, so nobody's access changes on the day it ships.</li>
+      <li>Client rows show a dash (hover: <i>Office only for now</i>) — they can't be given it yet.</li>
+      <li>The column appears only on a client where the Copilot is switched on. The tint here only marks what is new; it is not part of the design.</li>
+    </ul>
+  </section>
+
+  <section class="frame">
+    <span class="tag">What View looks like on the Copilot tab</span>
+    <div class="pair">
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:0"><b>Edit (today, for the office)</b>
+        <div class="shot"><img src="tab-edit.png" alt="Copilot tab with the composer, new chat button and quick replies"></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:0"><b>View</b>
+        <div class="shot"><img src="tab-view.png" alt="Copilot tab with no composer, no new chat button and a View only label"></div></div>
+    </div>
+    <ul>
+      <li>Every chat and deliverable is listed and opens, the same as today — all chats are visible to everyone with access.</li>
+      <li>Gone for View: <b>+ New chat</b>, the three dots (rename, archive), the reply buttons, the box to type and attach, and saving or editing a deliverable.</li>
+      <li>In place of the box: a small <b>View only</b> label, so the missing box doesn't look broken.</li>
+      <li>Deleting a chat stays the Super user's alone, whatever the table says.</li>
+    </ul>
+  </section>
+</div>

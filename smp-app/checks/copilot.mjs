@@ -33,7 +33,7 @@ import { serve } from "../modules/copilot/index.ts";
 import http from "node:http";
 import { deflateRawSync } from "node:zlib";
 import {
-  SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor,
+  SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor, copilotGrant,
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
@@ -72,6 +72,13 @@ check("...and the SMO team may delete nothing, archived or not, their own includ
 check("the tab is stamped for the office where the client has the module", copilotStampFor(["strategy", "copilot"], "smoteam") && copilotStampFor(["strategy", "copilot"], "super"));
 check("...and for nobody else — a client's person, or a client without it", !copilotStampFor(["strategy", "copilot"], "none") &&
   !copilotStampFor(["strategy", "copilot"], null) && !copilotStampFor(["strategy"], "super"));
+/* §442 — the Copilot column on Roles & access. Nothing stored is the office's
+   shipped edit; a client seat is none BY RULE, whatever a stored row says. */
+check("the office opens at edit with nothing stored — nobody's access moves the day it ships",
+  copilotGrant("super", null) === "edit" && copilotGrant("smoteam", undefined) === "edit");
+check("a stored view or none is obeyed for the office", copilotGrant("smoteam", "view") === "view" && copilotGrant("super", "none") === "none");
+check("...and a client's person is none even with edit stored (both ends, §94.2)", copilotGrant("none", "edit") === "none" && copilotGrant(null, "edit") === "none");
+check("a value outside the two buttons reads as none, never as edit (§96.2)", copilotGrant("smoteam", "fill") === "none");
 
 
 /* ══ §1b · files and answers, with no database ══════════════════════ */
@@ -282,6 +289,32 @@ try {
   check("a deliverable cannot be deleted, not even by the Super user — its versions are the record", noDel.st === 400 && (await asTenant(A, (c) => versionsOf(c, d1))).length === 7);
   const gone = await call("GET", "chat", null, NORAN, "?id=" + made.j.chat.id);
   check("a deleted chat reads as gone, in words", gone.st === 404 && /not here/.test(gone.j.why));
+
+  /* §442 — View and None are the SERVER's answer too, not only the screen's. */
+  section("§3b · the Copilot column: view reads, none is refused, both on the server");
+  const setGrant = (role, g) => asTenant(A, (c) => c.query(
+    "INSERT INTO access_grants (role_key, page_key, grant_) VALUES ($1, 'a_copilot', $2) ON CONFLICT (tenant_id, role_key, page_key) DO UPDATE SET grant_ = EXCLUDED.grant_", [role, g]));
+  try {
+    await setGrant("smoteam", "view");
+    const vl = await call("GET", "list", null, NORAN, "?place=mobile&section=analysis");
+    check("an SMO team member at view still reads every chat and deliverable", vl.st === 200 && vl.j.chats.length === 1 && vl.j.deliverables.length === 1, vl.st);
+    check("...and is told they may not change them, and may not delete", vl.j && vl.j.mayEdit === false && vl.j.mayDelete === false, JSON.stringify(vl.j && { e: vl.j.mayEdit, d: vl.j.mayDelete }));
+    const vc = await call("GET", "chat", null, NORAN, "?id=" + c1.id);
+    check("...the chat opens, read-only", vc.st === 200 && vc.j.mayEdit === false, vc.st);
+    const before = (await asTenant(A, (c) => chatsOn(c, "mobile", "analysis"))).length;
+    const vp = await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis" }, NORAN);
+    check("a write at view is refused in words, and nothing is kept",
+      vp.st === 403 && /View only/.test(vp.j && vp.j.why) && (await asTenant(A, (c) => chatsOn(c, "mobile", "analysis"))).length === before, vp.st + " " + JSON.stringify(vp.j));
+    const sp = await call("GET", "list", null, ISLAM, "?place=mobile&section=analysis");
+    check("the Super user's own row is untouched by the team's — still edit", sp.st === 200 && sp.j.mayEdit === true, JSON.stringify(sp.j && sp.j.mayEdit));
+    await setGrant("smoteam", "none");
+    const nl = await call("GET", "list", null, NORAN, "?place=mobile&section=analysis");
+    check("at none the reads are refused too, in words", nl.st === 403 && /not open to you/.test(nl.j && nl.j.why), nl.st + " " + JSON.stringify(nl.j));
+  } finally {
+    await asTenant(A, (c) => c.query("DELETE FROM access_grants WHERE page_key = 'a_copilot'"));
+  }
+  const back = await call("GET", "list", null, NORAN, "?place=mobile&section=analysis");
+  check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
   section("§5 · the AI is asked with the section's guidance, the platform's line and the files — and its answer is kept checked");

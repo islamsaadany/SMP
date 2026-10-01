@@ -47,8 +47,35 @@ export type Who = { personKey: string | null; seat: string | null };
    exactly where the api would answer (§61). `have` is what this person may
    open here, which already carries the client's own list. */
 import { isOffice as officeSeat } from "./tracker.ts";
+import { MODULE_DEF } from "./modules.ts";
 export function copilotStampFor(have: readonly string[], seat: unknown): boolean {
   return have.includes("copilot") && officeSeat(seat);
+}
+
+/* ── VIEW OR EDIT, PER OFFICE SEAT (Islam, 2026-10-01; the signed-off
+   design-mockups/copilot-access/2026-10-01_copilot-column.html) ─────────
+   The grant lives in the client's own access map under the area MODULE_DEF
+   declares (a role row, the area key), so Strategy's Roles & access writes it
+   through its ordinary save and the authoriser judges it as `access` — the
+   Super user's alone (§89). An absent row reads as the area's SHIPPED state
+   (§30.2: absent is "not answered yet", never "denied"), which is EDIT, so
+   the office keeps what it had the day this ships. A seat that is not the
+   office's is NONE by rule whatever the map holds: the column draws a dash
+   for every client role ("office only for now"). ONE answer for the screen's
+   stamp and the api's gate. */
+export const COPILOT_AREA = MODULE_DEF.copilot.areas[0];
+export type CopilotGrant = "edit" | "view" | "none";
+export function copilotGrant(seat: unknown, stored: string | null | undefined): CopilotGrant {
+  if (!officeSeat(seat)) return "none";
+  const g = stored == null ? COPILOT_AREA.shipped : stored;
+  return g === "edit" || g === "view" ? g : "none";
+}
+/* The stored cell for this seat's role, or null when the map holds none.
+   The seat and the role are the same word for the office (super, smoteam). */
+export async function storedCopilotGrant(c: PoolClient, seat: unknown): Promise<string | null> {
+  if (typeof seat !== "string") return null;
+  const r = await c.query("select grant_ from access_grants where role_key = $1 and page_key = $2", [seat, COPILOT_AREA.key]);
+  return r.rows.length ? String(r.rows[0].grant_) : null;
 }
 
 /* WHO MAY DELETE A CHAT (§441, Islam 2026-10-01, reversing plan §7.1's

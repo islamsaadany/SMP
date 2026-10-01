@@ -217,7 +217,21 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      the SMO team, decision record v0.4 §2 — so NO AREA, for the tracker's
      reason: it is opened by the seat, and a column here would be a cell no
      client person should hold (§61). A tab inside Strategy (`inside`). */
-  copilot:   { label: "Copilot", note: "The office's AI workspace for each place's strategy", built: true, areas: [], lines: [NOTHING], inside: "strategy" },
+  copilot:   { label: "Copilot", note: "The office's AI workspace for each place's strategy", built: true,
+    /* ONE AREA, OFFICE ROWS ONLY (Islam, 2026-10-01, from the signed-off
+       design-mockups/copilot-access/2026-10-01_copilot-column.html): a
+       column on Strategy's own Roles & access, because the Copilot is a tab
+       INSIDE Strategy rather than a module with a rail of its own. View reads
+       every chat and deliverable; edit is the office's whole behaviour. The
+       shipped state is EDIT and it is the OFFICE's default — the Super user
+       and the SMO team keep exactly what they had the day this ships — while
+       a client's own roles are refused by RULE, not by a cell (lib/copilot.ts
+       copilotGrant; "office only for now"), so `edit` here never reaches
+       them however the stored map reads. */
+    areas: [{ key: "a_copilot", label: "Copilot",
+              note: "View reads the chats and deliverables · edit chats and builds them",
+              states: ["view", "edit", "none"], shipped: "edit" }],
+    lines: [NOTHING], inside: "strategy" },
 };
 
 export function isModule(s: unknown): s is ModuleKey {

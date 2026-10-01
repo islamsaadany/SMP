@@ -10863,3 +10863,12 @@ body.presenting #buildband { display:none; }
 .copclip svg { width:16px; height:16px; }
 .cophint { margin-left:auto; font-size:11px; line-height:1; color:var(--ink-3); white-space:nowrap; }
 @media (prefers-reduced-motion:reduce){ .copbox { transition:none; } }
+
+/* ── VIEW ONLY (Islam, 2026-10-01, design-mockups/copilot-access/
+   2026-10-01_copilot-column.html) ─────────────────────────────────────────
+   Where the composer sits for somebody whose Copilot cell is View: the same
+   rule over it the composer has, and one quiet pill saying why there is no
+   box. Tokens only, so it reads in both palettes (§25). */
+.copviewonly{padding:14px 0 4px;border-top:1px solid var(--line);margin-top:auto}
+.copviewonly span{display:inline-flex;align-items:center;padding:6px 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface-2);font:600 12px/1.2 var(--sans);color:var(--ink-2)}

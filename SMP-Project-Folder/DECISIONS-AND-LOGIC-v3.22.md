@@ -59184,3 +59184,54 @@ list's answer and kept only `chats` and `deliverables`, dropping `archived` and
 `mayDelete` — so the foot read *Archived · 0* over a chat the database had just
 archived, and the Super user would never have been offered Delete. Found by
 §3f's *"the rail's foot says Archived · 1"* going red; one line.
+
+## §442 — a Copilot column on Roles & access: View or Edit (2026-10-01)
+
+Islam: *"in the roles & acces of the strategy module you want to add a a column
+for the copilot? with 2 buttons of view and edit where view can only see the
+chats and deliverables and edit is where he can create chat and build"*, then
+*"1. ok for now 2. ok 3. ok 4. visible to all"* and *"keep the view only label,
+build it"*. Drawn first (`design-mockups/copilot-access/`, rule 1c) out of the
+running platform.
+
+**442.1 — IT IS A MODULE AREA, SO NOTHING NEW IS STORED OR SAVED.** The Copilot
+declares one area (`a_copilot`, states view/edit/none, shipped `edit`) in
+`MODULE_DEF`, the shape §359.5 gave Insights. A press writes the ACCESS map
+through the existing `data-mac` writer, the default is stored as an ABSENCE
+(§50.6), and the server reads `access_grants` — no schema change, no migration,
+no new authoriser rule.
+
+**442.2 — THE OFFICE'S ROWS ONLY, AND THE CLIENT'S ARE NONE BY RULE.** Decision 1:
+client rows draw a dash, hover *"Office only for now."* The server enforces it
+rather than the screen: `copilotGrant(seat, stored)` answers `none` for any
+non-office seat whatever is stored, so a stray row cannot open it. Decision 2:
+both office rows ship at `edit`, so nobody's access moves the day it ships —
+measured, the access baseline is UNMOVED for all 33 people. Decision 3: the
+column is drawn only where the document carries `data-copilot-area`, which
+`lib/shell.ts` stamps exactly when it stamps the tab (`copilotStampFor`), so a
+client without the Copilot shows no column (§61).
+
+**442.3 — VIEW IS THE SERVER'S ANSWER TOO.** Every Copilot POST is a write, so at
+View the module refuses every POST with *"View only — you can read…"* and at
+None it refuses the reads as well (*"not open to you"*). The list and chat
+answers carry `mayEdit`; `mayDelete` now also needs edit, so a viewer is never
+offered Delete. Deleting a chat stays the Super user's alone (§441).
+
+**442.4 — THE TAB AT VIEW.** Decision 4: a viewer sees every chat and
+deliverable. Gone: + New chat, the three dots, quick replies, the pasted-material
+offer, pending files, the deliverable's Edit and Restore. In place of the
+composer a small **View only** label (Islam: keep it), so the missing box does
+not read as broken. The browser asks the live ACCESS map (`COPILOT.grant()`), so
+a change on Roles & access shows on the tab at once; at None the tab is not drawn.
+
+**442.5 — CHECKS.** `checks/copilot.mjs` §1 asserts the rule at both ends and
+§3b drives the server against a real Postgres (view reads and is refused writes,
+nothing kept; the Super user's row untouched by the team's; none refused; back to
+edit with the row removed) — 103/0, red under the new `no-view-gate`.
+`shell.mjs` §3h presses it in a browser: no column without the module; with it,
+buttons on the two office rows and dashes elsewhere; pressing View stores
+exactly that row; the tab then says View only with no box and no + New chat;
+removing the row brings + New chat back — 192/0, red under `no-copilot-area`.
+**And the first run of §3h went red on a correct build**: the label lives inside
+an opened chat, and the test client had none to open (§255), so the section makes
+one first.

@@ -940,6 +940,53 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
   }
 });
 
+await section("3h · the Copilot column on Roles & access, and View on the tab (§442)", async () => {
+  /* PRESSED AND READ BACK (§96): the column is drawn only where the Copilot is
+     on, a client's row carries a dash, the office's press writes the grant
+     the SERVER reads, and a View grant takes the composer off the tab and puts
+     "View only" in its place. Both ends (§94.2): the column absent without
+     the module, the composer present again once the row is removed. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const grantRow = async () => (await asTenant(tenantId, (c) => c.query("select role_key, grant_ from access_grants where page_key = 'a_copilot' order by role_key"))).rows;
+  const colOf = () => page.evaluate(() => {
+    const heads = Array.from(document.querySelectorAll(".acgrid thead th")).map((t) => t.textContent.trim());
+    const mac = Array.from(document.querySelectorAll('[data-mac*="|a_copilot|"]')).map((b) => b.dataset.mac.split("|")[0]);
+    const dash = Array.from(document.querySelectorAll('.acgrid [title="Office only for now."]')).length;
+    return { col: heads.includes("Copilot"), roles: Array.from(new Set(mac)).sort(), dash };
+  });
+  try {
+    await fresh(); await signIn("office@forefront.example");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]);
+    await open("/raya-trade/strategy/setup/access");
+    check(!(await colOf()).col, "without the Copilot there is no Copilot column (\u00a761)");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await open("/raya-trade/strategy/setup/access");
+    const c = await colOf();
+    check(c.col && c.roles.join(",") === "smoteam,super", "with it the column is drawn, with buttons on the office's two rows alone", JSON.stringify(c));
+    check(c.dash > 0, "\u2026and every client row carries a dash saying office only", JSON.stringify(c));
+    const mk = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "newChat", place: "mobile", section: "foundation", title: "Read me" }) })).json());
+    check(mk && mk.ok, "a chat to read is made while still at edit", JSON.stringify(mk));
+    await page.click('[data-mac^="super|a_copilot|view"]');
+    await page.waitForTimeout(1500);
+    const g = await grantRow();
+    check(g.length === 1 && g[0].role_key === "super" && g[0].grant_ === "view", "pressing View on the Super user's row stores exactly that", JSON.stringify(g));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    await page.click("[data-cop-chats] [data-cop-chat]").catch(() => {});
+    await page.waitForSelector("[data-cop-viewonly]", { timeout: 6000 }).catch(() => {});
+    const v = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"),
+      text: !!document.querySelector("[data-cop-text]"), nw: !!document.querySelector("[data-cop-newchat]"), tab: !!document.querySelector('#subtabs button[data-s="copilot"]') }));
+    check(v.tab && v.label && !v.text && !v.nw, "at View the tab is there, says View only, and has no box and no + New chat", JSON.stringify(v));
+    await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'"));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    const e = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"), nw: !!document.querySelector("[data-cop-newchat]") }));
+    check(!e.label && e.nw, "with the row removed the office is back at edit — + New chat, no View only label", JSON.stringify(e));
+  } finally {
+    await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'; delete from copilot_chats")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3g · turning a module on from inside the platform shows it at once (§441)", async () => {
   /* Islam: "I turned on the module but nothing is appearing in the
      navigation". The document carries which modules the client has, and

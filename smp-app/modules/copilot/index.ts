@@ -26,7 +26,7 @@ import {
   chatsOn, oneChat, newChat, renameChat, deleteChat, archiveChat, restoreChat, messagesOf,
   deliverablesOn, oneDeliverable, versionsOf, bodyOf, newDeliverable, addVersion, restoreVersion,
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
-  attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage,
+  attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, isPasted, configured } from "../../lib/copilot-ask.ts";
@@ -45,6 +45,17 @@ export async function serve(a: ServeArgs): Promise<Response> {
   const isApi = (first === "api" || first === "list" || first === "chat" || first === "deliverable" || first === "file") && a.rest.length === 1;
   if (!isApi) return Response.redirect(new URL(clientHref(a.slug, "strategy", ""), a.req.url), 302);
   if (!office) return no(403, "The Copilot is the office's.");
+  /* VIEW OR EDIT (Islam, 2026-10-01): the office seat's own cell on Roles &
+     access, read off the stored map on every path. NONE refuses the reads as
+     well — a hidden tab is decoration (§42) — and VIEW refuses every POST,
+     because every POST here is a write. The check's break skips the read so
+     a View seat can write, which must turn checks/copilot.mjs red (§94.5). */
+  const grant = brk() === "no-view-gate" ? "edit"
+    : copilotGrant(brk() === "no-office-gate" && !isOffice(a.seat) ? "smoteam" : a.seat,
+        await withTenant(a.tenantId, (c) => storedCopilotGrant(c, a.seat)));
+  if (grant === "none") return no(403, "The Copilot is not open to you on this client.");
+  if (a.req.method === "POST" && grant !== "edit")
+    return no(403, "View only — you can read the Copilot's chats and deliverables, not change them.");
   const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null };
   const u = new URL(a.req.url);
   const q = (k: string) => u.searchParams.get(k) || "";
@@ -55,14 +66,14 @@ export async function serve(a: ServeArgs): Promise<Response> {
       if (!isPlace(place) || !isSection(section)) return no(400, "Which place and which section?");
       return json(200, await withTenant(a.tenantId, async (c) =>
         ({ ok: true, chats: await chatsOn(c, place, section), archived: await chatsOn(c, place, section, true),
-           mayDelete: who.seat === "super", deliverables: await deliverablesOn(c, place, section) })));
+           mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section) })));
     }
     if (first === "chat") {
       const id = q("id");
       if (!UUID.test(id)) return no(400, "Which chat?");
       const got = await withTenant(a.tenantId, async (c) => {
         const chat = await oneChat(c, id);
-        return chat ? { ok: true, chat, messages: await messagesOf(c, id), mayDelete: mayDeleteChat(chat, who),
+        return chat ? { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured() } : null;
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");

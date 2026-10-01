@@ -145,6 +145,13 @@ export function shellDocument(tenantName: string, module: string | null = null, 
        landingStampFor). Absent everywhere else, and over file://, where the
        page says the served platform is where the line is set. */
     (copilot && brk !== "no-copilot-stamp" ? " data-copilot='1'" : "") +
+    /* THE COPILOT'S GRANTABLE AREA (Islam, 2026-10-01): its key, shipped
+       state, label and note, MODULE_DEF's own declaration and never a copy,
+       so Strategy's Roles & access draws the Copilot column and the tab reads
+       the viewer's view-or-edit off the live access map with the same
+       default the api applies (lib/copilot.ts copilotGrant). Only where the
+       tab itself is stamped. */
+    (copilot && brk !== "no-copilot-area" ? " data-copilot-area='" + esc(JSON.stringify(MODULE_DEF.copilot.areas[0])) + "'" : "") +
     (landing && brk !== "no-landing-stamp" ? " data-landing='" + esc(JSON.stringify(landing)) + "'" : "") +
     /* THE MODULE'S DECLARED AREAS (§359.5, spec 056 §4.4): what its Access
        page has columns for, on the Setup document alone and only for a

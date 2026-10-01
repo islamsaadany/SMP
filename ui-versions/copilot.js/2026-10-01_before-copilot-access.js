@@ -61,28 +61,7 @@ var COPILOT = (function(){
   function E(s){ return typeof esc === "function" ? esc(s) : String(s == null ? "" : s); }
   function live(){ return typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive(); }
   function stamped(){ return document.documentElement.getAttribute("data-copilot") === "1"; }
-  /* VIEW OR EDIT (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html): the
-     viewer's office roles asked of the LIVE access map through the module
-     cell's own reader, with the area's shipped default the api applies
-     (lib/copilot.ts copilotGrant) — so a cell the Super user changes on Roles
-     & access reads here at once, and the server refuses the same writes.
-     No declared area (an older document) is today's behaviour, edit. */
-  function grant(){
-    var a = typeof copilotArea === "function" ? copilotArea() : null;
-    if (!a) return "edit";
-    var rs = [];
-    try { rs = (typeof personRoles === "function" && typeof viewer === "function") ? personRoles(viewer()) : []; } catch (e) { rs = []; }
-    var best = "none", RANK = { none:0, view:1, edit:2 };
-    rs.forEach(function(r){
-      if (!SMPRules.isOfficeRole(r.role)) return;
-      var g = typeof moduleGrantFor === "function" ? moduleGrantFor(r.role, a) : a.shipped;
-      if ((RANK[g] || 0) > RANK[best]) best = g;
-    });
-    return best;
-  }
-  function canEdit(){ return grant() === "edit"; }
-  function shown(){ return stamped() && live() && (typeof inOffice !== "function" || inOffice()) && grant() !== "none"; }
+  function shown(){ return stamped() && live() && (typeof inOffice !== "function" || inOffice()); }
 
   function sections(){
     if (!shown()) return [];
@@ -164,7 +143,7 @@ var COPILOT = (function(){
   function archView(){ return !!ARCH[key()]; }
   function chatsHead(){
     return archView() ? '<span>Archived chats</span>'
-      : '<span>Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
+      : '<span>Chats</span><button type="button" class="copnew" data-cop-newchat>+ New chat</button>';
   }
   function chatsFoot(){
     var l = list();
@@ -178,7 +157,7 @@ var COPILOT = (function(){
     if (l.failed) return '<div class="copnone">The chats could not be read just now. Nothing has been lost. ' +
       '<button type="button" class="linkbu" data-cop-retry>Try again</button></div>';
     var arch = archView(), rows = arch ? (l.archived || []) : l.chats;
-    var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
+    var head = arch ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
     if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
     var o = OPEN[key()] || {};
@@ -198,8 +177,8 @@ var COPILOT = (function(){
         '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
           '<span class="copt">' + E(c.title) + '</span>' +
           '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + '</span></button>' +
-        (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
-          '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
+        '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
+          '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu + '</div>';
     }).join("");
   }
   function delivsHtml(){
@@ -222,7 +201,7 @@ var COPILOT = (function(){
     var o = OPEN[key()];
     var say = SAY ? '<div class="copsay" role="status">' + E(SAY) + '</div>' : '';
     if (!o) return say + '<div class="copempty">' +
-      '<b>' + (canEdit() ? 'Start a chat, or open a deliverable.' : 'Open a chat or a deliverable.') + '</b>' +
+      '<b>Start a chat, or open a deliverable.</b>' +
       'A chat here is about ' + E(placeWord()) + '’s ' + E(sectionWord()) + '.</div>';
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
@@ -318,14 +297,14 @@ var COPILOT = (function(){
         }).join("") + '</div></div>';
     }
     if (p.assumptions && p.assumptions.length) h += '<div class="copassume"><b>Assumed</b> ' + p.assumptions.map(E).join(" · ") + '</div>';
-    if (p.pastedOffer && !NOTNOW[p.pastedOffer.messageId] && canEdit()) {
+    if (p.pastedOffer && !NOTNOW[p.pastedOffer.messageId]) {
       var sw = p.pastedOffer.section, lab = "";
       for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === sw) lab = SECTIONS[i].label;
       h += '<div class="copopts"><span class="copm">Keep the pasted material as its own deliverable?</span>' +
         '<button type="button" class="copopt rec" data-cop-savepasted="' + E(p.pastedOffer.messageId) + '" data-cop-sec="' + E(sw) + '">Save to ' + E(lab || sw) + '</button>' +
         '<button type="button" class="copopt" data-cop-notnow="' + E(p.pastedOffer.messageId) + '">Not now</button></div>';
     }
-    if (p.options && p.options.length && last && canEdit()) {
+    if (p.options && p.options.length && last) {
       h += '<div class="copopts">' + p.options.map(function(o){
         return '<button type="button" class="copopt' + (o.recommended ? " rec" : "") + '" data-cop-reply="' + E(o.label) + '">' +
           E(o.label) + (o.recommended ? ' <span class="coprec">(recommended)</span>' : '') + '</button>';
@@ -357,14 +336,13 @@ var COPILOT = (function(){
       return '<div class="copmsg me"><span class="copwho">' + E(nameOf(m.by)) + ' · ' + E(when(m.at)) + '</span>' + personHtml(m) + '</div>';
     }).join("") + (THINKING === c.id ? '<div class="copmsg product" role="status"><div class="copbody">The Copilot is working on it…</div></div>' : '');
     var ctx = contextOf();
-    var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
+    var pend = (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("");
     return '<div class="copchat">' +
       '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
       '<div class="copheadrow">' + head + '</div>' +
       '<div class="copmsgs" data-cop-msgs>' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
-      (!canEdit() ? VIEWONLY
-        : c.archived
+      (c.archived
         ? '<div class="copsay copparked">This chat is archived. Restore it to keep talking. ' +
             '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
         : composerHtml(c, !!pend)) +
@@ -375,10 +353,6 @@ var COPILOT = (function(){
      then scrolling inside itself — with Send as the return-arrow icon in its
      corner and the paperclip on the tight line beneath it. Enter sends and
      Shift+Enter makes a new line. */
-  /* WHERE THE BOX WAS, FOR A VIEW GRANT (Islam: "keep the view only
-     label"): a status rather than a description (1b-ii), so an empty space
-     under the chat does not read as a box that failed to draw (§45.2). */
-  var VIEWONLY = '<div class="copviewonly" data-cop-viewonly><span>View only</span></div>';
   function composerHtml(c, pend){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
@@ -396,7 +370,7 @@ var COPILOT = (function(){
   function delivHtml(){
     var d = PANE.deliverable, vs = PANE.versions, cur = vs[0];
     var text = cur && cur.body && typeof cur.body.text === "string" ? cur.body.text : "";
-    var editing = EDIT && EDIT.id === d.id && canEdit();
+    var editing = EDIT && EDIT.id === d.id;
     var body = editing
       ? '<textarea class="fld copedit" data-cop-edit-text rows="12" aria-label="Deliverable text">' + E(EDIT.text) + '</textarea>' +
         '<input class="fld" data-cop-edit-note placeholder="What changed (optional)" aria-label="What changed" value="' + E(EDIT.note) + '">' +
@@ -408,12 +382,12 @@ var COPILOT = (function(){
         '<span class="copvnote">' + E(v.note || (v.restoredFrom ? "Restored from v" + v.restoredFrom : "")) + '</span>' +
         '<span class="copm">' + E(nameOf(v.by)) + ' · ' + E(when(v.at)) + '</span>' +
         (i === 0 ? '<span class="copchip">Latest</span>'
-          : canEdit() ? '<button type="button" class="copbtn quiet" data-cop-restore="' + v.n + '">Restore</button>' : '') + '</li>';
+          : '<button type="button" class="copbtn quiet" data-cop-restore="' + v.n + '">Restore</button>') + '</li>';
     }).join("");
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
+        (editing ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
       body +
       '<h4 class="copvh">Versions</h4><ol class="copvers">' + hist + '</ol>' +
@@ -675,7 +649,7 @@ var COPILOT = (function(){
     }
   });
 
-  return { shown: shown, sections: sections, render: renderPane, grant: grant, canEdit: canEdit,
+  return { shown: shown, sections: sections, render: renderPane,
            /* for the checks */
            state: function(){ return { open: OPEN[key()] || null, list: list(), pane: PANE, say: SAY, thinking: THINKING }; },
            context: contextOf };

@@ -327,14 +327,6 @@ function renderModuleAccess(){
 
    Seven roles down, seven areas across. Forty-nine cells, on one screen,
    in place of the 525 controls the page carried before. */
-/* The Copilot's grantable area as the served document declares it, or null
-   (file://, or a client without the Copilot). Read by the Copilot column
-   here and by the tab's own view-or-edit (copilot.js), one parse. */
-function copilotArea(){
-  var raw = document.documentElement.getAttribute("data-copilot-area");
-  if (!raw) return null;
-  try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
-}
 function renderAccess(){
   /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
      A grant cannot express this: the SMO team holds `a_setup` at edit, which
@@ -445,18 +437,6 @@ function renderAccess(){
     }
     hi += span;
   }
-  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
-     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
-     Last, and only where the client has the Copilot: the served document
-     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
-     over file:// and on a client without it there is no column to write to
-     nothing (§61). The office's two rows carry the eye and the pen through
-     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
-     every other row is a dash by RULE — "office only for now" — because the
-     api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). */
-  var COPA = copilotArea();
-  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
@@ -475,12 +455,7 @@ function renderAccess(){
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
-      }).join("") +
-      (COPA ? (SMPRules.isOfficeRole(r.key)
-        ? stateCell(r.key, COPA.key, editable, null, {
-            value: moduleGrantFor(r.key, COPA), states: ["view", "edit"],
-            attr: "data-mac", shipped: COPA.shipped || "none" })
-        : stateCell(r.key, COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+      }).join("") + '</tr>';
   }).join("");
 
   return section("", "Roles & access",

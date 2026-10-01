@@ -1,0 +1,139 @@
+<title>Copilot Conversation Fix</title>
+<style>
+:root{--ground:#F4F6F9;--surface:#fff;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#16202E;--ink-2:#3D4A5C;--ink-3:#5B6779;--gold:#C8962E;--gold-deep:#8A6414;--panel:#16325C;--bad-tx:#A3312A;--good-tx:#2E6B3E;--sans:"Source Sans 3",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#11151B;--surface:#1A2029;--surface-2:#222A35;--line:#333A45;--ink:#E9ECF1;--ink-2:#C2CAD6;--ink-3:#9AA5B5;--gold:#D9AE55;--gold-deep:#E2BE72;--panel:#0E2342;--bad-tx:#F09A8F;--good-tx:#8FD3A1;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#11151B;--surface:#1A2029;--surface-2:#222A35;--line:#333A45;--ink:#E9ECF1;--ink-2:#C2CAD6;--ink-3:#9AA5B5;--gold:#D9AE55;--gold-deep:#E2BE72;--panel:#0E2342;--bad-tx:#F09A8F;--good-tx:#8FD3A1;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);padding:24px 16px 48px}
+.wrap{max-width:1500px;margin:0 auto}
+h1{font-size:20px;margin:0 0 4px;color:var(--ink)}
+.lead{color:var(--ink-2);margin:0 0 20px;max-width:90ch}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.col{min-width:0}
+.tag{display:inline-block;font:700 11px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:8px}
+.tag.old{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.tag.new{background:var(--panel);color:#fff}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.ph{font-size:16px;margin:0 0 10px;color:var(--ink)}
+.msgs{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;display:flex;flex-direction:column;gap:3px}
+.msg.me{align-self:flex-end}
+.who{font-size:12px;color:var(--ink-3)}.me .who{text-align:right}
+.body{border-radius:8px;padding:9px 12px;border:1px solid var(--line);font-size:13.5px;line-height:1.55;overflow-wrap:anywhere}
+.me .body{background:var(--surface-2)}
+.ai .body{background:var(--surface);border-left:3px solid var(--gold)}
+.ai .body p{margin:0 0 8px}.ai .body p:last-child{margin:0}
+.ctx{display:flex;gap:6px;color:var(--ink-3);font-size:12px;margin-top:4px}
+dl.play{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:6px 0 0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:13px}
+dl.play dt{font:700 11px/1.6 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+dl.play dd{margin:0}
+.miss{margin-top:6px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+.miss b{color:var(--bad-tx)}.miss ul{margin:4px 0 0;padding-left:18px}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opt{font:600 12.5px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 11px}
+.opt.rec{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.draft{margin-top:6px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface)}
+.dt{font-weight:700;font-size:13.5px;margin-bottom:6px}
+.grp{font:700 11px/1.4 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:8px 0 4px}
+.draft ul{margin:0;padding-left:18px;font-size:13px}
+.src{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.item{border-top:1px solid var(--line);padding:8px 0;font-size:13px}
+.item:first-of-type{border-top:0}
+.it{display:flex;justify-content:space-between;gap:10px;font-weight:700}
+.score{font:700 11px/1.6 var(--sans);color:var(--good-tx);white-space:nowrap}
+.ev{color:var(--ink-3);font-size:12.5px;margin-top:2px}
+.notes{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.note b{color:var(--ink);display:block;margin-bottom:3px}
+.flag{font-size:12.5px;color:var(--ink-3);margin-top:10px}
+</style>
+<div class="wrap">
+<h1>Copilot conversation, today and after fixes A, B and C</h1>
+<p class="lead">Mobile, Analysis section. The same three messages from you on both sides. Today's side is what the current rules produce; the right side is what the new rules would produce. The question is a stand-in, since your two screenshots are no longer in front of me.</p>
+
+<div class="cols">
+<div class="col">
+<span class="tag old">Today</span>
+<div class="pane"><h2 class="ph">Build the SWOT</h2><div class="msgs">
+
+<div class="msg me"><div class="who">You</div><div class="body">Help me build the SWOT for Mobile</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body">I can help you build the SWOT for Mobile. How would you like to start?
+<dl class="play"><dt>Understood</dt><dd>You want a SWOT for Mobile.</dd><dt>Working from</dt><dd>The plan as written.</dd><dt>Missing</dt><dd>Internal analysis, market analysis.</dd></dl>
+<div class="miss"><b>Missing</b><ul><li>Internal analysis</li><li>Micro and macro analysis</li></ul></div>
+<div class="opts"><span class="opt rec">Guided questions</span><span class="opt">Upload notes</span><span class="opt">Template</span><span class="opt">Import</span><span class="opt">Assume for me</span></div>
+</div></div>
+
+<div class="msg me"><div class="who">You</div><div class="body">Our strength is the Samsung and Xiaomi distribution deals and 900 retail partners. Weakness is the slow collection from dealers.</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body">Thanks. Here is a draft SWOT.
+<dl class="play"><dt>Understood</dt><dd>You gave strengths and a weakness.</dd><dt>Working from</dt><dd>Your message.</dd><dt>Missing</dt><dd>Opportunities and threats.</dd></dl>
+<div class="draft"><div class="dt">Mobile SWOT</div>
+<div class="grp">Strengths</div><ul><li>Distribution deals with major brands <span class="src">pasted</span></li><li>Wide retail network <span class="src">pasted</span></li></ul>
+<div class="grp">Weaknesses</div><ul><li>Slow dealer collection <span class="src">pasted</span></li></ul>
+<div class="grp">Opportunities</div><ul><li>Growing smartphone demand <span class="src">assumed</span></li></ul>
+<div class="grp">Threats</div><ul><li>Currency volatility <span class="src">assumed</span></li></ul></div>
+<div class="opts"><span class="opt rec">Looks good</span><span class="opt">Add more</span><span class="opt">Start over</span></div>
+</div></div>
+
+<div class="msg me"><div class="who">You</div><div class="body">Add the opportunities from the market</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body">How would you like to start?
+<dl class="play"><dt>Understood</dt><dd>You want opportunities.</dd><dt>Missing</dt><dd>Market analysis.</dd></dl>
+<div class="opts"><span class="opt rec">Guided questions</span><span class="opt">Upload notes</span><span class="opt">Assume for me</span></div>
+</div></div>
+</div>
+<p class="flag">Every turn wears the same boxes. The items are one line each, with no evidence or score. On the third message it has forgotten its own draft and asks again how to start.</p>
+</div></div>
+
+<div class="col">
+<span class="tag new">After A · B · C</span>
+<div class="pane"><h2 class="ph">Build the SWOT</h2><div class="msgs">
+
+<div class="msg me"><div class="who">You</div><div class="body">Help me build the SWOT for Mobile</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body"><p>Happy to. One thing first: Mobile has no Internal, Micro or Macro analysis committed yet. Our method takes strengths and weaknesses from the Internal analysis and opportunities and threats from the market analyses, so without those I'll build from what you tell me and mark each item with where it came from.</p>
+<p>Let's start inside the business. What do you see as Mobile's two or three biggest advantages over other distributors, and where does it struggle most?</p>
+<div class="opts"><span class="opt rec">I'll type them</span><span class="opt">Do the Internal analysis first</span><span class="opt">Upload notes</span></div>
+<div class="ctx">Following: Situational Analysis · SWOT</div>
+</div></div>
+
+<div class="msg me"><div class="who">You</div><div class="body">Our strength is the Samsung and Xiaomi distribution deals and 900 retail partners. Weakness is the slow collection from dealers.</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body"><p>Good, those are concrete. Here are the internal half as the method wants them, each with its evidence and a score. I've held off on opportunities and threats until we look at the market.</p>
+<div class="draft"><div class="dt">Mobile SWOT · Strengths and weaknesses</div>
+<div class="grp">Strengths</div>
+<div class="item"><div class="it"><span>Exclusive-grade brand partnerships</span><span class="score">3 · Strong</span></div>Distribution agreements with Samsung and Xiaomi, the two leading smartphone brands in Egypt.<div class="ev">Evidence: your message <span class="src">pasted</span></div></div>
+<div class="item"><div class="it"><span>Broad retail reach</span><span class="score">3 · Strong</span></div>900 retail partners give national coverage few distributors match.<div class="ev">Evidence: your message <span class="src">pasted</span></div></div>
+<div class="grp">Weaknesses</div>
+<div class="item"><div class="it"><span>Slow dealer collections</span><span class="score">3 · Major</span></div>Cash tied up with dealers limits stock and credit headroom.<div class="ev">Evidence: your message <span class="src">pasted</span></div></div>
+</div>
+<p style="margin-top:8px">Is there a third strength worth naming, for example after-sales or logistics? If not, we can move to the market side.</p>
+<div class="opts"><span class="opt rec">Move to the market</span><span class="opt">Add another strength</span></div>
+</div></div>
+
+<div class="msg me"><div class="who">You</div><div class="body">Add the opportunities from the market</div></div>
+
+<div class="msg ai"><div class="who">Copilot</div>
+<div class="body"><p>Right, building on the strengths and weakness above. Three quick questions so the opportunities rest on something real:</p>
+<p>1. Which segments are growing fastest for you: entry phones, premium, or accessories?<br>2. Is the Nigeria market part of Mobile's plan this year?<br>3. Any new brand talks or channels, such as e-commerce, you are pursuing?</p>
+<p>Answer what you can, and I'll draft the opportunities with evidence the same way.</p>
+<div class="ctx">Following: Situational Analysis · SWOT · step 2 of 2 (external)</div>
+</div></div>
+</div>
+<p class="flag">It talks like a consultant, explains how the method works, asks the next useful question, and remembers the draft. Items carry the method's own shape: a title, a description, the evidence and a score.</p>
+</div></div>
+</div>
+
+<div class="notes">
+<div class="note"><b>A · The method leads</b>Your method runs the conversation and sets the shape of each item. My rules shrink to the few that can't bend: no invented numbers, a source on every item, short buttons.</div>
+<div class="note"><b>B · A real memory</b>About 20 messages, plus the drafts it made and the buttons it offered, so it builds on its own work instead of starting over.</div>
+<div class="note"><b>C · Talk first, boxes rarely</b>The "understood" box only before a first big draft. Buttons only when it asks something. No forced refine step when you have already said what to change.</div>
+<div class="note"><b>The "Following" line</b>A quiet line naming the method part it is using. It costs nothing and shows you the method is being followed. The step counter needs D, which comes later.</div>
+</div>
+</div>

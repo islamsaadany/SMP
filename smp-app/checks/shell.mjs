@@ -66,7 +66,8 @@ const MODEL_ANSWER = {
   missing: ["The purpose in the client's words"],
   options: [{ label: "Assume for me", recommended: true }, { label: "I'll give it" }],
   assumptions: ["Purpose follows the aspiration"],
-  draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }] }] },
+  draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }, { title: "Wide store network", text: "Present in every governorate", evidence: "Store count in the plan", score: "4", source: "platform" }] }] },
+  following: "Purpose",
 };
 const model = http.createServer((req, res) => {
   let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
@@ -856,10 +857,15 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
       return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
         srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector(".copopt.rec") || {}).textContent || "",
-        opts: m.querySelectorAll("[data-cop-reply]").length };
+        opts: m.querySelectorAll("[data-cop-reply]").length,
+        it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
     });
-    check(ans && ans.play && ans.miss && ans.groups === 2 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
+    check(ans && ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
       "the answer draws its playback, what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
+    /* §460: an item the method shapes draws its title, score and evidence, and
+       the answer says which part of the method it is working through. */
+    check(ans && /Wide store network/.test(ans.it) && /4/.test(ans.it) && /Evidence: Store count in the plan/.test(ans.it) && /Following: Purpose/.test(ans.follow),
+      "…an item with a title, a score and its evidence draws all three, and the step being followed is named (§460)", JSON.stringify(ans && { it: ans.it, follow: ans.follow }));
     const mine = await page.evaluate(() => { const m = document.querySelectorAll("[data-cop-msgs] .copmsg.me"); return m.length ? m[m.length - 1].textContent : ""; });
     check(/notes\.docx/.test(mine) && (await page.evaluate(() => !document.querySelector(".coppend .copfile"))), "…the file now rides on what was said, and nothing waits above the box", mine.slice(0, 120));
     await page.click("[data-cop-reply='Assume for me']");

@@ -1,0 +1,603 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useCanEdit } from "../../../workspace-access";
+import {
+  updateProcessStep,
+  deleteProcessStep,
+  createStepConnection,
+  deleteStepConnection,
+  addProcessStep,
+  moveProcessStep,
+  setStepMilestone,
+} from "@/ffp/lib/actions/process";
+import { STEP_GAP_DESCRIPTIONS, STEP_GAP_LABELS, type StepGap } from "@/ffp/lib/domain/step-readiness";
+import { DecisionBranchEditor, seedBranchDrafts } from "./decision-branch-editor";
+import { reconcileBranchDrafts, type BranchDraft } from "@/ffp/lib/domain/decision-branches";
+import { PredecessorEditor, seedPredecessorDrafts } from "./predecessor-editor";
+import { reconcilePredecessorDrafts, type PredecessorDraft } from "@/ffp/lib/domain/predecessor-editor";
+
+const TYPE_STYLES: Record<string, string> = {
+  START: "bg-emerald-50 text-emerald-700",
+  END: "bg-emerald-50 text-emerald-700",
+  TASK: "bg-slate-100 text-slate-600",
+  DECISION: "bg-indigo-50 text-indigo-700",
+};
+
+const STEP_TYPE_PREFIX: Record<string, string> = {
+  START: "Start",
+  TASK: "Task",
+  DECISION: "Decision",
+  END: "End",
+};
+
+type RoleRef = { id: string; name: string };
+type StepType = "START" | "TASK" | "DECISION" | "END";
+type StepT = {
+  id: string;
+  type: StepType;
+  label: string;
+  assignedRole: RoleRef | null;
+  reviewNotes: string | null;
+  milestone: boolean;
+  joinRequiresAll: boolean;
+  gaps: StepGap[];
+  detailedAction: string[];
+  exceptionHandling: string | null;
+  links: { id: string; targetProcessId: string; targetProcess: { code: string; name: string } }[];
+};
+type ConnectionT = { id: string; fromStepId: string; toStepId: string; label: string | null };
+type StepOption = { id: string; label: string; type: StepType };
+/** A resolved predecessor, carrying its own connection's label (e.g. "Yes" on a Decision's loop-back). */
+type PredecessorRef = StepOption & { connectionLabel: string | null };
+type ProcessOption = { id: string; code: string; name: string };
+
+export function StepListRow({
+  workspaceId,
+  processId,
+  isFirst,
+  isLast,
+  numberLabel,
+  step,
+  predecessors,
+  incomingConnections,
+  outgoingConnections,
+  roles,
+  stepOptions,
+  otherProcesses,
+}: {
+  workspaceId: string;
+  processId: string;
+  isFirst: boolean;
+  isLast: boolean;
+  /** "4", or "4a"/"4b" for a genuine parallel pair feeding a requires-all step (spec 016). */
+  numberLabel: string;
+  step: StepT;
+  /** Every step feeding into this one, resolved for display (spec 015 FR-001) — not just one. */
+  predecessors: PredecessorRef[];
+  /** This step's own incoming connections — every predecessor, not just one (FR-001). */
+  incomingConnections: ConnectionT[];
+  /** This step's own outgoing connections — a Decision's branches (FR-009). */
+  outgoingConnections: ConnectionT[];
+  roles: RoleRef[];
+  stepOptions: StepOption[];
+  otherProcesses: ProcessOption[];
+}) {
+  const canEdit = useCanEdit();
+  const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const [label, setLabel] = useState(step.label);
+  const [type, setType] = useState<StepType>(step.type);
+  const [roleId, setRoleId] = useState(step.assignedRole?.id ?? "");
+  const [predecessorDrafts, setPredecessorDrafts] = useState<PredecessorDraft[]>(() =>
+    seedPredecessorDrafts(incomingConnections.map((c) => ({ id: c.id, fromStepId: c.fromStepId, label: c.label })))
+  );
+  const [joinRequiresAll, setJoinRequiresAll] = useState(step.joinRequiresAll);
+  const [branchDrafts, setBranchDrafts] = useState<BranchDraft[]>(() =>
+    seedBranchDrafts(outgoingConnections.map((c) => ({ id: c.id, toStepId: c.toStepId, label: c.label })))
+  );
+  const [detailedAction, setDetailedAction] = useState(step.detailedAction.join("\n"));
+  const [exceptionHandling, setExceptionHandling] = useState(step.exceptionHandling ?? "");
+  const [linkedProcessIds, setLinkedProcessIds] = useState<string[]>(step.links.map((l) => l.targetProcessId));
+
+  function toggleMilestone() {
+    setError(null);
+    startTransition(async () => {
+      const result = await setStepMilestone({
+        workspaceId,
+        processId,
+        stepId: step.id,
+        milestone: !step.milestone,
+      });
+      if (!result.ok) {
+        setError(result.error === "VALIDATION_ERROR" ? (result.message ?? "Could not update") : result.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  function move(direction: "UP" | "DOWN") {
+    setError(null);
+    startTransition(async () => {
+      const result = await moveProcessStep({ workspaceId, processId, stepId: step.id, direction });
+      if (!result.ok) {
+        setError(result.error === "VALIDATION_ERROR" ? (result.message ?? "Could not move") : result.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  function startEditing() {
+    setLabel(step.label);
+    setType(step.type);
+    setRoleId(step.assignedRole?.id ?? "");
+    setPredecessorDrafts(
+      seedPredecessorDrafts(incomingConnections.map((c) => ({ id: c.id, fromStepId: c.fromStepId, label: c.label })))
+    );
+    setJoinRequiresAll(step.joinRequiresAll);
+    setBranchDrafts(
+      seedBranchDrafts(outgoingConnections.map((c) => ({ id: c.id, toStepId: c.toStepId, label: c.label })))
+    );
+    setDetailedAction(step.detailedAction.join("\n"));
+    setExceptionHandling(step.exceptionHandling ?? "");
+    setLinkedProcessIds(step.links.map((l) => l.targetProcessId));
+    setError(null);
+    setEditing(true);
+  }
+
+  function save() {
+    setError(null);
+    startTransition(async () => {
+      const result = await updateProcessStep({
+        workspaceId,
+        processId,
+        stepId: step.id,
+        type,
+        label,
+        assignedRoleId: roleId || undefined,
+        swimlaneRoleId: roleId || undefined,
+        detailedAction: detailedAction
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean),
+        exceptionHandling,
+        linkedProcessIds,
+        joinRequiresAll,
+      });
+      if (!result.ok) {
+        setError(result.error === "VALIDATION_ERROR" ? (result.message ?? "Invalid step") : result.error);
+        return;
+      }
+
+      const predecessorOperations = reconcilePredecessorDrafts(
+        incomingConnections.map((c) => ({ id: c.id, fromStepId: c.fromStepId, label: c.label })),
+        predecessorDrafts
+      );
+      for (const op of predecessorOperations) {
+        const opResult =
+          op.kind === "delete"
+            ? await deleteStepConnection({ workspaceId, processId, connectionId: op.connectionId })
+            : await createStepConnection({
+                workspaceId,
+                processId,
+                fromStepId: op.fromStepId,
+                toStepId: step.id,
+                label: op.label || undefined,
+              });
+        if (!opResult.ok) {
+          setError(
+            opResult.error === "VALIDATION_ERROR" ? (opResult.message ?? "A predecessor could not be saved.") : opResult.error
+          );
+          router.refresh(); // whatever did apply is real; reflect it
+          return;
+        }
+      }
+
+      if (type === "DECISION") {
+        const operations = reconcileBranchDrafts(
+          outgoingConnections.map((c) => ({ id: c.id, toStepId: c.toStepId, label: c.label })),
+          branchDrafts
+        );
+        for (const op of operations) {
+          const opResult =
+            op.kind === "delete"
+              ? await deleteStepConnection({ workspaceId, processId, connectionId: op.connectionId })
+              : op.kind === "createToExisting"
+                ? await createStepConnection({
+                    workspaceId,
+                    processId,
+                    fromStepId: step.id,
+                    toStepId: op.toStepId,
+                    label: op.label || undefined,
+                  })
+                : await addProcessStep({
+                    workspaceId,
+                    processId,
+                    step: { type: "TASK", label: op.newStepLabel, linkedProcessIds: [] },
+                    fromStepId: step.id,
+                    connectionLabel: op.label || undefined,
+                  });
+          if (!opResult.ok) {
+            setError(
+              opResult.error === "VALIDATION_ERROR"
+                ? (opResult.message ?? "A branch could not be saved.")
+                : opResult.error
+            );
+            router.refresh(); // whatever did apply is real; reflect it
+            return;
+          }
+        }
+      }
+
+      setEditing(false);
+      router.refresh();
+    });
+  }
+
+  function remove() {
+    startTransition(async () => {
+      const result = await deleteProcessStep({ workspaceId, processId, stepId: step.id });
+      if (!result.ok) {
+        setError(result.error === "VALIDATION_ERROR" ? (result.message ?? "Could not delete step") : result.error);
+        setConfirmingDelete(false);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  if (editing) {
+    return (
+      <div className="flex flex-col gap-3 rounded-xl border border-indigo-200 bg-indigo-50/40 p-3.5">
+        <div className="flex flex-wrap items-end gap-3">
+          <Field label="Step name">
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              required
+              className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+            />
+          </Field>
+          <Field label="Type">
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as StepType)}
+              className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+            >
+              <option value="TASK">Task</option>
+              <option value="DECISION">Decision</option>
+              <option value="START">Start</option>
+              <option value="END">End</option>
+            </select>
+          </Field>
+          <Field label="Assigned role">
+            <select
+              value={roleId}
+              onChange={(e) => setRoleId(e.target.value)}
+              className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+            >
+              <option value="">— none —</option>
+              {roles.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+        <PredecessorEditor
+          drafts={predecessorDrafts}
+          onChange={setPredecessorDrafts}
+          stepOptions={stepOptions.map((s) => ({ id: s.id, label: `[${STEP_TYPE_PREFIX[s.type]}] ${s.label}` }))}
+        />
+        <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
+          <input
+            type="checkbox"
+            checked={joinRequiresAll}
+            onChange={(e) => setJoinRequiresAll(e.target.checked)}
+          />
+          Requires all predecessors
+        </label>
+        {type === "DECISION" && (
+          <DecisionBranchEditor
+            drafts={branchDrafts}
+            onChange={setBranchDrafts}
+            stepOptions={stepOptions.map((s) => ({ id: s.id, label: `[${STEP_TYPE_PREFIX[s.type]}] ${s.label}` }))}
+          />
+        )}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Detailed Action (Export Report — one action per line)">
+            <textarea
+              value={detailedAction}
+              onChange={(e) => setDetailedAction(e.target.value)}
+              rows={2}
+              placeholder="One action per line"
+              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+            />
+          </Field>
+          <Field label="Risk if Mishandled (Export Report)">
+            <textarea
+              value={exceptionHandling}
+              onChange={(e) => setExceptionHandling(e.target.value)}
+              rows={2}
+              placeholder="What goes wrong if this step is missed or done incorrectly"
+              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+            />
+          </Field>
+        </div>
+        {otherProcesses.length > 0 && (
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-medium text-slate-600">Link to other process(es)</span>
+            <div className="flex flex-wrap gap-3">
+              {otherProcesses.map((p) => (
+                <label key={p.id} className="flex items-center gap-1.5 text-xs text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={linkedProcessIds.includes(p.id)}
+                    onChange={(e) =>
+                      setLinkedProcessIds((prev) =>
+                        e.target.checked ? [...prev, p.id] : prev.filter((id) => id !== p.id)
+                      )
+                    }
+                  />
+                  {p.code} — {p.name}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={save}
+            disabled={pending}
+            className="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {pending ? "Saving…" : "Save"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setEditing(false);
+              setError(null);
+            }}
+            disabled={pending}
+            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          {error && <span className="text-xs text-red-600">{error}</span>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-3 rounded-xl border border-slate-200 bg-white p-3.5">
+      <div className="flex flex-none flex-col items-center gap-0.5">
+        {canEdit && (
+          <button
+            type="button"
+            onClick={() => move("UP")}
+            disabled={pending || isFirst}
+            aria-label={`Move ${step.label} up`}
+            title="Move up"
+            className="rounded text-[10px] leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:invisible"
+          >
+            ▲
+          </button>
+        )}
+        <div className="flex h-6 min-w-6 items-center justify-center rounded-md bg-indigo-50 px-1 font-mono text-xs font-bold text-indigo-700">
+          {numberLabel}
+        </div>
+        {canEdit && (
+          <button
+            type="button"
+            onClick={() => move("DOWN")}
+            disabled={pending || isLast}
+            aria-label={`Move ${step.label} down`}
+            title="Move down"
+            className="rounded text-[10px] leading-none text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:invisible"
+          >
+            ▼
+          </button>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${TYPE_STYLES[step.type]}`}>
+            {step.type}
+          </span>
+          <span className="text-sm font-semibold text-slate-900">{step.label}</span>
+          {step.assignedRole && (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+              {step.assignedRole.name}
+            </span>
+          )}
+          {step.milestone && (
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">
+              ★ Milestone
+            </span>
+          )}
+          {step.gaps.length > 0 && (
+            <span
+              className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800"
+              title={step.gaps.map((gap) => STEP_GAP_DESCRIPTIONS[gap]).join("\n")}
+            >
+              ⚠ {step.gaps.map((gap) => STEP_GAP_LABELS[gap]).join(" · ")}
+            </span>
+          )}
+          {(step.detailedAction.length > 0 || step.exceptionHandling) && (
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+              📄 Documented
+            </span>
+          )}
+        </div>
+        <div className="mt-1 text-xs text-slate-500">
+          {predecessorSummary(predecessors, step.joinRequiresAll)}
+        </div>
+        {step.reviewNotes && (
+          <div className="mt-2 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/50 px-2.5 py-1.5 text-xs text-indigo-800">
+            <span className="font-semibold">AI Review note:</span> {step.reviewNotes}
+          </div>
+        )}
+        {step.links.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {step.links.map((link) => (
+              <Link
+                key={link.id}
+                href={`/${workspaceId}/processes/processes/${link.targetProcessId}/map`}
+                className="rounded-full border border-dashed border-indigo-300 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 hover:bg-indigo-50"
+              >
+                🔗 {link.targetProcess.code} — {link.targetProcess.name}
+              </Link>
+            ))}
+          </div>
+        )}
+        {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
+      </div>
+      <div className="flex flex-none items-start gap-1.5">
+        {!canEdit ? null : confirmingDelete ? (
+          <>
+            <span className="self-center text-xs text-slate-500">Delete this step?</span>
+            <button
+              type="button"
+              onClick={remove}
+              disabled={pending}
+              className="rounded-md bg-red-600 px-2 py-1 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pending ? "Deleting…" : "Yes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={pending}
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              No
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={toggleMilestone}
+              disabled={pending}
+              aria-pressed={step.milestone}
+              aria-label={
+                step.milestone
+                  ? `Remove ${step.label} from the Helicopter View`
+                  : `Show ${step.label} on the Helicopter View`
+              }
+              title={
+                step.milestone
+                  ? "A milestone — shown on the Helicopter View"
+                  : "Mark as a milestone, to show on the Helicopter View"
+              }
+              className={`rounded-md p-1.5 ${
+                step.milestone
+                  ? "text-amber-500 hover:bg-amber-50 hover:text-amber-700"
+                  : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              }`}
+            >
+              <StarIcon filled={step.milestone} />
+            </button>
+            <button
+              type="button"
+              onClick={startEditing}
+              aria-label={`Edit ${step.label}`}
+              title={`Edit ${step.label}`}
+              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            >
+              <PencilIcon />
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(true)}
+              aria-label={`Delete ${step.label}`}
+              title={`Delete ${step.label}`}
+              className="rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+            >
+              <TrashIcon />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
+      {label}
+      {children}
+    </label>
+  );
+}
+
+/** Joins names the way running prose does: "A", "A and B", "A, B, and C". */
+function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}
+
+function predecessorSummary(predecessors: PredecessorRef[], joinRequiresAll: boolean): string {
+  if (predecessors.length === 0) return "Entry point — no predecessor";
+  // The rule has no visible effect until there are two or more predecessors
+  // to actually require all of (spec 015 Edge Cases).
+  if (joinRequiresAll && predecessors.length > 1) {
+    const verb = predecessors.length === 2 ? "Needs both" : "Needs all of";
+    return `${verb}: ${joinNames(predecessors.map((p) => p.label))}`;
+  }
+  // Each predecessor's own connector label (e.g. "Yes" on a Decision's
+  // loop-back) — carried over from the single-predecessor summary this
+  // replaces, which read "Connects from: X (Yes)".
+  const withLabels = predecessors.map((p) => (p.connectionLabel ? `${p.label} (${p.connectionLabel})` : p.label));
+  return `Connects from: ${joinNames(withLabels)}`;
+}
+
+function StarIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+    </svg>
+  );
+}
+
+function PencilIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 6h18" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z" />
+    </svg>
+  );
+}

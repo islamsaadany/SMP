@@ -1,0 +1,297 @@
+"use server";
+
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/ffp/lib/db/client";
+import { requireFirmOwner, requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
+import { canChangeLastFirmOwner } from "@/ffp/lib/domain/access-control";
+import { validateLogoDataUrl, isValidHexColor } from "@/ffp/lib/domain/logo";
+import { DEFAULT_GOVERNANCE_ASPECT_NAMES } from "@/ffp/lib/domain/governance-focus-areas";
+import { ok, validationError, type ActionResult, type ActionError } from "@/ffp/lib/actions/errors";
+
+export type WorkspaceListEntry = {
+  id: string;
+  name: string;
+  accessVia: "MEMBER" | "OWNER_CARVEOUT";
+  accessLevel: "VIEWER" | "EDITOR" | "ADMIN";
+};
+
+/** Firm Owner-only: every Workspace in the Firm, per Constitution Principle V's carve-out. */
+export async function listAllWorkspaces(): Promise<ActionResult<WorkspaceListEntry[]>> {
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const firmMember = await prisma.firmMember.findUniqueOrThrow({ where: { userId: access.data.userId } });
+
+  const workspaces = await prisma.workspace.findMany({
+    where: { firmId: firmMember.firmId },
+    include: { members: { where: { userId: access.data.userId, status: "ACTIVE" } } },
+  });
+
+  return ok(
+    workspaces.map((w) => {
+      const explicitMember = w.members[0];
+      return {
+        id: w.id,
+        name: w.name,
+        accessVia: explicitMember ? "MEMBER" : "OWNER_CARVEOUT",
+        accessLevel: explicitMember?.accessLevel ?? "ADMIN",
+      };
+    })
+  );
+}
+
+const createWorkspaceSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  industry: z.string().trim().max(120).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+});
+
+/** Firm Owner-only: create a new client Workspace under the caller's Firm. */
+export async function createWorkspace(
+  input: z.infer<typeof createWorkspaceSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = createWorkspaceSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const firmMember = await prisma.firmMember.findUniqueOrThrow({ where: { userId: access.data.userId } });
+
+  const workspace = await prisma.workspace.create({
+    data: {
+      firmId: firmMember.firmId,
+      name: parsed.data.name,
+      industry: parsed.data.industry || undefined,
+      description: parsed.data.description || undefined,
+    },
+  });
+
+  // A new workspace starts with the same seven governance aspects an
+  // existing one already has (spec 017 FR-011/SC-005) — fully editable from
+  // here on, same as any other aspect.
+  await prisma.governanceAspect.createMany({
+    data: DEFAULT_GOVERNANCE_ASPECT_NAMES.map((name) => ({ workspaceId: workspace.id, name })),
+  });
+
+  revalidatePath("/platform");
+  return ok({ id: workspace.id });
+}
+
+const updateWorkspaceProfileSchema = z.object({
+  workspaceId: z.string().min(1),
+  industry: z.string().trim().max(120).optional().or(z.literal("")),
+  description: z.string().trim().max(2000).optional().or(z.literal("")),
+});
+
+/**
+ * Updates a Workspace's industry/context notes — the free-text background
+ * an AI review draws on for sector-appropriate suggestions. Workspace
+ * ADMIN-level, not Firm Owner-only: this is ordinary engagement upkeep, not
+ * the structural create/delete of the Workspace itself.
+ */
+export async function updateWorkspaceProfile(
+  input: z.infer<typeof updateWorkspaceProfileSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = updateWorkspaceProfileSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
+  if (!access.ok) return access;
+
+  const workspace = await prisma.workspace.update({
+    where: { id: parsed.data.workspaceId },
+    data: {
+      industry: parsed.data.industry || null,
+      description: parsed.data.description || null,
+    },
+  });
+
+  revalidatePath(`/${parsed.data.workspaceId}/processes`);
+  return ok({ id: workspace.id });
+}
+
+const deleteWorkspaceSchema = z.object({
+  workspaceId: z.string().min(1),
+  confirmName: z.string().min(1),
+});
+
+/**
+ * Firm Owner-only: permanently delete a Workspace and everything under it
+ * (Members, Roles, People, Processes, RACI/Authority data — all cascade). The
+ * caller must retype the Workspace's exact name to confirm, since this cannot
+ * be undone.
+ */
+export async function deleteWorkspace(
+  input: z.infer<typeof deleteWorkspaceSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = deleteWorkspaceSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const firmMember = await prisma.firmMember.findUniqueOrThrow({ where: { userId: access.data.userId } });
+
+  const workspace = await prisma.workspace.findUnique({ where: { id: parsed.data.workspaceId } });
+  if (!workspace || workspace.firmId !== firmMember.firmId) return validationError("Workspace not found");
+
+  if (workspace.name !== parsed.data.confirmName) {
+    return validationError(`Type "${workspace.name}" exactly to confirm deletion.`);
+  }
+
+  await prisma.workspace.delete({ where: { id: parsed.data.workspaceId } });
+
+  revalidatePath("/platform");
+  return ok({ id: parsed.data.workspaceId });
+}
+
+const updateWorkspaceBrandingSchema = z.object({
+  workspaceId: z.string().min(1),
+  logoDataUrl: z.string().min(1).nullable(),
+  accentColor: z.string().min(1).nullable(),
+  accentColorSecondary: z.string().min(1).nullable(),
+  accentColorTertiary: z.string().min(1).nullable(),
+});
+
+type WorkspaceBrandingResult = {
+  logoDataUrl: string | null;
+  accentColor: string | null;
+  accentColorSecondary: string | null;
+  accentColorTertiary: string | null;
+};
+
+/**
+ * Sets or clears this client's logo and up to three named accent colors
+ * (Primary/Secondary/Tertiary) — shown in the Workspace sidebar and used for
+ * a few brand touches on every page of this Workspace only, so a consultant
+ * sees the UI shift as they switch between client engagements. ADMIN-level,
+ * not Firm Owner-only: ordinary engagement upkeep, same as
+ * updateWorkspaceProfile.
+ */
+export async function updateWorkspaceBranding(
+  input: z.infer<typeof updateWorkspaceBrandingSchema>
+): Promise<ActionResult<WorkspaceBrandingResult>> {
+  const parsed = updateWorkspaceBrandingSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "ADMIN");
+  if (!access.ok) return access;
+
+  if (parsed.data.logoDataUrl !== null) {
+    const validation = validateLogoDataUrl(parsed.data.logoDataUrl);
+    if (!validation.ok) return validationError(validation.message);
+  }
+  for (const color of [parsed.data.accentColor, parsed.data.accentColorSecondary, parsed.data.accentColorTertiary]) {
+    if (color !== null && !isValidHexColor(color)) {
+      return validationError("Accent color must be a hex value like #2563eb.");
+    }
+  }
+
+  await prisma.workspace.update({
+    where: { id: parsed.data.workspaceId },
+    data: {
+      logoDataUrl: parsed.data.logoDataUrl,
+      accentColor: parsed.data.accentColor,
+      accentColorSecondary: parsed.data.accentColorSecondary,
+      accentColorTertiary: parsed.data.accentColorTertiary,
+    },
+  });
+
+  revalidatePath(`/${parsed.data.workspaceId}/processes`, "layout");
+  return ok({
+    logoDataUrl: parsed.data.logoDataUrl,
+    accentColor: parsed.data.accentColor,
+    accentColorSecondary: parsed.data.accentColorSecondary,
+    accentColorTertiary: parsed.data.accentColorTertiary,
+  });
+}
+
+const addOwnerSchema = z.object({ userId: z.string().min(1) });
+
+export async function addFirmOwner(
+  input: z.infer<typeof addOwnerSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = addOwnerSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const callerFirm = await prisma.firmMember.findUniqueOrThrow({ where: { userId: access.data.userId } });
+
+  const member = await prisma.firmMember.upsert({
+    where: { userId: parsed.data.userId },
+    update: { role: "OWNER" },
+    create: { firmId: callerFirm.firmId, userId: parsed.data.userId, role: "OWNER" },
+  });
+
+  revalidatePath("/firm/settings");
+  return ok({ id: member.id });
+}
+
+const changeRoleSchema = z.object({
+  firmMemberId: z.string().min(1),
+  role: z.enum(["OWNER", "MEMBER"]),
+});
+
+export async function changeFirmMemberRole(
+  input: z.infer<typeof changeRoleSchema>
+): Promise<ActionResult<{ id: string }> | ActionError> {
+  const parsed = changeRoleSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const target = await prisma.firmMember.findUniqueOrThrow({ where: { id: parsed.data.firmMemberId } });
+
+  if (target.role === "OWNER" && parsed.data.role !== "OWNER") {
+    const activeOwners = await prisma.firmMember.count({ where: { firmId: target.firmId, role: "OWNER" } });
+    if (!canChangeLastFirmOwner(activeOwners)) {
+      return { ok: false, error: "LAST_OWNER" };
+    }
+  }
+
+  const updated = await prisma.firmMember.update({
+    where: { id: parsed.data.firmMemberId },
+    data: { role: parsed.data.role },
+  });
+
+  revalidatePath("/firm/settings");
+  return ok({ id: updated.id });
+}
+
+const removeFirmMemberSchema = z.object({ firmMemberId: z.string().min(1) });
+
+/**
+ * Fully removes someone from the Firm — unlike demoting an Owner to Member,
+ * this deletes the Firm Member record entirely, so they lose the Firm-wide
+ * access carve-out (Constitution Principle V) and fall back to only whatever
+ * explicit Workspace Member records they have. Blocked on the Firm's last
+ * remaining Owner, same as demoting one.
+ */
+export async function removeFirmMember(
+  input: z.infer<typeof removeFirmMemberSchema>
+): Promise<ActionResult<{ id: string }> | ActionError> {
+  const parsed = removeFirmMemberSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireFirmOwner();
+  if (!access.ok) return access;
+
+  const target = await prisma.firmMember.findUniqueOrThrow({ where: { id: parsed.data.firmMemberId } });
+
+  if (target.role === "OWNER") {
+    const activeOwners = await prisma.firmMember.count({ where: { firmId: target.firmId, role: "OWNER" } });
+    if (!canChangeLastFirmOwner(activeOwners)) {
+      return { ok: false, error: "LAST_OWNER" };
+    }
+  }
+
+  await prisma.firmMember.delete({ where: { id: target.id } });
+
+  revalidatePath("/firm/settings");
+  return ok({ id: target.id });
+}

@@ -30,8 +30,9 @@
    module asking the spine to hand over its own subject.
 
    THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Processes
-   is a word the address reserves and nothing more (lib/modules.ts MODULE_DEF)
-   — Portfolio joined the built ones on 2026-09-30 and was finished on
+   (2026-10-01, FFProcess carried in whole) is built and has NO server here:
+   its pages are Next's own route tree, app/(ffp)/, which takes the address
+   before this table is asked (MODULE_DEF.appRoute) — Portfolio joined the built ones on 2026-09-30 and was finished on
    2026-10-01 (spec 060), and the TRIAL module that proved this seam could take
    a fourth was retired once real ones had (§360, §24). That the two lists
    agree — every built module serves itself,

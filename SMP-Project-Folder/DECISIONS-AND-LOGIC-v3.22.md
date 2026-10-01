@@ -61072,3 +61072,13 @@ new-client top level) and `check:frameworks:page` (1/14) are red **identically
 on `origin/main`'s own worktree** and their files are untouched here (§303).
 Nothing about how a save is judged moved, so no forced sign-out is owed.
 
+
+## §457 — Processes: FFProcess carried in, its people from the register (2026-10-01, spec 065)
+
+Islam: *"we need to bring this Process module with all it's data and deisgn even to the SMP"*, then *"A, keep its design, smp client register, office only, RHI"*. FFProcess is ported into the Next app as the **Processes** module: its own pages under `app/(ffp)/`, its own tables in a `ffprocess` schema, one workspace per client keyed by the client's slug, its look kept under SMP's shared top bar. **The seat decides, not FFProcess's own membership**: the office (`super`, `smoteam`) acts as the workspace's admin and anybody else is refused at the door (`OFFICE_ONLY`).
+
+**THE REGISTER IS THE STORE** (§53.5): who works at a client is the People register's question, so the Org Directory mirrors it — name and email follow the register, a retired or removed person is hidden and never deleted (their RACI cells and steps stay), and an old FFProcess person is adopted ONCE by a matching email rather than duplicated (§87: a name is never an identifier). A linked person's name and email are refused on the server and read-only on the page; Delete is not offered. **The first build showed an empty directory on the first load**: Next renders the layout and the page at the same time, so a sync started in the layout lost the race — the sync is one cached promise per request, awaited by every page (measured: 32 people on the first load after the fix).
+
+**THE OLD DATA**: `scripts/carry-ffprocess.mjs` copies one old workspace into a client's empty one — everything that workspace reaches by foreign key, ids kept, in one transaction, old users mapped to existing accounts by email — and refuses a workspace that already holds data. Behind a production-only deploy switch (`SMP_CARRY_FFPROCESS` = the old workspace's id or name, `FFPROCESS_DATABASE_URL` in Vercel), and a switch left on logs *turn it off* rather than failing the build (§317.9). Proved on a local copy built in the old shape: dry-run counts exact, a self-referencing manager and a parent/branch cycle carried, a matched user mapped, a second run refused; and the deploy path run with the switch on against an already-carried workspace, which logged and exited 0.
+
+**RECORDED, NOT DONE**: adding a person directly in Processes (not on the register) is still allowed — Islam's call.

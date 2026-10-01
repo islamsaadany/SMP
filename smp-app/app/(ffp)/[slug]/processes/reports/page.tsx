@@ -1,0 +1,52 @@
+import { registerReady } from "@/ffp/lib/register-sync";
+import { notFound as nextNotFound, redirect } from "next/navigation";
+import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
+import { loadReportData } from "@/ffp/lib/reports/load-report-data";
+import { prisma } from "@/ffp/lib/db/client";
+import { resolveArrangement } from "@/ffp/lib/domain/report-arrangement";
+import { ExportPreview } from "./export-preview";
+
+/**
+ * The Export Report lives outside the (app) route group on purpose: it renders
+ * with no workspace sidebar and no app header, so what's on screen is exactly
+ * what prints. That means it can't inherit (app)'s auth, so it runs its own
+ * requireWorkspaceAccess check here.
+ */
+export default async function ReportPage(props: PageProps<"/[slug]/processes/reports">) {
+  const { slug: workspaceId } = await props.params;
+  await registerReady(workspaceId);
+  const searchParams = await props.searchParams;
+  const idsRaw = searchParams["ids"];
+  const processIds = (Array.isArray(idsRaw) ? idsRaw : idsRaw ? [idsRaw] : []).filter(Boolean);
+
+  const access = await requireWorkspaceAccess(workspaceId, "VIEWER");
+  if (!access.ok) {
+    if (access.error === "UNAUTHORIZED") redirect("/" + workspaceId + "/sign-in");
+    nextNotFound();
+  }
+
+  const data = await loadReportData(workspaceId, processIds);
+  if (!data) nextNotFound();
+
+  // Read alongside the report data rather than through it: the deck reads the
+  // same two values independently, and neither should become a parameter of
+  // the other.
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    select: { reportArrangement: true, reportMapLayout: true },
+  });
+
+  // The layout control changes a client's settings, so only an editor is
+  // offered it — the action enforces the same gate server-side, which is what
+  // actually protects it (Constitution Principle V).
+  const editorAccess = await requireWorkspaceAccess(workspaceId, "EDITOR");
+
+  return (
+    <ExportPreview
+      {...data}
+      arrangement={resolveArrangement(workspace?.reportArrangement)}
+      mapLayout={workspace?.reportMapLayout ?? "FLOW"}
+      canEdit={editorAccess.ok}
+    />
+  );
+}

@@ -50843,3 +50843,54 @@ after (§329), the carried `.cjs` modules re-carried (§335), `node --check sw.j
 after the splice (§146.2), the merged result grepped for its own duplicate
 declarations (§56.7), and the SHELL name confirmed against `origin/main`
 immediately before the push (§94.16).
+
+### §380.8 — AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD NOT SEE
+
+Islam, on the built page, naming his first phase: **"Which project?"** under an
+empty plan. Two faults, and what they share is the whole finding.
+
+**THE BROWSER'S REQUEST NAMED NO PROJECT, ON ALL FIFTEEN ACTS.** The api asks
+for the project by name and refuses without it — correctly; the script's
+`post()` sent the act and the view and never the id. **So every press in edit
+mode was refused and the whole screen was dead**, while the api, the rules and
+**184 assertions were all right**: every one of those assertions builds its own
+request body, so **not one had ever driven the request the BROWSER makes**.
+§96 at its clearest — *a pen wired to nothing renders perfectly* — and the
+check that went 184/0 over it was testing everything except the one line
+between the page and the server. The project rides on the body now and `post()`
+sets it **once** (§104.7: fifteen call sites each remembering is fifteen
+chances to forget).
+
+**AND AN EMPTY CONTAINER OFFERED NO WAY TO PUT THE FIRST THING IN IT.** The add
+row is emitted where a container ENDS, read off the next row, and both tests
+were written as *the last row BELOW it* — so each fires only on a CHILD, and a
+phase just named had nothing under it to type into. The only route on was to
+name a second phase: **§61's trap, on the press that follows the one Islam
+made**. A container with nothing in it ends at its own row, which is one line
+and the same rule said properly.
+
+**NEITHER COULD HAVE BEEN FOUND WITHOUT PRESSING IT.** §12 of
+`checks/portfolio-module.mjs` serves the module over a real port — the same
+`serve()` the route calls, bridged from Node's request to a fetch Request — and
+Chromium presses the controls while the rows are read back **from Postgres and
+never off the screen** (§70, §96), which is the Internal Tracker's own §10
+(§356). It asserts Islam's press, that **nothing is said on the page because
+nothing was refused**, that the page did **not reload** (a mark planted before
+the first press and read after the last — §356.12, §113.8, or a reload
+satisfies every other assertion in the section), the kind key that decides what
+the next Enter makes, an arrow reordering the stored plan, a refusal arriving in
+the server's own words ON THE PAGE, and no page error anywhere in it.
+
+**Two of its own first failures were the CHECK**: it looked for
+`.addr[data-kind="activity"]`, which is a work package's add row rather than the
+key a phase offers; and it read `.dlg` unscoped, so it got the SHIFT dialog's
+*Leave everything* and reported a correct refusal broken (§100.3, §50.6).
+
+**197/0, red twenty-six ways** — `no-project` prints the screenshot back
+verbatim and `no-empty-add` reddens exactly the three assertions about typing
+into something new.
+
+*The lesson is not that a browser check is nice to have. It is that **a check
+that builds its own request body is a check of the server, and the screen is
+the half nobody was measuring** — and this module had five read-only screens,
+so until today there was nothing on it a request could be wrong about.*

@@ -268,6 +268,16 @@ function listView(a: PlanArgs, nums: string[], blocked: Set<string>): string {
     const par = parentOf(a.rows, i);
     const closesPkg = r.lvl === 2 && par && par.lvl === 1 && (!next || next.lvl <= 1);
     const closesPhase = (!next || next.lvl === 0) && r.lvl > 0;
+    /* AND A CONTAINER WITH NOTHING IN IT ENDS AT ITS OWN ROW. Written as
+       *the last row BELOW it*, both tests above fire only on a child — so a
+       phase just named, and a work package just named, offered no way to put
+       the first thing inside them and the only route was to name a second
+       phase (§61's trap, on the press that follows the one Islam made).
+       Found by pressing it in a browser, not by reading it (§70). */
+    const emptyPhase = r.lvl === 0 && (!next || next.lvl === 0);
+    const emptyPkg = r.lvl === 1 && (!next || next.lvl <= 1);
+    if (emptyPhase && brk() !== "no-empty-add") out.push(addRow(1, r.id, ["activity", "package"]));
+    if (emptyPkg && brk() !== "no-empty-add") out.push(addRow(2, r.id, ["activity"]));
     if (closesPkg && par) out.push(addRow(2, par.id, ["activity"]));
     if (closesPhase) {
       /* A PHASE ALREADY HOLDING A WORK PACKAGE IS OFFERED ONLY ANOTHER ONE,
@@ -752,8 +762,17 @@ export async function planDocument(a: PlanArgs): Promise<string> {
 
   return skeleton({ slug: a.slug, tenantName: a.tenantName, have: a.have, bar,
     css: PLAN_CSS, js: js.length ? js : undefined,
+    /* THE PROJECT RIDES ON THE BODY, because every act the script posts is
+       about this project and the api asks for it by name — written into
+       `post()` once rather than onto fifteen call sites (§104.7). Its
+       absence was the whole feature dead from the screen: the api, the rules
+       and 184 assertions were all right and every press came back *Which
+       project?*, because the check builds its own body and had never once
+       driven the request the BROWSER makes (§96). */
     body, attrs: a.edit
       ? ' data-api="' + esc(clientHref(a.slug, "portfolio", "api")) + '"' +
+        (brk() === "no-project" ? ' data-brk="no-project"' : "") +
+        ' data-project="' + esc(a.project.id) + '"' +
         ' data-plan="' + esc(planHref(a, {})) + '"'
       : undefined });
 }

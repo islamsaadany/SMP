@@ -1069,6 +1069,139 @@ try {
     new RegExp('data-row="' + phDesign.id + '" data-kind="phase"').test(pen2.html) &&
     new RegExp('data-row="' + pkg.id + '" data-kind="package"').test(pen2.html),
     (pen2.html.match(/data-kind="(phase|package)"/g) || []).join(" | "));
+
+  /* ══ §12 · THE PRESS ITSELF, IN A BROWSER (§380.8) ══════════════════ */
+  /* EVERY ASSERTION ABOVE BUILDS ITS OWN REQUEST BODY, so not one of them
+     ever drove the request the BROWSER makes — and the browser's was missing
+     the project on all fifteen acts, so every press in edit mode came back
+     *Which project?* while the api, the rules and 184 assertions were right
+     (§96 at its clearest). The module is served over a real port — the same
+     `serve()` the route calls, bridged from Node's request to a fetch
+     Request — and Chromium presses the controls while the DATABASE is read
+     back (§70: a control is pressed, never looked for). */
+  section("§12 · pressed in a browser, with the rows read back from Postgres (§380.8)");
+  const BP = await post(A, SEAT, { act: "start", name: "Press test" });
+  const bproj = BP.json.id;
+  const { createServer } = await import("node:http");
+  const srv = createServer(async (rq, rs) => {
+    try {
+      const chunks = []; for await (const ch of rq) chunks.push(ch);
+      const url = "http://smp.test" + rq.url;
+      const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);
+      const req = new Request(url, {
+        method: rq.method,
+        headers: { "Content-Type": rq.headers["content-type"] || "" },
+        body: rq.method === "POST" ? Buffer.concat(chunks) : undefined });
+      const res = await serve({ req, slug: "raya-trade", module: "portfolio", tenantId: A,
+        tenantName: "Raya Trade", have: offerable(), rest,
+        personKey: SEAT.personKey ?? null, seat: SEAT.seat ?? null });
+      rs.writeHead(res.status, Object.fromEntries(res.headers));
+      rs.end(Buffer.from(await res.arrayBuffer()));
+    } catch (e) { rs.writeHead(500); rs.end(String(e)); }
+  });
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  const base = "http://127.0.0.1:" + srv.address().port + "/raya-trade/portfolio/" + bproj + "/plan";
+  let browser = null;
+  try {
+    const { chromium } = await import("playwright-core");
+    browser = await chromium.launch({ executablePath: process.env.SMP_CHROME || undefined, args: ["--no-sandbox"] });
+  } catch (e) { check("a browser to press the controls in (set SMP_CHROME)", false, e.message.split("\n")[0]); }
+  if (browser) {
+    const pg = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+    const errs = [];
+    pg.on("pageerror", (e) => errs.push(String(e)));
+    pg.on("console", (m) => { if (m.type() === "error") errs.push(m.text()); });
+    const settle = () => pg.waitForTimeout(400);
+    const bRows = () => owner(
+      `SELECT 'phase' k, id, name, pos FROM portfolio_phases WHERE tenant_id=$1 AND project_id=$2
+       UNION ALL SELECT 'activity', a.id, a.name, a.pos FROM portfolio_activities a
+         JOIN portfolio_phases p ON p.id=a.phase_id
+        WHERE a.tenant_id=$1 AND p.project_id=$2 ORDER BY 1, 4`, [A, bproj]);
+
+    await pg.goto(base + "?edit=1"); await settle();
+    /* THE MARK IS PLANTED BEFORE THE FIRST PRESS, or *it stayed* proves
+       nothing: every write answers with the body swapped in (§356.12), and a
+       page that reloaded satisfies every other assertion here (§113.8). */
+    await pg.evaluate("window.__stay = 1");
+    check("the mark is really planted, or 'it stayed' proves nothing",
+      await pg.evaluate("window.__stay === 1"));
+
+    /* ── naming the first phase, which is the press Islam made ───────── */
+    const addBox = await pg.$('.addr[data-kind="phase"] input');
+    check("the add row is there to type in", !!addBox);
+    if (addBox) {
+      await addBox.fill("Phase 1");
+      await addBox.press("Enter");
+      await settle();
+    }
+    const R1 = await bRows();
+    check("A PHASE NAMED AND ENTER PRESSED REACHES POSTGRES — the whole feature was dead here, because the script's request named no project and the api answered *Which project?* on all fifteen acts (§96, §104.7)",
+      R1.length === 1 && R1[0].name === "Phase 1" && R1[0].k === "phase",
+      JSON.stringify(R1) + "  //  said: " + String(await pg.textContent(".said").catch(() => "")).trim());
+    check("...and nothing was said on the page, because nothing was refused (§32, §171)",
+      !(await pg.textContent(".said").catch(() => "")).trim(),
+      (await pg.textContent(".said").catch(() => "")).trim());
+    check("...and the page did not reload: the answer is the body drawn again and swapped in (§356.12)",
+      await pg.evaluate("window.__stay === 1"));
+
+    /* ── and a second one, so the order can be read ──────────────────── */
+    const addBox2 = await pg.$('.addr[data-kind="phase"] input');
+    if (addBox2) { await addBox2.fill("Phase 2"); await addBox2.press("Enter"); await settle(); }
+    const R2 = await bRows();
+    check("a second phase is APPENDED, and both are on the page after the swap",
+      R2.length === 2 && R2[0].name === "Phase 1" && R2[1].name === "Phase 2",
+      JSON.stringify(R2));
+
+    /* ── an activity under the phase, which is the other parent kind ───
+       A PHASE OFFERS BOTH AND THE KEY IS PRESSED (§15.3): the row's own
+       `data-kind` starts at the first of the two, so this is the one place a
+       press DECIDES what the next Enter makes. */
+    const phRow = await pg.$('.addr.l1');
+    const akAct = await pg.$('.addr.l1 .ak[data-kind="activity"]');
+    check("the phase now offers an activity under it as well as a work package",
+      !!akAct && !!(await pg.$('.addr.l1 .ak[data-kind="package"]')),
+      String(await pg.$$eval('.addr.l1 .ak', (xs) => xs.map((x) => x.getAttribute("data-kind")).join(",")).catch(() => "")));
+    if (akAct) {
+      await akAct.click();
+      check("...and pressing it is what the next Enter reads, so one row cannot mean two things (§32)",
+        (await phRow.getAttribute("data-kind")) === "activity", String(await phRow.getAttribute("data-kind")));
+    }
+    const actAdd = await pg.$('.addr.l1 input');
+    if (actAdd) { await actAdd.fill("Interviews"); await actAdd.press("Enter"); await settle(); }
+    const R3 = await bRows();
+    check("...and it lands under the PHASE it was typed under, through the browser's own request",
+      R3.some((x) => x.k === "activity" && x.name === "Interviews"), JSON.stringify(R3));
+
+    /* ── moving one, which is a different act through the same post ──── */
+    const dn = await pg.$('[data-mv="down"]');
+    if (dn) { await dn.click(); await settle(); }
+    const R4 = await bRows();
+    check("AN ARROW PRESSED REORDERS THE STORED PLAN, so the one line that names the project serves every act and not only the add (§104.7)",
+      R4.filter((x) => x.k === "phase")[0]?.name === "Phase 2", JSON.stringify(R4.filter((x) => x.k === "phase")));
+
+    /* ── and a refusal is written into the page in the server's words ── */
+    const rm = await pg.$$('[data-rm]');
+    check("there is a remove to press", rm.length > 0);
+    if (rm.length) {
+      /* The phase holding the activity: its removal must be refused BY NAME,
+         and the sentence must reach the page rather than the console. */
+      const holder = R4.filter((x) => x.k === "phase").find((x) => x.name === "Phase 1");
+      const btn = await pg.$('[data-row="' + holder.id + '"] [data-rm]');
+      if (btn) { await btn.click(); await settle(); }
+      /* SCOPED TO THE REMOVE DIALOG: there are two shells in the document and
+         the first `.dlg` is the shift's, so an unscoped read returns *Leave
+         everything* and reports a correct build broken (§100.3, §50.6). */
+      const dlgText = (await pg.textContent("#ov-rm").catch(() => "")) || "";
+      check("A REMOVAL THAT IS REFUSED SAYS SO IN THE SERVER'S OWN WORDS, on the page (§32, §123)",
+        /holds work/.test(dlgText) && /Interviews/.test(dlgText), dlgText.replace(/\s+/g, " ").slice(0, 140));
+      await pg.keyboard.press("Escape"); await settle();
+    }
+    check("and no page error anywhere in it (§96: a script that threw renders the page it was given)",
+      errs.length === 0, errs.slice(0, 2).join(" | "));
+    await browser.close();
+  }
+  await new Promise((r) => srv.close(r));
+
 } catch (e) {
   failed = true;
   console.log("\n  FAIL the check threw — " + (e && e.message ? e.message : String(e)));

@@ -2692,3 +2692,49 @@ untouched.
 - **A two-hundred-row plan is built from the workbook and not here**
   (&sect;9.3): this is for writing one and correcting it, and that is what the
   pen's one-request-per-field shape is sized for.
+
+### 16.8 &middot; The press itself, and two faults 184 assertions could not see
+
+**Islam, on the built page, naming his first phase:** the screenshot reads
+**"Which project?"** under an empty plan. Two faults, and the shape they share
+is the whole of this section.
+
+**ONE &mdash; THE BROWSER'S REQUEST NAMED NO PROJECT, ON ALL FIFTEEN ACTS.**
+The api asks for the project by name and refuses without it, correctly; the
+script's `post()` sent the act and the view and never the id. **So every press
+in edit mode was refused and the whole screen was dead**, while the api, the
+rules and **184 assertions were all right** &mdash; because every one of those
+assertions builds its own request body, so not one had ever driven the request
+the BROWSER makes. &sect;96 at its clearest: *a pen wired to nothing renders
+perfectly.* The project rides on the body now and `post()` sets it **once**,
+rather than fifteen call sites each remembering (&sect;104.7).
+
+**TWO &mdash; AN EMPTY CONTAINER OFFERED NO WAY TO PUT THE FIRST THING IN IT.**
+The add row is emitted where a container ENDS, read off the next row, and both
+tests were written as *the last row BELOW it* &mdash; so they fire only on a
+CHILD, and a phase just named, or a work package just named, had nothing under
+it to type into. The only route on was to name a second phase (&sect;61's trap,
+on the press that follows the one Islam made). **A container with nothing in it
+ends at its own row**, which is one line and the same rule said properly.
+
+**AND NEITHER COULD HAVE BEEN FOUND WITHOUT PRESSING IT.** &sect;12 of
+`checks/portfolio-module.mjs` serves the module over a real port &mdash; the
+same `serve()` the route calls, bridged from Node's request to a fetch Request
+&mdash; and Chromium presses the controls while the rows are read back **from
+Postgres and never off the screen** (&sect;70, &sect;96), which is the Internal
+Tracker's own &sect;10 (&sect;356). It asserts the press Islam made, that
+**nothing is said on the page because nothing was refused**, that the page did
+**not reload** (a mark planted before the first press and read after the last,
+&sect;356.12, &sect;113.8), the kind key that decides what the next Enter makes,
+an arrow reordering the stored plan, a refusal arriving **in the server's own
+words on the page**, and no page error anywhere in it.
+
+**Two of its own first failures were the CHECK**: it looked for
+`.addr[data-kind="activity"]`, which is a work package's add row and not the
+key a phase offers; and it read `.dlg` unscoped, so it got the SHIFT dialog's
+*Leave everything* and reported a correct refusal broken (&sect;100.3,
+&sect;50.6).
+
+**197/0, red twenty-six ways**, with `no-project` printing Islam's screenshot
+back verbatim &mdash; *Which project?* &mdash; and `no-empty-add` reddening
+exactly the three assertions about typing into something new.

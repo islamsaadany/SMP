@@ -40,7 +40,8 @@ export const WRITE_JS = `(function () {
   "use strict";
   var B = document.body;
   var API = B.getAttribute("data-api") || "";
-  if (!API) return;
+  var PROJ = B.getAttribute("data-project") || "";
+  if (!API || !PROJ) return;
   var body = document.getElementById("plbody");
   if (!body) return;
 
@@ -79,6 +80,10 @@ export const WRITE_JS = `(function () {
     clearSaid();
     var k = keep();
     chain = chain.then(function () {
+      /* EVERY ACT NAMES ITS PROJECT, set here and at no call site: the api
+         asks for it by name, and fifteen presses each remembering to send it
+         is fifteen chances to forget (§104.7). */
+      if (B.getAttribute("data-brk") !== "no-project") act.id = PROJ;
       act.view = B.getAttribute("data-view") || "";
       return fetch(API, { method: "POST", credentials: "same-origin",
           headers: { "Content-Type": "application/json" }, body: JSON.stringify(act) })

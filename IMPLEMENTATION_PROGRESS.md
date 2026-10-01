@@ -6240,3 +6240,26 @@ pages.
 
 **Still Islam's, and not started**: where *who is on a project* hangs, whether
 a Lead may name people onto one, and the merge to `main`.
+
+**Corrected the same day — it did not work when Islam pressed it.** Naming the
+first phase came back **"Which project?"**. Two faults, and both are now fixed
+and proved.
+
+The page's requests never said which project they were about, so **every press
+in edit mode was turned away** — while the server, the rules and all 184
+assertions were correct, because each of those assertions writes its own
+request and none had ever sent the one the page sends. And an empty phase
+offered nowhere to type the first thing into it, so the only way on was to name
+a second phase.
+
+**What was missing was a check that presses the real thing.** There is one now:
+it serves the module on a real address, opens it in a browser, types the name,
+presses Enter, and reads the row back out of the database — never off the
+screen, because a control wired to nothing looks perfect. It also watches that
+nothing is said on the page when nothing was refused, that the page does not
+reload, and that a refusal arrives in the server's own words where you can see
+it. Two of that check's own first failures were the check rather than the
+product.
+
+197 assertions, proved able to fail twenty-six ways — one of those breaks puts
+Islam's screenshot back word for word.

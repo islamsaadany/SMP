@@ -8409,7 +8409,37 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # before the `try` never reaches the `finally`, and
                                 # today's syntax-error runs left sixteen tenant pairs,
                                 # which took `checks/memory-page.mjs` 2 red naming a
-                                # client it never made (&sect;379.15 by a third road)
+                                # client it never made (&sect;379.15 by a third road).
+                                # AND SINCE &sect;380.8 ITS &sect;12 PRESSES THE REAL
+                                # THING: the module served over a real port &mdash; the
+                                # same `serve()` the route calls, bridged from Node's
+                                # request to a fetch Request &mdash; and Chromium
+                                # pressing the controls while the rows are read back FROM
+                                # POSTGRES and never off the screen (&sect;70, &sect;96),
+                                # which is the Internal Tracker's own &sect;10. **It
+                                # exists because 184 assertions could not see that the
+                                # screen was DEAD**: every one builds its own request
+                                # body, so not one had ever driven the request the
+                                # BROWSER makes, and that one was missing the project on
+                                # all fifteen acts &mdash; every press refused *Which
+                                # project?* while the api and the rules were right
+                                # (&sect;96 at its clearest). It asserts that press, that
+                                # NOTHING is said on the page when nothing was refused
+                                # (&sect;32, &sect;171), that the page did NOT reload (a
+                                # mark planted before the first press and read after the
+                                # last, or a reload satisfies every other assertion here
+                                # &mdash; &sect;356.12, &sect;113.8), the kind key that
+                                # decides what the next Enter makes, an arrow reordering
+                                # the stored plan, and a refusal arriving in the SERVER's
+                                # own words on the page. 197/0, red TWENTY-SIX ways, with
+                                # `no-project` printing the reported symptom verbatim and
+                                # `no-empty-add` reddening the three assertions about
+                                # typing into something new. Two of its own first
+                                # failures were the CHECK: `.addr[data-kind="activity"]`
+                                # is a work package's add row and not the key a PHASE
+                                # offers, and an unscoped `.dlg` reads the SHIFT dialog's
+                                # *Leave everything* and calls a correct refusal broken
+                                # (&sect;100.3, &sect;50.6)
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -10002,6 +10032,26 @@ memory 21/14/36/42/16 &middot; setup 33/0 &middot; deploy 5/0 &middot; standing
 92/0 &middot; door 70/0 &middot; shell 72/0 &middot; blob 23/23 &middot; comms
 47/47 &middot; upload 9/0 &middot; `generated-in-step` all clear &middot; `tsc`
 clean. **The frozen product is untouched**, so `sw.js` is NOT bumped.
+**&sect;380.8 &mdash; AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD
+NOT SEE.** Islam, naming his first phase on the built page: **"Which
+project?"** &mdash; the script's `post()` sent the act and the view and **never
+the project**, on all fifteen acts, so every press in edit mode was refused
+while the api, the rules and every assertion were right: **each of those
+assertions builds its own request body, so not one had ever driven the request
+the BROWSER makes** (&sect;96 at its clearest, and the half this module never had
+while all five of its screens only read). Set ONCE in `post()` (&sect;104.7).
+**AND AN EMPTY CONTAINER OFFERED NOWHERE TO TYPE THE FIRST THING**: the add row
+is emitted where a container ENDS and both tests were written as *the last row
+BELOW it*, so each fires only on a CHILD &mdash; a phase just named had nothing
+under it, and the only route on was to name a second phase (&sect;61's trap, on
+the press that FOLLOWS the one he made). **Neither could be found without
+pressing it**, so &sect;12 serves the module over a real port and presses it in
+Chromium with the rows read back FROM POSTGRES (&sect;70, the tracker's own
+&sect;10) &mdash; the press, nothing said when nothing was refused, no reload
+(a mark planted before and read after, &sect;356.12), the kind key, an arrow,
+and a refusal in the server's own words on the page. **197/0, red TWENTY-SIX
+ways**, `no-project` printing his screenshot back verbatim; two of the check's
+own first failures were the CHECK.
 **RECORDED, NOT DONE**: the team screen (both halves Islam's); a phase's weight
 control; nothing says who else is looking at a plan while it is restructured,
 which is the stated cost of having no Planning Mode; and a two-hundred-row plan

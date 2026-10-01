@@ -338,7 +338,7 @@ def run():
         pointers = pg.evaluate("""() => Array.from(
           document.querySelectorAll('[role="button"]'))
             .filter(e => e.tagName !== 'BUTTON' && e.tagName !== 'A')
-            .map(e => ({ cls: e.className, word: (e.textContent || '').trim(),
+            .map(e => ({ cls: e.className, word: (e.textContent || '').trim() || (e.title || ''),
                          cur: getComputedStyle(e).cursor }))""")
         # BOTH ENDS (§94.2): an empty list satisfies "none of them shows the
         # I-beam" perfectly, so the pair has to be FOUND before it is judged.
@@ -387,6 +387,16 @@ def run():
                   .find(e => e.offsetParent)""")
             check("…and the search still finds it by name", vis, vis)
             q.fill("")
+        # SETTINGS IS A MARK, NOT A WORD (2026-10-01): the platform's own
+        # two-sliders mark, the word on the hover and the accessible name.
+        cog = pg.evaluate("""() => { const e = document.querySelector(".ccard[data-client='raya-trade'] .ccfg");
+          if (!e) return null; const r = e.getBoundingClientRect();
+          return { text: e.textContent.trim(), svg: !!e.querySelector('svg circle'), title: e.title,
+                   label: e.getAttribute('aria-label'), w: Math.round(r.width), h: Math.round(r.height) } }""")
+        check("Settings on a card is the sliders mark with no word", bool(cog) and cog["text"] == "" and cog["svg"], cog)
+        check("…named Settings on the hover and for a screen reader",
+              bool(cog) and cog["title"] == "Settings" and cog["label"] == "Settings for Raya Trade", cog)
+        check("…and a square button", bool(cog) and cog["w"] == cog["h"] and cog["w"] >= 24, cog)
         SCENE["cards"] = CLIENTS + [DEMO]
 
         check("no page error anywhere", errs == [], errs)

@@ -60373,3 +60373,18 @@ keeps its name), on both copies of the console page; 27/0, red 2 under
 (`multi-client.py`, `door-landing.mjs`) now read the logo's alt where there is
 one. `client-archive.py` (15 red) and `client-setup-outside.py` (29 red) are
 red identically on the build before this change and are not this work's.
+
+## §446 — Settings on a client card is the sliders mark, not a word (2026-10-01)
+
+Islam: *"can we make the settings page an icon rather than a word?"* — the
+SETTINGS chip in each console card's corner. Drawn first
+(`design-mockups/client-card-logo/2026-10-01_settings-as-icon.html`) and built
+on his word. The mark is the platform's own two-sliders (`ICON_MANAGE`,
+chosen 2026-08-23 for the Setup button), so one meaning has one picture
+everywhere, in a 26px square in the same corner; the word moves to the hover
+(`title`) and the accessible name (*"Settings for <client>"*). On an archived
+client, *Bring back* stays a word and only Settings beside it becomes the mark.
+One builder (`settingsChip`) for both cards. Screen only. `platform-cards.py`
+30/0 on both copies of the page, its pair check reading the chip's title where
+there is no text; `client-archive` (15) and `client-setup-outside` (29) red
+identically on the build before, as recorded at §445.

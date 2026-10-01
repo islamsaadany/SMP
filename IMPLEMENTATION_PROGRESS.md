@@ -9048,3 +9048,9 @@ its own, bigger, in place of the name; a client without one still shows its
 initials and name, and every card in a row stays the same height. The name is
 still on the logo's hover and the search still finds it. Built from the mockup
 Islam approved. Not on main.
+
+### §446 — Settings on a client card is an icon (2026-10-01)
+The SETTINGS word in the corner of each client card on the console is now the
+platform's two-sliders Settings mark; the word shows on hover. On an archived
+client, Bring back stays a word. Built from the mockup Islam approved and merged
+to main.

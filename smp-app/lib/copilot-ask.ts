@@ -129,7 +129,7 @@ export type AskInput = {
   assumptions: string[];
   files: AskFile[];
   /* Forefront's method for this section and the templates it may offer, as
-     Copilot settings hold them now (lib/copilot-settings.ts, §444). */
+     Copilot settings hold them now (lib/copilot-settings.ts, §456). */
   method?: string;
   templates?: string[];
 };

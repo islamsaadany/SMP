@@ -1,4 +1,4 @@
-/* The Copilot's own settings (§444, spec 064) — a platform table, the same
+/* The Copilot's own settings (§456, spec 064) — a platform table, the same
    for every client. schema.sql is the source and carries the comments; this
    is the table for a database already running (009's reason, and IF NOT
    EXISTS for 009's other reason: on a fresh one schema.sql has just made it).

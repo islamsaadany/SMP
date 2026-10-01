@@ -323,7 +323,7 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
    differently (§53.5).
 
    A module that lives INSIDE another (`inside`, the Copilot) is listed too
-   since §444: it has a page of its own now — every chat and deliverable on
+   since §456: it has a page of its own now — every chat and deliverable on
    the client, and its settings — while its tab stays inside Strategy. Which
    PEOPLE see it is `openableModules`' answer, not this function's. */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };

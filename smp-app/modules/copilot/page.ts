@@ -1,4 +1,4 @@
-/* ── THE COPILOT'S OWN PAGE AND ITS SETTINGS (§444, spec 064) ────────────
+/* ── THE COPILOT'S OWN PAGE AND ITS SETTINGS (§456, spec 064) ────────────
    Signed off from design-mockups/copilot-settings/2026-10-01_copilot-page-
    and-settings.html (rule 1c). Three documents, drawn by the server with no
    script at all — the filters are a GET form, so a filtered list is a link

@@ -46,7 +46,7 @@ var COPILOT = (function(){
   var OPEN = {};                 /* "place|section" -> {kind:"chat"|"deliv", id} */
   var LISTS = {};                /* "place|section" -> {chats, deliverables} or {failed} */
   var PANE = null;               /* the open item's answer: chat+messages or deliverable+versions */
-  /* §444: THE COPILOT PAGE OPENS A ROW HERE. Its link ends in
+  /* §456: THE COPILOT PAGE OPENS A ROW HERE. Its link ends in
      `#cop=chat-<id>` or `#cop=deliv-<id>`, read ONCE as the script loads —
      the shell rewrites the address after its first paint and drops the hash —
      and spent on the first list that holds that id, so it opens that chat or
@@ -163,7 +163,7 @@ var COPILOT = (function(){
     '</div>';
   }
   function list(){ return LISTS[key()] || null; }
-  /* ── THE CHATS RAIL (§441, Islam 2026-10-01, from the signed-off
+  /* ── THE CHATS RAIL (§453, Islam 2026-10-01, from the signed-off
      design-mockups/copilot/2026-10-01_chat-composer.html) ──────────────
      Rename and Archive live on each chat's three dots, not on the open
      chat's header: they act on a chat, so they sit beside it, and any chat
@@ -383,7 +383,7 @@ var COPILOT = (function(){
         : composerHtml(c, !!pend)) +
       '</div>';
   }
-  /* THE COMPOSER (§441, from the signed-off mockup): one box shaped like
+  /* THE COMPOSER (§453, from the signed-off mockup): one box shaped like
      Claude's — one line to start, growing as you type to about ten lines and
      then scrolling inside itself — with Send as the return-arrow icon in its
      corner and the paperclip on the tight line beneath it. Enter sends and
@@ -452,7 +452,7 @@ var COPILOT = (function(){
     fitPane(); fitBox();
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
-  /* THE PANE FILLS THE WINDOW (§441): it ends at the bottom of the screen,
+  /* THE PANE FILLS THE WINDOW (§453): it ends at the bottom of the screen,
      measured from its DOCUMENT offset rather than its place on screen, which
      moves with every scroll — the Platform Inbox's own answer (§100.5), with
      no loop, since nothing above the pane moves when the pane changes height. */
@@ -463,7 +463,7 @@ var COPILOT = (function(){
   }
   /* THE BOX GROWS WITH WHAT IS TYPED. It never sizes below one line: a page
      drawn before it is visible measures 0, and a box sized to that is
-     squashed until somebody types (found in the mockup, §441) — so the floor
+     squashed until somebody types (found in the mockup, §453) — so the floor
      is in the CSS as well as here, and it sizes again once it is shown. */
   var BOX_MIN = 48, BOX_MAX = 210;
   function fitBox(){

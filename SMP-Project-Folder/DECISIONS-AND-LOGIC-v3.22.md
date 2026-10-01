@@ -59045,7 +59045,7 @@ failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
 
-## §439 — the Strategy Copilot, stage 1: the shelf, with no AI (spec 064, 2026-09-30)
+## §451 — the Strategy Copilot, stage 1: the shelf, with no AI (spec 064, 2026-09-30)
 
 Islam: *"go ahead with stage 1 and the mockup."* Stage 1 of spec 064's plan is the part that stands without the model: where the work lives, who may reach it, and a version history that never loses anything. Every decision here is from the decision record v0.4 and his answers on it; nothing was decided on the way.
 
@@ -59062,7 +59062,7 @@ Islam: *"go ahead with stage 1 and the mockup."* Stage 1 of spec 064's plan is t
 **RECORDED, NOT DONE.** A deliverable can be filed only through the api in stage 1 — *Save as deliverable* from a chat is stage 3. `/<client>/copilot/setup` would be read as the module's Setup rail; nothing links there. The round 2 mockup (ways to start, files, company-direction owners) awaits sign-off before stage 2.
 
 
-## §440 — the Strategy Copilot, stage 2: the AI in a chat (spec 064, 2026-09-30)
+## §452 — the Strategy Copilot, stage 2: the AI in a chat (spec 064, 2026-09-30)
 
 Islam, of the round-2 mockup: *"ok for round 2, go ahead with stage 2."*
 
@@ -59166,7 +59166,7 @@ on a touch screen (§280). Rename happens in the rail — Enter or leaving the b
 saves, an empty name keeps the old one.
 
 **441.4 — A CHAT IS ARCHIVED, AND ONLY THE SUPER USER DELETES — REVERSING
-§439's DELETE FOR ITS CREATOR.** Anyone in the office archives; *Archived · N*
+§451's DELETE FOR ITS CREATOR.** Anyone in the office archives; *Archived · N*
 at the rail's foot opens the archived list, where anyone may Restore and only
 the Super user sees *Delete…*, which asks once more in its row (§62, never a
 browser dialog, §95). Stored as `archivedAt`/`archivedBy` in
@@ -59185,7 +59185,7 @@ list's answer and kept only `chats` and `deliverables`, dropping `archived` and
 archived, and the Super user would never have been offered Delete. Found by
 §3f's *"the rail's foot says Archived · 1"* going red; one line.
 
-## §442 — a Copilot column on Roles & access: View or Edit (2026-10-01)
+## §454 — a Copilot column on Roles & access: View or Edit (2026-10-01)
 
 Islam: *"in the roles & acces of the strategy module you want to add a a column
 for the copilot? with 2 buttons of view and edit where view can only see the
@@ -59215,7 +59215,7 @@ client without the Copilot shows no column (§61).
 View the module refuses every POST with *"View only — you can read…"* and at
 None it refuses the reads as well (*"not open to you"*). The list and chat
 answers carry `mayEdit`; `mayDelete` now also needs edit, so a viewer is never
-offered Delete. Deleting a chat stays the Super user's alone (§441).
+offered Delete. Deleting a chat stays the Super user's alone (§453).
 
 **442.4 — THE TAB AT VIEW.** Decision 4: a viewer sees every chat and
 deliverable. Gone: + New chat, the three dots, quick replies, the pasted-material
@@ -59236,7 +59236,7 @@ removing the row brings + New chat back — 192/0, red under `no-copilot-area`.
 an opened chat, and the test client had none to open (§255), so the section makes
 one first.
 
-## §443 — the paperclip in the middle of a compact strip (2026-10-01)
+## §455 — the paperclip in the middle of a compact strip (2026-10-01)
 
 Islam, of the Copilot's composer: *"make the clip icon to be centered in the
 space below the box and make that space a bit more compact like claude's
@@ -59250,17 +59250,17 @@ never loosened (§218): it asserts the gap above the clip equals the gap below
 it and the strip is about 30px — the build before measured 0 above and 38 deep,
 which fails it. 193/0.
 
-## §444 — the Copilot gets a page and settings of its own (2026-10-01)
+## §456 — the Copilot gets a page and settings of its own (2026-10-01)
 
 Islam, of the signed-off mockup `design-mockups/copilot-settings/2026-10-01_copilot-page-and-settings.html`:
 *"ok build it"*, with two answers given before: *"1. forefront superuser only 2. stay"*.
 
-**WHAT IT REVERSES.** §439 made the Copilot a tab with no page of its own — its bare
+**WHAT IT REVERSES.** §451 made the Copilot a tab with no page of its own — its bare
 address went back to Strategy and the switcher never listed it. It has a page now:
 the bare address lists every chat and deliverable on the client (Chats | Deliverables,
 section and place filters, a search), and the switcher lists it like any other module.
 The tab inside Strategy is unchanged, and **who may use the Copilot stays on Strategy's
-Roles & access** (§442, his "2. stay"). A row opens that chat or deliverable in its
+Roles & access** (§454, his "2. stay"). A row opens that chat or deliverable in its
 place's Copilot tab through a bare `#cop=chat-<id>` anchor that the tab reads ONCE at
 load, because the shell rewrites the address after its first paint (§173).
 

@@ -10780,7 +10780,7 @@ body.presenting #buildband { display:none; }
 .copx:hover, .copx:focus-visible { color:var(--bad-tx); outline:none; }
 .copsend:disabled { opacity:.55; cursor:default; filter:none; }
 
-/* ── §441 (Islam 2026-10-01, from the signed-off
+/* ── §453 (Islam 2026-10-01, from the signed-off
    design-mockups/copilot/2026-10-01_chat-composer.html) ─────────────────
    THE PANE FILLS THE WINDOW. `--cop-top` is the pane's document offset,
    written by fitPane() — the Platform Inbox's own answer (§100.5). The chat

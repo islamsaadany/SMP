@@ -228,7 +228,7 @@ CREATE TABLE frameworks (
 );
 CREATE INDEX frameworks_section ON frameworks (idx);
 
--- ── The Copilot's own settings (§444, spec 064) ─────────────────────────
+-- ── The Copilot's own settings (§456, spec 064) ─────────────────────────
 -- The instructions the Copilot is told and the five blank templates it
 -- offers, SAME FOR EVERY CLIENT (Islam, 2026-10-01), so a platform table with
 -- no tenant column — frameworks' shape, read and written outside withTenant.

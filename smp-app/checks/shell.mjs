@@ -863,7 +863,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
 
-    /* §441 — THE COMPOSER AND THE RAIL'S THREE DOTS, from the signed-off
+    /* §453 — THE COMPOSER AND THE RAIL'S THREE DOTS, from the signed-off
        mockup. Measured as boxes and pressed, never read as classes (§94.8). */
     const box = async () => page.evaluate(() => { const t = document.querySelector("[data-cop-text]"); const s = document.querySelector("[data-cop-send]");
       const b = document.querySelector(".copbox"), u = document.querySelector(".copunder"), m = document.querySelector("[data-cop-main]");
@@ -941,7 +941,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(v.length === 3 && v[2].t === "Purpose: first draft", "Restore v1 adds v3 with v1's text, and v2 is still there", JSON.stringify(v));
     check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "no sideways scroll on the Copilot page");
 
-    /* §444 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
+    /* §456 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
        tab opens nothing by itself, so a chat drawn as current after the press
        is the link's doing; the switcher lists the Copilot now. */
     await open("/raya-trade/copilot");
@@ -949,7 +949,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       link: (document.querySelector('a[href*="#cop=chat-"]') || {}).getAttribute ? document.querySelector('a[href*="#cop=chat-"]').getAttribute("href") : "",
       sw: Array.from(document.querySelectorAll(".msw .mi")).map((x) => x.textContent) }));
     check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
-      "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§444)", JSON.stringify(lp));
+      "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§456)", JSON.stringify(lp));
     await page.click('a[href*="#cop=chat-"]');
     const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
     check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
@@ -966,7 +966,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
   }
 });
 
-await section("3h · the Copilot column on Roles & access, and View on the tab (§442)", async () => {
+await section("3h · the Copilot column on Roles & access, and View on the tab (§454)", async () => {
   /* PRESSED AND READ BACK (§96): the column is drawn only where the Copilot is
      on, a client's row carries a dash, the office's press writes the grant
      the SERVER reads, and a View grant takes the composer off the tab and puts
@@ -1013,7 +1013,7 @@ await section("3h · the Copilot column on Roles & access, and View on the tab (
   }
 });
 
-await section("3g · turning a module on from inside the platform shows it at once (§441)", async () => {
+await section("3g · turning a module on from inside the platform shows it at once (§453)", async () => {
   /* Islam: "I turned on the module but nothing is appearing in the
      navigation". The document carries which modules the client has, and
      since §432 the move from settings to a module is a paint — so the switch

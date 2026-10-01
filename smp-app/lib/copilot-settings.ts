@@ -1,4 +1,4 @@
-/* ══ THE COPILOT'S OWN SETTINGS (§444, spec 064) ═══════════════════════════
+/* ══ THE COPILOT'S OWN SETTINGS (§456, spec 064) ═══════════════════════════
    Two things, the same for every client (Islam, 2026-10-01): the method the
    Copilot is told, in fourteen parts filed under its five sections, and five
    blank templates. What ships is lib/copilot-defaults.generated.ts; a row in

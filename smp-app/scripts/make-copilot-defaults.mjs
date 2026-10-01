@@ -1,4 +1,4 @@
-/* ── THE COPILOT'S SHIPPED INSTRUCTIONS AND TEMPLATES (§444, spec 064) ──
+/* ── THE COPILOT'S SHIPPED INSTRUCTIONS AND TEMPLATES (§456, spec 064) ──
    Islam handed over two things on 2026-10-01: the methodology text another
    product of ours had hard-coded (assets/copilot/instructions-source.md, kept
    verbatim as the record) and five blank workbooks. This turns them into

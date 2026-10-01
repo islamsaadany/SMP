@@ -78,7 +78,7 @@ export async function storedCopilotGrant(c: PoolClient, seat: unknown): Promise<
   return r.rows.length ? String(r.rows[0].grant_) : null;
 }
 
-/* WHO MAY DELETE A CHAT (§441, Islam 2026-10-01, reversing plan §7.1's
+/* WHO MAY DELETE A CHAT (§453, Islam 2026-10-01, reversing plan §7.1's
    "whoever started it"): a chat is ARCHIVED, never deleted, by anybody in
    the office; deleting is the Super user's alone and only of a chat already
    archived, so nothing leaves the list and the record in one press. That is
@@ -127,7 +127,7 @@ export async function chatsOn(c: Q, place: string, section: Section, archived = 
     "ORDER BY c.last_at DESC, c.created_at DESC", [place, section, archived]);
   return r.rows.map(chatOf);
 }
-/* EVERY CHAT AND EVERY DELIVERABLE ON THE CLIENT (§444): the Copilot's own
+/* EVERY CHAT AND EVERY DELIVERABLE ON THE CLIENT (§456): the Copilot's own
    page lists them across places and sections, newest first. Archived chats
    are left out — the page is where work is FOUND, and an archived chat is
    reached from its own place's archived list. */

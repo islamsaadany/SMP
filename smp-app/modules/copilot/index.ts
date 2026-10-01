@@ -49,7 +49,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
      must turn checks/copilot.mjs red (§94.5). Never set on a deployment. */
   const office = brk() === "no-office-gate" ? a.seat != null : isOffice(a.seat);
   const isApi = (first === "api" || first === "list" || first === "chat" || first === "deliverable" || first === "file") && a.rest.length === 1;
-  /* THE COPILOT'S OWN PAGES (§444): the list at the module's bare address,
+  /* THE COPILOT'S OWN PAGES (§456): the list at the module's bare address,
      its settings under `settings`. Any other address inside the module goes
      back to the list rather than to Strategy, now that the module has a page
      of its own to be the answer. */
@@ -300,7 +300,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const question = (text.trim() || "(sent without words)") +
     (said.files.length ? "\n[attached with this message: " + said.files.map((f) => f.name).join(", ") + "]" : "");
   /* What this section is told, read on every question so an edit in Copilot
-     settings takes effect on the next message (§444). A database that will
+     settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
   const r = configured()
@@ -330,7 +330,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
     assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
 }
 
-/* ── THE PAGES (§444) ──────────────────────────────────────────────────
+/* ── THE PAGES (§456) ──────────────────────────────────────────────────
    The list, and the two settings pages. A write is a plain form POST that
    answers with the page drawn again and a sentence saying what happened
    (§171: a save that fails says so), so no script is needed anywhere here. */

@@ -76,7 +76,7 @@ export async function mayOpenModule(tenantId: string, seat: Seat, personKey: str
    per page. */
 export async function openableModules(tenantId: string, seat: Seat, personKey: string | null | undefined, stored: unknown): Promise<ModuleKey[]> {
   let have = modulesFor(stored);
-  /* The Copilot's own page is listed on the switcher (§444) for the office
+  /* The Copilot's own page is listed on the switcher (§456) for the office
      alone, and not for an office seat whose Copilot cell reads None — a door
      the page would only refuse is not offered (§61, spec 056 §6.4). One
      read, and only on a client that has the module. */

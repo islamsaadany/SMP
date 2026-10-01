@@ -973,7 +973,7 @@ var CLIENTSETUP = (function () {
               post({ action:"setModules", key:S.key, module:m.key, on:!on }).then(function (r) {
                 if (!r.ok) { mb.disabled = false; say(r.error || "Not changed.", true); return; }
                 reg.modules = r.modules || [];
-                /* §441: INSIDE THE PLATFORM THE PAGE IS BUILT FOR THE MODULES
+                /* §453: INSIDE THE PLATFORM THE PAGE IS BUILT FOR THE MODULES
                    THE CLIENT HAD WHEN IT LOADED (Islam: "I turned on the
                    module but nothing is appearing in the navigation"). The
                    served document carries which modules this client has —

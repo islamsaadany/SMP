@@ -66,7 +66,7 @@ export type ServeArgs = {
      client, and null where the door resolved no membership at all. */
   personKey: string | null;
   seat: "super" | "smoteam" | "none" | null;
-  /* A FOREFRONT SUPER USER (§444): the platform admin flag on the account,
+  /* A FOREFRONT SUPER USER (§456): the platform admin flag on the account,
      already false while the office is viewing as somebody (§383 — viewing as
      somebody may only narrow). What the Copilot's own settings ask before any
      write, because those settings are the same for every client. */

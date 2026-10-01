@@ -55,7 +55,7 @@ export const GUIDE: Record<Section, Guide> = {
   },
 };
 
-/* THE METHOD AND THE TEMPLATES (§444). Islam's instructions are not written
+/* THE METHOD AND THE TEMPLATES (§456). Islam's instructions are not written
    into this file after all: they are Copilot settings, edited by a Forefront
    super user and read on every question (lib/copilot-settings.ts methodFor),
    so they arrive here as an argument. The HOUSE rules stay here and go FIRST,

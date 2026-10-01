@@ -66,7 +66,7 @@ check("a place is the product's own word — group, a unit, fn:, co:, cap:",
   ["group", "mobile", "fn:finance", "co:distribution", "cap:cap6"].every(isPlace));
 check("...and nothing else is: an address, a quote, an empty string",
   !isPlace("") && !isPlace("fn:") && !isPlace("mobile/x") && !isPlace("x'--") && !isPlace("zz:q"));
-/* §441 (Islam, 2026-10-01) REVERSES "whoever started it may delete": a chat is
+/* §453 (Islam, 2026-10-01) REVERSES "whoever started it may delete": a chat is
    archived by anybody in the office and deleted only by the Super user, and
    only once archived. Rewritten, never loosened (§218) — both ends. */
 const live = { archived: "" }, gone = { archived: "2026-10-01T09:00:00Z" };
@@ -77,7 +77,7 @@ check("...and the SMO team may delete nothing, archived or not, their own includ
 check("the tab is stamped for the office where the client has the module", copilotStampFor(["strategy", "copilot"], "smoteam") && copilotStampFor(["strategy", "copilot"], "super"));
 check("...and for nobody else — a client's person, or a client without it", !copilotStampFor(["strategy", "copilot"], "none") &&
   !copilotStampFor(["strategy", "copilot"], null) && !copilotStampFor(["strategy"], "super"));
-/* §442 — the Copilot column on Roles & access. Nothing stored is the office's
+/* §454 — the Copilot column on Roles & access. Nothing stored is the office's
    shipped edit; a client seat is none BY RULE, whatever a stored row says. */
 check("the office opens at edit with nothing stored — nobody's access moves the day it ships",
   copilotGrant("super", null) === "edit" && copilotGrant("smoteam", undefined) === "edit");
@@ -258,10 +258,10 @@ try {
   }
   const postHend = await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis" }, HEND);
   check("...and at the api, writing nothing", postHend.st === 403 && (await asTenant(A, (c) => chatsOn(c, "mobile", "analysis"))).length === 1, postHend.st);
-  /* §444 REVERSES §439's "no page of its own": the bare address is the
+  /* §456 REVERSES §451's "no page of its own": the bare address is the
      Copilot page, listing every chat and deliverable on the client. */
   const bare = await page("GET", "", null, NORAN);
-  check("the Copilot's own address is a page now — HTML, not a trip back to Strategy (§444)",
+  check("the Copilot's own address is a page now — HTML, not a trip back to Strategy (§456)",
     bare.st === 200 && /html/.test(bare.ct) && /<table/.test(bare.text), bare.st + " " + bare.ct);
   check("...listing this client's chat with a link that opens it in its place's Copilot tab",
     bare.text.includes(c1.title) && /href="\/raya-trade\/strategy\/mobile\/copilot\/analysis#cop=chat-[0-9a-f-]{36}"/.test(bare.text), bare.text.slice(0, 200));
@@ -283,7 +283,7 @@ try {
   const ren = await call("POST", "api", { act: "rename", id: made.j.chat.id, title: "Prices" }, NORAN);
   check("anybody in the office may rename a chat", ren.st === 200);
   const liveDel = await call("POST", "api", { act: "deleteChat", id: made.j.chat.id }, ISLAM);
-  check("a live chat is not deleted, even by the Super user — it is archived first (§441)", liveDel.st === 400 && /Archive the chat first/.test(liveDel.j.why), JSON.stringify(liveDel.j));
+  check("a live chat is not deleted, even by the Super user — it is archived first (§453)", liveDel.st === 400 && /Archive the chat first/.test(liveDel.j.why), JSON.stringify(liveDel.j));
   const arc = await call("POST", "api", { act: "archiveChat", id: made.j.chat.id }, NORAN);
   const lst = await call("GET", "list", null, NORAN, "?place=fn:finance&section=advisory");
   check("anybody in the office may archive a chat, and it leaves the list for the archived one",
@@ -315,7 +315,7 @@ try {
   const gone = await call("GET", "chat", null, NORAN, "?id=" + made.j.chat.id);
   check("a deleted chat reads as gone, in words", gone.st === 404 && /not here/.test(gone.j.why));
 
-  /* §442 — View and None are the SERVER's answer too, not only the screen's. */
+  /* §454 — View and None are the SERVER's answer too, not only the screen's. */
   section("§3b · the Copilot column: view reads, none is refused, both on the server");
   const setGrant = (role, g) => asTenant(A, (c) => c.query(
     "INSERT INTO access_grants (role_key, page_key, grant_) VALUES ($1, 'a_copilot', $2) ON CONFLICT (tenant_id, role_key, page_key) DO UPDATE SET grant_ = EXCLUDED.grant_", [role, g]));
@@ -342,7 +342,7 @@ try {
   check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
-  /* ══ §3c · the Copilot's own settings (§444) ═══════════════════════
+  /* ══ §3c · the Copilot's own settings (§456) ═══════════════════════
      The same for every client; read by the office, changed by a Forefront
      super user only (the account's admin flag, never the client's seat). */
   section("§3c · Copilot settings: the office reads, only a Forefront super user changes");
@@ -448,7 +448,7 @@ try {
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
       /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
-    check("...and Forefront's own method for that section, read from Copilot settings (§444)",
+    check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
     const lastTurn = w && w.body ? w.body.contents[w.body.contents.length - 1] : null;

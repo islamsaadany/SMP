@@ -941,6 +941,22 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(v.length === 3 && v[2].t === "Purpose: first draft", "Restore v1 adds v3 with v1's text, and v2 is still there", JSON.stringify(v));
     check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "no sideways scroll on the Copilot page");
 
+    /* §444 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
+       tab opens nothing by itself, so a chat drawn as current after the press
+       is the link's doing; the switcher lists the Copilot now. */
+    await open("/raya-trade/copilot");
+    const lp = await page.evaluate(() => ({ rows: document.querySelectorAll("table tbody tr").length,
+      link: (document.querySelector('a[href*="#cop=chat-"]') || {}).getAttribute ? document.querySelector('a[href*="#cop=chat-"]').getAttribute("href") : "",
+      sw: Array.from(document.querySelectorAll(".msw .mi")).map((x) => x.textContent) }));
+    check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
+      "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§444)", JSON.stringify(lp));
+    await page.click('a[href*="#cop=chat-"]');
+    const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
+    check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
+    await open("/raya-trade/copilot/settings?section=analysis");
+    const stg = await page.evaluate(() => ({ swot: /SWOT/.test(document.body.textContent), same: /Same for all clients/.test(document.body.textContent) }));
+    check(stg.swot && stg.same, "Copilot settings › AI instructions draws the analysis method, the same for all clients", JSON.stringify(stg));
+
     await fresh(); await signIn("mobhead@raya.example");
     await open("/raya-trade/strategy/mobile/strategy");
     check(await page.evaluate(() => !document.querySelector('#subtabs button[data-s="copilot"]')), "a client's own person sees no Copilot tab (the office's alone)");

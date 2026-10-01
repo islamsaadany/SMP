@@ -46,19 +46,6 @@ var COPILOT = (function(){
   var OPEN = {};                 /* "place|section" -> {kind:"chat"|"deliv", id} */
   var LISTS = {};                /* "place|section" -> {chats, deliverables} or {failed} */
   var PANE = null;               /* the open item's answer: chat+messages or deliverable+versions */
-  /* §444: THE COPILOT PAGE OPENS A ROW HERE. Its link ends in
-     `#cop=chat-<id>` or `#cop=deliv-<id>`, read ONCE as the script loads —
-     the shell rewrites the address after its first paint and drops the hash —
-     and spent on the first list that holds that id, so it opens that chat or
-     deliverable in its place and section and never again. An id the list
-     does not hold (deleted since, or archived) opens nothing and says nothing:
-     the list on screen is the answer. */
-  var DEEP = (function(){
-    try {
-      var m = /^#cop=(chat|deliv)-([0-9a-f-]{36})$/i.exec(String(location.hash || ""));
-      return m ? { kind: m[1].toLowerCase(), id: m[2].toLowerCase() } : null;
-    } catch (e) { return null; }
-  })();
   var EDIT = null;               /* {id, text, note} while a deliverable is being edited */
   var RENAME = null;             /* chat id being renamed, in the rail */
   var MENU = null;               /* chat id whose three-dot menu is open */
@@ -486,10 +473,6 @@ var COPILOT = (function(){
     getJ("list", ["place=" + encodeURIComponent(p), "section=" + encodeURIComponent(s)]).then(function(x){
       if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [] };
       else LISTS[k] = { failed: true };
-      if (DEEP && !LISTS[k].failed) {
-        var pool = DEEP.kind === "chat" ? LISTS[k].chats.concat(LISTS[k].archived) : LISTS[k].deliverables;
-        if (pool.some(function(r){ return r && String(r.id).toLowerCase() === DEEP.id; })) { OPEN[k] = { kind: DEEP.kind, id: DEEP.id }; DEEP = null; }
-      }
       if (askedFor === k) { draw(); openIfNeeded(); }
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
   }

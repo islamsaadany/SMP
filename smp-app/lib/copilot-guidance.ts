@@ -55,11 +55,24 @@ export const GUIDE: Record<Section, Guide> = {
   },
 };
 
-export function guidanceFor(section: Section): string {
+/* THE METHOD AND THE TEMPLATES (§444). Islam's instructions are not written
+   into this file after all: they are Copilot settings, edited by a Forefront
+   super user and read on every question (lib/copilot-settings.ts methodFor),
+   so they arrive here as an argument. The HOUSE rules stay here and go FIRST,
+   and the method is told that where it describes a different answer shape
+   the house rules win — its own output layouts were removed when it was
+   tidied, and two shapes in one prompt is asking the model to choose. */
+export function guidanceFor(section: Section, method = "", templates: string[] = []): string {
   const g = GUIDE[section];
-  return HOUSE + "\n\nTHIS SECTION PRODUCES: " + g.produces +
-    (g.roads.length
-      ? "\nWAYS TO START (offer these as `options` when the person has not said how, recommended one first; if you can already see enough to start, pick one yourself, say which in `reply`, and offer one or two others): " + g.roads.join(" · ") +
-        ". The Template road is not ready yet: if chosen, say the templates have not been loaded and offer another way."
-      : "\nThis section has no set ways to start yet: work from what the person says.");
+  const roads = g.roads.length
+    ? "\nWAYS TO START (offer these as `options` when the person has not said how, recommended one first; if you can already see enough to start, pick one yourself, say which in `reply`, and offer one or two others): " + g.roads.join(" · ") + "." +
+      (templates.length
+        ? " The Template road: the person downloads the blank template from Copilot settings › Templates (" + templates.join(", ") +
+          "), fills it in and attaches it here; read an attached filled template as this section's input."
+        : " There is no template for this section: if the Template road is chosen, say so and offer another way.")
+    : "\nThis section has no set ways to start yet: work from what the person says.";
+  return HOUSE + "\n\nTHIS SECTION PRODUCES: " + g.produces + roads +
+    (method.trim()
+      ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION (follow its rules, limits, examples and bad examples; where it describes a different shape for your answer, the rules above win):\n\n" + method.trim()
+      : "");
 }

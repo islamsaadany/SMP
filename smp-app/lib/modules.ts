@@ -320,10 +320,15 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
    draw it — the shell's top bar (shell/route.js, through the document's
    `data-modules`) and a module's own bar (modules/insights/page.ts) — because
    a label invented at a call site is how two screens come to spell one module
-   differently (§53.5). */
+   differently (§53.5).
+
+   A module that lives INSIDE another (`inside`, the Copilot) is listed too
+   since §444: it has a page of its own now — every chat and deliverable on
+   the client, and its settings — while its tab stays inside Strategy. Which
+   PEOPLE see it is `openableModules`' answer, not this function's. */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
 export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
-  return have.filter((k) => !MODULE_DEF[k].inside).map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
+  return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
 }
 
 /* The one line a module says about a client on its card (spec 046 §4.6a).

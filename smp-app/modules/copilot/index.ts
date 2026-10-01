@@ -23,18 +23,24 @@ import { withTenant } from "../../lib/tenant.ts";
 import type { ServeArgs } from "../registry.ts";
 import {
   type Who, isOffice, isPlace, isSection, isKind, oneLine, mayDeleteChat, MAX_MESSAGE, MAX_TITLE, SECTION_WORD,
-  chatsOn, oneChat, newChat, renameChat, deleteChat, archiveChat, restoreChat, messagesOf,
+  chatsOn, allChats, allDeliverables, oneChat, newChat, renameChat, deleteChat, archiveChat, restoreChat, messagesOf,
   deliverablesOn, oneDeliverable, versionsOf, bodyOf, newDeliverable, addVersion, restoreVersion,
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, isPasted, configured } from "../../lib/copilot-ask.ts";
+import { methodFor, templateNamesFor, partsOf, templatesOf, templateFile, savePart, saveTemplate, resetAsset, MAX_TEMPLATE } from "../../lib/copilot-settings.ts";
+import { shellHeaders } from "../../lib/shell.ts";
+import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
+import { doorPool, getSession, readCookie } from "../../lib/auth.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
 const no = (status: number, why: string) => json(status, { ok: false, why });
+const html = (status: number, body: string) =>
+  new Response(body, { status, headers: { ...shellHeaders(), "Content-Type": "text/html; charset=utf-8" } });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function serve(a: ServeArgs): Promise<Response> {
@@ -43,17 +49,38 @@ export async function serve(a: ServeArgs): Promise<Response> {
      must turn checks/copilot.mjs red (§94.5). Never set on a deployment. */
   const office = brk() === "no-office-gate" ? a.seat != null : isOffice(a.seat);
   const isApi = (first === "api" || first === "list" || first === "chat" || first === "deliverable" || first === "file") && a.rest.length === 1;
-  if (!isApi) return Response.redirect(new URL(clientHref(a.slug, "strategy", ""), a.req.url), 302);
-  if (!office) return no(403, "The Copilot is the office's.");
+  /* THE COPILOT'S OWN PAGES (§444): the list at the module's bare address,
+     its settings under `settings`. Any other address inside the module goes
+     back to the list rather than to Strategy, now that the module has a page
+     of its own to be the answer. */
+  const isPage = !isApi && (a.rest.length === 0 || first === "settings");
+  if (!isApi && !isPage) return Response.redirect(new URL(clientHref(a.slug, "copilot", ""), a.req.url), 302);
+  if (!office) return isPage
+    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is the office's."))
+    : no(403, "The Copilot is the office's.");
   /* VIEW OR EDIT (Islam, 2026-10-01): the office seat's own cell on Roles &
      access, read off the stored map on every path. NONE refuses the reads as
      well — a hidden tab is decoration (§42) — and VIEW refuses every POST,
      because every POST here is a write. The check's break skips the read so
      a View seat can write, which must turn checks/copilot.mjs red (§94.5). */
+  /* A cell that cannot be READ refuses every act on the client's chats (a
+     500 in words) and still lets the page draw, because every read on the
+     page says for itself when it could not be made — a page is never blank
+     for want of one row (§93, §231.4). */
+  let stored: string | null | undefined;
+  try { stored = await withTenant(a.tenantId, (c) => storedCopilotGrant(c, a.seat)); }
+  catch (e) { console.error("copilot: grant " + a.slug + ":", (e as Error).message); stored = undefined; }
+  if (stored === undefined && !isPage && brk() !== "no-view-gate") return no(500, "The Copilot could not be read just now. Nothing has been lost — try again in a moment.");
   const grant = brk() === "no-view-gate" ? "edit"
-    : copilotGrant(brk() === "no-office-gate" && !isOffice(a.seat) ? "smoteam" : a.seat,
-        await withTenant(a.tenantId, (c) => storedCopilotGrant(c, a.seat)));
-  if (grant === "none") return no(403, "The Copilot is not open to you on this client.");
+    : copilotGrant(brk() === "no-office-gate" && !isOffice(a.seat) ? "smoteam" : a.seat, stored === undefined ? null : stored);
+  if (grant === "none") return isPage
+    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is not open to you on this client."))
+    : no(403, "The Copilot is not open to you on this client.");
+  /* The pages answer their own writes: the settings are not this client's
+     (lib/copilot-settings.ts), so they are not judged by the Copilot cell —
+     reading them needs the office and the cell's View, changing them needs a
+     Forefront super user, asked here on every POST (§42). */
+  if (isPage) return pages(a);
   if (a.req.method === "POST" && grant !== "edit")
     return no(403, "View only — you can read the Copilot's chats and deliverables, not change them.");
   const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null };
@@ -272,8 +299,12 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
 
   const question = (text.trim() || "(sent without words)") +
     (said.files.length ? "\n[attached with this message: " + said.files.map((f) => f.name).join(", ") + "]" : "");
+  /* What this section is told, read on every question so an edit in Copilot
+     settings takes effect on the next message (§444). A database that will
+     not answer gives the Copilot no method rather than no answer. */
+  const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
   const r = configured()
-    ? await askCopilot({
+    ? await askCopilot({ method, templates: templateNamesFor(chat.section),
         section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
         context: String(b.context ?? "").slice(0, 6000), question, pasted,
         history: material.history, assumptions: material.assumptions, files: material.files,
@@ -297,4 +328,114 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   });
   return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
     assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
+}
+
+/* ── THE PAGES (§444) ──────────────────────────────────────────────────
+   The list, and the two settings pages. A write is a plain form POST that
+   answers with the page drawn again and a sentence saying what happened
+   (§171: a save that fails says so), so no script is needed anywhere here. */
+async function pages(a: ServeArgs): Promise<Response> {
+  const u = new URL(a.req.url);
+  const q = (k: string) => u.searchParams.get(k) || "";
+  const bar = await barOf(a.tenantId);
+  const sub = a.rest[1] || "";
+  const by = await adminId(a);
+  try {
+    if (a.rest[0] !== "settings") {
+      if (a.rest.length) return Response.redirect(new URL(clientHref(a.slug, "copilot", ""), a.req.url), 302);
+      const ask: ListAsk = { view: q("view") === "deliverables" ? "deliverables" : "chats",
+        section: isSection(q("section")) ? q("section") : "", place: isPlace(q("place")) ? q("place") : "", q: oneLine(q("q")).slice(0, 120) };
+      let chats: any = null, delivs: any = null, names: Names = { places: new Map(), people: new Map() };
+      try {
+        await withTenant(a.tenantId, async (c) => {
+          if (ask.view === "chats") chats = await allChats(c); else delivs = await allDeliverables(c);
+          names = await namesOf(c);
+        });
+      } catch (e) { console.error("copilot: list " + a.slug + ":", (e as Error).message); }
+      return html(200, listDocument(a.slug, a.tenantName, a.have, bar, names, ask, chats, delivs));
+    }
+    const pool = doorPool();
+    if (sub === "" ) {
+      let flash: Flash = null;
+      if (a.req.method === "POST") {
+        if (!a.admin && brk() !== "settings-any-office") flash = { ok: false, text: "Only a Forefront super user can change the AI instructions." };
+        else {
+          const f = await a.req.formData();
+          const key = String(f.get("key") || ""), act = String(f.get("act") || "");
+          const r = act === "reset" ? await resetAsset(pool, key) : act === "save" ? await savePart(pool, key, String(f.get("text") ?? ""), by) : { ok: false as const, why: "Not something this page does." };
+          /* A write that landed answers with the page's own address (303), so
+             a refresh reads the page rather than sending the form again. */
+          if (r.ok) return seeOther(a, "settings", { section: q("section") || "foundation", done: act === "reset" ? "reset" : r.changed ? "saved" : "same" }, key);
+          flash = { ok: false, text: r.why };
+        }
+      } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped text is back." : q("done") === "saved" ? "Saved. Every client's Copilot reads it from the next message." : "Nothing changed." };
+      const parts = await partsOf(pool);
+      return html(flash && !flash.ok ? 400 : 200, instructionsDocument(a.slug, a.tenantName, a.have, bar, parts, q("section") || "foundation",
+        a.admin, flash && flash.ok ? "" : q("edit"), flash));
+    }
+    if (sub === "templates" && a.rest.length === 2) {
+      let flash: Flash = null;
+      if (a.req.method === "POST") {
+        if (!a.admin && brk() !== "settings-any-office") flash = { ok: false, text: "Only a Forefront super user can replace a template." };
+        else {
+          const f = await a.req.formData();
+          const key = String(f.get("key") || ""), act = String(f.get("act") || "");
+          let r: { ok: true; changed: boolean } | { ok: false; why: string };
+          if (act === "reset") r = await resetAsset(pool, key);
+          else if (act === "replace") {
+            const file = f.get("file");
+            if (!file || typeof file === "string") r = { ok: false, why: "Choose the file to put in its place." };
+            else if (file.size > MAX_TEMPLATE) r = { ok: false, why: "A template can be up to 3 MB." };
+            else r = await saveTemplate(pool, key, file.name, Buffer.from(await file.arrayBuffer()), by);
+          } else r = { ok: false, why: "Not something this page does." };
+          if (r.ok) return seeOther(a, "settings/templates", { done: act === "reset" ? "reset" : "replaced" }, "");
+          flash = { ok: false, text: r.why };
+        }
+      } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped file is back." : "Replaced. Every client now downloads the new file." };
+      return html(flash && !flash.ok ? 400 : 200, templatesDocument(a.slug, a.tenantName, a.have, bar, await templatesOf(pool), a.admin, flash));
+    }
+    if (sub === "templates" && a.rest.length === 3) {
+      const f = await templateFile(pool, a.rest[2]);
+      if (!f) return html(404, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "That template is not here."));
+      return new Response(new Uint8Array(f.bytes), { status: 200, headers: {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff", "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
+    }
+    return Response.redirect(new URL(clientHref(a.slug, "copilot", "settings"), a.req.url), 302);
+  } catch (e) {
+    console.error("copilot: page " + a.rest.join("/") + " " + a.slug + ":", (e as Error).message);
+    return html(500, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId,
+      a.req.method === "POST" ? "That did not save. Nothing was changed — try again." : "This could not be read just now. Nothing has been lost — try again in a moment."));
+  }
+}
+
+function seeOther(a: ServeArgs, rest: string, params: Record<string, string>, anchor: string): Response {
+  const u = new URL(clientHref(a.slug, "copilot", rest), a.req.url);
+  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
+  if (anchor) u.hash = anchor;
+  return new Response(null, { status: 303, headers: { Location: u.toString(), "Cache-Control": "no-store" } });
+}
+
+/* The account behind an admin's write, for `updated_by`; null for anybody
+   else, who cannot write here anyway. */
+async function adminId(a: ServeArgs): Promise<string | null> {
+  if (!a.admin) return null;
+  /* lib/session.ts would pull Next in; the two readers it wraps are here. */
+  try { const u = await getSession(doorPool(), readCookie(a.req.headers.get("cookie"))); return u ? u.id : null; } catch { return null; }
+}
+
+/* The client's names for every place word and every person, read once per
+   list — including retired ones, because a chat about a unit since retired
+   is still a record of what was said and should still say where. */
+async function namesOf(c: any): Promise<Names> {
+  const places = new Map<string, string>(), people = new Map<string, string>();
+  const r = await c.query(
+    "SELECT key AS k, coalesce(nullif(name,''), key) AS n, 'unit' AS t FROM units " +
+    "UNION ALL SELECT 'fn:' || key, coalesce(nullif(name,''), key), 'fn' FROM functions " +
+    "UNION ALL SELECT 'co:' || key, coalesce(nullif(name,''), key), 'co' FROM companies " +
+    "UNION ALL SELECT 'cap:' || id, coalesce(nullif(name,''), id), 'cap' FROM capabilities");
+  for (const x of r.rows) places.set(String(x.k), String(x.n));
+  const p = await c.query("SELECT key, coalesce(nullif(name,''), key) AS n FROM people");
+  for (const x of p.rows) people.set(String(x.key), String(x.n));
+  return { places, people };
 }

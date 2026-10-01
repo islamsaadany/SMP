@@ -128,6 +128,10 @@ export type AskInput = {
   history: { from_office: boolean; body: string }[];
   assumptions: string[];
   files: AskFile[];
+  /* Forefront's method for this section and the templates it may offer, as
+     Copilot settings hold them now (lib/copilot-settings.ts, §444). */
+  method?: string;
+  templates?: string[];
 };
 
 export function corpusOf(a: AskInput): string {
@@ -162,7 +166,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
     history: a.history,
     schema: SCHEMA,
     needsCorpus: false,
-    instruction: guidanceFor(a.section),
+    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
     corpusName: "THIS CHAT'S MATERIAL",
     corpusText: corpusOf(a),
     parts: pdfParts,

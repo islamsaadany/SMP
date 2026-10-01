@@ -228,6 +228,27 @@ CREATE TABLE frameworks (
 );
 CREATE INDEX frameworks_section ON frameworks (idx);
 
+-- ── The Copilot's own settings (§444, spec 064) ─────────────────────────
+-- The instructions the Copilot is told and the five blank templates it
+-- offers, SAME FOR EVERY CLIENT (Islam, 2026-10-01), so a platform table with
+-- no tenant column — frameworks' shape, read and written outside withTenant.
+-- What ships is lib/copilot-defaults.generated.ts; a row here is a Forefront
+-- super user's edit OVER the shipped text, by key, and deleting the row puts
+-- the shipped text back. So an untouched platform holds no rows at all, and
+-- nothing is copied out of the code into the database to drift from it.
+--   key  `part1`…`part14` (an instruction part, `text`) or `t1`…`t5` (a
+--        template, `bytes` and `name`)
+CREATE TABLE IF NOT EXISTS copilot_assets (
+  key         text PRIMARY KEY,
+  text        text NOT NULL DEFAULT '',
+  name        text NOT NULL DEFAULT '',
+  bytes       bytea,
+  updated_by  uuid NULL REFERENCES users (id) ON DELETE SET NULL,
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT copilot_asset_key CHECK (key ~ '^(part([1-9]|1[0-4])|t[1-5])$'),
+  CONSTRAINT copilot_asset_size CHECK (bytes IS NULL OR octet_length(bytes) <= 3145728)
+);
+
 -- ── The tenant-owned tables (42) ────────────────────────────────────────
 -- Every row: tenant_id uuid NOT NULL → tenants ON DELETE CASCADE, and the
 -- key it has today with tenant_id in front of it (data-model.md). The
@@ -1444,7 +1465,7 @@ BEGIN
     WHERE n.nspname = current_schema() AND c.relkind = 'r'
       AND c.relname NOT IN ('tenants','users','tenant_users','sessions','login_attempts',
                             'platform_access','tenant_log','push_keys','memory_entries',
-                            'frameworks','_migrations')
+                            'frameworks','copilot_assets','_migrations')
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);

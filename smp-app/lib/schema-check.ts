@@ -23,7 +23,7 @@ import type { Pool, PoolClient } from "pg";
    which is the guard, and is why adding a name here without adding it there
    (or the other way round) is now loud. */
 export const PLATFORM_TABLES = ["tenants", "users", "tenant_users", "sessions", "login_attempts",
-  "platform_access", "tenant_log", "push_keys", "memory_entries", "frameworks",
+  "platform_access", "tenant_log", "push_keys", "memory_entries", "frameworks", "copilot_assets",
   "_migrations"];
 
 export type SchemaReport = { ok: boolean; problems: string[]; tenantTables: string[] };

@@ -59249,3 +59249,66 @@ is 30px. Nothing else moves. `shell.mjs` §3f's *"underH <= 24"* is REWRITTEN,
 never loosened (§218): it asserts the gap above the clip equals the gap below
 it and the strip is about 30px — the build before measured 0 above and 38 deep,
 which fails it. 193/0.
+
+## §444 — the Copilot gets a page and settings of its own (2026-10-01)
+
+Islam, of the signed-off mockup `design-mockups/copilot-settings/2026-10-01_copilot-page-and-settings.html`:
+*"ok build it"*, with two answers given before: *"1. forefront superuser only 2. stay"*.
+
+**WHAT IT REVERSES.** §439 made the Copilot a tab with no page of its own — its bare
+address went back to Strategy and the switcher never listed it. It has a page now:
+the bare address lists every chat and deliverable on the client (Chats | Deliverables,
+section and place filters, a search), and the switcher lists it like any other module.
+The tab inside Strategy is unchanged, and **who may use the Copilot stays on Strategy's
+Roles & access** (§442, his "2. stay"). A row opens that chat or deliverable in its
+place's Copilot tab through a bare `#cop=chat-<id>` anchor that the tab reads ONCE at
+load, because the shell rewrites the address after its first paint (§173).
+
+**THE SETTINGS ARE NOT THE CLIENT'S.** AI instructions (Islam's methodology, tidied
+mechanically by `scripts/make-copilot-defaults.mjs` — the other product's screen names,
+output layouts and source paths removed, every rule and example kept — fourteen parts
+filed under the five sections) and five blank templates, both *"Same for all clients"*.
+So they live in a PLATFORM table, `copilot_assets` (migration 022), read through the
+door's pool and never inside `withTenant`, and named in both `schema.sql`'s RLS
+exclusion and `PLATFORM_TABLES` (asserted by `memory-boundary.mjs`). A row is an edit
+OVER the shipped text by key; saving the shipped text back DELETES the row (§50.6), so
+"edited" is always "a row exists".
+
+**WHO MAY CHANGE THEM: a Forefront super user** — the account's platform admin flag,
+never the client's Super user seat, because one edit changes what the Copilot is told
+on every client. The route hands the module `admin`, already narrowed for view-as
+(§383), and the module asks it on every POST (§42); everybody else in the office reads
+the same pages with a *Read only* chip and no Edit. A template is refused by its SHAPE
+(an xlsx is a zip, `PK\x03\x04`), not by its name. A write is a plain form POST that
+answers 303 on success, so a refresh does not resend it, and draws the page again with
+the reason on a refusal (§171).
+
+**WHAT THE MODEL IS TOLD.** On every question the section's parts are read fresh and
+appended under *FOREFRONT'S METHOD FOR THIS SECTION*, after the platform's own rules,
+which win where the method describes a different answer shape; the Template road now
+names the section's templates from Copilot settings › Templates, and says there is none
+where there is none.
+
+**AN OFFICE SEAT AT NONE IS NOT OFFERED THE COPILOT IN THE SWITCHER** — `openableModules`
+asks the stored Copilot cell, so the switcher and the door agree (§42). And a cell that
+cannot be READ refuses every act on the chats in words (500) while the page still draws,
+each read on it saying for itself when it could not be made — found by `modules.mjs`,
+which drives every module's server with no database and had the Copilot throwing.
+
+**CHECKS.** `checks/copilot.mjs` §3c is new: the office reads both settings pages read
+only, a non-admin POST changes nothing and says why, an admin's save stores a row and
+answers 303, the next question is told it, an empty part is refused, the shipped text
+deletes the row, five templates download, a renamed non-Excel file is refused, an
+admin's replacement is what downloads next, a client's own person is refused. §3 is
+REWRITTEN, never loosened (§218): *"the Copilot's own address goes back to Strategy"*
+became the page listing the chat with its opening link, a client's person refused it,
+and an unknown word coming back to the page. §5 asserts the method reaches the model.
+121/0, red NINE ways — `settings-any-office` and `no-method` new. `modules.mjs`
+rewritten the same way (the switcher lists the Copilot; a module with a page is its own
+landing; "no door it does not have" asked of the SWITCHER, since a module's own page
+links to itself): 181/0, red nine ways.
+
+**RECORDED, NOT DONE.** The Copilot page's switcher is a copy of Insights' — two
+spellings of one control (§53.5) worth folding into one builder; and the templates are
+downloaded blank (the department S&W template is not yet pre-filled with this client's
+units and functions, as the mockup's row 5 says).

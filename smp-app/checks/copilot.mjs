@@ -39,6 +39,11 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
 import { isPasted, shapeAnswer, corpusOf } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
+import { methodFor } from "../lib/copilot-settings.ts";
+import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
+import { doorPool } from "../lib/auth.ts";
+import { moduleMenu } from "../lib/modules.ts";
+import { decideOpen } from "../lib/access.ts";
 
 /* The key decides whether the model is asked at all; this check sets it per
    section, so a key in the environment must not decide it first (§100.3). */
@@ -129,7 +134,9 @@ check("...a source naming a file nobody attached is read as assumed, never drawn
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);
 check("each section's guidance carries the house rules; the roads only where the record defines them",
-  /PLAYBACK BEFORE PRODUCING/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /Template road is not ready/.test(guidanceFor("foundation")) &&
+  /PLAYBACK BEFORE PRODUCING/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
+  /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
+  /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
 const cp = corpusOf({ section: "analysis", place: "mobile", placeWord: "Mobile", context: "4 pillars · 2 measures off track", question: "q", pasted: true,
   history: [], assumptions: ["Margins flat"], files: [{ name: "notes.docx", kind: "docx", text: "Share fell" }, { name: "deck.pdf", kind: "pdf", text: "" }] });
@@ -223,13 +230,23 @@ try {
 
   /* ══ §3 · the server ═══════════════════════════════════════════ */
   section("§3 · the module's server: the office in, everybody else out, in words");
-  const call = async (method, path, body, who, qs = "") => {
+  const raw = async (method, path, body, who, qs = "", admin = false) => {
+    const isForm = body instanceof FormData;
     const req = new Request("https://smp.example/raya-trade/copilot/" + path + qs,
-      method === "POST" ? { method, body: JSON.stringify(body), headers: { "Content-Type": "application/json" } } : { method });
-    const res = await serve({ req, slug: "raya-trade", module: "copilot", tenantId: A, tenantName: "Raya Trade",
-      have: ["strategy", "copilot"], rest: [path], personKey: who.personKey, seat: who.seat });
+      method === "POST" ? (isForm ? { method, body } : { method, body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }) : { method });
+    return serve({ req, slug: "raya-trade", module: "copilot", tenantId: A, tenantName: "Raya Trade",
+      have: ["strategy", "copilot"], rest: path ? path.split("/") : [], personKey: who.personKey, seat: who.seat, admin });
+  };
+  const call = async (method, path, body, who, qs = "") => {
+    const res = await raw(method, path, body, who, qs);
     let j = null; try { j = await res.json(); } catch { j = null; }
     return { st: res.status, j, to: res.headers.get("location") || "" };
+  };
+  const page = async (method, path, body, who, qs = "", admin = false) => {
+    const res = await raw(method, path, body, who, qs, admin);
+    const ct = res.headers.get("content-type") || "";
+    return { st: res.status, ct, text: /html/.test(ct) ? await res.text() : "", bytes: /html/.test(ct) ? null : Buffer.from(await res.arrayBuffer()),
+      to: res.headers.get("location") || "", disp: res.headers.get("content-disposition") || "" };
   };
   const NORAN = { personKey: "noran", seat: "smoteam" }, ISLAM = { personKey: "islam", seat: "super" },
         OMAR = { personKey: "omar", seat: "smoteam" }, HEND = { personKey: "hend", seat: "none" };
@@ -241,9 +258,17 @@ try {
   }
   const postHend = await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis" }, HEND);
   check("...and at the api, writing nothing", postHend.st === 403 && (await asTenant(A, (c) => chatsOn(c, "mobile", "analysis"))).length === 1, postHend.st);
-  const bare = await call("GET", "", null, NORAN);
-  check("the Copilot's own address goes back to Strategy — it has no page of its own",
-    bare.st === 302 && /\/raya-trade(\/strategy)?\/?$/.test(new URL(bare.to).pathname), bare.st + " " + bare.to);
+  /* §444 REVERSES §439's "no page of its own": the bare address is the
+     Copilot page, listing every chat and deliverable on the client. */
+  const bare = await page("GET", "", null, NORAN);
+  check("the Copilot's own address is a page now — HTML, not a trip back to Strategy (§444)",
+    bare.st === 200 && /html/.test(bare.ct) && /<table/.test(bare.text), bare.st + " " + bare.ct);
+  check("...listing this client's chat with a link that opens it in its place's Copilot tab",
+    bare.text.includes(c1.title) && /href="\/raya-trade\/strategy\/mobile\/copilot\/analysis#cop=chat-[0-9a-f-]{36}"/.test(bare.text), bare.text.slice(0, 200));
+  const odd = await raw("GET", "elsewhere", null, NORAN);
+  check("an address the Copilot does not draw goes to its page, never a blank", odd.status === 302 && /\/raya-trade\/copilot\/?$/.test(new URL(odd.headers.get("location")).pathname));
+  const hendPage = await page("GET", "", null, HEND);
+  check("a client's own person is refused the page in words, not shown it", hendPage.st === 403 && !hendPage.text.includes(c1.title), hendPage.st + "");
   check("a place that is not a place word is refused", (await call("GET", "list", null, NORAN, "?place=../x&section=analysis")).st === 400);
   const made = await call("POST", "api", { act: "newChat", place: "fn:finance", section: "advisory", title: "  Pricing   question " }, OMAR);
   check("+ New chat makes one, its title on one line", made.st === 200 && made.j.chat.title === "Pricing question" && made.j.chat.by === "omar", JSON.stringify(made.j));
@@ -317,6 +342,58 @@ try {
   check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
+  /* ══ §3c · the Copilot's own settings (§444) ═══════════════════════
+     The same for every client; read by the office, changed by a Forefront
+     super user only (the account's admin flag, never the client's seat). */
+  section("§3c · Copilot settings: the office reads, only a Forefront super user changes");
+  const KEY = "part2";
+  await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]);
+  try {
+    const ins = await page("GET", "settings", null, NORAN, "?section=analysis");
+    check("the AI instructions page draws the analysis parts for the office, read only",
+      ins.st === 200 && /SWOT/.test(ins.text) && /Same for all clients/.test(ins.text) && /Read only/.test(ins.text) && !/edit=part/.test(ins.text), ins.st + "");
+    const insAdm = await page("GET", "settings", null, NORAN, "?section=analysis", true);
+    check("...and offers Edit to a Forefront super user, and only to one", /edit=part2/.test(insAdm.text) && !/Read only/.test(insAdm.text));
+    const fd = (o) => { const f = new FormData(); for (const [k, v] of Object.entries(o)) f.append(k, v); return f; };
+    const nope = await page("POST", "settings", fd({ act: "save", key: KEY, text: "Hijacked" }), NORAN, "?section=analysis");
+    const rowNope = await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY]);
+    check("a POST from somebody who is not a Forefront super user changes nothing and says why",
+      nope.st === 400 && /Only a Forefront super user/.test(nope.text) && rowNope.rowCount === 0, nope.st + " " + rowNope.rowCount);
+    const yes = await page("POST", "settings", fd({ act: "save", key: KEY, text: "## General\n\nOur own SWOT rule." }), NORAN, "?section=analysis", true);
+    const rowYes = await doorPool().query("SELECT text FROM copilot_assets WHERE key = $1", [KEY]);
+    check("an admin's save is stored and answers 303 to the page, so a refresh does not resend it",
+      yes.st === 303 && /done=saved/.test(yes.to) && rowYes.rowCount === 1 && /Our own SWOT rule/.test(rowYes.rows[0].text), yes.st + " " + yes.to);
+    check("...and the next question is told it (methodFor reads the stored row)", /Our own SWOT rule/.test(await methodFor(doorPool(), "analysis")));
+    const empty = await page("POST", "settings", fd({ act: "save", key: KEY, text: "   " }), NORAN, "?section=analysis", true);
+    check("an empty part is refused in words, the stored text kept", empty.st === 400 && /cannot be empty/.test(empty.text) &&
+      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 1);
+    const shipped = DEFAULT_PARTS.find((x) => x.key === KEY).text;
+    const back = await page("POST", "settings", fd({ act: "save", key: KEY, text: shipped }), NORAN, "?section=analysis", true);
+    check("saving the shipped text DELETES the row — the default is an absence (§50.6)",
+      back.st === 303 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 0, back.st + "");
+    const tp = await page("GET", "settings/templates", null, NORAN);
+    check("the templates page lists all five, each downloadable, read only for the office",
+      tp.st === 200 && (tp.text.match(/settings\/templates\/t[1-5]"/g) || []).length === 5 && /Read only/.test(tp.text), tp.st + "");
+    const dl = await page("GET", "settings/templates/t3", null, NORAN);
+    check("a template downloads as the shipped Excel file", dl.st === 200 && dl.bytes && dl.bytes[0] === 0x50 && dl.bytes[1] === 0x4b && /Porters/.test(decodeURIComponent(dl.disp)), dl.st + " " + dl.disp);
+    const notX = fd({ act: "replace", key: "t3" }); notX.append("file", new Blob([Buffer.from("not excel")]), "porter.xlsx");
+    const rep = await page("POST", "settings/templates", notX, NORAN, "", true);
+    check("a file that only CALLS itself .xlsx is refused by its shape", rep.st === 400 && /not an Excel file/.test(rep.text) &&
+      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 0, rep.st + "");
+    const realX = fd({ act: "replace", key: "t3" }); realX.append("file", new Blob([XLSX]), "Porter v2.xlsx");
+    const rep2 = await page("POST", "settings/templates", realX, NORAN, "", true);
+    const dl2 = await page("GET", "settings/templates/t3", null, NORAN);
+    check("an admin's replacement is what every client downloads next", rep2.st === 303 && dl2.bytes && dl2.bytes.equals(XLSX) && /Porter v2/.test(decodeURIComponent(dl2.disp)), rep2.st + " " + dl2.disp);
+    const repNo = await page("POST", "settings/templates", fd({ act: "reset", key: "t3" }), NORAN);
+    check("...and somebody else cannot put it back either", repNo.st === 400 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 1);
+    const hendSet = await page("GET", "settings", null, HEND);
+    check("a client's own person is refused the settings too", hendSet.st === 403, hendSet.st + "");
+    check("the switcher offers the Copilot to the office, and the door refuses a client's person",
+      moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && decideOpen("none", "copilot", {}, null) === false);
+  } finally {
+    await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]).catch(() => {});
+  }
+
   section("§5 · the AI is asked with the section's guidance, the platform's line and the files — and its answer is kept checked");
   const seen = [];
   let NEXT = null;
@@ -371,6 +448,8 @@ try {
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
       /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
+    check("...and Forefront's own method for that section, read from Copilot settings (§444)",
+      /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
     const lastTurn = w && w.body ? w.body.contents[w.body.contents.length - 1] : null;
     check("...and the PDF as itself, on the question — not a text extraction",

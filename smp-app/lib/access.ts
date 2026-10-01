@@ -24,6 +24,7 @@
 import { createRequire } from "node:module";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
+import { copilotGrant, storedCopilotGrant } from "./copilot.ts";
 import { MODULE_DEF, modulesFor, isModule, type ModuleKey, type ModuleArea } from "./modules.ts";
 
 const frozen = createRequire(import.meta.url)("./frozen.cjs") as {
@@ -51,6 +52,12 @@ export function decideOpen(seat: Seat, module: string, graph: unknown, personKey
   if (brk === "gate-open") return true;
   const area = openingArea(module);
   if (!area) return true;
+  /* THE COPILOT IS THE OFFICE'S BY RULE, NOT BY A CELL (spec 064; lib/
+     copilot.ts copilotGrant): its one area is a column the client's own rows
+     draw as a dash, so a client person is refused here whatever the stored
+     map reads — the same answer as an address naming a module the client
+     does not hold (§320.5). */
+  if (module === "copilot") return seat === "super" || seat === "smoteam";
   if (seat === "super" || seat === "smoteam") return true;
   if (!graph) return area.shipped !== "none";
   return frozen.mayOpen(graph, personKey || "", area);
@@ -68,7 +75,16 @@ export async function mayOpenModule(tenantId: string, seat: Seat, personKey: str
    all of them, or a client with four modules would open four connections
    per page. */
 export async function openableModules(tenantId: string, seat: Seat, personKey: string | null | undefined, stored: unknown): Promise<ModuleKey[]> {
-  const have = modulesFor(stored);
+  let have = modulesFor(stored);
+  /* The Copilot's own page is listed on the switcher (§444) for the office
+     alone, and not for an office seat whose Copilot cell reads None — a door
+     the page would only refuse is not offered (§61, spec 056 §6.4). One
+     read, and only on a client that has the module. */
+  if (have.includes("copilot")) {
+    const office = seat === "super" || seat === "smoteam";
+    const g = office ? copilotGrant(seat, await withTenant(tenantId, (c) => storedCopilotGrant(c, seat))) : "none";
+    if (g === "none") have = have.filter((k) => k !== "copilot");
+  }
   if (seat === "super" || seat === "smoteam" || !have.some((k) => openingArea(k))) return have;
   const graph = await withTenant(tenantId, (c) => readState(c));
   return have.filter((k) => decideOpen(seat, k, graph, personKey));

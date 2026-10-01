@@ -73,7 +73,8 @@ const OTHER = BUILT_EXTRA.filter((k) => !MODULE_DEF[k].inside)[0] || null;
    inside it go back to the module it lives in, and the switcher never lists
    it (a door to a page that is a redirect is a door behind a door, §32). */
 const INSIDE = MODULES.filter((k) => MODULE_DEF[k].built && MODULE_DEF[k].inside);
-const PAGED = () => offerable().filter((k) => !MODULE_DEF[k].inside);
+const PAGED = () => offerable();
+const OWN_PAGE_OF = (k) => existsSync(join(APP, "modules", k, "page.ts"));
 
 let ok = 0;
 const bad = [];
@@ -199,11 +200,11 @@ const drawnBy = async (k, rest = []) => {
   return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
 };
 const drawn = {};
+/* §444 REVERSES the redirect: the Copilot is still a tab inside Strategy,
+   AND it has a page of its own (every chat and deliverable on the client,
+   and its settings), so the switcher lists it like any other module. */
 for (const k of INSIDE) {
-  const out = await drawnBy(k);
-  check("...and " + k + ", a tab inside " + MODULE_DEF[k].inside + ", sends its own address back there",
-    out.status === 302 && out.to.endsWith(clientHref("raya-trade", MODULE_DEF[k].inside, "")), out.status + " " + out.to);
-  check("...and the switcher does not list " + k, !moduleMenu(offerable()).some((m) => m.key === k),
+  check("...and the switcher lists " + k + " too — it has a page of its own now (§444)", moduleMenu(offerable()).some((m) => m.key === k),
     moduleMenu(offerable()).map((m) => m.key).join(", "));
 }
 for (const k of PAGED()) {
@@ -229,8 +230,11 @@ check("...and no two of them draw the same document — a table cannot point two
    already gets (lib/modules.ts whereOf) rather than a second refusal. */
 for (const k of BUILT_EXTRA) {
   const out = await drawnBy(k, ["nothing-here"]);
+  /* A module with a page of its own is its own landing, inside another or
+     not (§444: the Copilot's unknown words come back to the Copilot page). */
+  const landing = MODULE_DEF[k].inside && !OWN_PAGE_OF(k) ? MODULE_DEF[k].inside : k;
   check("...and a word " + k + " does not draw comes back to its landing",
-    out.status === 302 && out.to.endsWith(clientHref("raya-trade", MODULE_DEF[k].inside || k, "")),
+    out.status === 302 && out.to.replace(/\/$/, "").endsWith(clientHref("raya-trade", landing, "").replace(/\/$/, "")),
     out.status + " " + out.to);
 }
 
@@ -616,9 +620,15 @@ for (const k of OWN_PAGE) {
   check("...and the module you are IN is marked — " + k,
     new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
     (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
+  /* Asked of the SWITCHER, not the whole document (§444): a module's own
+     page links to itself (the Copilot's list is a form posting back to its
+     own address), which is the page and not a door. A switcher missing
+     altogether would pass this vacuously, so it is asserted present first
+     (§113.8). */
+  const oneDoc = await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE);
+  const sw = (oneDoc.match(/<details class="msw">[\s\S]*?<\/details>/) || [""])[0];
   check("a client holding only the default is offered no door it does not have — " + k,
-    !(await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE))
-      .includes('href="' + clientHref("raya-trade", k, "") + '"'));
+    !!sw && !sw.includes('href="' + clientHref("raya-trade", k, "") + '"'), sw ? "" : "no switcher drawn");
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`

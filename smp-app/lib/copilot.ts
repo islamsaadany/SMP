@@ -127,6 +127,16 @@ export async function chatsOn(c: Q, place: string, section: Section, archived = 
     "ORDER BY c.last_at DESC, c.created_at DESC", [place, section, archived]);
   return r.rows.map(chatOf);
 }
+/* EVERY CHAT AND EVERY DELIVERABLE ON THE CLIENT (§444): the Copilot's own
+   page lists them across places and sections, newest first. Archived chats
+   are left out — the page is where work is FOUND, and an archived chat is
+   reached from its own place's archived list. */
+export async function allChats(c: Q): Promise<Chat[]> {
+  const r = await c.query(
+    "SELECT " + CHAT_COLS + ", (SELECT count(*) FROM copilot_messages m WHERE m.chat_id = c.id AND m.who = 'person') AS count " +
+    "FROM copilot_chats c WHERE NOT (c.extra ? 'archivedAt') ORDER BY c.last_at DESC, c.created_at DESC LIMIT 500");
+  return r.rows.map(chatOf);
+}
 export async function archiveChat(c: Q, id: string, by: string): Promise<void> {
   await c.query("UPDATE copilot_chats SET extra = extra || jsonb_build_object('archivedAt', now()::text, 'archivedBy', $2::text) WHERE id = $1", [id, by]);
 }
@@ -285,6 +295,10 @@ const DELIV_SELECT =
 
 export async function deliverablesOn(c: Q, place: string, section: Section): Promise<Deliverable[]> {
   const r = await c.query(DELIV_SELECT + "WHERE d.place = $1 AND d.section = $2 ORDER BY coalesce(v.at, d.created_at) DESC", [place, section]);
+  return r.rows.map(delivOf);
+}
+export async function allDeliverables(c: Q): Promise<Deliverable[]> {
+  const r = await c.query(DELIV_SELECT + "ORDER BY coalesce(v.at, d.created_at) DESC LIMIT 500");
   return r.rows.map(delivOf);
 }
 export async function oneDeliverable(c: Q, id: string): Promise<Deliverable | null> {

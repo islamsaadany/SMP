@@ -49826,7 +49826,7 @@ is the whole of why this line is here.*
 
 ---
 
-## §376 — PORTFOLIO: THE REFERENCE CODE READ, AND THE MODULE SERVING ITSELF (2026-09-30, spec 060 §11, §12)
+## §439 — PORTFOLIO: THE REFERENCE CODE READ, AND THE MODULE SERVING ITSELF (2026-09-30, spec 060 §11, §12)
 
 Islam, of the three drawings that had been waiting: **"ok for the landing"**,
 then **"ok for the progress and analytics too"** — which paid rule 1c in full
@@ -49847,7 +49847,7 @@ been reading that code, and had not chased it.* Finally, **"do the read-through
 and tell me where they disagree"**, and **"write it into the spec first, then
 start building."**
 
-**§376.1 — THE GATE §375 NAMED IS ANSWERED, AND IT WAS NOT A DRAWING.** That
+**§439.1 — THE GATE §375 NAMED IS ANSWERED, AND IT WAS NOT A DRAWING.** That
 section wrote down that `portfolio` was held at `built: false` by *"this
 repository has never seen the reference code and nothing in it has ever been
 run"*. The repository was supplied and read: six screens against the code
@@ -49865,7 +49865,7 @@ what remains unknown is the SHAPE a real client's plan takes on these screens
 and never the rules — a question for the screens, which is where it will be
 answered.
 
-**§376.2 — THE FRAME COST ONE FLAG AND ONE LINE, AND THAT IS SPEC 046 §4.5 PAID
+**§439.2 — THE FRAME COST ONE FLAG AND ONE LINE, AND THAT IS SPEC 046 §4.5 PAID
 BY SOMEBODY WHO DID NOT WRITE IT.** `portfolio` was already the reserved word
 (§320.5's own argument for reserving it), so the address, the switcher, the row
 on the client's card, the on/off drawer, the door, the seat and `withTenant`
@@ -49874,7 +49874,7 @@ and one entry in `SERVERS`. **Both of the registry's own breaks keep it**, so
 `no-server` and `wrong-server` go on falsifying what they were written for
 rather than incidentally falsifying this.
 
-**§376.3 — THE QUERIES LIVE IN THEIR OWN FILE, BECAUSE §8 PROMISED A CHECK WITH
+**§439.3 — THE QUERIES LIVE IN THEIR OWN FILE, BECAUSE §8 PROMISED A CHECK WITH
 NO DATABASE.** `checks/portfolio.mjs` is 121 assertions long precisely because
 `lib/portfolio.ts` is pure, and one query in it would have ended that — so
 `lib/portfolio-io.ts` is new and **the rules file gained exactly one line**,
@@ -49886,7 +49886,7 @@ at each level, returning the flat ordered array the drawings' own `_derive.js`
 already reads (§5.2: *the plan on the screen and the plan on the server cannot
 arrive at two answers for one project*).
 
-**§376.4 — WHO SEES WHICH PROJECT IS IN THE `WHERE`, NEVER IN A FILTER
+**§439.4 — WHO SEES WHICH PROJECT IS IN THE `WHERE`, NEVER IN A FILTER
 AFTERWARDS** (§355's lesson one module along: *a report kept off a list and
 still downloadable is no rule at all*). A seat on the client reaches every
 project; anybody else reaches the projects that NAME them, through the
@@ -49894,7 +49894,7 @@ membership join itself — and **a project this viewer cannot see answers the sa
 *not found* as one that does not exist**, so the address cannot be used to
 discover what a client holds. Both ends asserted (§94.2), falsified at 2 red.
 
-**§376.5 — A READ THAT FAILED IS NOT AN EMPTY LIST, AND IT WAS FOUND BY THE
+**§439.5 — A READ THAT FAILED IS NOT AN EMPTY LIST, AND IT WAS FOUND BY THE
 NEIGHBOUR CRASHING.** `checks/modules.mjs` drives every module's server with a
 deliberately fake tenant id, and `withTenant` refuses one — so the landing threw
 where the tracker's degrades. **The answer is not a catch that swallows**:
@@ -49904,20 +49904,20 @@ projects yet*. §35, §93 and §231.4 in one line, and on this page the cost of
 getting it wrong is telling a consultant their client has no delivery work at
 all.
 
-**§376.6 — AND A WORD IT DOES NOT DRAW IS A REDIRECT, NEVER THE LANDING.** Also
+**§439.6 — AND A WORD IT DOES NOT DRAW IS A REDIRECT, NEVER THE LANDING.** Also
 found by that check going red: my server fell through to the landing for any
 address it did not recognise, so **a mistyped address rendered a page that
 looked right** (§96's family). It answers 302 now, which is what every unknown
 word inside a client already gets.
 
-**§376.7 — ONE SPELLING OF THE EM-DASH.** My own check contradicted itself: the
+**§439.7 — ONE SPELLING OF THE EM-DASH.** My own check contradicted itself: the
 strip wrote the character and the owe cell wrote the entity, and `esc()` escapes
 only `& < > " '`, so the two render identically and only one can be asserted —
 fixing the first broke the second. **The character, everywhere**, because it
 survives `esc()`, with a comment saying so or the next person writes the entity
 again.
 
-**§376.8 — A BREAK THAT CANNOT FALSIFY IS NOT A BREAK.** The first
+**§439.8 — A BREAK THAT CANNOT FALSIFY IS NOT A BREAK.** The first
 falsification of the *No plan yet* state was a CSS `visibility:hidden` and it
 went **green**, because every assertion in that section is about the document's
 WORDS and a rule that hides them changes none (§54.5: *a falsification that
@@ -49925,7 +49925,7 @@ passes is indistinguishable from a working guard*). Replaced with a break that
 makes the cell print **0%** — the actual fault, a project with no plan reading
 as one that has done nothing — and it is 1 red.
 
-**§376.9 — TWO CHECKS HELD A LITERAL THIS BUILD MOVES** (§214.3, seventh time),
+**§439.9 — TWO CHECKS HELD A LITERAL THIS BUILD MOVES** (§214.3, seventh time),
 both **REWRITTEN and never loosened** (§218). `checks/portfolio.mjs` asserted
 *portfolio is a reserved word and NOT built*, true for as long as it was and now
 its opposite; it asserts what survives — **a built module has a server of its
@@ -49939,7 +49939,7 @@ flag put back is 2 red, the registry entry removed is 1 red. And
 `const UNBUILT` I wrote for it collided with the file's own** — §56.7, caught by
 the parser, which is the loud end of that fault.
 
-**§376.10 — AND THE CONTAINER COULD NOT PROVE ANYTHING UNTIL IT WAS MADE ABLE
+**§439.10 — AND THE CONTAINER COULD NOT PROVE ANYTHING UNTIL IT WAS MADE ABLE
 TO.** `tsc` reported **498 errors** and the checks could not find the `tenants`
 table: no `node_modules` and no database. Both set up rather than worked around
 — dependencies installed, Postgres 16 stood up, `db/apply.mjs` run through
@@ -49956,7 +49956,7 @@ already records as `main`'s, now four rather than one because the clock has
 moved ten days further from the fixture's stamps. Recorded, not fixed in passing
 (rule 1b).
 
-**§376.11 — WHAT IS NOT BUILT, SAID IN THE SERVER'S OWN HEADER RATHER THAN LEFT
+**§439.11 — WHAT IS NOT BUILT, SAID IN THE SERVER'S OWN HEADER RATHER THAN LEFT
 TO BE DISCOVERED** (§54.5): the plan, Progress and Analytics. A project opens on
 its **charter**, and a row on the landing reads **No plan yet** — which is the
 landing's own signed-off state for a project with none (§9.13) and not a
@@ -49967,15 +49967,15 @@ they did not.
 
 ---
 
-## §377 — PORTFOLIO: THE PLAN, IN TWO VIEWS (2026-09-30, spec 060 §13)
+## §440 — PORTFOLIO: THE PLAN, IN TWO VIEWS (2026-09-30, spec 060 §13)
 
-The second slice of §376's build, on the same word — **"write it into the spec
+The second slice of §439's build, on the same word — **"write it into the spec
 first, then start building"** — and the one the other two pages wait on: a
 project's **plan READ**, in the two views §9.9 signed off. Writing one is not
 built and is said in the server's own header rather than left to be discovered
-(§54.5, §376.11's habit).
+(§54.5, §439.11's habit).
 
-**§377.1 — ONE READ, ROLLED UP ONCE, AND BOTH VIEWS READ THAT ARRAY.** §9.9's
+**§440.1 — ONE READ, ROLLED UP ONCE, AND BOTH VIEWS READ THAT ARRAY.** §9.9's
 rule is that the tree and the chart are two readings of ONE list, and it is
 carried out literally: `planRows` is asked once, `rollUp` writes the parents'
 figures onto that array once, and the two views map over it. **Nothing on the
@@ -49987,7 +49987,7 @@ the check asserts **every figure on the page against `rollUp`'s own answer**
 rather than against a typed number (§94.8): a change to the roll-up moves the
 page and the check together and cannot move one.
 
-**§377.2 — AND THAT FOUND A REAL FAULT IN §376's OWN SLICE.** `planRows`
+**§440.2 — AND THAT FOUND A REAL FAULT IN §439's OWN SLICE.** `planRows`
 ordered a phase row with `p2 = 0` and an activity hung straight off that phase
 with `-1`, so **a phase sorted after its own children** and the numbering read
 `0.1 0.2 1 1.1` where it must read `1 1.1 1.2 2`. It is not only an order on a
@@ -49998,7 +49998,7 @@ the landing reads *No plan yet* and never walks the tree. One character
 (`-2`), and the break `bad-order` puts it back (**3 red**), so it cannot
 return unnoticed.
 
-**§377.3 — THE ADDRESS CARRIES THE VIEW AND THE OPENED ROW** (§173's place,
+**§440.3 — THE ADDRESS CARRIES THE VIEW AND THE OPENED ROW** (§173's place,
 the tracker's own idiom), so a plan opened on one activity is a link somebody
 can send, and the switch is two `<a>`s rather than a script. **AN OPENED
 ACTIVITY IS READ THROUGH ITS PROJECT** (§6): an activity id is a uuid anybody
@@ -50010,7 +50010,7 @@ this project's rows — so breaking the read changed nothing the page showed. It
 is asked of `oneActivity` itself now, with the page's refusal kept beside it
 as the control.
 
-**§377.4 — FIVE THINGS FOUND BY LOOKING AT THE RENDERED PAGE AND NONE BY A
+**§440.4 — FIVE THINGS FOUND BY LOOKING AT THE RENDERED PAGE AND NONE BY A
 CHECK** (§311.1 again), each now carrying an assertion of its own. **(1)** `27
 – 27 Feb` for a one-day commitment — a milestone's span is the day it falls
 on, and printing it twice reads as a range of nothing. **(2)** `Sep – Feb 27`
@@ -50026,7 +50026,7 @@ running* about work marked done, one line under a status contradicting it
 is written at sign-off* rather than leaving the absence to be wondered at
 (§35).
 
-**§377.5 — THE STATUS COLUMN SAYS WHAT THE STATUS MEANS, AND `ACT_WORD` IS
+**§440.5 — THE STATUS COLUMN SAYS WHAT THE STATUS MEANS, AND `ACT_WORD` IS
 UNTOUCHED.** `ACT_WORD.done` is **Done**, and a column reading *Done* beside
 *Completed* asks the reader to have been told the difference — which is the
 whole of §6.2's two steps. The column reads the drawing's own **Waiting to
@@ -50034,7 +50034,7 @@ sign off**; the stored word stays what the api and every refusal spell,
 because that is the status's NAME. Two questions, two answers (§53.5), rather
 than one word asked to do both jobs.
 
-**§377.6 — THE OVERRUN A ROW AWAITING SIGN-OFF CANNOT DRAW — A FINDING,
+**§440.6 — THE OVERRUN A ROW AWAITING SIGN-OFF CANNOT DRAW — A FINDING,
 RECORDED AND NOT FIXED.** The signed-off drawing draws an overrun for **2.2**,
 which is marked done, finished four days late, and waiting for a Lead. **The
 schema forbids that state**: `portfolio_activity_signed` requires `actual_end
@@ -50053,20 +50053,20 @@ beside a read (rule 1b) — and the check asserts **EXACTLY ONE** overrun rather
 than *at least one*, so the day it is closed this goes red rather than passing
 quietly (§113.8).
 
-**§377.7 — A PHASE HAS NO OWNER, AND THE DRAWING SHOWS ONE.**
+**§440.7 — A PHASE HAS NO OWNER, AND THE DRAWING SHOWS ONE.**
 `portfolio_phases` carries a name, a position and a weight and no assignee, so
 the Owner cell on a phase draws an em-dash where the drawing names a person.
 Honest (§35) and a gap: whether a phase is owned at all is a decision §6 did
 not take and the drawing took in passing. Recorded, never invented.
 
-**§377.8 — THE DAY HELPERS AND THE NAMES LEFT THE TRACKER, WHICH ITS OWN NOTE
+**§440.8 — THE DAY HELPERS AND THE NAMES LEFT THE TRACKER, WHICH ITS OWN NOTE
 PRESCRIBED.** `lib/notes.ts` said *a third module wanting them is the day they
 move to a file of their own*, and Portfolio is that third module — so the day
 helpers are **`lib/day.ts`** and the register's names are **`lib/people.ts`**,
 both re-exported from `lib/tracker.ts` so every existing caller is untouched,
 and the move is **asserted behaviour-neutral rather than claimed**: tracker
 and notes are at exactly the counts they were before it. **THE FAULT THAT
-FORCED IT WAS MINE**: §376 wrote a second `todayIn` inside
+FORCED IT WAS MINE**: §439 wrote a second `todayIn` inside
 `modules/portfolio/`, which is a second answer to *which day is it* — the
 drift the note was about, and the one that makes a row read *late* on one
 screen and not on another at 23:30 in Cairo. What stays the tracker's is what
@@ -50077,19 +50077,19 @@ portfolio copy is what `cascade` does its arithmetic with under §375's ten
 falsifications, so joining them is its own change (§53.5 flagged, not folded
 in — rule 3b).
 
-**§377.9 — THE FIXTURE'S DATES ARE RELATIVE TO TODAY, NEVER TYPED**, which is
+**§440.9 — THE FIXTURE'S DATES ARE RELATIVE TO TODAY, NEVER TYPED**, which is
 the one lesson `checks/tracker.mjs` is currently four failures short of: every
 date in that file was written against the day it was written and every one has
 gone stale (§214.3's family). A plan whose rows are placed either side of
 `todayIn()` stays true on whatever day it is run.
 
-**§377.10 — VERIFIED.** `checks/portfolio-module.mjs` **80/0**, red **NINE**
+**§440.10 — VERIFIED.** `checks/portfolio-module.mjs` **80/0**, red **NINE**
 ways (`no-seat-gate`, `see-everything`, `charter-anyone`, `no-plan-yet`,
 `bad-order`, `stale-name`, `both-views`, `no-elbows`, `act-anywhere`) — **and
 two of those nine went green when first written, both this file rather than
 the product** (§54.5): `stale-name` had no stored name to prefer, so
 preferring the register's changed nothing, and `act-anywhere` was asserted
-against the PAGE, which holds §377.3's second fence. `checks/portfolio.mjs`
+against the PAGE, which holds §440.3's second fence. `checks/portfolio.mjs`
 **121/0** and still red ten ways; `checks/modules.mjs` **112/0**; insights
 127/0; notes 170/0; `generated-in-step` all clear; `built-in-step.py` all
 good; `tsc` clean but for `lib/prisma.ts`'s pre-existing error.
@@ -50100,14 +50100,14 @@ they did not).
 
 ---
 
-## §378 — PORTFOLIO: PROGRESS AND ANALYTICS (2026-09-30, spec 060 §14)
+## §441 — PORTFOLIO: PROGRESS AND ANALYTICS (2026-09-30, spec 060 §14)
 
 Islam, of the two remaining project drawings: *"ok for the progress and
 analytics too."* Built together, because **they read the same thing** — the plan
-§377 built — and with them **five of Portfolio's six screens work**. What is
+§440 built — and with them **five of Portfolio's six screens work**. What is
 left is WRITING a plan, and the landing's own header says so (§54.5).
 
-### §378.1 — THREE SCREENS, ONE READ, AND NOT ONE OF THEM COMPUTES A FIGURE
+### §441.1 — THREE SCREENS, ONE READ, AND NOT ONE OF THEM COMPUTES A FIGURE
 
 `serve()` asks `planRows` once per request and rolls it up once, and Plan,
 Progress and Analytics all map over that array — **§5.2's rule carried out
@@ -50120,7 +50120,7 @@ browser at all, and the module check asserts **agreement with the rule** rather
 than a typed number (§94.8) — so a change to the roll-up moves the page and the
 check together and cannot move one.
 
-### §378.2 — ACCEPTING WORK IS THE ONE WRITE, AND IT IS TWO STEPS
+### §441.2 — ACCEPTING WORK IS THE ONE WRITE, AND IT IS TWO STEPS
 
 `signOff` and `reopen` are the only new writes, and both are §6.2's two steps: a
 Lead marks work done, and somebody holding the seat accepts the date it finished
@@ -50138,15 +50138,15 @@ refused **by name** (§123) through `endDateRefused`, the sentence `stampDates`
 already used rather than a second wording (§53.5).
 
 **Reopening clears the real end date AND who accepted it** while the progress
-figure stands — which is what keeps §378.4's reading honest: a commitment whose
+figure stands — which is what keeps §441.4's reading honest: a commitment whose
 acceptance was undone must stop counting as met, and a cleared status with a
 date still on the row would go on counting.
 
-### §378.3 — A BOUND NOTHING CAN MEASURE IS SAID, NOT ANSWERED WITH A COLUMN
+### §441.3 — A BOUND NOTHING CAN MEASURE IS SAID, NOT ANSWERED WITH A COLUMN
 
 The signed-off Progress drawing says the accepted date may not fall **before the
 day the work was marked done**. **There is no such column** — the platform
-stores when a row became `done` nowhere (§377.6 recorded the same absence from
+stores when a row became `done` nowhere (§440.6 recorded the same absence from
 the other side, where it costs the chart an overrun mark). So what ships is the
 two bounds that CAN be checked, and the departure is written into the file's own
 header and into the record, because adding a stored date is its own decision and
@@ -50154,7 +50154,7 @@ not something to ride in beside a screen (rule 1b). *A bound nothing can
 measure is a promise, and a promise in a refusal is worse than a narrower
 refusal that is true.*
 
-### §378.4 — A COMMITMENT IS HIT ONLY IF IT WAS ACCEPTED ON OR BEFORE ITS DAY
+### §441.4 — A COMMITMENT IS HIT ONLY IF IT WAS ACCEPTED ON OR BEFORE ITS DAY
 
 §9.12's three corrections of the reference, every one carried out and every one
 asserted:
@@ -50175,7 +50175,7 @@ marked done, waiting to be accepted, drawn as *Waiting* rather than *Overdue* �
 that draws two things that look inconsistent and explains neither teaches
 somebody to distrust both.
 
-### §378.5 — *ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE (§344)
+### §441.5 — *ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE (§344)
 
 The reference labels a phase at 90% *On Track*, which is a claim about a
 SCHEDULE, and a figure cannot see one. So `howFar` answers **how far along**
@@ -50184,7 +50184,7 @@ SCHEDULE, and a figure cannot see one. So `howFar` answers **how far along**
 be behind, and both are true. Two breaks hold it: `on-track` puts the
 reference's label back, and `far-words` gives the page a word table of its own.
 
-### §378.6 — AND A FALSIFICATION THAT DID NOT FALSIFY (§54.5)
+### §441.6 — AND A FALSIFICATION THAT DID NOT FALSIFY (§54.5)
 
 `far-words` first changed **`howFar` itself**, and the check compares the page's
 words AGAINST `howFar` — so both sides moved together and the run read **0
@@ -50194,7 +50194,7 @@ the assertion exists to catch is a SECOND answer to *how far along* (§53.5), so
 the break now lives in `analytics.ts` as a local word table — **1 red** — and
 the reason is written into the shared reader beside it, so nobody moves it back.
 
-### §378.7 — TWO FAULTS FOUND BY LOOKING AT THE RENDERED PAGE (§311.1)
+### §441.7 — TWO FAULTS FOUND BY LOOKING AT THE RENDERED PAGE (§311.1)
 
 Neither by a check, which is that section's own lesson arriving again; both now
 asserted.
@@ -50205,7 +50205,7 @@ asserted.
   *"— blocked by X"*, read off `dependsOn`; without it the row names a problem
   and not its cause (§123).
 
-### §378.8 — FOUR FAULTS IN THE CHECK ITSELF, THREE OF THEM ONE SHAPE
+### §441.8 — FOUR FAULTS IN THE CHECK ITSELF, THREE OF THEM ONE SHAPE
 
 - **A `date` COLUMN COMES BACK AS A `Date`**, so
   `String(row.actual_end).slice(0,10)` is `"Sat Sep 28"` and never a day — it
@@ -50227,10 +50227,10 @@ asserted.
   List/Timeline switch contains one; scoped to the `<nav class="tabs">` block,
   with the reason recorded in the check.
 
-### §378.9 — RECORDED, NOT DONE
+### §441.9 — RECORDED, NOT DONE
 
-- **The day work was marked done is not stored**, so §378.3's third bound
-  cannot be enforced and §377.6's overrun mark cannot be drawn. One decision
+- **The day work was marked done is not stored**, so §441.3's third bound
+  cannot be enforced and §440.6's overrun mark cannot be drawn. One decision
   answers both.
 - **The checkpoint line reports the cadence and never whether a checkpoint
   happened** — nothing records one — so it says when the next falls due and no
@@ -50238,7 +50238,7 @@ asserted.
 - **Analytics has no history**: every figure is today's, so there is no trend.
   It needs something kept per checkpoint, which is the item above.
 
-### §378.10 — PROVED
+### §441.10 — PROVED
 
 `checks/portfolio-module.mjs` **119 passed, 0 failed** with §9 (Progress) and
 §10 (Analytics) added, and **red under all fourteen breaks** — the five new ones
@@ -50259,7 +50259,7 @@ the built file's bytes changing, and they did not).
 
 ---
 
-## §379 — PORTFOLIO: WRITING A PLAN, DRAWN NOT BUILT (2026-09-30, spec 060 §15)
+## §442 — PORTFOLIO: WRITING A PLAN, DRAWN NOT BUILT (2026-09-30, spec 060 §15)
 
 Five of Portfolio's six screens read and none of them writes. The sixth is not a
 screen in the way the other five are: it is the **writing half** of two that
@@ -50268,7 +50268,7 @@ writing needs. **So rule 1c is owed**, the drawing is
 `design-mockups/portfolio/2026-09-30_plan-writing.html`, published as an
 artifact, and **nothing in `smp-app/` is built from it**.
 
-### §379.1 — THERE IS NO PLANNING MODE, AND THAT DECIDES EVERYTHING ELSE
+### §442.1 — THERE IS NO PLANNING MODE, AND THAT DECIDES EVERYTHING ELSE
 
 **§7.3 settled it on the audit and this is the first round that spends it.**
 Their version holds every added, changed and deleted row in the browser behind a
@@ -50287,7 +50287,7 @@ anybody looking at it while it happens, where Planning Mode let you finish
 first, and building a two-hundred-row plan without a request per keystroke is
 what the workbook is for (§9.3).
 
-### §379.2 — THE ROW GAINS A STRIP AND THE FIELDS STAY ON THE PANEL
+### §442.2 — THE ROW GAINS A STRIP AND THE FIELDS STAY ON THE PANEL
 
 Three buttons on the right of each row in edit mode — move up, move down,
 remove — **and the fields are not edited in the row**: they are edited on the
@@ -50305,7 +50305,7 @@ leaving 58px for the name, so the strip cannot be afforded a column of its own.
 its container, no move-down on the last — **with its space kept**, so the ×
 does not move between rows (§94.15, §302's family).
 
-### §379.3 — ADDING IS A NAME AND ENTER, AND THE KIND IS WHERE YOU TYPE
+### §442.3 — ADDING IS A NAME AND ENTER, AND THE KIND IS WHERE YOU TYPE
 
 One add row at the foot of every container, and **the kind is decided by WHERE
 you are typing** rather than by a picker somewhere else: a work package holds
@@ -50320,7 +50320,7 @@ cannot say whether it means a work package or an activity, and the add rows
 already say it unambiguously — two ways to do one thing, one of them vague
 (§32). What it cost is inserting in the middle; a row is appended and moved up.
 
-### §379.4 — WHAT EDIT MODE DELIBERATELY DOES NOT OFFER
+### §442.4 — WHAT EDIT MODE DELIBERATELY DOES NOT OFFER
 
 **Status is not a field.** It is worked out — a real start date the first time
 progress leaves nought, a real end date at sign-off (§3 №2) — so the way to
@@ -50333,7 +50333,7 @@ from the api and the workbook, and saying so is the point* (§42). **Reordering
 is by arrows and never by dragging** — §101 put that choice to Islam once
 already and he took the arrows, and this stack has no `arrange.js` to inherit.
 
-### §379.5 — MOVING A DATE SHOWS YOU FIRST, AND IT IS A TICKING LIST
+### §442.5 — MOVING A DATE SHOWS YOU FIRST, AND IT IS A TICKING LIST
 
 Rule 4 is *moving a date moves what depends on it, and shows you first*, and
 `cascade()` already returns the preview. **The dialog lists every row that would
@@ -50344,16 +50344,16 @@ has a date of its own that nothing may touch, and a plan with six things
 downstream is usually a mix — a pair of buttons cannot express one. **Nothing is
 written until the press**, including the date being moved.
 
-### §379.6 — REMOVING IS REFUSED WHERE THE ROW HOLDS WORK
+### §442.6 — REMOVING IS REFUSED WHERE THE ROW HOLDS WORK
 
 **A phase that still holds activities cannot be removed and the refusal names
 what is in the way** — the answer already settled one screen over for taking
 somebody off a project (§6.4, Islam: *refusal is better*), and §62's shape. The
 press stays live either way, because a control that is simply missing tells
 nobody why. **There is no undo and no archive, and that is asked rather than
-decided** (§379.9).
+decided** (§442.9).
 
-### §379.7 — TWO AUDIENCES SHARE THE PANEL AND SEE DIFFERENT HALVES
+### §442.7 — TWO AUDIENCES SHARE THE PANEL AND SEE DIFFERENT HALVES
 
 A Lead or a seat writes every fact; **the person the row is assigned to gets the
 breakdown's status pickers and *Mark it done* and nothing else** — the
@@ -50364,13 +50364,13 @@ NAME and its WEIGHT are the plan's, not the report's**, so they read as text for
 whoever is reporting: the first draft made all three boxes and quietly let
 somebody re-weight their own work.
 
-### §379.8 — EIGHT FAULTS FOUND BY RENDERING IT AND NONE BY READING IT
+### §442.8 — EIGHT FAULTS FOUND BY RENDERING IT AND NONE BY READING IT
 
 Swept at 1600/1440/1280/1100/1000/820/700 in both palettes, in the read state
 and the edit state, for overflow, sideways scroll, contrast and console errors —
 **and the sweep was proved able to fail first**, 44 reds from one broken colour
 and one broken breakpoint (§54.5). Clean now. On the way: the strip overrunning
-at 700 (§379.2); **a tick invented in front of *Done editing*** that the
+at 700 (§442.2); **a tick invented in front of *Done editing*** that the
 platform's own pen has never worn (§25); *+ work package* breaking across two
 lines in a 78px key column; the ambiguous *+ add beneath*; a move-up arrow on a
 row that cannot move up; **five class collisions**; **`hidden` on a box with its
@@ -50391,7 +50391,7 @@ its whole namespace*, so every class it introduces is now checked against that
 namespace rather than guessed at — which is what that rule actually asks for,
 and four of the five were found one at a time before the audit was written.
 
-### §379.9 — WHAT IS ASKED
+### §442.9 — WHAT IS ASKED
 
 1. **Where does *who is on a project* hang?** Drawn and signed off at §6.4 with
    no home named, and the tab row was agreed as four. A fifth tab, *Team*, or a
@@ -50400,14 +50400,14 @@ and four of the five were found one at a time before the audit was written.
    where the team changes through the work.
 2. **Can a Lead name people?** §6.4a answered it the narrow way until Islam says
    otherwise.
-3. **Is a removed row worth keeping?** §379.6 says no archive.
+3. **Is a removed row worth keeping?** §442.6 says no archive.
 4. **Does the plan need an undo?** Nothing else in the platform has one.
 
-### §379.10 — AND TWO STALE COMMENTS WERE CORRECTED IN THE CODE
+### §442.10 — AND TWO STALE COMMENTS WERE CORRECTED IN THE CODE
 
 Neither is visual and neither needs a sign-off. `modules/portfolio/page.ts`
 carried a comment above `TABS` reading *two of the four are not built and the
-row says so* — true until §378 built Progress and Analytics, and by then
+row says so* — true until §441 built Progress and Analytics, and by then
 describing an intention the code beneath it had stopped carrying out (§104.8);
 `modules/portfolio/plan.ts`'s header named the same two as *not yet*. **A stale
 comment renders perfectly and nothing can go red on it**, which is why both are
@@ -50424,16 +50424,16 @@ is vacuous and kept as the control (§113.8).
 so `sw.js` is NOT bumped (§91's trigger is the built file's bytes changing, and
 they did not). **On the branch, not merged.**
 
-### §379.11 — AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS THREE FAULTS
+### §442.11 — AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS THREE FAULTS
 
 `checks/tracker.mjs` has read **224 passed, 4 failed** since 20 September.
-&sect;375 and &sect;376 each recorded it as *not this work's*, established the
+&sect;375 and &sect;439 each recorded it as *not this work's*, established the
 honest way &mdash; reproduced on a baseline worktree before anything was blamed
 (&sect;303) &mdash; and stopped there. **That is &sect;303 doing its job and
 being asked the wrong question**: it settles whose a red is and says nothing
 about whether anybody will clear it, so a failure with its provenance written
 down is still a failure people learn to scroll past, which is &sect;280.1's own
-finding about a check that could no longer go green. Worse, **&sect;377 wrote
+finding about a check that could no longer go green. Worse, **&sect;440 wrote
 the lesson down naming this exact file** &mdash; *"Its dates are relative to
 `todayIn()`, never typed &mdash; the one lesson `checks/tracker.mjs` is four
 failures short of"* &mdash; and left the file four failures short of it.
@@ -50479,7 +50479,7 @@ line by taking the check's subject away (&sect;218: rewrite, never loosen).
 **The product is untouched** &mdash; one check file, read off the diff &mdash;
 so nothing is rebuilt and `sw.js` is not bumped.
 
-### §379.12 — THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES' TABLES
+### §442.12 — THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES' TABLES
 
 `npm run spike` is the nine proofs spec 043 rests on, and **S2 is the isolation
 proof**: as `smp_app` with tenant A set, on EVERY tenant table from the
@@ -50488,8 +50488,8 @@ catalogue, a SELECT with no WHERE returns A's rows only, an INSERT carrying B's
 the tables in FK order from a fixture that seeds one row per table, and **it had
 been dying on the fourth table in that order**, so every table after it went
 unwalked &mdash; which on an isolation proof is **unproven rather than merely
-unreported**. &sect;376 recorded it as somebody else's and left it, which is
-&sect;379.11's own finding a second time in one afternoon.
+unreported**. &sect;439 recorded it as somebody else's and left it, which is
+&sect;442.11's own finding a second time in one afternoon.
 
 **THE THROW IS WHAT MADE IT FINDABLE AND IT STAYS** (&sect;54.5 in the
 direction that helps): `placeholder()` ends in
@@ -50549,7 +50549,7 @@ green, all six falsifications of the three fixture-using proofs still red, and
 v2.0-shaped database this container does not hold, which its own docstring says
 and &sect;328 records for seven other harnesses.
 
-### §379.13 — AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE PLATFORM
+### §442.13 — AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE PLATFORM
 
 `checks/demo-seed.mjs` is the one file standing between a real client's names
 and a demo shown to somebody else, and it read **102 hits**, the first of them a
@@ -50579,7 +50579,7 @@ a real name in Raya's rows. **And it answered a question it raised on the way**
 does not arise today; the register IS scanned and would still catch one. **7/7,
 both falsifications red.**
 
-### §379.14 — AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN, TWICE OVER
+### §442.14 — AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN, TWICE OVER
 
 Worth writing down because six of them read exactly like product faults and are
 not. `check:state`, `door`, `shell`, `blob`, `comms` and `upload` each spawn
@@ -50593,7 +50593,7 @@ first**: &sect;105.6's rule &mdash; *a fix tested against the wrong bytes looks
 exactly like a fix that does not work* &mdash; reaches a whole sweep, where the
 wrong bytes are an absent build and the wrong state is a neighbour's.
 
-### §379.15 — AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A THIRD
+### §442.15 — AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A THIRD
 
 Found by running the whole app suite rather than the files this round edited
 (&sect;214), and the red it produced was in a module this branch has never
@@ -50604,12 +50604,12 @@ where it expects **Raya Trade**, a client that check never creates.
 **THE CAUSE WAS 203 LEFTOVER TENANTS, ALL CREATED THAT DAY.** Five module
 checks each insert two clients under a timestamped key &mdash; one named
 *Raya Trade*, one named *RHI* &mdash; and **two of the five never dropped
-them**: `checks/portfolio-module.mjs`, written at &sect;376 with no cleanup at
+them**: `checks/portfolio-module.mjs`, written at &sect;439 with no cleanup at
 all, and `checks/insights.mjs`, whose delete sat inside the `try` under a
 comment reading *"the fixture goes, whatever happened above"*. That comment is
 &sect;104.8 for the third time in one day: **a throw skipped it**, and a throw
 is the case a check meets most often on a day when the app will not start
-(&sect;379.14, an hour earlier).
+(&sect;442.14, an hour earlier).
 
 **LITTER IS NOT UNTIDINESS, IT IS A MOVING SUBJECT**, which is the finding
 rather than the fix: Forefront's console Memory page opens on the **first
@@ -50629,26 +50629,26 @@ is back to **one** tenant afterwards &mdash; which is the assertion, because a
 cleanup that runs and leaves rows behind is no cleanup. `portfolio.mjs`,
 `tracker.mjs` and `notes.mjs` already did this and are untouched.
 
-### §379.16 — AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING GENERATE
+### §442.16 — AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING GENERATE
 
-Four rounds &mdash; &sect;375, &sect;376, &sect;377, &sect;379 &mdash; each
+Four rounds &mdash; &sect;375, &sect;439, &sect;440, &sect;442 &mdash; each
 reported `typecheck` as *"clean but for `lib/prisma.ts`'s pre-existing error"*
 (`Property 'PrismaClient' does not exist on type 'typeof
 import("@prisma/client/default")'`). It is not a fault in that file and never
 was: **`npm run build` begins with `prisma generate`**, and the container had
 never been built in, so the generated client carried no types to find. After
-&sect;379.14's build, `npm run typecheck` &mdash; which deletes
+&sect;442.14's build, `npm run typecheck` &mdash; which deletes
 `tsconfig.tsbuildinfo` first, &sect;320.5a &mdash; **exits 0 with nothing to
 say**.
 
 *"Pre-existing" answers whose a failure is and not what it is*, which is
-&sect;379.11's finding about &sect;303 in a second place on the same day: four
+&sect;442.11's finding about &sect;303 in a second place on the same day: four
 rounds established it was not theirs, correctly, and none asked what it was.
 The honest line from here is that the typecheck is clean, and a container where
 it is not needs `npm run build` (or `npx prisma generate`) rather than an
 excuse.
 
-### §379.17 — THE MERGE, MEASURED AND NOT MADE
+### §442.17 — THE MERGE, MEASURED AND NOT MADE
 
 `main` has moved **313 commits** under this branch, which is **12** ahead, and
 it is at **&sect;438**. Measured rather than assumed, because the rule before
@@ -50659,21 +50659,28 @@ merge priced, so that when Islam's word comes it is cheap and provably correct.
 **THE ONE THING THAT COULD HAVE BEEN EXPENSIVE IS NOT THERE**: `main` holds
 **no `smp-app/modules/portfolio/`** at all, so no second session built these
 screens and the whole module is additive. `specs/060-portfolio/spec.md` on main
-stops at **&sect;10** and this branch adds &sect;11&ndash;&sect;15, so that file
+stops at **&sect;10** and this branch adds &sect;11&ndash;&sect;16, so that file
 extends rather than collides. And **&sect;375 &mdash; the rules and the tables
 &mdash; is already on main**, wearing that number, so that round merged cleanly
 weeks ago.
 
-**FOUR SECTION NUMBERS COLLIDE AND MUST MOVE BEFORE THE MERGE, NOT AFTER**
-(&sect;336.1's rule and why): this branch's &sect;376&ndash;&sect;379 name
-four different pieces of work on main &mdash; spec 061's reports tab, an
-address as a value, an address taken whole, and the working copy carrying the
-platform &mdash; so the branch's four become **&sect;439&ndash;&sect;442**. It
-is run **before** the merge, which is what makes it provably scoped to this
-branch's own lines, and by **matched text** rather than by number, because a
-blanket sweep takes the other side's citations (&sect;264.3 &mdash; 17 of them,
-once) **and it must cover BOTH spellings**, the literal `§` and the `&sect;`
-entity, or 83 citations go on naming somebody else's section (&sect;336.1).
+**THE COLLIDING SECTION NUMBERS MOVE BEFORE THE MERGE, NOT AFTER**
+(&sect;336.1's rule and why): main holds its own &sect;376&ndash;&sect;380
+&mdash; spec 061's reports tab, an address as a value, an address taken whole,
+the working copy carrying the platform, and one blank template per way of
+planning &mdash; and this branch had written five sections wearing those same
+numbers, so they become **&sect;439&ndash;&sect;443**. It is run **before** the
+merge, which is what makes it provably scoped to this branch's own lines, and by
+**matched text** rather than by number, because a blanket sweep takes the other
+side's citations (&sect;264.3 &mdash; 17 of them, once) **and it must cover ALL
+THREE spellings**, the literal `§`, the `&sect;` entity and the `\u00a7` JS
+escape, or citations go on naming somebody else's section (&sect;336.1,
+&sect;340.4). **AND THE SET HAD TO BE RE-MEASURED AT THE MERGE RATHER THAN
+TRUSTED**: this paragraph was written when the branch held four such sections and
+it then wrote a fifth, so a renumber run from the earlier reading would have left
+one section of this branch's own work still wearing main's number &mdash; the
+count is taken against `origin/main` on the day of the merge, never from the
+record of an earlier look.
 
 **ELEVEN FILES ARE TOUCHED ON BOTH SIDES** and each is COMBINED, never picked
 (&sect;318.7): the three record files, `checks/modules.mjs`,
@@ -50683,13 +50690,13 @@ entity, or 83 citations go on naming somebody else's section (&sect;336.1).
 about:
 
 * **`spike/_harness.mjs`** &mdash; main's fix is better and is what we keep
-  (&sect;379.12); this branch's self-reference guard rides onto it.
+  (&sect;442.12); this branch's self-reference guard rides onto it.
 * **`checks/tracker.mjs`** &mdash; main's copy, run in this tree, is
-  **226 passed, 3 failed**, so &sect;379.11's three repairs are still owed; the
+  **226 passed, 3 failed**, so &sect;442.11's three repairs are still owed; the
   file has grown 22 lines on main and 21 here, so it is a real hunk-by-hunk
   combine.
 * **`checks/demo-seed.mjs`** and **`checks/insights.mjs`** &mdash; main carries
-  neither &sect;379.13's `PLATFORM_TABLES` exclusion nor &sect;379.15's move of
+  neither &sect;442.13's `PLATFORM_TABLES` exclusion nor &sect;442.15's move of
   the fixture drop into the `finally`.
 
 **AND THE MERGE'S OWN CHECKLIST, WHICH IS NOT OPTIONAL HERE**: the built file
@@ -50704,22 +50711,22 @@ the start (&sect;94.16). **`main` is Islam's word, on that merge, every time.**
 
 ---
 
-## §380 — PORTFOLIO: WRITING A PLAN, BUILT (2026-10-01, spec 060 §16)
+## §443 — PORTFOLIO: WRITING A PLAN, BUILT (2026-10-01, spec 060 §16)
 
-Islam, of the drawing §379 published — *"No I mean the plan in the porfiltio I
+Islam, of the drawing §442 published — *"No I mean the plan in the porfiltio I
 wan to start planning I mean."* That is the sign-off, and the sixth screen is
-built. **§379 is left exactly as it was written** (Principle II): it is the
+built. **§442 is left exactly as it was written** (Principle II): it is the
 argument the sign-off was given on, and this section is what shipped and where
 the two differ.
 
-**Of §379.9's four open questions, two are about the TEAM screen and stay
+**Of §442.9's four open questions, two are about the TEAM screen and stay
 open** (where *who is on a project* hangs, and whether a Lead may name people —
 both Islam's); **two the drawing already answered with a default and that
 default shipped** — no archive on a removed row and no undo — **and both are
 said in the dialog that does the removing**, so nobody meets either as a
 surprise (§124).
 
-### §380.1 — THE PEN IS AN ADDRESS, AND IT CARRIES THE GATE ONCE
+### §443.1 — THE PEN IS AN ADDRESS, AND IT CARRIES THE GATE ONCE
 
 `?edit=1`, this page's own idiom (the view switch is two links already), so
 every control in edit mode is in the document **only for somebody the rules
@@ -50739,7 +50746,7 @@ are a **different** question — whether the Edit button is drawn at all, and wh
 an empty plan says to somebody who could fill it. With that, the break reddens
 exactly its own three assertions.
 
-### §380.2 — EVERY WRITE ANSWERS WITH THE PLAN DRAWN AGAIN
+### §443.2 — EVERY WRITE ANSWERS WITH THE PLAN DRAWN AGAIN
 
 The tracker's own answer (§356.12): the api re-reads, re-rolls-up and returns
 `planBody` rendered, and the script swaps it in. **The browser holds no copy of
@@ -50747,7 +50754,7 @@ the tree**, so it cannot disagree with the server about the numbering, which
 arrow a row may use, or where an add row goes — one request at a time, and what
 a hand is typing survives the swap.
 
-### §380.3 — ONE PRODUCT FAULT, AND IT WAS THE ONE STATEMENT THAT WRITES
+### §443.3 — ONE PRODUCT FAULT, AND IT WAS THE ONE STATEMENT THAT WRITES
 
 `moveDate` shifts a dependent row with `planned_start + $2`, and **a bound
 parameter arrives untyped**, so `date + unknown` is ambiguous between
@@ -50761,7 +50768,7 @@ is one. Found only because the check reads the row back from Postgres rather
 than off the screen — and the api answered 400 with the DATABASE's own words,
 which is §316.2 pointing at us.
 
-### §380.4 — WHAT THE DRAWING DOES NOT COVER, ANSWERED THREE WAYS
+### §443.4 — WHAT THE DRAWING DOES NOT COVER, ANSWERED THREE WAYS
 
 **Marking done turns both ways.** The drawing shows only the pressing, and a
 mark that cannot be taken off is a one-way door: the person who pressed it by
@@ -50779,7 +50786,7 @@ the rule and the api accept one already (`ROW_FIELDS.phase` carries it), so
 drawing a box for it is a visual decision nobody has signed off and the day it
 is drawn nothing else moves (rule 1c).
 
-### §380.5 — PROVED, AND THREE BREAKS TAUGHT THE FILE SOMETHING FIRST
+### §443.5 — PROVED, AND THREE BREAKS TAUGHT THE FILE SOMETHING FIRST
 
 `checks/portfolio.mjs` **135/0**, red **twelve** ways — its new §8c asks the
 eight pure writing rules with **no browser and no database**, which is §8 of
@@ -50792,7 +50799,7 @@ next sibling.
 break reddening its own assertions. **Both ends everywhere** (§94.2): the pen
 for a seat and for a Lead AND the read page for a Contributor and a Viewer; a
 refusal AND the write that must still land; a step's status reportable by
-whoever the row names AND its weight refused to them (§379.7).
+whoever the row names AND its weight refused to them (§442.7).
 
 **`append-anywhere` written as a bare `0` broke the STATEMENT rather than
 reproducing the defect** — a SELECT with no rows to read on an empty container,
@@ -50804,7 +50811,7 @@ a break that changes the order or deletes a row leaves a fixture read empty and
 degrade now, and both breaks report 36 and 34 failures where they used to report
 7 and 5 and then stop.
 
-### §380.6 — AND TWO FAULTS IN MY OWN HARNESS, BOTH OLD RULES
+### §443.6 — AND TWO FAULTS IN MY OWN HARNESS, BOTH OLD RULES
 
 **My runner read `tail -1` and reported `135 passed, 0 failed` for a run that
 was `111 passed, 22 failed`** — the last line was a continuation of the FAILED
@@ -50816,25 +50823,25 @@ every RLS policy — were dying one at a time while the suite reported clean.
 layer out). The verdict is matched by its own shape now.
 
 **And a run that dies before its `finally` leaves its world behind** —
-§379.15 by a third road. Today's syntax-error runs never reached the drops, so
+§442.15 by a third road. Today's syntax-error runs never reached the drops, so
 sixteen tenant pairs stayed, and `checks/memory-page.mjs` went **2 red** naming
 a client it never created: the console's Memory page opens on the FIRST client
-BY NAME and `RHI` sorts before `Raya Trade`. §379.15 put the drops in the
+BY NAME and `RHI` sorts before `Raya Trade`. §442.15 put the drops in the
 `finally`, which cannot help a run killed before the `try` — so both portfolio
 checks sweep anything of their OWN older than an hour before they start, which
 makes a crash clean up after itself on the next run and leaves a concurrent run
 untouched.
 
-### §380.7 — RECORDED, NOT DONE
+### §443.7 — RECORDED, NOT DONE
 
-The team screen (§379.9 №1 and №2, both Islam's); a phase's weight control
-(§380.4); **nothing says who else is looking at the plan while it is being
-restructured**, which is the stated cost of having no Planning Mode (§379.1) and
+The team screen (§442.9 №1 and №2, both Islam's); a phase's weight control
+(§443.4); **nothing says who else is looking at the plan while it is being
+restructured**, which is the stated cost of having no Planning Mode (§442.1) and
 the same gap the tracker has; and **a two-hundred-row plan is built from the
 workbook and not here** (§9.3) — this screen is for writing one and correcting
 it, which is what the pen's one-request-per-field shape is sized for.
 
-**THE MERGE IS STILL ISLAM'S, ON THAT MERGE** — and the measurement at §379.17
+**THE MERGE IS STILL ISLAM'S, ON THAT MERGE** — and the measurement at §442.17
 stands: `main` has moved 313 commits and is at §438, four of this branch's
 section numbers collide and must be renumbered BEFORE the merge by matched text
 in **both** spellings of `§` (§264.3, §336.1), the built file REBUILT rather
@@ -50844,7 +50851,7 @@ after the splice (§146.2), the merged result grepped for its own duplicate
 declarations (§56.7), and the SHELL name confirmed against `origin/main`
 immediately before the push (§94.16).
 
-### §380.8 — AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD NOT SEE
+### §443.8 — AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD NOT SEE
 
 Islam, on the built page, naming his first phase: **"Which project?"** under an
 empty plan. Two faults, and what they share is the whole finding.

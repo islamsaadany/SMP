@@ -5,7 +5,7 @@
    rules, not as screens.*
 
    NOTHING HERE DRAWS ANYTHING. It said *and nothing here opens a door* until
-   §376, when `portfolio` became `built: true` and the module began serving
+   §439, when `portfolio` became `built: true` and the module began serving
    itself — corrected rather than left standing, because a comment describing
    a state the code has left is the fault §104.8 records. What is still true
    is the division: the rules are here, the drawing is in `modules/portfolio/`,
@@ -696,7 +696,7 @@ export function signedOff(rows: readonly Row[]): Row[] {
    word.
 
    AND IT WAS DECLARED LOCALLY ON THE LANDING FOR ONE SLICE, under a comment
-   saying it was read from here (§104.8). Corrected at §378. */
+   saying it was read from here (§104.8). Corrected at §441. */
 export const SOON = 14;
 
 /* HOW FAR ALONG, IN WORDS — the drawings' own five and their own thresholds
@@ -712,7 +712,7 @@ export const SOON = 14;
 
    THE LANDING SHIPPED ITS OWN FIVE WORDS AND ITS OWN THREE THRESHOLDS for
    one slice — *Finished* and *Nearly there* at 34 and 67 — which is neither
-   the drawing's vocabulary nor Analytics'. Corrected at §378, and the check
+   the drawing's vocabulary nor Analytics'. Corrected at §441, and the check
    asserts the pair AGREE rather than asserting either (§94.8).
 
    AND THE BREAK FOR THAT MAY NOT LIVE HERE, WHICH TOOK A GREEN

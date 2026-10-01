@@ -432,7 +432,7 @@ let failed = false;
 try {
   await owner("SET search_path TO " + SCHEMA);
   /* AND A RUN THAT NEVER REACHED ITS `finally` LEFT ITS WORLD BEHIND
-     (§379.15, by a third road): the drops are in the `finally` and a run
+     (§442.15, by a third road): the drops are in the `finally` and a run
      killed before the `try` — a syntax error while this file is being
      written — never runs them, so today's crashing runs left sixteen pairs
      and `checks/memory-page.mjs` went 2 red naming a client it never made,

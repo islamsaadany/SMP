@@ -185,7 +185,7 @@ textarea.fld{min-height:64px;resize:vertical}
 /* THE QUIET WORD FOR AN ABSENCE. It was declared as .none2 and used as
    .none for one slice, so *No checkpoint set* drew in full ink where the
    drawing has it grey — the rule and the markup disagreeing, which renders
-   perfectly (§96) and was found by reading. §378.
+   perfectly (§96) and was found by reading. §441.
    AND NO BACKTICK MAY APPEAR IN THIS COMMENT: the whole stylesheet is one
    template literal, so a quoted class name here ENDS it (§272.8, §357.3
    — walked into while writing this very note). */
@@ -249,7 +249,7 @@ function awayIn(d: string, today: string): string {
   const n = daysTo(d, today);
   return n === 0 ? "today" : n === 1 ? "tomorrow" : "in " + plural(n, "day");
 }
-/* HOW FAR ALONG IS `lib/portfolio.ts`'s ANSWER AND NOT THIS FILE'S (§378).
+/* HOW FAR ALONG IS `lib/portfolio.ts`'s ANSWER AND NOT THIS FILE'S (§441).
    It had five words and three thresholds of its own here for one slice —
    *Finished* and *Nearly there* at 34 and 67 — which is neither the
    drawing's vocabulary (`_derive.js`: Done · Nearly done · Under way ·
@@ -386,7 +386,7 @@ export async function landingDocument(a: LandingArgs): Promise<string> {
    (§5.2). The window is `SOON`, read from lib/portfolio.ts rather than typed
    again (§9.13a's own lesson) — **which this file said and did not do for
    one slice**, declaring its own 14 directly under that sentence (§104.8).
-   Corrected at §378. */
+   Corrected at §441. */
 function commitmentsBlock(seen: Seen[], today: string): string {
   type C = { s: Seen; r: Row };
   const all: C[] = [];
@@ -534,8 +534,8 @@ export function seeProject(project: Project, rows: Row[], today: string, mine: b
 
 /* ══ the four tabs (§4 row 1, §9.9 decision 3) ═════════════════════════ */
 /* ALL FOUR ARE BUILT AND EVERY ONE IS A LINK, AND THAT SENTENCE IS THE EDIT
-   §379 MADE HERE: this comment read *two of the four are not built and the
-   row says so* until Progress and Analytics landed (§378), so it went on
+   §442 MADE HERE: this comment read *two of the four are not built and the
+   row says so* until Progress and Analytics landed (§441), so it went on
    describing an intention the code beneath it had stopped carrying out
    (§104.8) — the one fault in this file nothing can go red on, because a
    stale comment renders perfectly. The tab you are ON carries the word and

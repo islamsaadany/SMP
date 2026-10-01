@@ -90,9 +90,9 @@ const post = async (tenantId, who, body) => {
 };
 
 let failed = false;
-/* THE TWO CLIENTS THIS MAKES ARE DROPPED IN THE `finally` (§379.15), declared
-   out here so a throw still clears them. Written without it at §376, this had
-   left **100 pairs** of tenants in the check database by the end of §379 —
+/* THE TWO CLIENTS THIS MAKES ARE DROPPED IN THE `finally` (§442.15), declared
+   out here so a throw still clears them. Written without it at §439, this had
+   left **100 pairs** of tenants in the check database by the end of §442 —
    and litter is not tidiness, it is a moving subject: the console's Memory
    page defaults to the FIRST client BY NAME, and `RHI` sorts before
    `Raya Trade` in a case-sensitive sort, so `checks/memory-page.mjs` went 2
@@ -105,7 +105,7 @@ try {
   await owner("SET search_path TO " + SCHEMA);
   const TODAY = todayIn();
   /* AND A RUN THAT NEVER REACHED ITS `finally` LEFT ITS WORLD BEHIND
-     (§379.15, by a third road): the drops are in the `finally` and a run
+     (§442.15, by a third road): the drops are in the `finally` and a run
      killed before the `try` — a syntax error while this file is being
      written — never runs them, so today's crashing runs left sixteen pairs
      and `checks/memory-page.mjs` went 2 red naming a client it never made,
@@ -357,7 +357,7 @@ try {
   check("the status column says what the status MEANS, not only what it is called — *Done* beside *Completed* asks the reader to have been told the difference (§6.2, §87)",
     /Waiting to sign off/i.test(marks) && !/>DONE</.test(marks),
     (marks.match(/class="st [a-z]*">[^<]*/g) || []).join(" | "));
-  /* THE DATE IS DERIVED FROM `TODAY`, never typed (\u00a7379.11, \u00a7377):
+  /* THE DATE IS DERIVED FROM `TODAY`, never typed (\u00a7442.11, \u00a7440):
      written as `27 Feb 2027` this read a day that was 150 ahead when it was
      written and is 149 ahead now, so the file went red on a correct build the
      day the clock passed it \u2014 the same fault `checks/tracker.mjs` carried
@@ -427,7 +427,7 @@ try {
   const panelHtml = await opened.text();
   check("an activity opens a panel rather than a page (§4)", /class="act"/.test(panelHtml) && /Behavioural blueprint/.test(panelHtml));
   check("...carrying what it produces and what it is about", /documented set of behavioural pillars/.test(panelHtml));
-  /* REWRITTEN AT §380, NEVER LOOSENED (§214.3, §218): this held the read
+  /* REWRITTEN AT §443, NEVER LOOSENED (§214.3, §218): this held the read
      panel's own wording and its `.w` cell, and the writing half draws the same
      three facts in a cell a Lead can type into — so what is asserted is the
      three STEPS, their weights, and that the figure is said to come from them,
@@ -453,7 +453,7 @@ try {
      "rate" — which the module switcher's own *Strategy* contains, so the
      first version of this reported a correct build broken (§100.3). */
   const labels = (panelHtml.match(/<em>([^<]*)<\/em>/g) || []).map((m) => m.slice(4, -5));
-  /* REWRITTEN AT §380, NEVER LOOSENED (§214.3, §218): the signed-off
+  /* REWRITTEN AT §443, NEVER LOOSENED (§214.3, §218): the signed-off
      writing drawing puts *A milestone* and *Billable* together under ONE label,
      *Marks*, where the read panel had a `Billable` row of its own answering
      *Yes* — so the word that carried the claim moved. THE CLAIM HAS NOT: it
@@ -499,7 +499,7 @@ try {
     /class="tabs"/.test(mineOpen.html));
   /* EVERY TAB IS EITHER A LINK OR A WORD, AND WHICH IT IS FOLLOWS FROM
      WHETHER IT IS BUILT — asserted as that rule rather than by naming the
-     two that were unbuilt when this was written (§214.3, §218: §378 opened
+     two that were unbuilt when this was written (§214.3, §218: §441 opened
      both, and a check holding the list would have gone red on a correct
      build). The word carries no href either way, or a row of dead words
      passes half (§113.8). */
@@ -726,7 +726,7 @@ try {
   check("...and its counts read a dash rather than a nought",
     /class="v">\u2014</.test(unread.html), (unread.html.match(/class="v">[^<]*/g) || []).join(" | "));
 
-  /* ══ §11 · WRITING THE PLAN (§15, §380) ════════════════════════════ */
+  /* ══ §11 · WRITING THE PLAN (§15, §443) ════════════════════════════ */
   /* A PROJECT OF ITS OWN, so nothing here moves what §8–§10 measured
      (§94.2) — and three audiences on it, because §15.7 is about which half
      of one panel each of them sees and a file with only a Lead on it proves
@@ -1070,7 +1070,7 @@ try {
     new RegExp('data-row="' + pkg.id + '" data-kind="package"').test(pen2.html),
     (pen2.html.match(/data-kind="(phase|package)"/g) || []).join(" | "));
 
-  /* ══ §12 · THE PRESS ITSELF, IN A BROWSER (§380.8) ══════════════════ */
+  /* ══ §12 · THE PRESS ITSELF, IN A BROWSER (§443.8) ══════════════════ */
   /* EVERY ASSERTION ABOVE BUILDS ITS OWN REQUEST BODY, so not one of them
      ever drove the request the BROWSER makes — and the browser's was missing
      the project on all fifteen acts, so every press in edit mode came back
@@ -1079,7 +1079,7 @@ try {
      `serve()` the route calls, bridged from Node's request to a fetch
      Request — and Chromium presses the controls while the DATABASE is read
      back (§70: a control is pressed, never looked for). */
-  section("§12 · pressed in a browser, with the rows read back from Postgres (§380.8)");
+  section("§12 · pressed in a browser, with the rows read back from Postgres (§443.8)");
   const BP = await post(A, SEAT, { act: "start", name: "Press test" });
   const bproj = BP.json.id;
   const { createServer } = await import("node:http");

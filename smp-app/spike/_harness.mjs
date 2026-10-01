@@ -134,7 +134,7 @@ export async function seedTwoTenants(owner) {
 }
 
 /* AN ENUMERATED COLUMN NAMES ITS OWN LEGAL VALUES, SO IT IS ASKED RATHER THAN
-   LISTED (§379.12, §104.7). This held two hand-written cases —
+   LISTED (§442.12, §104.7). This held two hand-written cases —
    `swot_items.cat` and `access_grants.grant_` — and a third module's
    `tracker_events.kind` broke it, which is the shape of a list somebody
    forgets to add to. Postgres normalises `CHECK (col IN (…))` to
@@ -156,11 +156,11 @@ function placeholder(col, table, enums) {
   if (t === "jsonb" || t === "json") return "'{}'";
   if (t.startsWith("timestamp")) return "now()";
   /* A DATE, A TIME AND A FLOAT ARE ORDINARY COLUMN TYPES AND THIS TABLE NAMED
-     NONE OF THEM (§379.12). `notes.met_on` is `date NOT NULL` with no default
+     NONE OF THEM (§442.12). `notes.met_on` is `date NOT NULL` with no default
      (§357), so from the day Meeting Notes landed this threw on that one column
      and took S2, S4 and S5 down with it — every table after `notes` in the FK
      order went unwalked, which on the isolation proof means unproven rather
-     than merely unreported. §376 recorded it as somebody else's and left it.
+     than merely unreported. §439 recorded it as somebody else's and left it.
      The throw below is what made it findable at all and STAYS (§54.5): a
      fixture that silently skipped the column would have seeded a row the
      database refuses and blamed the product. What is fixed is the CLASS and
@@ -219,7 +219,7 @@ export async function seedRows(owner, tenantId) {
        NOT NULL — the first nullable one only (pillars_one_owner wants exactly
        one of two). */
     /* A SELF-REFERENCE CAN NEVER BE SATISFIED BY A TABLE'S FIRST ROW, AND NULL
-       IS THE CORRECT SEED FOR ONE (§379.12). `portfolio_activities.depends_on`
+       IS THE CORRECT SEED FOR ONE (§442.12). `portfolio_activities.depends_on`
        is a nullable self-FK with `ON DELETE SET NULL` and a CHECK forbidding a
        row depending on itself (§375), and the candidate list is ordered by
        constraint name — `depends_on` before `phase_id` — so the rule below

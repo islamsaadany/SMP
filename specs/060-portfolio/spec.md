@@ -2553,7 +2553,7 @@ checked against that namespace rather than guessed at.
 
 Neither is visual and neither needs a sign-off. `modules/portfolio/page.ts`
 carried a comment above `TABS` reading *two of the four are not built and the
-row says so* &mdash; true until &sect;378 built Progress and Analytics, and
+row says so* &mdash; true until &sect;441 built Progress and Analytics, and
 describing an intention the code beneath it had stopped carrying out
 (&sect;104.8). `modules/portfolio/plan.ts`'s header named the same two as *not
 yet* in its what-is-not-built list. **A stale comment renders perfectly and
@@ -2673,7 +2673,7 @@ reporting clean. *A check that cannot connect reports no failures* (&sect;54.5),
 and the verdict line is matched by its own shape now.
 
 **And a run that dies before its `finally` leaves its world behind**
-(&sect;379.15 by a third road): today's syntax-error runs never reached the
+(&sect;442.15 by a third road): today's syntax-error runs never reached the
 drops, so sixteen tenant pairs stayed and `checks/memory-page.mjs` went **2
 red** naming a client it never created &mdash; the console's Memory page opens
 on the FIRST client BY NAME and `RHI` sorts before `Raya Trade`. Both portfolio

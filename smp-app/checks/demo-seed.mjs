@@ -18,7 +18,7 @@
    Re-runnable: it seeds the demo tenant each time, with --replace. */
 import { createRequire } from "node:module";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
-import { PLATFORM_TABLES } from "../lib/schema-check.ts";  /* not a tenant's, so not fenced (§331, §379.13) */
+import { PLATFORM_TABLES } from "../lib/schema-check.ts";  /* not a tenant's, so not fenced (§331, §442.13) */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
@@ -52,7 +52,7 @@ try {
      §317.4 correctly moved this pool's path at line 37 and left this query
      naming the room the tables had just left. It then found nought tables and
      scanned nothing, and a scan of nothing finds no forbidden name.
-     AND CARRYING A `tenant_id` IS NOT THE SAME AS BEING A TENANT'S (§379.13):
+     AND CARRYING A `tenant_id` IS NOT THE SAME AS BEING A TENANT'S (§442.13):
      `tenant_users` and `memory_entries` carry one and are the PLATFORM's, so
      row-level security deliberately does not fence them (§331) — and this
      scan runs under `withTenant`, whose narrowing IS that fence, so on those

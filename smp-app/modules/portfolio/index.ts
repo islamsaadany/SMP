@@ -17,7 +17,7 @@
    drew: the rules are lib/portfolio.ts's, the same ones the page asked before
    drawing the control (§61 — a control the server refuses is never drawn).
 
-   AND SINCE §380 A PLAN IS WRITTEN HERE TOO (§15). THE PEN IS THE ADDRESS
+   AND SINCE §443 A PLAN IS WRITTEN HERE TOO (§15). THE PEN IS THE ADDRESS
    (`?edit=1`) and the gate is on the RENDER, so a page in edit mode is only
    ever drawn for somebody `mayBuildPlan` allows and every control inside it
    reaches nobody else's document (§61) — and every write below is judged
@@ -93,7 +93,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
      which must leave the chart complete and the elbows absent — a page that
      needs its script to be correct is a page that is wrong without one. */
   if (first === "plan.js" && a.rest.length === 1) return script(PLAN_JS);
-  /* The pen's own script (§15, §380) — served to anybody, because it does
+  /* The pen's own script (§15, §443) — served to anybody, because it does
      nothing without the api's own answers and every one of those is judged
      against the stored row (§42). */
   if (first === "write.js" && a.rest.length === 1) return script(WRITE_JS);
@@ -300,7 +300,7 @@ async function act(c: Q, body: Record<string, unknown>, a: ServeArgs, office: bo
   }
 
 
-  /* ══ WRITING THE PLAN (§15, §380) ════════════════════════════════════ */
+  /* ══ WRITING THE PLAN (§15, §443) ════════════════════════════════════ */
   /* EVERY ONE OF THESE IS JUDGED AGAINST THE STORED ROW AND THE STORED
      MEMBERSHIP, never against what drew the control (§42) — the page asked
      the same rules before drawing it (§61), and asking twice is what makes

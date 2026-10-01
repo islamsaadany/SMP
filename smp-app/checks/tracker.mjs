@@ -285,7 +285,7 @@ try {
      headings where the assertion counted three and this file had been four
      red for ten days. They are relative to today now, far enough either side
      of this week that neither can collide with it — which is the rule the
-     Portfolio check was given at §377 and this one was not. §379. */
+     Portfolio check was given at §440 and this one was not. §442. */
   const DAY = (n) => new Date(Date.parse(todayIn() + "T00:00:00Z") + n * 864e5).toISOString().slice(0, 10);
   const BACK = DAY(-10), AHEAD = DAY(35);
   const d3 = await asTenant(A, (c) => setFields(c, a1.id, { due: null }));
@@ -439,7 +439,7 @@ try {
      `todayIn()` compares two different todays and calls a correct page broken
      (§122.4's family). Both sides read `TODAY` now, so the assertion is an
      AGREEMENT that survives the clock moving rather than a string that goes
-     stale in it (§94.8). §379. */
+     stale in it (§94.8). §442. */
   check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
     heads(byWeek).join("|") === [...new Set([realThu, BACK, AHEAD].map(thursdayOf))].sort().map((t) => weekWord(t, TODAY) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
@@ -832,7 +832,7 @@ try {
        (§50.6, §100.3): every row carries one and all the others are CLOSED, so
        an unscoped probe measured a hidden list and reported box 0 and row 0 —
        a correct build called broken, with the assertion two lines above it
-       passing because THAT one is scoped. Found by running it. §379. */
+       passing because THAT one is scoped. Found by running it. §442. */
     const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .team');if(!t)return null;var c=getComputedStyle(t);"
       + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
       + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"

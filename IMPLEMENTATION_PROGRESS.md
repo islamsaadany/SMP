@@ -5774,7 +5774,7 @@ read-only dates at once, which is exactly what a permission gate doing nothing
 looks like; and the breakdown's name and weight were boxes for whoever was
 reporting, quietly letting them re-weight their own work.
 
-**Four things are asked** (§379.9): where *who is on a project* hangs — drawn
+**Four things are asked** (§442.9): where *who is on a project* hangs — drawn
 and signed off with no home named, and the tab row was agreed as four —
 whether a Lead may name people, whether a removed row is worth keeping, and
 whether the plan needs an undo.
@@ -5782,11 +5782,11 @@ whether the plan needs an undo.
 **And two stale comments were corrected in the code**, neither visual and
 neither needing a sign-off: `page.ts` said *two of the four are not built* over
 a `TABS` list where all four are, and `plan.ts`'s header named the same two as
-*not yet*. §378 built them and the comments stayed behind for a round (§104.8).
+*not yet*. §441 built them and the comments stayed behind for a round (§104.8).
 **A stale comment renders perfectly and nothing can go red on it.**
 
 **And one of the checks has been failing for ten days, so it is fixed
-(§379.11).** The Internal Tracker's check has read *4 failed* since the 20th.
+(§442.11).** The Internal Tracker's check has read *4 failed* since the 20th.
 Two earlier rounds looked at it, proved it was not their doing by running it
 against the code as it stood before them, wrote that down — and left it
 failing. That is the honest thing to do and it is only half the job: a failure
@@ -5806,7 +5806,7 @@ rather than typed, so they cannot go stale again; the check reads **228 passed,
 which is what says the fix did not buy the green by removing what it checks.
 
 **And then the whole suite was run, which found four more things and not one
-of them in the product (§379.12–§379.15).** All four are checks, and the
+of them in the product (§442.12–§442.15).** All four are checks, and the
 pattern is the same one every time: a check that is measured against the wrong
 world reads exactly like a broken product.
 

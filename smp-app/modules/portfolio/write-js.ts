@@ -1,4 +1,4 @@
-/* ── WRITING A PLAN: the one script (spec 060 §15, §380) ──────────────────
+/* ── WRITING A PLAN: the one script (spec 060 §15, §443) ──────────────────
    Served at /<client>/portfolio/write.js under the shell's `script-src 'self'`
    (lib/shell.ts), and nothing inline. It does one kind of thing: a control is
    pressed or a box is left, the change is POSTed to the module's own api, and

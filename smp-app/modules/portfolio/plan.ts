@@ -28,7 +28,7 @@
    on the build it was written for). `plan.js` measures the two rows and draws
    it; with no script the chart is complete and the elbows are simply absent.
 
-   AND SINCE §380 IT IS ALSO WHERE A PLAN IS WRITTEN (§15), from the drawing
+   AND SINCE §443 IT IS ALSO WHERE A PLAN IS WRITTEN (§15), from the drawing
    Islam signed off with *I want to start planning*. THE PEN IS THE ADDRESS
    (`?edit=1`), which is this page's own idiom — the view switch is two links
    already — and it means every control in edit mode is in the document only
@@ -45,9 +45,9 @@
    decided (§9.4); **inserting a row in the middle** — a row is appended and
    moved up, which is §15.3's stated cost; and **an archive of a removed
    row**, which is §15.9's third open question rather than an omission.
-   Progress and Analytics were on this list until §378 built them, and the
+   Progress and Analytics were on this list until §441 built them, and the
    clause naming them stayed behind for a round — §104.8 in a header, removed
-   at §379. */
+   at §442. */
 import { type ModuleKey, clientHref } from "../../lib/modules.ts";
 import { barFor } from "../../lib/branding.ts";
 import {
@@ -406,7 +406,7 @@ const hid = (yes: boolean) => (yes && brk() !== "both-views" ? " hidden" : "");
    and the panel says THAT instead — two honest answers rather than one that
    is true half the time (§35).
 
-   AND SINCE §380 TWO AUDIENCES SHARE IT AND SEE DIFFERENT HALVES (§15.7):
+   AND SINCE §443 TWO AUDIENCES SHARE IT AND SEE DIFFERENT HALVES (§15.7):
 
      · a Lead or a seat (`mayBuildPlan`) writes every fact on the row;
      · the person it is assigned to (`mayReport`) gets the breakdown's status

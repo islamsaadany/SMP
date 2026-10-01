@@ -24,7 +24,7 @@
 
    WHAT THE DRAWING'S BOUND HAS AND THIS ONE DOES NOT, said rather than left
    to be discovered (§54.5): *not before the day the work was marked done*.
-   **There is no column for that day** (§13.6, §377.6) — the platform stores
+   **There is no column for that day** (§13.6, §440.6) — the platform stores
    when work was ACCEPTED, which is right, and never when somebody marked it
    done. So the lower bound is the day the work STARTED, which is stamped,
    and the drawing's stricter half is a recorded decision rather than a

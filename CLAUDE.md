@@ -8181,7 +8181,7 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # &sect;356.7), one real page fault (`hidden`
                                 # hiding nothing under an author display,
                                 # &sect;356.8) and three faults of its own.
-                                # AND SINCE &sect;379.11 ITS DATES ARE
+                                # AND SINCE &sect;442.11 ITS DATES ARE
                                 # RELATIVE TO TODAY AND ITS PROBES ARE SCOPED
                                 # TO THE ROW THAT WAS PRESSED: it read 224/4
                                 # for ten days on three faults, every one of
@@ -8189,7 +8189,7 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # that became THIS WEEK'S own Thursday, so
                                 # the grouping drew two headings where the
                                 # assertion counted three (&sect;13.9,
-                                # &sect;214.3, and &sect;377 wrote that rule
+                                # &sect;214.3, and &sect;440 wrote that rule
                                 # down naming this file); an unscoped
                                 # `.team` measuring a CLOSED list from
                                 # another row and reporting `box 0, row 0`,
@@ -8254,7 +8254,7 @@ node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # which is what rule 1c's last step is for
 node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # landing and a project's charter (spec 060 &sect;12,
-                                # &sect;376) &mdash; `npm run check:portfolio:module`, needs a
+                                # &sect;439) &mdash; `npm run check:portfolio:module`, needs a
                                 # database and no browser. It DRIVES `serve()` with the
                                 # exact arguments the route hands a module (&sect;96: a
                                 # server wired to the wrong module renders perfectly) and
@@ -8282,7 +8282,7 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # was replaced with one that makes the cell print 0%: the
                                 # actual fault, a project with no plan reading as one that
                                 # has done nothing.
-                                # AND SINCE &sect;377 IT COVERS THE PLAN IN BOTH VIEWS
+                                # AND SINCE &sect;440 IT COVERS THE PLAN IN BOTH VIEWS
                                 # (spec 060 &sect;13): every figure on the page asserted
                                 # against `rollUp`'s OWN answer rather than a typed
                                 # number (&sect;94.8), so a change to the roll-up moves
@@ -8307,12 +8307,12 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # script to be correct is wrong without one. It asserts
                                 # **EXACTLY ONE** overrun rather than at least one, so the
                                 # day the day-work-was-marked-done column lands
-                                # (&sect;377.6, recorded not fixed) this goes red rather
+                                # (&sect;440.6, recorded not fixed) this goes red rather
                                 # than passing quietly. **Its dates are relative to
                                 # `todayIn()`, never typed** &mdash; the one lesson
                                 # `checks/tracker.mjs` is four failures short of
                                 # (&sect;214.3). 80/0, red NINE ways.
-                                # AND SINCE &sect;378 IT COVERS PROGRESS AND ANALYTICS
+                                # AND SINCE &sect;441 IT COVERS PROGRESS AND ANALYTICS
                                 # (spec 060 &sect;14), the two screens that READ that
                                 # plan &mdash; so every count and every bar is asserted
                                 # against the rules' own answer and never a typed one
@@ -8353,13 +8353,13 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # can check by reading; and one assertion ended in
                                 # `|| true` and could not fail (&sect;113.8). Its tab
                                 # assertion was REWRITTEN, never loosened (&sect;218):
-                                # it held &sect;376's *the unbuilt tabs carry no link*,
+                                # it held &sect;439's *the unbuilt tabs carry no link*,
                                 # which this slice moves, and its first rewrite then
                                 # reported a CORRECT build broken by testing
                                 # `href=".../plan"` against the whole document, where
                                 # the plan page's own List/Timeline switch holds one
                                 # (&sect;100.3) &mdash; scoped to the tab row now.
-                                # AND SINCE &sect;379 ITS UNBUILT-TAB ASSERTION IS A
+                                # AND SINCE &sect;442 ITS UNBUILT-TAB ASSERTION IS A
                                 # CONTROL AND SAYS SO: all four tabs are built, so
                                 # `UNBUILT_TABS` is empty and the assertion is
                                 # vacuous &mdash; kept rather than deleted, because
@@ -8371,7 +8371,7 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # cannot fail is kept only where it is NAMED as the
                                 # control, and `modules/portfolio/page.ts` carries
                                 # the other half of that note beside `TABS`.
-                                # AND SINCE &sect;380 ITS &sect;11 WRITES THE PLAN (spec
+                                # AND SINCE &sect;443 ITS &sect;11 WRITES THE PLAN (spec
                                 # 060 &sect;16): the pen is an ADDRESS and the gate is on
                                 # the RENDER, asserted at both ends &mdash; the strip, the
                                 # add rows and the script for a seat and for a Lead, and
@@ -8409,8 +8409,8 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # before the `try` never reaches the `finally`, and
                                 # today's syntax-error runs left sixteen tenant pairs,
                                 # which took `checks/memory-page.mjs` 2 red naming a
-                                # client it never made (&sect;379.15 by a third road).
-                                # AND SINCE &sect;380.8 ITS &sect;12 PRESSES THE REAL
+                                # client it never made (&sect;442.15 by a third road).
+                                # AND SINCE &sect;443.8 ITS &sect;12 PRESSES THE REAL
                                 # THING: the module served over a real port &mdash; the
                                 # same `serve()` the route calls, bridged from Node's
                                 # request to a fetch Request &mdash; and Chromium
@@ -8482,7 +8482,7 @@ node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # the check rather than in the drawing; it is asserted
                                 # beside the equally-weighted 50, so the number is pinned
                                 # by a difference and not only by itself.
-                                # AND SINCE &sect;380 ITS &sect;8c ASKS THE WRITING RULES,
+                                # AND SINCE &sect;443 ITS &sect;8c ASKS THE WRITING RULES,
                                 # which are pure, so they belong here rather than only
                                 # inside the module check that drives them through the api
                                 # &mdash; both are worth having: this says the rule is
@@ -9964,13 +9964,13 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 &mdash; **&sect;380: Portfolio &mdash; writing a
-plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;379 published
+*Last Updated: 2026-10-01 &mdash; **&sect;443: Portfolio &mdash; writing a
+plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;442 published
 &mdash; *"No I mean the plan in the porfiltio I wan to start planning I mean."*
 **THE SIXTH SCREEN WAS NEVER A SCREEN OF ITS OWN**: it is the writing half of
 two that already exist &mdash; the plan's tree and an activity's panel &mdash;
 plus the two dialogs writing needs, so all six of this module's screens now
-work. **&sect;379 IS LEFT EXACTLY AS IT WAS WRITTEN** (Principle II): it is the
+work. **&sect;442 IS LEFT EXACTLY AS IT WAS WRITTEN** (Principle II): it is the
 argument the sign-off was given on. Of its four open questions, two are the TEAM
 screen's and stay Islam's; two the drawing answered with a default and that
 default shipped &mdash; **no archive and no undo on a removed row, both said in
@@ -10021,7 +10021,7 @@ runner read `tail -1` and reported `135 passed, 0 failed` for a run that was
 (&sect;298.3) &mdash; **and what it hid is that `smp_app` could not
 authenticate, so every constraint and every RLS assertion was dying one at a
 time while the suite read clean** (&sect;54.5). And **a run that dies before its
-`finally` leaves its world behind** (&sect;379.15 by a third road): today's
+`finally` leaves its world behind** (&sect;442.15 by a third road): today's
 syntax-error runs left sixteen tenant pairs and took `checks/memory-page.mjs` 2
 red naming a client it never made, so both portfolio checks sweep anything of
 their own older than an hour before they start. Whole app suite re-run serially
@@ -10032,7 +10032,7 @@ memory 21/14/36/42/16 &middot; setup 33/0 &middot; deploy 5/0 &middot; standing
 92/0 &middot; door 70/0 &middot; shell 72/0 &middot; blob 23/23 &middot; comms
 47/47 &middot; upload 9/0 &middot; `generated-in-step` all clear &middot; `tsc`
 clean. **The frozen product is untouched**, so `sw.js` is NOT bumped.
-**&sect;380.8 &mdash; AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD
+**&sect;443.8 &mdash; AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD
 NOT SEE.** Islam, naming his first phase on the built page: **"Which
 project?"** &mdash; the script's `post()` sent the act and the view and **never
 the project**, on all fifteen acts, so every press in edit mode was refused
@@ -10056,10 +10056,10 @@ own first failures were the CHECK.
 control; nothing says who else is looking at a plan while it is restructured,
 which is the stated cost of having no Planning Mode; and a two-hundred-row plan
 is built from the workbook and not here (&sect;9.3). **On the branch, not
-merged** &mdash; `main` is Islam's word, on that merge, and &sect;379.17's
+merged** &mdash; `main` is Islam's word, on that merge, and &sect;442.17's
 measurement of it stands.*
 
-*Earlier: 2026-09-30 &mdash; **&sect;379: Portfolio &mdash; writing a
+*Earlier: 2026-09-30 &mdash; **&sect;442: Portfolio &mdash; writing a
 plan, DRAWN and not built (spec 060 &sect;15).** Five of Portfolio's six
 screens read and none of them writes; the sixth is not a screen the way the
 others were, it is the **writing half** of two that already exist &mdash; the
@@ -10110,22 +10110,22 @@ guessed at &mdash; four of the five were found one at a time first. Beside it:
 **`hidden` on a box with its own `display` hides nothing** (&sect;298.2,
 &sect;356.8, third time here), so the contributor state drew the date buttons
 AND the read-only dates at once, which is exactly what a permission gate doing
-nothing looks like. **FOUR THINGS ARE ASKED** (&sect;379.9), the first being
+nothing looks like. **FOUR THINGS ARE ASKED** (&sect;442.9), the first being
 where *who is on a project* hangs &mdash; drawn and signed off with no home
 named, against a tab row agreed as four. **AND TWO STALE COMMENTS WERE
 CORRECTED IN THE CODE**, neither visual: `page.ts` said *two of the four are
 not built* over a `TABS` list where all four are, and `plan.ts`'s header named
-the same two as *not yet* &mdash; &sect;378 built them and both comments stayed
+the same two as *not yet* &mdash; &sect;441 built them and both comments stayed
 behind for a round (&sect;104.8). **A stale comment renders perfectly and
 nothing can go red on it.**
-**&sect;379.11 &mdash; AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS
+**&sect;442.11 &mdash; AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS
 THREE FAULTS, EVERY ONE THE CHECK'S OWN**: `checks/tracker.mjs` has read
-224/4 since 20 September, and &sect;375 and &sect;376 each recorded it as *not
+224/4 since 20 September, and &sect;375 and &sect;439 each recorded it as *not
 this work's* &mdash; established the honest way, on a baseline worktree
 (&sect;303), and left standing. **&sect;303 settles WHOSE a red is and says
 nothing about whether anybody clears it**, so a failure with its provenance
 written down is still one people learn to scroll past (&sect;280.1) &mdash;
-and **&sect;377 wrote the rule down naming this exact file** (*"the one lesson
+and **&sect;440 wrote the rule down naming this exact file** (*"the one lesson
 `checks/tracker.mjs` is four failures short of"*) and left it four failures
 short of it. *A rule recorded against a file is not a rule applied to it.*
 (a) A typed `2026-10-01` was in the future when written and is **THIS WEEK'S
@@ -10143,11 +10143,11 @@ reported `box 0, row 0` &mdash; a correct build called broken (&sect;100.3,
 which is the assertion that matters, three of them standing on exactly the
 fixture dates this moved, where a repair that made them pass would have bought
 the green by taking the check's subject away (&sect;218).
-**&sect;379.12 &mdash; AND THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES'
+**&sect;442.12 &mdash; AND THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES'
 TABLES**: S2 is the isolation proof and it walks every tenant table in FK
 order, **dying on the fourth** &mdash; so every table after it went unwalked,
 which on an isolation proof is **unproven rather than merely unreported**
-(&sect;376 recorded it as somebody else's and left it, &sect;379.11 again).
+(&sect;439 recorded it as somebody else's and left it, &sect;442.11 again).
 **The throw is what made it findable and STAYS** (&sect;54.5 the useful way
 round): a fixture that silently dropped the column would have seeded a row the
 database refuses and **blamed the product**. **And fixing the CLASS rather than
@@ -10172,7 +10172,7 @@ that throws on the first missing thing hides the second*, cutting both ways.
 proofs green, six falsifications still red, and **S8 recorded UNRUN rather than
 passing** (&sect;54.5: it wants a v2.0-shaped database this container does not
 hold and says so itself).
-**&sect;379.13 &mdash; AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE
+**&sect;442.13 &mdash; AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE
 PLATFORM**: `checks/demo-seed.mjs`, the one file between a real client's names
 and a demo, read **102 hits** &mdash; the first a consultant's seat on another
 client &mdash; with nothing wrong with the demo. It derives its table list from
@@ -10185,24 +10185,24 @@ alarm) &mdash; one root, the list coming from a column rather than from the
 product's own shared, asserted answer, which is IMPORTED now. **The control
 still fires** (&sect;94.2, &sect;113.8): the same scan next door still finds a
 real name in Raya's rows. 7/7, both falsifications red.
-**&sect;379.14 &mdash; AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN**:
+**&sect;442.14 &mdash; AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN**:
 `state`, `door`, `shell`, `blob`, `comms` and `upload` each spawn `next start`,
 and **`.next/BUILD_ID` did not exist** &mdash; built, they read 92/0, 70/0,
 72/0, 23/23, 47/47 and 9/0. They had also been run as three concurrent batches
 against one set of ports, which gives the same sentence for a different reason.
 **Run them serially and check the build first**: &sect;105.6 reaches a whole
 sweep, where the wrong bytes are an absent build.
-**&sect;379.15 &mdash; AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A
+**&sect;442.15 &mdash; AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A
 THIRD**: the sweep's one remaining red was in a module this branch has never
 touched &mdash; `checks/memory-page.mjs` **2 red**, asserting that an insight
 names the client it came from and reading **RHI** where it expects **Raya
 Trade**, a client it never creates. **203 leftover tenants, all made that day**:
 five module checks each insert two clients under a timestamped key, one named
 *Raya Trade* and one named *RHI*, and **two of the five never dropped them**
-&mdash; `portfolio-module.mjs` (&sect;376, no cleanup at all) and
+&mdash; `portfolio-module.mjs` (&sect;439, no cleanup at all) and
 `insights.mjs`, whose delete sat inside the `try` under a comment reading *"the
 fixture goes, whatever happened above"* (&sect;104.8's third time in one day; a
-THROW skipped it, and a throw is what &sect;379.14 had been meeting all
+THROW skipped it, and a throw is what &sect;442.14 had been meeting all
 afternoon). **Litter is not untidiness, it is a moving subject**: the console's
 Memory page opens on the first client BY NAME and `RHI` sorts before `Raya
 Trade` case-sensitively, so a hundred portfolio runs quietly changed what
@@ -10211,49 +10211,46 @@ database rather than a row. Both drops move into the `finally`, and the proof is
 the COUNT: portfolio **121/0**, portfolio:module **119/0**, insights **127/0**,
 all five memory checks green (**42/0** where it was 40/2), and **one** tenant
 left afterwards, because a cleanup that runs and leaves rows is no cleanup.
-**&sect;379.16 &mdash; AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING
+**&sect;442.16 &mdash; AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING
 GENERATE**: four rounds reported `typecheck` as *clean but for `lib/prisma.ts`'s
 pre-existing error*, and it is not a fault in that file &mdash; `npm run build`
 begins with `prisma generate` and this container had never been built in, so
-the generated client carried no types to find. After &sect;379.14's build,
+the generated client carried no types to find. After &sect;442.14's build,
 `npm run typecheck` **exits 0 with nothing to say**. *"Pre-existing" answers
-whose a failure is and not what it is* &mdash; &sect;379.11's finding about
+whose a failure is and not what it is* &mdash; &sect;442.11's finding about
 &sect;303 in a second place the same day, four rounds having established it was
 not theirs and none having asked what it was.
-Verified: `check:portfolio:module` **119/0**, and after &sect;379.11&ndash;.16
+Verified: `check:portfolio:module` **119/0**, and after &sect;442.11&ndash;.16
 the whole app suite: setup 33/0, deploy 5/0, assistant 10/0, portfolio 121/0,
 insights 127/0, standing 7/0, demo **7/0**, room 10/0, modules 112/0, state
 92/0, door 70/0, shell 72/0, blob 23/23, comms 47/47, upload 9/0, notes 170/0,
 memory 21 &middot; 14 &middot; 36 &middot; **42** &middot; 16, frameworks 90/0,
 frameworks:page 64/0, tracker **228/0**, eight of the nine spike proofs (S8
-UNRUN, &sect;379.12), `generated-in-step` all clear, `built-in-step.py` all
-good and **`typecheck` clean** (&sect;379.16). The frozen product is untouched
+UNRUN, &sect;442.12), `generated-in-step` all clear, `built-in-step.py` all
+good and **`typecheck` clean** (&sect;442.16). The frozen product is untouched
 and measured, so **`sw.js` is NOT bumped**.
-**&sect;379.17 &mdash; AND THE MERGE IS MEASURED, NOT MADE**: `main` has moved
-**313 commits** under this branch (12 ahead) and is at **&sect;438**, fetched
+**&sect;442.17 &mdash; AND THE MERGE IS MEASURED, NOT MADE**: `main` has moved
+**313 commits** under this branch and is at **&sect;438**, fetched
 and looked at rather than assumed (&sect;313.37). **The expensive thing is not
 there** &mdash; main holds **no `modules/portfolio/`**, so nobody built these
 screens twice and the module is additive; spec 060 stops at &sect;10 there and
-this branch adds &sect;11&ndash;&sect;15; and **&sect;375 is already on main
-wearing that number**. **Four numbers collide** &mdash; this branch's
-&sect;376&ndash;&sect;379 name four other pieces of work on main &mdash; so they
-become &sect;439&ndash;&sect;442, renumbered BEFORE the merge, by matched text,
-in **both spellings** (&sect;264.3, &sect;336.1). **Eleven files touched on both
-sides**, each COMBINED never picked (&sect;318.7), three of them measured one at
-a time: main's `_harness.mjs` fix is better and is kept; main's `tracker.mjs`
-run here is **226/3**, so &sect;379.11 is still owed; and main carries neither
-&sect;379.13 nor &sect;379.15. The merge's own checklist &mdash; rebuild rather
-than merge the built file (&sect;91), re-run the four generators (&sect;329),
-re-carry the `.cjs` rule modules (&sect;335), `node --check sw.js`
-(&sect;146.2), grep the result for duplicate declarations (&sect;56.7), and
-confirm the SHELL name against `origin/main` immediately before the push
-(&sect;94.16) &mdash; is written down and **not started**.
-**`main` is Islam's word, on that merge.** **On the branch, not merged.***
+this branch adds &sect;11&ndash;&sect;16; and **&sect;375 is already on main
+wearing that number**. **Main's own &sect;376&ndash;&sect;380 are five other
+pieces of work**, so this branch's five sections are renumbered
+**&sect;439&ndash;&sect;443** BEFORE the merge, by matched text, in **all three
+spellings** (&sect;264.3, &sect;336.1, &sect;340.4) &mdash; **and the set is
+re-measured on the day of the merge rather than read off this paragraph**, which
+was written when the branch held four of them and then gained a fifth. **Eleven
+files touched on both sides**, each COMBINED never picked (&sect;318.7), three of
+them measured one at a time: main's `_harness.mjs` fix is better and is kept;
+main's `tracker.mjs` run here is **226/3**, so &sect;442.11 is still owed; and
+main carries neither &sect;442.13 nor &sect;442.15.
+**`main` is Islam's word, on that merge.***
 
-*Earlier the same day: **&sect;378: Portfolio &mdash; Progress and
+*Earlier the same day: **&sect;441: Portfolio &mdash; Progress and
 Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:
 **"ok for the progress and analytics too."** Built together, because **they
-read the same thing** &mdash; the plan &sect;377 built &mdash; and with them
+read the same thing** &mdash; the plan &sect;440 built &mdash; and with them
 **five of Portfolio's six screens work**; what is left is WRITING a plan, and
 the landing's own header says so (&sect;54.5). **THREE SCREENS, ONE READ, AND
 NOT ONE OF THEM COMPUTES A FIGURE**: `serve()` asks `planRows` once per request
@@ -10275,7 +10272,7 @@ real &mdash; refused BY NAME through the sentence `stampDates` already used
 progress figure stands, which is what keeps the on-time reading honest.
 **AND THE BOUND THE DRAWING ASKS FOR CANNOT BE ENFORCED, SO IT IS SAID**: the
 accepted date may not fall before the day the work was marked done, and **there
-is no such column** (&sect;377.6's absence from the other side) &mdash; the two
+is no such column** (&sect;440.6's absence from the other side) &mdash; the two
 bounds that CAN be checked are, and the departure is in the file's own header,
 because adding a stored date is its own decision (rule 1b). *A bound nothing
 can measure is a promise, and a promise inside a refusal is worse than a
@@ -10306,12 +10303,12 @@ a day (&sect;100.3); **three values read out of counted offsets were each wrong
 by one**, printing `&gt;100%` and `eadership interviews` &mdash; read out of the
 CAPTURE GROUP now, because *a magic offset in an assertion is a literal nobody
 can check by reading*; one assertion ended in `|| true` and could not fail
-(&sect;113.8); and the tab assertion held &sect;376's *the unbuilt tabs carry no
+(&sect;113.8); and the tab assertion held &sect;439's *the unbuilt tabs carry no
 link*, which this slice moves &mdash; REWRITTEN to the surviving rule, never
 loosened (&sect;218, &sect;214.3), and its first rewrite then reported a CORRECT
 build broken against the plan page's own List/Timeline switch. **RECORDED, NOT
 DONE**: the day work was marked done is not stored (one decision answers this
-and &sect;377.6 together), nothing records that a checkpoint HAPPENED so that
+and &sect;440.6 together), nothing records that a checkpoint HAPPENED so that
 line says only when the next falls due (&sect;124), and Analytics has no
 history because every figure on it is today's. **PROVED**: 119/0 red
 **FOURTEEN** ways &mdash; the five new ones 8 / 1 / 3 / 2 / 1, each reddening
@@ -10326,7 +10323,7 @@ signed-off drawings figure by figure** and reproduce them exactly (59% overall,
 product is untouched and MEASURED, so `sw.js` is not bumped. **On the branch,
 not merged.***
 
-*Earlier the same day: **&sect;377: Portfolio &mdash; the plan, in
+*Earlier the same day: **&sect;440: Portfolio &mdash; the plan, in
 two views (spec 060 &sect;13).** The second slice on the same word &mdash;
 **"write it into the spec first, then start building"** &mdash; and the one
 Progress and Analytics both wait on: a project's **plan READ**, in the two
@@ -10337,7 +10334,7 @@ because `planRows` is asked once, `rollUp` writes the parents' figures onto
 that array once, and both views map over it &mdash; **nothing on the page
 computes a figure**, so the check asserts every one of them against `rollUp`'s
 own answer rather than a typed number (&sect;94.8). **AND THAT FOUND A REAL
-FAULT IN &sect;376's OWN SLICE**: a phase sorted after its own children, so
+FAULT IN &sect;439's OWN SLICE**: a phase sorted after its own children, so
 the numbering read `0.1 0.2 1 1.1` &mdash; and worse, `rollUp` and `kidsOf`
 read that array **BY POSITION**, so every figure the landing drew for such a
 project was made of the wrong set; **invisible in slice 1**, whose only
@@ -10370,7 +10367,7 @@ goes red (&sect;113.8). **A PHASE HAS NO OWNER AND THE DRAWING SHOWS ONE**
 LEFT THE TRACKER**, which `lib/notes.ts`'s own note prescribed for the third
 module (`lib/day.ts`, `lib/people.ts`, re-exported so every caller is
 untouched, the move asserted behaviour-neutral) &mdash; **and the fault that
-forced it was mine**, &sect;376 having written a second `todayIn` inside the
+forced it was mine**, &sect;439 having written a second `todayIn` inside the
 module, which is how a row reads *late* on one screen and not another;
 `addDays`/`daysBetween` stay written twice and it is SAID (&sect;53.5 flagged,
 not folded in). **THE FIXTURE'S DATES ARE RELATIVE TO TODAY**, which is the
@@ -10383,7 +10380,7 @@ insights 127/0 &middot; notes 170/0 &middot; `generated-in-step` all clear
 (&sect;303). The frozen product is untouched and MEASURED, so `sw.js` is not
 bumped. **On the branch, not merged.***
 
-*Earlier the same day: **&sect;376: Portfolio &mdash; the reference
+*Earlier the same day: **&sect;439: Portfolio &mdash; the reference
 code read, and the module serving itself (spec 060 &sect;11, &sect;12).** Islam:
 **"ok for the landing"**, then **"ok for the progress and analytics too"**
 &mdash; rule 1c paid in full for all six screens &mdash; then, of the modules

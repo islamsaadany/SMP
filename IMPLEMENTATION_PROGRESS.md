@@ -4,11 +4,11 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-01 — where the strategy is planned, and the divisions read under it (§440), on the branch, not merged.** On Client set-up › Structure the top card now asks where the strategy is planned: on the company or on the business units. It replaces the On/Off on the business units' card and stores the same answer, so nothing changes for a client already set up. Planned on the company, the navigation's top button reads Strategy and the division dropdown goes; each division with functions linked to it appears on Strategy › Performance's row beside the company, showing its reading from those functions only.
+**2026-10-01 — where the strategy is planned, and the divisions read under it (§448), on the branch, not merged.** On Client set-up › Structure the top card now asks where the strategy is planned: on the company or on the business units. It replaces the On/Off on the business units' card and stores the same answer, so nothing changes for a client already set up. Planned on the company, the navigation's top button reads Strategy and the division dropdown goes; each division with functions linked to it appears on Strategy › Performance's row beside the company, showing its reading from those functions only.
 
-**2026-09-30 — an Objectives & actions unit moves across too (§439.1), on the branch, not merged.** Switching business units off moved nothing on El Abd, because its units plan in objectives and actions and the move only copied pillars. Now each such unit arrives on the company page as one direction under its own name: its objectives become that direction's measures and its actions become its tactics, with every figure; an action's date becomes the quarter it falls in, and the date is kept. Units planning in Projects are still not moved. On El Abd: switch business units back on, then off again, to run the move.
+**2026-09-30 — an Objectives & actions unit moves across too (§447.1), on the branch, not merged.** Switching business units off moved nothing on El Abd, because its units plan in objectives and actions and the move only copied pillars. Now each such unit arrives on the company page as one direction under its own name: its objectives become that direction's measures and its actions become its tactics, with every figure; an action's date becomes the quarter it falls in, and the date is kept. Units planning in Projects are still not moved. On El Abd: switch business units back on, then off again, to run the move.
 
-**2026-09-30 — one company, its directions on its own page (§439), on the branch, not merged.** Setup › Client set-up › Structure: the business units' card now has an On/Off. Pressing Off asks first; *Move them and switch off* copies every unit's directions onto the company page with all their figures, keeps each unit's old page (Foundation and SWOT) in the archive, and takes the units out of the navigation. The company page then holds the Foundation, the SWOT, the directions and the capabilities as separate sections; its Performance shows the directions averaged equally. Each direction's owner reports their own direction and cannot submit the company's report. Switching back on brings the units back as they were. Checked on the screen and on the server, and both checks fail when the change is removed. El Abd itself has not been switched — that is a press on the live client.
+**2026-09-30 — one company, its directions on its own page (§447), on the branch, not merged.** Setup › Client set-up › Structure: the business units' card now has an On/Off. Pressing Off asks first; *Move them and switch off* copies every unit's directions onto the company page with all their figures, keeps each unit's old page (Foundation and SWOT) in the archive, and takes the units out of the navigation. The company page then holds the Foundation, the SWOT, the directions and the capabilities as separate sections; its Performance shows the directions averaged equally. Each direction's owner reports their own direction and cannot submit the company's report. Switching back on brings the units back as they were. Checked on the screen and on the server, and both checks fail when the change is removed. El Abd itself has not been switched — that is a press on the live client.
 
 **2026-09-30 — a business unit says how it plans in Client set-up (§438), merged to main 2026-09-30.** The Business units step of Client set-up now has the same *plans in* dropdown every supporting function row already has: Pillars, Projects or Objectives & actions, starting at Pillars so nothing changes today. On a client that already holds a plan it works like the function row: a warning first, the old plan hidden and kept, and switching back brings it back. The same choice is still in the unit's Edit details on Setup › Business units. Checked in the browser and on the set-up flow's own answer; both checks fail when the change is removed.
 
@@ -1317,17 +1317,17 @@ is Islam's *"for now"* left open.
 
 ---
 
-## 2026-10-01 — §441.1: the Off button on Focus measures works
+## 2026-10-01 — §449.1: the Off button on Focus measures works
 
-Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §441, which is on the branch and reaches the live site when it is merged.
+Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §449, which is on the branch and reaches the live site when it is merged.
 
-## 2026-10-01 — the company page follows its own Structure (§441)
+## 2026-10-01 — the company page follows its own Structure (§449)
 
-Four from Islam on the company page. The Performance page's Themes section now shows only while Themes are ticked on for the top layer, and its capabilities section only while capabilities are on — called by the client's own word ("Capabilities"), never "Group capabilities". A company with its own pillars opens on Strategy › Pillars; a group with no plan still opens on Performance, so Raya's group page is unchanged. The Focus tab disappears when Focus measures are switched off (the switch stays on Setup › Focus measures), and the company's own pillars are a place to mark on Setup › Focus measures and show on the Focus board. Nothing stored moves. `single-company.py` gains §441, red 5 with the changes taken out. On the branch, not merged.
+Four from Islam on the company page. The Performance page's Themes section now shows only while Themes are ticked on for the top layer, and its capabilities section only while capabilities are on — called by the client's own word ("Capabilities"), never "Group capabilities". A company with its own pillars opens on Strategy › Pillars; a group with no plan still opens on Performance, so Raya's group page is unchanged. The Focus tab disappears when Focus measures are switched off (the switch stays on Setup › Focus measures), and the company's own pillars are a place to mark on Setup › Focus measures and show on the Focus board. Nothing stored moves. `single-company.py` gains §449, red 5 with the changes taken out. On the branch, not merged.
 
 ---
 
-## 2026-10-01 — the company button names the layer (§440.1)
+## 2026-10-01 — the company button names the layer (§448.1)
 
 Planned on the company, the top navigation button now reads the first layer's name from Structure (for example "Company") instead of "Strategy", so it no longer clashes with the Strategy tab under it. On the branch, not merged.
 
@@ -8376,4 +8376,4 @@ The yearly revision stays one for the whole client. Checked with the new
 `checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
 Not on main.
 
-- **§442 (2026-10-01, on the branch):** on Client set-up › Structure, the two buttons for where the strategy is planned now sit under the question instead of at the far end of the line.
+- **§450 (2026-10-01, on the branch):** on Client set-up › Structure, the two buttons for where the strategy is planned now sit under the question instead of at the far end of the line.

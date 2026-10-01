@@ -1,4 +1,4 @@
-"""One company, its directions on its own page (§439).
+"""One company, its directions on its own page (§447).
 
 Islam, of El Abd: *"a one company with multiple directions … all the
 directions and the Foundation and the SWAT belongs to its page only without
@@ -44,7 +44,7 @@ with sync_playwright() as p:
     pg.add_init_script("try{sessionStorage.setItem('smp.welcome.done','1');localStorage.setItem('smp.tour.never','1')}catch(e){}")
     pg.goto("file://" + os.path.abspath(BUILT)); pg.wait_for_timeout(800)
 
-    # §439.1: one unit planned in objectives & actions, MADE (§255)
+    # §447.1: one unit planned in objectives & actions, MADE (§255)
     OBJ = safe(pg, """()=>{var k=activeKeys().slice(-1)[0], u=UNITS[k]; u.format='objectives';
       u.keyObjectives=[{id:k+'-KO1',name:'Grow share',dir:'\u2265',target:'20%',compile:'Latest',actual:'12%',progress:60},
                        {id:k+'-KO2',name:'Cut cost',dir:'\u2264',target:'5M EGP',compile:'Sum',actual:null,progress:null}];
@@ -57,8 +57,8 @@ with sync_playwright() as p:
     ck("before: the layer is on and units are active", before.get("exists") is True and before.get("units", 0) > 1, before)
     ck("…the navigation carries units", navUnits() > 0, navUnits())
     ck("…and the company page holds no plan of its own", before.get("top") == 0, before)
-    # §441, the other end: a group with no plan of its own is untouched
-    ck("§441 before: the group still opens on Performance", safe(pg, "()=>entrySub('group')") == "performance")
+    # §449, the other end: a group with no plan of its own is untouched
+    ck("§449 before: the group still opens on Performance", safe(pg, "()=>entrySub('group')") == "performance")
     secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
     ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
@@ -66,9 +66,9 @@ with sync_playwright() as p:
     # ── 1. The switch, pressed in Client set-up › Structure ──────────
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
     ck("Client set-up › Structure opens", ok)
-    ck("§440 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
+    ck("§448 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
     geo = safe(pg, "()=>{var l=document.querySelector('.stplanq .lab'),b=document.querySelector('[data-stplan]');if(!l||!b)return null;var a=l.getBoundingClientRect(),c=b.getBoundingClientRect();return {below:c.top>=a.bottom-1,left:Math.abs(c.left-a.left)<2}}", None)
-    ck("§442 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)
+    ck("§450 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)
     ck("…and the business units' card has no switch of its own", safe(pg, "()=>!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
     press(pg, '[data-stplan] button:nth-child(1)')
     ck("choosing the company ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)
@@ -89,7 +89,7 @@ with sync_playwright() as p:
     ck("ids are fresh and unique", safe(pg, "()=>{var ids=[]; GROUP.items.forEach(p=>{ids.push(p.id); p.measures.forEach(m=>ids.push(m.id)); p.tactics.forEach(t=>ids.push(t.id));}); return new Set(ids).size===ids.length}") is True)
     d = pg.evaluate("""(k)=>{var p=GROUP.items.filter(q=>q.fromUnit===k&&q.fromId==='u:'+k)[0]; if(!p) return null;
       return {name:p.name===UNITS[k].name, m:p.measures.map(m=>[m.name,m.target,m.actual]), t:p.tactics.map(t=>[t.name,t.q1,t.q2,t.q3,t.q4,t.status,t.actual,t.due])}}""", OBJ)
-    ck("§439.1 the objectives unit arrives as ONE direction under its own name", bool(d) and d.get("name") is True, d)
+    ck("§447.1 the objectives unit arrives as ONE direction under its own name", bool(d) and d.get("name") is True, d)
     ck("…its objectives are the direction's measures, figures kept",
        bool(d) and d["m"] == [["Grow share","20%","12%"],["Cut cost","5M EGP",None]], d)
     ck("…its actions are the tactics, timed by the quarter of their date, status and % kept",
@@ -125,7 +125,7 @@ with sync_playwright() as p:
     else:
         print("  note  no capability in this build, the Capabilities section is not measured")
 
-    # ── 2b. §440 the divisions, read under the company ─────────────
+    # ── 2b. §448 the divisions, read under the company ─────────────
     DIV = safe(pg, """()=>{var cs=activeCompanyKeys(); if(cs.length<2) return null; var ck=cs[0];
       FUNCTION_KEYS.filter(k=>FUNCTIONS[k].active!==false).slice(0,2).forEach(k=>{FUNCTIONS[k].company=ck});
       current='group'; currentSub='performance'; GSEC=0; paint(); return ck}""")
@@ -135,7 +135,7 @@ with sync_playwright() as p:
         nav = safe(pg, "()=>({dd:!!document.querySelector('#topsel'), top:[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())})", {})
         ck("the navigation has no division dropdown", nav.get("dd") is False, nav)
         TW = safe(pg, "()=>labelWord('topword','group')")
-        ck("…and its top button names the layer (§440.1), not Strategy", TW and TW != "Strategy" and TW in (nav.get("top") or []), [TW, nav])
+        ck("…and its top button names the layer (§448.1), not Strategy", TW and TW != "Strategy" and TW in (nav.get("top") or []), [TW, nav])
         row = safe(pg, "()=>[...document.querySelectorAll('#secrow-in [data-sec]')].map(b=>b.textContent)", [])
         ck("Performance's row leads with the company", bool(row) and row[0] == safe(pg, "()=>labelWord('topword','group')"), row)
         dname = pg.evaluate("(ck)=>COMPANIES[ck].name", DIV)
@@ -151,8 +151,8 @@ with sync_playwright() as p:
         ck("…one card per linked function, and no unit", bool(v) and v["fns"] == 2 and v["units"] == 0, v)
         ck("…its figure scored from those functions alone", bool(v) and v["perf"] == v["mix"], v)
 
-    # ── 2b. §441: the company page follows its own Structure ─────────
-    ck("§441 the company opens on its Pillars",
+    # ── 2b. §449: the company page follows its own Structure ─────────
+    ck("§449 the company opens on its Pillars",
        safe(pg, "()=>{var t=entrySub('group'); return t==='strategy' && CURSEC.strategy==='plan'}") is True,
        safe(pg, "()=>[entrySub('group'), CURSEC.strategy]"))
     secs = lambda: safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
@@ -174,7 +174,7 @@ with sync_playwright() as p:
     mk = safe(pg, "()=>{var m=GROUP.items[0].measures[0]; if(!m) return null; CYCLE.focus[m.id]=true; return m.name}")
     ck("…a marked company measure is on the Focus board", bool(mk) and mk in (safe(pg, "()=>renderFocusBoard()") or ""), mk)
     ck("Focus on: the tab is there", "focus" in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
-    # §441.1: through the REAL control on Setup › Focus measures — the Off
+    # §449.1: through the REAL control on Setup › Focus measures — the Off
     # half was wired to nothing, so a direct setFocusOn() call passed here.
     safe(pg, "()=>{ current='setup'; currentSub='focusset'; paint(); }"); pg.wait_for_timeout(250)
     press(pg, "[data-focusswitch='0']"); pg.wait_for_timeout(200)

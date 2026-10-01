@@ -5367,7 +5367,7 @@ function renderFocusSetup(){
   /* A destination that has gone (a unit retired, a function switched off)
      leaves the page pointing at nothing — corrected here rather than left to
      render an empty table under a name nobody can select. */
-  /* §441: a destination no longer offered (a unit hidden by switching the
+  /* §449: a destination no longer offered (a unit hidden by switching the
      layer off) is corrected too, or the table marks a place nobody can see. */
   var allSubs = focusSubjects(), offered = allSubs.top.concat(allSubs.units, allSubs.caps, allSubs.fns)
     .some(function(x){ return x.key === FSET.unit; });

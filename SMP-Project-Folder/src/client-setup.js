@@ -1853,10 +1853,10 @@ var CLIENTSETUP = (function () {
     var top = card("Top level");
     top.appendChild(el("p", "lab", "Called"));
     namePick(top, "topword", TOP_NAMES, "one", ro);
-    /* §440: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
+    /* §448: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
        button on the company level to say that we will plan on the company
        level or we will plan on the unit level"*, then *"yes agreed"*.) It
-       replaces §439's On/Off on the business-units card, which described what
+       replaces §447's On/Off on the business-units card, which described what
        disappears rather than the decision being made. The store is the same
        `structure.bu.exists`, so nothing moves for a client already set up:
        absent is "on the business units". Choosing the company with units on
@@ -1906,7 +1906,7 @@ var CLIENTSETUP = (function () {
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
-    /* §439/§440: the business-unit card has no switch of its own; whether it
+    /* §447/§448: the business-unit card has no switch of its own; whether it
        is used is answered on the top card ("Where the strategy is planned").
        Not used, it says so and keeps everything. */
     var bu = card(W("unitword", "many", "Business units"));

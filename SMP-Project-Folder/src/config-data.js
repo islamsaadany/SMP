@@ -211,7 +211,7 @@ function planSubjectOf(x){
 }
 function templeOn(target){ return SMPRules.templeOn(GROUP, target); }
 function midExists(){ return SMPRules.midExists(GROUP, COMPANIES); }
-/* §439: whether the business-unit layer exists. Off, the company page holds
+/* §447: whether the business-unit layer exists. Off, the company page holds
    the directions (the top layer's own pillars, §428) and the units are hidden,
    never deleted. */
 function buExists(){ return SMPRules.buExists(GROUP); }
@@ -3783,7 +3783,7 @@ function unitBands(u){
 }
 function focusBands(key){
   if (!key) return [];
-  /* §441: THE TOP LAYER'S OWN PILLARS ARE MARKABLE, one band per pillar
+  /* §449: THE TOP LAYER'S OWN PILLARS ARE MARKABLE, one band per pillar
      exactly as a unit's are. Its key objectives are the Foundation's and are
      not on this view (topAsUnit's own note), so no empty band is drawn. */
   if (key === "group") return unitBands(topAsUnit()).slice(1);
@@ -3818,7 +3818,7 @@ function focusBands(key){
 }
 /* Every place a mark could be made, in the navigation's own order. */
 function focusSubjects(){
-  return { /* §441: the top layer, first, while it carries a plan of its own. */
+  return { /* §449: the top layer, first, while it carries a plan of its own. */
            top: (topHasPlan() && planOn("group") && compOn("group", "pillar"))
              ? [{ key:"group", name:labelWord("topword","group") || GROUP.org || "Group" }] : [],
            units: activeKeys().map(function(k){
@@ -4975,7 +4975,7 @@ function canReport(unitKey){
   if (unitKey === "group") {
     if (!topHasPlan() || !planOn("group")) return false;
     if (CYCLE.locked && !inOffice()) return false;
-    /* §439: with the units off each direction's owner reports their own
+    /* §447: with the units off each direction's owner reports their own
        direction here; canReportRow narrows them to it. */
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer());
@@ -5021,7 +5021,7 @@ function canReportRow(unitKey, x){
      unit's key objectives carry none, deliberately: they are the unit's
      headline and belong to no pillar, so nobody's draft can close them. */
   if (ownDraftShut(unitKey, x && x.cid)) return false;
-  /* §439: on the company page the office and the CEO enter every row; a
+  /* §447: on the company page the office and the CEO enter every row; a
      direction's owner enters the rows of their own direction. */
   if (unitKey === "group")
     return SMPRules.mayReportTop(world(), viewer()) ||
@@ -5121,7 +5121,7 @@ function canReportFnWhole(target){
    stopped being true the day the floor reached the projects. */
 function canSpeakFor(target){
   var t = subjKey(target);
-  /* §439: a direction's owner reports their own rows and never submits the
+  /* §447: a direction's owner reports their own rows and never submits the
      company's report — that stays the office's and the CEO's (§428). */
   if (t === "group") return canReport("group") && SMPRules.mayReportTop(world(), viewer());
   if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
@@ -8334,7 +8334,7 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§439) ─────────────────
+/* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§447) ─────────────────
    Islam, of El Abd: *"a one company with multiple directions … all the
    directions and the Foundation and the SWAT belongs to its page only
    without the navigation at the top"*, then *"every page is 1 direction"*,
@@ -8357,7 +8357,7 @@ function buFoldIntoTop(){
     var u = UNITS[k];
     var head = personBy((UNIT_ROLES[k] || {}).head);
     var took = false;
-    /* §439.1 — A UNIT THAT PLANS IN OBJECTIVES & ACTIONS BECOMES ONE
+    /* §447.1 — A UNIT THAT PLANS IN OBJECTIVES & ACTIONS BECOMES ONE
        DIRECTION. Islam: *"the plans where in objectives and actions actually
        which in pillars shift to measures and tactics"* — so the unit's name is
        the direction, its objectives are the direction's measures and its
@@ -10710,7 +10710,7 @@ function themeStats(ab){
    product is currently about; the nav, the cards, the compile and the
    weighting all ask it, so a retired unit cannot linger in one of them. */
 function activeKeys(){
-  /* §439: with the business-unit layer switched off there are no units to be
+  /* §447: with the business-unit layer switched off there are no units to be
      about — they are hidden, kept, and back the moment it is on again. The
      nav, the cards, the compile and the weighting all ask here, which is what
      makes it one switch rather than ten. */
@@ -10761,7 +10761,7 @@ function weightedOver(keys, of){
   });
   return tot ? Math.round(acc / tot) : null;
 }
-/* §439: the keys the group's own readings average — none while the units are
+/* §447: the keys the group's own readings average — none while the units are
    off, so a hidden unit cannot keep scoring a page it no longer appears on. */
 function scoringUnitKeys(){ return buExists() ? UNIT_KEYS : []; }
 function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObjectives); }
@@ -10794,7 +10794,7 @@ function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
    and the one he asked for. Its ACTIVE units only, the same as everywhere
    else: a retired unit keeps its record and stops appearing. */
 function companyUnitKeys(ck){
-  /* §440: with the strategy planned on the company the units are hidden, so a
+  /* §448: with the strategy planned on the company the units are hidden, so a
      division holds only the functions linked to it and is read from them. */
   if (!buExists()) return [];
   return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });

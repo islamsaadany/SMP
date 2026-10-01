@@ -59045,7 +59045,7 @@ failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
 
-## §439 — one company, its directions on its own page (2026-09-30)
+## §447 — one company, its directions on its own page (2026-09-30)
 
 Islam, of El Abd: *"a client like elabd is a one company with multiple
 directions so I was thinking if it's a wrong company and the company has the
@@ -59104,7 +59104,7 @@ structure join the world in `W()` AND `worldOf()` (§102.4).
 **VERIFIED.** `checks/single-company.py` 36/0, driving the real switch —
 question, Cancel, move — and asserting both ends; red **3** with the
 `activeKeys` gate out and **2** with the owner narrowing out, both from the
-SOURCES. `test-authorize.js` §439 **896/0**: own direction allowed, another's
+SOURCES. `test-authorize.js` §447 **896/0**: own direction allowed, another's
 refused, renaming refused, submitting refused, the office still everywhere,
 and with the units ON the same person refused; red **1** with the row check
 out and **1** with the units gate out. **One gate is belt and braces and is
@@ -59118,9 +59118,9 @@ graph-diff 140/0, platform-rules 69/0, my-reporting 65/0; `qa.py` ERRORS none;
 database checks. **Recorded, not done**: El Abd's own move is a press on the
 live client, to be made by Islam or at his word, not by a migration.
 
-### §439.1 — a unit that plans in Objectives & actions becomes one direction (2026-09-30)
+### §447.1 — a unit that plans in Objectives & actions becomes one direction (2026-09-30)
 
-Islam, testing §439 on El Abd: *"I made the swtich but nothign shofted to the
+Islam, testing §447 on El Abd: *"I made the swtich but nothign shofted to the
 company"*, then, asked how the units plan: *"the plans where in objectives and
 actions actually which in pillars shift to measures and tactics."* **THE SWITCH
 WORKED AND THE MOVE COPIED NOTHING**, because `buFoldIntoTop()` only read a
@@ -59141,9 +59141,9 @@ runs by switching the layer back on and off again. `checks/single-company.py`
 MAKES an objectives unit (§255) and asserts the direction, its measures and its
 tactics — **4 red** with the branch taken out, from the sources (§276).
 
-## §440 — where the strategy is planned, and the divisions read under it (2026-10-01)
+## §448 — where the strategy is planned, and the divisions read under it (2026-10-01)
 
-Islam, of §439: *"if we turn the 3rd layer off, the company will appear and the
+Islam, of §447: *"if we turn the 3rd layer off, the company will appear and the
 directions appear inside it and outside we find only the functional plans or
 what? … we might have an initial button on the company level to say that we
 will plan on the company level or we will plan on the unit level"* — then *"yes
@@ -59152,7 +59152,7 @@ agreed"*, **A** for the label, and **A** of the division mockup
 
 **THE QUESTION REPLACES THE SWITCH.** The business-units card's On/Off said
 what disappears; the top card now asks **Where the strategy is planned — On the
-company / On the business units**. The store is §439's `structure.bu.exists`,
+company / On the business units**. The store is §447's `structure.bu.exists`,
 so nothing moves for a client already set up (absent is "on the business
 units"). Choosing the company with units on the register asks first, in the
 card, and runs the same move; with no units at all it simply records the
@@ -59173,12 +59173,12 @@ so §391's arithmetic reads it from them alone. A division with no function
 linked is not listed. `checks/single-company.py` MAKES a division of two
 functions (§255): **5 red** with the change taken out, from the sources (§276).
 
-### §440.1 — the top button names the layer; the tab keeps "Strategy"
+### §448.1 — the top button names the layer; the tab keeps "Strategy"
 
-Islam, of the clash §440 left (the navigation button and the company page's own tab both read *Strategy*): *"the name is strategy as it has the foundation and the swot and plan below it … name it Company as per the naming in the structure of the first layer?"* — then *"yes go ahead"*. Reverses §440's label A for the BUTTON only: it reads the first layer's word from Structure (`labelWord("topword","group")`) on both shapes, which is what it already read when the strategy is planned on the business units, so the two shapes stop differing. The tab under it stays *Strategy*, like a unit's. One line in `shell.html`; `checks/single-company.py` asserts the button names the layer and is not *Strategy* (§218, rewritten not loosened). Nothing stored moves.
+Islam, of the clash §448 left (the navigation button and the company page's own tab both read *Strategy*): *"the name is strategy as it has the foundation and the swot and plan below it … name it Company as per the naming in the structure of the first layer?"* — then *"yes go ahead"*. Reverses §448's label A for the BUTTON only: it reads the first layer's word from Structure (`labelWord("topword","group")`) on both shapes, which is what it already read when the strategy is planned on the business units, so the two shapes stop differing. The tab under it stays *Strategy*, like a unit's. One line in `shell.html`; `checks/single-company.py` asserts the button names the layer and is not *Strategy* (§218, rewritten not loosened). Nothing stored moves.
 
 
-### §441 — the company page follows its own Structure
+### §449 — the company page follows its own Structure
 
 Islam, of the El Abd company page: *"why do we have group themes while themes already are swtiched off on the structure … for the capabilities it should show the capabilities if it's swtiched on as well. and not named group cabilities just capbilities … when I click on the company it should open by default on the Pillars … for the focus tab I can't set it off and it's showing only the capabiliteis and functions not the pillars as well."* Aligned in plain words, then *"yes go ahead build all four"*.
 
@@ -59190,12 +59190,12 @@ Islam, of the El Abd company page: *"why do we have group themes while themes al
 
 **The top layer's pillars are markable.** `focusSubjects()` gains a `top` subject (only while the top layer carries a plan), `focusBands("group")` returns its pillars' bands from `topAsUnit()` — no empty Key objectives band, because the group's objectives are the Foundation's (topAsUnit's own note) — and the marking page's switch and the board list it first. A destination that is no longer offered (a unit hidden by the units-off switch) is corrected rather than marked. Nothing stored moves; marks are ids in `CYCLE.focus` as before.
 
-`checks/single-company.py` §441, both ends (Raya's shape before the fold: still Performance, Themes drawn, no "Group capabilities"); falsified from the sources, **5 red**. Neighbours green: focus-switch, top-plan, structure, structure-sections, division-functions, stay-put, welcome, nav-scroll, capability-entry.
+`checks/single-company.py` §449, both ends (Raya's shape before the fold: still Performance, Themes drawn, no "Group capabilities"); falsified from the sources, **5 red**. Neighbours green: focus-switch, top-plan, structure, structure-sections, division-functions, stay-put, welcome, nav-scroll, capability-entry.
 
-## §441.1 — Off on Focus measures was wired to nothing (2026-10-01)
+## §449.1 — Off on Focus measures was wired to nothing (2026-10-01)
 
-Islam, after §441: *"same issue in the focus page, can't turn off and the pillars doesn't appear."* **Measured, the Off half of the switch did nothing**: `shell.html` bound the click with `document.querySelector("[data-focusswitch]")`, which returns the FIRST match only — the On button — so since the switch became an On | Off pair (§130.5) pressing Off changed nothing, for every tenant. Both halves are wired now (`querySelectorAll`). **And `single-company.py` §441 could not have caught it**: it turned focus off with a direct `setFocusOn(false)` call, which passes on a build where the control is dead (§96). It presses the real Setup › Focus measures buttons now, Off and On, and reads `GROUP.focusOff` back; red with the old wiring put back. **The pillars half is §441 itself**: the company's pillars join the Focus page through `focusSubjects().top`, which is on the branch and not yet on `main`, so production still shows only capabilities and functions until the merge. `setup-header.py`'s one red ("a real table with a real head") reproduces on the build before §441 and is not this change. Screen only; nothing stored, nothing migrated.
+Islam, after §449: *"same issue in the focus page, can't turn off and the pillars doesn't appear."* **Measured, the Off half of the switch did nothing**: `shell.html` bound the click with `document.querySelector("[data-focusswitch]")`, which returns the FIRST match only — the On button — so since the switch became an On | Off pair (§130.5) pressing Off changed nothing, for every tenant. Both halves are wired now (`querySelectorAll`). **And `single-company.py` §449 could not have caught it**: it turned focus off with a direct `setFocusOn(false)` call, which passes on a build where the control is dead (§96). It presses the real Setup › Focus measures buttons now, Off and On, and reads `GROUP.focusOff` back; red with the old wiring put back. **The pillars half is §449 itself**: the company's pillars join the Focus page through `focusSubjects().top`, which is on the branch and not yet on `main`, so production still shows only capabilities and functions until the merge. `setup-header.py`'s one red ("a real table with a real head") reproduces on the build before §449 and is not this change. Screen only; nothing stored, nothing migrated.
 
-## §442 — The plan question's answer sits under it
+## §450 — The plan question's answer sits under it
 
 Islam, of Client set-up › Structure: *"the buttons needs to ocme under the question."* The two choices (*On the company* / *On the business units*) sat at the far right end of the line, away from the question they answer — `.stsech` is a space-between row, right for a section header with a switch at its end and wrong for a question. One modifier class (`stplanq`) stacks the row: the label, then the two buttons under it at its left edge, which is how the *Called* row directly above it already reads. Nothing stored, nothing migrated, no rule moved. `single-company.py` asserts the buttons are below the question and aligned to its left edge; 1 red with the stacking removed.

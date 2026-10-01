@@ -1611,7 +1611,7 @@ function capsTable(){
 }
 
 
-/* ── THE COMPANY PAGE'S CAPABILITIES (§439) ───────────────────────────
+/* ── THE COMPANY PAGE'S CAPABILITIES (§447) ───────────────────────────
    Islam, of round 2's mockup: *"splitting the directions and the
    capabilities was a good choice"* — so with the business units off they
    are a SECTION of their own on the company's Strategy tab, never folded
@@ -2426,7 +2426,7 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
-    /* §439: with the units off these ARE the company's directions and this is
+    /* §447: with the units off these ARE the company's directions and this is
        its headline — the equal average Islam chose (*"yes equally"*). */
     if (!buExists()) return drillCard(L("pillar", "bu") + " &mdash; performance", unitPillars(tu), {
       primary: true, sub: "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", each counting equally.",
@@ -2474,7 +2474,7 @@ function whereNext(keys){
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
 
-  /* §440: THE DIVISIONS, READ UNDER THE COMPANY (Islam's A). Planned on the
+  /* §448: THE DIVISIONS, READ UNDER THE COMPANY (Islam's A). Planned on the
      company, a division is no longer a place you go; it is a reading of the
      functions linked to it, one entry per division on this page's own row,
      beside the company's. Its body is the division page itself, so a
@@ -2492,7 +2492,7 @@ function whereNext(keys){
         ' &middot; drag by the handle to reorder</span></div>' : '';
   };
 
-  /* §439: no units section when the layer is off — they are hidden, not gone. */
+  /* §447: no units section when the layer is off — they are hidden, not gone. */
   if (buExists()) SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
       null,
       GVIEW.units === "table"
@@ -2501,7 +2501,7 @@ function whereNext(keys){
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
       TIP_PERF(), viewToggle("units")) });
 
-  /* §441: each section is drawn only while the Structure step carries it on
+  /* §449: each section is drawn only while the Structure step carries it on
      the top layer — a section shown for a part that is switched off is the
      page disagreeing with the setting (§53.5). Capabilities are named in the
      client's own word, never "Group …" (Islam, 2026-10-01). */

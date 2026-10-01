@@ -463,7 +463,7 @@
          and on the server it is therefore the STORED register by
          construction (§42.2). */
       people: o.people || [],
-      /* §439: the top layer's own pillars and the group's structure, so a
+      /* §447: the top layer's own pillars and the group's structure, so a
          direction's owner can be found (ownsTopPillar). Here AND in worldOf()
          (§102.4). */
       topItems: o.topItems || [],
@@ -4160,7 +4160,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), f = s && s.fn;
     return !(f && f.exists === false);
   }
-  /* §439: WHETHER THE BUSINESS-UNIT LAYER EXISTS. Islam, of El Abd: *"a
+  /* §447: WHETHER THE BUSINESS-UNIT LAYER EXISTS. Islam, of El Abd: *"a
      client like elabd is a one company with multiple directions"* — every
      direction had been set up as a unit and sat in the navigation. Off, the
      top layer holds the directions as its own pillars (§428) and the units
@@ -4170,7 +4170,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), b = s && s.bu;
     return !(b && b.exists === false);
   }
-  /* §439: a direction's owner reports their own direction on the company
+  /* §447: a direction's owner reports their own direction on the company
      page. A RULE beside mayReportTop, for the same reason: it is one answer
      whatever a tenant sets, and only while the units are off, because that
      is the only shape in which the top layer's pillars ARE the directions. */

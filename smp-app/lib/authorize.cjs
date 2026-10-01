@@ -1909,7 +1909,7 @@ function authorize(stored, incoming, person) {
             return;
           }
           if (R.mayReportTop(w, person)) return;
-          /* §439: with the business units off, a direction's owner reports
+          /* §447: with the business units off, a direction's owner reports
              the rows of their own direction and nothing else — never the
              company's submission, note or slides. Found through the STORED
              top plan (§42), never the incoming one. */

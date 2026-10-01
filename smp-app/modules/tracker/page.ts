@@ -27,9 +27,10 @@
    — and nothing here is inline. Every control is drawn as the FACT until it
    is pressed, and only for somebody the server would let press it (§61): a
    control the server refuses is never drawn. */
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { barFor } from "../../lib/branding.ts";
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
   FORMATS, FORMAT_WORD, todayIn, weekOf, weekLabel, readableDay, isLate, carriedWeeks, lateWord, inView, summary, mayChange,
@@ -69,19 +70,6 @@ const CSS = `
 @media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
-.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
-.bar h1{margin:0;font-size:14.5px;font-weight:600}
-.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
-.msw{position:relative;flex:none}
-.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
-.msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
-.msw svg{width:17px;height:17px;display:block}
-.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
-.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
-.mi.on{background:var(--ground);cursor:default}
-.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
 h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
 h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
@@ -255,23 +243,14 @@ select.st:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
   .team,.weeks{right:auto;left:0}}
 `;
 
-function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
-  const items = moduleMenu(have).map((m) =>
-    m.key === here
-      ? '<span class="mi on" aria-current="true">' + esc(m.label) + "<i>" + esc(m.note) + "</i></span>"
-      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) + "<i>" + esc(m.note) + "</i></a>").join("");
-  return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-    '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-    '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-    "</g></svg></summary><div class=\"mmenu\">" + items + "</div></details>";
-}
 
 /* What the script needs to know rides on <body>: the two addresses it talks
    to, and the view, the search and the grouping the page was drawn with, so
    a press asks the server for the same list it is looking at. */
+const topOf = (p: PageArgs): TopBar => ({ slug: p.slug, tenantName: p.tenantName, module: "tracker", have: p.have, consultant: !!p.consultant });
+
 type BodyAttrs = { api: string; list: string; view: string; q: string; group: string; dates: string };
-function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: string, attrs: BodyAttrs | null, body: string): string {
+function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, attrs: BodyAttrs | null, body: string): string {
   const a = attrs
     ? ' data-api="' + esc(attrs.api) + '" data-list="' + esc(attrs.list) + '" data-view="' + esc(attrs.view) + '" data-q="' + esc(attrs.q) + '" data-group="' + esc(attrs.group) + '" data-dates="' + esc(attrs.dates) + '"'
     : "";
@@ -280,20 +259,18 @@ function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: stri
     "<title>" + esc(tenantName) + " &mdash; " + esc(MODULE_DEF.tracker.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", bar) + brkCss() + "</style>\n</head>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + brkCss() + "</style>\n</head>\n" +
     "<body" + a + ">\n" +
-    '<header class="bar">' + switcher(slug, have, "tracker") +
-    "<h1>" + esc(MODULE_DEF.tracker.label) + "</h1>" +
-    '<span class="org">&middot; <b>' + esc(tenantName) + "</b></span></header>\n" +
+    topBarHtml(top) + "\n" +
     body +
     (attrs ? '<script src="' + esc(clientHref(slug, "tracker", "app.js")) + '"></script>\n' : "") +
     "</body>\n</html>\n";
 }
 
 /* Not the office: said in words, with the way back (§61). */
-export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[]): Promise<string> {
+export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], consultant = false): Promise<string> {
   const bar = await barFor(tenantId);
-  return skeleton(slug, tenantName, have, bar, null,
+  return skeleton(slug, tenantName, { slug, tenantName, module: "tracker", have, consultant }, bar, null,
     '<main class="pg"><div class="none"><b>The Internal Tracker is the office\'s.</b>' +
     'It is where Forefront keeps its own weekly actions about ' + esc(tenantName) + '. ' +
     '<a href="' + esc(clientHref(slug, null, "")) + '">Back to ' + esc(tenantName) + "</a></div></main>\n");
@@ -301,7 +278,7 @@ export async function refusedDocument(slug: string, tenantId: string, tenantName
 
 export type Ask = { view: View; q: string; open: string | null; group: Group; dates: Format };
 export type PageArgs = {
-  slug: string; tenantId: string; tenantName: string; have: ModuleKey[]; ask: Ask; who: Who; today?: string;
+  slug: string; tenantId: string; tenantName: string; have: ModuleKey[]; ask: Ask; who: Who; today?: string; consultant?: boolean;
 };
 
 type Q = Parameters<typeof officeRows>[0];
@@ -591,11 +568,11 @@ export async function trackerDocument(p: PageArgs): Promise<string> {
   if (!L) {
     const body = '<main class="pg">' + title + nav +
       '<p class="unread">The list could not be read just now. Nothing has been lost &mdash; try again in a moment.</p></main>\n';
-    return skeleton(p.slug, p.tenantName, p.have, bar, null, body);
+    return skeleton(p.slug, p.tenantName, topOf(p), bar, null, body);
   }
   const out = listBody(L, p, today);
   const body = '<main class="pg">' + title + nav +
     '<p class="said" id="said" role="alert" aria-live="polite"></p>' +
     '<div id="body">' + out.body + "</div></main>\n";
-  return skeleton(p.slug, p.tenantName, p.have, bar, attrs, body);
+  return skeleton(p.slug, p.tenantName, topOf(p), bar, attrs, body);
 }

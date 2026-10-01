@@ -53,10 +53,10 @@ export async function serve(a: ServeArgs): Promise<Response> {
   const office = brk() === "no-office-gate" ? a.seat != null : isOffice(a.seat);
   if (!office) {
     if (first === "api") return no(403, "Meeting Notes is the office's.");
-    return new Response(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have), { status: 403, headers: shellHeaders() });
+    return new Response(await refusedDocument(a.slug, a.tenantId, a.tenantName, a.have, !!a.consultant), { status: 403, headers: shellHeaders() });
   }
   const who: Who = { personKey: a.personKey ?? null, seat: a.seat ?? null };
-  const page = (ask: Ask): PageArgs => ({ slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, ask, who });
+  const page = (ask: Ask): PageArgs => ({ slug: a.slug, tenantId: a.tenantId, tenantName: a.tenantName, have: a.have, ask, who, consultant: !!a.consultant });
 
   if (first === "api" && a.rest.length === 1) {
     if (a.req.method !== "POST") return no(405, "POST only.");

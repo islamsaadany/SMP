@@ -20,7 +20,8 @@
    (lib/copilot-settings.ts). Who may USE the Copilot is not here — it stays
    a column on Strategy's Roles & access (Islam: "stay"), and the rail says
    where in one row rather than drawing a page that would be a second copy. */
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss } from "../../lib/topbar.ts";
 import { barFor } from "../../lib/branding.ts";
 import { SECTIONS, SECTION_WORD, type Chat, type Deliverable } from "../../lib/copilot.ts";
 import { SECTION_ORDER, type Part, type Template } from "../../lib/copilot-settings.ts";
@@ -29,39 +30,12 @@ const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
-/* The switcher is the one every module's own bar draws (modules/insights/
-   page.ts), spelt from lib/modules.ts so a module's name has one spelling. */
-function switcher(slug: string, have: ModuleKey[]): string {
-  const items = moduleMenu(have).map((m) =>
-    m.key === "copilot"
-      ? '<span class="mi on" aria-current="true">' + esc(m.label) + "<i>" + esc(m.note) + "</i></span>"
-      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) + "<i>" + esc(m.note) + "</i></a>").join("");
-  return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-    '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-    '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-    "</g></svg></summary><div class=\"mmenu\">" + items + "</div></details>";
-}
-
 const CSS = `
 *{box-sizing:border-box}
 :root{--bar:%BAR%;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EFF2F6;--gold:#9C5D08;--good-tx:#1E6B41;--bad-tx:#A23123;--note:#FFF7E3}
 @media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#B4BCC8;--ink-3:#8F9AAD;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222833;--gold:#F5A623;--good-tx:#6FCF97;--bad-tx:#F19A8E;--note:#2E2A1C}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
-.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
-.bar h1{margin:0;font-size:14.5px;font-weight:600}
-.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
-.bar .org a{color:inherit;text-decoration:none}.bar .org a:hover{text-decoration:underline}
-.msw{position:relative;flex:none}
-.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
-.msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
-.msw svg{width:17px;height:17px;display:block}
-.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
-.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
-.mi.on{background:var(--ground);cursor:default}
-.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
+.crumbs{color:var(--ink-3);font-size:13px}.crumbs a{color:inherit}
 .pg{max-width:1180px;margin:0 auto;padding:20px 20px 48px;display:flex;flex-direction:column;gap:14px}
 .head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .head h2{margin:0 auto 0 0;font-size:21px;font-weight:600}
@@ -127,16 +101,21 @@ details.part>summary .m{margin-left:auto;color:var(--ink-3);font-size:12px}
 @media (max-width:760px){.split{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line)}}
 `;
 
-function frame(slug: string, tenantName: string, have: ModuleKey[], bar: string, crumbs: string, title: string, body: string): string {
+/* THE SHARED TOP BAR (main's §444): the Copilot's own pages wear the bar
+   Insights, the Tracker and Notes wear, so walking here from Strategy keeps
+   the way to other clients and to Sign out. No Viewing as — it is the
+   office's page and the switch would change nothing (his §444 answer for
+   the Tracker and Notes). Where you are inside the Copilot is a line under
+   the bar, since the trail ends at the module. */
+function frame(slug: string, tenantName: string, have: ModuleKey[], bar: string, crumbs: string, title: string, body: string, consultant = false): string {
   return "<!doctype html>\n<html lang='en' data-module='copilot'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " &mdash; " + esc(title) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    "<style>" + CSS.replace("%BAR%", bar) + "</style>\n</head>\n<body>\n" +
-    '<header class="bar">' + switcher(slug, have) + "<h1>Strategy Management Platform</h1>" +
-    '<span class="org">&middot; ' + esc(tenantName) + " " + crumbs + "</span></header>\n" +
-    '<main class="pg">\n' + body + "\n</main>\n</body>\n</html>\n";
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + "</style>\n</head>\n<body>\n" +
+    topBarHtml({ slug, tenantName, module: "copilot", have, consultant, viewer: null }) + "\n" +
+    '<main class="pg">\n' + (crumbs ? '<div class="crumbs">' + crumbs + "</div>\n" : "") + body + "\n</main>\n</body>\n</html>\n";
 }
 
 /* ── WHERE A ROW SITS, IN WORDS ────────────────────────────────────────
@@ -169,7 +148,7 @@ export type ListAsk = { view: "chats" | "deliverables"; section: string; place: 
 
 export function listDocument(
   slug: string, tenantName: string, have: ModuleKey[], bar: string, names: Names, ask: ListAsk,
-  chats: Chat[] | null, delivs: Deliverable[] | null,
+  chats: Chat[] | null, delivs: Deliverable[] | null, consultant = false,
 ): string {
   const here = clientHref(slug, "copilot", "");
   const href = (over: Partial<ListAsk>) => {
@@ -236,7 +215,7 @@ export function listDocument(
   const body = '<div class="head"><h2>' + esc(MODULE_DEF.copilot.label) + "</h2>" +
     '<a class="btn" href="' + esc(clientHref(slug, "copilot", "settings")) + '">Settings</a></div>' +
     '<div class="filters">' + seg + form + count + "</div>" + table;
-  return frame(slug, tenantName, have, bar, "<b>&rsaquo; " + esc(MODULE_DEF.copilot.label) + "</b>", "Copilot", body);
+  return frame(slug, tenantName, have, bar, "", "Copilot", body, consultant);
 }
 
 /* ── THE SETTINGS RAIL ─────────────────────────────────────────────────
@@ -286,7 +265,7 @@ const flashHtml = (f: Flash) => f ? '<p class="flash' + (f.ok ? "" : " bad") + '
 
 export function instructionsDocument(
   slug: string, tenantName: string, have: ModuleKey[], bar: string, parts: Part[], section: string,
-  admin: boolean, editing: string, flash: Flash,
+  admin: boolean, editing: string, flash: Flash, consultant = false,
 ): string {
   const sec = (SECTION_ORDER as readonly string[]).includes(section) ? section : "foundation";
   const segs = '<nav class="seg" aria-label="Section">' + SECTION_ORDER.map((s) =>
@@ -316,7 +295,7 @@ export function instructionsDocument(
     '<p class="why">What the Copilot is told for this section, read on every message. ' +
     (admin ? "An edit here changes it for every client." : "Only a Forefront super user can change it.") + "</p></div></div>";
   return frame(slug, tenantName, have, bar,
-    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">&rsaquo; Copilot</a> <b>&rsaquo; Settings</b>', "Copilot settings", body);
+    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot settings", body, consultant);
 }
 
 function sizeOf(n: number): string {
@@ -324,7 +303,7 @@ function sizeOf(n: number): string {
 }
 
 export function templatesDocument(
-  slug: string, tenantName: string, have: ModuleKey[], bar: string, ts: Template[], admin: boolean, flash: Flash,
+  slug: string, tenantName: string, have: ModuleKey[], bar: string, ts: Template[], admin: boolean, flash: Flash, consultant = false,
 ): string {
   const action = clientHref(slug, "copilot", "settings/templates");
   const rows = ts.map((t, i) =>
@@ -347,13 +326,13 @@ export function templatesDocument(
     '<p class="why">A filled template attached in a Copilot chat is read as that section&rsquo;s input.' +
     (admin ? " A replaced file is what every client downloads." : "") + "</p></div></div>";
   return frame(slug, tenantName, have, bar,
-    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">&rsaquo; Copilot</a> <b>&rsaquo; Settings</b>', "Copilot templates", body);
+    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot templates", body, consultant);
 }
 
 export async function barOf(tenantId: string): Promise<string> { return barFor(tenantId); }
 
-export async function refusedCopilot(slug: string, tenantName: string, have: ModuleKey[], tenantId: string, why: string): Promise<string> {
+export async function refusedCopilot(slug: string, tenantName: string, have: ModuleKey[], tenantId: string, why: string, consultant = false): Promise<string> {
   const bar = await barFor(tenantId);
-  return frame(slug, tenantName, have, bar, "<b>&rsaquo; Copilot</b>", "Copilot",
-    '<div class="tw"><div class="none"><b>' + esc(why) + '</b><a href="' + esc(clientHref(slug, "strategy", "")) + '">Back to Strategy</a></div></div>');
+  return frame(slug, tenantName, have, bar, "", "Copilot",
+    '<div class="tw"><div class="none"><b>' + esc(why) + '</b><a href="' + esc(clientHref(slug, "strategy", "")) + '">Back to Strategy</a></div></div>', consultant);
 }

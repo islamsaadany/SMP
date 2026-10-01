@@ -41,12 +41,12 @@ export const SPINE_SEGMENTS = ["setup", "tour"] as const;
 
    `built` IS NOT A PREFERENCE, IT IS WHAT STOPS A DOOR OPENING ONTO THE
    WRONG ROOM. A module nobody has built is a word the address resolves with
-   nothing behind it: offered today, Portfolio would open the STRATEGY
-   platform wearing another name, which is worse than not offering it at all
-   (§61). So the unbuilt ones keep their entries — the words stay
-   reserved and isModule() must go on knowing them, or a business unit keyed
-   `portfolio` would quietly claim the address the day the module lands — and
-   nobody is offered them until there is something to open. */
+   nothing behind it: offered before 2026-09-30, Portfolio would have opened
+   the STRATEGY platform wearing another name, which is worse than not
+   offering it at all (§61). So an unbuilt one keeps its entry — the word
+   stays reserved and isModule() must go on knowing it, or a business unit
+   keyed `processes` would quietly claim the address the day that module
+   lands — and nobody is offered it until there is something to open. */
 /* ── A MODULE'S OWN AREAS (spec 046 §4.2, §4.4; spec 053 §4.5) ─────────
    The contract's second line — *its own roles and areas* — answered HERE
    rather than in a file of its own, because this is already where a module
@@ -186,7 +186,21 @@ const INSIGHTS_LINES: LineDef[] = [
 ];
 export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
   strategy:  { label: "Strategy",  note: "Plans, measures, reporting and the review",        built: true,  areas: [], lines: STRATEGY_LINES, mark: STRATEGY_MARK },
-  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: false, areas: [], lines: [NOTHING] },
+  /* BUILT 2026-09-30 and finished 2026-10-01: the landing, a project's
+     charter, the plan in two views, Progress, Analytics, and writing a plan
+     (spec 060 §11–§16). NO AREA: §6 puts the three roles on the PROJECT and
+     says outright there is no Portfolio column on Roles & access, so a column
+     here would be a cell nobody should fill (§61) — the tracker's and Meeting
+     Notes' own reason, for a different rule.
+
+     AND IT DECLARES NO LINE AND NO MARK, said rather than left as an absence
+     (§54.5). Both read `lib/landing-facts.ts`, which answers about the
+     STRATEGY cycle and knows nothing about a delivery plan, so a line or a
+     mark here would have to be given facts of its own — a decision about what
+     a consultant reads on a client's card, not something to ride in beside a
+     merge (rule 1b). `[NOTHING]` is what main chose for it while it was
+     unbuilt and is still the honest answer. */
+  portfolio: { label: "Portfolio", note: "Detailed projects, timelines and checkpoints",     built: true,  areas: [], lines: [NOTHING] },
   insights:  { label: "Insights",  note: "Research, analytics and market reports",           built: true,
     /* ONE AREA, because there is one thing to be granted: opening the
        library. Per-item visibility is spec 046 decision #15's deferral —

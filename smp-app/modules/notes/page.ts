@@ -22,9 +22,10 @@
    (§61): the whole module is the office's, so inside it every control is
    live — what is drawn as a fact rather than a control is what nothing can
    change, like a send that has already gone. */
+import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { barFor } from "../../lib/branding.ts";
-import { clientHref, moduleMenu, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
+import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Note, type Who, type Minutes, type Named, type SendRow, type Register, type Person,
   readableDay, todayIn, minutesEmpty, namedOf, registerOf, officeRows, shortNames,
@@ -44,19 +45,6 @@ const CSS = `
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
-.bar{background:var(--bar);color:#EAF0FA;display:flex;align-items:center;gap:10px;padding:11px 16px;flex-wrap:wrap}
-.bar h1{margin:0;font-size:14.5px;font-weight:600}
-.bar .org{color:#A9BBD8;font-size:13px}.bar .org b{color:#EAF0FA;font-weight:600}
-.msw{position:relative;flex:none}
-.msw>summary{list-style:none;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28);cursor:pointer;color:#EAF0FA}
-.msw>summary::-webkit-details-marker{display:none}
-.msw>summary:hover,.msw>summary:focus-visible{background:rgba(234,240,250,.14);outline:none}
-.msw svg{width:17px;height:17px;display:block}
-.mmenu{position:absolute;top:34px;left:0;z-index:9;min-width:290px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:11px;box-shadow:0 8px 26px rgba(20,28,43,.16);overflow:hidden}
-.mi{display:block;padding:10px 15px;text-decoration:none;color:inherit;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.mi:last-child{border-bottom:0}.mi:hover,.mi:focus-visible{background:var(--ground);outline:none}
-.mi.on{background:var(--ground);cursor:default}
-.mi i{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--ink-3);margin-top:2px}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 40px}
 h2.pt{margin:0 0 14px;font-size:21px;font-weight:600;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
@@ -178,20 +166,11 @@ input.date{cursor:auto}
   .head{grid-template-columns:1fr}.pick{width:min(300px,calc(100vw - 60px))}}
 `;
 
-function switcher(slug: string, have: ModuleKey[], here: ModuleKey): string {
-  const items = moduleMenu(have).map((m) =>
-    m.key === here
-      ? '<span class="mi on" aria-current="true">' + esc(m.label) + "<i>" + esc(m.note) + "</i></span>"
-      : '<a class="mi" href="' + esc(clientHref(slug, m.key, "")) + '">' + esc(m.label) + "<i>" + esc(m.note) + "</i></a>").join("");
-  return '<details class="msw"><summary title="Modules" aria-label="Modules">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-    '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-    '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-    "</g></svg></summary><div class=\"mmenu\">" + items + "</div></details>";
-}
+
+const topOf = (p: PageArgs): TopBar => ({ slug: p.slug, tenantName: p.tenantName, module: "notes", have: p.have, consultant: !!p.consultant });
 
 type BodyAttrs = { api: string; here: string; note: string };
-function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: string, attrs: BodyAttrs | null, body: string): string {
+function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, attrs: BodyAttrs | null, body: string): string {
   const a = attrs ? ' data-api="' + esc(attrs.api) + '" data-here="' + esc(attrs.here) + '" data-note="' + esc(attrs.note) + '"' : "";
   return "<!doctype html>\n<html lang='en' data-module='notes'>\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
@@ -201,29 +180,27 @@ function skeleton(slug: string, tenantName: string, have: ModuleKey[], bar: stri
     /* `title-as-heading` puts the reported look back — borderless, transparent,
        no key — which must turn checks/notes.mjs red (§94.5). Never set on a
        deployment (constitution XVI). */
-    "<style>" + CSS.replace("%BAR%", bar) +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) +
       (BRK() === "title-as-heading" ? ".ttl{border:0!important;border-radius:0!important;background:transparent!important}.head .lab{display:none}" : "") +
       "</style>\n</head>\n" +
     "<body" + a + ">\n" +
-    '<header class="bar">' + switcher(slug, have, "notes") +
-    "<h1>" + esc(MODULE_DEF.notes.label) + "</h1>" +
-    '<span class="org">&middot; <b>' + esc(tenantName) + "</b></span></header>\n" +
+    topBarHtml(top) + "\n" +
     body +
     (attrs ? '<script src="' + esc(clientHref(slug, "notes", "app.js")) + '"></script>\n' : "") +
     "</body>\n</html>\n";
 }
 
 /* Not the office: said in words, with the way back (§61). */
-export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[]): Promise<string> {
+export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], consultant = false): Promise<string> {
   const bar = await barFor(tenantId);
-  return skeleton(slug, tenantName, have, bar, null,
+  return skeleton(slug, tenantName, { slug, tenantName, module: "notes", have, consultant }, bar, null,
     '<main class="pg"><div class="none"><b>Meeting Notes is the office\'s.</b>' +
     "It is where Forefront keeps its notes of meetings with " + esc(tenantName) + ", and sends the minutes. " +
     '<a href="' + esc(clientHref(slug, null, "")) + '">Back to ' + esc(tenantName) + "</a></div></main>\n");
 }
 
 export type Ask = { q: string; note: string | null };
-export type PageArgs = { slug: string; tenantId: string; tenantName: string; have: ModuleKey[]; ask: Ask; who: Who; today?: string };
+export type PageArgs = { slug: string; tenantId: string; tenantName: string; have: ModuleKey[]; ask: Ask; who: Who; today?: string; consultant?: boolean };
 
 type Q = Parameters<typeof listNotes>[0];
 export type Loaded = { notes: Note[]; reg: Register; office: Person[]; short: Map<string, string>; note: Note | null; sends: SendRow[] };
@@ -452,13 +429,13 @@ export async function notesDocument(p: PageArgs): Promise<string> {
   try { L = await withTenant(p.tenantId, (c) => load(c, p.ask.note)); }
   catch (e) { console.error("notes: reading " + p.slug + ":", (e as Error).message); }
   if (!L) {
-    return skeleton(p.slug, p.tenantName, p.have, bar, null,
+    return skeleton(p.slug, p.tenantName, topOf(p), bar, null,
       '<main class="pg"><h2 class="pt">Meetings</h2>' +
       '<p class="unread">The meetings could not be read just now. Nothing has been lost &mdash; try again in a moment.</p></main>\n');
   }
   /* A note asked for and not found: said, with the way back (§35, §61). */
   if (p.ask.note && !L.note) {
-    return skeleton(p.slug, p.tenantName, p.have, bar, null,
+    return skeleton(p.slug, p.tenantName, topOf(p), bar, null,
       '<main class="pg"><div class="none"><b>That meeting is not on this client\'s list any more.</b>' +
       'It may have been deleted, or the link may be another client\'s. <a href="' + esc(here) + '">Back to the meetings</a></div></main>\n');
   }
@@ -469,7 +446,7 @@ export async function notesDocument(p: PageArgs): Promise<string> {
     : '<main class="pg"><h2 class="pt">Meetings <small>' + esc(p.tenantName) + "</small></h2>" +
       '<p class="said" id="said" role="alert" aria-live="polite"></p>' +
       '<div id="body">' + listBody(L, p, today) + "</div></main>\n";
-  return skeleton(p.slug, p.tenantName, p.have, bar, attrs, body);
+  return skeleton(p.slug, p.tenantName, topOf(p), bar, attrs, body);
 }
 
 /* A press's answer: the note read again under the tenant and drawn by the

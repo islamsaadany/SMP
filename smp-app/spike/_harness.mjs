@@ -133,7 +133,9 @@ export async function seedTwoTenants(owner) {
   return { A, B, order };
 }
 
-/* A VALUE THE COLUMN'S OWN CHECK ALLOWS, READ OFF THE CONSTRAINT (§365.2).
+/* A VALUE THE COLUMN'S OWN CHECK ALLOWS, READ OFF THE CONSTRAINT (§365.2;
+   this branch found the same gap independently as §442.12 and main's answer
+   is the one kept, because it reads the bare `IN (…)` form as well).
    This was two hand-written special cases — swot_items.cat and
    access_grants.grant_ — and main's Internal Tracker then added two more
    columns with an IN (...) CHECK, so the generic 'k' was refused and SIX of
@@ -172,12 +174,22 @@ function placeholder(col, table, checks) {
   if (t === "boolean") return "true";
   if (t === "jsonb" || t === "json") return "'{}'";
   if (t.startsWith("timestamp")) return "now()";
-  /* A PLAIN DATE, added because main's `notes.met_on` is one (§365.2). Without
-     it this harness threw, and it is SHARED — so six of the nine proofs went
-     RED on a healthy schema, among them the tenant isolation (S2), the door
-     (S7) and the row-addressed write (S9). Measured on origin/main's own
-     build before it was touched (§303): identical there. */
+  /* A DATE, A TIME AND A FLOAT ARE ORDINARY COLUMN TYPES AND THIS TABLE NAMED
+     NONE OF THEM. `notes.met_on` is `date NOT NULL` with no default (§357), so
+     from the day Meeting Notes landed this harness THREW on that one column and
+     took the proofs after it down with it — every table past `notes` in the FK
+     order went unwalked, which on the isolation proof (S2) means unproven rather
+     than merely unreported. Both sides found it: main as §365.2, this branch as
+     §442.12, each measured on main's own build first (§303), so it was main's
+     gap and not the merge's. The throw below is what made it findable at all and
+     STAYS (§54.5): a fixture that silently skipped the column would have seeded
+     a row the database refuses and blamed the product. What the branch adds to
+     main's `date` is the CLASS rather than the instance — `time` and the two
+     floats, which with the branches above cover every type `db/schema.sql` uses
+     today, so the next NOT NULL column of any of them costs nothing (§104.7). */
   if (t === "date") return "current_date";
+  if (t.startsWith("time")) return "'00:00'";
+  if (t === "real" || t === "double precision") return "1";
   if (t === "uuid") return "gen_random_uuid()";
   throw new Error("seed: no placeholder for " + table + "." + col.name + " " + t);
 }
@@ -218,8 +230,18 @@ export async function seedRows(owner, tenantId) {
     /* FK columns from the parent row: every NOT NULL FK, and — where none is
        NOT NULL — the first nullable one only (pillars_one_owner wants exactly
        one of two). */
-    const notNullFk = fks[t].filter((f) => f.cols.every((c) => cols[t].find((x) => x.name === c).notnull));
-    const use = notNullFk.length ? notNullFk : fks[t].slice(0, 1);
+    /* A SELF-REFERENCE CAN NEVER BE SATISFIED BY A TABLE'S FIRST ROW, AND NULL
+       IS THE CORRECT SEED FOR ONE (§442.12). `portfolio_activities.depends_on`
+       is a nullable self-FK with `ON DELETE SET NULL` and a CHECK forbidding a
+       row depending on itself (§375), and the candidate list is ordered by
+       constraint name — `depends_on` before `phase_id` — so the rule below
+       picked the one FK that cannot be met and threw. It was hidden behind
+       `notes.met_on` until that was fixed in the same edit: *a fixture that
+       throws on the first missing thing hides the second*, which is the
+       argument for fixing the class rather than the instance. */
+    const usable = fks[t].filter((f) => f.ref !== t);
+    const notNullFk = usable.filter((f) => f.cols.every((c) => cols[t].find((x) => x.name === c).notnull));
+    const use = notNullFk.length ? notNullFk : usable.slice(0, 1);
     for (const f of use) {
       if (!first[f.ref]) throw new Error("seed: " + t + " references " + f.ref + " which has no row yet");
       f.cols.forEach((c, i) => { if (c !== "tenant_id") row[c] = first[f.ref][f.refcols[i]]; });

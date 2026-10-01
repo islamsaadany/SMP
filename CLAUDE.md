@@ -8685,12 +8685,38 @@ node smp-app/checks/tracker.mjs  # the Internal Tracker, the office's weekly lis
                                 # details and the names list are asserted the same
                                 # way: an AGREEMENT worked out from the page's own
                                 # padding and the check's own arithmetic, never a
-                                # pixel count somebody typed. 228/0,
-                                # red THIRTEEN ways (`check:tracker:red`). Its first run
-                                # found ONE product fault (an undated line vanishing
-                                # from This week, &sect;356.7), one real page fault
-                                # (`hidden` hiding nothing under an author display,
-                                # &sect;356.8) and three faults of its own
+                                # pixel count somebody typed. 228/0, red
+                                # THIRTEEN ways (`check:tracker:red`). Its
+                                # first run found ONE product fault (an
+                                # undated line vanishing from This week,
+                                # &sect;356.7), one real page fault (`hidden`
+                                # hiding nothing under an author display,
+                                # &sect;356.8) and three faults of its own.
+                                # AND SINCE &sect;442.11 ITS DATES ARE
+                                # RELATIVE TO TODAY AND ITS PROBES ARE SCOPED
+                                # TO THE ROW THAT WAS PRESSED: it read 224/4
+                                # for ten days on three faults, every one of
+                                # them its own &mdash; a typed `2026-10-01`
+                                # that became THIS WEEK'S own Thursday, so
+                                # the grouping drew two headings where the
+                                # assertion counted three (&sect;13.9,
+                                # &sect;214.3, and &sect;440 wrote that rule
+                                # down naming this file); an unscoped
+                                # `.team` measuring a CLOSED list from
+                                # another row and reporting `box 0, row 0`,
+                                # a correct build called broken, unnoticed
+                                # because the assertion two lines above it
+                                # is scoped (&sect;100.3, &sect;50.6); and a
+                                # week worded with `todayIn()` over a page
+                                # rendered as of `TODAY`, two different
+                                # todays in one string (&sect;122.4). Both
+                                # sides read `TODAY` now, so it is an
+                                # AGREEMENT that survives the clock moving
+                                # (&sect;94.8). **&sect;303 settles WHOSE a
+                                # red is and says nothing about whether
+                                # anybody clears it** &mdash; two rounds
+                                # recorded this one as not theirs, honestly,
+                                # and left it standing (&sect;280.1)
 node smp-app/checks/notes.mjs    # Meeting Notes: one meeting, one note, and the
                                 # minutes as an email (spec 055, &sect;357) &mdash;
                                 # `npm run check:notes`, needs a database and the
@@ -8819,6 +8845,227 @@ python3 SMP-Project-Folder/src/checks/my-reporting.py # ...and the presses (&sec
                                 # MADE now from a row that IS asked, with the quarters
                                 # asserted. All good; red three ways from the SOURCES at
                                 # **2 / 1 / 1**
+node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
+                                # landing and a project's charter (spec 060 &sect;12,
+                                # &sect;439) &mdash; `npm run check:portfolio:module`, needs a
+                                # database and no browser. It DRIVES `serve()` with the
+                                # exact arguments the route hands a module (&sect;96: a
+                                # server wired to the wrong module renders perfectly) and
+                                # reads the rows back from Postgres THROUGH the tenant,
+                                # never off the screen. BOTH ENDS everywhere (&sect;94.2):
+                                # the office reaches every project AND anybody else only
+                                # the projects that name them, with a project they cannot
+                                # see answering the same *not found* as one that does not
+                                # exist, or the address bar becomes a way to discover
+                                # what a client has (&sect;355); a Lead writes the charter
+                                # AND a Contributor is refused; a seat starts a project
+                                # AND a client's own person is told so with the way back
+                                # (&sect;61). **A READ THAT FAILED IS NOT AN EMPTY LIST**
+                                # (&sect;35, &sect;93, &sect;231.4): the strip's counts read an
+                                # em-dash and the page says *Not read just now*, asserted
+                                # beside a read that WORKED or a build that never reads
+                                # passes half. And *No plan yet* is asserted as the
+                                # landing's signed-off state for a project with none,
+                                # against the 0% a project with a started plan reads
+                                # &mdash; the difference &sect;9.13 exists to draw. 36/0, red
+                                # FOUR ways (`check:portfolio:module:red`): 5 / 2 / 2 / 1.
+                                # **AND THE FIRST BREAK OF THE NO-PLAN STATE WENT GREEN**
+                                # &mdash; a CSS `visibility:hidden` cannot falsify an
+                                # assertion about the document's WORDS (&sect;54.5), so it
+                                # was replaced with one that makes the cell print 0%: the
+                                # actual fault, a project with no plan reading as one that
+                                # has done nothing.
+                                # AND SINCE &sect;440 IT COVERS THE PLAN IN BOTH VIEWS
+                                # (spec 060 &sect;13): every figure on the page asserted
+                                # against `rollUp`'s OWN answer rather than a typed
+                                # number (&sect;94.8), so a change to the roll-up moves
+                                # the page and the check together and cannot move one
+                                # &mdash; which is what found the phase sorting after its
+                                # own children (`bad-order`, 3 red: the numbering read
+                                # `0.1 0.2 1 1.1`, and `rollUp`/`kidsOf` read that array
+                                # BY POSITION, so the landing's figures came from the
+                                # wrong set). BOTH VIEWS drawn from one read and both
+                                # asserted, or a build serving one of them passes half
+                                # (`both-views`); an opened activity asserted read
+                                # THROUGH its project, on `oneActivity` and NOT on the
+                                # page &mdash; the page holds a second fence, so the
+                                # page-level version of that assertion went GREEN under
+                                # its own break (&sect;113.8, &sect;54.5) and the page is
+                                # kept as the control (`act-anywhere`); the register's
+                                # name preferred over the one stored on the row, with a
+                                # stored name MADE to prefer it over (`stale-name`, which
+                                # also went green until the fixture held one); and the
+                                # elbows absent-but-chart-complete with the script NOT
+                                # served (`no-elbows`), because a page that needs its
+                                # script to be correct is wrong without one. It asserts
+                                # **EXACTLY ONE** overrun rather than at least one, so the
+                                # day the day-work-was-marked-done column lands
+                                # (&sect;440.6, recorded not fixed) this goes red rather
+                                # than passing quietly. **Its dates are relative to
+                                # `todayIn()`, never typed** &mdash; the one lesson
+                                # `checks/tracker.mjs` is four failures short of
+                                # (&sect;214.3). 80/0, red NINE ways.
+                                # AND SINCE &sect;441 IT COVERS PROGRESS AND ANALYTICS
+                                # (spec 060 &sect;14), the two screens that READ that
+                                # plan &mdash; so every count and every bar is asserted
+                                # against the rules' own answer and never a typed one
+                                # (&sect;94.8). It DRIVES the only two writes this
+                                # module has: a future end date and one before the work
+                                # started each refused BY NAME (&sect;123), a Viewer's
+                                # press refused though the page drew no button
+                                # (&sect;42's half that a drawn-control assertion cannot
+                                # see), an activity signed off THROUGH another project
+                                # refused because the project is in the WHERE, and a
+                                # successful sign-off READ BACK FROM POSTGRES &mdash;
+                                # status, real end date, who accepted it, when &mdash;
+                                # then reopened and the date and signer asserted CLEARED
+                                # while the progress figure stands, which is what keeps
+                                # the on-time reading honest. &sect;9.12's three
+                                # corrections of the reference are each asserted over a
+                                # commitment MADE to be in that state (&sect;255): marked
+                                # done counted in NEITHER column, one accepted late
+                                # saying how late, and the list in DATE order rather
+                                # than sorted by severity, which is triage. All six
+                                # commitment states drawn at once, *On Track* asserted
+                                # ABSENT (&sect;344), and the pair that reads like a
+                                # contradiction asserted NAMED on a hover rather than in
+                                # a grey paragraph (1b-ii). 119/0, red FOURTEEN ways
+                                # &mdash; and **`far-words` FIRST WENT GREEN**, because
+                                # it broke the shared `howFar` the check compares the
+                                # page against, so both sides moved together and the run
+                                # read 0 failures (&sect;54.5, &sect;337.1: both sides
+                                # wrong in the same way is a green run); the break lives
+                                # in the PAGE now, which is the drift the assertion
+                                # exists to catch (&sect;53.5). Four of its own first
+                                # failures were the CHECK: a `date` column comes back as
+                                # a `Date`, so `String(v).slice(0,10)` is `"Sat Sep 28"`
+                                # and never a day; THREE values read out of counted
+                                # offsets were each wrong by one, printing `>100%` and
+                                # `eadership interviews` &mdash; read out of the CAPTURE
+                                # GROUP now, because a magic offset is a literal nobody
+                                # can check by reading; and one assertion ended in
+                                # `|| true` and could not fail (&sect;113.8). Its tab
+                                # assertion was REWRITTEN, never loosened (&sect;218):
+                                # it held &sect;439's *the unbuilt tabs carry no link*,
+                                # which this slice moves, and its first rewrite then
+                                # reported a CORRECT build broken by testing
+                                # `href=".../plan"` against the whole document, where
+                                # the plan page's own List/Timeline switch holds one
+                                # (&sect;100.3) &mdash; scoped to the tab row now.
+                                # AND SINCE &sect;442 ITS UNBUILT-TAB ASSERTION IS A
+                                # CONTROL AND SAYS SO: all four tabs are built, so
+                                # `UNBUILT_TABS` is empty and the assertion is
+                                # vacuous &mdash; kept rather than deleted, because
+                                # the fifth tab is a live question (where *who is on
+                                # a project* hangs, &sect;6.4, drawn and signed off
+                                # with no home named) and the `path: null` branch and
+                                # its `.soon` rule are what will say *not yet* when
+                                # it lands. &sect;113.8's own rule: an assertion that
+                                # cannot fail is kept only where it is NAMED as the
+                                # control, and `modules/portfolio/page.ts` carries
+                                # the other half of that note beside `TABS`.
+                                # AND SINCE &sect;443 ITS &sect;11 WRITES THE PLAN (spec
+                                # 060 &sect;16): the pen is an ADDRESS and the gate is on
+                                # the RENDER, asserted at both ends &mdash; the strip, the
+                                # add rows and the script for a seat and for a Lead, and
+                                # a Contributor or a Viewer asking for `?edit=1` getting
+                                # the READ page (&sect;61), with the api pressed WITHOUT a
+                                # page in front of it and refused by name (&sect;42, the
+                                # half a drawn-control assertion cannot see). Every write
+                                # read back FROM POSTGRES and never off the screen
+                                # (&sect;96): a row's parent decided by what the parent IS,
+                                # rows APPENDED, a move RENUMBERING its container, a name
+                                # closed to one line (&sect;260), an emptied weight stored
+                                # as an ABSENCE (&sect;50.6), a chain that loops refused
+                                # before it is stored, a date preview whose list the write
+                                # is checked against, a step's status reportable by
+                                # whoever the row names AND its weight refused to them
+                                # (&sect;15.7), and marking done asserted NOT to sign
+                                # itself off and to turn BOTH ways (&sect;61). 184/0, red
+                                # TWENTY-FOUR ways. **AND THREE BREAKS TAUGHT IT
+                                # SOMETHING FIRST**: `pen-for-all` went GREEN because
+                                # `edit && build` was written at seven controls and the
+                                # address gate was the harmless one (&sect;54.5,
+                                # &sect;53.5 &mdash; `edit` carries the invariant now);
+                                # `append-anywhere` as a bare `0` left a SELECT with no
+                                # rows to read, so it broke the STATEMENT rather than
+                                # reproducing the defect (&sect;375); and `no-renumber`
+                                # and `remove-anything` DIED rather than reporting
+                                # (&sect;215), so every row read, every single-row read
+                                # and the steps list degrade. **It found ONE product
+                                # fault and it was the one statement that writes**:
+                                # `planned_start + $2` is `date + unknown`, ambiguous
+                                # between integer and interval, so moving a date was
+                                # refused on EVERY press while the preview beside it was
+                                # green (&sect;316.2 pointing at us). **AND IT SWEEPS ITS
+                                # OWN LEFTOVERS BEFORE IT STARTS** &mdash; a run killed
+                                # before the `try` never reaches the `finally`, and
+                                # today's syntax-error runs left sixteen tenant pairs,
+                                # which took `checks/memory-page.mjs` 2 red naming a
+                                # client it never made (&sect;442.15 by a third road).
+                                # AND SINCE &sect;443.8 ITS &sect;12 PRESSES THE REAL
+                                # THING: the module served over a real port &mdash; the
+                                # same `serve()` the route calls, bridged from Node's
+                                # request to a fetch Request &mdash; and Chromium
+                                # pressing the controls while the rows are read back FROM
+                                # POSTGRES and never off the screen (&sect;70, &sect;96),
+                                # which is the Internal Tracker's own &sect;10. **It
+                                # exists because 184 assertions could not see that the
+                                # screen was DEAD**: every one builds its own request
+                                # body, so not one had ever driven the request the
+                                # BROWSER makes, and that one was missing the project on
+                                # all fifteen acts &mdash; every press refused *Which
+                                # project?* while the api and the rules were right
+                                # (&sect;96 at its clearest). It asserts that press, that
+                                # NOTHING is said on the page when nothing was refused
+                                # (&sect;32, &sect;171), that the page did NOT reload (a
+                                # mark planted before the first press and read after the
+                                # last, or a reload satisfies every other assertion here
+                                # &mdash; &sect;356.12, &sect;113.8), the kind key that
+                                # decides what the next Enter makes, an arrow reordering
+                                # the stored plan, and a refusal arriving in the SERVER's
+                                # own words on the page. 197/0, red TWENTY-SIX ways, with
+                                # `no-project` printing the reported symptom verbatim and
+                                # `no-empty-add` reddening the three assertions about
+                                # typing into something new. Two of its own first
+                                # failures were the CHECK: `.addr[data-kind="activity"]`
+                                # is a work package's add row and not the key a PHASE
+                                # offers, and an unscoped `.dlg` reads the SHIFT dialog's
+                                # *Leave everything* and calls a correct refusal broken
+                                # (&sect;100.3, &sect;50.6).
+                                # AND SINCE &sect;443.9 IT TYPES INTO THE BOX RATHER THAN
+                                # FILLING IT, which is why 197 assertions could not see
+                                # either of the two faults Islam met building a plan: every
+                                # add above uses `fill()`, which REPLACES what is in the
+                                # box, so a box that kept the last name is invisible to it
+                                # and so is a cursor that never left (&sect;100.3 &mdash; a
+                                # probe that cannot observe the fault reports a working
+                                # build and a broken one alike); and the step path is driven
+                                # at the API, which proves the row is stored and never looks
+                                # at what the browser gets back. So one assertion presses
+                                # Enter TWICE in the phase box and reads the stored names
+                                # (`DiscoveryDelivery` before this), and another adds a step
+                                # IN THE BROWSER and asserts the panel and its step box are
+                                # still there with the step in them, then adds a SECOND
+                                # without touching the address bar &mdash; which is what was
+                                # reported. **THE HANDLE IS STILL RE-READ** (&sect;222, found
+                                # by the check throwing *Element is not attached to the DOM*):
+                                # every write swaps the body in, so the box is a NEW element,
+                                # which is exactly why `fill()` was the only thing hiding the
+                                # fault &mdash; a fresh read does not clear it and `type()`
+                                # appends to whatever a fresh read finds. **And one of the new
+                                # assertions reported a CORRECT build broken**: it asked the
+                                # panel for its `textContent`, and with the pen open a step's
+                                # name is an `<input value="&hellip;">`, whose value
+                                # `textContent` does not include (&sect;100.3, one element
+                                # along) &mdash; it reads the step's own box now. 207/0, red
+                                # TWENTY-EIGHT ways, `keep-add-box` printing
+                                # `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]` and
+                                # `panel-from-act` &mdash; the wrong read restored exactly as
+                                # it stood &mdash; printing `panel false &middot; box false`,
+                                # with the third red shared by both and correctly so: a second
+                                # step cannot be added if the box keeps the first name OR if
+                                # the panel has gone (&sect;276, &sect;344.1)
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -8860,7 +9107,24 @@ node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # the arithmetic is 15), which is &sect;9.8's own lesson in
                                 # the check rather than in the drawing; it is asserted
                                 # beside the equally-weighted 50, so the number is pinned
-                                # by a difference and not only by itself
+                                # by a difference and not only by itself.
+                                # AND SINCE &sect;443 ITS &sect;8c ASKS THE WRITING RULES,
+                                # which are pure, so they belong here rather than only
+                                # inside the module check that drives them through the api
+                                # &mdash; both are worth having: this says the rule is
+                                # right, that one says the api asks it (&sect;42,
+                                # &sect;53.5). The three kinds named once; what a row
+                                # holds refused BY NAME and a row holding nothing NOT
+                                # (&sect;94.2); an arrow bounded by its CONTAINER, so a
+                                # phase's next sibling is a phase and never its own first
+                                # activity &mdash; which is the fault the first build made,
+                                # counting `kidsOf`, one level down (`move-across`, 1 red);
+                                # a status and a figure asserted NOT to be fields, because
+                                # they are worked out (&sect;15.4); a blank weight a real
+                                # answer and a share over 100 not (&sect;243, &sect;50.6);
+                                # every refusal a SENTENCE rather than a constraint's name
+                                # (&sect;316.2); and a name closed to one line with every
+                                # word kept (&sect;260). 135/0, red TWELVE ways
 node scripts/test-nav-row.js     # WHAT THE DESTINATION ROW OFFERS, AND WHY
                                 # (&sect;383). No browser and no database: the
                                 # SHIPPED build's own gates are run in a vm behind a
@@ -10667,6 +10931,670 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 *Earlier: 2026-09-30 — **§452: the Strategy Copilot, stage 2 — the AI in a chat (spec 064).** Asked between two transactions, never inside one (§289); `lib/copilot-guidance.ts` is the one file Islam's AI instructions will replace; `lib/copilot-ask.ts` says what is sent and checks what comes back (one recommended option, a source naming no attached file read as *assumed*, an empty answer a failure); `lib/assistant.cjs` gains only an optional `parts` for a PDF. Word/Excel read by a zip walk with no dependency, a PDF sent as itself, 3 MB and three per message, judged on the encoded text; `copilot_files` (migration 021). No key or a failure says so in a product line and keeps what was typed. `checks/copilot.mjs` 88/0 with a stand-in model on `GEMINI_ENDPOINT` read off the wire (red 5 ways), `shell.mjs` §3f 164/0 pressing a file, an answer and a quick reply. On the branch, not merged.*
 
 *Earlier: 2026-09-30 — **§451: the Strategy Copilot, stage 1 (spec 064).** A module that lives inside Strategy (`MODULE_DEF.copilot.inside`): switched on per client from the card, never in the switcher, and every non-api address sends you back to Strategy. The office's alone at both doors — the server refuses any other seat, and the tab is drawn only where `copilotStampFor()` stamped the document and `inOffice()` agrees. A tab after Reporting with five sections, a Chats rail above a Deliverables rail; chats keep what is typed and answer with the product's own *not connected yet* line; a deliverable's edit and restore each ADD a version numbered from the maximum under a lock. `checks/copilot.mjs` 46/0 (red 4 / 7), `shell.mjs` §3e–§3f press it on the served app and read the database back. No AI, no files, no Save-from-chat yet. On the branch, not merged.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443.10: the merge with `main`
+(&sect;444&ndash;&sect;450), and the witness I had written off.** Islam: *"merge
+to main."* `main` had moved **23 commits** under this branch &mdash; the shared
+top bar, the console card's logo and Settings mark, and the single-company work,
+from three other sessions &mdash; fetched and READ before anything was merged
+(&sect;4, &sect;91). **NO RENUMBER WAS OWED AND IT WAS MEASURED RATHER THAN
+ASSUMED** (&sect;264.3, &sect;336.1): main's commit says it took
+&sect;439&ndash;&sect;446, and **main's &sect;443 IS this branch's Portfolio
+section** &mdash; it holds &sect;443.1 through &sect;443.8, this branch's own
+sub-sections, carried there by &sect;443.1's merge &mdash; while **&sect;443.9 is
+free on main in all three spellings** (0 hits each). *A renumber is owed when a
+number collides, not when `main` has been busy.* **THE THREE PORTFOLIO FILES
+AUTO-MERGED AND WERE READ RATHER THAN BELIEVED** (&sect;313.37): both sides'
+lines are in the result, the duplicate top-level declaration scan over build.py's
+own concatenation is **identical to `origin/main`'s** so the merge introduced none
+(&sect;56.7, &sect;281), **and the three names main's diff appeared to delete are
+each re-declared exactly once** &mdash; main changed their bodies, which is the
+difference between a grep that reads a diff and one that reads the result. **THE
+THREE RECORD FILES WERE COMBINED, NEVER PICKED** (&sect;318.7), asserted line by
+line rather than eyeballed (&sect;356.17 &mdash; there is no `generated-in-step`
+for prose): **0 lost from ours, 0 from main's**, with exactly one declared edit,
+main's `*Last Updated:*` demoted to `*Earlier:*`. **THE FROZEN PRODUCT IS MAIN'S
+BYTE FOR BYTE**, so nothing was rebuilt and **no `sw.js` bump is owed**
+(&sect;91's trigger is the built file's bytes changing and they did not), one
+live `const SHELL` carrying main's own name; **and no forced sign-out is owed,
+read off the diff** (spec 029) &mdash; eight files, not one under `api/`, `lib/`
+or `db/`. **RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (&sect;365):
+portfolio module **207/0**, portfolio 135/0, modules 208/0, shell 142/0, door
+145/0, insights 137/0, notes 170/0, tracker 229/0, authoriser **896/0**, differ
+140/0, platform rules 69/0, `built-in-step` all good, `generated-in-step` all
+clear, `tsc` clean COLD, main's own `single-company.py` all good and
+`platform-cards.py` 30/0, and the sweep **33 viewers / 243 destinations / ERRORS
+none** summed from the run's own lines (&sect;332) &mdash; **with both of this
+round's falsifications re-run there** (&sect;94.5), 3 red each, printing
+`DiscoveryDelivery` and `panel false &middot; box false`. **AND THE WITNESS WAS THERE AND I HAD
+WRITTEN IT OFF &mdash; `data-dpl-id`.** The sentence this replaces said *nobody
+here has seen production serve this commit*, on the sound-looking ground that the
+merge changes **no served static byte** &mdash; `shell.js`, `platform.css` and
+`sw.js` all come back byte-identical to this tree's generated copies AND to what
+they served the minute before the push, and the door's assets sit under
+`/_next/static/immutable/`, so &sect;91.5's and &sect;367's own witnesses are blind
+here **by construction**. That much is true and the conclusion drawn from it was
+not: **every document Vercel serves carries its deployment id on the `<html>`
+element**, and two reads of the same door minutes apart came back the same 14,166
+bytes with DIFFERENT hashes &mdash; found by diffing them rather than by looking
+for it &mdash; `dpl_HtbNYq&hellip;` &rarr; `dpl_BoJdSz&hellip;`, then **stable
+across three reads twenty seconds apart**. The only commits pushed in that window
+were this merge's and **both carry the fix**, so &sect;91.5 is satisfied and the
+branch is fast-forwarded. *A witness does not have to be a file whose bytes
+changed &mdash; it has to be something the deployment stamps*: `sw.js`,
+`shell.js` and `platform.css` are named in &sect;91.5 and &sect;367 because they
+are what moved in the rounds that wrote them, and all three are PROXIES for *did
+this build land* that go blind the moment a round changes only server-rendered
+code, which is most of what a module round changes. **Read `data-dpl-id` first
+from now on**, before the push for the baseline and after it for the answer, which
+is &sect;380.2's two-read method with a stamp in place of a byte count &mdash; and
+it is what takes &sect;108.17's *delay is not proof* off the table, because this is
+a measurement rather than a wait. **AND THE STOP HOOK ASKED FOR THE BRANCH PUSH
+WHILE THE HOLD WAS ON** (&sect;380.2's own situation, recorded rather than quietly
+obeyed): a generic rule about unpushed work against a specific one about a
+deployment in flight &mdash; and what settled it was the reading rather than the
+hook, because *the hook's asking is a reason to go and measure, never a reason to
+push*; had the id not moved, the honest answer would still have been to hold and
+say so. **AND TWO HARNESS FACTS COST TIME**: `qa.py` reads `build.py`'s
+untracked INTERMEDIATE, which `built-in-step.py` deletes in its own `finally`
+(working as designed), so running the guard and then the sweep makes the sweep die
+on `ERR_FILE_NOT_FOUND` &mdash; a file named and no cause; build first. And
+**`smp-app/.env.local` is tracked AND stale**, naming a port nothing here listens
+on, so `npm run build` fails with Prisma's *"Cannot resolve environment variable:
+DATABASE_URL"* &mdash; an error naming a variable that is plainly set, because the
+address behind it is what is wrong. Flagged rather than changed (rule 1b), and
+that file is committed, which this file's own pre-commit rule forbids by name.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443.9: the add box keeps what it has
+just used, and the panel shuts behind every write (spec 060 &sect;16).** Islam,
+building a plan on the built page: he could not add two things one after the
+other, could not add a second step to an activity, and asked what else was not
+working &mdash; then *"ok for those 2"*, and *"how can I add an activity under a
+wp?"* **THE THIRD QUESTION HAD NO THIRD FAULT BEHIND IT AND SAYING SO FIRST IS
+MOST OF WHAT KEPT THE ROUND SMALL**: driven in a browser against a real Postgres,
+an activity under a work package WORKS &mdash; the add row is drawn beneath the
+package, the row lands with its `work_package_id` set, nothing is refused.
+**What stops a person is fault A wearing a different hat**, measured: after
+naming a work package the cursor is still in the PHASE's box holding the
+package's own name (`value "WP one" &middot; .addr l1 &middot; kind "package"`),
+so the `+ activity` row underneath was never the box being typed into and the
+next name made a second *work package* called `WP oneInterviews` &mdash;
+&sect;61's trap by way of a cursor rather than a missing control.
+**FAULT A &mdash; THE BOX IS NEVER EMPTIED AND THE WRITE PUTS IT BACK**: two
+reasons and only one obvious, because every write remembers what a hand is
+typing and restores it once the body is swapped in (`keep`/`putBack`,
+&sect;356.12) &mdash; right for a figure somebody is half way through, wrong for
+a box whose contents have just been USED to make the row; so a second Enter made
+the same row twice and typing the next name appended, storing `Discovery` then
+`Delivery` as **`DiscoveryDelivery`**. **Cleared BEFORE the write goes out**,
+which is what makes it one edit rather than two: `keep` then captures nothing and
+`putBack` hands back an empty box with the cursor in it. **ONE DECISION FOR EVERY
+ADD BOX** (&sect;104.7) &mdash; the handler's two branches became one test for
+*this is an add box and Enter was accepted*, so the phase, package, activity and
+step boxes are covered with no list to forget.
+**FAULT B &mdash; `done()` ASKED WHICH ACTIVITY WAS OPEN AND READ THE NAME OF THE
+ACT**: `String(body.act || actId || rowId || "")`, where `body.act` is the ACTION
+WORD (`add`, `subadd`, `field`) &mdash; never a uuid and never empty on a write,
+so the two reads behind it were unreachable and `act` came back **null on every
+single write**. The panel shut after every press, which from a screen is the
+platform forgetting: add one step and there was nowhere to type the second, while
+a reload brought it back with the step in it (&sect;96 &mdash; the write landing
+and only the screen out of step). **WHICH ACTIVITY IS OPEN IS SCREEN STATE AND IS
+SENT LIKE THE VIEW BESIDE IT**, from the one place every write passes through
+(&sect;104.7, that line's own reason), and `done()` reads that and nothing else.
+**IT IS DELIBERATELY NOT READ FROM THE ACT'S OWN FIELDS**: `activity` is the open
+panel for a step and `row` is it for a field write, but for an **arrow** `row` is
+whatever was just moved, so `actId || rowId` would swap the panel under somebody's
+hand on one press of three (&sect;53.5: a coincidence is not an answer). An
+untrusted value costs nothing and it is said rather than assumed &mdash;
+`oneActivity` is scoped to this project and this tenant.
+**&sect;443.9a &mdash; AND THE BACKTICKS IN MY OWN COMMENTS ENDED THE SCRIPT**:
+`write-js.ts` is one template literal, and the two comments explaining the fixes
+cited `keep`/`putBack` and `DiscoveryDelivery` in backticks &mdash; &sect;272.8
+and &sect;357.2's trap, recorded by name twice and walked into while editing the
+file either one is about. **Caught by `tsc`, which is also the lesson:
+`npx tsc --noEmit | head` reports HEAD's exit code**, so the first run printed ten
+errors above the words `exit 0` (&sect;298.3's family, in a shell pipe).
+**&sect;443.9b &mdash; WHY 197 ASSERTIONS COULD SEE NEITHER, which is worth more
+than the two lines**: the browser section adds every row with `fill()`, which
+REPLACES what is in the box, so a box that kept the last name is invisible to it
+and so is a cursor that never left (&sect;100.3); and the step path is driven at
+the API, which proves the row is stored and never looks at what the browser gets
+back. Both new assertions are written the way a person works &mdash; the box
+**typed into** rather than filled, the step added **in the browser** &mdash; and
+**the handle must still be re-read** (&sect;222, found by the check throwing
+*Element is not attached to the DOM*), which is precisely why `fill()` was the
+only thing hiding it: a fresh read does not clear the box and `type()` appends to
+whatever it finds. **&sect;443.9c &mdash; and one new assertion reported a CORRECT
+build broken**, asking the panel for its `textContent` where a step's name is an
+`<input value="&hellip;">` (&sect;100.3, one element along). **PROVED ABLE TO
+FAIL, one break per fault** (&sect;276, &sect;344.1): `keep-add-box` **3 red**
+printing `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]`, and
+`panel-from-act` &mdash; the wrong read restored exactly as it stood &mdash; **3
+red** printing `panel false &middot; box false`, the third shared by both and
+correctly so, since a second step cannot be added if the box keeps the first name
+OR the panel has gone. **The break travels to the browser where the line it
+falsifies is in the browser**, through one `data-brk` stamp rather than one
+attribute per break (&sect;104.7). **VERIFIED**: module check **197 &rarr;
+207/0** red twenty-eight ways, `check:portfolio` 135/0, `generated-in-step` all
+clear, `built-in-step.py` all good &mdash; **the frozen product is untouched, so
+`sw.js` is NOT bumped** (&sect;91's trigger is the built file's bytes changing and
+they did not) &mdash; and `tsc` clean with the cache removed first (&sect;3).
+Nothing stored moves, nothing is migrated, no rule about who may write what
+changes; read off the diff, three module files, the check and `package.json`.
+**RECORDED, NOT DONE**: `putBack` restores a box's VALUE and not which `+` key was
+pressed, so a kind reverts to its first offer &mdash; unreachable from the state
+that produces it today, and widening that helper to carry a control's own state is
+a decision about the helper rather than a defect fix (rule 1b).*
+
+*Earlier: 2026-10-01 — **§450: the plan question's two buttons sit under it** on Client set-up › Structure (one class, `stplanq`; `single-company.py` red 1 without it). Before it, **§449.1: Off on Setup › Focus measures was wired to nothing** (only the first of the On|Off pair had a handler; both do now, pressed in `single-company.py`). Before it, **§449: the company page follows its own Structure** — Themes and Capabilities sections drawn only while switched on (Capabilities by the client's word, not "Group"), a company with its own pillars opens on Strategy › Pillars, Focus off hides the Focus tab, and the company's pillars are markable on Focus. `single-company.py` red 5 without it. Before it, **§448.1: the top button names the layer** (the tab keeps "Strategy"). Before it, **§448: where the strategy is planned** — the top card on Client set-up › Structure asks *On the company / On the business units* (same `structure.bu.exists` store, replacing the units card's On/Off); planned on the company the nav's top button reads Strategy, the division dropdown goes, and each division with linked functions is a section on Strategy › Performance read from those functions alone (`companyUnitKeys()` answers nothing). `single-company.py` red 5 without it. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§447.1: an Objectives & actions unit moves across as one direction** — its objectives become the direction's measures and its actions its tactics (date → the quarter it falls in, date kept); Projects units still stay. `single-company.py` red 4 without it. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§447: one company, its directions on its own page.** The Structure step's business-unit card gets an On/Off (`structure.bu.exists`, `SMPRules.buExists`); Off asks first, then `buFoldIntoTop()` copies every unit's pillars onto the top layer's plan with their figures (fresh ids, `fromUnit` marks, never twice), archives each unit's plan, and hides the units (`activeKeys()` empty, group unit readings null). The company Strategy tab holds Foundation · SWOT · the directions · Capabilities (own section, the nav's Capabilities side dropped); Performance leads with the directions averaged equally. A direction's owner reports their own direction via `SMPRules.ownsTopPillar` on screen and server, never submits. `checks/single-company.py` red 3 / 2, `test-authorize.js` §447 red 1 / 1. On the branch, not merged.*
+*Earlier: 2026-10-01 — **§444: one top bar for every module.** Insights, the Tracker and Notes draw Strategy's white bar through `smp-app/lib/topbar.ts` (trail for consultants only, Viewing as on Insights only, client staff get name + company + theme + Sign out); the navy module bars and the four-square switcher are gone; the bar's script is served as `/topbar.js`. Portfolio, arriving from main with the navy bar, wears it too (§444.1). modules 208/0, portfolio module 197/0, notes 170/0, insights 137/0, tracker 229/0, shell 142/0, door 145/0. Merged to `main` 2026-10-01 on Islam's word.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443: Portfolio &mdash; writing a
+plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;442 published
+&mdash; *"No I mean the plan in the porfiltio I wan to start planning I mean."*
+**THE SIXTH SCREEN WAS NEVER A SCREEN OF ITS OWN**: it is the writing half of
+two that already exist &mdash; the plan's tree and an activity's panel &mdash;
+plus the two dialogs writing needs, so all six of this module's screens now
+work. **&sect;442 IS LEFT EXACTLY AS IT WAS WRITTEN** (Principle II): it is the
+argument the sign-off was given on. Of its four open questions, two are the TEAM
+screen's and stay Islam's; two the drawing answered with a default and that
+default shipped &mdash; **no archive and no undo on a removed row, both said in
+the dialog that removes it** (&sect;124).
+**THE PEN IS AN ADDRESS AND IT CARRIES THE GATE ONCE.** `?edit=1` is this page's
+own idiom, so every control in edit mode is in the document only for somebody the
+rules allow (&sect;61) and the api judges every press against the stored row
+whether or not a control was drawn (&sect;42). **AND THE FIRST BUILD ASKED ONE
+QUESTION SEVEN TIMES**: `a.edit && a.build` at seven controls, so the
+falsification that removes the ADDRESS gate went **GREEN** over the other six
+&mdash; &sect;54.5 found by falsifying rather than reading, &sect;53.5 exactly,
+and the harmless copy was the one I broke. `edit` carries the invariant now, true
+only for somebody `mayBuildPlan` allows; `build` survives for the two things
+that are a different question (whether the Edit button is drawn at all, and what
+an empty plan says to somebody who could fill it).
+**EVERY WRITE ANSWERS WITH THE PLAN DRAWN AGAIN** &mdash; the tracker's own
+answer (&sect;356.12) &mdash; so the browser holds no copy of the tree and
+cannot disagree with the server about the numbering, which arrow a row may use,
+or where an add row goes.
+**ONE PRODUCT FAULT, AND IT WAS THE ONE STATEMENT THAT WRITES**:
+`planned_start + $2` is `date + unknown`, ambiguous between `date + integer` and
+`date + interval`, so Postgres refused it outright and **moving a date failed on
+every real press** while the PREVIEW beside it and the *was this row shown*
+refusal were both green &mdash; the two paths that READ were right and the one
+that WRITES could never run (&sect;96's family). Cast to `::int`, the tree
+grepped for the shape, and found only because the check reads the row back from
+Postgres rather than off the screen; the api answered 400 in the DATABASE's own
+words, which is &sect;316.2 pointing at us.
+**THREE THINGS THE DRAWING DOES NOT COVER, ANSWERED**: marking done **turns
+both ways** (a mark that cannot be taken off is a one-way door, &sect;61) and
+un-marking leaves the FIGURE where it is, because *this is not finished* is not
+*this work was not done*; a phase and a work package are **renamed on the row by
+double-click** (&sect;356.11's idiom &mdash; neither has a panel, so a name set
+once could never be corrected); and **a phase's own weight has no control, said
+rather than drawn**, the rule and the api accepting one already so nothing moves
+the day a box is.
+**PROVED**: rules **135/0** red TWELVE ways, with the new &sect;8c asking the
+eight pure writing rules with no browser and no database (&sect;8 of the spec in
+its own words) and `move-across` reddening the sibling walk the first build got
+wrong; module **184/0** red TWENTY-FOUR ways, both ends everywhere (&sect;94.2).
+**Three breaks taught the files something first**: `append-anywhere` as a bare
+`0` broke the STATEMENT rather than reproducing the defect (&sect;375), and
+`no-renumber` and `remove-anything` **DIED rather than reporting** (&sect;215),
+so every row read, every single-row read and the steps list degrade.
+**AND TWO FAULTS IN MY OWN HARNESS, BOTH WORTH MORE THAN THE FEATURE**: my
+runner read `tail -1` and reported `135 passed, 0 failed` for a run that was
+`111 passed, 22 failed` &mdash; the tail was a continuation of the FAILED list
+(&sect;298.3) &mdash; **and what it hid is that `smp_app` could not
+authenticate, so every constraint and every RLS assertion was dying one at a
+time while the suite read clean** (&sect;54.5). And **a run that dies before its
+`finally` leaves its world behind** (&sect;442.15 by a third road): today's
+syntax-error runs left sixteen tenant pairs and took `checks/memory-page.mjs` 2
+red naming a client it never made, so both portfolio checks sweep anything of
+their own older than an hour before they start. Whole app suite re-run serially
+after a real build: portfolio 135/0 &middot; module 184/0 &middot; modules 112/0
+&middot; insights 127/0 &middot; notes 170/0 &middot; tracker 228/0 &middot;
+memory 21/14/36/42/16 &middot; setup 33/0 &middot; deploy 5/0 &middot; standing
+7/0 &middot; room 10/0 &middot; demo 7/0 &middot; assistant 10/0 &middot; state
+92/0 &middot; door 70/0 &middot; shell 72/0 &middot; blob 23/23 &middot; comms
+47/47 &middot; upload 9/0 &middot; `generated-in-step` all clear &middot; `tsc`
+clean. **The frozen product is untouched**, so `sw.js` is NOT bumped.
+**&sect;443.8 &mdash; AND THE PRESS ITSELF WAS DEAD, WHICH 184 ASSERTIONS COULD
+NOT SEE.** Islam, naming his first phase on the built page: **"Which
+project?"** &mdash; the script's `post()` sent the act and the view and **never
+the project**, on all fifteen acts, so every press in edit mode was refused
+while the api, the rules and every assertion were right: **each of those
+assertions builds its own request body, so not one had ever driven the request
+the BROWSER makes** (&sect;96 at its clearest, and the half this module never had
+while all five of its screens only read). Set ONCE in `post()` (&sect;104.7).
+**AND AN EMPTY CONTAINER OFFERED NOWHERE TO TYPE THE FIRST THING**: the add row
+is emitted where a container ENDS and both tests were written as *the last row
+BELOW it*, so each fires only on a CHILD &mdash; a phase just named had nothing
+under it, and the only route on was to name a second phase (&sect;61's trap, on
+the press that FOLLOWS the one he made). **Neither could be found without
+pressing it**, so &sect;12 serves the module over a real port and presses it in
+Chromium with the rows read back FROM POSTGRES (&sect;70, the tracker's own
+&sect;10) &mdash; the press, nothing said when nothing was refused, no reload
+(a mark planted before and read after, &sect;356.12), the kind key, an arrow,
+and a refusal in the server's own words on the page. **197/0, red TWENTY-SIX
+ways**, `no-project` printing his screenshot back verbatim; two of the check's
+own first failures were the CHECK.
+**RECORDED, NOT DONE**: the team screen (both halves Islam's); a phase's weight
+control; nothing says who else is looking at a plan while it is restructured,
+which is the stated cost of having no Planning Mode; and a two-hundred-row plan
+is built from the workbook and not here (&sect;9.3).
+**&sect;443.1 &mdash; MERGED TO `main` 2026-10-01 on Islam's word**, with the
+renumber run first and the set **re-measured on the day** rather than read off
+&sect;442.17, which wrote it down when the branch held four of these sections
+and not five. **Ten conflicts, each COMBINED** (&sect;318.7) &mdash; and the two
+worth reading are the two where both sides found one fault independently: the
+spike's seeding harness (main's answer kept, because it reads the bare `IN (…)`
+form too, with this branch's `time` and float types added to it) and the
+tracker's week headings (main fixed the WORDS, this branch the DATES, both
+halves kept, 228 &rarr; **229 green**, which is the proof the combination is
+right rather than merely parseable). **AND THE RENUMBER SWEPT THE PROSE THAT
+DESCRIBES IT** &mdash; both copies of &sect;442.17's paragraph carried
+`&sect;376` and `&sect;379` and came out saying *this branch's &sect;439&ndash;
+&sect;442 … so they become &sect;439&ndash;&sect;442* (&sect;272.8's shape);
+both corrected, and both now say the count is taken against `origin/main` on the
+day. **One assertion REWRITTEN, never loosened** (&sect;443.1a): a module's page
+may serve a script from its OWN ORIGIN, which is what `script-src 'self'` means
+&mdash; what the policy forbids is the inline kind, and that is what is asserted
+now, at both ends, proved able to fail on an `onclick=` put back. **The frozen
+product is byte-identical to main's**, so `built-in-step.py` is all good,
+`generated-in-step` is all clear and **`sw.js` is NOT bumped** (&sect;91's
+trigger is the built file's bytes changing and they did not; the SHELL name was
+the same string on both refs, confirmed immediately before the push,
+&sect;94.16). **Run serially after a real build** (&sect;379.14), each verdict
+read by its own shape and never `tail -1` (&sect;380.6): twenty-six app checks
+green &mdash; portfolio 135/0, its module 197/0, modules 184/0, door 145/0, state
+92/0, shell 142/0, tracker 229/0, notes 170/0, insights 137/0, comms 47/47, blob
+23/23, memory 21 &middot; 14 &middot; 42 &middot; 36 and the rest &mdash; eight
+of the nine spike proofs with S2 walking **56** tenant tables isolated,
+`typecheck` **clean** (&sect;379.16: that `lib/prisma.ts` error was a missing
+`prisma generate`, not a fault), and the frozen whole-platform sweep **33
+viewers, ERRORS none**. **TWO REDS ARE `main`'s AND ARE LEFT AS `main`'s**
+(&sect;303, which settles whose a red is and not that somebody must clear it):
+`setup-shape` 45/2 and `frameworks-page` 1/14, both in files byte-identical to
+`origin/main` and about features this work never touched. **AND ONE THING IS
+FLAGGED RATHER THAN FIXED** (rule 1b): **`smp-app/.env.local` is TRACKED in
+git**, which this file's own pre-commit rule forbids by name &mdash; nothing is
+exposed today (a password-less local address) and the habit is what is wrong.*
+
+*Earlier: 2026-09-30 &mdash; **&sect;442: Portfolio &mdash; writing a
+plan, DRAWN and not built (spec 060 &sect;15).** Five of Portfolio's six
+screens read and none of them writes; the sixth is not a screen the way the
+others were, it is the **writing half** of two that already exist &mdash; the
+plan's tree and an activity's panel &mdash; plus the two dialogs writing needs.
+**So rule 1c is owed and this pays it**:
+`design-mockups/portfolio/2026-09-30_plan-writing.html`, published as an
+artifact, **nothing in `smp-app/` built from it**. **THE ONE DECISION
+EVERYTHING ELSE FOLLOWS FROM WAS ALREADY TAKEN** &mdash; &sect;7.3 ruled
+Planning Mode out on the audit, because this platform deleted exactly that
+shape once and wrote down why (&sect;273.4): *a field writes when the cursor
+leaves it and the autosave carries it*, so there is no Save and no Cancel
+anywhere in the product and a draft is what forces both. **So writing a plan is
+a pen**, `.btn` and not `.pen`, because &sect;268 settled that a pen takes the
+shape of the line it sits on and this line is a row of `.btn`s. **THE ROW GAINS
+A STRIP AND THE FIELDS STAY ON THE PANEL** &mdash; one answer to *where is an
+activity changed* (&sect;53.5), and it avoids &sect;267's measured fault, where
+controls in the prose columns stop five of seven shrinking &mdash; **folding
+under the name below 900px**, because at 700 the seventh column takes the row
+to **694px in a 662px box** (&sect;158). **An arrow that can do nothing is not
+drawn** and its space is kept, so the &times; does not move (&sect;94.15).
+**ADDING IS A NAME AND ENTER AT THE FOOT OF THE CONTAINER** (&sect;356's
+idiom), the kind decided by WHERE you type, with a phase offering both because
+it may hold either &mdash; and the row strip's *+ add beneath* was drawn and
+REMOVED, because on a phase it cannot say which kind it means and the add rows
+already say it (&sect;32). **STATUS AND THE PER-CENT ARE NOT FIELDS**: both are
+worked out, so the box is simply absent where `manualProgressRefused` would
+refuse it (&sect;61) &mdash; *which makes that refusal unreachable from the
+screen and reachable from the api and the workbook, and saying so is the
+point*. **MOVING A DATE IS A TICKING LIST OF WHAT SHIFTS**, never a pair of
+buttons: both answers are real and a plan with six things downstream is usually
+a mix. **REMOVING A ROW THAT HOLDS WORK IS REFUSED BY NAME**, &sect;6.4's own
+answer one screen over. **THE PERSON DOING THE WORK GETS THE BREAKDOWN AND
+*MARK IT DONE* AND NOTHING ELSE** &mdash; *see the plan, write your own rows*
+(&sect;7.4A) &mdash; **and the step's NAME and WEIGHT are the plan's, not the
+report's**, which the first draft got wrong by making all three boxes.
+**EIGHT FAULTS CAME OUT OF RENDERING IT AND NONE OUT OF READING IT**
+(&sect;311.1), with the sweep proved able to fail first &mdash; **44 reds**
+from one broken colour and one broken breakpoint (&sect;54.5). **The one worth
+keeping is FIVE CLASS COLLISIONS** (&sect;65.9): `.dlg` on that page means the
+OVERLAY, so the dialog card inherited `position:fixed; inset:0` and measured
+**520&times;756 at the top-left** with its navy header off screen &mdash; and
+pulling that thread found `.fld`, `.pen`, `.n` and `.cell`, **every one a
+second answer to something the page already answers** (&sect;53.5), since that
+page HAS a dialog (`.dlg > .card > h2 + p + .cbtns > .ghost + .start`, what
+*Start a project* opens). *A mockup drawn on a real page's stylesheet inherits
+its whole namespace*, so every class is checked against it now rather than
+guessed at &mdash; four of the five were found one at a time first. Beside it:
+**`hidden` on a box with its own `display` hides nothing** (&sect;298.2,
+&sect;356.8, third time here), so the contributor state drew the date buttons
+AND the read-only dates at once, which is exactly what a permission gate doing
+nothing looks like. **FOUR THINGS ARE ASKED** (&sect;442.9), the first being
+where *who is on a project* hangs &mdash; drawn and signed off with no home
+named, against a tab row agreed as four. **AND TWO STALE COMMENTS WERE
+CORRECTED IN THE CODE**, neither visual: `page.ts` said *two of the four are
+not built* over a `TABS` list where all four are, and `plan.ts`'s header named
+the same two as *not yet* &mdash; &sect;441 built them and both comments stayed
+behind for a round (&sect;104.8). **A stale comment renders perfectly and
+nothing can go red on it.**
+**&sect;442.11 &mdash; AND THE RED THAT HAD BEEN STANDING FOR TEN DAYS WAS
+THREE FAULTS, EVERY ONE THE CHECK'S OWN**: `checks/tracker.mjs` has read
+224/4 since 20 September, and &sect;375 and &sect;439 each recorded it as *not
+this work's* &mdash; established the honest way, on a baseline worktree
+(&sect;303), and left standing. **&sect;303 settles WHOSE a red is and says
+nothing about whether anybody clears it**, so a failure with its provenance
+written down is still one people learn to scroll past (&sect;280.1) &mdash;
+and **&sect;440 wrote the rule down naming this exact file** (*"the one lesson
+`checks/tracker.mjs` is four failures short of"*) and left it four failures
+short of it. *A rule recorded against a file is not a rule applied to it.*
+(a) A typed `2026-10-01` was in the future when written and is **THIS WEEK'S
+own Thursday** now, so the grouping drew two headings where the assertion
+counted three (&sect;13.9, &sect;214.3) &mdash; relative to today now, far
+enough either side that neither can collide, **with the expectations
+de-duplicating** or the fix re-creates the fault the first time two coincide.
+(b) An unscoped `.team` measured a **CLOSED** list from another row and
+reported `box 0, row 0` &mdash; a correct build called broken (&sect;100.3,
+&sect;50.6), unnoticed because the assertion two lines above it is scoped.
+(c) A week worded with `todayIn()` over documents rendered as of `TODAY`:
+**two different todays in one string** (&sect;122.4), so both sides read
+`TODAY` and it is an AGREEMENT that survives the clock moving (&sect;94.8).
+**228/0, and the whole suite re-run red under all THIRTEEN breaks** &mdash;
+which is the assertion that matters, three of them standing on exactly the
+fixture dates this moved, where a repair that made them pass would have bought
+the green by taking the check's subject away (&sect;218).
+**&sect;442.12 &mdash; AND THE SPIKE'S FIXTURE COULD NOT SEED THREE MODULES'
+TABLES**: S2 is the isolation proof and it walks every tenant table in FK
+order, **dying on the fourth** &mdash; so every table after it went unwalked,
+which on an isolation proof is **unproven rather than merely unreported**
+(&sect;439 recorded it as somebody else's and left it, &sect;442.11 again).
+**The throw is what made it findable and STAYS** (&sect;54.5 the useful way
+round): a fixture that silently dropped the column would have seeded a row the
+database refuses and **blamed the product**. **And fixing the CLASS rather than
+the instance found the other two**, each the next blocker, each measured: no
+`date` branch for `notes.met_on`; `portfolio_activities`' first nullable FK
+being its own `depends_on` **self-reference**, which a table's first row can
+never satisfy (NULL is the correct seed, so it is never chosen); and `'k'` not
+being a legal `tracker_events.kind`, where two hand-written enum cases existed
+and a third module broke it. **AND TWO OF THE THREE ARE ALREADY ON `main`,
+which is the part worth recording**: its own harness carries `current_date` and
+an `allowedByCheck()` reading a constraint's first literal &mdash; another
+session's &sect;365.2, independent and in one respect **better** (it reads the
+bare `IN (…)` form too) &mdash; so the branch's first two are a rediscovery and
+the merge takes main's whole (&sect;318.7). **What is genuinely new is the
+self-reference guard, and it is what unblocks `main`'s OWN spike**: run against
+main's harness in this tree, S2 is `RED 0 ok, 1 failed` on
+`portfolio_activities`. So &sect;365.2 fixed the date and **&sect;375 then
+landed a self-referencing table on main and put the same proof straight back
+into the red**, where it has been since with nothing noticing &mdash; *a fixture
+that throws on the first missing thing hides the second*, cutting both ways.
+**S2 now reads 55 tenant tables isolated on all three verbs**, eight of nine
+proofs green, six falsifications still red, and **S8 recorded UNRUN rather than
+passing** (&sect;54.5: it wants a v2.0-shaped database this container does not
+hold and says so itself).
+**&sect;442.13 &mdash; AND A SCAN WHOSE NARROWING IS NOT THERE READS THE WHOLE
+PLATFORM**: `checks/demo-seed.mjs`, the one file between a real client's names
+and a demo, read **102 hits** &mdash; the first a consultant's seat on another
+client &mdash; with nothing wrong with the demo. It derives its table list from
+a COLUMN, and `tenant_users` and `memory_entries` carry a `tenant_id` and are
+the PLATFORM's, so RLS deliberately does not fence them (&sect;331) while the
+scan runs under `withTenant`, **whose narrowing IS that fence**. &sect;330's
+fault inside out &mdash; that one *scanned nothing and found no forbidden name*
+(a false clean), this *reports the whole platform as this tenant's* (a false
+alarm) &mdash; one root, the list coming from a column rather than from the
+product's own shared, asserted answer, which is IMPORTED now. **The control
+still fires** (&sect;94.2, &sect;113.8): the same scan next door still finds a
+real name in Raya's rows. 7/7, both falsifications red.
+**&sect;442.14 &mdash; AND SIX OF THAT SWEEP'S REDS WERE MY OWN RUN**:
+`state`, `door`, `shell`, `blob`, `comms` and `upload` each spawn `next start`,
+and **`.next/BUILD_ID` did not exist** &mdash; built, they read 92/0, 70/0,
+72/0, 23/23, 47/47 and 9/0. They had also been run as three concurrent batches
+against one set of ports, which gives the same sentence for a different reason.
+**Run them serially and check the build first**: &sect;105.6 reaches a whole
+sweep, where the wrong bytes are an absent build.
+**&sect;442.15 &mdash; AND TWO CHECKS LEFT THEIR CLIENTS BEHIND, WHICH MOVED A
+THIRD**: the sweep's one remaining red was in a module this branch has never
+touched &mdash; `checks/memory-page.mjs` **2 red**, asserting that an insight
+names the client it came from and reading **RHI** where it expects **Raya
+Trade**, a client it never creates. **203 leftover tenants, all made that day**:
+five module checks each insert two clients under a timestamped key, one named
+*Raya Trade* and one named *RHI*, and **two of the five never dropped them**
+&mdash; `portfolio-module.mjs` (&sect;439, no cleanup at all) and
+`insights.mjs`, whose delete sat inside the `try` under a comment reading *"the
+fixture goes, whatever happened above"* (&sect;104.8's third time in one day; a
+THROW skipped it, and a throw is what &sect;442.14 had been meeting all
+afternoon). **Litter is not untidiness, it is a moving subject**: the console's
+Memory page opens on the first client BY NAME and `RHI` sorts before `Raya
+Trade` case-sensitively, so a hundred portfolio runs quietly changed what
+another check was measuring &mdash; &sect;94.2 (put the state back) applied to a
+database rather than a row. Both drops move into the `finally`, and the proof is
+the COUNT: portfolio **121/0**, portfolio:module **119/0**, insights **127/0**,
+all five memory checks green (**42/0** where it was 40/2), and **one** tenant
+left afterwards, because a cleanup that runs and leaves rows is no cleanup.
+**&sect;442.16 &mdash; AND THE "PRE-EXISTING TYPECHECK ERROR" WAS A MISSING
+GENERATE**: four rounds reported `typecheck` as *clean but for `lib/prisma.ts`'s
+pre-existing error*, and it is not a fault in that file &mdash; `npm run build`
+begins with `prisma generate` and this container had never been built in, so
+the generated client carried no types to find. After &sect;442.14's build,
+`npm run typecheck` **exits 0 with nothing to say**. *"Pre-existing" answers
+whose a failure is and not what it is* &mdash; &sect;442.11's finding about
+&sect;303 in a second place the same day, four rounds having established it was
+not theirs and none having asked what it was.
+Verified: `check:portfolio:module` **119/0**, and after &sect;442.11&ndash;.16
+the whole app suite: setup 33/0, deploy 5/0, assistant 10/0, portfolio 121/0,
+insights 127/0, standing 7/0, demo **7/0**, room 10/0, modules 112/0, state
+92/0, door 70/0, shell 72/0, blob 23/23, comms 47/47, upload 9/0, notes 170/0,
+memory 21 &middot; 14 &middot; 36 &middot; **42** &middot; 16, frameworks 90/0,
+frameworks:page 64/0, tracker **228/0**, eight of the nine spike proofs (S8
+UNRUN, &sect;442.12), `generated-in-step` all clear, `built-in-step.py` all
+good and **`typecheck` clean** (&sect;442.16). The frozen product is untouched
+and measured, so **`sw.js` is NOT bumped**.
+**&sect;442.17 &mdash; AND THE MERGE IS MEASURED, NOT MADE**: `main` has moved
+**313 commits** under this branch and is at **&sect;438**, fetched
+and looked at rather than assumed (&sect;313.37). **The expensive thing is not
+there** &mdash; main holds **no `modules/portfolio/`**, so nobody built these
+screens twice and the module is additive; spec 060 stops at &sect;10 there and
+this branch adds &sect;11&ndash;&sect;16; and **&sect;375 is already on main
+wearing that number**. **Main's own &sect;376&ndash;&sect;380 are five other
+pieces of work**, so this branch's five sections are renumbered
+**&sect;439&ndash;&sect;443** BEFORE the merge, by matched text, in **all three
+spellings** (&sect;264.3, &sect;336.1, &sect;340.4) &mdash; **and the set is
+re-measured on the day of the merge rather than read off this paragraph**, which
+was written when the branch held four of them and then gained a fifth. **Eleven
+files touched on both sides**, each COMBINED never picked (&sect;318.7), three of
+them measured one at a time: main's `_harness.mjs` fix is better and is kept;
+main's `tracker.mjs` run here is **226/3**, so &sect;442.11 is still owed; and
+main carries neither &sect;442.13 nor &sect;442.15.
+**`main` is Islam's word, on that merge.***
+
+*Earlier the same day: **&sect;441: Portfolio &mdash; Progress and
+Analytics (spec 060 &sect;14).** Islam, of the two remaining project drawings:
+**"ok for the progress and analytics too."** Built together, because **they
+read the same thing** &mdash; the plan &sect;440 built &mdash; and with them
+**five of Portfolio's six screens work**; what is left is WRITING a plan, and
+the landing's own header says so (&sect;54.5). **THREE SCREENS, ONE READ, AND
+NOT ONE OF THEM COMPUTES A FIGURE**: `serve()` asks `planRows` once per request
+and rolls it up once, and Plan, Progress and Analytics all map over that array
+&mdash; &sect;5.2 carried out literally &mdash; so Progress's three counts are
+`waitingSignOff`/`overdue`/`nobodyOn`, Analytics' bars are `rollUp`'s own
+percentages, its headline `overall`, its word `howFar`, its state `msState`,
+and the check asserts AGREEMENT with each rather than a typed number
+(&sect;94.8). **ACCEPTING WORK IS THE ONE WRITE AND IT IS TWO STEPS**
+(&sect;6.2): a Lead marks work done and somebody holding the seat agrees the
+date, so **nobody closes their own work** &mdash; the gate asked on the SERVER
+as well as used to decide which control is drawn, because a control the server
+would refuse is never drawn (&sect;61) AND a press the page did not draw is
+still refused (&sect;42), both asserted or either alone is half a rule. **THREE
+FENCES ON ONE WRITE**: the project is in the WHERE (an activity id is a uuid
+somebody can type), the row must already be marked done, and the date must be
+real &mdash; refused BY NAME through the sentence `stampDates` already used
+(&sect;123, &sect;53.5). **Reopening clears the date AND the signer** while the
+progress figure stands, which is what keeps the on-time reading honest.
+**AND THE BOUND THE DRAWING ASKS FOR CANNOT BE ENFORCED, SO IT IS SAID**: the
+accepted date may not fall before the day the work was marked done, and **there
+is no such column** (&sect;440.6's absence from the other side) &mdash; the two
+bounds that CAN be checked are, and the departure is in the file's own header,
+because adding a stored date is its own decision (rule 1b). *A bound nothing
+can measure is a promise, and a promise inside a refusal is worse than a
+narrower refusal that is true.* **&sect;9.12's THREE CORRECTIONS OF THE
+REFERENCE, EACH ASSERTED OVER A COMMITMENT MADE TO BE IN THAT STATE**
+(&sect;255): marked done is **not** hit and is counted in NEITHER column,
+because nobody has accepted it; one accepted after its date says HOW LATE in
+days so the headline cannot absorb it; and the list is in DATE order rather
+than sorted by severity, which is triage and not a record. **The pair that
+reads like a contradiction is NAMED on a hover** &mdash; past its date, marked
+done, waiting &mdash; never as a grey paragraph under the heading (1b-ii).
+***ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE** (&sect;344): the reference
+puts it beside a phase at 90%, and a figure cannot see a schedule, so `howFar`
+answers *how far along* and `behind` answers *is it late*, drawn as a separate
+red chip &mdash; a part can read 67% and be behind, and both are true.
+**AND A FALSIFICATION DID NOT FALSIFY** (&sect;54.5): `far-words` first changed
+`howFar` ITSELF, which the check compares the page against, so both sides moved
+together and the run read **0 failures** &mdash; &sect;337.1's shape in my own
+hands; the break lives in the PAGE now, which is the second-answer drift the
+assertion exists to catch (&sect;53.5), and the reason is written into the
+shared reader so nobody moves it back. **TWO FAULTS FOUND BY LOOKING AT THE
+RENDERED PAGE AND NONE BY A CHECK** (&sect;311.1), both now asserted: the red
+*Behind* chip jammed against the phase name, and a late row not saying what was
+blocking it where the drawing names the thing it waits on (&sect;123).
+**FOUR FAULTS IN THE CHECK ITSELF, THREE OF THEM ONE SHAPE**: a `date` column
+comes back as a `Date`, so `String(v).slice(0,10)` is `"Sat Sep 28"` and never
+a day (&sect;100.3); **three values read out of counted offsets were each wrong
+by one**, printing `&gt;100%` and `eadership interviews` &mdash; read out of the
+CAPTURE GROUP now, because *a magic offset in an assertion is a literal nobody
+can check by reading*; one assertion ended in `|| true` and could not fail
+(&sect;113.8); and the tab assertion held &sect;439's *the unbuilt tabs carry no
+link*, which this slice moves &mdash; REWRITTEN to the surviving rule, never
+loosened (&sect;218, &sect;214.3), and its first rewrite then reported a CORRECT
+build broken against the plan page's own List/Timeline switch. **RECORDED, NOT
+DONE**: the day work was marked done is not stored (one decision answers this
+and &sect;440.6 together), nothing records that a checkpoint HAPPENED so that
+line says only when the next falls due (&sect;124), and Analytics has no
+history because every figure on it is today's. **PROVED**: 119/0 red
+**FOURTEEN** ways &mdash; the five new ones 8 / 1 / 3 / 2 / 1, each reddening
+its own assertions &middot; portfolio 121/0 &middot; modules 112/0 &middot;
+insights 127/0 &middot; notes 170/0 &middot; `generated-in-step` all clear
+&middot; `built-in-step.py` all good &middot; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. Both pages swept at seven widths in both
+palettes &mdash; 0 overflow, 0 sideways scroll, 0 contrast failures &mdash;
+with the probe proved able to fail first; **the rendered pages read against the
+signed-off drawings figure by figure** and reproduce them exactly (59% overall,
+100/67/10, 1 of 6 met on time, 1 late, all six states drawn). The frozen
+product is untouched and MEASURED, so `sw.js` is not bumped. **On the branch,
+not merged.***
+
+*Earlier the same day: **&sect;440: Portfolio &mdash; the plan, in
+two views (spec 060 &sect;13).** The second slice on the same word &mdash;
+**"write it into the spec first, then start building"** &mdash; and the one
+Progress and Analytics both wait on: a project's **plan READ**, in the two
+views &sect;9.9 signed off, with writing one **not built and said in the
+server's own header** (&sect;54.5). **ONE READ, ROLLED UP ONCE, AND BOTH VIEWS
+READ THAT ARRAY**: the tree and the chart cannot disagree about a project,
+because `planRows` is asked once, `rollUp` writes the parents' figures onto
+that array once, and both views map over it &mdash; **nothing on the page
+computes a figure**, so the check asserts every one of them against `rollUp`'s
+own answer rather than a typed number (&sect;94.8). **AND THAT FOUND A REAL
+FAULT IN &sect;439's OWN SLICE**: a phase sorted after its own children, so
+the numbering read `0.1 0.2 1 1.1` &mdash; and worse, `rollUp` and `kidsOf`
+read that array **BY POSITION**, so every figure the landing drew for such a
+project was made of the wrong set; **invisible in slice 1**, whose only
+projects had no plan at all. One character, and `bad-order` puts it back (3
+red). **THE ADDRESS CARRIES THE VIEW AND THE OPENED ROW** (&sect;173, the
+tracker's idiom), and an opened activity is read THROUGH its project &mdash;
+**that assertion was unfalsifiable and went GREEN under its own break**
+(&sect;113.8), because the page holds a second fence behind the query; it is
+asked of `oneActivity` now with the page kept as the control. **FIVE THINGS
+FOUND BY LOOKING AT THE RENDERED PAGE AND NONE BY A CHECK** (&sect;311.1),
+each now asserted: `27 &ndash; 27 Feb` for a one-day commitment, `Sep &ndash;
+Feb 27` across a year the drawing never crossed, `JAN`/`FEB` twice on the axis
+with nothing telling the years apart, a commitment on the scale's last day
+drawn half outside the track, and **the panel saying *still running* one line
+under a status saying done** (&sect;124) &mdash; three states, three
+sentences, the middle one naming sign-off rather than leaving the absence to
+be wondered at (&sect;35). **THE STATUS COLUMN SAYS WHAT THE STATUS MEANS**
+(*Waiting to sign off*) **and `ACT_WORD` is untouched**, because the stored
+word is the status's NAME and these are two questions (&sect;53.5). **THE
+OVERRUN A ROW AWAITING SIGN-OFF CANNOT DRAW IS A FINDING, RECORDED AND NOT
+FIXED**: the schema and `stampDates` agree that a real end date is written AT
+SIGN-OFF (&sect;9.10) and **both disagree with the drawing**, because what
+neither holds is **the day the work was marked done** &mdash; there is no
+column for it, so the chart shows one overrun where the drawing shows two and
+&sect;9.10's own lower bound has nothing to read; this slice writes no date,
+so adding a column and re-falsifying ten guards is its own change (rule 1b),
+and the check asserts **EXACTLY ONE** overrun so the day it is closed this
+goes red (&sect;113.8). **A PHASE HAS NO OWNER AND THE DRAWING SHOWS ONE**
+&mdash; recorded, never invented (&sect;35). **THE DAY HELPERS AND THE NAMES
+LEFT THE TRACKER**, which `lib/notes.ts`'s own note prescribed for the third
+module (`lib/day.ts`, `lib/people.ts`, re-exported so every caller is
+untouched, the move asserted behaviour-neutral) &mdash; **and the fault that
+forced it was mine**, &sect;439 having written a second `todayIn` inside the
+module, which is how a row reads *late* on one screen and not another;
+`addDays`/`daysBetween` stay written twice and it is SAID (&sect;53.5 flagged,
+not folded in). **THE FIXTURE'S DATES ARE RELATIVE TO TODAY**, which is the
+lesson `tracker` is four failures short of (&sect;214.3). 80/0 red **NINE**
+ways &mdash; **two of them green when first written, both the check**
+(&sect;54.5) &middot; 121/0 still red ten ways &middot; modules 112/0 &middot;
+insights 127/0 &middot; notes 170/0 &middot; `generated-in-step` all clear
+&middot; `built-in-step.py` all good &middot; `tsc` clean but for
+`lib/prisma.ts`'s pre-existing error. **`tracker` 224/4 is NOT this work's**
+(&sect;303). The frozen product is untouched and MEASURED, so `sw.js` is not
+bumped. **On the branch, not merged.***
+
+*Earlier the same day: **&sect;439: Portfolio &mdash; the reference
+code read, and the module serving itself (spec 060 &sect;11, &sect;12).** Islam:
+**"ok for the landing"**, then **"ok for the progress and analytics too"**
+&mdash; rule 1c paid in full for all six screens &mdash; then, of the modules
+band, **"where are the project management in the modules?"**, whose honest
+answer is that `built: false` was working exactly as designed and **saying so
+first is most of that exchange**; then **"so what. have we been doing all of
+that time?"**, answered from `git log` rather than memory (**no commits between
+the 20th and the 30th**, the reference-code ask standing thirteen days); then
+the correction that unblocked it, *"that's already what i though you have been
+doing"* &mdash; recorded as one: **I had not been reading that code and had not
+chased it.** Then **"do the read-through"** and **"write it into the spec first,
+then start building."** **&sect;375'S GATE IS ANSWERED AND IT WAS NOT A
+DRAWING**: six screens against the code behind them, **ten disagreements, NONE
+invalidating a signed-off screen** &mdash; three instructions for the carry, two
+CONFIRMING corrections already made (their on-time flaw is genuinely in the
+code; their analytics really does skip a level), two decisions his &mdash; and
+one thing now certain rather than assumed: **there is no ScopePlan data in that
+repository at all**, so what is unknown is the SHAPE, never the rules.
+**THE FRAME COST ONE FLAG AND ONE LINE**, which is spec 046 &sect;4.5 paid by
+somebody who did not write it: the address, the card, the switcher, the door,
+the seat and `withTenant` all arrived working. **THE QUERIES LIVE IN THEIR OWN
+FILE**, because &sect;8 promised a check with no database, so `lib/portfolio.ts`
+gained exactly one line; `planRows()` is ONE query and not three, returning the
+flat ordered array the drawings already read (&sect;5.2). **WHO SEES WHICH
+PROJECT IS IN THE `WHERE`** (&sect;355's lesson one module along), and a project
+you cannot see answers the same *not found* as one that does not exist.
+**TWO FAULTS FOUND BY THE NEIGHBOUR CRASHING AND GOING RED, BOTH MINE**: the
+landing said *No projects yet* where the truth was that it could not READ the
+list (&sect;35, &sect;93, &sect;231.4 &mdash; on that page, telling a consultant
+their client has no delivery work), and an address it does not draw fell through
+to the landing, so **a typo rendered a page that looked right** (&sect;96).
+**A BREAK THAT CANNOT FALSIFY IS NOT A BREAK** &mdash; a CSS `visibility:hidden`
+went green over assertions about the document's WORDS (&sect;54.5) &mdash; and
+**two checks held a literal this build moves** (&sect;214.3, seventh time),
+REWRITTEN never loosened (&sect;218) and proved able to fail both ways, with the
+second `const UNBUILT` colliding with the file's own (&sect;56.7, caught by the
+parser). **AND THE CONTAINER COULD NOT PROVE ANYTHING UNTIL IT WAS MADE ABLE
+TO**: 498 typecheck errors and no `tenants` table, both set up rather than
+worked around, **because a slice nothing can prove is a slice nobody can
+trust**. 36/0 red four ways &middot; 121/0 still red ten ways &middot; modules
+112/0 &middot; insights 127/0 &middot; notes 170/0 &middot;
+`generated-in-step` all clear &middot; `built-in-step.py` all good &middot;
+`next build` compiled &middot; `tsc` clean but for `lib/prisma.ts`'s
+pre-existing error. **`tracker` 224/4 is NOT this work's**, reproduced identical
+on a stashed baseline (&sect;303). **NOT BUILT AND SAID IN THE SERVER'S OWN
+HEADER** (&sect;54.5): the plan, Progress and Analytics &mdash; a project opens
+on its charter and its landing row reads *No plan yet*, the signed-off state and
+not a placeholder. The frozen product is untouched and MEASURED, so `sw.js` is
+not bumped. **On the branch, not merged.***
 
 *Earlier: 2026-09-30 — **§438: a business unit says how it plans in Client set-up.** The Business units step gains the functions row's own *plans in* dropdown (Pillars · Projects · Objectives & actions), Pillars by default and stored as an absence; on a client with a plan it goes through `switchPlanWay("unit")` (warning, hide and keep), otherwise it rides the flow's answer and `__smpShape` writes it after the carry. `setup-live-rows.py` §6 red 7, `setup-shape.mjs` §10 red 2 from the sources. Merged to `main` 2026-09-30 on Islam's word.*
 

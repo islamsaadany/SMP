@@ -1437,6 +1437,7 @@ var CLIENTSETUP = (function () {
     out.mid.temple = !!(st && st.mid && st.mid.temple === true);
     out.bu.on = lv("bu"); out.fn.on = lv("fn");
     out.fn.exists = SMPRules.fnExists(GROUP);
+    out.bu.exists = SMPRules.buExists(GROUP);
     /* §428: THE CAPABILITIES CARD HOLDS THE FUNCTIONS' ANSWERS UNTIL IT IS
        SAVED. Unsaid, a capability reads the functions' level (effLevel), so
        the card is drawn from a copy of theirs; the copy is written only when
@@ -1452,6 +1453,7 @@ var CLIENTSETUP = (function () {
     return out;
   }
   var CAP_BASE = null;
+  var BU_ASK = false;
   function structWrite(next){
     if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
@@ -1873,6 +1875,44 @@ var CLIENTSETUP = (function () {
     var top = card("Top level");
     top.appendChild(el("p", "lab", "Called"));
     namePick(top, "topword", TOP_NAMES, "one", ro);
+    /* §448: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
+       button on the company level to say that we will plan on the company
+       level or we will plan on the unit level"*, then *"yes agreed"*.) It
+       replaces §447's On/Off on the business-units card, which described what
+       disappears rather than the decision being made. The store is the same
+       `structure.bu.exists`, so nothing moves for a client already set up:
+       absent is "on the business units". Choosing the company with units on
+       the register asks first, here, because it copies their plans across. */
+    var ph = el("div", "stsech stplanq"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
+    var plan = segButtons([[false, "On the " + W("topword", "one", "Company").toLowerCase()],
+                           [true, "On the " + W("unitword", "many", "Business units").toLowerCase()]],
+      lv.bu.exists, function (v) {
+        if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
+        if (!UNIT_KEYS.length) { var n0 = structNow(); n0.bu.exists = false; structWrite(n0); return; }
+        BU_ASK = true; redraw();
+      });
+    plan.classList.add("stonoff"); plan.setAttribute("data-stplan", "1");
+    ph.appendChild(plan);
+    top.appendChild(ph);
+    if (BU_ASK && lv.bu.exists) {
+      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
+      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
+        "'s plan moves onto the " + W("topword", "one", "company").toLowerCase() + "'s own page as directions, with every figure, and each one's own page is kept in the archive. " +
+        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Choosing the " +
+        W("unitword", "many", "business units").toLowerCase() + " again brings them back as they were."));
+      var go = el("button", "btn amber", "Move them and plan on the " + W("topword", "one", "company").toLowerCase()); go.type = "button"; go.setAttribute("data-buask-go", "1");
+      go.onclick = function () {
+        BU_ASK = false;
+        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
+        var nx = structNow(); nx.bu.exists = false;
+        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
+        structWrite(nx);
+      };
+      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
+      no.onclick = function () { BU_ASK = false; redraw(); };
+      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
+      top.appendChild(ask);
+    }
     structLevel(top, lv, "top");
 
     /* §418: a layer the client does not have is switched off as a whole —
@@ -1888,10 +1928,18 @@ var CLIENTSETUP = (function () {
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
+    /* §447/§448: the business-unit card has no switch of its own; whether it
+       is used is answered on the top card ("Where the strategy is planned").
+       Not used, it says so and keeps everything. */
     var bu = card(W("unitword", "many", "Business units"));
-    callBoxes(bu, "unitword", ro);
-    structLevel(bu, lv, "bu");
-    exceptBox(bu, "bu");
+    bu.setAttribute("data-stcard", "bu");
+    if (lv.bu.exists) {
+      callBoxes(bu, "unitword", ro);
+      structLevel(bu, lv, "bu");
+      exceptBox(bu, "bu");
+    } else bu.appendChild(el("p", "sthid", "Not used: the strategy is planned on the " +
+      W("topword", "one", "company").toLowerCase() + ". The " +
+      W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
     var fn = card(W("fnword", "many", "Supporting functions"));
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));

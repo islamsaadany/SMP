@@ -194,6 +194,10 @@ const argsFor = (module, rest) => ({
      a module the office alone may open (the Internal Tracker, spec 054) draws
      its page here rather than its refusal. */
   personKey: "islam", seat: "super",
+  /* ...and a CONSULTANT (§444): only Forefront's own people get the shared
+     bar's trail, which is where the module menu below lives. A client's own
+     person is asserted separately, in §5b. */
+  consultant: true, me: { personKey: "islam", seat: "super" },
 });
 const drawnBy = async (k, rest = []) => {
   const res = await serverFor(k)(argsFor(k, rest));
@@ -297,8 +301,17 @@ for (const k of BUILT_EXTRA) {
     whereOf(clientHref("raya-trade", k, "").split("/").slice(2), HAVE_BOTH).module === k,
     clientHref("raya-trade", k, ""));
 }
+/* AND THE UNBUILT ONE IS DERIVED, never typed (§214.3, §218). It named
+   `portfolio` outright and went red the day that module was built — which is
+   a check arguing with a decision rather than guarding one. What survives a
+   module being built is the RULE: a word MODULES reserves and MODULE_DEF has
+   not built is not an address, whichever word it is. With none left unbuilt
+   the assertion says so rather than passing over an empty list (§113.8).
+   `UNBUILT` is the file's own, declared at the top — a second `const` here
+   was §56.7's collision, caught by the parser rather than by reading. */
 check("an unbuilt module's word is not an address either",
-  whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
+  UNBUILT.length > 0 && UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : "none left unbuilt — this assertion has nothing to stand on");
 check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 /* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's
@@ -620,13 +633,14 @@ for (const k of OWN_PAGE) {
   check("...and the module you are IN is marked — " + k,
     new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
     (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
-  /* Asked of the SWITCHER, not the whole document (§456): a module's own
+  /* Asked of the MODULE MENU, not the whole document (§456; the menu is the
+     shared bar's `tbmod` since main's §444): a module's own
      page links to itself (the Copilot's list is a form posting back to its
      own address), which is the page and not a door. A switcher missing
      altogether would pass this vacuously, so it is asserted present first
      (§113.8). */
   const oneDoc = await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE);
-  const sw = (oneDoc.match(/<details class="msw">[\s\S]*?<\/details>/) || [""])[0];
+  const sw = (oneDoc.match(/<details class="tbstep tbmod">[\s\S]*?<\/details>/) || [""])[0];
   check("a client holding only the default is offered no door it does not have — " + k,
     !!sw && !sw.includes('href="' + clientHref("raya-trade", k, "") + '"'), sw ? "" : "no switcher drawn");
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
@@ -634,9 +648,48 @@ for (const k of OWN_PAGE) {
   /* The page is served under the shell's policy, which is `script-src 'self'`
      (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
      and never run, so the switcher is a <details> and this asserts it stays
-     one. */
+     one.
+
+     REWRITTEN, NEVER LOOSENED (§218, §214.3). It asked for no `<script` of any
+     kind, which was true of every module while none of them had behaviour and
+     went red the day Portfolio served its own — a check arguing with a
+     decision rather than guarding one, and arguing with the very route the
+     policy EXISTS to leave open. What the policy forbids is the INLINE kind:
+     an `onclick=` and a <script> with a body. A `<script src>` from this
+     origin is what `'self'` means, so it is asserted to be served that way
+     rather than asserted absent, which is the both-ends version of the same
+     rule (§94.2) — a module that stopped serving its behaviour at all would
+     satisfy a bare absence perfectly (§113.8). */
   check("nothing inline needs a script, or the policy would silence it — " + k,
-    !/<script|onclick=/i.test(doc));
+    !/\son[a-z]+\s*=/i.test(doc) && !/<script(?![^>]*\ssrc=)/i.test(doc),
+    (doc.match(/<script[^>]*>/g) || []).join(" "));
+  check("...and any script it does serve comes from this origin, which is what `'self'` means — " + k,
+    (doc.match(/<script[^>]*>/g) || []).every((t) => /\ssrc="\/[^"]*"/.test(t)),
+    (doc.match(/<script[^>]*>/g) || []).join(" ") || "(no script — vacuously true)");
+  /* §444: and the one script the shared bar brings is a FILE with nothing
+     inside the tag, the both-ends half of main's rule above. */
+  check("...and no script carries a body, src or not — " + k,
+    (doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /<script\b[^>]*>\s*<\/script>/i.test(t)));
+  /* §444: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
+     steps, the theme switch and Sign out — and its script, or the menus and
+     the switch would be drawn and dead (§96). */
+  check("it wears the shared top bar, trail and all — " + k,
+    /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+  check("...and the navy module bar it replaces is gone — " + k,
+    !/class="bar"|class="msw"|class="mmenu"/.test(doc));
+  check("...and the page's dark colours answer the switch, not only the device — " + k,
+    /:root\[data-theme="dark"\]\{/.test(doc) && !/@media \(prefers-color-scheme:dark\)\{:root\{/.test(doc));
+  /* 5b · A CLIENT'S OWN PERSON (§444, Islam: "they don't get it it's only for
+     the consutlants"). No trail and no module menu — and still a way back
+     into their platform, or a page reached by its address is a room with no
+     door (§61). Both ends, or a build that dropped the trail for everybody
+     passes the first half (§94.2). */
+  const staff = await (await serverFor(k)({ ...argsFor(k, []), consultant: false })).text();
+  check("a client's own person gets no trail — " + k,
+    /<header class="tb">/.test(staff) && !/class="tbtrail"/.test(staff) && !/class="tbmenu"/.test(staff));
+  check("...and their way back is the product's name — " + k,
+    staff.includes('class="tbbrand" href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"') && /id="tbout"/.test(staff));
 }
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");

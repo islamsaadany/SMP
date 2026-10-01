@@ -230,7 +230,10 @@ def main():
             # name — so the bare wait returns on the skeleton and the line under
             # it reads an empty list.
             pg.wait_for_selector(".ccard[data-client]", timeout=9000)
-            names = pg.eval_on_selector_all(".ccard[data-client] h2", "els => els.map(e => e.textContent)")
+            # A client with a logo shows the logo INSTEAD of the name (2026-10-01,
+            # signed-off mockup client-card-logo), and the name is its alt text.
+            names = pg.eval_on_selector_all(".ccard[data-client] .ctop h2, .ccard[data-client] .ctop img.cmark",
+                                            "els => els.map(e => e.tagName === 'IMG' ? e.alt : e.textContent)")
             check("the admin sees every client", len(names) >= 3, names)
             # WHAT IS DRAWN IS WHAT THE SERVER WILL OPEN — asked of the server,
             # not inferred from the screen (§94.2, both ends).
@@ -254,7 +257,7 @@ def main():
             # and §320.3 made the card's name un-pressable — every way in
             # names a module now (spec 046 §4.6a). Both ends: the top does
             # NOT navigate, and the row does.
-            pg.click(".ccard[data-client='raya-trade'] .ctop h2")
+            pg.click(".ccard[data-client='raya-trade'] .ctop > :first-child")
             pg.wait_for_timeout(600)
             check("the card's name is not a door — only the rows open (§320.3)",
                   pg.url.rstrip("/").endswith("/platform"), pg.url)

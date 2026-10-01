@@ -1245,17 +1245,27 @@
 
      The rows come from the server (lib/modules.ts moduleRows), so the console
      cannot spell a module differently from the switch or from Setup. */
+  /* The platform's Settings mark (shell.html ICON_MANAGE), drawn the same here. */
+  function settingsChip(name) {
+    var cog = el("span", "ccfg ico");
+    cog.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
+      '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
+    cog.title = "Settings";
+    cog.setAttribute("aria-label", "Settings for " + name);
+    return cog;
+  }
+
   function cardFor(c) {
     var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; top.appendChild(im);
     } else {
       top.appendChild(el("div", "cmark", initials(c.name)));
+      top.appendChild(el("h2", null, c.name));
     }
-    top.appendChild(el("h2", null, c.name));
     if (c.industry) top.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
@@ -1307,7 +1317,7 @@
     }
 
     if (c.canConfig) {
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
@@ -1352,11 +1362,11 @@
     b.dataset.client = c.key;
     b.dataset.arch = "1";
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; b.appendChild(im);
     } else {
       b.appendChild(el("div", "cmark", initials(c.name)));
+      b.appendChild(el("h2", null, c.name));
     }
-    b.appendChild(el("h2", null, c.name));
     if (c.industry) b.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var when = archDate(c.at);
@@ -1387,7 +1397,7 @@
       back.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go(e); });
       acts.appendChild(back);
 
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* ON THIS PAGE, not the client's (§360): an archived client's address
          is closed, so its two acts — bringing it back and deleting it — are

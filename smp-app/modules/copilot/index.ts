@@ -56,7 +56,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
   const isPage = !isApi && (a.rest.length === 0 || first === "settings");
   if (!isApi && !isPage) return Response.redirect(new URL(clientHref(a.slug, "copilot", ""), a.req.url), 302);
   if (!office) return isPage
-    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is the office's."))
+    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is the office's.", !!a.consultant))
     : no(403, "The Copilot is the office's.");
   /* VIEW OR EDIT (Islam, 2026-10-01): the office seat's own cell on Roles &
      access, read off the stored map on every path. NONE refuses the reads as
@@ -74,7 +74,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
   const grant = brk() === "no-view-gate" ? "edit"
     : copilotGrant(brk() === "no-office-gate" && !isOffice(a.seat) ? "smoteam" : a.seat, stored === undefined ? null : stored);
   if (grant === "none") return isPage
-    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is not open to you on this client."))
+    ? html(403, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "The Copilot is not open to you on this client.", !!a.consultant))
     : no(403, "The Copilot is not open to you on this client.");
   /* The pages answer their own writes: the settings are not this client's
      (lib/copilot-settings.ts), so they are not judged by the Copilot cell —
@@ -352,7 +352,7 @@ async function pages(a: ServeArgs): Promise<Response> {
           names = await namesOf(c);
         });
       } catch (e) { console.error("copilot: list " + a.slug + ":", (e as Error).message); }
-      return html(200, listDocument(a.slug, a.tenantName, a.have, bar, names, ask, chats, delivs));
+      return html(200, listDocument(a.slug, a.tenantName, a.have, bar, names, ask, chats, delivs, !!a.consultant));
     }
     const pool = doorPool();
     if (sub === "" ) {
@@ -371,7 +371,7 @@ async function pages(a: ServeArgs): Promise<Response> {
       } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped text is back." : q("done") === "saved" ? "Saved. Every client's Copilot reads it from the next message." : "Nothing changed." };
       const parts = await partsOf(pool);
       return html(flash && !flash.ok ? 400 : 200, instructionsDocument(a.slug, a.tenantName, a.have, bar, parts, q("section") || "foundation",
-        a.admin, flash && flash.ok ? "" : q("edit"), flash));
+        a.admin, flash && flash.ok ? "" : q("edit"), flash, !!a.consultant));
     }
     if (sub === "templates" && a.rest.length === 2) {
       let flash: Flash = null;
@@ -392,11 +392,11 @@ async function pages(a: ServeArgs): Promise<Response> {
           flash = { ok: false, text: r.why };
         }
       } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped file is back." : "Replaced. Every client now downloads the new file." };
-      return html(flash && !flash.ok ? 400 : 200, templatesDocument(a.slug, a.tenantName, a.have, bar, await templatesOf(pool), a.admin, flash));
+      return html(flash && !flash.ok ? 400 : 200, templatesDocument(a.slug, a.tenantName, a.have, bar, await templatesOf(pool), a.admin, flash, !!a.consultant));
     }
     if (sub === "templates" && a.rest.length === 3) {
       const f = await templateFile(pool, a.rest[2]);
-      if (!f) return html(404, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "That template is not here."));
+      if (!f) return html(404, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "That template is not here.", !!a.consultant));
       return new Response(new Uint8Array(f.bytes), { status: 200, headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff", "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
@@ -405,7 +405,7 @@ async function pages(a: ServeArgs): Promise<Response> {
   } catch (e) {
     console.error("copilot: page " + a.rest.join("/") + " " + a.slug + ":", (e as Error).message);
     return html(500, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId,
-      a.req.method === "POST" ? "That did not save. Nothing was changed — try again." : "This could not be read just now. Nothing has been lost — try again in a moment."));
+      a.req.method === "POST" ? "That did not save. Nothing was changed — try again." : "This could not be read just now. Nothing has been lost — try again in a moment.", !!a.consultant));
   }
 }
 

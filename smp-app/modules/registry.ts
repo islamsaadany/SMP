@@ -29,14 +29,18 @@
    register's to answer (lib/place.ts). A module that wanted more would be a
    module asking the spine to hand over its own subject.
 
-   THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Portfolio
-   and Processes are words the address reserves and nothing more (lib/modules.ts
-   MODULE_DEF). That the two lists agree — every built module serves itself,
+   THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Processes
+   is a word the address reserves and nothing more (lib/modules.ts MODULE_DEF)
+   — Portfolio joined the built ones on 2026-09-30 and was finished on
+   2026-10-01 (spec 060), and the TRIAL module that proved this seam could take
+   a fourth was retired once real ones had (§360, §24). That the two lists
+   agree — every built module serves itself,
    and no unbuilt one claims to — is asserted in checks/modules.mjs rather than
    trusted, because a module marked built with nothing to draw is precisely the
    door onto the wrong room that flag exists to stop (§61). */
 import type { ModuleKey } from "../lib/modules.ts";
 import { serve as strategy } from "./strategy/index.ts";
+import { serve as portfolio } from "./portfolio/index.ts";
 import { serve as insights } from "./insights/index.ts";
 import { serve as tracker } from "./tracker/index.ts";
 import { serve as notes } from "./notes/index.ts";
@@ -71,6 +75,14 @@ export type ServeArgs = {
      somebody may only narrow). What the Copilot's own settings ask before any
      write, because those settings are the same for every client. */
   admin: boolean;
+  /* §444, THE SHARED TOP BAR. `consultant` is a Forefront session (kind not
+     "client") — only they get the trail. `me` is who SIGNED IN, before any
+     view-as narrowing: the bar's Viewing as is offered by the signed-in seat,
+     never by the seat being looked through (lib/view-as.ts maySimulate). Both
+     optional so a check that drives a server directly is judged as a
+     client's own person, the narrower answer. */
+  consultant?: boolean;
+  me?: { personKey: string | null; seat: "super" | "smoteam" | "none" | null };
 };
 export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 
@@ -80,12 +92,12 @@ export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 const BREAK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
 
 export const SERVERS: Partial<Record<ModuleKey, ModuleServer>> =
-  BREAK === "no-server" ? { strategy, tracker, notes, copilot }
+  BREAK === "no-server" ? { strategy, tracker, notes, portfolio, copilot }
   /* Two words pointing at one page — the door onto the wrong room, wired
      rather than guessed at. It renders perfectly, which is why the check
      DRIVES each server rather than reading the table (§96). */
-  : BREAK === "wrong-server" ? { strategy, insights: strategy, tracker, notes, copilot }
-  : { strategy, insights, tracker, notes, copilot };
+  : BREAK === "wrong-server" ? { strategy, insights: strategy, tracker, notes, portfolio, copilot }
+  : { strategy, portfolio, insights, tracker, notes, copilot };
 
 /* Null is "nothing here draws that", which the route answers as Not found
    rather than falling back to the Strategy shell: a module word that resolved

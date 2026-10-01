@@ -1,0 +1,81 @@
+import { registerReady } from "@/ffp/lib/register-sync";
+import Link from "next/link";
+import { prisma } from "@/ffp/lib/db/client";
+import { WorkspacePageHeader } from "./workspace-page-header";
+import { WorkspaceProfile } from "./workspace-profile";
+import { WorkspaceBranding } from "./workspace-branding";
+
+export default async function WorkspaceDashboardPage(
+  props: PageProps<"/[slug]/processes">
+) {
+  const { slug: workspaceId } = await props.params;
+  await registerReady(workspaceId);
+
+  const [processCount, memberCount, workspace] = await Promise.all([
+    prisma.process.count({ where: { workspaceId, archivedAt: null } }),
+    prisma.member.count({ where: { workspaceId, status: "ACTIVE" } }),
+    prisma.workspace.findUnique({ where: { id: workspaceId } }),
+  ]);
+
+  const draftMatrices = await prisma.raciMatrixStatus.count({
+    where: { status: "DRAFT", process: { workspaceId } },
+  });
+
+  return (
+    <main className="mx-auto w-full max-w-4xl px-6 py-8">
+      <WorkspacePageHeader title={workspace?.name ?? ""} subtitle="Client engagement workspace overview." />
+
+      <div>
+        <WorkspaceBranding
+          workspaceId={workspaceId}
+          logoDataUrl={workspace?.logoDataUrl ?? null}
+          accentColor={workspace?.accentColor ?? null}
+          accentColorSecondary={workspace?.accentColorSecondary ?? null}
+          accentColorTertiary={workspace?.accentColorTertiary ?? null}
+        />
+      </div>
+
+      <WorkspaceProfile
+        workspaceId={workspaceId}
+        industry={workspace?.industry ?? null}
+        description={workspace?.description ?? null}
+      />
+
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Processes" value={processCount} />
+        <StatCard label="RACI drafts" value={draftMatrices} />
+        <StatCard label="Members" value={memberCount} />
+      </div>
+
+      <div className="mt-8 flex flex-wrap gap-2">
+        <Link
+          href={`/${workspaceId}/processes/processes`}
+          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+        >
+          View processes →
+        </Link>
+        <Link
+          href={`/${workspaceId}/processes/org`}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+        >
+          Org directory
+        </Link>
+        <Link
+          href={`/${workspaceId}/processes/export`}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+        >
+          Export report
+        </Link>
+      </div>
+    </main>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <div className="text-2xl font-bold tabular-nums text-slate-900">{value}</div>
+      <div className="mt-0.5 text-xs text-slate-500">{label}</div>
+    </div>
+  );
+}

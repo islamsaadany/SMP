@@ -163,7 +163,12 @@ const INSIGHTS_MARK: MarkDef = (f) => {
    standing on. So it is never a door on the switcher — a menu entry that
    lands you back in the module you came from is a door behind a door (§32) —
    and its own address comes back to its host rather than drawing a page. */
-export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef; inside?: ModuleKey };
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef; inside?: ModuleKey;
+  /* Its pages are Next's own route tree (app/(ffp)/[slug]/<key>/) rather than
+     a server in modules/registry.ts: FFProcess is React through and through,
+     and a route group takes the address before the module table is asked, so
+     a server here would be code nothing reaches (§24). */
+  appRoute?: true };
 const NOTHING: LineDef = { key: "none", label: "Nothing", example: "The module is listed with no line under it", read: () => "" };
 const STRATEGY_LINES: LineDef[] = [
   { key: "cycle", label: "The cycle\u2019s state", example: "Cycle open \u00b7 reports due 30 Sep",
@@ -214,7 +219,13 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
               note: "Open the library and download what is in it",
               states: ["view", "none"], shipped: "view" }],
     lines: INSIGHTS_LINES, mark: INSIGHTS_MARK },
-  processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
+  /* FFPROCESS, CARRIED IN WHOLE (2026-10-01): process maps, RACI, authority
+     matrices and governance, with its own design under SMP's top bar. The
+     office's alone, by seat (ffp/lib/auth/workspace.ts) — so NO AREA, the
+     tracker's reason. No longer a library: Forefront works IN it rather
+     than publishing to it, so the card's row walks into the client's
+     platform (LIBRARY_MODULES below). */
+  processes: { label: "Processes", note: "Process maps, RACI and authority matrices",        built: true,  areas: [], lines: [NOTHING], appRoute: true },
   /* THE OFFICE'S OWN LIST ABOUT THIS CLIENT (spec 054). Built, and NO AREA:
      it is opened by the seat and by nothing a client could be granted
      (decision 2) — the way Inbox and Setup are — so a column here would be a
@@ -359,7 +370,7 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    NAMED HERE for the reason every other module fact is: the card, the address
    and Setup ask one place what a module is (§53.5). The card reads the flag
    off the row the server sent it and decides nothing itself. */
-export const LIBRARY_MODULES: readonly ModuleKey[] = ["insights", "processes"];
+export const LIBRARY_MODULES: readonly ModuleKey[] = ["insights"];
 export function isLibrary(k: unknown): boolean {
   return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
 }

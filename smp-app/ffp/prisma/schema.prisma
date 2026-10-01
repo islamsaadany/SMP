@@ -1,0 +1,1090 @@
+// FFProcess data model — see specs/001-process-mapping-raci-authority/data-model.md
+// for the authoritative field-by-field rationale. This file is the implementation
+// of that design; keep them in sync when either changes.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// Auth.js (NextAuth v5) — database session strategy, Prisma adapter
+// ============================================================================
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+
+  accounts    Account[]
+  sessions    Session[]
+  firmMember  FirmMember?
+  memberships Member[]
+
+  /// Policy Lifecycle (spec 018) — every policy version this user has saved,
+  /// and every policy they've approved. Users are never deleted in this app
+  /// (only Firm/Workspace membership records are), so these relations never
+  /// actually need to survive a User row disappearing.
+  policyVersionsAuthored       GovernancePolicyVersion[]
+  policiesApproved             GovernancePolicyDraft[]
+  governanceActivityLogEntries GovernanceActivityLogEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ============================================================================
+// Firm — the single consultancy that owns every Workspace (spec FR-023-FR-026)
+// ============================================================================
+
+enum FirmRole {
+  OWNER
+  MEMBER
+}
+
+model Firm {
+  id   String @id @default(uuid())
+  name String
+
+  members           FirmMember[]
+  workspaces        Workspace[]
+  processCategories ProcessCategory[]
+
+  createdAt DateTime @default(now())
+
+  @@map("firms")
+}
+
+model FirmMember {
+  id     String   @id @default(uuid())
+  firmId String
+  userId String   @unique
+  role   FirmRole
+
+  firm Firm @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("firm_members")
+}
+
+// ============================================================================
+// Workspace — one client engagement; the isolation boundary (spec FR-001)
+// ============================================================================
+
+enum AccessLevel {
+  VIEWER
+  EDITOR
+  ADMIN
+}
+
+enum MemberStatus {
+  PENDING
+  ACTIVE
+  REMOVED
+}
+
+model Workspace {
+  id          String  @id @default(uuid())
+  firmId      String
+  name        String
+  currency    String  @default("USD")
+  industry    String?
+  description String?
+
+  /// Set alongside `industry` to ground a governance assessment in this
+  /// client's actual scale and legal context. Optional, like `industry` —
+  /// generateGovernanceAssessment refuses to run without both set rather than
+  /// this column being required, so an unrelated workspace edit never fails.
+  governanceCompanySize  String?
+  governanceJurisdiction String?
+
+  /// This client's logo, shown in the workspace sidebar on every page of
+  /// this workspace, as a data: URL (see validateLogoDataUrl for the size
+  /// cap). Per-Workspace rather than per-Firm so each client engagement gets
+  /// its own identity as a consultant switches between them.
+  logoDataUrl String? @db.Text
+
+  /// Up to three hex accent colors (e.g. "#2563eb") auto-suggested from
+  /// logoDataUrl at upload time (client-side — see extractDominantColors)
+  /// and each independently editable. Primary/Secondary/Tertiary are named
+  /// roles, not a free palette: Primary marks the sidebar's active nav item;
+  /// Secondary/Tertiary are used for a couple more small brand touches
+  /// (the Export Report's document labels, the dashboard's industry chip).
+  accentColor          String?
+  accentColorSecondary String?
+  accentColorTertiary  String?
+
+  /// How this client's Export Report pack is arranged: which pack sections,
+  /// per-process sections and blocks are included, in what order, and which
+  /// section each block sits under.
+  ///
+  /// Null means nobody has arranged this workspace, and is not a gap to be
+  /// backfilled — it is what makes an un-arranged client render exactly the
+  /// report it rendered before this column existed. The catalogue of what
+  /// *exists* lives in lib/domain/report-arrangement.ts, not here, so a
+  /// section added to the product later appears for every client instead of
+  /// being silently hidden from the ones already arranged.
+  reportArrangement Json?
+  reportMapLayout   ReportMapLayout @default(FLOW)
+
+  firm Firm @relation(fields: [firmId], references: [id], onDelete: Cascade)
+
+  members               Member[]
+  roles                 Role[]
+  people                Person[]
+  processes             Process[]
+  phases                Phase[]
+  governanceAspects     GovernanceAspect[]
+  governanceAssessments GovernanceAssessment[]
+  governanceRisks       GovernanceRisk[]
+  governancePolicies    GovernancePolicyDraft[]
+  governanceActivityLog GovernanceActivityLogEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("workspaces")
+}
+
+model Member {
+  id           String       @id @default(uuid())
+  workspaceId  String
+  userId       String?
+  invitedEmail String?
+  accessLevel  AccessLevel
+  status       MemberStatus @default(PENDING)
+
+  inviteToken          String?   @unique
+  inviteTokenExpiresAt DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId, status])
+  @@map("members")
+}
+
+// ============================================================================
+// Shared org model — Role, Person, PersonRole (spec FR-002, Constitution II)
+// ============================================================================
+
+model Role {
+  id          String    @id @default(uuid())
+  workspaceId String
+  name        String
+  archivedAt  DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  personRoles           PersonRole[]
+  processSteps          ProcessStep[]                   @relation("StepAssignedRole")
+  swimlaneSteps         ProcessStep[]                   @relation("StepSwimlaneRole")
+  supportedSteps        ProcessStep[]                   @relation("StepSupportingRoles")
+  raciAssignments       RaciAssignment[]
+  authorityRules        AuthorityRule[]                 @relation("AuthorityRuleRole")
+  governanceRisks       GovernanceRisk[]
+  checklistItemsOwned   GovernanceChecklistItem[]       @relation("ChecklistItemOwnerRole")
+  treatmentActionsOwned GovernanceRiskTreatmentAction[] @relation("TreatmentActionOwnerRole")
+
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId])
+  @@map("roles")
+}
+
+model Person {
+  id          String    @id @default(uuid())
+  workspaceId String
+  name        String
+  email       String?
+  managerId   String?
+  archivedAt  DateTime?
+  /// SMP: the key of the client's People register row this person mirrors.
+  /// Null for a person Processes holds on its own.
+  smpKey      String?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  manager   Person?   @relation("PersonManager", fields: [managerId], references: [id])
+  reports   Person[]  @relation("PersonManager")
+
+  personRoles            PersonRole[]
+  authorityRules         AuthorityRule[]                   @relation("AuthorityRulePerson")
+  governanceRisks        GovernanceRisk[]
+  policyAcknowledgements GovernancePolicyAcknowledgement[]
+  checklistItemsOwned    GovernanceChecklistItem[]         @relation("ChecklistItemOwnerPerson")
+  treatmentActionsOwned  GovernanceRiskTreatmentAction[]   @relation("TreatmentActionOwnerPerson")
+
+  createdAt DateTime @default(now())
+
+  @@unique([workspaceId, smpKey])
+  @@index([workspaceId])
+  @@index([managerId])
+  @@map("people")
+}
+
+model PersonRole {
+  personId String
+  roleId   String
+
+  person Person @relation(fields: [personId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([personId, roleId])
+  @@map("person_roles")
+}
+
+// ============================================================================
+// Process Mapping — Process, ProcessStep, ProcessStepLink, StepConnection
+// (spec FR-003, FR-004, FR-019-FR-022, FR-027)
+// ============================================================================
+
+model Process {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  categoryId      String?
+  code            String
+  name            String
+  description     String?
+  parentProcessId String?
+  archivedAt      DateTime?
+
+  /// Roles explicitly pinned as RACI table columns for this process — lets a
+  /// large workspace with many Roles keep the matrix to only the titles
+  /// relevant here, instead of every Role in the workspace. Any Role with at
+  /// least one assignment always shows regardless of this list (see
+  /// computeVisibleRoleIds in lib/domain/raci-table.ts).
+  raciVisibleRoleIds String[] @default([])
+
+  /// The step in ANOTHER process that this one picks up from — a process that
+  /// doesn't start on its own but resumes mid-flow elsewhere, with its own
+  /// people and RACI from that point on. Independent of parentProcessId:
+  /// that one is filing (where a process sits in the tree), this is flow
+  /// (where the work actually continues). Also independent of
+  /// ProcessStepLink, which points the other way and stays as it is.
+  branchFromStepId String?
+
+  /// Process-level documentation feeding the Export Report — edited on the
+  /// Process Map page (not in the report itself, which is read-only), so the
+  /// report never has to show an empty editable field.
+  processPurpose   String?
+  inScope          String[] @default([])
+  outOfScope       String[] @default([])
+  /// { name, description }[] — external parties involved in this process.
+  externalEntities Json     @default("[]")
+  /// { metric, target, frequency }[] — operational KPIs/SLAs for this process.
+  kpis             Json     @default("[]")
+
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])
+  subProcesses   Process[]        @relation("ProcessHierarchy")
+  /// SetNull rather than Cascade: deleting the source step must not delete a
+  /// process someone else owns — the branch link is simply dropped.
+  branchFromStep ProcessStep?     @relation("ProcessBranchOrigin", fields: [branchFromStepId], references: [id], onDelete: SetNull)
+
+  steps                ProcessStep[]
+  activities           Activity[]
+  raciMatrixStatus     RaciMatrixStatus?
+  linkedFromSteps      ProcessStepLink[]     @relation("LinkTargetProcess")
+  reviewFindings       ReviewFinding[]
+  authorityAssignments AuthorityAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([workspaceId, code])
+  @@index([workspaceId, parentProcessId])
+  @@index([categoryId])
+  @@index([branchFromStepId])
+  @@map("processes")
+}
+
+/**
+ * A standardized process-type label (HR, Sales, Procurement, ...), shared
+ * across every Workspace in a Firm rather than re-entered per client — the
+ * taxonomy is the same regardless of which engagement is using it.
+ */
+model ProcessCategory {
+  id     String @id @default(uuid())
+  firmId String
+  name   String
+
+  firm      Firm      @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  processes Process[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([firmId, name])
+  @@map("process_categories")
+}
+
+/// Which layout a client's printed process map uses (spec 013 FR-018).
+/// A column of its own rather than a field inside reportArrangement: that blob
+/// is a versioned arrangement of sections and blocks with its own catalogue and
+/// resolver, and a map layout is not an arrangement of anything. The default is
+/// what makes FR-021 free — an unset client has no "never chosen" state to
+/// handle anywhere in the code, it simply reads FLOW.
+enum ReportMapLayout {
+  /// The process runs down the page, one step per row, each given the page's
+  /// full width for its label. Legible at any number of roles.
+  FLOW
+
+  /// A column per role, the process flowing down through them, so a hand-off
+  /// reads as a sideways move. Falls back to FLOW above the role ceiling.
+  ROLES
+}
+
+enum StepType {
+  START
+  TASK
+  DECISION
+  END
+}
+
+/// A named stage of the engagement's value chain — Initiation, Evaluation,
+/// Proposal, Award, Execution, Finance, Closure. Workspace-scoped and ordered,
+/// because every client names and sequences their own.
+///
+/// Distinct from ProcessCategory, which is firm-wide and files a whole Process;
+/// a Phase groups individual steps, and steps from different Processes share
+/// one — which is what makes a cross-process value-chain board possible.
+model Phase {
+  id          String  @id @default(uuid())
+  workspaceId String
+  name        String
+  order       Int     @default(0)
+  /// Hex colour for the board's column dot, chosen when the Phase is created.
+  color       String?
+
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  steps     ProcessStep[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId, order])
+  @@map("phases")
+}
+
+model ProcessStep {
+  id             String   @id @default(uuid())
+  processId      String
+  type           StepType
+  label          String
+  assignedRoleId String?
+  swimlaneRoleId String?
+  positionX      Float    @default(0)
+  positionY      Float    @default(0)
+  raciSkipped    Boolean  @default(false)
+  reviewNotes    String?
+
+  /// Where this step sits in the Steps List, and therefore in the Export
+  /// Report and every export. Explicit rather than implied by createdAt: a
+  /// step added later often belongs in the middle, and ordering by creation
+  /// time stranded it at the bottom no matter what it connected to.
+  order Int @default(0)
+
+  /// Which stage of the value chain this step belongs to. Optional: a process
+  /// map is perfectly valid without phases, and they only matter once someone
+  /// is looking at the engagement as one value chain.
+  phaseId String?
+
+  /// Where this step sits *within* its phase on the value-chain board. A
+  /// separate axis from `order`: that one is the step's place in its own
+  /// process, this one is its place among activities from every process that
+  /// share a stage, which is a different sequence and a different judgement.
+  phaseOrder Int @default(0)
+
+  /// Marked as one of the few steps worth seeing from the engagement level —
+  /// these are the beads on this process's rail in the Helicopter View. Off by
+  /// default: a milestone means something only because most steps aren't one.
+  milestone Boolean @default(false)
+
+  /// Whether this step needs every one of its predecessors done, not just one
+  /// — a real join rather than an ordinary either/or convergence. Off by
+  /// default: an unmarked convergence has always meant "either is enough,"
+  /// and every process that exists before this field does must keep reading
+  /// that way.
+  joinRequiresAll Boolean @default(false)
+
+  /// This step's procedure for the Export Report — edited inline in the
+  /// Process Map's Steps List view, one action per line; the report just
+  /// displays it read-only.
+  detailedAction String[] @default([])
+
+  /// What goes wrong if the step is missed or done incorrectly. Shown as
+  /// "Risk if Mishandled" — the column keeps its original name because
+  /// renaming it would cost a migration on delivered client data for a purely
+  /// cosmetic gain. The old label promised a handling *procedure*, which is
+  /// not what anyone was writing in it.
+  exceptionHandling String?
+
+  process      Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  assignedRole Role?   @relation("StepAssignedRole", fields: [assignedRoleId], references: [id])
+  swimlaneRole Role?   @relation("StepSwimlaneRole", fields: [swimlaneRoleId], references: [id])
+
+  /// SetNull rather than Cascade: deleting a Phase must not delete the work
+  /// that sat in it — the steps simply become unphased.
+  phase Phase? @relation(fields: [phaseId], references: [id], onDelete: SetNull)
+
+  /// The other departments involved in this step, as the value-chain board's
+  /// "Supporting Departments" column. Lighter than RACI on purpose: RACI is
+  /// per-Activity and governs accountability, this is the handful of names a
+  /// card needs to show who else is in the room.
+  supportingRoles Role[] @relation("StepSupportingRoles")
+
+  links               ProcessStepLink[]
+  outgoingEdges       StepConnection[]     @relation("FromStep")
+  incomingEdges       StepConnection[]     @relation("ToStep")
+  activities          Activity[]
+  reviewFindings      ReviewFinding[]
+  authorityAssignment AuthorityAssignment?
+  branchedProcesses   Process[]            @relation("ProcessBranchOrigin")
+
+  createdAt DateTime @default(now())
+
+  @@index([processId])
+  @@index([processId, order])
+  @@index([phaseId])
+  @@map("process_steps")
+}
+
+model ProcessStepLink {
+  id              String @id @default(uuid())
+  stepId          String
+  targetProcessId String
+
+  step          ProcessStep @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  targetProcess Process     @relation("LinkTargetProcess", fields: [targetProcessId], references: [id], onDelete: Cascade)
+
+  @@unique([stepId, targetProcessId])
+  @@map("process_step_links")
+}
+
+model StepConnection {
+  id         String  @id @default(uuid())
+  processId  String
+  fromStepId String
+  toStepId   String
+  label      String?
+
+  fromStep ProcessStep @relation("FromStep", fields: [fromStepId], references: [id], onDelete: Cascade)
+  toStep   ProcessStep @relation("ToStep", fields: [toStepId], references: [id], onDelete: Cascade)
+
+  @@index([processId])
+  @@map("step_connections")
+}
+
+// ============================================================================
+// RACI Matrix — Activity, RaciAssignment, RaciMatrixStatus (spec FR-005-FR-007)
+// ============================================================================
+
+model Activity {
+  id            String  @id @default(uuid())
+  processId     String
+  name          String
+  relatedStepId String?
+  order         Int     @default(0)
+
+  process     Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
+  relatedStep ProcessStep? @relation(fields: [relatedStepId], references: [id])
+
+  raciAssignments     RaciAssignment[]
+  authorityAssignment AuthorityAssignment?
+
+  createdAt DateTime @default(now())
+
+  @@index([processId])
+  @@map("activities")
+}
+
+enum RaciCode {
+  RESPONSIBLE
+  ACCOUNTABLE
+  CONSULTED
+  INFORMED
+}
+
+model RaciAssignment {
+  id         String   @id @default(uuid())
+  activityId String
+  roleId     String
+  code       RaciCode
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  role     Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, roleId])
+  @@map("raci_assignments")
+}
+
+enum RaciStatus {
+  DRAFT
+  FINAL
+}
+
+model RaciMatrixStatus {
+  processId           String     @id
+  status              RaciStatus @default(DRAFT)
+  finalizedAt         DateTime?
+  finalizedByMemberId String?
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@map("raci_matrix_statuses")
+}
+
+// ============================================================================
+// AI Review — persisted findings from runProcessReview, editable/dismissible,
+// and optionally integrated back into the Process Map.
+// ============================================================================
+
+enum ReviewFindingCategory {
+  GAP
+  RISK
+}
+
+enum ReviewFindingArea {
+  PROCESS_MAP
+  RACI
+  AUTHORITY
+  GENERAL
+}
+
+enum ReviewFindingSeverity {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum ReviewFindingStatus {
+  OPEN
+  EDITED
+  INTEGRATED
+  DISMISSED
+}
+
+enum ReviewFindingIntegrationMode {
+  MERGED
+  REPLACED
+}
+
+model ReviewFinding {
+  id               String                        @id @default(uuid())
+  processId        String
+  category         ReviewFindingCategory
+  area             ReviewFindingArea
+  severity         ReviewFindingSeverity
+  title            String
+  description      String
+  recommendation   String
+  status           ReviewFindingStatus           @default(OPEN)
+  integratedStepId String?
+  integrationMode  ReviewFindingIntegrationMode?
+
+  process        Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
+  integratedStep ProcessStep? @relation(fields: [integratedStepId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([processId])
+  @@map("review_findings")
+}
+
+// ============================================================================
+// Authority Matrix — DecisionType, ApprovalRule (spec FR-008-FR-011)
+// ============================================================================
+
+/// Which side of an Authority row's money threshold requires approval.
+/// EQUAL_NO_APPROVAL marks a step as having no approval gate at all.
+enum AuthorityDirection {
+  GREATER_THAN
+  GREATER_OR_EQUAL
+  LESS_THAN
+  LESS_OR_EQUAL
+  EQUAL_NO_APPROVAL
+}
+
+/// Authority Matrix rows — one per Process Map step (or, when a step's
+/// been split into finer-grained RACI Activities, one per Activity), the
+/// same task list the RACI table draws from (see buildAuthorityTableRows in
+/// lib/domain/authority-table.ts). A row is only persisted once it has a
+/// threshold, an approver, or is explicitly skipped — otherwise it's just an
+/// empty row derived from the Process Map/Activities at render time.
+model AuthorityAssignment {
+  id         String  @id @default(uuid())
+  processId  String
+  activityId String? @unique
+  stepId     String? @unique
+
+  /// Task-level, not rule-level: a skipped task is skipped however many rules
+  /// it has, which is why this stays here while everything else moved to
+  /// AuthorityRule.
+  skipped Boolean @default(false)
+
+  /// The task's rules, in display order. A task may have none — it then reads
+  /// as having no rules, and validation says so if it needs one.
+  rules AuthorityRule[]
+
+  process  Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
+  activity Activity?    @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  step     ProcessStep? @relation(fields: [stepId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([processId])
+  @@map("authority_assignments")
+}
+
+/// What a rule turns on. Exactly one figure applies: MONEY uses `amount`,
+/// TIME uses `days`, and NONE carries neither — it exists so a task can say
+/// "no approval required" and still render dimmed.
+enum AuthorityMeasure {
+  MONEY
+  TIME
+  NONE
+}
+
+/// What happens when a rule fires.
+enum AuthorityConsequence {
+  APPROVAL
+  ESCALATION
+}
+
+/// One governance statement about one task: what it turns on, the figure,
+/// which side of the figure it fires on, and who it lands on when it does.
+///
+/// A task carries an ordered list of these. That is what replaced the old
+/// fixed columns — a second signer is simply a second APPROVAL rule rather
+/// than a special "co-approval" field, and a task with both a spending limit
+/// and a turnaround is two rules rather than one row holding two unrelated
+/// governance rules at once.
+model AuthorityRule {
+  id           String @id @default(uuid())
+  assignmentId String
+
+  /// Position in this task's list. Same pattern as ProcessStep.order and
+  /// Phase.order; createdAt breaks ties.
+  order Int @default(0)
+
+  measure AuthorityMeasure @default(MONEY)
+
+  /// Set only when measure is MONEY.
+  amount Decimal? @db.Decimal(14, 2)
+
+  /// Set only when measure is TIME. Whole days.
+  days Int?
+
+  /// Which side of the figure the rule fires on. EQUAL_NO_APPROVAL pairs with
+  /// measure NONE and means the task has no rule at all.
+  direction AuthorityDirection @default(GREATER_THAN)
+
+  consequence AuthorityConsequence @default(APPROVAL)
+
+  /// Who the consequence lands on — a role or a named person, never both.
+  /// Neither means an unfinished rule, which validation reports rather than
+  /// the save rejecting: a consultant may set the figure before deciding who
+  /// signs.
+  whoRoleId   String?
+  whoPersonId String?
+
+  assignment AuthorityAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  whoRole    Role?               @relation("AuthorityRuleRole", fields: [whoRoleId], references: [id])
+  whoPerson  Person?             @relation("AuthorityRulePerson", fields: [whoPersonId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assignmentId, order])
+  @@map("authority_rules")
+}
+
+// ============================================================================
+// AI Governance Assessment — profile-grounded, five-pillar-framed assessment
+// per focus area: a persisted summary, a phased checklist, draft policies,
+// and a workspace-wide Risk Register. Modeled directly on ReviewFinding's
+// persist-and-reconcile shape above (spec 012-governance-generator).
+// ============================================================================
+
+enum GovernanceItemPhase {
+  IMMEDIATE
+  NEAR_TERM
+  LONG_TERM
+}
+
+/// Shared by checklist items and policy drafts. DONE only applies to a
+/// checklist item; a policy stops at EDITED, which is itself what protects
+/// it from being overwritten by a later run (see governance-findings.ts).
+enum GovernanceItemStatus {
+  OPEN
+  EDITED
+  DONE
+  DISMISSED
+}
+
+/// A policy's approval/publication state (spec 018) — independent of
+/// GovernanceItemStatus above, which tracks whether the *recommendation*
+/// behind a policy was acted on, not whether the *document* is reviewed and
+/// in force. DRAFT is the starting state for every policy, hand-written or
+/// AI-drafted. Editing an APPROVED or PUBLISHED policy resets it to DRAFT —
+/// see updatePolicyDraft.
+enum GovernancePolicyLifecycleStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  RETIRED
+}
+
+enum RiskLikelihood {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RiskImpact {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  MITIGATING
+  ACCEPTED
+  CLOSED
+}
+
+/// A workspace's own governance "aspect" tab (spec 017) — Board Structure,
+/// Ethics Policy, or a client-specific one a consultant added. Replaces what
+/// used to be a fixed, product-wide GovernanceFocusArea enum: every workspace
+/// gets its own rows, addable, renameable, and deletable like any other
+/// workspace-scoped entity, with the original seven no different from one
+/// added later.
+model GovernanceAspect {
+  id          String @id @default(uuid())
+  workspaceId String
+  name        String
+
+  workspace       Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assessments     GovernanceAssessment[]
+  /// Spec 029: at most one governing policy.
+  governingPolicy GovernancePolicyDraft? @relation("AspectGoverningPolicy")
+
+  createdAt DateTime @default(now())
+
+  /// Ordering is by createdAt (oldest first) — a newly added aspect appends
+  /// after the existing ones; no separate order column, since nothing here
+  /// reorders the list.
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("governance_aspects")
+}
+
+/// One run, for one workspace and one aspect. Re-running replaces `summary`
+/// but reconciles `items` rather than deleting and recreating them — see
+/// governance-findings.ts.
+model GovernanceAssessment {
+  id          String @id @default(uuid())
+  workspaceId String
+  aspectId    String
+
+  /// The pillar-framed executive summary from the most recent run, or a
+  /// consultant's own rewrite of it.
+  summary String @db.Text
+
+  /// Set once a person edits the summary themselves. Protects it from
+  /// generateGovernanceAssessment's regenerate the same way a policy's
+  /// EDITED status and a risk's own handManaged flag already protect
+  /// theirs — see governance-findings.ts's isHandManaged.
+  summaryHandEdited Boolean @default(false)
+
+  workspace Workspace                 @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// Deleting an aspect deletes its own assessment with it (spec 017 FR-004)
+  /// — but deleteGovernanceAspect must detach any linked policy draft first,
+  /// or GovernancePolicyDraft.checklistItem's own Cascade would silently take
+  /// it down too (research.md Decision 2 for spec 017).
+  aspect    GovernanceAspect          @relation(fields: [aspectId], references: [id], onDelete: Cascade)
+  items     GovernanceChecklistItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([aspectId])
+  @@map("governance_assessments")
+}
+
+model GovernanceChecklistItem {
+  id           String               @id @default(uuid())
+  assessmentId String
+  phase        GovernanceItemPhase
+  title        String
+  description  String               @db.Text
+  status       GovernanceItemStatus @default(OPEN)
+
+  /// Spec 028 — who is doing this, and by when. A role or a person, never
+  /// both. Roles and people are archived rather than deleted, so an archived
+  /// owner stays here (shown as archived); SetNull only covers a hard delete.
+  ownerRoleId   String?
+  ownerPersonId String?
+  dueDate       DateTime?
+
+  assessment  GovernanceAssessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  policy      GovernancePolicyDraft?
+  risks       GovernanceRisk[]
+  ownerRole   Role?                  @relation("ChecklistItemOwnerRole", fields: [ownerRoleId], references: [id], onDelete: SetNull)
+  ownerPerson Person?                @relation("ChecklistItemOwnerPerson", fields: [ownerPersonId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([assessmentId])
+  @@map("governance_checklist_items")
+}
+
+/// One-to-one with the checklist item that recommended it. Its own status,
+/// separate from the item's: a consultant can mark the *item* done while the
+/// *policy* stays a draft they're still editing, or vice versa.
+/// A policy document: drafted by an assessment against a checklist item, or
+/// written by hand from the Policy Library with no checklist item behind it
+/// (`checklistItemId` null, `handManaged` true) — the same parity the Risk
+/// Register gives a hand-added risk. `workspaceId` is stored rather than
+/// reached through checklistItem -> assessment, because a hand-written policy
+/// has no assessment to reach it through.
+model GovernancePolicyDraft {
+  id              String               @id @default(uuid())
+  workspaceId     String
+  checklistItemId String?              @unique
+  title           String
+  body            String               @db.Text
+  status          GovernanceItemStatus @default(OPEN)
+
+  /// Set once a person writes or edits this policy themselves, which is what
+  /// keeps a later assessment run from overwriting their words.
+  handManaged Boolean @default(false)
+
+  /// Policy Lifecycle (spec 018) — independent of `status` above; see
+  /// GovernancePolicyLifecycleStatus's own doc comment.
+  lifecycleStatus  GovernancePolicyLifecycleStatus @default(DRAFT)
+  /// Set together, only by approvePolicyDraft; both null until then, and
+  /// cleared again the moment the policy is edited back to DRAFT.
+  approvedByUserId String?
+  approvedAt       DateTime?
+  /// Set by publishPolicyDraft — the given date, or "today" if omitted.
+  effectiveDate    DateTime?
+  /// Independent of lifecycleStatus — settable at any point (FR-011).
+  reviewDueDate    DateTime?
+  /// Spec 029: the aspect this policy governs, if any. Unique: an aspect has
+  /// at most one governing policy and a policy governs at most one aspect.
+  /// SetNull: deleting the aspect keeps the policy.
+  governsAspectId  String?                         @unique
+
+  workspace        Workspace                         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  checklistItem    GovernanceChecklistItem?          @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
+  governsAspect    GovernanceAspect?                 @relation("AspectGoverningPolicy", fields: [governsAspectId], references: [id], onDelete: SetNull)
+  approvedByUser   User?                             @relation(fields: [approvedByUserId], references: [id])
+  versions         GovernancePolicyVersion[]
+  acknowledgements GovernancePolicyAcknowledgement[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@map("governance_policy_drafts")
+}
+
+/// An immutable snapshot of a policy's title/body, one per save, sequential
+/// from 1 (spec 018) — a policy always has at least one version, created
+/// alongside the policy itself. Full history, not just "last edited by."
+model GovernancePolicyVersion {
+  id              String @id @default(uuid())
+  policyId        String
+  versionNumber   Int
+  title           String
+  body            String @db.Text
+  createdByUserId String
+
+  policy        GovernancePolicyDraft @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  createdByUser User                  @relation(fields: [createdByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([policyId, versionNumber])
+  @@index([policyId])
+  @@map("governance_policy_versions")
+}
+
+/// One row per (policy, Person) a consultant has marked as having
+/// acknowledged a PUBLISHED policy, on that person's behalf — People in
+/// this app's directory have no login of their own, so this is never
+/// self-service (spec 018).
+model GovernancePolicyAcknowledgement {
+  id       String @id @default(uuid())
+  policyId String
+  personId String
+
+  policy GovernancePolicyDraft @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  person Person                @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  acknowledgedAt DateTime @default(now())
+
+  @@unique([policyId, personId])
+  @@index([policyId])
+  @@map("governance_policy_acknowledgements")
+}
+
+/// A tracked risk — from an assessment (`sourceItemId` set) or added by hand
+/// (null). Not scoped to one focus area: a risk found while assessing Risk &
+/// Controls stays on the register even if Board Structure is regenerated
+/// next. `handManaged` flips true the moment a consultant sets any field
+/// directly, which is what protects it from a later run's reconciliation
+/// (governance-findings.ts) — the same role GovernancePolicyDraft's EDITED
+/// status plays for a policy.
+model GovernanceRisk {
+  id            String         @id @default(uuid())
+  workspaceId   String
+  sourceItemId  String?
+  title         String
+  description   String         @db.Text
+  likelihood    RiskLikelihood
+  impact        RiskImpact
+  status        RiskStatus     @default(OPEN)
+  handManaged   Boolean        @default(false)
+  ownerRoleId   String?
+  ownerPersonId String?
+
+  /// Spec 027 — what the client will do about it, and the level it should
+  /// reach once treated. All optional: a risk can be recorded before anyone
+  /// has decided.
+  treatmentStrategy  RiskTreatmentStrategy?
+  treatmentRationale String?                @db.Text
+  targetLikelihood   RiskLikelihood?
+  targetImpact       RiskImpact?
+
+  workspace        Workspace                       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  /// SetNull, not Cascade: the risk outlives the run that found it.
+  sourceItem       GovernanceChecklistItem?        @relation(fields: [sourceItemId], references: [id], onDelete: SetNull)
+  ownerRole        Role?                           @relation(fields: [ownerRoleId], references: [id])
+  ownerPerson      Person?                         @relation(fields: [ownerPersonId], references: [id])
+  treatmentActions GovernanceRiskTreatmentAction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@map("governance_risks")
+}
+
+enum RiskTreatmentStrategy {
+  MITIGATE
+  TRANSFER
+  ACCEPT
+  AVOID
+}
+
+/// One planned step to bring a risk down (spec 027). Deleted with its risk;
+/// an owner that is hard-deleted leaves the action unassigned.
+model GovernanceRiskTreatmentAction {
+  id            String    @id @default(uuid())
+  riskId        String
+  description   String    @db.Text
+  ownerRoleId   String?
+  ownerPersonId String?
+  dueDate       DateTime?
+  doneAt        DateTime?
+
+  risk        GovernanceRisk @relation(fields: [riskId], references: [id], onDelete: Cascade)
+  ownerRole   Role?          @relation("TreatmentActionOwnerRole", fields: [ownerRoleId], references: [id], onDelete: SetNull)
+  ownerPerson Person?        @relation("TreatmentActionOwnerPerson", fields: [ownerPersonId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([riskId])
+  @@map("governance_risk_treatment_actions")
+}
+
+enum GovernanceActivityEntityType {
+  ASPECT
+  ASSESSMENT
+  CHECKLIST_ITEM
+  RISK
+  POLICY
+}
+
+/// One completed governance action (spec 019), append-only. entityId is
+/// deliberately not a relation: the entry must outlive the record it
+/// describes, and entityLabel keeps that record's name as it was then.
+model GovernanceActivityLogEntry {
+  id          String                       @id @default(uuid())
+  workspaceId String
+  entityType  GovernanceActivityEntityType
+  entityId    String
+  entityLabel String
+  summary     String
+  actorUserId String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User      @relation(fields: [actorUserId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId, createdAt])
+  @@map("governance_activity_log_entries")
+}

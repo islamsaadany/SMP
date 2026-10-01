@@ -41,7 +41,7 @@ function ownerUrl(): string {
 
 /* smp_app's URL: SMP_APP_URL when set, otherwise the owner's URL with the user
    and password swapped — the same host, the same DIRECT endpoint. */
-function appUrl(): string {
+export function appUrl(): string {
   if (process.env.SMP_APP_URL) return process.env.SMP_APP_URL;
   const u = new URL(ownerUrl());
   u.username = "smp_app";

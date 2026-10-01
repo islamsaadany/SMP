@@ -73,7 +73,11 @@ const OTHER = BUILT_EXTRA.filter((k) => !MODULE_DEF[k].inside)[0] || null;
    inside it go back to the module it lives in, and the switcher never lists
    it (a door to a page that is a redirect is a door behind a door, §32). */
 const INSIDE = MODULES.filter((k) => MODULE_DEF[k].built && MODULE_DEF[k].inside);
-const PAGED = () => offerable();
+/* A module whose pages are Next's own route tree (MODULE_DEF.appRoute —
+   Processes, FFProcess carried in) has no server in the table to drive; its
+   pages are asserted to EXIST in §2b instead, so it is not let off. */
+const APP_ROUTE = (k) => !!MODULE_DEF[k].appRoute;
+const PAGED = () => offerable().filter((k) => !APP_ROUTE(k));
 const OWN_PAGE_OF = (k) => existsSync(join(APP, "modules", k, "page.ts"));
 
 let ok = 0;
@@ -175,7 +179,9 @@ check("a module's area is NOT in the client's carried matrix",
    today would be the door onto the wrong room, arriving quietly. */
 console.log("\n2b · every module serves itself");
 check("every BUILT module has a page of its own to serve",
-  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => typeof serverFor(k) === "function"),
+  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => APP_ROUTE(k)
+    ? existsSync(join(APP, "app", "(ffp)", "[slug]", k, "layout.tsx")) && serverFor(k) === null
+    : typeof serverFor(k) === "function"),
   MODULES.map((k) => k + ":" + (serverFor(k) ? "serves" : "none")).join(" "));
 check("...and a word that is NOT built serves nothing, or it is a door onto the wrong room",
   UNBUILT.every((k) => serverFor(k) === null), UNBUILT.join(", "));
@@ -232,7 +238,7 @@ check("...and no two of them draw the same document — a table cannot point two
 /* A module's landing is its landing: an address inside one that it does not
    draw comes BACK to it, which is what every unknown word inside a client
    already gets (lib/modules.ts whereOf) rather than a second refusal. */
-for (const k of BUILT_EXTRA) {
+for (const k of BUILT_EXTRA.filter((k) => !APP_ROUTE(k))) {
   const out = await drawnBy(k, ["nothing-here"]);
   /* A module with a page of its own is its own landing, inside another or
      not (§456: the Copilot's unknown words come back to the Copilot page). */
@@ -309,9 +315,15 @@ for (const k of BUILT_EXTRA) {
    the assertion says so rather than passing over an empty list (§113.8).
    `UNBUILT` is the file's own, declared at the top — a second `const` here
    was §56.7's collision, caught by the parser rather than by reading. */
-check("an unbuilt module's word is not an address either",
-  UNBUILT.length > 0 && UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy),
-  UNBUILT.length ? UNBUILT.join(", ") : "none left unbuilt — this assertion has nothing to stand on");
+/* AND WITH NONE LEFT UNBUILT (Processes, 2026-10-01, was the last) the
+   rule is asked of the case that survives it rather than passing over an
+   empty list (§113.8, §218): a module's word the CLIENT does not hold is not
+   an address for that client, which is the same door shut by the same rule. */
+check(UNBUILT.length ? "an unbuilt module's word is not an address either"
+    : "a module's word the client does not hold is not an address either (none is left unbuilt)",
+  UNBUILT.length ? UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy)
+    : BUILT_EXTRA.every((k) => whereOf([k], [DEFAULT_MODULE]).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : BUILT_EXTRA.join(", "));
 check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 /* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's

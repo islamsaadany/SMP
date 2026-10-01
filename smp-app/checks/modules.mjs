@@ -186,6 +186,10 @@ const argsFor = (module, rest) => ({
      a module the office alone may open (the Internal Tracker, spec 054) draws
      its page here rather than its refusal. */
   personKey: "islam", seat: "super",
+  /* ...and a CONSULTANT (§439): only Forefront's own people get the shared
+     bar's trail, which is where the module menu below lives. A client's own
+     person is asserted separately, in §5b. */
+  consultant: true, me: { personKey: "islam", seat: "super" },
 });
 const drawnBy = async (k, rest = []) => {
   const res = await serverFor(k)(argsFor(k, rest));
@@ -608,11 +612,36 @@ for (const k of OWN_PAGE) {
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`
-     (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
-     and never run, so the switcher is a <details> and this asserts it stays
-     one. */
+     (lib/shell.ts SHELL_CSP): an inline script or handler here would render
+     perfectly and never run. REWRITTEN, NEVER LOOSENED (§218, §439): it said
+     `<script` at all, which was the same claim while a module page carried
+     no script — the shared top bar loads ONE FILE (`/topbar.js`), which the
+     policy admits, so what is asserted is still that nothing INLINE needs to
+     run: every <script> has a src and an empty body, and no on*= handler. */
+  const scripts = doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || [];
   check("nothing inline needs a script, or the policy would silence it — " + k,
-    !/<script|onclick=/i.test(doc));
+    scripts.every((t) => /\bsrc=/.test(t) && /<script\b[^>]*>\s*<\/script>/i.test(t)) && !/\son[a-z]+=/i.test(doc),
+    scripts.join(" "));
+  /* §439: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
+     steps, the theme switch and Sign out — and its script, or the menus and
+     the switch would be drawn and dead (§96). */
+  check("it wears the shared top bar, trail and all — " + k,
+    /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+  check("...and the navy module bar it replaces is gone — " + k,
+    !/class="bar"|class="msw"|class="mmenu"/.test(doc));
+  check("...and the page's dark colours answer the switch, not only the device — " + k,
+    /:root\[data-theme="dark"\]\{/.test(doc) && !/@media \(prefers-color-scheme:dark\)\{:root\{/.test(doc));
+  /* 5b · A CLIENT'S OWN PERSON (§439, Islam: "they don't get it it's only for
+     the consutlants"). No trail and no module menu — and still a way back
+     into their platform, or a page reached by its address is a room with no
+     door (§61). Both ends, or a build that dropped the trail for everybody
+     passes the first half (§94.2). */
+  const staff = await (await serverFor(k)({ ...argsFor(k, []), consultant: false })).text();
+  check("a client's own person gets no trail — " + k,
+    /<header class="tb">/.test(staff) && !/class="tbtrail"/.test(staff) && !/class="tbmenu"/.test(staff));
+  check("...and their way back is the product's name — " + k,
+    staff.includes('class="tbbrand" href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"') && /id="tbout"/.test(staff));
 }
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");

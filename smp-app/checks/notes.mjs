@@ -476,8 +476,14 @@ try {
      the module is served over a real port — the same serve() the route calls
      — and Chromium presses the controls while the DATABASE is read back. */
   section("§9 · a note taken, refined and sent, pressed in a browser");
+  /* §439: the shared top bar loads /topbar.js, which the app serves from its
+     own route (app/topbar.js/route.ts) — served here from the same string, or
+     the page's one script answers with this server's 404 and every press
+     below reports a page error that is the harness's, not the product's. */
+  const { TOPBAR_SCRIPT } = await import("../lib/topbar.ts");
   const srv = createServer(async (rq, rs) => {
     try {
+      if (String(rq.url).split("?")[0] === "/topbar.js") { rs.writeHead(200, { "Content-Type": "application/javascript" }); rs.end(TOPBAR_SCRIPT); return; }
       const chunks = []; for await (const ch of rq) chunks.push(ch);
       const url = "http://smp.test" + rq.url;
       const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);

@@ -59044,3 +59044,51 @@ directions) — **2 red** with the write removed. `setup-shape.mjs`'s two other
 failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
+
+## §439 — one top bar for every module (2026-10-01)
+
+Islam, with Strategy's top bar on screen: *"we need to maintain this top bar
+across all the modules as this would be the main navigation bar across all the
+module and clients."* Four answers before the mockup — *"1. only when it changes
+something 2. they don't get it it's onyl for the consutlants 3. console page as
+is 4. white, show mockup"* — and on the mockup
+(`design-mockups/top-bar-modules/2026-10-01_shared-top-bar.html`), *"ok build
+it"*.
+
+- **ONE BUILDER, `smp-app/lib/topbar.ts`**, drawn by every module that serves
+  its own document (Insights, Tracker, Notes). The navy module bars, the
+  four-square switcher and its CSS are DELETED from all three pages (§24); the
+  trail's two menus do that job, as they already do on Strategy (§400/§401).
+- **THE TRAIL IS FOR FOREFRONT'S CONSULTANTS ONLY.** `ServeArgs` gains
+  `consultant` (`user.kind !== "client"`, read by the route, never by a page)
+  and `me` (the signed-in seat, for who may simulate). A client's own staff get
+  the product name, their company, the theme switch and Sign out — what their
+  Strategy bar already shows. `SMP_BREAK=trail-for-staff` reddens it.
+- **VIEWING AS ONLY WHERE IT CHANGES WHAT IS SHOWN**: Insights, because a
+  report can be narrowed to places (§355). Not the Tracker or Notes, the
+  office's own lists, which read the same for everybody who can open them. The
+  list is drawn only for somebody who may simulate (§185's gate, the session's
+  seat), and the choice rides the address the route already narrows by (§383).
+- **NO INLINE SCRIPT** under `script-src 'self'`: the bar's behaviour is served
+  as `/topbar.js` from a Next route rather than from `public/`, which is
+  generated and watched by `generated-in-step`. The module checks were
+  rewritten, never loosened (§218): every `<script>` must have a `src` and an
+  empty body, and no `on*=` handler may appear.
+- **THE THEME SWITCH HAS TO REACH THE PAGE**: the modules' stylesheets answered
+  only `prefers-color-scheme`, so `themedCss()` restates each dark block under
+  `:root[data-theme="dark"]` and guards the media block with
+  `:root:not([data-theme="light"])` — the platform's own shape.
+- **WHAT THE CHECKS TAUGHT**: the Tracker and Notes browser harnesses serve
+  their own page and had to serve `/topbar.js` too, or the page threw on a 404;
+  and `font:inherit` in the bar's CSS tripped §356.14's guard, so it is
+  `font-family:inherit`.
+
+**Proved**: `check:modules` 181/0 and all nine `:red` breaks red (with
+`trail-for-staff`); Notes 170/0; Insights 137/0; shell 142/0; door 145/0;
+`generated-in-step` clear; `next build` green; typecheck clean but for
+`lib/prisma.ts`'s pre-existing error. **Recorded, not this work's**: three
+Tracker assertions (exact-date grouping, the names list width, row height) fail
+identically with this change stashed (§303) — likely the calendar, as in
+§385.10. Screen only: nothing stored, nothing migrated, no rule moved, no
+sign-out owed.
+

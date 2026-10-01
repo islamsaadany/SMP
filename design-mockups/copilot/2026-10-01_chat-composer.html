@@ -42,7 +42,8 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 .old .send{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;font:700 13px var(--sans);padding:8px 16px}
 .old .gap{height:120px;flex:none}
 /* PROPOSED */
-.new .foot{padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.new .foot{flex:none;padding:10px 16px 14px;display:flex;flex-direction:column;gap:6px}
+.new .box,.new .under,.frame .ctx,.frame .head{flex:none}
 .box{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--surface);transition:border-color .12s}
 .box:focus-within{border-color:var(--gold-deep)}
 .box textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;background:transparent;color:var(--ink);
@@ -51,7 +52,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 .box .send:disabled{background:var(--surface-2);color:var(--ink-3);cursor:default}
 .box .send:focus-visible,.attach:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .under{display:flex;align-items:center;gap:10px}
-.attach{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--ink-2);font:600 12px var(--sans);padding:3px 4px;border-radius:6px;cursor:pointer}
+.attach{display:inline-grid;place-items:center;width:28px;height:28px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:6px;cursor:pointer}
 .attach:hover{background:var(--surface-2)}
 .hint{margin-left:auto;font-size:11px;color:var(--ink-3)}
 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
@@ -96,7 +97,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
 
 <div class="wrap">
   <h1>Copilot chat: the composer</h1>
-  <p class="lede">Left is the chat as it is today. Below it is the proposal: the chats rail with Rename and Archive behind three dots, an Archived list, and the new chat box &mdash; it fills the window top to bottom, starts one line tall, Send sits inside it as an arrow, and Attach sits under it on the left. Everything in the proposal can be pressed.</p>
+  <p class="lede">Left is the chat as it is today. Below it is the proposal: the chats rail with Rename and Archive behind three dots, an Archived list, and the new chat box &mdash; it fills the window top to bottom, starts one line tall, Send sits inside it as an arrow, and the paperclip sits under it on the left. Everything in the proposal can be pressed.</p>
 
   <div class="pair">
     <section>
@@ -149,9 +150,8 @@ h1{font-size:20px;margin:0;text-wrap:balance}
             </button>
           </div>
           <div class="under">
-            <button class="attach" type="button">
+            <button class="attach" type="button" aria-label="Attach a file" title="Attach a file">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg>
-              Attach
             </button>
             <span class="hint">Enter sends · Shift + Enter for a new line</span>
           </div>
@@ -164,7 +164,7 @@ h1{font-size:20px;margin:0;text-wrap:balance}
   <div class="notes">
     <div class="note"><b>Fills the window</b>The chat reaches from below the tab row to the bottom of the screen. The messages scroll inside it, and the box stays pinned at the bottom.</div>
     <div class="note"><b>Grows as you type</b>One line to start, growing to about ten lines (200px). After that the box scrolls inside itself.</div>
-    <div class="note"><b>Send inside, Attach below</b>Send is the round arrow in the box's corner, greyed out while the box is empty. Attach is under the box on the left, and attached files show as chips above the box, as they do today.</div>
+    <div class="note"><b>Send inside, Attach below</b>Send is the round arrow in the box's corner, greyed out while the box is empty. The paperclip is under the box on the left (no word, the name is on its hover), and attached files show as chips above the box, as they do today.</div>
     <div class="note"><b>Rename and Archive in the rail</b>Three dots on each chat: always shown on the open chat and on a touch screen, on hover for the rest. Rename turns the name into a box (Enter saves, Escape cancels). Archive takes the chat off the list; nothing is lost.</div>
     <div class="note"><b>Archived chats</b>At the foot of the rail, &ldquo;Archived &middot; N&rdquo; opens the archived list in the same rail. Anybody in the office can Restore a chat. Only the Super user sees Delete, and it asks once more in the row. Switch &ldquo;Look at it as&rdquo; above to see both.</div>
     <div class="note"><b>To decide: Enter</b>Drawn here as Enter sends and Shift+Enter makes a new line, as in Claude. Today Enter makes a new line and only the button sends.</div>

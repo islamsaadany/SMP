@@ -9040,3 +9040,54 @@ is committed to the repository, which the project's own pre-commit rule forbids 
 name. Nothing is exposed today — it holds a local address with no password — but
 the next person to point it at a real database commits that too.
 
+
+---
+
+## Two faults in building a plan, fixed (2026-10-01, §443.9)
+
+Islam, building a plan on the built page: he could not add two things one after
+the other, could not add a second step to an activity, and asked what else was
+not working. Both turned out to be in the writing path and both left the screen
+out of step with what had actually been saved. Nothing was ever lost.
+
+**The box you type a name into did not empty itself.** You typed a name, pressed
+Enter, the row appeared — and the name was still sitting there with the cursor
+still in it. Press Enter again and you got the same row twice; type the next name
+and it joined onto the end of the last one, so "Discovery" then "Delivery" was
+saved as one row called "DiscoveryDelivery".
+
+There were two reasons it stayed and only one of them was obvious. The box was
+never emptied. And every save deliberately remembers what a hand is typing and
+puts it back once the page redraws, which is right for a figure somebody is half
+way through and wrong for this box, whose contents had just been used to make the
+row. It is emptied now before the save goes out, so there is nothing to put back
+and the box comes back blank with the cursor in it.
+
+**This is also what made his third question unanswerable.** He asked how to add
+an activity under a work package. You can, and you always could — the row is
+drawn right there underneath it. What was stopping him is the same fault: after
+naming a work package the cursor was still in the box above, holding the package's
+own name, so the next thing he typed became a second work package rather than an
+activity.
+
+**The panel shut after every save, so no second step could be added.** Adding a
+step saved it and closed the panel, leaving nowhere to type the next one; a reload
+brought it back with the step in it, which is why it read as the platform
+forgetting. When the page redrew after a save it asked which activity was open and
+looked at the name of the action rather than the activity's id — and since the
+action is never empty it never got as far as the id, so nothing was ever
+re-opened. The browser now says which activity is open on every save, beside the
+view it already sent, and the page reads that.
+
+**Why the 197 tests on this could not see either.** The test types into a box by
+*replacing* whatever is in it, so a box that kept the last name is invisible to it,
+and so is a cursor that never moved. And it adds steps by talking to the server
+directly, which proves the step is saved and never looks at what the screen does
+afterwards. Both new tests do it the way a person does — typing into the box and
+adding the step in a browser — and both were proved to fail on the build before
+the fix, printing the exact symptoms: `DiscoveryDelivery`, and `panel false`.
+
+**What to go and check:** build a plan with the pen open. Name a phase, then name
+another straight away — two rows. Name a work package, then type an activity's
+name into the row underneath it — it lands under the package. Open an activity and
+add two steps one after the other without reloading.

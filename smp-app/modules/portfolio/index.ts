@@ -337,7 +337,27 @@ async function act(c: Q, body: Record<string, unknown>, a: ServeArgs, office: bo
 
     const done = async (): Promise<Response> => {
       rows = rollUp(await planRows(c, id));
-      const want = String(body.act || actId || rowId || "");
+      /* WHICH ACTIVITY IS STILL OPEN IS THE BROWSER'S TO SAY (§443.9), beside
+         the view it already sends: this read was `body.act`, which is the
+         NAME OF THE ACT (`add`, `subadd`, `field`) and never a uuid — so it
+         was never empty, the `actId || rowId` behind it was unreachable, and
+         `act` came back null on every single write. The panel therefore shut
+         after every press, which from a screen is the platform forgetting:
+         add one step and there was nowhere left to type the second, and a
+         reload brought it back with the step in it (§96 — the write landed
+         and only the screen was out of step).
+
+         IT IS READ FROM THE SCREEN RATHER THAN FROM THE ACT because the act's
+         own fields only coincide with the open panel: `activity` is it for a
+         step, `row` is it for a field write, and for an arrow `row` is
+         whatever was moved — so reading those would swap the panel under
+         somebody's hand on one press of three (§53.5). An untrusted value
+         costs nothing: `oneActivity` is scoped to this project and this
+         tenant, so the worst a made-up id can do is open a panel the person
+         could already open. */
+      const want = brk() === "panel-from-act"
+        ? String(body.act || actId || rowId || "")   /* the read that was wrong */
+        : String(body.open || "");
       const act = want && UUID.test(want) ? await oneActivity(c, id, want) : null;
       const names = (await readNames(c)).short;
       const args: PlanArgs = {

@@ -9032,7 +9032,40 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # is a work package's add row and not the key a PHASE
                                 # offers, and an unscoped `.dlg` reads the SHIFT dialog's
                                 # *Leave everything* and calls a correct refusal broken
-                                # (&sect;100.3, &sect;50.6)
+                                # (&sect;100.3, &sect;50.6).
+                                # AND SINCE &sect;443.9 IT TYPES INTO THE BOX RATHER THAN
+                                # FILLING IT, which is why 197 assertions could not see
+                                # either of the two faults Islam met building a plan: every
+                                # add above uses `fill()`, which REPLACES what is in the
+                                # box, so a box that kept the last name is invisible to it
+                                # and so is a cursor that never left (&sect;100.3 &mdash; a
+                                # probe that cannot observe the fault reports a working
+                                # build and a broken one alike); and the step path is driven
+                                # at the API, which proves the row is stored and never looks
+                                # at what the browser gets back. So one assertion presses
+                                # Enter TWICE in the phase box and reads the stored names
+                                # (`DiscoveryDelivery` before this), and another adds a step
+                                # IN THE BROWSER and asserts the panel and its step box are
+                                # still there with the step in them, then adds a SECOND
+                                # without touching the address bar &mdash; which is what was
+                                # reported. **THE HANDLE IS STILL RE-READ** (&sect;222, found
+                                # by the check throwing *Element is not attached to the DOM*):
+                                # every write swaps the body in, so the box is a NEW element,
+                                # which is exactly why `fill()` was the only thing hiding the
+                                # fault &mdash; a fresh read does not clear it and `type()`
+                                # appends to whatever a fresh read finds. **And one of the new
+                                # assertions reported a CORRECT build broken**: it asked the
+                                # panel for its `textContent`, and with the pen open a step's
+                                # name is an `<input value="&hellip;">`, whose value
+                                # `textContent` does not include (&sect;100.3, one element
+                                # along) &mdash; it reads the step's own box now. 207/0, red
+                                # TWENTY-EIGHT ways, `keep-add-box` printing
+                                # `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]` and
+                                # `panel-from-act` &mdash; the wrong read restored exactly as
+                                # it stood &mdash; printing `panel false &middot; box false`,
+                                # with the third red shared by both and correctly so: a second
+                                # step cannot be added if the box keeps the first name OR if
+                                # the panel has gone (&sect;276, &sect;344.1)
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -10887,7 +10920,89 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 &mdash; **&sect;443: Portfolio &mdash; writing a
+*Last Updated: 2026-10-01 &mdash; **&sect;443.9: the add box keeps what it has
+just used, and the panel shuts behind every write (spec 060 &sect;16).** Islam,
+building a plan on the built page: he could not add two things one after the
+other, could not add a second step to an activity, and asked what else was not
+working &mdash; then *"ok for those 2"*, and *"how can I add an activity under a
+wp?"* **THE THIRD QUESTION HAD NO THIRD FAULT BEHIND IT AND SAYING SO FIRST IS
+MOST OF WHAT KEPT THE ROUND SMALL**: driven in a browser against a real Postgres,
+an activity under a work package WORKS &mdash; the add row is drawn beneath the
+package, the row lands with its `work_package_id` set, nothing is refused.
+**What stops a person is fault A wearing a different hat**, measured: after
+naming a work package the cursor is still in the PHASE's box holding the
+package's own name (`value "WP one" &middot; .addr l1 &middot; kind "package"`),
+so the `+ activity` row underneath was never the box being typed into and the
+next name made a second *work package* called `WP oneInterviews` &mdash;
+&sect;61's trap by way of a cursor rather than a missing control.
+**FAULT A &mdash; THE BOX IS NEVER EMPTIED AND THE WRITE PUTS IT BACK**: two
+reasons and only one obvious, because every write remembers what a hand is
+typing and restores it once the body is swapped in (`keep`/`putBack`,
+&sect;356.12) &mdash; right for a figure somebody is half way through, wrong for
+a box whose contents have just been USED to make the row; so a second Enter made
+the same row twice and typing the next name appended, storing `Discovery` then
+`Delivery` as **`DiscoveryDelivery`**. **Cleared BEFORE the write goes out**,
+which is what makes it one edit rather than two: `keep` then captures nothing and
+`putBack` hands back an empty box with the cursor in it. **ONE DECISION FOR EVERY
+ADD BOX** (&sect;104.7) &mdash; the handler's two branches became one test for
+*this is an add box and Enter was accepted*, so the phase, package, activity and
+step boxes are covered with no list to forget.
+**FAULT B &mdash; `done()` ASKED WHICH ACTIVITY WAS OPEN AND READ THE NAME OF THE
+ACT**: `String(body.act || actId || rowId || "")`, where `body.act` is the ACTION
+WORD (`add`, `subadd`, `field`) &mdash; never a uuid and never empty on a write,
+so the two reads behind it were unreachable and `act` came back **null on every
+single write**. The panel shut after every press, which from a screen is the
+platform forgetting: add one step and there was nowhere to type the second, while
+a reload brought it back with the step in it (&sect;96 &mdash; the write landing
+and only the screen out of step). **WHICH ACTIVITY IS OPEN IS SCREEN STATE AND IS
+SENT LIKE THE VIEW BESIDE IT**, from the one place every write passes through
+(&sect;104.7, that line's own reason), and `done()` reads that and nothing else.
+**IT IS DELIBERATELY NOT READ FROM THE ACT'S OWN FIELDS**: `activity` is the open
+panel for a step and `row` is it for a field write, but for an **arrow** `row` is
+whatever was just moved, so `actId || rowId` would swap the panel under somebody's
+hand on one press of three (&sect;53.5: a coincidence is not an answer). An
+untrusted value costs nothing and it is said rather than assumed &mdash;
+`oneActivity` is scoped to this project and this tenant.
+**&sect;443.9a &mdash; AND THE BACKTICKS IN MY OWN COMMENTS ENDED THE SCRIPT**:
+`write-js.ts` is one template literal, and the two comments explaining the fixes
+cited `keep`/`putBack` and `DiscoveryDelivery` in backticks &mdash; &sect;272.8
+and &sect;357.2's trap, recorded by name twice and walked into while editing the
+file either one is about. **Caught by `tsc`, which is also the lesson:
+`npx tsc --noEmit | head` reports HEAD's exit code**, so the first run printed ten
+errors above the words `exit 0` (&sect;298.3's family, in a shell pipe).
+**&sect;443.9b &mdash; WHY 197 ASSERTIONS COULD SEE NEITHER, which is worth more
+than the two lines**: the browser section adds every row with `fill()`, which
+REPLACES what is in the box, so a box that kept the last name is invisible to it
+and so is a cursor that never left (&sect;100.3); and the step path is driven at
+the API, which proves the row is stored and never looks at what the browser gets
+back. Both new assertions are written the way a person works &mdash; the box
+**typed into** rather than filled, the step added **in the browser** &mdash; and
+**the handle must still be re-read** (&sect;222, found by the check throwing
+*Element is not attached to the DOM*), which is precisely why `fill()` was the
+only thing hiding it: a fresh read does not clear the box and `type()` appends to
+whatever it finds. **&sect;443.9c &mdash; and one new assertion reported a CORRECT
+build broken**, asking the panel for its `textContent` where a step's name is an
+`<input value="&hellip;">` (&sect;100.3, one element along). **PROVED ABLE TO
+FAIL, one break per fault** (&sect;276, &sect;344.1): `keep-add-box` **3 red**
+printing `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]`, and
+`panel-from-act` &mdash; the wrong read restored exactly as it stood &mdash; **3
+red** printing `panel false &middot; box false`, the third shared by both and
+correctly so, since a second step cannot be added if the box keeps the first name
+OR the panel has gone. **The break travels to the browser where the line it
+falsifies is in the browser**, through one `data-brk` stamp rather than one
+attribute per break (&sect;104.7). **VERIFIED**: module check **197 &rarr;
+207/0** red twenty-eight ways, `check:portfolio` 135/0, `generated-in-step` all
+clear, `built-in-step.py` all good &mdash; **the frozen product is untouched, so
+`sw.js` is NOT bumped** (&sect;91's trigger is the built file's bytes changing and
+they did not) &mdash; and `tsc` clean with the cache removed first (&sect;3).
+Nothing stored moves, nothing is migrated, no rule about who may write what
+changes; read off the diff, three module files, the check and `package.json`.
+**RECORDED, NOT DONE**: `putBack` restores a box's VALUE and not which `+` key was
+pressed, so a kind reverts to its first offer &mdash; unreachable from the state
+that produces it today, and widening that helper to carry a control's own state is
+a decision about the helper rather than a defect fix (rule 1b).*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443: Portfolio &mdash; writing a
 plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;442 published
 &mdash; *"No I mean the plan in the porfiltio I wan to start planning I mean."*
 **THE SIXTH SCREEN WAS NEVER A SCREEN OF ITS OWN**: it is the writing half of

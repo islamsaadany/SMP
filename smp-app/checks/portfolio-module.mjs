@@ -1196,6 +1196,84 @@ try {
         /holds work/.test(dlgText) && /Interviews/.test(dlgText), dlgText.replace(/\s+/g, " ").slice(0, 140));
       await pg.keyboard.press("Escape"); await settle();
     }
+    /* ── THE BOX IS EMPTY AFTERWARDS, which 197 assertions could not see ──
+       Every add above re-reads the box and uses `fill()`, which REPLACES what
+       is in it — so a box that kept the last name is invisible to this file,
+       and so is a cursor that never left it (§100.3: a probe that cannot
+       observe the fault reports a working build and a broken one alike).
+       Here one handle is held and typed INTO, which is what a person does. */
+    const twice = await pg.$('.addr[data-kind="phase"] input');
+    check("there is a phase box to type into twice", !!twice);
+    if (twice) {
+      await twice.type("Discovery");
+      await twice.press("Enter");
+      await settle();
+      check("AFTER ENTER THE BOX IS EMPTY AND STILL HOLDS THE CURSOR, or the next name is typed onto the end of the last one (§443.9)",
+        await pg.evaluate(() => {
+          const a = document.activeElement;
+          const r = a && a.closest ? a.closest(".addr") : null;
+          return !!r && a.value === "";
+        }),
+        JSON.stringify(await pg.evaluate(() => {
+          const a = document.activeElement;
+          return { tag: a && a.tagName, value: a && a.value,
+            inAddr: !!(a && a.closest && a.closest(".addr")) };
+        })));
+      /* AND THE SECOND NAME IS TYPED, never filled: `fill()` REPLACES, so it
+         hides a kept value, while `type()` appends to whatever is there and
+         is what a person's keyboard does. The handle must be re-read — every
+         write swaps the body in, so the box is a new element (§222) — which
+         is why the fault survives a fresh read and `fill()` is the only
+         reason 197 assertions could not see it. */
+      const twice2 = await pg.$('.addr[data-kind="phase"] input');
+      if (twice2) { await twice2.type("Delivery"); await twice2.press("Enter"); await settle(); }
+      const RT = await bRows();
+      const phs = RT.filter((x) => x.k === "phase").map((x) => x.name);
+      check("...so two names typed one after the other are two rows, not one run of both — stored as DiscoveryDelivery before this (§443.9)",
+        phs.includes("Discovery") && phs.includes("Delivery") &&
+          !phs.some((n) => /DiscoveryDelivery/.test(n)),
+        JSON.stringify(phs));
+    }
+
+    /* ── AND A STEP LEAVES THE PANEL OPEN, so a second one can be added ──
+       `done()` read the act's own NAME where it meant the activity's id, so
+       no activity was ever re-opened and the panel shut after every write:
+       the step landed and there was nowhere left to type the next (§96, the
+       write is right and only the screen is out of step). The api-driven
+       assertions above drive two steps straight at the server, which proves
+       the row is stored and never looks at what the browser gets back. */
+    const actRow = (await bRows()).find((x) => x.k === "activity");
+    check("there is an activity to open a panel on", !!actRow, JSON.stringify(actRow || null));
+    if (actRow) {
+      await pg.goto(base + "?edit=1&act=" + actRow.id); await settle();
+      await pg.evaluate("window.__stay = 1");
+      check("its panel is open to begin with, or the assertion below proves nothing (§113.8)",
+        !!(await pg.$('.act[data-act="' + actRow.id + '"]')) && !!(await pg.$("#subadd")));
+      const sb = await pg.$("#subadd");
+      if (sb) { await sb.type("Book the interviews"); await sb.press("Enter"); await settle(); }
+      const steps = await owner("SELECT name FROM portfolio_sub_activities WHERE tenant_id=$1 AND activity_id=$2 ORDER BY pos", [A, actRow.id]);
+      check("the step reaches Postgres", steps.length === 1 && steps[0].name === "Book the interviews",
+        JSON.stringify(steps));
+      check("AND THE PANEL IS STILL OPEN WITH A BOX FOR THE NEXT STEP — it shut after every write before this, so no second step could be added without reloading (§443.9)",
+        !!(await pg.$('.act[data-act="' + actRow.id + '"]')) && !!(await pg.$("#subadd")),
+        "panel " + !!(await pg.$(".act[data-act]")) + " · box " + !!(await pg.$("#subadd")));
+      /* READ OFF THE BOX, never the panel's text: with the pen open a step's
+         name is an `<input value="...">`, and `textContent` does not include a
+         field's value — so asking the panel for the words reported a correct
+         build broken (§100.3, found by falsifying rather than by reading). */
+      const inPanel = await pg.$$eval('.act[data-act] [data-sub][data-field="name"]',
+        (xs) => xs.map((x) => x.value)).catch(() => []);
+      check("...and the step it just made is drawn in it, so the panel came back with the write rather than from a reload (§356.12)",
+        inPanel.includes("Book the interviews"), JSON.stringify(inPanel));
+      check("...and the page did not reload to do it", await pg.evaluate("window.__stay === 1"));
+      /* A SECOND STEP, which is the reported symptom in one press. */
+      const sb2 = await pg.$("#subadd");
+      if (sb2) { await sb2.type("Run them"); await sb2.press("Enter"); await settle(); }
+      const steps2 = await owner("SELECT name FROM portfolio_sub_activities WHERE tenant_id=$1 AND activity_id=$2 ORDER BY pos", [A, actRow.id]);
+      check("...so a SECOND step can be added without touching the address bar, which is what was reported",
+        steps2.length === 2 && steps2[1].name === "Run them", JSON.stringify(steps2.map((x) => x.name)));
+    }
+
     check("and no page error anywhere in it (§96: a script that threw renders the page it was given)",
       errs.length === 0, errs.slice(0, 2).join(" | "));
     await browser.close();

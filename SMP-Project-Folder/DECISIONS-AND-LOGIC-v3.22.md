@@ -60268,3 +60268,125 @@ habit, because the next person to point it at a real database commits that.
 Running the suite here needed the URL passed in the environment to override it,
 which is the shape of the problem in miniature.
 
+
+## §443.9 — THE ADD BOX KEEPS WHAT IT JUST USED, AND THE PANEL SHUTS BEHIND EVERY WRITE (2026-10-01, spec 060 §16)
+
+Islam, building a plan on the built page: he could not add two things one after
+the other, could not add a second step to an activity, and asked for anything
+else that was not working — then, of the two fixes put to him in plain words,
+*"ok for those 2"*, and *"how can I add an activity under a wp?"*
+
+**THE THIRD QUESTION HAD NO THIRD FAULT BEHIND IT, AND ESTABLISHING THAT FIRST
+IS MOST OF WHAT MADE THE ROUND SMALL.** Driven in a browser against a real
+Postgres, adding an activity under a work package WORKS: the add row is drawn
+beneath the package (`addr l2`, kind `activity`, its `data-add` the package's own
+id), the row lands with `work_package_id` set, nothing is refused and nothing is
+logged. What stops a person is fault A wearing a different hat — measured, after
+naming a work package the cursor is **still in the PHASE's box holding the
+package's own name**:
+
+```
+cursor: INPUT · value "WP one" · inside .addr l1 · kind "package"
+```
+
+So the `+ activity` row drawn underneath was never the box being typed into, and
+the next name made a second *work package* called `WP oneInterviews`. **§61's
+trap by way of a cursor rather than a missing control** — the way on was there
+and the keyboard was somewhere else.
+
+**FAULT A — THE BOX IS NEVER EMPTIED, AND THE WRITE PUTS IT BACK.** Two reasons,
+and only the first is obvious: the Enter handler never cleared `t.value`, and on
+top of that every write deliberately remembers what a hand is typing and restores
+it once the body is swapped in (`keep`/`putBack`, §356.12) — **right for a figure
+somebody is half way through and wrong for this box, whose contents have just
+been USED to make the row.** Two symptoms from one cause: a second Enter makes
+the same row twice, and typing the next name appends to the last, so `Discovery`
+then `Delivery` is stored as **`DiscoveryDelivery`**. **CLEARED BEFORE THE WRITE
+GOES OUT**, which is what makes it one edit rather than two: `keep` then captures
+nothing and `putBack` hands back an empty box with the cursor still in it, which
+is exactly what somebody who has just named one thing is about to need. **ONE
+DECISION FOR EVERY ADD BOX THERE IS** (§104.7) — the two branches of that handler
+became one test for *this is an add box and Enter was accepted*, so the phase, the
+work package, the activity and the step box are covered without a list, and a
+fifth is covered the day it is added.
+
+**FAULT B — `done()` ASKED WHICH ACTIVITY WAS OPEN AND READ THE NAME OF THE
+ACT.** The line was `String(body.act || actId || rowId || "")`, and `body.act` is
+the ACTION WORD (`add`, `subadd`, `field`) — never a uuid and never empty on a
+write, so the two reads behind it were unreachable and `act` came back **null on
+every single write**. The panel therefore shut after every press, which from a
+screen is the platform forgetting: add one step and there was nowhere left to type
+the second, while a reload brought it back with the step in it — **§96, the write
+landing and only the screen being out of step.** Measured before anything moved:
+
+```
+on open          panel: yes   step box: yes
+after Enter      panel: no    step box: no      database: ['Book them']
+after reload     panel: yes   step box: yes     steps: 1
+```
+
+**WHICH ACTIVITY IS OPEN IS SCREEN STATE, AND IT IS SENT LIKE THE VIEW BESIDE
+IT.** The browser already stamps `act.view` on every write in the one place every
+write passes through (§104.7, that line's own reason); `act.open` joins it, read
+from the panel the person is looking at, and `done()` reads `body.open` and
+nothing else. **IT IS NOT READ FROM THE ACT'S OWN FIELDS, and refusing to is the
+decision**: `activity` is the open panel for a step and `row` is it for a field
+write, but for an **arrow** `row` is whatever was just moved — so `actId || rowId`
+would have swapped the panel under somebody's hand on one press of three
+(§53.5: a coincidence is not an answer). An untrusted value costs nothing, said
+rather than assumed: `oneActivity` is scoped to this project and this tenant, so
+the worst a made-up id can do is open a panel the person could already open.
+
+**§443.9a — AND THE BACKTICKS IN MY OWN COMMENTS ENDED THE SCRIPT.** `write-js.ts`
+is one template literal, so the two comments explaining the fixes — citing
+`keep`/`putBack` and `DiscoveryDelivery` in backticks — closed it and the file
+would not parse. §272.8 and §357.2's trap, recorded by name twice in this
+document and walked into while editing the file either one is about. Caught by
+`tsc`, which is also the lesson: **`npx tsc --noEmit | head` reports head's exit
+code, not the typechecker's**, so the first run printed ten errors above the words
+`exit 0` (§298.3's family, in a shell pipe).
+
+**§443.9b — WHY 197 ASSERTIONS COULD NOT SEE EITHER, which is the finding worth
+more than the two lines.** The browser section adds every row with `fill()`, which
+**REPLACES** what is in the box — so a box that kept the last name is invisible to
+it, and so is a cursor that never left (§100.3: a probe that cannot observe the
+fault reports a working build and a broken one alike). And the step path is driven
+**at the api**, which proves the row is stored and never looks at what the browser
+gets back. Both new assertions therefore had to be written the way a person works:
+the box is **typed into** rather than filled, and the step is added **in the
+browser** with the panel read afterwards. **THE HANDLE MUST STILL BE RE-READ**
+(§222, found by the check throwing *Element is not attached to the DOM*) — every
+write swaps the body in, so the box is a new element — which is precisely why
+`fill()` was the only thing hiding the fault: a fresh read does not clear it, and
+`type()` appends to whatever a fresh read finds.
+
+**§443.9c — AND ONE OF THE NEW ASSERTIONS REPORTED A CORRECT BUILD BROKEN.**
+*"...and the step it just made is drawn in it"* asked the panel for its
+`textContent`, and with the pen open a step's name is an `<input value="…">` —
+**`textContent` does not include a field's value** (§100.3 again, one element
+along). It reads the step's own box now. Found by running it, not by reading it.
+
+**PROVED ABLE TO FAIL, one break per fault, each reddening its own assertions**
+(§276, §344.1): `keep-add-box` **3 red**, its detail printing
+`["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]` — the reported symptom
+verbatim — and `panel-from-act`, which restores the wrong read exactly as it
+stood, **3 red** printing `panel false · box false`. The third red is shared by
+both and correctly so: the second step cannot be added if the box keeps the first
+name *or* if the panel has gone. **The break travels to the browser where the line
+it falsifies is in the browser**, through one `data-brk` stamp rather than one
+attribute per break (§104.7), so the next one needs no edit in `plan.ts`.
+
+**VERIFIED**: `check:portfolio:module` **197 → 207/0**, red **twenty-eight** ways;
+`check:portfolio` 135/0; `generated-in-step` all clear; `built-in-step.py` all
+good, so **the frozen product is untouched and `sw.js` is NOT bumped** (§91's
+trigger is the built file's bytes changing and they did not); `tsc` clean with the
+cache removed first (§3). Nothing stored moves, nothing is migrated, and no rule
+about who may write what changes — read off the diff, which is three module files,
+the check and `package.json`.
+
+**RECORDED, NOT DONE**: pressing a `+ work package` key on an empty phase and then
+adding one puts the cursor back in a row whose kind has reverted to its first
+offer, because `putBack` restores the value and not which key was pressed — today
+that row offers only *work package* once the phase holds one, so it cannot be
+reached from the state that produces it, and widening `putBack` to carry a control's
+own state is a decision about that helper rather than a defect fix (rule 1b).

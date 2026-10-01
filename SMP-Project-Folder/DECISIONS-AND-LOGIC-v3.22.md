@@ -60388,3 +60388,30 @@ One builder (`settingsChip`) for both cards. Screen only. `platform-cards.py`
 30/0 on both copies of the page, its pair check reading the chip's title where
 there is no text; `client-archive` (15) and `client-setup-outside` (29) red
 identically on the build before, as recorded at §445.
+
+## §447 — the two red console checks, and the fault one of them was hiding (2026-10-01)
+
+Islam: *"fix the two failing console checks."* **Most of the red was the checks,
+and one part of it was the product.** Since §400 the console opens on *My work*,
+and `client-archive.py` and `client-setup-outside.py` still opened `/platform`
+expecting the client cards. Every assertion after that one measured a page that
+was not there (§51.11). Both now go to `/platform#clients` through `about:blank`,
+the way `platform-cards.py` already does. That is a rewrite of where the checks
+land, and nothing in what they assert is loosened (§218).
+
+**WITH THE CHECKS LANDING IN THE RIGHT PLACE, A REAL PAGE ERROR SHOWED.** Typing
+in the console's *Add a client* piece threw twice. The handler §436 added (on
+leaving a word box, redraw if the shape is frozen) calls `canShape()`. That
+function read `GROUP` and `S`, and on the console neither exists: the create
+piece mounts no flow and there is no graph behind it. `GROUP && …` does not
+answer false for a name that was never declared; it throws. Nothing visible
+broke, because the throw happened inside a `change` handler that had nothing
+else to do. The fault was still live on production (§96's family). The fix
+answers the question honestly: a client that has not been made yet holds
+nothing (`typeof GROUP` guard), and the null flow state is guarded where it is
+read.
+
+Verified: `client-archive` 0 failures and `client-setup-outside` 0 failures on
+both copies of the page. `client-setup`, `platform-cards` 30/0,
+`setup-live-rows` and `structure` all pass. The full `qa.py` sweep reports
+ERRORS none, and `built-in-step` reports all good.

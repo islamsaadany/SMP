@@ -57,6 +57,11 @@ with sync_playwright() as p:
     ck("before: the layer is on and units are active", before.get("exists") is True and before.get("units", 0) > 1, before)
     ck("…the navigation carries units", navUnits() > 0, navUnits())
     ck("…and the company page holds no plan of its own", before.get("top") == 0, before)
+    # §441, the other end: a group with no plan of its own is untouched
+    ck("§441 before: the group still opens on Performance", safe(pg, "()=>entrySub('group')") == "performance")
+    secs0 = safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
+    ck("…its Themes are drawn while Themes are on", ("Group " + (safe(pg, "()=>L('theme')") or "")) in secs0, secs0)
+    ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
 
     # ── 1. The switch, pressed in Client set-up › Structure ──────────
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
@@ -143,6 +148,33 @@ with sync_playwright() as p:
         ck("pressing it draws the division's reading", bool(v), v)
         ck("…one card per linked function, and no unit", bool(v) and v["fns"] == 2 and v["units"] == 0, v)
         ck("…its figure scored from those functions alone", bool(v) and v["perf"] == v["mix"], v)
+
+    # ── 2b. §441: the company page follows its own Structure ─────────
+    ck("§441 the company opens on its Pillars",
+       safe(pg, "()=>{var t=entrySub('group'); return t==='strategy' && CURSEC.strategy==='plan'}") is True,
+       safe(pg, "()=>[entrySub('group'), CURSEC.strategy]"))
+    secs = lambda: safe(pg, "()=>{renderGroupPerformance(); return GROUP_SECTIONS.slice()}", []) or []
+    TH = "Group " + (safe(pg, "()=>L('theme')") or "")
+    CAPW = safe(pg, "()=>L('capability','bu')")
+    safe(pg, "()=>{var t=GROUP.structure.top; t.on=SMPRules.levelComponents(GROUP,'top').filter(c=>c!=='theme')}")
+    ck("Themes switched off: no Themes section", TH not in secs(), secs())
+    safe(pg, "()=>{var t=GROUP.structure.top; t.on=t.on.concat(['theme'])}")
+    ck("…switched back on, it returns", TH in secs(), secs())
+    s1 = secs()
+    ck("capabilities on: a section named in the client's own word", CAPW in s1 and not any(x.startswith("Group ") and "apabilit" in x for x in s1), s1)
+    safe(pg, "()=>{GROUP.structure.cap=Object.assign({},GROUP.structure.cap,{exists:false})}")
+    ck("capabilities off: no capabilities section", CAPW not in secs(), secs())
+    safe(pg, "()=>{delete GROUP.structure.cap.exists}")
+    f = safe(pg, """()=>{var s=focusSubjects(); var b=focusBands('group');
+      return {top:s.top.length, bands:b.length, pillars:GROUP.items.length,
+              ids:b.every(x=>x.items.every(m=>!!m.id))}}""", {})
+    ck("Focus offers the company's own pillars, one band each", f.get("top") == 1 and f.get("bands") == f.get("pillars") and f.get("ids") is True, f)
+    mk = safe(pg, "()=>{var m=GROUP.items[0].measures[0]; if(!m) return null; CYCLE.focus[m.id]=true; return m.name}")
+    ck("…a marked company measure is on the Focus board", bool(mk) and mk in (safe(pg, "()=>renderFocusBoard()") or ""), mk)
+    ck("Focus on: the tab is there", "focus" in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
+    safe(pg, "()=>setFocusOn(false)")
+    ck("Focus off: the tab is gone", "focus" not in (safe(pg, "()=>allowed(SUBS.group,'group').map(d=>d.k)", []) or []))
+    safe(pg, "()=>setFocusOn(true)")
 
     # ── 3. A direction owner reports their own direction ─────────────
     who = safe(pg, """()=>{var p=GROUP.items[0]; var q=PEOPLE.filter(x=>x.active!==false && !SMPRules.mayReportTop(world(),x) && !SMPRules.isOfficeRole((x.role||''))&& x.name && x.name.split(' ').length>1)[0]; if(!q) return null; p.owner=q.name; GROUP.items.slice(1).forEach(o=>{ if(o.owner===q.name) o.owner=''; }); return q.key}""")

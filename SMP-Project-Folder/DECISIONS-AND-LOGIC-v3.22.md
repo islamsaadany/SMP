@@ -59176,3 +59176,18 @@ functions (§255): **5 red** with the change taken out, from the sources (§276)
 ### §440.1 — the top button names the layer; the tab keeps "Strategy"
 
 Islam, of the clash §440 left (the navigation button and the company page's own tab both read *Strategy*): *"the name is strategy as it has the foundation and the swot and plan below it … name it Company as per the naming in the structure of the first layer?"* — then *"yes go ahead"*. Reverses §440's label A for the BUTTON only: it reads the first layer's word from Structure (`labelWord("topword","group")`) on both shapes, which is what it already read when the strategy is planned on the business units, so the two shapes stop differing. The tab under it stays *Strategy*, like a unit's. One line in `shell.html`; `checks/single-company.py` asserts the button names the layer and is not *Strategy* (§218, rewritten not loosened). Nothing stored moves.
+
+
+### §441 — the company page follows its own Structure
+
+Islam, of the El Abd company page: *"why do we have group themes while themes already are swtiched off on the structure … for the capabilities it should show the capabilities if it's swtiched on as well. and not named group cabilities just capbilities … when I click on the company it should open by default on the Pillars … for the focus tab I can't set it off and it's showing only the capabiliteis and functions not the pillars as well."* Aligned in plain words, then *"yes go ahead build all four"*.
+
+**The Performance page drew two sections nobody's setting reached.** *Group Themes* and *Group capabilities* were pushed unconditionally — the page disagreeing with the Structure step (§53.5). Themes are asked of `compOn("group","theme")`, capabilities of `SMPRules.capExists(GROUP)`, and the capabilities heading is `L("capability","bu")` with no "Group" before it. An unsaid Structure reads both on, so Raya's group page is unchanged.
+
+**A top layer with pillars of its own opens on them.** `entrySub("group")` landed on the `primary` tab (Performance), a rule set when the top layer had no plan. It now lands on Strategy › Plan whenever that section is offered (`planOn` and the pillar component); otherwise exactly as before (§428.2 keeps Raya's plan off).
+
+**Focus off now hides the Focus tab** (`when: focusOn()`), §102's own *"off means it disappears"* reaching the one surface it missed. The switch stays on Setup › Focus measures, so the way back is never removed (§61).
+
+**The top layer's pillars are markable.** `focusSubjects()` gains a `top` subject (only while the top layer carries a plan), `focusBands("group")` returns its pillars' bands from `topAsUnit()` — no empty Key objectives band, because the group's objectives are the Foundation's (topAsUnit's own note) — and the marking page's switch and the board list it first. A destination that is no longer offered (a unit hidden by the units-off switch) is corrected rather than marked. Nothing stored moves; marks are ids in `CYCLE.focus` as before.
+
+`checks/single-company.py` §441, both ends (Raya's shape before the fold: still Performance, Themes drawn, no "Group capabilities"); falsified from the sources, **5 red**. Neighbours green: focus-switch, top-plan, structure, structure-sections, division-functions, stay-put, welcome, nav-scroll, capability-entry.

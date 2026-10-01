@@ -10557,6 +10557,10 @@ function unitBands(u){
 }
 function focusBands(key){
   if (!key) return [];
+  /* §441: THE TOP LAYER'S OWN PILLARS ARE MARKABLE, one band per pillar
+     exactly as a unit's are. Its key objectives are the Foundation's and are
+     not on this view (topAsUnit's own note), so no empty band is drawn. */
+  if (key === "group") return unitBands(topAsUnit()).slice(1);
   /* §334: A CAPABILITY IS A SUBJECT OF ITS OWN, so its key objectives are
      markable where they are — they left the function's bands with the box
      (§326, §334), and a mark stored where nobody can see it is §61's trap
@@ -10588,7 +10592,10 @@ function focusBands(key){
 }
 /* Every place a mark could be made, in the navigation's own order. */
 function focusSubjects(){
-  return { units: activeKeys().map(function(k){
+  return { /* §441: the top layer, first, while it carries a plan of its own. */
+           top: (topHasPlan() && planOn("group") && compOn("group", "pillar"))
+             ? [{ key:"group", name:labelWord("topword","group") || GROUP.org || "Group" }] : [],
+           units: activeKeys().map(function(k){
              return { key:k, name:UNITS[k].name }; }),
            /* §334: beside the units and the functions, in the order the
               navigation switch reads (§53.5). */
@@ -27007,12 +27014,16 @@ function whereNext(keys){
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
       TIP_PERF(), viewToggle("units")) });
 
-  SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
+  /* §441: each section is drawn only while the Structure step carries it on
+     the top layer — a section shown for a part that is switched off is the
+     page disagreeing with the setting (§53.5). Capabilities are named in the
+     client's own word, never "Group …" (Islam, 2026-10-01). */
+  if (compOn("group", "theme")) SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
       null,
       arrangeBar("themes", GROUP.themes.length) +
       '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
-  SECS.push({ t: "Group " + L("capability"), h: section("", "Group " + L("capability"),
+  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -30378,7 +30389,7 @@ function renderFocusBoard(){
   /* §334: the capabilities between them, in the navigation's own order — a
      board that lists what is marked and leaves out a whole kind of subject is
      a board nobody can trust (§130.5). */
-  var all = subs.units.concat(subs.caps).concat(subs.fns);
+  var all = subs.top.concat(subs.units).concat(subs.caps).concat(subs.fns);
   var live = all.filter(function(x){ return focusIn(x.key).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
@@ -30390,6 +30401,7 @@ function renderFocusBoard(){
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
+                      : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
                         (String(sub.key).indexOf("cap:") === 0
                           ? L1("capability") : L1("fnword")) + '</span>') +
@@ -39767,7 +39779,7 @@ function focusNav(){
      something behind them, so a tenant with no capabilities meets exactly the
      two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var sides = [["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
+  var sides = [["top", labelWord("topword", "group") || "Group"], ["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
     .filter(function(x){ return (subs[x[0]] || []).length; });
   var side = (subs[FSET.side] || []).length ? FSET.side
            : (sides.length ? sides[0][0] : "units");
@@ -39798,10 +39810,14 @@ function renderFocusSetup(){
   /* A destination that has gone (a unit retired, a function switched off)
      leaves the page pointing at nothing — corrected here rather than left to
      render an empty table under a name nobody can select. */
-  if (!bands.length) {
-    var subs = focusSubjects(),
-        first = (subs.units[0] || subs.caps[0] || subs.fns[0]);
-    if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
+  /* §441: a destination no longer offered (a unit hidden by switching the
+     layer off) is corrected too, or the table marks a place nobody can see. */
+  var allSubs = focusSubjects(), offered = allSubs.top.concat(allSubs.units, allSubs.caps, allSubs.fns)
+    .some(function(x){ return x.key === FSET.unit; });
+  if (!bands.length || !offered) {
+    var subs = allSubs,
+        first = (subs.top[0] || subs.units[0] || subs.caps[0] || subs.fns[0]);
+    if (first && first.key !== FSET.unit) { FSET.unit = first.key; ["top","units","caps","fns"].forEach(function(sd){ if (subs[sd][0] === first) FSET.side = sd; }); bands = focusBands(FSET.unit); }
   }
 
   /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§135.5) ────────────
@@ -60537,7 +60553,9 @@ var SYNC = (function () {
       topStrategyTab(true),
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       topStrategyTab(false),
-      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
+      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
+        /* §441: off means it disappears (§102); the switch stays on Setup. */
+        when: function(){ return focusOn(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
       /* §439: the weighting sets how much each unit counts; with the units
@@ -62171,6 +62189,15 @@ var SYNC = (function () {
        always has — on the tab marked primary (Performance). Strategy leading
        the row is where it sits, not where a session lands. */
     if (k === "group") {
+      /* §441: A TOP LAYER WITH PILLARS OF ITS OWN OPENS ON THEM (Islam:
+         "when I click on the company it should open by default on the
+         Pillars"). Only when the plan section is actually offered, so a
+         group whose plan is off still opens on Performance as before. */
+      var gs = d.filter(function(x){ return x.k === "strategy"; })[0];
+      if (gs) {
+        var gsecs = allowed(gs.sections(), t);
+        if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+      }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
     }

@@ -5336,7 +5336,7 @@ function focusNav(){
      something behind them, so a tenant with no capabilities meets exactly the
      two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var sides = [["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
+  var sides = [["top", labelWord("topword", "group") || "Group"], ["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
     .filter(function(x){ return (subs[x[0]] || []).length; });
   var side = (subs[FSET.side] || []).length ? FSET.side
            : (sides.length ? sides[0][0] : "units");
@@ -5367,10 +5367,14 @@ function renderFocusSetup(){
   /* A destination that has gone (a unit retired, a function switched off)
      leaves the page pointing at nothing — corrected here rather than left to
      render an empty table under a name nobody can select. */
-  if (!bands.length) {
-    var subs = focusSubjects(),
-        first = (subs.units[0] || subs.caps[0] || subs.fns[0]);
-    if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
+  /* §441: a destination no longer offered (a unit hidden by switching the
+     layer off) is corrected too, or the table marks a place nobody can see. */
+  var allSubs = focusSubjects(), offered = allSubs.top.concat(allSubs.units, allSubs.caps, allSubs.fns)
+    .some(function(x){ return x.key === FSET.unit; });
+  if (!bands.length || !offered) {
+    var subs = allSubs,
+        first = (subs.top[0] || subs.units[0] || subs.caps[0] || subs.fns[0]);
+    if (first && first.key !== FSET.unit) { FSET.unit = first.key; ["top","units","caps","fns"].forEach(function(sd){ if (subs[sd][0] === first) FSET.side = sd; }); bands = focusBands(FSET.unit); }
   }
 
   /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§135.5) ────────────

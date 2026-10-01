@@ -3783,6 +3783,10 @@ function unitBands(u){
 }
 function focusBands(key){
   if (!key) return [];
+  /* §441: THE TOP LAYER'S OWN PILLARS ARE MARKABLE, one band per pillar
+     exactly as a unit's are. Its key objectives are the Foundation's and are
+     not on this view (topAsUnit's own note), so no empty band is drawn. */
+  if (key === "group") return unitBands(topAsUnit()).slice(1);
   /* §334: A CAPABILITY IS A SUBJECT OF ITS OWN, so its key objectives are
      markable where they are — they left the function's bands with the box
      (§326, §334), and a mark stored where nobody can see it is §61's trap
@@ -3814,7 +3818,10 @@ function focusBands(key){
 }
 /* Every place a mark could be made, in the navigation's own order. */
 function focusSubjects(){
-  return { units: activeKeys().map(function(k){
+  return { /* §441: the top layer, first, while it carries a plan of its own. */
+           top: (topHasPlan() && planOn("group") && compOn("group", "pillar"))
+             ? [{ key:"group", name:labelWord("topword","group") || GROUP.org || "Group" }] : [],
+           units: activeKeys().map(function(k){
              return { key:k, name:UNITS[k].name }; }),
            /* §334: beside the units and the functions, in the order the
               navigation switch reads (§53.5). */

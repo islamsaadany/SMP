@@ -2501,12 +2501,16 @@ function whereNext(keys){
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
       TIP_PERF(), viewToggle("units")) });
 
-  SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
+  /* §441: each section is drawn only while the Structure step carries it on
+     the top layer — a section shown for a part that is switched off is the
+     page disagreeing with the setting (§53.5). Capabilities are named in the
+     client's own word, never "Group …" (Islam, 2026-10-01). */
+  if (compOn("group", "theme")) SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
       null,
       arrangeBar("themes", GROUP.themes.length) +
       '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
-  SECS.push({ t: "Group " + L("capability"), h: section("", "Group " + L("capability"),
+  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -5872,7 +5876,7 @@ function renderFocusBoard(){
   /* §334: the capabilities between them, in the navigation's own order — a
      board that lists what is marked and leaves out a whole kind of subject is
      a board nobody can trust (§130.5). */
-  var all = subs.units.concat(subs.caps).concat(subs.fns);
+  var all = subs.top.concat(subs.units).concat(subs.caps).concat(subs.fns);
   var live = all.filter(function(x){ return focusIn(x.key).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
@@ -5884,6 +5888,7 @@ function renderFocusBoard(){
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
+                      : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
                         (String(sub.key).indexOf("cap:") === 0
                           ? L1("capability") : L1("fnword")) + '</span>') +

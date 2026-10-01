@@ -49,7 +49,7 @@ tr:nth-child(even) td{background:var(--surface-2)}
 </style>
 <div class="wrap">
   <div><span class="lab">Copilot · proposal for sign-off</span><h1>The Copilot gets a page and settings of its own</h1></div>
-  <p class="intro">Today pressing Copilot sends you back to Strategy. Below: the Copilot's own settings (instructions, templates, access) and its own page listing every chat and deliverable. The Copilot tab inside Strategy stays as it is.</p>
+  <p class="intro">Today pressing Copilot sends you back to Strategy. Below: the Copilot's own settings (instructions and templates) and its own page listing every chat and deliverable. The Copilot tab inside Strategy stays as it is, and who may use the Copilot is still set on Strategy's Roles &amp; access.</p>
 
   <section style="display:flex;flex-direction:column;gap:8px">
     <span class="lab">1 · Copilot settings › AI instructions</span>
@@ -61,18 +61,17 @@ tr:nth-child(even) td{background:var(--surface-2)}
           <div class="g">The AI</div>
           <div class="it on">AI instructions</div>
           <div class="it">Templates</div>
-          <div class="g">Access</div>
-          <div class="it">Roles &amp; access</div>
           <div style="border-top:1px solid var(--line);margin-top:14px;padding:10px 14px;color:var(--gold-deep)">Client settings ›</div>
         </nav>
         <div class="pane">
-          <div class="head"><h2>AI instructions</h2><span class="chip">Same for all clients</span><span class="btn">Edit</span></div>
+          <div class="head"><h2>AI instructions</h2><span class="chip">Same for all clients</span><span class="btn solid">Edit</span></div>
           <div class="seg"><span>Foundation</span><span class="on">Analysis</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
           <details open><summary><b>2</b>SWOT<span class="m">General · Strengths · Weaknesses · Opportunities · Threats · Department SWOT</span></summary>
             <div class="body"><h4>General</h4><p>The method text, word for word: requirements, what to look for, scoring guidelines, examples and bad examples for each quadrant.</p><h4>Strengths — requirements</h4><p>…</p></div></details>
           <details><summary><b>3</b>Porter's Five Forces<span class="m">Rivalry · New entrants · Substitutes · Suppliers · Buyers</span></summary></details>
           <details><summary><b>4</b>DESTEP<span class="m">Demographic · Economic · Social · Technological · Ecological · Political</span></summary></details>
           <details><summary><b>5</b>Portfolio — IFE / EFE / IE<span class="m">Internal and external factor scoring, the IE matrix</span></summary></details>
+          <div class="note"><b>Seen by a Forefront super user.</b> Everybody else in the office sees the same pages with no Edit button and a "Read only" chip in its place.</div>
           <div class="note">Removed while tidying: the other product's screen names, output layouts and web address. Every rule, example and bad example is kept as written.</div>
         </div>
       </div>
@@ -84,9 +83,9 @@ tr:nth-child(even) td{background:var(--surface-2)}
     <div class="screen">
       <div class="bar"><b>Strategy Management Platform</b><span class="q">· Raya Trade › Copilot › Settings</span></div>
       <div class="split">
-        <nav class="rail"><div class="rh">Copilot · Setup</div><div class="g">The AI</div><div class="it">AI instructions</div><div class="it on">Templates</div><div class="g">Access</div><div class="it">Roles &amp; access</div></nav>
+        <nav class="rail"><div class="rh">Copilot · Setup</div><div class="g">The AI</div><div class="it">AI instructions</div><div class="it on">Templates</div></nav>
         <div class="pane">
-          <div class="head"><h2>Templates</h2><span class="chip">Same for all clients</span></div>
+          <div class="head"><h2>Templates</h2><span class="chip">Same for all clients</span><span class="btn solid">Replace a template</span></div>
           <div class="tw"><table>
             <tr><th>#</th><th>Template</th><th>Section</th><th>Used for</th><th></th></tr>
             <tr><td>1</td><td>Foundation interview</td><td>Foundation</td><td>Who we are, purpose, aspiration, north star, values</td><td><span class="btn">Download</span></td></tr>
@@ -120,11 +119,4 @@ tr:nth-child(even) td{background:var(--surface-2)}
     </div>
   </section>
 
-  <section class="note ask">
-    <b>Two questions before building</b>
-    <ol>
-      <li>Who may edit the shared instructions and templates? Recommendation: Forefront admins only, from any client's Copilot settings. Other office people read them.</li>
-      <li>Should the Copilot column move from Strategy's Roles &amp; access to the Copilot's own (as drawn), or stay where it is?</li>
-    </ol>
-  </section>
 </div>

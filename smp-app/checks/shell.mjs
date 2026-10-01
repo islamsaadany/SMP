@@ -863,6 +863,57 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
 
+    /* §441 — THE COMPOSER AND THE RAIL'S THREE DOTS, from the signed-off
+       mockup. Measured as boxes and pressed, never read as classes (§94.8). */
+    const box = async () => page.evaluate(() => { const t = document.querySelector("[data-cop-text]"); const s = document.querySelector("[data-cop-send]");
+      const b = document.querySelector(".copbox"), u = document.querySelector(".copunder"), m = document.querySelector("[data-cop-main]");
+      return { h: t.getBoundingClientRect().height, sendIn: !!(b && s && b.contains(s)), sendWord: s ? s.textContent.trim() : "?",
+        svg: !!(s && s.querySelector("svg")), clipWord: (u && u.querySelector("[data-cop-attach]") || {}).textContent || "",
+        clipUnder: !!(u && u.querySelector("[data-cop-attach]")), underH: u ? u.getBoundingClientRect().height : 0,
+        bottomGap: m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1 }; });
+    let bx = await box();
+    check(bx.h >= 47 && bx.h <= 52, "the box starts at one line", bx.h);
+    check(bx.sendIn && bx.svg && bx.sendWord === "", "…Send is the arrow icon inside the box, with no word", JSON.stringify(bx));
+    check(bx.clipUnder && bx.clipWord.trim() === "" && bx.underH <= 24, "…and the paperclip, with no word, sits on a tight line beneath it", JSON.stringify(bx));
+    check(bx.bottomGap >= 0 && bx.bottomGap <= 40, "the chat fills the window down to its bottom edge", bx.bottomGap);
+    await page.focus("[data-cop-text]");
+    await page.keyboard.type("line one"); await page.keyboard.down("Shift"); await page.keyboard.press("Enter"); await page.keyboard.up("Shift");
+    await page.keyboard.type("line two");
+    const typed = await page.evaluate(() => document.querySelector("[data-cop-text]").value);
+    bx = await box();
+    check(typed === "line one\nline two" && bx.h > 52, "Shift + Enter makes a new line, and the box grows to hold it", JSON.stringify([typed, bx.h]));
+    await page.fill("[data-cop-text]", Array.from({ length: 30 }, (_, i) => "line " + i).join("\n"));
+    await page.dispatchEvent("[data-cop-text]", "input");
+    bx = await box();
+    check(bx.h >= 205 && bx.h <= 214, "…up to about ten lines, then it scrolls inside itself", bx.h);
+    await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
+
+    const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
+    const dotsShown = await page.evaluate(() => { const d = document.querySelector("[data-cop-chats] .coprow.on [data-cop-menu]"); return d ? getComputedStyle(d).opacity : "none"; });
+    check(dotsShown === "1", "the open chat shows its three dots", dotsShown);
+    check(await page.evaluate(() => !document.querySelector("[data-cop-main] [data-cop-rename], [data-cop-main] [data-cop-delete]")), "…and Rename and Delete are no longer on the chat's header");
+    await page.click("[data-cop-chats] [data-cop-menu]");
+    const items = await page.evaluate(() => Array.from(document.querySelectorAll(".copmenu button")).map((b) => b.textContent.trim()));
+    check(items.join("|") === "Rename|Archive", "the dots open Rename and Archive — no Delete", items.join("|"));
+    await page.click("[data-cop-archive]"); await page.waitForTimeout(700);
+    const arch = async () => (await asTenant(tenantId, (c) => c.query("select extra ? 'archivedAt' a from copilot_chats where id = $1", [chatId]))).rows;
+    let ar = await arch();
+    check(ar.length === 1 && ar[0].a === true, "Archive keeps the chat and marks it archived", JSON.stringify(ar));
+    const foot = await page.evaluate(() => (document.querySelector("[data-cop-archview]") || {}).textContent || "");
+    check(/Archived\s*·\s*1/.test(foot) && await page.evaluate(() => !document.querySelector("[data-cop-chats] [data-cop-chat]")),
+      "…it leaves the Chats rail, and the rail's foot says Archived · 1", foot);
+    await page.click("[data-cop-archview]");
+    await page.click("[data-cop-chats] [data-cop-menu]");
+    const aitems = await page.evaluate(() => Array.from(document.querySelectorAll(".copmenu button")).map((b) => b.textContent.trim()));
+    check(aitems.join("|") === "Restore|Delete…", "in the archived list the Super user gets Restore and Delete…", aitems.join("|"));
+    await page.click("[data-cop-delete]");
+    check(await page.evaluate(() => !!document.querySelector("[data-cop-delete-yes]")), "Delete asks again, in the row");
+    await page.click("[data-cop-delete-no]");
+    await page.click("[data-cop-chats] [data-cop-menu]"); await page.click("[data-cop-restore-chat]"); await page.waitForTimeout(700);
+    ar = await arch();
+    check(ar.length === 1 && ar[0].a === false, "Cancel keeps it, and Restore brings it back", JSON.stringify(ar));
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…onto the Chats rail");
+
     const made = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
     check(made && made.ok && made.id, "a deliverable can be filed (through the api until stage 3)", JSON.stringify(made));

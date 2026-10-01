@@ -59129,3 +59129,58 @@ Built page looked at in both themes beside the mockup.
 Advisory's budget (stage 4), the group and company grouping (stage 5), the
 Template road (waits on the templates), and the methodology prompts (wait on
 Islam's instructions).
+
+## 441. The Copilot tab shows the moment it is turned on, and its chat reads like Claude's
+
+**Islam, 2026-10-01** — *"I turned on the module but nothing is appearing in the
+navigation"*, then a redesign of the chat signed off from
+`design-mockups/copilot/2026-10-01_chat-composer.html` (published as an
+artifact, four rounds): *"ok build it"*.
+
+**441.1 — A MODULE SWITCH RELOADS THE PAGE.** The document carries which
+modules the client has, and since §432 crossing from the client's settings to
+Strategy is a paint rather than a page load — so a module turned on from inside
+the platform did not exist for the page until somebody refreshed by hand. The
+switch reloads once the server has taken it. `shell.mjs` §3g presses the real
+control and crosses by the trail. **The Copilot tab sits after Insights**, last
+on the row (his order).
+
+**441.2 — THE COMPOSER IS CLAUDE'S SHAPE.** One box with 10px corners that
+starts at one line (48px) and grows as you type to about ten lines (210px), then
+scrolls inside itself; Send is the return-arrow icon inside its corner; the
+paperclip, with no word, sits on a tight 22px line beneath it beside
+*Enter sends · Shift + Enter for a new line*. **The one-line floor is in the CSS
+AND in `fitBox()`**, found in the mockup: a page drawn while hidden measures
+`scrollHeight` 0, and a box sized to that was squashed until somebody typed —
+it never showed headless, only in Islam's viewer, and was reproduced by drawing
+the page under `display:none`. **The pane fills the window** through `--cop-top`,
+the pane's document offset (the Platform Inbox's own answer, §100.5), so the box
+sits at the bottom of the screen; below 820px the rails stack and the page
+scrolls as before. `.copsend` keeps its gold look outside the box (a
+deliverable's *Save as v2*), so the icon style is scoped to `.copbox`.
+
+**441.3 — RENAME AND ARCHIVE ARE ON THE CHAT'S THREE DOTS**, not on the open
+chat's header: they act on a chat, so they sit beside it and any chat can be
+renamed without opening it. The dots show on the open chat, on hover, and always
+on a touch screen (§280). Rename happens in the rail — Enter or leaving the box
+saves, an empty name keeps the old one.
+
+**441.4 — A CHAT IS ARCHIVED, AND ONLY THE SUPER USER DELETES — REVERSING
+§439's DELETE FOR ITS CREATOR.** Anyone in the office archives; *Archived · N*
+at the rail's foot opens the archived list, where anyone may Restore and only
+the Super user sees *Delete…*, which asks once more in its row (§62, never a
+browser dialog, §95). Stored as `archivedAt`/`archivedBy` in
+`copilot_chats.extra` — an absence when live (§50.6), **no migration**. The
+server refuses a delete from anybody but the Super user (403) and refuses even
+the Super user on a chat that is not archived (400), so nothing leaves the list
+and the record in one press (§89's destruction rule); an archived chat takes no
+message and no file until restored. `checks/copilot.mjs` 92/0, red six ways with
+`delete-live` new; `shell.mjs` §3f presses the box, Shift+Enter, the growth to
+its cap, the dots, Archive, the archived list, Delete's question and Restore,
+each read back from the database (§96) — **185/0**.
+
+**441.5 — AND THE CHECK FOUND A REAL FAULT IN THE BUILD.** The browser read the
+list's answer and kept only `chats` and `deliverables`, dropping `archived` and
+`mayDelete` — so the foot read *Archived · 0* over a chat the database had just
+archived, and the Super user would never have been offered Delete. Found by
+§3f's *"the rail's foot says Archived · 1"* going red; one line.

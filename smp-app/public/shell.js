@@ -55305,7 +55305,10 @@ var COPILOT = (function(){
   var LISTS = {};                /* "place|section" -> {chats, deliverables} or {failed} */
   var PANE = null;               /* the open item's answer: chat+messages or deliverable+versions */
   var EDIT = null;               /* {id, text, note} while a deliverable is being edited */
-  var RENAME = null;             /* chat id being renamed */
+  var RENAME = null;             /* chat id being renamed, in the rail */
+  var MENU = null;               /* chat id whose three-dot menu is open */
+  var ASKDEL = null;             /* archived chat id asking "Delete?" in its row */
+  var ARCH = {};                 /* "place|section" -> true while the rail shows the archived chats */
   var DRAFT = {};                /* chat id -> what is half-typed in its composer */
   var SAY = "";                  /* the outcome line under the pane (§63) */
   var busy = false, askedFor = null;
@@ -55374,9 +55377,9 @@ var COPILOT = (function(){
     setTimeout(function(){ loadList(false); }, 0);
     return '<div class="coppane" data-cop-pane>' +
       '<aside class="coprails">' +
-        '<section class="coprail"><div class="coprh"><span>Chats</span>' +
-          '<button type="button" class="copnew" data-cop-newchat>+ New chat</button></div>' +
-          '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div></section>' +
+        '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
+          '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
+          '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
         '<section class="coprail"><div class="coprh"><span>Deliverables</span></div>' +
           '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
       '</aside>' +
@@ -55384,19 +55387,56 @@ var COPILOT = (function(){
     '</div>';
   }
   function list(){ return LISTS[key()] || null; }
+  /* ── THE CHATS RAIL (§441, Islam 2026-10-01, from the signed-off
+     design-mockups/copilot/2026-10-01_chat-composer.html) ──────────────
+     Rename and Archive live on each chat's three dots, not on the open
+     chat's header: they act on a chat, so they sit beside it, and any chat
+     can be renamed without opening it first. The dots show on the open chat
+     always, on the others when hovered, and always on a touch screen — a
+     tablet has no hover (§280). A chat is ARCHIVED, never deleted, by anyone
+     in the office; the archived list is the same rail, reached from its
+     foot, where anyone may Restore and only the Super user may Delete, and
+     Delete asks once more in its row (§62 — never a browser dialog, §95). */
+  var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
+  function archView(){ return !!ARCH[key()]; }
+  function chatsHead(){
+    return archView() ? '<span>Archived chats</span>'
+      : '<span>Chats</span><button type="button" class="copnew" data-cop-newchat>+ New chat</button>';
+  }
+  function chatsFoot(){
+    var l = list();
+    if (archView()) return '<button type="button" class="coparch" data-cop-archview>&lsaquo; Back to chats</button>';
+    if (!l || l.failed) return '';
+    return '<button type="button" class="coparch" data-cop-archview>Archived &middot; ' + (l.archived || []).length + '</button>';
+  }
   function chatsHtml(){
     var l = list();
     if (!l) return '<div class="copnone">Asking…</div>';
     if (l.failed) return '<div class="copnone">The chats could not be read just now. Nothing has been lost. ' +
       '<button type="button" class="linkbu" data-cop-retry>Try again</button></div>';
-    if (!l.chats.length) return '<div class="copnone">No chats here yet.</div>';
+    var arch = archView(), rows = arch ? (l.archived || []) : l.chats;
+    var head = arch ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
+      : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
+    if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
     var o = OPEN[key()] || {};
-    return l.chats.map(function(c){
+    return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
-      return '<button type="button" class="copitem' + (on ? " on" : "") + '" data-cop-chat="' + E(c.id) + '"' +
-        (on ? ' aria-current="true"' : '') + '>' +
-        '<span class="copt">' + E(c.title) + '</span>' +
-        '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + '</span></button>';
+      if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
+        '<span class="copaskrow">Delete? <button type="button" class="copbtn danger solid" data-cop-delete-yes="' + E(c.id) + '">Delete</button>' +
+        '<button type="button" class="copbtn quiet" data-cop-delete-no>Cancel</button></span></div>';
+      if (RENAME === c.id) return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
+        '<input class="fld copren" data-cop-rename-box="' + E(c.id) + '" value="' + E(c.title) + '" aria-label="Chat name" maxlength="160"></div>';
+      var menu = MENU === c.id ? '<div class="copmenu" role="menu">' + (arch
+          ? '<button type="button" role="menuitem" data-cop-restore-chat="' + E(c.id) + '">Restore</button>' +
+            (l.mayDelete ? '<button type="button" role="menuitem" class="danger" data-cop-delete="' + E(c.id) + '">Delete…</button>' : '')
+          : '<button type="button" role="menuitem" data-cop-rename="' + E(c.id) + '">Rename</button>' +
+            '<button type="button" role="menuitem" data-cop-archive="' + E(c.id) + '">Archive</button>') + '</div>' : '';
+      return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
+        '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
+          '<span class="copt">' + E(c.title) + '</span>' +
+          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + '</span></button>' +
+        '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
+          '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu + '</div>';
     }).join("");
   }
   function delivsHtml(){
@@ -55492,6 +55532,7 @@ var COPILOT = (function(){
   }
   var FILEMARK = '<svg class="copfm" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z M9.5 1.5V5H13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
   var CLIP = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.3 1.3 0 0 0 1.9 1.9l5-5a2.6 2.6 0 0 0-3.7-3.7l-5 5a3.9 3.9 0 0 0 5.5 5.5l4.2-4.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  var SENDMARK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 5v7a3 3 0 0 1-3 3H5M9 11l-4 4 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var INFO = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4.5M8 4.6v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
 
   function srcTag(s){
@@ -55542,13 +55583,7 @@ var COPILOT = (function(){
 
   function chatHtml(){
     var c = PANE.chat;
-    var head = RENAME === c.id
-      ? '<input class="fld copren" data-cop-rename-box value="' + E(c.title) + '" aria-label="Chat name" maxlength="160">' +
-        '<button type="button" class="copbtn" data-cop-rename-save>Save</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-rename-cancel>Cancel</button>'
-      : '<h3 class="coph">' + E(c.title) + '</h3>' +
-        '<button type="button" class="copbtn quiet" data-cop-rename>Rename</button>' +
-        (PANE.mayDelete ? '<button type="button" class="copbtn quiet danger" data-cop-delete>Delete</button>' : '');
+    var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
     var n = PANE.messages.length;
     var msgs = PANE.messages.map(function(m, i){
       if (m.who === "ai") {
@@ -55563,16 +55598,30 @@ var COPILOT = (function(){
     return '<div class="copchat">' +
       '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
       '<div class="copheadrow">' + head + '</div>' +
-      (PANE.confirmDelete ? '<div class="copask" role="alert">Delete this chat and everything said in it? This cannot be undone. ' +
-        '<button type="button" class="copbtn danger" data-cop-delete-yes>Delete</button>' +
-        '<button type="button" class="copbtn quiet" data-cop-delete-no>Keep it</button></div>' : '') +
       '<div class="copmsgs" data-cop-msgs>' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
-      '<div class="copcompose">' +
+      (c.archived
+        ? '<div class="copsay copparked">This chat is archived. Restore it to keep talking. ' +
+            '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
+        : composerHtml(c, !!pend)) +
+      '</div>';
+  }
+  /* THE COMPOSER (§441, from the signed-off mockup): one box shaped like
+     Claude's — one line to start, growing as you type to about ten lines and
+     then scrolling inside itself — with Send as the return-arrow icon in its
+     corner and the paperclip on the tight line beneath it. Enter sends and
+     Shift+Enter makes a new line. */
+  function composerHtml(c, pend){
+    var text = DRAFT[c.id] || "";
+    return '<div class="copcompose">' +
+      '<div class="copbox">' +
+        '<textarea data-cop-text rows="1" placeholder="' + (pend ? "Say what this file is for…" : "Ask about " + E(placeWord()) + "’s " + E(sectionWord().toLowerCase()) + "…") + '" aria-label="Message">' + E(text) + '</textarea>' +
+        '<button type="button" class="copsend" data-cop-send aria-label="Send" title="Send"' + (THINKING === c.id || (!text.trim() && !pend) ? ' disabled' : '') + '>' + SENDMARK + '</button>' +
+      '</div>' +
+      '<div class="copunder">' +
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
         '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
-        '<textarea class="fld" data-cop-text rows="3" placeholder="' + (pend ? "Say what this file is for…" : "Ask about " + E(placeWord()) + "’s " + E(sectionWord().toLowerCase()) + "…") + '" aria-label="Message">' + E(DRAFT[c.id] || "") + '</textarea>' +
-        '<button type="button" class="copsend" data-cop-send' + (THINKING === c.id ? ' disabled' : '') + '>Send</button>' +
+        '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
       '</div></div>';
   }
 
@@ -55614,10 +55663,38 @@ var COPILOT = (function(){
   function draw(){
     keepDraft();
     var a = document.querySelector("[data-cop-chats]"); if (a) a.innerHTML = chatsHtml();
+    var ah = document.querySelector("[data-cop-chatshead]"); if (ah) ah.innerHTML = chatsHead();
+    var af = document.querySelector("[data-cop-chatsfoot]"); if (af) af.innerHTML = chatsFoot();
     var b = document.querySelector("[data-cop-delivs]"); if (b) b.innerHTML = delivsHtml();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
+    fitPane(); fitBox();
+    var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
   }
+  /* THE PANE FILLS THE WINDOW (§441): it ends at the bottom of the screen,
+     measured from its DOCUMENT offset rather than its place on screen, which
+     moves with every scroll — the Platform Inbox's own answer (§100.5), with
+     no loop, since nothing above the pane moves when the pane changes height. */
+  function fitPane(){
+    var p = document.querySelector("[data-cop-pane]"); if (!p) return;
+    var top = p.getBoundingClientRect().top + (window.pageYOffset || 0);
+    if (top > 0) p.style.setProperty("--cop-top", Math.round(top) + "px");
+  }
+  /* THE BOX GROWS WITH WHAT IS TYPED. It never sizes below one line: a page
+     drawn before it is visible measures 0, and a box sized to that is
+     squashed until somebody types (found in the mockup, §441) — so the floor
+     is in the CSS as well as here, and it sizes again once it is shown. */
+  var BOX_MIN = 48, BOX_MAX = 210;
+  function fitBox(){
+    var t = document.querySelector("[data-cop-text]"); if (!t) return;
+    t.style.height = BOX_MIN + "px";
+    var sh = t.scrollHeight;
+    t.style.height = Math.max(BOX_MIN, Math.min(sh || BOX_MIN, BOX_MAX)) + "px";
+    t.style.overflowY = sh > BOX_MAX ? "auto" : "hidden";
+    var b = document.querySelector("[data-cop-send]");
+    if (b) b.disabled = !!THINKING || (!t.value.trim() && !(PANE && PANE.pending && PANE.pending.length));
+  }
+  window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 
   /* ── THE ASKS ──────────────────────────────────────────────────────── */
   function loadList(force){
@@ -55626,7 +55703,7 @@ var COPILOT = (function(){
     if (!force && LISTS[k] && !LISTS[k].failed) { draw(); openIfNeeded(); return; }
     askedFor = k;
     getJ("list", ["place=" + encodeURIComponent(p), "section=" + encodeURIComponent(s)]).then(function(x){
-      if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], deliverables: x.j.deliverables || [] };
+      if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [] };
       else LISTS[k] = { failed: true };
       if (askedFor === k) { draw(); openIfNeeded(); }
     }, function(){ LISTS[k] = { failed: true }; if (askedFor === k) draw(); });
@@ -55636,7 +55713,7 @@ var COPILOT = (function(){
     if (o && (!PANE || PANE.id !== o.id)) openItem(o.kind, o.id);
   }
   function openItem(kind, id){
-    OPEN[key()] = { kind: kind, id: id }; EDIT = null; RENAME = null;
+    OPEN[key()] = { kind: kind, id: id }; EDIT = null;
     if (!PANE || PANE.id !== id) PANE = null;
     draw();
     var k = key();
@@ -55661,7 +55738,7 @@ var COPILOT = (function(){
   /* ── WIRING, DELEGATED ONCE (§29.5) ────────────────────────────────── */
   function hit(ev, sel){ return ev.target && ev.target.closest && ev.target.closest(sel); }
   document.addEventListener("input", function(ev){
-    var t = hit(ev, "[data-cop-text]"); if (t && PANE && PANE.chat) DRAFT[PANE.chat.id] = t.value;
+    var t = hit(ev, "[data-cop-text]"); if (t && PANE && PANE.chat) { DRAFT[PANE.chat.id] = t.value; fitBox(); }
     var e = hit(ev, "[data-cop-edit-text]"); if (e && EDIT) EDIT.text = e.value;
     var n = hit(ev, "[data-cop-edit-note]"); if (n && EDIT) EDIT.note = n.value;
   });
@@ -55669,6 +55746,7 @@ var COPILOT = (function(){
     if (ev.key === "Enter" && !ev.shiftKey && hit(ev, "[data-cop-text]")) { ev.preventDefault(); send(); }
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
     if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
+    if (ev.key === "Escape" && (MENU || ASKDEL)) { MENU = null; ASKDEL = null; draw(); }
   });
   /* SENDING. What was typed appears at once and the product says the
      Copilot is working, because a draft can take most of a minute and a box
@@ -55724,21 +55802,36 @@ var COPILOT = (function(){
     var f = hit(ev, "[data-cop-file]"); if (!f) return;
     var file = f.files && f.files[0]; f.value = ""; attach(file);
   });
+  /* Rename happens in the rail: Enter or leaving the box saves, Escape
+     cancels, and an empty name keeps the old one rather than refusing. */
   function rename(){
-    var b = document.querySelector("[data-cop-rename-box]"); if (!b || !PANE || !PANE.chat) return;
-    var id = PANE.chat.id, title = b.value;
-    act({ act:"rename", id:id, title:title }, function(){ RENAME = null; PANE.chat.title = title.replace(/\s+/g, " ").trim(); loadList(true); });
+    var b = document.querySelector("[data-cop-rename-box]"); if (!b || !RENAME) return;
+    var id = RENAME, title = b.value.replace(/\s+/g, " ").trim();
+    RENAME = null;
+    if (!title) { draw(); return; }
+    act({ act:"rename", id:id, title:title }, function(){
+      if (PANE && PANE.chat && PANE.chat.id === id) PANE.chat.title = title;
+      loadList(true); });
   }
+  document.addEventListener("focusout", function(ev){
+    if (hit(ev, "[data-cop-rename-box]") && RENAME) setTimeout(function(){
+      var b = document.querySelector("[data-cop-rename-box]");
+      if (b && b.isConnected && document.activeElement !== b) rename(); }, 0);
+  });
+  /* A press anywhere else shuts an open menu, on pointerdown (§100.4). */
+  document.addEventListener("pointerdown", function(ev){
+    if (MENU && !hit(ev, ".copmenu") && !hit(ev, "[data-cop-menu]")) { MENU = null; draw(); }
+  }, true);
   document.addEventListener("click", function(ev){
     var b;
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
-    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; openItem("chat", b.getAttribute("data-cop-chat")); return; }
+    if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       act({ act:"newChat", place: place(), section: section() }, function(j){
         var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-        PANE = { id: j.chat.id, chat: j.chat, messages: [], mayDelete: true };
+        PANE = { id: j.chat.id, chat: j.chat, messages: [] };
         OPEN[key()] = { kind:"chat", id: j.chat.id };
         draw(); var t = document.querySelector("[data-cop-text]"); if (t) t.focus();
       });
@@ -55764,17 +55857,31 @@ var COPILOT = (function(){
         LISTS[place() + "|" + sec] = null; loadList(true); });
       return;
     }
-    if ((b = hit(ev, "[data-cop-rename]"))) { RENAME = PANE && PANE.chat ? PANE.chat.id : null; draw();
-      var r = document.querySelector("[data-cop-rename-box]"); if (r) { r.focus(); r.select(); } return; }
-    if ((b = hit(ev, "[data-cop-rename-save]"))) { rename(); return; }
-    if ((b = hit(ev, "[data-cop-rename-cancel]"))) { RENAME = null; draw(); return; }
-    if ((b = hit(ev, "[data-cop-delete]"))) { if (PANE) { PANE.confirmDelete = true; draw(); } return; }
-    if ((b = hit(ev, "[data-cop-delete-no]"))) { if (PANE) { PANE.confirmDelete = false; draw(); } return; }
+    if ((b = hit(ev, "[data-cop-menu]"))) { var mid2 = b.getAttribute("data-cop-menu"); MENU = MENU === mid2 ? null : mid2; ASKDEL = null; draw(); return; }
+    if ((b = hit(ev, "[data-cop-archview]"))) { ARCH[key()] = !archView(); MENU = null; ASKDEL = null; RENAME = null; draw(); return; }
+    if ((b = hit(ev, "[data-cop-rename]"))) { MENU = null; RENAME = b.getAttribute("data-cop-rename"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-archive]"))) {
+      var aid = b.getAttribute("data-cop-archive"); MENU = null;
+      act({ act:"archiveChat", id:aid }, function(){
+        var o2 = OPEN[key()]; if (o2 && o2.id === aid) { delete OPEN[key()]; PANE = null; }
+        SAY = "Archived. It is in Archived at the foot of the chats, and nothing in it is lost."; loadList(true); });
+      return;
+    }
+    if ((b = hit(ev, "[data-cop-restore-chat]"))) {
+      var rcid = b.getAttribute("data-cop-restore-chat"); MENU = null;
+      act({ act:"restoreChat", id:rcid }, function(){
+        SAY = "Restored to the chats."; ARCH[key()] = false;
+        if (PANE && PANE.chat && PANE.chat.id === rcid) PANE.chat.archived = "";
+        loadList(true); });
+      return;
+    }
+    if ((b = hit(ev, "[data-cop-delete]"))) { MENU = null; ASKDEL = b.getAttribute("data-cop-delete"); draw(); return; }
+    if ((b = hit(ev, "[data-cop-delete-no]"))) { ASKDEL = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-delete-yes]"))) {
-      if (!PANE || !PANE.chat) return;
-      var id = PANE.chat.id;
-      act({ act:"deleteChat", id:id }, function(){ delete OPEN[key()]; PANE = null; delete DRAFT[id];
-        SAY = "The chat was deleted."; loadList(true); });
+      var did0 = b.getAttribute("data-cop-delete-yes");
+      act({ act:"deleteChat", id:did0 }, function(){
+        ASKDEL = null; var o3 = OPEN[key()]; if (o3 && o3.id === did0) { delete OPEN[key()]; PANE = null; }
+        delete DRAFT[did0]; SAY = "The chat was deleted."; loadList(true); });
       return;
     }
     if ((b = hit(ev, "[data-cop-edit]"))) {

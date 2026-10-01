@@ -61,11 +61,14 @@ check("a place is the product's own word — group, a unit, fn:, co:, cap:",
   ["group", "mobile", "fn:finance", "co:distribution", "cap:cap6"].every(isPlace));
 check("...and nothing else is: an address, a quote, an empty string",
   !isPlace("") && !isPlace("fn:") && !isPlace("mobile/x") && !isPlace("x'--") && !isPlace("zz:q"));
-const chatBy = { by: "noran" };
-check("whoever started a chat may delete it", mayDeleteChat(chatBy, { personKey: "noran", seat: "smoteam" }));
-check("...and the Super user may, whoever started it", mayDeleteChat(chatBy, { personKey: "islam", seat: "super" }));
-check("...and another member of the SMO team may NOT (both ends, §94.2)", !mayDeleteChat(chatBy, { personKey: "omar", seat: "smoteam" }));
-check("an unplaced login never matches an unsigned chat", !mayDeleteChat({ by: "" }, { personKey: null, seat: "smoteam" }));
+/* §441 (Islam, 2026-10-01) REVERSES "whoever started it may delete": a chat is
+   archived by anybody in the office and deleted only by the Super user, and
+   only once archived. Rewritten, never loosened (§218) — both ends. */
+const live = { archived: "" }, gone = { archived: "2026-10-01T09:00:00Z" };
+check("the Super user may delete an ARCHIVED chat", mayDeleteChat(gone, { personKey: "islam", seat: "super" }));
+check("...but not one still live — it is archived first", !mayDeleteChat(live, { personKey: "islam", seat: "super" }));
+check("...and the SMO team may delete nothing, archived or not, their own included (both ends, §94.2)",
+  !mayDeleteChat(gone, { personKey: "omar", seat: "smoteam" }) && !mayDeleteChat(live, { personKey: "omar", seat: "smoteam" }));
 check("the tab is stamped for the office where the client has the module", copilotStampFor(["strategy", "copilot"], "smoteam") && copilotStampFor(["strategy", "copilot"], "super"));
 check("...and for nobody else — a client's person, or a client without it", !copilotStampFor(["strategy", "copilot"], "none") &&
   !copilotStampFor(["strategy", "copilot"], null) && !copilotStampFor(["strategy"], "super"));
@@ -247,13 +250,28 @@ try {
     long.st === 400 && /thirty pages/.test(long.j.why) && (await asTenant(A, (c) => messagesOf(c, made.j.chat.id))).length === 2, JSON.stringify(long.j));
   const ren = await call("POST", "api", { act: "rename", id: made.j.chat.id, title: "Prices" }, NORAN);
   check("anybody in the office may rename a chat", ren.st === 200);
-  const delNo = await call("POST", "api", { act: "deleteChat", id: made.j.chat.id }, NORAN);
-  check("somebody else in the SMO team may NOT delete Omar's chat, and is told who can", delNo.st === 403 && /started this chat/.test(delNo.j.why), JSON.stringify(delNo.j));
+  const liveDel = await call("POST", "api", { act: "deleteChat", id: made.j.chat.id }, ISLAM);
+  check("a live chat is not deleted, even by the Super user — it is archived first (§441)", liveDel.st === 400 && /Archive the chat first/.test(liveDel.j.why), JSON.stringify(liveDel.j));
+  const arc = await call("POST", "api", { act: "archiveChat", id: made.j.chat.id }, NORAN);
+  const lst = await call("GET", "list", null, NORAN, "?place=fn:finance&section=advisory");
+  check("anybody in the office may archive a chat, and it leaves the list for the archived one",
+    arc.st === 200 && !lst.j.chats.some((x) => x.id === made.j.chat.id) && lst.j.archived.some((x) => x.id === made.j.chat.id), JSON.stringify(lst.j).slice(0, 200));
+  check("...the list says whether this person may delete: the SMO team may not", lst.j.mayDelete === false);
+  const sayArc = await call("POST", "api", { act: "say", id: made.j.chat.id, text: "still there?" }, OMAR);
+  check("...an archived chat takes nothing new until it is restored", sayArc.st === 400 && /archived/.test(sayArc.j.why), JSON.stringify(sayArc.j));
+  const res = await call("POST", "api", { act: "restoreChat", id: made.j.chat.id }, OMAR);
+  const lst2 = await call("GET", "list", null, NORAN, "?place=fn:finance&section=advisory");
+  check("Restore puts it back on the list, with every message kept",
+    res.st === 200 && lst2.j.chats.some((x) => x.id === made.j.chat.id) &&
+    (await owner("SELECT count(*)::int AS n FROM copilot_messages WHERE chat_id = $1", [made.j.chat.id]))[0].n === 2);
+  await call("POST", "api", { act: "archiveChat", id: made.j.chat.id }, OMAR);
+  const delNo = await call("POST", "api", { act: "deleteChat", id: made.j.chat.id }, OMAR);
+  check("whoever started it may NOT delete it, archived or not, and is told who can", delNo.st === 403 && /Only the Super user/.test(delNo.j.why), JSON.stringify(delNo.j));
   const delYes = await call("POST", "api", { act: "deleteChat", id: made.j.chat.id }, ISLAM);
   check("...the Super user may, and it and everything said in it are gone",
     delYes.st === 200 && (await owner("SELECT count(*)::int AS n FROM copilot_messages WHERE chat_id = $1", [made.j.chat.id]))[0].n === 0);
-  const own = await call("POST", "api", { act: "deleteChat", id: unnamed.j.chat.id }, OMAR);
-  check("...and whoever started a chat may delete their own", own.st === 200);
+  const own = await call("POST", "api", { act: "archiveChat", id: unnamed.j.chat.id }, OMAR);
+  check("...and the unnamed chat is archived, not deleted", own.st === 200);
   const ed = await call("POST", "api", { act: "editVersion", id: d1, text: "edited", note: "Tightened" }, NORAN);
   check("Edit through the server adds the next version", ed.st === 200 && ed.j.n === 7, JSON.stringify(ed.j));
   const same = await call("POST", "api", { act: "editVersion", id: d1, text: "edited" }, NORAN);

@@ -23,7 +23,7 @@ import { withTenant } from "../../lib/tenant.ts";
 import type { ServeArgs } from "../registry.ts";
 import {
   type Who, isOffice, isPlace, isSection, isKind, oneLine, mayDeleteChat, MAX_MESSAGE, MAX_TITLE, SECTION_WORD,
-  chatsOn, oneChat, newChat, renameChat, deleteChat, messagesOf,
+  chatsOn, oneChat, newChat, renameChat, deleteChat, archiveChat, restoreChat, messagesOf,
   deliverablesOn, oneDeliverable, versionsOf, bodyOf, newDeliverable, addVersion, restoreVersion,
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage,
@@ -54,7 +54,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
       const place = q("place"), section = q("section");
       if (!isPlace(place) || !isSection(section)) return no(400, "Which place and which section?");
       return json(200, await withTenant(a.tenantId, async (c) =>
-        ({ ok: true, chats: await chatsOn(c, place, section), deliverables: await deliverablesOn(c, place, section) })));
+        ({ ok: true, chats: await chatsOn(c, place, section), archived: await chatsOn(c, place, section, true),
+           mayDelete: who.seat === "super", deliverables: await deliverablesOn(c, place, section) })));
     }
     if (first === "chat") {
       const id = q("id");
@@ -112,6 +113,7 @@ type Q = Parameters<typeof oneChat>[0];
 type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
 const refused = (status: number, why: string): Out => out(status, { ok: false, why });
+const ARCHIVED = "This chat is archived. Restore it to keep talking.";
 const TOO_LONG = "That is longer than about thirty pages, so it was not kept. Send it in parts.";
 
 async function act(c: Q, b: any, who: Who): Promise<Out> {
@@ -144,6 +146,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   if (kind === "attach" || kind === "detach") {
     const chat = await oneChat(c, id);
     if (!chat) return refused(404, "That chat is not here any more.");
+    if (chat.archived) return refused(400, ARCHIVED);
     if (kind === "detach") {
       const fid = String(b.fileId || "");
       if (!UUID.test(fid)) return refused(400, "Which file?");
@@ -186,16 +189,20 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, id: did });
   }
 
-  if (kind === "rename" || kind === "deleteChat") {
+  if (kind === "rename" || kind === "deleteChat" || kind === "archiveChat" || kind === "restoreChat") {
     const chat = await oneChat(c, id);
     if (!chat) return refused(404, "That chat is not here any more.");
+    if (kind === "archiveChat") { if (!chat.archived) await archiveChat(c, id, by); return out(200, { ok: true }); }
+    if (kind === "restoreChat") { if (chat.archived) await restoreChat(c, id); return out(200, { ok: true }); }
     if (kind === "rename") {
       const title = oneLine(b.title).slice(0, MAX_TITLE);
       if (!title) return refused(400, "A chat needs a name.");
       await renameChat(c, id, title);
       return out(200, { ok: true });
     }
-    if (!mayDeleteChat(chat, who)) return refused(403, "Only the person who started this chat or the Super user can delete it.");
+    if (!mayDeleteChat(chat, who)) return who.seat !== "super"
+      ? refused(403, "Only the Super user can delete a chat. Archive it instead — nothing is lost.")
+      : refused(400, "Archive the chat first; only an archived chat can be deleted.");
     await deleteChat(c, id);
     return out(200, { ok: true });
   }
@@ -242,11 +249,13 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const step1 = await withTenant(tenantId, async (c) => {
     const chat = await oneChat(c, id);
     if (!chat) return null;
+    if (chat.archived) return "archived" as const;
     const said = await recordSaid(c, id, { body: text, by, fileIds, pasted });
     if (said === "badFile") return "badFile" as const;
     return { chat, said, material: await materialOf(c, id, said.messageId) };
   });
   if (!step1) return refused(404, "That chat is not here any more.");
+  if (step1 === "archived") return refused(400, ARCHIVED);
   if (step1 === "badFile") return refused(400, "One of those files is not waiting in this chat any more. Attach it again.");
   const { chat, said, material } = step1;
 

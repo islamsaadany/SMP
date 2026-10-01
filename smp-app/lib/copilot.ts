@@ -51,14 +51,16 @@ export function copilotStampFor(have: readonly string[], seat: unknown): boolean
   return have.includes("copilot") && officeSeat(seat);
 }
 
-/* WHO MAY DELETE A CHAT (plan §7.1, Islam): whoever started it, or the Super
-   user. A deliverable is never deleted — its versions are the record. An
-   office login the register has not placed has no key, so it can delete only
-   by being the Super user: an empty key must never match an empty
-   `created_by`, or every chat nobody signed would be anybody's. */
-export function mayDeleteChat(chat: { by: string }, who: Who): boolean {
-  if (who.seat === "super") return true;
-  return !!who.personKey && chat.by === who.personKey;
+/* WHO MAY DELETE A CHAT (§441, Islam 2026-10-01, reversing plan §7.1's
+   "whoever started it"): a chat is ARCHIVED, never deleted, by anybody in
+   the office; deleting is the Super user's alone and only of a chat already
+   archived, so nothing leaves the list and the record in one press. That is
+   §89's destruction rule (`mayDestroy`), asked of the seat the door set. A
+   deliverable is never deleted — its versions are the record. */
+export function mayDeleteChat(chat: { archived: string }, who: Who): boolean {
+  /* The check's break deletes a live chat, which must turn it red (§94.5). */
+  if (process.env.SMP_BREAK === "delete-live") return who.seat === "super";
+  return who.seat === "super" && !!chat.archived;
 }
 
 /* ABOUT THIRTY PAGES (plan §7.2): a paste longer than this is refused with
@@ -81,16 +83,28 @@ export function failedLine(why: string): string {
 export function oneLine(v: unknown): string { return str(v).replace(/\s+/g, " ").trim(); }
 
 /* ── CHATS ──────────────────────────────────────────────────────────── */
-export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number };
-const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at";
+/* `archived` is when it was archived, or "" — stored in `extra` as an
+   ABSENCE (§50.6), so no migration and a restored chat is byte-shaped like
+   one never archived. */
+export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number; archived: string };
+const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at, c.extra->>'archivedAt' AS archived";
 const chatOf = (r: any): Chat => ({ id: str(r.id), place: str(r.place), section: r.section, title: str(r.title),
-  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0 });
+  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0, archived: str(r.archived) });
 
-export async function chatsOn(c: Q, place: string, section: Section): Promise<Chat[]> {
+/* The live list, or (`archived`) the archived one — never both at once, so
+   the rail draws exactly one of them. */
+export async function chatsOn(c: Q, place: string, section: Section, archived = false): Promise<Chat[]> {
   const r = await c.query(
     "SELECT " + CHAT_COLS + ", (SELECT count(*) FROM copilot_messages m WHERE m.chat_id = c.id AND m.who = 'person') AS count " +
-    "FROM copilot_chats c WHERE c.place = $1 AND c.section = $2 ORDER BY c.last_at DESC, c.created_at DESC", [place, section]);
+    "FROM copilot_chats c WHERE c.place = $1 AND c.section = $2 AND (c.extra ? 'archivedAt') = $3 " +
+    "ORDER BY c.last_at DESC, c.created_at DESC", [place, section, archived]);
   return r.rows.map(chatOf);
+}
+export async function archiveChat(c: Q, id: string, by: string): Promise<void> {
+  await c.query("UPDATE copilot_chats SET extra = extra || jsonb_build_object('archivedAt', now()::text, 'archivedBy', $2::text) WHERE id = $1", [id, by]);
+}
+export async function restoreChat(c: Q, id: string): Promise<void> {
+  await c.query("UPDATE copilot_chats SET extra = extra - 'archivedAt' - 'archivedBy' WHERE id = $1", [id]);
 }
 export async function oneChat(c: Q, id: string): Promise<Chat | null> {
   const r = await c.query("SELECT " + CHAT_COLS + ", 0 AS count FROM copilot_chats c WHERE c.id = $1", [id]);
@@ -99,7 +113,7 @@ export async function oneChat(c: Q, id: string): Promise<Chat | null> {
 export async function newChat(c: Q, a: { place: string; section: Section; title: string; by: string }): Promise<Chat> {
   const r = await c.query(
     "INSERT INTO copilot_chats (place, section, title, created_by) VALUES ($1, $2, $3, $4) " +
-    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count",
+    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count, '' AS archived",
     [a.place, a.section, a.title, a.by]);
   return chatOf(r.rows[0]);
 }

@@ -27,7 +27,12 @@
    is at the group for this purpose, which is what `null` means below. */
 import type { Pool, PoolClient } from "pg";
 
-type Q = Pool | PoolClient;
+/* STRUCTURAL, so a caller holding a checked-out client inside `withTenant`
+   can pass it without naming `PoolClient` — this file only ever calls
+   `.query`, and the narrower spelling turned a correct call into a type
+   error for `lib/portfolio-io.ts`, whose own `Q` is this shape (§53.5: one
+   answer to *what can be queried*). */
+type Q = { query: Pool["query"] | PoolClient["query"] };
 
 /* A unit's key, or `fn:` and a supporting function's. Never a company, never
    `group` — both of those are the ABSENCE of a place for this question. */

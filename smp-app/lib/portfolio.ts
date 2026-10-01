@@ -4,11 +4,12 @@
    what §8 asks for in those words: *the six rules of §3 are checked as
    rules, not as screens.*
 
-   NOTHING HERE DRAWS ANYTHING AND NOTHING HERE OPENS A DOOR. `portfolio`
-   is still `built: false` in `lib/modules.ts`, so the address, the switcher
-   and the card are unchanged: a module marked built with nothing to draw is
-   the door onto the wrong room that flag exists to stop (§61), and three of
-   its screens are drawn and not yet signed off (§9.10, §9.12, §9.13).
+   NOTHING HERE DRAWS ANYTHING. It said *and nothing here opens a door* until
+   §439, when `portfolio` became `built: true` and the module began serving
+   itself — corrected rather than left standing, because a comment describing
+   a state the code has left is the fault §104.8 records. What is still true
+   is the division: the rules are here, the drawing is in `modules/portfolio/`,
+   and a screen may not answer a question this file answers (§53.5).
 
    THE RULE LIVES ON THE SERVER AND THE SCREEN ASKS THE SAME FUNCTION
    (§42, §6.5). Every predicate below is the whole answer to its question,
@@ -227,14 +228,19 @@ export function endDateRefused(end: string | null, opts: { start?: string | null
    success (§7.6). */
 export type Dates = { actualStart: string | null; actualEnd: string | null };
 export type Before = { status: ActStatus; progress: number } & Dates;
-export type After = { status: ActStatus; progress: number };
+/* `actualEnd` IS THE DATE A LEAD CHOSE AT SIGN-OFF (§9.10) and it comes
+   through here rather than being written beside this function, or the
+   chokepoint above stops being one the day the queue is built. Absent, a
+   completion stamps today, which is what every other path wants. */
+export type After = { status: ActStatus; progress: number; actualEnd?: string | null };
 
 export function stampDates(before: Before, after: After, today: string): Dates {
   const started = before.actualStart || (after.progress > 0 ? today : null);
   if (brk() === "restamp-start") {
     return { actualStart: after.progress > 0 ? today : before.actualStart, actualEnd: before.actualEnd };
   }
-  if (after.status === "completed") return { actualStart: started || today, actualEnd: before.actualEnd || today };
+  if (after.status === "completed")
+    return { actualStart: started || today, actualEnd: after.actualEnd || before.actualEnd || today };
   /* Anything that is not Completed has no real end — which is the clearing
      half, and it is the half theirs does at a gate a Contributor can reach. */
   return { actualStart: started, actualEnd: null };
@@ -294,6 +300,38 @@ export type Row = {
   end?: string | null;
   status?: ActStatus;
   assignee?: string | null;
+  /* An activity marked as a commitment — their `is_milestone` (§5). It
+     changes no arithmetic here: what it decides is which rows the landing's
+     "what is owed next" reads (§9.13b), and whether Analytics counts the row
+     as a commitment met (§9.12). */
+  milestone?: boolean;
+  /* WHEN THE WORK ACTUALLY RAN, stamped by `stampDates` and never typed
+     (§3 №3) — the plan's two views read it as the overrun past the planned
+     bar, and `stampDates` is what writes it. */
+  actualStart?: string | null;
+  actualEnd?: string | null;
+  /* THE ONE ACTIVITY THAT MUST FINISH FIRST (§5): one per activity, so the
+     graph is a forest of chains and `cascade`'s preview is a walk. It is a
+     rules field rather than a screen one — `cascade` takes exactly this
+     beside the two dates — which is why it belongs here and `billable`,
+     `description` and the breakdown do not (they are the panel's, read by
+     `oneActivity`). */
+  dependsOn?: string | null;
+  /* THE DAY SOMEBODY ACCEPTED IT — the second half of §3 №1, written by
+     `signOff` and cleared on a reopen exactly as `actualEnd` is. It is a
+     rules field because §9.12's whole headline turns on it: a commitment is
+     met when it was accepted ON OR BEFORE its date, and the reference's own
+     reading — an activity with no recorded end date assumed to have met it
+     — is what flatters the sign-off backlog it sits beside. */
+  signedOffAt?: string | null;
+  /* WHO accepted it — read by Progress's signed-off list for a reader who
+     cannot reopen, so the section says who did it rather than drawing an
+     empty cell where a control would be (§35, and the drawing's own). */
+  signedOffBy?: string;
+  /* A name the register no longer holds keeps what was stored beside it
+     (§288.1, §96.2). What is DRAWN is the register's answer where there is
+     one; this is the fallback and never the first reading (§48, §130.9). */
+  assigneeName?: string;
   /* Written by `rollUp` onto a parent. */
   total?: number;
   done?: number;
@@ -459,6 +497,146 @@ export function cascade(rows: readonly Dep[], id: string, newEnd: string): Shift
   return out;
 }
 
+/* ══ WRITING A PLAN (§15, spec 060) ═══════════════════════════════════ */
+
+/* THE THREE KINDS OF ROW, named once. The tree's own three levels wear two
+   names already — `lvl` 0/1/2 for the walkers, and a table each — so the
+   word a request carries is pinned here and the api, the queries and the
+   page all read it from one place rather than each spelling it (§53.5). */
+export const KINDS = ["phase", "package", "activity"] as const;
+export type Kind = (typeof KINDS)[number];
+export function isKind(s: unknown): s is Kind {
+  return typeof s === "string" && (KINDS as readonly string[]).includes(s);
+}
+export const KIND_WORD: Record<Kind, string> = {
+  phase: "phase", package: "work package", activity: "activity",
+};
+/* The level a kind sits at, which is what `kidsOf` and `renumber` read. */
+export const KIND_LVL: Record<Kind, Lvl> = { phase: 0, package: 1, activity: 2 };
+
+/* WHAT A ROW HOLDS IS WHY A REMOVAL IS REFUSED (§15.6, §62): a phase that
+   still holds work cannot go, and the refusal NAMES what is in the way
+   rather than leaving somebody to guess which of its children is the
+   problem (§123, §62's own shape). An activity holds a breakdown, which is
+   its own figure rather than another row of the plan, so it is removed with
+   it — a sub-activity has no life outside the activity it weighs.
+
+   ASKED OF THE ROWS BOTH SIDES ALREADY HOLD, so the page can say it before
+   the press and the server says it again after (§42: a screen that only
+   narrows a control has narrowed nothing). */
+export function removeRefused(rows: readonly Row[], id: string): string | null {
+  if (brk() === "remove-anything") return null;
+  const i = rows.findIndex((r) => r.id === id);
+  if (i < 0) return "That row is not on this plan.";
+  const r = rows[i];
+  if (r.lvl === 2) return null;
+  const kids = kidsOf(rows, i).map((j) => rows[j]);
+  if (!kids.length) return null;
+  /* The deepest thing under it is what the sentence names, because that is
+     what somebody has to move: a phase holding two work packages is
+     refused by naming the packages, not the twelve activities inside them. */
+  const word = kids.length === 1 ? KIND_WORD[kids[0].lvl === 1 ? "package" : "activity"]
+    : kids[0].lvl === 1 ? "work packages" : "activities";
+  return "This " + KIND_WORD[r.lvl === 0 ? "phase" : "package"] +
+    " cannot be removed while it holds work. " +
+    plainCount(kids.length, word) + " " + (kids.length === 1 ? "is" : "are") + " in it: " +
+    kids.map((k) => k.name || "").filter(Boolean).join(", ") + ".";
+}
+
+/* A count and its noun, where the noun is already inflected by the caller.
+   `plural()` is the shell's and takes a singular; this takes the word as
+   given, because `removeRefused` has already chosen between a singular and
+   an irregular plural one line above (§107.8: a label is never inflected
+   by adding an "s" — *activities* is not *activitys*). */
+function plainCount(n: number, word: string): string { return n + " " + word; }
+
+/* WHICH WAY A ROW CAN MOVE, asked once for the page and the server. An
+   arrow that can do nothing is not DRAWN (§94.15, §15.2) and a move with
+   nothing to swap is REFUSED, and those have to be one answer or the page
+   draws a control the server turns away (§61, §42).
+
+   IT IS WITHIN THE CONTAINER AND NEVER ACROSS ONE: the first activity of a
+   work package does not move up into the package above it, because that is
+   a different act — re-parenting — and nothing on this screen offers it. */
+export function mayMove(rows: readonly Row[], id: string, dir: -1 | 1): boolean {
+  const i = rows.findIndex((r) => r.id === id);
+  if (i < 0) return false;
+  const lvl = rows[i].lvl;
+  /* ONE WALK FOR BOTH DIRECTIONS: step until a row at this level turns up,
+     and stop at anything SHALLOWER, which is the edge of the container. A
+     deeper row is somebody else's child and is stepped over — the first
+     attempt at this counted `kidsOf`, which answers one level down and not
+     the whole subtree, so a phase holding a work package reported the
+     package's first activity as its next sibling. */
+  for (let k = i + dir; k >= 0 && k < rows.length; k += dir) {
+    if (rows[k].lvl < lvl && brk() !== "move-across") return false;
+    if (rows[k].lvl === lvl) return true;
+  }
+  return false;
+}
+
+/* THE FIELDS A ROW'S OWNER MAY WRITE, by kind — and the list is what the
+   api validates against, so a field name nobody drew is refused by name
+   rather than written (§42's fall-through, closed).
+
+   STATUS AND THE PER-CENT ARE DELIBERATELY NOT HERE (§15.4): both are
+   worked out — a status from the breakdown and the sign-off, a parent's
+   figure from its children by weight — so there is no box for either and no
+   field to carry one. `manualProgressRefused` is what turns a typed figure
+   away where a breakdown exists, and it is reachable from the api and the
+   workbook and from no control on this screen, which is the point. */
+export const ROW_FIELDS: Record<Kind, readonly string[]> = {
+  phase: ["name", "weight"],
+  package: ["name", "weight"],
+  activity: ["name", "weight", "description", "deliverables", "assignee",
+             "dependsOn", "milestone", "billable", "start", "end"],
+};
+export function isRowField(kind: Kind, field: unknown): boolean {
+  return typeof field === "string" && ROW_FIELDS[kind].includes(field);
+}
+
+/* A WEIGHT IS A NUMBER OR AN ABSENCE, and an absence is a real answer:
+   §243's rule, reused rather than re-decided — a blank counts as the
+   average of the weights that WERE set. So an emptied box DELETES the value
+   rather than storing nought, which would quietly re-weight its siblings
+   (§50.6). Returns the reason, or null. */
+export function weightRefused(v: string): string | null {
+  if (!v.trim()) return null;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return "A weight is a number, or empty for an equal share.";
+  if (n < 0) return "A weight cannot be negative.";
+  if (n > 100) return "A weight is a share, so it cannot be over 100.";
+  return null;
+}
+
+/* A PLANNED DATE IS A DAY OR AN ABSENCE, and the pair must stay in order —
+   the schema says so too (`portfolio_activity_window`), and a refusal in
+   the database's words would name a constraint rather than a reason
+   (§316.2). Checked here so the sentence is the person's (§123). */
+export function dateRefused(v: string): string | null {
+  if (!v) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return "That is not a day.";
+  if (Number.isNaN(Date.parse(v + "T00:00:00Z"))) return "That is not a day.";
+  return null;
+}
+export function windowRefused(start: string | null, end: string | null): string | null {
+  if (start && end && end < start) return "The end of a window cannot fall before its start.";
+  return null;
+}
+
+/* A NAME IS ONE LINE AND IS NEVER EMPTY (§260, §316): the schema refuses a
+   blank outright, so the sentence is written here rather than let through
+   to be answered by a constraint name. Line breaks are closed up for
+   `SMPRules.oneLine`'s own reason, one product over — a title is one line
+   of prose however long, and a box that keeps thirty blank lines renders as
+   a fault nobody can see until the pen is open. */
+export function oneLine(v: string): string {
+  return v.replace(/\s*\n\s*/g, " ").replace(/\s+/g, " ").trim();
+}
+export function nameRefused(v: string): string | null {
+  return oneLine(v) ? null : "It needs a name.";
+}
+
 /* ══ what is waiting on somebody (§9.13, §279) ════════════════════════ */
 
 /* THREE PREDICATES, NAMED ONCE, because Progress draws them as three
@@ -498,6 +676,124 @@ export function owed(rows: readonly Row[], today: string): Row[] {
   }
   return out;
 }
+
+/* ══ the reading (§9.10, §9.12) ═══════════════════════════════════════ */
+
+/* SIGNED OFF — the fourth of Progress's four sections, and the only one that
+   is not a thing owed. It is there so the page is not only a list of
+   problems and so undoing one has somewhere to be done from (§9.10). */
+export function signedOff(rows: readonly Row[]): Row[] {
+  return acts(rows).filter((r) => r.status === "completed");
+}
+
+/* HOW MUCH WARNING A COMMITMENT GETS — the one number in this module that
+   somebody CHOSE rather than derived, so it is named once and every screen
+   that prints a commitment date reads it (§9.13a is the record of it being
+   written twice, thirty days on a landing beside the fourteen Analytics
+   already had). It is NOT a guessed constant (§122.5's fix there is to
+   measure, and how much warning somebody wants cannot be measured) — it is
+   a decision, reversible in one place, and it decides a COLOUR and never a
+   word.
+
+   AND IT WAS DECLARED LOCALLY ON THE LANDING FOR ONE SLICE, under a comment
+   saying it was read from here (§104.8). Corrected at §441. */
+export const SOON = 14;
+
+/* HOW FAR ALONG, IN WORDS — the drawings' own five and their own thresholds
+   (`design-mockups/portfolio/_derive.js`), read by the landing AND by
+   Analytics, because a percentage described two ways on two screens of one
+   client is §53.5's drift wearing an adjective.
+
+   *ON TRACK* IS NOT A WORD A PERCENTAGE MAY USE (§344, §9.12): the
+   reference labels a phase at 90% *On Track*, which is a claim about a
+   schedule the figure cannot see. So this answers *how far along* and
+   `behind()` answers *is it late*, and a row can be 67% and behind, and
+   both are true.
+
+   THE LANDING SHIPPED ITS OWN FIVE WORDS AND ITS OWN THREE THRESHOLDS for
+   one slice — *Finished* and *Nearly there* at 34 and 67 — which is neither
+   the drawing's vocabulary nor Analytics'. Corrected at §441, and the check
+   asserts the pair AGREE rather than asserting either (§94.8).
+
+   AND THE BREAK FOR THAT MAY NOT LIVE HERE, WHICH TOOK A GREEN
+   FALSIFICATION RUN TO SEE (§54.5, §337.1): `far-words` first changed THIS
+   function, and the check compares the page's words against THIS function
+   — so both sides moved together and it read 0 failures, which is
+   indistinguishable from a guard that works. The fault it is for is a
+   SECOND answer to *how far along*, so the break lives in `analytics.ts`
+   as a local word table (§53.5). */
+export type Far = { word: string; cls: string };
+export function howFar(pct: number): Far {
+  if (pct === 100) return { word: "Done", cls: "done" };
+  if (pct >= 90) return { word: "Nearly done", cls: "on" };
+  if (pct >= 25) return { word: "Under way", cls: "on" };
+  if (pct > 0) return { word: "Early", cls: "on" };
+  return { word: "Not started", cls: "" };
+}
+
+/* ══ a commitment, and whether it was met (§9.12) ══════════════════════ */
+
+/* IN DATE ORDER, REVERSING THE REFERENCE (§9.12): theirs sorts by severity
+   — overdue, then upcoming, then met — which is right for triage and wrong
+   for reading a project out. A review walks the timeline, and the
+   outstanding ones stand out by colour without being dragged to the top.
+   A commitment with no date sorts last rather than first (§35). */
+export function commitments(rows: readonly Row[]): Row[] {
+  return acts(rows).filter((r) => r.milestone)
+    .sort((a, b) => String(a.end || "9999-99-99").localeCompare(String(b.end || "9999-99-99")));
+}
+
+/* SIX STATES, AND TWO OF THEM ARE CORRECTIONS OF THE REFERENCE (§9.12):
+
+     hit   signed off ON OR BEFORE the day it was due
+     late  signed off after it — and NOT counted as hit, where theirs
+           counts a commitment delivered three weeks late as delivered
+     wait  the work is finished and no Lead has accepted it. Counted in
+           NEITHER column; theirs counts it as delivered on time, because an
+           activity with no recorded end date is assumed to have met its
+           date — which flatters exactly the sign-off backlog it sits beside
+     over  not signed off, and the day has passed
+     soon  not signed off, due within `SOON`
+     plan  further out than that
+
+   A COMMITMENT IS MET WHEN SOMEBODY ACCEPTED IT, never when its work was
+   finished — which is why a phase can read *2 of 3 done* while its own
+   commitment reads *Awaiting sign-off*, and the page says so rather than
+   leaving it as an apparent contradiction (§9.12, §124).
+
+   ONE ANSWER FOR BOTH SCREENS: Analytics draws all six and the landing
+   draws the three that are owed, and a state named twice is how the two
+   come to disagree about one row (§5.2, §53.5). */
+export const MS_STATES = ["hit", "late", "wait", "over", "soon", "plan"] as const;
+export type MsState = (typeof MS_STATES)[number];
+export function msState(r: Row, today: string): MsState {
+  /* ACCEPTED. The day somebody accepted it is what it is judged against,
+     with the stamped real end as the fallback — both are dates the platform
+     wrote itself (`signOff`, `stampDates`) and never typed.
+
+     AND A COMPLETED ROW WITH NEITHER DATE, OR WITH NO PLANNED END, READS
+     *ON TIME* — which is a path this product cannot produce, because
+     `signOff` writes both and a commitment is drawn on a scale, so there is
+     no branch for it (§24). Said here rather than left to be discovered:
+     this is the one place the file trusts its own writer instead of
+     re-checking it. */
+  if (r.status === "completed") {
+    const on = r.signedOffAt || r.actualEnd || null;
+    return on && r.end && on > r.end ? "late" : "hit";
+  }
+  /* MARKED DONE IS NOT HIT. The break counts it as met on time, which is
+     the reference's own reading and must turn the check red (§94.5). */
+  if (r.status === "done") return brk() === "done-is-hit" ? "hit" : "wait";
+  if (!r.end) return "plan";
+  if (r.end < today) return "over";
+  return daysBetween(today, r.end) <= SOON ? "soon" : "plan";
+}
+/* MET, AND MET ON TIME, ARE TWO QUESTIONS (§9.12): the landing asks the
+   first to decide what is still owed, Analytics asks the second for its
+   headline — and the headline counts `hit` ALONE, so a commitment delivered
+   late and one still waiting for a Lead are each in neither column. */
+export function met(r: Row): boolean { return r.status === "completed"; }
+export function hitOnTime(r: Row, today: string): boolean { return msState(r, today) === "hit"; }
 
 /* ══ the checkpoint (spec 046 §4.2 row 4, §9.10) ══════════════════════ */
 

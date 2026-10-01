@@ -346,7 +346,7 @@ await section("5 · the office", async () => {
   check((await text(page, "#nav button"))[0] === "My work", "…which opens on My work (§400)", (await text(page, "#nav button")).join("|"));
   await page.locator("#nav button", { hasText: "Clients" }).click();
   await page.waitForSelector(".ccard[data-client]", { timeout: 15000 }).catch(() => {});
-  check((await text(page, ".ccard[data-client] h2")).includes("Raya Trade"), "…and one press away lists the clients they may open");
+  check((await page.$$eval(".ccard[data-client] .ctop h2, .ccard[data-client] .ctop img.cmark", (els) => els.map((e) => e.tagName === "IMG" ? e.alt : e.textContent.trim()))).includes("Raya Trade"), "…and one press away lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" }); await inModule(page); await booted(page);
   check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§360)", page.url());
   const officeWant = frozen.landing(graph, "smo");

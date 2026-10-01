@@ -20,13 +20,17 @@
    to the register (the register is the client's people; this is one person
    at one meeting).
 
-   THE DAY HELPERS ARE THE TRACKER'S OWN (lib/tracker.ts) rather than a
-   second copy: the same zone, the same spelling, the same refusal of a date
-   that cannot be read. A third module wanting them is the day they move to a
-   file of their own. */
+   THE DAY HELPERS AND THE NAMES ARE THE SPINE'S (lib/day.ts, lib/people.ts).
+   They were the tracker's, and the note that stood here said *a third module
+   wanting them is the day they move to a file of their own* — Portfolio was
+   that third module and they moved, so this file reads them where they now
+   live rather than through a neighbour. What is still the tracker's is what
+   is genuinely spec 054's: the Sunday-to-Thursday week and the office seats. */
 import { createRequire } from "node:module";
 import type { PoolClient } from "pg";
-import { calendarDay, todayIn, readableDay, isOffice, OFFICE_SEATS, officeRows, namesOf, shortNames, type Person } from "./tracker.ts";
+import { calendarDay, todayIn, readableDay } from "./day.ts";
+import { namesOf, shortNames, type Person } from "./people.ts";
+import { isOffice, OFFICE_SEATS, officeRows } from "./tracker.ts";
 import { placesFor } from "./place.ts";
 
 export { calendarDay, todayIn, readableDay, isOffice, OFFICE_SEATS, officeRows, namesOf, shortNames };

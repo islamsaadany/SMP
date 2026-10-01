@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en" data-theme="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Where the cursor goes</title>
+<style>
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}
+:root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}}
+:root[data-theme="dark"]{--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}
+.tb{background:var(--tb-surface);border-bottom:1px solid var(--tb-line);color:var(--tb-ink);font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;position:relative;z-index:30}
+.tbin{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.tbtrail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.tbff{color:var(--tb-ink-2);text-decoration:none;font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.tbff:hover{color:var(--tb-ink);text-decoration:underline}
+.tbsep{color:var(--tb-ink-3);font-size:15px;line-height:1}
+.tbstep{position:relative}
+.tbstep>summary{list-style:none;display:inline-flex;align-items:center;cursor:pointer;gap:6px;padding:3px 7px;border-radius:7px;color:var(--tb-ink);font-weight:600}
+.tbstep>summary::-webkit-details-marker{display:none}
+.tbclient>summary{color:var(--tb-ink-2)}
+.tbstep>summary:hover,.tbstep[open]>summary{background:var(--tb-surface-2);color:var(--tb-ink)}
+.tbstep>summary>span{overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.tbstep>summary>svg{width:10px;height:10px;flex:none;color:var(--tb-ink-3)}
+.tbmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:290px;background:var(--tb-surface);border:1px solid var(--tb-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:4px 0;white-space:normal}
+.tbmenu a{display:block;text-decoration:none;font-size:13.5px;color:var(--tb-ink);padding:9px 14px}
+.tbmenu a:hover{background:var(--tb-surface-2)}
+.tbmenu a[aria-current="true"]{font-weight:700}
+.tbsub{display:block;font-size:11.5px;color:var(--tb-ink-2);margin-top:2px;font-weight:400}
+.tbquiet{padding:9px 14px;font-size:13.5px;color:var(--tb-ink-2);font-style:italic}
+.tbrule{height:1px;background:var(--tb-line);margin:4px 0}
+.tbbrand{font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
+.tbbrand:hover{text-decoration:underline}
+.tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+.tbviewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--tb-line);min-width:0}
+.tbviewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-2);white-space:nowrap}
+.tbviewer select{font-family:inherit;font-size:12.5px;max-width:260px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 6px;background:var(--tb-surface);color:var(--tb-ink)}
+.tbnote{font-size:12.5px;color:var(--tb-ink-3);white-space:nowrap}
+.tbacts{display:flex;align-items:center;gap:10px}
+.tbtheme{width:26px;height:26px;padding:0;border-radius:50%;border:1px solid var(--tb-line);background:none;color:var(--tb-ink-3);display:grid;place-items:center;cursor:pointer}
+.tbtheme svg{width:14px;height:14px}
+.tbout{font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-3);background:none;border:1px solid var(--tb-line);border-radius:99px;padding:5px 14px;cursor:pointer}
+.tbtheme:hover,.tbout:hover{border-color:var(--tb-soft);color:var(--tb-ink)}
+.tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
+@media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
+
+*{box-sizing:border-box}
+:root{
+  --bar:#16325C;
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+  --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+  --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+  --none:#8E97A3; --on-fill:#FFFFFF; --on-accent:#16325C;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+  }
+}
+:root[data-theme="dark"]{
+  --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+  --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+  --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+  --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+  --none:#8E97A3; --on-fill:#14161A; --on-accent:#14161A;
+}
+
+body{margin:0;background:var(--ground);color:var(--ink);
+  font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 56px}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.phead h1{font-size:21px;font-weight:700;margin:0;letter-spacing:-.01em}
+.crumb{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 4px}
+.crumb a{color:inherit;text-decoration:none}
+.crumb a:hover{text-decoration:underline}
+.start{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;padding:8px 15px;font-size:13px;font-weight:700}
+.start:hover{background:var(--gold-deep);color:var(--on-fill)}
+
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+@media (max-width:820px){.strip{grid-template-columns:1fr}}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:12px 15px}
+.cell .k{margin:0;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.cell .v{font-size:25px;font-weight:700;line-height:1.15;margin-top:3px;letter-spacing:-.02em}
+.cell .w{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.cell.late .v{color:var(--bad-tx)}
+.cell.owed .v{color:var(--attn-tx)}
+
+.sect{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 7px}
+.sect span{color:var(--ink-3);font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px}
+/* THE FOUR TABS, SHARED because both the charter and the plan draw them and a
+   second copy is how one page's row comes to sit at a different height from
+   the other's (§53.5). */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:10px 0 18px;flex-wrap:wrap}
+.tabs > *{padding:8px 13px;font-size:13.5px;color:var(--ink-3);font-weight:600;border-bottom:2px solid transparent;text-decoration:none}
+.tabs > a:hover{color:var(--ink)}
+.tabs > .on{color:var(--ink);border-bottom-color:var(--gold)}
+.tabs > .soon{color:var(--ink-3);opacity:.6;cursor:default}
+.tabs > .soon::after{content:" \2014 not yet";font-size:11px;font-weight:600;font-style:italic}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--panel);color:var(--panel-ink);text-align:left;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:8px 14px;white-space:nowrap}
+tbody td{border-top:1px solid var(--line-soft);padding:11px 14px;vertical-align:top;font-size:13.5px}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+
+.pname{font-weight:700;font-size:14.5px}
+.pname a{color:inherit;text-decoration:none;border-bottom:1px solid transparent}
+.pname a:hover{border-bottom-color:var(--gold)}
+.pbrief{font-size:11.5px;color:var(--ink-3);margin-top:2px;max-width:42ch}
+.far{width:210px}
+.bar2{height:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
+.bar2 i{display:block;height:100%;background:var(--gold)}
+.bar2 i.done{background:var(--good)}
+.figs{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pc{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.word{font-size:11.5px;color:var(--ink-3)}
+.behind,.cb{display:inline-block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;border-radius:4px;padding:1px 6px}
+.behind,.cb.over{color:var(--bad-tx);background:var(--bad-bg);border:1px solid var(--bad)}
+.cb.wait{color:var(--panel-ink);background:var(--panel);border:1px solid var(--panel)}
+.cb.soon{color:var(--attn-tx);background:var(--attn-bg);border:1px solid var(--attn)}
+.noplan{font-size:12.5px;color:var(--ink-3);font-style:italic}
+.owe{width:230px}
+.owe .n{font-size:17px;font-weight:700;color:var(--attn-tx)}
+.owe .n.clear{color:var(--ink-3);font-weight:600;font-size:13px}
+.owe .parts{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.mine{box-shadow:inset 3px 0 0 var(--gold)}
+.when{width:150px;font-size:12.5px}
+.when .d{font-weight:600}
+.when .s{font-size:11px;color:var(--ink-3)}
+.when .none{color:var(--ink-3)}
+.empty{margin:0;padding:22px 16px;text-align:center;font-size:13px;color:var(--ink-3)}
+.cdue{width:104px;font-variant-numeric:tabular-nums;font-weight:600}
+.cdue.past{color:var(--bad-tx)}
+.cwhat{width:188px}
+.cname{font-weight:600}
+.cproj{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+/* the charter (§5.1) — a page of rows, read, with a pen per section */
+.ch h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 7px;font-weight:700}
+.chbox{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:flex;gap:16px;padding:11px 15px;border-top:1px solid var(--line-soft)}
+.row:first-child{border-top:0}
+.row em{flex:none;width:158px;font-style:normal;font-size:11.5px;color:var(--ink-3);font-weight:600;padding-top:2px}
+.row .val{flex:1;min-width:0;font-size:13.5px;white-space:pre-wrap}
+.row .val.none{color:var(--ink-3);font-style:italic}
+.pen{background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:4px 10px;font-size:12px;font-weight:600;color:var(--ink-2)}
+.pen:hover{border-color:var(--gold)}
+.fld{width:100%;font:inherit;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:6px 9px}
+.fld:focus{outline:2px solid var(--focus);outline-offset:0}
+textarea.fld{min-height:64px;resize:vertical}
+/* THE QUIET WORD FOR AN ABSENCE. It was declared as .none2 and used as
+   .none for one slice, so *No checkpoint set* drew in full ink where the
+   drawing has it grey — the rule and the markup disagreeing, which renders
+   perfectly (§96) and was found by reading. §441.
+   AND NO BACKTICK MAY APPEAR IN THIS COMMENT: the whole stylesheet is one
+   template literal, so a quoted class name here ENDS it (§272.8, §357.3
+   — walked into while writing this very note). */
+.none{color:var(--ink-3)}
+.dlg{position:fixed;inset:0;background:rgba(10,14,22,.5);display:grid;place-items:center;padding:20px;z-index:20}
+.dlg[hidden]{display:none!important}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;max-width:440px;width:100%}
+.card h2{margin:0 0 4px;font-size:15px}
+.card p{margin:0 0 12px;font-size:12.5px;color:var(--ink-3)}
+.cbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.ghost{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 13px;font-size:13px;color:var(--ink-2);font-weight:600}
+
+  .pbar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .pbar .sp{ margin-left:auto; display:flex; gap:8px; }
+  .btn{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+        background:var(--surface); color:var(--ink-2); border:1px solid var(--line);
+        border-radius:5px; padding:6px 12px; text-decoration:none; display:inline-block; }
+  .btn:hover{ border-color:var(--gold); color:var(--ink); }
+  .btn.on{ background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .owed{ font-size:12.5px; color:var(--attn-tx); background:var(--attn-bg);
+         border-radius:4px; padding:3px 9px; font-weight:600; }
+  .owed.red{ color:var(--bad-tx); background:var(--bad-bg); }
+  .pcx{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  .pl .head, .pl .r{ display:grid;
+             grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px;
+             gap:12px; align-items:center; padding:7px 14px; }
+  .pl .head{ background:var(--panel); color:var(--panel-ink);
+         font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+  .pl .head span:nth-child(n+5){ text-align:right; }
+  .pl .r{ border-top:1px solid var(--line-soft); font-size:13.5px; }
+  .pl .r:hover{ background:var(--zebra); }
+  .pl .r.lvl0{ background:var(--surface-2); font-weight:700; }
+  .pl .r.lvl1{ font-weight:600; }
+  .num{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; font-weight:700; }
+  .nm{ min-width:0; display:flex; align-items:center; gap:7px; }
+  .nm .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:inherit; text-decoration:none; }
+  .nm a.t:hover{ text-decoration:underline; }
+  .nm .tw{ color:var(--ink-3); font-size:11px; }
+  .pl .r.lvl1 .nm{ padding-left:16px; }
+  .pl .r.lvl2 .nm{ padding-left:32px; }
+  .pwho{ color:var(--ink-2); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .win{ font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+  .win.late{ color:var(--bad-tx); font-weight:600; }
+  .fig{ text-align:right; font-variant-numeric:tabular-nums; font-size:12.5px; color:var(--ink-2); }
+  .lvl0 .fig, .lvl1 .fig{ color:var(--ink); font-weight:700; }
+  .st{ justify-self:end; font-size:11px; letter-spacing:.04em; text-transform:uppercase;
+       font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
+  .st.done{ background:var(--good-bg); color:var(--good-tx); }
+  .st.wip{ background:var(--attn-bg); color:var(--attn-tx); }
+  .st.not{ background:var(--surface-2); color:var(--ink-3); }
+  .st.sign{ background:var(--panel); color:var(--panel-accent); }
+  .mk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+       color:var(--gold-deep); border:1px solid var(--gold); border-radius:3px; padding:0 4px; flex:none; }
+  .blk{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+        font-weight:700; color:var(--bad-tx); flex:none; }
+  .pl .r.pick{ background:var(--zebra); box-shadow:inset 3px 0 0 var(--gold); }
+
+  .gwrap{ overflow-x:auto; }
+  .g{ min-width:820px; }
+  .ghead, .gr{ display:grid; grid-template-columns:300px minmax(0,1fr); align-items:center; }
+  .ghead{ background:var(--panel); color:var(--panel-ink); }
+  .ghead .gl{ padding:7px 14px; font-size:10px; letter-spacing:.08em;
+              text-transform:uppercase; font-weight:700; }
+  .months{ display:grid; }
+  .months span{ font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+                font-weight:700; padding:7px 0 7px 7px;
+                border-left:1px solid rgba(255,255,255,.18); }
+  .gr{ border-top:1px solid var(--line-soft); font-size:13px; }
+  .gr:hover{ background:var(--zebra); }
+  .gr.lvl0{ background:var(--surface-2); font-weight:700; }
+  .gr.lvl1{ font-weight:600; }
+  .gl{ display:flex; align-items:center; gap:7px; min-width:0; padding:5px 12px; }
+  .gl .gn{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:11.5px;
+           font-weight:700; flex:none; width:44px; }
+  .gl .t{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .gr.lvl1 .gl .t{ padding-left:10px; }
+  .gr.lvl2 .gl .t{ padding-left:22px; }
+  .track{ position:relative; height:28px; border-left:1px solid var(--line); }
+  .grid{ position:absolute; inset:0; display:grid; pointer-events:none; }
+  .grid i{ border-left:1px solid var(--line-soft); }
+  .grid i:first-child{ border-left:0; }
+  .now{ position:absolute; top:0; bottom:0; width:2px; background:var(--gold); pointer-events:none; }
+  .nowlab{ position:absolute; top:2px; transform:translateX(-50%);
+           font-size:9.5px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--on-accent); background:var(--gold);
+           border-radius:3px; padding:0 4px; white-space:nowrap; }
+  .b{ position:absolute; top:8px; height:12px; border-radius:3px;
+      background:var(--surface-2); border:1px solid var(--line); overflow:hidden; }
+  .b > i{ display:block; height:100%; background:var(--good); }
+  .b.sum{ top:11px; height:6px; background:var(--stone); border-color:var(--stone);
+          border-radius:2px; opacity:.55; }
+  .over{ position:absolute; top:8px; height:12px; border-radius:0 3px 3px 0; background:var(--bad); }
+  .dia{ position:absolute; top:8px; width:12px; height:12px; background:var(--gold);
+        border:1px solid var(--gold-deep); transform:translateX(-6px) rotate(45deg); }
+  .dia.not{ background:var(--surface); }
+  .dep{ position:absolute; height:0; border-top:1.5px dotted var(--ink-3); }
+  .depv{ position:absolute; width:0; border-left:1.5px dotted var(--ink-3); }
+  .deph{ position:absolute; width:0; height:0; border-top:4px solid transparent;
+         border-bottom:4px solid transparent; border-left:5px solid var(--ink-3); }
+  .gfoot{ display:flex; gap:16px; flex-wrap:wrap; padding:9px 14px;
+          border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-3); }
+  .gfoot b{ display:inline-block; width:22px; height:8px; border-radius:2px;
+            vertical-align:middle; margin-right:5px; }
+
+  .act{ background:var(--surface); border:1px solid var(--line); border-radius:7px;
+        margin-top:16px; overflow:hidden; }
+  .act > header{ background:var(--panel); color:var(--panel-ink); padding:10px 16px;
+                 display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; }
+  .act > header b{ font-size:15px; }
+  .act > header .k{ font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+                    color:var(--panel-quiet); font-weight:700; }
+  .act > header a.k{ text-decoration:none; }
+  .act > header a.k:hover{ color:var(--panel-accent); }
+  .act > header .shut{ margin-left:12px; }
+  .abody{ padding:6px 16px 14px; display:grid; grid-template-columns:1fr 1fr; gap:0 28px; }
+  @media (max-width:820px){ .abody{ grid-template-columns:1fr; } }
+  .arow{ display:grid; grid-template-columns:116px minmax(0,1fr); gap:0 12px;
+         padding:8px 0; border-bottom:1px solid var(--line-soft); align-items:start; }
+  .arow > em{ font-style:normal; font-size:10.5px; letter-spacing:.07em;
+              text-transform:uppercase; color:var(--ink-3); font-weight:700; padding-top:3px; }
+  .arow .v{ min-width:0; font-size:13.5px; }
+  .arow .v p{ margin:0; color:var(--ink-2); }
+  .arow .v .soon{ color:var(--ink-3); font-size:12.5px; }
+  .full{ grid-column:1 / -1; }
+  .sub{ display:grid; gap:4px; }
+  .sub .s{ display:grid; grid-template-columns:minmax(0,1fr) 92px 52px; gap:10px;
+           font-size:13px; align-items:center; }
+  .sub .s .w{ font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; text-align:right; }
+  .note{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+
+/* ══ WRITING IT (§15) ══════════════════════════════════════════════════ */
+/* CARRIED VERBATIM from the signed-off drawing
+   (design-mockups/portfolio/2026-09-30_plan-writing.html) less its
+   drawing-only blocks. Every token is one CSS above already declares and
+   nothing here re-declares .fld, .dlg, .card, .cbtns, .ghost,
+   .start or .btn — which is the drawing's own best hour (§65.9, §53.5):
+   its first draft declared .dlg for the dialog CARD, and .dlg on this
+   page is the OVERLAY, so the card inherited position:fixed; inset:0 and
+   measured 520x756 at the top-left with its header off screen. */
+
+/* EDIT MODE GIVES THE ROW A SEVENTH COLUMN rather than putting controls
+   INSIDE the prose columns, which is §267 exactly: five of seven holding
+   controls and the name paying for the window. */
+.pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px 92px; }
+.rowbu{ display:flex; gap:2px; justify-self:end; }
+.rowbu button{ width:22px; height:22px; padding:0; line-height:1;
+  background:none; border:1px solid transparent; border-radius:4px;
+  color:var(--ink-3); font-size:12px; }
+.rowbu button:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.rowbu button.rm:hover{ border-color:var(--bad); color:var(--bad-tx); }
+.rowbu svg{ display:block; width:12px; height:12px; margin:0 auto; fill:currentColor; }
+/* AND IT FOLDS UNDER THE NAME ON A NARROW WINDOW — found by RENDERING the
+   drawing rather than by reading it (§311.1): at 700px the seventh column
+   takes the row to 694px in a 662px box, and §158's rule is *fit, never and
+   it scrolls*. The read table already sits at its own edge there, so the
+   strip cannot be afforded a column of its own — §267's fold, one table
+   over. */
+@media (max-width:900px){
+  .pl.ed .head, .pl.ed .r{ grid-template-columns:78px minmax(0,1fr) 128px 132px 104px 74px; }
+  .pl.ed .r .rowbu{ grid-column:2; justify-self:start; margin-top:4px; }
+  .pl.ed .head .edonly{ display:none!important; }
+}
+
+/* THE ADD ROW · one idiom for all three kinds (the tracker's own, §356). */
+.addr{ display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:7px 14px; border-top:1px solid var(--line-soft); background:var(--zebra); }
+.addr.l1{ padding-left:30px; } .addr.l2{ padding-left:46px; }
+/* THE KEY SIZES ITSELF — it was a 78px column to line up with #, and
+   *+ work package* broke across two lines in it (§311.1, found by looking).
+   Lining up with a column it does not belong to is not worth a wrapped
+   word. */
+.addr .ak{ font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  font-weight:700; color:var(--ink-3); white-space:nowrap; flex:none;
+  background:none; border:1px solid transparent; border-radius:4px; padding:3px 7px; }
+.addr button.ak:hover{ border-color:var(--line); color:var(--ink); background:var(--surface); }
+.addr button.ak[aria-pressed="true"]{ border-color:var(--gold); color:var(--gold-deep); }
+.addr input{ flex:1 1 220px; min-width:0; font:inherit; font-size:13.5px;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:4px 9px; color:var(--ink); }
+.addr input::placeholder{ color:var(--ink-3); }
+.addr input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+
+/* One quiet line saying the numbers move, said once where it happens (§35). */
+.ednote{ font-size:12.5px; color:var(--ink-2); background:var(--attn-bg);
+  border-top:1px solid var(--line-soft); padding:6px 14px; }
+/* What a refusal says, in the server's own words, where the act was (§32,
+   §171, §190's *the dismiss under the box with the issue*). */
+.said{ font-size:13px; color:var(--bad-tx); background:var(--bad-bg);
+  border-top:1px solid var(--line-soft); padding:7px 14px; }
+.said:empty{ display:none; }
+
+/* A card a shade wider than the page's 440, MEASURED rather than guessed:
+   the shifts list is four columns and reads cramped under 500. */
+.card.wide{ max-width:520px; }
+.card .refuse{ font-size:13.5px; color:var(--bad-tx); background:var(--bad-bg);
+  border-radius:5px; padding:8px 11px; margin:0 0 12px; white-space:normal; }
+.shifts{ display:grid; gap:0; margin:4px 0 12px; }
+.shifts .sh{ display:grid; grid-template-columns:20px 46px minmax(0,1fr) auto;
+  gap:9px; align-items:center; font-size:13px; padding:5px 0;
+  border-top:1px solid var(--line-soft); }
+.shifts .sh .code{ font-size:12px; font-weight:700; color:var(--ink-3);
+  font-variant-numeric:tabular-nums; }
+.shifts .sh .mv{ font-size:12.5px; color:var(--ink-2); font-variant-numeric:tabular-nums;
+  white-space:nowrap; }
+.shifts .sh .mv b{ color:var(--bad-tx); }
+.cbtns.apart{ justify-content:space-between; }
+
+/* A DAY IS SET THE WAY THE OFFICE'S OTHER MODULES SET ONE (§356.14, §357.4):
+   the word is a button and the press opens the browser's own picker, with the
+   native box clipped in place beside it rather than swapped in for the word —
+   so the day never reformats under the hand that pressed it, and a browser
+   that cannot open a picker shows the box instead (§61). */
+.daybu{ font:inherit; font-size:12.5px; font-variant-numeric:tabular-nums;
+  background:var(--surface); border:1px solid var(--line); border-radius:5px;
+  padding:3px 9px; color:var(--ink); }
+.daybu:hover{ border-color:var(--gold); }
+.dayw{ position:relative; display:inline-block; }
+.dayw input[type=date]{ position:absolute; left:0; bottom:0; width:1px; height:1px;
+  opacity:0; border:0; padding:0; pointer-events:none; }
+.two{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.two .to{ color:var(--ink-3); font-size:12.5px; }
+.tick{ display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-2); }
+
+/* The breakdown, being written and being reported. AND IT IS wcell, NOT
+   cell — the fifth class the drawing collided with (§65.9): .cell is
+   Analytics' stat card on this same stylesheet, a border and a radius and
+   12px of padding, which drew a box round a value meant to be plain text.
+
+   THE STEP'S NAME AND ITS WEIGHT ARE THE PLAN'S, NOT THE REPORT'S (§15.7),
+   so the person the row is assigned to gets the status picker and reads the
+   other two — the drawing's first draft made all three boxes and quietly let
+   somebody reporting their own work re-weight it. */
+.sub .s.edit{ grid-template-columns:minmax(0,1fr) 128px 56px 22px; gap:8px; }
+.sub .s .fld{ padding:2px 7px; font-size:13px; }
+.sub .s .wcell{ min-width:0; display:block; font-size:13px; color:var(--ink-2); }
+.sub .s .wcell .wt{ font-variant-numeric:tabular-nums; color:var(--ink-3); }
+.sub .s select.fld{ font-size:12px; }
+.subadd{ display:grid; grid-template-columns:minmax(0,1fr) 128px 56px 22px;
+  gap:8px; align-items:center; padding:5px 0 0; }
+.derived{ font-size:12.5px; color:var(--ink-2); }
+.derived b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+/* The panel's own textarea is 64px tall by the page's rule above, which is
+   right for a charter field and two lines too many for a one-line name. */
+.act textarea.fld{ min-height:calc(3em + 14px); }
+
+/* Marking it done — the first of the two steps (§3 №1, §6.5). */
+.donebar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  border-top:1px solid var(--line-soft); margin-top:12px; padding-top:12px; }
+.donebar .why{ font-size:12.5px; color:var(--ink-2); margin:0; max-width:64ch; }
+
+/* HIDDEN ON A BOX WITH ITS OWN display HIDES NOTHING, and the drawing
+   walked into it for the third time in this repository (§298.2, §356.8):
+   .two, .tick and .dayw carry a display, so an author rule outranks
+   the browser's own [hidden]{display:none} — the Planned row drew the two
+   date buttons AND the read-only dates at once, which is exactly what it
+   looks like when a permission gate does nothing. */
+[hidden]{ display:none!important; }
+</style><style>
+/* ── the mockup's OWN furniture, and nothing else (§41.9) ──────────────
+   Every rule above this line is the running platform's, lifted verbatim
+   out of the served page. These five are the drawing's: a still cannot
+   hold a focus ring or a caret, so they stand in for what the browser
+   paints. Nothing here is proposed for the product. */
+body{ margin:0; background:var(--ground); color:var(--ink);
+      font-family:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+.mk-wrap{ max-width:1180px; margin:0 auto; padding:28px 20px 80px; }
+.mk-h1{ font-size:26px; font-weight:800; margin:0 0 6px; letter-spacing:-.01em; }
+.mk-sub{ font-size:14.5px; color:var(--ink-2); margin:0 0 26px; max-width:72ch; line-height:1.55; }
+.mk-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+          padding:18px 18px 20px; margin:0 0 20px; }
+.mk-key{ font-size:10px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+         color:var(--ink-3); }
+.mk-name{ font-size:17px; font-weight:800; margin:3px 0 5px; }
+.mk-say{ font-size:14px; color:var(--ink-2); line-height:1.55; margin:0 0 14px; max-width:78ch; }
+.mk-cap{ font-size:12.5px; color:var(--ink-3); margin:9px 0 0; }
+.mk-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:900px){ .mk-two{ grid-template-columns:1fr; } }
+.mk-lab{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:700;
+         color:var(--ink-3); margin:0 0 7px; }
+/* THE RING AND THE CARET stand in for the browser's own focus paint. */
+.mk-box{ flex:1 1 220px; min-width:0; font-size:13.5px; background:var(--surface);
+         border:1px solid var(--line); border-radius:5px; padding:4px 9px;
+         color:var(--ink); display:flex; align-items:center; }
+.mk-ringed{ outline:2px solid var(--focus); outline-offset:1px; border-color:var(--gold); }
+.mk-ph{ color:var(--ink-3); }
+.mk-caret{ width:1px; height:16px; background:var(--ink); margin-right:1px; }
+.mk-tag{ font-size:10px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+         padding:2px 7px; border-radius:999px; margin-left:10px; white-space:nowrap; }
+.mk-good{ background:var(--good-bg); color:var(--good-tx); }
+.mk-bad{ background:var(--bad-bg); color:var(--bad-tx); }
+.mk-attn{ background:var(--attn-bg); color:var(--attn-tx); }
+table.mk-t{ width:100%; border-collapse:collapse; font-size:13.5px; margin-top:4px; }
+.mk-t th, .mk-t td{ border-bottom:1px solid var(--line-soft); padding:9px 10px;
+                    text-align:left; vertical-align:top; }
+.mk-t thead th{ background:var(--panel); color:var(--panel-ink); font-size:10px;
+                letter-spacing:.08em; text-transform:uppercase; border-bottom:0; }
+.mk-t tbody th{ font-weight:600; color:var(--ink-2); width:34%; }
+.mk-t td b{ font-variant-numeric:tabular-nums; }
+.mk-t .yes{ color:var(--good-tx); font-weight:700; }
+.mk-t .no{ color:var(--bad-tx); font-weight:700; }
+.mk-rec{ border-left:3px solid var(--gold); padding-left:14px; margin:26px 0 0; }
+.mk-fact{ background:var(--attn-bg); border:1px solid var(--line-soft); border-radius:8px;
+          padding:12px 14px; font-size:13.5px; color:var(--ink-2); line-height:1.6;
+          margin:0 0 24px; }
+</style></head>
+<body><div class="mk-wrap">
+
+<h1 class="mk-h1">Where the cursor goes after you name something</h1>
+<p class="mk-sub">Drawn out of the running platform — every box, colour and spacing below is the
+product's own, lifted from the served page. Only the focus ring and the text caret are drawn by
+hand, because a still picture cannot hold them. Nothing here is built.</p>
+
+<div class="mk-fact"><b>What happens today, measured in a browser and read back out of the
+database.</b> You name <i>WP one</i> and press Enter. The platform puts you back in the box you
+were typing in — which is the one that makes <b>work packages</b>. Type <i>Interviews</i> next and
+you get <b>1.2 Interviews</b>, a second work package beside the first, instead of
+<b>1.1.1 Interviews</b> underneath it. The tree, the numbering and the saving are all correct; only
+the cursor is in the wrong box.</div>
+
+<div class="mk-card"><div class="mk-key">Today</div><div class="mk-name">The cursor stays in the box you typed in</div><p class="mk-say">You named a work package in the <b>+ work package</b> box, so that is where the cursor goes back to. The <b>+ activity</b> box belonging to <i>WP one</i> is one line above it, with nothing drawing your eye to it.</p><div class="box pl ed"><div class="head"><span>#</span><span>Phase · Work package · Activity</span><span>Owner</span><span>Planned</span><span>Status</span><span>Done</span><span class="edonly"></span></div><div class="r lvl0"><span class="num">1</span><span class="nm"><span class="tw">▾</span><span class="t">Discovery</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="r lvl1"><span class="num">1.1</span><span class="nm"><span class="tw">▾</span><span class="t">WP one</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="addr l2"><span class="ak">+ activity</span><span class="mk-box"><span class="mk-ph">Name it and press Enter</span></span></div><div class="addr l1 mk-ring"><span class="ak">+ work package</span><span class="mk-box mk-ringed"><span class="mk-caret">|</span><span class="mk-ph">Name it and press Enter</span></span></div><div class="addr l0"><span class="ak">+ phase</span><span class="mk-box"><span class="mk-ph">Name it and press Enter</span></span></div><div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers the ones after it — a code is where a row sits, not a name it keeps.</div></div><p class="mk-cap">The ring is on <b>+ work package</b>. Type here and you get a second work package.</p></div>
+<div class="mk-card"><div class="mk-key">Option A</div><div class="mk-name">Leave the cursor alone — make each box say what it makes</div><p class="mk-say">Nothing moves under your hand. The three boxes stop all reading <i>“Name it and press Enter”</i> and say which kind they make, so a wrong Enter is something you can see coming rather than something you find afterwards.</p><div class="box pl ed"><div class="head"><span>#</span><span>Phase · Work package · Activity</span><span>Owner</span><span>Planned</span><span>Status</span><span>Done</span><span class="edonly"></span></div><div class="r lvl0"><span class="num">1</span><span class="nm"><span class="tw">▾</span><span class="t">Discovery</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="r lvl1"><span class="num">1.1</span><span class="nm"><span class="tw">▾</span><span class="t">WP one</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="addr l2"><span class="ak">+ activity</span><span class="mk-box"><span class="mk-ph">Name an activity and press Enter</span></span></div><div class="addr l1 mk-ring"><span class="ak">+ work package</span><span class="mk-box mk-ringed"><span class="mk-caret">|</span><span class="mk-ph">Name a work package and press Enter</span></span></div><div class="addr l0"><span class="ak">+ phase</span><span class="mk-box"><span class="mk-ph">Name a phase and press Enter</span></span></div><div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers the ones after it — a code is where a row sits, not a name it keeps.</div></div><p class="mk-cap">Same ring, same place — the only change is the words in the boxes.</p></div>
+<div class="mk-card"><div class="mk-key">Option B</div><div class="mk-name">The cursor follows into the thing you just made</div><p class="mk-say">Name a work package and you land in its own <b>+ activity</b> box. Exactly the sequence you were building. The cost is that it does the same after a <b>phase</b>, so naming a second phase straight after the first makes an activity instead.</p><div class="box pl ed"><div class="head"><span>#</span><span>Phase · Work package · Activity</span><span>Owner</span><span>Planned</span><span>Status</span><span>Done</span><span class="edonly"></span></div><div class="r lvl0"><span class="num">1</span><span class="nm"><span class="tw">▾</span><span class="t">Discovery</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="r lvl1"><span class="num">1.1</span><span class="nm"><span class="tw">▾</span><span class="t">WP one</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="addr l2 mk-ring"><span class="ak">+ activity</span><span class="mk-box mk-ringed"><span class="mk-caret">|</span><span class="mk-ph">Name an activity and press Enter</span></span></div><div class="addr l1"><span class="ak">+ work package</span><span class="mk-box"><span class="mk-ph">Name a work package and press Enter</span></span></div><div class="addr l0"><span class="ak">+ phase</span><span class="mk-box"><span class="mk-ph">Name a phase and press Enter</span></span></div><div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers the ones after it — a code is where a row sits, not a name it keeps.</div></div><p class="mk-cap">The ring is on <b>+ activity</b>, under <i>WP one</i>.</p></div>
+<div class="mk-card"><div class="mk-key">Option C — recommended</div><div class="mk-name">Follow in only where there is nothing to guess</div><p class="mk-say">A work package holds one kind of thing — activities — so after naming one the cursor goes into it. A phase can hold either a work package or an activity, so after naming a phase the cursor stays where it is, because the platform cannot know which you meant. At the moment you reported, C and B draw the same picture; they differ one step earlier.</p><div class="mk-two"><div><p class="mk-lab">Option B — after naming the phase <i>Discovery</i></p><div class="box pl ed"><div class="head"><span>#</span><span>Phase · Work package · Activity</span><span>Owner</span><span>Planned</span><span>Status</span><span>Done</span><span class="edonly"></span></div><div class="r lvl0"><span class="num">1</span><span class="nm"><span class="tw">▾</span><span class="t">Discovery</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="addr l1 mk-ring"><button type="button" class="ak" aria-pressed="true">+ activity</button><button type="button" class="ak" aria-pressed="false">+ work package</button><span class="mk-box mk-ringed"><span class="mk-caret">|</span><span class="mk-ph">Name an activity and press Enter</span></span></div><div class="addr l0"><span class="ak">+ phase</span><span class="mk-box"><span class="mk-ph">Name a phase and press Enter</span></span></div><div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers the ones after it — a code is where a row sits, not a name it keeps.</div></div><p class="mk-cap">The cursor is dragged into the phase. Typing <i>Delivery</i> here makes an <b>activity</b>, not a second phase. <span class="mk-tag mk-bad">the cost of B</span></p></div><div><p class="mk-lab">Option C — after naming the phase <i>Discovery</i></p><div class="box pl ed"><div class="head"><span>#</span><span>Phase · Work package · Activity</span><span>Owner</span><span>Planned</span><span>Status</span><span>Done</span><span class="edonly"></span></div><div class="r lvl0"><span class="num">1</span><span class="nm"><span class="tw">▾</span><span class="t">Discovery</span></span><span class="pwho">—</span><span class="win">—</span><span class="st not">Not started</span><span class="fig">0%</span><span class="rowbu"><span style="width:22px"></span><span style="width:22px"></span><button type="button" class="rm" title="Remove">×</button></span></div><div class="addr l1"><button type="button" class="ak" aria-pressed="true">+ activity</button><button type="button" class="ak" aria-pressed="false">+ work package</button><span class="mk-box"><span class="mk-ph">Name an activity and press Enter</span></span></div><div class="addr l0 mk-ring"><span class="ak">+ phase</span><span class="mk-box mk-ringed"><span class="mk-caret">|</span><span class="mk-ph">Name a phase and press Enter</span></span></div><div class="ednote edonly">Numbers follow position. Moving or removing a row renumbers the ones after it — a code is where a row sits, not a name it keeps.</div></div><p class="mk-cap">The cursor stays on <b>+ phase</b>, because a phase holds two kinds and there is nothing to guess. <span class="mk-tag mk-good">C leaves this alone</span></p></div></div></div>
+
+<div class="mk-card"><div class="mk-key">The whole trade, in one table</div>
+<div class="mk-name">What the next thing you type turns into</div>
+<p class="mk-say">The numbering is the product's own. There is no option that is right in all three
+rows, because the cursor can only be in one box.</p>
+<table class="mk-t"><thead><tr><th>What you do next</th><th>Today</th><th>Option A</th><th>Option B</th><th>Option C</th></tr></thead><tbody><tr><th>After naming a <b>work package</b>, you type an <b>activity</b> name</th><td><b>1.2</b> — a work package <span class="no">✗</span></td><td><b>1.2</b> — a work package <span class="no">✗</span><br><span style="color:var(--ink-3)">but the box said “work package” before you typed</span></td><td><b>1.1.1</b> — an activity <span class="yes">✓</span></td><td><b>1.1.1</b> — an activity <span class="yes">✓</span></td></tr><tr><th>After naming a <b>work package</b>, you type a <b>second work package</b></th><td><b>1.2</b> — a work package <span class="yes">✓</span></td><td><b>1.2</b> — a work package <span class="yes">✓</span></td><td><b>1.1.1</b> — an activity <span class="no">✗</span></td><td><b>1.1.1</b> — an activity <span class="no">✗</span></td></tr><tr><th>After naming a <b>phase</b>, you type a <b>second phase</b></th><td><b>2</b> — a phase <span class="yes">✓</span></td><td><b>2</b> — a phase <span class="yes">✓</span></td><td><b>1.1</b> — an activity <span class="no">✗</span></td><td><b>2</b> — a phase <span class="yes">✓</span></td></tr></tbody></table></div>
+
+<div class="mk-rec"><div class="mk-key">Recommendation</div>
+<div class="mk-name">Option C, and take A's wording with it</div>
+<p class="mk-say">C is the only one that is right about both the thing you reported and naming a run
+of phases, and the line it draws is one the platform already has: a work package can hold one kind
+of thing, so there is nothing to guess; a phase can hold either, so it stays put rather than
+guessing. Its one cost — naming two work packages back to back — is the least common of the three,
+and A's wording makes it visible rather than silent. A on its own changes no behaviour, so it would
+leave your sequence exactly as it is today.</p></div>
+
+</div></body></html>

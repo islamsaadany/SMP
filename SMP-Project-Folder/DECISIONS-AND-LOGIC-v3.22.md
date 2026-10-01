@@ -59045,7 +59045,7 @@ failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
 
-## §439 — a client's logo stands for its name on the console card (2026-10-01)
+## §445 — a client's logo stands for its name on the console card (2026-10-01)
 
 Islam, of the console's client cards: *"I fixed this earlier where if the logo
 of the company is there the company name is removed and the logo takes the

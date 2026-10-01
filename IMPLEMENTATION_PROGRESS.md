@@ -8356,7 +8356,7 @@ The yearly revision stays one for the whole client. Checked with the new
 `checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
 Not on main.
 
-### §439 — the logo stands for the name on a client card (2026-10-01)
+### §445 — the logo stands for the name on a client card (2026-10-01)
 On the console's client cards, a client that has a logo now shows the logo on
 its own, bigger, in place of the name; a client without one still shows its
 initials and name, and every card in a row stays the same height. The name is

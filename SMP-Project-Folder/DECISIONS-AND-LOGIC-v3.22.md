@@ -59172,3 +59172,7 @@ holds only the functions linked to it — `companyUnitKeys()` answers nothing �
 so §391's arithmetic reads it from them alone. A division with no function
 linked is not listed. `checks/single-company.py` MAKES a division of two
 functions (§255): **5 red** with the change taken out, from the sources (§276).
+
+### §440.1 — the top button names the layer; the tab keeps "Strategy"
+
+Islam, of the clash §440 left (the navigation button and the company page's own tab both read *Strategy*): *"the name is strategy as it has the foundation and the swot and plan below it … name it Company as per the naming in the structure of the first layer?"* — then *"yes go ahead"*. Reverses §440's label A for the BUTTON only: it reads the first layer's word from Structure (`labelWord("topword","group")`) on both shapes, which is what it already read when the strategy is planned on the business units, so the two shapes stop differing. The tab under it stays *Strategy*, like a unit's. One line in `shell.html`; `checks/single-company.py` asserts the button names the layer and is not *Strategy* (§218, rewritten not loosened). Nothing stored moves.

@@ -10656,7 +10656,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 — **§440: where the strategy is planned** — the top card on Client set-up › Structure asks *On the company / On the business units* (same `structure.bu.exists` store, replacing the units card's On/Off); planned on the company the nav's top button reads Strategy, the division dropdown goes, and each division with linked functions is a section on Strategy › Performance read from those functions alone (`companyUnitKeys()` answers nothing). `single-company.py` red 5 without it. On the branch, not merged.*
+*Last Updated: 2026-10-01 — **§440.1: the top button names the layer** (the tab keeps "Strategy"). Before it, **§440: where the strategy is planned** — the top card on Client set-up › Structure asks *On the company / On the business units* (same `structure.bu.exists` store, replacing the units card's On/Off); planned on the company the nav's top button reads Strategy, the division dropdown goes, and each division with linked functions is a section on Strategy › Performance read from those functions alone (`companyUnitKeys()` answers nothing). `single-company.py` red 5 without it. On the branch, not merged.*
 
 *Earlier: 2026-09-30 — **§439.1: an Objectives & actions unit moves across as one direction** — its objectives become the direction's measures and its actions its tactics (date → the quarter it falls in, date kept); Projects units still stay. `single-company.py` red 4 without it. On the branch, not merged.*
 

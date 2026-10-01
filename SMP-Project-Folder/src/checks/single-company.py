@@ -127,7 +127,8 @@ with sync_playwright() as p:
     if DIV:
         nav = safe(pg, "()=>({dd:!!document.querySelector('#topsel'), top:[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())})", {})
         ck("the navigation has no division dropdown", nav.get("dd") is False, nav)
-        ck("…and its top button reads Strategy", "Strategy" in (nav.get("top") or []), nav)
+        TW = safe(pg, "()=>labelWord('topword','group')")
+        ck("…and its top button names the layer (§440.1), not Strategy", TW and TW != "Strategy" and TW in (nav.get("top") or []), [TW, nav])
         row = safe(pg, "()=>[...document.querySelectorAll('#secrow-in [data-sec]')].map(b=>b.textContent)", [])
         ck("Performance's row leads with the company", bool(row) and row[0] == safe(pg, "()=>labelWord('topword','group')"), row)
         dname = pg.evaluate("(ck)=>COMPANIES[ck].name", DIV)

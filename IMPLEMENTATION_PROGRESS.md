@@ -1317,6 +1317,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-01 — the company button names the layer (§440.1)
+
+Planned on the company, the top navigation button now reads the first layer's name from Structure (for example "Company") instead of "Strategy", so it no longer clashes with the Strategy tab under it. On the branch, not merged.
+
 ## Documentation sweep, 2026-09-05
 
 A pass over the whole platform's documentation against spec-kit. It touched no

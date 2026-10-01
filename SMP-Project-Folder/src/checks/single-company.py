@@ -67,6 +67,8 @@ with sync_playwright() as p:
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
     ck("Client set-up › Structure opens", ok)
     ck("§440 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
+    geo = safe(pg, "()=>{var l=document.querySelector('.stplanq .lab'),b=document.querySelector('[data-stplan]');if(!l||!b)return null;var a=l.getBoundingClientRect(),c=b.getBoundingClientRect();return {below:c.top>=a.bottom-1,left:Math.abs(c.left-a.left)<2}}", None)
+    ck("§442 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)
     ck("…and the business units' card has no switch of its own", safe(pg, "()=>!document.querySelector('[data-stsec=\"bu|layer\"]')") is True)
     press(pg, '[data-stplan] button:nth-child(1)')
     ck("choosing the company ASKS first, in the card", safe(pg, "()=>!!document.querySelector('[data-buask]')") is True)

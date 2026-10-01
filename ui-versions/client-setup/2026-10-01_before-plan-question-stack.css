@@ -246,10 +246,6 @@
 .csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
 .csetup .stsec:last-child { border-right:0; }
 .csetup .stsech { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-/* §442: the plan question reads as a question, so its answer sits under it
-   rather than at the far end of the line (Islam: "the buttons needs to come
-   under the question"). */
-.csetup .stsech.stplanq { flex-direction:column; align-items:flex-start; gap:8px; }
 .csetup .stkind { font-size:var(--fs-micro); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2); }
 .csetup .stfixed { font-size:var(--fs-small); color:var(--ink-3); }
 .csetup .stsec > .lab, .csetup .stway > .lab { margin:4px 0 0; }

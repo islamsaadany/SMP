@@ -58085,7 +58085,7 @@ var CLIENTSETUP = (function () {
        `structure.bu.exists`, so nothing moves for a client already set up:
        absent is "on the business units". Choosing the company with units on
        the register asks first, here, because it copies their plans across. */
-    var ph = el("div", "stsech"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
+    var ph = el("div", "stsech stplanq"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
     var plan = segButtons([[false, "On the " + W("topword", "one", "Company").toLowerCase()],
                            [true, "On the " + W("unitword", "many", "Business units").toLowerCase()]],
       lv.bu.exists, function (v) {

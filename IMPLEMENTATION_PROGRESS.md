@@ -8375,3 +8375,5 @@ had turned one on for everybody keeps it on everywhere until a layer is changed.
 The yearly revision stays one for the whole client. Checked with the new
 `checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
 Not on main.
+
+- **§442 (2026-10-01, on the branch):** on Client set-up › Structure, the two buttons for where the strategy is planned now sit under the question instead of at the far end of the line.

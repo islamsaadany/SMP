@@ -222,6 +222,13 @@
      taller than one without — two card heights in one row for no reason
      anybody could read. */
   .ccard img.cmark{ width:auto; max-width:120px; height:30px; object-fit:contain; background:#fff; padding:3px 7px; box-sizing:content-box }
+  /* THE LOGO STANDS FOR THE NAME (Islam, 2026-10-01, signed-off mockup
+     design-mockups/client-card-logo/): a client with a mark shows the mark
+     alone, grown into the space the small mark and the name line shared
+     (30 + 5 gap + the name line = ~59px: 53px plus the plate's padding), so a card with a
+     logo and a card with initials stay one height. The name is the picture's
+     alt text and its hover, and data-name still carries it for the search. */
+  .ccard img.cmark.solo{ height:53px; max-width:180px; align-self:flex-start; border-radius:6px }
   .markrow{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
   .markrow img{ height:40px; width:auto; max-width:200px; object-fit:contain; background:#fff; padding:5px 10px; border:1px solid var(--line); border-radius:8px }
   .markrow .none{ font-size:13px; color:var(--ink-3) }

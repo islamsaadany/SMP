@@ -350,6 +350,45 @@ def run():
               bad == [], bad or [p["word"] + ": " + p["cur"] for p in pointers])
         SCENE["archived"] = []
 
+        # ── THE LOGO STANDS FOR THE NAME (2026-10-01, mockup
+        # design-mockups/client-card-logo/) ── a client with a mark shows the
+        # mark ALONE, grown into the name's space, so a card with a logo and a
+        # card with initials stay one height. BOTH ENDS (§94.2): the client
+        # with no mark keeps its initials AND its name, or a build that dropped
+        # every name passes the first half.
+        png = ("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAQCAIAAAD4YuoOAAAAG0lEQVR42u3BMQEAAADCoPVPbQ0PoAAAAAAAAPgZGxAAAZp1CjkAAAAASUVORK5CYII=")
+        logo = dict(CLIENTS[0], mark=png, industry=None)   # RHI carries none either: like with like
+        SCENE["cards"] = [logo] + CLIENTS[1:] + [DEMO]
+        pg.goto("about:blank"); pg.goto(BASE + "/platform#clients")
+        pg.wait_for_selector(".ccard[data-client='raya-trade']", timeout=9000)
+        if BREAK == "name-beside-logo":
+            pg.evaluate("""() => { var t = document.querySelector(".ccard[data-client='raya-trade'] .ctop");
+              var h = document.createElement('h2'); h.textContent = 'Raya Trade'; t.insertBefore(h, t.children[1]); }""")
+        got = pg.evaluate("""() => {
+          const top = k => document.querySelector(".ccard[data-client='" + k + "'] .ctop");
+          const r = top('raya-trade'), n = top('rhi');
+          const img = r.querySelector('img.cmark');
+          return { h2: !!r.querySelector('h2'), alt: img && img.alt, title: img && img.title,
+                   imgH: img && img.getBoundingClientRect().height,
+                   ra: r.getBoundingClientRect().height, rh: n.getBoundingClientRect().height,
+                   rhiName: (n.querySelector('h2') || {}).textContent, rhiMark: !!n.querySelector('div.cmark') } }""")
+        check("a client with a logo shows no name line", got["h2"] is False, got)
+        check("…the logo carries the name for a screen reader and a hover",
+              got["alt"] == "Raya Trade" and got["title"] == "Raya Trade", got)
+        check("…and is drawn larger than the small mark", (got["imgH"] or 0) > 40, got)
+        check("a client with no logo keeps its initials and its name",
+              got["rhiMark"] and got["rhiName"] == "RHI", got)
+        check("the logo card's top is within 4px of the initials card's",
+              abs(got["ra"] - got["rh"]) <= 4, got)
+        q = pg.locator("input[placeholder='Search clients']").first
+        if q.count():
+            q.fill("raya")
+            vis = pg.evaluate("""() => !!Array.from(document.querySelectorAll(".ccard[data-client='raya-trade']"))
+                  .find(e => e.offsetParent)""")
+            check("…and the search still finds it by name", vis, vis)
+            q.fill("")
+        SCENE["cards"] = CLIENTS + [DEMO]
+
         check("no page error anywhere", errs == [], errs)
         b.close()
     srv.shutdown()

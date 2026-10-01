@@ -59044,3 +59044,29 @@ directions) — **2 red** with the write removed. `setup-shape.mjs`'s two other
 failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
+
+## §439 — a client's logo stands for its name on the console card (2026-10-01)
+
+Islam, of the console's client cards: *"I fixed this earlier where if the logo
+of the company is there the company name is removed and the logo takes the
+whole vertical space"* — the cards were drawing the small 30px logo AND the name
+under it. The earlier fix was not found anywhere in this repository's history,
+so it was rebuilt, from a mockup signed off first
+(`design-mockups/client-card-logo/2026-10-01_logo-replaces-name.html`).
+
+A client with a mark shows the mark ALONE, grown into the space the small mark,
+the gap and the name line shared (53px plus the plate's padding; the mockup
+drew 49 and measuring the built card against an initials card said 53 keeps
+the two one height — the mockup is the record of what was signed off, not of
+what was built). A client with no mark is unchanged: initials, then the name.
+The name is the picture's `alt` and its hover, and `data-name` still carries
+it, so the search finds a client by name either way. Both the live card and
+the archived band's card follow the rule, since they draw the same identity
+block. Screen only: nothing stored, nothing migrated, no rule moved.
+
+`checks/platform-cards.py` gains the section, both ends (the no-logo client
+keeps its name), on both copies of the console page; 27/0, red 2 under
+`--break=name-beside-logo`. Two checks that read a client's name off its `h2`
+(`multi-client.py`, `door-landing.mjs`) now read the logo's alt where there is
+one. `client-archive.py` (15 red) and `client-setup-outside.py` (29 red) are
+red identically on the build before this change and are not this work's.

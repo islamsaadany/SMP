@@ -59235,3 +59235,17 @@ removing the row brings + New chat back — 192/0, red under `no-copilot-area`.
 **And the first run of §3h went red on a correct build**: the label lives inside
 an opened chat, and the test client had none to open (§255), so the section makes
 one first.
+
+## §443 — the paperclip in the middle of a compact strip (2026-10-01)
+
+Islam, of the Copilot's composer: *"make the clip icon to be centered in the
+space below the box and make that space a bit more compact like claude's
+chat"*, then of the drawn before/after (`design-mockups/copilot-clip/`),
+*"yes go ahead with 30px"*. Measured first: the clip touched the box (0px above)
+and the pane's 16px bottom padding sat under it, 38px from box to edge. The
+strip under the box now takes that padding (`.copcompose` margin-bottom −16px,
+`.copunder` 30px), so the 22px clip has 4px above and 4px below and box to edge
+is 30px. Nothing else moves. `shell.mjs` §3f's *"underH <= 24"* is REWRITTEN,
+never loosened (§218): it asserts the gap above the clip equals the gap below
+it and the strip is about 30px — the build before measured 0 above and 38 deep,
+which fails it. 193/0.

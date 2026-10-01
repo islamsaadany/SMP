@@ -870,11 +870,21 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       return { h: t.getBoundingClientRect().height, sendIn: !!(b && s && b.contains(s)), sendWord: s ? s.textContent.trim() : "?",
         svg: !!(s && s.querySelector("svg")), clipWord: (u && u.querySelector("[data-cop-attach]") || {}).textContent || "",
         clipUnder: !!(u && u.querySelector("[data-cop-attach]")), underH: u ? u.getBoundingClientRect().height : 0,
+        strip: (() => { const c = u && u.querySelector("[data-cop-attach]"); if (!b || !c || !m) return null;
+          const bb = b.getBoundingClientRect(), cb = c.getBoundingClientRect(), mb = m.getBoundingClientRect();
+          return { space: Math.round(mb.bottom - bb.bottom), above: Math.round(cb.top - bb.bottom), below: Math.round(mb.bottom - cb.bottom) }; })(),
         bottomGap: m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1 }; });
     let bx = await box();
     check(bx.h >= 47 && bx.h <= 52, "the box starts at one line", bx.h);
     check(bx.sendIn && bx.svg && bx.sendWord === "", "…Send is the arrow icon inside the box, with no word", JSON.stringify(bx));
-    check(bx.clipUnder && bx.clipWord.trim() === "" && bx.underH <= 24, "…and the paperclip, with no word, sits on a tight line beneath it", JSON.stringify(bx));
+    check(bx.clipUnder && bx.clipWord.trim() === "", "…and the paperclip, with no word, sits beneath it", JSON.stringify(bx));
+    /* Islam, 2026-10-01 (design-mockups/copilot-clip/): the clip in the MIDDLE
+       of the strip under the box, and the strip compact — asserted as the
+       agreement of the two gaps and the strip's whole depth, never as a
+       class (§94.8). Rewritten from "underH <= 24" (§218). */
+    const st = bx.strip || {};
+    check(st.space >= 28 && st.space <= 32 && Math.abs(st.above - st.below) <= 1,
+      "…centred in a compact strip — the same gap above the clip as below it, about 30px from box to edge", JSON.stringify(st));
     check(bx.bottomGap >= 0 && bx.bottomGap <= 40, "the chat fills the window down to its bottom edge", bx.bottomGap);
     await page.focus("[data-cop-text]");
     await page.keyboard.type("line one"); await page.keyboard.down("Shift"); await page.keyboard.press("Enter"); await page.keyboard.up("Shift");

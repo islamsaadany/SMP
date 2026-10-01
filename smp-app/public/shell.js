@@ -7504,7 +7504,7 @@ function unitLogo(u){ return (u && u.logo) || ""; }
    does not recognise there, so this needs NO migration, exactly as a
    unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
    a group that has set none, never the key. */
-/* §460: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
+/* §461: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
    client's mark and for now keep the ones in the mark on the door."* The
    door's mark (§313.36) lives on the client's registry row, so a served page
    reads it from SYNC; a stored `GROUP.logo` is no longer read there and is
@@ -36043,7 +36043,7 @@ function brandingBody(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* §460: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
+  /* §461: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
      client's, set in the block above this one on Client set-up (the door's,
      §313.36) and worn by the decks through groupLogo(). Deleted rather than
      hidden (§24); a stored GROUP.logo is left where it is and simply no
@@ -56784,7 +56784,7 @@ var CONT = (function () {
         });
 
         var g = SYNC.graph();
-        /* §460: the copy has no server to ask for the client's mark, so the
+        /* §461: the copy has no server to ask for the client's mark, so the
            mark the decks wear goes INTO the copy's own graph — on a clone, or
            this tab's next save would carry it as a change. */
         if (SYNC.clientMark && SYNC.clientMark()) {
@@ -57941,7 +57941,7 @@ var CLIENTSETUP = (function () {
 
   /* The mark on this client's door (§313.36): PNG only, shrunk here on a
      transparent canvas, written the moment it is picked. */
-  /* §460: the decks read the same mark, so a change here reaches the open
+  /* §461: the decks read the same mark, so a change here reaches the open
      platform at once rather than on the next sign-in. */
   /* The console's copy of this flow has no labels (it runs outside the
      platform), so the platform's word is asked for only where it exists. */
@@ -59740,7 +59740,7 @@ var SYNC = (function () {
      from it was a second copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
-  /* §460: the client's mark, handed over with the person (state-api.ts) and
+  /* §461: the client's mark, handed over with the person (state-api.ts) and
      kept OUTSIDE the graph — it is the registry's, and a graph field would be
      a second copy that every save carries and the server has to judge. */
   var CLIENT_MARK = "";
@@ -60702,7 +60702,7 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
-    /* §460: the client's one mark — the door's — for the decks and the
+    /* §461: the client's one mark — the door's — for the decks and the
        client's settings bar; set again when the set-up flow replaces it. */
     clientMark: function () { return CLIENT_MARK; },
     setClientMark: function (v) { CLIENT_MARK = v || ""; },

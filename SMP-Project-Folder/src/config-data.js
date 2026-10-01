@@ -730,7 +730,7 @@ function unitLogo(u){ return (u && u.logo) || ""; }
    does not recognise there, so this needs NO migration, exactly as a
    unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
    a group that has set none, never the key. */
-/* §460: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
+/* §461: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
    client's mark and for now keep the ones in the mark on the door."* The
    door's mark (§313.36) lives on the client's registry row, so a served page
    reads it from SYNC; a stored `GROUP.logo` is no longer read there and is

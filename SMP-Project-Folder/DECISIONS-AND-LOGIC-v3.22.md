@@ -61192,7 +61192,7 @@ Islam: *"we need to bring this Process module with all it's data and deisgn even
 
 **RECORDED, NOT DONE**: adding a person directly in Processes (not on the register) is still allowed — Islam's call.
 
-## §460 — One mark, the client's (2026-10-01)
+## §461 — One mark, the client's (2026-10-01)
 
 Islam, of Client set-up's first step showing *Mark on this client's door* and *The group's mark* one above the other: *"why is there a mark on the door and the groups mark.?"* — and then *"yes keep them as one and name the client's mark and for now keep the ones in the mark on the door."*
 

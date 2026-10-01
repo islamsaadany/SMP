@@ -194,7 +194,7 @@ var SYNC = (function () {
      from it was a second copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
-  /* §460: the client's mark, handed over with the person (state-api.ts) and
+  /* §461: the client's mark, handed over with the person (state-api.ts) and
      kept OUTSIDE the graph — it is the registry's, and a graph field would be
      a second copy that every save carries and the server has to judge. */
   var CLIENT_MARK = "";
@@ -1156,7 +1156,7 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
-    /* §460: the client's one mark — the door's — for the decks and the
+    /* §461: the client's one mark — the door's — for the decks and the
        client's settings bar; set again when the set-up flow replaces it. */
     clientMark: function () { return CLIENT_MARK; },
     setClientMark: function (v) { CLIENT_MARK = v || ""; },

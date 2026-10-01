@@ -1590,7 +1590,7 @@ function brandingBody(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* §460: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
+  /* §461: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
      client's, set in the block above this one on Client set-up (the door's,
      §313.36) and worn by the decks through groupLogo(). Deleted rather than
      hidden (§24); a stored GROUP.logo is left where it is and simply no

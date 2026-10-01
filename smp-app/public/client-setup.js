@@ -888,7 +888,7 @@ var CLIENTSETUP = (function () {
 
   /* The mark on this client's door (§313.36): PNG only, shrunk here on a
      transparent canvas, written the moment it is picked. */
-  /* §460: the decks read the same mark, so a change here reaches the open
+  /* §461: the decks read the same mark, so a change here reaches the open
      platform at once rather than on the next sign-in. */
   /* The console's copy of this flow has no labels (it runs outside the
      platform), so the platform's word is asked for only where it exists. */

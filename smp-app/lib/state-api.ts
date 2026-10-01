@@ -152,7 +152,7 @@ export async function personFor(r: Resolved): Promise<Person> {
   const seatRole = r.seat === "super" || r.seat === "smoteam" ? r.seat : "";
   return { key, name: r.user.name, role: seatRole, email: r.user.email, kind: r.user.kind, mustChange: false,
            clientName: r.tenant.name,
-           /* §460: THE CLIENT'S MARK IS ONE PICTURE. It is the mark on this
+           /* §461: THE CLIENT'S MARK IS ONE PICTURE. It is the mark on this
               client's door (§313.36, the registry row) and the decks wear it
               too, so the shell is handed it here rather than keeping a second
               upload inside the graph (§53.5). Already public: the door shows it

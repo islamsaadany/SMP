@@ -179,9 +179,9 @@ with sync_playwright() as p:
     # ── 3 · THE BRANDING IS ABSORBED INTO STEP ONE ─────────────────────────
     print("\n§3 · the branding lives on the first step")
     ck("the colour controls are inside the flow", bool(q(pg, ".csetup .wzbrand [data-brand]")))
-    # §460 REVERSED this, never loosened it (§218): there is ONE mark, the
+    # §461 REVERSED this, never loosened it (§218): there is ONE mark, the
     # client's (the door's), so the branding block carries no second upload.
-    ck("…and NO second, group mark upload (§460: one mark, the client's)", not q(pg, ".csetup .wzbrand [data-glogo]"))
+    ck("…and NO second, group mark upload (§461: one mark, the client's)", not q(pg, ".csetup .wzbrand [data-glogo]"))
     key = ev(pg, "()=>(document.querySelector('.csetup [data-brand]')||{}).dataset && document.querySelector('.csetup [data-brand]').dataset.brand", None)
     before = after = wrote = None
     if key:   # degrades: a build with no control here has nothing to write with (§215)

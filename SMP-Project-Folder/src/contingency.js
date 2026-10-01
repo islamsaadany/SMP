@@ -258,7 +258,7 @@ var CONT = (function () {
         });
 
         var g = SYNC.graph();
-        /* §460: the copy has no server to ask for the client's mark, so the
+        /* §461: the copy has no server to ask for the client's mark, so the
            mark the decks wear goes INTO the copy's own graph — on a clone, or
            this tab's next save would carry it as a change. */
         if (SYNC.clientMark && SYNC.clientMark()) {

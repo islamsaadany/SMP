@@ -234,8 +234,8 @@ with sync_playwright() as p:
     pg.evaluate("() => { delete GROUP.branding; applyBrand(); paint(); }")
     pg.wait_for_timeout(300)
 
-    print("\n8 · ONE mark, the client's (§460) — no second upload, and the offline copy's own")
-    # REWRITTEN, NEVER LOOSENED (§218): §460 made the door's mark the decks'
+    print("\n8 · ONE mark, the client's (§461) — no second upload, and the offline copy's own")
+    # REWRITTEN, NEVER LOOSENED (§218): §461 made the door's mark the decks'
     # mark too, so the group's upload is GONE — asserted absent, with the
     # colour controls beside it asserted present so an empty page cannot pass
     # (§113.8). Over file:// there is no server, so the decks read the mark a
@@ -272,7 +272,7 @@ with sync_playwright() as p:
         ok(r[t]["feet"] > 0, "%s — its content slides are footed" % t)
         ok(r[t]["sectFeet"] == 0, "%s — and no divider is (§259.1)" % t)
 
-    print("\n10 · served, the client's mark wins and a stored group mark is not read (§460)")
+    print("\n10 · served, the client's mark wins and a stored group mark is not read (§461)")
     got = pg.evaluate("""() => {
       const keep = { live: SYNC.isLive, mark: SYNC.clientMark };
       SYNC.isLive = () => true;

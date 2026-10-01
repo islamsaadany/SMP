@@ -59045,7 +59045,7 @@ failures (`desc` asked and unheld; the top level of a new client not carrying
 everything) reproduce identically with this change stashed — they are §428 and
 §436's, recorded here rather than fixed in passing.
 
-## §439 — one top bar for every module (2026-10-01)
+## §444 — one top bar for every module (2026-10-01)
 
 Islam, with Strategy's top bar on screen: *"we need to maintain this top bar
 across all the modules as this would be the main navigation bar across all the

@@ -1,4 +1,4 @@
-/* THE SHARED TOP BAR'S SCRIPT (§439, lib/topbar.ts). Served from the app
+/* THE SHARED TOP BAR'S SCRIPT (§444, lib/topbar.ts). Served from the app
    rather than written into public/, because public/ is generated from the
    frozen product and checked to be in step with it (checks/generated-in-step
    .mjs) — a hand-written file there would be the one copy nothing generates.

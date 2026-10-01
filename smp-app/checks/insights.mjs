@@ -465,7 +465,7 @@ try {
     (page.match(/<form/g) || []).length === 1);
   check("the file's path is nowhere in the document, which is §2's absence end to end",
     !page.includes("insights/" + a.id), "the blob path reached the page");
-  /* REWRITTEN, NEVER LOOSENED (§218, §439): "no script at all" was the claim
+  /* REWRITTEN, NEVER LOOSENED (§218, §444): "no script at all" was the claim
      while the page carried none; the shared top bar loads ONE FILE, which the
      shell's `script-src 'self'` admits — so what is asserted is still that
      nothing INLINE needs to run, and that the one script is the bar's. */

@@ -28,7 +28,7 @@ import { registerOf } from "../../lib/notes.ts";
 import { maySimulate } from "../../lib/view-as.ts";
 import type { TopViewer } from "../../lib/topbar.ts";
 
-/* ── VIEWING AS, ON THE SHARED BAR (§439) ─────────────────────────────
+/* ── VIEWING AS, ON THE SHARED BAR (§444) ─────────────────────────────
    Islam: Viewing as stays where it changes what is shown, and on Insights it
    does — who sees which report is the person's (spec 046 §4.10). Offered by
    the SIGNED-IN seat (`me`), never the one being looked through, because the

@@ -7,7 +7,7 @@
    something they would be refused (§61).
 
    NO SCRIPT OF ITS OWN, and it is not a limitation — it is what the shape
-   already wanted (the shared top bar's `/topbar.js` is the bar's, §439). The categories are the module's navigation (spec 046 §4.6) and the
+   already wanted (the shared top bar's `/topbar.js` is the bar's, §444). The categories are the module's navigation (spec 046 §4.6) and the
    search is a GET form, so the address carries the filter: a filtered library
    is a link somebody can send, Back works, and the shell's `script-src 'self'`
    policy has nothing to admit (the trial module made the same call for the
@@ -200,7 +200,7 @@ export type Ask = { q?: string; category?: string };
 
 export async function insightsDocument(
   slug: string, tenantId: string, tenantName: string, have: ModuleKey[], ask: Ask, viewer: Viewer,
-  /* §439: whose bar this is — a consultant gets the trail, and the office
+  /* §444: whose bar this is — a consultant gets the trail, and the office
      may pick whose eyes the page is drawn through */
   top: { consultant?: boolean; viewer?: TopViewer | null } = {},
 ): Promise<string> {

@@ -476,7 +476,7 @@ try {
      the module is served over a real port — the same serve() the route calls
      — and Chromium presses the controls while the DATABASE is read back. */
   section("§9 · a note taken, refined and sent, pressed in a browser");
-  /* §439: the shared top bar loads /topbar.js, which the app serves from its
+  /* §444: the shared top bar loads /topbar.js, which the app serves from its
      own route (app/topbar.js/route.ts) — served here from the same string, or
      the page's one script answers with this server's 404 and every press
      below reports a page error that is the harness's, not the product's. */

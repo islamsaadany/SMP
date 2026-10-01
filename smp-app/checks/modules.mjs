@@ -186,7 +186,7 @@ const argsFor = (module, rest) => ({
      a module the office alone may open (the Internal Tracker, spec 054) draws
      its page here rather than its refusal. */
   personKey: "islam", seat: "super",
-  /* ...and a CONSULTANT (§439): only Forefront's own people get the shared
+  /* ...and a CONSULTANT (§444): only Forefront's own people get the shared
      bar's trail, which is where the module menu below lives. A client's own
      person is asserted separately, in §5b. */
   consultant: true, me: { personKey: "islam", seat: "super" },
@@ -613,7 +613,7 @@ for (const k of OWN_PAGE) {
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`
      (lib/shell.ts SHELL_CSP): an inline script or handler here would render
-     perfectly and never run. REWRITTEN, NEVER LOOSENED (§218, §439): it said
+     perfectly and never run. REWRITTEN, NEVER LOOSENED (§218, §444): it said
      `<script` at all, which was the same claim while a module page carried
      no script — the shared top bar loads ONE FILE (`/topbar.js`), which the
      policy admits, so what is asserted is still that nothing INLINE needs to
@@ -622,7 +622,7 @@ for (const k of OWN_PAGE) {
   check("nothing inline needs a script, or the policy would silence it — " + k,
     scripts.every((t) => /\bsrc=/.test(t) && /<script\b[^>]*>\s*<\/script>/i.test(t)) && !/\son[a-z]+=/i.test(doc),
     scripts.join(" "));
-  /* §439: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
+  /* §444: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
      steps, the theme switch and Sign out — and its script, or the menus and
      the switch would be drawn and dead (§96). */
   check("it wears the shared top bar, trail and all — " + k,
@@ -632,7 +632,7 @@ for (const k of OWN_PAGE) {
     !/class="bar"|class="msw"|class="mmenu"/.test(doc));
   check("...and the page's dark colours answer the switch, not only the device — " + k,
     /:root\[data-theme="dark"\]\{/.test(doc) && !/@media \(prefers-color-scheme:dark\)\{:root\{/.test(doc));
-  /* 5b · A CLIENT'S OWN PERSON (§439, Islam: "they don't get it it's only for
+  /* 5b · A CLIENT'S OWN PERSON (§444, Islam: "they don't get it it's only for
      the consutlants"). No trail and no module menu — and still a way back
      into their platform, or a page reached by its address is a room with no
      door (§61). Both ends, or a build that dropped the trail for everybody

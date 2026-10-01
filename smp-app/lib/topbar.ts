@@ -1,4 +1,4 @@
-/* ── ONE TOP BAR FOR EVERY MODULE (§439) ──────────────────────────────────
+/* ── ONE TOP BAR FOR EVERY MODULE (§444) ──────────────────────────────────
    Islam, of Strategy's bar: *"we need to maintain this top bar across all the
    modules as this would be the main navigation bar across all the module and
    clients."* Measured first: Strategy and the settings pages drew the trail
@@ -181,7 +181,7 @@ export function themedCss(css: string): string {
   return out + css.slice(last);
 }
 
-export const TOPBAR_SCRIPT = `/* §439 — the top bar every module draws (lib/topbar.ts). */
+export const TOPBAR_SCRIPT = `/* §444 — the top bar every module draws (lib/topbar.ts). */
 (function () {
   var KEY = "smp.theme";
   function read() {

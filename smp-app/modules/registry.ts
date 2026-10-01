@@ -65,7 +65,7 @@ export type ServeArgs = {
      client, and null where the door resolved no membership at all. */
   personKey: string | null;
   seat: "super" | "smoteam" | "none" | null;
-  /* §439, THE SHARED TOP BAR. `consultant` is a Forefront session (kind not
+  /* §444, THE SHARED TOP BAR. `consultant` is a Forefront session (kind not
      "client") — only they get the trail. `me` is who SIGNED IN, before any
      view-as narrowing: the bar's Viewing as is offered by the signed-in seat,
      never by the seat being looked through (lib/view-as.ts maySimulate). Both

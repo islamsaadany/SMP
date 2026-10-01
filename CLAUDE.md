@@ -10656,7 +10656,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 — **§439: one top bar for every module.** Insights, the Tracker and Notes draw Strategy's white bar through `smp-app/lib/topbar.ts` (trail for consultants only, Viewing as on Insights only, client staff get name + company + theme + Sign out); the navy module bars and the four-square switcher are gone; the bar's script is served as `/topbar.js`. modules 181/0 red nine ways, notes 170/0, insights 137/0, shell 142/0, door 145/0. On the branch, not merged.*
+*Last Updated: 2026-10-01 — **§444: one top bar for every module.** Insights, the Tracker and Notes draw Strategy's white bar through `smp-app/lib/topbar.ts` (trail for consultants only, Viewing as on Insights only, client staff get name + company + theme + Sign out); the navy module bars and the four-square switcher are gone; the bar's script is served as `/topbar.js`. modules 181/0 red nine ways, notes 170/0, insights 137/0, shell 142/0, door 145/0. On the branch, not merged.*
 
 *Earlier: 2026-09-30 — **§438: a business unit says how it plans in Client set-up.** The Business units step gains the functions row's own *plans in* dropdown (Pillars · Projects · Objectives & actions), Pillars by default and stored as an absence; on a client with a plan it goes through `switchPlanWay("unit")` (warning, hide and keep), otherwise it rides the flow's answer and `__smpShape` writes it after the carry. `setup-live-rows.py` §6 red 7, `setup-shape.mjs` §10 red 2 from the sources. Merged to `main` 2026-09-30 on Islam's word.*
 

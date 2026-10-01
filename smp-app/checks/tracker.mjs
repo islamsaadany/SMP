@@ -487,7 +487,7 @@ try {
      presses the controls while the DATABASE is read back (§70, §96). */
   section("§10 · the next empty line, pressed in a browser — and every press silent");
   const { createServer } = await import("node:http");
-  /* §439: the shared top bar loads /topbar.js, which the app serves from its
+  /* §444: the shared top bar loads /topbar.js, which the app serves from its
      own route (app/topbar.js/route.ts) — served here from the same string, or
      the page's one script answers with this server's 404 and every press
      below reports a page error that is the harness's, not the product's. */

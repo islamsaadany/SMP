@@ -61073,7 +61073,7 @@ on `origin/main`'s own worktree** and their files are untouched here (§303).
 Nothing about how a save is judged moved, so no forced sign-out is owed.
 
 
-## §457 — Processes: FFProcess carried in, its people from the register (2026-10-01, spec 065)
+## §459 — Processes: FFProcess carried in, its people from the register (2026-10-01, spec 065)
 
 Islam: *"we need to bring this Process module with all it's data and deisgn even to the SMP"*, then *"A, keep its design, smp client register, office only, RHI"*. FFProcess is ported into the Next app as the **Processes** module: its own pages under `app/(ffp)/`, its own tables in a `ffprocess` schema, one workspace per client keyed by the client's slug, its look kept under SMP's shared top bar. **The seat decides, not FFProcess's own membership**: the office (`super`, `smoteam`) acts as the workspace's admin and anybody else is refused at the door (`OFFICE_ONLY`).
 

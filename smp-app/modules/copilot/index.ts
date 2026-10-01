@@ -273,6 +273,10 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
    built by the tab from the platform's own readers — and it is only ever
    material for the prompt: nothing is stored from it and nothing is decided
    by it. */
+/* What the tab sends of the plan (§457): the place's own written words, the
+   chat's section first, so a long plan loses the far sections and never the
+   one being asked about. A whole unit's plan is ~8,000 characters. */
+const MAX_CONTEXT = 24_000;
 async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const id = String(b.id || "");
   if (!UUID.test(id)) return refused(400, "Which chat?");
@@ -306,7 +310,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   const r = configured()
     ? await askCopilot({ method, templates: templateNamesFor(chat.section),
         section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
-        context: String(b.context ?? "").slice(0, 6000), question, pasted,
+        context: String(b.context ?? "").slice(0, MAX_CONTEXT), question, pasted,
         history: material.history, assumptions: material.assumptions, files: material.files,
       })
     : { ok: false as const, noKey: true, why: "no key is set" };

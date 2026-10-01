@@ -61072,3 +61072,57 @@ new-client top level) and `check:frameworks:page` (1/14) are red **identically
 on `origin/main`'s own worktree** and their files are untouched here (§303).
 Nothing about how a save is judged moved, so no forced sign-out is owed.
 
+
+## §457 — the Copilot reads the plan's own words, and asks a busy provider once more (2026-10-01)
+
+Islam, testing the merged Copilot on Mobile's Foundation: *"it says there is no
+winning aspiration text while there is already in the plan and then I got this
+message"* — and then *"yes build both"*.
+
+**THE COPILOT WAS RIGHT ABOUT WHAT IT HAD BEEN GIVEN.** §452 sent each question
+with the one line above the chat — the place, its counts, the cycle, the
+measures off track — and the pillar names on its hover. Never a sentence
+anybody wrote: no Winning Aspiration, no End in mind, no Who we are, no SWOT,
+no targets. So on a Foundation chat it worked blind on the very thing asked
+about, and said so honestly. The gap was ours.
+
+**EACH QUESTION NOW CARRIES THE PLACE'S WRITTEN PLAN**, read off the object the
+page renders (`unitLike`, so a pillars function and a pillars capability come
+too): the Foundation (aspiration with its horizon, end in mind, Who we are,
+key objectives with target, 3-year target and figure), the SWOT, each pillar
+with its measures, and the tactics with owner, quarters, status and outcome.
+Two shapes `unitLike` does not cover are read where they live (`sourceOf`): the
+group's Foundation is on `GROUP` (§428's `topAsUnit` carries only its pillars
+and SWOT), and a function or capability planning in projects or actions is
+read off the function or capability and its holders (`fnHolders`, §326, §342).
+**Hidden rows are left out** exactly as every score leaves them out (§233).
+**The chat's own section goes first**, so the server's cap trims the far
+sections and never the one asked about; the cap goes 6,000 → 24,000 characters
+because Mobile's plan alone is ~6,600 and the old cap would have cut the
+aspiration's neighbours on a bigger unit. **The info line says so** — *"· the
+plan's own text"* — so what the Copilot was given stays visible (§124).
+Nothing is stored from it and nobody's access moves: the tab only ever reads a
+place the person already has open.
+
+This is wider than the sentence put to Islam (*"the section the chat is in"*),
+and deliberately: a Directions question needs the aspiration it serves, so the
+whole plan goes with the chat's section leading rather than the section alone.
+
+**A BUSY PROVIDER IS ASKED ONCE MORE BEFORE ANYBODY IS TOLD.** The red line in
+his third screenshot was Google's own *"503: This model is currently
+experiencing high demand"*, not the platform. `askCopilot` now retries once,
+after 2.5s, on 429/500/502/503/504 only — never on a refusal of the question
+or the key, which a second ask would only repeat — and never more than once,
+so a person's message is held for seconds, not minutes. Busy answers come back
+fast, so two asks stay inside one request's life. The chat corner's own
+assistant (§104) is untouched.
+
+**PROVED ABLE TO FAIL, BOTH HALVES.** `checks/copilot.mjs` 125/0: a 503 then an
+answer gives the answer from exactly two asks; a 404 is asked once and said;
+two busy answers are a failure after exactly two asks; a 15,000-character
+Foundation reaches the model whole. Red under the new `no-retry` break (2) and
+with the cap put back at 6,000 (1). `checks/shell.mjs` §3f 197/0 asserts on the
+served app that the request the model received carries Mobile's own stored
+aspiration — read from the tenant, never a literal — and goes red (1) with the
+plan text removed from what the tab sends. `qa.py` ERRORS none,
+`check:modules` 230/0, `built-in-step` all good, typecheck clean.

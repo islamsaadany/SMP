@@ -401,7 +401,7 @@ try {
     let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
       let j = null; try { j = JSON.parse(b); } catch { j = null; }
       seen.push({ url: req.url, key: req.headers["x-goog-api-key"], body: j });
-      const n = NEXT || { answer: { reply: "ok" } };
+      const n = (Array.isArray(NEXT) ? NEXT.shift() : NEXT) || { answer: { reply: "ok" } };
       if (n.status) { res.writeHead(n.status, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { message: "stand-in refused" } })); return; }
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(n.answer) }] } }] }));
@@ -410,6 +410,7 @@ try {
   await new Promise((r) => stand.listen(0, "127.0.0.1", r));
   process.env.GEMINI_ENDPOINT = "http://127.0.0.1:" + stand.address().port + "/models/";
   process.env.GEMINI_API_KEY = "stand-in-key";
+  process.env.SMP_COPILOT_RETRY_MS = "0";
   try {
     const ch = (await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis", title: "Q3 SWOT" }, NORAN)).j.chat;
     const b64 = (buf) => buf.toString("base64");
@@ -498,13 +499,40 @@ try {
     const notPaste = await call("POST", "api", { act: "savePasted", id: ch.id, messageId: me.id, section: "analysis" }, NORAN);
     check("...and a message that was NOT pasted cannot be saved that way — judged on the stored row (§42)", notPaste.st === 400 && /not pasted/.test(notPaste.j.why));
 
+    /* §457: THE PLAN'S OWN WORDS REACH THE MODEL WHOLE. The tab now sends the
+       place's written plan, ~8,000 characters for a unit, and the old 6,000
+       cap would have cut the very sentence Islam asked about. */
+    NEXT = { answer: { reply: "Read it." } };
+    const longCtx = "Mobile · 4 pillars · the plan's own text\n\nTHE PLAN AS WRITTEN:\nFOUNDATION\nWinning Aspiration: " + "x".repeat(15000) + " ASPIRATION-END";
+    await call("POST", "api", { act: "say", id: ch.id, text: "Can we enhance the winning aspiration?", context: longCtx, placeWord: "Mobile" }, NORAN);
+    const sysL = seen[seen.length - 1].body.systemInstruction.parts.map((p) => p.text).join("");
+    check("the place's written plan reaches the model whole — a 15,000-character Foundation is not cut", /ASPIRATION-END/.test(sysL) && /THE PLAN AS WRITTEN/.test(sysL));
+
+    /* §457: A BUSY PROVIDER IS ASKED ONCE MORE. Both ends (§94.2): a 503 then
+       an answer gives the answer, from two asks; a refusal that is not "busy"
+       is asked once; and busy twice is a failure after exactly two asks. */
+    NEXT = [{ status: 503 }, { answer: { reply: "Second time lucky." } }];
+    const b0 = seen.length;
+    const r1 = await call("POST", "api", { act: "say", id: ch.id, text: "Busy then fine" }, NORAN);
+    const a1 = r1.j.messages[r1.j.messages.length - 1];
+    check("a 503 is asked again once, and the person sees the answer, not the refusal",
+      seen.length === b0 + 2 && a1.part.kind === "answer" && a1.body === "Second time lucky.", seen.length - b0 + " asks · " + JSON.stringify(a1).slice(0, 160));
+    NEXT = [{ status: 404 }, { answer: { reply: "never reached" } }];
+    const b1 = seen.length;
+    const r2 = await call("POST", "api", { act: "say", id: ch.id, text: "Not a busy refusal" }, NORAN);
+    check("...a refusal that is not 'busy' is asked once only, and said",
+      seen.length === b1 + 1 && r2.j.messages[r2.j.messages.length - 1].part.kind === "failed", seen.length - b1 + " asks");
+    NEXT = null;
+
     NEXT = { status: 500 };
+    const b2 = seen.length;
     const n0 = (await asTenant(A, (c) => messagesOf(c, ch.id))).length;
     const s4 = await call("POST", "api", { act: "say", id: ch.id, text: "One more question" }, NORAN);
     const last4 = s4.j.messages[s4.j.messages.length - 1];
     check("when the AI fails, what was typed is kept and the product says so — never a pretend answer",
       s4.st === 200 && s4.j.messages.length === n0 + 2 && s4.j.messages[s4.j.messages.length - 2].body === "One more question" &&
       last4.part.kind === "failed" && /could not answer just now/.test(last4.body) && /send it again/.test(last4.body), JSON.stringify(last4));
+    check("...after exactly two asks — once, then once more, never a loop", seen.length === b2 + 2, seen.length - b2 + " asks");
     delete process.env.GEMINI_API_KEY;
     const before = seen.length;
     const s5 = await call("POST", "api", { act: "say", id: ch.id, text: "And with no key?" }, NORAN);
@@ -512,7 +540,7 @@ try {
     const chat5 = await call("GET", "chat", null, NORAN, "?id=" + ch.id);
     check("...and the chat reports that the AI is off", chat5.j.aiOn === false);
   } finally {
-    delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_ENDPOINT;
+    delete process.env.GEMINI_API_KEY; delete process.env.GEMINI_ENDPOINT; delete process.env.SMP_COPILOT_RETRY_MS;
     await new Promise((r) => stand.close(r));
   }
 

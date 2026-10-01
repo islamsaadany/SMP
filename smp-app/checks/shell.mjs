@@ -844,6 +844,14 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const sys = sent && sent.systemInstruction ? sent.systemInstruction.parts.map((x) => x.text).join("") : "";
     check(MODEL_SEEN.length === seen0 + 1 && /THIS SECTION PRODUCES: The place's foundation/.test(sys) && sys.includes(ctxLine) && /=== FILE: notes\.docx ===/.test(sys),
       "the model was asked once, with the section's guidance, the tab's own line and the file", sys.slice(0, 160));
+    /* §457: the place's WRITTEN plan travels with the question. Islam was told
+       Mobile had no Winning Aspiration while the Foundation held one, because
+       only names and counts went. Asserted against the tenant's own stored
+       words, never a literal (§94.8), with the words asserted present first or
+       an empty aspiration passes the "includes" half by default (§113.8). */
+    const asp = await page.evaluate(() => { try { return String((UNITS.mobile || {}).aspiration || "").replace(/\s+/g, " ").trim(); } catch (e) { return ""; } });
+    check(asp.length > 20 && /THE PLAN AS WRITTEN/.test(sys) && sys.includes(asp.slice(0, 60)) && /the plan's own text/.test(ctxLine),
+      "…and Mobile's own Winning Aspiration went with it, the line saying the plan's text is included (§457)", asp.slice(0, 60));
     const ans = await page.evaluate(() => {
       const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
       return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,

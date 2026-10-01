@@ -157,11 +157,13 @@ export type AskResult = { ok: true; reply: string; part: Answer } | { ok: false;
 /* The one call. A PDF rides as a document on the question; everything else
    is text in the corpus. The timeout is the drafting one — a draft is not a
    lookup (§134's own distinction) — and thinking is allowed. */
+const BUSY = new Set([429, 500, 502, 503, 504]);
+const RETRY_MS = () => { const n = Number(process.env.SMP_COPILOT_RETRY_MS); return Number.isFinite(n) && n >= 0 ? n : 2500; };
 export async function askCopilot(a: AskInput): Promise<AskResult> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
   const pdfParts = a.files.filter((f) => f.kind === "pdf" && f.bytes && f.bytes.length)
     .map((f) => ({ inlineData: { mimeType: "application/pdf", data: f.bytes!.toString("base64") } }));
-  const r = await A.askJson({
+  const call = () => A.askJson({
     question: a.question,
     history: a.history,
     schema: SCHEMA,
@@ -174,6 +176,18 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
     maxOutput: 8192,
     timeoutMs: 55_000,
   });
+  /* A BUSY PROVIDER IS ASKED ONCE MORE BEFORE ANYBODY IS TOLD (Islam,
+     2026-10-01, after a 503 "high demand" reached him mid-conversation).
+     Only the statuses that mean "not now" — never a refusal of the question
+     or the key, which a second ask would only repeat — and only once, after
+     a short pause, because a spike is usually seconds long and a loop would
+     hold the person's message for minutes. Such an answer comes back fast,
+     so two asks stay well inside one request's life. */
+  let r = await call();
+  if (!r.ok && BUSY.has(Number((r as { status?: number }).status)) && process.env.SMP_BREAK !== "no-retry") {
+    await new Promise((res) => setTimeout(res, RETRY_MS()));
+    r = await call();
+  }
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
   const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
   if (!shaped) return { ok: false, why: "the answer had nothing in it" };

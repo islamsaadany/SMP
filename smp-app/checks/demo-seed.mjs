@@ -18,6 +18,7 @@
    Re-runnable: it seeds the demo tenant each time, with --replace. */
 import { createRequire } from "node:module";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
+import { PLATFORM_TABLES } from "../lib/schema-check.ts";  /* not a tenant's, so not fenced (§331, §442.13) */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
@@ -50,11 +51,25 @@ try {
      NAME, which is the one kind of query a `search_path` cannot help — so
      §317.4 correctly moved this pool's path at line 37 and left this query
      naming the room the tables had just left. It then found nought tables and
-     scanned nothing, and a scan of nothing finds no forbidden name. */
+     scanned nothing, and a scan of nothing finds no forbidden name.
+     AND CARRYING A `tenant_id` IS NOT THE SAME AS BEING A TENANT'S (§442.13):
+     `tenant_users` and `memory_entries` carry one and are the PLATFORM's, so
+     row-level security deliberately does not fence them (§331) — and this
+     scan runs under `withTenant`, whose narrowing IS that fence, so on those
+     tables it read every tenant's rows and attributed them to the demo: 102
+     hits, of which the first was a consultant's seat on somebody else's
+     client. §330's fault turned inside out — *a scan whose narrowing is not
+     there reports the whole platform as this tenant's* — and both halves have
+     one root, the list being derived from a COLUMN rather than from the
+     product's own answer to which tables are a tenant's. That answer exists,
+     is shared, and is asserted against `db/schema.sql`'s own loop
+     (`PLATFORM_TABLES`, §331), so it is IMPORTED rather than listed
+     (§104.7). */
   const tables = (await owner.query(
     "SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace " +
     "JOIN pg_attribute a ON a.attrelid = c.oid AND a.attname = 'tenant_id' " +
-    "WHERE n.nspname = $1 AND c.relkind = 'r' ORDER BY c.relname", [SCHEMA])).rows.map((x) => x.relname);
+    "WHERE n.nspname = $1 AND c.relkind = 'r' AND NOT (c.relname = ANY($2)) " +
+    "ORDER BY c.relname", [SCHEMA, PLATFORM_TABLES])).rows.map((x) => x.relname);
   check(tables.length > 25, "and there are tenant-owned tables to scan at all", tables.length);
 
   /* THE MATCHING RULE IS THE FROZEN SCRIPT'S, ASKED AND NOT REWRITTEN

@@ -240,9 +240,19 @@ async function asTenant(tenantId, fn) {
 }
 
 let failed = false;
+/* THE STAMP IS OUT HERE SO THE `finally` CAN CLEAR THE FIXTURE (§442.15).
+   The line that drops it said *"the fixture goes, whatever happened above"*
+   and sat inside the `try`, so a THROW skipped it — §104.8, a comment
+   describing an intention the code beneath it does not carry out, and the
+   throw is the case a check meets most often on a day when the app will not
+   start. Two clients per surviving run is not untidiness: the console's
+   Memory page defaults to the first client BY NAME, so leftovers move what
+   another check measures (§442.15's own finding, next door). */
+let stamp_ = null;
 try {
   await owner("SET search_path TO " + SCHEMA);
   const stamp = "chk" + Date.now().toString(36);
+  stamp_ = stamp;
   const [a] = await owner(
     "INSERT INTO " + SCHEMA + ".tenants (key, name) VALUES ($1, $2) RETURNING id", [stamp + "-a", "Client A"]);
   const [b] = await owner(
@@ -718,9 +728,6 @@ section("§14 · which filters a person is offered (§385)");
   check("a client with nothing published is offered no filters",
     freshC.length === 0, freshC.join(" · ") || "(none)");
 }
-
-  /* the fixture goes, whatever happened above (§94.2) */
-  await owner("DELETE FROM " + SCHEMA + ".tenants WHERE key LIKE $1", [stamp + "%"]);
 } catch (e) {
   /* A RUN THAT DIED SAID "0 failed" (§298.3, §215). The summary counts `bad`
      and this branch only set a flag, so a falsification that CRASHED the run
@@ -732,6 +739,8 @@ section("§14 · which filters a person is offered (§385)");
   bad.push("the run itself — " + (e && e.message));
   console.log("\n  FAIL the run itself — " + (e && e.message));
 } finally {
+  /* the fixture goes, whatever happened above (§94.2, §442.15) */
+  if (stamp_) await owner("DELETE FROM " + SCHEMA + ".tenants WHERE key LIKE $1", [stamp_ + "%"]).catch(() => {});
   await pool.end();
   await endPools().catch(() => {});
 }

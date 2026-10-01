@@ -283,8 +283,17 @@ for (const k of BUILT_EXTRA) {
     whereOf(clientHref("raya-trade", k, "").split("/").slice(2), HAVE_BOTH).module === k,
     clientHref("raya-trade", k, ""));
 }
+/* AND THE UNBUILT ONE IS DERIVED, never typed (§214.3, §218). It named
+   `portfolio` outright and went red the day that module was built — which is
+   a check arguing with a decision rather than guarding one. What survives a
+   module being built is the RULE: a word MODULES reserves and MODULE_DEF has
+   not built is not an address, whichever word it is. With none left unbuilt
+   the assertion says so rather than passing over an empty list (§113.8).
+   `UNBUILT` is the file's own, declared at the top — a second `const` here
+   was §56.7's collision, caught by the parser rather than by reading. */
 check("an unbuilt module's word is not an address either",
-  whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
+  UNBUILT.length > 0 && UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : "none left unbuilt — this assertion has nothing to stand on");
 check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 /* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's
@@ -612,16 +621,30 @@ for (const k of OWN_PAGE) {
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`
-     (lib/shell.ts SHELL_CSP): an inline script or handler here would render
-     perfectly and never run. REWRITTEN, NEVER LOOSENED (§218, §444): it said
-     `<script` at all, which was the same claim while a module page carried
-     no script — the shared top bar loads ONE FILE (`/topbar.js`), which the
-     policy admits, so what is asserted is still that nothing INLINE needs to
-     run: every <script> has a src and an empty body, and no on*= handler. */
-  const scripts = doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || [];
+     (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
+     and never run, so the switcher is a <details> and this asserts it stays
+     one.
+
+     REWRITTEN, NEVER LOOSENED (§218, §214.3). It asked for no `<script` of any
+     kind, which was true of every module while none of them had behaviour and
+     went red the day Portfolio served its own — a check arguing with a
+     decision rather than guarding one, and arguing with the very route the
+     policy EXISTS to leave open. What the policy forbids is the INLINE kind:
+     an `onclick=` and a <script> with a body. A `<script src>` from this
+     origin is what `'self'` means, so it is asserted to be served that way
+     rather than asserted absent, which is the both-ends version of the same
+     rule (§94.2) — a module that stopped serving its behaviour at all would
+     satisfy a bare absence perfectly (§113.8). */
   check("nothing inline needs a script, or the policy would silence it — " + k,
-    scripts.every((t) => /\bsrc=/.test(t) && /<script\b[^>]*>\s*<\/script>/i.test(t)) && !/\son[a-z]+=/i.test(doc),
-    scripts.join(" "));
+    !/\son[a-z]+\s*=/i.test(doc) && !/<script(?![^>]*\ssrc=)/i.test(doc),
+    (doc.match(/<script[^>]*>/g) || []).join(" "));
+  check("...and any script it does serve comes from this origin, which is what `'self'` means — " + k,
+    (doc.match(/<script[^>]*>/g) || []).every((t) => /\ssrc="\/[^"]*"/.test(t)),
+    (doc.match(/<script[^>]*>/g) || []).join(" ") || "(no script — vacuously true)");
+  /* §444: and the one script the shared bar brings is a FILE with nothing
+     inside the tag, the both-ends half of main's rule above. */
+  check("...and no script carries a body, src or not — " + k,
+    (doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /<script\b[^>]*>\s*<\/script>/i.test(t)));
   /* §444: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
      steps, the theme switch and Sign out — and its script, or the menus and
      the switch would be drawn and dead (§96). */

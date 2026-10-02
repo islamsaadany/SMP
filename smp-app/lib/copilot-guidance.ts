@@ -58,7 +58,7 @@ type Guide = { produces: string; roads: string[] };
 export const GUIDE: Record<Section, Guide> = {
   foundation: {
     produces: "The place's foundation: purpose, aspiration, north star and values.",
-    roads: ["Guided questions", "Upload notes", "Template", "Import a finished foundation", "Deep-research prompt"],
+    roads: ["Guided questions", "Upload notes", "Template", "Import a finished foundation"],
   },
   analysis: {
     produces: "Analysis: a SWOT, a macro or market scan, an internal analysis.",

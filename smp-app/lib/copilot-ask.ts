@@ -208,6 +208,16 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
      Only the statuses that mean "not now" — a refusal of the question or the
      key would only be repeated — and a busy answer comes back fast, so the
      whole ladder stays well inside one request's life. */
+  const r = await withRetry(call);
+  if (!r.ok) return { ok: false, why: r.why || "no answer" };
+  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
+  if (!shaped) return { ok: false, why: "the answer had nothing in it" };
+  return { ok: true, reply: shaped.reply, part: shaped.part };
+}
+
+/* The ladder, shared by every ask the Copilot makes (§465): the guided
+   Foundation's draft, refine and check are asked of the same busy provider. */
+async function withRetry(call: (model?: string) => Promise<any>): Promise<any> {
   const busy = (x: { ok: boolean }) => !x.ok && BUSY.has(Number((x as { status?: number }).status));
   let r = await call();
   if (busy(r) && process.env.SMP_BREAK !== "no-retry") {
@@ -217,8 +227,20 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
       if (f.ok) r = f;
     }
   }
+  return r;
+}
+
+/* ONE SMALL ASK IN ONE SMALL SHAPE (§465): the guided Foundation's draft,
+   refine and check. No history — what the flow knows is in the corpus. */
+export async function askFlowJson(a: { instruction: string; corpus: string; question: string; schema: unknown }):
+  Promise<{ ok: true; json: any } | { ok: false; why: string; noKey?: boolean }> {
+  if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
+  const call = (model?: string) => A.askJson({
+    question: a.question, history: [], maxTurns: 0, schema: a.schema, needsCorpus: false,
+    instruction: a.instruction, corpusName: "THIS FOUNDATION", corpusText: a.corpus, parts: [],
+    think: true, maxOutput: 4096, timeoutMs: 55_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
-  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
-  if (!shaped) return { ok: false, why: "the answer had nothing in it" };
-  return { ok: true, reply: shaped.reply, part: shaped.part };
+  return { ok: true, json: r.json };
 }

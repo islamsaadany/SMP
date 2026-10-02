@@ -113,10 +113,10 @@ export function oneLine(v: unknown): string { return str(v).replace(/\s+/g, " ")
 /* `archived` is when it was archived, or "" — stored in `extra` as an
    ABSENCE (§50.6), so no migration and a restored chat is byte-shaped like
    one never archived. */
-export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number; archived: string };
-const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at, c.extra->>'archivedAt' AS archived";
+export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number; archived: string; guided: boolean };
+const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at, c.extra->>'archivedAt' AS archived, (c.extra ? 'flow') AS guided";
 const chatOf = (r: any): Chat => ({ id: str(r.id), place: str(r.place), section: r.section, title: str(r.title),
-  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0, archived: str(r.archived) });
+  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0, archived: str(r.archived), guided: r.guided === true });
 
 /* The live list, or (`archived`) the archived one — never both at once, so
    the rail draws exactly one of them. */
@@ -150,7 +150,7 @@ export async function oneChat(c: Q, id: string): Promise<Chat | null> {
 export async function newChat(c: Q, a: { place: string; section: Section; title: string; by: string }): Promise<Chat> {
   const r = await c.query(
     "INSERT INTO copilot_chats (place, section, title, created_by) VALUES ($1, $2, $3, $4) " +
-    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count, '' AS archived",
+    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count, '' AS archived, false AS guided",
     [a.place, a.section, a.title, a.by]);
   return chatOf(r.rows[0]);
 }

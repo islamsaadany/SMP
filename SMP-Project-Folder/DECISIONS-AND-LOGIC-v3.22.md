@@ -61287,3 +61287,52 @@ and seen to change on the same element. One older assertion read the first
 asks for the recommended quick reply instead (§218, rewritten not loosened).
 Built file and served copies regenerated, `sw.js` → `smp-shell-v5.86-save-working`.
 
+
+## §468 — The guided Foundation flow (2026-10-02)
+
+Islam, of the approved mockup (`design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html`,
+Option A): **"ok approved, build it"**. Numbered §468 because `main` has taken
+§464–§467 for other work while this branch was in flight; this branch's own
+§462–§464 will need renumbering at the merge (§264.3), which is Islam's word.
+
+**What it is.** A Copilot chat in the Foundation section can run as a guided
+flow: pick the years first, then one of four roads (Guided is marked
+Recommended; there is no deep research in the Foundation, his correction of
+the first drawing), then each of the five parts — Who we are, Purpose,
+Aspiration, Key objectives, Core values — is asked one question at a time with
+three examples under each. An answer under 15 characters gets a nudge rather
+than a refusal. When a part's questions are done the answers come back in
+editable boxes, then **Draft**, then refine by one of three buttons or by
+typing, then **Save and continue to <next>**. At the end a consistency check
+lists what agrees and what does not, with **Go back to <part>** for each
+issue, and **Save as Foundation — <place> vN** keeps the result as a
+deliverable; each run adds a new version.
+
+**The layout.** Three columns: the rail, the five element cards (Core values
+full width), and the chat. A Claude-style button hides the rail to a 44px strip
+carrying a "+"; the choice is remembered per browser (`localStorage`, wrapped).
+The composer is unchanged.
+
+**Stored on the chat, cut to shape on the server.** The flow lives in
+`copilot_chats.extra.flow` — no migration — and `sanitizeFlow`
+(`lib/copilot-flow.ts`) keeps only the known keys and lengths, so a browser
+cannot store anything the flow does not use. Four server acts drive it:
+`newFlow`, `flowSave`, `flowDraft`/`flowRefine`/`flowCheck` (one model call
+each, answering a fixed shape) and `flowFinish`, which writes the version
+through the same writer every deliverable uses. The office's alone, as every
+Copilot act is.
+
+**One fault found by driving it.** An edit in an answer box was shown and not
+stored until the next press — a box left after typing wrote nothing. Each box
+now saves when the cursor leaves it (§35's rule), and the check edits, leaves
+and reads the database.
+
+**Checks.** `check:copilot` 175/0, red under four server breaks. `check:shell`
+236/0 with a new section 3i driving the whole flow in a browser and reading the
+stored flow and the saved version from Postgres; red three ways from the
+sources (roads before the years, no nudge, an answer box not kept). Two older
+assertions pressed the first new-chat button on the page, which is now the
+hidden strip's "+"; scoped to the rail's own head (§51.11). One read the rail a
+moment too early after a save and now waits for it. `qa.py` ERRORS none;
+`check:modules` 233/0, `door-landing` 145/0. Built file and served copies
+regenerated, `sw.js` → `smp-shell-v5.88-guided-foundation`.

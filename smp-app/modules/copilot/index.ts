@@ -30,7 +30,12 @@ import {
   saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
-import { askCopilot, isPasted, configured } from "../../lib/copilot-ask.ts";
+import { askCopilot, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
+import {
+  FLOW_ELEMENTS, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
+  flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
+  saveFoundation, nextFoundationVersion,
+} from "../../lib/copilot-flow.ts";
 import { methodFor, templateNamesFor, partsOf, templatesOf, templateFile, savePart, saveTemplate, resetAsset, MAX_TEMPLATE } from "../../lib/copilot-settings.ts";
 import { shellHeaders } from "../../lib/shell.ts";
 import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
@@ -101,8 +106,14 @@ export async function serve(a: ServeArgs): Promise<Response> {
       if (!UUID.test(id)) return no(400, "Which chat?");
       const got = await withTenant(a.tenantId, async (c) => {
         const chat = await oneChat(c, id);
-        return chat ? { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
-          pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured() } : null;
+        if (!chat) return null;
+        /* A GUIDED FOUNDATION carries its state and its questions (§465): the
+           screen draws the questions the server will draft from (§53.5). */
+        const flow = await flowOf(c, id);
+        const pw = oneLine(q("placeWord")).slice(0, 120);
+        return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
+          pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
+          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -138,6 +149,10 @@ export async function serve(a: ServeArgs): Promise<Response> {
       const r = await sayFlow(a.tenantId, body, who);
       return json(r.status, r.body);
     }
+    if (body.act === "flowDraft" || body.act === "flowRefine" || body.act === "flowCheck") {
+      const r = await flowAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
     const out = await withTenant(a.tenantId, (c) => act(c, body, who));
     return json(out.status, out.body);
   } catch (e) {
@@ -153,6 +168,7 @@ type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
 const refused = (status: number, why: string): Out => out(status, { ok: false, why });
 const ARCHIVED = "This chat is archived. Restore it to keep talking.";
+const SAVED_ALREADY = "This Foundation is saved. Start a new guided run to make the next version.";
 const TOO_LONG = "That is longer than about thirty pages, so it was not kept. Send it in parts.";
 
 async function act(c: Q, b: any, who: Who): Promise<Out> {
@@ -165,6 +181,15 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const title = oneLine(b.title).slice(0, MAX_TITLE) || ("New " + SECTION_WORD[section].toLowerCase() + " chat");
     const chat = await newChat(c, { place, section, title, by });
     return out(200, { ok: true, chat });
+  }
+  if (kind === "newFlow") {
+    /* A GUIDED FOUNDATION (§465): a Foundation chat that carries a flow. */
+    const place = String(b.place || "");
+    if (!isPlace(place)) return refused(400, "Which place?");
+    const chat = await newChat(c, { place, section: "foundation", title: oneLine(b.title).slice(0, MAX_TITLE) || "Guided Foundation", by });
+    const flow = newFlow();
+    await writeFlow(c, chat.id, flow);
+    return out(200, { ok: true, chat: { ...chat, guided: true }, flow });
   }
   if (kind === "newDeliverable") {
     const place = String(b.place || ""), section = String(b.section || "");
@@ -257,6 +282,28 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       : refused(400, "Archive the chat first; only an archived chat can be deleted.");
     await deleteChat(c, id);
     return out(200, { ok: true });
+  }
+
+  if (kind === "flowSave" || kind === "flowFinish") {
+    const chat = await oneChat(c, id);
+    if (!chat) return refused(404, "That chat is not here any more.");
+    if (chat.archived) return refused(400, ARCHIVED);
+    const stored = await flowOf(c, id);
+    if (!stored) return refused(400, "This is not a guided Foundation chat.");
+    if (stored.saved && brk() !== "flow-reopen") return refused(400, SAVED_ALREADY);
+    if (kind === "flowSave") {
+      const f = sanitizeFlow(b.flow, stored);
+      await writeFlow(c, id, f);
+      return out(200, { ok: true, flow: f });
+    }
+    /* SAVED AS A VERSION OF "Foundation — <place>" — only when all five parts
+       are agreed, asked of the STORED flow (§42), never of the page. */
+    if (!(stored.done.every(Boolean) || brk() === "finish-any")) return refused(400, "All five parts need a draft you have agreed before the Foundation can be saved.");
+    const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
+    const s = await saveFoundation(c, chat, stored, placeWord, by);
+    const f: Flow = { ...stored, phase: "saved", saved: { deliverableId: s.deliverableId, n: s.n, title: s.title } };
+    await writeFlow(c, id, f);
+    return out(200, { ok: true, flow: f, saved: f.saved });
   }
 
   if (kind === "editVersion" || kind === "restore") {
@@ -376,6 +423,78 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   });
   return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
     assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
+}
+
+/* ── THE GUIDED FOUNDATION'S THREE ASKS (§465) ──────────────────────────
+   A draft of one part, a refine of it, and the check across all five. The
+   same shape as `sayFlow`: read in one transaction, the model asked with no
+   transaction open (§289), the answer written in another, against the flow
+   as it stands THEN, so a page that saved meanwhile is not overwritten. */
+async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
+  const id = String(b.id || "");
+  if (!UUID.test(id)) return refused(400, "Which chat?");
+  const kind = String(b.act);
+  const el = Number(b.el);
+  if (kind !== "flowCheck" && !(Number.isInteger(el) && el >= 0 && el < FLOW_ELEMENTS.length)) return refused(400, "Which part?");
+  const how = String(b.how ?? "").trim();
+  if (kind === "flowRefine" && (!how || how.length > MAX_ANSWER)) return refused(400, "Say what to change.");
+  const placeWord = oneLine(b.placeWord).slice(0, 120);
+  const context = String(b.context ?? "").slice(0, MAX_CONTEXT);
+
+  const step1 = await withTenant(tenantId, async (c) => {
+    const chat = await oneChat(c, id);
+    if (!chat) return refused(404, "That chat is not here any more.");
+    if (chat.archived) return refused(400, ARCHIVED);
+    const stored = await flowOf(c, id);
+    if (!stored) return refused(400, "This is not a guided Foundation chat.");
+    if (stored.saved) return refused(400, SAVED_ALREADY);
+    if (stored.path !== "guided" && brk() !== "flow-any-path") return refused(400, "Choose to answer the guided questions first.");
+    /* The answers or the draft as the page has them now ride with the ask,
+       checked as any save is, so a correction made a second ago is drafted. */
+    const f = b.flow ? sanitizeFlow(b.flow, stored) : stored;
+    if (kind === "flowDraft" && !f.ans[el].some((x) => x.trim())) return refused(400, "Answer at least one question first.");
+    if (kind === "flowRefine" && !f.drafts[el].trim()) return refused(400, "There is no draft of this part to change yet.");
+    if (kind === "flowCheck" && !f.done.every(Boolean)) return refused(400, "All five parts need a draft you have agreed before they can be checked together.");
+    if (b.flow) await writeFlow(c, id, f);
+    return { chat, f };
+  });
+  if ("status" in step1) return step1;
+  const { chat, f } = step1;
+
+  const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), "foundation").catch(() => "") : "";
+  const question = kind === "flowDraft" ? draftQuestion(f, el) : kind === "flowRefine" ? refineQuestion(f, el, how) : checkQuestion(f);
+  const r = await askFlowJson({ instruction: flowInstruction(method), corpus: flowCorpus(f, placeWord || chat.place, context, kind === "flowCheck" ? undefined : el),
+    question, schema: kind === "flowCheck" ? CHECK_SCHEMA : TEXT_SCHEMA });
+  if (!r.ok) {
+    if (!(r as any).noKey) console.error("copilot: flow ask:", r.why);
+    return refused(503, (r as any).noKey ? NO_KEY : failedLine(r.why));
+  }
+  if (kind === "flowCheck") {
+    const j = r.json || {};
+    const agree = (Array.isArray(j.agree) ? j.agree : []).map((x: unknown) => oneLine(x).slice(0, 400)).filter(Boolean).slice(0, 8);
+    const keys = FLOW_ELEMENTS.map((e) => e.key);
+    const issues = (Array.isArray(j.issues) ? j.issues : []).map((x: any) => ({ el: keys.includes(String(x && x.element)) ? String(x.element) : "", text: oneLine(x && x.text).slice(0, 400) }))
+      .filter((x: any) => x.text).slice(0, 8);
+    if (!agree.length && !issues.length) return refused(503, failedLine("the answer had nothing in it"));
+    return withTenant(tenantId, async (c) => {
+      const now = await flowOf(c, id);
+      if (!now || now.saved) return refused(400, SAVED_ALREADY);
+      const g: Flow = { ...now, phase: "check", check: { agree, issues } };
+      await writeFlow(c, id, g);
+      return out(200, { ok: true, flow: g });
+    });
+  }
+  const text = String((r.json && r.json.text) ?? "").trim().replace(/^["“]+|["”]+$/g, "").slice(0, MAX_DRAFT);
+  if (!text) return refused(503, failedLine("the answer had nothing in it"));
+  return withTenant(tenantId, async (c) => {
+    const now = await flowOf(c, id);
+    if (!now || now.saved) return refused(400, SAVED_ALREADY);
+    const drafts = now.drafts.slice(); drafts[el] = text;
+    const done = now.done.slice(); done[el] = false;
+    const g: Flow = { ...now, phase: "draft", e: el, drafts, done, check: null };
+    await writeFlow(c, id, g);
+    return out(200, { ok: true, flow: g });
+  });
 }
 
 /* ── THE PAGES (§456) ──────────────────────────────────────────────────

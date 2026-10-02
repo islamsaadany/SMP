@@ -5,7 +5,7 @@
    person's page served to the next. This worker STORES NOTHING and has no
    fetch handler at all — the browser goes to the network for everything. */
 
-/* release 1b9ea508baa1aa8f — changes whenever a file a tab holds changes (§397) */
+/* release ec4d75aeaf257842 — changes whenever a file a tab holds changes (§397) */
 
 self.addEventListener("install", () => self.skipWaiting());
 

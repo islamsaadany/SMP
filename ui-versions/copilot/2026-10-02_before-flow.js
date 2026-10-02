@@ -158,12 +158,8 @@ var COPILOT = (function(){
   /* ── THE PANE ────────────────────────────────────────────────────────── */
   function renderPane(){
     setTimeout(function(){ loadList(false); }, 0);
-    var shut = railShut();
-    return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
-      '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
-        (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
+    return '<div class="coppane" data-cop-pane>' +
       '<aside class="coprails">' +
-        '<div class="coprtop"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button><span>Copilot</span></div>' +
         '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
           '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
           '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
@@ -204,10 +200,8 @@ var COPILOT = (function(){
     var arch = archView(), rows = arch ? (l.archived || []) : l.chats;
     var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
-    var o = OPEN[key()] || {};
-    if (!arch && canEdit() && section() === "foundation") head = '<button type="button" class="copguided" data-cop-newflow>' +
-      icon(PATH_CARDS[0].i) + '<span><b>Guided Foundation</b><span class="copm">Build it part by part, from questions</span></span></button>' + head;
     if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
+    var o = OPEN[key()] || {};
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
       if (ASKDEL === c.id) return '<div class="coprow ask" data-cop-row="' + E(c.id) + '"><span class="copt">' + E(c.title) + '</span>' +
@@ -223,7 +217,7 @@ var COPILOT = (function(){
       return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
           '<span class="copt">' + E(c.title) + '</span>' +
-          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + '</span></button>' +
+          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + '</span></button>' +
         (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
           '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
     }).join("");
@@ -253,7 +247,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
       ' <button type="button" class="linkbu" data-cop-reopen>Try again</button></div>';
-    return say + (o.kind === "chat" ? (flowView() ? flowHtml() : chatHtml()) : delivHtml());
+    return say + (o.kind === "chat" ? chatHtml() : delivHtml());
   }
   function placeWord(){
     var t = place();
@@ -576,7 +570,6 @@ var COPILOT = (function(){
     return '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
       '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
       '<div class="copheadrow">' + head + sizeHtml() + '</div>' +
-      (PANE.flow ? roadLine() : '') +
       '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div></div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
       (!canEdit() ? VIEWONLY
@@ -594,304 +587,19 @@ var COPILOT = (function(){
   /* WHERE THE BOX WAS, FOR A VIEW GRANT (Islam: "keep the view only
      label"): a status rather than a description (1b-ii), so an empty space
      under the chat does not read as a box that failed to draw (§45.2). */
-  /* What the box asks for: in the guided flow it says what a typed line
-     will do there (§465). */
-  function boxWord(pend){
-    if (flowView()) {
-      var ph = PANE.flow.phase;
-      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…" : "Use the buttons above to carry on…";
-    }
-    return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
-  }
   var VIEWONLY = '<div class="copviewonly" data-cop-viewonly><span>View only</span></div>';
   function composerHtml(c, pend){
     var text = DRAFT[c.id] || "";
     return '<div class="copcompose">' +
       '<div class="copbox">' +
-        '<textarea data-cop-text rows="1" placeholder="' + E(boxWord(pend)) + '" aria-label="Message">' + E(text) + '</textarea>' +
+        '<textarea data-cop-text rows="1" placeholder="' + (pend ? "Say what this file is for…" : "Ask about " + E(placeWord()) + "’s " + E(sectionWord().toLowerCase()) + "…") + '" aria-label="Message">' + E(text) + '</textarea>' +
         '<button type="button" class="copsend" data-cop-send aria-label="Send" title="Send"' + (THINKING === c.id || (!text.trim() && !pend) ? ' disabled' : '') + '>' + SENDMARK + '</button>' +
       '</div>' +
-      '<div class="copunder">' + (flowView() ? '<span class="cophint">Enter sends · Shift + Enter for a new line</span></div></div>' :
+      '<div class="copunder">' +
         '<button type="button" class="copclip" data-cop-attach aria-label="Attach a Word, PDF or Excel file" title="Attach a Word, PDF or Excel file (up to 3 MB)">' + CLIP + '</button>' +
         '<input type="file" hidden data-cop-file accept=".docx,.pdf,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">' +
         '<span class="cophint">Enter sends · Shift + Enter for a new line</span>' +
-      '</div></div>');
-  }
-
-
-  /* ══ THE GUIDED FOUNDATION (§465, the signed-off
-     design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html,
-     Option A) ═══════════════════════════════════════════════════════════
-     Islam: "ok approved, build it". A Foundation chat can carry a FLOW: the
-     years first, then the way to build it, then the five parts in order —
-     each question with its examples, the answers back in boxes, a draft, a
-     refine, save and on — then one check across all five and the whole saved
-     as the next version of "Foundation — <place>".
-
-     THE SCREEN IS DRAWN FROM THE STORED FLOW, never from a list of messages,
-     so leaving and coming back lands exactly where you were, and the
-     QUESTIONS are the ones the server sends with the chat — the ones the
-     draft is written from (§53.5). Every press saves the flow at once; the
-     server cuts it to shape (§96.2) and decides alone what was saved. */
-  var NUDGE = null;              /* {id, text}: a short answer held for "Add more detail" / "Continue anyway" */
-  var PATH_CARDS = [
-    { k:"guided", t:"Answer guided questions", rec:true, d:"I ask you a few questions and draft your Foundation from your answers.",
-      i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>' },
-    { k:"notes", t:"Upload raw notes", d:"Upload interview notes or a workshop export and I turn them into a Foundation.",
-      i:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>' },
-    { k:"template", t:"Use a template", d:"Download an interview template, fill it in, and upload it back.",
-      i:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>' },
-    { k:"import", t:"Import a finished Foundation", d:"Already have one? Paste it and I structure it into the 5 elements.",
-      i:'<path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/>' }
-  ];
-  function pathWord(k){ for (var i = 0; i < PATH_CARDS.length; i++) if (PATH_CARDS[i].k === k) return PATH_CARDS[i].t; return k; }
-  function icon(paths){ return '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + paths + '</svg>'; }
-  var TOGMARK = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M6 2.5v11"/></svg>';
-  function flowOn(){ return !!(PANE && PANE.chat && PANE.flow); }
-  /* The flow's own screen while it is the guided road or no road is chosen
-     yet; the other three roads go on as an ordinary chat (§465). */
-  function flowView(){ return flowOn() && (PANE.flow.path === "guided" || !PANE.flow.path); }
-  function steps(){ return (PANE && PANE.flowSteps) || []; }
-  function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
-  function fname(){ return "Foundation — " + placeWord(); }
-  function doneCount(f){ return f.done.filter(Boolean).length; }
-  function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
-  function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
-  function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
-  function examplesHtml(ex, f){
-    if (!ex || !ex.length) return '';
-    return '<div class="copexs"><div class="copeh">Examples to inspire you</div>' +
-      ex.map(function(x){ return '<p>• ' + E(withY(x, f)) + '</p>'; }).join("") + '</div>';
-  }
-  function cardsHtml(f){
-    var S = steps();
-    return '<div class="copcards">' + S.map(function(el, i){
-      var st, cls = "copst", body;
-      if (f.done[i]) { st = "Done"; cls += " done"; }
-      else if (i === f.e && f.path === "guided" && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
-      else if (i === f.e && f.phase === "review") { st = "Reviewing"; cls += " now"; }
-      else if (i === f.e && f.phase === "draft") { st = "Drafting"; cls += " now"; }
-      else st = "Waiting";
-      body = f.drafts[i] && (f.done[i] || (i === f.e && f.phase === "draft")) ? E(withY(f.drafts[i], f)) : el.questions.length + " questions";
-      var now = cls.indexOf(" now") > 0;
-      return '<div class="copcard' + (i === S.length - 1 ? " wide" : "") + (now ? " now" : "") + '" data-cop-card="' + i + '">' +
-        '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + st + '</span></h3><p>' + body + '</p></div>';
-    }).join("") + '</div>';
-  }
-  function flowHead(f){
-    var S = steps(), el = S[f.e] || {}, t, p = "";
-    if (f.phase === "year" || f.phase === "path") t = "Copilot · Foundation";
-    else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
-    else {
-      t = "Copilot · " + el.name;
-      p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
-    }
-    var total = 0, answered = 0;
-    S.forEach(function(x, i){ total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
-    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
-  }
-  function flowMsgs(f){
-    var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
-    out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
-    out.push(aiMsg("Before we start: how long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
-      (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
-        '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
-        '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
-    if (f.phase === "year") return out.join("");
-    out.push(meMsg(yearsWord(f)));
-    out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
-      return '<button type="button" class="coppcard' + (c.rec ? " rec" : "") + '" data-cop-path="' + c.k + '">' + icon(c.i) +
-        '<span class="coppt">' + E(c.t) + (c.rec ? ' <span class="coppill">Recommended</span>' : '') + '</span><span class="coppd">' + E(c.d) + '</span></button>';
-    }).join("") + '</div>' : ''), true));
-    if (f.phase === "path") return out.join("");
-    out.push(meMsg(pathWord(f.path)));
-    out.push(aiMsg("Good. We'll build the five parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
-    var all = f.phase === "check" || f.phase === "saved";
-    S.forEach(function(el, i){
-      var current = !all && i === f.e;
-      if (!current) {
-        if (f.done[i]) out.push(aiMsg(E(el.name) + " agreed for " + E(fname()) + "."));
-        return;
-      }
-      if (f.phase === "ask") {
-        for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
-        out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
-        if (NUDGE && NUDGE.id === PANE.chat.id) {
-          out.push(meMsg(NUDGE.text));
-          out.push('<div class="copwarn" role="status">That answer is quite short. A little more detail makes a better draft.' +
-            '<div class="copbtns"><button type="button" class="copbtn" data-cop-nudge-more>Add more detail</button>' +
-            '<button type="button" class="copbtn quiet" data-cop-nudge-go>Continue anyway</button></div></div>');
-        }
-      } else if (f.phase === "review") {
-        out.push(aiMsg("Here is what you told me about " + E(el.name) + ". Change anything before I draft it." +
-          '<div class="coprv">' + el.questions.map(function(q, k){
-            return '<label>' + E(withY(q, f)) + '<textarea class="copfed" rows="2" data-cop-fans="' + k + '"' + (ed ? '' : ' readonly') + '>' + E(f.ans[i][k]) + '</textarea></label>';
-          }).join("") + '</div>' +
-          (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(el.name) + '</button></div>' : ''), true));
-      } else if (f.phase === "draft") {
-        var nx = nextUndone(f, i);
-        out.push(aiMsg('<span class="copeh">Draft · ' + E(el.name) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
-          (ed ? 'Refine it, or type what to change in the box below.' +
-            '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
-            '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
-            '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
-            '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
-      }
-    });
-    if (all && f.check) {
-      var byKey = {}; S.forEach(function(el, i){ byKey[el.key] = i; });
-      var issues = f.check.issues || [], agree = f.check.agree || [];
-      out.push(aiMsg('<span class="copeh">Consistency check across the five parts</span>' +
-        (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
-        (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(S[byKey[x.el]].name) + '</button>'; }).join("") +
-          '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
-    }
-    if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
-    }
-    if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
-    return out.join("");
-  }
-  function nextUndone(f, from){
-    var n = steps().length;
-    for (var i = from + 1; i < n; i++) if (!f.done[i]) return i;
-    for (var j = 0; j < from; j++) if (!f.done[j]) return j;
-    return -1;
-  }
-  function flowHtml(){
-    var c = PANE.chat, f = PANE.flow, S = steps();
-    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
-      ' · ' + doneCount(f) + ' of ' + S.length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
-    return '<div class="copflow">' +
-      '<div class="copleft">' + vline + cardsHtml(f) + '</div>' +
-      '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
-        flowHead(f) +
-        '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
-        (!canEdit() ? VIEWONLY
-          : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
-              '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
-          : composerHtml(c, false)) +
       '</div></div>';
-  }
-  /* The other three roads go on as an ordinary chat, told in one product
-     line what to do next — and the guided road is one press away. */
-  function roadLine(){
-    var f = PANE.flow, w;
-    if (f.path === "notes") w = "You chose to upload raw notes. Attach them with the paperclip below and say what they are, and the Copilot turns them into a Foundation.";
-    else if (f.path === "template") w = "You chose a template. Download it from Copilot settings › Templates, fill it in, and attach it here.";
-    else w = "You chose to import a finished Foundation. Paste it below and the Copilot structures it into the five parts.";
-    return '<div class="copsay copfroad">' + E(w) +
-      (f.path === "template" ? ' <a class="linkbu" href="/' + E(slug()) + '/copilot/settings/templates">Open the templates</a>' : '') +
-      (canEdit() && !PANE.chat.archived ? ' <button type="button" class="linkbu" data-cop-path="guided">Answer the guided questions instead</button>' : '') + '</div>';
-  }
-
-  /* SAVING THE FLOW. What the page shows changes at once and the server's
-     answer replaces it; a refusal says so and reads the chat again. */
-  function flowSave(f, then){
-    if (!PANE || !PANE.chat) return;
-    var id = PANE.chat.id;
-    PANE.flow = f; draw();
-    act({ act:"flowSave", id:id, flow:f }, function(j){
-      if (PANE && PANE.chat && PANE.chat.id === id) PANE.flow = j.flow;
-      draw(); if (then) then();
-    });
-  }
-  function flowCopy(){ return JSON.parse(JSON.stringify(PANE.flow)); }
-  function flowAsk(body){
-    if (!PANE || !PANE.chat || THINKING) return;
-    var id = PANE.chat.id, ctx = contextOf();
-    THINKING = id; SAY = ""; THINK_AT = Date.now();
-    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
-    draw();
-    body.id = id; body.placeWord = placeWord();
-    body.context = ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : "");
-    post(body, WAIT_MS).then(function(x){
-      THINKING = null;
-      if (x.st === 200 && x.j && x.j.ok) { if (PANE && PANE.chat && PANE.chat.id === id) PANE.flow = x.j.flow; draw(); return; }
-      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again."; openItem("chat", id);
-    }, function(err){
-      THINKING = null;
-      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Open the chat again in a moment."
-        : "The server could not be reached. Nothing was lost — try again.";
-      openItem("chat", id);
-    });
-  }
-  /* A TYPED LINE, by phase: an answer while asking (a short one is held for
-     a second look), what to change while drafting, otherwise a pointer to
-     the buttons — the flow is driven by them (§465). */
-  function flowType(text, forced){
-    var f = PANE.flow, id = PANE.chat.id;
-    if (f.phase === "ask") {
-      if (!forced && text.trim().length < (PANE.shortAnswer || 15)) { NUDGE = { id:id, text:text }; DRAFT[id] = ""; draw(); return; }
-      NUDGE = null;
-      var g = flowCopy(), n = steps()[g.e].questions.length;
-      g.ans[g.e][g.qi] = text.trim();
-      if (g.qi < n - 1) g.qi++; else g.phase = "review";
-      DRAFT[id] = "";
-      flowSave(g, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); });
-      return;
-    }
-    if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    SAY = "Noted. Use the buttons above to carry on."; draw();
-  }
-  function flowClick(ev){
-    var b, f = PANE && PANE.flow;
-    if (!flowOn()) return false;
-    if ((b = hit(ev, "[data-cop-setyears]"))) {
-      var y0 = Number((document.querySelector("[data-cop-y0]") || {}).value), y1 = Number((document.querySelector("[data-cop-y1]") || {}).value);
-      if (!(Number.isInteger(y0) && y0 >= 2000 && y0 <= 2100 && Number.isInteger(y1) && y1 >= 2000 && y1 <= 2100)) { SAY = "Type each year as four digits."; draw(); return true; }
-      if (y1 < y0) { SAY = "The end year has to be the same as or after the start year."; draw(); return true; }
-      var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "path"; SAY = ""; flowSave(g); return true;
-    }
-    if ((b = hit(ev, "[data-cop-path]"))) {
-      var g2 = flowCopy(); g2.path = b.getAttribute("data-cop-path");
-      if (g2.path === "guided") { g2.phase = "ask"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
-      flowSave(g2, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
-    }
-    if ((b = hit(ev, "[data-cop-nudge-more]"))) {
-      if (NUDGE) DRAFT[PANE.chat.id] = NUDGE.text.replace(/\s+$/, "") + ", ";
-      NUDGE = null; draw();
-      var t = document.querySelector("[data-cop-text]"); if (t) { t.focus(); t.selectionStart = t.selectionEnd = t.value.length; }
-      return true;
-    }
-    if ((b = hit(ev, "[data-cop-nudge-go]"))) { if (NUDGE) flowType(NUDGE.text, true); return true; }
-    if ((b = hit(ev, "[data-cop-fdraft]"))) { if (!b.disabled) flowAsk({ act:"flowDraft", el:f.e, flow:flowCopy() }); return true; }
-    if ((b = hit(ev, "[data-cop-refine]"))) { if (!b.disabled) flowAsk({ act:"flowRefine", el:f.e, how:b.getAttribute("data-cop-refine"), flow:flowCopy() }); return true; }
-    if ((b = hit(ev, "[data-cop-fsave]"))) {
-      if (b.disabled) return true;
-      var g3 = flowCopy(); g3.done[g3.e] = true;
-      var nx = nextUndone(g3, g3.e);
-      if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
-      g3.e = nx; g3.qi = 0; g3.phase = g3.drafts[nx] ? "draft" : "ask";
-      flowSave(g3); return true;
-    }
-    if ((b = hit(ev, "[data-cop-goback]"))) {
-      var g4 = flowCopy(), x = Number(b.getAttribute("data-cop-goback"));
-      g4.done[x] = false; g4.e = x; g4.phase = "draft"; flowSave(g4); return true;
-    }
-    if ((b = hit(ev, "[data-cop-ffinish]"))) {
-      if (b.disabled) return true;
-      var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord() }, function(j){
-        if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
-        loadList(true); draw(); });
-      return true;
-    }
-    return false;
-  }
-  /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
-     rail"), remembered on this browser only — a per-viewer convenience. */
-  var RAILKEY = "smp.copilot.rail";
-  function railShut(){ try { return localStorage.getItem(RAILKEY) === "shut"; } catch (e) { return false; } }
-  function setRail(shut){
-    try { if (shut) localStorage.setItem(RAILKEY, "shut"); else localStorage.removeItem(RAILKEY); } catch (e) {}
-    var p = document.querySelector("[data-cop-pane]"); if (p) p.classList.toggle("copshut", shut);
-    document.querySelectorAll("[data-cop-railtog]").forEach(function(t){ t.setAttribute("aria-expanded", String(!shut)); });
-    fitBox();
   }
 
   function delivHtml(){
@@ -990,7 +698,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== id) PANE = null;
     draw();
     var k = key();
-    getJ(kind === "chat" ? "chat" : "deliverable", ["id=" + encodeURIComponent(id)].concat(kind === "chat" ? ["placeWord=" + encodeURIComponent(placeWord())] : [])).then(function(x){
+    getJ(kind === "chat" ? "chat" : "deliverable", ["id=" + encodeURIComponent(id)]).then(function(x){
       var o = OPEN[k]; if (!o || o.id !== id) return;
       if (x.st === 200 && x.j && x.j.ok) PANE = Object.assign({ id: id }, x.j);
       else if (x.st === 404) { delete OPEN[k]; PANE = null; SAY = (x.j && x.j.why) || "That is not here any more."; loadList(true); return; }
@@ -1013,18 +721,7 @@ var COPILOT = (function(){
   document.addEventListener("input", function(ev){
     var t = hit(ev, "[data-cop-text]"); if (t && PANE && PANE.chat) { DRAFT[PANE.chat.id] = t.value; fitBox(); }
     var e = hit(ev, "[data-cop-edit-text]"); if (e && EDIT) EDIT.text = e.value;
-    var fa = hit(ev, "[data-cop-fans]"); if (fa && flowOn()) PANE.flow.ans[PANE.flow.e][+fa.getAttribute("data-cop-fans")] = fa.value;
     var n = hit(ev, "[data-cop-edit-note]"); if (n && EDIT) EDIT.note = n.value;
-  });
-  /* An answer changed in its box is kept when the box is left, like every
-     other field in the platform (§35) — not only when Draft is pressed. */
-  document.addEventListener("change", function(ev){
-    var fa = hit(ev, "[data-cop-fans]");
-    if (fa && flowOn() && canEdit() && !THINKING) {
-      var f = flowCopy(); f.ans[f.e][+fa.getAttribute("data-cop-fans")] = fa.value;
-      var id = PANE.chat.id;
-      act({ act:"flowSave", id:id, flow:f }, function(j){ if (PANE && PANE.chat && PANE.chat.id === id) PANE.flow = j.flow; });
-    }
   });
   document.addEventListener("keydown", function(ev){
     if (ev.key === "Enter" && !ev.shiftKey && hit(ev, "[data-cop-text]")) { ev.preventDefault(); send(); }
@@ -1042,7 +739,6 @@ var COPILOT = (function(){
     var text = forced != null ? forced : (t ? t.value : (DRAFT[id] || ""));
     var files = (PANE.pending || []).slice();
     if (!text.trim() && !files.length) return;
-    if (flowView()) { if (forced == null && t) t.value = ""; flowType(text); return; }
     var ctx = contextOf();
     if (forced == null) { DRAFT[id] = ""; if (t) t.value = ""; }
     PANE.messages = PANE.messages.concat([{ id:"new", who:"person", by: (typeof SYNC !== "undefined" && SYNC.actingAs && SYNC.actingAs()) || "",
@@ -1117,17 +813,6 @@ var COPILOT = (function(){
   }, true);
   document.addEventListener("click", function(ev){
     var b;
-    if (flowClick(ev)) return;
-    if ((b = hit(ev, "[data-cop-railtog]"))) { setRail(!railShut()); return; }
-    if ((b = hit(ev, "[data-cop-newflow]"))) {
-      act({ act:"newFlow", place: place() }, function(j){
-        var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-        PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
-        OPEN[key()] = { kind:"chat", id: j.chat.id };
-        openItem("chat", j.chat.id);
-      });
-      return;
-    }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }

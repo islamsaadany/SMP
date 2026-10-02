@@ -1055,6 +1055,42 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.click('a[href*="#cop=chat-"]');
     const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
     check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
+    /* §470 (Islam's room options 1 and 2): "Fold bars" in the unit row folds
+       the top bar, the unit row and the tab row into one thin line; the
+       section row stays; the chat gains the height; it is remembered; and no
+       other page wears it. Both ends (§94.2): folded AND shown again. */
+    {
+      const rd = () => page.evaluate(() => { const vis = (el) => !!el && el.getClientRects().length > 0;
+        const m = document.querySelector("[data-cop-main]");
+        return { btn: vis(document.querySelector("#units [data-copfold='fold']")), top: vis(document.querySelector(".chrome > header.top")),
+          units: vis(document.querySelector(".chrome > nav.units")), tabs: vis(document.getElementById("tabrow")),
+          thin: vis(document.getElementById("copthin")), thinText: (document.getElementById("copthin") || {}).textContent || "",
+          secs: vis(document.getElementById("secrow")), chrome: Math.round(document.querySelector(".chrome").getBoundingClientRect().height),
+          mainH: m ? Math.round(m.getBoundingClientRect().height) : 0, gutter: Math.round(parseFloat(getComputedStyle(document.querySelector(".wrap")).paddingLeft)),
+          extra: document.documentElement.scrollHeight - innerHeight }; });
+      const f0 = await rd();
+      check(f0.btn && f0.top && f0.units && f0.tabs && !f0.thin && f0.gutter <= 12,
+        "the Copilot's unit row offers Fold bars, all three bars show, the thin line does not, and the page gutter is tight (§470)", JSON.stringify(f0));
+      await page.click("#units [data-copfold='fold']");
+      await page.waitForTimeout(300);
+      const f1 = await rd();
+      check(!f1.top && !f1.units && !f1.tabs && f1.thin && f1.secs && /Mobile/.test(f1.thinText) && /Copilot/.test(f1.thinText) && /Show navigation/.test(f1.thinText),
+        "…pressed, the three bars fold into one thin line naming where you are, with the section row kept", JSON.stringify(f1));
+      check(f1.chrome <= f0.chrome - 100 && f1.mainH >= f0.mainH + 100 && f1.extra <= 1,
+        "…and the chat gains the height without the page scrolling", JSON.stringify({ before: f0.chrome, after: f1.chrome, mainBefore: f0.mainH, mainAfter: f1.mainH, extra: f1.extra }));
+      await page.reload(); await page.waitForTimeout(800);
+      const f2 = await rd();
+      check(f2.thin && !f2.top, "…remembered on this device after a reload", JSON.stringify(f2));
+      await page.evaluate(() => { const b = document.querySelector('#subtabs button[data-s]:not([data-s="copilot"])'); if (b) b.click(); });
+      await page.waitForTimeout(400);
+      const f3 = await page.evaluate(() => ({ fold: document.documentElement.hasAttribute("data-cop-fold"), top: document.querySelector(".chrome > header.top").getClientRects().length > 0, gutter: Math.round(parseFloat(getComputedStyle(document.querySelector(".wrap")).paddingLeft)) }));
+      check(!f3.fold && f3.top && f3.gutter > 12, "…and leaving the Copilot tab shows the full bars and the usual gutter again", JSON.stringify(f3));
+      await open("/raya-trade/strategy/mobile/copilot/foundation");
+      await page.click("#copthin [data-copfold='show']");
+      await page.waitForTimeout(300);
+      const f4 = await rd();
+      check(f4.top && f4.units && f4.tabs && !f4.thin && f4.btn, "…and Show navigation brings the three bars back", JSON.stringify(f4));
+    }
     await open("/raya-trade/copilot/settings?section=analysis");
     const stg = await page.evaluate(() => ({ swot: /SWOT/.test(document.body.textContent), same: /Same for all clients/.test(document.body.textContent) }));
     check(stg.swot && stg.same, "Copilot settings › AI instructions draws the analysis method, the same for all clients", JSON.stringify(stg));
@@ -1137,11 +1173,13 @@ await section("3i · the guided Foundation: rail toggle, years, the road cards, 
 
     /* The rail hides to a strip and comes back; the choice outlives a reload. */
     check(await page.$(".copguided[data-cop-newflow]") !== null, "the Foundation rail offers the guided Foundation");
-    await page.click(".coprtop [data-cop-railtog]");
+    check(await page.evaluate(() => !document.querySelector(".coprtop") && !!document.querySelector(".coprh [data-cop-railtog]")),
+      "the hide control sits in the Chats header, with no row of its own above the rails (§470 option A)");
+    await page.click(".coprh [data-cop-railtog]");
     const shut = await page.evaluate(() => ({ cls: document.querySelector("[data-cop-pane]").classList.contains("copshut"),
       rails: getComputedStyle(document.querySelector(".coprails")).display, slim: document.querySelector(".copslim").getBoundingClientRect().width,
       stored: localStorage.getItem("smp.copilot.rail") }));
-    check(shut.cls && shut.rails === "none" && shut.slim > 30 && shut.slim < 60, "the rail button hides the rail to a slim strip", JSON.stringify(shut));
+    check(shut.cls && shut.rails === "none" && shut.slim >= 20 && shut.slim <= 28, "the rail button hides the rail to a 24px strip (§470 option A)", JSON.stringify(shut));
     await shot("0-shut");
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     check(await page.evaluate(() => document.querySelector("[data-cop-pane]").classList.contains("copshut")), "…and it stays hidden after a reload");
@@ -1171,9 +1209,9 @@ await section("3i · the guided Foundation: rail toggle, years, the road cards, 
     await shot("2-roads");
     const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".coppcard")).map((b) => ({ k: b.dataset.copPath, rec: b.classList.contains("rec"),
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
-    check(roads.length === 4 && roads[0].k === "guided" && roads[0].rec && /Recommended/.test(roads[0].t) && roads.filter((r) => r.rec).length === 1 &&
+    check(roads.length === 4 && roads[0].k === "guided" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
       roads.every((r) => r.d.length > 20) && !roads.some((r) => /research/i.test(r.t + r.d)),
-      "four road cards, each with a sentence, Guided alone recommended, no deep research", JSON.stringify(roads));
+      "four road cards, each with a sentence, none marked Recommended (§470), no deep research", JSON.stringify(roads));
     let F = await flowRow(cid);
     check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "path", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 

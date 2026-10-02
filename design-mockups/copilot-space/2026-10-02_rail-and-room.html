@@ -59,6 +59,13 @@ p{margin:0;max-width:72ch}
 .thin .q{color:var(--panel-quiet)}.thin .sp{flex:1}
 .thin .ex{border:1px solid var(--panel-quiet);border-radius:3px;padding:0 4px;font-size:7px}
 .ruler{position:absolute;right:4px;font:600 7px/1 var(--sans);color:var(--good);background:var(--surface);padding:1px 3px;border-radius:2px;border:1px solid var(--good)}
+.flow{flex:1;min-width:0;display:grid;grid-template-columns:.95fr 1.1fr;gap:6px;min-height:0}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:5px;align-content:start;min-width:0}
+.card{border:1px solid var(--line);border-radius:3px;padding:4px 5px;background:var(--surface);min-width:0}
+.card.wide{grid-column:1/-1}.card.now{background:var(--surface-2);box-shadow:inset 2px 0 0 var(--gold)}
+.card b{display:flex;justify-content:space-between;gap:4px;font-size:8px}.card b i{font-style:normal;font-weight:600;font-size:6.5px;color:var(--ink-3)}
+.card.now b i{color:var(--hlink)}.card .line{height:4px}
+.vline{font-size:7px;color:var(--ink-3);grid-column:1/-1}
 .note{font-size:13.5px;color:var(--ink-2)}
 .why{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 </style>
@@ -71,24 +78,24 @@ p{margin:0;max-width:72ch}
 
 <h2>Part 1: the rail's hide control</h2>
 <p class="note">Today the control has a <b>row of its own</b> above Chats (a button and the word "Copilot"). Hidden, it leaves a <b>44px column</b> holding two buttons. On a narrow window that column turns into a full-width row.</p>
+<p class="note"><b>Round 2:</b> every frame below is drawn with the room you chose (the three bars folded into one thin line, and the tighter gaps) and with the guided Foundation open, so the five part boxes sit beside the chat. Compare how much room the boxes and the chat get in each option.</p>
 <div id="p1"></div>
 
 <h2>Part 2: more room for the Copilot</h2>
-<p class="note">Each of these can sit alongside any rail option from Part 1. The green tag gives the height each one gives back at 1440&times;900.</p>
+<p class="note"><b>Chosen 2 Oct: options 1 and 2 together.</b> Option 3 was not chosen. They are kept here as the record.</p>
 <div id="p2"></div>
 
 <div class="why">
-<h3>My recommendation</h3>
-<p><b>Rail: A</b>. The control moves into the Chats header, and the hidden state becomes a 24px strip that never turns into a row. It is the smallest change, and the way back stays exactly where you left it.</p>
-<p><b>Room: 1 + 2 together</b>. Use one press to fold the three bars into a single thin line while you work, and tighten the gaps around the Copilot. That gives back about 170px of height and about 30px of width. I also considered folding the bars automatically as you scroll and did not draw it, because the platform removed exactly that behaviour once after it made the page jump (&sect;28).</p>
-<p class="cost">Two answers are needed: which rail option, and which room options. Nothing is built until you choose.</p>
+<h3>What is still open</h3>
+<p><b>Which rail option: A, B or C.</b> I recommend A. Option C gives the boxes and the chat the most room, because nothing is left when the rail is hidden. But it means you can't start a new chat without showing the rail first.</p>
+<p class="cost">The room changes (1 and 2) and removing the Guided card's Recommended label are being built now.</p>
 </div>
 </div>
 
 <script>
 var TOG='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M6 2.5v11"/></svg>';
 function chrome(o){o=o||{};
- if(o.thin) return '<div class="thin'+(o.markThin?' mark':'')+'"><b>Raya Trade</b><span class="q">›</span>Mobile<span class="q">›</span>Copilot<span class="q">›</span>Foundation<span class="sp"></span><span class="ex">Show navigation ▾</span></div>';
+ if(o.thin) return '<div class="thin'+(o.markThin?' mark':'')+'"><b>Raya Trade</b><span class="q">›</span>Mobile<span class="q">›</span>Copilot<span class="q">›</span>Foundation<span class="sp"></span><span class="ex">Show navigation ▾</span></div>'+'<div class="secs"'+(o.tight?' style="height:20px"':'')+'><span class="seg">'+segs()+'</span></div>';
  return '<div class="top"><b>Strategy Management Platform</b><span class="q">Raya Trade</span><span style="flex:1"></span><span class="q">Viewing as Mohamed Essam</span></div>'+
  '<div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>B2B Ecomm</span><span>Consumer Electronics</span><span>Online Shop</span><span>Corporate</span><span>Care</span>'+(o.foldBtn?'<span style="flex:1"></span><span class="ex mark" style="border:1px solid var(--panel-quiet);border-radius:3px;padding:0 4px;font-size:7px">Fold bars ▴</span>':'')+'</div>'+
  '<div class="tabs"><span>Strategy</span><span>Performance</span><span>Reporting</span><span class="on">Copilot</span>'+(o.secsInTabs?'<span style="flex:1"></span><span class="seg mark">'+segs()+'</span>':'')+'</div>'+
@@ -103,24 +110,29 @@ function main(o){o=o||{};
  '<div class="msgs"><div class="bub">Here is what the plan holds today for the Winning Aspiration. What would you like to change?<div class="line" style="width:90%"></div><div class="line" style="width:70%"></div></div>'+
  '<div class="bub me">Make it about the customer, shorter.</div><div class="bub">A draft:<div class="line" style="width:95%"></div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div></div></div>'+
  '<div class="cmp"></div></div>';}
+function flow(o){o=o||{};var P=[["Who We Are","Done"],["Purpose","Answering 2/3"],["Winning Aspiration","Waiting"],["Key Objectives","Waiting"],["Core Values","Waiting"]];
+ return '<div class="flow"><div class="cards"><div class="vline">Foundation — Mobile · 2026 to 2028</div>'+P.map(function(p,i){return '<div class="card'+(i==4?' wide':'')+(i==1?' now':'')+'"><b>'+p[0]+'<i>'+p[1]+'</i></b><div class="line" style="width:90%"></div><div class="line" style="width:65%"></div>'+(i==0?'<div class="line" style="width:75%"></div>':'')+'</div>'}).join('')+'</div>'+
+ '<div class="main"><div class="mh'+(o.markMh?' mark':'')+'">'+(o.togInMain?'<span class="tog">'+TOG+'</span>':'')+'Copilot · Purpose<span class="sp"></span><span class="az">A−</span><span class="az">A+</span></div>'+
+ '<div class="msgs"><div class="bub">Why does Mobile exist, beyond making money?<div class="line" style="width:85%"></div></div><div class="bub me">To keep people connected wherever they are.</div><div class="bub">Who benefits most when you do it well?<div class="line" style="width:80%"></div><div class="line" style="width:60%"></div></div></div><div class="cmp"></div></div></div>';}
 function scr(inner,o){o=o||{};return '<div class="scroll"><div class="scr">'+chrome(o)+'<div class="body"'+(o.tight?' style="--g:5px;--pad:4px 6px"':'')+'>'+inner+'</div>'+(o.ruler||'')+'</div></div>';}
 function frame(cap,h){return '<div><div class="cap">'+cap+'</div>'+h+'</div>';}
 function opt(id,title,tagRec,gain,cost,a,b){return '<div class="opt"><div class="opthead"><span class="tag'+(tagRec?' rec':'')+'">'+id+(tagRec?' · recommended':'')+'</span><h3>'+title+'</h3></div>'+
  (gain?'<p class="gain">'+gain+'</p>':'')+'<p class="cost">'+cost+'</p><div class="pair">'+a+(b||'')+'</div></div>';}
 
+var ROOM={thin:true,tight:true};
 var p1 =
  opt('Today','A row for the control, a column when hidden',false,'','The button and the word "Copilot" take a 36px row above Chats. Hidden, a 44px column holds two buttons.',
-   frame('Open', scr('<div class="rail"><div class="toprow"><span class="tog">'+TOG+'</span>Copilot</div>'+chats()+'</div>'+main())),
-   frame('Hidden', scr('<div class="slim" style="width:22px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+main()))) +
+   frame('Open', scr('<div class="rail"><div class="toprow"><span class="tog">'+TOG+'</span>Copilot</div>'+chats()+'</div>'+flow(),ROOM)),
+   frame('Hidden', scr('<div class="slim" style="width:22px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+flow(),ROOM))) +
  opt('A','The control sits in the Chats header',true,'Open: the 36px row goes. Hidden: 44px becomes 24px, and it stays a column on every width.','Hidden, the strip keeps two small buttons: show the rail, and start a new chat.',
-   frame('Open', scr('<div class="rail">'+chats({togInHead:true,markHead:true})+'</div>'+main())),
-   frame('Hidden', scr('<div class="slim mark" style="width:12px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+main()))) +
+   frame('Open', scr('<div class="rail">'+chats({togInHead:true,markHead:true})+'</div>'+flow(),ROOM)),
+   frame('Hidden', scr('<div class="slim mark" style="width:12px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+flow(),ROOM))) +
  opt('B','A tab on the rail\'s edge',false,'Open: the 36px row goes. Hidden: nothing is left but a small tab on the left edge, so the chat takes the full width.','The tab is small: easy to miss at first, and a small target on a tablet.',
-   frame('Open', scr('<div class="rail" style="position:relative">'+chats()+'</div><span class="edge mark" style="left:132px;top:100px">‹</span>'+main())),
-   frame('Hidden', scr(main()+'<span class="edge mark" style="left:0;top:100px">›</span>'))) +
+   frame('Open', scr('<div class="rail" style="position:relative">'+chats()+'</div><span class="edge mark" style="left:126px;top:90px">‹</span>'+flow(),ROOM)),
+   frame('Hidden', scr(flow()+'<span class="edge mark" style="left:0;top:90px">›</span>',ROOM))) +
  opt('C','The control moves into the open chat\'s title line',false,'Open: the 36px row goes. Hidden: nothing is left at all.','The button sits beside A− and A+, with the same button in the same place in both states. Starting a new chat while hidden means showing the rail first.',
-   frame('Open', scr('<div class="rail">'+chats()+'</div>'+main({togInMain:true,markMh:true}))),
-   frame('Hidden', scr(main({togInMain:true,markMh:true}))));
+   frame('Open', scr('<div class="rail">'+chats()+'</div>'+flow({togInMain:true,markMh:true}),ROOM)),
+   frame('Hidden', scr(flow({togInMain:true,markMh:true}),ROOM)));
 
 var R=function(t,top){return '<span class="ruler" style="top:'+top+'px">'+t+'</span>';};
 var p2 =

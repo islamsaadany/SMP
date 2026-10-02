@@ -163,6 +163,7 @@ var COPILOT = (function(){
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails">' +
+        '<div class="coprtop"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button><span>Copilot</span></div>' +
         '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
           '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
           '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
@@ -185,13 +186,9 @@ var COPILOT = (function(){
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
   function archView(){ return !!ARCH[key()]; }
-  /* §470 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
-     start of the Chats header rather than on a row of its own above the
-     rails, so an open rail spends no line on it. */
   function chatsHead(){
-    var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railShut() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
-    return archView() ? tog + '<span class="coprhl">Archived chats</span>'
-      : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
+    return archView() ? '<span>Archived chats</span>'
+      : '<span>Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
   }
   function chatsFoot(){
     var l = list();
@@ -636,10 +633,8 @@ var COPILOT = (function(){
      draft is written from (§53.5). Every press saves the flow at once; the
      server cuts it to shape (§96.2) and decides alone what was saved. */
   var NUDGE = null;              /* {id, text}: a short answer held for "Add more detail" / "Continue anyway" */
-  /* No road is marked Recommended (§470, Islam 2026-10-02: "remove the
-     label") — the four are offered as equals, as the quick replies are (§469). */
   var PATH_CARDS = [
-    { k:"guided", t:"Answer guided questions", d:"I ask you a few questions and draft your Foundation from your answers.",
+    { k:"guided", t:"Answer guided questions", rec:true, d:"I ask you a few questions and draft your Foundation from your answers.",
       i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>' },
     { k:"notes", t:"Upload raw notes", d:"Upload interview notes or a workshop export and I turn them into a Foundation.",
       i:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>' },
@@ -705,8 +700,8 @@ var COPILOT = (function(){
     if (f.phase === "year") return out.join("");
     out.push(meMsg(yearsWord(f)));
     out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
-      return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
-        '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
+      return '<button type="button" class="coppcard' + (c.rec ? " rec" : "") + '" data-cop-path="' + c.k + '">' + icon(c.i) +
+        '<span class="coppt">' + E(c.t) + (c.rec ? ' <span class="coppill">Recommended</span>' : '') + '</span><span class="coppd">' + E(c.d) + '</span></button>';
     }).join("") + '</div>' : ''), true));
     if (f.phase === "path") return out.join("");
     out.push(meMsg(pathWord(f.path)));

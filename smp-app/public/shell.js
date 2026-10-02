@@ -55645,7 +55645,6 @@ var COPILOT = (function(){
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails">' +
-        '<div class="coprtop"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button><span>Copilot</span></div>' +
         '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
           '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
           '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
@@ -55668,9 +55667,13 @@ var COPILOT = (function(){
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
   function archView(){ return !!ARCH[key()]; }
+  /* §470 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
+     start of the Chats header rather than on a row of its own above the
+     rails, so an open rail spends no line on it. */
   function chatsHead(){
-    return archView() ? '<span>Archived chats</span>'
-      : '<span>Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
+    var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railShut() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
+    return archView() ? tog + '<span class="coprhl">Archived chats</span>'
+      : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
   }
   function chatsFoot(){
     var l = list();
@@ -56115,8 +56118,10 @@ var COPILOT = (function(){
      draft is written from (§53.5). Every press saves the flow at once; the
      server cuts it to shape (§96.2) and decides alone what was saved. */
   var NUDGE = null;              /* {id, text}: a short answer held for "Add more detail" / "Continue anyway" */
+  /* No road is marked Recommended (§470, Islam 2026-10-02: "remove the
+     label") — the four are offered as equals, as the quick replies are (§469). */
   var PATH_CARDS = [
-    { k:"guided", t:"Answer guided questions", rec:true, d:"I ask you a few questions and draft your Foundation from your answers.",
+    { k:"guided", t:"Answer guided questions", d:"I ask you a few questions and draft your Foundation from your answers.",
       i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>' },
     { k:"notes", t:"Upload raw notes", d:"Upload interview notes or a workshop export and I turn them into a Foundation.",
       i:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>' },
@@ -56182,8 +56187,8 @@ var COPILOT = (function(){
     if (f.phase === "year") return out.join("");
     out.push(meMsg(yearsWord(f)));
     out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
-      return '<button type="button" class="coppcard' + (c.rec ? " rec" : "") + '" data-cop-path="' + c.k + '">' + icon(c.i) +
-        '<span class="coppt">' + E(c.t) + (c.rec ? ' <span class="coppill">Recommended</span>' : '') + '</span><span class="coppd">' + E(c.d) + '</span></button>';
+      return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
+        '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
     }).join("") + '</div>' : ''), true));
     if (f.phase === "path") return out.join("");
     out.push(meMsg(pathWord(f.path)));
@@ -63927,7 +63932,53 @@ var SYNC = (function () {
   }
   function chromeActsHTML(){
     var gear = menuHTML();
-    return gear ? '<span class="sep pinsep"></span>' + gear : "";
+    /* §470: on the Copilot the row also offers to fold the three bars away.
+       Wired by a delegated listener (copFoldWire) because this row's
+       innerHTML is rewritten on every paint (§29.5). */
+    var fold = currentSub === "copilot"
+      ? '<button type="button" class="copfoldbtn" data-copfold="fold" title="Fold the three bars into one line for more room">Fold bars \u25B4</button>'
+      : "";
+    return fold + (gear ? '<span class="sep pinsep"></span>' + gear : "");
+  }
+  /* ── FOLD THE BARS ON THE COPILOT (§470, room option 1) ────────────────
+     The choice is this device's (localStorage), stored as an ABSENCE when
+     the bars show (§50.6), and it only ever applies on the Copilot tab:
+     every other page draws the full bars whatever is remembered. A throwing
+     store reads as "not folded", which is the page as it always was. */
+  var COPFOLD_KEY = "smp.copilot.bars";
+  function copFolded(){ try { return localStorage.getItem(COPFOLD_KEY) === "folded"; } catch (e) { return false; } }
+  function copSetFolded(on){
+    try { if (on) localStorage.setItem(COPFOLD_KEY, "folded"); else localStorage.removeItem(COPFOLD_KEY); } catch (e) {}
+  }
+  (function copFoldWire(){
+    document.addEventListener("click", function(e){
+      var b = e.target && e.target.closest && e.target.closest("[data-copfold]");
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation();
+      copSetFolded(b.getAttribute("data-copfold") === "fold");
+      paint();
+    });
+  })();
+  function copThinPaint(){
+    var on = currentSub === "copilot" && copFolded();
+    var root = document.documentElement;
+    if (currentSub === "copilot") root.setAttribute("data-cop-page", "on");
+    else root.removeAttribute("data-cop-page");
+    if (on) root.setAttribute("data-cop-fold", "on");
+    else root.removeAttribute("data-cop-fold");
+    var el = document.getElementById("copthin");
+    if (!el) return;
+    el.textContent = "";
+    if (!on) return;
+    var bits = [GROUP.org || "", (current && current !== "group") ? placeLabel(current) : "The group", "Copilot"];
+    bits.forEach(function(t, i){
+      if (!t) return;
+      if (el.childNodes.length) { var q = document.createElement("span"); q.className = "q"; q.textContent = "\u203A"; el.appendChild(q); }
+      var w = document.createElement(i === 0 ? "b" : "span"); w.textContent = t; el.appendChild(w);
+    });
+    var sp = document.createElement("span"); sp.className = "sp"; el.appendChild(sp);
+    var bt = document.createElement("button"); bt.type = "button"; bt.setAttribute("data-copfold", "show");
+    bt.textContent = "Show navigation \u25BE"; el.appendChild(bt);
   }
   function menuHTML(){
     var gs = menuGroups();
@@ -64243,6 +64294,7 @@ var SYNC = (function () {
 
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
+    copThinPaint();
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     TARGET_SETUP = current === "setup" || current === "manage";
     /* Repainted rather than set once: Labels can rename the tenant while you

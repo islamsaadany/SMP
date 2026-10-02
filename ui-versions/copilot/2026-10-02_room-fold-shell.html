@@ -118,13 +118,6 @@
   <div class="tabs-in" role="tablist" id="subtabs"></div>
 </nav>
 
-<!-- THE COPILOT'S THIN LINE (§470, Islam's room option 1). On the Copilot
-     tab only, and only once somebody has pressed "Fold bars", the three rows
-     above are stood down by CSS off `data-cop-fold` and this one line says
-     where you are, with the way back. Hidden everywhere else, so no other page
-     moves a pixel. Filled by paint(); textContent only. -->
-<div class="copthin" id="copthin" aria-label="Where you are"></div>
-
 <nav class="tabs sectionrow" id="secrow" hidden>
   <div class="tabs-in" role="tablist" id="secrow-in"></div>
 </nav>
@@ -2592,53 +2585,7 @@
   }
   function chromeActsHTML(){
     var gear = menuHTML();
-    /* §470: on the Copilot the row also offers to fold the three bars away.
-       Wired by a delegated listener (copFoldWire) because this row's
-       innerHTML is rewritten on every paint (§29.5). */
-    var fold = currentSub === "copilot"
-      ? '<button type="button" class="copfoldbtn" data-copfold="fold" title="Fold the three bars into one line for more room">Fold bars \u25B4</button>'
-      : "";
-    return fold + (gear ? '<span class="sep pinsep"></span>' + gear : "");
-  }
-  /* ── FOLD THE BARS ON THE COPILOT (§470, room option 1) ────────────────
-     The choice is this device's (localStorage), stored as an ABSENCE when
-     the bars show (§50.6), and it only ever applies on the Copilot tab:
-     every other page draws the full bars whatever is remembered. A throwing
-     store reads as "not folded", which is the page as it always was. */
-  var COPFOLD_KEY = "smp.copilot.bars";
-  function copFolded(){ try { return localStorage.getItem(COPFOLD_KEY) === "folded"; } catch (e) { return false; } }
-  function copSetFolded(on){
-    try { if (on) localStorage.setItem(COPFOLD_KEY, "folded"); else localStorage.removeItem(COPFOLD_KEY); } catch (e) {}
-  }
-  (function copFoldWire(){
-    document.addEventListener("click", function(e){
-      var b = e.target && e.target.closest && e.target.closest("[data-copfold]");
-      if (!b) return;
-      e.preventDefault(); e.stopPropagation();
-      copSetFolded(b.getAttribute("data-copfold") === "fold");
-      paint();
-    });
-  })();
-  function copThinPaint(){
-    var on = currentSub === "copilot" && copFolded();
-    var root = document.documentElement;
-    if (currentSub === "copilot") root.setAttribute("data-cop-page", "on");
-    else root.removeAttribute("data-cop-page");
-    if (on) root.setAttribute("data-cop-fold", "on");
-    else root.removeAttribute("data-cop-fold");
-    var el = document.getElementById("copthin");
-    if (!el) return;
-    el.textContent = "";
-    if (!on) return;
-    var bits = [GROUP.org || "", (current && current !== "group") ? placeLabel(current) : "The group", "Copilot"];
-    bits.forEach(function(t, i){
-      if (!t) return;
-      if (el.childNodes.length) { var q = document.createElement("span"); q.className = "q"; q.textContent = "\u203A"; el.appendChild(q); }
-      var w = document.createElement(i === 0 ? "b" : "span"); w.textContent = t; el.appendChild(w);
-    });
-    var sp = document.createElement("span"); sp.className = "sp"; el.appendChild(sp);
-    var bt = document.createElement("button"); bt.type = "button"; bt.setAttribute("data-copfold", "show");
-    bt.textContent = "Show navigation \u25BE"; el.appendChild(bt);
+    return gear ? '<span class="sep pinsep"></span>' + gear : "";
   }
   function menuHTML(){
     var gs = menuGroups();
@@ -2954,7 +2901,6 @@
 
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
-    copThinPaint();
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     TARGET_SETUP = current === "setup" || current === "manage";
     /* Repainted rather than set once: Labels can rename the tenant while you

@@ -61360,3 +61360,48 @@ field to carry the mark. Proved: `check:copilot` 175/0, with **2 red** when the
 model's mark is trusted again; `check:shell`'s answer section asserts no option
 wears the dress or the word, while its stub still sends `recommended:true`.
 
+
+
+## §470 — More room for the Copilot, the rail control in its header, and no Recommended road (2026-10-02)
+
+Islam, after §469: *"still saying recommended"*, the left panel's hide control
+*"is taking a big space"*, and *"let's think of different options to gain space
+for the copilot work"*. Drawn first
+(`design-mockups/copilot-space/2026-10-02_rail-and-room.html`, published), and
+answered: *"1 and 2 for the room … remove the label"*, then *"A ok"*.
+
+**The Recommended that was left was the Guided road card**, not a quick reply.
+The pill and its rules are deleted; the four roads are offered as equals, as
+the quick replies are (§469). `.copopt.rec` stays for the Save buttons.
+
+**Room 1, the bars fold.** On the Copilot tab the unit row carries *Fold bars*,
+which folds the top bar, the unit row and the tab row into one 28px line naming
+the client, the place and *Copilot*, with *Show navigation* to bring them back.
+The section row stays, because it is how you move between the five sections.
+The choice is this device's (`localStorage` `smp.copilot.bars`, stored as an
+absence when the bars show, §50.6) and it only applies on the Copilot tab: the
+root attribute `data-cop-fold` is set by `copThinPaint()` in `paint()` before
+the tab renders (so `fitPane()` measures the folded chrome) and cleared on every
+other page. Measured: the chrome 188 → about 70px and the chat taller by more
+than 100px, with the page still not scrolling (§458). The buttons are wired by
+one delegated listener, because the unit row is rewritten on every paint
+(§29.5).
+
+**Room 2, tighter gaps, the Copilot page only** (`data-cop-page`): the page
+and chrome gutters 24 → 12px, the rail-to-chat gap 18 → 10px, the section row's
+padding 8 → 3px. No other page moves.
+
+**Rail option A.** The hide control moves from a row of its own above the rails
+into the start of the Chats header, so an open rail spends no line on it.
+Hidden, the strip is 24px (was 44px) and stays a column at every width, with
+its two small buttons: show the rail, and start a new chat.
+
+Checks: `smp-app/checks/shell.mjs` §3f, both ends of the fold (folded, the
+chrome shrinks and the chat grows, remembered after a reload, gone off the
+Copilot tab, and Show navigation brings it back), the header control, and the
+24px strip. 241 ok on the served app. Falsified from the sources with
+`copThinPaint()` removed: 5 red. **Recorded, not this work's**: two *My work*
+assertions are red when run after midnight in Cairo, because the fixture dates
+by the database's UTC day while the page groups by the Cairo week, so a
+"this week" action reads as late on the Saturday. Screen only; nothing stored
+on the server, nothing migrated.

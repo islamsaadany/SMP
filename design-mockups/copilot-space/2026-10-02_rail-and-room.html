@@ -1,0 +1,139 @@
+<title>Copilot Room Options</title>
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;
+--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#9AA6B8;--gold:#C9A24D;--gold-deep:#8A6B22;--good:#2E7D4F;--hl:#FFF6DA;--hlink:#7A5A10;
+--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--panel:#0E1014;--panel-ink:#EAF0FA;--panel-quiet:#9AA6B8;--gold:#D9B665;--gold-deep:#D9B665;--good:#6CC48F;--hl:#3A3220;--hlink:#E6C65C;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--panel:#0E1014;--panel-ink:#EAF0FA;--panel-quiet:#9AA6B8;--gold:#D9B665;--gold-deep:#D9B665;--good:#6CC48F;--hl:#3A3220;--hlink:#E6C65C;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding:24px 16px 60px}
+.page{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+h2{font-size:20px;margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:0}
+p{margin:0;max-width:72ch}
+.opt{display:flex;flex-direction:column;gap:10px}
+.opthead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tag{font:700 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.tag.rec{background:var(--hl);color:var(--hlink)}
+.gain{font-size:13px;color:var(--good);font-weight:600}
+.cost{font-size:13px;color:var(--ink-3)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.cap{font:700 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.scroll{overflow-x:auto}
+.pair>div{min-width:0}
+/* ── the drawn screen: 1440x900 drawn at 0.5 ── */
+.scr{width:540px;height:340px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--ground);display:flex;flex-direction:column;font-size:9px;line-height:1.3;position:relative}
+.top{height:20px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:0 9px;flex:none}
+.top b{font-size:8.5px}.top .q{color:var(--ink-3);font-size:8px}
+.nav{height:23px;background:var(--panel);display:flex;align-items:center;gap:9px;padding:0 9px;color:var(--panel-ink);flex:none;font-size:8.5px}
+.nav .on{border-bottom:2px solid var(--gold);padding-bottom:2px}
+.nav .q{color:var(--panel-quiet)}
+.tabs{height:23px;background:var(--surface-2);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;padding:0 9px;flex:none;color:var(--ink-2);font-size:8.5px}
+.tabs .on{font-weight:700;color:var(--ink);border-bottom:2px solid var(--gold);padding-bottom:3px}
+.secs{height:27px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 9px;flex:none}
+.seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg span{padding:2px 7px;font-size:8px;color:var(--ink-2)}.seg .on{background:var(--panel);color:var(--panel-ink);font-weight:600}
+.body{flex:1;display:flex;gap:var(--g,9px);padding:var(--pad,8px 12px);min-height:0}
+.rail{width:120px;flex:none;display:flex;flex-direction:column;gap:6px;min-height:0}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:3px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.bh{display:flex;align-items:center;gap:4px;padding:4px 6px;background:var(--surface-2);border-bottom:1px solid var(--line);font:700 7px/1.2 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.bh .sp{flex:1}
+.nw{font:600 7.5px/1 var(--sans);text-transform:none;letter-spacing:0;border:1px solid var(--line);border-radius:3px;padding:2px 4px;background:var(--surface);color:var(--ink)}
+.it{padding:4px 6px;border-bottom:1px solid var(--line);font-size:8px}.it.on{background:var(--surface-2);box-shadow:inset 2px 0 0 var(--gold)}
+.it small{display:block;color:var(--ink-3);font-size:7px}
+.tog{width:15px;height:14px;border:1px solid var(--line);border-radius:3px;background:var(--surface);display:inline-grid;place-items:center;flex:none;color:var(--ink-2)}
+.tog svg{width:9px;height:9px}
+.toprow{display:flex;align-items:center;gap:5px;font:700 7px/1 var(--sans);letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;height:16px;flex:none}
+.main{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:3px;display:flex;flex-direction:column;overflow:hidden}
+.mh{display:flex;align-items:center;gap:5px;padding:5px 8px;border-bottom:1px solid var(--line);font-weight:700;font-size:8.5px;flex:none}
+.mh .sp{flex:1}.mh .az{font-size:7px;color:var(--ink-3);border:1px solid var(--line);border-radius:3px;padding:1px 3px;font-weight:600}
+.msgs{flex:1;display:flex;flex-direction:column;gap:6px;padding:8px 10px;min-height:0}
+.bub{max-width:78%;padding:5px 7px;border-radius:5px;background:var(--surface-2);font-size:8px}.bub.me{align-self:flex-end;background:var(--hl)}
+.line{height:5px;border-radius:2px;background:var(--line);margin-top:3px}
+.cmp{margin:6px 8px 8px;border:1px solid var(--line);border-radius:5px;height:24px;flex:none}
+.slim{width:20px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:1px}
+.edge{position:absolute;width:9px;height:30px;border:1px solid var(--line);border-left:0;border-radius:0 4px 4px 0;background:var(--surface);display:grid;place-items:center;color:var(--ink-3);font-size:8px}
+.mark{outline:2px dashed var(--gold);outline-offset:1px;border-radius:3px}
+.thin{height:14px;background:var(--panel);color:var(--panel-ink);display:flex;align-items:center;gap:5px;padding:0 9px;font-size:7.5px;flex:none}
+.thin .q{color:var(--panel-quiet)}.thin .sp{flex:1}
+.thin .ex{border:1px solid var(--panel-quiet);border-radius:3px;padding:0 4px;font-size:7px}
+.ruler{position:absolute;right:4px;font:600 7px/1 var(--sans);color:var(--good);background:var(--surface);padding:1px 3px;border-radius:2px;border:1px solid var(--good)}
+.note{font-size:13.5px;color:var(--ink-2)}
+.why{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+</style>
+
+<div class="page">
+<header style="display:flex;flex-direction:column;gap:8px">
+<h1>Copilot room: the rail's hide control, and more space to work</h1>
+<p class="note">Drawn at half size from the real chrome at 1440&times;900: top bar 41px, unit row 46px, tab row 47px, section row 54px. That makes <b>188px of chrome</b> before the Copilot starts. The <span class="mark" style="padding:0 4px">dashed gold outline</span> marks what each option changes.</p>
+</header>
+
+<h2>Part 1: the rail's hide control</h2>
+<p class="note">Today the control has a <b>row of its own</b> above Chats (a button and the word "Copilot"). Hidden, it leaves a <b>44px column</b> holding two buttons. On a narrow window that column turns into a full-width row.</p>
+<div id="p1"></div>
+
+<h2>Part 2: more room for the Copilot</h2>
+<p class="note">Each of these can sit alongside any rail option from Part 1. The green tag gives the height each one gives back at 1440&times;900.</p>
+<div id="p2"></div>
+
+<div class="why">
+<h3>My recommendation</h3>
+<p><b>Rail: A</b>. The control moves into the Chats header, and the hidden state becomes a 24px strip that never turns into a row. It is the smallest change, and the way back stays exactly where you left it.</p>
+<p><b>Room: 1 + 2 together</b>. Use one press to fold the three bars into a single thin line while you work, and tighten the gaps around the Copilot. That gives back about 170px of height and about 30px of width. I also considered folding the bars automatically as you scroll and did not draw it, because the platform removed exactly that behaviour once after it made the page jump (&sect;28).</p>
+<p class="cost">Two answers are needed: which rail option, and which room options. Nothing is built until you choose.</p>
+</div>
+</div>
+
+<script>
+var TOG='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M6 2.5v11"/></svg>';
+function chrome(o){o=o||{};
+ if(o.thin) return '<div class="thin'+(o.markThin?' mark':'')+'"><b>Raya Trade</b><span class="q">›</span>Mobile<span class="q">›</span>Copilot<span class="q">›</span>Foundation<span class="sp"></span><span class="ex">Show navigation ▾</span></div>';
+ return '<div class="top"><b>Strategy Management Platform</b><span class="q">Raya Trade</span><span style="flex:1"></span><span class="q">Viewing as Mohamed Essam</span></div>'+
+ '<div class="nav"><span>Group ▾</span><span class="on">Mobile</span><span>Retail Stores</span><span>B2B Ecomm</span><span>Consumer Electronics</span><span>Online Shop</span><span>Corporate</span><span>Care</span>'+(o.foldBtn?'<span style="flex:1"></span><span class="ex mark" style="border:1px solid var(--panel-quiet);border-radius:3px;padding:0 4px;font-size:7px">Fold bars ▴</span>':'')+'</div>'+
+ '<div class="tabs"><span>Strategy</span><span>Performance</span><span>Reporting</span><span class="on">Copilot</span>'+(o.secsInTabs?'<span style="flex:1"></span><span class="seg mark">'+segs()+'</span>':'')+'</div>'+
+ (o.secsInTabs?'':'<div class="secs"'+(o.tight?' style="height:20px"':'')+'><span class="seg">'+segs()+'</span></div>');}
+function segs(){return ['Foundation','Analysis','Directions','Execution','Advisory'].map(function(s,i){return '<span'+(i?'':' class="on"')+'>'+s+'</span>'}).join('');}
+function chats(o){o=o||{};
+ return '<div class="box" style="flex:1"><div class="bh'+(o.markHead?' mark':'')+'">'+(o.togInHead?'<span class="tog">'+TOG+'</span>':'')+'Chats<span class="sp"></span><span class="nw">+ New</span></div>'+
+ '<div class="it on">Aspiration draft<small>Today · Foundation</small></div><div class="it">Purpose wording<small>Yesterday</small></div><div class="it">Values check<small>28 Sep</small></div></div>'+
+ '<div class="box" style="flex:0 0 auto"><div class="bh">Deliverables</div><div class="it">Foundation v3<small>2 Oct</small></div></div>';}
+function main(o){o=o||{};
+ return '<div class="main"><div class="mh'+(o.markMh?' mark':'')+'">'+(o.togInMain?'<span class="tog">'+TOG+'</span>':'')+'Aspiration draft<span class="sp"></span><span class="az">A−</span><span class="az">A+</span></div>'+
+ '<div class="msgs"><div class="bub">Here is what the plan holds today for the Winning Aspiration. What would you like to change?<div class="line" style="width:90%"></div><div class="line" style="width:70%"></div></div>'+
+ '<div class="bub me">Make it about the customer, shorter.</div><div class="bub">A draft:<div class="line" style="width:95%"></div><div class="line" style="width:80%"></div><div class="line" style="width:60%"></div></div></div>'+
+ '<div class="cmp"></div></div>';}
+function scr(inner,o){o=o||{};return '<div class="scroll"><div class="scr">'+chrome(o)+'<div class="body"'+(o.tight?' style="--g:5px;--pad:4px 6px"':'')+'>'+inner+'</div>'+(o.ruler||'')+'</div></div>';}
+function frame(cap,h){return '<div><div class="cap">'+cap+'</div>'+h+'</div>';}
+function opt(id,title,tagRec,gain,cost,a,b){return '<div class="opt"><div class="opthead"><span class="tag'+(tagRec?' rec':'')+'">'+id+(tagRec?' · recommended':'')+'</span><h3>'+title+'</h3></div>'+
+ (gain?'<p class="gain">'+gain+'</p>':'')+'<p class="cost">'+cost+'</p><div class="pair">'+a+(b||'')+'</div></div>';}
+
+var p1 =
+ opt('Today','A row for the control, a column when hidden',false,'','The button and the word "Copilot" take a 36px row above Chats. Hidden, a 44px column holds two buttons.',
+   frame('Open', scr('<div class="rail"><div class="toprow"><span class="tog">'+TOG+'</span>Copilot</div>'+chats()+'</div>'+main())),
+   frame('Hidden', scr('<div class="slim" style="width:22px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+main()))) +
+ opt('A','The control sits in the Chats header',true,'Open: the 36px row goes. Hidden: 44px becomes 24px, and it stays a column on every width.','Hidden, the strip keeps two small buttons: show the rail, and start a new chat.',
+   frame('Open', scr('<div class="rail">'+chats({togInHead:true,markHead:true})+'</div>'+main())),
+   frame('Hidden', scr('<div class="slim mark" style="width:12px"><span class="tog">'+TOG+'</span><span class="tog">+</span></div>'+main()))) +
+ opt('B','A tab on the rail\'s edge',false,'Open: the 36px row goes. Hidden: nothing is left but a small tab on the left edge, so the chat takes the full width.','The tab is small: easy to miss at first, and a small target on a tablet.',
+   frame('Open', scr('<div class="rail" style="position:relative">'+chats()+'</div><span class="edge mark" style="left:132px;top:100px">‹</span>'+main())),
+   frame('Hidden', scr(main()+'<span class="edge mark" style="left:0;top:100px">›</span>'))) +
+ opt('C','The control moves into the open chat\'s title line',false,'Open: the 36px row goes. Hidden: nothing is left at all.','The button sits beside A− and A+, with the same button in the same place in both states. Starting a new chat while hidden means showing the rail first.',
+   frame('Open', scr('<div class="rail">'+chats()+'</div>'+main({togInMain:true,markMh:true}))),
+   frame('Hidden', scr(main({togInMain:true,markMh:true}))));
+
+var R=function(t,top){return '<span class="ruler" style="top:'+top+'px">'+t+'</span>';};
+var p2 =
+ opt('1','Fold the three bars into one thin line',true,'About +140px of height.','One press in the unit row ("Fold bars") folds the top bar, the unit row and the tab row into a 28px line that names where you are, with a button to bring them back. The section row stays. The choice is remembered on this device only, and every page shows the full bars again when you leave the Copilot.',
+   frame('Bars showing (button added)', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main(),{foldBtn:true})),
+   frame('Bars folded', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main(),{thin:true,markThin:true,ruler:R('+140px',4)}))) +
+ opt('2','Tighten the gaps around the Copilot',false,'About +30px of height and +30px of width.','The page margin goes from 24 to 12, the gap between the rail and the chat from 18 to 10, and the section row drops from 54 to 40. This only applies on the Copilot page, so no other page moves.',
+   frame('Today', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main())),
+   frame('Tightened', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main(),{tight:true,ruler:R('+30px',70)}))) +
+ opt('3','The five sections join the tab row',false,'+54px of height, all the time, with no button to press.','Foundation · Analysis · Directions · Execution · Advisory sit at the right end of the Copilot tab row, so their own row goes. On a narrow window they collapse into a dropdown. The Strategy tab keeps its own section row, so the two tabs would look slightly different.',
+   frame('Today', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main())),
+   frame('Sections in the tab row', scr('<div class="rail">'+chats({togInHead:true})+'</div>'+main(),{secsInTabs:true,ruler:R('+54px',50)})));
+
+document.getElementById('p1').innerHTML=p1;
+document.getElementById('p2').innerHTML=p2;
+</script>

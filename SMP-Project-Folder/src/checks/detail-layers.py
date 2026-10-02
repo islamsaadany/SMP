@@ -81,7 +81,15 @@ with sync_playwright() as p:
     ck("the set-up flow's Structure step opens", ok)
     rows = safe(pg, "()=>[...document.querySelectorAll('[data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
     ck("every layer shown carries all four rows",
-       all(("%s|%s" % (k, d)) in rows for k in ("top", "bu", "fn") for d in ("overview", "outcomes", "requirements", "years")), rows)
+       all(("%s|%s" % (k, d)) in rows for k in ("bu", "fn") for d in ("overview", "outcomes", "requirements", "years")), rows)
+    # §462: the company's rows are on its Directions card, separate from the
+    # units' — none while it is off, all four once it is on.
+    ck("…none for the company while its Directions are off (§462)", not any(r.startswith("top|") for r in rows), rows)
+    press(pg, '[data-stsec="top|plan"] button:nth-child(1)')
+    rows2 = safe(pg, "()=>[...document.querySelectorAll('[data-stcard=\"dir\"] [data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
+    ck("…and all four on the Directions card once it is on",
+       all(("top|%s" % d) in rows2 for d in ("overview", "outcomes", "requirements", "years")), rows2)
+    press(pg, '[data-stsec="top|plan"] button:nth-child(2)')
     ck("no old client-wide card", safe(pg, "()=>document.querySelectorAll('[data-stdetail]:not([data-stdetail*=\"|\"])').length") == 0)
     ck("an off row says so and draws no name box",
        safe(pg, "()=>{var r=document.querySelector('[data-stdetrow=\"fn|requirements\"]');return r?[r.textContent.indexOf('Off for')>=0, r.querySelectorAll('input').length]:null}") == [True, 0])

@@ -1338,6 +1338,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-02 — the Structure cards, and capabilities in one place (§462)
+
+Built (stage 2 of the "where the plan lives" mockup). On Client set-up › Structure the question now reads **Company level | Units level**. The top card keeps its Foundation and SWOT; its plan moved to a new **Directions** card, which says Off for Raya Trade (it was saying On while nothing showed). Capabilities now live in one place at a time: a new **capabilities in the company plan** card, or the **capabilities as their own layer** card at the end — turning one on greys the other. At company level they are always the company's. The cards come in the same order at both levels. Raya Trade shows exactly what it did. Next: stage 3, the Directions planning in Projects. On the branch, not merged.
+
 ## 2026-10-02 — planned on the company, the row is the functions (§461)
 
 Stage 1 of "where the plan lives". When the strategy is planned on the company, the navigation shows the company button, then either the word Functions with every function beside it, or — when functions belong to divisions — a switch of the division names (Retail | Wholesale | Group) with the pressed one's functions beside it. Pressing a division opens its own page, its performance read from its functions; the division sections on the company's Performance tab are gone. The Structure card is called Functions. Next: reshaping the Structure cards, then directions planned in projects. On the branch, not merged.

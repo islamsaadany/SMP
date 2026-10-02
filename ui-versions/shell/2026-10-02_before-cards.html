@@ -305,11 +305,7 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")) || topCapsOn(); }
-  /* §462: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")); }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -327,7 +323,7 @@
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    when: topCapsOn }];
+                    when: function(){ return !buExists() && SMPRules.capExists(GROUP) && capsReachable().length > 0; } }];
       } };
   }
   var SUBS = {
@@ -1399,7 +1395,7 @@
       keys:us });
     /* §447: with the units off, capabilities are a section of the company
        page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
+    if (cs.length && buExists()) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
     if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
     if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),

@@ -61219,3 +61219,21 @@ Islam, of the company-level navigation: *"having the functions button and the fu
 
 Units level is unchanged. Nothing stored moves, nothing is migrated, no rule about who reaches what changes. `single-company.py` gains §461 (13 assertions), red 9 with the divisions taken out of the switch and red 1 with the division sections put back on Performance — and its first falsification DIED rather than reporting (§215), so the probes degrade now. `sw.js` SHELL `v5.83-company-row`.
 
+
+## §462 — The Structure cards, and capabilities in one place at a time (2026-10-02)
+
+Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`: *"ok build it"*, then *"proceed with all and pause when you need something from me"*. Stage 2 of three; §461 was the navigation.
+
+**THE QUESTION IS NAMED FOR THE LEVEL**: *Company level | Units level*, his words, replacing "On the company / On the business units". The store is §448's `structure.bu.exists`, unchanged.
+
+**THE TOP CARD LOSES ITS PLAN; THE PLAN BECOMES A DIRECTIONS CARD.** The top card keeps its first and second sections and its Temple. Its plan section was an On/Off that read **On** for Raya Trade while nothing was drawn, because §428.2 keeps the `pillar` component off for an unsaid top — a switch saying yes over a page saying no (§42's drift on one card). The Directions card's On/Off is the TRUE answer, `planOn(group) && pillar carried`, so Raya reads Off; On writes both halves (deletes `top.plan.on`, adds `pillar`), Off sets `top.plan.on = false` and keeps the pillars carried (hide and keep, §44). Switched on, it names the directions one and many at the top of the card and the parts INSIDE the way below them, skipping the pillar row the card already named — one `planWays()` drawn for a layer's plan section and for this card alike (§53.5). Its four extras are the top layer's own (`structure.top.details`), so they were always separate from the units' (§420); the card makes that visible. The `data-stsec="top|plan"` key travels with the switch, so what reads it still finds it.
+
+**CAPABILITIES LIVE IN ONE PLACE AT A TIME.** `SMPRules.capAtTop(group)` is the one answer: always true at company level (§447), and at units level true only where `structure.cap.at === "top"`, stored as an ABSENCE — so a client that never chose keeps them a layer, Raya included. The navigation's capabilities side, the company Strategy tab's capabilities section (`topCapsOn()`), and whether that tab leads as Strategy (`topExtrasOn()`) all ask it. Card 3 holds the capabilities when they are the company's, card 7 when they are a layer; whichever holds them carries `data-stcard="cap"` and the `cap|layer` switch, and the other is greyed with its switch disabled (§220) and the reason on the hover. At units level card 3's own switch (`cap|top`) moves them: On writes `at` and `exists`, Off deletes `at` and leaves `exists` as it was, so on-then-off is exactly where it started.
+
+**SWITCHING LEVELS FOLDS AND RESTORES WITHOUT A STEP OF ITS OWN**: at company level `capAtTop` is true by rule, so the capabilities are the company's section; back at units level an absent `at` makes them a layer again. Nothing moves in the data.
+
+**THE ORDER IS THE SAME AT BOTH LEVELS** — top, directions, capabilities, second layer, units, functions, capabilities as a layer — and what changes is what each card holds. At company level the units card shows its switch held Off, answered by the top card.
+
+**CHECKS**: `checks/plan-level.py` new (29 assertions, both ends: the worked example untouched first), red 4 with `at` ignored and 1 with the navigation still asking `buExists`, from the sources. Four checks held the old top card and were REWRITTEN, never loosened (§218): `structure.py` (the top draws two sections; no way named while the Directions are off; the units card found by name rather than by position, which the inserted cards moved; the Directions card pressed both ways), `client-setup.py` and `detail-layers.py` (the company's names and extras asserted on the Directions card once it is on, and absent while it is off).
+
+**NOT BUILT HERE**: stage 3, the Directions planning in Projects.

@@ -61230,3 +61230,60 @@ Islam, after the Copilot answered *"Let's enhance the winning aspiration"* with 
 
 **Checks.** `checks/copilot.mjs` asserts the starting rule is in every section's guidance, that the method comes before it and it before the ways to start, that no playback reaches the model's instructions or a stored answer, and what the model was actually sent. 139/0; red under `no-refine` (5) and `method-last` (2). The §458 leak test moved from the removed field to `assumptions`, which runs through the same cutter. `checks/shell.mjs` 206/0; its "no playback box" assertion is the CONTROL and says so — it stays green with the old drawing put back, because the server already drops the field (§113.8). Nothing stored moves, nothing is migrated.
 
+## §464 — The Copilot asks before it improves, saves a draft, and shows one word while it works (2026-10-02)
+
+Islam, testing §463 with a screenshot: *"the reply needs to fetch in case of
+something existing and the enhancement needs to ask first what to enahnce"*;
+*"when I tried looks great save it it kept working no idea why it should be
+saved to the deliverables rail on the left"*; and *"change the copilot is
+working on it maybe with a variety of changing words and 3 dots after like
+what claude do"*. Drawn first (`design-mockups/copilot-save-working/`,
+published), and approved: *"go ahead with all three but for the working line
+keep it one word like reading, thinking, checking, fetching, drafting, etc.
+and ok for the message after 40 seconds"*.
+
+**§464.1 — ASKING FIRST IS THE PRODUCT'S, NOT THE MODEL'S.** §463 told the
+model to show what exists and ask what to change, and the model drafted
+anyway. A rule the model may ignore is a request, so the server now enforces
+it for exactly one case: a SHORT ask to improve (`isBareEnhance` — eight words
+or fewer, an improve/enhance/refine/sharpen/polish/strengthen/rework/rewrite/
+tweak/better stem), with the plan's own text in the context, no file, no paste,
+and the Copilot not having just asked. That turn carries a one-turn
+instruction to quote the plan word for word and offer three or four specific
+improvements, and **any draft it writes anyway is dropped** before it is
+stored (`part.askFirst`). The next turn is never held, so the person's answer
+goes straight to a draft. This is a short list of words, which §463 argued
+against; it is narrowed to the one case the model kept getting wrong and is
+written down here so it is a decision rather than a drift.
+
+**§464.2 — A DRAFT IS SAVED FROM UNDER IT.** There was no path from a chat to
+the Deliverables rail at all, so *"save it"* was just another question, and
+the page waited with no limit. Every draft now carries **Save to <Section>
+deliverables**; pressing it keeps the draft as a deliverable, written out as
+text (title, each group in capitals, `- ` items, `Evidence:` lines) with the
+structured draft beside it. **A later draft with the same title in the same
+place and section becomes the next version** of that deliverable, never a
+second row. The pressed answer then reads *✓ Saved as vN* with **Open it**;
+saving the same draft twice is refused by name. **Typing "save it"** (a short
+message with *save* and no negation) saves the latest draft the same way and
+**does not ask the model at all**; with no draft in the chat it says so. The
+model is also told it cannot save and should point at the button.
+
+**§464.3 — ONE WORD AND THREE DOTS.** *"The Copilot is working on it…"* is now
+one word — Reading · Thinking · Checking · Fetching · Weighing · Drafting ·
+Writing — changing every two seconds **in place** (no redraw, so nothing typed
+is touched), with three moving dots (still under reduced motion), and after 40
+seconds *"Still working — this one is taking a little longer"*. **The page
+stops waiting after two minutes** and says the answer, if it arrives, will be
+in the chat when it is opened again. **Departure from the mockup, stated**:
+the mockup put the typed text back in the box on a timeout; it is not put
+back, because what was typed is already stored as the person's message.
+
+**Checks.** `check:copilot` 153/0, red under `no-ask-first` (2) and
+`save-to-model` (2). `check:shell` 213/0 — the Save button pressed and read
+back from the database, the working word measured as one word with three dots
+and seen to change on the same element. One older assertion read the first
+`.copopt.rec` and now meets the Save button, which also wears that style; it
+asks for the recommended quick reply instead (§218, rewritten not loosened).
+Built file and served copies regenerated, `sw.js` → `smp-shell-v5.86-save-working`.
+

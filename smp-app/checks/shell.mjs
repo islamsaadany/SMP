@@ -73,11 +73,16 @@ const MODEL_ANSWER = {
   draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }, { title: "Wide store network", text: "Present in every governorate", evidence: "Store count in the plan", score: "4", source: "platform" }] }] },
   following: "Purpose",
 };
+/* §464: a provider that takes its time, so the working line can be seen
+   while it waits (0 = answer at once, which is every other section). */
+let MODEL_DELAY = 0;
 const model = http.createServer((req, res) => {
   let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
     try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
+    setTimeout(() => {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
+    }, MODEL_DELAY);
   });
 });
 await new Promise((r) => model.listen(0, "127.0.0.1", r));
@@ -860,7 +865,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const ans = await page.evaluate(() => {
       const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
       return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
-        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector(".copopt.rec") || {}).textContent || "",
+        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector("[data-cop-reply].rec") || {}).textContent || "",
         opts: m.querySelectorAll("[data-cop-reply]").length,
         it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
     });
@@ -880,6 +885,46 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "pressing a quick reply sends it, and the assumption already made goes with the next ask", MODEL_SEEN.length - seen0);
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
+
+    /* §464 — A DRAFT IS SAVED FROM UNDER IT, AND THE WAIT IS ONE WORD. Islam:
+       "when I tried looks great save it it kept working … it should be saved
+       to the deliverables rail on the left". Pressed, then read back from the
+       database, never off the screen (§96). */
+    const saveBtns = await page.evaluate(() => [...document.querySelectorAll("[data-cop-msgs] [data-cop-savedraft]")].map((b) => b.textContent.trim()));
+    check(saveBtns.length === 2 && saveBtns.every((t) => t === "Save to Foundation deliverables"),
+      "every draft carries a Save button naming the section's deliverables (§464)", JSON.stringify(saveBtns));
+    const d0 = await count("copilot_deliverables");
+    await page.locator("[data-cop-msgs] [data-cop-savedraft]").last().click();
+    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copsaved"), null, { timeout: 10000 }).catch(() => {});
+    const sv = await page.evaluate(() => ({ saved: [...document.querySelectorAll("[data-cop-msgs] .copsaved")].map((x) => x.textContent.trim()),
+      open: document.querySelectorAll("[data-cop-msgs] .copsaved ~ [data-cop-deliv]").length,
+      left: document.querySelectorAll("[data-cop-msgs] [data-cop-savedraft]").length,
+      rail: [...document.querySelectorAll("[data-cop-delivs] [data-cop-deliv], .coprail [data-cop-deliv]")].map((x) => x.textContent.trim()).join("|") }));
+    const savedRow = (await asTenant(tenantId, (c) => c.query("select d.title, v.n, v.body->>'text' t from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id order by d.created_at desc, v.n desc limit 1"))).rows[0];
+    check((await count("copilot_deliverables")) === d0 + 1 && savedRow && savedRow.title === "Mobile foundation" && savedRow.n === 1 && /PURPOSE\n- Connect every Egyptian/.test(savedRow.t),
+      "pressing Save keeps the draft as a deliverable, v1, written out as text", JSON.stringify(savedRow));
+    check(sv.saved.length === 1 && /Saved as v1/.test(sv.saved[0]) && sv.open === 1 && sv.left === 1,
+      "…the pressed draft now says Saved as v1 with a way to open it, and the other draft keeps its button", JSON.stringify(sv));
+    check(/Mobile foundation/.test(sv.rail), "…and it is on the left under Deliverables", sv.rail);
+
+    MODEL_DELAY = 2600;
+    await page.fill("[data-cop-text]", "Tighten the purpose");
+    await page.click("[data-cop-send]");
+    await page.waitForSelector("[data-cop-msgs] .copworking", { timeout: 5000 }).catch(() => {});
+    const w1 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] .copworking");
+      window.__copW = el && el.querySelector("[data-cop-wword]");
+      return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent } : null; });
+    await page.waitForTimeout(2200);
+    const w2 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] [data-cop-wword]"); return { word: el ? el.textContent : "", same: el === window.__copW }; });
+    const words = await page.evaluate(() => window.__copWork && window.__copWork.words);
+    check(w1 && words && words.includes(w1.word) && !/\s/.test(w1.word) && w1.dots === 3 && w1.role === "status" && !/working on it/i.test(w1.all),
+      "while the Copilot works it shows ONE word and three dots, never the old sentence (§464)", JSON.stringify(w1));
+    check(w2.word !== w1.word && words.includes(w2.word) && w2.same,
+      "…and the word changes in place, without redrawing the chat", JSON.stringify([w1 && w1.word, w2]));
+    check(await page.evaluate(() => typeof window.__copWork.word === "function" && typeof window.__copWork.slow === "string" && /Still working/.test(window.__copWork.slow)),
+      "…with a longer line kept for a slow answer (after 40 seconds)");
+    await page.waitForFunction(() => !document.querySelector("[data-cop-msgs] .copworking"), null, { timeout: 10000 }).catch(() => {});
+    MODEL_DELAY = 0;
 
     /* §453 — THE COMPOSER AND THE RAIL'S THREE DOTS, from the signed-off
        mockup. Measured as boxes and pressed, never read as classes (§94.8). */
@@ -980,7 +1025,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
     check(made && made.ok && made.id, "a deliverable can be filed (through the api until stage 3)", JSON.stringify(made));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
-    await page.click("[data-cop-deliv]"); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
+    await page.click('[data-cop-deliv="' + made.id + '"]'); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
     await page.click("[data-cop-edit]"); await page.waitForSelector("[data-cop-edit-text]", { timeout: 8000 });
     await page.fill("[data-cop-edit-text]", "Purpose: second draft");
     await page.click("[data-cop-edit-save]");

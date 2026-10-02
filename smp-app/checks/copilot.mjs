@@ -35,6 +35,7 @@ import { deflateRawSync } from "node:zlib";
 import {
   SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor, copilotGrant,
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
+  isSaveAsk, isBareEnhance, draftText,
   partMemo,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
@@ -586,6 +587,57 @@ try {
     const pA = (rL.j.messages[rL.j.messages.length - 1].part.assumptions) || [];
     check("a line that ran on into the answer's next field is cut there (§458)", pA[1] === "The plan's aspiration (MENA expansion).", JSON.stringify(pA[1]));
     check("...and ordinary quotes in what the model wrote are kept", pA[0] === 'He said "yes", "no" and left', JSON.stringify(pA[0]));
+
+    /* §464: AN ENHANCEMENT ASKS FIRST, held by the product. A short "enhance"
+       about something the plan holds is told so on that turn, and a draft
+       written anyway is dropped; the answer to that question is not held. */
+    const qL = JSON.stringify(seen.find((x) => /Can we enhance the winning aspiration/.test(JSON.stringify(x.body.contents))).body.contents);
+    check("a short ask to improve what the plan holds is told, on that turn, to quote it and ask what to improve (§464)", /FOR THIS TURN ONLY/.test(qL) && /word for word/.test(qL), qL.slice(-300));
+    const ctxA = "Mobile\n\nTHE PLAN AS WRITTEN:\nWinning Aspiration: Be first.";
+    const DR = { title: "Aspiration — Mobile", groups: [{ title: "Aspiration", items: [{ text: "Be the first choice for a phone", source: "platform" }] }] };
+    NEXT = { answer: { reply: "Today it reads: Be first. What should improve?", options: [{ label: "Make it measurable" }], draft: DR } };
+    const e1 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: ctxA }, NORAN);
+    const ae1 = e1.j.messages[e1.j.messages.length - 1];
+    check("...and a draft it writes anyway is dropped, so the page shows the question, not a draft", !ae1.part.draft && ae1.part.askFirst === true && ae1.part.options.length === 1, JSON.stringify(ae1.part).slice(0, 200));
+    NEXT = { answer: { reply: "Here it is, sharper.", draft: DR } };
+    const e2 = await call("POST", "api", { act: "say", id: ch.id, text: "improve it, make it measurable", context: ctxA }, NORAN);
+    const ae2 = e2.j.messages[e2.j.messages.length - 1];
+    const q2 = JSON.stringify(seen[seen.length - 1].body.contents);
+    check("...the answer to that question is not held: the draft comes (§464, both ends)", !!(ae2.part.draft && ae2.part.draft.groups) && !/FOR THIS TURN ONLY/.test(q2.slice(-600)), JSON.stringify(ae2.part).slice(0, 160));
+    NEXT = { answer: { reply: "A first aspiration.", draft: DR } };
+    const e3 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: "Mobile" }, NORAN);
+    check("...and where the plan holds nothing, nothing is held back", !!e3.j.messages[e3.j.messages.length - 1].part.draft);
+
+    /* §464: A DRAFT IS SAVED TO THE RAIL by the product. The button makes v1;
+       the same title again is v2 of the same deliverable; a saved draft is
+       not saved twice; and a typed "save it" saves without asking the model. */
+    const dm2 = ae2.id;
+    const sv1 = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: dm2 }, NORAN);
+    const shelfS = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
+    const dS = shelfS.find((d) => d.title === "Aspiration — Mobile");
+    const vS = dS ? await asTenant(A, (c) => versionsOf(c, dS.id)) : [];
+    check("Save under a draft puts it on the rail as v1, its text written out (§464)",
+      sv1.st === 200 && sv1.j.saved.n === 1 && !!dS && vS.length === 1 && /Be the first choice for a phone/.test(vS[0].body.text), JSON.stringify(sv1.j).slice(0, 200));
+    check("...and the draft now says it was saved", sv1.j.messages.find((m) => m.id === dm2).part.saved.n === 1);
+    const again = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: dm2 }, NORAN);
+    check("...a saved draft is not saved twice, in words", again.st === 400 && /already saved/.test(again.j.why));
+    const notD = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: e1.j.messages[e1.j.messages.length - 2].id }, NORAN);
+    check("...and the person's own message is not a draft — judged on the stored row (§42)", notD.st === 400 && /not a draft/.test(notD.j.why));
+    const bS = seen.length;
+    const ty = await call("POST", "api", { act: "say", id: ch.id, text: "looks great, save it" }, NORAN);
+    const tyL = ty.j.messages[ty.j.messages.length - 1];
+    const vS2 = await asTenant(A, (c) => versionsOf(c, dS.id));
+    check("a typed 'looks great, save it' saves the latest draft at once, asking the model nothing (§464)",
+      ty.st === 200 && seen.length === bS && tyL.part.kind === "saved" && /Saved: Aspiration — Mobile, v2/.test(tyL.body) && vS2.length === 2, seen.length - bS + " asks · " + tyL.body);
+    const shelfS2 = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
+    check("...as v2 of the SAME deliverable, never a second row with the same title", shelfS2.filter((d) => d.title === "Aspiration — Mobile").length === 1);
+    const ch2 = (await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis", title: "Empty" }, NORAN)).j.chat;
+    const ty2 = await call("POST", "api", { act: "say", id: ch2.id, text: "save it" }, NORAN);
+    check("...and in a chat with no draft it says so rather than pretending", /no draft in this chat/.test(ty2.j.messages[ty2.j.messages.length - 1].body));
+    check("the save words are narrow: a question that mentions saving goes to the model",
+      isSaveAsk("save it") && isSaveAsk("Looks great, save it!") && !isSaveAsk("how would this save us money in Q3 and beyond") && !isSaveAsk("don't save it yet"));
+    check("...and a short 'enhance' is the bare kind, a long one is not", isBareEnhance("enhance it") && !isBareEnhance("enhance the aspiration so it names online sales and the 2028 target clearly"));
+    check("a draft is written out as readable text", /^Aspiration — Mobile\n\nASPIRATION\n- Be the first choice/.test(draftText(DR)), JSON.stringify(draftText(DR)));
     NEXT = null;
 
     NEXT = { status: 500 };

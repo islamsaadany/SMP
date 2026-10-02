@@ -125,17 +125,10 @@ var COPILOT = (function(){
     return fetch(url(path, qs), { cache:"no-store", credentials:"same-origin" })
       .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); });
   }
-  /* A question is waited for two minutes at most (§464): with no limit a
-     slow answer left the page on "working" for as long as it took, which
-     read as broken. */
-  var WAIT_MS = (window.__copWaitMs || 120000);
-  function post(body, waitMs){
-    var ctrl = (waitMs && typeof AbortController !== "undefined") ? new AbortController() : null, timedOut = false;
-    var tm = ctrl ? setTimeout(function(){ timedOut = true; ctrl.abort(); }, waitMs) : null;
+  function post(body){
     return fetch(url("api"), { method:"POST", cache:"no-store", credentials:"same-origin",
-      headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined })
-      .then(function(r){ if (tm) clearTimeout(tm); return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); },
-        function(e){ if (tm) clearTimeout(tm); throw (timedOut ? { timedOut: true } : e); });
+      headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); });
   }
 
   /* ── NAMES ARE THE REGISTER'S (§93.8, §130.7) ──────────────────────────
@@ -449,29 +442,6 @@ var COPILOT = (function(){
       '<div>' + E(it.text) + '</div>' +
       '<div class="copev">' + (it.evidence ? 'Evidence: ' + E(it.evidence) : '') + srcTag(it.source) + '</div></li>';
   }
-  function secLabel(){
-    var s = section();
-    for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === s) return SECTIONS[i].label;
-    return s;
-  }
-  /* WHILE THE COPILOT WORKS (§464, Islam: "keep it one word"): one word that
-     changes every two seconds, three moving dots, and after forty seconds a
-     line saying it is taking longer. The word is rewritten IN PLACE on a
-     clock and never by a repaint, or the box under it would be rebuilt while
-     somebody types the next message (§35). */
-  var WORK_WORDS = ["Reading", "Thinking", "Checking", "Fetching", "Weighing", "Drafting", "Writing"];
-  var WORK_SLOW = "Still working — this one is taking a little longer";
-  var THINK_AT = 0, WORK_TIMER = null;
-  function workWord(){
-    var ms = THINK_AT ? Date.now() - THINK_AT : 0;
-    if (ms >= 40000) return WORK_SLOW;
-    return WORK_WORDS[Math.floor(ms / 2000) % WORK_WORDS.length];
-  }
-  function workTick(){
-    if (!THINKING) { clearInterval(WORK_TIMER); WORK_TIMER = null; return; }
-    var w = document.querySelector("[data-cop-wword]"); if (w) w.textContent = workWord();
-  }
-  window.__copWork = { words: WORK_WORDS, slow: WORK_SLOW, word: workWord };
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
@@ -484,14 +454,6 @@ var COPILOT = (function(){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
             g.items.map(itemHtml).join("") + '</ul></div>';
         }).join("") + '</div></div>';
-      /* SAVED TO THE RAIL (§464): a button under every draft, and once it is
-         saved the line says which version it became and opens it. */
-      if (p.saved && p.saved.deliverableId) {
-        h += '<div class="copopts"><span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span>' +
-          '<button type="button" class="copopt" data-cop-deliv="' + E(p.saved.deliverableId) + '">Open it</button></div>';
-      } else if (canEdit() && PANE && PANE.chat && !PANE.chat.archived) {
-        h += '<div class="copopts"><button type="button" class="copopt rec" data-cop-savedraft="' + E(m.id) + '">Save to ' + E(secLabel()) + ' deliverables</button></div>';
-      }
     }
     if (p.assumptions && p.assumptions.length) h += '<div class="copassume"><b>Assumed</b> ' + p.assumptions.map(E).join(" · ") + '</div>';
     if (p.pastedOffer && !NOTNOW[p.pastedOffer.messageId] && canEdit()) {
@@ -564,7 +526,7 @@ var COPILOT = (function(){
         return '<div class="copmsg ai"><span class="copwho">Copilot</span>' + answerHtml(m, i === n - 1 && THINKING !== c.id) + '</div>';
       }
       return '<div class="copmsg me"><span class="copwho">' + E(nameOf(m.by)) + ' · ' + E(when(m.at)) + '</span>' + personHtml(m) + '</div>';
-    }).join("") + (THINKING === c.id ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '');
+    }).join("") + (THINKING === c.id ? '<div class="copmsg product" role="status"><div class="copbody">The Copilot is working on it…</div></div>' : '');
     var ctx = contextOf();
     var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
     return '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
@@ -744,11 +706,9 @@ var COPILOT = (function(){
     PANE.messages = PANE.messages.concat([{ id:"new", who:"person", by: (typeof SYNC !== "undefined" && SYNC.actingAs && SYNC.actingAs()) || "",
       body:text, part:{ kind:"said", files:files }, at:new Date().toISOString() }]);
     PANE.pending = [];
-    THINKING = id; SAY = ""; THINK_AT = Date.now();
-    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
-    draw();
+    THINKING = id; SAY = ""; draw();
     post({ act:"say", id:id, text:text, fileIds: files.map(function(f){ return f.id; }),
-           context: ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : ""), placeWord: placeWord() }, WAIT_MS).then(function(x){
+           context: ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : ""), placeWord: placeWord() }).then(function(x){
       THINKING = null;
       if (x.st === 200 && x.j && x.j.ok) {
         if (PANE && PANE.chat && PANE.chat.id === id) { PANE.messages = x.j.messages || PANE.messages; PANE.assumptions = x.j.assumptions || []; }
@@ -757,14 +717,8 @@ var COPILOT = (function(){
       SAY = (x.j && x.j.why) || "That did not send. Nothing was lost — try again.";
       if (forced == null) DRAFT[id] = text;
       openItem("chat", id);
-    }, function(err){
-      THINKING = null;
-      /* The page stopped waiting (§464). What was typed is already kept on
-         the server, so it is not put back in the box — sending it again would
-         say it twice; the chat is read again instead, and an answer that
-         arrives later is there the next time it is opened. */
-      if (err && err.timedOut) { SAY = "This is taking too long, so the page stopped waiting. If the answer arrives, it will be here when you open this chat again."; openItem("chat", id); return; }
-      SAY = "The server could not be reached. What you typed is back in the box — try again.";
+    }, function(){
+      THINKING = null; SAY = "The server could not be reached. What you typed is back in the box — try again.";
       if (forced == null) DRAFT[id] = text; openItem("chat", id);
     });
   }
@@ -838,15 +792,6 @@ var COPILOT = (function(){
       return;
     }
     if ((b = hit(ev, "[data-cop-notnow]"))) { NOTNOW[b.getAttribute("data-cop-notnow")] = true; draw(); return; }
-    if ((b = hit(ev, "[data-cop-savedraft]"))) {
-      if (!PANE || !PANE.chat) return;
-      var cid4 = PANE.chat.id;
-      act({ act:"saveDraft", id:cid4, messageId:b.getAttribute("data-cop-savedraft") }, function(j){
-        if (PANE && PANE.chat && PANE.chat.id === cid4 && j.messages) PANE.messages = j.messages;
-        SAY = j.saved ? "Saved: " + j.saved.title + ", v" + j.saved.n + ". It is on the left under Deliverables." : "";
-        LISTS[key()] = null; loadList(true); draw(); });
-      return;
-    }
     if ((b = hit(ev, "[data-cop-savepasted]"))) {
       if (!PANE || !PANE.chat) return;
       var sec = b.getAttribute("data-cop-sec"), mid = b.getAttribute("data-cop-savepasted"), lab = sec;

@@ -35,6 +35,7 @@ export const START = [
   "WHERE THE WORK STARTS, in every section:",
   "- When the conversation turns to something THE PLAN AS WRITTEN already holds (an aspiration, a purpose, the north star, the values, a SWOT, a direction or pillar, its measures, its tactics, projects or actions), start from it: show it in `reply` word for word as the plan holds it today, then talk about what to change. If the person has not said what to change, ask, and leave `draft` empty on that turn. If they have already said what to change, show it and then make that change in the same turn.",
   "- When the plan holds nothing for it yet, say so plainly and help them start, using the ways to start listed below (each follows Forefront's method in its own way).",
+  "- You cannot save anything yourself. Every draft has a Save button under it that keeps it on the left under Deliverables. If the person asks you to save, tell them in one line to press it, and do not write the draft again.",
 ].join("\n");
 
 /* The few limits that do not bend, whatever the method says. */

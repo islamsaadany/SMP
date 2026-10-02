@@ -27,6 +27,7 @@ import {
   deliverablesOn, oneDeliverable, versionsOf, bodyOf, newDeliverable, addVersion, restoreVersion,
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
+  saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, isPasted, configured } from "../../lib/copilot-ask.ts";
@@ -227,6 +228,19 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, id: did });
   }
 
+  if (kind === "saveDraft") {
+    /* A draft saved to the Deliverables rail (§464). Judged against the
+       STORED message (§42): it must be this chat's and the Copilot's, and
+       carry a draft; a draft already saved is not saved twice. */
+    const chat = await oneChat(c, id);
+    if (!chat) return refused(404, "That chat is not here any more.");
+    if (chat.archived) return refused(400, ARCHIVED);
+    const r = await saveDraftFrom(c, chat, String(b.messageId || "").replace(/\D/g, "") || "0", by);
+    if (r === "notDraft") return refused(400, "That is not a draft in this chat.");
+    if (r === "already") return refused(400, "That draft is already saved.");
+    return out(200, { ok: true, saved: r, messages: await messagesOf(c, id) });
+  }
+
   if (kind === "rename" || kind === "deleteChat" || kind === "archiveChat" || kind === "restoreChat") {
     const chat = await oneChat(c, id);
     if (!chat) return refused(404, "That chat is not here any more.");
@@ -301,8 +315,37 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   if (step1 === "badFile") return refused(400, "One of those files is not waiting in this chat any more. Attach it again.");
   const { chat, said, material } = step1;
 
+  /* "SAVE IT" IS THE PRODUCT'S, NOT THE MODEL'S (§464): a short ask to save
+     saves the latest draft at once, with no question to the model — which
+     is what kept the page "working" for minutes and then saved nothing. */
+  if (!said.files.length && isSaveAsk(text) && brk() !== "save-to-model") {
+    await withTenant(tenantId, async (c) => {
+      const mid = await latestDraftId(c, id);
+      if (!mid) { await recordAnswer(c, id, { body: "There is no draft in this chat to save yet.", part: { kind: "saved" } }); return; }
+      const r = await saveDraftFrom(c, chat, mid, by);
+      const body = r === "already" ? "That draft is already saved — it is on the left under Deliverables."
+        : r === "notDraft" ? "There is no draft in this chat to save yet."
+        : "Saved: " + r.title + ", v" + r.n + ". It is on the left under Deliverables.";
+      await recordAnswer(c, id, { body, part: { kind: "saved" } });
+    });
+    return out(200, { ok: true, messages: await withTenant(tenantId, (c) => messagesOf(c, id)),
+      assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
+  }
+
+  /* AN ENHANCEMENT ASKS FIRST, AND THE PRODUCT HOLDS IT TO THAT (§464).
+     The instruction already says so and the model did not always follow it:
+     a short "enhance it" about something the plan already holds is told,
+     on this turn, to quote what exists and ask what to improve — and any
+     draft it writes anyway is dropped, so the page never shows one. The
+     person's next answer is not held, or the asking would never end. */
+  const hasPlan = /THE PLAN AS WRITTEN:\s*\S/.test(String(b.context ?? ""));
+  const lastAi = [...material.history].reverse().find((h) => h.from_office);
+  const askedBefore = !!(lastAi && /\[asked what to improve\]/.test(lastAi.body));
+  const askFirst = hasPlan && !pasted && !said.files.length && isBareEnhance(text) && !askedBefore && brk() !== "no-ask-first";
+
   const question = (text.trim() || "(sent without words)") +
-    (said.files.length ? "\n[attached with this message: " + said.files.map((f) => f.name).join(", ") + "]" : "");
+    (said.files.length ? "\n[attached with this message: " + said.files.map((f) => f.name).join(", ") + "]" : "") +
+    (askFirst ? "\n\n[FOR THIS TURN ONLY: the person asked to improve something the plan already holds and did not say what to improve. Quote the existing text from THE PLAN AS WRITTEN word for word in `reply`, ask what they want improved, offer three or four specific improvements as `options`, and leave `draft` empty.]" : "");
   /* What this section is told, read on every question so an edit in Copilot
      settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
@@ -318,6 +361,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   await withTenant(tenantId, async (c) => {
     if (r.ok) {
       const part: any = { ...r.part };
+      if (askFirst) { delete part.draft; part.askFirst = true; }
       /* The offer to keep pasted material is attached by the PRODUCT, only
          under a message that really was pasted — never on the model's say. */
       if (pasted || brk() === "offer-always") part.pastedOffer = { messageId: said.messageId, section: r.part.pastedBelongsTo || chat.section };

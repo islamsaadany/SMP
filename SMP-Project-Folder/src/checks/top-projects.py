@@ -1,4 +1,4 @@
-"""The company plans in projects (§463).
+"""The company plans in projects (§466).
 
 Islam: *"agreed, build stage 3"* — the company's own plan (the Directions card)
 may be planned in projects instead of pillars, on three decisions: pillars

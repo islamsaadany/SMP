@@ -5189,11 +5189,11 @@ console.log("\n§447 · a direction's owner on the company page");
   check("§447 REFUSED: with the units ON the rule does not exist", !v.ok, "was ALLOWED");
 })();
 
-/* ── §463: THE COMPANY PLANS IN PROJECTS ─────────────────────────────────
+/* ── §466: THE COMPANY PLANS IN PROJECTS ─────────────────────────────────
    A company project's named Owner reports the rows of their own project and
    nothing else; the office reports and submits; authoring stays the office's;
    and with the company planning in pillars the rule does not exist. */
-console.log("\n§463 · a company project's owner");
+console.log("\n§466 · a company project's owner");
 (function () {
   const B = clone(SEED);
   B.people = B.people.concat([{ key: "t463_own", name: "Testcase Project Owner", unit: "group" }]);
@@ -5208,26 +5208,26 @@ console.log("\n§463 · a company project's owner");
       milestones: [] }];
   function as(who, mutate, base) { const b = base || B; const inc = clone(b); mutate(inc); return A.authorize(b, inc, personOf(b, who)); }
   let v = as("t463_own", function (inc) { inc.group.topProjects[0].outcomes[0].actual = "40"; });
-  check("§463: a project's owner reports their own project", v.ok, (v.refusals || []).join(" / "));
+  check("§466: a project's owner reports their own project", v.ok, (v.refusals || []).join(" / "));
   v = as("t463_own", function (inc) { inc.group.topProjects[0].milestones[0].status = "Done"; });
-  check("§463: …its milestones too", v.ok, (v.refusals || []).join(" / "));
+  check("§466: …its milestones too", v.ok, (v.refusals || []).join(" / "));
   v = as("t463_own", function (inc) { inc.group.topProjects[1].outcomes[0].actual = "5"; });
-  check("§463 REFUSED: another project's figure", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: another project's figure", !v.ok, "was ALLOWED");
   v = as("t463_own", function (inc) { inc.group.topProjects[0].name = "Renamed"; });
-  check("§463 REFUSED: renaming their project (authoring stays the office's)", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: renaming their project (authoring stays the office's)", !v.ok, "was ALLOWED");
   v = as("t463_own", function (inc) { inc.review = inc.review || {}; inc.review.submitted = Object.assign({}, inc.review.submitted || {}, { group: { at: "30 Sep 2026", by: "t463_own" } }); });
-  check("§463 REFUSED: submitting the company's report", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: submitting the company's report", !v.ok, "was ALLOWED");
   v = as("smo", function (inc) { inc.group.topProjects[1].outcomes[0].actual = "5"; });
-  check("§463: the office reports every project", v.ok, (v.refusals || []).join(" / "));
+  check("§466: the office reports every project", v.ok, (v.refusals || []).join(" / "));
   v = as("smo", function (inc) { inc.group.topProjects.push({ id: "group-P3", name: "New", owner: "", deliverables: [], outcomes: [], milestones: [] }); });
-  check("§463: the office adds a project", v.ok, (v.refusals || []).join(" / "));
+  check("§466: the office adds a project", v.ok, (v.refusals || []).join(" / "));
   v = as("t463_own", function (inc) { inc.group.topProjects.push({ id: "group-P3", name: "New", owner: "", deliverables: [], outcomes: [], milestones: [] }); });
-  check("§463 REFUSED: an owner adding a project", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: an owner adding a project", !v.ok, "was ALLOWED");
   const Pil = clone(B); delete Pil.group[R.STRUCTURE].top.plan;
   v = as("t463_own", function (inc) { inc.group.topProjects[0].outcomes[0].actual = "40"; }, Pil);
-  check("§463 REFUSED: with the company planning in pillars the rule does not exist", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: with the company planning in pillars the rule does not exist", !v.ok, "was ALLOWED");
   v = as("t463_own", function (inc) { inc.group[R.STRUCTURE] = { top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } }; });
-  check("§463 REFUSED: an owner switching how the company plans", !v.ok, "was ALLOWED");
+  check("§466 REFUSED: an owner switching how the company plans", !v.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

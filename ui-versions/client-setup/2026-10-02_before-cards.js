@@ -1941,7 +1941,7 @@ var CLIENTSETUP = (function () {
       W("topword", "one", "company").toLowerCase() + ". The " +
       W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
-    /* §461: Islam, "for the supporting functions name it functions" — the
+    /* §464: Islam, "for the supporting functions name it functions" — the
        card names the layer; the client's own word is chosen inside it. */
     var fn = card("Functions");
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));

@@ -1728,7 +1728,7 @@ var CLIENTSETUP = (function () {
       });
     }
     secs.appendChild(s2);
-    /* §462: the top card stops here — its plan is the Directions card. */
+    /* §465: the top card stops here — its plan is the Directions card. */
     if (noPlan) { box.appendChild(secs); structTail(box, L, k); return; }
 
     /* 3 — the plan: always on. A unit or function picks how it plans on its
@@ -1768,7 +1768,7 @@ var CLIENTSETUP = (function () {
     box.appendChild(secs);
     structTail(box, L, k);
   }
-  /* §462: the names inside each way, drawn for a layer's plan section and
+  /* §465: the names inside each way, drawn for a layer's plan section and
      for the Directions card alike. `skip` leaves out a part the card names
      itself (the directions are named at the top of their card). */
   function planWays(s3, k, tgt, ways, skip){
@@ -1881,7 +1881,7 @@ var CLIENTSETUP = (function () {
     var ro = !canShape();
     var lv = structNow();
     var card = function (tag) { var c = el("section", "stcard"); c.appendChild(el("span", "tag", tag)); box.appendChild(c); return c; };
-    /* §462: a switch shown in its state and not pressable here, the reason on
+    /* §465: a switch shown in its state and not pressable here, the reason on
        the hover (1b-ii); disabled, never merely dimmed (§220). */
     var held = function (cur, why) {
       var h = el("div", "stsech"); h.appendChild(el("span", "lab", "This client has them"));
@@ -1916,7 +1916,7 @@ var CLIENTSETUP = (function () {
        absent is "on the business units". Choosing the company with units on
        the register asks first, here, because it copies their plans across. */
     var ph = el("div", "stsech stplanq"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
-    /* §462: the two answers are named for the level, Islam's own words. */
+    /* §465: the two answers are named for the level, Islam's own words. */
     var plan = segButtons([[false, "Company level"], [true, "Units level"]],
       lv.bu.exists, function (v) {
         if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
@@ -1947,7 +1947,7 @@ var CLIENTSETUP = (function () {
     }
     structLevel(top, lv, "top", true);
 
-    /* §462 — THE COMPANY'S OWN PLAN IS TWO CARDS (Islam, approving the
+    /* §465 — THE COMPANY'S OWN PLAN IS TWO CARDS (Islam, approving the
        plan-level mockup: *"ok build it"*). The top card keeps its first and
        second sections; its plan leaves for a Directions card, and the
        capabilities the company carries get a card beside it. The order is the
@@ -1974,7 +1974,7 @@ var CLIENTSETUP = (function () {
       cr.appendChild(nameBox("top", "pillar", "one", "Direction, one"));
       cr.appendChild(nameBox("top", "pillar", "many", "Directions, many"));
       dr.appendChild(cr);
-      /* §463: the company plans in pillars or in projects — the unit row's
+      /* §466: the company plans in pillars or in projects — the unit row's
          own "plans in" control (§438), two ways here. A change goes through
          the shell's switch, which warns and hides-and-keeps what the old way
          held (§405); offline it writes the structure itself. */
@@ -2047,7 +2047,7 @@ var CLIENTSETUP = (function () {
        Not used, it says so and keeps everything. */
     var bu = card(W("unitword", "many", "Business units"));
     bu.setAttribute("data-stcard", "bu");
-    /* §462: shown switched off at company level, answered by the top card. */
+    /* §465: shown switched off at company level, answered by the top card. */
     if (!lv.bu.exists) bu.appendChild(held(false, "Answered by Where the strategy is planned, on the top card."));
     if (lv.bu.exists) {
       callBoxes(bu, "unitword", ro);
@@ -2057,7 +2057,7 @@ var CLIENTSETUP = (function () {
       W("topword", "one", "company").toLowerCase() + ". The " +
       W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
-    /* §461: Islam, "for the supporting functions name it functions" — the
+    /* §464: Islam, "for the supporting functions name it functions" — the
        card names the layer; the client's own word is chosen inside it. */
     var fn = card("Functions");
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));
@@ -2072,7 +2072,7 @@ var CLIENTSETUP = (function () {
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
     /* §428: CAPABILITIES AS A LAYER OF THEIR OWN, after the functions, with
-       the same three sections. §462: greyed whenever they are in the company
+       the same three sections. §465: greyed whenever they are in the company
        plan instead — always at company level, by choice at units level. */
     var cp = card(capWord + " as their own layer");
     if (capTop) {

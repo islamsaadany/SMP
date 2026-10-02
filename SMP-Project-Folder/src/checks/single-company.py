@@ -128,7 +128,7 @@ with sync_playwright() as p:
     else:
         print("  note  no capability in this build, the Capabilities section is not measured")
 
-    # ── 2b. §461 the row is the functions; divisions are its segments ──
+    # ── 2b. §464 the row is the functions; divisions are its segments ──
     navNow = lambda: safe(pg, """()=>({one:[...document.querySelectorAll('#units .navswitch.one .nsw')].map(x=>x.textContent),
       segs:[...document.querySelectorAll('#units .navswitch.multi .nsw')].map(b=>({t:b.textContent, co:b.dataset.co||null, on:b.classList.contains('on'), here:b.classList.contains('here')})),
       fns:[...document.querySelectorAll('#units [data-u^="fn:"]')].map(b=>b.dataset.u),
@@ -136,7 +136,7 @@ with sync_playwright() as p:
     safe(pg, "()=>{activeCompanyKeys().forEach(c=>{}); FUNCTION_KEYS.forEach(k=>{delete FUNCTIONS[k].company}); current='group'; currentSub='strategy'; paint()}")
     pg.wait_for_timeout(250)
     n0 = navNow(); allF = safe(pg, "()=>myFns().map(k=>'fn:'+k)", [])
-    ck("§461 no divisions: one lit word, not a control", n0.get("one") == [safe(pg, "()=>navWord('fnword','Functions')")] and not n0.get("segs"), n0)
+    ck("§464 no divisions: one lit word, not a control", n0.get("one") == [safe(pg, "()=>navWord('fnword','Functions')")] and not n0.get("segs"), n0)
     ck("…with every function beside it in the row", bool(allF) and n0.get("fns") == allF, [n0.get("fns"), allF])
     DIV = safe(pg, """()=>{var cs=activeCompanyKeys(); if(cs.length<2) return null; var ck=cs[0];
       FUNCTION_KEYS.filter(k=>FUNCTIONS[k].active!==false).slice(0,2).forEach(k=>{FUNCTIONS[k].company=ck});
@@ -150,7 +150,7 @@ with sync_playwright() as p:
         ck("the navigation has no division dropdown", n1.get("dd") is False, n1)
         ck("…its top button names the layer (§448.1)", TW and TW in (safe(pg, "()=>[...document.querySelectorAll('#units [data-u=\"group\"]')].map(b=>b.textContent.trim())") or []), TW)
         segs = [x["t"] for x in n1.get("segs") or []]
-        ck("§461 the divisions are the switch, bare names, the top word last", segs == [dname, TW], segs)
+        ck("§464 the divisions are the switch, bare names, the top word last", segs == [dname, TW], segs)
         ck("…only divisions that hold a function", len(n1.get("segs") or []) > 1 and all(x["co"] for x in n1["segs"][:-1]) and n1["segs"][-1]["co"] is None, n1.get("segs"))
         press(pg, '#units .nsw[data-fold="fns"]')
         n2 = navNow()

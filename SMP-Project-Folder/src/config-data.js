@@ -4979,7 +4979,7 @@ function canReport(unitKey){
        direction here; canReportRow narrows them to it. */
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
-           /* §463: a company project's owner reports their own project. */
+           /* §466: a company project's owner reports their own project. */
            SMPRules.ownsTopProject(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
@@ -8323,7 +8323,7 @@ function fnWritable(fk){
    group's own key objectives are NOT on this view either: they are the
    Foundation's, rolled up from the units, and asking them here would put them
    on the top layer's Reporting page as figures nobody enters. */
-/* §463: the way the top layer plans, and whether that way holds anything.
+/* §466: the way the top layer plans, and whether that way holds anything.
    `topHasPlan()` answers for whichever way is in force, so the Reporting tab,
    the board, the deck and the Performance card follow the projects the moment
    the company plans in them; `topHasPillars()` is for the readers that are
@@ -8349,7 +8349,7 @@ function topAsUnit(){
            items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
            keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
            swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,
-           /* §463: the way it plans and, in projects, its projects — the view
+           /* §466: the way it plans and, in projects, its projects — the view
               a unit's own holder reads (§405), so the function pages draw it. */
            format:topWay() === "projects" ? "projects" : undefined,
            projects:topProjectsList(),
@@ -9066,7 +9066,7 @@ function eachHolder(fn){
      every walk that existed before this reads the same order it always did. */
   (typeof UNIT_KEYS !== "undefined" ? UNIT_KEYS : []).forEach(function(k){
     unitHolders(k).forEach(fn); });
-  /* §463: and the company's own projects, last for the same reason. */
+  /* §466: and the company's own projects, last for the same reason. */
   unitHolders("group").forEach(fn);
 }
 function projById(id){
@@ -10370,7 +10370,7 @@ function unitFormat(u){
 }
 function isUnitHolderId(x){ return String(x || "").indexOf("u:") === 0; }
 function subjKey(t){ var s = String(t || ""); return s.indexOf("u:") === 0 ? s.slice(2) : s; }
-/* §463: the unit-shaped thing behind a `u:` holder — a business unit, or the
+/* §466: the unit-shaped thing behind a `u:` holder — a business unit, or the
    top layer when the company plans in projects ("u:group"). Only through the
    `u:` door: a bare "group" keeps meaning the group everywhere it did. */
 function ownUnit(k){ return k === "group" ? topAsUnit() : UNITS[k]; }
@@ -10395,7 +10395,7 @@ function unitOwnHolder(k){
            actions: unitActions(k), projects: unitOwnProjects(k) };
 }
 function unitOwnHolderWritable(k){
-  /* §463: the top layer's projects live on GROUP.topProjects, and its key
+  /* §466: the top layer's projects live on GROUP.topProjects, and its key
      objectives are the Foundation's — never written from here. */
   if (k === "group") {
     if (topWay() !== "projects") return null;

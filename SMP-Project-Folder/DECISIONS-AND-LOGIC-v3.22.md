@@ -61207,7 +61207,7 @@ Nothing stored moves, nothing is migrated, no rule about who may use the Copilot
 
 **Merged to `main` 2026-10-01 on Islam's word.** `main` had taken §459 for Processes (spec 065) while this was built, and this work was already numbered §460, so no renumber was owed. The three record files were COMBINED (§318.7); the built file and `smp-app/public/` were rebuilt from the merged sources rather than merged (§91, §329); `sw.js` SHELL `v5.82-copilot-conversation`, past main's `v5.81`.
 
-## §461 — planned on the company, the row is the functions and the divisions are its switch (2026-10-02)
+## §464 — planned on the company, the row is the functions and the divisions are its switch (2026-10-02)
 
 Islam, of the company-level navigation: *"having the functions button and the functions beside it like the units level and if the divisions are there the divisions become the buttons ... no drop downs"*, then *"remove the 2nd word ... just retail wholesale group"*, and of the mockup (`design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`, artifact v4) *"ok build it"*. Stage 1 of three; the Structure cards' reshape and directions planned in projects follow.
 
@@ -61217,12 +61217,12 @@ Islam, of the company-level navigation: *"having the functions button and the fu
 
 **THE STRUCTURE CARD IS CALLED "Functions"** (*"for the supporting functions name it functions"*) — the card names the layer; the client's own word is still chosen inside it, and the label default is untouched.
 
-Units level is unchanged. Nothing stored moves, nothing is migrated, no rule about who reaches what changes. `single-company.py` gains §461 (13 assertions), red 9 with the divisions taken out of the switch and red 1 with the division sections put back on Performance — and its first falsification DIED rather than reporting (§215), so the probes degrade now. `sw.js` SHELL `v5.83-company-row`.
+Units level is unchanged. Nothing stored moves, nothing is migrated, no rule about who reaches what changes. `single-company.py` gains §464 (13 assertions), red 9 with the divisions taken out of the switch and red 1 with the division sections put back on Performance — and its first falsification DIED rather than reporting (§215), so the probes degrade now. `sw.js` SHELL `v5.83-company-row`.
 
 
-## §462 — The Structure cards, and capabilities in one place at a time (2026-10-02)
+## §465 — The Structure cards, and capabilities in one place at a time (2026-10-02)
 
-Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`: *"ok build it"*, then *"proceed with all and pause when you need something from me"*. Stage 2 of three; §461 was the navigation.
+Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`: *"ok build it"*, then *"proceed with all and pause when you need something from me"*. Stage 2 of three; §464 was the navigation.
 
 **THE QUESTION IS NAMED FOR THE LEVEL**: *Company level | Units level*, his words, replacing "On the company / On the business units". The store is §448's `structure.bu.exists`, unchanged.
 
@@ -61238,7 +61238,7 @@ Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.h
 
 **NOT BUILT HERE**: stage 3, the Directions planning in Projects.
 
-## §463 — The company plans in projects (2026-10-02)
+## §466 — The company plans in projects (2026-10-02)
 
 Islam, of stage 3 of the "where the plan lives" mockup: *"agreed, build stage
 3"*, on three decisions put to him first. **The company's own plan — the
@@ -61286,5 +61286,5 @@ way (`planTitle(…, topWay())`, the projects word where the company stands alon
 **CHECKS**: `checks/top-projects.py` new (both ends throughout), red four ways
 from the sources — an owner reaching every project (1), the switch deleting the
 pillars (2), the card's select removed (3), the projects card removed (1).
-`test-authorize.js` §463, 10 new (906/0), red 2 with the server branch removed
+`test-authorize.js` §466, 10 new (906/0), red 2 with the server branch removed
 and 1 with ownership answered for everybody.

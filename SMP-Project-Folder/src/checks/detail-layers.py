@@ -82,9 +82,9 @@ with sync_playwright() as p:
     rows = safe(pg, "()=>[...document.querySelectorAll('[data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
     ck("every layer shown carries all four rows",
        all(("%s|%s" % (k, d)) in rows for k in ("bu", "fn") for d in ("overview", "outcomes", "requirements", "years")), rows)
-    # §462: the company's rows are on its Directions card, separate from the
+    # §465: the company's rows are on its Directions card, separate from the
     # units' — none while it is off, all four once it is on.
-    ck("…none for the company while its Directions are off (§462)", not any(r.startswith("top|") for r in rows), rows)
+    ck("…none for the company while its Directions are off (§465)", not any(r.startswith("top|") for r in rows), rows)
     press(pg, '[data-stsec="top|plan"] button:nth-child(1)')
     rows2 = safe(pg, "()=>[...document.querySelectorAll('[data-stcard=\"dir\"] [data-stdetrow]')].map(r=>r.dataset.stdetrow)", [])
     ck("…and all four on the Directions card once it is on",

@@ -2417,7 +2417,7 @@ function whereNext(keys){
      every existing client's page is byte for byte what it was. */
   function topPlanCard(){
     if (!topHasPlan() || !planOn("group")) return "";
-    /* §463: A COMPANY THAT PLANS IN PROJECTS IS SCORED BY THEM — each
+    /* §466: A COMPANY THAT PLANS IN PROJECTS IS SCORED BY THEM — each
        project's performance averaged equally (Islam: the projects *"take the
        place of the directions' score"*), the same `capPerf` a function's own
        projects are read by, in the same card and the same place. Nothing
@@ -2497,7 +2497,7 @@ function whereNext(keys){
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
 
-  /* §461: the divisions left this page for the navigation — planned on the
+  /* §464: the divisions left this page for the navigation — planned on the
      company, a division is a segment of the row and its page is its own
      reading (renderCompanyPerformance), reached by pressing it. Reading it
      here as well would be two places to look for one number (§87). */
@@ -9286,7 +9286,7 @@ function unitPlanBody(it, u, railed){
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
    function and must keep reaching the pillars pages. */
 function unitWayOf(u){
-  /* §463: and the top layer's own view, which planning in projects routes
+  /* §466: and the top layer's own view, which planning in projects routes
      through the same function pages over `u:group`. */
   if (!u || !u.ukey || (UNITS[u.ukey] !== u && !u.topLayer)) return null;
   var f = unitFormat(u);

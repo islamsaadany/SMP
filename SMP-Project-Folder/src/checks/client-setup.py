@@ -349,9 +349,9 @@ with sync_playwright() as p:
     ck("…and the key measures and tactics beside the pillars, on the units and the functions",
        all(q(pg, '.csetup [data-stway="%s|pillars"] [data-stlw="%s|%s|%s"]' % (k, k, part, form))
            for k in ("bu", "fn") for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
-    # §462: the company's own names live on the Directions card, once it is on.
+    # §465: the company's own names live on the Directions card, once it is on.
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(1)')
-    ck("…and on the company's Directions card once it is switched on (§462)",
+    ck("…and on the company's Directions card once it is switched on (§465)",
        all(q(pg, '.csetup [data-stcard="dir"] [data-stlw="top|pillar|%s"]' % f) for f in ("one", "many")) and
        all(q(pg, '.csetup [data-stway="top|pillars"] [data-stlw="top|%s|%s"]' % (p, f)) for p in ("measure", "tactic") for f in ("one", "many")))
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)')

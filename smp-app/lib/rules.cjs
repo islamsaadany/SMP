@@ -467,7 +467,7 @@
          direction's owner can be found (ownsTopPillar). Here AND in worldOf()
          (§102.4). */
       topItems: o.topItems || [],
-      /* §463: and its own projects, so a company project's owner can be
+      /* §466: and its own projects, so a company project's owner can be
          found (ownsTopProject). Here AND in worldOf() (§102.4). */
       topProjects: o.topProjects || [],
       group: o.group || null
@@ -3961,7 +3961,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (c && typeof c.exists === "boolean") return c.exists;
     return levelComponents(group, "top").indexOf("capability") >= 0;
   }
-  /* §462 — WHERE THE CAPABILITIES LIVE. One place at a time (Islam,
+  /* §465 — WHERE THE CAPABILITIES LIVE. One place at a time (Islam,
      approving the plan-level mockup): as a section of the company's own
      Strategy tab, or as a layer of their own with a side in the navigation.
      Planned at company level they are always the company's (§447); at units
@@ -4197,7 +4197,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       return p && p.owner && namedOn({ owner: p.owner }, person);
     });
   }
-  /* §463 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
+  /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
      ABSENCE (§50.6) on `structure.top.plan.way`, so every client that never
      chose reads exactly as before. Hidden and kept either way (§405): the

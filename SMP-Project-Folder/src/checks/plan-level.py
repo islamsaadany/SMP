@@ -1,4 +1,4 @@
-"""Where the plan lives: the Structure cards, and capabilities in one place (§462).
+"""Where the plan lives: the Structure cards, and capabilities in one place (§465).
 
 Islam, approving design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html:
 *"ok build it"*. The where-planned question reads Company level | Units level;

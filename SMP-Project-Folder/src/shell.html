@@ -306,10 +306,10 @@
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
   function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
-  /* §463: the top's plan is drawn while it is switched on and either it
+  /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §462: the capabilities are a section of this tab wherever the office put
+  /* §465: the capabilities are a section of this tab wherever the office put
      them in the company plan — always at company level, by choice at units
      level — and never while they are a layer of their own. */
   function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
@@ -1368,7 +1368,7 @@
      this next. Nothing stored holds it (it is a plain var, re-initialised on
      every load), so the rename costs no tenant anything. */
   var NAVFOLD = "units";
-  var NAVFOLDAT = null;   /* §461: the destination the company-level list last followed */
+  var NAVFOLDAT = null;   /* §464: the destination the company-level list last followed */
 
   function myUnits(){
     return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
@@ -1409,7 +1409,7 @@
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
-  /* ── PLANNED ON THE COMPANY, THE ROW IS THE FUNCTIONS (§461) ───────────
+  /* ── PLANNED ON THE COMPANY, THE ROW IS THE FUNCTIONS (§464) ───────────
      Islam, of the company-level row: *"having the functions button and the
      functions beside it like the units level and if the divisions are there
      the divisions become the buttons ... no drop downs"*, then *"remove the
@@ -1463,7 +1463,7 @@
 
   function foldsNeeded(){
     var sides = navSides();
-    /* §461: planned on the company the switch is always drawn — one lit word
+    /* §464: planned on the company the switch is always drawn — one lit word
        with no divisions, the divisions with them — because that word is what
        says what the row beside it lists. */
     if (!buExists() && myFns().length) return true;
@@ -1537,7 +1537,7 @@
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
       var sides = navSides(), atCo = !buExists();
-      /* §461: on the company the list follows where you ARE when you arrive
+      /* §464: on the company the list follows where you ARE when you arrive
          somewhere new — a function opened from a link, or a division's page —
          and is left alone while you are only browsing the switch. */
       if (atCo && current !== NAVFOLDAT) {
@@ -2355,7 +2355,7 @@
            segmented control means and the opposite of what §41.8 decided for
            the two-sided one (there, lighting the other half made the state
            unreadable exactly when somebody was looking at it). */
-        /* §461: one side on the company is a WORD, not a control — there is
+        /* §464: one side on the company is a WORD, not a control — there is
            nothing to switch to, and a button that switches to itself is a
            control that lies about having somewhere to go (§61). */
         if (t.folds.length === 1 && t.folds[0].one) {
@@ -2445,7 +2445,7 @@
            stay exactly as they are. A SWITCH, not a toggle — pressing the lit
            side leaves it lit (§47.6). */
         NAVFOLD = b.dataset.fold;
-        /* §461: a division's segment is also a door — its own page, read
+        /* §464: a division's segment is also a door — its own page, read
            from the functions linked to it — when this viewer may open it. */
         var co = b.dataset.co;
         if (co && ownTabs(SUBS.co, "co:" + co).length) {
@@ -11217,7 +11217,7 @@
      plan or … capabilities it needs to be changable with a warning"*). It
      had none — Setup's control switched in silence — and it plans two ways
      only, pillars or projects (capFormat), absent being projects. */
-  /* §463: THE TOP LAYER TAKES THE SAME SWITCH — the company's plan in
+  /* §466: THE TOP LAYER TAKES THE SAME SWITCH — the company's plan in
      pillars or in projects. Its way lives on the structure, not on a row
      (`structure.top.plan.way`, an ABSENCE for pillars, §50.6), and what is
      held is `GROUP.items` or `GROUP.topProjects`; hidden and kept either

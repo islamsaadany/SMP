@@ -220,8 +220,8 @@ with sync_playwright() as p:
        safe(pg, "()=>{var b=document.querySelector('[data-sttemple=\"mid\"]'); return !!b&&b.disabled&&b.getAttribute('aria-pressed')==='false'&&!!b.closest('.dummy')}") is True)
     ck("…while the top level's SWOT and plan switches stay live",
        safe(pg, "()=>['top|swot','top|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); return w&&!w.classList.contains('dummy')&&[...w.querySelectorAll('button')].every(x=>!x.disabled)})") is True)
-    # §462: the top card keeps two sections; its plan is the Directions card.
-    ck("each layer draws three sections, the top two (its plan is the Directions card, §462)",
+    # §465: the top card keeps two sections; its plan is the Directions card.
+    ck("each layer draws three sections, the top two (its plan is the Directions card, §465)",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "2,3,3,3,3",
        safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))
     # §428: the fifth card is the capabilities', and its plan names two ways, never three.
@@ -230,7 +230,7 @@ with sync_playwright() as p:
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway).join(',')"))
     ck("…and no card carries a 'Carries capabilities' tick",
        safe(pg, "()=>!document.querySelector('[data-stcomp$=\"|capability\"]')") is True)
-    # §462: unsaid, the company plans nothing of its own, so the Directions
+    # §465: unsaid, the company plans nothing of its own, so the Directions
     # card is off and names no way; it is switched on further down.
     ck("the plan section names all three ways on units and functions, none on the company while its Directions are off",
        safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "0,0,3,3",
@@ -249,11 +249,11 @@ with sync_playwright() as p:
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.join(',')===" + json.dumps(topShown) + " && GROUP.structure.top.temple===true") is True, st)
     ck("…and the section says it is hidden rather than drawing its boxes",
        safe(pg, "()=>{var s=document.querySelector('[data-stcard=\"bu\"]').querySelectorAll('.stsec')[1]; return !!s.querySelector('.sthid') && !s.querySelector('.stquad')}") is True)
-    # §462: the Directions card. Switched on, it names the directions (one
+    # §465: the Directions card. Switched on, it names the directions (one
     # and many) and the parts inside the pillars way; the top card itself
     # carries no plan section at all. BOTH ENDS: off it draws none of it.
     snap = safe(pg, "()=>JSON.stringify(GROUP.structure)", "{}")
-    ck("§462 the Directions card is there, and off for a client that never chose",
+    ck("§465 the Directions card is there, and off for a client that never chose",
        safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"dir\"]'); return !!c && !!c.querySelector('.sthid') && !c.querySelector('[data-stway]')}") is True)
     ck("…pressing it On", press(pg, '[data-stsec="top|plan"] button:nth-child(1)'))
     ck("…stores the company's plan on and its pillars carried",

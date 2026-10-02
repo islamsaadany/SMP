@@ -140,7 +140,7 @@ function deckHtmlFor(target){
   /* §405: a unit that plans in projects or in objectives and actions gets the
      function's deck, over its own holder — Islam's fourth answer, *"use the
      existing function versions"*. */
-  var ou = UNITS[subjKey(t)];
+  var ou = subjKey(t) === "group" ? topAsUnit() : UNITS[subjKey(t)];
   if (ou && unitWayOf(ou)) return deckSlidesFn("u:" + subjKey(t));
   var u = unitLike(t);
   return u ? deckSlides(u) : "";
@@ -928,7 +928,7 @@ function deckSlidesFn(subject){
   var isUnit = isUnitHolderId(target);
   var cap = isCap ? capById(capKeyOf(target)) : null;
   var fk = isCap ? (cap && cap.fn) : isUnit ? null : fnKeyOf(target);
-  var f = isCap ? cap : isUnit ? UNITS[subjKey(target)] : FUNCTIONS[fk];
+  var f = isCap ? cap : isUnit ? subjUnit(target) : FUNCTIONS[fk];
   var noteKey = isUnit ? subjKey(target) : "fn:" + fk;
   var caps = capsShown(target);
   var realCaps = (isCap || isUnit) ? [] : capsOfFunction(fk);

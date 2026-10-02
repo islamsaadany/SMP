@@ -61237,3 +61237,54 @@ Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.h
 **CHECKS**: `checks/plan-level.py` new (29 assertions, both ends: the worked example untouched first), red 4 with `at` ignored and 1 with the navigation still asking `buExists`, from the sources. Four checks held the old top card and were REWRITTEN, never loosened (§218): `structure.py` (the top draws two sections; no way named while the Directions are off; the units card found by name rather than by position, which the inserted cards moved; the Directions card pressed both ways), `client-setup.py` and `detail-layers.py` (the company's names and extras asserted on the Directions card once it is on, and absent while it is off).
 
 **NOT BUILT HERE**: stage 3, the Directions planning in Projects.
+
+## §463 — The company plans in projects (2026-10-02)
+
+Islam, of stage 3 of the "where the plan lives" mockup: *"agreed, build stage
+3"*, on three decisions put to him first. **The company's own plan — the
+Directions card — may be planned in PROJECTS instead of pillars.**
+
+**1. HIDDEN AND KEPT, BOTH WAYS.** The top's way is `structure.top.plan.way`,
+`"projects"` or ABSENT for pillars (§50.6), and switching it is §405's switch
+with a "top" kind (`switchTopWay`): it warns where the old way holds anything,
+the select is put back on Cancel (§110), and the old way's rows stay where they
+are — `GROUP.items` for pillars, `GROUP.topProjects` for projects — so switching
+back brings them back exactly. No migration: both ride `org.extra`.
+**Pillar readers ask `topHasPillars()`, never `items.length`**, so hidden
+directions score nothing, draw no Focus band and reach no card while the
+company plans in projects (§233's "hidden is not counted").
+
+**2. THE NAMED OWNER REPORTS, THE OFFICE SUBMITS** — a function's project rule
+(§301), joined to the top's own (§428). `SMPRules.ownsTopProject(w, person,
+owner)` is the one answer the screen and the server ask (§42): only while the
+company plans in projects, and only for a non-empty owner the register's own
+name rule matches (`namedOn`). On the server the `capReporting` case gains a
+"group" branch ahead of the area test: the office and the group CEO pass
+(`mayReportTop`), an owner passes for rows of THEIR project found through the
+STORED top plan, everybody else is refused by name. Submitting, the note and
+authoring stay the office's — `reportState` never consults the new rule.
+`topProjects` joins `gExtra` and `topView()` so the §428 pass reaches it, or it
+would be swept as unknown (§259.2).
+
+**3. THE PROJECTS TAKE THE DIRECTIONS' PLACE ON PERFORMANCE** — `topPlanCard()`
+draws "Projects — performance": the projects averaged equally (`capPerf` over
+the company's holder) with a drill of each project, and nothing else on the page
+moves.
+
+**IT RIDES §405's MACHINERY, NOT A COPY OF IT** (§53.5): the company is the
+unit-holder `"u:group"` — `ownUnit("group")` is `topAsUnit()`, and
+`unitOwnHolder`, `fnHolders`, the projects/reporting/performance pages and the
+deck all draw it through the paths a business unit planning in projects
+already uses. `unitOwnHolderWritable("group")` mints `GROUP.topProjects` and
+never writes key objectives (the company's objectives are its Foundation's).
+
+**THE CONTROL** is a "plans in" select on the Directions card of Client set-up ›
+Structure — the unit row's own `wzrt` control (§438), two ways here — so no new
+visual shape and no mockup owed (rule 1c); the plan section's title follows the
+way (`planTitle(…, topWay())`, the projects word where the company stands alone).
+
+**CHECKS**: `checks/top-projects.py` new (both ends throughout), red four ways
+from the sources — an owner reaching every project (1), the switch deleting the
+pillars (2), the card's select removed (3), the projects card removed (1).
+`test-authorize.js` §463, 10 new (906/0), red 2 with the server branch removed
+and 1 with ownership answered for everybody.

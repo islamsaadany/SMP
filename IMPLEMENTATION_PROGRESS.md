@@ -1338,6 +1338,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-02 — the company plans in projects (§463)
+
+Built (stage 3 of the "where the plan lives" mockup). The company's own plan (the Directions card on Client set-up › Structure) now has a **plans in** choice: Directions or Projects. Switching asks first and nothing is lost — the directions are hidden and kept, and come back if you switch back. A company project's named owner enters its figures and only theirs; the office (and the group CEO) report everything and submit. On the company's Performance page a **Projects — performance** card takes the directions' place. On the branch, not merged.
+
 ## 2026-10-02 — the Structure cards, and capabilities in one place (§462)
 
 Built (stage 2 of the "where the plan lives" mockup). On Client set-up › Structure the question now reads **Company level | Units level**. The top card keeps its Foundation and SWOT; its plan moved to a new **Directions** card, which says Off for Raya Trade (it was saying On while nothing showed). Capabilities now live in one place at a time: a new **capabilities in the company plan** card, or the **capabilities as their own layer** card at the end — turning one on greys the other. At company level they are always the company's. The cards come in the same order at both levels. Raya Trade shows exactly what it did. Next: stage 3, the Directions planning in Projects. On the branch, not merged.

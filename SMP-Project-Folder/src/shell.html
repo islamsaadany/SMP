@@ -305,7 +305,10 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")) || topCapsOn(); }
+  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
+  /* §463: the top's plan is drawn while it is switched on and either it
+     plans in projects or its pillars component is on. */
+  function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
   /* §462: the capabilities are a section of this tab wherever the office put
      them in the company plan — always at company level, by choice at units
      level — and never while they are a layer of their own. */
@@ -320,9 +323,9 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || (buExists() ? "Plan" : L("pillar", "bu")),
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: function(){ return planOn("group") && compOn("group", "pillar"); } },
+                    when: topPlanOn },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -11214,7 +11217,51 @@
      plan or … capabilities it needs to be changable with a warning"*). It
      had none — Setup's control switched in silence — and it plans two ways
      only, pillars or projects (capFormat), absent being projects. */
+  /* §463: THE TOP LAYER TAKES THE SAME SWITCH — the company's plan in
+     pillars or in projects. Its way lives on the structure, not on a row
+     (`structure.top.plan.way`, an ABSENCE for pillars, §50.6), and what is
+     held is `GROUP.items` or `GROUP.topProjects`; hidden and kept either
+     way, exactly as a unit's switch. */
+  function switchTopWay(value, sel){
+    var was = topWay(), now = value === "projects" ? "projects" : "pillars";
+    var back = function(){ if (sel) sel.value = was; };
+    if (now === was) return;
+    var apply = function(){
+      var st = GROUP.structure || (GROUP.structure = {});
+      var top = st.top || (st.top = {}), pl = top.plan || (top.plan = {});
+      if (now === "projects") pl.way = "projects";
+      else {
+        delete pl.way;
+        if (!Object.keys(pl).length) delete top.plan;
+        if (!Object.keys(top).length) delete st.top;
+        if (!Object.keys(st).length) delete GROUP.structure;
+      }
+      fieldSaved();
+      paint();
+    };
+    var n = was === "pillars" ? (Array.isArray(GROUP.items) ? GROUP.items.length : 0)
+          : (Array.isArray(GROUP.topProjects) ? GROUP.topProjects.length : 0);
+    if (!n) { apply(); return; }
+    var wordOf = function(k){ return k === "pillars" ? L("pillar","bu") : L("project","bu"); };
+    var held = was === "pillars" ? plural(n, L1("pillar"), L("pillar")) : plural(n, L1("project"), L("project"));
+    var who = labelWord("topword", "group") || "The company";
+    openModalHtml(esc("Change how " + who + " plans?"),
+      esc(wordOf(was) + " \u2192 " + wordOf(now)),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(who) + '</b>\u2019s ' + esc(held) +
+          ' will be hidden and kept. Switching back brings them back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
+        '<button class="go" data-rmyes="1">Change how it plans</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ back(); closeModal(); });
+    var yes = box.querySelector("[data-rmyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); apply(); });
+  }
   function switchPlanWay(kind, key, value, sel){
+    if (kind === "top") { switchTopWay(value, sel); return; }
     var isUnit = kind === "unit", isCap = kind === "cap";
     var rec = isUnit ? UNITS[key] : isCap ? capById(key) : FUNCTIONS[key];
     if (!rec) return;

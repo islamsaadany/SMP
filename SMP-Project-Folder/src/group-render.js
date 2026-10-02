@@ -2417,6 +2417,29 @@ function whereNext(keys){
      every existing client's page is byte for byte what it was. */
   function topPlanCard(){
     if (!topHasPlan() || !planOn("group")) return "";
+    /* §463: A COMPANY THAT PLANS IN PROJECTS IS SCORED BY THEM — each
+       project's performance averaged equally (Islam: the projects *"take the
+       place of the directions' score"*), the same `capPerf` a function's own
+       projects are read by, in the same card and the same place. Nothing
+       else on this page moves. */
+    if (topWay() === "projects") {
+      var th = unitOwnHolder("group"), prs = th ? th.projects : [];
+      var pv = th ? capPerf(th) : null;
+      var pdrill = miniTable(["#", L1("project"), "Performance"],
+        prs.map(function(p, i){
+          var v = projPerf(p);
+          return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(projCode("u:group", p) + " " + (p.name || "")) + '</td>' +
+            '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
+      var ptitle = L("project", "bu") + " &mdash; performance";
+      return drillCard(buExists() ? labelWord("topword", "group") + " " + ptitle : ptitle, pv, {
+        primary: !buExists(),
+        sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", each counting equally.",
+        drill: pdrill, modalTitle: L("project", "bu") + " — performance",
+        modalSub: "Each project scored and averaged equally"
+      });
+    }
     var tu = topAsUnit(), items = itemsNow(tu);
     var drill = miniTable(["#", L1("pillar"), "Performance", "Delivered", "Planned"],
       items.map(function(p, i){
@@ -9263,7 +9286,9 @@ function unitPlanBody(it, u, railed){
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
    function and must keep reaching the pillars pages. */
 function unitWayOf(u){
-  if (!u || !u.ukey || UNITS[u.ukey] !== u) return null;
+  /* §463: and the top layer's own view, which planning in projects routes
+     through the same function pages over `u:group`. */
+  if (!u || !u.ukey || (UNITS[u.ukey] !== u && !u.topLayer)) return null;
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }

@@ -1954,7 +1954,8 @@ var CLIENTSETUP = (function () {
     var atCo = !lv.bu.exists;
     var dr = card(W("pillar", "many", "Directions"));
     dr.setAttribute("data-stcard", "dir");
-    var dOn = SMPRules.planOn(GROUP, "group") && lv.top.on.indexOf("pillar") >= 0;
+    var topWayNow = SMPRules.topWay(GROUP);
+    var dOn = SMPRules.planOn(GROUP, "group") && (topWayNow === "projects" || lv.top.on.indexOf("pillar") >= 0);
     var dh = el("div", "stsech"); dh.appendChild(el("span", "lab", "The " + W("topword", "one", "company").toLowerCase() + " plans its own"));
     dh.appendChild(onOff(dOn, function (v) {
       var nx = structNow(), t = nx.top;
@@ -1972,7 +1973,31 @@ var CLIENTSETUP = (function () {
       cr.appendChild(nameBox("top", "pillar", "one", "Direction, one"));
       cr.appendChild(nameBox("top", "pillar", "many", "Directions, many"));
       dr.appendChild(cr);
-      planWays(dr, "top", "group", ["pillars"], ["pillar"]);
+      /* §463: the company plans in pillars or in projects — the unit row's
+         own "plans in" control (§438), two ways here. A change goes through
+         the shell's switch, which warns and hides-and-keeps what the old way
+         held (§405); offline it writes the structure itself. */
+      var wr = el("div", "stsech");
+      var wt = el("span", "wzrt");
+      wt.appendChild(el("span", "wzsub", "plans in"));
+      var wsel = el("select", "fld");
+      [["pillars", W("pillar", "many", "Directions")], ["projects", W("project", "many", "Projects")]].forEach(function (f) {
+        var o = el("option", null, f[1]); o.value = f[0];
+        if (topWayNow === f[0]) o.selected = true;
+        wsel.appendChild(o);
+      });
+      wsel.setAttribute("data-wztopway", "1");
+      wsel.setAttribute("aria-label", "How the " + W("topword", "one", "company").toLowerCase() + " plans");
+      wsel.addEventListener("change", function () {
+        if (OPTS.switchWay) { OPTS.switchWay("top", "group", wsel.value, wsel); return; }
+        var nx = structNow(), t = nx.top;
+        t.plan = t.plan || {};
+        if (wsel.value === "projects") t.plan.way = "projects";
+        else { delete t.plan.way; if (!Object.keys(t.plan).length) delete t.plan; }
+        structWrite(nx);
+      });
+      wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
+      planWays(dr, "top", "group", [topWayNow], ["pillar"]);
     } else dr.appendChild(el("p", "sthid", atCo
       ? "Off: the " + W("topword", "one", "company").toLowerCase() + " plans nothing of its own. Nothing entered is lost."
       : "The " + W("topword", "one", "company").toLowerCase() + "'s own plan, beside the " +

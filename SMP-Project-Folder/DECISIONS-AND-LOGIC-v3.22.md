@@ -61305,7 +61305,7 @@ pillars (2), the card's select removed (3), the projects card removed (1).
 `test-authorize.js` §466, 10 new (906/0), red 2 with the server branch removed
 and 1 with ownership answered for everybody.
 
-## §467 — The Structure cards: names as headers, the agreed order (2026-10-02)
+## §468 — The Structure cards: names as headers, the agreed order (2026-10-02)
 
 Islam, of Client set-up › Structure, over three rounds of alignment and two of
 mockup (`design-mockups/structure-cards/2026-10-02_agreed-order.html`): the

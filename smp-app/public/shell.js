@@ -59050,7 +59050,7 @@ var CLIENTSETUP = (function () {
   function structureStep(box){
     var ro = !canShape();
     var lv = structNow();
-    /* §467: a card's NAME is its header — bold, a size up, on a shaded band,
+    /* §468: a card's NAME is its header — bold, a size up, on a shaded band,
        with its On/Off on the right (Islam: *"the title of the group plans its
        own and the client has them is irrelevant ... make the main title
        already bold ... and shaded background"*). The switch's own label went
@@ -59060,7 +59060,7 @@ var CLIENTSETUP = (function () {
       h.appendChild(el("span", "tag", tag)); c.appendChild(h); (into || box).appendChild(c); return c;
     };
     var hd = function (c, sw) { c.querySelector(".sthd").appendChild(sw); };
-    /* Two cards side by side in one row (§467): the company's pillars and its
+    /* Two cards side by side in one row (§468): the company's pillars and its
        capabilities, and the bottom pair when both are off. */
     var pair = function () { var w = el("div", "stpair"); box.appendChild(w); return w; };
     /* §465: a switch shown in its state and not pressable here, the reason on
@@ -59070,7 +59070,7 @@ var CLIENTSETUP = (function () {
       [].slice.call(b.querySelectorAll("button")).forEach(function (x) { x.disabled = true; });
       return b;
     };
-    /* §467: inside the company plan a capability is a part of that plan, so
+    /* §468: inside the company plan a capability is a part of that plan, so
        it has no first or second section of its own and no Except for — only
        its name and its plan section (Islam: *"the capabilities has no first
        section and second section"*). What was set there is kept, not shown. */
@@ -59236,7 +59236,7 @@ var CLIENTSETUP = (function () {
     /* §447/§448: the business-unit card has no switch of its own; whether it
        is used is answered on the top card ("Where the strategy is planned").
        Not used, it says so and keeps everything. */
-    /* §467: the bottom pair, the third layer and independent capabilities.
+    /* §468: the bottom pair, the third layer and independent capabilities.
        Each is a whole layer when on, so they stack; only when both are off
        do they share a row, one line each. */
     var bothOff = !lv.bu.exists && (capTop || !lv.cap.exists);

@@ -56,7 +56,7 @@ with sync_playwright() as p:
     ck("the question reads Company level | Units level",
        safe(pg, "()=>[...document.querySelectorAll('[data-stplan] button')].map(b=>b.textContent).join('|')") == "Company level|Units level")
     tags = safe(pg, TAGS, [])
-    # §467: Functions come before the third layer, and the bottom pair is the
+    # §468: Functions come before the third layer, and the bottom pair is the
     # third layer and independent capabilities (Islam's agreed order).
     ck("seven cards in the agreed order", tags == ["-", "dir", "capco", "-", "-", "bu", "cap"], tags)
     ck("each card's name is its shaded header, and no switch carries a label of its own",

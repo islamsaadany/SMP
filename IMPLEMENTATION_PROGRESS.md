@@ -1340,7 +1340,7 @@ is Islam's *"for now"* left open.
 
 ---
 
-## 2026-10-02 — the Structure cards in the agreed order (§467)
+## 2026-10-02 — the Structure cards in the agreed order (§468)
 
 Built from the signed-off mockup. On Client set-up › Structure each card's name is now its header, bold on a shaded band, with its On/Off beside it; the extra labels on the switches ("This client has them" and the like) are gone. The order is: top level, then the company's pillars and capabilities side by side, then the second layer, then functions, then the third layer and independent capabilities. Those last two sit one under the other when on, and side by side only when both are off. Capabilities inside the company plan show only their plan. Nothing stored changes.
 

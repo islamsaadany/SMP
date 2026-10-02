@@ -12,9 +12,24 @@ h1{font-size:21px;margin:0;text-wrap:balance}
 .bar b{box-shadow:inset 0 -2px 0 var(--goldfill);padding-bottom:3px}.bar span{color:var(--panel-quiet)}
 .sec{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .sec span{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}.sec span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
-.body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:12px;padding:12px;height:640px;transition:grid-template-columns .2s}
-.frame.shut .body{grid-template-columns:52px minmax(0,1fr)}
-@media (max-width:860px){.body,.frame.shut .body{grid-template-columns:1fr;height:auto}.frame.shut .left{display:none}}
+.body{display:grid;grid-template-columns:230px minmax(0,.95fr) minmax(0,1.1fr);gap:12px;padding:12px;height:660px;transition:grid-template-columns .2s}
+.frame.shut .body{grid-template-columns:44px minmax(0,.95fr) minmax(0,1.1fr)}
+@media (max-width:980px){.body{grid-template-columns:200px minmax(0,1fr);height:auto}.frame.shut .body{grid-template-columns:44px minmax(0,1fr)}.left{display:none}}
+@media (max-width:620px){.body,.frame.shut .body{grid-template-columns:1fr}.rails{display:none}}
+.rails{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
+.rtop{display:flex;align-items:center;gap:6px}
+.rtop .lbl{font:700 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);flex:1}
+.coprail{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.coprail.chats{flex:1 1 auto}
+.coprh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--surface-2);border-bottom:1px solid var(--line);font:700 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.copnew{font:600 12px/1.2 var(--sans);text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+.copitem{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}.copitem:last-child{border-bottom:0}
+.copitem.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--goldfill)}
+.copitem b{display:block;font-weight:600}.copitem small{color:var(--ink-3);font-size:12px}
+.frame.shut .rtop .lbl,.frame.shut .coprail{display:none}
+.slim{display:none;flex-direction:column;align-items:center;gap:8px}
+.frame.shut .slim{display:flex}
+.frame.shut .rtop{justify-content:center}
 .left{min-width:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .vline{font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .vline b{color:var(--ink)}
@@ -26,10 +41,6 @@ h1{font-size:21px;margin:0;text-wrap:balance}
 .card p{margin:0;font-size:13px;color:var(--ink-2);white-space:pre-line}
 .card.now{box-shadow:inset 3px 0 0 var(--goldfill);background:var(--surface-2)}
 .st{font:600 11.5px/1.4 var(--sans);color:var(--ink-3);white-space:nowrap}.st.done{color:var(--good)}.st.now{color:var(--gold)}
-.strip{display:none;flex-direction:column;align-items:center;gap:8px;padding-top:4px}
-.frame.shut .cards,.frame.shut .vline{display:none}.frame.shut .strip{display:flex}
-.dot{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font:700 11px/1 var(--sans);color:var(--ink-3);background:var(--surface)}
-.dot.done{border-color:var(--good);color:var(--good)}.dot.now{border-color:var(--goldfill);color:var(--gold);background:var(--surface-2)}
 .cop{border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface-2)}
 .coph{padding:7px 10px;border-bottom:1px solid var(--line);font-size:13px;display:flex;align-items:center;gap:8px}
 .coph b{font-size:13.5px;flex:1;min-width:0}.prog{color:var(--ink-3);white-space:nowrap}
@@ -42,9 +53,9 @@ h1{font-size:21px;margin:0;text-wrap:balance}
 .m small{display:block;color:var(--ink-3);font-size:12px;margin-top:4px}
 .m h4{margin:0 0 4px;font-size:13px}
 .m ol{margin:4px 0 0;padding-left:18px}.m li{margin:2px 0}
-.ex{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.chip{font:12px/1.3 var(--sans);border:1px solid var(--line);border-radius:12px;padding:3px 9px;color:var(--ink-2);background:var(--surface);cursor:pointer}
-.chip:hover{border-color:var(--goldfill)}
+.exs{margin:-3px 0 0 8px;padding-left:11px;border-left:2px solid var(--line);max-width:88%}
+.exs .eh{font:700 10px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px}
+.exs p{margin:0;font-size:12.5px;color:var(--ink-3);line-height:1.45}
 .warn{background:var(--warnbg);border:1px solid var(--warnln);border-radius:8px;padding:8px 11px;font-size:13px}
 .btns{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
 .btn{font:600 12.5px/1.3 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 10px;cursor:pointer}
@@ -53,11 +64,15 @@ h1{font-size:21px;margin:0;text-wrap:balance}
 .draft{border:1px solid var(--line);border-radius:6px;background:var(--surface-2);padding:8px 10px;margin-top:6px;white-space:pre-line}
 textarea.ed{width:100%;box-sizing:border-box;font:13px/1.4 var(--sans);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 7px;resize:vertical}
 .rv{display:flex;flex-direction:column;gap:6px;margin-top:6px}.rv label{font-size:12px;color:var(--ink-3)}
-.foot{margin:0 10px 10px;display:flex;flex-direction:column;gap:5px}
-.box{display:flex;gap:6px;align-items:flex-end;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:6px 6px 6px 10px}
-.box textarea{flex:1;border:0;outline:0;background:transparent;color:var(--ink);font:14px/1.4 var(--sans);resize:none;min-height:22px;max-height:120px}
-.send{width:30px;height:30px;border-radius:7px;border:0;background:var(--panel);color:var(--panel-ink);cursor:pointer;flex:none}
-.under{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-3);flex-wrap:wrap}
+.foot{margin:0 10px}
+.copbox{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.copbox:focus-within{border-color:var(--gold)}
+.copbox textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;background:transparent;color:var(--ink);font:15px/22px var(--sans);padding:13px 46px 13px 14px;height:48px;min-height:48px;max-height:210px;overflow-y:hidden}
+.copsend{position:absolute;right:8px;bottom:9px;width:30px;height:30px;padding:0;display:grid;place-items:center;border:0;border-radius:6px;background:none;color:var(--ink);cursor:pointer}
+.copsend:hover{background:var(--surface-2)}
+.under{display:flex;align-items:center;gap:8px;height:30px;padding:0 6px 0 8px;font-size:12px;color:var(--ink-3)}
+.copclip{width:22px;height:22px;display:inline-grid;place-items:center;border:0;border-radius:5px;background:none;color:var(--ink-2)}
+.under .linkb{margin-left:auto}
 .linkb{background:none;border:0;color:var(--gold);font:600 12px/1.3 var(--sans);cursor:pointer;padding:0}
 .yr{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;align-items:end}
 .yr label{font-size:12px;color:var(--ink-3);display:flex;flex-direction:column;gap:2px}
@@ -67,27 +82,36 @@ textarea.ed{width:100%;box-sizing:border-box;font:13px/1.4 var(--sans);color:var
 </style>
 <div class="wrap">
   <div><h1>Foundation flow — working prototype (Option A)</h1>
-  <p class="k">Press through it as a consultant would. The button with two panels, top left of the Copilot, hides and shows the five cards. "Fill a sample answer" under the box saves typing. Nothing here is saved.</p></div>
+  <p class="k">Press through it as a consultant would. The button with two panels at the top of the rail hides and shows the chats and deliverables. "Fill a sample answer" under the box saves typing. Nothing here is saved.</p></div>
 
   <div class="frame" id="fr">
     <div class="bar"><span>Mobile</span><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
     <div class="sec"><span class="on">Foundation</span><span>Analysis</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
     <div class="body">
+      <div class="rails">
+        <div class="rtop"><button class="tog" id="tog" title="Hide chats and deliverables" aria-label="Hide chats and deliverables"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M6 2.5v11"/></svg></button><span class="lbl">Copilot</span></div>
+        <div class="slim"><button class="tog" title="New chat" aria-label="New chat">+</button></div>
+        <div class="coprail chats"><div class="coprh">Chats <span class="copnew">+ New</span></div>
+          <div class="copitem on"><b>Foundation flow</b><small>today</small></div>
+          <div class="copitem"><b>Aspiration ideas</b><small>28 Sep</small></div>
+          <div class="copitem"><b>Board pack wording</b><small>21 Sep</small></div></div>
+        <div class="coprail"><div class="coprh">Deliverables</div>
+          <div class="copitem on"><b>Foundation — Mobile</b><small id="dvsub">v3 · in progress</small></div>
+          <div class="copitem"><b>SWOT — Mobile</b><small>v2</small></div></div>
+      </div>
       <div class="left">
         <div class="vline" id="vline"></div>
         <div class="cards" id="cards"></div>
-        <div class="strip" id="strip"></div>
       </div>
       <div class="cop">
         <div class="coph">
-          <button class="tog" id="tog" title="Hide the five cards" aria-label="Hide the five cards"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="2.5" width="13" height="11" rx="2"/><path d="M6 2.5v11"/></svg></button>
           <b id="ctitle">Copilot · Foundation</b><span class="prog" id="prog"></span>
         </div>
         <div class="track"><i id="trk"></i></div>
         <div class="msgs" id="msgs"></div>
         <div class="foot">
-          <div class="box"><textarea id="inp" rows="1" placeholder="Type your answer…"></textarea><button class="send" id="send" aria-label="Send">↵</button></div>
-          <div class="under"><button class="linkb" id="sample">Fill a sample answer</button><span id="hint"></span></div>
+          <div class="copbox"><textarea id="inp" rows="1" placeholder="Type your answer…"></textarea><button class="copsend" id="send" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10l-5 5 5 5"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg></button></div>
+          <div class="under"><button class="copclip" title="Attach a file" aria-label="Attach a file"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button><span id="hint"></span><button class="linkb" id="sample">Fill a sample answer</button></div>
         </div>
       </div>
     </div>
@@ -95,7 +119,7 @@ textarea.ed{width:100%;box-sizing:border-box;font:13px/1.4 var(--sans);color:var
 
   <div class="note"><b>What to try</b><ul>
     <li>Answer with something short like "phones" to see the nudge.</li>
-    <li>Collapse the cards and see how much room the chat and the drafts get.</li>
+    <li>Hide the chats and deliverables and see how much room the cards and the chat get.</li><li>Write a long answer: the box grows up to about nine lines, then scrolls inside, as it does today.</li>
     <li>Go through all five elements to reach the consistency check and the saved version.</li></ul></div>
 </div>
 <script>
@@ -103,25 +127,21 @@ var Y0=2026, Y1=2028;
 var EL=[
  {k:"who",n:"Who We Are",s:"WHO",q:["Let's start simple — what type of organization are you? Don't overthink it.","What do you sell or provide? Just list your main products or services.","Who buys from you? What industries or customer types?","Where do you operate geographically?","How do customers find and buy from you? What are your sales channels?","How do you operate internally? What's your delivery model?","What makes you different from competitors? Be specific."],
   a:["A mobile phone retailer, part of Raya Trade.","Smartphones, accessories, repairs and device insurance.","Consumers first, plus small businesses buying fleets of phones.","Egypt, through 120 stores in Cairo, Alexandria and the Delta.","Our own stores, an online shop, and partner sales with the telecom operators.","Central buying and warehousing, stores run by area managers, repairs in two hubs.","The widest after-sales care: repairs, insurance and trade-in under one roof."],
-  ex:["Phones and accessories","Repairs and insurance"],
   d:"Mobile is Raya Trade's phone retailer in Egypt. It sells smartphones, accessories, repairs and device insurance to consumers and small businesses through 120 stores, an online shop and operator partnerships, and stands apart through after-sales care under one roof."},
  {k:"pur",n:"Purpose",s:"PUR",q:["Take me back to the beginning — why was this organization created? What problem sparked it all?","Who benefits most from what you do? How are their lives or businesses better because of you?","Here's a thought experiment: if your organization disappeared tomorrow, what would the world actually lose?","When your team wakes up for work, what feeling do you want them to have about why they're coming in?"],
   a:["Buying a phone in Egypt used to mean no help after the sale.","Families and small businesses who depend on one device for everything.","A place people trust to keep their phones working.","That they keep people connected."],
-  ex:["Trust after the sale","Keeping people connected"],
   d:"We keep Egypt connected by standing behind every phone we sell."},
  {k:"asp",n:"Winning Aspiration",s:"ASP",q:["Close your eyes and imagine it's the end of {Y} — you've \"won.\" Paint me that picture. What does success look like?","What specific achievements would make you say \"we made it\"? Give me something measurable.","What's the bold, stretch goal that excites you but also scares you a little?","By the end of {Y}, where do you want to stand compared to your competitors? What's your market position?"],
   a:["Customers come to us first, for buying and for fixing.","25% market share and 1 million care-plan customers.","Every phone sold in Egypt is serviceable at a Mobile store.","Number one in phone retail and the clear leader in after-sales."],
-  ex:["Number one in market share","1 million care customers"],
   d:"By the end of {Y}, Mobile is Egypt's first choice for buying and caring for a phone: 25% market share and one million care-plan customers."},
  {k:"obj",n:"Key Objectives",s:"OBJ",q:["Let's talk numbers. What financial metric would tell you the business is healthy and growing?","What about your customers? What metric would show they love what you're doing?","Operationally, what metric proves your engine is running smoothly?","What about your team? What metric would show your people are thriving?","If you could only look at ONE number to know if everything is working, what would it be?"],
   a:["Revenue growth of 15% a year at a stable margin.","A net promoter score above 60.","Repairs returned within 48 hours.","Staff retention above 85%.","Care-plan customers."],
-  ex:["Revenue growth","Net promoter score"],
   d:"1. Grow revenue 15% a year at a stable margin\n2. Net promoter score above 60\n3. Repairs back within 48 hours\n4. Keep 85% of our people\n5. Reach one million care-plan customers by {Y}"},
  {k:"val",n:"Core Values",s:"VAL",q:["Think of your best team member — the one who perfectly embodies your culture. What 3 behaviors do they consistently show?","What behavior is absolutely unacceptable here — even if the person delivers amazing results?","Picture your team at its absolute best. What does that look like? How are people interacting?","How do you want your people to treat customers — especially when things get tough?","Last one! When someone asks your employees \"what's it like working there?\" what do you want them to say?"],
   a:["Owns the problem, follows up, stays calm.","Hiding a mistake from a customer.","Stores helping each other with stock and repairs.","Honestly, even when the answer is no.","They trust us and let us grow."],
-  ex:["Owns the problem","Honest with customers"],
   d:"Own it — we see a problem through.\nTell the truth — even when the answer is no.\nOne team — stores help each other.\nCare after the sale — the sale is the start."}
 ];
+var EX=[["An F&B retail company", "A logistics company", "A management consultancy"], ["Meals, desserts, and beverages", "Freight forwarding, warehousing, and last-mile delivery", "Strategy consulting and organizational design"], ["Urban consumers aged 18-45", "E-commerce, retail, and healthcare businesses", "Mid-size companies with 100-500 employees"], ["Cairo, Alexandria, and Giza", "Egypt and Saudi Arabia", "Across the UAE"], ["Dine-in restaurants, delivery apps, and takeaway counters", "Direct sales team and channel partners", "Referrals and RFP responses"], ["Central kitchens supplying all outlets with standardized recipes", "Own fleet with real-time tracking and warehouse network", "Project-based teams with senior partner oversight"], ["Consistent food quality through standardized central production", "Real-time visibility and faster delivery than competitors", "Deep sector expertise in healthcare and financial services"], ["To make quality food accessible to everyday families", "To solve the inefficiencies in regional logistics", "To help businesses navigate digital transformation"], ["Busy professionals who get reliable, delicious meals without cooking", "Businesses that can now deliver products faster and more reliably", "Companies that become more competitive through better strategy"], ["A trusted source of comfort food that brings people together", "A logistics partner that truly understands local market needs", "Strategic thinking that helps businesses thrive, not just survive"], ["Proud to make someone's day better with every meal served", "Part of something that's transforming an entire industry", "That their ideas directly shape the future of our clients"], ["We're the go-to brand for quick, quality meals in every major city", "We've become the most trusted logistics partner in the MENA region", "Our clients see us as essential to their strategic success"], ["100 outlets across 5 countries with 90%+ customer satisfaction", "Processing 1M+ shipments annually with 99% on-time delivery", "50+ enterprise clients with 80% renewal rate"], ["Become a household name that people recommend to friends", "Disrupt the industry with tech that competitors try to copy", "Be invited to advise on national-level strategic initiatives"], ["The #1 choice for quality-conscious diners in our category", "The premier logistics partner that others benchmark against", "The strategic consultancy that top executives trust most"], ["Revenue growth of 25% year-over-year", "Gross margin above 40%", "Monthly recurring revenue of $1M+"], ["Customer retention rate above 85%", "Net Promoter Score (NPS) of 50+", "Monthly active users growing 10%+ monthly"], ["On-time delivery rate of 99%+", "Average fulfillment time under 24 hours", "Quality defect rate below 1%"], ["Employee engagement score above 80%", "Staff turnover below 15% annually", "Internal promotion rate of 30%+"], ["Number of happy repeat customers per month", "Total orders fulfilled with 5-star ratings", "Net revenue retention rate"], ["They admit mistakes quickly, help others without being asked, and share knowledge openly", "They challenge ideas respectfully, follow through on commitments, and celebrate others' wins", "They stay calm under pressure, find solutions not blame, and mentor junior colleagues"], ["Blaming others, hiding mistakes, or taking credit for someone else's work", "Being disrespectful to colleagues, cutting corners on quality, or lying to customers", "Hoarding information, undermining teammates, or ignoring safety protocols"], ["Ideas flow freely, debates are healthy, and decisions happen fast", "Everyone knows the goal, helps each other, and celebrates wins together", "People speak up, listen deeply, and build on each other's ideas"], ["We listen first, never make excuses, and always find a way to help", "We're honest about what we can deliver, proactive about problems, and generous with our time", "We treat every customer like our most important one, respond quickly, and follow up until it's resolved"], ["It's challenging but rewarding - you grow faster here than anywhere else", "The people are incredible - everyone genuinely wants each other to succeed", "You're trusted to do your best work, and your ideas actually matter"]];EL.forEach(function(e,i){var o=0;for(var j=0;j<i;j++)o+=EL[j].q.length;e.ex=EX.slice(o,o+e.q.length)});
 var VER=3, st={phase:"year", e:0, qi:0, ans:EL.map(function(){return[]}), done:EL.map(function(){return""}), pending:null};
 var $=function(i){return document.getElementById(i)}, M=$("msgs");
 function y(s){return s.replace(/\{Y\}/g,Y1)}
@@ -130,36 +150,42 @@ function add(html,cls){var d=document.createElement("div");d.className="m "+(cls
 function addRaw(html,cls){var d=document.createElement("div");d.className=cls;d.innerHTML=html;M.appendChild(d);M.scrollTop=M.scrollHeight;return d}
 function nDone(){return st.done.filter(Boolean).length}
 function paintLeft(){
-  var cur=st.phase==="year"?-1:st.e;
-  $("vline").innerHTML="Foundation — Mobile <b>v"+VER+"</b> · "+(st.phase==="saved"?"saved":"in progress")+" · "+nDone()+" of 5 done"+(st.phase!=="year"?" · <b>"+Y0+" to the end of "+Y1+"</b>":"");
+  var cur=st.phase==="year"||st.phase==="path"?-1:st.e;
+  $("vline").innerHTML="Foundation — Mobile <b>v"+VER+"</b> · "+(st.phase==="saved"?"saved":"in progress")+" · "+nDone()+" of 5 done"+(st.phase!=="year"&&st.phase!=="path"?" · <b>"+Y0+" to the end of "+Y1+"</b>":"");
   $("cards").innerHTML=EL.map(function(e,i){
     var done=st.done[i], now=i===cur&&st.phase!=="consistency"&&st.phase!=="saved";
     var lab=done?"Done":now?(st.phase==="review"?"Reviewing":st.phase==="draft"?"Drafting":"Answering "+(st.qi+1)+"/"+e.q.length):"Waiting";
     return '<div class="card'+(i===4?" wide":"")+(now?" now":"")+'"><h3>'+e.n+' <span class="st'+(done?" done":now?" now":"")+'">'+lab+'</span></h3><p>'+(done?esc(done):e.q.length+" questions")+'</p></div>'}).join("");
-  $("strip").innerHTML=EL.map(function(e,i){var c=st.done[i]?"done":i===cur?"now":"";return '<div class="dot '+c+'" title="'+e.n+'">'+e.s+'</div>'}).join("");
+  $("dvsub").textContent="v"+VER+" · "+(st.phase==="saved"?"saved":"in progress");
   var tot=EL.reduce(function(a,e){return a+e.q.length},0), got=0;for(var i=0;i<st.e;i++)got+=EL[i].q.length;
-  if(st.phase==="ask")got+=st.qi; else if(st.phase!=="year")got+=EL[st.e]?EL[st.e].q.length:0;
+  if(st.phase==="ask")got+=st.qi; else if(st.phase!=="year"&&st.phase!=="path")got+=EL[st.e]?EL[st.e].q.length:0;
   if(st.phase==="consistency"||st.phase==="saved")got=tot;
   $("trk").style.width=Math.round(got/tot*100)+"%";
-  $("ctitle").textContent="Copilot · "+(st.phase==="year"?"Foundation":st.phase==="consistency"||st.phase==="saved"?"Foundation · check":EL[st.e].n);
+  $("ctitle").textContent="Copilot · "+(st.phase==="year"||st.phase==="path"?"Foundation":st.phase==="consistency"||st.phase==="saved"?"Foundation · check":EL[st.e].n);
   $("prog").textContent=st.phase==="ask"?"Question "+(st.qi+1)+" of "+EL[st.e].q.length:st.phase==="review"?"Review":st.phase==="draft"?"Draft":"";
 }
-$("tog").onclick=function(){var s=$("fr").classList.toggle("shut");var t=s?"Show the five cards":"Hide the five cards";this.title=t;this.setAttribute("aria-label",t)};
+$("tog").onclick=function(){var s=$("fr").classList.toggle("shut");var t=s?"Show chats and deliverables":"Hide chats and deliverables";this.title=t;this.setAttribute("aria-label",t)};
 function askYear(){
-  var d=add("Before we start: how long does this strategy run, and which year does it end? I'll use that year in the wording.<div class='yr'><label>Starts<input id='y0' type='number' value='"+Y0+"'></label><label>Ends at the end of<input id='y1' type='number' value='"+Y1+"'></label><span class='btn rec' id='yok'>Set the years</span></div>");
+  var d=add("Before we start: how long does this strategy run, and which year does it end? Everything we build for Mobile will use that year.<div class='yr'><label>Starts<input id='y0' type='number' value='"+Y0+"'></label><label>Ends at the end of<input id='y1' type='number' value='"+Y1+"'></label><span class='btn rec' id='yok'>Set the years</span></div>");
   d.querySelector("#yok").onclick=function(){var a=+d.querySelector("#y0").value,b=+d.querySelector("#y1").value;
     if(!a||!b||b<a){add("The end year has to be the same as or after the start year.");return}
-    Y0=a;Y1=b;this.remove();add(Y0+" to the end of "+Y1+" ("+(Y1-Y0+1)+" years)","me");st.phase="ask";st.e=0;st.qi=0;
-    add("Good. We'll build the five parts in order, starting with <b>Who We Are</b> (7 short questions).");askQ()};
+    Y0=a;Y1=b;this.remove();add(Y0+" to the end of "+Y1+" ("+(Y1-Y0+1)+" years)","me");st.phase="path";paintLeft();askPath()};
   paintLeft();
 }
-function askQ(){var e=EL[st.e];var d=add(esc(y(e.q[st.qi]))+(st.qi===0?"":"")+"<div class='ex'>"+e.ex.map(function(x){return"<span class='chip'>"+esc(x)+"</span>"}).join("")+"</div>");
-  d.querySelectorAll(".chip").forEach(function(c){c.onclick=function(){$("inp").value=c.textContent;$("inp").focus()}});paintLeft();$("hint").textContent="";}
+function askPath(){
+  var P=["Guided questions","Upload notes","Template","Import a finished foundation","Deep-research prompt"];
+  var d=add("How would you like to build it?<div class='btns'>"+P.map(function(x,i){return"<span class='btn"+(i?"":" rec")+"'>"+x+(i?"":" (recommended)")+"</span>"}).join("")+"</div>");
+  d.querySelectorAll(".btn").forEach(function(b,i){b.onclick=function(){
+    if(i){add(P[i],"me");add("This prototype only walks through Guided questions. Pick it to carry on.");return}
+    d.querySelector(".btns").remove();add(P[0],"me");st.phase="ask";st.e=0;st.qi=0;
+    add("Good. We'll build the five parts in order, starting with <b>Who We Are</b> (7 short questions).");askQ()}})}
+function askQ(){var e=EL[st.e];add(esc(y(e.q[st.qi])));
+  addRaw("<div class='eh'>Examples to inspire you</div>"+e.ex[st.qi].map(function(x){return"<p>• "+esc(x)+"</p>"}).join(""),"exs");paintLeft();$("hint").textContent="";}
 function submit(){var v=$("inp").value.trim();if(!v)return;
   if(st.phase!=="ask"){add(esc(v),"me");$("inp").value="";add("Noted. Use the buttons above to carry on.");return}
   $("inp").value="";add(esc(v),"me");
   if(v.length<15){var w=addRaw("That answer is quite short. A little more detail makes a better draft.<div class='btns'><span class='btn rec'>Add more detail</span><span class='btn'>Continue anyway</span></div>","warn");
-    var b=w.querySelectorAll(".btn");b[0].onclick=function(){w.remove();$("inp").value=v+", ";$("inp").focus()};b[1].onclick=function(){w.remove();keep(v)};return}
+    var b=w.querySelectorAll(".btn");b[0].onclick=function(){w.remove();$("inp").value=v+", ";grow();$("inp").focus()};b[1].onclick=function(){w.remove();keep(v)};return}
   keep(v)}
 function keep(v){st.ans[st.e][st.qi]=v;st.qi++;if(st.qi<EL[st.e].q.length)askQ();else review()}
 function review(){st.phase="review";var e=EL[st.e];
@@ -180,9 +206,11 @@ function check(){st.phase="consistency";paintLeft();
   var b=d.querySelectorAll(".btn");
   b[0].onclick=function(){d.querySelector(".btns").remove();st.e=3;draft()};
   b[1].onclick=function(){d.querySelector(".btns").remove();st.phase="saved";add("Saved as <b>Foundation — Mobile v"+VER+"</b>. v2 is kept and can still be opened. Next time you run the flow it becomes v"+(VER+1)+".");paintLeft()}}
-$("send").onclick=submit;
-$("inp").addEventListener("keydown",function(ev){if(ev.key==="Enter"&&!ev.shiftKey){ev.preventDefault();submit()}});
-$("sample").onclick=function(){if(st.phase==="ask"){$("inp").value=st.ans[st.e][st.qi]||EL[st.e].a[st.qi];$("inp").focus()}else $("hint").textContent="Use the buttons in the chat for this step."};
+function grow(){var t=$("inp");t.style.height="48px";var h=Math.min(t.scrollHeight,210);t.style.height=Math.max(48,h)+"px";t.style.overflowY=t.scrollHeight>210?"auto":"hidden"}
+$("inp").addEventListener("input",grow);
+$("send").onclick=function(){submit();grow()};
+$("inp").addEventListener("keydown",function(ev){if(ev.key==="Enter"&&!ev.shiftKey){ev.preventDefault();submit();grow()}});
+$("sample").onclick=function(){if(st.phase==="ask"){$("inp").value=st.ans[st.e][st.qi]||EL[st.e].a[st.qi];grow();$("inp").focus()}else $("hint").textContent="Use the buttons in the chat for this step."};
 add("Hi — let's build Mobile's Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part.");
 askYear();
 </script>

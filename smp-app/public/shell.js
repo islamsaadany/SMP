@@ -57220,6 +57220,10 @@ function __smpHeld(r) { return !!(r && (r.head || r.custodian)); }
    pillar, an objective or a SWOT point. */
 function __smpHoldsNow() {
   var plans = 0, caps = 0;
+  /* On the console's create piece there is no graph at all — a client not
+     made yet holds nothing — and `GROUP && …` throws on an undeclared name
+     rather than reading false (§467). */
+  if (typeof GROUP === "undefined") return { plans: 0, capabilities: 0, units: 0, functions: 0 };
   ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
     var n = ((c.keyObjectives || []).length) + ((c.projects || []).length) +
             ((c.items || []).length);
@@ -57720,14 +57724,15 @@ var CLIENTSETUP = (function () {
     if (OPTS.repaint) OPTS.repaint();
     else if (HOST) render();
   }
-  function canEdit(){ return !!(S.reg && S.reg.canEdit); }
+  function canEdit(){ return !!(S && S.reg && S.reg.canEdit); }
   /* The shape is frozen once there is a plan (§346): its own flag, never
      `canEdit`, because the name, the mark and the team stay changeable. In
      the platform the graph's own writers decide — anybody who may open this
      page may shape a client that holds no plan. */
   function canShape(){
     var h = holdsNow();
-    return !(h.plans || h.capabilities) && !(S.reg && S.reg.client && S.reg.client.status === "retired");
+    return !(h.plans || h.capabilities) && !(S && S.reg && S.reg.client && S.reg.client.status === "retired");
+    /* `S` is null on the console's create piece, which never mounts a flow (§467). */
   }
 
   function render(){

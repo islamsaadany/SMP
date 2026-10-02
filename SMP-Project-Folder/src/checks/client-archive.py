@@ -302,7 +302,7 @@ with sync_playwright() as p:
         return ev("()=>location.pathname")
 
     def console():
-        pg.goto(BASE + "/platform"); pg.wait_for_timeout(600)
+        pg.goto("about:blank"); pg.goto(BASE + "/platform#clients"); pg.wait_for_timeout(600)
 
     def archive(key):
         """§255: the act is inside the client now; the console is TOLD."""
@@ -378,7 +378,7 @@ with sync_playwright() as p:
     # ── 5 · THE BAND SURVIVES A FRESH VISIT ─────────────────────────────
     print("\n§5 · a fresh visit")
     archive("elabd-foods")
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(550)
+    pg.goto("about:blank"); pg.goto(BASE + "/platform#clients"); pg.wait_for_timeout(550)
     ck("the band is drawn on a page loaded from cold",
        bool(q(pg, '[data-grid="archived"] .ccard[data-client="elabd-foods"]')))
 

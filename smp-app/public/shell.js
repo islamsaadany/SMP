@@ -55969,6 +55969,36 @@ var COPILOT = (function(){
     return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
   }
 
+  /* THE CHAT'S TEXT SIZE (§462, Islam 2026-10-02, design-mockups/copilot-font-size/):
+     A− / A+ on the chat's title line, four steps, the conversation and the
+     reply box only. A screen preference, so localStorage and never the state
+     graph (§25, §47.1); a throwing or empty store reads as the normal size.
+     The press changes the size IN PLACE and never repaints, or a half-typed
+     message in the box would be rebuilt under the hand typing it (§35). */
+  var ZOOMS = [0.9, 1, 1.15, 1.3], ZKEY = "smp.copilot.textsize";
+  function zi(){
+    var v = null; try { v = localStorage.getItem(ZKEY); } catch (e) {}
+    var n = parseInt(v, 10);
+    return n >= 0 && n < ZOOMS.length ? n : 1;
+  }
+  function sizeHtml(){
+    var i = zi();
+    return '<span class="copsize" role="group" aria-label="Chat text size">' +
+      '<button type="button" class="copsz sm" data-cop-size="-1"' + (i === 0 ? ' disabled' : '') + ' title="Smaller text" aria-label="Smaller text">A&minus;</button>' +
+      '<button type="button" class="copsz big" data-cop-size="1"' + (i === ZOOMS.length - 1 ? ' disabled' : '') + ' title="Larger text" aria-label="Larger text">A+</button></span>';
+  }
+  function setSize(step){
+    var i = Math.max(0, Math.min(ZOOMS.length - 1, zi() + step));
+    try { if (i === 1) localStorage.removeItem(ZKEY); else localStorage.setItem(ZKEY, String(i)); } catch (e) {}
+    var box = document.querySelector("[data-cop-chatbox]");
+    if (box) box.style.setProperty("--copz", String(ZOOMS[i]));
+    var sm = document.querySelector('[data-cop-size="-1"]'), bg = document.querySelector('[data-cop-size="1"]');
+    if (sm) sm.disabled = i === 0;
+    if (bg) bg.disabled = i === ZOOMS.length - 1;
+    fitBox();
+  }
+  window.__copSize = { steps: ZOOMS, index: function(){ return ZOOMS[zi()]; } };
+
   function chatHtml(){
     var c = PANE.chat;
     var head = '<h3 class="coph">' + E(c.title) + '</h3>' + (c.archived ? '<span class="copchip">Archived</span>' : '');
@@ -55983,10 +56013,10 @@ var COPILOT = (function(){
     }).join("") + (THINKING === c.id ? '<div class="copmsg product" role="status"><div class="copbody">The Copilot is working on it…</div></div>' : '');
     var ctx = contextOf();
     var pend = canEdit() ? (PANE.pending || []).map(function(f){ return fileChip(f, true); }).join("") : "";
-    return '<div class="copchat">' +
+    return '<div class="copchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
       '<div class="copctx" title="' + E(ctx.detail || ctx.line) + '">' + INFO + '<span>' + E(ctx.line) + '</span></div>' +
-      '<div class="copheadrow">' + head + '</div>' +
-      '<div class="copmsgs" data-cop-msgs>' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div>' +
+      '<div class="copheadrow">' + head + sizeHtml() + '</div>' +
+      '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + (msgs || '<div class="copnone">Nothing said yet.</div>') + '</div></div>' +
       (pend ? '<div class="coppend" data-cop-pending>' + pend + '</div>' : '') +
       (!canEdit() ? VIEWONLY
         : c.archived
@@ -56234,6 +56264,7 @@ var COPILOT = (function(){
       });
       return;
     }
+    if ((b = hit(ev, "[data-cop-size]"))) { if (!b.disabled) setSize(+b.getAttribute("data-cop-size")); return; }
     if ((b = hit(ev, "[data-cop-send]"))) { send(); return; }
     if ((b = hit(ev, "[data-cop-reply]"))) { send(b.getAttribute("data-cop-reply")); return; }
     if ((b = hit(ev, "[data-cop-attach]"))) { var fi = document.querySelector("[data-cop-file]"); if (fi) fi.click(); return; }

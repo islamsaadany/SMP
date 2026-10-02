@@ -1,0 +1,45 @@
+<title>Copilot Text Size</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#16325C;--ink-2:#3B4A63;--ink-3:#5B6A80;--gold:#C9952B;--gold-deep:#8A6414;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14181F;--surface:#1B2029;--surface-2:#232A35;--line:#333A45;--ink:#E9ECF1;--ink-2:#C3CAD6;--ink-3:#9AA4B4;--gold:#E0B04F;--gold-deep:#E0B04F;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14181F;--surface:#1B2029;--surface-2:#232A35;--line:#333A45;--ink:#E9ECF1;--ink-2:#C3CAD6;--ink-3:#9AA4B4;--gold:#E0B04F;--gold-deep:#E0B04F;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;padding:24px 16px;margin:0}
+.wrap{max-width:1000px;margin:0 auto;display:grid;gap:28px}
+h1{font-size:20px;margin:0}
+.cap{font-size:13px;color:var(--ink-3);margin:0 0 8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.main{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.head h3{margin:0;font-size:17px;flex:1;min-width:0}
+.ts{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ts button{font:600 12.5px/1 "Source Sans 3",sans-serif;background:var(--surface);color:var(--ink-2);border:0;padding:6px 10px;cursor:pointer}
+.ts button+button{border-left:1px solid var(--line)}
+.ts button:hover{color:var(--ink);background:var(--surface-2)}
+.ts .big{font-size:15px}.ts .sm{font-size:11px}
+.ts button[disabled]{color:var(--line);cursor:default;background:var(--surface)}
+.msgs{display:flex;flex-direction:column;gap:10px;font-size:calc(13.5px*var(--z))}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:3px}
+.me{align-self:flex-end}
+.who{font-size:calc(12.5px*var(--z));color:var(--ink-3)}
+.body{border:1px solid var(--line);border-radius:6px;padding:9px 12px;line-height:1.45}
+.me .body{background:var(--surface-2)}
+.ai .body{border-left:3px solid var(--gold)}
+.comp{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:calc(13.5px*var(--z))}
+.note{font-size:14px;color:var(--ink-2);max-width:70ch;line-height:1.5}
+</style>
+<div class="wrap">
+<h1>Copilot chat — text size</h1>
+<p class="note">Two small buttons at the right of the chat's title line. <b>A−</b> makes the chat text smaller, <b>A+</b> larger. Four steps (90% · 100% · 115% · 130%); a button greys out at its end. Only the conversation and the reply box change — the side lists and the rest of the page stay as they are. Remembered on this device only.</p>
+
+<div><p class="cap">At the normal size</p>
+<div class="main" style="--z:1"><div class="head"><h3>Mobile — winning aspiration</h3><span class="ts"><button class="sm" aria-label="Smaller text">A−</button><button class="big" aria-label="Larger text">A+</button></span></div>
+<div class="msgs"><div class="msg me"><span class="who">Islam Saadany · 2 Oct 2026</span><div class="body">Let's enhance the winning aspiration</div></div>
+<div class="msg ai"><span class="who">Copilot</span><div class="body">Here is what the plan holds today: "To be Egypt's biggest and most diversified distributor…". What would you like to change about it?</div></div></div>
+<div class="comp">Write to the Copilot…</div></div></div>
+
+<div><p class="cap">After pressing A+ twice (130%, A+ greyed)</p>
+<div class="main" style="--z:1.3"><div class="head"><h3>Mobile — winning aspiration</h3><span class="ts"><button class="sm" aria-label="Smaller text">A−</button><button class="big" disabled aria-label="Larger text">A+</button></span></div>
+<div class="msgs"><div class="msg me"><span class="who">Islam Saadany · 2 Oct 2026</span><div class="body">Let's enhance the winning aspiration</div></div>
+<div class="msg ai"><span class="who">Copilot</span><div class="body">Here is what the plan holds today: "To be Egypt's biggest and most diversified distributor…". What would you like to change about it?</div></div></div>
+<div class="comp">Write to the Copilot…</div></div></div>
+</div>

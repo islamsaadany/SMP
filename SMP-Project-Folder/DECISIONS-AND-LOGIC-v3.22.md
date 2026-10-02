@@ -61206,3 +61206,17 @@ Nothing stored moves, nothing is migrated, no rule about who may use the Copilot
 
 
 **Merged to `main` 2026-10-01 on Islam's word.** `main` had taken §459 for Processes (spec 065) while this was built, and this work was already numbered §460, so no renumber was owed. The three record files were COMBINED (§318.7); the built file and `smp-app/public/` were rebuilt from the merged sources rather than merged (§91, §329); `sw.js` SHELL `v5.82-copilot-conversation`, past main's `v5.81`.
+
+## §462 — the Copilot chat's text size (2026-10-02)
+
+Islam: *"can we add a clean buttong to increaes and decrease the font size in the chat panel?"* Drawn first (rule 1c, `design-mockups/copilot-font-size/2026-10-02_text-size.html`, published as an artifact) and signed off: *"build 2"*.
+
+- **A− / A+ on the chat's own title line**, a two-button group, four steps — 90% · 100% · 115% · 130% — the button at an end greyed (`disabled`, because there is nothing left for it to do, unlike §221's refusals that carry a reason).
+- **The conversation and the reply box only.** The side lists, the context line and the page stay as they are, which is what *"in the chat panel"* asked for.
+- **CSS `zoom` on a wrapper INSIDE the scrolling box**, never on the box itself: zoom scales a declared height too, so on `.copmsgs` it would have changed how much of the window the conversation takes. Inside it the box keeps its height and everything in it — bubbles, drafts, quick replies — scales together, with no font size restated per element. The reply box takes `calc(15px × --copz)` and the existing `fitBox()` grows it, so no new sizing code. Cost stated: a browser without CSS `zoom` (Firefox before 126) shows the normal size and the buttons do nothing visible there.
+- **A screen preference, never the state graph** (§25, §47.1): `localStorage` key `smp.copilot.textsize`, the normal size stored as an ABSENCE (§50.6), a throwing store reading as normal.
+- **The press never repaints** (§35): it sets the variable and the two buttons' state in place, so a half-typed message survives it — asserted.
+- `smp-app/checks/shell.mjs` §3f measures it as PAINT (a bubble's height, the box's line height), never as the stored number: larger after two A+, smaller after three A−, both ends greyed, the side lists unchanged, the absence back at normal. **206/0**, and red with the `zoom` declaration removed from the source (§276).
+
+Screen only — no `api/`, `lib/` or `db/` file — nothing stored on the server, nothing migrated, nobody signed out.
+

@@ -918,6 +918,34 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(bx.h >= 205 && bx.h <= 214, "…up to about ten lines, then it scrolls inside itself", bx.h);
     await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
 
+    /* §462 — A− / A+ on the chat's title line. Measured as PAINT (a bubble's
+       rendered height, the box's line height), never as the stored number,
+       and the press must not repaint: a half-typed message survives it. */
+    const sz = async () => page.evaluate(() => {
+      const b = document.querySelector("[data-cop-msgs] .copbody"), t = document.querySelector("[data-cop-text]");
+      const sm = document.querySelector('[data-cop-size="-1"]'), bg = document.querySelector('[data-cop-size="1"]');
+      let stored = null; try { stored = localStorage.getItem("smp.copilot.textsize"); } catch (e) {}
+      return { h: b ? b.getBoundingClientRect().height : 0, lh: t ? parseFloat(getComputedStyle(t).lineHeight) : 0,
+        val: t ? t.value : null, sm: sm ? sm.disabled : null, bg: bg ? bg.disabled : null, stored,
+        inHead: !!document.querySelector(".copheadrow .copsize"), side: getComputedStyle(document.querySelector(".coprail .copt") || document.body).fontSize };
+    });
+    const z0 = await sz();
+    check(z0.inHead && z0.sm === false && z0.bg === false && z0.stored === null, "A− and A+ sit on the chat's title line, both live at the normal size, nothing stored", JSON.stringify(z0));
+    await page.fill("[data-cop-text]", "half typed");
+    await page.click('[data-cop-size="1"]'); await page.click('[data-cop-size="1"]');
+    const z2 = await sz();
+    check(z2.h > z0.h * 1.2 && z2.lh > z0.lh * 1.2, "two presses of A+ make the conversation and the reply box larger", JSON.stringify([z0.h, z2.h, z0.lh, z2.lh]));
+    check(z2.bg === true && z2.sm === false && z2.stored === "3", "…A+ greys out at the largest step, and the size is remembered on this device", JSON.stringify(z2));
+    check(z2.val === "half typed", "…without throwing away what is half typed in the box", z2.val);
+    check(z2.side === z0.side, "…and the side lists stay the size they were", z2.side + " / " + z0.side);
+    await page.click('[data-cop-size="-1"]'); await page.click('[data-cop-size="-1"]'); await page.click('[data-cop-size="-1"]');
+    const zs = await sz();
+    check(zs.h < z0.h && zs.sm === true && zs.bg === false, "three presses of A− go below normal and A− greys out at the smallest", JSON.stringify(zs));
+    await page.click('[data-cop-size="1"]');
+    const zb = await sz();
+    check(zb.stored === null && Math.abs(zb.h - z0.h) < 1, "back at normal the stored preference is removed (an absence, §50.6)", JSON.stringify(zb));
+    await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
+
     const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
     const dotsShown = await page.evaluate(() => { const d = document.querySelector("[data-cop-chats] .coprow.on [data-cop-menu]"); return d ? getComputedStyle(d).opacity : "none"; });
     check(dotsShown === "1", "the open chat shows its three dots", dotsShown);

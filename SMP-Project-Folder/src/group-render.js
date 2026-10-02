@@ -1611,6 +1611,33 @@ function capsTable(){
 }
 
 
+/* ── THE COMPANY PAGE'S CAPABILITIES (§447) ───────────────────────────
+   Islam, of round 2's mockup: *"splitting the directions and the
+   capabilities was a good choice"* — so with the business units off they
+   are a SECTION of their own on the company's Strategy tab, never folded
+   into the directions, and shown the way the Structure step sets them (for
+   El Abd, planned in pillars). One row per capability with the way into its
+   own pages, which are unchanged — the navigation row no longer carries a
+   Capabilities side, so this is where they are reached. */
+function renderTopCaps(){
+  var caps = capsReachable();
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
+  var rows = caps.map(function(c){
+    var fn = c.fn ? functionOf(c.fn) : null, pil = capPlansInPillars(c);
+    var cu = pil ? capAsUnit("cap:" + c.id) : null;
+    var n = pil ? itemsNow(cu).length : (c.projects || []).length;
+    var v = pil ? unitPillars(cu) : capPerf(c);
+    return '<tr><td>' + esc(c.name) + (fn ? '<span class="why">' + esc(fn.name) + '</span>' : '') + '</td>' +
+      '<td>' + (pil ? L("pillar", "bu") : L("project", "bu")) + '</td>' +
+      '<td class="num">' + n + '</td>' +
+      '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td>' +
+      '<td class="num"><button type="button" class="linkbtn" data-gocap="cap:' + esc(c.id) + '">Open</button></td></tr>';
+  }).join("");
+  return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th>Planned in</th><th class="num">Rows</th>' +
+    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+}
+
 /* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).
 
    Islam: "across the platform hide the distinction of direction and capability.
@@ -2390,6 +2417,29 @@ function whereNext(keys){
      every existing client's page is byte for byte what it was. */
   function topPlanCard(){
     if (!topHasPlan() || !planOn("group")) return "";
+    /* §466: A COMPANY THAT PLANS IN PROJECTS IS SCORED BY THEM — each
+       project's performance averaged equally (Islam: the projects *"take the
+       place of the directions' score"*), the same `capPerf` a function's own
+       projects are read by, in the same card and the same place. Nothing
+       else on this page moves. */
+    if (topWay() === "projects") {
+      var th = unitOwnHolder("group"), prs = th ? th.projects : [];
+      var pv = th ? capPerf(th) : null;
+      var pdrill = miniTable(["#", L1("project"), "Performance"],
+        prs.map(function(p, i){
+          var v = projPerf(p);
+          return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(projCode("u:group", p) + " " + (p.name || "")) + '</td>' +
+            '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">The mean across ' + L("project") + ' (' + prs.length + '): <b>' + pct(pv) + '</b>.</p>';
+      var ptitle = L("project", "bu") + " &mdash; performance";
+      return drillCard(buExists() ? labelWord("topword", "group") + " " + ptitle : ptitle, pv, {
+        primary: !buExists(),
+        sub: "The " + (buExists() ? "top layer" : "company") + "’s <b>" + prs.length + "</b> " + L("project", "bu") + ", each counting equally.",
+        drill: pdrill, modalTitle: L("project", "bu") + " — performance",
+        modalSub: "Each project scored and averaged equally"
+      });
+    }
     var tu = topAsUnit(), items = itemsNow(tu);
     var drill = miniTable(["#", L1("pillar"), "Performance", "Delivered", "Planned"],
       items.map(function(p, i){
@@ -2399,6 +2449,13 @@ function whereNext(keys){
       }).join("")) +
       '<p class="sub">The mean across ' + L("pillar") + ' (' + items.length + '): <b>' + pct(unitPillars(tu)) + '</b>. ' +
       'Kept apart from the ' + L("unitword") + '’ own score.</p>';
+    /* §447: with the units off these ARE the company's directions and this is
+       its headline — the equal average Islam chose (*"yes equally"*). */
+    if (!buExists()) return drillCard(L("pillar", "bu") + " &mdash; performance", unitPillars(tu), {
+      primary: true, sub: "The company’s <b>" + items.length + "</b> " + L("pillar", "bu") + ", each counting equally.",
+      drill: drill, modalTitle: L("pillar", "bu") + " — performance",
+      modalSub: "Each direction scored and averaged equally"
+    });
     return drillCard(labelWord("topword", "group") + " " + L("pillar") + " &mdash; own plan", unitPillars(tu), {
       sub: "The top layer’s own " + L("pillar") + " (<b>" + items.length + "</b>), scored like a unit’s.",
       drill: drill, modalTitle: labelWord("topword", "group") + " " + L("pillar") + " — own plan",
@@ -2407,7 +2464,7 @@ function whereNext(keys){
   }
 
   var SECS = [];
-  SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
+  SECS.push({ t: buExists() ? "Overall performance" : labelWord("topword", "group"), h: section("", "Overall performance", null,
       '<div class="scores">' +
         drillCard("Group " + L("keyobj") + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the " + L("unitword") + "."), groupKeyObjectives(), {
           /* Was "The group's own scorecard. All 6 objectives have a target
@@ -2419,6 +2476,7 @@ function whereNext(keys){
           drill: koDrill, modalTitle: "Group " + L("keyobj"), modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         topPlanCard() +
+        (!buExists() ? "" :
         drillCard(L("unitword","bu") + " &mdash; performance" + tip(TIP_PERF()), groupUnitsObjectives(), {
           delta: deltaTag("group"),
           /* THE LINE SAYS WHAT THE NUMBER IS, NOT HOW IT WAS MADE (§156).
@@ -2436,8 +2494,13 @@ function whereNext(keys){
              says "Not yet measurable" is three false precisions in a row. */
           sub: deliveryLine(groupExec(), groupPlan()),
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
-        }) +
-      '</div>' + whereNext(UNIT_KEYS)) });
+        })) +
+      '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
+
+  /* §464: the divisions left this page for the navigation — planned on the
+     company, a division is a segment of the row and its page is its own
+     reading (renderCompanyPerformance), reached by pressing it. Reading it
+     here as well would be two places to look for one number (§87). */
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -2445,7 +2508,8 @@ function whereNext(keys){
         ' &middot; drag by the handle to reorder</span></div>' : '';
   };
 
-  SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
+  /* §447: no units section when the layer is off — they are hidden, not gone. */
+  if (buExists()) SECS.push({ t: L("unitword","bu"), h: section("", L("unitword","bu"),
       null,
       GVIEW.units === "table"
         ? unitsTable(keys)
@@ -2453,12 +2517,16 @@ function whereNext(keys){
           '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
       TIP_PERF(), viewToggle("units")) });
 
-  SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
+  /* §449: each section is drawn only while the Structure step carries it on
+     the top layer — a section shown for a part that is switched off is the
+     page disagreeing with the setting (§53.5). Capabilities are named in the
+     client's own word, never "Group …" (Islam, 2026-10-01). */
+  if (compOn("group", "theme")) SECS.push({ t: "Group " + L("theme"), h: section("", "Group " + L("theme"),
       null,
       arrangeBar("themes", GROUP.themes.length) +
       '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
-  SECS.push({ t: "Group " + L("capability"), h: section("", "Group " + L("capability"),
+  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -5824,7 +5892,7 @@ function renderFocusBoard(){
   /* §334: the capabilities between them, in the navigation's own order — a
      board that lists what is marked and leaves out a whole kind of subject is
      a board nobody can trust (§130.5). */
-  var all = subs.units.concat(subs.caps).concat(subs.fns);
+  var all = subs.top.concat(subs.units).concat(subs.caps).concat(subs.fns);
   var live = all.filter(function(x){ return focusIn(x.key).length; });
   var totals = { over:0, met:0, short:0, none:0, total:0 };
 
@@ -5836,6 +5904,7 @@ function renderFocusBoard(){
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
+                      : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
                         (String(sub.key).indexOf("cap:") === 0
                           ? L1("capability") : L1("fnword")) + '</span>') +
@@ -9217,7 +9286,9 @@ function unitPlanBody(it, u, railed){
    Only a unit ITSELF — `fnAsUnit()` hands out a unit-shaped view of a pillars
    function and must keep reaching the pillars pages. */
 function unitWayOf(u){
-  if (!u || !u.ukey || UNITS[u.ukey] !== u) return null;
+  /* §466: and the top layer's own view, which planning in projects routes
+     through the same function pages over `u:group`. */
+  if (!u || !u.ukey || (UNITS[u.ukey] !== u && !u.topLayer)) return null;
   var f = unitFormat(u);
   return f === "pillars" ? null : f;
 }

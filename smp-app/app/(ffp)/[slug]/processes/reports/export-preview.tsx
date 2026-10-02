@@ -1,0 +1,1568 @@
+"use client";
+
+import { Fragment, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { Source_Serif_4 } from "next/font/google";
+import { StaticOrgChart } from "../(shell)/org/chart/static-org-chart";
+import { PrintedProcessMap } from "./printed-map/printed-process-map";
+import "./printed-map/printed-map.css";
+import { StaticMilestoneRails } from "../(shell)/helicopter/static-milestone-rails";
+import { paginate } from "@/ffp/lib/domain/report-pagination";
+import { setReportMapLayout } from "@/ffp/lib/actions/report-map-layout";
+import { mixHex, readableInkOn } from "@/ffp/lib/domain/color-contrast";
+import type { RaciCode, StepType } from "@/ffp/lib/domain/raci-table";
+import type { RailProcess } from "@/ffp/lib/domain/milestone-rails";
+import type { AuthorityDirection } from "@/ffp/lib/domain/authority-table";
+import {
+  isBlockEmpty,
+  isSectionEmpty,
+  type ResolvedArrangement,
+} from "@/ffp/lib/domain/report-arrangement";
+import {
+  formatReportDate,
+  POLICY_LIFECYCLE_LABEL,
+  RISK_STATUS_LABEL,
+  titleCase,
+  type GovernanceReport,
+} from "@/ffp/lib/domain/governance-report";
+
+type PersonT = { id: string; name: string; managerId: string | null; roleNames: string[] };
+
+/**
+ * How tightly the report is set. Every spacing and type size in it is in rem
+ * while the sheet itself is a fixed A4 in millimetres, so one root font-size
+ * scales the whole document against a page that doesn't move — which is what
+ * actually changes how much lands on each page, in the preview and in the
+ * printed PDF alike. Anything deliberately fixed (the diagram boxes, the
+ * cover's page-height frame) is in px or mm and stays where it is.
+ */
+const DENSITY_OPTIONS = [
+  { id: "tight", label: "Tight", scale: 0.85 },
+  { id: "compact", label: "Compact", scale: 0.92 },
+  { id: "default", label: "Default", scale: 1 },
+  { id: "roomy", label: "Roomy", scale: 1.08 },
+] as const;
+
+type DensityId = (typeof DENSITY_OPTIONS)[number]["id"];
+
+/**
+ * The two printed map layouts (spec 013). Flow is the default because it is
+ * legible at any number of roles, where Roles degrades as roles are added — so
+ * it is the safer thing to give a client nobody has chosen for.
+ */
+const MAP_LAYOUT_OPTIONS = [
+  { id: "FLOW", label: "Flow", hint: "The process runs down the page, one step per row" },
+  { id: "ROLES", label: "Roles", hint: "A column per role, so hand-offs read as sideways moves" },
+] as const;
+
+// The cover's one deliberate serif moment — self-hosted via next/font so the
+// PDF/print render never depends on a live network fetch for it.
+const coverSerif = Source_Serif_4({ subsets: ["latin"], weight: ["400", "600"], style: ["normal", "italic"], display: "swap" });
+
+const DEFAULT_ACCENT_SECONDARY = "#4338ca";
+// Same defaults, same functions, as the workspace layout that paints the
+// sidebar pages — a client's report banner and its app banner come out
+// identical rather than two independent guesses at "the brand colour".
+const DEFAULT_ACCENT = "#334155"; // slate-700 — a workspace with no logo/accent set yet
+const DEFAULT_ACCENT_TERTIARY = "#4338ca";
+
+/**
+ * A short, deterministic document code for the cover — built from the
+ * client's own name rather than a random ID, so re-rendering the same
+ * report's cover always shows the same code instead of a new one each time.
+ */
+function deriveDocId(companyName: string): string {
+  const slug = companyName
+    .split(/\s+/)[0]
+    ?.replace(/[^a-z0-9]/gi, "")
+    .toUpperCase();
+  return `${slug || "BPD"}-BPD-${new Date().getFullYear()}`;
+}
+
+export type ExportProcessData = {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  /** The main process this one is filed under, for the title banner's breadcrumb. */
+  parentCode: string | null;
+  parentName: string | null;
+  processPurpose: string | null;
+  inScope: string[];
+  outOfScope: string[];
+  externalEntities: { name: string; description: string }[];
+  kpis: { metric: string; target: string; frequency: string }[];
+  steps: {
+    id: string;
+    type: "START" | "TASK" | "DECISION" | "END";
+    label: string;
+    positionX: number;
+    positionY: number;
+    detailedAction: string[];
+    exceptionHandling: string | null;
+    assignedRole: { id: string; name: string } | null;
+    swimlaneRole: { id: string; name: string } | null;
+    /** Whether this step needs every one of its predecessors, not just one (spec 015). */
+    joinRequiresAll: boolean;
+    links: { id: string; targetProcessId: string; targetProcess: { code: string; name: string } }[];
+    slaDays: number | null;
+    threshold: number | null;
+    direction?: AuthorityDirection;
+  }[];
+  connections: { id: string; fromStepId: string; toStepId: string; label: string | null }[];
+  matrixRoles: { id: string; name: string }[];
+  combinedRows: {
+    rowId: string;
+    label: string;
+    stepType: StepType | null;
+    raci: Record<string, RaciCode>;
+    approverLabel: string | null;
+    slaDays: number | null;
+    threshold: number | null;
+    directionLabel: string;
+    requiresApproval: boolean;
+    extraApprovals: { amount: number | null; label: string | null }[];
+    ruleSentences: string[];
+    escalationLabel: string | null;
+  }[];
+  involvedRoles: {
+    id: string;
+    name: string;
+    duties: { key: string; label: string; tasks: string[] }[];
+  }[];
+  controlPoints: { rowId: string; statement: string; flagged: boolean }[];
+  processOwnerName: string | null;
+  triggerLabel: string | null;
+  outputLabel: string | null;
+  gaps: string[];
+};
+
+const CODE_LETTER: Record<RaciCode, string> = {
+  RESPONSIBLE: "R",
+  ACCOUNTABLE: "A",
+  CONSULTED: "C",
+  INFORMED: "I",
+};
+
+/** One phase's worth of the value chain, as the report prints it. */
+export type ValueChainColumn = {
+  title: string;
+  color: string | null;
+  activities: {
+    stepId: string;
+    label: string;
+    ownerName: string | null;
+    supportNames: string[];
+    processCode: string;
+    linksTo: string[];
+  }[];
+};
+
+export function ExportPreview({
+  workspaceId,
+  companyName,
+  firmName,
+  industry,
+  description,
+  accentColor,
+  accentColorTertiary,
+  accentSecondary,
+  logoDataUrl,
+  people,
+  processes,
+  valueChain,
+  unphasedActivityCount,
+  railProcesses,
+  governance,
+  arrangement,
+  mapLayout: initialMapLayout,
+  canEdit,
+}: {
+  workspaceId: string;
+  companyName: string;
+  firmName: string;
+  industry: string | null;
+  description: string | null;
+  accentColor: string | null;
+  accentColorTertiary: string | null;
+  accentSecondary: string | null;
+  /** The client's logo — same source as the in-app sidebar (WorkspaceBranding), or null if never set. */
+  logoDataUrl: string | null;
+  people: PersonT[];
+  processes: ExportProcessData[];
+  valueChain: ValueChainColumn[];
+  unphasedActivityCount: number;
+  railProcesses: RailProcess[];
+  governance: GovernanceReport;
+  arrangement: ResolvedArrangement;
+  mapLayout: "FLOW" | "ROLES";
+  /** Whether this viewer may change the client's settings — the layout control is theirs alone. */
+  canEdit: boolean;
+}) {
+  const allGaps = processes.flatMap((p) => p.gaps.map((gap) => ({ process: p.name, gap })));
+  const pptxHref = `/api/ffp/export/report/${workspaceId}?${processes.map((p) => `ids=${p.id}`).join("&")}`;
+
+  const [density, setDensity] = useState<DensityId>("default");
+
+  /* Unlike Spacing, this one is the client's and persists. It is held in state
+     as well so the map redraws immediately rather than after the round trip. */
+  const [mapLayout, setMapLayout] = useState<"FLOW" | "ROLES">(initialMapLayout);
+
+  function chooseMapLayout(layout: "FLOW" | "ROLES") {
+    setMapLayout(layout);
+    void setReportMapLayout({ workspaceId, layout });
+  }
+
+  /**
+   * Where the PDF will break, so the preview can say so.
+   *
+   * The marker used to be drawn by `.print-page::after` — the very class that
+   * forced the break — so preview and PDF agreed only because both broke after
+   * every section. Now that sections flow, CSS decides breaks at paint time and
+   * tells the DOM nothing, so the only honest option is to measure the blocks
+   * and predict, which is what paginate() does.
+   */
+  const paperRef = useRef<HTMLElement | null>(null);
+  const [breakOffsets, setBreakOffsets] = useState<number[]>([]);
+
+  useEffect(() => {
+    const paper = paperRef.current;
+    if (!paper) return;
+
+    const measure = () => {
+      const base = paper.getBoundingClientRect().top;
+      const blocks: { id: string; height: number }[] = [];
+      const forcedBreakBefore: string[] = [];
+      let n = 0;
+
+      for (const section of paper.querySelectorAll<HTMLElement>(".print-page")) {
+        const forced = section.classList.contains("print-break-before");
+        // A section's own children are what flows; the section is not, because
+        // a process document is several pages long.
+        const kids = Array.from(section.children).filter(
+          (k) => (k as HTMLElement).getBoundingClientRect().height > 2
+        ) as HTMLElement[];
+        // A child that is only a wrapper around atomic blocks is not itself a
+        // block: the wrapped process map is a column of one box per row-group,
+        // and measuring the column instead of the boxes made it taller than a
+        // page and every break after it wrong.
+        const units = (kids.length > 0 ? kids : [section]).flatMap((kid) => {
+          if (kid.classList.contains("print-keep")) return [kid];
+          const inner = Array.from(kid.querySelectorAll<HTMLElement>(":scope > .print-keep"));
+          return inner.length > 0 ? inner : [kid];
+        });
+        units.forEach((el, i) => {
+          const id = `blk${n++}`;
+          blocks.push({ id, height: el.getBoundingClientRect().height });
+          if (forced && i === 0) forcedBreakBefore.push(id);
+        });
+      }
+
+      const { breaks } = paginate(blocks, { forcedBreakBefore });
+      setBreakOffsets(breaks.map((b) => b.offset));
+      void base;
+    };
+
+    // After layout has settled — diagrams and charts size themselves late, and
+    // a height measured before they do is a break in the wrong place.
+    const id = window.setTimeout(measure, 400);
+    const observer = new ResizeObserver(() => window.setTimeout(measure, 0));
+    observer.observe(paper);
+    return () => {
+      window.clearTimeout(id);
+      observer.disconnect();
+    };
+  }, [density, processes, arrangement]);
+
+  useEffect(() => {
+    const scale = DENSITY_OPTIONS.find((option) => option.id === density)?.scale ?? 1;
+    const root = document.documentElement;
+    // Cleared rather than set to 100% at Default, so the document goes back to
+    // whatever font size the reader's own browser is set to.
+    root.style.fontSize = scale === 1 ? "" : `${scale * 100}%`;
+    // The report is its own chrome-free route, but a client-side navigation
+    // back to the app would otherwise leave every other page scaled too.
+    return () => {
+      root.style.fontSize = "";
+    };
+  }, [density]);
+
+  // The four main-title banners (cover, value chain, each process title) paint
+  // themselves in this — the workspace's own Primary accent, resolved exactly
+  // the way the app layout resolves it, so the ink colour stays readable
+  // whether the brand colour is navy or pale yellow.
+  const accentPrimary = accentColor ?? DEFAULT_ACCENT;
+  const accentTertiary = accentColorTertiary ?? DEFAULT_ACCENT_TERTIARY;
+
+  return (
+    <div
+      className="report-root min-h-screen"
+      style={
+        {
+          "--accent": accentPrimary,
+          "--accent-secondary": accentSecondary ?? DEFAULT_ACCENT_SECONDARY,
+          "--accent-tertiary": accentTertiary,
+          "--accent-banner-to": mixHex(accentPrimary, accentTertiary, 0.3),
+          "--accent-ink": readableInkOn(accentPrimary),
+        } as React.CSSProperties
+      }
+    >
+      <style>{`
+        /* The preview is laid out on the real page: an A4 landscape sheet
+           (297mm) with the printer's own 14mm margin as padding, leaving
+           exactly the 269mm the PDF gets. Previewing at some other width is
+           what let the two disagree — a responsive column that existed on
+           screen and never on paper, text wrapping at a different point.
+           At this width they can't. */
+        @media screen {
+          /* Grey behind the sheet, so the page reads as a page. Set on the
+             report's own root as well as body — a white wrapper stretched to
+             the viewport would otherwise paint straight over it. */
+          body { background: #e9edf2 !important; }
+          .report-root { background: #e9edf2; }
+          /* The preview-only notices sit above the sheet and share its width,
+             so nothing on screen is wider than the page it describes. */
+          .report-notice { width: 297mm; max-width: 100%; margin: 16px auto 0; }
+          .report-paper {
+            width: 297mm;
+            max-width: 100%;
+            margin: 20px auto 64px;
+            padding: 14mm;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.14);
+          }
+          /* Where the PDF will break, the preview says so rather than leaving
+             the reader to find out at print time.
+
+             Positioned from a measurement, not from a class. It used to be
+             drawn by .print-page::after — the very class that forced the break
+             — so preview and PDF agreed only because both broke after every
+             section. Once sections flow, CSS decides breaks at paint time and
+             tells the DOM nothing, so the preview has to predict them: see
+             paginate() in lib/domain/report-pagination.ts. */
+          .print-break-marker {
+            position: absolute;
+            left: -14mm;
+            right: -14mm;
+            border-top: 1px dashed #94a3b8;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            text-align: center;
+            pointer-events: none;
+          }
+        }
+
+        @media print {
+          .no-print { display: none !important; }
+
+          /* ---- The page rule, stated once ----------------------------------
+             A report is a document, not a slide deck. Every section used to
+             carry break-after: page, so a section of three lines took a whole
+             sheet and the next started fresh however much room was left — six
+             of thirteen pages under a third used, and about half the paper
+             blank. Sections now flow.
+
+             Two divisions still earn a page because they tell a reader where
+             they are: the cover, and the start of each process document.
+
+             What may not be split is the BLOCK, not the section. A process
+             document measures around four pages, and break-inside: avoid on an
+             element taller than the page cannot be honoured — the browser
+             ignores it and fragments wherever it lands, which is what cut the
+             process map through the middle of its step cards. Asking the
+             possible is the whole fix. */
+          .print-page { break-after: auto; }
+          .print-break-before { break-before: page; }
+          .print-keep { break-inside: avoid; }
+
+          body { background: #fff !important; }
+          .report-root { background: #fff; }
+          /* On paper the sheet *is* the page — the printer supplies the
+             width and margin, so the preview's paper styling comes off. */
+          .report-paper {
+            width: auto;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+          }
+
+          /* A heading is never left alone at the bottom of a page with its
+             own content starting on the next one — push the whole heading
+             over instead of breaking right after it. */
+          h1, h2, h3, h4 { break-after: avoid; break-inside: avoid; }
+
+          /* A table continuing onto another page repeats its column headings.
+             The browser does this for a real thead by itself, which is why
+             nothing is built for it — but it only works if the markup has one,
+             so the report's tables must keep theirs. */
+          thead { display: table-header-group; }
+
+          /* Table rows read as one thing and shouldn't be sliced by a page
+             boundary — a row half on one page and half on the next is
+             unreadable either side of the cut. */
+          tr { break-inside: avoid; }
+
+          /* Chrome's print engine doesn't fragment a flex container reliably
+             — a list of print-keep cards inside a flex column can
+             jump to the next page as one clump even when several of them
+             would still fit on the page they're on, wasting whatever room
+             was left. Block layout fragments the way print-keep on
+             each child expects, so print falls back to it here and swaps
+             the flex gap for margins between the same children. */
+          .print-stack { display: block; }
+          .print-stack > * + * { margin-top: 10px; }
+        }
+        @page { size: A4 landscape; margin: 14mm; }
+      `}</style>
+
+      {/* Sized in px throughout, unlike the document below it: this bar is the
+          control for the density setting, and a control that shrinks as you
+          turn it down reads as a glitch rather than as feedback. */}
+      <div className="no-print sticky top-0 z-10 flex items-center gap-[12px] border-b border-slate-200 bg-white px-[24px] py-[12px]">
+        <Link
+          href={`/${workspaceId}/processes/export`}
+          className="text-[12px] font-semibold text-slate-500 hover:text-slate-900"
+        >
+          ← Back to picker
+        </Link>
+        <div className="flex-1" />
+        <div className="flex items-center gap-[8px]">
+          <span className="text-[12px] font-semibold text-slate-500">Spacing</span>
+          <div className="flex overflow-hidden rounded-[8px] border border-slate-300">
+            {DENSITY_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setDensity(option.id)}
+                aria-pressed={density === option.id}
+                className={`border-slate-300 px-[10px] py-[7px] text-[12px] font-semibold not-first:border-s ${
+                  density === option.id
+                    ? "bg-slate-900 text-white"
+                    : "bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {canEdit && (
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[12px] font-semibold text-slate-500">Map layout</span>
+            <div className="flex overflow-hidden rounded-[8px] border border-slate-300">
+              {MAP_LAYOUT_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => chooseMapLayout(option.id)}
+                  aria-pressed={mapLayout === option.id}
+                  title={option.hint}
+                  className={`border-slate-300 px-[10px] py-[7px] text-[12px] font-semibold not-first:border-s ${
+                    mapLayout === option.id
+                      ? "bg-slate-900 text-white"
+                      : "bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <a
+          href={pptxHref}
+          className="rounded-[8px] border border-slate-300 bg-white px-[16px] py-[8px] text-[13px] font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Download PPTX
+        </a>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="rounded-[8px] bg-slate-900 px-[16px] py-[8px] text-[13px] font-semibold text-white hover:bg-slate-800"
+        >
+          Print / Save as PDF
+        </button>
+      </div>
+
+      {unphasedActivityCount > 0 && (
+        <div className="no-print report-notice rounded-xl border border-slate-300 bg-slate-50 px-4 py-3">
+          <div className="text-sm font-semibold text-slate-800">
+            {unphasedActivityCount} {unphasedActivityCount === 1 ? "activity is" : "activities are"} not in a phase
+            yet
+          </div>
+          <p className="mt-1 text-xs text-slate-600">
+            They are documented in the process sections as usual, but are left off the Value Chain page — put them
+            in a phase on the Value Chain board to include them.
+          </p>
+        </div>
+      )}
+
+      {allGaps.length > 0 && (
+        <div className="no-print report-notice rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+          <div className="text-sm font-semibold text-amber-900">
+            {/* This used to say the sections were "left out of this report",
+                which stopped being true when an included section started
+                printing marked instead of vanishing — the banner would have
+                sat directly above the very section it claimed was missing. */}
+            ⚠ Some sections have nothing recorded yet and print as empty
+          </div>
+          <ul className="mt-1.5 list-disc space-y-0.5 ps-5 text-xs text-amber-900">
+            {allGaps.map(({ process, gap }, i) => (
+              <li key={i}>
+                <strong>{process}:</strong> {gap}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-xs text-amber-800">
+            Fill these in on each process&rsquo;s Process Map page, or untick them on the Export Report
+            page to leave them out of this pack.
+          </p>
+        </div>
+      )}
+
+      <main className="report-paper relative" ref={paperRef}>
+        {/* Drawn from the measurement, not from a class — see the effect above. */}
+        {breakOffsets.map((offset, i) => (
+          <div
+            key={`break-${i}`}
+            aria-hidden="true"
+            className="print-break-marker no-print absolute -start-[14mm] -end-[14mm] border-t border-dashed border-slate-400 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500"
+            style={{ top: offset }}
+          >
+            Page break
+          </div>
+        ))}
+        {/* The pack's front and back matter, in the order this client arranged
+            it. "index" is where the processes themselves go, so moving it
+            moves the whole body of the pack rather than just its contents
+            list. */}
+        {arrangement.pack.map((section) => {
+          if (!section.on) return null;
+          switch (section.id) {
+            case "cover":
+              return (
+                <CoverPage
+                  key={section.id}
+                  companyName={companyName}
+                  firmName={firmName}
+                  industry={industry}
+                  description={description}
+                  logoDataUrl={logoDataUrl}
+                  processes={processes}
+                />
+              );
+            case "org":
+              return (
+                <section key={section.id} className="print-page">
+                  <h2 className="text-xl font-semibold text-slate-900">Org Structure</h2>
+                  <p className="mt-1 mb-4 text-sm text-slate-500">Reporting lines across {companyName}.</p>
+                  {people.length > 0 ? <StaticOrgChart people={people} /> : <NothingRecorded />}
+                </section>
+              );
+            case "heli":
+              return railProcesses.length > 0 ? (
+                <HelicopterViewPage key={section.id} processes={railProcesses} companyName={companyName} />
+              ) : (
+                <EmptyPackSection key={section.id} title="Helicopter View" />
+              );
+            case "chain":
+              return valueChain.length > 0 ? (
+                <ValueChainPage key={section.id} columns={valueChain} companyName={companyName} />
+              ) : (
+                <EmptyPackSection key={section.id} title={`${companyName} Value Chain`} />
+              );
+            case "governance":
+              return <GovernancePackSection key={section.id} governance={governance} companyName={companyName} />;
+            case "index":
+              return (
+                <Fragment key={section.id}>
+                  {processes.length > 0 ? (
+                    <ProcessIndexPage processes={processes} />
+                  ) : (
+                    <EmptyPackSection title="Processes in This Report" />
+                  )}
+                  {processes.map((process) => (
+                    <ProcessReportSection
+                      key={process.id}
+                      workspaceId={workspaceId}
+                      process={process}
+                      arrangement={arrangement}
+                      mapLayout={mapLayout}
+                    />
+                  ))}
+                </Fragment>
+              );
+            case "closing":
+              return <ClosingPage key={section.id} />;
+            default:
+              return null;
+          }
+        })}
+      </main>
+    </div>
+  );
+}
+
+/**
+ * The report's title page, styled like the cover of a bound procedure
+ * manual rather than a stretched-out version of the per-process banner:
+ * a ruled frame, a letterhead strip identifying the client, a serif title,
+ * and a footer split between the document's own metadata and a preview of
+ * what's inside — the same information a reader would look for on the
+ * cover of any formal deliverable before turning the first page.
+ */
+function CoverPage({
+  companyName,
+  firmName,
+  industry,
+  description,
+  logoDataUrl,
+  processes,
+}: {
+  companyName: string;
+  firmName: string;
+  industry: string | null;
+  description: string | null;
+  logoDataUrl: string | null;
+  processes: ExportProcessData[];
+}) {
+  const docId = deriveDocId(companyName);
+  const effectiveDate = new Date().toISOString().slice(0, 10);
+  const previewCount = 6;
+  const previewed = processes.slice(0, previewCount);
+
+  return (
+    <section className="print-page print-break-before relative min-h-[182mm] overflow-hidden border border-slate-300">
+      <div className="pointer-events-none absolute inset-3 border border-slate-200" />
+      <div className="relative flex h-full flex-col p-[6%]">
+        <div className="flex items-center gap-2.5">
+          {logoDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- a stored data: URL, not an optimizable remote asset
+            <img src={logoDataUrl} alt="" className="h-6 w-6 flex-none rounded-md object-contain" />
+          ) : (
+            <div
+              className="h-6 w-6 flex-none rounded-md"
+              style={{ backgroundImage: "linear-gradient(135deg, var(--accent), var(--accent-banner-to))" }}
+            />
+          )}
+          <span className="text-sm font-semibold text-slate-800">{companyName}</span>
+        </div>
+
+        <div className="mt-auto max-w-[78%]">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-secondary)]">
+            Business Process Documentation &amp; Procedure Standard
+          </div>
+          <h1 className={`${coverSerif.className} mt-3 text-5xl leading-[1.05] font-semibold text-slate-900`}>
+            {companyName}
+          </h1>
+          {(description || industry) && (
+            <p className={`${coverSerif.className} mt-3 max-w-2xl text-[15px] leading-relaxed whitespace-pre-line text-slate-600 italic`}>
+              {description ?? industry}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-[6%] grid grid-cols-2 gap-[6%] border-t border-slate-900/15 pt-[4%]">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-3.5 gap-y-1 text-[11.5px]">
+            <dt className="text-slate-500">Document ID</dt>
+            <dd className="font-semibold text-slate-900">{docId}</dd>
+            <dt className="text-slate-500">Version</dt>
+            <dd className="font-semibold text-slate-900">1.0</dd>
+            <dt className="text-slate-500">Effective Date</dt>
+            <dd className="font-semibold text-slate-900">{effectiveDate}</dd>
+            <dt className="text-slate-500">Classification</dt>
+            <dd className="font-semibold text-slate-900">Internal — Confidential</dd>
+            <dt className="text-slate-500">Prepared By</dt>
+            <dd className="font-semibold text-slate-900">{firmName}</dd>
+          </dl>
+
+          {previewed.length > 0 && (
+            <div>
+              <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                Contents — {processes.length} process{processes.length === 1 ? "" : "es"}
+              </div>
+              {previewed.map((p) => (
+                <div
+                  key={p.id}
+                  className="flex items-baseline gap-2 border-b border-dotted border-slate-300 py-0.5 text-[11.5px]"
+                >
+                  <span className="font-mono text-[10px] font-semibold text-[var(--accent-secondary)]">{p.code}</span>
+                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="flex-none text-[10.5px] text-slate-500">
+                    {p.parentName ? `under ${p.parentCode}` : "top-level"}
+                  </span>
+                </div>
+              ))}
+              {processes.length > previewCount && (
+                <div className="mt-1 text-[10.5px] text-slate-500">
+                  +{processes.length - previewCount} more — see the full index
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * The main-title treatment: painted in the workspace's own Primary accent,
+ * with an ink colour chosen for contrast against it rather than assumed white
+ * — the same banner the sidebar pages use, so a report and the app it came
+ * from read as one brand rather than two different guesses at it. Reserved
+ * for the titles that open a real section of the document: the Value Chain
+ * page and each process's own title.
+ */
+function BrandBanner({ eyebrow, children }: { eyebrow?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div
+      className="rounded-xl px-6 py-5 text-[var(--accent-ink)]"
+      style={{ backgroundImage: "linear-gradient(120deg, var(--accent), var(--accent-banner-to))" }}
+    >
+      {eyebrow && <div className="mb-1 flex items-center gap-2 text-xs opacity-80">{eyebrow}</div>}
+      {children}
+    </div>
+  );
+}
+
+/**
+ * The last page: a branded bar closing the document out, so a reader reaches
+ * a deliberate end rather than the last process's tables simply stopping.
+ * Centred and text-only — it carries no data, so nothing here can go stale.
+ */
+function ClosingPage() {
+  return (
+    <section className="print-page print-keep mt-6">
+      <div
+        className="rounded-xl px-6 py-10 text-center text-[var(--accent-ink)]"
+        style={{ backgroundImage: "linear-gradient(120deg, var(--accent), var(--accent-banner-to))" }}
+      >
+        <p className="text-xl font-bold">Thank you</p>
+        <p className="mx-auto mt-2 max-w-xl text-sm opacity-90">
+          Please refer back to the process team for any inputs or comments needed.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function SectionHeading({ num, title }: { num: string; title: string }) {
+  return (
+    <h3 className="mt-8 mb-2 flex items-baseline gap-2 border-b border-slate-200 pb-2 text-lg font-bold text-slate-900">
+      <span className="text-[var(--accent-secondary)]">{num}</span> {title}
+    </h3>
+  );
+}
+
+
+function SubHeading({ children }: { children: React.ReactNode }) {
+  return <h4 className="mt-4 mb-1.5 text-sm font-bold text-slate-800">{children}</h4>;
+}
+
+function ProcessReportSection({
+  workspaceId,
+  process,
+  arrangement,
+  mapLayout,
+}: {
+  workspaceId: string;
+  process: ExportProcessData;
+  arrangement: ResolvedArrangement;
+  mapLayout: "FLOW" | "ROLES";
+}) {
+  const matrixRoleNameById = new Map(process.matrixRoles.map((r) => [r.id, r.name]));
+
+  // RACI's Accountable and the Authority matrix's approver both live on the
+  // combined matrix row, keyed by Activity, so a step with no Activity of its
+  // own — or one whose Activity carries neither — has no `row` answer at all.
+  // The step's own "Assigned role" (set directly on the step, independent of
+  // either matrix) is the last fallback rather than being skipped outright:
+  // without it, a step owner entered the only place the Steps List actually
+  // offers printed as empty, even though it was "added in the process step".
+  function stepOwnerLabel(
+    row: ExportProcessData["combinedRows"][number] | undefined,
+    step: ExportProcessData["steps"][number]
+  ): string {
+    const accountableRoleId = row ? Object.entries(row.raci).find(([, code]) => code === "ACCOUNTABLE")?.[0] : undefined;
+    if (accountableRoleId) return matrixRoleNameById.get(accountableRoleId) ?? "—";
+    if (row?.approverLabel) return row.approverLabel;
+    return step.assignedRole?.name ?? "—";
+  }
+
+  // Only steps that actually carry documentation appear as narrative cards —
+  // an undocumented step is surfaced in the preview-only gaps banner instead
+  // of printing as an empty box.
+  const documentedSteps = process.steps.filter(
+    (s) => s.detailedAction.length > 0 || s.exceptionHandling?.trim()
+  );
+
+
+  return (
+    // Every process starts on its own fresh page, whether or not it has a
+    // body — an umbrella program with nothing beyond its title card still
+    // gets a page of its own rather than sharing one with the next process's
+    // content: two processes' banners stacked on one page reads as one
+    // process bleeding into another, not as two separate documents.
+    <section className="print-page print-break-before">
+      {/* Banner and its document metadata are one title block — kept
+          together so a page break can't land between them and strand the
+          banner alone at the bottom of a page. */}
+      <div className="print-keep">
+        <BrandBanner
+          eyebrow={
+            <>
+              <span className="rounded bg-black/15 px-1.5 py-0.5 font-mono text-[10px] font-bold">{process.code}</span>
+              {process.parentName && (
+                <span>
+                  under {process.parentCode} · {process.parentName}
+                </span>
+              )}
+            </>
+          }
+        >
+          <h2 className="text-2xl font-bold">{process.name}</h2>
+          {process.description && <p className="mt-1 text-sm opacity-85">{process.description}</p>}
+        </BrandBanner>
+        <dl className="mt-3 grid grid-cols-2 gap-x-8 gap-y-1.5 border-b-2 border-slate-100 pb-3 text-xs sm:grid-cols-3">
+          <MetaField label="Document ID" value={`${process.code}-${new Date().getFullYear()}`} />
+          <MetaField label="Version" value="1.0" />
+          <MetaField label="Effective Date" value={new Date().toISOString().slice(0, 10)} />
+          <MetaField label="Review Cycle" value="Annual" />
+          <MetaField label="Process Owner" value={process.processOwnerName ?? "—"} />
+          <MetaField label="Process Code" value={process.code} mono />
+        </dl>
+      </div>
+
+      {/* The arrangement decides what prints and in what order. Before this,
+          the four sections were a fixed sequence of JSX guarded by hasX &&,
+          which is why an empty section vanished without trace — the guard
+          could only say "yes" or "nothing at all". Splitting each part into a
+          block with an emptiness predicate makes "leave it out" and "print it,
+          marked empty" two separate decisions, which is what the arrangement
+          needs them to be. */}
+      {arrangement.sections.map((section) => {
+        if (!section.on) return null;
+        const printed = section.blocks.filter((b) => b.on);
+        const empty = isSectionEmpty(section, process);
+        return (
+          <Fragment key={section.id}>
+            <SectionHeading num={section.number ?? ""} title={section.title} />
+            {empty ? (
+              <NothingRecorded />
+            ) : (
+              printed.map((block) =>
+                // A block included but empty says so, in its own place. Before
+                // this the whole section was the unit, so an empty block inside
+                // a full section printed its heading over nothing.
+                isBlockEmpty(block.id, process) ? (
+                  <Fragment key={block.id}>
+                    <SubHeading>{block.title}</SubHeading>
+                    <NothingRecorded />
+                  </Fragment>
+                ) : (
+                <Fragment key={block.id}>
+                  {renderProcessBlock(block.id, {
+                    process,
+                    workspaceId,
+                    documentedSteps,
+                    stepOwnerLabel,
+                    // Excluding either half of the RACI table drops columns
+                    // rather than splitting it, which is why the pair is
+                    // pinned: there is only ever one table shape.
+                    withRules: printed.some((b) => b.id === "rules"),
+                    mapLayout,
+                    // The Workflow sub-heading only earns its place when Scope
+                    // printed above it; on its own the diagram needs no label.
+                    labelWorkflow: printed.some((b) => b.id === "scope") && !isBlockEmpty("scope", process),
+                  })}
+                </Fragment>
+                )
+              )
+            )}
+          </Fragment>
+        );
+      })}
+    </section>
+  );
+}
+
+/**
+ * The RACI grid and the authority rules: one table, a variable set of columns.
+ *
+ * The rules were always a column of this table rather than a table of their
+ * own, which is why the catalogue pins the two together. Excluding either drops
+ * columns; it never produces a second table for a reader to reconcile.
+ */
+function RaciAuthorityTable({
+  process,
+  withRules,
+}: {
+  process: ExportProcessData;
+  withRules?: boolean;
+}) {
+  return (
+    <>
+      <p className="text-sm text-slate-500">
+        Each task&rsquo;s responsibility assignment{withRules === false ? "" : " and its approval limits"}, combined
+        into one table.
+      </p>
+      <div className="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th className="px-3 py-2">Process Step</th>
+              {process.matrixRoles.map((r) => (
+                <th key={r.id} className="px-3 py-2 text-center">
+                  {r.name}
+                </th>
+              ))}
+              {withRules !== false && <th className="px-3 py-2">Authority rules</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {process.combinedRows.map((row) => (
+              <tr key={row.rowId} className="border-t border-slate-100">
+                <td className="px-3 py-2 font-medium text-slate-900">{row.label}</td>
+                {process.matrixRoles.map((r) => {
+                  const code = row.raci[r.id] as RaciCode | undefined;
+                  return (
+                    <td key={r.id} className="px-3 py-2 text-center font-mono text-xs font-bold text-slate-600">
+                      {code ? CODE_LETTER[code] : ""}
+                    </td>
+                  );
+                })}
+                {/* Every rule the task carries, in its own order —
+                    six summarising columns replaced by the statements
+                    themselves, which is what the matrix on screen
+                    shows and what a reader actually needs. */}
+                {withRules !== false && (
+                  <td className="px-3 py-2 text-xs text-slate-600">
+                    {row.ruleSentences.length === 0 ? (
+                      <span className="text-slate-500">No authority rules.</span>
+                    ) : (
+                      /* Bulleted with a hanging indent, not just stacked:
+                         a rule long enough to wrap was indistinguishable
+                         from the next rule starting, so two rules read as
+                         one paragraph. The marker sits outside the text
+                         column so wrapped lines align under the sentence. */
+                      <ul className="ms-3.5 list-outside list-disc space-y-1 marker:text-slate-500">
+                        {row.ruleSentences.map((sentence, i) => (
+                          <li key={i} className="print-keep ps-0.5 leading-snug">
+                            {sentence}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+/** A pack section that is included but has nothing recorded behind it. */
+function EmptyPackSection({ title }: { title: string }) {
+  return (
+    <section className="print-page">
+      <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+      <NothingRecorded />
+    </section>
+  );
+}
+
+/**
+ * The workspace-wide governance section (spec 020): assessment summaries, the
+ * Risk Register, and a Policy Library index. Each part says specifically what
+ * is missing rather than the generic "No data yet" marker, so the pack's
+ * outline doesn't change shape depending on what happens to be recorded.
+ */
+const RISK_LEVEL_TONE: Record<string, string> = {
+  HIGH: "bg-red-50 text-red-700 border-red-200",
+  MEDIUM: "bg-amber-50 text-amber-700 border-amber-200",
+  LOW: "bg-slate-50 text-slate-600 border-slate-200",
+};
+
+function GovernancePackSection({ governance, companyName }: { governance: GovernanceReport; companyName: string }) {
+  return (
+    <section className="print-page">
+      <TwoToneRule />
+      <h2 className="text-xl font-semibold text-slate-900">Governance &amp; Risk</h2>
+      <p className="mt-1 mb-2 text-sm text-slate-500">
+        The governance programme across {companyName} — the assessment, the Risk Register and the Policy Library,
+        which apply to the whole organisation rather than to any one process.
+      </p>
+
+      <h3 className="mt-4 text-base font-semibold text-slate-900">Governance Assessment</h3>
+      {governance.summaries.length === 0 ? (
+        <GovernanceEmpty>No governance assessment has been written yet.</GovernanceEmpty>
+      ) : (
+        governance.summaries.map((s) => (
+          <div key={s.aspectName} className="print-keep">
+            <SubHeading>{s.aspectName}</SubHeading>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{s.summary}</p>
+          </div>
+        ))
+      )}
+
+      <h3 className="mt-5 mb-1.5 text-base font-semibold text-slate-900">Risk Register</h3>
+      {governance.risks.length === 0 ? (
+        <GovernanceEmpty>No risks have been recorded on the Risk Register yet.</GovernanceEmpty>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
+              <tr>
+                <th className="px-3 py-2">Risk</th>
+                <th className="px-3 py-2">Likelihood</th>
+                <th className="px-3 py-2">Impact</th>
+                <th className="px-3 py-2">Level</th>
+                <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Owner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {governance.risks.map((risk, i) => (
+                <tr key={i} className="border-t border-slate-100 align-top">
+                  <td className="px-3 py-2">
+                    <div className="font-semibold text-slate-900">{risk.title}</div>
+                    <div className="text-xs text-slate-600">{risk.description}</div>
+                  </td>
+                  <td className="px-3 py-2 text-slate-800">{titleCase(risk.likelihood)}</td>
+                  <td className="px-3 py-2 text-slate-800">{titleCase(risk.impact)}</td>
+                  <td className="px-3 py-2">
+                    <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${RISK_LEVEL_TONE[risk.level]}`}>
+                      {titleCase(risk.level)}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-slate-800">{RISK_STATUS_LABEL[risk.status]}</td>
+                  <td className="px-3 py-2 text-slate-800">{risk.owner ?? "Unassigned"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <h3 className="mt-5 mb-1.5 text-base font-semibold text-slate-900">Governing Policies</h3>
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th className="px-3 py-2">Aspect</th>
+              <th className="px-3 py-2">Governing policy</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Effective</th>
+            </tr>
+          </thead>
+          <tbody>
+            {governance.governing.map((row, i) => (
+              <tr key={i} className="border-t border-slate-100">
+                <td className="px-3 py-2 font-semibold text-slate-900">{row.aspectName}</td>
+                {row.policy ? (
+                  <>
+                    <td className="px-3 py-2 text-slate-800">{row.policy.title}</td>
+                    <td className="px-3 py-2 text-slate-800">{POLICY_LIFECYCLE_LABEL[row.policy.lifecycleStatus]}</td>
+                    <td className="px-3 py-2 text-slate-800">
+                      {row.policy.effectiveDate ? formatReportDate(row.policy.effectiveDate) : "—"}
+                    </td>
+                  </>
+                ) : (
+                  <td colSpan={3} className="px-3 py-2 text-slate-600">
+                    No governing policy
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h3 className="mt-5 mb-1.5 text-base font-semibold text-slate-900">Policy Library</h3>
+      {governance.policies.length === 0 ? (
+        <GovernanceEmpty>No policies have been written yet.</GovernanceEmpty>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
+              <tr>
+                <th className="px-3 py-2">Policy</th>
+                <th className="px-3 py-2">Status</th>
+                <th className="px-3 py-2">Effective</th>
+              </tr>
+            </thead>
+            <tbody>
+              {governance.policies.map((policy, i) => (
+                <tr key={i} className="border-t border-slate-100">
+                  <td className="px-3 py-2 font-semibold text-slate-900">{policy.title}</td>
+                  <td className="px-3 py-2 text-slate-800">{POLICY_LIFECYCLE_LABEL[policy.lifecycleStatus]}</td>
+                  <td className="px-3 py-2 text-slate-800">
+                    {policy.effectiveDate ? formatReportDate(policy.effectiveDate) : "—"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function GovernanceEmpty({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">{children}</p>;
+}
+
+/** What an included section or block prints when there is nothing to show. */
+function NothingRecorded() {
+  return (
+    <p className="mt-1 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+      No data yet &mdash; nothing has been recorded for this section.
+    </p>
+  );
+}
+
+type BlockContext = {
+  process: ExportProcessData;
+  workspaceId: string;
+  documentedSteps: ExportProcessData["steps"];
+  labelWorkflow: boolean;
+  stepOwnerLabel: (
+    row: ExportProcessData["combinedRows"][number] | undefined,
+    step: ExportProcessData["steps"][number]
+  ) => string;
+  withRules?: boolean;
+  mapLayout: "FLOW" | "ROLES";
+};
+
+/**
+ * One renderer per block, keyed by the id the catalogue uses.
+ *
+ * These are the same markup the fixed sequence produced; what changed is that
+ * each one can now be asked for individually, in any order, and its emptiness
+ * asked about separately from whether it is wanted.
+ */
+const PROCESS_BLOCKS: Record<string, (ctx: BlockContext) => React.ReactNode> = {
+  purpose: ({ process }) => (
+    <>
+      <SubHeading>Process Purpose</SubHeading>
+      <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">{process.processPurpose}</p>
+    </>
+  ),
+
+  trigger: ({ process }) => (
+    <div className="mt-3 grid grid-cols-2 gap-4">
+      {process.triggerLabel && <ScopeBox label="Process Trigger" value={process.triggerLabel} />}
+      {process.outputLabel && <ScopeBox label="Process Output" value={process.outputLabel} />}
+    </div>
+  ),
+
+  roles: ({ process }) => (
+    <>
+      <SubHeading>Internal Roles</SubHeading>
+      <div className="print-stack flex flex-col gap-2.5">
+        {process.involvedRoles.map((role) => (
+          <RoleCard key={role.id} name={role.name} duties={role.duties} />
+        ))}
+      </div>
+    </>
+  ),
+
+  ext: ({ process }) => (
+    <>
+      <SubHeading>External Entities</SubHeading>
+      <ul className="list-disc space-y-1 ps-5 text-sm text-slate-700">
+        {process.externalEntities.map((entity, i) => (
+          <li key={i} className="print-keep">
+            <strong className="text-slate-900">{entity.name}</strong> &mdash; {entity.description}
+          </li>
+        ))}
+      </ul>
+    </>
+  ),
+
+  scope: ({ process }) => (
+    <>
+      <SubHeading>Scope</SubHeading>
+      <div className="grid grid-cols-2 gap-4">
+        {process.inScope.length > 0 && <BulletBox label="In-Scope" items={process.inScope} />}
+        {process.outOfScope.length > 0 && <BulletBox label="Out-of-Scope" items={process.outOfScope} />}
+      </div>
+    </>
+  ),
+
+  diagram: ({ process, labelWorkflow, mapLayout }) => (
+    <>
+      {labelWorkflow && <SubHeading>Workflow</SubHeading>}
+      <PrintedProcessMap
+        steps={process.steps}
+        connections={process.connections}
+        layout={mapLayout}
+      />
+    </>
+  ),
+
+  narr: ({ process, documentedSteps, stepOwnerLabel }) => (
+    <>
+      {documentedSteps.map((step) => {
+        const row = process.combinedRows.find((r) => r.rowId === step.id);
+        return (
+          // A rule between entries rather than a card around each one:
+          // the box's border and its four sides of padding cost real
+          // vertical space on every step, and a long process pays that
+          // cost once per step.
+          <div key={step.id} className="mt-2.5 print-keep border-t border-slate-200 pt-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="font-semibold text-slate-900">{step.label}</span>
+              <span className="text-xs text-slate-500">
+                Step Owner: {stepOwnerLabel(row, step)}
+              </span>
+            </div>
+            <div className="mt-1 grid grid-cols-2 gap-4">
+              {step.detailedAction.length > 0 && (
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    Detailed Action
+                  </div>
+                  <ol className="mt-1 list-decimal space-y-0.5 ps-4 text-sm text-slate-700">
+                    {step.detailedAction.map((action, i) => (
+                      <li key={i}>{action}</li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {step.exceptionHandling && (
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    Risk if Mishandled
+                  </div>
+                  <p className="mt-1 whitespace-pre-line text-sm text-slate-700">{step.exceptionHandling}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </>
+  ),
+
+  // The RACI grid and the authority rules are one table with a variable set of
+  // columns, which is why they are pinned together in the catalogue: excluding
+  // either drops columns, never splits the table in two. The grid owns the
+  // markup and asks whether the rules column is wanted.
+  raciGrid: (ctx) => <RaciAuthorityTable {...ctx} />,
+  rules: () => null,
+
+  controls: ({ process }) => (
+    <>
+      <SubHeading>Key Control Points</SubHeading>
+      <ul className="space-y-1.5 text-sm">
+        {process.controlPoints.map((cp) => (
+          <li
+            key={cp.rowId}
+            className={
+              cp.flagged
+                ? "print-keep rounded-lg bg-amber-50 px-2.5 py-1.5 text-amber-800"
+                : "print-keep text-slate-700"
+            }
+          >
+            {cp.flagged && <strong>⚠ </strong>}
+            {cp.statement}
+          </li>
+        ))}
+      </ul>
+    </>
+  ),
+
+  kpis: ({ process }) => (
+    <>
+      <SubHeading>Operational KPIs &amp; SLAs</SubHeading>
+      {/* A KPI table is a handful of rows, so it moves to the next
+          page whole rather than splitting — the split left one
+          metric stranded under a repeated header on an otherwise
+          blank page, and a torn-off box edge at the bottom of the
+          page it came from. A table taller than a page still has
+          to fragment; the tr rule keeps that from cutting a row. */}
+      <div className="print-keep overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th className="px-3 py-2">Metric</th>
+              <th className="px-3 py-2">Target</th>
+              <th className="px-3 py-2">Frequency</th>
+            </tr>
+          </thead>
+          <tbody>
+            {process.kpis.map((kpi, i) => (
+              <tr key={i} className="border-t border-slate-100">
+                <td className="px-3 py-2 text-slate-800">{kpi.metric}</td>
+                <td className="px-3 py-2 text-slate-800">{kpi.target}</td>
+                <td className="px-3 py-2 text-slate-800">{kpi.frequency}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  ),
+};
+
+function renderProcessBlock(id: string, ctx: BlockContext): React.ReactNode {
+  const render = PROCESS_BLOCKS[id];
+  return render ? render(ctx) : null;
+}
+
+/**
+ * How the processes in this pack connect, before either the chain page or the
+ * per-process detail: which one resumes from a step of another, and which
+ * step hands off to another process — the same rails the workspace's own
+ * Helicopter View draws, scoped to just what's in this pack so a rail never
+ * points at a process the reader can't turn to.
+ */
+function HelicopterViewPage({ processes, companyName }: { processes: RailProcess[]; companyName: string }) {
+  return (
+    <section className="print-page">
+      <TwoToneRule />
+      <h2 className="text-xl font-semibold text-slate-900">Helicopter View</h2>
+      <p className="mt-1 mb-4 text-sm text-slate-500">
+        How {companyName}&rsquo;s processes in this report connect, at a glance.
+      </p>
+      <StaticMilestoneRails processes={processes} />
+    </section>
+  );
+}
+
+/**
+ * The whole engagement in one page, before the process documents: each phase
+ * and the activities in it, with who owns each. Names and owners only — the
+ * detail is the process sections that follow, and repeating it here would make
+ * the pack say everything twice.
+ */
+function ValueChainPage({ columns, companyName }: { columns: ValueChainColumn[]; companyName: string }) {
+  const printed = columns.flatMap((column) => column.activities);
+  const activityCount = printed.length;
+  // Counted from what this page actually prints, so the three numbers in the
+  // line below can't disagree with each other.
+  const departmentCount = new Set(
+    printed.flatMap((activity) => [...(activity.ownerName ? [activity.ownerName] : []), ...activity.supportNames])
+  ).size;
+
+  return (
+    <section className="print-page">
+      <BrandBanner
+        eyebrow={<span>Business Process Documentation &amp; Procedure Standard</span>}
+      >
+        <h2 className="text-2xl font-bold">{companyName} Value Chain</h2>
+        <p className="mt-1 text-sm opacity-85">
+          {activityCount} {activityCount === 1 ? "activity" : "activities"} · {columns.length}{" "}
+          {columns.length === 1 ? "phase" : "phases"} · {departmentCount}{" "}
+          {departmentCount === 1 ? "department" : "departments"}
+        </p>
+      </BrandBanner>
+
+      <SectionHeading num="0.1" title="The chain, end to end" />
+
+      {/* Newspaper columns rather than a grid of fixed rows. A grid sizes every
+          row to its tallest phase, so a five-activity phase beside a
+          one-activity phase left four activities' worth of blank paper in that
+          row — on a real chain that padding alone pushed the page count past
+          one. Multi-column flow packs each phase directly under the previous
+          one in the same column and moves on to the next column when it runs
+          out of room, which is what keeps the whole chain on a single page.
+          Four columns, fixed rather than responsive: an A4 landscape page is
+          narrower than the lg breakpoint, so a responsive count existed on
+          screen and never in the PDF. print-keep keeps a phase's title
+          with its own list rather than splitting it across two columns; a
+          phase taller than the page still has to break somewhere, and the
+          per-activity print-keep is what stops that from cutting an
+          entry in half. */}
+      <div className="columns-4 gap-x-5">
+        {columns.map((column) => (
+          <div key={column.title} className="mb-3 print-keep">
+            <h3
+              className="border-b-2 pb-1 text-[10px] font-bold uppercase tracking-wide"
+              style={{ borderColor: column.color ?? "#cbd5e1", color: column.color ?? "#475569" }}
+            >
+              {column.title}
+            </h3>
+            <ul className="print-stack mt-1.5 flex flex-col gap-1.5">
+              {column.activities.map((activity) => (
+                <li key={activity.stepId} className="print-keep text-xs leading-tight">
+                  <span className="font-semibold text-slate-900">{activity.label}</span>
+                  <span className="mt-0.5 block text-[11px] text-slate-500">
+                    {activity.ownerName ?? "No owner yet"}
+                    {activity.supportNames.length > 0 && ` · support ${activity.supportNames.join(", ")}`}
+                    {activity.linksTo.length > 0 && ` → ${activity.linksTo.join(", ")}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-6 text-xs text-slate-500">
+        Each activity is documented in full in the process sections that follow.
+      </p>
+    </section>
+  );
+}
+
+// Cycled across the numbered badges below so the index page draws on all
+// three of the workspace's brand colors rather than just the one accent the
+// rest of the report leans on.
+const INDEX_BADGE_COLORS = ["var(--accent)", "var(--accent-secondary)", "var(--accent-tertiary)"];
+
+/**
+ * A two-tone accent bar marking a section break on screen, not just on paper
+ * — a "print-page" alone only forces a page break under @media print, so
+ * without this a section boundary is invisible while previewing in the
+ * browser. Shared by every top-level page that isn't already a full
+ * BrandBanner, so they all mark their own start the same way.
+ */
+function TwoToneRule() {
+  return (
+    <div
+      className="mb-6 h-[3px] rounded-full"
+      style={{
+        backgroundImage:
+          "linear-gradient(90deg, var(--accent) 0%, var(--accent) 60%, var(--accent-tertiary) 60%, var(--accent-tertiary) 100%)",
+      }}
+    />
+  );
+}
+
+/**
+ * Every process in the pack, by code and name, in the order they print — the
+ * table of contents. Sits after the Value Chain page, before the first
+ * process document, so a reader knows what's ahead before reaching it. The
+ * two-tone rule above the heading is this page's own separator — the section
+ * headings below it get a plain border-bottom, but nothing marked where the
+ * Value Chain page ended and this one began.
+ */
+function ProcessIndexPage({ processes }: { processes: ExportProcessData[] }) {
+  return (
+    <section className="print-page">
+      <TwoToneRule />
+      <h2 className="text-xl font-semibold text-slate-900">Processes in This Report</h2>
+      <p className="mt-1 mb-4 text-sm text-slate-500">
+        {processes.length} process{processes.length === 1 ? "" : "es"}, in the order they follow.
+      </p>
+      <ol className="flex flex-col">
+        {processes.map((process, i) => (
+          <li
+            key={process.id}
+            className="flex items-center gap-3 print-keep border-b border-slate-100 py-2.5 text-sm last:border-b-0"
+          >
+            <span
+              className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full text-[11px] font-bold text-white"
+              style={{ backgroundColor: INDEX_BADGE_COLORS[i % INDEX_BADGE_COLORS.length] }}
+            >
+              {i + 1}
+            </span>
+            <span className="flex-none rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-700">
+              {process.code}
+            </span>
+            <span className="font-semibold text-slate-900">{process.name}</span>
+            <span className="flex-1 border-b border-dotted border-slate-300" />
+            <span className="flex-none text-xs text-slate-500">
+              {process.parentName ? `under ${process.parentCode}` : "top-level"}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function MetaField({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div>
+      <dt className="text-slate-500">{label}</dt>
+      <dd className={`font-semibold text-slate-900 ${mono ? "font-mono" : ""}`}>{value}</dd>
+    </div>
+  );
+}
+
+/** Tone per duty, so Accountable reads as the heaviest and Informed the lightest. */
+const DUTY_TONE: Record<string, { chip: string; label: string }> = {
+  accountable: { chip: "bg-amber-50 text-amber-700", label: "text-amber-700" },
+  responsible: { chip: "bg-blue-50 text-blue-700", label: "text-blue-700" },
+  consulted: { chip: "bg-emerald-50 text-emerald-700", label: "text-emerald-700" },
+  informed: { chip: "bg-slate-100 text-slate-600", label: "text-slate-600" },
+  approves: { chip: "bg-indigo-50 text-indigo-700", label: "text-indigo-700" },
+  coApproves: { chip: "bg-indigo-50 text-indigo-700", label: "text-indigo-700" },
+  escalationFor: { chip: "bg-rose-50 text-rose-700", label: "text-rose-700" },
+};
+
+const DEFAULT_TONE = { chip: "bg-slate-100 text-slate-600", label: "text-slate-600" };
+
+/**
+ * One Role's duties, grouped and labelled instead of run together into a
+ * sentence — a real process has enough tasks that the sentence form became a
+ * paragraph nobody could scan.
+ */
+function RoleCard({ name, duties }: { name: string; duties: { key: string; label: string; tasks: string[] }[] }) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200 print-keep">
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3.5 py-2">
+        <span className="text-sm font-bold text-slate-900">{name}</span>
+        <span className="ms-auto flex flex-wrap gap-1.5">
+          {duties.map((duty) => (
+            <span
+              key={duty.key}
+              className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${(DUTY_TONE[duty.key] ?? DEFAULT_TONE).chip}`}
+            >
+              {duty.tasks.length} {duty.label}
+            </span>
+          ))}
+        </span>
+      </div>
+      {duties.map((duty) => (
+        <div
+          key={duty.key}
+          className="grid grid-cols-[110px_1fr] gap-2.5 border-t border-slate-100 px-3.5 py-2 first:border-t-0"
+        >
+          <span
+            className={`pt-0.5 text-[10px] font-bold uppercase tracking-wide ${(DUTY_TONE[duty.key] ?? DEFAULT_TONE).label}`}
+          >
+            {duty.label}
+          </span>
+          <span className="text-xs text-slate-700">{duty.tasks.join(" · ")}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ScopeBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg bg-slate-50 px-3 py-2.5 text-sm">
+      <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="mt-0.5 text-slate-800">{value}</div>
+    </div>
+  );
+}
+
+function BulletBox({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="print-keep rounded-lg border border-slate-200 px-3 py-2.5">
+      <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{label}</div>
+      <ul className="mt-1 list-disc space-y-0.5 ps-4 text-sm text-slate-700">
+        {items.map((item, i) => (
+          <li key={i} className="print-keep">
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

@@ -4,6 +4,33 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-01 — one logo per client (§461), merged to main 2026-10-01, renumbered from §460.** The client's settings had two logo uploads, one for the sign-in page and one for the presentations. There is one now, called *The client's mark*: the logo already on the sign-in page is the one the presentations wear (on the cover and the footer of any unit without its own logo, and of every supporting function). The second upload is gone from the page. A logo uploaded there before is not deleted, it is simply no longer used. Changing the client's mark reaches the open platform straight away, and a downloaded backup copy carries it. Checked: the presentation and set-up checks green, red with the old behaviour put back; the whole-platform sweep with no errors. Not run here: the new app's own checks and typecheck (its packages are not installed in this session).
+
+**2026-10-01 — the Copilot talks like a consultant (§460), merged to main 2026-10-01.** It now follows Forefront's method for the section as the lead (in its order, with each item's title, description, evidence and score where the method asks for them, and a small line saying which step it is on), remembers its own last drafts and the choices it offered across 20 turns instead of 8, and talks normally — the recap only on the first draft, questions only when it is genuinely stuck, and buttons only for a real choice. Not built yet: a step tracker, and a note when the lighter model answered.
+
+**2026-10-01 — Processes (FFProcess) brought into SMP (§459, spec 065), merged to main 2026-10-01.** FFProcess now runs inside SMP as the Processes module, with its own look under SMP's top bar, for the office only. Its people come from the client's People register: everyone on the register shows up, name and email follow the register, and somebody retired there is hidden here but nothing they appear in is lost. Someone from the old FFProcess data is linked to their register row by email the first time the page opens. A script copies the old FFProcess data into RHI once; it can run at deploy from a switch. **Waiting on you**: put the old FFProcess database address in Vercel as `FFPROCESS_DATABASE_URL`, tell me which old workspace is RHI's, turn Processes on for RHI from its card, and say whether people may still be added in Processes without being on the register.
+
+**2026-10-01 — the Copilot asks before it refines (§458), merged to main 2026-10-01.** Ask it to refine the aspiration, the SWOT or anything else already in the plan and it now first quotes what is there, asks what you want to change, and offers a few quick replies written for that text — it drafts only after you answer. The Copilot page no longer scrolls; only the chat does. When Google is too busy, it now tries three more times over about 17 seconds and then the lighter model before showing you the message. And a stray bit of the AI's reply format no longer shows in "Working from".
+
+**2026-10-01 — the Copilot reads the plan's own words (§457), merged to main 2026-10-01.** The Copilot told you Mobile had no Winning Aspiration because it was only ever sent the place's name and counts, never what is written. Each question now carries the place's written plan — Foundation, SWOT, pillars and measures, tactics — with the chat's own section first, and the line above the chat says *the plan's own text* so you can see it went. When Google answers "too busy", the platform now quietly asks once more after a couple of seconds before showing you the message.
+**2026-10-01 — the Copilot has a page and settings of its own (§456), merged to main 2026-10-01.** Pressing Copilot in the module switcher now opens a page listing every chat and deliverable on the client, with filters and a search; pressing a row opens it in its place's Copilot tab. The Copilot has its own settings: the AI instructions (your methodology, tidied, shown section by section) and the five templates to download. Both are the same for every client. Only a Forefront super user sees Edit and Replace; the rest of the office reads them. What the AI is told on each question now includes that section's instructions. Not done yet: the department strengths and weaknesses template is downloaded blank rather than filled with the client's units.
+
+**2026-10-01 — the Copilot's paperclip sits in the middle of a shorter strip (§455), merged to main 2026-10-01.** The strip under the typing box went from 38px to 30px and the paperclip is centred in it, as drawn and approved.
+
+**2026-10-01 — who can use the Copilot is set on Roles & access (§454), merged to main 2026-10-01.** Strategy's Roles & access table gets a Copilot column, shown only on a client where the Copilot is switched on. It has the usual two buttons for the Super user and the SMO team: View lets someone open and read every chat and deliverable but not change anything, with a small "View only" label where the typing box would be; Edit is today's full use. Both start at Edit, so nobody loses anything. Client staff rows show a dash, because the Copilot is the office's only for now, and the server refuses them whatever the table says. Checked against a real database and in a real browser.
+
+**2026-10-01 — the Copilot tab appears when turned on, and its chat reads like Claude's (§453), merged to main 2026-10-01.** Turning the Copilot on from the client's settings now shows its tab straight away (the page reloads itself), and the tab sits after Insights. The chat fills the screen; the box starts at one line and grows as you type, with the return-arrow Send inside it and the paperclip on a tight line beneath. Rename and Archive are on each chat's three dots in the left list. A chat is archived, never deleted, by the office; *Archived* at the foot of the list opens the archived chats, where anyone can restore one and only the Super user can delete. Checked in a real browser, every press read back from the database.
+
+**2026-09-30 — the Strategy Copilot, stage 2: the AI answers in the chat (§452, spec 064), merged to main 2026-10-01.** A chat now gets a real answer. At the top of each chat one line says what the Copilot can see for the place (its pillars, measures, objectives, the cycle, what is off track), with the detail on hover. Before it drafts, the answer says what it understood, what it is working from and what is missing; anything missing comes with two quick-reply buttons, one of them *Assume for me*, and an assumption once made is kept on the chat and never asked again. A draft shows where each line came from — a file's name, *Pasted*, or *Assumed*. Long pasted text is folded and the Copilot offers to keep it as its own deliverable in the right section. The paperclip attaches Word, PDF and Excel files (up to 3 MB each, three per message); they sit above the box until sent, then ride on the message, and can be downloaded again. If no AI key is set, or the AI fails, the chat says so plainly and keeps what you typed. **Not in stage 2**: saving a chat's draft as a deliverable in its shape, owners, Advisory's budget, the group view. **Still waiting on you**: your templates (the Template road says it is not ready) and your AI instructions (they go in one file). Checked: the Copilot check 88/0 against a stand-in AI that records what it was sent, red under five deliberate breaks; the served shell check 164/0 with a file attached, an answer drawn and a quick reply pressed in a real browser; the whole-platform sweep with no errors; typecheck clean.
+
+**2026-09-30 — the Strategy Copilot, stage 1: the shelf, with no AI yet (§451, spec 064), merged to main 2026-10-01.** A client can now have the Copilot switched on from its card on the console. For the office (the Super user and the SMO team) every place gets a **Copilot** tab right after Reporting, with five sections (Foundation, Analysis, Directions, Execution, Advisory). Each section has a **Chats** rail above a **Deliverables** rail. *+ New chat* starts a chat; what you type is kept, and the reply is one fixed line saying the Copilot is not connected yet. Chats can be renamed, and deleted only by whoever started them or the Super user. A deliverable opens with its text, *Edit* saves the change as the next version, and *Restore* brings an older version back as a new one, so nothing is lost; deliverables cannot be deleted. A client's own people never see the tab, and the server refuses them too. **Not in stage 1**: the AI itself, file upload, saving a chat's work as a deliverable (a deliverable can only be filed through the server for now), the ways to start, and company-direction owners — those are stages 2 to 5. **Still waiting on you**: sign-off on the round 2 mockup, your templates, and your AI instructions. Checked: the new Copilot check 46/0 (red when the office gate or the version numbering is broken), the served shell check 158/0 with the tab pressed end to end and the database read back, modules 172/0, door 145/0, state 92/0, the whole-platform sweep with no errors, typecheck clean.
+
+**2026-09-30 — the Strategy Copilot: mockup signed off, build plan written (spec 064), waiting on Islam.** The Copilot becomes a tab on every place, after Reporting, with five sections and a Chats rail above a Deliverables rail (mockup `design-mockups/copilot/`). The build plan is `specs/064-strategy-copilot/plan.md`: five stages, starting with the shelf and chats and no AI, then the AI in a chat, then saving in the right shape, then Advisory, then the group view and the sweep. Office only. Updated for decision record v0.4 (roads proposed inside the chat; company-level sets whose rows each name an owning unit or function). Settled: chats can be deleted by their starter or the Super user, pastes up to ~30 pages, Word/PDF/Excel files accepted in the chat, the AI proposes each row's owner and the consultant confirms, owners see their rows read-only. Waiting on Islam for the existing Copilot templates; a short second mockup round covers the new on-screen pieces. Nothing built yet.
+**2026-10-01 — where the strategy is planned, and the divisions read under it (§448), on the branch, not merged.** On Client set-up › Structure the top card now asks where the strategy is planned: on the company or on the business units. It replaces the On/Off on the business units' card and stores the same answer, so nothing changes for a client already set up. Planned on the company, the navigation's top button reads Strategy and the division dropdown goes; each division with functions linked to it appears on Strategy › Performance's row beside the company, showing its reading from those functions only.
+
+**2026-09-30 — an Objectives & actions unit moves across too (§447.1), on the branch, not merged.** Switching business units off moved nothing on El Abd, because its units plan in objectives and actions and the move only copied pillars. Now each such unit arrives on the company page as one direction under its own name: its objectives become that direction's measures and its actions become its tactics, with every figure; an action's date becomes the quarter it falls in, and the date is kept. Units planning in Projects are still not moved. On El Abd: switch business units back on, then off again, to run the move.
+
+**2026-09-30 — one company, its directions on its own page (§447), on the branch, not merged.** Setup › Client set-up › Structure: the business units' card now has an On/Off. Pressing Off asks first; *Move them and switch off* copies every unit's directions onto the company page with all their figures, keeps each unit's old page (Foundation and SWOT) in the archive, and takes the units out of the navigation. The company page then holds the Foundation, the SWOT, the directions and the capabilities as separate sections; its Performance shows the directions averaged equally. Each direction's owner reports their own direction and cannot submit the company's report. Switching back on brings the units back as they were. Checked on the screen and on the server, and both checks fail when the change is removed. El Abd itself has not been switched — that is a press on the live client.
 **2026-10-01 — one top bar for every module (§444).** Built from the mockup Islam approved. Insights, the Internal Tracker and Meeting Notes now wear Strategy's own white top bar instead of their navy ones: *Platform › client ▾ › module ▾*, the theme switch and Sign out. *Viewing as* appears on Insights only, because that is the one module where who is looking changes what is shown. A client's own staff see no trail: just the product name with their company, the theme switch and Sign out. The console keeps its own bar and Strategy is untouched. Checked: the module, Tracker, Notes, Insights, shell and door checks; the bar drawn in light and dark at two widths. **Merged to `main` 2026-10-01.** Main had moved while this was built: Portfolio arrived, and it had taken section numbers §439–§443, so this round became §444. Portfolio came in still wearing the old navy bar, so the merge puts the same shared top bar on Portfolio's pages too, which is what "every module" means. After the merge every check is green, including the three Tracker checks that had been failing; main's own fix for the calendar cleared those.
 
 **2026-09-30 — a business unit says how it plans in Client set-up (§438), merged to main 2026-09-30.** The Business units step of Client set-up now has the same *plans in* dropdown every supporting function row already has: Pillars, Projects or Objectives & actions, starting at Pillars so nothing changes today. On a client that already holds a plan it works like the function row: a warning first, the old plan hidden and kept, and switching back brings it back. The same choice is still in the unit's Edit details on Setup › Business units. Checked in the browser and on the set-up flow's own answer; both checks fail when the change is removed.
@@ -1312,6 +1339,32 @@ away. Screen only: 527/0, 131/0, sweep clean. The editable `.pptx` of that deck
 is Islam's *"for now"* left open.
 
 ---
+
+## 2026-10-02 — the company plans in projects (§466)
+
+Built (stage 3 of the "where the plan lives" mockup). The company's own plan (the Directions card on Client set-up › Structure) now has a **plans in** choice: Directions or Projects. Switching asks first and nothing is lost — the directions are hidden and kept, and come back if you switch back. A company project's named owner enters its figures and only theirs; the office (and the group CEO) report everything and submit. On the company's Performance page a **Projects — performance** card takes the directions' place. On the branch, not merged.
+
+## 2026-10-02 — the Structure cards, and capabilities in one place (§465)
+
+Built (stage 2 of the "where the plan lives" mockup). On Client set-up › Structure the question now reads **Company level | Units level**. The top card keeps its Foundation and SWOT; its plan moved to a new **Directions** card, which says Off for Raya Trade (it was saying On while nothing showed). Capabilities now live in one place at a time: a new **capabilities in the company plan** card, or the **capabilities as their own layer** card at the end — turning one on greys the other. At company level they are always the company's. The cards come in the same order at both levels. Raya Trade shows exactly what it did. Next: stage 3, the Directions planning in Projects. On the branch, not merged.
+
+## 2026-10-02 — planned on the company, the row is the functions (§464)
+
+Stage 1 of "where the plan lives". When the strategy is planned on the company, the navigation shows the company button, then either the word Functions with every function beside it, or — when functions belong to divisions — a switch of the division names (Retail | Wholesale | Group) with the pressed one's functions beside it. Pressing a division opens its own page, its performance read from its functions; the division sections on the company's Performance tab are gone. The Structure card is called Functions. Next: reshaping the Structure cards, then directions planned in projects. On the branch, not merged.
+
+## 2026-10-01 — §449.1: the Off button on Focus measures works
+
+Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §449, which is on the branch and reaches the live site when it is merged.
+
+## 2026-10-01 — the company page follows its own Structure (§449)
+
+Four from Islam on the company page. The Performance page's Themes section now shows only while Themes are ticked on for the top layer, and its capabilities section only while capabilities are on — called by the client's own word ("Capabilities"), never "Group capabilities". A company with its own pillars opens on Strategy › Pillars; a group with no plan still opens on Performance, so Raya's group page is unchanged. The Focus tab disappears when Focus measures are switched off (the switch stays on Setup › Focus measures), and the company's own pillars are a place to mark on Setup › Focus measures and show on the Focus board. Nothing stored moves. `single-company.py` gains §449, red 5 with the changes taken out. On the branch, not merged.
+
+---
+
+## 2026-10-01 — the company button names the layer (§448.1)
+
+Planned on the company, the top navigation button now reads the first layer's name from Structure (for example "Company") instead of "Strategy", so it no longer clashes with the Strategy tab under it. On the branch, not merged.
 
 ## Documentation sweep, 2026-09-05
 
@@ -8913,6 +8966,7 @@ The yearly revision stays one for the whole client. Checked with the new
 `checks/detail-layers.py` and the four detail checks rewritten to the new ticks.
 Not on main.
 
+- **§450 (2026-10-01, on the branch):** on Client set-up › Structure, the two buttons for where the strategy is planned now sit under the question instead of at the far end of the line.
 
 ## Portfolio — writing a plan (2026-10-01, built)
 
@@ -9041,6 +9095,101 @@ set-up flow's shape check and the Frameworks console page.
 is committed to the repository, which the project's own pre-commit rule forbids by
 name. Nothing is exposed today — it holds a local address with no password — but
 the next person to point it at a real database commits that too.
+
+
+---
+
+## Two faults in building a plan, fixed (2026-10-01, §443.9)
+
+Islam, building a plan on the built page: he could not add two things one after
+the other, could not add a second step to an activity, and asked what else was
+not working. Both turned out to be in the writing path and both left the screen
+out of step with what had actually been saved. Nothing was ever lost.
+
+**The box you type a name into did not empty itself.** You typed a name, pressed
+Enter, the row appeared — and the name was still sitting there with the cursor
+still in it. Press Enter again and you got the same row twice; type the next name
+and it joined onto the end of the last one, so "Discovery" then "Delivery" was
+saved as one row called "DiscoveryDelivery".
+
+There were two reasons it stayed and only one of them was obvious. The box was
+never emptied. And every save deliberately remembers what a hand is typing and
+puts it back once the page redraws, which is right for a figure somebody is half
+way through and wrong for this box, whose contents had just been used to make the
+row. It is emptied now before the save goes out, so there is nothing to put back
+and the box comes back blank with the cursor in it.
+
+**This is also what made his third question unanswerable.** He asked how to add
+an activity under a work package. You can, and you always could — the row is
+drawn right there underneath it. What was stopping him is the same fault: after
+naming a work package the cursor was still in the box above, holding the package's
+own name, so the next thing he typed became a second work package rather than an
+activity.
+
+**The panel shut after every save, so no second step could be added.** Adding a
+step saved it and closed the panel, leaving nowhere to type the next one; a reload
+brought it back with the step in it, which is why it read as the platform
+forgetting. When the page redrew after a save it asked which activity was open and
+looked at the name of the action rather than the activity's id — and since the
+action is never empty it never got as far as the id, so nothing was ever
+re-opened. The browser now says which activity is open on every save, beside the
+view it already sent, and the page reads that.
+
+**Why the 197 tests on this could not see either.** The test types into a box by
+*replacing* whatever is in it, so a box that kept the last name is invisible to it,
+and so is a cursor that never moved. And it adds steps by talking to the server
+directly, which proves the step is saved and never looks at what the screen does
+afterwards. Both new tests do it the way a person does — typing into the box and
+adding the step in a browser — and both were proved to fail on the build before
+the fix, printing the exact symptoms: `DiscoveryDelivery`, and `panel false`.
+
+**What to go and check:** build a plan with the pen open. Name a phase, then name
+another straight away — two rows. Name a work package, then type an activity's
+name into the row underneath it — it lands under the package. Open an activity and
+add two steps one after the other without reloading.
+## The two plan-building fixes are on main (2026-10-01, §443.10)
+
+The two fixes are merged and on `main`. Main had moved twenty-three commits under
+this branch while they were built — the shared top bar across the modules, the
+client card's logo and Settings mark, and the single-company work — so all of
+that came in first and everything was run again on the combined tree rather than
+on the branch.
+
+What the combining had to get right: the three record files each had both
+sessions writing in the same place, and both sides are kept whole — checked line
+by line, nothing lost from either. The three Portfolio files merged on their own
+and were read rather than trusted: both this round's fixes and the new top bar
+are in the result.
+
+Everything green on the combined tree, including every one of the other
+sessions' own checks at their own numbers, and the whole-platform sweep with no
+errors. Both of this round's deliberate breaks were put back and watched to fail
+again, because a test you ran before a merge has not been run on what the merge
+produced.
+
+**And it is live — confirmed.** I first wrote that it could not be confirmed,
+because nothing a browser downloads has changed, so the usual way of telling
+whether the live site has picked something up does not work here. That was the
+wrong conclusion: every page the site serves quietly carries a tag saying which
+build it came from, and that tag changed after the push and has stayed changed.
+The only thing pushed in that window was this work. So it is on the live site.
+
+Worth keeping, because it will come up again: from now on I can tell whether a
+release has landed even when the change is entirely in code that runs on the
+server, which is most of what a change to one of these modules is.
+
+### What to go and check
+
+Open a client's Portfolio, open a project, press Edit on the plan.
+
+- Type a phase name and press Enter, then type another straight away — two
+  rows, not one name run into the other.
+- Name a work package, then type an activity's name into the row underneath it —
+  it lands under the package.
+- Open an activity and add two steps one after the other without reloading.
+- Then the screens the other sessions changed: the top bar across Insights, the
+  Tracker and Notes; the client cards on the console; and a company set up to
+  plan on the company rather than on its business units.
 
 ### §445 — the logo stands for the name on a client card (2026-10-01)
 On the console's client cards, a client that has a logo now shows the logo on

@@ -234,29 +234,24 @@ with sync_playwright() as p:
     pg.evaluate("() => { delete GROUP.branding; applyBrand(); paint(); }")
     pg.wait_for_timeout(300)
 
-    print("\n8 · the group's mark — the control writes, and Remove DELETES the key")
-    # REWRITTEN, NEVER LOOSENED (§218, §214.3): §357 absorbed Branding into the
-    # set-up flow's first step and deleted the `brand` def, so `currentSub='brand'`
-    # painted a page that no longer exists — and the group's mark is still drawn
-    # by the same `brandingBody()`, so what moved is where the walk lands, not
-    # the control. Everything asserted below is unchanged.
+    print("\n8 · ONE mark, the client's (§461) — no second upload, and the offline copy's own")
+    # REWRITTEN, NEVER LOOSENED (§218): §461 made the door's mark the decks'
+    # mark too, so the group's upload is GONE — asserted absent, with the
+    # colour controls beside it asserted present so an empty page cannot pass
+    # (§113.8). Over file:// there is no server, so the decks read the mark a
+    # contingency copy writes into its own graph (GROUP.logo); it is set the
+    # way that copy sets it, from a real PNG.
     pg.evaluate("() => { closeDeck(); current='setup'; currentSub='start'; paint(); }")
     pg.wait_for_timeout(400)
-    ok(pg.locator("input[data-glogo]").count() == 1, "one upload control on Branding")
-    ok(pg.locator("[data-glogoclear]").count() == 0, "no Remove while there is no mark (§61)")
-    # Guarded on the control BEING THERE, or a build with no group mark at
-    # all times out here rather than reporting that it has none (§215, twice
-    # in this file's first run against the previous build).
-    if MARK.exists() and pg.locator("input[data-glogo]").count():
-        pg.set_input_files("input[data-glogo]", str(MARK))
-        pg.wait_for_timeout(800)
-        wrote = pg.evaluate("() => (GROUP.logo || '').slice(0, 14)")
-        ok(wrote == "data:image/png", "the upload reaches GROUP.logo — %r" % wrote)
-        ok(pg.locator(".gmarkrow img.umarkimg").count() == 1, "and the preview is drawn")
-    elif not MARK.exists():
-        ok(False, "the test mark is missing at %s" % MARK)
+    ok(pg.locator("[data-brand]").count() > 0, "the branding block is drawn (the control case)")
+    ok(pg.locator("input[data-glogo]").count() == 0, "and carries NO separate group-mark upload")
+    if MARK.exists():
+        import base64
+        uri = "data:image/png;base64," + base64.b64encode(MARK.read_bytes()).decode()
+        pg.evaluate("u => { GROUP.logo = u; }", uri)
+        ok(pg.evaluate("() => groupLogo().slice(0,14)") == "data:image/png", "offline, the decks read the copy's mark")
     else:
-        ok(False, "no upload control to drive — the group mark is not built")
+        ok(False, "the test mark is missing at %s" % MARK)
 
     print("\n9 · the mark reaches every deck, and never a divider's foot")
     r = pg.evaluate("""() => {
@@ -277,15 +272,21 @@ with sync_playwright() as p:
         ok(r[t]["feet"] > 0, "%s — its content slides are footed" % t)
         ok(r[t]["sectFeet"] == 0, "%s — and no divider is (§259.1)" % t)
 
-    print("\n10 · Remove puts it back")
-    pg.evaluate("() => { current='setup'; currentSub='start'; paint(); }")
-    pg.wait_for_timeout(300)
-    if pg.locator("[data-glogoclear]").count():
-        pg.locator("[data-glogoclear]").click()
-        pg.wait_for_timeout(400)
-    ok(pg.evaluate("() => !('logo' in GROUP)"),
-       "the key is DELETED, not blanked (§50.6) — a group that never set one "
-       "and one that set and cleared one are the same shape")
+    print("\n10 · served, the client's mark wins and a stored group mark is not read (§461)")
+    got = pg.evaluate("""() => {
+      const keep = { live: SYNC.isLive, mark: SYNC.clientMark };
+      SYNC.isLive = () => true;
+      SYNC.clientMark = () => 'data:image/png;base64,CLIENT';
+      const withMark = deckMark(UNITS['mobile'] && !UNITS['mobile'].logo ? UNITS['mobile'] : null);
+      const fnMark = deckMark(null);
+      SYNC.clientMark = () => '';
+      const none = groupLogo();
+      SYNC.isLive = keep.live; SYNC.clientMark = keep.mark;
+      return { withMark, fnMark, none, stored: (GROUP.logo||'').slice(0,14) }; }""")
+    ok(got["fnMark"] == "data:image/png;base64,CLIENT", "a subject with no mark of its own wears the client's — %r" % got["fnMark"][:30])
+    ok(got["stored"] == "data:image/png" and got["none"] == "",
+       "and a stored group mark is NOT read on a served page — the door's is the only one")
+    pg.evaluate("() => { delete GROUP.logo; }")
 
     print("\n11 · the four dead hue rules are gone from the stylesheet (§24)")
     dead = pg.evaluate("""() => {

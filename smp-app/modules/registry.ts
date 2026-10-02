@@ -30,8 +30,9 @@
    module asking the spine to hand over its own subject.
 
    THE LIST IS PARTIAL ON PURPOSE. Only a BUILT module has a server; Processes
-   is a word the address reserves and nothing more (lib/modules.ts MODULE_DEF)
-   — Portfolio joined the built ones on 2026-09-30 and was finished on
+   (2026-10-01, FFProcess carried in whole) is built and has NO server here:
+   its pages are Next's own route tree, app/(ffp)/, which takes the address
+   before this table is asked (MODULE_DEF.appRoute) — Portfolio joined the built ones on 2026-09-30 and was finished on
    2026-10-01 (spec 060), and the TRIAL module that proved this seam could take
    a fourth was retired once real ones had (§360, §24). That the two lists
    agree — every built module serves itself,
@@ -44,6 +45,7 @@ import { serve as portfolio } from "./portfolio/index.ts";
 import { serve as insights } from "./insights/index.ts";
 import { serve as tracker } from "./tracker/index.ts";
 import { serve as notes } from "./notes/index.ts";
+import { serve as copilot } from "./copilot/index.ts";
 
 export type ServeArgs = {
   req: Request;
@@ -69,6 +71,11 @@ export type ServeArgs = {
      client, and null where the door resolved no membership at all. */
   personKey: string | null;
   seat: "super" | "smoteam" | "none" | null;
+  /* A FOREFRONT SUPER USER (§456): the platform admin flag on the account,
+     already false while the office is viewing as somebody (§383 — viewing as
+     somebody may only narrow). What the Copilot's own settings ask before any
+     write, because those settings are the same for every client. */
+  admin: boolean;
   /* §444, THE SHARED TOP BAR. `consultant` is a Forefront session (kind not
      "client") — only they get the trail. `me` is who SIGNED IN, before any
      view-as narrowing: the bar's Viewing as is offered by the signed-in seat,
@@ -86,12 +93,12 @@ export type ModuleServer = (a: ServeArgs) => Promise<Response>;
 const BREAK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
 
 export const SERVERS: Partial<Record<ModuleKey, ModuleServer>> =
-  BREAK === "no-server" ? { strategy, tracker, notes, portfolio }
+  BREAK === "no-server" ? { strategy, tracker, notes, portfolio, copilot }
   /* Two words pointing at one page — the door onto the wrong room, wired
      rather than guessed at. It renders perfectly, which is why the check
      DRIVES each server rather than reading the table (§96). */
-  : BREAK === "wrong-server" ? { strategy, insights: strategy, tracker, notes, portfolio }
-  : { strategy, portfolio, insights, tracker, notes };
+  : BREAK === "wrong-server" ? { strategy, insights: strategy, tracker, notes, portfolio, copilot }
+  : { strategy, portfolio, insights, tracker, notes, copilot };
 
 /* Null is "nothing here draws that", which the route answers as Not found
    rather than falling back to the Strategy shell: a module word that resolved

@@ -1,0 +1,122 @@
+<title>Copilot Settings Mockup</title>
+<style>
+:root{--ground:#F3F5F8;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6878;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DB;--gold:#B8902F;--gold-deep:#7E621C;--good:#2E7D4F;--note:#FFF7E3}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C2027;--surface-2:#242A33;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#97A1B0;--panel:#0F2342;--panel-ink:#F2F5FA;--panel-quiet:#9FB0CB;--gold:#E6C65C;--gold-deep:#E6C65C;--good:#6FCF97;--note:#2E2A1C;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C2027;--surface-2:#242A33;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#97A1B0;--panel:#0F2342;--panel-ink:#F2F5FA;--panel-quiet:#9FB0CB;--gold:#E6C65C;--gold-deep:#E6C65C;--good:#6FCF97;--note:#2E2A1C;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 "Source Sans 3","Segoe UI",system-ui,sans-serif;margin:0;padding-inline:16px}
+.wrap{max-width:1180px;margin:0 auto;padding-block:24px 56px;display:flex;flex-direction:column;gap:28px}
+h1{font-size:22px;margin:0}
+.intro{color:var(--ink-2);max-width:70ch;margin:0}
+.lab{font:700 11px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep)}
+.screen{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.bar{background:var(--panel);color:var(--panel-ink);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+.bar .q{color:var(--panel-quiet)}
+.split{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:420px}
+.rail{background:var(--surface-2);border-right:1px solid var(--line);padding:12px 0}
+.rail .rh{font:700 11px system-ui;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:4px 14px 10px}
+.rail .g{font:700 10.5px system-ui;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:10px 14px 4px}
+.rail .it{padding:6px 14px;color:var(--ink-2)}
+.rail .it.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:inset 3px 0 0 var(--gold)}
+.rail .new{color:var(--gold-deep);font:600 10px system-ui;margin-left:6px}
+.pane{padding:16px 20px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.head{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.head h2{font-size:17px;margin:0;margin-right:auto}
+.chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--ink-2)}
+.btn{border:1px solid var(--line);border-radius:6px;padding:4px 12px;font-size:12.5px;background:var(--surface);color:var(--ink)}
+.btn.solid{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg span{padding:5px 12px;font-size:13px;border-right:1px solid var(--line);color:var(--ink-2)}
+.seg span:last-child{border-right:0}
+.seg span.on{background:var(--panel);color:var(--panel-ink)}
+details{border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+summary{padding:9px 12px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+summary b{min-width:24px;color:var(--gold-deep)}
+summary .m{margin-left:auto;color:var(--ink-3);font-size:12px}
+.body{border-top:1px solid var(--line);padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.body h4{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+.body p{margin:0;color:var(--ink-2);max-width:80ch}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th{background:var(--panel);color:var(--panel-ink);text-align:left;font:600 11.5px system-ui;letter-spacing:.05em;text-transform:uppercase;padding:7px 10px;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:nth-child(even) td{background:var(--surface-2)}
+.note{background:var(--note);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink-2)}
+.ask{display:flex;flex-direction:column;gap:6px}
+.ask ol{margin:0;padding-left:20px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search{border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:var(--ink-3);min-width:200px}
+@media (max-width:760px){.split{grid-template-columns:1fr}.rail{border-right:0;border-bottom:1px solid var(--line)}}
+</style>
+<div class="wrap">
+  <div><span class="lab">Copilot · proposal for sign-off</span><h1>The Copilot gets a page and settings of its own</h1></div>
+  <p class="intro">Today pressing Copilot sends you back to Strategy. Below: the Copilot's own settings (instructions and templates) and its own page listing every chat and deliverable. The Copilot tab inside Strategy stays as it is, and who may use the Copilot is still set on Strategy's Roles &amp; access.</p>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="lab">1 · Copilot settings › AI instructions</span>
+    <div class="screen">
+      <div class="bar"><b>Strategy Management Platform</b><span class="q">· Raya Trade › Copilot › Settings</span></div>
+      <div class="split">
+        <nav class="rail">
+          <div class="rh">Copilot · Setup</div>
+          <div class="g">The AI</div>
+          <div class="it on">AI instructions</div>
+          <div class="it">Templates</div>
+          <div style="border-top:1px solid var(--line);margin-top:14px;padding:10px 14px;color:var(--gold-deep)">Client settings ›</div>
+        </nav>
+        <div class="pane">
+          <div class="head"><h2>AI instructions</h2><span class="chip">Same for all clients</span><span class="btn solid">Edit</span></div>
+          <div class="seg"><span>Foundation</span><span class="on">Analysis</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
+          <details open><summary><b>2</b>SWOT<span class="m">General · Strengths · Weaknesses · Opportunities · Threats · Department SWOT</span></summary>
+            <div class="body"><h4>General</h4><p>The method text, word for word: requirements, what to look for, scoring guidelines, examples and bad examples for each quadrant.</p><h4>Strengths — requirements</h4><p>…</p></div></details>
+          <details><summary><b>3</b>Porter's Five Forces<span class="m">Rivalry · New entrants · Substitutes · Suppliers · Buyers</span></summary></details>
+          <details><summary><b>4</b>DESTEP<span class="m">Demographic · Economic · Social · Technological · Ecological · Political</span></summary></details>
+          <details><summary><b>5</b>Portfolio — IFE / EFE / IE<span class="m">Internal and external factor scoring, the IE matrix</span></summary></details>
+          <div class="note"><b>Seen by a Forefront super user.</b> Everybody else in the office sees the same pages with no Edit button and a "Read only" chip in its place.</div>
+          <div class="note">Removed while tidying: the other product's screen names, output layouts and web address. Every rule, example and bad example is kept as written.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="lab">2 · Copilot settings › Templates</span>
+    <div class="screen">
+      <div class="bar"><b>Strategy Management Platform</b><span class="q">· Raya Trade › Copilot › Settings</span></div>
+      <div class="split">
+        <nav class="rail"><div class="rh">Copilot · Setup</div><div class="g">The AI</div><div class="it">AI instructions</div><div class="it on">Templates</div></nav>
+        <div class="pane">
+          <div class="head"><h2>Templates</h2><span class="chip">Same for all clients</span><span class="btn solid">Replace a template</span></div>
+          <div class="tw"><table>
+            <tr><th>#</th><th>Template</th><th>Section</th><th>Used for</th><th></th></tr>
+            <tr><td>1</td><td>Foundation interview</td><td>Foundation</td><td>Who we are, purpose, aspiration, north star, values</td><td><span class="btn">Download</span></td></tr>
+            <tr><td>2</td><td>Analysis interview (Q1–Q12)</td><td>Foundation + Analysis</td><td>Interview answers and the interviewee list</td><td><span class="btn">Download</span></td></tr>
+            <tr><td>3</td><td>Porter's Five Forces</td><td>Analysis</td><td>The five forces, scored</td><td><span class="btn">Download</span></td></tr>
+            <tr><td>4</td><td>DESTEP</td><td>Analysis</td><td>The outside world, factor by factor</td><td><span class="btn">Download</span></td></tr>
+            <tr><td>5</td><td>Department strengths &amp; weaknesses</td><td>Analysis</td><td>Filled with this client's units and functions</td><td><span class="btn">Download</span></td></tr>
+          </table></div>
+          <p style="margin:0;color:var(--ink-2)">A filled template attached in a Copilot chat is read as that section's input (the "Template" road).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="lab">3 · The Copilot page (opened from the module switcher)</span>
+    <div class="screen">
+      <div class="bar"><b>Strategy Management Platform</b><span class="q">· Raya Trade › Copilot</span></div>
+      <div class="pane">
+        <div class="head"><h2>Copilot</h2><span class="btn">Settings</span></div>
+        <div class="filters"><div class="seg"><span class="on">Chats</span><span>Deliverables</span></div><span class="chip">All sections ▾</span><span class="chip">All places ▾</span><span class="search">Search…</span></div>
+        <div class="tw"><table>
+          <tr><th>Place</th><th>Section</th><th>Chat</th><th>By</th><th>Last activity</th></tr>
+          <tr><td>Mobile</td><td>Analysis</td><td>SWOT from the March interviews</td><td>Islam</td><td>Today 10:42</td></tr>
+          <tr><td>Retail Stores</td><td>Foundation</td><td>Winning aspiration draft</td><td>Essam</td><td>Yesterday</td></tr>
+          <tr><td>The group</td><td>Directions</td><td>Pillars for 2027</td><td>Omar</td><td>28 Sep</td></tr>
+          <tr><td>Finance</td><td>Execution</td><td>Functional projects</td><td>Islam</td><td>25 Sep</td></tr>
+        </table></div>
+        <p style="margin:0;color:var(--ink-2)">Pressing a row opens that chat in the Copilot tab of its place in Strategy. The Deliverables view lists Title · Version · Last by the same way.</p>
+      </div>
+    </div>
+  </section>
+
+</div>

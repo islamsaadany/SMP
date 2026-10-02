@@ -9032,7 +9032,40 @@ node smp-app/checks/portfolio-module.mjs # Portfolio serves itself &mdash; the
                                 # is a work package's add row and not the key a PHASE
                                 # offers, and an unscoped `.dlg` reads the SHIFT dialog's
                                 # *Leave everything* and calls a correct refusal broken
-                                # (&sect;100.3, &sect;50.6)
+                                # (&sect;100.3, &sect;50.6).
+                                # AND SINCE &sect;443.9 IT TYPES INTO THE BOX RATHER THAN
+                                # FILLING IT, which is why 197 assertions could not see
+                                # either of the two faults Islam met building a plan: every
+                                # add above uses `fill()`, which REPLACES what is in the
+                                # box, so a box that kept the last name is invisible to it
+                                # and so is a cursor that never left (&sect;100.3 &mdash; a
+                                # probe that cannot observe the fault reports a working
+                                # build and a broken one alike); and the step path is driven
+                                # at the API, which proves the row is stored and never looks
+                                # at what the browser gets back. So one assertion presses
+                                # Enter TWICE in the phase box and reads the stored names
+                                # (`DiscoveryDelivery` before this), and another adds a step
+                                # IN THE BROWSER and asserts the panel and its step box are
+                                # still there with the step in them, then adds a SECOND
+                                # without touching the address bar &mdash; which is what was
+                                # reported. **THE HANDLE IS STILL RE-READ** (&sect;222, found
+                                # by the check throwing *Element is not attached to the DOM*):
+                                # every write swaps the body in, so the box is a NEW element,
+                                # which is exactly why `fill()` was the only thing hiding the
+                                # fault &mdash; a fresh read does not clear it and `type()`
+                                # appends to whatever a fresh read finds. **And one of the new
+                                # assertions reported a CORRECT build broken**: it asked the
+                                # panel for its `textContent`, and with the pen open a step's
+                                # name is an `<input value="&hellip;">`, whose value
+                                # `textContent` does not include (&sect;100.3, one element
+                                # along) &mdash; it reads the step's own box now. 207/0, red
+                                # TWENTY-EIGHT ways, `keep-add-box` printing
+                                # `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]` and
+                                # `panel-from-act` &mdash; the wrong read restored exactly as
+                                # it stood &mdash; printing `panel false &middot; box false`,
+                                # with the third red shared by both and correctly so: a second
+                                # step cannot be added if the box keeps the first name OR if
+                                # the panel has gone (&sect;276, &sect;344.1)
 node smp-app/checks/portfolio.mjs # the delivery plan's RULES and TABLES, before
                                 # any screen (spec 060, &sect;375) &mdash; `npm run
                                 # check:portfolio`, needs a database and NO browser,
@@ -10887,7 +10920,195 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-01 — **§444: one top bar for every module.** Insights, the Tracker and Notes draw Strategy's white bar through `smp-app/lib/topbar.ts` (trail for consultants only, Viewing as on Insights only, client staff get name + company + theme + Sign out); the navy module bars and the four-square switcher are gone; the bar's script is served as `/topbar.js`. Portfolio, arriving from main with the navy bar, wears it too (§444.1). modules 208/0, portfolio module 197/0, notes 170/0, insights 137/0, tracker 229/0, shell 142/0, door 145/0. Merged to `main` 2026-10-01 on Islam's word.*
+*Last Updated: 2026-10-02 — **§466: the company plans in projects.** The Directions card gains a plans-in choice (the unit row's own control); the way is `structure.top.plan.way`, an absence for pillars, switched through §405's warn-then-hide-and-keep (`switchTopWay`), with pillars in `GROUP.items` and projects in `GROUP.topProjects` both kept. The company rides §405's unit holder as `u:group`; a project's named owner reports their own project (`SMPRules.ownsTopProject`, screen and server), the office submits; a Projects — performance card replaces the directions' score. `checks/top-projects.py` new, red 1/2/3/1 from the sources; `test-authorize.js` 906/0, red 2/1. Merged to `main` 2026-10-02 on Islam's word.*
+
+*Earlier: 2026-10-02 — **§465: the Structure cards, and capabilities in one place.** The where-planned question reads Company level | Units level; the top card's plan becomes a Directions card (its On/Off the true answer, so Raya reads Off); capabilities live in the company plan or as their own layer, never both (`SMPRules.capAtTop`, `structure.cap.at`, an absence), asked by the navigation, the company Strategy tab and the cards. `checks/plan-level.py` new, red 4 / 1; four checks rewritten, never loosened. Merged to `main` 2026-10-02 on Islam's word.*
+
+*Earlier: 2026-10-02 — **§464: planned on the company, the row is the functions and the divisions are its switch** (stage 1 of "where the plan lives"). `companyFnSides()` in `navSides()`: one lit word with every function, or one segment per division plus a top-word segment for unlinked functions; a division segment opens `co:<ck>`; §448's division sections leave the company Performance; the Structure card is "Functions". `single-company.py` red 9 / 1 from the sources. Merged to `main` 2026-10-02 on Islam's word.*
+
+*Earlier: 2026-10-01 — **§461: one mark per client.** The door's mark (the client's registry row) is also the decks' mark: handed to the shell as `person.clientMark`, read by `groupLogo()` on a served page, written into a contingency copy's graph; the *Group's mark* upload is gone and a stored `GROUP.logo` is no longer read when served. Merged to `main` 2026-10-01 on Islam's word, renumbered from §460 (main took it for the Copilot).*
+
+*Earlier: 2026-10-01 — **§460: the Copilot talks like a consultant.** `guidanceFor()` puts the voice first and Forefront's method as the lead, the house rules last as *rules for your answer*; items carry title/text/evidence/score and the answer names the method step (`following`); 20 turns travel with each AI turn's own draft and options (`partMemo`); recap only on the first draft, questions only when blocked, buttons only for a real choice. `check:copilot` 137/0 red 16, `check:shell` 199/0 red 1. Merged to `main` 2026-10-01 on Islam's word, with main's §459 Processes brought in first.*
+
+*Earlier: 2026-10-01 — **§459: Processes (FFProcess) carried into SMP (spec 065), merged to `main` 2026-10-01 on Islam's word.** FFProcess's pages under `app/(ffp)/[slug]/processes/`, its tables in the `ffprocess` schema, one workspace per client keyed by slug, office only (`OFFICE_ONLY`, the seat acting as admin). The Org Directory mirrors the client's People register (`ffp/lib/register-sync.ts`, one cached sync per request awaited by every page, adopt by email once, hide never delete; a linked person's name and email are refused). `scripts/carry-ffprocess.mjs` copies one old workspace into an empty one, also via the production-only deploy switch `SMP_CARRY_FFPROCESS` + `FFPROCESS_DATABASE_URL`.*
+
+*Earlier: 2026-10-01 — **§458: the Copilot asks before it refines, the page stops scrolling, a busy provider is tried harder.** A house rule (all five sections): asked to refine something the plan holds, quote it word for word, ask what to change with quick replies the Copilot writes, draft nothing that turn. The pane ended 16px from the bottom while the page kept its 80px foot, so the page scrolled 64px; `.wrap:has(.coppane)` takes `--pane-foot`. A 503 now gets three more asks (2/5/10s) then the lighter model once (`GEMINI_FALLBACK_MODEL`, default `gemini-flash-lite-latest`; `assistant.cjs` takes an optional `model`). A field that runs on into the answer's next JSON key is cut (`unleak`). `check:copilot` 129/0 red 13, `check:shell` 198/0 red 1 on the scroll. Merged to `main` 2026-10-01 on Islam's word, a clean fast-forward.*
+
+*Earlier: 2026-10-01 — **§457: the Copilot reads the plan's own words, and asks a busy provider once more.** Each question carries the place's written plan (Foundation, SWOT, pillars and measures, tactics; the group's Foundation off `GROUP`, a projects or actions function off its holders), hidden rows left out, the chat's section first, server cap 6,000 → 24,000; the info line says *the plan's own text*. `askCopilot` retries once after 2.5s on 429/5xx only. `check:copilot` 125/0 red 10 (new `no-retry`), `shell.mjs` 197/0 asserting Mobile's stored aspiration reached the model, red 1 without. Merged to `main` 2026-10-01 on Islam's word, a clean fast-forward.*
+
+*Earlier: 2026-10-01 — **§456: the Copilot gets a page and settings of its own.** The bare `/<client>/copilot` lists every chat and deliverable (filters, search) and a row opens it in its place's tab via `#cop=chat-<id>`, read once at load; the switcher lists the Copilot (reversing §451's redirect). Copilot settings — AI instructions (Islam's methodology tidied into fourteen parts under five sections) and five templates — are the same for all clients, so they live in the platform table `copilot_assets` (migration 022, door pool, both exclusion lists), shipped text by default and a row only for an edit. Only a Forefront super user (`users.is_admin`, handed to the module as `admin`, narrowed for view-as) may change them; the office reads. Each question is told its section's method. An office seat at None is not offered the Copilot in the switcher. `check:copilot` 121/0 red 9, `check:modules` 230/0 red 9. **Merged to `main` 2026-10-01 on Islam's word**, with main's §439–§450 (Portfolio, the shared top bar, single company) brought in first, so the Copilot's sections were renumbered §439–§444 → §451–§456 before the merge (the shared base held none of them); the Copilot's own pages now wear main's shared top bar (§444), and two of my own assertions were re-pointed from the old switcher to that bar's module menu. `check:setup`'s two reds and `check:frameworks:page` are red identically on main and untouched here.*
+
+*Earlier: 2026-10-01 — **§455: the Copilot's paperclip is centred in a 30px strip under the box** (was touching the box with 16px of padding beneath, 38px deep); approved from `design-mockups/copilot-clip/`; `shell.mjs` 193/0. On the branch, not merged.*
+
+*Earlier: 2026-10-01 — **§454: a Copilot column on Roles & access, View or Edit.** One module area (`a_copilot`, shipped edit) through the existing `data-mac` writer, no migration; the column drawn only where the server stamps `data-copilot-area`; client rows a dash ("Office only for now"), and the server's `copilotGrant()` answers none for any non-office seat whatever is stored. At View the module refuses every POST and the tab shows the chats with a *View only* label in place of the composer; at None the reads are refused and the tab is not drawn. Access baseline UNMOVED. `check:copilot` 103/0 red 7 ways, `shell.mjs` 192/0 red 9 ways. On the branch, not merged.*
+
+*Earlier: 2026-10-01 — **§453: the Copilot tab appears the moment it is turned on, and its chat reads like Claude's.** A module switch reloads the page (§432 made the crossing a paint, so a new module never reached it); the tab sits after Insights. The composer is one 10px box starting at one line (48px floor in CSS AND `fitBox()` — a page drawn hidden measures 0) growing to 210px, return-arrow Send inside, paperclip-only on a 22px line beneath; the pane fills the window via `--cop-top` (§100.5). Rename and Archive on each chat's three dots; a chat is ARCHIVED by the office (`extra.archivedAt`, no migration) and DELETED only by the Super user from the archived list, asked in the row — reversing §451's creator delete, refused on the server both ways. The check found the browser dropping `archived`/`mayDelete` from the list answer. `check:copilot` 92/0 red 6 ways, `shell.mjs` 185/0. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§452: the Strategy Copilot, stage 2 — the AI in a chat (spec 064).** Asked between two transactions, never inside one (§289); `lib/copilot-guidance.ts` is the one file Islam's AI instructions will replace; `lib/copilot-ask.ts` says what is sent and checks what comes back (one recommended option, a source naming no attached file read as *assumed*, an empty answer a failure); `lib/assistant.cjs` gains only an optional `parts` for a PDF. Word/Excel read by a zip walk with no dependency, a PDF sent as itself, 3 MB and three per message, judged on the encoded text; `copilot_files` (migration 021). No key or a failure says so in a product line and keeps what was typed. `checks/copilot.mjs` 88/0 with a stand-in model on `GEMINI_ENDPOINT` read off the wire (red 5 ways), `shell.mjs` §3f 164/0 pressing a file, an answer and a quick reply. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§451: the Strategy Copilot, stage 1 (spec 064).** A module that lives inside Strategy (`MODULE_DEF.copilot.inside`): switched on per client from the card, never in the switcher, and every non-api address sends you back to Strategy. The office's alone at both doors — the server refuses any other seat, and the tab is drawn only where `copilotStampFor()` stamped the document and `inOffice()` agrees. A tab after Reporting with five sections, a Chats rail above a Deliverables rail; chats keep what is typed and answer with the product's own *not connected yet* line; a deliverable's edit and restore each ADD a version numbered from the maximum under a lock. `checks/copilot.mjs` 46/0 (red 4 / 7), `shell.mjs` §3e–§3f press it on the served app and read the database back. No AI, no files, no Save-from-chat yet. On the branch, not merged.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443.10: the merge with `main`
+(&sect;444&ndash;&sect;450), and the witness I had written off.** Islam: *"merge
+to main."* `main` had moved **23 commits** under this branch &mdash; the shared
+top bar, the console card's logo and Settings mark, and the single-company work,
+from three other sessions &mdash; fetched and READ before anything was merged
+(&sect;4, &sect;91). **NO RENUMBER WAS OWED AND IT WAS MEASURED RATHER THAN
+ASSUMED** (&sect;264.3, &sect;336.1): main's commit says it took
+&sect;439&ndash;&sect;446, and **main's &sect;443 IS this branch's Portfolio
+section** &mdash; it holds &sect;443.1 through &sect;443.8, this branch's own
+sub-sections, carried there by &sect;443.1's merge &mdash; while **&sect;443.9 is
+free on main in all three spellings** (0 hits each). *A renumber is owed when a
+number collides, not when `main` has been busy.* **THE THREE PORTFOLIO FILES
+AUTO-MERGED AND WERE READ RATHER THAN BELIEVED** (&sect;313.37): both sides'
+lines are in the result, the duplicate top-level declaration scan over build.py's
+own concatenation is **identical to `origin/main`'s** so the merge introduced none
+(&sect;56.7, &sect;281), **and the three names main's diff appeared to delete are
+each re-declared exactly once** &mdash; main changed their bodies, which is the
+difference between a grep that reads a diff and one that reads the result. **THE
+THREE RECORD FILES WERE COMBINED, NEVER PICKED** (&sect;318.7), asserted line by
+line rather than eyeballed (&sect;356.17 &mdash; there is no `generated-in-step`
+for prose): **0 lost from ours, 0 from main's**, with exactly one declared edit,
+main's `*Last Updated:*` demoted to `*Earlier:*`. **THE FROZEN PRODUCT IS MAIN'S
+BYTE FOR BYTE**, so nothing was rebuilt and **no `sw.js` bump is owed**
+(&sect;91's trigger is the built file's bytes changing and they did not), one
+live `const SHELL` carrying main's own name; **and no forced sign-out is owed,
+read off the diff** (spec 029) &mdash; eight files, not one under `api/`, `lib/`
+or `db/`. **RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (&sect;365):
+portfolio module **207/0**, portfolio 135/0, modules 208/0, shell 142/0, door
+145/0, insights 137/0, notes 170/0, tracker 229/0, authoriser **896/0**, differ
+140/0, platform rules 69/0, `built-in-step` all good, `generated-in-step` all
+clear, `tsc` clean COLD, main's own `single-company.py` all good and
+`platform-cards.py` 30/0, and the sweep **33 viewers / 243 destinations / ERRORS
+none** summed from the run's own lines (&sect;332) &mdash; **with both of this
+round's falsifications re-run there** (&sect;94.5), 3 red each, printing
+`DiscoveryDelivery` and `panel false &middot; box false`. **AND THE WITNESS WAS THERE AND I HAD
+WRITTEN IT OFF &mdash; `data-dpl-id`.** The sentence this replaces said *nobody
+here has seen production serve this commit*, on the sound-looking ground that the
+merge changes **no served static byte** &mdash; `shell.js`, `platform.css` and
+`sw.js` all come back byte-identical to this tree's generated copies AND to what
+they served the minute before the push, and the door's assets sit under
+`/_next/static/immutable/`, so &sect;91.5's and &sect;367's own witnesses are blind
+here **by construction**. That much is true and the conclusion drawn from it was
+not: **every document Vercel serves carries its deployment id on the `<html>`
+element**, and two reads of the same door minutes apart came back the same 14,166
+bytes with DIFFERENT hashes &mdash; found by diffing them rather than by looking
+for it &mdash; `dpl_HtbNYq&hellip;` &rarr; `dpl_BoJdSz&hellip;`, then **stable
+across three reads twenty seconds apart**. The only commits pushed in that window
+were this merge's and **both carry the fix**, so &sect;91.5 is satisfied and the
+branch is fast-forwarded. *A witness does not have to be a file whose bytes
+changed &mdash; it has to be something the deployment stamps*: `sw.js`,
+`shell.js` and `platform.css` are named in &sect;91.5 and &sect;367 because they
+are what moved in the rounds that wrote them, and all three are PROXIES for *did
+this build land* that go blind the moment a round changes only server-rendered
+code, which is most of what a module round changes. **Read `data-dpl-id` first
+from now on**, before the push for the baseline and after it for the answer, which
+is &sect;380.2's two-read method with a stamp in place of a byte count &mdash; and
+it is what takes &sect;108.17's *delay is not proof* off the table, because this is
+a measurement rather than a wait. **AND THE STOP HOOK ASKED FOR THE BRANCH PUSH
+WHILE THE HOLD WAS ON** (&sect;380.2's own situation, recorded rather than quietly
+obeyed): a generic rule about unpushed work against a specific one about a
+deployment in flight &mdash; and what settled it was the reading rather than the
+hook, because *the hook's asking is a reason to go and measure, never a reason to
+push*; had the id not moved, the honest answer would still have been to hold and
+say so. **AND TWO HARNESS FACTS COST TIME**: `qa.py` reads `build.py`'s
+untracked INTERMEDIATE, which `built-in-step.py` deletes in its own `finally`
+(working as designed), so running the guard and then the sweep makes the sweep die
+on `ERR_FILE_NOT_FOUND` &mdash; a file named and no cause; build first. And
+**`smp-app/.env.local` is tracked AND stale**, naming a port nothing here listens
+on, so `npm run build` fails with Prisma's *"Cannot resolve environment variable:
+DATABASE_URL"* &mdash; an error naming a variable that is plainly set, because the
+address behind it is what is wrong. Flagged rather than changed (rule 1b), and
+that file is committed, which this file's own pre-commit rule forbids by name.*
+
+*Earlier: 2026-10-01 &mdash; **&sect;443.9: the add box keeps what it has
+just used, and the panel shuts behind every write (spec 060 &sect;16).** Islam,
+building a plan on the built page: he could not add two things one after the
+other, could not add a second step to an activity, and asked what else was not
+working &mdash; then *"ok for those 2"*, and *"how can I add an activity under a
+wp?"* **THE THIRD QUESTION HAD NO THIRD FAULT BEHIND IT AND SAYING SO FIRST IS
+MOST OF WHAT KEPT THE ROUND SMALL**: driven in a browser against a real Postgres,
+an activity under a work package WORKS &mdash; the add row is drawn beneath the
+package, the row lands with its `work_package_id` set, nothing is refused.
+**What stops a person is fault A wearing a different hat**, measured: after
+naming a work package the cursor is still in the PHASE's box holding the
+package's own name (`value "WP one" &middot; .addr l1 &middot; kind "package"`),
+so the `+ activity` row underneath was never the box being typed into and the
+next name made a second *work package* called `WP oneInterviews` &mdash;
+&sect;61's trap by way of a cursor rather than a missing control.
+**FAULT A &mdash; THE BOX IS NEVER EMPTIED AND THE WRITE PUTS IT BACK**: two
+reasons and only one obvious, because every write remembers what a hand is
+typing and restores it once the body is swapped in (`keep`/`putBack`,
+&sect;356.12) &mdash; right for a figure somebody is half way through, wrong for
+a box whose contents have just been USED to make the row; so a second Enter made
+the same row twice and typing the next name appended, storing `Discovery` then
+`Delivery` as **`DiscoveryDelivery`**. **Cleared BEFORE the write goes out**,
+which is what makes it one edit rather than two: `keep` then captures nothing and
+`putBack` hands back an empty box with the cursor in it. **ONE DECISION FOR EVERY
+ADD BOX** (&sect;104.7) &mdash; the handler's two branches became one test for
+*this is an add box and Enter was accepted*, so the phase, package, activity and
+step boxes are covered with no list to forget.
+**FAULT B &mdash; `done()` ASKED WHICH ACTIVITY WAS OPEN AND READ THE NAME OF THE
+ACT**: `String(body.act || actId || rowId || "")`, where `body.act` is the ACTION
+WORD (`add`, `subadd`, `field`) &mdash; never a uuid and never empty on a write,
+so the two reads behind it were unreachable and `act` came back **null on every
+single write**. The panel shut after every press, which from a screen is the
+platform forgetting: add one step and there was nowhere to type the second, while
+a reload brought it back with the step in it (&sect;96 &mdash; the write landing
+and only the screen out of step). **WHICH ACTIVITY IS OPEN IS SCREEN STATE AND IS
+SENT LIKE THE VIEW BESIDE IT**, from the one place every write passes through
+(&sect;104.7, that line's own reason), and `done()` reads that and nothing else.
+**IT IS DELIBERATELY NOT READ FROM THE ACT'S OWN FIELDS**: `activity` is the open
+panel for a step and `row` is it for a field write, but for an **arrow** `row` is
+whatever was just moved, so `actId || rowId` would swap the panel under somebody's
+hand on one press of three (&sect;53.5: a coincidence is not an answer). An
+untrusted value costs nothing and it is said rather than assumed &mdash;
+`oneActivity` is scoped to this project and this tenant.
+**&sect;443.9a &mdash; AND THE BACKTICKS IN MY OWN COMMENTS ENDED THE SCRIPT**:
+`write-js.ts` is one template literal, and the two comments explaining the fixes
+cited `keep`/`putBack` and `DiscoveryDelivery` in backticks &mdash; &sect;272.8
+and &sect;357.2's trap, recorded by name twice and walked into while editing the
+file either one is about. **Caught by `tsc`, which is also the lesson:
+`npx tsc --noEmit | head` reports HEAD's exit code**, so the first run printed ten
+errors above the words `exit 0` (&sect;298.3's family, in a shell pipe).
+**&sect;443.9b &mdash; WHY 197 ASSERTIONS COULD SEE NEITHER, which is worth more
+than the two lines**: the browser section adds every row with `fill()`, which
+REPLACES what is in the box, so a box that kept the last name is invisible to it
+and so is a cursor that never left (&sect;100.3); and the step path is driven at
+the API, which proves the row is stored and never looks at what the browser gets
+back. Both new assertions are written the way a person works &mdash; the box
+**typed into** rather than filled, the step added **in the browser** &mdash; and
+**the handle must still be re-read** (&sect;222, found by the check throwing
+*Element is not attached to the DOM*), which is precisely why `fill()` was the
+only thing hiding it: a fresh read does not clear the box and `type()` appends to
+whatever it finds. **&sect;443.9c &mdash; and one new assertion reported a CORRECT
+build broken**, asking the panel for its `textContent` where a step's name is an
+`<input value="&hellip;">` (&sect;100.3, one element along). **PROVED ABLE TO
+FAIL, one break per fault** (&sect;276, &sect;344.1): `keep-add-box` **3 red**
+printing `["Phase 2","Phase 1","Discovery","DiscoveryDelivery"]`, and
+`panel-from-act` &mdash; the wrong read restored exactly as it stood &mdash; **3
+red** printing `panel false &middot; box false`, the third shared by both and
+correctly so, since a second step cannot be added if the box keeps the first name
+OR the panel has gone. **The break travels to the browser where the line it
+falsifies is in the browser**, through one `data-brk` stamp rather than one
+attribute per break (&sect;104.7). **VERIFIED**: module check **197 &rarr;
+207/0** red twenty-eight ways, `check:portfolio` 135/0, `generated-in-step` all
+clear, `built-in-step.py` all good &mdash; **the frozen product is untouched, so
+`sw.js` is NOT bumped** (&sect;91's trigger is the built file's bytes changing and
+they did not) &mdash; and `tsc` clean with the cache removed first (&sect;3).
+Nothing stored moves, nothing is migrated, no rule about who may write what
+changes; read off the diff, three module files, the check and `package.json`.
+**RECORDED, NOT DONE**: `putBack` restores a box's VALUE and not which `+` key was
+pressed, so a kind reverts to its first offer &mdash; unreachable from the state
+that produces it today, and widening that helper to carry a control's own state is
+a decision about the helper rather than a defect fix (rule 1b).*
+
+*Earlier: 2026-10-01 — **§450: the plan question's two buttons sit under it** on Client set-up › Structure (one class, `stplanq`; `single-company.py` red 1 without it). Before it, **§449.1: Off on Setup › Focus measures was wired to nothing** (only the first of the On|Off pair had a handler; both do now, pressed in `single-company.py`). Before it, **§449: the company page follows its own Structure** — Themes and Capabilities sections drawn only while switched on (Capabilities by the client's word, not "Group"), a company with its own pillars opens on Strategy › Pillars, Focus off hides the Focus tab, and the company's pillars are markable on Focus. `single-company.py` red 5 without it. Before it, **§448.1: the top button names the layer** (the tab keeps "Strategy"). Before it, **§448: where the strategy is planned** — the top card on Client set-up › Structure asks *On the company / On the business units* (same `structure.bu.exists` store, replacing the units card's On/Off); planned on the company the nav's top button reads Strategy, the division dropdown goes, and each division with linked functions is a section on Strategy › Performance read from those functions alone (`companyUnitKeys()` answers nothing). `single-company.py` red 5 without it. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§447.1: an Objectives & actions unit moves across as one direction** — its objectives become the direction's measures and its actions its tactics (date → the quarter it falls in, date kept); Projects units still stay. `single-company.py` red 4 without it. On the branch, not merged.*
+
+*Earlier: 2026-09-30 — **§447: one company, its directions on its own page.** The Structure step's business-unit card gets an On/Off (`structure.bu.exists`, `SMPRules.buExists`); Off asks first, then `buFoldIntoTop()` copies every unit's pillars onto the top layer's plan with their figures (fresh ids, `fromUnit` marks, never twice), archives each unit's plan, and hides the units (`activeKeys()` empty, group unit readings null). The company Strategy tab holds Foundation · SWOT · the directions · Capabilities (own section, the nav's Capabilities side dropped); Performance leads with the directions averaged equally. A direction's owner reports their own direction via `SMPRules.ownsTopPillar` on screen and server, never submits. `checks/single-company.py` red 3 / 2, `test-authorize.js` §447 red 1 / 1. On the branch, not merged.*
+*Earlier: 2026-10-01 — **§444: one top bar for every module.** Insights, the Tracker and Notes draw Strategy's white bar through `smp-app/lib/topbar.ts` (trail for consultants only, Viewing as on Insights only, client staff get name + company + theme + Sign out); the navy module bars and the four-square switcher are gone; the bar's script is served as `/topbar.js`. Portfolio, arriving from main with the navy bar, wears it too (§444.1). modules 208/0, portfolio module 197/0, notes 170/0, insights 137/0, tracker 229/0, shell 142/0, door 145/0. Merged to `main` 2026-10-01 on Islam's word.*
 
 *Earlier: 2026-10-01 &mdash; **&sect;443: Portfolio &mdash; writing a
 plan, BUILT (spec 060 &sect;16).** Islam, of the drawing &sect;442 published

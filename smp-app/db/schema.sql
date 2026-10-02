@@ -228,6 +228,27 @@ CREATE TABLE frameworks (
 );
 CREATE INDEX frameworks_section ON frameworks (idx);
 
+-- ── The Copilot's own settings (§456, spec 064) ─────────────────────────
+-- The instructions the Copilot is told and the five blank templates it
+-- offers, SAME FOR EVERY CLIENT (Islam, 2026-10-01), so a platform table with
+-- no tenant column — frameworks' shape, read and written outside withTenant.
+-- What ships is lib/copilot-defaults.generated.ts; a row here is a Forefront
+-- super user's edit OVER the shipped text, by key, and deleting the row puts
+-- the shipped text back. So an untouched platform holds no rows at all, and
+-- nothing is copied out of the code into the database to drift from it.
+--   key  `part1`…`part14` (an instruction part, `text`) or `t1`…`t5` (a
+--        template, `bytes` and `name`)
+CREATE TABLE IF NOT EXISTS copilot_assets (
+  key         text PRIMARY KEY,
+  text        text NOT NULL DEFAULT '',
+  name        text NOT NULL DEFAULT '',
+  bytes       bytea,
+  updated_by  uuid NULL REFERENCES users (id) ON DELETE SET NULL,
+  updated_at  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT copilot_asset_key CHECK (key ~ '^(part([1-9]|1[0-4])|t[1-5])$'),
+  CONSTRAINT copilot_asset_size CHECK (bytes IS NULL OR octet_length(bytes) <= 3145728)
+);
+
 -- ── The tenant-owned tables (42) ────────────────────────────────────────
 -- Every row: tenant_id uuid NOT NULL → tenants ON DELETE CASCADE, and the
 -- key it has today with tenant_id in front of it (data-model.md). The
@@ -1293,6 +1314,119 @@ CREATE TABLE portfolio_terminology (
 -- and portfolio_history. Each arrives with the screen that reads it; a table
 -- ahead of its screen is a column nothing writes (§294.2).
 
+-- ── THE STRATEGY COPILOT (spec 064) ──────────────────────────────────────
+-- A chat with the AI about one place and one section, and the deliverables
+-- saved from it, each with every version it has had. Office-only, by the
+-- module's own server (modules/copilot). Tenant-owned, so the loop below
+-- fences them on a fresh database and migration 020 on one already up.
+CREATE TABLE copilot_chats (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  -- The product's own place word (§54): `group`, `co:<k>`, a unit key,
+  -- `fn:<k>`, `cap:<id>`.
+  place text NOT NULL,
+  section text NOT NULL,
+  title text NOT NULL,
+  -- What "assume for me" recorded on this chat (decisions §3.3), carried onto
+  -- anything saved from it. Written by stage 2; stored empty until then.
+  assumptions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  -- The Advisory question budget (decisions §5): questions asked, the round.
+  budget jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  last_at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_chat_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX copilot_chats_shelf ON copilot_chats (tenant_id, place, section, last_at DESC);
+
+-- Appended, never edited: what was said is the record of how a deliverable
+-- came to be (decisions §3.6).
+CREATE TABLE copilot_messages (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  chat_id uuid NOT NULL,
+  who text NOT NULL,
+  by_key text NOT NULL DEFAULT '',
+  body text NOT NULL DEFAULT '',
+  -- What the screen draws specially (playback, draft, an offer, an
+  -- assumption, pasted material). NULL is a plain message.
+  part jsonb,
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, chat_id) REFERENCES copilot_chats (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_message_who CHECK (who IN ('person','ai'))
+);
+CREATE INDEX copilot_messages_chat ON copilot_messages (tenant_id, chat_id, id);
+
+CREATE TABLE copilot_deliverables (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  place text NOT NULL,
+  section text NOT NULL,
+  type text NOT NULL DEFAULT 'free',
+  kind text NOT NULL DEFAULT 'copilot-only',
+  title text NOT NULL,
+  -- The approach recorded when the place was not set up yet (decisions §4.3).
+  approach text NOT NULL DEFAULT '',
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_deliverable_kind CHECK (kind IN ('promotable','copilot-only')),
+  CONSTRAINT copilot_deliverable_title CHECK (btrim(title) <> '')
+);
+CREATE INDEX copilot_deliverables_shelf ON copilot_deliverables (tenant_id, place, section);
+
+-- A version is never edited or deleted: an edit and a restore each ADD one
+-- (decisions §3.6, §3.7). `chat_id` carries NO foreign key on purpose — a
+-- chat may be deleted by whoever started it, and the version it produced is
+-- the record and must outlive it; the chat's title is kept beside it.
+CREATE TABLE copilot_versions (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id bigserial,
+  deliverable_id uuid NOT NULL,
+  n integer NOT NULL,
+  body jsonb NOT NULL DEFAULT '{}'::jsonb,
+  note text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  chat_id uuid,
+  chat_title text NOT NULL DEFAULT '',
+  restored_from integer,
+  assumptions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  pasted boolean NOT NULL DEFAULT false,
+  gaps jsonb NOT NULL DEFAULT '[]'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, deliverable_id) REFERENCES copilot_deliverables (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_version_n UNIQUE (tenant_id, deliverable_id, n),
+  CONSTRAINT copilot_version_positive CHECK (n >= 1)
+);
+
+-- A file in a Copilot chat (spec 064 stage 2): belongs to its chat and
+-- nothing else. message_id is NULL while it waits above the composer.
+CREATE TABLE copilot_files (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  chat_id uuid NOT NULL,
+  message_id bigint,
+  name text NOT NULL,
+  kind text NOT NULL,
+  size integer NOT NULL,
+  bytes bytea NOT NULL,
+  text text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  FOREIGN KEY (tenant_id, chat_id) REFERENCES copilot_chats (tenant_id, id) ON DELETE CASCADE,
+  CONSTRAINT copilot_file_kind CHECK (kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_file_size CHECK (size > 0 AND size <= 3145728)
+);
+CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users
@@ -1331,7 +1465,7 @@ BEGIN
     WHERE n.nspname = current_schema() AND c.relkind = 'r'
       AND c.relname NOT IN ('tenants','users','tenant_users','sessions','login_attempts',
                             'platform_access','tenant_log','push_keys','memory_entries',
-                            'frameworks','_migrations')
+                            'frameworks','copilot_assets','_migrations')
   LOOP
     EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
     EXECUTE format('ALTER TABLE %I FORCE ROW LEVEL SECURITY', t);

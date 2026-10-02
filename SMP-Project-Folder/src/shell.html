@@ -223,6 +223,7 @@
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
 <script src="LIBRARY"></script>
+<script src="COPILOT"></script>
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
@@ -271,6 +272,16 @@
      second client-wide tab says so about itself and `ownTabs()` is never
      edited (§104.7). It is still DRAWN wherever you are; what it stops
      being is the REASON to be there. */
+  /* SPEC 064: THE STRATEGY COPILOT — the office's AI workspace for the place
+     you are standing on, after Reporting (Islam's decision record v0.4 and
+     the picture he signed off). `when` is the server's own gate read off the
+     document (COPILOT.shown); `everywhere` because, like the reports, being
+     able to open it is never a reason to be offered a destination (§383).
+     Declared once and referenced four times, the file's own idiom. */
+  var COP_TAB = { k:"copilot", ac:"c_kb", label:"Copilot", everywhere:true,
+                  when: function(){ return COPILOT.shown(); },
+                  sections: function(){ return COPILOT.sections(); } };
+
   var LIB_TAB = { k:"insights", ac:"c_kb", label:"Insights", everywhere:true,
                   when: function(){ return LIBRARY.shown(); },
                   sections: function(){ return LIBRARY.sections(); } };
@@ -294,7 +305,14 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")); }
+  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
+  /* §466: the top's plan is drawn while it is switched on and either it
+     plans in projects or its pillars component is on. */
+  function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
+  /* §465: the capabilities are a section of this tab wherever the office put
+     them in the company plan — always at company level, by choice at units
+     level — and never while they are a layer of their own. */
+  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -305,9 +323,14 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || "Plan",
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: function(){ return planOn("group") && compOn("group", "pillar"); } }];
+                    when: topPlanOn },
+                  /* §447: with the units off the company page carries its
+                     capabilities as a section of their own. */
+                  { k:"caps", ac:"g_found", label:L("capability", "bu"),
+                    render: renderTopCaps,
+                    when: topCapsOn }];
       } };
   }
   var SUBS = {
@@ -440,7 +463,8 @@
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(k){ return renderFnReport(k); } },
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
        strategy of its own — no plan, no foundation, no objectives (§23) — so a
@@ -463,7 +487,8 @@
             ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn(t, c); });
         } },
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     group: [
       /* ── STRATEGY FIRST, AS A UNIT'S IS (§428) ──────────────────────
@@ -481,17 +506,23 @@
       topStrategyTab(true),
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       topStrategyTab(false),
-      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
+      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
+        /* §449: off means it disappears (§102); the switch stays on Setup. */
+        when: function(){ return focusOn(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
         when: function(){ return templeOn("group"); } },
-      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting },
+      /* §447: the weighting sets how much each unit counts; with the units
+         off there is nothing for it to weight. */
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
+        when: function(){ return buExists(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
         when: function(){ return !!reportSectionState() && topHasPlan() && planOn("group") && canReport("group"); },
         render: function(){ return renderReport(topAsUnit()); } },
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     unit: [
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
@@ -579,7 +610,8 @@
         when: function(t){ return !!reportSectionState() && planOn(t); },
         render: function(u){ return renderReport(u); } },
       MY_TAB,
-      LIB_TAB
+      LIB_TAB,
+      COP_TAB
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
 
@@ -1336,6 +1368,7 @@
      this next. Nothing stored holds it (it is a plain var, re-initialised on
      every load), so the rename costs no tenant anything. */
   var NAVFOLD = "units";
+  var NAVFOLDAT = null;   /* §464: the destination the company-level list last followed */
 
   function myUnits(){
     return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
@@ -1367,10 +1400,41 @@
     var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
     if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    if (cs.length) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
+    /* §447: with the units off, capabilities are a section of the company
+       page and not a side of the row. */
+    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
+    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
     if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
+    return out;
+  }
+  /* ── PLANNED ON THE COMPANY, THE ROW IS THE FUNCTIONS (§464) ───────────
+     Islam, of the company-level row: *"having the functions button and the
+     functions beside it like the units level and if the divisions are there
+     the divisions become the buttons ... no drop downs"*, then *"remove the
+     2nd word ... just retail wholesale group"*. So with no division the side
+     is one lit word with every function beside it, and with divisions the
+     side becomes one segment per division holding a function, in the order
+     they are declared, plus a last segment named with the top-level word for
+     the functions linked to none. A segment carries its division (`co`), so
+     pressing it opens that division's page as well as its list. A division
+     linking no function this viewer reaches has nothing to list and no
+     segment (&sect;61 from the other side: a segment that lists nothing is a
+     control with nothing behind it). */
+  function companyFnSides(fs){
+    var left = fs.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
+        keys:mine.map(function(k){ return "fn:" + k; }) });
+    });
+    if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
+      keys:fs.map(function(k){ return "fn:" + k; }) }];
+    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
+      keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
   /* A TENANT WITH NO CAPABILITIES SEES EXACTLY THE SWITCH IT HAS TODAY, which
@@ -1399,6 +1463,10 @@
 
   function foldsNeeded(){
     var sides = navSides();
+    /* §464: planned on the company the switch is always drawn — one lit word
+       with no divisions, the divisions with them — because that word is what
+       says what the row beside it lists. */
+    if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
     return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
   }
@@ -1430,8 +1498,11 @@
        tenant with no companies has only the group, and a company CEO whose
        `seeGroup` flag is off has only their own company. */
     var tops = [];
-    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label:labelWord("topword","group") });  /* §404: the client's own word */
-    companiesReachable().forEach(function(ck){
+    if (ownTabs(SUBS.group, "group").length) tops.push({ k:"group", label: labelWord("topword","group") });  /* §404: the client's own word — §448.1: on both shapes, so the button names the layer and the tab under it keeps "Strategy" */
+    /* §448: planned on the company, a division is read under Strategy ›
+       Performance rather than visited, so it leaves the navigation — unless
+       the group is out of reach, when the divisions are all there is. */
+    if (buExists() || !tops.length) companiesReachable().forEach(function(ck){
       if (ownTabs(SUBS.co, "co:" + ck).length)
         tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
     });
@@ -1465,11 +1536,21 @@
          list with no way to see that Functions has anything. §334: asked of
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
-      var sides = navSides();
+      var sides = navSides(), atCo = !buExists();
+      /* §464: on the company the list follows where you ARE when you arrive
+         somewhere new — a function opened from a link, or a division's page —
+         and is left alone while you are only browsing the switch. */
+      if (atCo && current !== NAVFOLDAT) {
+        NAVFOLDAT = current;
+        sides.forEach(function(x){
+          if (x.keys.indexOf(current) !== -1 || (x.co && current === "co:" + x.co)) NAVFOLD = x.fold;
+        });
+      }
       if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
         NAVFOLD = sides.length ? sides[0].fold : "units";
-      out.push({ folds: sides.map(function(x){
-        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold };
+      out.push({ multi:atCo, folds: sides.map(function(x){
+        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold, co:x.co || null,
+          here:!!(x.co && current === "co:" + x.co), one:!!x.one };
       }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
@@ -2107,6 +2188,15 @@
        always has — on the tab marked primary (Performance). Strategy leading
        the row is where it sits, not where a session lands. */
     if (k === "group") {
+      /* §449: A TOP LAYER WITH PILLARS OF ITS OWN OPENS ON THEM (Islam:
+         "when I click on the company it should open by default on the
+         Pillars"). Only when the plan section is actually offered, so a
+         group whose plan is off still opens on Performance as before. */
+      var gs = d.filter(function(x){ return x.k === "strategy"; })[0];
+      if (gs) {
+        var gsecs = allowed(gs.sections(), t);
+        if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+      }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
     }
@@ -2265,13 +2355,22 @@
            segmented control means and the opposite of what §41.8 decided for
            the two-sided one (there, lighting the other half made the state
            unreadable exactly when somebody was looking at it). */
-        if (t.folds.length > 2) {
+        /* §464: one side on the company is a WORD, not a control — there is
+           nothing to switch to, and a button that switches to itself is a
+           control that lies about having somewhere to go (§61). */
+        if (t.folds.length === 1 && t.folds[0].one) {
+          return '<span class="sep"></span>' +
+            '<span class="navswitch one"><span class="nsw on">' + esc(t.folds[0].label) + '</span></span>';
+        }
+        if (t.folds.length > 2 || t.multi) {
           return '<span class="sep"></span>' +
             '<div class="navswitch multi" role="group" aria-label="Which list to show">' +
             t.folds.map(function(f){
-              return '<button class="nsw' + (f.open ? " on" : "") + '"' +
-                ' data-fold="' + f.fold + '" aria-pressed="' + (f.open ? "true" : "false") +
-                '">' + f.label + '</button>';
+              return '<button class="nsw' + (f.open ? " on" : "") + (f.here ? " here" : "") + '"' +
+                ' data-fold="' + esc(f.fold) + '"' + (f.co ? ' data-co="' + esc(f.co) + '"' : '') +
+                (f.here ? ' aria-current="page"' : '') +
+                ' aria-pressed="' + (f.open ? "true" : "false") +
+                '">' + esc(f.label) + '</button>';
             }).join("") + '</div>';
         }
         var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
@@ -2346,6 +2445,16 @@
            stay exactly as they are. A SWITCH, not a toggle — pressing the lit
            side leaves it lit (§47.6). */
         NAVFOLD = b.dataset.fold;
+        /* §464: a division's segment is also a door — its own page, read
+           from the functions linked to it — when this viewer may open it. */
+        var co = b.dataset.co;
+        if (co && ownTabs(SUBS.co, "co:" + co).length) {
+          if (current !== "co:" + co) leaveModes();
+          current = NAVFOLDAT = "co:" + co;
+          currentSub = entrySub(current);
+          paint(); window.scrollTo(0,0);
+          return;
+        }
         paintUnits();
       });
     });
@@ -4377,6 +4486,16 @@
     document.querySelectorAll("[data-modal]").forEach(function(b){
       b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
     });
+    /* §447: a capability opened from the company page lands where its own
+       row would have landed it. */
+    document.querySelectorAll("[data-gocap]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.preventDefault();
+        if (!capsReachable().some(function(c){ return "cap:" + c.id === b.dataset.gocap; })) return;
+        leaveModes(); current = b.dataset.gocap; currentSub = entrySub(current);
+        paint(); window.scrollTo(0,0);
+      });
+    });
     document.querySelectorAll("[data-go]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation(); e.preventDefault();
@@ -4516,9 +4635,13 @@
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     /* The focus feature's switch (§102). `this`, never a closure over the
        element, for the reason stated three lines down. */
-    var fsw = document.querySelector("[data-focusswitch]");
-    if (fsw) fsw.addEventListener("click", function(){
-      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    /* §449.1: BOTH halves. A `querySelector` wired the first match only, so
+       since the switch became an On|Off pair (§130.5) pressing Off did
+       nothing at all — Islam: *"can't turn off"*. */
+    document.querySelectorAll("[data-focusswitch]").forEach(function(fsw){
+      fsw.addEventListener("click", function(){
+        setFocusOn(this.dataset.focusswitch === "1"); paint();
+      });
     });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
@@ -11094,7 +11217,51 @@
      plan or … capabilities it needs to be changable with a warning"*). It
      had none — Setup's control switched in silence — and it plans two ways
      only, pillars or projects (capFormat), absent being projects. */
+  /* §466: THE TOP LAYER TAKES THE SAME SWITCH — the company's plan in
+     pillars or in projects. Its way lives on the structure, not on a row
+     (`structure.top.plan.way`, an ABSENCE for pillars, §50.6), and what is
+     held is `GROUP.items` or `GROUP.topProjects`; hidden and kept either
+     way, exactly as a unit's switch. */
+  function switchTopWay(value, sel){
+    var was = topWay(), now = value === "projects" ? "projects" : "pillars";
+    var back = function(){ if (sel) sel.value = was; };
+    if (now === was) return;
+    var apply = function(){
+      var st = GROUP.structure || (GROUP.structure = {});
+      var top = st.top || (st.top = {}), pl = top.plan || (top.plan = {});
+      if (now === "projects") pl.way = "projects";
+      else {
+        delete pl.way;
+        if (!Object.keys(pl).length) delete top.plan;
+        if (!Object.keys(top).length) delete st.top;
+        if (!Object.keys(st).length) delete GROUP.structure;
+      }
+      fieldSaved();
+      paint();
+    };
+    var n = was === "pillars" ? (Array.isArray(GROUP.items) ? GROUP.items.length : 0)
+          : (Array.isArray(GROUP.topProjects) ? GROUP.topProjects.length : 0);
+    if (!n) { apply(); return; }
+    var wordOf = function(k){ return k === "pillars" ? L("pillar","bu") : L("project","bu"); };
+    var held = was === "pillars" ? plural(n, L1("pillar"), L("pillar")) : plural(n, L1("project"), L("project"));
+    var who = labelWord("topword", "group") || "The company";
+    openModalHtml(esc("Change how " + who + " plans?"),
+      esc(wordOf(was) + " \u2192 " + wordOf(now)),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(who) + '</b>\u2019s ' + esc(held) +
+          ' will be hidden and kept. Switching back brings them back.</p>' +
+        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
+        '<button class="go" data-rmyes="1">Change how it plans</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rmno]");
+    if (no) no.addEventListener("click", function(){ back(); closeModal(); });
+    var yes = box.querySelector("[data-rmyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); apply(); });
+  }
   function switchPlanWay(kind, key, value, sel){
+    if (kind === "top") { switchTopWay(value, sel); return; }
     var isUnit = kind === "unit", isCap = kind === "cap";
     var rec = isUnit ? UNITS[key] : isCap ? capById(key) : FUNCTIONS[key];
     if (!rec) return;

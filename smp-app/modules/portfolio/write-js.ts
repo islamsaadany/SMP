@@ -85,6 +85,13 @@ export const WRITE_JS = `(function () {
          is fifteen chances to forget (§104.7). */
       if (B.getAttribute("data-brk") !== "no-project") act.id = PROJ;
       act.view = B.getAttribute("data-view") || "";
+      /* WHICH ACTIVITY IS OPEN IS SCREEN STATE, LIKE THE VIEW BESIDE IT, and
+         only the browser knows it — so it is sent on every act, here and at
+         no call site (§104.7, the line above's own reason). done() used to
+         guess at it from the act's own fields, which is a coincidence rather
+         than an answer: it is the open activity for a step or a field write
+         and somebody else's row for an arrow (§53.5). */
+      act.open = actId() || "";
       return fetch(API, { method: "POST", credentials: "same-origin",
           headers: { "Content-Type": "application/json" }, body: JSON.stringify(act) })
         .then(function (r) { return r.json().catch(function () { return { ok: false, why: "The server did not answer." }; }); })
@@ -163,18 +170,37 @@ export const WRITE_JS = `(function () {
     }
     if (e.key !== "Enter") return;
     var ar = t.closest ? t.closest(".addr") : null;
-    if (ar) {
+    /* THE BOX IS EMPTIED THE MOMENT ENTER IS ACCEPTED, and that is one
+       decision for every add box there is rather than one per kind (§104.7):
+       a fifth box added later is covered the day it is added.
+
+       IT HAS TO HAPPEN BEFORE THE WRITE GOES OUT, which is the whole fault.
+       Every write remembers what a hand is typing and puts it back once the
+       body is swapped in (keep/putBack, §356.12) — right for a figure
+       somebody is half way through, and wrong for this box, whose contents
+       have just been USED to make the row. So the name stayed in it with the
+       cursor still in it: a second Enter made the same row twice, and typing
+       the next name appended to the last, storing Discovery then Delivery
+       as DiscoveryDelivery. Cleared first, keep captures nothing and
+       putBack hands back an empty box with the cursor in it, which is what
+       a person who has just named one thing is about to need.
+
+       AND IT IS WHAT MADE AN ACTIVITY UNDER A WORK PACKAGE UNREACHABLE: the
+       cursor stayed in the PHASE's box holding the package's own name, so the
+       '+ activity' row drawn underneath was never the box being typed into
+       (§61's trap, by way of a cursor rather than a missing control). */
+    if (ar || t.id === "subadd") {
       e.preventDefault();
-      if (!t.value.trim()) return;
-      where = "said";
-      post({ act: "add", kind: ar.getAttribute("data-kind"), parent: ar.getAttribute("data-add"), name: t.value });
-      return;
-    }
-    if (t.id === "subadd") {
-      e.preventDefault();
-      if (!t.value.trim()) return;
-      where = "asaid";
-      post({ act: "subadd", activity: actId(), name: t.value });
+      var nm = t.value;
+      if (!nm.trim()) return;
+      if (B.getAttribute("data-brk") !== "keep-add-box") t.value = "";
+      if (ar) {
+        where = "said";
+        post({ act: "add", kind: ar.getAttribute("data-kind"), parent: ar.getAttribute("data-add"), name: nm });
+      } else {
+        where = "asaid";
+        post({ act: "subadd", activity: actId(), name: nm });
+      }
       return;
     }
     /* A one-line box commits on Enter rather than inserting a newline, which

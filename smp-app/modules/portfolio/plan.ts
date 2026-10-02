@@ -60,6 +60,8 @@ import { shortDay, monthWord } from "../../lib/day.ts";
 import { esc, plural, skeleton, tabs, PLAN_CSS } from "./page.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
+/* The breaks whose subject is a line of the browser script. */
+const BROWSER_BREAKS = ["no-project", "keep-add-box"];
 
 const DAY = 864e5;
 const at = (d: string) => Date.parse(d + "T00:00:00Z");
@@ -772,7 +774,10 @@ export async function planDocument(a: PlanArgs): Promise<string> {
        driven the request the BROWSER makes (§96). */
     body, attrs: a.edit
       ? ' data-api="' + esc(clientHref(a.slug, "portfolio", "api")) + '"' +
-        (brk() === "no-project" ? ' data-brk="no-project"' : "") +
+        /* THE BREAK TRAVELS TO THE BROWSER where the line it falsifies is in
+           the browser (constitution XVI): one stamp rather than one attribute
+           per break, so a break added later needs no edit here (§104.7). */
+        (BROWSER_BREAKS.includes(brk()) ? ' data-brk="' + brk() + '"' : "") +
         ' data-project="' + esc(a.project.id) + '"' +
         ' data-plan="' + esc(planHref(a, {})) + '"'
       : undefined });

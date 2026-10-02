@@ -179,7 +179,9 @@ with sync_playwright() as p:
     # ── 3 · THE BRANDING IS ABSORBED INTO STEP ONE ─────────────────────────
     print("\n§3 · the branding lives on the first step")
     ck("the colour controls are inside the flow", bool(q(pg, ".csetup .wzbrand [data-brand]")))
-    ck("…and the group's mark upload", bool(q(pg, ".csetup .wzbrand [data-glogo]")))
+    # §461 REVERSED this, never loosened it (§218): there is ONE mark, the
+    # client's (the door's), so the branding block carries no second upload.
+    ck("…and NO second, group mark upload (§461: one mark, the client's)", not q(pg, ".csetup .wzbrand [data-glogo]"))
     key = ev(pg, "()=>(document.querySelector('.csetup [data-brand]')||{}).dataset && document.querySelector('.csetup [data-brand]').dataset.brand", None)
     before = after = wrote = None
     if key:   # degrades: a build with no control here has nothing to write with (§215)
@@ -346,9 +348,15 @@ with sync_playwright() as p:
        all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("unitword|one", "unitword|many", "fnword|one", "fnword|many")))
     # §418: a part is named per LAYER, inside the plan section's pillars way
     # (rewritten, never loosened, §218 — every layer, both forms).
-    ck("…and the key measures and tactics beside the pillars, on every layer",
+    ck("…and the key measures and tactics beside the pillars, on the units and the functions",
        all(q(pg, '.csetup [data-stway="%s|pillars"] [data-stlw="%s|%s|%s"]' % (k, k, part, form))
-           for k in ("top", "bu", "fn") for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
+           for k in ("bu", "fn") for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
+    # §465: the company's own names live on the Directions card, once it is on.
+    press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(1)')
+    ck("…and on the company's Directions card once it is switched on (§465)",
+       all(q(pg, '.csetup [data-stcard="dir"] [data-stlw="top|pillar|%s"]' % f) for f in ("one", "many")) and
+       all(q(pg, '.csetup [data-stway="top|pillars"] [data-stlw="top|%s|%s"]' % (p, f)) for p in ("measure", "tactic") for f in ("one", "many")))
+    press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)')
     ck("there is no Words step", q(pg, ".csetup .wzstep[data-step=words]") is None)
     # no second layer: the divisions step says so and no row offers a division
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));st.mid=Object.assign({},st.mid||{},{exists:false});GROUP[SMPRules.STRUCTURE]=st;paint();}")

@@ -24,6 +24,7 @@
 
    Needs `npm run build` first and the chromium this image carries. */
 import { spawn } from "node:child_process";
+import http from "node:http";
 import { SCHEMA } from "../db/schema-name.mjs";   /* the shared schema is not `public` (§317.4) */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -55,7 +56,29 @@ if (brk === "serve-from-disk") writeFileSync(SWFILE, SWWAS + '\nself.addEventLis
 
 const { tenantId } = await devTenant({ url: URL_, log: () => {} });
 const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_path=" + SCHEMA });
-const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk }, stdio: ["ignore", "pipe", "pipe"], detached: true });
+/* A STAND-IN MODEL (§100.3, spec 064 stage 2): the Copilot tab is pressed
+   against a provider that answers with a full answer, so what the tab DRAWS
+   of an answer is measured, and what it SENT is read off the wire. */
+const MODEL_SEEN = [];
+const MODEL_ANSWER = {
+  reply: "Here is a first foundation from the plan.",
+  playback: { understood: "Draft Mobile's foundation", workingFrom: "the platform", missing: "The purpose in the client's words" },
+  missing: ["The purpose in the client's words"],
+  options: [{ label: "Assume for me", recommended: true }, { label: "I'll give it" }],
+  assumptions: ["Purpose follows the aspiration"],
+  draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }, { title: "Wide store network", text: "Present in every governorate", evidence: "Store count in the plan", score: "4", source: "platform" }] }] },
+  following: "Purpose",
+};
+const model = http.createServer((req, res) => {
+  let b = ""; req.on("data", (d) => (b += d)); req.on("end", () => {
+    try { MODEL_SEEN.push(JSON.parse(b)); } catch { MODEL_SEEN.push(null); }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(MODEL_ANSWER) }] } }] }));
+  });
+});
+await new Promise((r) => model.listen(0, "127.0.0.1", r));
+const server = spawn("npx", ["next", "start", "-p", String(PORT)], { cwd: join(import.meta.dirname, ".."), env: { ...process.env, DATABASE_URL_UNPOOLED: URL_, SMP_BREAK: brk,
+  GEMINI_API_KEY: "stand-in-key", GEMINI_ENDPOINT: "http://127.0.0.1:" + model.address().port + "/models/" }, stdio: ["ignore", "pipe", "pipe"], detached: true });
 server.stdout.on("data", () => {}); server.stderr.on("data", (d) => process.stderr.write(d));
 let up = false;
 for (let i = 0; i < 60 && !up; i++) { await new Promise((r) => setTimeout(r, 500)); try { up = (await fetch(BASE + "/")).status === 200; } catch {} }
@@ -759,6 +782,298 @@ await section("3d · the reports tab is stamped with what this client HAS (§385
   }
 });
 
+await section("3e · the Copilot tab is stamped for the office only (spec 064)", async () => {
+  /* THE SEAM (§316.7's shape, spec 064 stage 1). The rule is copilotStampFor
+     — the client HAS the module AND the seat is the office's — and the tab
+     reads one attribute off the document the server wrote. A build that
+     stamped it for everybody satisfies every assertion made from the office's
+     side, so the client's own person is asked in the same run (§94.2). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const has = (h) => / data-copilot='1'/.test(h.slice(0, 1200));
+  const rawAs = async (who) => { await fresh(); await signIn(who);
+    const ck = (await ctx.cookies()).map((c) => c.name + "=" + c.value).join("; ");
+    return await (await fetch(BASE + "/raya-trade/strategy", { headers: { cookie: ck } })).text(); };
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    check(has(await rawAs("office@forefront.example")), "the office, on a client with the Copilot, is stamped for the tab");
+    check(!has(await rawAs("mobhead@raya.example")), "\u2026a client's own person on the same client is not (the office's alone)");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]);
+    check(!has(await rawAs("office@forefront.example")), "\u2026and a client WITHOUT the module stamps nobody (\u00a761)");
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 2)", async () => {
+  /* PRESSED, AND READ BACK FROM THE DATABASE (§96): a rail that draws what it
+     was handed and writes nothing looks identical to one that works. The
+     state is MADE (§255) — the dev tenant holds no module and no chat. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const count = async (t) => Number((await asTenant(tenantId, (c) => c.query("select count(*)::int n from " + t))).rows[0].n);
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    const p = await place();
+    check(p[0] === "mobile" && p[1] === "copilot" && p[2] === "foundation", "the address opens Mobile's Copilot, Foundation section", JSON.stringify(p));
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
+    const ci = tabs.indexOf("copilot");
+    check(ci >= 0 && ci === tabs.length - 1, "the Copilot tab is the last tab, after Reporting and Insights (Islam, 2026-10-01)", tabs.join("|"));
+    const secs = await page.evaluate(() => Array.from(document.querySelectorAll("[data-sub2]")).map((b) => b.textContent.trim()));
+    check(["Foundation", "Analysis", "Directions", "Execution", "Advisory"].every((w) => secs.includes(w)), "…with its five sections", secs.join("|"));
+    const rails = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => ({ t: r.getBoundingClientRect().top, h: r.querySelector("h3,.coprh,header") ? r.textContent.slice(0, 40) : r.textContent.slice(0, 40) })));
+    check(rails.length === 2 && rails[0].t < rails[1].t && /Chats/i.test(rails[0].h) && /Deliverables/i.test(rails[1].h),
+      "two rails, Chats above Deliverables", JSON.stringify(rails));
+
+    const c0 = await count("copilot_chats"), m0 = await count("copilot_messages");
+    await page.click("[data-cop-newchat]"); await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
+    const ctxLine = await page.evaluate(() => { const e = document.querySelector(".copctx"); return e ? e.textContent.trim() : ""; });
+    check(/Mobile/.test(ctxLine) && /pillar/i.test(ctxLine), "the chat says in one line what the AI can see for the place", ctxLine);
+    /* A file, attached through the real control and read back (§96). */
+    const docx = readFileSync(join(import.meta.dirname, "fixtures", "copilot-notes.docx"));
+    await page.setInputFiles("[data-cop-file]", { name: "notes.docx", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", buffer: docx });
+    await page.waitForSelector(".coppend .copfile", { timeout: 8000 }).catch(() => {});
+    check(/notes\.docx/.test(await page.evaluate(() => (document.querySelector(".coppend") || {}).textContent || "")) && (await count("copilot_files")) >= 1,
+      "a Word file attaches through the paperclip and waits above the box as a chip");
+    const seen0 = MODEL_SEEN.length;
+    await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copplay"), null, { timeout: 15000 }).catch(() => {});
+    check((await count("copilot_chats")) === c0 + 1, "+ New chat writes a chat to the database");
+    check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the Copilot's answer");
+    const sent = MODEL_SEEN[seen0];
+    const sys = sent && sent.systemInstruction ? sent.systemInstruction.parts.map((x) => x.text).join("") : "";
+    check(MODEL_SEEN.length === seen0 + 1 && /THIS SECTION PRODUCES: The place's foundation/.test(sys) && sys.includes(ctxLine) && /=== FILE: notes\.docx ===/.test(sys),
+      "the model was asked once, with the section's guidance, the tab's own line and the file", sys.slice(0, 160));
+    /* §457: the place's WRITTEN plan travels with the question. Islam was told
+       Mobile had no Winning Aspiration while the Foundation held one, because
+       only names and counts went. Asserted against the tenant's own stored
+       words, never a literal (§94.8), with the words asserted present first or
+       an empty aspiration passes the "includes" half by default (§113.8). */
+    const asp = await page.evaluate(() => { try { return String((UNITS.mobile || {}).aspiration || "").replace(/\s+/g, " ").trim(); } catch (e) { return ""; } });
+    check(asp.length > 20 && /THE PLAN AS WRITTEN/.test(sys) && sys.includes(asp.slice(0, 60)) && /the plan's own text/.test(ctxLine),
+      "…and Mobile's own Winning Aspiration went with it, the line saying the plan's text is included (§457)", asp.slice(0, 60));
+    const ans = await page.evaluate(() => {
+      const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
+      return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
+        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector(".copopt.rec") || {}).textContent || "",
+        opts: m.querySelectorAll("[data-cop-reply]").length,
+        it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
+    });
+    check(ans && ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
+      "the answer draws its playback, what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
+    /* §460: an item the method shapes draws its title, score and evidence, and
+       the answer says which part of the method it is working through. */
+    check(ans && /Wide store network/.test(ans.it) && /4/.test(ans.it) && /Evidence: Store count in the plan/.test(ans.it) && /Following: Purpose/.test(ans.follow),
+      "…an item with a title, a score and its evidence draws all three, and the step being followed is named (§460)", JSON.stringify(ans && { it: ans.it, follow: ans.follow }));
+    const mine = await page.evaluate(() => { const m = document.querySelectorAll("[data-cop-msgs] .copmsg.me"); return m.length ? m[m.length - 1].textContent : ""; });
+    check(/notes\.docx/.test(mine) && (await page.evaluate(() => !document.querySelector(".coppend .copfile"))), "…the file now rides on what was said, and nothing waits above the box", mine.slice(0, 120));
+    await page.click("[data-cop-reply='Assume for me']");
+    await page.waitForFunction(() => document.querySelectorAll("[data-cop-msgs] .copmsg.me").length >= 2 && document.querySelectorAll("[data-cop-msgs] .copmsg.ai").length >= 2, null, { timeout: 15000 }).catch(() => {});
+    const again = MODEL_SEEN[MODEL_SEEN.length - 1];
+    const sys2 = again && again.systemInstruction ? again.systemInstruction.parts.map((x) => x.text).join("") : "";
+    check(MODEL_SEEN.length === seen0 + 2 && /- Purpose follows the aspiration/.test(sys2),
+      "pressing a quick reply sends it, and the assumption already made goes with the next ask", MODEL_SEEN.length - seen0);
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
+
+    /* §453 — THE COMPOSER AND THE RAIL'S THREE DOTS, from the signed-off
+       mockup. Measured as boxes and pressed, never read as classes (§94.8). */
+    const box = async () => page.evaluate(() => { const t = document.querySelector("[data-cop-text]"); const s = document.querySelector("[data-cop-send]");
+      const b = document.querySelector(".copbox"), u = document.querySelector(".copunder"), m = document.querySelector("[data-cop-main]");
+      return { h: t.getBoundingClientRect().height, sendIn: !!(b && s && b.contains(s)), sendWord: s ? s.textContent.trim() : "?",
+        svg: !!(s && s.querySelector("svg")), clipWord: (u && u.querySelector("[data-cop-attach]") || {}).textContent || "",
+        clipUnder: !!(u && u.querySelector("[data-cop-attach]")), underH: u ? u.getBoundingClientRect().height : 0,
+        strip: (() => { const c = u && u.querySelector("[data-cop-attach]"); if (!b || !c || !m) return null;
+          const bb = b.getBoundingClientRect(), cb = c.getBoundingClientRect(), mb = m.getBoundingClientRect();
+          return { space: Math.round(mb.bottom - bb.bottom), above: Math.round(cb.top - bb.bottom), below: Math.round(mb.bottom - cb.bottom) }; })(),
+        bottomGap: m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1 }; });
+    let bx = await box();
+    check(bx.h >= 47 && bx.h <= 52, "the box starts at one line", bx.h);
+    /* §458: Islam — "the page of the copilot is scrolling up with no need the
+       scrolling is inside the chat". The pane is sized to the window, so the
+       PAGE must have nothing to scroll; asserted with the chat itself able
+       to scroll or not, since a page that scrolls is the fault either way. */
+    const pg = await page.evaluate(() => ({ extra: document.documentElement.scrollHeight - innerHeight, chatEnds: (() => { const m = document.querySelector("[data-cop-main]"); return m ? Math.round(innerHeight - m.getBoundingClientRect().bottom) : -1; })() }));
+    check(pg.extra <= 1 && pg.chatEnds >= 0, "…and the page itself does not scroll — only the chat inside it does (§458)", JSON.stringify(pg));
+    check(bx.sendIn && bx.svg && bx.sendWord === "", "…Send is the arrow icon inside the box, with no word", JSON.stringify(bx));
+    check(bx.clipUnder && bx.clipWord.trim() === "", "…and the paperclip, with no word, sits beneath it", JSON.stringify(bx));
+    /* Islam, 2026-10-01 (design-mockups/copilot-clip/): the clip in the MIDDLE
+       of the strip under the box, and the strip compact — asserted as the
+       agreement of the two gaps and the strip's whole depth, never as a
+       class (§94.8). Rewritten from "underH <= 24" (§218). */
+    const st = bx.strip || {};
+    check(st.space >= 28 && st.space <= 32 && Math.abs(st.above - st.below) <= 1,
+      "…centred in a compact strip — the same gap above the clip as below it, about 30px from box to edge", JSON.stringify(st));
+    check(bx.bottomGap >= 0 && bx.bottomGap <= 40, "the chat fills the window down to its bottom edge", bx.bottomGap);
+    await page.focus("[data-cop-text]");
+    await page.keyboard.type("line one"); await page.keyboard.down("Shift"); await page.keyboard.press("Enter"); await page.keyboard.up("Shift");
+    await page.keyboard.type("line two");
+    const typed = await page.evaluate(() => document.querySelector("[data-cop-text]").value);
+    bx = await box();
+    check(typed === "line one\nline two" && bx.h > 52, "Shift + Enter makes a new line, and the box grows to hold it", JSON.stringify([typed, bx.h]));
+    await page.fill("[data-cop-text]", Array.from({ length: 30 }, (_, i) => "line " + i).join("\n"));
+    await page.dispatchEvent("[data-cop-text]", "input");
+    bx = await box();
+    check(bx.h >= 205 && bx.h <= 214, "…up to about ten lines, then it scrolls inside itself", bx.h);
+    await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
+
+    const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
+    const dotsShown = await page.evaluate(() => { const d = document.querySelector("[data-cop-chats] .coprow.on [data-cop-menu]"); return d ? getComputedStyle(d).opacity : "none"; });
+    check(dotsShown === "1", "the open chat shows its three dots", dotsShown);
+    check(await page.evaluate(() => !document.querySelector("[data-cop-main] [data-cop-rename], [data-cop-main] [data-cop-delete]")), "…and Rename and Delete are no longer on the chat's header");
+    await page.click("[data-cop-chats] [data-cop-menu]");
+    const items = await page.evaluate(() => Array.from(document.querySelectorAll(".copmenu button")).map((b) => b.textContent.trim()));
+    check(items.join("|") === "Rename|Archive", "the dots open Rename and Archive — no Delete", items.join("|"));
+    await page.click("[data-cop-archive]"); await page.waitForTimeout(700);
+    const arch = async () => (await asTenant(tenantId, (c) => c.query("select extra ? 'archivedAt' a from copilot_chats where id = $1", [chatId]))).rows;
+    let ar = await arch();
+    check(ar.length === 1 && ar[0].a === true, "Archive keeps the chat and marks it archived", JSON.stringify(ar));
+    const foot = await page.evaluate(() => (document.querySelector("[data-cop-archview]") || {}).textContent || "");
+    check(/Archived\s*·\s*1/.test(foot) && await page.evaluate(() => !document.querySelector("[data-cop-chats] [data-cop-chat]")),
+      "…it leaves the Chats rail, and the rail's foot says Archived · 1", foot);
+    await page.click("[data-cop-archview]");
+    await page.click("[data-cop-chats] [data-cop-menu]");
+    const aitems = await page.evaluate(() => Array.from(document.querySelectorAll(".copmenu button")).map((b) => b.textContent.trim()));
+    check(aitems.join("|") === "Restore|Delete…", "in the archived list the Super user gets Restore and Delete…", aitems.join("|"));
+    await page.click("[data-cop-delete]");
+    check(await page.evaluate(() => !!document.querySelector("[data-cop-delete-yes]")), "Delete asks again, in the row");
+    await page.click("[data-cop-delete-no]");
+    await page.click("[data-cop-chats] [data-cop-menu]"); await page.click("[data-cop-restore-chat]"); await page.waitForTimeout(700);
+    ar = await arch();
+    check(ar.length === 1 && ar[0].a === false, "Cancel keeps it, and Restore brings it back", JSON.stringify(ar));
+    check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…onto the Chats rail");
+
+    const made = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
+    check(made && made.ok && made.id, "a deliverable can be filed (through the api until stage 3)", JSON.stringify(made));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    await page.click("[data-cop-deliv]"); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
+    await page.click("[data-cop-edit]"); await page.waitForSelector("[data-cop-edit-text]", { timeout: 8000 });
+    await page.fill("[data-cop-edit-text]", "Purpose: second draft");
+    await page.click("[data-cop-edit-save]");
+    await page.waitForSelector("[data-cop-restore]", { timeout: 8000 }).catch(() => {});
+    const vs = async () => (await asTenant(tenantId, (c) => c.query("select n, body->>'text' t from copilot_versions where deliverable_id = $1 order by n", [made.id]))).rows;
+    let v = await vs();
+    check(v.length === 2 && v[1].n === 2 && v[1].t === "Purpose: second draft", "Edit + Save adds v2 holding what was typed", JSON.stringify(v));
+    await page.click('[data-cop-restore="1"]'); await page.waitForTimeout(800);
+    v = await vs();
+    check(v.length === 3 && v[2].t === "Purpose: first draft", "Restore v1 adds v3 with v1's text, and v2 is still there", JSON.stringify(v));
+    check(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth), "no sideways scroll on the Copilot page");
+
+    /* §456 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
+       tab opens nothing by itself, so a chat drawn as current after the press
+       is the link's doing; the switcher lists the Copilot now — asked of the
+       shared bar's module menu (main's §444), where it is the current item. */
+    await open("/raya-trade/copilot");
+    const lp = await page.evaluate(() => ({ rows: document.querySelectorAll("table tbody tr").length,
+      link: (document.querySelector('a[href*="#cop=chat-"]') || {}).getAttribute ? document.querySelector('a[href*="#cop=chat-"]').getAttribute("href") : "",
+      sw: Array.from(document.querySelectorAll('.tbmod .tbmenu a[aria-current="true"]')).map((x) => x.textContent) }));
+    check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
+      "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§456)", JSON.stringify(lp));
+    await page.click('a[href*="#cop=chat-"]');
+    const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
+    check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
+    await open("/raya-trade/copilot/settings?section=analysis");
+    const stg = await page.evaluate(() => ({ swot: /SWOT/.test(document.body.textContent), same: /Same for all clients/.test(document.body.textContent) }));
+    check(stg.swot && stg.same, "Copilot settings › AI instructions draws the analysis method, the same for all clients", JSON.stringify(stg));
+
+    await fresh(); await signIn("mobhead@raya.example");
+    await open("/raya-trade/strategy/mobile/strategy");
+    check(await page.evaluate(() => !document.querySelector('#subtabs button[data-s="copilot"]')), "a client's own person sees no Copilot tab (the office's alone)");
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+  }
+});
+
+await section("3h · the Copilot column on Roles & access, and View on the tab (§454)", async () => {
+  /* PRESSED AND READ BACK (§96): the column is drawn only where the Copilot is
+     on, a client's row carries a dash, the office's press writes the grant
+     the SERVER reads, and a View grant takes the composer off the tab and puts
+     "View only" in its place. Both ends (§94.2): the column absent without
+     the module, the composer present again once the row is removed. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const grantRow = async () => (await asTenant(tenantId, (c) => c.query("select role_key, grant_ from access_grants where page_key = 'a_copilot' order by role_key"))).rows;
+  const colOf = () => page.evaluate(() => {
+    const heads = Array.from(document.querySelectorAll(".acgrid thead th")).map((t) => t.textContent.trim());
+    const mac = Array.from(document.querySelectorAll('[data-mac*="|a_copilot|"]')).map((b) => b.dataset.mac.split("|")[0]);
+    const dash = Array.from(document.querySelectorAll('.acgrid [title="Office only for now."]')).length;
+    return { col: heads.includes("Copilot"), roles: Array.from(new Set(mac)).sort(), dash };
+  });
+  try {
+    await fresh(); await signIn("office@forefront.example");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy"]), tenantId]);
+    await open("/raya-trade/strategy/setup/access");
+    check(!(await colOf()).col, "without the Copilot there is no Copilot column (\u00a761)");
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await open("/raya-trade/strategy/setup/access");
+    const c = await colOf();
+    check(c.col && c.roles.join(",") === "smoteam,super", "with it the column is drawn, with buttons on the office's two rows alone", JSON.stringify(c));
+    check(c.dash > 0, "\u2026and every client row carries a dash saying office only", JSON.stringify(c));
+    const mk = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "newChat", place: "mobile", section: "foundation", title: "Read me" }) })).json());
+    check(mk && mk.ok, "a chat to read is made while still at edit", JSON.stringify(mk));
+    await page.click('[data-mac^="super|a_copilot|view"]');
+    await page.waitForTimeout(1500);
+    const g = await grantRow();
+    check(g.length === 1 && g[0].role_key === "super" && g[0].grant_ === "view", "pressing View on the Super user's row stores exactly that", JSON.stringify(g));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    await page.click("[data-cop-chats] [data-cop-chat]").catch(() => {});
+    await page.waitForSelector("[data-cop-viewonly]", { timeout: 6000 }).catch(() => {});
+    const v = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"),
+      text: !!document.querySelector("[data-cop-text]"), nw: !!document.querySelector("[data-cop-newchat]"), tab: !!document.querySelector('#subtabs button[data-s="copilot"]') }));
+    check(v.tab && v.label && !v.text && !v.nw, "at View the tab is there, says View only, and has no box and no + New chat", JSON.stringify(v));
+    await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'"));
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    const e = await page.evaluate(() => ({ label: !!document.querySelector("[data-cop-viewonly]"), nw: !!document.querySelector("[data-cop-newchat]") }));
+    check(!e.label && e.nw, "with the row removed the office is back at edit — + New chat, no View only label", JSON.stringify(e));
+  } finally {
+    await asTenant(tenantId, (c) => c.query("delete from access_grants where page_key = 'a_copilot'; delete from copilot_chats")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3g · turning a module on from inside the platform shows it at once (§453)", async () => {
+  /* Islam: "I turned on the module but nothing is appearing in the
+     navigation". The document carries which modules the client has, and
+     since §432 the move from settings to a module is a paint — so the switch
+     reloads the page once the server has taken it. Pressed through the real
+     control and then crossed the way he crossed, by the trail (§96). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "insights"]), tenantId]);
+    await fresh(); await signIn("office@forefront.example");
+    let found = false;
+    for (const pg2 of ["/raya-trade/setup/start", "/raya-trade/setup/clientsetup", "/raya-trade/setup"]) {
+      await open(pg2);
+      if (await page.$(".teamrow[data-module='copilot'] button")) { found = true; break; }
+    }
+    check(found, "the client's settings draw the Copilot row with its switch");
+    if (!found) return;
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-copilot"))) !== "1", "…and before the press the page carries no Copilot");
+    await page.evaluate(() => { window.__sameDoc = 1; });
+    await page.click(".teamrow[data-module='copilot'] button");
+    await page.waitForFunction(() => !window.__sameDoc, null, { timeout: 15000 }).catch(() => {});
+    await booted();
+    check(await page.evaluate(() => !window.__sameDoc), "the press reloads the page once the server has it", "same document");
+    check((await page.evaluate(() => document.documentElement.getAttribute("data-copilot"))) === "1", "…and the page it reloads to carries the Copilot");
+    const go = await page.$("nav.trail [data-trgo='/raya-trade/strategy']");
+    if (go) await page.evaluate(() => document.querySelector("nav.trail [data-trgo='/raya-trade/strategy']").click());
+    else await open("/raya-trade/strategy/mobile");
+    await page.waitForTimeout(800);
+    if (await page.evaluate(() => current === null || current === "group" || current === "setup")) {
+      await page.evaluate(() => { const b = document.querySelector("[data-u='mobile']"); if (b) b.click(); });
+      await page.waitForTimeout(600);
+    }
+    const tabs = await page.evaluate(() => Array.from(document.querySelectorAll("#subtabs button[data-s]")).map((b) => b.dataset.s));
+    check(tabs.includes("copilot"), "…so crossing to Strategy shows the Copilot tab with no refresh by hand", tabs.join("|"));
+    check(tabs.indexOf("insights") >= 0 && tabs.indexOf("copilot") === tabs.length - 1, "…and it comes last, after Insights (Islam, 2026-10-01)", tabs.join("|"));
+  } finally {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]);
+  }
+});
+
 await section("4 · Forefront's own pages", async () => {
   await fresh(); await signIn("office@forefront.example");
   await page.goto(BASE + "/platform", { waitUntil: "networkidle" }); await page.waitForSelector("body.ready", { timeout: 15000 });
@@ -1017,6 +1332,7 @@ await section("10 · the security headers cross with it, read from vercel.json (
 });
 
 try { process.kill(-server.pid); } catch {}
+model.close();
 await browser.close(); await owner.end();
 console.log((fails ? "RED   " : "GREEN ") + oks + " ok, " + fails + " failed" + (brk ? "  (--break=" + brk + ")" : ""));
 process.exit(fails ? 1 : 0);

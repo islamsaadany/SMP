@@ -66,7 +66,19 @@ const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_M
    assertions — and adding the next one means editing none. If there is no
    second built module at all the file says so once, here, rather than going
    quietly green over a list of one (§54.5, §113.8). */
-const OTHER = BUILT_EXTRA[0] || null;
+const OTHER = BUILT_EXTRA.filter((k) => !MODULE_DEF[k].inside)[0] || null;
+/* A MODULE THAT IS A TAB OF ANOTHER (spec 064, `inside`): the Copilot draws
+   no document of its own — it is a tab inside Strategy's pages — so it is
+   asserted the other way round below: its bare address and any unknown word
+   inside it go back to the module it lives in, and the switcher never lists
+   it (a door to a page that is a redirect is a door behind a door, §32). */
+const INSIDE = MODULES.filter((k) => MODULE_DEF[k].built && MODULE_DEF[k].inside);
+/* A module whose pages are Next's own route tree (MODULE_DEF.appRoute —
+   Processes, FFProcess carried in) has no server in the table to drive; its
+   pages are asserted to EXIST in §2b instead, so it is not let off. */
+const APP_ROUTE = (k) => !!MODULE_DEF[k].appRoute;
+const PAGED = () => offerable().filter((k) => !APP_ROUTE(k));
+const OWN_PAGE_OF = (k) => existsSync(join(APP, "modules", k, "page.ts"));
 
 let ok = 0;
 const bad = [];
@@ -167,7 +179,9 @@ check("a module's area is NOT in the client's carried matrix",
    today would be the door onto the wrong room, arriving quietly. */
 console.log("\n2b · every module serves itself");
 check("every BUILT module has a page of its own to serve",
-  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => typeof serverFor(k) === "function"),
+  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => APP_ROUTE(k)
+    ? existsSync(join(APP, "app", "(ffp)", "[slug]", k, "layout.tsx")) && serverFor(k) === null
+    : typeof serverFor(k) === "function"),
   MODULES.map((k) => k + ":" + (serverFor(k) ? "serves" : "none")).join(" "));
 check("...and a word that is NOT built serves nothing, or it is a door onto the wrong room",
   UNBUILT.every((k) => serverFor(k) === null), UNBUILT.join(", "));
@@ -196,7 +210,14 @@ const drawnBy = async (k, rest = []) => {
   return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
 };
 const drawn = {};
-for (const k of offerable()) {
+/* §456 REVERSES the redirect: the Copilot is still a tab inside Strategy,
+   AND it has a page of its own (every chat and deliverable on the client,
+   and its settings), so the switcher lists it like any other module. */
+for (const k of INSIDE) {
+  check("...and the switcher lists " + k + " too — it has a page of its own now (§456)", moduleMenu(offerable()).some((m) => m.key === k),
+    moduleMenu(offerable()).map((m) => m.key).join(", "));
+}
+for (const k of PAGED()) {
   drawn[k] = await drawnBy(k);
   check("...and " + k + "'s server answers with a page of its own",
     drawn[k].status === 200 && /<html/.test(drawn[k].html),
@@ -211,16 +232,19 @@ for (const k of offerable()) {
    A title is written by the page out of its own vocabulary and cannot be
    handed in, so two modules sharing one is two modules sharing a page —
    compared as a SET, naming nothing, so a fourth module is covered. */
-const titles = offerable().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
+const titles = PAGED().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
 check("...and no two of them draw the same document — a table cannot point two words at one page",
   new Set(titles).size === titles.length, titles.join(" | "));
 /* A module's landing is its landing: an address inside one that it does not
    draw comes BACK to it, which is what every unknown word inside a client
    already gets (lib/modules.ts whereOf) rather than a second refusal. */
-for (const k of BUILT_EXTRA) {
+for (const k of BUILT_EXTRA.filter((k) => !APP_ROUTE(k))) {
   const out = await drawnBy(k, ["nothing-here"]);
+  /* A module with a page of its own is its own landing, inside another or
+     not (§456: the Copilot's unknown words come back to the Copilot page). */
+  const landing = MODULE_DEF[k].inside && !OWN_PAGE_OF(k) ? MODULE_DEF[k].inside : k;
   check("...and a word " + k + " does not draw comes back to its landing",
-    out.status === 302 && out.to.endsWith(clientHref("raya-trade", k, "")),
+    out.status === 302 && out.to.replace(/\/$/, "").endsWith(clientHref("raya-trade", landing, "").replace(/\/$/, "")),
     out.status + " " + out.to);
 }
 
@@ -291,9 +315,15 @@ for (const k of BUILT_EXTRA) {
    the assertion says so rather than passing over an empty list (§113.8).
    `UNBUILT` is the file's own, declared at the top — a second `const` here
    was §56.7's collision, caught by the parser rather than by reading. */
-check("an unbuilt module's word is not an address either",
-  UNBUILT.length > 0 && UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy),
-  UNBUILT.length ? UNBUILT.join(", ") : "none left unbuilt — this assertion has nothing to stand on");
+/* AND WITH NONE LEFT UNBUILT (Processes, 2026-10-01, was the last) the
+   rule is asked of the case that survives it rather than passing over an
+   empty list (§113.8, §218): a module's word the CLIENT does not hold is not
+   an address for that client, which is the same door shut by the same rule. */
+check(UNBUILT.length ? "an unbuilt module's word is not an address either"
+    : "a module's word the client does not hold is not an address either (none is left unbuilt)",
+  UNBUILT.length ? UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy)
+    : BUILT_EXTRA.every((k) => whereOf([k], [DEFAULT_MODULE]).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : BUILT_EXTRA.join(", "));
 check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 /* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's
@@ -615,9 +645,16 @@ for (const k of OWN_PAGE) {
   check("...and the module you are IN is marked — " + k,
     new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
     (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
+  /* Asked of the MODULE MENU, not the whole document (§456; the menu is the
+     shared bar's `tbmod` since main's §444): a module's own
+     page links to itself (the Copilot's list is a form posting back to its
+     own address), which is the page and not a door. A switcher missing
+     altogether would pass this vacuously, so it is asserted present first
+     (§113.8). */
+  const oneDoc = await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE);
+  const sw = (oneDoc.match(/<details class="tbstep tbmod">[\s\S]*?<\/details>/) || [""])[0];
   check("a client holding only the default is offered no door it does not have — " + k,
-    !(await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE))
-      .includes('href="' + clientHref("raya-trade", k, "") + '"'));
+    !!sw && !sw.includes('href="' + clientHref("raya-trade", k, "") + '"'), sw ? "" : "no switcher drawn");
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`

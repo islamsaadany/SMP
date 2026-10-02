@@ -9,6 +9,7 @@ import { MODULE_DEF } from "../../../../lib/modules.ts";
 import { shellDocument, shellHeaders } from "../../../../lib/shell.ts";
 import { viewAsOf, narrowToViewed } from "../../../../lib/view-as.ts";
 import { libraryStampFor } from "../../../../lib/library-viewer.ts";
+import { copilotStampFor } from "../../../../lib/copilot.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string; rest: string[] }> };
@@ -117,7 +118,8 @@ export async function GET(req: Request, { params }: P) {
        (lib/library-viewer.ts), asked once per document and never per paint. */
     return new Response(shellDocument(ans.tenant.name, key, moduleMenu(open), landing, MODULE_DEF[key].areas,
                                       w.module ? key : "client",
-                                      await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open)),
+                                      await libraryStampFor(ans.tenant.id, who.seat, who.personKey, open),
+                                      copilotStampFor(open, who.seat)),
                         { status: 200, headers: shellHeaders() });
   }
   const serve = serverFor(key);
@@ -126,7 +128,7 @@ export async function GET(req: Request, { params }: P) {
      already resolved both — a module asking for them again would be a second
      answer to a question `resolveTenant` exists to settle (§53.5). */
   return serve({ req, slug, module: key, tenantId: ans.tenant.id, tenantName: ans.tenant.name,
-    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat,
+    have: open, rest: w.rest, personKey: who.personKey, seat: who.seat, admin: user.isAdmin && !asked,
     consultant: user.kind !== "client", me: { personKey: ans.personKey, seat: ans.seat } });
 }
 

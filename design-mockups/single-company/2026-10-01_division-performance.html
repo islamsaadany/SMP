@@ -1,0 +1,155 @@
+<title>Division Performance</title>
+<style>
+:root{--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B7C4D8;--panel-hover:#24487A;--gold:#C9A24D;--gold-deep:#8A6B22;--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--good-tx:#1F6248;--good-bg:#E4F0EA;--attn-tx:#7A5D1C;--attn-bg:#F7EFD6;--bad-tx:#8C3327;--note:#FDFAF1;--stone:#16325C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--panel:#0F1A2E;--panel-ink:#E9ECF1;--panel-quiet:#9AA6B8;--panel-hover:#1A2030;--gold:#D9B665;--gold-deep:#C9A24D;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--good-tx:#8FD3B0;--good-bg:#1E3329;--attn-tx:#E8CA6A;--attn-bg:#332B15;--bad-tx:#E79A93;--note:#23201A;--stone:#7FA3D8;color-scheme:dark}}
+:root[data-theme="dark"]{--panel:#0F1A2E;--panel-ink:#E9ECF1;--panel-quiet:#9AA6B8;--panel-hover:#1A2030;--gold:#D9B665;--gold-deep:#C9A24D;--ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--good-tx:#8FD3B0;--good-bg:#1E3329;--attn-tx:#E8CA6A;--attn-bg:#332B15;--bad-tx:#E79A93;--note:#23201A;--stone:#7FA3D8;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:14px/1.45 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px;padding-block:24px 60px}
+.page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:34px}
+h1{font-size:24px;margin:0;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:70ch;margin:6px 0 0}
+.panel{display:flex;flex-direction:column;gap:10px;min-width:0}
+.kick{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+.panel h2{font-size:18px;margin:0}
+.say{color:var(--ink-2);margin:0;max-width:75ch}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700}
+.mark{width:26px;height:26px;border-radius:6px;background:var(--panel);color:var(--panel-ink);display:grid;place-items:center;font-size:12px}
+.top .who{margin-left:auto;font-weight:400;color:var(--ink-3);font-size:12.5px}
+.nav{background:var(--panel);color:var(--panel-quiet);display:flex;gap:2px;padding:0 10px;overflow-x:auto;font-size:13.5px}
+.nav span{padding:11px 11px;white-space:nowrap;border-bottom:3px solid transparent}
+.nav .on{color:var(--panel-ink);border-color:var(--gold)}
+.nav .sep{border-left:1px solid var(--panel-hover);margin:8px 6px;padding:0}
+.nav .dd::after{content:" ▾";font-size:10px}
+.tabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.tabs span{padding:7px 12px;color:var(--ink-2)}
+.tabs .on{color:var(--ink);border-bottom:3px solid var(--gold);font-weight:700}
+.tabs .rep{color:#A4512C;font-weight:700}
+.secs{display:flex;gap:6px;padding:10px 14px;flex-wrap:wrap}
+.secs span{padding:4px 11px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;color:var(--ink-2)}
+.secs .on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.secs .new{border-style:dashed;border-color:var(--gold)}
+.body{display:grid;grid-template-columns:230px 1fr;gap:14px;padding:4px 14px 16px}
+@media (max-width:720px){.body{grid-template-columns:1fr}}
+.rail{border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0}
+.rail .rh{background:var(--panel);color:var(--panel-ink);padding:7px 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+.ri{padding:8px 10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.ri b{font-size:13px}
+.ri small{color:var(--ink-3);font-size:11.5px}
+.ri.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--gold)}
+.ri .mine{color:var(--good-tx);font-weight:700}
+.pane{border:1px solid var(--line);border-radius:8px;min-width:0;overflow:hidden}
+.band{background:var(--panel);color:var(--panel-ink);padding:9px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.band .code{color:var(--gold);font-weight:700}
+.band small{margin-left:auto;color:var(--panel-quiet)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--surface-2);text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:7px 10px;white-space:nowrap}
+td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.box{display:inline-block;min-width:64px;border:1px solid var(--line);border-radius:5px;padding:3px 8px;background:var(--surface);color:var(--ink-3)}
+.box.live{border-color:var(--gold)}
+.ro{color:var(--ink-3)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;padding:12px}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.card b{font-size:13.5px}
+.card small{color:var(--ink-3)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700}
+.pill.good{background:var(--good-bg);color:var(--good-tx)}
+.pill.attn{background:var(--attn-bg);color:var(--attn-tx)}
+.note{background:var(--note);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:6px;padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.x{color:var(--bad-tx);text-decoration:line-through}
+.struct{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;padding:14px}
+.lc{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.lc h3{margin:0;font-size:14px;display:flex;align-items:center;gap:8px}
+.lc h3 .sw{margin-left:auto}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:12px;font-weight:700}
+.sw span{padding:3px 10px;color:var(--ink-3)}
+.sw .lit{background:var(--panel);color:var(--panel-ink)}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.chips .t{background:var(--surface-2);font-weight:700}
+.lc.off{opacity:.55}
+.lc.hl{border-color:var(--gold);box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 30%,transparent)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.cmp{grid-template-columns:1fr}}
+ol.q{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:80ch}
+.heads{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:12px 14px 4px}
+.hd{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.hd small{color:var(--ink-3);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.hd b{font-size:24px;font-variant-numeric:tabular-nums}
+.hd .good{color:var(--good-tx)} .hd .attn{color:var(--attn-tx)}
+.inner{display:flex;gap:4px;padding:10px 14px 0;flex-wrap:wrap}
+.inner span{padding:4px 11px;font-size:12.5px;color:var(--ink-2);border-radius:6px}
+.inner .on{background:var(--surface-2);color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--gold)}
+.tw{padding:8px 14px 16px}
+.cap{font-size:12px;color:var(--ink-3);padding:0 14px}
+</style>
+
+<div class="page">
+<header>
+  <div class="kick">Mockup · for sign-off · 1 Oct 2026</div>
+  <h1>Where divisions go when the strategy is planned on the company</h1>
+  <p class="lede">El Abd, with the strategy planned on the company. The division dropdown leaves the navigation; each division's performance, scored only from the supporting functions linked to it, moves under Strategy. Two placements to choose from. Function names and figures are illustrative.</p>
+</header>
+
+<section class="panel">
+  <div class="kick">Today</div>
+  <h2>Divisions are a dropdown in the navigation</h2>
+  <div class="frame">
+    <div class="nav"><span class="on dd">Company</span><span class="sep"></span><span>Finance</span><span>HR</span><span>IT</span><span>Supply Chain</span><span>Marketing</span></div>
+    <p class="say" style="padding:10px 14px">The dropdown lists Company, Commercial · 5 Directions, Operations · 0, Corporate Support · 0. The small count is business units, so with units off every division would read 0.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="kick">Option A</div>
+  <h2>One Performance tab, with a small row: Company · each division</h2>
+  <p class="say">The navigation's top button reads Strategy. Inside Performance, a small row picks whose performance you are reading. Company is the directions; each division is its functions.</p>
+  <div class="frame">
+    <div class="nav"><span class="on">Strategy</span><span class="sep"></span><span>Finance</span><span>HR</span><span>IT</span><span>Supply Chain</span><span>Marketing</span></div>
+    <div class="tabs"><span>Strategy</span><span class="on">Performance</span><span class="rep">Reporting</span></div>
+    <div class="inner"><span>Company</span><span class="on">Commercial</span><span>Operations</span><span>Corporate Support</span></div>
+    <div class="heads">
+      <div class="hd"><small>Commercial · performance</small><b class="good">84%</b></div>
+      <div class="hd"><small>Execution</small><b class="attn">71%</b></div>
+      <div class="hd"><small>Functions</small><b>2</b></div>
+    </div>
+    <div class="tw"><div class="tbl"><table>
+      <tr><th>Function</th><th>Share</th><th>Performance</th><th>Execution</th><th>Status</th></tr>
+      <tr><td>Marketing</td><td class="num">60%</td><td class="num">88%</td><td class="num">74%</td><td><span class="pill good">On track</span></td></tr>
+      <tr><td>Supply Chain</td><td class="num">40%</td><td class="num">78%</td><td class="num">66%</td><td><span class="pill attn">Watch</span></td></tr>
+    </table></div></div>
+  </div>
+  <p class="cap">Company shows today's page: the directions' readings. A division with no functions linked is not in the row.</p>
+</section>
+
+<section class="panel">
+  <div class="kick">Option B</div>
+  <h2>A tab of its own: Divisions Performance, with a small row of divisions inside it</h2>
+  <p class="say">Performance stays the company's overall reading, untouched. Beside it, a Divisions Performance tab holds the small row, one entry per division.</p>
+  <div class="frame">
+    <div class="nav"><span class="on">Strategy</span><span class="sep"></span><span>Finance</span><span>HR</span><span>IT</span><span>Supply Chain</span><span>Marketing</span></div>
+    <div class="tabs"><span>Strategy</span><span>Performance</span><span class="on">Divisions Performance</span><span class="rep">Reporting</span></div>
+    <div class="inner"><span class="on">Commercial</span><span>Operations</span><span>Corporate Support</span></div>
+    <div class="heads">
+      <div class="hd"><small>Commercial · performance</small><b class="good">84%</b></div>
+      <div class="hd"><small>Execution</small><b class="attn">71%</b></div>
+      <div class="hd"><small>Functions</small><b>2</b></div>
+    </div>
+    <div class="tw"><div class="tbl"><table>
+      <tr><th>Function</th><th>Share</th><th>Performance</th><th>Execution</th><th>Status</th></tr>
+      <tr><td>Marketing</td><td class="num">60%</td><td class="num">88%</td><td class="num">74%</td><td><span class="pill good">On track</span></td></tr>
+      <tr><td>Supply Chain</td><td class="num">40%</td><td class="num">78%</td><td class="num">66%</td><td><span class="pill attn">Watch</span></td></tr>
+    </table></div></div>
+  </div>
+  <p class="cap">The tab appears only when at least one division has a function linked to it.</p>
+</section>
+
+<section class="panel">
+  <div class="kick">The difference</div>
+  <ol class="q">
+    <li><b>A</b> keeps one Performance tab; the company and the divisions are side by side in one small row. One more click to reach the company's own reading is not needed: Company is the first entry and opens by default.</li>
+    <li><b>B</b> keeps Performance exactly as it is and puts the divisions behind their own tab. Cleaner separation; one more tab on the row.</li>
+  </ol>
+</section>
+</div>

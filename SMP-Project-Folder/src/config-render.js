@@ -327,6 +327,14 @@ function renderModuleAccess(){
 
    Seven roles down, seven areas across. Forty-nine cells, on one screen,
    in place of the 525 controls the page carried before. */
+/* The Copilot's grantable area as the served document declares it, or null
+   (file://, or a client without the Copilot). Read by the Copilot column
+   here and by the tab's own view-or-edit (copilot.js), one parse. */
+function copilotArea(){
+  var raw = document.documentElement.getAttribute("data-copilot-area");
+  if (!raw) return null;
+  try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
+}
 function renderAccess(){
   /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
      A grant cannot express this: the SMO team holds `a_setup` at edit, which
@@ -437,6 +445,18 @@ function renderAccess(){
     }
     hi += span;
   }
+  /* ── THE COPILOT COLUMN (Islam, 2026-10-01, from the signed-off
+     design-mockups/copilot-access/2026-10-01_copilot-column.html) ──────
+     Last, and only where the client has the Copilot: the served document
+     stamps its area (`data-copilot-area`, MODULE_DEF's own declaration), so
+     over file:// and on a client without it there is no column to write to
+     nothing (§61). The office's two rows carry the eye and the pen through
+     the module cell's own writer (§359.5: the default is an ABSENCE, edit);
+     every other row is a dash by RULE — "office only for now" — because the
+     api refuses a client's own person whatever the map holds, and a toggle
+     that changes nothing is decoration (§42). */
+  var COPA = copilotArea();
+  if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
@@ -455,7 +475,12 @@ function renderAccess(){
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
       AREAS.map(function(a){
         return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
-      }).join("") + '</tr>';
+      }).join("") +
+      (COPA ? (SMPRules.isOfficeRole(r.key)
+        ? stateCell(r.key, COPA.key, editable, null, {
+            value: moduleGrantFor(r.key, COPA), states: ["view", "edit"],
+            attr: "data-mac", shipped: COPA.shipped || "none" })
+        : stateCell(r.key, COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
 
   return section("", "Roles & access",
@@ -1565,41 +1590,12 @@ function brandingBody(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* ── THE GROUP'S MARK (§259) ─────────────────────────────
-     FIRST on the page, deliberately. A mark is the most concrete thing a
-     tenant has, and the three colour sections under it are one argument
-     read in order (the two colours, what follows from them, whether it is
-     readable) — dropping the mark into the middle of that would break the
-     only sequence on the page.
-
-     THE UNIT MARKS' OWN SHAPE (§52.9), not a second one: a preview, the
-     two controls, and the note that says what may be uploaded. Nothing to
-     hold apart, so no table — there is one row and one row is not a list. */
-  var gm = groupLogo();
-  var markBlock = section("", "The group’s mark", null,
-    '<p class="why" style="margin:0 0 14px">Shown on any deck that has no mark of its own — ' +
-      'a ' + L1("unitword") + ' whose own mark has not been uploaded, and every ' + L1("fnword") + ', ' +
-      'which never has one. Large on the cover, small in the footer of every other slide. ' +
-      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints ' +
-      'a box around itself on a dark slide.</p>' +
-    '<div class="gmarkrow">' +
-      (gm
-        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(gm) + '" alt="' +
-            esc(GROUP.org) + '"></span>'
-        : '<span class="why" style="margin:0">No mark — a deck with none shows the ' +
-            'subject’s name instead, which costs nothing.</span>') +
-      (mayEdit
-        ? '<div class="rowacts">' +
-            '<label class="linkbu umarkpick">' + (gm ? "Replace" : "Upload") +
-              '<input type="file" accept="image/png" data-glogo="1" hidden></label>' +
-            (gm ? '<button class="linkbu" data-glogoclear="1">Remove</button>' : '') +
-          '</div>'
-        : '<span class="why" style="margin:0">SMO</span>') +
-    '</div>' +
-    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
-
-  return markBlock +
-
+  /* §461: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
+     client's, set in the block above this one on Client set-up (the door's,
+     §313.36) and worn by the decks through groupLogo(). Deleted rather than
+     hidden (§24); a stored GROUP.logo is left where it is and simply no
+     longer read on a served page. */
+  return "" +
     section("", "The tenant’s colours",
       null,
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
@@ -5336,7 +5332,7 @@ function focusNav(){
      something behind them, so a tenant with no capabilities meets exactly the
      two-part control it has today and never learns the concept. */
   var subs = focusSubjects();
-  var sides = [["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
+  var sides = [["top", labelWord("topword", "group") || "Group"], ["units", navWord("unitword", "Units")], ["caps", navWord("capability", "Capabilities")], ["fns", navWord("fnword", "Functions")]]
     .filter(function(x){ return (subs[x[0]] || []).length; });
   var side = (subs[FSET.side] || []).length ? FSET.side
            : (sides.length ? sides[0][0] : "units");
@@ -5367,10 +5363,14 @@ function renderFocusSetup(){
   /* A destination that has gone (a unit retired, a function switched off)
      leaves the page pointing at nothing — corrected here rather than left to
      render an empty table under a name nobody can select. */
-  if (!bands.length) {
-    var subs = focusSubjects(),
-        first = (subs.units[0] || subs.caps[0] || subs.fns[0]);
-    if (first && first.key !== FSET.unit) { FSET.unit = first.key; bands = focusBands(FSET.unit); }
+  /* §449: a destination no longer offered (a unit hidden by switching the
+     layer off) is corrected too, or the table marks a place nobody can see. */
+  var allSubs = focusSubjects(), offered = allSubs.top.concat(allSubs.units, allSubs.caps, allSubs.fns)
+    .some(function(x){ return x.key === FSET.unit; });
+  if (!bands.length || !offered) {
+    var subs = allSubs,
+        first = (subs.top[0] || subs.units[0] || subs.caps[0] || subs.fns[0]);
+    if (first && first.key !== FSET.unit) { FSET.unit = first.key; ["top","units","caps","fns"].forEach(function(sd){ if (subs[sd][0] === first) FSET.side = sd; }); bands = focusBands(FSET.unit); }
   }
 
   /* ── ONE TABLE, HEADED THE WAY THE REGISTER IS (§135.5) ────────────

@@ -22,7 +22,7 @@
    the document it is served in (lib/shell.ts stamps `data-module`), so
    shell/route.js keeps no second copy of these words (§53.5). */
 
-export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes"] as const;
+export const MODULES = ["strategy", "portfolio", "insights", "processes", "tracker", "notes", "copilot"] as const;
 export type ModuleKey = (typeof MODULES)[number];
 
 /* Where a client lands when the address names no module. */
@@ -157,7 +157,18 @@ const INSIGHTS_MARK: MarkDef = (f) => {
     tip: g.newReports + " new report" + (g.newReports === 1 ? "" : "s") + " this month" };
 };
 
-export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef };
+/* `inside` NAMES A MODULE THAT IS A TAB OF ANOTHER (spec 064). The Copilot is
+   bought and switched on per client like any module, and it is drawn as a
+   tab inside Strategy's pages, because it works on the place you are
+   standing on. So it is never a door on the switcher — a menu entry that
+   lands you back in the module you came from is a door behind a door (§32) —
+   and its own address comes back to its host rather than drawing a page. */
+export type ModuleDef = { label: string; note: string; built: boolean; areas: ModuleArea[]; lines: LineDef[]; mark?: MarkDef; inside?: ModuleKey;
+  /* Its pages are Next's own route tree (app/(ffp)/[slug]/<key>/) rather than
+     a server in modules/registry.ts: FFProcess is React through and through,
+     and a route group takes the address before the module table is asked, so
+     a server here would be code nothing reaches (§24). */
+  appRoute?: true };
 const NOTHING: LineDef = { key: "none", label: "Nothing", example: "The module is listed with no line under it", read: () => "" };
 const STRATEGY_LINES: LineDef[] = [
   { key: "cycle", label: "The cycle\u2019s state", example: "Cycle open \u00b7 reports due 30 Sep",
@@ -208,7 +219,13 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
               note: "Open the library and download what is in it",
               states: ["view", "none"], shipped: "view" }],
     lines: INSIGHTS_LINES, mark: INSIGHTS_MARK },
-  processes: { label: "Processes", note: "How things are done here",                         built: false, areas: [], lines: [NOTHING] },
+  /* FFPROCESS, CARRIED IN WHOLE (2026-10-01): process maps, RACI, authority
+     matrices and governance, with its own design under SMP's top bar. The
+     office's alone, by seat (ffp/lib/auth/workspace.ts) — so NO AREA, the
+     tracker's reason. No longer a library: Forefront works IN it rather
+     than publishing to it, so the card's row walks into the client's
+     platform (LIBRARY_MODULES below). */
+  processes: { label: "Processes", note: "Process maps, RACI and authority matrices",        built: true,  areas: [], lines: [NOTHING], appRoute: true },
   /* THE OFFICE'S OWN LIST ABOUT THIS CLIENT (spec 054). Built, and NO AREA:
      it is opened by the seat and by nothing a client could be granted
      (decision 2) — the way Inbox and Setup are — so a column here would be a
@@ -221,6 +238,25 @@ export const MODULE_DEF: Record<ModuleKey, ModuleDef> = {
      this client, opened by the seat. The attendees get an email and never
      open it. The word is Islam's to change (decision 11). */
   notes:     { label: "Meeting Notes",     note: "Notes taken in a meeting, refined into minutes and sent to the attendees", built: true, areas: [], lines: [NOTHING] },
+  /* THE STRATEGY COPILOT (spec 064). The office's alone — the Super user and
+     the SMO team, decision record v0.4 §2 — so NO AREA, for the tracker's
+     reason: it is opened by the seat, and a column here would be a cell no
+     client person should hold (§61). A tab inside Strategy (`inside`). */
+  copilot:   { label: "Copilot", note: "The office's AI workspace for each place's strategy", built: true,
+    /* ONE AREA, OFFICE ROWS ONLY (Islam, 2026-10-01, from the signed-off
+       design-mockups/copilot-access/2026-10-01_copilot-column.html): a
+       column on Strategy's own Roles & access, because the Copilot is a tab
+       INSIDE Strategy rather than a module with a rail of its own. View reads
+       every chat and deliverable; edit is the office's whole behaviour. The
+       shipped state is EDIT and it is the OFFICE's default — the Super user
+       and the SMO team keep exactly what they had the day this ships — while
+       a client's own roles are refused by RULE, not by a cell (lib/copilot.ts
+       copilotGrant; "office only for now"), so `edit` here never reaches
+       them however the stored map reads. */
+    areas: [{ key: "a_copilot", label: "Copilot",
+              note: "View reads the chats and deliverables · edit chats and builds them",
+              states: ["view", "edit", "none"], shipped: "edit" }],
+    lines: [NOTHING], inside: "strategy" },
 };
 
 export function isModule(s: unknown): s is ModuleKey {
@@ -309,7 +345,12 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
    draw it — the shell's top bar (shell/route.js, through the document's
    `data-modules`) and a module's own bar (modules/insights/page.ts) — because
    a label invented at a call site is how two screens come to spell one module
-   differently (§53.5). */
+   differently (§53.5).
+
+   A module that lives INSIDE another (`inside`, the Copilot) is listed too
+   since §456: it has a page of its own now — every chat and deliverable on
+   the client, and its settings — while its tab stays inside Strategy. Which
+   PEOPLE see it is `openableModules`' answer, not this function's. */
 export type ModuleMenuItem = { key: ModuleKey; label: string; note: string };
 export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
   return have.map((k) => ({ key: k, label: MODULE_DEF[k].label, note: MODULE_DEF[k].note }));
@@ -329,7 +370,7 @@ export function moduleMenu(have: ModuleKey[]): ModuleMenuItem[] {
    NAMED HERE for the reason every other module fact is: the card, the address
    and Setup ask one place what a module is (§53.5). The card reads the flag
    off the row the server sent it and decides nothing itself. */
-export const LIBRARY_MODULES: readonly ModuleKey[] = ["insights", "processes"];
+export const LIBRARY_MODULES: readonly ModuleKey[] = ["insights"];
 export function isLibrary(k: unknown): boolean {
   return typeof k === "string" && (LIBRARY_MODULES as readonly string[]).includes(k);
 }

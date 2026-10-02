@@ -60389,7 +60389,7 @@ One builder (`settingsChip`) for both cards. Screen only. `platform-cards.py`
 there is no text; `client-archive` (15) and `client-setup-outside` (29) red
 identically on the build before, as recorded at §445.
 
-## §447 — the two red console checks, and the fault one of them was hiding (2026-10-01)
+## §467 — the two red console checks, and the fault one of them was hiding (2026-10-01)
 
 Islam: *"fix the two failing console checks."* **Most of the red was the checks,
 and one part of it was the product.** Since §400 the console opens on *My work*,

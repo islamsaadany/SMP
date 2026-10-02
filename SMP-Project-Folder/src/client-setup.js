@@ -60,7 +60,7 @@ function __smpHoldsNow() {
   var plans = 0, caps = 0;
   /* On the console's create piece there is no graph at all — a client not
      made yet holds nothing — and `GROUP && …` throws on an undeclared name
-     rather than reading false (§447). */
+     rather than reading false (§467). */
   if (typeof GROUP === "undefined") return { plans: 0, capabilities: 0, units: 0, functions: 0 };
   ((GROUP && GROUP.capabilities) || []).forEach(function (c) {
     var n = ((c.keyObjectives || []).length) + ((c.projects || []).length) +
@@ -570,7 +570,7 @@ var CLIENTSETUP = (function () {
   function canShape(){
     var h = holdsNow();
     return !(h.plans || h.capabilities) && !(S && S.reg && S.reg.client && S.reg.client.status === "retired");
-    /* `S` is null on the console's create piece, which never mounts a flow (§447). */
+    /* `S` is null on the console's create piece, which never mounts a flow (§467). */
   }
 
   function render(){

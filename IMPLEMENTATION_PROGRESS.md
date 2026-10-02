@@ -9049,7 +9049,7 @@ initials and name, and every card in a row stays the same height. The name is
 still on the logo's hover and the search still finds it. Built from the mockup
 Islam approved. Not on main.
 
-### §447 — the two red console checks fixed (2026-10-01)
+### §467 — the two red console checks fixed (2026-10-01)
 
 Two console checks were failing because they opened the console expecting the client cards. Since §400 the console opens on My work, so they now go straight to the Clients tab. Once they landed in the right place, they showed a real error: typing in *Add a client* threw quietly, because a rule written for the client's own settings asked about a plan that does not exist yet. Now a client not made yet counts as holding nothing, and the error is gone. Both checks pass on both copies of the page, and the full sweep is clean. On the branch, not merged.
 

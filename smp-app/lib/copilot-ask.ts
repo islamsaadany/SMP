@@ -43,10 +43,6 @@ export const SCHEMA = {
   type: "OBJECT",
   properties: {
     reply: { type: "STRING" },
-    playback: {
-      type: "OBJECT",
-      properties: { understood: { type: "STRING" }, workingFrom: { type: "STRING" }, missing: { type: "STRING" } },
-    },
     missing: { type: "ARRAY", items: { type: "STRING" } },
     options: {
       type: "ARRAY",
@@ -80,7 +76,6 @@ export const SCHEMA = {
 
 export type Answer = {
   kind: "answer";
-  playback: { understood: string; workingFrom: string; missing: string } | null;
   missing: string[];
   options: { label: string; recommended: boolean }[];
   assumptions: string[];
@@ -99,9 +94,6 @@ export type DraftItem = { text: string; source: string; title?: string; evidence
 export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string; part: Answer } | null {
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
-  const pb = j.playback && typeof j.playback === "object" ? j.playback : null;
-  const playback = pb && (clip(pb.understood, 600) || clip(pb.workingFrom, 600) || clip(pb.missing, 600))
-    ? { understood: clip(pb.understood, 600), workingFrom: clip(pb.workingFrom, 600), missing: clip(pb.missing, 600) } : null;
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
   let seenRec = false;
   const options = (Array.isArray(j.options) ? j.options : [])
@@ -136,11 +128,11 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
   }
   const pastedBelongsTo = (SECTIONS as readonly string[]).includes(j.pastedBelongsTo) ? (j.pastedBelongsTo as Section) : null;
   const part: Answer = {
-    kind: "answer", playback, missing: list(j.missing, 8, 300), options,
+    kind: "answer", missing: list(j.missing, 8, 300), options,
     assumptions: list(j.assumptions, 10, 300), draft, pastedBelongsTo,
     following: clip(j.following, 120),
   };
-  if (!reply && !playback && !draft) return null;
+  if (!reply && !draft) return null;
   return { reply, part };
 }
 

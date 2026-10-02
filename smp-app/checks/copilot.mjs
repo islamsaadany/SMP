@@ -135,7 +135,7 @@ check("...a source naming a file nobody attached is read as assumed, never drawn
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);
 check("each section's guidance carries the house rules; the roads only where the record defines them",
-  /PLAYBACK BEFORE PRODUCING/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
+  /WHERE THE WORK STARTS/.test(guidanceFor("analysis")) && /Never invent a figure/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
@@ -144,11 +144,17 @@ check("each section's guidance carries the house rules; the roads only where the
   const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
   const gi = guidanceFor("analysis", M, []);
   check("§460 A: the method LEADS — it is sent before the answer rules and is not overruled by them",
-    gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("RULES FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
+    gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("LIMITS FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
   check("§460 A: a drafted item takes the method's shape — title, evidence, score — and a turn names the method part it follows",
     /`title`[\s\S]*`evidence`[\s\S]*`score`/.test(gi) && /`following`/.test(gi));
-  check("§460 C: talk first — playback once, buttons only for a real question, no refine stop once they said what to change",
-    /TALK LIKE A CONSULTANT/.test(gi) && /PLAYBACK BEFORE PRODUCING, ONCE/.test(gi) && /leave `options` empty/.test(gi) && /ALREADY said what to change/.test(gi));
+  check("§463: a natural conversation — no playback box, buttons only for a real choice, and one starting point for every section",
+    /natural conversation/.test(gi) && !/PLAYBACK/.test(gi) && !/playback/.test(gi) && /leave `options` empty/.test(gi) &&
+    /WHERE THE WORK STARTS, in every section/.test(gi) && /word for word/.test(gi) && /already said what to change/.test(gi) &&
+    ["foundation", "analysis", "directions", "execution", "advisory"].every((k) => /WHERE THE WORK STARTS/.test(guidanceFor(k))));
+  check("§463: what exists comes before the ways to start, and the method before both",
+    gi.indexOf("Phase one") < gi.indexOf("WHERE THE WORK STARTS") && gi.indexOf("WHERE THE WORK STARTS") < gi.indexOf("WAYS TO START"));
+  check("§463: an answer's old playback field is not kept",
+    !("playback" in (shapeAnswer({ reply: "Hi", playback: { understood: "x" } }, []) || { part: { playback: 1 } }).part));
   const sh2 = shapeAnswer({ reply: "Here is the internal half.", following: "Situational Analysis · SWOT",
     draft: { title: "Mobile SWOT", groups: [{ title: "Strengths", items: [
       { title: "Brand partnerships", text: "Samsung and Xiaomi deals.", evidence: "your message", score: "3 · Strong", source: "pasted" },
@@ -461,7 +467,6 @@ try {
 
     NEXT = { answer: {
       reply: "I read your deck and notes. Here is a first SWOT.",
-      playback: { understood: "Refresh the Q3 SWOT", workingFrom: "Q3 deck.pdf, notes.docx, the platform", missing: "Competitor prices" },
       missing: ["Competitor prices for Q3"],
       options: [{ label: "Assume for me", recommended: true }, { label: "I'll send them" }],
       assumptions: ["Competitor prices held flat", "Competitor prices held flat"],
@@ -473,9 +478,9 @@ try {
     check("the model was asked, once, with the key", seen.length === 1 && w.key === "stand-in-key", seen.length + "");
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
-      /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
-    check("...told to quote what the plan holds and ask what to change before refining it (§458)",
-      /REFINING WHAT ALREADY EXISTS/.test(sys) && /First quote in `reply` what THE PLAN AS WRITTEN holds/.test(sys));
+      /WHERE THE WORK STARTS/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
+    check("...told to start from what the plan holds, word for word, and ask what to change (§463)",
+      /start from it: show it in `reply` word for word/.test(sys) && /If the person has not said what to change, ask/.test(sys));
     check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
@@ -484,8 +489,8 @@ try {
       !!lastTurn && lastTurn.parts.some((p) => p.inlineData && p.inlineData.mimeType === "application/pdf" && Buffer.from(p.inlineData.data, "base64").equals(pdf)) &&
       lastTurn.parts.some((p) => /\[attached with this message: Q3 deck\.pdf, notes\.docx\]/.test(p.text || "")), JSON.stringify(lastTurn && lastTurn.parts.map((p) => Object.keys(p))));
     const ans = s1.j && s1.j.messages[s1.j.messages.length - 1];
-    check("the answer is kept as an answer: playback, the missing input, two ways on, the draft with its sources",
-      s1.st === 200 && ans.who === "ai" && ans.part.kind === "answer" && ans.part.playback.missing === "Competitor prices" &&
+    check("the answer is kept as an answer: the missing input, two ways on, the draft with its sources",
+      s1.st === 200 && ans.who === "ai" && ans.part.kind === "answer" && ans.part.missing[0] === "Competitor prices for Q3" && !("playback" in ans.part) &&
       ans.part.options.length === 2 && ans.part.options[0].recommended && ans.part.draft.groups[0].items[0].source === "notes.docx",
       JSON.stringify(ans).slice(0, 300));
     check("...a source naming a file nobody attached reads as assumed", ans && ans.part.draft.groups[0].items[1].source === "assumed");
@@ -576,11 +581,11 @@ try {
     /* §458: the answer's own format never reaches the screen. Both ends: a
        field that ran on into the next JSON key is cut, and a quote-comma-quote
        that is not one of our keys is kept as written. */
-    NEXT = { answer: { reply: "Refined.", playback: { understood: "He said \"yes\", \"no\" and left", workingFrom: "The plan's aspiration (MENA expansion).\", \"missing\": \"None.", missing: "" } } };
+    NEXT = { answer: { reply: "Refined.", following: "Foundation \u00b7 Aspiration", assumptions: ["He said \"yes\", \"no\" and left", "The plan's aspiration (MENA expansion).\", \"missing\": \"None."] } };
     const rL = await call("POST", "api", { act: "say", id: ch.id, text: "Leak test" }, NORAN);
-    const pL = rL.j.messages[rL.j.messages.length - 1].part.playback || {};
-    check("a playback line that ran on into the answer's next field is cut there (§458)", pL.workingFrom === "The plan's aspiration (MENA expansion).", JSON.stringify(pL.workingFrom));
-    check("...and ordinary quotes in what the model wrote are kept", pL.understood === 'He said "yes", "no" and left', JSON.stringify(pL.understood));
+    const pA = (rL.j.messages[rL.j.messages.length - 1].part.assumptions) || [];
+    check("a line that ran on into the answer's next field is cut there (§458)", pA[1] === "The plan's aspiration (MENA expansion).", JSON.stringify(pA[1]));
+    check("...and ordinary quotes in what the model wrote are kept", pA[0] === 'He said "yes", "no" and left', JSON.stringify(pA[0]));
     NEXT = null;
 
     NEXT = { status: 500 };

@@ -61220,3 +61220,13 @@ Islam: *"can we add a clean buttong to increaes and decrease the font size in th
 
 Screen only — no `api/`, `lib/` or `db/` file — nothing stored on the server, nothing migrated, nobody signed out.
 
+## §463 — The Copilot talks naturally: one starting point, no playback box (2026-10-02)
+
+Islam, after the Copilot answered *"Let's enhance the winning aspiration"* with an immediate draft under an Understood / Working-from box: *"rethink the prompting flow in general to have a natural conversation not customized for everything … there is a methodology prompt and there is a starting point either from something existing or the user is prompted to start giving answers in the different methods that was already brought from the copilot."* His three answers: remove the box, keep the method-step line, and make show-what-exists-and-ask the default for every section.
+
+**The cause was the shape, not one missing word.** §458's refine rule fired on a list of trigger words and "enhance" was not on it — but adding it would have been the next case of the same fault. The prompt had grown one rule per case (playback, refine stop, already-said), and rules placed after the method lost to it. So the prompt is now four parts in the conversation's own order: VOICE (talk like a consultant, one step at a time, build on the conversation and earlier drafts), what the section produces, Forefront's method (it leads), and START — two cases with no trigger words: *something the plan holds* is shown word for word and the person is asked what to change (or, if they already said, it is shown and changed in the same turn); *nothing yet* is said plainly and the ways to start are offered. Last, a short list of LIMITS that do not bend (no invented figures, every item sourced, missing input named, options only for a real choice, the draft's shape, `following`, where pasted material belongs).
+
+**The playback box is removed, not hidden.** It is out of the answer schema, the stored answer, and the screen; an older stored answer that still carries one is simply not drawn. `following` stays — Islam's answer 2.
+
+**Checks.** `checks/copilot.mjs` asserts the starting rule is in every section's guidance, that the method comes before it and it before the ways to start, that no playback reaches the model's instructions or a stored answer, and what the model was actually sent. 139/0; red under `no-refine` (5) and `method-last` (2). The §458 leak test moved from the removed field to `assumptions`, which runs through the same cutter. `checks/shell.mjs` 206/0; its "no playback box" assertion is the CONTROL and says so — it stays green with the old drawing put back, because the server already drops the field (§113.8). Nothing stored moves, nothing is migrated.
+

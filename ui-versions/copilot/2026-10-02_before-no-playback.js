@@ -14,7 +14,7 @@
    STAGE 2 IS THE AI IN THE CHAT (plan §5), drawn as round 2 signed it off
    (design-mockups/copilot/2026-09-30_copilot-round2.html): the one line of
    what the AI can see for this place, read from the platform's own scoring
-   so the numbers match Performance; missing input
+   so the numbers match Performance; playback before a draft; missing input
    named with its ways on as quick replies; "Assume for me" recorded on the
    chat; pasted material marked with an offer to keep it; and files — Word,
    PDF and Excel — attached beside the box and shown as chips.
@@ -445,8 +445,10 @@ var COPILOT = (function(){
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    /* §463: no "Understood / Working from" box. A stored answer from before
-       may still carry one; it is not drawn — the reply says it in words. */
+    if (p.playback) {
+      var pb = p.playback, row = function(k, v){ return v ? '<dt>' + k + '</dt><dd>' + E(v) + '</dd>' : ''; };
+      h += '<dl class="copplay">' + row("Understood", pb.understood) + row("Working from", pb.workingFrom) + row("Missing", pb.missing) + '</dl>';
+    }
     if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
     if (p.draft && p.draft.groups) {
       h += '<div class="copdraft">' + (p.draft.title ? '<div class="copdt">' + E(p.draft.title) + '</div>' : '') +

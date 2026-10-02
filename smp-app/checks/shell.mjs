@@ -62,6 +62,10 @@ const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_
 const MODEL_SEEN = [];
 const MODEL_ANSWER = {
   reply: "Here is a first foundation from the plan.",
+  /* §463: a model still sending the old playback box. The SERVER drops the
+     field (checks/copilot.mjs asserts that, red under the old shape), so the
+     "no playback box" assertion below is the CONTROL and says so: it stays
+     green even with the old drawing put back, measured (§113.8). */
   playback: { understood: "Draft Mobile's foundation", workingFrom: "the platform", missing: "The purpose in the client's words" },
   missing: ["The purpose in the client's words"],
   options: [{ label: "Assume for me", recommended: true }, { label: "I'll give it" }],
@@ -838,7 +842,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const seen0 = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
     await page.click("[data-cop-send]");
-    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copplay"), null, { timeout: 15000 }).catch(() => {});
+    await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copmiss"), null, { timeout: 15000 }).catch(() => {});
     check((await count("copilot_chats")) === c0 + 1, "+ New chat writes a chat to the database");
     check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the Copilot's answer");
     const sent = MODEL_SEEN[seen0];
@@ -860,8 +864,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
         opts: m.querySelectorAll("[data-cop-reply]").length,
         it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
     });
-    check(ans && ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
-      "the answer draws its playback, what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
+    check(ans && !ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
+      "the answer draws no playback box (§463), and draws what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
     /* §460: an item the method shapes draws its title, score and evidence, and
        the answer says which part of the method it is working through. */
     check(ans && /Wide store network/.test(ans.it) && /4/.test(ans.it) && /Evidence: Store count in the plan/.test(ans.it) && /Following: Purpose/.test(ans.follow),

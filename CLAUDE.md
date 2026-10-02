@@ -10920,7 +10920,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-02 — **§462: the Copilot chat's text size.** A− / A+ on a chat's title line, four steps (90–130%), the conversation and the reply box only, through CSS `zoom` on a wrapper inside the scrolling box plus `calc(15px × --copz)` on the reply box; `localStorage` `smp.copilot.textsize`, normal stored as an absence; the press never repaints. `check:shell` 206/0, red with the zoom removed. On the branch, not merged.*
+*Last Updated: 2026-10-02 — **§463: the Copilot talks naturally.** `guidanceFor()` sends VOICE, the method (leading), START (one rule for every section: something the plan holds is shown word for word, then what to change is asked — or made at once if already said; nothing yet → the ways to start) and short LIMITS; the per-case trigger list and the playback box are gone (removed from SCHEMA/Answer/shapeAnswer and from `copilot.js`), `following` kept. `check:copilot` 139/0, red under `no-refine` (5) and `method-last` (2); `check:shell` 206/0, its no-box assertion the named control. On the branch, not merged.*
+
+*Earlier: 2026-10-02 — **§462: the Copilot chat's text size.** A− / A+ on a chat's title line, four steps (90–130%), the conversation and the reply box only, through CSS `zoom` on a wrapper inside the scrolling box plus `calc(15px × --copz)` on the reply box; `localStorage` `smp.copilot.textsize`, normal stored as an absence; the press never repaints. `check:shell` 206/0, red with the zoom removed. On the branch, not merged.*
 
 *Earlier: 2026-10-01 — **§460: the Copilot talks like a consultant.** `guidanceFor()` puts the voice first and Forefront's method as the lead, the house rules last as *rules for your answer*; items carry title/text/evidence/score and the answer names the method step (`following`); 20 turns travel with each AI turn's own draft and options (`partMemo`); recap only on the first draft, questions only when blocked, buttons only for a real choice. `check:copilot` 137/0 red 16, `check:shell` 199/0 red 1. Merged to `main` 2026-10-01 on Islam's word, with main's §459 Processes brought in first.*
 

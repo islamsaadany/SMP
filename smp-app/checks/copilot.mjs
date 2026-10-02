@@ -12,7 +12,7 @@
        a client's own person refused at the api AND every read, in words —
        and every act refused where it must be;
      · §1b (stage 2) a Word or Excel file read, or refused in words; an
-       answer checked rather than trusted (one recommended option, a source
+       answer checked rather than trusted (no option marked recommended, a source
        naming a file nobody attached read as assumed);
      · §5 (stage 2) the AI READ OFF THE WIRE — a stand-in model on
        GEMINI_ENDPOINT (§100.3) records what it was sent: the guidance, the
@@ -130,7 +130,7 @@ const sh = shapeAnswer({ reply: " Here is a start. ", options: [{ label: "Assume
   draft: { title: "SWOT", groups: [{ title: "Strengths", items: [{ text: "Coverage", source: "Q3 deck.pdf" }, { text: "Brand", source: "made-up.xlsx" }, { text: "Share", source: "platform" }, { text: "" }] }, { title: "Empty", items: [] }] },
   assumptions: ["Margins flat"], pastedBelongsTo: "nowhere" }, ["Q3 deck.pdf"]);
 check("an answer is trimmed, empty options and empty groups dropped", sh && sh.reply === "Here is a start." && sh.part.options.length === 2 && sh.part.draft.groups.length === 1 && sh.part.draft.groups[0].items.length === 3, JSON.stringify(sh));
-check("...only ONE option can be the recommended one", sh && sh.part.options.filter((o) => o.recommended).length === 1 && sh.part.options[0].recommended);
+check("...and no option is ever marked recommended, whatever the model sends (§469)", sh && sh.part.options.length === 2 && sh.part.options.every((o) => !("recommended" in o)));
 check("...a source naming a file nobody attached is read as assumed, never drawn as a file (§96.2)",
   sh && sh.part.draft.groups[0].items.map((x) => x.source).join("|") === "Q3 deck.pdf|assumed|platform", sh && JSON.stringify(sh.part.draft.groups[0].items));
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
@@ -492,7 +492,7 @@ try {
     const ans = s1.j && s1.j.messages[s1.j.messages.length - 1];
     check("the answer is kept as an answer: the missing input, two ways on, the draft with its sources",
       s1.st === 200 && ans.who === "ai" && ans.part.kind === "answer" && ans.part.missing[0] === "Competitor prices for Q3" && !("playback" in ans.part) &&
-      ans.part.options.length === 2 && ans.part.options[0].recommended && ans.part.draft.groups[0].items[0].source === "notes.docx",
+      ans.part.options.length === 2 && !ans.part.options.some((o) => "recommended" in o) && ans.part.draft.groups[0].items[0].source === "notes.docx",
       JSON.stringify(ans).slice(0, 300));
     check("...a source naming a file nobody attached reads as assumed", ans && ans.part.draft.groups[0].items[1].source === "assumed");
     check("...and the files it read are named on it", ans && (ans.part.read || []).join(",") === "Q3 deck.pdf,notes.docx");

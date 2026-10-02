@@ -868,12 +868,12 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const ans = await page.evaluate(() => {
       const m = document.querySelector("[data-cop-msgs] .copmsg.ai"); if (!m) return null;
       return { play: !!m.querySelector(".copplay"), miss: !!m.querySelector(".copmiss"), groups: m.querySelectorAll(".copgrp li").length,
-        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: (m.querySelector("[data-cop-reply].rec") || {}).textContent || "",
+        srcs: Array.from(m.querySelectorAll(".copsrc")).map((x) => x.textContent), rec: m.querySelectorAll("[data-cop-reply].rec, [data-cop-reply] .coprec").length, recWord: /recommended/i.test(Array.from(m.querySelectorAll("[data-cop-reply]")).map((x) => x.textContent).join("|")), firstOpt: (m.querySelector("[data-cop-reply]") || {}).textContent || "",
         opts: m.querySelectorAll("[data-cop-reply]").length,
         it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
     });
-    check(ans && !ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.rec) && ans.srcs.join("|") === "Assumed",
-      "the answer draws no playback box (§463), and draws what is missing, the draft with sources, and two ways on — the recommended one filled", JSON.stringify(ans));
+    check(ans && !ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.firstOpt) && ans.rec === 0 && !ans.recWord && ans.srcs.join("|") === "Assumed",
+      "the answer draws no playback box (§463), and draws what is missing, the draft with sources, and two ways on — neither marked recommended (§469)", JSON.stringify(ans));
     /* §460: an item the method shapes draws its title, score and evidence, and
        the answer says which part of the method it is working through. */
     check(ans && /Wide store network/.test(ans.it) && /4/.test(ans.it) && /Evidence: Store count in the plan/.test(ans.it) && /Following: Purpose/.test(ans.follow),

@@ -10776,8 +10776,6 @@ body.presenting #buildband { display:none; }
 .copopt:hover, .copopt:focus-visible { border-color:var(--gold); outline:none; }
 .copopt.rec { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
 .copopt.rec:hover, .copopt.rec:focus-visible { border-color:var(--panel-accent); }
-.copopt.rec .coprec { color:var(--panel-accent); font-weight:600; }
-.coprec { font-weight:500; }
 .coppaste summary { cursor:pointer; list-style:none; font-size:var(--fs-small, 12.5px); color:var(--ink-2);
                     background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 10px; }
 .coppaste summary::-webkit-details-marker { display:none; }

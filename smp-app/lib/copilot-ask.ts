@@ -6,8 +6,8 @@
 
    THE ANSWER IS CHECKED, NEVER TRUSTED AS WRITTEN (§96.2): every list is
    capped, every string trimmed, a `source` naming a file nobody attached is
-   read as "assumed" rather than drawn as a file, and at most one option is
-   the recommended one. An answer with nothing in it is a failure, not an
+   read as "assumed" rather than drawn as a file, and no option is ever
+   marked recommended (§469). An answer with nothing in it is a failure, not an
    empty bubble (§124). */
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
@@ -26,7 +26,7 @@ const str = (v: unknown) => (v == null ? "" : String(v));
    the next field of its JSON INSIDE this one. A string that runs on into
    `", "<one of our own field names>":` is cut there; anything else is kept
    exactly as written (§96.2). */
-const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|recommended|evidence|score|following";
+const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|evidence|score|following";
 const LEAK = new RegExp('["\u201d]\\s*,\\s*"(?:' + OWN_KEYS + ')"\\s*:[\\s\\S]*$');
 export const unleak = (v: string) => (process.env.SMP_BREAK === "keep-leak" ? v : v.replace(LEAK, "").trim());
 const clip = (v: unknown, n: number) => unleak(str(v).replace(/\s+/g, " ").trim()).slice(0, n);
@@ -46,7 +46,7 @@ export const SCHEMA = {
     missing: { type: "ARRAY", items: { type: "STRING" } },
     options: {
       type: "ARRAY",
-      items: { type: "OBJECT", properties: { label: { type: "STRING" }, recommended: { type: "BOOLEAN" } }, required: ["label"] },
+      items: { type: "OBJECT", properties: { label: { type: "STRING" } }, required: ["label"] },
     },
     assumptions: { type: "ARRAY", items: { type: "STRING" } },
     draft: {
@@ -77,7 +77,7 @@ export const SCHEMA = {
 export type Answer = {
   kind: "answer";
   missing: string[];
-  options: { label: string; recommended: boolean }[];
+  options: { label: string }[];
   assumptions: string[];
   draft: { title: string; groups: { title: string; items: DraftItem[] }[] } | null;
   pastedBelongsTo: Section | null;
@@ -95,12 +95,13 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
-  let seenRec = false;
+  // §469: a quick reply is never marked recommended (Islam: "remove
+  // recommended from answering questions"), so whatever the model sends
+  // in that field is dropped here rather than trusted.
   const options = (Array.isArray(j.options) ? j.options : [])
-    .map((o: any) => ({ label: clip(o && o.label, 60), recommended: !!(o && o.recommended) }))
+    .map((o: any) => ({ label: clip(o && o.label, 60) }))
     .filter((o: any) => o.label)
-    .slice(0, 5)
-    .map((o: any) => { const r = o.recommended && !seenRec; if (r) seenRec = true; return { label: o.label, recommended: r }; });
+    .slice(0, 5);
   const names = new Set(fileNames);
   const source = (s: unknown) => {
     const v = clip(s, 160);

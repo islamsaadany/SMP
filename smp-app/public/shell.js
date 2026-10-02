@@ -55991,8 +55991,7 @@ var COPILOT = (function(){
     }
     if (p.options && p.options.length && last && canEdit()) {
       h += '<div class="copopts">' + p.options.map(function(o){
-        return '<button type="button" class="copopt' + (o.recommended ? " rec" : "") + '" data-cop-reply="' + E(o.label) + '">' +
-          E(o.label) + (o.recommended ? ' <span class="coprec">(recommended)</span>' : '') + '</button>';
+        return '<button type="button" class="copopt" data-cop-reply="' + E(o.label) + '">' + E(o.label) + '</button>';
       }).join("") + '</div>';
     }
     /* What part of the method this turn works through (§460): quiet, and

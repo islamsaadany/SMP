@@ -61336,3 +61336,27 @@ hidden strip's "+"; scoped to the rail's own head (§51.11). One read the rail a
 moment too early after a save and now waits for it. `qa.py` ERRORS none;
 `check:modules` 233/0, `door-landing` 145/0. Built file and served copies
 regenerated, `sw.js` → `smp-shell-v5.88-guided-foundation`.
+
+## §469 — No quick reply is marked recommended (2026-10-02)
+
+Islam: *"remove recommended from answering questions."* The Copilot's quick
+replies under an answer carried one option filled navy with *(recommended)*
+beside it, because the guidance told the model to mark at most one and
+`shapeAnswer` kept the first one marked. **All three halves go together**, or
+one survives the other two: the guidance now says never to mark one, the
+answer's schema stops offering the field, and `shapeAnswer` drops whatever the
+model sends in it, so the mark cannot come back through a model that ignores
+the instruction (§96.2, an answer is checked and never trusted as written).
+The screen draws every quick reply the same way and the `.coprec` rules are
+deleted (§24). **`.copopt.rec` STAYS**: it is also the dress of *Save to …
+deliverables* (§464), a button that acts rather than a recommendation, and
+taking it off would quietly restyle a control nobody asked about (rule 1b).
+**DELIBERATELY NOT TOUCHED**: the guided flow's road cards still mark *Guided*
+as recommended (§468). That is the platform choosing how to start, not an answer
+to a question, and the request named answers. **Islam's own methodology text**
+also asks for a clear recommendation in places. It is his content, editable on
+Copilot settings, so it is left as written; the answer's shape now simply has no
+field to carry the mark. Proved: `check:copilot` 175/0, with **2 red** when the
+model's mark is trusted again; `check:shell`'s answer section asserts no option
+wears the dress or the word, while its stub still sends `recommended:true`.
+

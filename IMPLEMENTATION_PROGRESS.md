@@ -1340,6 +1340,12 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-02 — the Structure cards in the agreed order (§467)
+
+Built from the signed-off mockup. On Client set-up › Structure each card's name is now its header, bold on a shaded band, with its On/Off beside it; the extra labels on the switches ("This client has them" and the like) are gone. The order is: top level, then the company's pillars and capabilities side by side, then the second layer, then functions, then the third layer and independent capabilities. Those last two sit one under the other when on, and side by side only when both are off. Capabilities inside the company plan show only their plan. Nothing stored changes.
+
+**Next** (agreed, each mockup first): an owner and custodian on each direction and capability, the SMO filling in where there is no owner, and who may fill in what; then the cycle board lines; then the per-direction decks.
+
 ## 2026-10-02 — the company plans in projects (§466)
 
 Built (stage 3 of the "where the plan lives" mockup). The company's own plan (the Directions card on Client set-up › Structure) now has a **plans in** choice: Directions or Projects. Switching asks first and nothing is lost — the directions are hidden and kept, and come back if you switch back. A company project's named owner enters its figures and only theirs; the office (and the group CEO) report everything and submit. On the company's Performance page a **Projects — performance** card takes the directions' place. On the branch, not merged.

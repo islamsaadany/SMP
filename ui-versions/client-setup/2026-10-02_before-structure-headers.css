@@ -232,18 +232,6 @@
 .csetup .stcard { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
   padding:12px 14px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
 .csetup .stcard > .tag { align-self:flex-start; }
-/* §467: the card's name is its header — bold, a size up, on a shaded band
-   the width of the card, with its On/Off on the right. */
-.csetup .stcard > .sthd { display:flex; align-items:center; justify-content:space-between; gap:10px;
-  margin:-12px -14px 4px; padding:9px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);
-  border-radius:var(--r-md) var(--r-md) 0 0; }
-.csetup .stcard > .sthd > .tag { font-size:15px; font-weight:700; color:var(--ink); }
-/* §467: two cards on one row — the company's pillars and capabilities, and
-   the bottom pair when both are off. Stacks below 900px (§158). */
-.csetup .stpair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; margin-bottom:12px; }
-.csetup .stpair > .stcard { margin-bottom:0; min-width:0; }
-.csetup .stpair .sthid { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-@media (max-width:900px) { .csetup .stpair { grid-template-columns:minmax(0,1fr); } }
 .csetup .stcard > .lab { margin:4px 0 0; }
 .csetup .stnames, .csetup .strow { display:flex; flex-wrap:wrap; gap:8px 12px; }
 .csetup .stnm { display:flex; flex-direction:column; gap:3px; min-width:150px; flex:1 1 150px; max-width:240px; }
@@ -257,7 +245,6 @@
   border-radius:var(--r-md); overflow:hidden; margin-top:4px; }
 .csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
 .csetup .stsec:last-child { border-right:0; }
-.csetup .stsecs.stsecs1 { grid-template-columns:minmax(0,1fr); }
 .csetup .stsech { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
 /* §450: the plan question reads as a question, so its answer sits under it
    rather than at the far end of the line (Islam: "the buttons needs to come

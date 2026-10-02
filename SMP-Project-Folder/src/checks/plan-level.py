@@ -56,7 +56,15 @@ with sync_playwright() as p:
     ck("the question reads Company level | Units level",
        safe(pg, "()=>[...document.querySelectorAll('[data-stplan] button')].map(b=>b.textContent).join('|')") == "Company level|Units level")
     tags = safe(pg, TAGS, [])
-    ck("seven cards in the agreed order", tags == ["-", "dir", "capco", "-", "bu", "-", "cap"], tags)
+    # §467: Functions come before the third layer, and the bottom pair is the
+    # third layer and independent capabilities (Islam's agreed order).
+    ck("seven cards in the agreed order", tags == ["-", "dir", "capco", "-", "-", "bu", "cap"], tags)
+    ck("each card's name is its shaded header, and no switch carries a label of its own",
+       safe(pg, "()=>{var c=[...document.querySelectorAll('.stcard')]; return c.length===7 && c.every(x=>x.firstElementChild.classList.contains('sthd') && !!x.firstElementChild.querySelector('.tag')) && ![...document.querySelectorAll('.stcard .lab')].some(l=>/This client has|plans its own|Part of the/.test(l.textContent))}") is True)
+    ck("the company's pillars and capabilities share one row",
+       safe(pg, "()=>{var d=document.querySelector('[data-stcard=\"dir\"]'),c=document.querySelector('[data-stcard=\"capco\"]'); return d.parentNode.classList.contains('stpair') && d.parentNode===c.parentNode && Math.abs(d.getBoundingClientRect().top-c.getBoundingClientRect().top)<1}") is True)
+    ck("the third layer, being on, is stacked rather than paired",
+       safe(pg, "()=>!document.querySelector('[data-stcard=\"bu\"]').parentNode.classList.contains('stpair')") is True)
     ck("the Directions card is off", safe(pg, "()=>!!document.querySelector('[data-stcard=\"dir\"] .sthid')") is True)
     ck("the company-plan capabilities card is off and the layer card is live",
        safe(pg, "()=>{var a=document.querySelector('[data-stsec=\"cap|top\"] button[aria-pressed=true]'); return !!a && a.textContent==='Off' && !!document.querySelector('[data-stcard=\"cap\"] [data-stsec=\"cap|layer\"]')}") is True)
@@ -68,6 +76,8 @@ with sync_playwright() as p:
        safe(pg, "()=>JSON.stringify(GROUP.structure&&GROUP.structure.cap)"))
     tags = safe(pg, TAGS, [])
     ck("…the settings move to card 3 and card 7 is greyed", tags[2:3] == ["cap"] and tags[6:7] == ["caplayer"], tags)
+    ck("…and inside the company plan they show only their plan section",
+       safe(pg, "()=>document.querySelectorAll('[data-stcard=\"cap\"] .stsecs > .stsec').length===1 && !document.querySelector('[data-stcard=\"cap\"] [data-stsec=\"cap|found\"]')") is True)
     ck("…its switch held off and unpressable", safe(pg, LAYERHELD) is True)
     ck("…the navigation loses the capabilities side", safe(pg, CAPSIDE) is False)
     ck("…and the company's Strategy tab gains them", safe(pg, "()=>topCapsOn()===true && topExtrasOn()===true") is True)
@@ -80,7 +90,9 @@ with sync_playwright() as p:
     ck("choosing Company level asks first", press(pg, '[data-buask-go]'))
     ck("…and lands on it", safe(pg, "()=>!buExists() && SMPRules.capAtTop(GROUP)") is True)
     tags = safe(pg, TAGS, [])
-    ck("the same seven, card 3 holding the capabilities and card 7 greyed", tags == ["-", "dir", "cap", "-", "bu", "-", "caplayer"], tags)
+    ck("the same seven, card 3 holding the capabilities and card 7 greyed", tags == ["-", "dir", "cap", "-", "-", "bu", "caplayer"], tags)
+    ck("…the bottom two, both off, share one row",
+       safe(pg, "()=>{var a=document.querySelector('[data-stcard=\"bu\"]'),b=document.querySelector('[data-stcard=\"caplayer\"]'); return a.parentNode.classList.contains('stpair') && a.parentNode===b.parentNode}") is True)
     ck("…card 7 unpressable", safe(pg, LAYERHELD) is True)
     ck("the units card shows its switch held off",
        safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"bu\"]'); var b=[...c.querySelectorAll('.stonoff button')]; return b.length===2 && b.every(x=>x.disabled) && b[1].getAttribute('aria-pressed')==='true'}") is True)

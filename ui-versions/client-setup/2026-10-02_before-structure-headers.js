@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1889,43 +1888,28 @@ var CLIENTSETUP = (function () {
   function structureStep(box){
     var ro = !canShape();
     var lv = structNow();
-    /* §467: a card's NAME is its header — bold, a size up, on a shaded band,
-       with its On/Off on the right (Islam: *"the title of the group plans its
-       own and the client has them is irrelevant ... make the main title
-       already bold ... and shaded background"*). The switch's own label went
-       with it; a switch is put into the header with `hd(c, sw)`. */
-    var card = function (tag, into) {
-      var c = el("section", "stcard"); var h = el("div", "stsech sthd");
-      h.appendChild(el("span", "tag", tag)); c.appendChild(h); (into || box).appendChild(c); return c;
-    };
-    var hd = function (c, sw) { c.querySelector(".sthd").appendChild(sw); };
-    /* Two cards side by side in one row (§467): the company's pillars and its
-       capabilities, and the bottom pair when both are off. */
-    var pair = function () { var w = el("div", "stpair"); box.appendChild(w); return w; };
+    var card = function (tag) { var c = el("section", "stcard"); c.appendChild(el("span", "tag", tag)); box.appendChild(c); return c; };
     /* §465: a switch shown in its state and not pressable here, the reason on
        the hover (1b-ii); disabled, never merely dimmed (§220). */
     var held = function (cur, why) {
+      var h = el("div", "stsech"); h.appendChild(el("span", "lab", "This client has them"));
       var b = onOff(cur, function () {}); b.classList.add("dummy"); b.title = why;
       [].slice.call(b.querySelectorAll("button")).forEach(function (x) { x.disabled = true; });
-      return b;
+      h.appendChild(b); return h;
     };
-    /* §467: inside the company plan a capability is a part of that plan, so
-       it has no first or second section of its own and no Except for — only
-       its name and its plan section (Islam: *"the capabilities has no first
-       section and second section"*). What was set there is kept, not shown. */
-    var capSettings = function (c, inPlan) {
+    var capSettings = function (c) {
       callBoxes(c, "capability", ro);
       structLevel(c, lv, "cap");
-      if (!inPlan) { exceptBox(c, "cap"); return; }
-      var g = c.querySelector(".stsecs"), ss = g ? g.querySelectorAll(":scope > .stsec") : [];
-      if (ss.length > 1) { for (var i = 0; i < ss.length - 1; i++) g.removeChild(ss[i]); g.classList.add("stsecs1"); }
+      exceptBox(c, "cap");
     };
-    var capCard = function (c, onWhy, offLine, inPlan) {
-      hd(c, onOff(lv.cap.exists, function (v) {
+    var capCard = function (c, onWhy) {
+      var ch = el("div", "stsech"); ch.appendChild(el("span", "lab", "This client has them"));
+      ch.appendChild(onOff(lv.cap.exists, function (v) {
         var nx = structNow(); nx.cap.exists = v; structWrite(nx);
       }, "cap|layer"));
-      if (lv.cap.exists) { if (onWhy) c.appendChild(el("p", "wzwhy", onWhy)); capSettings(c, inPlan); }
-      else c.appendChild(el("p", "sthid", offLine || "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
+      c.appendChild(ch);
+      if (lv.cap.exists) { c.appendChild(el("p", "wzwhy", onWhy)); capSettings(c); }
+      else c.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
     };
 
     var top = card("Top level");
@@ -1977,13 +1961,12 @@ var CLIENTSETUP = (function () {
        capabilities the company carries get a card beside it. The order is the
        same at both levels — what a card holds is what changes. */
     var atCo = !lv.bu.exists;
-    var topOne = W("topword", "one", "company"), topLow = topOne.toLowerCase();
-    var row2 = pair();
-    var dr = card(topOne + " " + W("pillar", "many", "Directions").toLowerCase(), row2);
+    var dr = card(W("pillar", "many", "Directions"));
     dr.setAttribute("data-stcard", "dir");
     var topWayNow = SMPRules.topWay(GROUP);
     var dOn = SMPRules.planOn(GROUP, "group") && (topWayNow === "projects" || lv.top.on.indexOf("pillar") >= 0);
-    hd(dr, onOff(dOn, function (v) {
+    var dh = el("div", "stsech"); dh.appendChild(el("span", "lab", "The " + W("topword", "one", "company").toLowerCase() + " plans its own"));
+    dh.appendChild(onOff(dOn, function (v) {
       var nx = structNow(), t = nx.top;
       if (v) {
         if (t.plan) { delete t.plan.on; if (!Object.keys(t.plan).length) delete t.plan; }
@@ -1991,6 +1974,7 @@ var CLIENTSETUP = (function () {
       } else { t.plan = t.plan || {}; t.plan.on = false; }
       structWrite(nx);
     }, "top|plan"));
+    dr.appendChild(dh);
     if (dOn) {
       dr.appendChild(el("p", "lab", "Called"));
       dr.appendChild(partHead());
@@ -2024,8 +2008,9 @@ var CLIENTSETUP = (function () {
       wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
       planWays(dr, "top", "group", [topWayNow], ["pillar"]);
     } else dr.appendChild(el("p", "sthid", atCo
-      ? "Off: the " + topLow + " plans nothing of its own."
-      : "Off: the plan is at units level."));
+      ? "Off: the " + W("topword", "one", "company").toLowerCase() + " plans nothing of its own. Nothing entered is lost."
+      : "The " + W("topword", "one", "company").toLowerCase() + "'s own plan, beside the " +
+        W("unitword", "many", "business units").toLowerCase() + "' plans. Off unless switched on."));
 
     /* Capabilities live in ONE place at a time: in the company plan (this
        card) or as a layer of their own (the last card). At company level they
@@ -2034,25 +2019,30 @@ var CLIENTSETUP = (function () {
        card holds them carries data-stcard="cap" and the On/Off "cap|layer". */
     var capTop = SMPRules.capAtTop(GROUP);
     var capWord = W("capability", "many", "Capabilities");
-    var cc = card(topOne + " " + capWord.toLowerCase(), row2);
+    var cc = card(atCo ? capWord : capWord + " in the company plan");
     if (atCo) {
       cc.setAttribute("data-stcard", "cap");
-      capCard(cc, null, "Off: the " + topLow + " carries no " + capWord.toLowerCase() + ".", true);
+      capCard(cc, "Part of the " + W("topword", "one", "company").toLowerCase() + "'s plan: a section of its Strategy tab, never a page of its own.");
     } else {
       cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
-      hd(cc, onOff(capTop, function (v) {
+      var ch3 = el("div", "stsech"); ch3.appendChild(el("span", "lab", "Part of the " + W("topword", "one", "company").toLowerCase() + "'s plan"));
+      ch3.appendChild(onOff(capTop, function (v) {
         var nx = structNow();
         if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
         structWrite(nx);
       }, "cap|top"));
-      if (capTop) capSettings(cc, true);
-      else cc.appendChild(el("p", "sthid", "Off: they are their own layer (below)."));
+      cc.appendChild(ch3);
+      if (capTop) capSettings(cc);
+      else cc.appendChild(el("p", "sthid", "Switching this on greys out the separate layer: " +
+        capWord.toLowerCase() + " live in one place at a time."));
     }
 
     /* §418: a layer the client does not have is switched off as a whole —
        the second layer as before, the supporting functions now too. */
     var mid = card("Second layer");
-    hd(mid, onOff(lv.mid.exists, function (v) { var nx = structNow(); nx.mid.exists = v; structWrite(nx); }, "mid|layer"));
+    var mh = el("div", "stsech"); mh.appendChild(el("span", "lab", "This client has one"));
+    mh.appendChild(onOff(lv.mid.exists, function (v) { var nx = structNow(); nx.mid.exists = v; structWrite(nx); }, "mid|layer"));
+    mid.appendChild(mh);
     if (lv.mid.exists) {
       mid.appendChild(el("p", "lab", "Called"));
       namePick(mid, "division", MID_NAMES, "both", ro);
@@ -2060,44 +2050,44 @@ var CLIENTSETUP = (function () {
       exceptBox(mid, "mid");
     } else mid.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
+    /* §447/§448: the business-unit card has no switch of its own; whether it
+       is used is answered on the top card ("Where the strategy is planned").
+       Not used, it says so and keeps everything. */
+    var bu = card(W("unitword", "many", "Business units"));
+    bu.setAttribute("data-stcard", "bu");
+    /* §465: shown switched off at company level, answered by the top card. */
+    if (!lv.bu.exists) bu.appendChild(held(false, "Answered by Where the strategy is planned, on the top card."));
+    if (lv.bu.exists) {
+      callBoxes(bu, "unitword", ro);
+      structLevel(bu, lv, "bu");
+      exceptBox(bu, "bu");
+    } else bu.appendChild(el("p", "sthid", "Not used: the strategy is planned on the " +
+      W("topword", "one", "company").toLowerCase() + ". The " +
+      W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
+
     /* §464: Islam, "for the supporting functions name it functions" — the
        card names the layer; the client's own word is chosen inside it. */
     var fn = card("Functions");
-    hd(fn, onOff(lv.fn.exists, function (v) {
+    var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));
+    fh.appendChild(onOff(lv.fn.exists, function (v) {
       var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx);
     }, "fn|layer"));
+    fn.appendChild(fh);
     if (lv.fn.exists) {
       callBoxes(fn, "fnword", ro);
       structLevel(fn, lv, "fn");
       exceptBox(fn, "fn");
     } else fn.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
 
-    /* §447/§448: the business-unit card has no switch of its own; whether it
-       is used is answered on the top card ("Where the strategy is planned").
-       Not used, it says so and keeps everything. */
-    /* §467: the bottom pair, the third layer and independent capabilities.
-       Each is a whole layer when on, so they stack; only when both are off
-       do they share a row, one line each. */
-    var bothOff = !lv.bu.exists && (capTop || !lv.cap.exists);
-    var row5 = bothOff ? pair() : box;
-    var bu = card("Third layer", row5);
-    bu.setAttribute("data-stcard", "bu");
-    /* §465: shown switched off at company level, answered by the top card. */
-    if (!lv.bu.exists) hd(bu, held(false, "Answered by Where the strategy is planned, on the top card."));
-    if (lv.bu.exists) {
-      callBoxes(bu, "unitword", ro);
-      structLevel(bu, lv, "bu");
-      exceptBox(bu, "bu");
-    } else bu.appendChild(el("p", "sthid", "Off: the " + topLow + " plans its own (above)."));
-
     /* §428: CAPABILITIES AS A LAYER OF THEIR OWN, after the functions, with
        the same three sections. §465: greyed whenever they are in the company
        plan instead — always at company level, by choice at units level. */
-    var cp = card("Independent " + capWord.toLowerCase(), row5);
+    var cp = card(capWord + " as their own layer");
     if (capTop) {
       cp.setAttribute("data-stcard", "caplayer");
-      hd(cp, held(false, capWord + " are part of the company plan."));
-      cp.appendChild(el("p", "sthid", "Off: they are in the " + topLow + " plan (above)."));
+      cp.appendChild(held(false, capWord + " are part of the company plan."));
+      cp.appendChild(el("p", "sthid", capWord + " are part of the " + W("topword", "one", "company").toLowerCase() +
+        " plan (above). They live in one place at a time."));
     } else {
       cp.setAttribute("data-stcard", "cap");
       capCard(cp, "As their own layer: each has its own plan, owner, custodian and page.");

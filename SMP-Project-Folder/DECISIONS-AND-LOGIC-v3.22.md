@@ -61304,3 +61304,42 @@ from the sources — an owner reaching every project (1), the switch deleting th
 pillars (2), the card's select removed (3), the projects card removed (1).
 `test-authorize.js` §466, 10 new (906/0), red 2 with the server branch removed
 and 1 with ownership answered for everybody.
+
+## §467 — The Structure cards: names as headers, the agreed order (2026-10-02)
+
+Islam, of Client set-up › Structure, over three rounds of alignment and two of
+mockup (`design-mockups/structure-cards/2026-10-02_agreed-order.html`): the
+company's own plan sits in two cards side by side under the top level, the
+functions come straight after the second layer, and the third layer (the
+business units) and independent capabilities are the bottom pair — *"ok stacked
+is fine, build it"*.
+
+**THE ORDER**: Top level → [company pillars | company capabilities] → Second
+layer → Functions → Third layer → Independent capabilities. **The bottom two
+stack when either is on** (each is a whole layer with three sections, and side
+by side neither could be read) and **share a row only when both are off**, one
+line each saying why. The company pair always shares a row, since a capability
+inside the company plan carries only its plan section.
+
+**A CARD'S NAME IS ITS HEADER**: bold, a size up, on a shaded band across the
+card, with its On/Off on the right. The labels the switches carried — *"The
+group plans its own"*, *"This client has them / has one"*, *"Part of the group's
+plan"* — are removed as saying nothing the card's name does not (1b-ii). The
+card names follow the client's own top word (*Group pillars*, *Group
+capabilities* on Raya) where the mockup wrote *Company*; the bottom pair is
+*Third layer* and *Independent capabilities* (the client's word for a unit is
+asked inside the card).
+
+**INSIDE THE COMPANY PLAN A CAPABILITY HAS NO FIRST OR SECOND SECTION** and no
+Except for — only its name and its plan. What was set in them is kept, not
+shown. **Nothing stored moves**: every switch writes what it wrote before;
+this is the drawing of the step only.
+
+**CHECKS**: `checks/plan-level.py` rewritten for the new order, never loosened,
+with five new assertions (the header on every card and no switch label, the
+company pair on one row, the third layer stacked when on, the bottom pair on
+one row when both are off, a capability in the company plan showing only its
+plan section) — red 7 on the build before. Structure, client-setup,
+detail-layers, top-plan, top-projects, single-company, plan-switch,
+structure-sections, fn-sw-default and setup-live-rows green.
+

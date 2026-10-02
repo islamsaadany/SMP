@@ -2474,10 +2474,17 @@ function whereNext(keys){
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
 
-  /* §461: the divisions left this page for the navigation — planned on the
-     company, a division is a segment of the row and its page is its own
-     reading (renderCompanyPerformance), reached by pressing it. Reading it
-     here as well would be two places to look for one number (§87). */
+  /* §448: THE DIVISIONS, READ UNDER THE COMPANY (Islam's A). Planned on the
+     company, a division is no longer a place you go; it is a reading of the
+     functions linked to it, one entry per division on this page's own row,
+     beside the company's. Its body is the division page itself, so a
+     division's figure can never differ between the two (§53.5). A division
+     with no function linked has nothing to read and is not listed. */
+  if (!buExists()) activeCompanyKeys().forEach(function(ck){
+    if (!companyFnKeys(ck).length || grantAt("g_perf", "co:" + ck) === "none") return;
+    var body = renderCompanyPerformance(ck);
+    SECS.push({ t: esc(COMPANIES[ck].name), h: '<div data-divperf="' + esc(ck) + '">' + body + '</div>' });
+  });
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE

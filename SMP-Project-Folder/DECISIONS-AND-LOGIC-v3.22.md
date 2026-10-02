@@ -61206,3 +61206,16 @@ Nothing stored moves, nothing is migrated, no rule about who may use the Copilot
 
 
 **Merged to `main` 2026-10-01 on Islam's word.** `main` had taken §459 for Processes (spec 065) while this was built, and this work was already numbered §460, so no renumber was owed. The three record files were COMBINED (§318.7); the built file and `smp-app/public/` were rebuilt from the merged sources rather than merged (§91, §329); `sw.js` SHELL `v5.82-copilot-conversation`, past main's `v5.81`.
+
+## §461 — planned on the company, the row is the functions and the divisions are its switch (2026-10-02)
+
+Islam, of the company-level navigation: *"having the functions button and the functions beside it like the units level and if the divisions are there the divisions become the buttons ... no drop downs"*, then *"remove the 2nd word ... just retail wholesale group"*, and of the mockup (`design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`, artifact v4) *"ok build it"*. Stage 1 of three; the Structure cards' reshape and directions planned in projects follow.
+
+**THE ROW**: planned on the company (`!buExists()`) the navigation is the top button, then — with no division — one lit word in the client's own word for functions with every function beside it, and — with divisions — a switch of the divisions' bare names, one segment per division holding a function this viewer reaches, in declared order, plus a last segment named with the top-level word for the functions linked to none. `companyFnSides()` builds those sides and `navSides()` returns them, so the switch, the list and the reset read one answer (§53.5). **ONE WORD IS NOT A CONTROL** — a single side draws as a span, because a button that switches to itself has nowhere to go (§61). **A DIVISION'S SEGMENT IS ALSO A DOOR**: pressing it opens that division's page (`co:<ck>`, its Performance read from its functions, `renderCompanyPerformance`), marked with the row's own gold underline; pressing the top-word segment only switches the list, because the top button beside it is already the way to the company. The list follows where you ARE when you arrive somewhere new (a function opened from a link, a division's page) and is left alone while you browse the switch (`NAVFOLDAT`).
+
+**§448'S DIVISION SECTIONS LEAVE THE COMPANY'S PERFORMANCE** — reading a division there as well as on its own page would be two places for one number (§87). Recorded as replacing that half of §448.
+
+**THE STRUCTURE CARD IS CALLED "Functions"** (*"for the supporting functions name it functions"*) — the card names the layer; the client's own word is still chosen inside it, and the label default is untouched.
+
+Units level is unchanged. Nothing stored moves, nothing is migrated, no rule about who reaches what changes. `single-company.py` gains §461 (13 assertions), red 9 with the divisions taken out of the switch and red 1 with the division sections put back on Performance — and its first falsification DIED rather than reporting (§215), so the probes degrade now. `sw.js` SHELL `v5.83-company-row`.
+

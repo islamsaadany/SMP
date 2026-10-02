@@ -26987,17 +26987,10 @@ function whereNext(keys){
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
 
-  /* §448: THE DIVISIONS, READ UNDER THE COMPANY (Islam's A). Planned on the
-     company, a division is no longer a place you go; it is a reading of the
-     functions linked to it, one entry per division on this page's own row,
-     beside the company's. Its body is the division page itself, so a
-     division's figure can never differ between the two (§53.5). A division
-     with no function linked has nothing to read and is not listed. */
-  if (!buExists()) activeCompanyKeys().forEach(function(ck){
-    if (!companyFnKeys(ck).length || grantAt("g_perf", "co:" + ck) === "none") return;
-    var body = renderCompanyPerformance(ck);
-    SECS.push({ t: esc(COMPANIES[ck].name), h: '<div data-divperf="' + esc(ck) + '">' + body + '</div>' });
-  });
+  /* §461: the divisions left this page for the navigation — planned on the
+     company, a division is a segment of the row and its page is its own
+     reading (renderCompanyPerformance), reached by pressing it. Reading it
+     here as well would be two places to look for one number (§87). */
 
   var arrangeBar = function(label, n){
     return canArrange("group") && ARRANGE
@@ -59021,7 +59014,9 @@ var CLIENTSETUP = (function () {
       W("topword", "one", "company").toLowerCase() + ". The " +
       W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
-    var fn = card(W("fnword", "many", "Supporting functions"));
+    /* §461: Islam, "for the supporting functions name it functions" — the
+       card names the layer; the client's own word is chosen inside it. */
+    var fn = card("Functions");
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));
     fh.appendChild(onOff(lv.fn.exists, function (v) {
       var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx);
@@ -62305,6 +62300,7 @@ var SYNC = (function () {
      this next. Nothing stored holds it (it is a plain var, re-initialised on
      every load), so the rename costs no tenant anything. */
   var NAVFOLD = "units";
+  var NAVFOLDAT = null;   /* §461: the destination the company-level list last followed */
 
   function myUnits(){
     return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
@@ -62340,8 +62336,37 @@ var SYNC = (function () {
        page and not a side of the row. */
     if (cs.length && buExists()) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
+    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
     if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
+    return out;
+  }
+  /* ── PLANNED ON THE COMPANY, THE ROW IS THE FUNCTIONS (§461) ───────────
+     Islam, of the company-level row: *"having the functions button and the
+     functions beside it like the units level and if the divisions are there
+     the divisions become the buttons ... no drop downs"*, then *"remove the
+     2nd word ... just retail wholesale group"*. So with no division the side
+     is one lit word with every function beside it, and with divisions the
+     side becomes one segment per division holding a function, in the order
+     they are declared, plus a last segment named with the top-level word for
+     the functions linked to none. A segment carries its division (`co`), so
+     pressing it opens that division's page as well as its list. A division
+     linking no function this viewer reaches has nothing to list and no
+     segment (&sect;61 from the other side: a segment that lists nothing is a
+     control with nothing behind it). */
+  function companyFnSides(fs){
+    var left = fs.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
+        keys:mine.map(function(k){ return "fn:" + k; }) });
+    });
+    if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
+      keys:fs.map(function(k){ return "fn:" + k; }) }];
+    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
+      keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
   /* A TENANT WITH NO CAPABILITIES SEES EXACTLY THE SWITCH IT HAS TODAY, which
@@ -62370,6 +62395,10 @@ var SYNC = (function () {
 
   function foldsNeeded(){
     var sides = navSides();
+    /* §461: planned on the company the switch is always drawn — one lit word
+       with no divisions, the divisions with them — because that word is what
+       says what the row beside it lists. */
+    if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
     return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
   }
@@ -62439,11 +62468,21 @@ var SYNC = (function () {
          list with no way to see that Functions has anything. §334: asked of
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
-      var sides = navSides();
+      var sides = navSides(), atCo = !buExists();
+      /* §461: on the company the list follows where you ARE when you arrive
+         somewhere new — a function opened from a link, or a division's page —
+         and is left alone while you are only browsing the switch. */
+      if (atCo && current !== NAVFOLDAT) {
+        NAVFOLDAT = current;
+        sides.forEach(function(x){
+          if (x.keys.indexOf(current) !== -1 || (x.co && current === "co:" + x.co)) NAVFOLD = x.fold;
+        });
+      }
       if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
         NAVFOLD = sides.length ? sides[0].fold : "units";
-      out.push({ folds: sides.map(function(x){
-        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold };
+      out.push({ multi:atCo, folds: sides.map(function(x){
+        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold, co:x.co || null,
+          here:!!(x.co && current === "co:" + x.co), one:!!x.one };
       }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
@@ -63248,13 +63287,22 @@ var SYNC = (function () {
            segmented control means and the opposite of what §41.8 decided for
            the two-sided one (there, lighting the other half made the state
            unreadable exactly when somebody was looking at it). */
-        if (t.folds.length > 2) {
+        /* §461: one side on the company is a WORD, not a control — there is
+           nothing to switch to, and a button that switches to itself is a
+           control that lies about having somewhere to go (§61). */
+        if (t.folds.length === 1 && t.folds[0].one) {
+          return '<span class="sep"></span>' +
+            '<span class="navswitch one"><span class="nsw on">' + esc(t.folds[0].label) + '</span></span>';
+        }
+        if (t.folds.length > 2 || t.multi) {
           return '<span class="sep"></span>' +
             '<div class="navswitch multi" role="group" aria-label="Which list to show">' +
             t.folds.map(function(f){
-              return '<button class="nsw' + (f.open ? " on" : "") + '"' +
-                ' data-fold="' + f.fold + '" aria-pressed="' + (f.open ? "true" : "false") +
-                '">' + f.label + '</button>';
+              return '<button class="nsw' + (f.open ? " on" : "") + (f.here ? " here" : "") + '"' +
+                ' data-fold="' + esc(f.fold) + '"' + (f.co ? ' data-co="' + esc(f.co) + '"' : '') +
+                (f.here ? ' aria-current="page"' : '') +
+                ' aria-pressed="' + (f.open ? "true" : "false") +
+                '">' + esc(f.label) + '</button>';
             }).join("") + '</div>';
         }
         var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
@@ -63329,6 +63377,16 @@ var SYNC = (function () {
            stay exactly as they are. A SWITCH, not a toggle — pressing the lit
            side leaves it lit (§47.6). */
         NAVFOLD = b.dataset.fold;
+        /* §461: a division's segment is also a door — its own page, read
+           from the functions linked to it — when this viewer may open it. */
+        var co = b.dataset.co;
+        if (co && ownTabs(SUBS.co, "co:" + co).length) {
+          if (current !== "co:" + co) leaveModes();
+          current = NAVFOLDAT = "co:" + co;
+          currentSub = entrySub(current);
+          paint(); window.scrollTo(0,0);
+          return;
+        }
         paintUnits();
       });
     });

@@ -6345,6 +6345,12 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     outline-offset:-2px;border-radius:7px}
   .units-in.folded .navswitch{margin:0 3px}
   .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+  /* §461: on the company, the division whose page you are on wears the
+     row's own gold underline — the same mark a destination tab wears — and a
+     single word with nothing to switch to is not a control at all. */
+  .units .navswitch.multi .nsw.here{box-shadow:inset 0 -3px 0 var(--gold)}
+  .units .navswitch.one{cursor:default}
+  .units .navswitch.one:hover{background:rgba(255,255,255,.08)}
 
   /* `.foldgroup` and `.navfold` went with the two-button fold (§51.7) — §24:
      delete an element and delete its CSS with it, or the next person drawing

@@ -1338,6 +1338,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-02 — planned on the company, the row is the functions (§461)
+
+Stage 1 of "where the plan lives". When the strategy is planned on the company, the navigation shows the company button, then either the word Functions with every function beside it, or — when functions belong to divisions — a switch of the division names (Retail | Wholesale | Group) with the pressed one's functions beside it. Pressing a division opens its own page, its performance read from its functions; the division sections on the company's Performance tab are gone. The Structure card is called Functions. Next: reshaping the Structure cards, then directions planned in projects. On the branch, not merged.
+
 ## 2026-10-01 — §449.1: the Off button on Focus measures works
 
 Pressing **Off** on Setup › Focus measures did nothing — only the On button had been connected. Both are now. The company's pillars on the Focus page come with §449, which is on the branch and reaches the live site when it is merged.

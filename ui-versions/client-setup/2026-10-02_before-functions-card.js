@@ -1,4 +1,3 @@
-/* COPIED by scripts/build-shell.mjs from SMP-Project-Folder/src/client-setup.js. Do not edit. */
 /* ══ SETTING A CLIENT UP, INSIDE THE PLATFORM (§360, spec 057) ═══════════
    Islam, 2026-09-16, of where a client's settings live: *"the client either
    we open a module or we go to the client settings page where we find a rail
@@ -1942,9 +1941,7 @@ var CLIENTSETUP = (function () {
       W("topword", "one", "company").toLowerCase() + ". The " +
       W("unitword", "many", "business units").toLowerCase() + " are kept but not shown. Nothing entered is lost."));
 
-    /* §461: Islam, "for the supporting functions name it functions" — the
-       card names the layer; the client's own word is chosen inside it. */
-    var fn = card("Functions");
+    var fn = card(W("fnword", "many", "Supporting functions"));
     var fh = el("div", "stsech"); fh.appendChild(el("span", "lab", "This client has them"));
     fh.appendChild(onOff(lv.fn.exists, function (v) {
       var nx = structNow(); if (v) delete nx.fn.exists; else nx.fn.exists = false; structWrite(nx);

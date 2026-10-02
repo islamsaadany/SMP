@@ -27,7 +27,7 @@ import {
   deliverablesOn, oneDeliverable, versionsOf, bodyOf, newDeliverable, addVersion, restoreVersion,
   NO_KEY, failedLine, recordSaid, materialOf, recordAnswer, assumptionsOf,
   attachFile, detachFile, pendingFiles, pendingCount, fileBytes, oneMessage, copilotGrant, storedCopilotGrant,
-  saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance,
+  saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance, claimsDraft, NO_DRAFT,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
@@ -397,23 +397,34 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
      settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
-  const r = configured()
-    ? await askCopilot({ method, templates: templateNamesFor(chat.section),
-        section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
-        context: String(b.context ?? "").slice(0, MAX_CONTEXT), question, pasted,
-        history: material.history, assumptions: material.assumptions, files: material.files,
-      })
-    : { ok: false as const, noKey: true, why: "no key is set" };
+  const ask = (q: string) => askCopilot({ method, templates: templateNamesFor(chat.section),
+    section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
+    context: String(b.context ?? "").slice(0, MAX_CONTEXT), question: q, pasted,
+    history: material.history, assumptions: material.assumptions, files: material.files,
+  });
+  let r = configured() ? await ask(question) : { ok: false as const, noKey: true, why: "no key is set" };
+  /* A CHANGE CLAIMED IS A CHANGE SHOWN (§471). Asked to refine, the model
+     answered "I've removed the year … press Save under the draft" and sent
+     no draft, so the page claimed a change it never showed and offered a
+     button that was not there. Such an answer is asked again once, told to
+     return the whole revised text as the draft; if it still comes back
+     without one, the false claim is replaced by a line saying so. */
+  let noDraft = false;
+  if (r.ok && !askFirst && !r.part.draft && claimsDraft(r.reply) && brk() !== "trust-claim") {
+    const r2 = await ask(question + "\n\n[FOR THIS TURN ONLY: your answer said the change was made but returned no draft. Return the whole revised text in `draft` (every item, not only what changed), and keep `reply` to one short line.]");
+    if (r2.ok && r2.part.draft) r = r2; else noDraft = true;
+  }
 
   await withTenant(tenantId, async (c) => {
     if (r.ok) {
       const part: any = { ...r.part };
       if (askFirst) { delete part.draft; part.askFirst = true; }
+      if (noDraft) part.noDraft = true;
       /* The offer to keep pasted material is attached by the PRODUCT, only
          under a message that really was pasted — never on the model's say. */
       if (pasted || brk() === "offer-always") part.pastedOffer = { messageId: said.messageId, section: r.part.pastedBelongsTo || chat.section };
       if (said.files.length) part.read = said.files.map((f) => f.name);
-      await recordAnswer(c, id, { body: r.reply, part, assumptions: r.part.assumptions });
+      await recordAnswer(c, id, { body: noDraft ? NO_DRAFT : r.reply, part, assumptions: r.part.assumptions });
     } else if ((r as any).noKey) {
       await recordAnswer(c, id, { body: NO_KEY, part: { kind: "noKey" } });
     } else {

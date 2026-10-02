@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-02 — a refinement shows the revised text and its Save button (§471), on the branch, not merged.** When the Copilot says it changed something but sends no revised text, it is asked again once for the full text; if it still sends none, the page says so plainly instead of pointing to a Save button that is not there. The Fold bars button is kept as it is.
+
 **2026-10-02 — more room for the Copilot, and the rail control in its header (§470), on the branch, not merged.** The Guided card no longer says Recommended. On the Copilot tab a "Fold bars" button folds the three top bars into one thin line with a "Show navigation" button to bring them back; the choice is remembered on that device and only applies on the Copilot. The Copilot page also has tighter gaps. The button that hides the chats list now sits in the Chats heading instead of a row of its own, and the hidden strip is narrower (24px).
 
 **2026-10-02 — no "recommended" on the Copilot's quick replies (§469), on the branch, not merged.** When the Copilot offers short replies under an answer, none of them is marked recommended or highlighted any more, even if the AI tries to mark one. The "Guided" card at the start of the Foundation flow still says Recommended, because that is a choice of how to start rather than an answer.

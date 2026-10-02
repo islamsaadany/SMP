@@ -476,3 +476,15 @@ export function isBareEnhance(text: string): boolean {
   if (!/\b(enhanc\w*|improv\w*|refin\w*|sharpen\w*|polish\w*|strengthen\w*|rework\w*|rewrit\w*|tweak\w*|better)\b/.test(t)) return false;
   return t.split(" ").length <= 8;
 }
+
+/* §471: an answer that says a revised text is waiting — "I've removed …",
+   "here is the updated …", "press Save under the draft" — is a claim the page
+   can only honour with a draft. Narrow on purpose: talk ABOUT a draft in
+   general ("shall I draft one?") is not a claim that one is here. */
+export function claimsDraft(reply: string): boolean {
+  const t = String(reply || "").toLowerCase();
+  return /\b(i'?ve|i have) (now )?(removed|updated|refined|revised|changed|rewritten|reworded|edited|adjusted|sharpened|tightened|replaced|added|dropped)\b/.test(t) ||
+    /\bhere(?:'s| is) (?:the |your |a )?(?:revised|updated|refined|new|adjusted|reworded|sharper|tighter)\b/.test(t) ||
+    /\b(press|click|use|hit) (the )?save\b/.test(t) || /\bsave button\b/.test(t) || /\b(under|below) the draft\b/.test(t);
+}
+export const NO_DRAFT = "The revised text did not come back with this answer, so there is nothing to save yet. Send your change again and it will be shown here with a Save button.";

@@ -35,7 +35,7 @@ import { deflateRawSync } from "node:zlib";
 import {
   SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor, copilotGrant,
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
-  isSaveAsk, isBareEnhance, draftText,
+  isSaveAsk, isBareEnhance, draftText, claimsDraft, NO_DRAFT,
   partMemo,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
@@ -607,6 +607,32 @@ try {
     NEXT = { answer: { reply: "A first aspiration.", draft: DR } };
     const e3 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: "Mobile" }, NORAN);
     check("...and where the plan holds nothing, nothing is held back", !!e3.j.messages[e3.j.messages.length - 1].part.draft);
+
+    /* §471: A CHANGE CLAIMED IS A CHANGE SHOWN. Islam's report: asked to
+       remove the year, the model said "I've removed the hardcoded year …
+       Click the Save button under the draft" and sent no draft. Asked again
+       once; the second answer's draft is what the page shows. Both ends: a
+       second miss says so instead of the claim, and an answer that claims
+       nothing is asked once only. */
+    NEXT = [{ answer: { reply: "I've removed the hardcoded year. Click the Save button under the draft." } },
+            { answer: { reply: "Revised.", draft: DR } }];
+    const bC = seen.length;
+    const c1 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    const ac1 = c1.j.messages[c1.j.messages.length - 1];
+    const qC = JSON.stringify(seen[seen.length - 1].body.contents);
+    check("an answer that claims a change with no draft is asked again, and the revised text is shown with its Save (§471)",
+      seen.length === bC + 2 && !!(ac1.part.draft && ac1.part.draft.groups) && ac1.body === "Revised." && /whole revised text in `draft`/.test(qC),
+      seen.length - bC + " asks · " + JSON.stringify(ac1).slice(0, 200));
+    NEXT = [{ answer: { reply: "I've removed the year. Press Save below." } }, { answer: { reply: "I've removed it." } }];
+    const c2 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    const ac2 = c2.j.messages[c2.j.messages.length - 1];
+    check("...a second miss says so, and never claims a Save that is not there", !ac2.part.draft && ac2.body === NO_DRAFT && ac2.part.noDraft === true, JSON.stringify(ac2).slice(0, 200));
+    NEXT = { answer: { reply: "Which year would you like it to name instead?" } };
+    const bN = seen.length;
+    await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    check("...and an answer that claims nothing is asked once only", seen.length === bN + 1, seen.length - bN + " asks");
+    check("the claim words are narrow", claimsDraft("I've removed the hardcoded year") && claimsDraft("Here is the revised aspiration.") && claimsDraft("Click the Save button under the draft") &&
+      !claimsDraft("Shall I draft one for you?") && !claimsDraft("Which year would you like it to name instead?") && !claimsDraft("What should improve?"));
 
     /* §464: A DRAFT IS SAVED TO THE RAIL by the product. The button makes v1;
        the same title again is v2 of the same deliverable; a saved draft is

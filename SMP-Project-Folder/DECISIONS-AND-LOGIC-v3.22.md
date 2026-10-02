@@ -61405,3 +61405,14 @@ assertions are red when run after midnight in Cairo, because the fixture dates
 by the database's UTC day while the page groups by the Cairo week, so a
 "this week" action reads as late on the Saturday. Screen only; nothing stored
 on the server, nothing migrated.
+
+## §471 — A change claimed is a change shown (2026-10-02)
+
+Islam, asked a refinement of the Winning Aspiration ("Remove specific target year"): the Copilot answered *"I've removed the hardcoded year … Click the Save button under the draft"* and sent no draft, so the page claimed a change it never showed and pointed at a button that was not there. Not the §464 ask-first rule (that request is not a bare "enhance"); the model returned prose and no `draft`.
+
+- **The product holds the model to it.** An answer with no draft whose reply claims a change (`claimsDraft()` — "I've removed/updated/…", "here is the revised …", "press Save", "save button", "under the draft") is asked again once, told FOR THIS TURN ONLY to return the whole revised text in `draft`. If the second answer has one, that answer is shown with its Save button.
+- **A second miss says so.** The false claim is replaced by `NO_DRAFT` ("The revised text did not come back … nothing to save yet. Send your change again …"), `part.noDraft` set. Never a Save the page cannot draw (§124).
+- **Narrow on purpose**: talk about a draft in general ("Shall I draft one?") and a question back ("Which year …?") are not claims, and are asked once only — asserted.
+- The guidance line about refining existing text now says the revised text goes in `draft` in the same turn, and never to claim a change or point to Save without it.
+- Kept as Islam asked: the Fold bars button stays as it is. The fold-button mockup is committed as the record of what was offered.
+- `checks/copilot.mjs` 179/0; red under `SMP_BREAK=trust-claim` (2 red). Server only — no frozen file changed, no `sw.js` bump.

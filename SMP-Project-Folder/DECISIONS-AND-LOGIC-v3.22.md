@@ -61207,6 +61207,22 @@ Nothing stored moves, nothing is migrated, no rule about who may use the Copilot
 
 **Merged to `main` 2026-10-01 on Islam's word.** `main` had taken §459 for Processes (spec 065) while this was built, and this work was already numbered §460, so no renumber was owed. The three record files were COMBINED (§318.7); the built file and `smp-app/public/` were rebuilt from the merged sources rather than merged (§91, §329); `sw.js` SHELL `v5.82-copilot-conversation`, past main's `v5.81`.
 
+## §461 — One mark, the client's (2026-10-01)
+
+Islam, of Client set-up's first step showing *Mark on this client's door* and *The group's mark* one above the other: *"why is there a mark on the door and the groups mark.?"* — and then *"yes keep them as one and name the client's mark and for now keep the ones in the mark on the door."*
+
+**Why there were two.** §313.36 put the door's mark on the client's REGISTRY row, because the sign-in page has to show it before anybody is signed in and nothing inside the client can be read then. §259.2 put the deck's fallback mark in the client's own graph (`org.extra.logo`). Two stores for one picture, and on RHI they had already diverged — the group mark held a slide screenshot.
+
+**What changed.** The registry row is the one store. `personFor()` (smp-app/lib/state-api.ts) hands the mark to the shell as `person.clientMark`; `sync.js` keeps it OUTSIDE the graph (a graph field would be a second copy every save carries and the server must judge, §42) and exports `clientMark()`/`setClientMark()`; `groupLogo()` reads it on a served page. A stored `GROUP.logo` is left where it is and no longer read on a served page — hidden, not destroyed (§44). Only a page with no server reads `GROUP.logo`: the baked file, and the contingency copy (§306), which now writes the client's mark into its own graph clone so a backup deck keeps the cover mark.
+
+**The page.** The *Group's mark* section is deleted from `brandingBody()` (§24) — and the deletion first left a bare `return` on its own line, which returns nothing and took the colour controls with it (§94.15's own trap, caught by `client-setup.py`). The door block is renamed *The client's mark* and its note says both places it is worn. Replacing it in the set-up flow updates the open shell at once. Content agreed in chat; no visual design was added, so no mockup was owed (1c, 2026-09-23).
+
+**Checks.** `deck-dividers.py` §8/§10 and `client-setup.py` §3 REWRITTEN, never loosened (§218): no second upload (with the colour controls asserted present as the control), a subject with no mark of its own wears the client's mark when served, and a stored group mark is not read. Falsified from the SOURCES (§276): with `groupLogo()` reading `GROUP.logo` again, 2 red. `contingency.py` 0 failures, full `qa.py` ERRORS none, `built-in-step` all good. **Unrun here** (§54.5): `smp-app` checks and `tsc` — no `node_modules` in this session; `door-landing.mjs` asserts the door's own mark and its subject is untouched.
+
+**Recorded, not done.** The authoriser still classifies `GROUP.logo` (dormant). The console's client card and the door keep reading the registry exactly as before.
+
+**Merged to `main` 2026-10-01 on Islam's word.** Built as §460 and renumbered §461 before the merge, because `main` took §460 for the Copilot; the merge base held no §460, so the renumber touched only this section's own lines. Both sides had named the shell `v5.82`, so the merge goes past both to `v5.83-one-client-mark` (§94.12).
+
 ## §464 — planned on the company, the row is the functions and the divisions are its switch (2026-10-02)
 
 Islam, of the company-level navigation: *"having the functions button and the functions beside it like the units level and if the divisions are there the divisions become the buttons ... no drop downs"*, then *"remove the 2nd word ... just retail wholesale group"*, and of the mockup (`design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`, artifact v4) *"ok build it"*. Stage 1 of three; the Structure cards' reshape and directions planned in projects follow.

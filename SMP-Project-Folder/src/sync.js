@@ -194,6 +194,10 @@ var SYNC = (function () {
      from it was a second copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
+  /* §461: the client's mark, handed over with the person (state-api.ts) and
+     kept OUTSIDE the graph — it is the registry's, and a graph field would be
+     a second copy that every save carries and the server has to judge. */
+  var CLIENT_MARK = "";
   function graph() {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
@@ -1152,6 +1156,10 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
+    /* §461: the client's one mark — the door's — for the decks and the
+       client's settings bar; set again when the set-up flow replaces it. */
+    clientMark: function () { return CLIENT_MARK; },
+    setClientMark: function (v) { CLIENT_MARK = v || ""; },
     /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
        client in the browser (client-setup.js, §360): the set-up flow shapes
        a COPY through the product's own minters and hands it here, so the
@@ -1457,6 +1465,7 @@ var SYNC = (function () {
         try {
           hydrate(cached.state);
           person = cached.person;
+          CLIENT_MARK = (person && person.clientMark) || "";
           stale = true;
           /* markStale only while still stale: a fast answer can land between
              this call and its delayed paint (BOOT_FLOOR). */
@@ -1523,6 +1532,7 @@ var SYNC = (function () {
           hydrate(data.state);
           live = true;
           person = data.person || null;
+          CLIENT_MARK = (person && person.clientMark) || "";
           cacheWrite(data.state, person);
           /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§431). With a saved
              copy on screen the page has already landed, so `land()` runs its

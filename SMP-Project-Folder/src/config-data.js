@@ -730,7 +730,17 @@ function unitLogo(u){ return (u && u.logo) || ""; }
    does not recognise there, so this needs NO migration, exactly as a
    unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
    a group that has set none, never the key. */
-function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+/* §461: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
+   client's mark and for now keep the ones in the mark on the door."* The
+   door's mark (§313.36) lives on the client's registry row, so a served page
+   reads it from SYNC; a stored `GROUP.logo` is no longer read there and is
+   left where it is rather than deleted (§44: hidden, not destroyed). Only a
+   page with no server — the baked file, or a contingency copy that wrote the
+   mark into its own graph (contingency.js) — reads `GROUP.logo`. */
+function groupLogo(){
+  if (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive() && SYNC.clientMark) return SYNC.clientMark();
+  return (GROUP && GROUP.logo) || "";
+}
 
 /* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
    if it has one, the group's otherwise — so a tenant that uploads one

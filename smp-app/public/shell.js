@@ -7539,7 +7539,17 @@ function unitLogo(u){ return (u && u.logo) || ""; }
    does not recognise there, so this needs NO migration, exactly as a
    unit's mark needed none. And it READS WITHOUT WRITING (§50.6): "" for
    a group that has set none, never the key. */
-function groupLogo(){ return (GROUP && GROUP.logo) || ""; }
+/* §461: ONE MARK, THE CLIENT'S. Islam: *"keep them as one and name the
+   client's mark and for now keep the ones in the mark on the door."* The
+   door's mark (§313.36) lives on the client's registry row, so a served page
+   reads it from SYNC; a stored `GROUP.logo` is no longer read there and is
+   left where it is rather than deleted (§44: hidden, not destroyed). Only a
+   page with no server — the baked file, or a contingency copy that wrote the
+   mark into its own graph (contingency.js) — reads `GROUP.logo`. */
+function groupLogo(){
+  if (typeof SYNC !== "undefined" && SYNC.isLive && SYNC.isLive() && SYNC.clientMark) return SYNC.clientMark();
+  return (GROUP && GROUP.logo) || "";
+}
 
 /* WHICH MARK A SUBJECT'S DECK WEARS, asked in one place. A unit's own
    if it has one, the group's otherwise — so a tenant that uploads one
@@ -36128,41 +36138,12 @@ function brandingBody(){
       }).join("") + '</tbody></table></div>'
     : '';
 
-  /* ── THE GROUP'S MARK (§259) ─────────────────────────────
-     FIRST on the page, deliberately. A mark is the most concrete thing a
-     tenant has, and the three colour sections under it are one argument
-     read in order (the two colours, what follows from them, whether it is
-     readable) — dropping the mark into the middle of that would break the
-     only sequence on the page.
-
-     THE UNIT MARKS' OWN SHAPE (§52.9), not a second one: a preview, the
-     two controls, and the note that says what may be uploaded. Nothing to
-     hold apart, so no table — there is one row and one row is not a list. */
-  var gm = groupLogo();
-  var markBlock = section("", "The group’s mark", null,
-    '<p class="why" style="margin:0 0 14px">Shown on any deck that has no mark of its own — ' +
-      'a ' + L1("unitword") + ' whose own mark has not been uploaded, and every ' + L1("fnword") + ', ' +
-      'which never has one. Large on the cover, small in the footer of every other slide. ' +
-      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints ' +
-      'a box around itself on a dark slide.</p>' +
-    '<div class="gmarkrow">' +
-      (gm
-        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(gm) + '" alt="' +
-            esc(GROUP.org) + '"></span>'
-        : '<span class="why" style="margin:0">No mark — a deck with none shows the ' +
-            'subject’s name instead, which costs nothing.</span>') +
-      (mayEdit
-        ? '<div class="rowacts">' +
-            '<label class="linkbu umarkpick">' + (gm ? "Replace" : "Upload") +
-              '<input type="file" accept="image/png" data-glogo="1" hidden></label>' +
-            (gm ? '<button class="linkbu" data-glogoclear="1">Remove</button>' : '') +
-          '</div>'
-        : '<span class="why" style="margin:0">SMO</span>') +
-    '</div>' +
-    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
-
-  return markBlock +
-
+  /* §461: THE GROUP'S MARK IS GONE FROM THIS PAGE. There is one mark, the
+     client's, set in the block above this one on Client set-up (the door's,
+     §313.36) and worn by the decks through groupLogo(). Deleted rather than
+     hidden (§24); a stored GROUP.logo is left where it is and simply no
+     longer read on a served page. */
+  return "" +
     section("", "The tenant’s colours",
       null,
       '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
@@ -56911,6 +56892,12 @@ var CONT = (function () {
         });
 
         var g = SYNC.graph();
+        /* §461: the copy has no server to ask for the client's mark, so the
+           mark the decks wear goes INTO the copy's own graph — on a clone, or
+           this tab's next save would carry it as a change. */
+        if (SYNC.clientMark && SYNC.clientMark()) {
+          g = Object.assign({}, g, { group: Object.assign({}, g.group, { logo: SYNC.clientMark() }) });
+        }
         /* `</` inside a script block ENDS it wherever it appears, so the one
            sequence that can break out is escaped. JSON reads `<\/` as `</`,
            so nothing about the data changes. */
@@ -58062,9 +58049,15 @@ var CLIENTSETUP = (function () {
 
   /* The mark on this client's door (§313.36): PNG only, shrunk here on a
      transparent canvas, written the moment it is picked. */
+  /* §461: the decks read the same mark, so a change here reaches the open
+     platform at once rather than on the next sign-in. */
+  /* The console's copy of this flow has no labels (it runs outside the
+     platform), so the platform's word is asked for only where it exists. */
+  function word(k, d){ return typeof labelWord === "function" ? labelWord(k, "group") : d; }
+  function tellShell(v){ if (typeof SYNC !== "undefined" && SYNC.setClientMark) SYNC.setClientMark(v); }
   function markBlock(c){
     var mk = el("div", "wzmark");
-    mk.appendChild(el("span", "lab", "Mark on this client's door"));
+    mk.appendChild(el("span", "lab", "The client's mark"));
     var mrow = el("div", "markrow");
     var preview = el("img"); preview.alt = "";
     var noneNote = el("span", "none", "No mark yet — the door opens plain until one is set.");
@@ -58082,7 +58075,7 @@ var CLIENTSETUP = (function () {
       var drop = el("button", "btn", "Remove"); drop.type = "button";
       drop.hidden = !c.mark;
       drop.addEventListener("click", function () {
-        saveReg({ mark:"" }, function () { c.mark = null; show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
+        saveReg({ mark:"" }, function () { c.mark = null; tellShell(""); show(null); drop.hidden = true; choose.textContent = "Choose a PNG"; });
       });
       file.addEventListener("change", function () {
         var f = file.files && file.files[0];
@@ -58100,7 +58093,7 @@ var CLIENTSETUP = (function () {
           cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
           var out = cv.toDataURL("image/png");
           if (out.length > 400000) { say("That picture is too large even shrunk — try a simpler PNG.", true); return; }
-          saveReg({ mark:out }, function () { c.mark = out; show(out); drop.hidden = false; choose.textContent = "Replace"; });
+          saveReg({ mark:out }, function () { c.mark = out; tellShell(out); show(out); drop.hidden = false; choose.textContent = "Replace"; });
         };
         img.onerror = function () { URL.revokeObjectURL(url); say("That file could not be read as a picture.", true); };
         img.src = url;
@@ -58108,7 +58101,10 @@ var CLIENTSETUP = (function () {
       mrow.appendChild(choose); mrow.appendChild(drop); mrow.appendChild(file);
     }
     mk.appendChild(mrow);
-    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at."));
+    mk.appendChild(el("p", "note", "Shown on " + location.origin + "/" + S.key + "/sign-in, the door this client's people sign in at, " +
+      "and on the presentations: large on the cover and small in the footer of every slide, for any " +
+      word("unitword", "business unit") + " without a mark of its own and every " + word("fnword", "supporting function") +
+      ". PNG only, with a transparent background."));
     return mk;
   }
 
@@ -59966,6 +59962,10 @@ var SYNC = (function () {
      from it was a second copy of the graph kept in step with nothing. */
   /* `clone` is the platform's own, defined once beside the archive model. */
 
+  /* §461: the client's mark, handed over with the person (state-api.ts) and
+     kept OUTSIDE the graph — it is the registry's, and a graph field would be
+     a second copy that every save carries and the server has to judge. */
+  var CLIENT_MARK = "";
   function graph() {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
@@ -60924,6 +60924,10 @@ var SYNC = (function () {
        idea of what the state is would be a backup of something the platform
        never held. */
     graph: function () { return graph(); },
+    /* §461: the client's one mark — the door's — for the decks and the
+       client's settings bar; set again when the set-up flow replaces it. */
+    clientMark: function () { return CLIENT_MARK; },
+    setClientMark: function (v) { CLIENT_MARK = v || ""; },
     /* THE GLOBALS REBOUND FROM A GRAPH, for the ONE thing that shapes a
        client in the browser (client-setup.js, §360): the set-up flow shapes
        a COPY through the product's own minters and hands it here, so the
@@ -61229,6 +61233,7 @@ var SYNC = (function () {
         try {
           hydrate(cached.state);
           person = cached.person;
+          CLIENT_MARK = (person && person.clientMark) || "";
           stale = true;
           /* markStale only while still stale: a fast answer can land between
              this call and its delayed paint (BOOT_FLOOR). */
@@ -61295,6 +61300,7 @@ var SYNC = (function () {
           hydrate(data.state);
           live = true;
           person = data.person || null;
+          CLIENT_MARK = (person && person.clientMark) || "";
           cacheWrite(data.state, person);
           /* THE BASELINE BEFORE THE LANDING, NEVER AFTER (§431). With a saved
              copy on screen the page has already landed, so `land()` runs its

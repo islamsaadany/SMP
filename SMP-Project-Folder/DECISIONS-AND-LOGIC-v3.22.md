@@ -61418,3 +61418,4 @@ top-plan, plan-level, single-company, top-projects, project-done, pillar-kind,
 owner-picker. **Recorded, not done**: the plan workbook carries no Custodian
 column for a direction, so a download-and-upload of the company plan drops
 the custodian — whether it should is a separate question.
+**Merged to `main` 2026-10-03 on Islam's word**, a clean fast-forward, shell `v5.89-direction-seats`. Checked first against a units-on client (Raya Trade's shape): `ownsTopPillar` returns false whenever `buExists`, the seats and the Custodian row draw only inside the top plan (off unless ticked), and the rowDone group branch judges only `group-*` ids — project-done, submit-gate, report-saves, my-reporting, capability-first, top-plan, single-company and `qa.py` all green. Screen and rule change; no sign-out owed, since the rule only ever allows more and never refuses a save that worked before.

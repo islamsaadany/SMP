@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-03 — two checks that were wrong, not the product (§480), on the branch.** Two of main's automated checks had been failing because they still described the platform as it was before three earlier decisions (the function Description word, the top level starting empty on a new client, and the single client mark). They now check what is true today, and were each shown to still catch a real break. Nothing on any screen changes.
+
 **2026-10-03 — Structure decides what a unit's Foundation asks (§479), merged to main 2026-10-03.** Purpose and Core Values are no longer "optional": where Client set-up › Structure has them on, the unit's Foundation page shows them, an empty one reads Missing and counts like the Aspiration, and the Foundation chat asks for them; where they are off, they are not shown and not asked, and anything already written is kept. New clients start with both off, and so does every existing client that never saved its units' Structure, so nobody suddenly owes two new parts.
 
 **2026-10-03 — a Foundation chat starts from what is there (§478), merged to main 2026-10-03.** The Guided Foundation button is gone: a new Foundation chat asks whether to start from the existing Foundation or fresh, shows six cards (Purpose optional, End in Mind new), and fills them from the plan when you start from it. A unit's Foundation page has optional Purpose and Core Values boxes.

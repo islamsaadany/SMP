@@ -571,7 +571,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
       startRow: start ? { grp: (start.closest("[data-railitems]") || { dataset: {} }).dataset.railitems, label: (start.querySelector(".rilab") || {}).textContent } : null,
       csetup: !!q(".csetup"), step: (q('.wzstep[aria-current="step"]') || { dataset: {} }).dataset.step,
       steps: [...document.querySelectorAll(".wzstep")].map((e) => e.dataset.step),
-      wzdone: !!q("[data-wzdone]"), brand: document.querySelectorAll(".csetup [data-brand]").length, glogo: document.querySelectorAll(".csetup [data-glogo]").length,
+      wzdone: !!q("[data-wzdone]"), brand: document.querySelectorAll(".csetup [data-brand]").length, glogo: document.querySelectorAll(".csetup [data-glogo]").length, dmark: document.querySelectorAll(".csetup [data-doormark]").length,
       band: t(".csetup .band .lab"), name: (q(".csetup .rowset input.fld") || {}).value,
       done: (typeof GROUP !== "undefined" && GROUP) ? GROUP.setupDone : undefined, head: t("#panel .secttl, #panel h1") };
   });
@@ -623,7 +623,15 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
        rather than a Words step of their own. Still seven, still client first. */
     "…on step 1 of seven, the client itself (§404.4's order)", JSON.stringify([r.steps, r.step]));
   check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
-  check(r.brand > 0 && r.glogo > 0, "Branding's colour and mark controls are inside the flow (the brand def is gone)", JSON.stringify([r.brand, r.glogo]));
+  /* §480: REWRITTEN, NEVER LOOSENED (§218, §214.3). §461 made the client's
+     door mark the decks' mark too and DELETED Branding's group-mark upload
+     (`data-glogo`), so this asked for a control a decision removed. What it
+     was for — the colours AND a mark are set inside the flow — still holds:
+     the mark is the client's own (`data-doormark`), on the same step. Both
+     ends (§94.2): the old upload is asserted GONE, or a build drawing two
+     marks again would pass. */
+  check(r.brand > 0 && r.dmark > 0, "Branding's colours and the client's mark are inside the flow (the brand def is gone)", JSON.stringify([r.brand, r.dmark]));
+  check(r.glogo === 0, "…and the group's separate mark upload is gone (§461: one mark per client)", JSON.stringify(r.glogo));
   check(r.band === "Modules this client has", "…and so is the modules band, on step 1", r.band);
   check(r.wzdone, "…and Done with set-up is offered while it is not done");
   /* STEP 1 WRITES THE REGISTRY: a typed name, blurred, posts saveClient */

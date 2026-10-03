@@ -61741,3 +61741,33 @@ skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
 values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
 other two reds (`desc`, the top level) are main's, recorded before.
 
+
+## §480 — two checks main was red on, both stale, both rewritten (never loosened)
+
+Islam: *"do 1"* — clear the two failures recorded at §479 as main's own.
+**Neither was a product fault**; each asserted a literal that a later,
+deliberate decision had moved (§214.3), and each is rewritten to the property
+that survives the decision (§218).
+
+**`setup-shape.mjs` §1 — `desc` is answered by the part defaults.** The words
+step asks for a function's Description (§436), and the check required every
+key it asks to be a key in `LABELS`. `labelWord` falls back through
+`SMPRules.PART_DEFAULTS`, which holds `desc` since §418 — so the word was
+never unanswered. The check now accepts a key held by either, and asserts
+`PART_DEFAULTS` is there with `desc` in it, or a build that dropped the
+fallback would pass by both lists being empty (§113.8).
+
+**`setup-shape.mjs` — the new client's top level.** It asserted the top carried
+a written structure; §427/§428.2 deliberately left the top UNSAID on a new
+client (`STRUCT_NEW_CLIENT` holds `mid` and `bu` only). Rewritten as an
+AGREEMENT (§94.8): every component reads the same on a new client's top as on a
+top with nothing stored, and that top still carries its Brief — the control,
+or "they agree" passes on a build where both read nothing. 49/0; red under all
+six breaks.
+
+**`door-landing.mjs` — Branding inside the flow.** It counted the group's own
+mark upload, which §461 removed (one mark per client, set on the client's
+door). Rewritten at both ends: the colours and the client's door mark are
+inside the set-up flow, and the separate group-mark upload is ABSENT. 146/0.
+
+No product file changes; nothing stored, nothing migrated, no `sw.js` bump.

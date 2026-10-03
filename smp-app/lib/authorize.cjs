@@ -604,13 +604,15 @@ function collect(stored, incoming, w) {
      objectives are GROUP_OWN's, judged above, and passing them through would
      report every change twice. Both keys are named in gExtra below, or they
      are swept as unknown as well (§259.2). */
-  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot))
+  /* §466: and its projects, when it plans in projects — the §405 block of
+     `collectUnit` judges them as a unit's own projects, against "group". */
+  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !same(sg.topProjects, ig.topProjects))
     collectUnit("group", topView(sg), topView(ig), add, w);
 
   const gExtra = GROUP_OWN.concat(["items", "swot", "capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
-                                   SEASONS, DRIVERS_ON, "planYear"]);
+                                   SEASONS, DRIVERS_ON, "planYear", "topProjects"]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -1329,6 +1331,7 @@ function asUnit(f, ukey) {
 /* §428: the top layer's own plan, in the shape collectUnit() reads. */
 function topView(g) {
   return { ukey: "group", items: (g && g.items) || [], keyObjectives: [],
+           projects: (g && g.topProjects) || [],
            swot: (g && g.swot) || {}, aspiration: "", endInMind: "", clauses: [] };
 }
 
@@ -1529,10 +1532,10 @@ function ctxOfUnit(u) {
   (u && u.items || []).forEach(function (p) {
     (p.measures || []).forEach(function (m) {
       out[m.id] = { row: { owner: p.owner, collaborators: m.collaborators },
-                    pillarOwner: p.owner };
+                    pillarOwner: p.owner, pillarCust: p.custodian };
     });
     (p.tactics || []).forEach(function (t) {
-      out[t.id] = { row: t, pillarOwner: p.owner };
+      out[t.id] = { row: t, pillarOwner: p.owner, pillarCust: p.custodian };
     });
   });
   return out;
@@ -1614,7 +1617,8 @@ function containerIndex(stored) {
          which is the wrong shape of answer to leave to walk order. */
       if (seen[k]) { out[k] = null; return; }
       seen[k] = 1;
-      out[k] = { target: target, owner: x.owner, name: x.name || null };
+      out[k] = { target: target, owner: x.owner, custodian: x.custodian || null,
+                 name: x.name || null };
     });
   };
   Object.keys(stored.units || {}).forEach(function (uk) {
@@ -1628,6 +1632,10 @@ function containerIndex(stored) {
   ((stored.group || {}).capabilities || []).forEach(function (c) {
     if (c && c.id) take(c.projects, "cap:" + c.id);
   });
+  /* §469: and the company's own directions, so a direction's owner or
+     custodian can save their own direction as a draft — the act a project
+     owner has had since §309. */
+  take((stored.group || {}).items, "group");
   return out;
 }
 
@@ -1920,7 +1928,7 @@ function authorize(stored, incoming, person) {
           const tctx = ctxOfUnit(topView(stored.group));
           const notMineT = ch.ids.filter(function (id) {
             const c = tctx[id];
-            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "");
+            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "", c.pillarCust || "");
           });
           if (notMineT.length)
             no("Your role reports only your own direction — " + notMineT.length +
@@ -2021,6 +2029,20 @@ function authorize(stored, incoming, person) {
           return;
         }
         const t = String(c.target || "");
+        /* §469: A COMPANY DIRECTION is saved by its owner or custodian, or by
+           whoever reports the whole top layer (the office and the CEO) —
+           the same two rules its figures are judged by, never a matrix cell. */
+        if (t === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (!R.mayReportTop(w, person) &&
+              !R.ownsTopPillar(w, person, c.owner || "", c.custodian || ""))
+            no("Saving " + (c.name ? "“" + c.name + "”" : "a direction") +
+               " is its owner's or its custodian's.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
@@ -2229,6 +2251,30 @@ function authorize(stored, incoming, person) {
         /* §405: a business unit's own projects and actions report in the
            UNIT area, where its access comes from. */
         const capT = String(ch.target || "");
+        /* §466: THE COMPANY'S OWN PROJECTS are reported by the office and the
+           group's CEO (§428's rule), and a project's named Owner reports the
+           rows of their own project and nothing else (§301's rule). Found
+           through the STORED top plan (§42), never the incoming one. */
+        if (capT === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (R.mayReportTop(w, person)) return;
+          if (!ch.ids || !R.ownsTopProject(w, person)) {
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+            return;
+          }
+          const gctx = ctxOfUnitOwn(topView(stored.group));
+          const notMineP = ch.ids.filter(function (id) {
+            const c = gctx[id];
+            return !c || !c.project || !R.ownsTopProject(w, person, c.project.owner || "");
+          });
+          if (notMineP.length)
+            no("Your role reports only your own project — " + notMineP.length +
+               (notMineP.length === 1 ? " figure" : " figures") + " is not yours.");
+          return;
+        }
         const capArea = (capT.indexOf("fn:") === 0 || capT.indexOf("cap:") === 0) ? "fn" : "unit";
         if (!edits(w, person, capArea, ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
         if (locked && !office) {

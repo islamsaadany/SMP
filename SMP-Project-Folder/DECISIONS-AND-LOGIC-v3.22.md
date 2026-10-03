@@ -61207,6 +61207,219 @@ Nothing stored moves, nothing is migrated, no rule about who may use the Copilot
 
 **Merged to `main` 2026-10-01 on Islam's word.** `main` had taken §459 for Processes (spec 065) while this was built, and this work was already numbered §460, so no renumber was owed. The three record files were COMBINED (§318.7); the built file and `smp-app/public/` were rebuilt from the merged sources rather than merged (§91, §329); `sw.js` SHELL `v5.82-copilot-conversation`, past main's `v5.81`.
 
+## §461 — One mark, the client's (2026-10-01)
+
+Islam, of Client set-up's first step showing *Mark on this client's door* and *The group's mark* one above the other: *"why is there a mark on the door and the groups mark.?"* — and then *"yes keep them as one and name the client's mark and for now keep the ones in the mark on the door."*
+
+**Why there were two.** §313.36 put the door's mark on the client's REGISTRY row, because the sign-in page has to show it before anybody is signed in and nothing inside the client can be read then. §259.2 put the deck's fallback mark in the client's own graph (`org.extra.logo`). Two stores for one picture, and on RHI they had already diverged — the group mark held a slide screenshot.
+
+**What changed.** The registry row is the one store. `personFor()` (smp-app/lib/state-api.ts) hands the mark to the shell as `person.clientMark`; `sync.js` keeps it OUTSIDE the graph (a graph field would be a second copy every save carries and the server must judge, §42) and exports `clientMark()`/`setClientMark()`; `groupLogo()` reads it on a served page. A stored `GROUP.logo` is left where it is and no longer read on a served page — hidden, not destroyed (§44). Only a page with no server reads `GROUP.logo`: the baked file, and the contingency copy (§306), which now writes the client's mark into its own graph clone so a backup deck keeps the cover mark.
+
+**The page.** The *Group's mark* section is deleted from `brandingBody()` (§24) — and the deletion first left a bare `return` on its own line, which returns nothing and took the colour controls with it (§94.15's own trap, caught by `client-setup.py`). The door block is renamed *The client's mark* and its note says both places it is worn. Replacing it in the set-up flow updates the open shell at once. Content agreed in chat; no visual design was added, so no mockup was owed (1c, 2026-09-23).
+
+**Checks.** `deck-dividers.py` §8/§10 and `client-setup.py` §3 REWRITTEN, never loosened (§218): no second upload (with the colour controls asserted present as the control), a subject with no mark of its own wears the client's mark when served, and a stored group mark is not read. Falsified from the SOURCES (§276): with `groupLogo()` reading `GROUP.logo` again, 2 red. `contingency.py` 0 failures, full `qa.py` ERRORS none, `built-in-step` all good. **Unrun here** (§54.5): `smp-app` checks and `tsc` — no `node_modules` in this session; `door-landing.mjs` asserts the door's own mark and its subject is untouched.
+
+**Recorded, not done.** The authoriser still classifies `GROUP.logo` (dormant). The console's client card and the door keep reading the registry exactly as before.
+
+**Merged to `main` 2026-10-01 on Islam's word.** Built as §460 and renumbered §461 before the merge, because `main` took §460 for the Copilot; the merge base held no §460, so the renumber touched only this section's own lines. Both sides had named the shell `v5.82`, so the merge goes past both to `v5.83-one-client-mark` (§94.12).
+
+## §464 — planned on the company, the row is the functions and the divisions are its switch (2026-10-02)
+
+Islam, of the company-level navigation: *"having the functions button and the functions beside it like the units level and if the divisions are there the divisions become the buttons ... no drop downs"*, then *"remove the 2nd word ... just retail wholesale group"*, and of the mockup (`design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`, artifact v4) *"ok build it"*. Stage 1 of three; the Structure cards' reshape and directions planned in projects follow.
+
+**THE ROW**: planned on the company (`!buExists()`) the navigation is the top button, then — with no division — one lit word in the client's own word for functions with every function beside it, and — with divisions — a switch of the divisions' bare names, one segment per division holding a function this viewer reaches, in declared order, plus a last segment named with the top-level word for the functions linked to none. `companyFnSides()` builds those sides and `navSides()` returns them, so the switch, the list and the reset read one answer (§53.5). **ONE WORD IS NOT A CONTROL** — a single side draws as a span, because a button that switches to itself has nowhere to go (§61). **A DIVISION'S SEGMENT IS ALSO A DOOR**: pressing it opens that division's page (`co:<ck>`, its Performance read from its functions, `renderCompanyPerformance`), marked with the row's own gold underline; pressing the top-word segment only switches the list, because the top button beside it is already the way to the company. The list follows where you ARE when you arrive somewhere new (a function opened from a link, a division's page) and is left alone while you browse the switch (`NAVFOLDAT`).
+
+**§448'S DIVISION SECTIONS LEAVE THE COMPANY'S PERFORMANCE** — reading a division there as well as on its own page would be two places for one number (§87). Recorded as replacing that half of §448.
+
+**THE STRUCTURE CARD IS CALLED "Functions"** (*"for the supporting functions name it functions"*) — the card names the layer; the client's own word is still chosen inside it, and the label default is untouched.
+
+Units level is unchanged. Nothing stored moves, nothing is migrated, no rule about who reaches what changes. `single-company.py` gains §464 (13 assertions), red 9 with the divisions taken out of the switch and red 1 with the division sections put back on Performance — and its first falsification DIED rather than reporting (§215), so the probes degrade now. `sw.js` SHELL `v5.83-company-row`.
+
+
+## §465 — The Structure cards, and capabilities in one place at a time (2026-10-02)
+
+Islam, approving `design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html`: *"ok build it"*, then *"proceed with all and pause when you need something from me"*. Stage 2 of three; §464 was the navigation.
+
+**THE QUESTION IS NAMED FOR THE LEVEL**: *Company level | Units level*, his words, replacing "On the company / On the business units". The store is §448's `structure.bu.exists`, unchanged.
+
+**THE TOP CARD LOSES ITS PLAN; THE PLAN BECOMES A DIRECTIONS CARD.** The top card keeps its first and second sections and its Temple. Its plan section was an On/Off that read **On** for Raya Trade while nothing was drawn, because §428.2 keeps the `pillar` component off for an unsaid top — a switch saying yes over a page saying no (§42's drift on one card). The Directions card's On/Off is the TRUE answer, `planOn(group) && pillar carried`, so Raya reads Off; On writes both halves (deletes `top.plan.on`, adds `pillar`), Off sets `top.plan.on = false` and keeps the pillars carried (hide and keep, §44). Switched on, it names the directions one and many at the top of the card and the parts INSIDE the way below them, skipping the pillar row the card already named — one `planWays()` drawn for a layer's plan section and for this card alike (§53.5). Its four extras are the top layer's own (`structure.top.details`), so they were always separate from the units' (§420); the card makes that visible. The `data-stsec="top|plan"` key travels with the switch, so what reads it still finds it.
+
+**CAPABILITIES LIVE IN ONE PLACE AT A TIME.** `SMPRules.capAtTop(group)` is the one answer: always true at company level (§447), and at units level true only where `structure.cap.at === "top"`, stored as an ABSENCE — so a client that never chose keeps them a layer, Raya included. The navigation's capabilities side, the company Strategy tab's capabilities section (`topCapsOn()`), and whether that tab leads as Strategy (`topExtrasOn()`) all ask it. Card 3 holds the capabilities when they are the company's, card 7 when they are a layer; whichever holds them carries `data-stcard="cap"` and the `cap|layer` switch, and the other is greyed with its switch disabled (§220) and the reason on the hover. At units level card 3's own switch (`cap|top`) moves them: On writes `at` and `exists`, Off deletes `at` and leaves `exists` as it was, so on-then-off is exactly where it started.
+
+**SWITCHING LEVELS FOLDS AND RESTORES WITHOUT A STEP OF ITS OWN**: at company level `capAtTop` is true by rule, so the capabilities are the company's section; back at units level an absent `at` makes them a layer again. Nothing moves in the data.
+
+**THE ORDER IS THE SAME AT BOTH LEVELS** — top, directions, capabilities, second layer, units, functions, capabilities as a layer — and what changes is what each card holds. At company level the units card shows its switch held Off, answered by the top card.
+
+**CHECKS**: `checks/plan-level.py` new (29 assertions, both ends: the worked example untouched first), red 4 with `at` ignored and 1 with the navigation still asking `buExists`, from the sources. Four checks held the old top card and were REWRITTEN, never loosened (§218): `structure.py` (the top draws two sections; no way named while the Directions are off; the units card found by name rather than by position, which the inserted cards moved; the Directions card pressed both ways), `client-setup.py` and `detail-layers.py` (the company's names and extras asserted on the Directions card once it is on, and absent while it is off).
+
+**NOT BUILT HERE**: stage 3, the Directions planning in Projects.
+
+## §466 — The company plans in projects (2026-10-02)
+
+Islam, of stage 3 of the "where the plan lives" mockup: *"agreed, build stage
+3"*, on three decisions put to him first. **The company's own plan — the
+Directions card — may be planned in PROJECTS instead of pillars.**
+
+**1. HIDDEN AND KEPT, BOTH WAYS.** The top's way is `structure.top.plan.way`,
+`"projects"` or ABSENT for pillars (§50.6), and switching it is §405's switch
+with a "top" kind (`switchTopWay`): it warns where the old way holds anything,
+the select is put back on Cancel (§110), and the old way's rows stay where they
+are — `GROUP.items` for pillars, `GROUP.topProjects` for projects — so switching
+back brings them back exactly. No migration: both ride `org.extra`.
+**Pillar readers ask `topHasPillars()`, never `items.length`**, so hidden
+directions score nothing, draw no Focus band and reach no card while the
+company plans in projects (§233's "hidden is not counted").
+
+**2. THE NAMED OWNER REPORTS, THE OFFICE SUBMITS** — a function's project rule
+(§301), joined to the top's own (§428). `SMPRules.ownsTopProject(w, person,
+owner)` is the one answer the screen and the server ask (§42): only while the
+company plans in projects, and only for a non-empty owner the register's own
+name rule matches (`namedOn`). On the server the `capReporting` case gains a
+"group" branch ahead of the area test: the office and the group CEO pass
+(`mayReportTop`), an owner passes for rows of THEIR project found through the
+STORED top plan, everybody else is refused by name. Submitting, the note and
+authoring stay the office's — `reportState` never consults the new rule.
+`topProjects` joins `gExtra` and `topView()` so the §428 pass reaches it, or it
+would be swept as unknown (§259.2).
+
+**3. THE PROJECTS TAKE THE DIRECTIONS' PLACE ON PERFORMANCE** — `topPlanCard()`
+draws "Projects — performance": the projects averaged equally (`capPerf` over
+the company's holder) with a drill of each project, and nothing else on the page
+moves.
+
+**IT RIDES §405's MACHINERY, NOT A COPY OF IT** (§53.5): the company is the
+unit-holder `"u:group"` — `ownUnit("group")` is `topAsUnit()`, and
+`unitOwnHolder`, `fnHolders`, the projects/reporting/performance pages and the
+deck all draw it through the paths a business unit planning in projects
+already uses. `unitOwnHolderWritable("group")` mints `GROUP.topProjects` and
+never writes key objectives (the company's objectives are its Foundation's).
+
+**THE CONTROL** is a "plans in" select on the Directions card of Client set-up ›
+Structure — the unit row's own `wzrt` control (§438), two ways here — so no new
+visual shape and no mockup owed (rule 1c); the plan section's title follows the
+way (`planTitle(…, topWay())`, the projects word where the company stands alone).
+
+**CHECKS**: `checks/top-projects.py` new (both ends throughout), red four ways
+from the sources — an owner reaching every project (1), the switch deleting the
+pillars (2), the card's select removed (3), the projects card removed (1).
+`test-authorize.js` §466, 10 new (906/0), red 2 with the server branch removed
+and 1 with ownership answered for everybody.
+
+## §467 — the two red console checks, and the fault one of them was hiding (2026-10-01)
+
+Islam: *"fix the two failing console checks."* **Most of the red was the checks,
+and one part of it was the product.** Since §400 the console opens on *My work*,
+and `client-archive.py` and `client-setup-outside.py` still opened `/platform`
+expecting the client cards. Every assertion after that one measured a page that
+was not there (§51.11). Both now go to `/platform#clients` through `about:blank`,
+the way `platform-cards.py` already does. That is a rewrite of where the checks
+land, and nothing in what they assert is loosened (§218).
+
+**WITH THE CHECKS LANDING IN THE RIGHT PLACE, A REAL PAGE ERROR SHOWED.** Typing
+in the console's *Add a client* piece threw twice. The handler §436 added (on
+leaving a word box, redraw if the shape is frozen) calls `canShape()`. That
+function read `GROUP` and `S`, and on the console neither exists: the create
+piece mounts no flow and there is no graph behind it. `GROUP && …` does not
+answer false for a name that was never declared; it throws. Nothing visible
+broke, because the throw happened inside a `change` handler that had nothing
+else to do. The fault was still live on production (§96's family). The fix
+answers the question honestly: a client that has not been made yet holds
+nothing (`typeof GROUP` guard), and the null flow state is guarded where it is
+read.
+
+Verified: `client-archive` 0 failures and `client-setup-outside` 0 failures on
+both copies of the page. `client-setup`, `platform-cards` 30/0,
+`setup-live-rows` and `structure` all pass. The full `qa.py` sweep reports
+ERRORS none, and `built-in-step` reports all good.
+
+## §468 — The Structure cards: names as headers, the agreed order (2026-10-02)
+
+Islam, of Client set-up › Structure, over three rounds of alignment and two of
+mockup (`design-mockups/structure-cards/2026-10-02_agreed-order.html`): the
+company's own plan sits in two cards side by side under the top level, the
+functions come straight after the second layer, and the third layer (the
+business units) and independent capabilities are the bottom pair — *"ok stacked
+is fine, build it"*.
+
+**THE ORDER**: Top level → [company pillars | company capabilities] → Second
+layer → Functions → Third layer → Independent capabilities. **The bottom two
+stack when either is on** (each is a whole layer with three sections, and side
+by side neither could be read) and **share a row only when both are off**, one
+line each saying why. The company pair always shares a row, since a capability
+inside the company plan carries only its plan section.
+
+**A CARD'S NAME IS ITS HEADER**: bold, a size up, on a shaded band across the
+card, with its On/Off on the right. The labels the switches carried — *"The
+group plans its own"*, *"This client has them / has one"*, *"Part of the group's
+plan"* — are removed as saying nothing the card's name does not (1b-ii). The
+card names follow the client's own top word (*Group pillars*, *Group
+capabilities* on Raya) where the mockup wrote *Company*; the bottom pair is
+*Third layer* and *Independent capabilities* (the client's word for a unit is
+asked inside the card).
+
+**INSIDE THE COMPANY PLAN A CAPABILITY HAS NO FIRST OR SECOND SECTION** and no
+Except for — only its name and its plan. What was set in them is kept, not
+shown. **Nothing stored moves**: every switch writes what it wrote before;
+this is the drawing of the step only.
+
+**CHECKS**: `checks/plan-level.py` rewritten for the new order, never loosened,
+with five new assertions (the header on every card and no switch label, the
+company pair on one row, the third layer stacked when on, the bottom pair on
+one row when both are off, a capability in the company plan showing only its
+plan section) — red 7 on the build before. Structure, client-setup,
+detail-layers, top-plan, top-projects, single-company, plan-switch,
+structure-sections, fn-sw-default and setup-live-rows green.
+
+
+
+## §469 — A company direction's owner and custodian (2026-10-03)
+
+Islam, of `design-mockups/owner-custodian/2026-10-02_direction-seats.html`:
+*"ok agreed, build it"* — after the content was aligned in chat: each
+direction has an owner AND a custodian; where nobody is named the Strategy
+office fills it in; capabilities keep their own head and custodian (§412).
+
+**A RULE, NOT A ROW.** `SMPRules.ownsTopPillar` already let a direction's
+named owner report it while the business units are off (§447); it now takes
+the custodian beside the owner, through the same `namedOn` match, and the
+general form reads both seats across `GROUP.items`. Nothing is added to Roles
+& access — the seat is a property of the THING (§33), like §447's owner.
+**Naming either seat stays the office's**: `custodian` is a plan field on the
+pillar, so a change falls to `unitPlan` like the owner (asserted both ways).
+
+**SAVE DRAFT, ONE DIRECTION WIDE.** §309's control is the bounded owner's,
+asked through `boundedHere` — false for the group — so a direction's seat had
+no way to close its direction. `doneCtl` gains a group branch (`seated` =
+not `mayReportTop` and `ownsTopPillar(owner, custodian)`), `ownDraftShut`
+shuts a saved direction for everybody except those `mayReportTop` allows (the
+office and the CEO report the whole top layer and are never bounded by a
+draft), and `lib/authorize.js`'s `rowDone` gains a `group` branch:
+`containerIndex` now carries the company's own directions with their
+custodian, and the save is refused unless the person may report the top layer
+or holds that direction's seat. The reporting row carries `pcust` beside
+`pown` so `canReportRow` asks the same pair.
+
+**THE EMPTY SEAT IS SAID**, in the attention ink and never the alarm (§168):
+*"None yet — the Strategy office fills this in"*, because an empty seat is a
+state of a healthy plan, not a fault. Seats show on the PLAN band only (the
+mockup's own placement); read and pen, same builder.
+
+**THE CAPABILITIES SHOW THEIR OWN SEATS, READ-ONLY**: two columns on the
+company's Strategy › Capabilities section, read from `c.head` / `c.custodian`
+through `personName`; a key the register no longer holds reads as a dash.
+Set on Setup › Capabilities, the one door for them (§53.5).
+
+`checks/direction-seats.py` makes its state (§255) and asserts both ends;
+falsified from the SOURCES (§276): the band's seats removed **3 red**, the
+custodian dropped from Save draft **2 red**. `test-authorize.js` §469, 8 new
+assertions, 914/0, red **2** with the custodian dropped from the rule and
+**2** with the rowDone group branch refusing everyone. Neighbours green:
+top-plan, plan-level, single-company, top-projects, project-done, pillar-kind,
+owner-picker. **Recorded, not done**: the plan workbook carries no Custodian
+column for a direction, so a download-and-upload of the company plan drops
+the custodian — whether it should is a separate question.
+**Merged to `main` 2026-10-03 on Islam's word**, a clean fast-forward, shell `v5.89-direction-seats`. Checked first against a units-on client (Raya Trade's shape): `ownsTopPillar` returns false whenever `buExists`, the seats and the Custodian row draw only inside the top plan (off unless ticked), and the rowDone group branch judges only `group-*` ids — project-done, submit-gate, report-saves, my-reporting, capability-first, top-plan, single-company and `qa.py` all green. Screen and rule change; no sign-out owed, since the rule only ever allows more and never refuses a save that worked before.
+
 ## §470 — the Copilot chat's text size (2026-10-02)
 
 Islam: *"can we add a clean buttong to increaes and decrease the font size in the chat panel?"* Drawn first (rule 1c, `design-mockups/copilot-font-size/2026-10-02_text-size.html`, published as an artifact) and signed off: *"build 2"*.

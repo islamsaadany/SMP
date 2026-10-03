@@ -467,6 +467,9 @@
          direction's owner can be found (ownsTopPillar). Here AND in worldOf()
          (§102.4). */
       topItems: o.topItems || [],
+      /* §466: and its own projects, so a company project's owner can be
+         found (ownsTopProject). Here AND in worldOf() (§102.4). */
+      topProjects: o.topProjects || [],
       group: o.group || null
     };
   }
@@ -492,6 +495,7 @@
                   reads off `state` rather than off `state.group`. */
                people: state.people,
                topItems: (state.group || {}).items,
+               topProjects: (state.group || {}).topProjects,
                group: state.group ? { structure: state.group.structure } : null });
   }
 
@@ -3967,6 +3971,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (c && typeof c.exists === "boolean") return c.exists;
     return levelComponents(group, "top").indexOf("capability") >= 0;
   }
+  /* §465 — WHERE THE CAPABILITIES LIVE. One place at a time (Islam,
+     approving the plan-level mockup): as a section of the company's own
+     Strategy tab, or as a layer of their own with a side in the navigation.
+     Planned at company level they are always the company's (§447); at units
+     level they are a layer unless the office moved them into the company
+     plan, which `structure.cap.at = "top"` records. Stored as an absence, so
+     a client that never chose — Raya Trade — keeps them a layer. */
+  function capAtTop(group) {
+    if (!buExists(group)) return true;
+    var s = structureOf(group), c = s && s.cap;
+    return !!(c && c.at === "top");
+  }
   /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
      fifth answer says, with ONE exception: a supporting function's own S&W
      (§399). That section is newer than the clients it would appear on, so
@@ -4189,10 +4205,37 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      page. A RULE beside mayReportTop, for the same reason: it is one answer
      whatever a tenant sets, and only while the units are off, because that
      is the only shape in which the top layer's pillars ARE the directions. */
-  function ownsTopPillar(w, person, pillarOwner) {
+  /* §469: AND ITS CUSTODIAN, the same rule. Islam: *"each direction has an
+     owner and a custodian"*, both reading the whole company plan and
+     reporting only their own direction; where neither is named the office
+     fills it, which needs nothing here because the office reports every row
+     already. Both are register NAMES, never keys (§130.1), matched the one
+     way a plan's Owner column is matched (`namedOn`). `pillarCust` is
+     optional so a caller that predates it still answers about the owner. */
+  function ownsTopPillar(w, person, pillarOwner, pillarCust) {
     if (!person || buExists(w.group)) return false;
-    if (pillarOwner != null) return pillarOwner !== "" && namedOn({ owner: pillarOwner }, person);
+    var seat = function (name) { return !!name && namedOn({ owner: name }, person); };
+    if (pillarOwner != null || pillarCust != null) return seat(pillarOwner) || seat(pillarCust);
     return (w.topItems || []).some(function (p) {
+      return p && (seat(p.owner) || seat(p.custodian));
+    });
+  }
+  /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
+     unless the office chose projects on the Directions card; stored as an
+     ABSENCE (§50.6) on `structure.top.plan.way`, so every client that never
+     chose reads exactly as before. Hidden and kept either way (§405): the
+     pillars stay in `items` and the projects in `topProjects`. */
+  function topWay(group) {
+    var s = structureOf(group), t = s && s.top, b = t && t.plan;
+    return b && b.way === "projects" ? "projects" : "pillars";
+  }
+  /* A company project's named Owner enters that project's figures (Islam:
+     the function's own rule, §301) and never submits. A RULE beside
+     mayReportTop, and only while the company plans in projects. */
+  function ownsTopProject(w, person, projectOwner) {
+    if (!person || topWay(w.group) !== "projects") return false;
+    if (projectOwner != null) return projectOwner !== "" && namedOn({ owner: projectOwner }, person);
+    return (w.topProjects || []).some(function (p) {
       return p && p.owner && namedOn({ owner: p.owner }, person);
     });
   }
@@ -4796,10 +4839,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     FN_DESC: FN_DESC, descPart: descPart,
     STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
     structureOf: structureOf, structLevelOf: structLevelOf,
-    effLevel: effLevel, capExists: capExists, mayReportTop: mayReportTop,
+    effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,

@@ -146,18 +146,6 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
-/* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
-   and Core Values are owed (Missing) only while Client set-up › Structure
-   carries them for this unit; off, they are not drawn and not counted, and
-   whatever is stored stays stored (§404: off hides, never deletes). Handed to
-   SMPRules.gapMissing/gapEmptyFields as `off` by every reader of the unit's
-   own gaps, so the bar, the walk and Submit cannot disagree (§116.2). */
-function unitGapOff(u){
-  var t = (u && u.ukey) || "group", off = [];
-  if (!compOn(t, "purpose")) off.push("mission");
-  if (!compOn(t, "values")) off.push("values");
-  return off;
-}
 /* §437 (Islam, 2026-09-30: *"keep them in the first section as an option"*):
    A SUPPORTING FUNCTION'S KEY OBJECTIVES ARE A TICK ON ITS FIRST SECTION, and
    when it is off they are hidden AND stop counting — no longer asked for on
@@ -5049,8 +5037,7 @@ function canReportRow(unitKey, x){
      direction's owner enters the rows of their own direction. */
   if (unitKey === "group")
     return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer(), (x && x.pown) || "",
-                                  (x && x.pcust) || "");
+           SMPRules.ownsTopPillar(world(), viewer(), (x && x.pown) || "");
   /* §341: `areaOfTarget()`, for the reason it was named once (§330.5) — this
      ternary is the same question one function below, and it answered "unit"
      for a capability while `boundedHere` two hundred lines down answered
@@ -5565,12 +5552,12 @@ function reportItems(u){
        pages disagree about whether a row is shut. */
     SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators, pown:p.owner, pcust:p.custodian,
+                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -5587,7 +5574,7 @@ function reportItems(u){
       out.push({ id:c.row.id + "|" + c.col.id, noteId:c.row.id,
                  obj:c.row, col:c.col, kind:"bdcell",
                  group:head, sub:bdColWord(p, c.col),
-                 owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
   });
   return out;
@@ -5850,11 +5837,6 @@ function setDoneMark(id, on){
    a cell the server would accept and the screen refuses, or the reverse. */
 function ownDraftShut(target, id){
   if (!id) return false;
-  /* §469: a company direction saved by its owner or custodian shuts for
-     them, never for the office or the CEO, who report the whole top layer
-     and are not bounded by anybody's draft (§309's shape, one layer up). */
-  if (String(target) === "group")
-    return !!doneMark(id) && !SMPRules.mayReportTop(world(), viewer());
   return !!doneMark(id) && boundedHere(target);
 }
 /* Whose mark it is, asked of the SHARED rule so the screen draws exactly what
@@ -7731,7 +7713,7 @@ function gapMap(target, all, fillable){
     if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
-  var G = function(acKey, ctx, kind, row, off){
+  var G = function(acKey, ctx, kind, row){
     /* §233: a hidden row's blanks are not gaps — it is not counted, not
        asked, and not walked; gapCell() closes the same row's controls, so
        the count and the walk stay one list (§192.4). */
@@ -7741,8 +7723,8 @@ function gapMap(target, all, fillable){
        SECOND — the machinery is main's (§223, §272) and is untouched here.
        WHO is shown it is the decision §301.3 changed, and that question is
        asked in ONE place, `seesEmpty()` below. */
-    if (fillable) return SMPRules.gapEmptyFields(kind, row, off).length;
-    return SMPRules.gapMissing(kind, row, off).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
+    return SMPRules.gapMissing(kind, row).length;
   };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
@@ -7811,7 +7793,7 @@ function gapMap(target, all, fillable){
     if (!u) return;
     w = w || UNIT_WORDS;
     if (w.found) {
-      var found = G(w.found, {}, "unit", u, unitGapOff(u));
+      var found = G(w.found, {}, "unit", u);
       entry("found", "Foundation", found, { sec: "found", page: "foundation" });
       var ko = 0;
       (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });

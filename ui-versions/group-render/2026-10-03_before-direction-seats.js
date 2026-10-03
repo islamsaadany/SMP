@@ -1619,14 +1619,6 @@ function capsTable(){
    El Abd, planned in pillars). One row per capability with the way into its
    own pages, which are unchanged — the navigation row no longer carries a
    Capabilities side, so this is where they are reached. */
-/* §469 — the capability's own Owner and Custodian (§412), READ here: they
-   are set on Setup › Capabilities, the one door for them, so this column says
-   who holds the seat and never offers to change it (§53.5). A key the
-   register no longer holds reads as nobody (&mdash;), never as the key. */
-function seatName(key){
-  var n = key ? personName(key) : "";
-  return n && n !== key ? esc(n) : '<span class="why">&mdash;</span>';
-}
 function renderTopCaps(){
   var caps = capsReachable();
   if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
@@ -1637,13 +1629,12 @@ function renderTopCaps(){
     var v = pil ? unitPillars(cu) : capPerf(c);
     return '<tr><td>' + esc(c.name) + (fn ? '<span class="why">' + esc(fn.name) + '</span>' : '') + '</td>' +
       '<td>' + (pil ? L("pillar", "bu") : L("project", "bu")) + '</td>' +
-      '<td>' + seatName(c.head) + '</td><td>' + seatName(c.custodian) + '</td>' +
       '<td class="num">' + n + '</td>' +
       '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td>' +
       '<td class="num"><button type="button" class="linkbtn" data-gocap="cap:' + esc(c.id) + '">Open</button></td></tr>';
   }).join("");
   return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
-    '<th style="width:30%">' + L1("capability") + '</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th class="num">Rows</th>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th>Planned in</th><th class="num">Rows</th>' +
     '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
@@ -5267,7 +5258,7 @@ function renderUnitFoundation(u){
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
   return fillBarOr("foundation", "u_found",
-      SMPRules.gapMissing("unit", u, unitGapOff(u)).length +
+      SMPRules.gapMissing("unit", u).length +
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
@@ -5284,85 +5275,11 @@ function renderUnitFoundation(u){
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' : '') +
-      unitPurposeAnd(u, upg,
-        aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-          function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-          false, u, u.ukey)) +
+      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
+        false, u, u.ukey) +
     '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false) +
-    unitValuesBox(u, upg);
-}
-/* §478 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
-   `values` of {name, def}, §404's foundationBody), so one vocabulary for one
-   thing (§53.5); stored on the unit and riding `units.extra` (no migration).
-
-   §479 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
-   proceed"*, to five points, of which these two are the page's: a box is drawn
-   exactly when Client set-up › Structure carries that part for this unit,
-   with the pen open or not — off, it is not drawn at all and whatever is
-   stored stays stored (§404: off hides, never deletes); and switched on and
-   empty it reads **Missing**, counted like the aspiration (unitGapOff, one
-   answer for the bar, the walk and Submit, §116.2). So the *Optional* tag
-   goes: §478's "optional" meant both "never a gap" and "not drawn when empty",
-   and §479 reverses both.
-
-   THE FILL GRANT CAN CLOSE BOTH, OR THE COUNT WOULD PROMISE A CONTROL THAT IS
-   NOT THERE (§223, §61). The Purpose is a gapCell exactly as the aspiration
-   is; the Core Values list opens to a filler while it is empty or still
-   pending, every write stamping the mark the server's gap pass already judges
-   (`values` is in GAP_FILLABLE.unit, so add, amend and undo are gapFill and
-   the office's own write confirms, §145). */
-function unitPurposeAnd(u, upg, asp){
-  if (!compOn(u.ukey, "purpose")) return asp;
-  return '<div class="fcol"><div class="card upurpose"><h2 class="sec first">' + L1("purpose") +
-    '</h2><p class="statement">' +
-    gapCell("foundation", "u_found", u, "mission",
-      { kind:"area", cls:"big-field", flow:true, del:true, fillKind:"unit" }) +
-    '</p></div>' + asp + '</div>';
-}
-/* May the person looking write the Core Values list right now — as its
-   author (the pen), or as a filler while the list is still owed (§479)? */
-function unitValuesWrite(u){
-  if (authoring("foundation", "u_found")) return "edit";
-  var vals = Array.isArray(u.values) ? u.values : [];
-  if (filling("foundation", "u_found", {}) && !SMPRules.isHidden(u) &&
-      (!vals.length || SMPRules.pendOf(u).values)) return "fill";
-  return "";
-}
-/* A write to the list: an author's settles (lifting any mark — correcting is
-   confirming), a filler's is pending while the list holds anything and is
-   lifted when it is emptied again (the undo, §145). An emptied list loses its
-   key (§50.6). */
-function unitValuesTouch(u, how){
-  if (Array.isArray(u.values) && !u.values.length) delete u.values;
-  if (how === "fill" && Array.isArray(u.values)) gapStamp(u, "values");
-  else gapLift(u, "values");
-  gapBandRefresh();
-}
-function unitValuesBox(u, upg){
-  if (!compOn(u.ukey, "values")) return "";
-  var vals = Array.isArray(u.values) ? u.values : [];
-  var how = unitValuesWrite(u), pg = how ? "foundation" : null;
-  var pend = how === "fill" && SMPRules.pendOf(u).values ? "pendfld" : "";
-  var walk = !vals.length ? " gapwalk" : "";
-  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
-    (how
-      ? '<div class="uvlist">' + vals.map(function(v, i){
-          return '<div class="uvrow">' +
-            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
-            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
-            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
-            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
-        }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
-        '">+ Add a value</button></div>'
-      : vals.length
-        ? '<div class="valgrid">' + vals.map(function(v){
-            return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
-              '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
-          }).join("") + '</div>'
-        : '<p class="statement"><span class="missing">Missing</span></p>') +
-    '</div>';
+    koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -6318,13 +6235,13 @@ function renderReport(u){
        still answer alike. */
     var ms = [];
     SMPRules.shown(p.measures).forEach(function(m){
-      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner, pcust:p.custodian,
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner,
                 cid:p.id });
     });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
-                owner:t.owner, collaborators:t.collaborators, pown:p.owner, pcust:p.custodian,
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
     /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
@@ -6334,11 +6251,11 @@ function renderReport(u){
        the same object and one line clears them all. */
     var bds = bdCells(p).map(function(c){
       return { id:c.row.id + "|" + c.col.id, obj:c.row, col:c.col, kind:"bdcell",
-               owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+               owner:p.owner, pown:p.owner, cid:p.id };
     });
     var bdRowItem = function(r){
       return { id:r.id, obj:r, kind:"bdrow", pillar:p,
-               owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+               owner:p.owner, pown:p.owner, cid:p.id };
     };
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT) + doneOf(bds),
@@ -6438,7 +6355,7 @@ function renderReport(u){
                 if (!SMPRules.bdAsked(r, c))
                   return '<td class="cc"><span class="nobody">&mdash;</span></td>';
                 var x = { id:r.id, obj:r, col:c, kind:"bdcell",
-                          owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+                          owner:p.owner, pown:p.owner, cid:p.id };
                 return '<td class="cc">' + bdEntry(x) +
                   '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
               }).join("") +
@@ -6462,7 +6379,7 @@ function renderReport(u){
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi), p.custodian), p.kind) +
+        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi)), p.kind) +
       mTable + bdTable + tTable;
   };
 
@@ -8652,15 +8569,8 @@ function unitRailFor(u, sel){
    NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
    wears, and marked reads as the pill-and-way-back pair the report already
    uses for Submitted · Reopen. Nothing new in the stylesheets. */
-function doneCtl(target, id, owner, code, cust){
+function doneCtl(target, id, owner, code){
   var on = !!doneMark(id);
-  /* §469: a company direction is saved by the person in its seat — its
-     owner or its custodian — through the rule its figures are judged by.
-     The office and the CEO see the state and get no button (§309). */
-  var seated = String(target) === "group"
-    ? !SMPRules.mayReportTop(world(), viewer()) &&
-      SMPRules.ownsTopPillar(world(), viewer(), owner || "", cust || "")
-    : boundedHere(target) && mayMarkDoneOn(target, owner);
   /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
@@ -8678,7 +8588,7 @@ function doneCtl(target, id, owner, code, cust){
      project, which are finished. Drawn only when it is SET, because "not
      saved yet" is the ordinary state and a word for it on every band would
      be furniture (§94.15). */
-  if (!seated)
+  if (!boundedHere(target) || !mayMarkDoneOn(target, owner))
     return on ? '<span class="pbdone" title="' +
       esc("Its owner has saved it as a draft and closed it. They can reopen it.") +
       '">Draft saved</span>' : "";
@@ -8822,22 +8732,6 @@ function yearsLine(it){
 /* The short tag in a rail row, and the greyed row's reason under it. */
 function yearsTagHtml(it){
   return yearsOn(it) ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
-}
-/* ── WHO ANSWERS FOR A COMPANY DIRECTION (§469) ──────────────────────
-   Islam: *"each direction has an owner and a custodian"*, and *"if no owner
-   per direction then the smo fills it by default"*. Read off the band in the
-   band's own quiet type, so nobody has to open the pen to learn whose it is;
-   and where NEITHER seat is named the band says so and says who fills it,
-   in the warning ink, because an empty seat is outstanding rather than broken
-   (§168). A named seat beside an empty one shows the dash (§15.1). */
-function topSeats(it){
-  var o = it && it.owner, c = it && it.custodian;
-  var key = function(w){ return '<span class="pbseat-k">' + w + '</span>'; };
-  if (!o && !c)
-    return '<span class="pbseats none">' + key("Owner") +
-      'None yet &mdash; the Strategy office fills this in</span>';
-  return '<span class="pbseats">' + key("Owner") + (o ? esc(o) : '&mdash;') +
-    ' &middot; ' + key("Custodian") + (c ? esc(c) : '&mdash;') + '</span>';
 }
 function pillarBand(code, name, right, kind, cls){
   /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
@@ -9252,8 +9146,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, yearsMarks(it) +
-        (u.ukey === "group" ? topSeats(it) : ""), it.kind, "planband") + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name, yearsMarks(it), it.kind, "planband") + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -9311,16 +9204,6 @@ function unitPlanBody(it, u, railed){
           '<div class="pfrow"><em>Owner</em><div class="pfval">' +
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
           '</div></div>' +
-          /* §469: a company direction also has a CUSTODIAN, picked from the
-             register the way the owner is. The top layer's alone, because the
-             rule that lets the seat report (`ownsTopPillar`) reads only the
-             company's directions. An emptied seat DELETES its key (§50.6):
-             nobody minted it, so its absence is the default. */
-          (u.ukey === "group"
-            ? '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
-                ownerSel("plan", it.custodian, function(v){
-                  if (v) it.custodian = v; else delete it.custodian; }) +
-              '</div></div>' : '') +
           '<div class="pfrow"><em>Kind</em><div class="pfval">' +
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +

@@ -487,7 +487,7 @@ var COPILOT = (function(){
     return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
   }
 
-  /* THE CHAT'S TEXT SIZE (§462, Islam 2026-10-02, design-mockups/copilot-font-size/):
+  /* THE CHAT'S TEXT SIZE (§470, Islam 2026-10-02, design-mockups/copilot-font-size/):
      A− / A+ on the chat's title line, four steps, the conversation and the
      reply box only. A screen preference, so localStorage and never the state
      graph (§25, §47.1); a throwing or empty store reads as the normal size.

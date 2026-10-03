@@ -125,7 +125,7 @@ var COPILOT = (function(){
     return fetch(url(path, qs), { cache:"no-store", credentials:"same-origin" })
       .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); });
   }
-  /* A question is waited for two minutes at most (§464): with no limit a
+  /* A question is waited for two minutes at most (§472): with no limit a
      slow answer left the page on "working" for as long as it took, which
      read as broken. */
   var WAIT_MS = (window.__copWaitMs || 120000);
@@ -460,7 +460,7 @@ var COPILOT = (function(){
     for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === s) return SECTIONS[i].label;
     return s;
   }
-  /* WHILE THE COPILOT WORKS (§464, Islam: "keep it one word"): one word that
+  /* WHILE THE COPILOT WORKS (§472, Islam: "keep it one word"): one word that
      changes every two seconds, three moving dots, and after forty seconds a
      line saying it is taking longer. The word is rewritten IN PLACE on a
      clock and never by a repaint, or the box under it would be rebuilt while
@@ -481,7 +481,7 @@ var COPILOT = (function(){
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    /* §463: no "Understood / Working from" box. A stored answer from before
+    /* §471: no "Understood / Working from" box. A stored answer from before
        may still carry one; it is not drawn — the reply says it in words. */
     if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
     if (p.draft && p.draft.groups) {
@@ -490,7 +490,7 @@ var COPILOT = (function(){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
             g.items.map(itemHtml).join("") + '</ul></div>';
         }).join("") + '</div></div>';
-      /* SAVED TO THE RAIL (§464): a button under every draft, and once it is
+      /* SAVED TO THE RAIL (§472): a button under every draft, and once it is
          saved the line says which version it became and opens it. */
       if (p.saved && p.saved.deliverableId) {
         h += '<div class="copopts"><span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span>' +
@@ -528,7 +528,7 @@ var COPILOT = (function(){
     return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
   }
 
-  /* THE CHAT'S TEXT SIZE (§462, Islam 2026-10-02, design-mockups/copilot-font-size/):
+  /* THE CHAT'S TEXT SIZE (§470, Islam 2026-10-02, design-mockups/copilot-font-size/):
      A− / A+ on the chat's title line, four steps, the conversation and the
      reply box only. A screen preference, so localStorage and never the state
      graph (§25, §47.1); a throwing or empty store reads as the normal size.
@@ -1062,7 +1062,7 @@ var COPILOT = (function(){
       openItem("chat", id);
     }, function(err){
       THINKING = null;
-      /* The page stopped waiting (§464). What was typed is already kept on
+      /* The page stopped waiting (§472). What was typed is already kept on
          the server, so it is not put back in the box — sending it again would
          say it twice; the chat is read again instead, and an answer that
          arrives later is there the next time it is opened. */

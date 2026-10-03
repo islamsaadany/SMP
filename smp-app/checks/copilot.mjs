@@ -130,7 +130,7 @@ const sh = shapeAnswer({ reply: " Here is a start. ", options: [{ label: "Assume
   draft: { title: "SWOT", groups: [{ title: "Strengths", items: [{ text: "Coverage", source: "Q3 deck.pdf" }, { text: "Brand", source: "made-up.xlsx" }, { text: "Share", source: "platform" }, { text: "" }] }, { title: "Empty", items: [] }] },
   assumptions: ["Margins flat"], pastedBelongsTo: "nowhere" }, ["Q3 deck.pdf"]);
 check("an answer is trimmed, empty options and empty groups dropped", sh && sh.reply === "Here is a start." && sh.part.options.length === 2 && sh.part.draft.groups.length === 1 && sh.part.draft.groups[0].items.length === 3, JSON.stringify(sh));
-check("...and no option is ever marked recommended, whatever the model sends (§469)", sh && sh.part.options.length === 2 && sh.part.options.every((o) => !("recommended" in o)));
+check("...and no option is ever marked recommended, whatever the model sends (§474)", sh && sh.part.options.length === 2 && sh.part.options.every((o) => !("recommended" in o)));
 check("...a source naming a file nobody attached is read as assumed, never drawn as a file (§96.2)",
   sh && sh.part.draft.groups[0].items.map((x) => x.source).join("|") === "Q3 deck.pdf|assumed|platform", sh && JSON.stringify(sh.part.draft.groups[0].items));
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
@@ -148,13 +148,13 @@ check("each section's guidance carries the house rules; the roads only where the
     gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("LIMITS FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
   check("§460 A: a drafted item takes the method's shape — title, evidence, score — and a turn names the method part it follows",
     /`title`[\s\S]*`evidence`[\s\S]*`score`/.test(gi) && /`following`/.test(gi));
-  check("§463: a natural conversation — no playback box, buttons only for a real choice, and one starting point for every section",
+  check("§471: a natural conversation — no playback box, buttons only for a real choice, and one starting point for every section",
     /natural conversation/.test(gi) && !/PLAYBACK/.test(gi) && !/playback/.test(gi) && /leave `options` empty/.test(gi) &&
     /WHERE THE WORK STARTS, in every section/.test(gi) && /word for word/.test(gi) && /already said what to change/.test(gi) &&
     ["foundation", "analysis", "directions", "execution", "advisory"].every((k) => /WHERE THE WORK STARTS/.test(guidanceFor(k))));
-  check("§463: what exists comes before the ways to start, and the method before both",
+  check("§471: what exists comes before the ways to start, and the method before both",
     gi.indexOf("Phase one") < gi.indexOf("WHERE THE WORK STARTS") && gi.indexOf("WHERE THE WORK STARTS") < gi.indexOf("WAYS TO START"));
-  check("§463: an answer's old playback field is not kept",
+  check("§471: an answer's old playback field is not kept",
     !("playback" in (shapeAnswer({ reply: "Hi", playback: { understood: "x" } }, []) || { part: { playback: 1 } }).part));
   const sh2 = shapeAnswer({ reply: "Here is the internal half.", following: "Situational Analysis · SWOT",
     draft: { title: "Mobile SWOT", groups: [{ title: "Strengths", items: [
@@ -480,7 +480,7 @@ try {
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
       /WHERE THE WORK STARTS/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
-    check("...told to start from what the plan holds, word for word, and ask what to change (§463)",
+    check("...told to start from what the plan holds, word for word, and ask what to change (§471)",
       /start from it: show it in `reply` word for word/.test(sys) && /If the person has not said what to change, ask/.test(sys));
     check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
@@ -588,11 +588,11 @@ try {
     check("a line that ran on into the answer's next field is cut there (§458)", pA[1] === "The plan's aspiration (MENA expansion).", JSON.stringify(pA[1]));
     check("...and ordinary quotes in what the model wrote are kept", pA[0] === 'He said "yes", "no" and left', JSON.stringify(pA[0]));
 
-    /* §464: AN ENHANCEMENT ASKS FIRST, held by the product. A short "enhance"
+    /* §472: AN ENHANCEMENT ASKS FIRST, held by the product. A short "enhance"
        about something the plan holds is told so on that turn, and a draft
        written anyway is dropped; the answer to that question is not held. */
     const qL = JSON.stringify(seen.find((x) => /Can we enhance the winning aspiration/.test(JSON.stringify(x.body.contents))).body.contents);
-    check("a short ask to improve what the plan holds is told, on that turn, to quote it and ask what to improve (§464)", /FOR THIS TURN ONLY/.test(qL) && /word for word/.test(qL), qL.slice(-300));
+    check("a short ask to improve what the plan holds is told, on that turn, to quote it and ask what to improve (§472)", /FOR THIS TURN ONLY/.test(qL) && /word for word/.test(qL), qL.slice(-300));
     const ctxA = "Mobile\n\nTHE PLAN AS WRITTEN:\nWinning Aspiration: Be first.";
     const DR = { title: "Aspiration — Mobile", groups: [{ title: "Aspiration", items: [{ text: "Be the first choice for a phone", source: "platform" }] }] };
     NEXT = { answer: { reply: "Today it reads: Be first. What should improve?", options: [{ label: "Make it measurable" }], draft: DR } };
@@ -603,12 +603,12 @@ try {
     const e2 = await call("POST", "api", { act: "say", id: ch.id, text: "improve it, make it measurable", context: ctxA }, NORAN);
     const ae2 = e2.j.messages[e2.j.messages.length - 1];
     const q2 = JSON.stringify(seen[seen.length - 1].body.contents);
-    check("...the answer to that question is not held: the draft comes (§464, both ends)", !!(ae2.part.draft && ae2.part.draft.groups) && !/FOR THIS TURN ONLY/.test(q2.slice(-600)), JSON.stringify(ae2.part).slice(0, 160));
+    check("...the answer to that question is not held: the draft comes (§472, both ends)", !!(ae2.part.draft && ae2.part.draft.groups) && !/FOR THIS TURN ONLY/.test(q2.slice(-600)), JSON.stringify(ae2.part).slice(0, 160));
     NEXT = { answer: { reply: "A first aspiration.", draft: DR } };
     const e3 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: "Mobile" }, NORAN);
     check("...and where the plan holds nothing, nothing is held back", !!e3.j.messages[e3.j.messages.length - 1].part.draft);
 
-    /* §471: A CHANGE CLAIMED IS A CHANGE SHOWN. Islam's report: asked to
+    /* §476: A CHANGE CLAIMED IS A CHANGE SHOWN. Islam's report: asked to
        remove the year, the model said "I've removed the hardcoded year …
        Click the Save button under the draft" and sent no draft. Asked again
        once; the second answer's draft is what the page shows. Both ends: a
@@ -620,13 +620,13 @@ try {
     const c1 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
     const ac1 = c1.j.messages[c1.j.messages.length - 1];
     const qC = JSON.stringify(seen[seen.length - 1].body.contents);
-    check("an answer that claims a change with no draft is asked again, and the revised text is shown with its Save (§471)",
+    check("an answer that claims a change with no draft is asked again, and the revised text is shown with its Save (§476)",
       seen.length === bC + 2 && !!(ac1.part.draft && ac1.part.draft.groups) && /removed the hardcoded year/.test(ac1.body) && /whole revised text in `draft`/.test(qC),
       seen.length - bC + " asks · " + JSON.stringify(ac1).slice(0, 200));
-    /* §472: the second try is a SMALLER ask — its shape holds only the
+    /* §477: the second try is a SMALLER ask — its shape holds only the
        draft, required, with no `reply` to talk in. Read off the wire. */
     const sch2 = (seen[seen.length - 1].body.generationConfig || {}).responseSchema || {};
-    check("...and that second ask can only return the draft — no reply field, the draft required (§472)",
+    check("...and that second ask can only return the draft — no reply field, the draft required (§477)",
       !!(sch2.properties && sch2.properties.draft) && !(sch2.properties && sch2.properties.reply) && (sch2.required || []).includes("draft"),
       JSON.stringify(sch2).slice(0, 160));
     NEXT = [{ answer: { reply: "I've removed the year. Press Save below." } }, { answer: { reply: "I've removed it." } }];
@@ -640,7 +640,7 @@ try {
     check("the claim words are narrow", claimsDraft("I've removed the hardcoded year") && claimsDraft("Here is the revised aspiration.") && claimsDraft("Click the Save button under the draft") &&
       !claimsDraft("Shall I draft one for you?") && !claimsDraft("Which year would you like it to name instead?") && !claimsDraft("What should improve?"));
 
-    /* §464: A DRAFT IS SAVED TO THE RAIL by the product. The button makes v1;
+    /* §472: A DRAFT IS SAVED TO THE RAIL by the product. The button makes v1;
        the same title again is v2 of the same deliverable; a saved draft is
        not saved twice; and a typed "save it" saves without asking the model. */
     const dm2 = ae2.id;
@@ -648,7 +648,7 @@ try {
     const shelfS = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
     const dS = shelfS.find((d) => d.title === "Aspiration — Mobile");
     const vS = dS ? await asTenant(A, (c) => versionsOf(c, dS.id)) : [];
-    check("Save under a draft puts it on the rail as v1, its text written out (§464)",
+    check("Save under a draft puts it on the rail as v1, its text written out (§472)",
       sv1.st === 200 && sv1.j.saved.n === 1 && !!dS && vS.length === 1 && /Be the first choice for a phone/.test(vS[0].body.text), JSON.stringify(sv1.j).slice(0, 200));
     check("...and the draft now says it was saved", sv1.j.messages.find((m) => m.id === dm2).part.saved.n === 1);
     const again = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: dm2 }, NORAN);
@@ -659,7 +659,7 @@ try {
     const ty = await call("POST", "api", { act: "say", id: ch.id, text: "looks great, save it" }, NORAN);
     const tyL = ty.j.messages[ty.j.messages.length - 1];
     const vS2 = await asTenant(A, (c) => versionsOf(c, dS.id));
-    check("a typed 'looks great, save it' saves the latest draft at once, asking the model nothing (§464)",
+    check("a typed 'looks great, save it' saves the latest draft at once, asking the model nothing (§472)",
       ty.st === 200 && seen.length === bS && tyL.part.kind === "saved" && /Saved: Aspiration — Mobile, v2/.test(tyL.body) && vS2.length === 2, seen.length - bS + " asks · " + tyL.body);
     const shelfS2 = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
     check("...as v2 of the SAME deliverable, never a second row with the same title", shelfS2.filter((d) => d.title === "Aspiration — Mobile").length === 1);
@@ -680,7 +680,7 @@ try {
     {
     section("§6 · the Foundation chat: from the plan or fresh, the years, the draft, the check, a new version each run");
     const nf = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
-    check("a new Foundation chat on a place with no Foundation opens on the roads — no question to ask (§473)",
+    check("a new Foundation chat on a place with no Foundation opens on the roads — no question to ask (§478)",
       nf.st === 200 && nf.j.chat.section === "foundation" && nf.j.flow.phase === "path" && nf.j.flow.ans.length === 6, JSON.stringify(nf.j).slice(0, 200));
     const np = await call("POST", "api", { act: "newFlow", place: "mobile", hasPlan: true }, NORAN);
     check("...and on a place that has one it asks first: start from it, or start fresh", np.st === 200 && np.j.flow.phase === "start" && np.j.flow.start === "", JSON.stringify(np.j.flow).slice(0, 120));
@@ -703,7 +703,7 @@ try {
     check("...and a client's own person cannot start one", hendNf.st === 403, hendNf.st + "");
     const fid = nf.j.chat.id;
     const g0 = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
-    check("the chat comes with its flow, the six parts' questions and examples, nothing marked optional (§474: Structure decides, never the card), the short-answer line and the next version",
+    check("the chat comes with its flow, the six parts' questions and examples, nothing marked optional (§479: Structure decides, never the card), the short-answer line and the next version",
       g0.j.flow && g0.j.flowSteps.length === 6 && g0.j.flowSteps.map((e) => e.key).join() === "who,asp,eim,pur,obj,val" &&
       !g0.j.flowSteps.some((e) => e.optional) && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
       g0.j.shortAnswer === 15 && g0.j.nextVersion === 1, JSON.stringify(Object.keys(g0.j)));
@@ -744,10 +744,10 @@ try {
     F = r1.j.flow;
     F.drafts = F.drafts.map((d, i) => d || (i === 3 ? "" : "Part " + (i + 1) + " draft for {Y}")); F.done = F.done.map((_, i) => i !== 3); F.phase = "check";
     await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
-    /* §474: nothing is optional — a part the Structure carries is owed, and
+    /* §479: nothing is optional — a part the Structure carries is owed, and
        one it does not is never asked. Both ends (§94.2). */
     const owedPur = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
-    check("with Purpose switched on in Structure, an empty Purpose holds the check (§474)", owedPur.st === 400 && /Every part needs/.test(owedPur.j.why), owedPur.st + "");
+    check("with Purpose switched on in Structure, an empty Purpose holds the check (§479)", owedPur.st === 400 && /Every part needs/.test(owedPur.j.why), owedPur.st + "");
     F.skip = ["pur"];
     const sv = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
     check("...and switched off it is not asked", sv.st === 200 && sv.j.flow.skip.join() === "pur", JSON.stringify(sv.j.flow && sv.j.flow.skip));

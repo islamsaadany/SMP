@@ -187,10 +187,10 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const place = String(b.place || "");
     if (!isPlace(place)) return refused(400, "Which place?");
     const chat = await newChat(c, { place, section: "foundation", title: oneLine(b.title).slice(0, MAX_TITLE) || "Foundation", by });
-    /* §473: whether the place already HAS a Foundation only decides which
+    /* §478: whether the place already HAS a Foundation only decides which
        question opens the chat — start from it, or the four roads — so the
        page's word is enough; nothing is read or written by it. */
-    /* §474: which parts the Structure switches off rides the same word. */
+    /* §479: which parts the Structure switches off rides the same word. */
     const flow = newFlow(b.hasPlan === true, cleanSkip(b.skip));
     await writeFlow(c, chat.id, flow);
     return out(200, { ok: true, chat: { ...chat, guided: true }, flow });
@@ -258,7 +258,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   }
 
   if (kind === "saveDraft") {
-    /* A draft saved to the Deliverables rail (§464). Judged against the
+    /* A draft saved to the Deliverables rail (§472). Judged against the
        STORED message (§42): it must be this chat's and the Copilot's, and
        carry a draft; a draft already saved is not saved twice. */
     const chat = await oneChat(c, id);
@@ -294,7 +294,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     if (chat.archived) return refused(400, ARCHIVED);
     let stored = await flowOf(c, id);
     if (!stored) return refused(400, "This is not a guided Foundation chat.");
-    /* §474: the Structure may have changed since the flow was last written,
+    /* §479: the Structure may have changed since the flow was last written,
        so the finish carries the page's current answer of what is off. */
     if (Array.isArray(b.skip)) stored = { ...stored, skip: cleanSkip(b.skip) };
     if (stored.saved && brk() !== "flow-reopen") return refused(400, SAVED_ALREADY);
@@ -369,7 +369,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   if (step1 === "badFile") return refused(400, "One of those files is not waiting in this chat any more. Attach it again.");
   const { chat, said, material } = step1;
 
-  /* "SAVE IT" IS THE PRODUCT'S, NOT THE MODEL'S (§464): a short ask to save
+  /* "SAVE IT" IS THE PRODUCT'S, NOT THE MODEL'S (§472): a short ask to save
      saves the latest draft at once, with no question to the model — which
      is what kept the page "working" for minutes and then saved nothing. */
   if (!said.files.length && isSaveAsk(text) && brk() !== "save-to-model") {
@@ -386,7 +386,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
       assumptions: await withTenant(tenantId, (c) => assumptionsOf(c, id)) });
   }
 
-  /* AN ENHANCEMENT ASKS FIRST, AND THE PRODUCT HOLDS IT TO THAT (§464).
+  /* AN ENHANCEMENT ASKS FIRST, AND THE PRODUCT HOLDS IT TO THAT (§472).
      The instruction already says so and the model did not always follow it:
      a short "enhance it" about something the plan already holds is told,
      on this turn, to quote what exists and ask what to improve — and any
@@ -411,7 +411,7 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
   });
   const ask = (q: string) => askCopilot(askIn(q));
   let r = configured() ? await ask(question) : { ok: false as const, noKey: true, why: "no key is set" };
-  /* A CHANGE CLAIMED IS A CHANGE SHOWN (§471). Asked to refine, the model
+  /* A CHANGE CLAIMED IS A CHANGE SHOWN (§476). Asked to refine, the model
      answered "I've removed the year … press Save under the draft" and sent
      no draft, so the page claimed a change it never showed and offered a
      button that was not there. Such an answer is asked again once, told to

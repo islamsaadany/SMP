@@ -1025,7 +1025,7 @@
      whitespace, never a typed 0 (§104.10 — Number("") is 0, and an empty
      box must not read as a genuine nought). */
   var GAP_FIELDS = {
-    /* §474: a unit's Purpose (`mission`) and Core Values (`values`) are owed
+    /* §479: a unit's Purpose (`mission`) and Core Values (`values`) are owed
        like its aspiration — but ONLY where the client's Structure carries
        them, which this static table cannot know. The caller hands the parts
        Structure has switched off to gapMissing/gapEmptyFields as `off`
@@ -3925,7 +3925,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the two levels named here have a default of their own. */
   var STRUCT_NEW_CLIENT = {
     mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
-    /* §474 reverses §473 here at Islam's word: a NEW client's units carry
+    /* §479 reverses §478 here at Islam's word: a NEW client's units carry
        no Purpose and no Core Values until somebody ticks them on Client
        set-up › Structure, because a switched-on part is now owed (Missing). */
     bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
@@ -3988,9 +3988,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var STRUCT_UNSAID = {
     top: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot" && c !== "pillar"; }),
     fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }),
-    /* §474: a unit's Purpose and Core Values are asked only once the office
+    /* §479: a unit's Purpose and Core Values are asked only once the office
        ticks them. Unsaid they stay off, which is exactly what an existing
-       client saw before §473 drew them (§427 had them read off on a unit),
+       client saw before §478 drew them (§427 had them read off on a unit),
        so no unit on a live tenant suddenly owes two Missing parts. */
     bu: STRUCT_COMPONENTS.filter(function (c) { return c !== "purpose" && c !== "values"; })
   };

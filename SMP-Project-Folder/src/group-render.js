@@ -5267,19 +5267,19 @@ function renderUnitFoundation(u){
     koBand(u.keyObjectives, "foundation", "u_found", u, false) +
     unitValuesBox(u, upg);
 }
-/* §473 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
+/* §478 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
    `values` of {name, def}, §404's foundationBody), so one vocabulary for one
    thing (§53.5); stored on the unit and riding `units.extra` (no migration).
 
-   §474 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
+   §479 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
    proceed"*, to five points, of which these two are the page's: a box is drawn
    exactly when Client set-up › Structure carries that part for this unit,
    with the pen open or not — off, it is not drawn at all and whatever is
    stored stays stored (§404: off hides, never deletes); and switched on and
    empty it reads **Missing**, counted like the aspiration (unitGapOff, one
    answer for the bar, the walk and Submit, §116.2). So the *Optional* tag
-   goes: §473's "optional" meant both "never a gap" and "not drawn when empty",
-   and §474 reverses both.
+   goes: §478's "optional" meant both "never a gap" and "not drawn when empty",
+   and §479 reverses both.
 
    THE FILL GRANT CAN CLOSE BOTH, OR THE COUNT WOULD PROMISE A CONTROL THAT IS
    NOT THERE (§223, §61). The Purpose is a gapCell exactly as the aspiration
@@ -5296,7 +5296,7 @@ function unitPurposeAnd(u, upg, asp){
     '</p></div>' + asp + '</div>';
 }
 /* May the person looking write the Core Values list right now — as its
-   author (the pen), or as a filler while the list is still owed (§474)? */
+   author (the pen), or as a filler while the list is still owed (§479)? */
 function unitValuesWrite(u){
   if (authoring("foundation", "u_found")) return "edit";
   var vals = Array.isArray(u.values) ? u.values : [];

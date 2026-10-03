@@ -62,7 +62,7 @@ const owner = new pg.Pool({ connectionString: URL_, max: 2, options: "-c search_
 const MODEL_SEEN = [];
 const MODEL_ANSWER = {
   reply: "Here is a first foundation from the plan.",
-  /* §463: a model still sending the old playback box. The SERVER drops the
+  /* §471: a model still sending the old playback box. The SERVER drops the
      field (checks/copilot.mjs asserts that, red under the old shape), so the
      "no playback box" assertion below is the CONTROL and says so: it stays
      green even with the old drawing put back, measured (§113.8). */
@@ -73,7 +73,7 @@ const MODEL_ANSWER = {
   draft: { title: "Mobile foundation", groups: [{ title: "Purpose", items: [{ text: "Connect every Egyptian", source: "assumed" }, { text: "Four pillars", source: "platform" }, { title: "Wide store network", text: "Present in every governorate", evidence: "Store count in the plan", score: "4", source: "platform" }] }] },
   following: "Purpose",
 };
-/* §464: a provider that takes its time, so the working line can be seen
+/* §472: a provider that takes its time, so the working line can be seen
    while it waits (0 = answer at once, which is every other section). */
 let MODEL_DELAY = 0;
 const model = http.createServer((req, res) => {
@@ -838,7 +838,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "two rails, Chats above Deliverables", JSON.stringify(rails));
 
     const c0 = await count("copilot_chats"), m0 = await count("copilot_messages");
-    /* REWRITTEN, never loosened (§218): since §473 "+ New chat" in Foundation
+    /* REWRITTEN, never loosened (§218): since §478 "+ New chat" in Foundation
        starts the FLOW (§3i presses that), so the plain Foundation chat this
        section is about is made through the module's own api, as §3h does,
        and opened by its own link — the rest of the section presses it. */
@@ -883,7 +883,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
         it: (m.querySelector(".copgrp li.copit") || {}).textContent || "", follow: (m.querySelector(".copfollow") || {}).textContent || "" };
     });
     check(ans && !ans.play && ans.miss && ans.groups === 3 && ans.opts === 2 && /Assume for me/.test(ans.firstOpt) && ans.rec === 0 && !ans.recWord && ans.srcs.join("|") === "Assumed",
-      "the answer draws no playback box (§463), and draws what is missing, the draft with sources, and two ways on — neither marked recommended (§469)", JSON.stringify(ans));
+      "the answer draws no playback box (§471), and draws what is missing, the draft with sources, and two ways on — neither marked recommended (§474)", JSON.stringify(ans));
     /* §460: an item the method shapes draws its title, score and evidence, and
        the answer says which part of the method it is working through. */
     check(ans && /Wide store network/.test(ans.it) && /4/.test(ans.it) && /Evidence: Store count in the plan/.test(ans.it) && /Following: Purpose/.test(ans.follow),
@@ -899,13 +899,13 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-msgs] [data-cop-reply]").length === 2), "…only the LAST answer carries live quick replies");
     check(await page.evaluate(() => document.querySelectorAll("[data-cop-chats] [data-cop-chat]").length === 1), "…and the chat is on the Chats rail");
 
-    /* §464 — A DRAFT IS SAVED FROM UNDER IT, AND THE WAIT IS ONE WORD. Islam:
+    /* §472 — A DRAFT IS SAVED FROM UNDER IT, AND THE WAIT IS ONE WORD. Islam:
        "when I tried looks great save it it kept working … it should be saved
        to the deliverables rail on the left". Pressed, then read back from the
        database, never off the screen (§96). */
     const saveBtns = await page.evaluate(() => [...document.querySelectorAll("[data-cop-msgs] [data-cop-savedraft]")].map((b) => b.textContent.trim()));
     check(saveBtns.length === 2 && saveBtns.every((t) => t === "Save to Foundation deliverables"),
-      "every draft carries a Save button naming the section's deliverables (§464)", JSON.stringify(saveBtns));
+      "every draft carries a Save button naming the section's deliverables (§472)", JSON.stringify(saveBtns));
     const d0 = await count("copilot_deliverables");
     await page.locator("[data-cop-msgs] [data-cop-savedraft]").last().click();
     await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copsaved"), null, { timeout: 10000 }).catch(() => {});
@@ -932,7 +932,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     const w2 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] [data-cop-wword]"); return { word: el ? el.textContent : "", same: el === window.__copW }; });
     const words = await page.evaluate(() => window.__copWork && window.__copWork.words);
     check(w1 && words && words.includes(w1.word) && !/\s/.test(w1.word) && w1.dots === 3 && w1.role === "status" && !/working on it/i.test(w1.all),
-      "while the Copilot works it shows ONE word and three dots, never the old sentence (§464)", JSON.stringify(w1));
+      "while the Copilot works it shows ONE word and three dots, never the old sentence (§472)", JSON.stringify(w1));
     check(w2.word !== w1.word && words.includes(w2.word) && w2.same,
       "…and the word changes in place, without redrawing the chat", JSON.stringify([w1 && w1.word, w2]));
     check(await page.evaluate(() => typeof window.__copWork.word === "function" && typeof window.__copWork.slow === "string" && /Still working/.test(window.__copWork.slow)),
@@ -981,7 +981,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(bx.h >= 205 && bx.h <= 214, "…up to about ten lines, then it scrolls inside itself", bx.h);
     await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
 
-    /* §462 — A− / A+ on the chat's title line. Measured as PAINT (a bubble's
+    /* §470 — A− / A+ on the chat's title line. Measured as PAINT (a bubble's
        rendered height, the box's line height), never as the stored number,
        and the press must not repaint: a half-typed message survives it. */
     const sz = async () => page.evaluate(() => {
@@ -1065,7 +1065,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.click('a[href*="#cop=chat-"]');
     const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
     check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
-    /* §470 (Islam's room options 1 and 2): "Fold bars" in the unit row folds
+    /* §475 (Islam's room options 1 and 2): "Fold bars" in the unit row folds
        the top bar, the unit row and the tab row into one thin line; the
        section row stays; the chat gains the height; it is remembered; and no
        other page wears it. Both ends (§94.2): folded AND shown again. */
@@ -1080,7 +1080,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
           extra: document.documentElement.scrollHeight - innerHeight }; });
       const f0 = await rd();
       check(f0.btn && f0.top && f0.units && f0.tabs && !f0.thin && f0.gutter <= 12,
-        "the Copilot's unit row offers Fold bars, all three bars show, the thin line does not, and the page gutter is tight (§470)", JSON.stringify(f0));
+        "the Copilot's unit row offers Fold bars, all three bars show, the thin line does not, and the page gutter is tight (§475)", JSON.stringify(f0));
       await page.click("#units [data-copfold='fold']");
       await page.waitForTimeout(300);
       const f1 = await rd();
@@ -1183,14 +1183,14 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.rail"); } catch (e) {} });
 
     /* The rail hides to a strip and comes back; the choice outlives a reload. */
-    check(!(await page.$(".copguided")) && !(await page.$("[data-cop-newflow]")), "the Guided Foundation button is gone — a Foundation chat is the start (§473)");
+    check(!(await page.$(".copguided")) && !(await page.$("[data-cop-newflow]")), "the Guided Foundation button is gone — a Foundation chat is the start (§478)");
     check(await page.evaluate(() => !document.querySelector(".coprtop") && !!document.querySelector(".coprh [data-cop-railtog]")),
-      "the hide control sits in the Chats header, with no row of its own above the rails (§470 option A)");
+      "the hide control sits in the Chats header, with no row of its own above the rails (§475 option A)");
     await page.click(".coprh [data-cop-railtog]");
     const shut = await page.evaluate(() => ({ cls: document.querySelector("[data-cop-pane]").classList.contains("copshut"),
       rails: getComputedStyle(document.querySelector(".coprails")).display, slim: document.querySelector(".copslim").getBoundingClientRect().width,
       stored: localStorage.getItem("smp.copilot.rail") }));
-    check(shut.cls && shut.rails === "none" && shut.slim >= 20 && shut.slim <= 28, "the rail button hides the rail to a 24px strip (§470 option A)", JSON.stringify(shut));
+    check(shut.cls && shut.rails === "none" && shut.slim >= 20 && shut.slim <= 28, "the rail button hides the rail to a 24px strip (§475 option A)", JSON.stringify(shut));
     await shot("0-shut");
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     check(await page.evaluate(() => document.querySelector("[data-cop-pane]").classList.contains("copshut")), "…and it stays hidden after a reload");
@@ -1198,8 +1198,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(await page.evaluate(() => !document.querySelector("[data-cop-pane]").classList.contains("copshut") && getComputedStyle(document.querySelector(".coprails")).display !== "none"),
       "…and the strip's button brings it back");
 
-    /* §473: a new Foundation chat on a place with a Foundation asks first. */
-    /* §474: the cards follow Client set-up › Structure. The dev tenant never
+    /* §478: a new Foundation chat on a place with a Foundation asks first. */
+    /* §479: the cards follow Client set-up › Structure. The dev tenant never
        saved its units' Structure, so Purpose and Core Values are OFF — four
        cards. Ticked on through the stored graph, it is six, nothing optional. */
     ST0 = await page.evaluate(() => GROUP.structure ? JSON.parse(JSON.stringify(GROUP.structure)) : null);
@@ -1208,7 +1208,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 5000 }).catch(() => {});
     const off4 = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()));
     check(off4.join("|") === "Who We Are|Winning Aspiration|End in Mind|Key Objectives",
-      "with Purpose and Core Values off in Structure, the chat has no card for either (§474)", JSON.stringify(off4));
+      "with Purpose and Core Values off in Structure, the chat has no card for either (§479)", JSON.stringify(off4));
     await page.evaluate(() => { GROUP.structure = { bu: { on: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"] } }; paint(); });
     const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
     await page.click(".copnew[data-cop-newchat]");
@@ -1231,7 +1231,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     let P = await flowRow(pid);
     check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /From the plan/.test(pl[0].st) && /From the plan/.test(pl[1].st),
       "Start from it fills the cards from the plan, each marked From the plan, and stores it", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
-    check(!pl.some((c) => /Optional/.test(c.st || "")), "nothing is marked optional — switched on, Purpose is asked like the rest (§474)", JSON.stringify(pl.map((c) => c.st)));
+    check(!pl.some((c) => /Optional/.test(c.st || "")), "nothing is marked optional — switched on, Purpose is asked like the rest (§479)", JSON.stringify(pl.map((c) => c.st)));
     check(/loaded what Mobile/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says what it loaded and asks no years");
     await shot("0c-loaded");
     await page.click("[data-cop-cards=hide]");
@@ -1267,7 +1267,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
     check(roads.length === 4 && roads[0].k === "guided" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
       roads.every((r) => r.d.length > 20) && !roads.some((r) => /research/i.test(r.t + r.d)),
-      "four road cards, each with a sentence, none marked Recommended (§470), no deep research", JSON.stringify(roads));
+      "four road cards, each with a sentence, none marked Recommended (§475), no deep research", JSON.stringify(roads));
     await page.click('[data-cop-path="guided"]');
     await page.waitForSelector("[data-cop-setyears]", { timeout: 10000 });
     await shot("1-years");

@@ -445,7 +445,7 @@ var COPILOT = (function(){
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    /* §463: no "Understood / Working from" box. A stored answer from before
+    /* §471: no "Understood / Working from" box. A stored answer from before
        may still carry one; it is not drawn — the reply says it in words. */
     if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
     if (p.draft && p.draft.groups) {
@@ -485,7 +485,7 @@ var COPILOT = (function(){
     return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
   }
 
-  /* THE CHAT'S TEXT SIZE (§462, Islam 2026-10-02, design-mockups/copilot-font-size/):
+  /* THE CHAT'S TEXT SIZE (§470, Islam 2026-10-02, design-mockups/copilot-font-size/):
      A− / A+ on the chat's title line, four steps, the conversation and the
      reply box only. A screen preference, so localStorage and never the state
      graph (§25, §47.1); a throwing or empty store reads as the normal size.

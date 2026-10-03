@@ -1,6 +1,6 @@
-"""A UNIT'S PURPOSE AND CORE VALUES: STRUCTURE DECIDES, AND ON MEANS OWED (§474).
+"""A UNIT'S PURPOSE AND CORE VALUES: STRUCTURE DECIDES, AND ON MEANS OWED (§479).
 
-§473 built both as optional boxes; §474 reverses that at Islam's word
+§478 built both as optional boxes; §479 reverses that at Islam's word
 (*"yes for all proceed"*): a box is drawn exactly when Client set-up ›
 Structure carries that part for this unit, pen open or not; switched on and
 empty it reads Missing and is counted like the aspiration; switched off it is
@@ -60,7 +60,7 @@ with sync_playwright() as pw:
                 "current='mobile'; currentSub='found'; EDIT_PAGE['foundation']=false; paint(); }")
 
     # ── UNSAID: a client whose Structure was never saved (every live tenant
-    # today) sees neither box and owes neither — what it saw before §473.
+    # today) sees neither box and owes neither — what it saw before §478.
     pg.evaluate("() => { delete GROUP.structure; paint(); }")
     r = pg.evaluate(SEE)
     ck("a client that never saved its Structure draws neither box", not r["pur"] and not r["val"], r)

@@ -12,7 +12,7 @@
    of this file. */
 import type { Section } from "./copilot.ts";
 
-/* HOW THE COPILOT TALKS (§460, rethought at §463). Islam, 2026-10-02: "we
+/* HOW THE COPILOT TALKS (§460, rethought at §471). Islam, 2026-10-02: "we
    need to rethink the prompting flow in general to have a natural
    conversation not customized for everything … there is a methodology prompt
    and there is a starting point either from something existing or the user
@@ -29,7 +29,7 @@ export const VOICE = [
   "Read the whole conversation before answering. Build on what was already said and on your own earlier drafts (shown in the conversation as [my draft …]); never restart and never ask again what has been answered.",
 ].join("\n");
 
-/* WHERE THE WORK STARTS (§463, Islam: "default for every section"). Two
+/* WHERE THE WORK STARTS (§471, Islam: "default for every section"). Two
    cases and no trigger words: something exists, or nothing does. */
 export const START = [
   "WHERE THE WORK STARTS, in every section:",
@@ -78,10 +78,10 @@ export const GUIDE: Record<Section, Guide> = {
   },
 };
 
-/* THE METHOD AND THE TEMPLATES (§456, reshaped §463). Islam's instructions
+/* THE METHOD AND THE TEMPLATES (§456, reshaped §471). Islam's instructions
    are Copilot settings, edited by a Forefront super user and read on every
    question (lib/copilot-settings.ts methodFor), so they arrive here as an
-   argument. Since §463 the order is the conversation's own: the voice, what
+   argument. Since §471 the order is the conversation's own: the voice, what
    the section produces, the METHOD (which leads), where the work starts
    (what exists, or the ways to start), and last the LIMITS — a short list of
    things that do not bend, never a script that decides what to say. */

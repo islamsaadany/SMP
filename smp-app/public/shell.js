@@ -1027,7 +1027,7 @@
      whitespace, never a typed 0 (§104.10 — Number("") is 0, and an empty
      box must not read as a genuine nought). */
   var GAP_FIELDS = {
-    /* §474: a unit's Purpose (`mission`) and Core Values (`values`) are owed
+    /* §479: a unit's Purpose (`mission`) and Core Values (`values`) are owed
        like its aspiration — but ONLY where the client's Structure carries
        them, which this static table cannot know. The caller hands the parts
        Structure has switched off to gapMissing/gapEmptyFields as `off`
@@ -3927,7 +3927,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the two levels named here have a default of their own. */
   var STRUCT_NEW_CLIENT = {
     mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
-    /* §474 reverses §473 here at Islam's word: a NEW client's units carry
+    /* §479 reverses §478 here at Islam's word: a NEW client's units carry
        no Purpose and no Core Values until somebody ticks them on Client
        set-up › Structure, because a switched-on part is now owed (Missing). */
     bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
@@ -3990,9 +3990,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   var STRUCT_UNSAID = {
     top: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot" && c !== "pillar"; }),
     fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }),
-    /* §474: a unit's Purpose and Core Values are asked only once the office
+    /* §479: a unit's Purpose and Core Values are asked only once the office
        ticks them. Unsaid they stay off, which is exactly what an existing
-       client saw before §473 drew them (§427 had them read off on a unit),
+       client saw before §478 drew them (§427 had them read off on a unit),
        so no unit on a live tenant suddenly owes two Missing parts. */
     bu: STRUCT_COMPONENTS.filter(function (c) { return c !== "purpose" && c !== "values"; })
   };
@@ -6935,7 +6935,7 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
-/* §474: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
+/* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
    and Core Values are owed (Missing) only while Client set-up › Structure
    carries them for this unit; off, they are not drawn and not counted, and
    whatever is stored stays stored (§404: off hides, never deletes). Handed to
@@ -29807,19 +29807,19 @@ function renderUnitFoundation(u){
     koBand(u.keyObjectives, "foundation", "u_found", u, false) +
     unitValuesBox(u, upg);
 }
-/* §473 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
+/* §478 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
    `values` of {name, def}, §404's foundationBody), so one vocabulary for one
    thing (§53.5); stored on the unit and riding `units.extra` (no migration).
 
-   §474 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
+   §479 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
    proceed"*, to five points, of which these two are the page's: a box is drawn
    exactly when Client set-up › Structure carries that part for this unit,
    with the pen open or not — off, it is not drawn at all and whatever is
    stored stays stored (§404: off hides, never deletes); and switched on and
    empty it reads **Missing**, counted like the aspiration (unitGapOff, one
    answer for the bar, the walk and Submit, §116.2). So the *Optional* tag
-   goes: §473's "optional" meant both "never a gap" and "not drawn when empty",
-   and §474 reverses both.
+   goes: §478's "optional" meant both "never a gap" and "not drawn when empty",
+   and §479 reverses both.
 
    THE FILL GRANT CAN CLOSE BOTH, OR THE COUNT WOULD PROMISE A CONTROL THAT IS
    NOT THERE (§223, §61). The Purpose is a gapCell exactly as the aspiration
@@ -29836,7 +29836,7 @@ function unitPurposeAnd(u, upg, asp){
     '</p></div>' + asp + '</div>';
 }
 /* May the person looking write the Core Values list right now — as its
-   author (the pen), or as a filler while the list is still owed (§474)? */
+   author (the pen), or as a filler while the list is still owed (§479)? */
 function unitValuesWrite(u){
   if (authoring("foundation", "u_found")) return "edit";
   var vals = Array.isArray(u.values) ? u.values : [];
@@ -55708,7 +55708,7 @@ var COPILOT = (function(){
     return fetch(url(path, qs), { cache:"no-store", credentials:"same-origin" })
       .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); });
   }
-  /* A question is waited for two minutes at most (§464): with no limit a
+  /* A question is waited for two minutes at most (§472): with no limit a
      slow answer left the page on "working" for as long as it took, which
      read as broken. */
   var WAIT_MS = (window.__copWaitMs || 120000);
@@ -55768,7 +55768,7 @@ var COPILOT = (function(){
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
   function archView(){ return !!ARCH[key()]; }
-  /* §470 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
+  /* §475 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
      start of the Chats header rather than on a row of its own above the
      rails, so an open rail spends no line on it. */
   function chatsHead(){
@@ -56044,7 +56044,7 @@ var COPILOT = (function(){
     for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === s) return SECTIONS[i].label;
     return s;
   }
-  /* WHILE THE COPILOT WORKS (§464, Islam: "keep it one word"): one word that
+  /* WHILE THE COPILOT WORKS (§472, Islam: "keep it one word"): one word that
      changes every two seconds, three moving dots, and after forty seconds a
      line saying it is taking longer. The word is rewritten IN PLACE on a
      clock and never by a repaint, or the box under it would be rebuilt while
@@ -56065,7 +56065,7 @@ var COPILOT = (function(){
   function answerHtml(m, last){
     var p = m.part || {};
     var h = m.body ? '<div class="copbody">' + E(m.body) + '</div>' : '';
-    /* §463: no "Understood / Working from" box. A stored answer from before
+    /* §471: no "Understood / Working from" box. A stored answer from before
        may still carry one; it is not drawn — the reply says it in words. */
     if (p.missing && p.missing.length) h += '<div class="copmiss"><b>Missing</b><ul>' + p.missing.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
     if (p.draft && p.draft.groups) {
@@ -56074,7 +56074,7 @@ var COPILOT = (function(){
           return '<div class="copgrp"><div class="copgt">' + E(g.title) + '</div><ul>' +
             g.items.map(itemHtml).join("") + '</ul></div>';
         }).join("") + '</div></div>';
-      /* SAVED TO THE RAIL (§464): a button under every draft, and once it is
+      /* SAVED TO THE RAIL (§472): a button under every draft, and once it is
          saved the line says which version it became and opens it. */
       if (p.saved && p.saved.deliverableId) {
         h += '<div class="copopts"><span class="copsaved">&#10003; Saved as v' + E(String(p.saved.n || 1)) + '</span>' +
@@ -56112,7 +56112,7 @@ var COPILOT = (function(){
     return body + (files ? '<div class="copfiles">' + files + '</div>' : '');
   }
 
-  /* THE CHAT'S TEXT SIZE (§462, Islam 2026-10-02, design-mockups/copilot-font-size/):
+  /* THE CHAT'S TEXT SIZE (§470, Islam 2026-10-02, design-mockups/copilot-font-size/):
      A− / A+ on the chat's title line, four steps, the conversation and the
      reply box only. A screen preference, so localStorage and never the state
      graph (§25, §47.1); a throwing or empty store reads as the normal size.
@@ -56218,8 +56218,8 @@ var COPILOT = (function(){
      draft is written from (§53.5). Every press saves the flow at once; the
      server cuts it to shape (§96.2) and decides alone what was saved. */
   var NUDGE = null;              /* {id, text}: a short answer held for "Add more detail" / "Continue anyway" */
-  /* No road is marked Recommended (§470, Islam 2026-10-02: "remove the
-     label") — the four are offered as equals, as the quick replies are (§469). */
+  /* No road is marked Recommended (§475, Islam 2026-10-02: "remove the
+     label") — the four are offered as equals, as the quick replies are (§474). */
   var PATH_CARDS = [
     { k:"guided", t:"Answer guided questions", d:"I ask you a few questions and draft your Foundation from your answers.",
       i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>' },
@@ -56249,7 +56249,7 @@ var COPILOT = (function(){
     return '<div class="copexs"><div class="copeh">Examples to inspire you</div>' +
       ex.map(function(x){ return '<p>• ' + E(withY(x, f)) + '</p>'; }).join("") + '</div>';
   }
-  /* WHAT THE PLAN ALREADY SAYS, PART BY PART (§473), read off the place
+  /* WHAT THE PLAN ALREADY SAYS, PART BY PART (§478), read off the place
      the way its own Foundation page draws it — a unit's fields, the group's
      own GROUP — keyed by the flow's element keys. Hidden objectives are left
      out, as they are everywhere they are counted. */
@@ -56270,7 +56270,7 @@ var COPILOT = (function(){
     };
   }
   function planHas(p){ var off = skipNow(); for (var k in p) if (p[k] && off.indexOf(k) < 0) return true; return false; }
-  /* §474 — THE CARDS FOLLOW THE STRUCTURE. Purpose and Core Values are
+  /* §479 — THE CARDS FOLLOW THE STRUCTURE. Purpose and Core Values are
      asked only where Client set-up › Structure switches them on for this
      place's Foundation; off, they have no card and no question, whatever
      was written before. Nothing is "optional" any more: a part that is on
@@ -56339,7 +56339,7 @@ var COPILOT = (function(){
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
     var plan = f.start === "plan";
-    /* §473: where the place already HAS a Foundation the chat opens by
+    /* §478: where the place already HAS a Foundation the chat opens by
        asking whether to start from it; the answer stays on the page with
        the chosen button lit, as the mockup draws it. */
     if (f.phase === "start" || f.start) {
@@ -56363,7 +56363,7 @@ var COPILOT = (function(){
       if (f.phase === "path") return out.join("");
       out.push(meMsg(pathWord(f.path)));
       /* The years are the guided road's question, asked once the road is
-         chosen (§473); a Foundation started from the plan never asks them. */
+         chosen (§478); a Foundation started from the plan never asks them. */
       out.push(aiMsg("How long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
         (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
           '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
@@ -56758,7 +56758,7 @@ var COPILOT = (function(){
       openItem("chat", id);
     }, function(err){
       THINKING = null;
-      /* The page stopped waiting (§464). What was typed is already kept on
+      /* The page stopped waiting (§472). What was typed is already kept on
          the server, so it is not put back in the box — sending it again would
          say it twice; the chat is read again instead, and an answer that
          arrives later is there the next time it is opened. */
@@ -56819,7 +56819,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
-      /* A NEW FOUNDATION CHAT IS A FLOW (§473, Islam: "remove the guided
+      /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
          button"). It opens on "start from what is there, or fresh?" where
          the place already has a Foundation, and on the four roads where it
          has none — the page knows which, because it holds the plan. */
@@ -64145,7 +64145,7 @@ var SYNC = (function () {
   }
   function chromeActsHTML(){
     var gear = menuHTML();
-    /* §470: on the Copilot the row also offers to fold the three bars away.
+    /* §475: on the Copilot the row also offers to fold the three bars away.
        Wired by a delegated listener (copFoldWire) because this row's
        innerHTML is rewritten on every paint (§29.5). */
     var fold = currentSub === "copilot"
@@ -64153,7 +64153,7 @@ var SYNC = (function () {
       : "";
     return fold + (gear ? '<span class="sep pinsep"></span>' + gear : "");
   }
-  /* ── FOLD THE BARS ON THE COPILOT (§470, room option 1) ────────────────
+  /* ── FOLD THE BARS ON THE COPILOT (§475, room option 1) ────────────────
      The choice is this device's (localStorage), stored as an ABSENCE when
      the bars show (§50.6), and it only ever applies on the Copilot tab:
      every other page draws the full bars whatever is remembered. A throwing
@@ -70911,8 +70911,8 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* §473: a unit's Core Values — add and remove, re-asked on the click
-       (§48.2). An emptied list loses its key (§50.6). §474: the fill grant
+    /* §478: a unit's Core Values — add and remove, re-asked on the click
+       (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
        may write the list while it is owed, and unitValuesWrite answers who
        may, from the stored state at press time — never from the drawn one. */
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){

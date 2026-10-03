@@ -7,7 +7,7 @@
    THE ANSWER IS CHECKED, NEVER TRUSTED AS WRITTEN (§96.2): every list is
    capped, every string trimmed, a `source` naming a file nobody attached is
    read as "assumed" rather than drawn as a file, and no option is ever
-   marked recommended (§469). An answer with nothing in it is a failure, not an
+   marked recommended (§474). An answer with nothing in it is a failure, not an
    empty bubble (§124). */
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
@@ -95,7 +95,7 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
-  // §469: a quick reply is never marked recommended (Islam: "remove
+  // §474: a quick reply is never marked recommended (Islam: "remove
   // recommended from answering questions"), so whatever the model sends
   // in that field is dropped here rather than trusted.
   const options = (Array.isArray(j.options) ? j.options : [])
@@ -216,7 +216,7 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
   return { ok: true, reply: shaped.reply, part: shaped.part };
 }
 
-/* THE SECOND TRY HAS ONLY ONE PLACE TO PUT AN ANSWER (§472). §471 asked a
+/* THE SECOND TRY HAS ONLY ONE PLACE TO PUT AN ANSWER (§477). §476 asked a
    draftless "I've made the change" again in the same full shape, and on
    Islam's tenant it talked a second time and sent nothing — most likely
    copying its own earlier draftless replies in the history. So the second

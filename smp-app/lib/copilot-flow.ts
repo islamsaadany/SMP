@@ -103,7 +103,7 @@ export const FLOW_ELEMENTS: FlowElement[] = [
 ];
 const N = FLOW_ELEMENTS.length;
 
-/* WHERE A FLOW STANDS (§473). `start` asks whether to begin from the
+/* WHERE A FLOW STANDS (§478). `start` asks whether to begin from the
    Foundation the place already has or from nothing — drawn only where the
    place HAS one; `path` the way to build it, `year` the years (the guided
    road from nothing), `loaded` the cards filled from the plan with nobody
@@ -122,14 +122,14 @@ export type Flow = {
 export const MAX_ANSWER = 2000;
 export const MAX_DRAFT = 6000;
 export const SHORT_ANSWER = 15;
-/* §474 — WHAT IS ASKED FOLLOWS THE STRUCTURE, AND NOTHING IS "OPTIONAL"
-   (Islam, of §473's Optional mark: *"yes for all proceed"* to: a part
+/* §479 — WHAT IS ASKED FOLLOWS THE STRUCTURE, AND NOTHING IS "OPTIONAL"
+   (Islam, of §478's Optional mark: *"yes for all proceed"* to: a part
    switched on in Client set-up › Structure is asked and owed like any other,
    a part switched off is left out of the chat entirely). Purpose and Core
    Values are the two a Structure can switch off for a Foundation; the page
    names which are off (`skip`), because the Structure is the client's graph
    and the page holds it. Nothing outside this list can be skipped, so a
-   page cannot talk its way past the Aspiration. Reversing §473's
+   page cannot talk its way past the Aspiration. Reversing §478's
    OPTIONAL set, recorded as a reversal. */
 export const SKIPPABLE = ["pur", "val"];
 export function cleanSkip(v: unknown): string[] {
@@ -145,7 +145,7 @@ export function newFlow(hasPlan = false, skip: string[] = []): Flow {
     ans: FLOW_ELEMENTS.map((el) => el.questions.map(() => "")), drafts: FLOW_ELEMENTS.map(() => ""),
     done: FLOW_ELEMENTS.map(() => false), from: FLOW_ELEMENTS.map(() => false), skip: cleanSkip(skip), check: null, saved: null };
 }
-/* Every part the Structure asks for agreed WITH a draft (§474); a part
+/* Every part the Structure asks for agreed WITH a draft (§479); a part
    switched off is not asked, so it waits for nothing. */
 export function allAgreed(f: Flow): boolean {
   return FLOW_ELEMENTS.every((_, i) => !live(f, i) || (f.done[i] && !!f.drafts[i].trim()));

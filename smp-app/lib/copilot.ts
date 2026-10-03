@@ -224,7 +224,7 @@ export function partMemo(part: any): string {
   }
   if (Array.isArray(part.options) && part.options.length) out.push("[options I offered: " + part.options.map((o: any) => str(o.label)).join(" · ") + "]");
   if (part.following) out.push("[following: " + str(part.following) + "]");
-  /* §464: the turn that asked what to improve says so, so the next "enhance"
+  /* §472: the turn that asked what to improve says so, so the next "enhance"
      is read as the answer to it rather than asked again. */
   if (part.askFirst) out.push("[asked what to improve]");
   if (part.saved && part.saved.n) out.push("[this draft was saved as v" + str(part.saved.n) + "]");
@@ -401,7 +401,7 @@ export async function restoreVersion(c: Q, id: string, from: number, by: string)
   return n;
 }
 
-/* ── SAVING A DRAFT FROM THE CHAT (§464, Islam 2026-10-02) ─────────────
+/* ── SAVING A DRAFT FROM THE CHAT (§472, Islam 2026-10-02) ─────────────
    "when I tried looks great save it it kept working … it should be saved to
    the deliverables rail on the left." There was no way to keep a draft at
    all, so "save it" only started another answer. A draft is now saved by
@@ -469,7 +469,7 @@ export function isSaveAsk(text: string): boolean {
   if (/\b(don'?t|do not|not|no|never|without)\b/.test(t)) return false;
   return t.split(" ").length <= 8;
 }
-/* AN ENHANCEMENT ASKS FIRST (§464): a short ask to improve something the
+/* AN ENHANCEMENT ASKS FIRST (§472): a short ask to improve something the
    plan already holds, with nothing said about WHAT to improve. */
 export function isBareEnhance(text: string): boolean {
   const t = String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -477,7 +477,7 @@ export function isBareEnhance(text: string): boolean {
   return t.split(" ").length <= 8;
 }
 
-/* §471: an answer that says a revised text is waiting — "I've removed …",
+/* §476: an answer that says a revised text is waiting — "I've removed …",
    "here is the updated …", "press Save under the draft" — is a claim the page
    can only honour with a draft. Narrow on purpose: talk ABOUT a draft in
    general ("shall I draft one?") is not a claim that one is here. */

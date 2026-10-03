@@ -1,0 +1,261 @@
+<title>Copilot Chat Composer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: two frames side by side (today | proposed), each a cut of the Copilot tab; stacked on a phone. */
+:root{
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C; --focus:#8A6B22; --bad:#B23A2B; --bad-ink:#FFFFFF;
+  --sans:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#E6C65C; --on-accent:#14161A; --focus:#E6C65C; --bad:#E07A6C; --bad-ink:#14161A; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --panel:#0E1014; --panel-ink:#EAF0FA;
+  --gold:#D9B665; --gold-deep:#E6C65C; --on-accent:#14161A; --focus:#E6C65C; --bad:#E07A6C; --bad-ink:#14161A; color-scheme:dark }
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font:15px/1.45 var(--sans);margin:0}
+.wrap{padding-block:20px;padding-inline:16px;max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:20px;margin:0;text-wrap:balance}
+.lede{color:var(--ink-2);margin:0;max-width:75ch}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.pair{grid-template-columns:1fr}}
+.lab{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:8px;height:640px;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.ctx{font-size:12px;color:var(--ink-2);padding:10px 16px;border-bottom:1px solid var(--line)}
+.head{display:flex;align-items:center;gap:8px;padding:10px 16px}
+.head b{flex:1;font-size:16px}
+.btn{font:600 12px var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 10px}
+.btn.del{color:var(--bad)}
+.msgs{flex:1;overflow:auto;padding:4px 16px 12px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.m{max-width:80%;padding:8px 12px;border-radius:10px;font-size:14px}
+.m.me{align-self:flex-end;background:var(--surface-2)}
+.m.ai{align-self:flex-start;border:1px solid var(--line-soft)}
+.empty{color:var(--ink-3);font-size:13px}
+/* TODAY, as in the screenshot */
+.old .foot{border-top:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:10px}
+.old .clip{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;color:var(--ink-2)}
+.old textarea{flex:1;height:72px;border:1px solid var(--line);border-radius:6px;font:14px var(--sans);padding:8px 10px;resize:vertical;background:var(--surface);color:var(--ink)}
+.old .send{background:var(--gold);color:var(--on-accent);border:0;border-radius:6px;font:700 13px var(--sans);padding:8px 16px}
+.old .gap{height:120px;flex:none}
+/* PROPOSED */
+.new .foot{flex:none;padding:8px 16px 6px;display:flex;flex-direction:column;gap:0}
+.new .box,.new .under,.frame .ctx,.frame .head{flex:none}
+.box{position:relative;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 1px 3px rgba(23,27,34,.06);transition:border-color .12s}
+.box:focus-within{border-color:var(--gold-deep)}
+.box textarea{display:block;width:100%;box-sizing:border-box;border:0;outline:0;resize:none;background:transparent;color:var(--ink);
+  font:15px/22px var(--sans);padding:13px 46px 13px 14px;height:48px;min-height:48px;max-height:210px;overflow-y:hidden}
+.box .send{position:absolute;right:8px;bottom:9px;width:30px;height:30px;border-radius:6px;border:0;background:none;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+.box .send:hover:not(:disabled){background:var(--surface-2)}
+.box .send:disabled{color:var(--ink-3);opacity:.6;cursor:default}
+.box .send:focus-visible,.attach:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.under{display:flex;align-items:center;gap:8px;padding:1px 6px 0 8px;height:22px}
+.attach{display:inline-grid;place-items:center;width:22px;height:22px;border:0;background:none;color:var(--ink-2);padding:0;border-radius:5px;cursor:pointer}
+.attach:hover{background:var(--surface-2)}
+.hint{margin-left:auto;font-size:11px;line-height:1;color:var(--ink-3)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.note{border-top:2px solid var(--gold);padding-top:8px;font-size:13px;color:var(--ink-2)}
+.note b{color:var(--ink);display:block;font-size:13px;margin-bottom:2px}
+
+/* PROPOSED: rail + chat */
+.full{display:flex;flex-direction:column;gap:6px}
+.app{display:grid;grid-template-columns:240px 1fr;height:640px;background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+@media (max-width:700px){.app{grid-template-columns:1fr;height:auto}.app .rail{max-height:300px}.app .frame{height:560px}}
+.app .frame{border:0;border-radius:0;height:auto;border-left:1px solid var(--line)}
+.rail{display:flex;flex-direction:column;min-height:0;background:var(--surface)}
+.rhd{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)}
+.rhd b{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.newchat{font:600 12px var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 8px;cursor:pointer}
+.list{flex:1;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:2px;min-height:0}
+.row{position:relative;display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:6px;font-size:13px;color:var(--ink-2);cursor:pointer;min-height:20px}
+.row:hover{background:var(--surface-2)}
+.row.on{background:var(--surface-2);color:var(--ink);font-weight:600;box-shadow:inset 3px 0 0 var(--gold-deep)}
+.row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row input{flex:1;min-width:0;font:600 13px var(--sans);border:1px solid var(--gold-deep);border-radius:4px;padding:2px 5px;background:var(--surface);color:var(--ink)}
+.dots{width:22px;height:22px;border:0;border-radius:5px;background:none;color:var(--ink-2);display:grid;place-items:center;cursor:pointer;opacity:0}
+.row:hover .dots,.row.on .dots,.dots[aria-expanded="true"],.dots:focus-visible{opacity:1}
+@media (hover:none){.dots{opacity:1}}
+.dots:hover{background:var(--line-soft)}
+.menu{position:absolute;right:6px;top:30px;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.14);padding:4px;min-width:140px;display:flex;flex-direction:column}
+.menu button{font:13px var(--sans);text-align:left;border:0;background:none;color:var(--ink);padding:6px 10px;border-radius:5px;cursor:pointer}
+.menu button:hover{background:var(--surface-2)}
+.menu .danger{color:var(--bad)}
+.ask{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);white-space:nowrap}
+.ask button{font:600 12px var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:5px;padding:2px 8px;cursor:pointer}
+.ask .yes{background:var(--bad);border-color:var(--bad);color:var(--bad-ink)}
+.rft{border-top:1px solid var(--line);padding:8px 12px}
+.arch{border:0;background:none;font:600 12px var(--sans);color:var(--ink-2);cursor:pointer;padding:3px 4px;border-radius:5px;display:inline-flex;gap:6px;align-items:center}
+.arch:hover{background:var(--surface-2)}
+.rsub{font-size:11px;color:var(--ink-3);padding:6px 8px 2px}
+.as{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.as button{font:600 12px var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:6px;padding:4px 10px;cursor:pointer}
+.as button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+@media (prefers-reduced-motion:reduce){.box{transition:none}}
+</style>
+
+<div class="wrap">
+  <h1>Copilot chat: the composer</h1>
+  <p class="lede">Left is the chat as it is today. Below it is the proposal: the chats rail with Rename and Archive behind three dots, an Archived list, and the new chat box &mdash; it fills the window top to bottom, starts one line tall, Send sits inside it as Claude's return-arrow icon, and the paperclip sits under it on the left. Everything in the proposal can be pressed.</p>
+
+  <div class="pair">
+    <section>
+      <p class="lab">Today</p>
+      <div class="frame old">
+        <div class="ctx">Devices · 4 Pillars · 19 Key measures · 4 Key Objectives · H1 2026: 41 of 41 reported · 11 measures off track</div>
+        <div class="head"><b>New foundation chat</b><span class="btn">Rename</span><span class="btn del">Delete</span></div>
+        <div class="msgs"><span class="empty">Nothing said yet.</span></div>
+        <div class="foot">
+          <span class="clip" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg></span>
+          <textarea id="oldbox" placeholder="Ask about Devices’s foundation…" aria-label="Today's message box"></textarea>
+          <span class="send">Send</span>
+        </div>
+        <div class="gap" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section>
+      <p class="lab">What moves</p>
+      <p class="lede" style="font-size:13px;margin:0">Rename and Delete sit on the chat's own header (left). Below, the proposal moves them to the rail.</p>
+    </section>
+  </div>
+
+  <section class="full">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <p class="lab" style="margin:0">Proposed &mdash; hover a chat, press the three dots</p>
+      <div class="as" role="group" aria-label="Look at it as">Look at it as
+        <button type="button" data-as="team" aria-pressed="true">SMO team</button>
+        <button type="button" data-as="super" aria-pressed="false">Super user</button>
+      </div>
+    </div>
+    <div class="app">
+      <aside class="rail" aria-label="Chats">
+        <div class="rhd"><b id="railttl">Chats</b><button class="newchat" id="newchat" type="button">+ New chat</button></div>
+        <div class="list" id="list"></div>
+        <div class="rft"><button class="arch" id="archbtn" type="button"></button></div>
+      </aside>
+      <div class="frame new">
+        <div class="ctx">Devices · 4 Pillars · 19 Key measures · 4 Key Objectives · H1 2026: 41 of 41 reported · 11 measures off track</div>
+        <div class="head"><b id="chattitle">Foundation draft</b></div>
+        <div class="msgs">
+          <div class="m me">Draft the foundation from the plan.</div>
+          <div class="m ai">Here is a first foundation from the plan. I worked from the four pillars and the 2026 targets; the purpose in your own words is missing.</div>
+        </div>
+        <div class="foot">
+          <div class="box">
+            <textarea id="newbox" rows="1" placeholder="Ask about Devices’s foundation…" aria-label="Message"></textarea>
+            <button class="send" id="send" type="button" aria-label="Send" title="Send" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v7a3 3 0 0 1-3 3H5"/><path d="M9 11l-4 4 4 4"/></svg>
+            </button>
+          </div>
+          <div class="under">
+            <button class="attach" type="button" aria-label="Attach a file" title="Attach a file">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path data-clip d="M21 11.5l-8.6 8.6a5 5 0 0 1-7.1-7.1l8.6-8.6a3.3 3.3 0 0 1 4.7 4.7l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l7.9-7.9"/></svg>
+            </button>
+            <span class="hint">Enter sends · Shift + Enter for a new line</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <div class="notes">
+    <div class="note"><b>Fills the window</b>The chat reaches from below the tab row to the bottom of the screen. The messages scroll inside it, and the box stays pinned at the bottom.</div>
+    <div class="note"><b>Grows as you type</b>One line to start, growing to about ten lines (200px). After that the box scrolls inside itself.</div>
+    <div class="note"><b>Send inside, Attach below</b>Send is the return-arrow icon in the box's bottom-right corner, as in Claude, greyed out while the box is empty. The paperclip is under the box on the left (no word, the name is on its hover), and attached files show as chips above the box, as they do today.</div>
+    <div class="note"><b>Rename and Archive in the rail</b>Three dots on each chat: always shown on the open chat and on a touch screen, on hover for the rest. Rename turns the name into a box (Enter saves, Escape cancels). Archive takes the chat off the list; nothing is lost.</div>
+    <div class="note"><b>Archived chats</b>At the foot of the rail, &ldquo;Archived &middot; N&rdquo; opens the archived list in the same rail. Anybody in the office can Restore a chat. Only the Super user sees Delete, and it asks once more in the row. Switch &ldquo;Look at it as&rdquo; above to see both.</div>
+    <div class="note"><b>To decide: Enter</b>Drawn here as Enter sends and Shift+Enter makes a new line, as in Claude. Today Enter makes a new line and only the button sends.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var t = document.getElementById("newbox"), s = document.getElementById("send");
+  /* A page drawn before it is visible measures 0: never size below one line, and size again once it shows. */
+  function fit(){ t.style.height = "48px"; var sh = t.scrollHeight; var h = Math.max(48, Math.min(sh || 48, 210)); t.style.height = h + "px";
+    t.style.overflowY = sh > 210 ? "auto" : "hidden"; s.disabled = !t.value.trim(); }
+  t.addEventListener("input", fit);
+  t.addEventListener("keydown", function(e){ if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); t.value = ""; fit(); } });
+  s.addEventListener("click", function(){ t.value = ""; fit(); t.focus(); });
+  fit(); window.addEventListener("resize", fit); window.addEventListener("load", fit);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(t);
+
+  var chats = [
+    {id:1,name:"Foundation draft",arch:false},
+    {id:2,name:"SWOT from the H1 figures",arch:false},
+    {id:3,name:"Pillar 2 measures check",arch:false},
+    {id:4,name:"Old aspiration wording",arch:true},
+    {id:5,name:"Test chat",arch:true}
+  ];
+  var st = {on:1, menu:null, renaming:null, asking:null, view:"live", as:"team", next:6};
+  var list = document.getElementById("list"), archbtn = document.getElementById("archbtn");
+  function esc(x){ return String(x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+  var DOTS = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+  function draw(){
+    var arch = st.view === "arch";
+    document.getElementById("railttl").textContent = arch ? "Archived chats" : "Chats";
+    document.getElementById("newchat").hidden = arch;
+    var rows = chats.filter(function(c){ return c.arch === arch; });
+    var h = "";
+    if (arch) h += '<div class="rsub">' + (st.as === "super" ? "Restore brings a chat back. Delete removes it for good." : "Restore brings a chat back. Only the Super user can delete.") + '</div>';
+    if (!rows.length) h += '<div class="rsub">' + (arch ? "Nothing archived." : "No chats yet.") + '</div>';
+    rows.forEach(function(c){
+      var on = !arch && c.id === st.on;
+      h += '<div class="row' + (on ? " on" : "") + '" data-id="' + c.id + '">';
+      if (st.asking === c.id){
+        h += '<span class="ask">Delete? <button class="yes" data-act="del-yes">Delete</button><button data-act="del-no">Cancel</button></span>';
+      } else if (st.renaming === c.id){
+        h += '<input data-act="ren" value="' + esc(c.name) + '" aria-label="Chat name">';
+      } else {
+        h += '<span class="nm">' + esc(c.name) + '</span><button class="dots" type="button" aria-label="Actions for ' + esc(c.name) + '" aria-expanded="' + (st.menu === c.id) + '" data-act="menu">' + DOTS + '</button>';
+      }
+      if (st.menu === c.id){
+        h += '<div class="menu" role="menu">';
+        if (!arch) h += '<button data-act="rename">Rename</button><button data-act="archive">Archive</button>';
+        else { h += '<button data-act="restore">Restore</button>'; if (st.as === "super") h += '<button class="danger" data-act="delete">Delete&hellip;</button>'; }
+        h += '</div>';
+      }
+      h += '</div>';
+    });
+    list.innerHTML = h;
+    var n = chats.filter(function(c){return c.arch;}).length;
+    archbtn.innerHTML = arch ? "&lsaquo; Back to chats" : 'Archived &middot; ' + n;
+    var cur = chats.filter(function(c){return c.id === st.on;})[0];
+    document.getElementById("chattitle").textContent = cur ? cur.name : "New chat";
+    var inp = list.querySelector("input[data-act=ren]"); if (inp){ inp.focus(); inp.select(); }
+  }
+  function byId(id){ return chats.filter(function(c){return c.id === id;})[0]; }
+  list.addEventListener("click", function(e){
+    var row = e.target.closest(".row"); if (!row) return;
+    var id = +row.dataset.id, c = byId(id), b = e.target.closest("[data-act]"), act = b && b.dataset.act;
+    if (act === "menu"){ st.menu = st.menu === id ? null : id; draw(); return; }
+    if (act === "rename"){ st.menu = null; st.renaming = id; draw(); return; }
+    if (act === "archive"){ st.menu = null; c.arch = true; if (st.on === id){ var nx = chats.filter(function(x){return !x.arch;})[0]; st.on = nx ? nx.id : null; } draw(); return; }
+    if (act === "restore"){ st.menu = null; c.arch = false; draw(); return; }
+    if (act === "delete"){ st.menu = null; st.asking = id; draw(); return; }
+    if (act === "del-yes"){ chats = chats.filter(function(x){return x.id !== id;}); st.asking = null; draw(); return; }
+    if (act === "del-no"){ st.asking = null; draw(); return; }
+    if (act === "ren") return;
+    if (st.view === "live"){ st.on = id; st.menu = null; draw(); }
+  });
+  list.addEventListener("keydown", function(e){
+    if (e.target.dataset.act !== "ren") return;
+    if (e.key === "Enter"){ var v = e.target.value.trim(); if (v) byId(st.renaming).name = v; st.renaming = null; draw(); }
+    if (e.key === "Escape"){ st.renaming = null; draw(); }
+  });
+  list.addEventListener("focusout", function(e){
+    if (e.target.dataset && e.target.dataset.act === "ren" && st.renaming){ var v = e.target.value.trim(); if (v) byId(st.renaming).name = v; st.renaming = null; setTimeout(draw, 0); }
+  });
+  document.addEventListener("pointerdown", function(e){ if (st.menu && !e.target.closest(".menu") && !e.target.closest(".dots")){ st.menu = null; draw(); } });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && st.menu){ st.menu = null; draw(); } });
+  archbtn.addEventListener("click", function(){ st.view = st.view === "live" ? "arch" : "live"; st.menu = null; st.asking = null; draw(); });
+  document.getElementById("newchat").addEventListener("click", function(){ var c = {id:st.next++, name:"New chat", arch:false}; chats.unshift(c); st.on = c.id; draw(); });
+  document.querySelectorAll("[data-as]").forEach(function(b){ b.addEventListener("click", function(){
+    st.as = b.dataset.as; document.querySelectorAll("[data-as]").forEach(function(x){ x.setAttribute("aria-pressed", x === b); }); st.menu = null; st.asking = null; draw(); }); });
+  draw();
+})();
+</script>

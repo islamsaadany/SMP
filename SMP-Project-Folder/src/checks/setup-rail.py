@@ -254,18 +254,25 @@ with sync_playwright() as p:
     # mockup, whose font had it, and rendered as tofu in the product. Nothing
     # complains — the character is "supported", it just has no outline — so it
     # is measured against a character guaranteed to be missing.
+    # AND IT IS MEASURED AS PIXELS, NOT AS A WIDTH (§402). Source Sans 3 has
+    # no Greek, so the fallback draws Σ at 7.59px against the missing box's
+    # 7.84 — inside the old 0.5px tolerance, so a glyph plainly on screen was
+    # reported as tofu. A width is a proxy for "drawn"; the pixels are "drawn".
+    # Each mark and the guaranteed-missing character are painted in the rail's
+    # own font on a canvas: identical pixels mean the mark IS the empty box.
     tofu = pg.evaluate("""()=>{
-      const probe=document.createElement('span');
-      const s=getComputedStyle(document.querySelector('.setuprail .rigl'));
-      probe.style.cssText='position:absolute;visibility:hidden;white-space:pre;font:'+s.font;
-      document.body.appendChild(probe);
-      const w=c=>{probe.textContent=c;return probe.getBoundingClientRect().width;};
-      const none=w('\uFFFF');
-      const bad=[...document.querySelectorAll('.setuprail .ritem')]
+      const font=getComputedStyle(document.querySelector('.setuprail .rigl')).font;
+      const cv=document.createElement('canvas'); cv.width=48; cv.height=48;
+      const cx=cv.getContext('2d',{willReadFrequently:true});
+      const ink=c=>{cx.clearRect(0,0,48,48); cx.font=font; cx.fillStyle='#000';
+        cx.textBaseline='middle'; cx.fillText(c,8,24);
+        return cx.getImageData(0,0,48,48).data.join(',');};
+      const none=ink('\uFFFF'), blank=(cx.clearRect(0,0,48,48),
+        cx.getImageData(0,0,48,48).data.join(','));
+      return [...document.querySelectorAll('.setuprail .ritem')]
         .map(r=>({g:(r.querySelector('.rigl')||{}).textContent||'',
                   l:((r.querySelector('.rilab')||{}).textContent||'').trim()}))
-        .filter(x=>Math.abs(w(x.g)-none)<0.5);
-      probe.remove(); return bad;}""")
+        .filter(x=>{const d=ink(x.g); return d===none || d===blank;});}""")
     ck("no glyph renders as an empty box", not tofu, tofu)
 
     # SHORTER ROWS, AND NO LABEL ON TWO LINES (§121.3). Islam measured the

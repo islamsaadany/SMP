@@ -1,0 +1,125 @@
+<title>Foundation Flow Layouts</title>
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#9A7426;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--good:#1F6B45;--warnbg:#FBF3E2;--warnln:#E5CF9C;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--warnbg:#2E2717;--warnln:#5C4B24;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--warnbg:#2E2717;--warnln:#5C4B24;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:24px 48px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+h1{font-size:22px;margin:0;text-wrap:balance}h2{font-size:17px;margin:0}
+p.k{margin:4px 0 0;color:var(--ink-2);max-width:75ch}
+.tag{font:700 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.frame{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-ink);padding:8px 14px;font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap}
+.bar b{box-shadow:inset 0 -2px 0 var(--goldfill);padding-bottom:3px}.bar span{color:var(--panel-quiet)}
+.sec{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sec span{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}.sec span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.body{display:grid;gap:12px;padding:12px;min-height:520px}
+.A .body{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.B .body{grid-template-columns:190px minmax(0,1fr)}
+@media (max-width:860px){.A .body,.B .body{grid-template-columns:1fr}}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+@media (max-width:520px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--surface);display:flex;flex-direction:column;gap:4px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h3{margin:0;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.card p{margin:0;font-size:13px;color:var(--ink-2)}
+.st{font:600 11.5px/1.4 var(--sans);color:var(--ink-3);white-space:nowrap}.st.done{color:var(--good)}.st.now{color:var(--gold)}
+.card.now{box-shadow:inset 3px 0 0 var(--goldfill);background:var(--surface-2)}
+.by{font-size:12.5px;color:var(--ink-3);grid-column:1/-1}
+.cop{border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-width:0;background:var(--surface-2)}
+.coph{padding:8px 12px;border-bottom:1px solid var(--line);font-size:13px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.coph b{font-size:13.5px}.prog{color:var(--ink-3)}
+.track{height:4px;background:var(--line);margin:0 12px;border-radius:2px;overflow:hidden}.track i{display:block;height:100%;width:28%;background:var(--goldfill)}
+.msgs{flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.m{max-width:90%;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:13.5px}
+.m.ai{border-left:3px solid var(--goldfill)}.m.me{align-self:flex-end;background:var(--surface-2)}
+.m small{display:block;color:var(--ink-3);font-size:12px;margin-top:4px}
+.ex{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.ex span{font-size:12px;border:1px solid var(--line);border-radius:12px;padding:2px 9px;color:var(--ink-2);background:var(--surface)}
+.warn{background:var(--warnbg);border:1px solid var(--warnln);border-radius:8px;padding:8px 11px;font-size:13px}
+.btns{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.btn{font:600 12.5px/1.3 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 10px}
+.btn.rec{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.box{margin:0 12px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:9px 11px;font-size:13.5px;color:var(--ink-3)}
+.rail{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--surface);align-self:start}
+.rh{font:700 11px/1.4 var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);padding:6px 6px 2px}
+.ri{padding:5px 6px;border-radius:5px;font-size:13px}.ri.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--goldfill)}
+.ri small{display:block;color:var(--ink-3);font-size:11.5px}
+.mini{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}.mini span{font-size:11.5px;border-radius:10px;padding:1px 8px;border:1px solid var(--line);color:var(--ink-3)}
+.mini span.d{border-color:var(--good);color:var(--good)}.mini span.n{border-color:var(--goldfill);color:var(--gold)}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:860px){.pc{grid-template-columns:1fr}}
+.pc ul{margin:4px 0 0;padding-left:18px;font-size:13.5px;color:var(--ink-2)}.pc h4{margin:0;font-size:13px}
+</style>
+<div class="wrap">
+  <div><h1>Foundation flow — two layouts</h1>
+  <p class="k">Same moment in both: a fresh Mobile foundation, guided questions, on Who We Are, question 2 of 7. Who We Are is not saved yet; the version on the rail fills as each element is confirmed.</p></div>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="tag">Option A · five cards left, Copilot right (like the old copilot)</span>
+    <div class="frame A">
+      <div class="bar"><span>Mobile</span><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+      <div class="sec"><span class="on">Foundation</span><span>Analysis</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
+      <div class="body">
+        <div class="cards">
+          <div class="by">Foundation v3 · in progress · 1 of 5 done · <b>By the end of 2028</b></div>
+          <div class="card now"><h3>Who We Are <span class="st now">Answering 2/7</span></h3><p>Not drafted yet.</p></div>
+          <div class="card"><h3>Purpose <span class="st">Waiting</span></h3><p>4 questions</p></div>
+          <div class="card"><h3>Winning Aspiration <span class="st">Waiting</span></h3><p>4 questions</p></div>
+          <div class="card"><h3>Key Objectives <span class="st">Waiting</span></h3><p>5 questions</p></div>
+          <div class="card wide"><h3>Core Values <span class="st">Waiting</span></h3><p>5 questions</p></div>
+          <div class="by">Open a card to read or edit what is saved. “Send to the plan” lives on the version, not here in the chat.</div>
+        </div>
+        <div class="cop">
+          <div class="coph"><b>Copilot · Who We Are</b><span class="prog">Question 2 of 7</span></div>
+          <div class="track"><i></i></div>
+          <div class="msgs">
+            <div class="m ai">Let's start simple — what type of organization are you?</div>
+            <div class="m me">A mobile phone retailer.</div>
+            <div class="m ai">What do you sell or provide? Just list your main products or services.<small>Keep it factual — no need for fancy descriptions.</small>
+              <div class="ex"><span>Phones and accessories</span><span>Repairs and insurance</span></div></div>
+            <div class="m me">phones</div>
+            <div class="warn">That answer is quite short. A little more detail makes a better draft.
+              <div class="btns"><span class="btn rec">Add more detail</span><span class="btn">Continue anyway</span></div></div>
+          </div>
+          <div class="box">Type your answer…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="tag">Option B · today's layout: rails left, chat in the middle</span>
+    <div class="frame B">
+      <div class="bar"><span>Mobile</span><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+      <div class="sec"><span class="on">Foundation</span><span>Analysis</span><span>Directions</span><span>Execution</span><span>Advisory</span></div>
+      <div class="body">
+        <div class="rail">
+          <div class="rh">Chats</div>
+          <div class="ri on">Foundation flow<small>today</small></div>
+          <div class="ri">Aspiration ideas<small>28 Sep</small></div>
+          <div class="rh">Deliverables</div>
+          <div class="ri on">Foundation — Mobile<small>v3 · in progress</small>
+            <div class="mini"><span class="n">Who</span><span>Purpose</span><span>Aspiration</span><span>Objectives</span><span>Values</span></div></div>
+          <div class="ri">SWOT — Mobile<small>v2</small></div>
+        </div>
+        <div class="cop">
+          <div class="coph"><b>Foundation · Who We Are</b><span class="prog">Question 2 of 7 · then Purpose, Aspiration, Objectives, Values</span></div>
+          <div class="track"><i></i></div>
+          <div class="msgs">
+            <div class="m ai">Let's start simple — what type of organization are you?</div>
+            <div class="m me">A mobile phone retailer.</div>
+            <div class="m ai">What do you sell or provide? Just list your main products or services.<small>Keep it factual — no need for fancy descriptions.</small>
+              <div class="ex"><span>Phones and accessories</span><span>Repairs and insurance</span></div></div>
+            <div class="m me">phones</div>
+            <div class="warn">That answer is quite short. A little more detail makes a better draft.
+              <div class="btns"><span class="btn rec">Add more detail</span><span class="btn">Continue anyway</span></div></div>
+          </div>
+          <div class="box">Type your answer…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pc">
+    <div><h4>Option A gives</h4><ul><li>All five elements in sight, and where you are in the flow.</li><li>Close to the old copilot people know.</li><li>Cost: a new page shape for the Foundation tab only; other tabs would need their own cards later.</li><li>Cost: chat is narrower.</li></ul></div>
+    <div><h4>Option B gives</h4><ul><li>No new layout; the version on the rail shows the five elements as small chips.</li><li>Same layout for every tab, including Advisory's free chat.</li><li>Cost: the five elements are only visible as chips until you open the version.</li></ul></div>
+  </section>
+</div>

@@ -274,7 +274,10 @@ const SCHEMA = {
      · `think`       — let the model reason. Default OFF, and §134 gives the
                        reason in its own words: "answering from a corpus that
                        is IN THE PROMPT is retrieval, not reasoning". That
-                       reasoning is exactly what does NOT hold for drafting. */
+                       reasoning is exactly what does NOT hold for drafting.
+     · `model`       — ask this model instead of the deployment's own, once
+                       (the Copilot's fallback when the main one is busy,
+                       §458). Optional, so every other caller is unchanged. */
 async function callModel(opts) {
   const kb = opts.kb || {};
   if (!configured()) return { ok: false, why: "no " + KEY_NAME + " is set on this deployment" };
@@ -282,13 +285,24 @@ async function callModel(opts) {
     return { ok: false, why: opts.emptyWhy || "the knowledge base is empty" };
   }
 
-  const turns = (opts.history || []).slice(-8).map(function (m) {
+  /* How many earlier turns ride along: eight for the chat corner's short
+     answers, more where a caller asks (the Copilot, §460 B — a strategy
+     conversation runs long and loses its thread at eight). */
+  const keep = Math.max(1, Math.min(40, Number(opts.maxTurns) || 8));
+  const turns = (opts.history || []).slice(-keep).map(function (m) {
     return { role: m.from_office ? "model" : "user",
              parts: [{ text: String(m.body || "") }] };
   });
   /* A conversation must start with the person, or the provider rejects it. */
   while (turns.length && turns[0].role === "model") turns.shift();
   turns.push({ role: "user", parts: [{ text: String(opts.question || "") }] });
+  /* EXTRA PARTS ON THE LAST TURN (spec 064 stage 2): a PDF goes to the model
+     AS a document (inlineData), because it reads one itself and a text
+     extraction would lose every table it can see. Optional, so every
+     existing caller is byte-for-byte unchanged (§250's shape). */
+  if (Array.isArray(opts.parts) && opts.parts.length) {
+    turns[turns.length - 1].parts = opts.parts.concat(turns[turns.length - 1].parts);
+  }
 
   /* NO THINKING FOR A LOOKUP (§134). The model reasons before it answers by
      default, and how long it reasons is a lottery — the same short question
@@ -346,7 +360,7 @@ async function callModel(opts) {
   const timer = setTimeout(function () { ctrl.abort(); }, opts.timeoutMs || TIMEOUT_MS);
   let res, text;
   try {
-    res = await fetch(endpoint() + encodeURIComponent(model()) + ":generateContent", {
+    res = await fetch(endpoint() + encodeURIComponent(opts.model || model()) + ":generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey() },
       body: JSON.stringify(body),
@@ -392,7 +406,7 @@ async function callModel(opts) {
     }
     return { ok: false, status: res.status,
              why: "the assistant refused the request (" + res.status +
-                  (res.status === 404 ? ", model \"" + model() + "\"" : "") +
+                  (res.status === 404 ? ", model \"" + (opts.model || model()) + "\"" : "") +
                   (detail ? ": " + detail.slice(0, 200) : "") + ")" };
   }
 

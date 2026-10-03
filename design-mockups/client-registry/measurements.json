@@ -1,0 +1,307 @@
+{
+ "today": {
+  "tableW": 1355,
+  "boxW": 1165,
+  "rowH": [
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39
+  ],
+  "cols": [
+   "#",
+   "Name",
+   "Job title",
+   "Official BU",
+   "Unit",
+   "Email",
+   "Roles",
+   "Status",
+   "Password",
+   ""
+  ]
+ },
+ "a_rest": {
+  "tableW": 1389,
+  "boxW": 1165,
+  "rowH": 45
+ },
+ "a_open": {
+  "rowH": 43,
+  "saveX": 1268
+ },
+ "a_wide": {
+  "#": 38,
+  "Name": 228,
+  "Emp. ID": 81,
+  "Job title": 150,
+  "Official BU": 117,
+  "Unit": 150,
+  "Email": 252,
+  "Mobile": 130,
+  "Roles": 209,
+  "Status": 81,
+  "Password": 91,
+  "(actions)": 133,
+  "__table": 1659,
+  "__box": 1325
+ },
+ "b_open": {
+  "rowH": 40
+ },
+ "dbl": {
+  "onCopy": {
+   "clicks": 2,
+   "says": "Copied",
+   "selected": ""
+  },
+  "onText": {
+   "selected": "Care"
+  }
+ },
+ "c_cell": {
+  "rowH": 40,
+  "cellWas": 150,
+  "cellNow": 150,
+  "tableW": 1355
+ },
+ "roles_wide": {
+  "at": "care",
+  "mine": [
+   "owner"
+  ],
+  "away": [
+   "fnhead@fn:care"
+  ],
+  "derived": [
+   "plowner"
+  ],
+  "offered": [
+   "Super user \u2014 a seat \u2014 asks before it lands",
+   "SMO team \u2014 a seat \u2014 asks before it lands",
+   "Group CEO \u2014 a seat \u2014 asks before it lands",
+   "Company CEO \u2014 held at a company \u2014 set the Unit first",
+   "BU owner",
+   "Strategy custodian \u2014 held by Rania Fahmy",
+   "Function head \u2014 held at a supporting function \u2014 set the Unit first"
+  ],
+  "rowH": 43,
+  "cols": {
+   "#": 38,
+   "Name": 228,
+   "Job title": 150,
+   "Official BU": 115,
+   "Unit": 150,
+   "Email": 252,
+   "Roles": 477,
+   "Status": 81,
+   "Password": 91,
+   "(actions)": 41,
+   "__table": 1623,
+   "__box": 1165
+  }
+ },
+ "roles": {
+  "colWas": 209,
+  "col": 236,
+  "tableWas": 1355,
+  "table": 1382,
+  "over": -0.0,
+  "scrollW": 235,
+  "clientW": 235,
+  "rowsWas": [
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39
+  ],
+  "rowsNow": [
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39
+  ],
+  "grew": 0,
+  "offered": [
+   "Super user \u2014 a seat \u2014 asks before it lands",
+   "SMO team \u2014 a seat \u2014 asks before it lands",
+   "Group CEO \u2014 a seat \u2014 asks before it lands",
+   "Company CEO \u2014 held at a company \u2014 set the Unit first",
+   "BU owner",
+   "Strategy custodian \u2014 held by Rania Fahmy",
+   "Function head \u2014 held at a supporting function \u2014 set the Unit first"
+  ],
+  "rowH": 39
+ },
+ "popup": {
+  "w": 380,
+  "h": 405,
+  "rows": [
+   "Super usera seat \u2014 asks before it lands",
+   "SMO teama seat \u2014 asks before it lands",
+   "Group CEOa seat \u2014 asks before it lands",
+   "Company CEOheld at a company \u2014 set the Unit first",
+   "BU owner",
+   "Strategy custodianheld by Rania Fahmy",
+   "Function headheld at a supporting function \u2014 set the Unit first"
+  ]
+ },
+ "w_closed": {
+  "#": 38,
+  "Name": 228,
+  "Job title": 150,
+  "Official BU": 115,
+  "Unit": 150,
+  "Email": 252,
+  "Roles": 209,
+  "Status": 81,
+  "Password": 91,
+  "(actions)": 41,
+  "__table": 1355,
+  "__box": 1165
+ },
+ "w_a_rest": {
+  "#": 38,
+  "Name": 228,
+  "Job title": 150,
+  "Official BU": 115,
+  "Unit": 150,
+  "Email": 252,
+  "Roles": 209,
+  "Status": 81,
+  "Password": 91,
+  "(actions)": 75,
+  "__table": 1389,
+  "__box": 1165
+ },
+ "w_a_open": {
+  "#": 38,
+  "Name": 228,
+  "Job title": 150,
+  "Official BU": 117,
+  "Unit": 150,
+  "Email": 252,
+  "Roles": 209,
+  "Status": 81,
+  "Password": 91,
+  "(actions)": 133,
+  "__table": 1449,
+  "__box": 1165
+ },
+ "w_b_open": {
+  "#": 38,
+  "Name": 228,
+  "Job title": 150,
+  "Official BU": 115,
+  "Unit": 150,
+  "Email": 252,
+  "Roles": 209,
+  "Status": 81,
+  "Password": 91,
+  "(actions)": 41,
+  "__table": 1355,
+  "__box": 1165
+ },
+ "freeze": {
+  "frozen": {
+   "save_x": 1268,
+   "box_right": 1401
+  },
+  "as_rowActions_returns_it": {
+   "save_x": 1552,
+   "box_right": 1401
+  }
+ },
+ "fit": {
+  "1600": {
+   "box": 1325,
+   "today": 1355,
+   "a_open": 1449,
+   "b_open": 1355,
+   "tallest_row_a": 45
+  },
+  "1440": {
+   "box": 1165,
+   "today": 1355,
+   "a_open": 1449,
+   "b_open": 1355,
+   "tallest_row_a": 45
+  },
+  "1280": {
+   "box": 1005,
+   "today": 1355,
+   "a_open": 1449,
+   "b_open": 1355,
+   "tallest_row_a": 45
+  },
+  "1100": {
+   "box": 825,
+   "today": 1355,
+   "a_open": 1449,
+   "b_open": 1355,
+   "tallest_row_a": 45
+  }
+ }
+}

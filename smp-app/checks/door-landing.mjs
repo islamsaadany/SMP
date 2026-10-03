@@ -28,6 +28,29 @@
      … --break=done-dropped   (RED: Done with set-up is applied on screen and never reaches the store — lib/save.ts, §360)
      … --shots=<dir>          (also writes door.png, client-door.png, landing.png, password.png)
 
+   AND FIVE OF `check:door:red`'s BREAKS DIED WITH THE LANDING, WITH THE
+   FIRST OF THEM MASKING THE REST (§368). `no-rows`, `first-person`,
+   `membership-key`, `setup-any-seat` and `modules-unread` were all
+   falsifications of THE CLIENT'S LANDING PAGE — its rows, its viewer
+   fallback, its register lookup, its Client setup block, its Your modules
+   block — and §360 made `/<client>` a redirect, deleted `landingShape()`
+   and replaced §7 with the client's own Setup rail. From that day the five
+   words matched nothing in the product (grepped: 0 hits each in `lib/`,
+   `app/`, `shell/`, `scripts/`, and none applied by this file either), so
+   every one of those runs came back green — which is indistinguishable from
+   a guard that works (§54.5). Worse than a dead assertion: the red script
+   `exit 1`s on the first break that fails to redden, and `no-rows` was
+   FIRST, so the four after it had not run since §360 — a list of ten that
+   exercised one. Established as pre-existing rather than assumed (§303):
+   `no-rows` run at the commit before this one, GREEN 140/0, and the other
+   four absent from the product at that same commit. Removed rather than
+   given new subjects, because what they broke does not exist (§24) —
+   `no-rows` stays live in checks/client-card-modules.py, whose subject is
+   the CARD's rows and is still there. **AND `done-dropped` JOINS THE LIST**:
+   §360 wrote the break, documented it here and never added it to the
+   script, so the one falsification the landing's removal did not kill was
+   also not running. Seven breaks, seven red.
+
    THE STRIP HAS NO ENV HOOK AND IS FALSIFIED FROM THE SOURCES (§276): the
    Getting started strip is the frozen shell's (shell.html setupRail), served
    as the generated public/shell.js, and no server variable reaches it. To
@@ -214,7 +237,16 @@ await section("3 · sign in and land", async () => {
   check(alerts.join("|") === wantAlerts.join("|"), "…with the same alerts under them", alerts.join("|"));
   const pages = await text(page, ".wpages a");
   check(pages.length === want.pages.length && want.pages.every((p, i) => pages[i].startsWith(p.label)), "Your pages are the reader's pages", pages.join(" | "));
-  check((await page.locator(".wexit .wexlab").textContent().catch(() => "")).trim() === want.continueWord, "the way out names where it goes (§202)", await page.locator(".wexit .wexlab").textContent().catch(() => ""));
+  /* REWRITTEN, NEVER LOOSENED (§218, §400). The way out was a Continue bar
+     naming where it goes (§202); §400 made Home a page inside the chrome
+     whose way out is the navigation itself, so there is no Continue to name
+     anything. What the line was FOR — that the screen says it is Home and
+     does not trap anybody — is asserted as the house lit while Home is open
+     and the destination row reachable beside it (§61). */
+  check((await page.locator(".welcomeover .wexit").count()) === 0 &&
+        (await page.evaluate(() => document.documentElement.getAttribute("data-home-open"))) === "1" &&
+        (await page.locator("nav.units").isVisible()),
+    "Home has no Continue: the house is lit and the navigation beside it is the way on (§400)");
   check((await page.locator(".wcycle").count()) === (want.review.open && !want.cycle ? 1 : 0), "the cycle chip is drawn exactly when the block is not (§200)");
   /* the overlay always builds the card and HIDES it for somebody no story
      fits, so what is asserted is the visible card, folded (§202) */
@@ -299,15 +331,31 @@ await section("5 · the office", async () => {
   await signIn(page, "office@forefront.example", "Raya-2026!");
   await page.waitForURL(BASE + "/platform");
   check(page.url() === BASE + "/platform", "the office lands on the platform's own address (contracts §2)");
-  /* REWRITTEN (§218): a holder listed them; Phase B serves Forefront's own
-     page, so the clients are its cards. */
-  await page.waitForSelector(".ccard", { timeout: 15000 }).catch(() => {});
-  check((await text(page, ".ccard h2")).includes("Raya Trade"), "…which lists the clients they may open");
+  /* REWRITTEN TWICE (§218). A holder listed them; Phase B serves Forefront's
+     own page, so the clients are its cards — and since §371 a bare `.ccard`
+     is no longer one of them: the console draws THREE PLACEHOLDER CARDS while
+     it waits, and a placeholder has no `h2` at all. So this waited on the
+     skeleton, read the name a beat too early and passed or failed on which
+     round trip won — it is the REAL card that is waited on now
+     (`[data-client]`, the mark the skeleton does not carry), which is what
+     `.ccard` meant when the line was written. */
+  /* §400: THE CONSOLE OPENS ON *MY WORK*; the cards are its second tab.
+     REWRITTEN, NEVER LOOSENED (§218): the landing is asserted, and the cards
+     are still asserted, one press away. */
+  await page.waitForSelector("#nav button", { timeout: 15000 }).catch(() => {});
+  check((await text(page, "#nav button"))[0] === "My work", "…which opens on My work (§400)", (await text(page, "#nav button")).join("|"));
+  await page.locator("#nav button", { hasText: "Clients" }).click();
+  await page.waitForSelector(".ccard[data-client]", { timeout: 15000 }).catch(() => {});
+  check((await page.$$eval(".ccard[data-client] .ctop h2, .ccard[data-client] .ctop img.cmark", (els) => els.map((e) => e.tagName === "IMG" ? e.alt : e.textContent.trim()))).includes("Raya Trade"), "…and one press away lists the clients they may open");
   await page.goto(BASE + "/raya-trade", { waitUntil: "networkidle" }); await inModule(page); await booted(page);
   check(page.url().startsWith(BASE + IN_MODULE), "the office opening a client is sent into its first module too (§360)", page.url());
   const officeWant = frozen.landing(graph, "smo");
   check((await page.locator(".welcomeover h2").textContent().catch(() => "")).trim() === "Welcome, " + officeWant.name, "the office's welcome on a client is theirs", await page.locator(".welcomeover h2").textContent().catch(() => ""));
-  check((await page.locator(".wexit .wexlab").textContent().catch(() => "")).trim() === officeWant.continueWord, "…and continues to the group");
+  const trailText = ((await page.locator("nav.trail").textContent().catch(() => "")) || "").replace(/\s+/g, " ");
+  check((await page.locator(".welcomeover .wexit").count()) === 0 && /^\s*Platform\b/.test(trailText) && /Raya Trade/.test(trailText),
+    /* REWRITTEN, NEVER LOOSENED (§218): §400.1 renamed the trail's first
+       word from Forefront to Platform (Islam: "let's change it to Platform"). */
+    "…with no Continue, and the office's trail naming the platform and the client above it (§400, §400.1)", trailText);
   check(((await text(page, ".wpages a"))[0] || "").startsWith("Setup"), "…with Setup first among their pages");
   const r404 = await page.goto(BASE + "/no-such-client", { waitUntil: "networkidle" });
   const s1 = r404.status(), t1 = (await page.locator(".holder h1").textContent()).trim();
@@ -569,7 +617,11 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
   else fail("pressing the strip", "no strip to press");
   r = await readRail();
   check(r.s === "start" && r.csetup && r.path === "/raya-trade/setup/start", "pressing it opens the flow at the client's own address", JSON.stringify([r.s, r.csetup, r.path]));
-  check(r.steps.join(",") === "client,units,cos,fns,caps,words,office" && r.step === "client", "…on step 1 of seven, the client itself", JSON.stringify([r.steps, r.step]));
+  check(r.steps.join(",") === "client,structure,cos,units,fns,caps,office" && r.step === "client",
+    /* REWRITTEN, NEVER LOOSENED (§218): §404.4 put Structure second, the
+       divisions before the units, and asked the words on Structure's cards
+       rather than a Words step of their own. Still seven, still client first. */
+    "…on step 1 of seven, the client itself (§404.4's order)", JSON.stringify([r.steps, r.step]));
   check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
   check(r.brand > 0 && r.glogo > 0, "Branding's colour and mark controls are inside the flow (the brand def is gone)", JSON.stringify([r.brand, r.glogo]));
   check(r.band === "Modules this client has", "…and so is the modules band, on step 1", r.band);
@@ -665,8 +717,10 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
      the first draft read `st.group` and the default's "key deleted" passed on
      null either way (§113.8), so the pick is asserted PRESENT first */
   const stored = async () => { const st = await (await page.request.get(BASE + "/api/raya-trade/state")).json(); const g = st.state && st.state.group; return (g && g.landing) || null; };
-  const cardLine = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
-    const c = (j.cards || []).find((x) => x.key === "raya-trade"); const m = c && (c.modules || []).find((x) => x.key === "strategy"); return m ? m.line : null; };
+  const cardRow = async () => { const j = await (await page.request.post(BASE + "/api/platform", { data: { action: "cards" } })).json();
+    const c = (j.cards || []).find((x) => x.key === "raya-trade"); return (c && (c.modules || []).find((x) => x.key === "strategy")) || null; };
+  const cardLine = async () => { const m = await cardRow(); return m ? m.line : null; };
+  const cardMark = async () => { const m = await cardRow(); return m ? m.mark : null; };
   /* the landing's own row went with the landing (§360); what is left to
      agree are the Setup page and the console's card (§53.5) */
   await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
@@ -679,8 +733,23 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
   check(!r.none, "…and never the no-stamp sentence", r.none);
   check(r.radios[0] && r.radios[0][1] === true && (await stored()) === null, "with nothing stored the FIRST line is lit — the default is an absence (§50.6)", JSON.stringify([r.radios, await stored()]));
   check(!!r.stamp && r.prev === r.stamp.lines[0].text && !!r.prev, "the preview under the list is the stamp's own text for it", JSON.stringify([r.prev, r.stamp && r.stamp.lines[0].text]));
-  const before = await cardLine();
-  check(!!r.stamp && before === r.stamp.lines[0].text, "the console's card says the same sentence (one reader, §53.5)", JSON.stringify([before, r.stamp && r.stamp.lines[0].text]));
+  /* REWRITTEN, NEVER LOOSENED (§218, §214.3), AND IT IS A REVERSAL.
+     This asserted that the console's card said the same SENTENCE as this
+     page (§359.4's one reader). §368 made the card say Forefront's own MARK
+     instead — Islam's call, because that card exists so a consultant can
+     decide which client to open next — so the property being guarded is now
+     the opposite one, and it is written as the reversal rather than deleted:
+     a build that wires the client's pick back into the console goes red
+     here, driven end to end through the real page and the real endpoint.
+     BOTH ENDS: the mark is asserted PRESENT before it is asserted to be
+     none of this page's sentences, or a card that said nothing at all would
+     satisfy the second half perfectly (§113.8). */
+  const before = await cardMark();
+  check(!!before, "the console's card carries a mark of its own", JSON.stringify(before));
+  check((await cardLine()) === undefined, "…and no line: the row stopped carrying a sentence (§368)", JSON.stringify(await cardLine()));
+  check(!!r.stamp && !r.stamp.lines.some((l) => l.text && l.text === before),
+    "…and that mark is none of the sentences this page offers — it is not the client's pick",
+    JSON.stringify([before, r.stamp && r.stamp.lines.map((l) => l.text)]));
   /* THE PICK */
   const want = r.stamp ? r.stamp.lines[1] : null;
   /* EVERY PRESS IS GUARDED (§215): on the no-stamp build there is nothing to
@@ -698,14 +767,22 @@ await section("8 · the landing line, chosen on Strategy's Setup and read on the
     check(!!lit && lit[1] === true && r.prevKey === "waiting" && !!want && r.prev === want.text, "a pick lights its row and moves the preview to that line's text", JSON.stringify([r.radios, r.prev]));
     const st = await stored();
     check(!!st && st.strategy === "waiting", "…and is STORED on the group under the module's key (read off the server)", JSON.stringify(st));
-    check(want && (await cardLine()) === want.text, "…and the console's card now says that line (the landing's row went with the landing, §360)", JSON.stringify(await cardLine()));
+    /* REVERSED WITH THE ONE ABOVE (§218, §368): this asserted the card now
+       said the picked line. The card is Forefront's own answer, so what has
+       to hold is that the pick moved the page's preview — asserted two lines
+       up — and moved the card's mark NOT AT ALL. */
+    check((await cardMark()) === before, "…and the console's card is UNMOVED by it: the mark is Forefront's own (§368)", JSON.stringify([before, await cardMark()]));
     /* THE DEFAULT DELETES THE KEY */
     await page.goto(BASE + "/raya-trade/strategy/setup/landing", { waitUntil: "networkidle" }); await booted(); await page.waitForTimeout(500);
     await pick("cycle");
     check((await stored()) === null, "picking the default again DELETES the key, so never-set and set-then-cleared are the same bytes (§50.6)", JSON.stringify(await stored()));
     /* NOTHING is a choice, drawn as a row with no line */
     await pick("none");
-    check((await cardLine()) === "", "Nothing keeps the card's row and draws no line under it", JSON.stringify(await cardLine()));
+    /* NOTHING is still a choice and still keeps the card's ROW — the door is
+       what the row is — and since §368 it cannot touch the mark either. */
+    const nothingRow = await cardRow();
+    check(!!nothingRow && nothingRow.key === "strategy", "Nothing keeps the card's row: the door is not a sentence", JSON.stringify(nothingRow));
+    check(!!nothingRow && nothingRow.mark === before, "…and leaves the mark where it was", JSON.stringify([before, nothingRow && nothingRow.mark]));
   } finally {
     await owner.query("UPDATE org SET extra = extra - 'landing' WHERE tenant_id = $1", [tenant.id]).catch(() => {});
   }
@@ -773,6 +850,42 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     const ownerBtn = page.locator('[data-mac^="owner|a_insights|"]');
     if (await ownerBtn.count()) { await ownerBtn.click(); await page.waitForTimeout(2500); }
     else fail("pressing the BU owner's eye", "no such button to press");
+    /* AND EVERY OTHER ROW THIS PERSON HOLDS \u2014 ASKED, NEVER TYPED
+       (\u00a7218, \u00a7214.3, \u00a7255). Shutting one role is not shutting a
+       person: access is the MOST GENEROUS grant across the roles they hold
+       (\u00a733), and the matrix has a row per role precisely so two can
+       differ. \u00a7384 made a tactic's owner a role, so the Mobile head derived
+       `towner@mobile` as well as `owner@mobile` and the door below went on
+       serving them Insights with the BU owner's cell plainly shut \u2014 the
+       fixture had stopped making the state its own assertions are about,
+       which is a check reporting a correct build broken.
+
+       \u00a7387.1 THEN REMOVED THAT ROW on Islam's word, and the guard written
+       for it \u2014 `heldRows.length >= 2` \u2014 went red on a correct build:
+       \u00a7214.3, the same literal-outliving-its-decision one round later, and
+       in the SECOND file carrying it (\u00a751.11: when a decision moves, grep
+       every check for the assumption rather than the one that failed first).
+       REWRITTEN, NEVER LOOSENED (\u00a7218) to the claim that survives EITHER
+       decision \u2014 the rows are the product's own answer and one of them is
+       the BU owner's \u2014 which still fails if personRoles stops deriving it
+       or the head stops being an owner. What the COUNT was standing in for is
+       driven where it can be driven, in checks/modules.mjs \u00a74c, over a
+       person who does hold two.
+
+       THE ROLES COME FROM THE PRODUCT'S OWN RULE (personRoles, the one both
+       sides ask \u2014 \u00a742), so the row derived by the NEXT thing somebody is
+       named on is shut here the day it is added rather than being a second
+       list to remember. */
+    const heldRows = await page.evaluate(() =>
+      Array.from(new Set(personRoles(personBy("mobhead")).map((r) => r.role))));
+    check(heldRows.length > 0 && heldRows.includes("owner"),
+          "\u2026and the rows shut below are the product's own answer for the Mobile head, never a typed list (\u00a742)", JSON.stringify(heldRows));
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b2 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b2.count()) { await b2.click(); await page.waitForTimeout(2000); }
+      else fail("pressing the " + role + " row's eye", "no such button to press");
+    }
     r = await readAccessPage();
     let acc = await storedAccess();
     check(!!r.owner && !r.owner.on && r.owner.off, "pressing the lit eye turns the cell off — nothing lit IS the answer", JSON.stringify(r.owner));
@@ -853,6 +966,16 @@ await section("9 · Insights' Setup: Access writes a grant the door reads (spec 
     await signIn(page, "office@forefront.example", "Raya-2026!");
     await page.waitForURL(BASE + "/platform");
     await goSetup("/raya-trade/insights/setup/access");
+    /* THE OTHER ROWS COME BACK FIRST, so the assertion below reads the whole
+       map restored rather than one row of it: `canon(acc) === canon(accBefore)`
+       is what says never-set and set-then-cleared are the same bytes, and it
+       is about every row this section touched (\u00a794.2, \u00a750.6). */
+    for (const role of heldRows) {
+      if (role === "owner") continue;
+      const b3 = page.locator('[data-mac^="' + role + '|a_insights|"]');
+      if (await b3.count()) { await b3.click(); await page.waitForTimeout(2000); }
+      else fail("opening the " + role + " row's eye again", "no such button to press");
+    }
     /* a NEW locator: the earlier one was bound to a page since closed, and a
        locator on a closed page throws rather than reporting (§215) */
     const ownerBtn2 = page.locator('[data-mac^="owner|a_insights|"]');

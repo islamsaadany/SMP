@@ -180,8 +180,11 @@ with sync_playwright() as p:
        not dlg.get("none") and dlg.get("picks") == 2, dlg)
     ck("...with both answers and a Cancel",
        dlg.get("keep") and dlg.get("all") and dlg.get("cancel"), dlg)
+    # §395: the client's word, asked as an agreement with the label, never the
+    # platform's literal (§214.3, §218).
+    pw = pg.evaluate("labelWord('project','bu')")
     ck("...the two answers say what they do",
-       dlg.get("titles") == ["Keep the projects", "Remove everything"], dlg)
+       dlg.get("titles") == ["Keep the " + pw, "Remove everything"], dlg)
     ck("...exactly one of them is the safe one",
        dlg.get("safe") == 1, dlg)
     # REWRITTEN, NOT LOOSENED (§218). This asserted that ONE sibling is NAMED

@@ -1,0 +1,171 @@
+<title>Foundation Chat Start</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--good:#1F6B45;--newbg:#FBF3E2;--newln:#E5CF9C;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--newbg:#2E2717;--newln:#5C4B24;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--newbg:#2E2717;--newln:#5C4B24;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:20px 40px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-size:21px;margin:0}
+h2.step{font-size:16px;margin:22px 0 0;display:flex;gap:10px;align-items:baseline}
+h2.step span{font:700 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.k{margin:0;color:var(--ink-2);font-size:14px;max-width:85ch}
+.frame{border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-ink);padding:8px 14px;font-size:13.5px;display:flex;gap:18px;flex-wrap:wrap}
+.bar b{box-shadow:inset 0 -2px 0 var(--goldfill);padding-bottom:3px}.bar span{color:var(--panel-quiet)}
+.sec{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sec span{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}.sec span.on{background:var(--surface-2);color:var(--ink);font-weight:600}
+.body{display:grid;grid-template-columns:220px minmax(0,1fr) minmax(0,1.05fr);gap:12px;padding:12px;min-height:520px}
+.body.two{grid-template-columns:220px minmax(0,1fr)}
+@media (max-width:980px){.body,.body.two{grid-template-columns:1fr}.rail{display:none}}
+.rail{border:1px solid var(--line);border-radius:6px;overflow:hidden;align-self:start}
+.rh{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface-2);border-bottom:1px solid var(--line);font:700 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.rh i{font:600 12px/1.2 var(--sans);font-style:normal;text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 9px}
+.ri{padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}.ri:last-child{border-bottom:0}
+.ri.on{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--goldfill)}
+.ri b{display:block;font-weight:600}.ri small{color:var(--ink-3);font-size:12px}
+.gone{padding:8px 10px;border-bottom:1px dashed var(--line);font-size:12px;color:var(--ink-3);text-decoration:line-through}
+.cop{border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-width:0;background:var(--surface-2)}
+.coph{padding:7px 10px;border-bottom:1px solid var(--line);font-size:13px;display:flex;align-items:center;gap:8px}
+.coph b{flex:1}
+.msgs{flex:1;padding:12px;display:flex;flex-direction:column;gap:10px}
+.m{max-width:94%;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-size:13.5px}
+.m.ai{border-left:3px solid var(--goldfill)}.m.me{align-self:flex-end;background:var(--surface-2)}
+.choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.choice{font:600 13px/1.2 var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:7px 12px}
+.choice.picked{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.roads{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+@media (max-width:520px){.roads{grid-template-columns:1fr}}
+.road{border:1px solid var(--line);border-radius:7px;padding:8px 10px;background:var(--surface);font-size:12.5px;color:var(--ink-2)}
+.road b{display:block;color:var(--ink);font-size:13px}
+.comp{margin:0 12px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 14px;color:var(--ink-3);font-size:14px}
+.side{min-width:0;display:flex;flex-direction:column;gap:8px}
+.sh{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--ink-3)}
+.sh b{color:var(--ink);font-size:13.5px}
+.x{width:28px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink-2);display:grid;place-items:center;font-size:15px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-content:start}
+@media (max-width:520px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);display:flex;flex-direction:column;gap:4px;min-width:0}
+.card.wide{grid-column:1/-1}
+.card h3{margin:0;font-size:13.5px;display:flex;justify-content:space-between;gap:8px}
+.card p{margin:0;font-size:12.5px;color:var(--ink-2)}
+.card ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+.card.empty p{color:var(--ink-3);font-style:italic}
+.tag{font:600 11px/1.4 var(--sans);white-space:nowrap;color:var(--ink-3)}
+.tag.plan{color:var(--good)}.tag.opt{color:var(--gold)}
+.note{font-size:12.5px;color:var(--ink-3)}
+.pg{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.pg{grid-template-columns:1fr}}
+.pc{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--surface)}
+.pc h4{margin:0 0 6px;font:700 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);display:flex;justify-content:space-between}
+.pc p{margin:0 0 8px;font-size:13.5px}
+.pc dl{margin:0;font-size:13px}.pc dt{font-weight:600;display:inline}.pc dd{display:inline;margin:0 0 0 4px}.pc dd:after{content:"";display:block}
+.pc.new{border-color:var(--newln);background:var(--newbg)}
+.pc .empty{color:var(--ink-3);font-style:italic;font-size:13px}
+.newtag{font:600 11px/1.4 var(--sans);letter-spacing:0;text-transform:none;color:var(--gold)}
+</style>
+<div class="wrap">
+<h1>A Foundation chat starts by asking</h1>
+<p class="k">Mobile's Foundation tab in the Copilot. The separate “Guided Foundation” button at the top of the chats list is gone; every new Foundation chat opens with the question below.</p>
+
+<h2 class="step"><span>1</span> New chat, the place already has a Foundation</h2>
+<div class="frame">
+ <div class="bar"><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+ <div class="sec"><span class="on">Foundation</span><span>SWOT</span><span>Plan</span></div>
+ <div class="body two">
+  <div class="rail"><div class="rh">Chats <i>+ New chat</i></div>
+   <div class="gone">Guided Foundation (removed)</div>
+   <div class="ri on"><b>New chat</b><small>Just now</small></div>
+   <div class="ri"><b>Aspiration wording</b><small>2 Oct</small></div></div>
+  <div class="cop"><div class="coph"><b>New chat</b></div>
+   <div class="msgs">
+    <div class="m ai">Mobile already has a Foundation. Do you want to start from what's there, or start fresh?
+     <div class="choices"><span class="choice">Start from it</span><span class="choice">Start fresh</span></div></div>
+   </div>
+   <div class="comp">Ask about Mobile's foundation…</div></div>
+ </div>
+</div>
+<p class="note">If the place has no Foundation yet, this question is skipped and the chat opens straight on the four ways to start (step 3).</p>
+
+<h2 class="step"><span>2</span> “Start from it” — the six cards appear, filled from the plan</h2>
+<div class="frame">
+ <div class="bar"><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+ <div class="sec"><span class="on">Foundation</span><span>SWOT</span><span>Plan</span></div>
+ <div class="body">
+  <div class="rail"><div class="rh">Chats <i>+ New chat</i></div>
+   <div class="ri on"><b>Foundation — Mobile</b><small>Just now</small></div>
+   <div class="ri"><b>Aspiration wording</b><small>2 Oct</small></div></div>
+  <div class="side">
+   <div class="sh"><b>Foundation — Mobile</b><span class="x" title="Close the cards">×</span></div>
+   <div class="cards">
+    <div class="card wide"><h3>Who We Are <span class="tag plan">From the plan</span></h3>
+     <ul><li>We are a consumer electronics distribution company</li><li>We provide distribution services (account management, logistics, product management)</li><li>For e-commerce, retail, operators, hyper markets, IR and OR</li><li>…3 more lines</li></ul></div>
+    <div class="card wide"><h3>Winning Aspiration <span class="tag plan">From the plan</span></h3>
+     <p>To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.</p></div>
+    <div class="card"><h3>End in Mind <span class="tag plan">From the plan</span></h3>
+     <p>To be positioned as one of the recognized regional distributors for consumer electronics</p></div>
+    <div class="card empty"><h3>Purpose <span class="tag opt">Optional · empty</span></h3>
+     <p>Nothing saved yet.</p></div>
+    <div class="card"><h3>Key Objectives <span class="tag plan">From the plan</span></h3>
+     <ul><li>Distribution revenue</li><li>Mobile market share</li><li>Active merchant reach</li><li>App coverage rate</li></ul></div>
+    <div class="card empty"><h3>Core Values <span class="tag">Empty</span></h3>
+     <p>Nothing saved yet.</p></div>
+   </div>
+   <p class="note">Press a card to work on that part: ask, draft, refine, save. × closes the cards; a “Show cards” button brings them back.</p>
+  </div>
+  <div class="cop"><div class="coph"><b>Chat</b></div>
+   <div class="msgs">
+    <div class="m ai">Mobile already has a Foundation. Do you want to start from what's there, or start fresh?
+     <div class="choices"><span class="choice picked">Start from it</span><span class="choice">Start fresh</span></div></div>
+    <div class="m ai">I've loaded what Mobile's Foundation says today into the cards. Pick a part to work on, or tell me what you want to change.</div>
+   </div>
+   <div class="comp">Ask about Mobile's foundation…</div></div>
+ </div>
+</div>
+
+<h2 class="step"><span>3</span> “Start fresh” — the four ways to start, cards empty</h2>
+<div class="frame">
+ <div class="bar"><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+ <div class="sec"><span class="on">Foundation</span><span>SWOT</span><span>Plan</span></div>
+ <div class="body">
+  <div class="rail"><div class="rh">Chats <i>+ New chat</i></div>
+   <div class="ri on"><b>Foundation — Mobile</b><small>Just now</small></div></div>
+  <div class="side">
+   <div class="sh"><b>Foundation — Mobile</b><span class="x" title="Close the cards">×</span></div>
+   <div class="cards">
+    <div class="card wide empty"><h3>Who We Are <span class="tag">Empty</span></h3><p>Not started.</p></div>
+    <div class="card wide empty"><h3>Winning Aspiration <span class="tag">Empty</span></h3><p>Not started.</p></div>
+    <div class="card empty"><h3>End in Mind <span class="tag">Empty</span></h3><p>Not started.</p></div>
+    <div class="card empty"><h3>Purpose <span class="tag opt">Optional</span></h3><p>Not started.</p></div>
+    <div class="card empty"><h3>Key Objectives <span class="tag">Empty</span></h3><p>Not started.</p></div>
+    <div class="card empty"><h3>Core Values <span class="tag">Empty</span></h3><p>Not started.</p></div>
+   </div>
+  </div>
+  <div class="cop"><div class="coph"><b>Chat</b></div>
+   <div class="msgs">
+    <div class="m ai">Mobile already has a Foundation. Do you want to start from what's there, or start fresh?
+     <div class="choices"><span class="choice">Start from it</span><span class="choice picked">Start fresh</span></div></div>
+    <div class="m ai">How would you like to build it?
+     <div class="roads">
+      <div class="road"><b>Answer guided questions</b>I ask you a few questions and draft each part from your answers.</div>
+      <div class="road"><b>Upload raw notes</b>Interview notes or a workshop export, turned into a Foundation.</div>
+      <div class="road"><b>Use a template</b>Download an interview template, fill it in, upload it back.</div>
+      <div class="road"><b>Import a finished Foundation</b>Paste it and I sort it into the parts.</div>
+     </div></div>
+   </div>
+   <div class="comp">Ask about Mobile's foundation…</div></div>
+ </div>
+</div>
+<p class="note">Saving at the end still makes a new version of the Foundation deliverable; Mobile's plan itself only changes when you choose to save to it.</p>
+
+<h2 class="step"><span>4</span> Mobile's Foundation page gains an optional Purpose box</h2>
+<div class="frame">
+ <div class="bar"><b>Strategy</b><span>Performance</span><span>Reporting</span><span>Copilot</span></div>
+ <div class="sec"><span class="on">Foundation</span><span>SWOT</span><span>Plan</span></div>
+ <div class="pg">
+  <div class="pc"><h4>Who we are</h4><dl><dt>We are</dt><dd>consumer electronics distribution company</dd><dt>We provide</dt><dd>distribution services (account management, logistics services, product management)</dd><dt>For</dt><dd>e-commerce, retail, operators, hyper markets, IR and OR</dd></dl></div>
+  <div class="pc"><h4>Winning Aspiration</h4><p>To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems…</p><h4>End in mind</h4><p>To be positioned as one of the recognized regional distributors for consumer electronics</p></div>
+  <div class="pc new"><h4>Purpose <span class="newtag">New · optional</span></h4><p class="empty">Not written yet. Behind the pen: one box, left empty if the unit has none.</p></div>
+ </div>
+</div>
+</div>

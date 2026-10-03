@@ -1,0 +1,123 @@
+<title>Plan Section Split</title>
+<style>
+/* Layout: today on the left, proposed on the right, both drawn in the Structure step's own shape. */
+:root{
+  --ground:#F3F5F8; --surface:#FFFFFF; --surface-2:#EDF0F5; --line:#D6DCE5;
+  --ink:#1B2433; --ink-2:#3E4A5C; --ink-3:#5E6A7C; --panel:#16325C; --panel-ink:#FFFFFF;
+  --gold:#B8862F; --gold-deep:#8A6420; --new:#E9F2E4; --newline:#6E9A55;
+  --sans:"Source Sans 3", system-ui, sans-serif; --mono:"JetBrains Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#11151C; --surface:#181E28; --surface-2:#1F2733; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C3CAD5; --ink-3:#9AA4B3; --panel:#274A80; --panel-ink:#FFFFFF;
+  --gold:#D9A94E; --gold-deep:#E3BC72; --new:#1E2B1A; --newline:#8CBB70; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --ground:#11151C; --surface:#181E28; --surface-2:#1F2733; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C3CAD5; --ink-3:#9AA4B3; --panel:#274A80; --panel-ink:#FFFFFF;
+  --gold:#D9A94E; --gold-deep:#E3BC72; --new:#1E2B1A; --newline:#8CBB70; color-scheme:dark }
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);padding-block:24px;padding-inline:16px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+h1{font-size:22px;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--ink-2);max-width:70ch;line-height:1.5}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.col{min-width:0;display:grid;gap:10px}
+.coltag{font:600 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.coltag.b{color:var(--gold-deep)}
+.sec{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px}
+.h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.kind{font:700 11px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.fixed{font-size:12.5px;color:var(--ink-3)}
+.onoff{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.onoff span{padding:3px 10px;font-size:12.5px;color:var(--ink-2)}
+.onoff span.on{background:var(--panel);color:var(--panel-ink)}
+.way{background:var(--surface-2);border-radius:6px;padding:10px;display:grid;gap:6px}
+.lab{font:600 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:4px 0 0}
+.fld{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:6px 9px;font-size:13px;color:var(--ink);min-width:0}
+.fld.ph{color:var(--ink-3)}
+.row{display:grid;grid-template-columns:22px 118px minmax(0,1fr) minmax(0,1fr);gap:6px;align-items:center}
+.row.three{grid-template-columns:22px minmax(0,1fr) minmax(0,1fr)}
+.row.sub{grid-template-columns:22px 118px minmax(0,1fr) minmax(0,1fr);padding-left:0}
+.row.sub .n{padding-left:14px;color:var(--ink-2);font-size:12.5px}
+.n{font-size:12.5px}
+.tick{width:18px;height:18px;border-radius:4px;background:var(--panel);display:grid;place-items:center}
+.tick::after{content:"";width:9px;height:5px;border:2px solid var(--panel-ink);border-top:0;border-right:0;transform:rotate(-45deg) translateY(-1px)}
+.w{grid-column:3/5;font-size:12px;font-style:italic;color:var(--ink-3)}
+.years{grid-column:3/5;display:flex;gap:6px;flex-wrap:wrap}
+.yr{border:1px solid var(--line);border-radius:12px;padding:2px 10px;font-size:12px;color:var(--ink-2);background:var(--surface)}
+.group{border-top:1px solid var(--line);padding-top:6px;display:grid;gap:6px}
+.new{background:var(--new);outline:1.5px dashed var(--newline);outline-offset:3px;border-radius:4px}
+.note{font-size:12.5px;color:var(--ink-2);line-height:1.45;margin:0}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:grid;gap:8px}
+.q h2{font-size:15px;margin:0}
+.q ol{margin:0;padding-left:20px;display:grid;gap:6px;line-height:1.45;color:var(--ink-2)}
+.key{font-size:12px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+  <h1>The plan section on the Structure step</h1>
+  <p class="lead">Drawn for one layer, the business units. The same change applies to the top level and the supporting functions. The dashed green boxes are what is new.</p>
+
+  <div class="cols">
+    <div class="col">
+      <span class="coltag">Today</span>
+      <div class="sec">
+        <div class="h"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
+        <div class="way">
+          <span class="kind">If planned in pillars</span>
+          <p class="lab">Section title</p><div class="fld">Plan</div>
+          <div class="row three"><span></span><span class="lab">One</span><span class="lab">Many</span></div>
+          <div class="row three"><span></span><div class="fld">Direction</div><div class="fld">Direction</div></div>
+          <div class="row three"><span></span><div class="fld">Success Metric</div><div class="fld">Success Metrics</div></div>
+          <div class="row three"><span></span><div class="fld ph">Tactic</div><div class="fld ph">Tactics</div></div>
+          <p class="lab">Extra details</p>
+          <div class="row"><span class="tick"></span><span class="n">Overview</span><div class="fld ph">Overview</div><div class="fld ph">Overviews</div></div>
+          <div class="row"><span class="tick"></span><span class="n">Several outcomes</span><div class="fld ph">Outcome</div><div class="fld ph">Outcomes</div></div>
+          <div class="row"><span class="tick"></span><span class="n">Requirements</span><div class="fld ph">Requirement</div><div class="fld ph">Requirements</div></div>
+          <div class="row"><span class="tick"></span><span class="n">Years 1 · 2 · 3</span><span class="w">No names needed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <span class="coltag b">Proposed</span>
+      <div class="sec">
+        <div class="h"><span class="kind">Plan section</span><span class="onoff new"><span class="on">On</span><span>Off</span></span></div>
+        <div class="way">
+          <span class="kind">If planned in pillars</span>
+          <p class="lab">Section title</p><div class="fld">Plan</div>
+          <div class="row three"><span></span><span class="lab">One</span><span class="lab">Many</span></div>
+          <div class="row three"><span></span><div class="fld">Direction</div><div class="fld">Direction</div></div>
+          <div class="row three"><span></span><div class="fld">Success Metric</div><div class="fld">Success Metrics</div></div>
+          <div class="row three"><span></span><div class="fld ph">Tactic</div><div class="fld ph">Tactics</div></div>
+
+          <div class="group new">
+            <p class="lab">Extra details · general</p>
+            <div class="row"><span class="tick"></span><span class="n">Overview</span><div class="fld ph">Overview</div><div class="fld ph">Overviews</div></div>
+            <div class="row sub"><span></span><span class="n">Objective</span><div class="fld ph">Objective</div><span></span></div>
+            <div class="row sub"><span></span><span class="n">Why now</span><div class="fld ph">Why now</div><span></span></div>
+            <div class="row sub"><span></span><span class="n">Risks</span><div class="fld ph">Risks &amp; mitigations</div><span></span></div>
+            <div class="row"><span class="tick"></span><span class="n">Years</span><div class="years"><span class="yr">Year 1</span><span class="yr">Year 2</span><span class="yr">Year 3</span></div></div>
+          </div>
+
+          <div class="group new">
+            <p class="lab">Extra details · tactics</p>
+            <div class="row"><span class="tick"></span><span class="n">Several outcomes</span><div class="fld ph">Outcome</div><div class="fld ph">Outcomes</div></div>
+            <div class="row"><span class="tick"></span><span class="n">Requirements</span><div class="fld ph">Requirement</div><div class="fld ph">Requirements</div></div>
+          </div>
+        </div>
+      </div>
+      <p class="note">When Off: the pillars ways box folds to one line, "Not shown on this layer. Nothing entered is lost.", the same as the first and second sections do today.</p>
+    </div>
+  </div>
+
+  <div class="q">
+    <h2>Three things to confirm before I build</h2>
+    <ol>
+      <li><b>The overview's three areas</b> get their own name boxes (Objective, Why now, Risks &amp; mitigations), so a client can call them something else. Or should they only be listed, with no renaming?</li>
+      <li><b>The years</b> are shown as Year 1 · Year 2 · Year 3. Shown only, or should the word "Year" be renameable too (for example "Phase 1 · 2 · 3")?</li>
+      <li><b>Plan section Off</b> hides the plan on that layer's pages and keeps what was written. On business units and functions it also means they have nothing to report, so their Reporting tab and their plan slides go too, and they drop out of the scores. Is that what you want Off to mean?</li>
+    </ol>
+    <p class="key">The fix you already approved (the Group / Company / Holding buttons working on a client with a plan) is built and pushed separately.</p>
+  </div>
+</div>

@@ -5,6 +5,15 @@
   /* ── One shape for every request (§71's rule: three callers with the same
      six lines is where a typo lives in exactly one of them). ───────── */
   function send(path, body) {
+    /* A TAB KEEPS WHAT IT LAST SHOWED (§400.2). A request made while a tab is
+       re-reading behind its kept copy is counted, so the fresh copy is swapped
+       in when the last answer has landed; and anything that CHANGES something
+       drops every kept copy, so the next look at a tab never shows a state
+       this page has just altered. */
+    var rv = REVAL;
+    if (rv) rv.pending++;
+    if (!body || READS.indexOf(body.action) < 0) KEPT = {};
+    var landed = function () { if (rv) { rv.pending--; setTimeout(function () { revalSettle(rv); }, 0); } };
     return fetch(path, { method: "POST", cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body) })
@@ -17,7 +26,8 @@
           });
         }
         return r.json();
-      });
+      })
+      .then(function (v) { landed(); return v; }, function (e) { landed(); throw e; });
   }
   /* TWO ENDPOINTS, ONE DOOR. /api/memory is its own route (spec 045) and the
      401-is-the-door rule above is not written twice for it. */
@@ -27,8 +37,20 @@
 
   var page = document.getElementById("page");
   var nav = document.getElementById("nav");
-  var TAB = "clients";
+  /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
+     address's hash, so a reload keeps it and a link can name one
+     ("Switch client…" from a client is /platform#clients). */
+  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks"];
+  var TAB = (function () {
+    var h = String(location.hash || "").replace(/^#/, "");
+    return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";
+  })();
   var ME = null;
+  /* The boot's own `cards` answer, waiting for the FIRST draw and nobody else
+     (§369). Declared here rather than left to hoist, because a second `var` of
+     one name in this scope is one binding and the later one wins in silence
+     (§56.7) — grepped, and this is the only pair. */
+  var BOOTCARDS = null;
 
   function el(tag, cls, text) {
     var e = document.createElement(tag);
@@ -37,7 +59,7 @@
     if (text != null) e.textContent = text;
     return e;
   }
-  function clear() { page.textContent = ""; }
+  function clear() { page.textContent = ""; if (page === SHOWN) ONLIST = null; }
   function say(msg, bad) {
     var p = el("p", bad ? "err" : "said", msg);
     page.appendChild(p);
@@ -74,7 +96,8 @@
        insight, which is what makes it a memory rather than a filing cabinet.
        The boundary it does keep is on the server — a client's own account
        never reaches /api/memory — and it is checked there. */
-    var tabs = [["clients", "Clients", true],
+    var tabs = [["mywork", "My work", true],
+                ["clients", "Clients", true],
                 ["consultants", "Consultants", ME.canConsultants],
                 ["access", "Who sees what", ME.canAccess],
                 ["memory", "Memory", true],
@@ -88,18 +111,79 @@
       var b = el("button", TAB === t[0] ? "on" : null, t[1]);
       b.type = "button";
       b.setAttribute("data-tab", t[0]);
-      b.addEventListener("click", function () { go(t[0]); });
+      b.addEventListener("click", function () { go(t[0], true); });
       nav.appendChild(b);
     });
   }
 
-  function go(tab) {
+  /* ── A TAB SHOWS WHAT IT LAST SHOWED, THEN CATCHES UP (§400.2) ─────
+     Islam: "when I switch between the tabs of the platform like my work and
+     clients everytime it loads" — and, of the two answers put to him, the one
+     that is always current: the kept copy is drawn at once and the tab reads
+     again BEHIND it, the fresh copy swapped in when the answers land.
+     HOW: every draw writes into `page`, including the parts that arrive
+     later (settle(), the archived band, the library), so during a re-read
+     `page` IS a detached box for the whole of it, and the kept copy sits in
+     the real one. Kept as the tab's own NODES, moved rather than cloned, so
+     every control on it still works.
+     ONLY THE TAB ROW USES A KEPT COPY. The six other ways here to `go()` —
+     after adding a client, archiving one, changing whose work you are
+     looking at — follow a change and read fresh, as they did (§369, §48.2).
+     A HAND ON THE PAGE WINS: a press or a key inside the kept copy abandons
+     the re-read, so nothing is swapped out from under somebody typing into a
+     search box (§35, §71.2). Kept in memory only: a refresh starts clean. */
+  var SHOWN = page;
+  var KEPT = {};
+  var ONLIST = null;
+  var REVAL = null;
+  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client"];
+  function revalStop() {
+    if (!REVAL) return;
+    REVAL = null;
+    page = SHOWN;
+  }
+  function revalSettle(rv) {
+    if (REVAL !== rv || rv.pending > 0) return;
+    REVAL = null;
+    page = SHOWN;
+    var y = window.scrollY;
+    SHOWN.textContent = "";
+    while (rv.next.firstChild) SHOWN.appendChild(rv.next.firstChild);
+    window.scrollTo(0, y);
+  }
+  ["pointerdown", "keydown"].forEach(function (ev) {
+    SHOWN.addEventListener(ev, revalStop, true);
+  });
+  function go(tab, fromTabRow) {
+    revalStop();
+    /* Only the tab's own list is kept, never a form or a reading view
+       opened inside it — go() below puts the tab back on its list. */
+    if (ONLIST && ONLIST === TAB && SHOWN.firstChild && MEM.view === "list" && FW.view === "list") {
+      var f = document.createDocumentFragment();
+      while (SHOWN.firstChild) f.appendChild(SHOWN.firstChild);
+      KEPT[TAB] = f;
+    }
+    ONLIST = null;
     TAB = tab;
+    try { history.replaceState(null, "", tab === "mywork" ? location.pathname : "#" + tab); } catch (e) { /* the address is a convenience */ }
     MEM.view = "list";
     FW.view = "list";
     drawNav();
     clear();
-    return redraw();
+    var kept = fromTabRow ? KEPT[tab] : null;
+    delete KEPT[tab];
+    if (!kept) {
+      var r = redraw();
+      ONLIST = tab;
+      return r;
+    }
+    SHOWN.appendChild(kept);
+    var rv = { pending: 0, next: document.createElement("div") };
+    REVAL = rv;
+    page = rv.next;
+    redraw();
+    ONLIST = tab;
+    setTimeout(function () { revalSettle(rv); }, 0);
   }
 
   /* ── A SILENT REFRESH (§313.28) ───────────────────────────────────
@@ -114,6 +198,7 @@
      a working hand — applied to the one page that had no other way to update
      itself. */
   function redraw() {
+    if (TAB === "mywork") return drawMyWork();
     if (TAB === "clients") return drawClients();
     if (TAB === "consultants") return drawConsultants();
     if (TAB === "access") return drawAccess();
@@ -870,6 +955,147 @@
   }
 
   /* ── Clients ─────────────────────────────────────────────────── */
+  /* ── WHAT THE PAGE SHOWS WHILE IT ASKS (§371) ──────────────────────
+     §369 measured the silence and did not fill it: one round trip, about
+     740ms warm and seconds on a cold function, with the bar standing up
+     over a hidden body — a window that looks open, answers nothing, and
+     says nothing about either. Islam chose the grey skeleton over the
+     page's own words, from two shot out of the real page
+     (design-mockups/console-loading/).
+
+     IT IS DRAWN BEFORE THE ANSWER, which is the one thing the gate above
+     was stopping — and it is safe to draw for precisely the reason that
+     gate exists: it holds no name, no mark, no colour of anybody's and no
+     figure, so nothing here can turn out to have been somebody else's
+     screen (§94.10).
+
+     THE TITLE AND THE CARDS, AND NOT THE SEARCH BOX. That box filters the
+     grid it is drawn beside, so one drawn over placeholders would take a
+     word and hide three grey blocks (§61: a control with nothing to act on
+     is not a choice). It arrives with the cards, where `drawClients`
+     builds it — which is also why this draws the title WITHOUT a right-hand
+     group rather than an empty one.
+
+     THREE IS A GUESS, AND IT IS THE COST ISLAM TOOK WITH IT NAMED: a
+     console with seven clients shows three and then seven. It is not
+     remembered from the last visit, because a count kept per device is a
+     second thing that has to stay true and §94.10 refused that same trade
+     for the branding it was about.
+
+     `aria-hidden` BECAUSE IT SAYS NOTHING. Three empty boxes read out one
+     after another is noise, and what a screen reader gets here is what it
+     gets today: the page, and then the cards when they land. */
+  function drawWaiting() {
+    /* Opening on another tab (§400), the waiting page is that tab's title
+       and nothing it would have to take back (§94.10). */
+    if (TAB !== "clients") { title(TAB === "mywork" ? "My work" : ""); document.body.classList.add("ready"); return; }
+    title("Clients");
+    var grid = el("div", "cards");
+    grid.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) {
+      var c = el("div", "ccard skel");
+      var top = el("div", "ctop");
+      top.appendChild(el("div", "sk-mark"));
+      top.appendChild(el("div", "sk-line"));
+      top.appendChild(el("div", "sk-line thin"));
+      c.appendChild(top);
+      /* The hairline the real card draws above its module rows, so the two
+         shapes end the same way rather than the line appearing on arrival. */
+      c.appendChild(el("div", "mods"));
+      grid.appendChild(c);
+    }
+    page.appendChild(grid);
+    document.body.classList.add("ready");
+  }
+
+  /* ── MY WORK (§400) ───────────────────────────────────────────────
+     Islam: "for the main console we can have the person tasks across the
+     different clients outside on the main platform derived from the internal
+     tracker of the different clients work." Every row is read from that
+     client's own Tracker on the server (lib/my-work.ts) — nothing here is
+     stored, and every word ("Late 1 w", "This week", "In progress") is the
+     Tracker's own, so an action reads the same in both places (§53.5).
+     Pressing a row opens that client's Tracker. An admin may look at a
+     colleague's list; the server reads it as THEIR world. */
+  var WORK = { who: "" };
+  function drawMyWork() {
+    var right = el("div");
+    title("My work", right);
+    var body = el("div");
+    page.appendChild(body);
+    body.appendChild(el("p", "muted", "Reading your actions…"));
+    post({ action: "mywork", who: WORK.who || undefined }).then(function (j) {
+      if (TAB !== "mywork") return;
+      body.textContent = "";
+      if (!j.ok) { body.appendChild(el("p", "err", j.error || "Could not read the actions.")); return; }
+      if (j.people && j.people.length > 1) {
+        var pick = el("label", "wpick");
+        pick.appendChild(document.createTextNode("Show"));
+        var sel = el("select");
+        sel.setAttribute("data-workwho", "");
+        j.people.forEach(function (p) {
+          var o = el("option", null, p.email === ME.email ? "Me" : p.name);
+          o.value = p.email === ME.email ? "" : p.email;
+          if ((WORK.who || "") === o.value) o.selected = true;
+          sel.appendChild(o);
+        });
+        sel.addEventListener("change", function () { WORK.who = sel.value; go("mywork"); });
+        pick.appendChild(sel);
+        right.className = "right"; right.appendChild(pick);
+        if (!right.parentNode) page.querySelector(".ptitle").appendChild(right);
+      }
+      var st = j.stats || {};
+      var tiles = el("div", "wstat");
+      [[st.open, "open actions"], [st.late, "late", "bad"], [st.dueWeek, "due this week"], [st.clients, st.clients === 1 ? "client" : "clients"]]
+        .forEach(function (t) {
+          var d = el("div", t[2] && t[0] ? t[2] : null);
+          d.appendChild(el("b", null, String(t[0] || 0)));
+          d.appendChild(document.createTextNode(t[1]));
+          tiles.appendChild(d);
+        });
+      body.appendChild(tiles);
+      if (j.unanswered && j.unanswered.length) {
+        body.appendChild(el("p", "err", "Could not read the Tracker on " + j.unanswered.join(", ") + " — nothing has been lost; try again shortly."));
+      }
+      if (!j.rows.length) {
+        body.appendChild(el("p", "muted", (j.who && !j.who.self ? j.who.name + " has" : "You have") +
+          " no open actions in any client's Tracker."));
+        return;
+      }
+      var t = el("table", "work");
+      t.setAttribute("data-grid", "mywork");
+      var th = el("thead"), hr = el("tr");
+      ["Action", "Client", "Due", "Status"].forEach(function (h) { hr.appendChild(el("th", null, h)); });
+      th.appendChild(hr); t.appendChild(th);
+      var tb = el("tbody");
+      var HEAD = { late: "Late", week: "This week", later: "Next week and later" };
+      var last = "";
+      j.rows.forEach(function (r) {
+        if (r.bucket !== last) {
+          last = r.bucket;
+          var g = el("tr", "grp"), gd = el("td", null, HEAD[r.bucket]);
+          gd.colSpan = 4; g.appendChild(gd); tb.appendChild(g);
+        }
+        var tr = el("tr", "wrow");
+        tr.tabIndex = 0;
+        tr.setAttribute("data-client", r.client);
+        tr.appendChild(el("td", "act", r.title || "(untitled)"));
+        var cl = el("td"); cl.appendChild(el("span", "cl", r.clientName)); tr.appendChild(cl);
+        tr.appendChild(el("td", r.late ? "late" : "when", r.when));
+        tr.appendChild(el("td", null, r.statusWord));
+        var open = function () { location.assign("/" + r.client + "/tracker"); };
+        tr.addEventListener("click", open);
+        tr.addEventListener("keydown", function (e) { if (e.key === "Enter") open(); });
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb);
+      body.appendChild(t);
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      body.textContent = ""; body.appendChild(el("p", "err", "Could not reach the server."));
+    });
+  }
+
   function drawClients() {
     /* ── WHY A CLIENT SENT THEM BACK HERE (§313.32) ──────────────────
        A client whose register cannot place this account refuses and lands
@@ -916,7 +1142,18 @@
     page.appendChild(grid);
     grid.appendChild(el("p", "muted", "Reading your clients…"));
 
-    post({ action: "cards" }).then(function (j) {
+    /* THE BOOT'S OWN ANSWER, ONCE (§369). The boot asks `cards` to learn what
+       the navigation may offer, and this asked the identical question again a
+       round trip later — the heaviest question in the page, which opens a
+       connection per client to read its units, its plan and its cycle. Handed
+       over rather than asked twice.
+       IT IS ONE-SHOT AND MUST BE: `go("clients")` is pressed from six other
+       places — after adding a client, on the way back out of one, after
+       archiving — and every one of those has to read the list AGAIN, or the
+       grid draws a client that has just been archived (§48.2: a value is read
+       at press time, never trusted from the render that drew the button). */
+    var handed = BOOTCARDS; BOOTCARDS = null;
+    (handed ? Promise.resolve(handed) : post({ action: "cards" })).then(function (j) {
       grid.textContent = "";
       if (!j.ok) { say(j.error || "Could not read your clients.", true); return; }
       /* ── THE WAY IN IS DRAWN WHEN THERE IS NOTHING (§313.18, §61) ──
@@ -1008,17 +1245,27 @@
 
      The rows come from the server (lib/modules.ts moduleRows), so the console
      cannot spell a module differently from the switch or from Setup. */
+  /* The platform's Settings mark (shell.html ICON_MANAGE), drawn the same here. */
+  function settingsChip(name) {
+    var cog = el("span", "ccfg ico");
+    cog.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
+      '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/><circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
+    cog.title = "Settings";
+    cog.setAttribute("aria-label", "Settings for " + name);
+    return cog;
+  }
+
   function cardFor(c) {
     var b = el("div", "ccard" + (c.kind === "demo" ? " demo" : "") + (c.canOpen ? "" : " listed"));
     b.dataset.client = c.key;
     b.dataset.name = String(c.name + " " + (c.industry || "")).toLowerCase();
     var top = el("div", "ctop");
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; top.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; top.appendChild(im);
     } else {
       top.appendChild(el("div", "cmark", initials(c.name)));
+      top.appendChild(el("h2", null, c.name));
     }
-    top.appendChild(el("h2", null, c.name));
     if (c.industry) top.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var tag = function (t, cls) { foot.appendChild(el("span", "tag" + (cls ? " " + cls : ""), t)); };
@@ -1040,11 +1287,20 @@
         r.type = "button";
         r.dataset.module = m.key;
         r.appendChild(document.createTextNode(m.label));
-        /* THE LANDING LINE (§359.4): what the client's own landing says under
-           this module, from the same reader — then the card's own health
-           word, when there is one. */
-        if (m.line) r.appendChild(el("span", "mline", m.line));
-        if (m.state) r.appendChild(el("i", null, m.state));
+        /* THE MARK (§368): what this module says is OUTSTANDING on this
+           client, in the fewest words, and NOTHING when nothing is — which
+           is where the compactness comes from. It replaces the pair that
+           was here, a full sentence (the client's chosen landing line) and
+           the card's own health word, which on a running cycle said the
+           same fact twice and could not fit on one line.
+           Both come from the server (lib/modules.ts), so the page decides
+           nothing: `alarm` is the module's own word for *broken rather than
+           busy* and `tip` is the whole sentence for the hover. */
+        if (m.mark) {
+          var mk = el("i", m.alarm ? "alarm" : "due", m.mark);
+          if (m.tip) mk.title = m.tip;
+          r.appendChild(mk);
+        }
         /* A LIBRARY'S ROW OPENS THE ROOM WE PUBLISH FROM, not the client's
            own page (spec 053; the flag is the server's, lib/modules.ts). The
            client's read-only library is one press further in, from there —
@@ -1061,7 +1317,7 @@
     }
 
     if (c.canConfig) {
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* THE CLIENT'S OWN SETUP RAIL (§360, spec 057): one press into the
          client at /<client>/setup, in its own chrome — Getting started at the
@@ -1106,11 +1362,11 @@
     b.dataset.client = c.key;
     b.dataset.arch = "1";
     if (c.mark) {
-      var im = el("img", "cmark"); im.src = c.mark; im.alt = ""; b.appendChild(im);
+      var im = el("img", "cmark solo"); im.src = c.mark; im.alt = c.name; im.title = c.name; b.appendChild(im);
     } else {
       b.appendChild(el("div", "cmark", initials(c.name)));
+      b.appendChild(el("h2", null, c.name));
     }
-    b.appendChild(el("h2", null, c.name));
     if (c.industry) b.appendChild(el("p", "ind", c.industry));
     var foot = el("div", "foot");
     var when = archDate(c.at);
@@ -1141,7 +1397,7 @@
       back.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") go(e); });
       acts.appendChild(back);
 
-      var cog = el("span", "ccfg", "Settings");
+      var cog = settingsChip(c.name);
       cog.setAttribute("role", "button"); cog.tabIndex = 0;
       /* ON THIS PAGE, not the client's (§360): an archived client's address
          is closed, so its two acts — bringing it back and deleting it — are
@@ -2906,33 +3162,97 @@
   }
 
   document.getElementById("signout").addEventListener("click", function () {
+    /* §431: signing out wipes every saved copy of a client's page */
+    try { for (var i = localStorage.length - 1; i >= 0; i--) { var k = localStorage.key(i); if (k && k.indexOf("smp.cache.") === 0) localStorage.removeItem(k); } } catch (e) {}
     fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" },
       body: '{"action":"logout"}' }).finally(function () { location.replace("/"); });
   });
 
-  /* ── Boot ────────────────────────────────────────────────────── */
-  post({ action: "me" }).then(function (j) {
+  /* ── Boot ──────────────────────────────────────────────────────
+     BOTH QUESTIONS AT ONCE (§369). Islam: "something strange the window is not
+     active on opening I need to click anyway to start accepting clicks on the
+     cards." THE WINDOW IS ACTIVE AND THE PAGE IS NOT FINISHED, which is worse,
+     because the two are indistinguishable from outside: `.top` is drawn
+     OUTSIDE `.wrap`, so the bar stands up with Forefront's name and a Sign out
+     button over a body that `body:not(.ready)` has hidden — a window that
+     looks open, answers nothing, and says nothing about either.
+
+     Measured at 600ms a round trip, which is production's own shape: the
+     requests went out as `me` → `cards` → `cards`, THREE sequential trips for
+     one page load with the last two the SAME request; the bar was up and dead
+     for 1,255ms, the page then appeared titled and empty, and the cards landed
+     at 1,872. A click inside that window hits BODY — `elementFromPoint` where
+     a card will be, every 100ms of it — so the press he spends is the one that
+     happens to land after the page became ready.
+
+     Nothing in `cards` reads `me`'s ANSWER — the session is the cookie both
+     already carry — so they were sequential for no reason but the order they
+     were written in, and `drawClients()` asked the second one over again. One
+     trip now. The cost, stated: a signed-out visitor sends one `cards` that is
+     thrown away, and they are being redirected anyway.
+
+     IT IS NOT §368's, established before it was blamed (§303): the same probe
+     against the build before that section reports 1,259ms to 1,255. It is the
+     boot's own shape, and §359.4 made the second trip heavier by giving
+     `cards` a per-client read.
+
+     WHAT IS LEFT IS ONE ROUND TRIP OF THE SAME SILENCE, and it is not fixed
+     here. A first draft of this comment said the grid "already says Reading
+     your clients… and this gate hides it", and MEASURING IT SAID OTHERWISE:
+     lifting the gate alone produces a picture byte-identical to today's,
+     because `drawClients()` BUILDS that sentence and is not called until the
+     answer lands — there is nothing behind the gate to reveal. Corrected
+     rather than left standing (§124).
+     So saying anything at all means DRAWING before the answer, which is a
+     decision about what a loading page looks like: the page's own title,
+     search and sentence drawn early (whose cost is that `drawNav()` reads the
+     answer, so the tab row lands a beat later — measured, an early
+     `go("clients")` throws on a null ME), or §94.10's grey skeleton, whose
+     RULE the gate above cites and whose treatment this page never took. Both
+     shot out of the real page and put to Islam
+     (design-mockups/console-loading/), never ridden in behind a repair
+     (rule 1b, 1c).
+
+     ANSWERED (§371): Islam took the skeleton, over the recommendation. It is
+     `drawWaiting()` above, and the window is no longer silent — which is why
+     two assertions in checks/console-boot.py §2 and §4 were REWRITTEN rather
+     than loosened: they recorded this state on purpose so that the day it
+     moved they would go red (§214.3, §218). */
+  drawWaiting();
+  Promise.all([post({ action: "me" }), post({ action: "cards" })]).then(function (r) {
+    var j = r[0], c = r[1];
     if (!j || !j.ok) { location.replace("/"); return; }
     ME = { email: j.account.email, name: j.account.name, isAdmin: j.account.isAdmin,
            canConsultants: true, canAccess: !!j.account.isAdmin };
     /* What the navigation may show is asked of the same rules the pages ask —
        `cards` answers it for this account, so the row cannot offer a page the
        next request refuses. */
-    return post({ action: "cards" }).then(function (c) {
-      if (c && c.ok) {
-        ME.canConsultants = !!c.canConsultants;
-        ME.canAccess = !!c.canAccess;
-      }
-      /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
-         after renaming the column is exactly the twins this rename avoided. */
-      document.getElementById("who").textContent =
-        ME.name + (ME.isAdmin ? " · Super user" : "");
-      document.body.classList.add("ready");
-      go("clients");
-    });
+    if (c && c.ok) {
+      ME.canConsultants = !!c.canConsultants;
+      ME.canAccess = !!c.canAccess;
+      BOOTCARDS = c;
+    }
+    /* THE CHROME SAYS THE SAME WORD THE TABLE DOES. Leaving "Admin" here
+       after renaming the column is exactly the twins this rename avoided. */
+    document.getElementById("who").textContent =
+      ME.name + (ME.isAdmin ? " · Super user" : "");
+    document.body.classList.add("ready");
+    /* The boot's `cards` answer is for the Clients tab's FIRST draw only
+       (§369); opening on another tab, it is let go rather than handed to a
+       later visit as a stale list (§48.2). */
+    if (TAB !== "clients") BOOTCARDS = null;
+    if (!ME.canConsultants && TAB === "consultants") TAB = "mywork";
+    if (!ME.canAccess && TAB === "access") TAB = "mywork";
+    go(TAB);
   }).catch(function (e) {
     if (String(e.message) === "sign in") return;
     document.body.classList.add("ready");
+    /* THE WAITING CARDS COME DOWN BEFORE THE REFUSAL GOES UP (§371). A
+       skeleton is a promise that something is arriving, and `say` APPENDS —
+       so without this the sentence lands under three grey cards still
+       saying it is on its way. The happy path needs no such line, because
+       `go` clears the page itself. */
+    clear();
     say("Could not reach the server.", true);
   });
 })();

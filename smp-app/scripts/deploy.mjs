@@ -23,7 +23,11 @@
        address — and it cannot be turned into a guard.
 
    3 · The demo seeded — only when `SMP_SEED_DEMO=1`. Refuses to overwrite a
-       demo somebody has practised in unless `--replace` is passed by hand.
+       demo somebody has practised in unless `--replace` is passed by hand,
+       or the switch says `SMP_SEED_DEMO=replace`: the demo's CONTENT is
+       swapped and the tenant, and everybody given it, stays (seed-demo.mjs).
+       Like `1`, it is a switch to turn off again — left on, every production
+       deploy resets the demo.
 
    NEITHER SWITCH RUNS ON A PREVIEW. A preview build gets production's
    environment unless somebody has scoped it, and a preview that carried a
@@ -39,6 +43,7 @@
    load-bearing and is not is worse than none (§24). Said rather than
    quietly dropped. */
 import { applyAll } from "../db/apply.mjs";
+import { applyFfp } from "../db/apply-ffp.mjs";
 
 const url = process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING
   || process.env.DATABASE_URL || process.env.POSTGRES_URL;
@@ -73,6 +78,10 @@ if (onVercel && (pw.length < 12 || !/[a-z]/.test(pw) || !/[A-Z0-9]/.test(pw))) {
 
 const applied = await applyAll(url);
 console.log("deploy: schema and migrations up to date" + (applied.length ? " — applied " + applied.join(", ") : " (nothing new)"));
+/* Processes' own tables (FFProcess, carried in whole) — their own schema,
+   after SMP's, because they are granted to the role SMP's run makes. */
+const ffpApplied = await applyFfp(url, { log: () => {} });
+console.log("deploy: Processes tables up to date" + (ffpApplied.length ? " — applied " + ffpApplied.length + " migrations" : " (nothing new)"));
 
 if (asked("SMP_CARRY_RAYA")) {
   if (!production) console.log("deploy: SMP_CARRY_RAYA is set but this is a preview — the carry does not run here");
@@ -94,13 +103,41 @@ if (asked("SMP_CARRY_RAYA")) {
   }
 }
 
-if (asked("SMP_SEED_DEMO")) {
+/* FFProcess's own data carried into a client's Processes (2026-10-01).
+   SMP_CARRY_FFPROCESS holds the OLD workspace's id or exact name (not "1"),
+   FFPROCESS_DATABASE_URL the old database — set in Vercel, never pasted in a
+   chat. It copies into an EMPTY workspace once and refuses itself after, so a
+   switch left on is a line in the log rather than a failed build (§317.9). */
+const ffFrom = process.env.SMP_CARRY_FFPROCESS || "";
+if (ffFrom) {
+  if (!production) console.log("deploy: SMP_CARRY_FFPROCESS is set but this is a preview — the carry does not run here");
+  else if (!process.env.FFPROCESS_DATABASE_URL) console.log("deploy: SMP_CARRY_FFPROCESS is set but FFPROCESS_DATABASE_URL is not — nothing carried");
+  else {
+    const { carryFfprocess } = await import("./carry-ffprocess.mjs");
+    try {
+      await carryFfprocess({
+        source: process.env.FFPROCESS_DATABASE_URL, target: url, from: ffFrom,
+        to: process.env.SMP_CARRY_FFPROCESS_TO || "rhi",
+        sourceSchema: process.env.FFPROCESS_SOURCE_SCHEMA || "public",
+        apply: true, log: (m) => console.log(m),
+      });
+      console.log("deploy: Processes carried across — turn SMP_CARRY_FFPROCESS off; it refuses itself from here on");
+    } catch (e) {
+      if (!/already holds/.test(String(e.message))) throw e;
+      console.log("deploy: SMP_CARRY_FFPROCESS is still on and the workspace already holds data — nothing done; turn it off");
+    }
+  }
+}
+
+const demoReplace = process.env.SMP_SEED_DEMO === "replace";
+if (asked("SMP_SEED_DEMO") || demoReplace) {
   if (!production) console.log("deploy: SMP_SEED_DEMO is set but this is a preview — the demo is not seeded here");
   else {
     const { seedDemo } = await import("./seed-demo.mjs");
     try {
-      await seedDemo({ url });
-      console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
+      await seedDemo({ url, replace: demoReplace });
+      if (demoReplace) console.log("deploy: the demo's content is replaced — turn SMP_SEED_DEMO off, or every deploy resets it");
+      else console.log("deploy: the demo is seeded — turn SMP_SEED_DEMO off");
     } catch (e) {
       if (!/already|practised|--replace/.test(String(e.message))) throw e;
       console.log("deploy: SMP_SEED_DEMO is still on and the demo is already seeded — nothing done; turn it off");

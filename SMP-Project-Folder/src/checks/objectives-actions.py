@@ -22,7 +22,7 @@ What is asserted, and why each end matters (§94.2):
   - THE SWITCH ARCHIVES WHAT STOOD (§318 §6.2, Islam's *"archvied when type
     changes and create the new apprach"*). This REPLACES §59's refusal for
     this one transition, so both ends are asserted: the archive is taken with
-    the outgoing plan's counts in it, AND the new form starts empty;
+    (since §405) no archive: what stood is hidden and kept, AND the new form starts empty;
 
   - THE THREE PAGES DRAW THE NEW WORK AND NOT THE OLD. The Plan holds actions
     and no project rail; Performance holds the two cards and both tables;
@@ -94,6 +94,14 @@ def go(pg, fk):
         return False
 
 def sec(pg, k):
+    # A tab with ONE section draws no section row at all (§213's gate), which
+    # is the state an objectives function reaches once its Overview holds
+    # nothing and its S&W waits for the office (§423, §430). There is then no
+    # button to press, and the question is whether that one section IS k —
+    # asked of the shell's own answer, never assumed (§218: the claim that the
+    # Plan opens is kept, only the way it is reached changes).
+    if not ev(pg, "(k)=>!!document.querySelector('#secrow-in [data-sub2]')", True, k):
+        return bool(ev(pg, "(k)=>CURSEC[currentSub]===k", False, k))
     try:
         pg.click('#secrow-in [data-sub2="%s"]' % k, timeout=2500); pg.wait_for_timeout(520)
         return True
@@ -162,15 +170,20 @@ def main():
         ev(pg, "()=>closeRowDialog(true)"); pg.wait_for_timeout(300)
         ev(pg, "(k)=>openRowDialog('fns', k)", None, FK); pg.wait_for_timeout(420)
 
-        print("\n§2 the switch ARCHIVES what stood, and starts the new form empty")
+        # §405 REVERSES §342's ARCHIVE AT ISLAM'S WORD ("for functions hide and
+        # keep yes"): the switch changes the form and nothing else, so what
+        # stood is still stored and comes back on switching back. REWRITTEN,
+        # never deleted (§218) — each claim below is the one that survives.
+        print("\n§2 the switch HIDES and KEEPS what stood, and the new form starts empty")
         ev(pg, """(k)=>{const s=document.querySelector('[data-fnformat="'+k+'"]');
           s.value='objectives'; s.dispatchEvent(new Event('change',{bubbles:true}));}""",
            None, FK)
         pg.wait_for_timeout(560)
         said = ev(pg, "()=>{const m=document.getElementById('modal-b');"
                       " return m ? m.innerText.replace(/\\n/g,' ') : '';}", "")
-        ck("it asks first, and says what is held", "holds" in said and "archiv" in said.lower(), said[:120])
-        ck("and says where the way back is", "Import" in said, said[:160])
+        ck("it asks first, and says what is hidden and kept",
+           "hidden and kept" in said and "Projects" in said, said[:120])
+        ck("and says where the way back is", "Switching back brings them back" in said, said[:160])
         ev(pg, "()=>{const y=document.querySelector('[data-rmyes]'); if(y)y.click();}")
         pg.wait_for_timeout(700)
         now = ev(pg, "(k)=>({ fmt: fnFormat(FUNCTIONS[k]),"
@@ -178,11 +191,10 @@ def main():
                      " actions: (FUNCTIONS[k].actions||[]).length,"
                      " arch: ARCHIVES.length, counts: (ARCHIVES[0]||{}).counts })", {}, FK)
         ck("the form is stored as the third value", now.get("fmt") == "objectives", now)
-        ck("an archive was taken, carrying what stood",
-           now.get("arch") == was.get("arch", 0) + 1 and
-           (now.get("counts") or {}).get("projects") == was.get("projects"), now)
-        ck("and the new form starts empty",
-           now.get("projects") == 0 and now.get("actions") == 0, now)
+        ck("no archive is taken, and what stood is still stored",
+           now.get("arch") == was.get("arch", 0) and
+           now.get("projects") == was.get("projects"), now)
+        ck("and the new form starts empty", now.get("actions") == 0, now)
 
         # §255/§100.3: the rows are the product's own shapes, minted through the
         # product's own minter where there is one.
@@ -234,23 +246,39 @@ def main():
         ck("Reporting asks for both",
            "Retail academy" in rep and "Achieve revenue target" in rep, rep[:140])
 
-        print("\n§4 the Overview is the one a projects function draws (§213)")
-        # §3 left the report TAB, and the section row belongs to Strategy — a
-        # press that cannot land leaves the previous page on screen and every
-        # assertion after it measures that (§215, §50.6).
+        print("\n§4 the objectives are on the PLAN, and the Overview is the brief alone (§430)")
+        # §430 REWRITES WHAT §213 ASSERTED HERE, at Islam's word (2026-09-30):
+        # *"a function PLANNING in objectives and actions get their objectives
+        # and actions in the plan tab not the overview tab"*. The agreement with
+        # a projects function's Overview is replaced, not loosened (§218): the
+        # objectives are asserted ON the Plan, ABOVE the actions, and ABSENT
+        # from this function's Overview — beside a projects function whose
+        # Overview still draws them, or a build that dropped objectives
+        # everywhere would pass (§113.8).
         ck("the Strategy tab comes back", tab(pg, "fnstrat"))
-        ck("and the Overview section opens", sec(pg, "found"))
-        mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
-                      " function(x){ return x.textContent.trim(); })", [])
-        ck("it draws something", len(mine) > 0, mine)
+        ck("the Plan section opens", sec(pg, "proj"))
+        heads = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h4.mini'),"
+                       " function(x){ return x.textContent.trim().toLowerCase(); })", [])
+        ko_at = next((i for i, h in enumerate(heads) if "objective" in h), -1)
+        ac_at = next((i for i, h in enumerate(heads) if h.startswith("actions")), -1)
+        ck("the Plan draws the objectives, then the actions", 0 <= ko_at < ac_at, heads)
+        ck("and the objectives are this function's own",
+           "Achieve revenue target" in panel(pg), panel(pg)[:160])
+        brief = ev(pg, "(k)=>compOn('fn:'+k,'brief')", False, FK)
+        opened = sec(pg, "found")
+        ck("the Overview is offered exactly while the brief is switched on",
+           bool(opened) == bool(brief), {"brief": brief, "overview": opened})
+        if opened:
+            mine = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
+                          " function(x){ return x.textContent.trim(); })", [])
+            ck("and it holds no objectives", not any("Objective" in h for h in mine), mine)
         ck("the control function opens", go(pg, CTRL))
         ck("its Strategy tab comes back", tab(pg, "fnstrat"))
         ck("and its Overview opens", sec(pg, "found"))
         theirs = ev(pg, "()=>[].map.call(document.querySelectorAll('#panel h2,#panel h3,#panel h4'),"
                         " function(x){ return x.textContent.trim(); })", [])
-        # §94.8: the AGREEMENT, never a list of headings a wording change breaks.
-        ck("and it is the same page the other format draws", mine == theirs,
-           {"objectives": mine, "projects": theirs})
+        ck("and a projects function's Overview still draws its objectives",
+           any("Objective" in h for h in theirs), theirs)
 
         print("\n§5 every press reaches the STORED graph (§96)")
         go(pg, FK); sec(pg, "proj")
@@ -259,7 +287,11 @@ def main():
         except Exception:
             pass
         wrote = ev(pg, """(k)=>{
-          var box = document.querySelector('#panel textarea[data-fld], #panel input[data-fld]');
+          /* §430: the Plan holds two tables now, the objectives first, so the
+             action's box is asked of the LAST one — the first box on the page
+             is an objective's name. */
+          var tbs = document.querySelectorAll('#panel table');
+          var box = tbs.length ? tbs[tbs.length-1].querySelector('textarea[data-fld], input[data-fld]') : null;
           if (!box) return null;
           box.value = "Retail academy 2027";
           box.dispatchEvent(new Event('change', {bubbles:true}));
@@ -314,6 +346,29 @@ def main():
         ck("the blank row is counted, not merely marked",
            owed.get("gaps", 0) >= 2 and sorted(owed.get("missing") or []) == ["due", "owner"], owed)
         ck("and Submit says so", "missing in the plan" in (owed.get("refusal") or ""), owed.get("refusal"))
+
+        print("\n§7b an action that is behind asks for a note, as a milestone does (§434)")
+        # Islam, 2026-09-30: *"let's fix the actions that ask for a note"*. An
+        # action read through `measureScore` always answered null, so a due and
+        # behind action never asked. BOTH ENDS (§94.2): asked with no note,
+        # cleared by one, and never asked of an action whose date has not come.
+        behind = ev(pg, """(k)=>{
+          var a = addAction(k); a.name = "Payroll audit"; a.owner = "Amr Hassan";
+          a.due = "Mar 26"; a.status = "wip"; a.pct = 30;
+          var b = addAction(k); b.name = "Next year's grading review"; b.owner = "Amr Hassan";
+          b.due = "Dec 26"; b.status = "wip"; b.pct = 10;
+          var ids = function(){ return fnMissingNotes("fn:" + k).map(function(x){ return x.id; }); };
+          var before = ids(), refusal = submitRefusal("fn:" + k);
+          a.note = "Waiting on the payroll system export, due in April.";
+          var after = ids();
+          return { a: a.id, b: b.id, before: before, after: after, refusal: refusal };
+        }""", {}, FK)
+        ck("a due action at 30% with no note is asked for one",
+           behind.get("a") in (behind.get("before") or []), behind)
+        ck("and Submit says a figure has no note", "no note" in (behind.get("refusal") or ""), behind.get("refusal"))
+        ck("a note clears it", behind.get("a") not in (behind.get("after") or []), behind)
+        ck("and an action not yet due is never asked",
+           behind.get("b") not in (behind.get("before") or []), behind)
 
         print("\n§8 the plan can leave and come back (§22)")
         wb = ev(pg, """(k)=>{
@@ -397,6 +452,79 @@ def main():
         ck("and a figure reported by file reaches the stored row",
            bool(prog) and prog.get("status") == "wip" and prog.get("pct") == 40
            and prog.get("note") == "Two cohorts held", prog)
+
+        print("\n§8b the DOOR resolves the name the dropdown offers (§380)")
+        # THE GAP THAT HID A LIVE DEFECT. §8 above asserts the function is
+        # OFFERED in the file's own B2 dropdown and then calls
+        # `capPlanFromWorkbook` DIRECTLY — so the upload's own resolution, which
+        # is what a person actually meets, had never once been asked about this
+        # format. It refused: that predicate matched a function with
+        # `fnOwnsProjects`, which §342 makes false here, so the template offered
+        # a name and the upload answered "no business unit, supporting function
+        # or capability called …". A plan that downloads and cannot come back
+        # (§22, §61), and §53.5 exactly — one question with two answers.
+        #
+        # DRIVEN THROUGH THE REAL CONTROL (§96, §70): the blank template is
+        # built by the button's own builder, the subject is picked from the
+        # file's own dropdown, the bytes are written to disk and handed to the
+        # page's file input. Reading the door's predicate would assert it
+        # against itself (§113.8).
+        # THE BYTES GO STRAIGHT TO THE INPUT, never through a file on disk:
+        # `qa-run.py` refuses to sweep a file that mentions `design-mockups`
+        # AND writes (§334.14), and this file's own docstring names the mockup
+        # it was built from — so writing a temp .xlsx here would take the whole
+        # check out of every sweep. Spelling the write differently would be
+        # dodging a guard rather than satisfying it; not writing is neither.
+        import base64
+        b64 = ev(pg, """(k)=>{
+          var wb = capPlanWorkbook(blankCapShape(), { fmt:"objectives", only:true });
+          var list = wb[0].validations[0].list || [];
+          if (list.indexOf(FUNCTIONS[k].name) < 0) return { picked:null, list:list };
+          wb[0].rows[1][1] = FUNCTIONS[k].name;        /* chosen from its own list */
+          wb[1].rows = [["Time to hire", "\\u2264", "30", "d", "60", "Latest", ""]];
+          wb[2].rows = [["Sign the framework agreement", "Hala Nabil", "Jul 2026", ""]];
+          var u8 = buildXlsx(wb), s = "";
+          for (var i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+          return { picked: FUNCTIONS[k].name, list:list, b64: btoa(s) };
+        }""", {}, FK)
+        ck("the blank objectives template offers this function",
+           bool(b64.get("picked")), b64.get("list"))
+        if b64.get("b64"):
+            ev(pg, "()=>{ current='setup'; currentSub='import'; CURSEC.import='up'; paint(); }")
+            pg.wait_for_timeout(420)
+            try:
+                pg.set_input_files("#imp-file-plan", {
+                    "name": "objectives-plan.xlsx",
+                    "mimeType": "application/vnd.openxmlformats-officedocument."
+                                "spreadsheetml.sheet",
+                    "buffer": base64.b64decode(b64["b64"]) })
+                pg.wait_for_timeout(1200)
+            except Exception as e:
+                ck("the upload control is there", False, e)
+            door = ev(pg, """()=>({
+              problems: ((IMP.check && IMP.check.problems) || []).map(function(x){ return x.msg; }),
+              target: IMP.unit || "", read: !!IMP.summary
+            })""", {})
+            ck("the upload resolves it rather than refusing by name",
+               not any("no business unit" in (m or "") for m in (door.get("problems") or [])),
+               door.get("problems"))
+            ck("…and it resolves to that function, never to a capability",
+               door.get("target") == "fn:" + FK, door.get("target"))
+            ck("…and the file was read", door.get("read") is True, door)
+            # BOTH ENDS (§94.2): the door must still refuse a name nobody holds,
+            # or "it resolved" is true of a build that resolves anything.
+            bogus = ev(pg, """()=>{
+              var picked = "Nobody At All";
+              var uk = UNIT_KEYS.filter(function(x){ return UNITS[x].name === picked; })[0];
+              var fk = uk ? null : FUNCTION_KEYS.filter(function(x){
+                var f = FUNCTIONS[x];
+                return f.active !== false && fnPlansInPillars(f) && f.name === picked; })[0];
+              var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
+              var pfk = projectSubjectFns().filter(function(x){
+                return FUNCTIONS[x].name === picked; })[0];
+              return !!(uk || fk || pfk || caps.length);
+            }""", None)
+            ck("…and a name nobody holds is still refused", bogus is False, bogus)
 
         print("\n§9 the deck says what it holds")
         deck = ev(pg, """(k)=>{

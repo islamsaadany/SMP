@@ -583,7 +583,7 @@ with sync_playwright() as pw:
     other = pg.evaluate("""()=>{
       var u = UNITS["%s"], p = u.items.find(function(x){ return x.owner !== "Pillar Owner 287"; });
       if (!p) return null;
-      RAIL[unitRailKey(u)] = p.code; paint();
+      RAIL[unitRailKey(u)] = p.id; paint();
       return { code: p.code,
                boxes: document.querySelectorAll('#panel [data-rep]').length }; }""" % UNIT)
     ck("the pillar beside theirs still offers nothing — the reach is per row",

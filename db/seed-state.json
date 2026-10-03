@@ -1,6 +1,15 @@
 {
  "group": {
   "org": "Raya Trade",
+  "driversOn": true,
+  "seasons": [
+   {
+    "id": "ramadan",
+    "name": "Ramadan season",
+    "start": "2026-02-17",
+    "end": "2026-03-19"
+   }
+  ],
   "mainbus": [
    {
     "name": "Distribution",
@@ -1252,6 +1261,155 @@
     "pillars": 78,
     "exec": 71
    },
+   "drivers": {
+    "subs": [
+     {
+      "name": "Retail Stores",
+      "periods": [
+       {
+        "name": "Base year — excluding seasons",
+        "type": "base",
+        "drivers": [
+         {
+          "id": "d1",
+          "name": "Number of stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 12,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 12
+         },
+         {
+          "id": "d2",
+          "name": "Transactions per store-month",
+          "kind": "vol",
+          "unit": "n",
+          "base": 4500,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 4100,
+          "note": "Assumed the mature-store rate held. It did not — traffic softened from April."
+         },
+         {
+          "id": "d3",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 180,
+          "up": 10,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 201,
+          "note": "List price rise across the range from March."
+         }
+        ]
+       },
+       {
+        "name": "Ramadan season",
+        "type": "season",
+        "seasonId": "ramadan",
+        "drivers": [
+         {
+          "id": "d4",
+          "name": "Number of stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 12,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true
+         },
+         {
+          "id": "d5",
+          "name": "Transactions per store-month",
+          "kind": "vol",
+          "unit": "n",
+          "base": 6500,
+          "up": 5,
+          "upUnit": "%",
+          "actual": 7200,
+          "note": "The season ran harder than assumed."
+         },
+         {
+          "id": "d6",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 230,
+          "up": 10,
+          "upUnit": "%",
+          "assume": true,
+          "actual": 249,
+          "note": "Gifting and bulk purchase lift the basket well above the 180 annual average."
+         }
+        ]
+       },
+       {
+        "name": "New stores — 2026 openings",
+        "type": "increment",
+        "drivers": [
+         {
+          "id": "d10",
+          "name": "New stores",
+          "kind": "vol",
+          "unit": "n",
+          "base": 3,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 2,
+          "note": "Alex Corniche did not open — the lease completed in November."
+         },
+         {
+          "id": "d7",
+          "name": "Months active",
+          "kind": "vol",
+          "unit": "n",
+          "base": 9,
+          "up": 0,
+          "upUnit": "%",
+          "actual": 7,
+          "assume": true,
+          "note": "Both openings ran late against the Feb–Jun plan."
+         },
+         {
+          "id": "d8",
+          "name": "Transactions per store-month (mature)",
+          "kind": "vol",
+          "unit": "n",
+          "base": 4500,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true,
+          "note": "Mature-store rate. The ramp is applied separately below."
+         },
+         {
+          "id": "d9",
+          "name": "Average basket",
+          "kind": "val",
+          "unit": "n",
+          "base": 180,
+          "up": 0,
+          "upUnit": "%",
+          "assume": true
+         },
+         {
+          "id": "d11",
+          "name": "Maturity factor",
+          "kind": "val",
+          "unit": "%",
+          "base": 70,
+          "up": 0,
+          "upUnit": "%",
+          "note": "New stores trade below mature levels in year one."
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
    "clauses": [
     [
      "We are",
@@ -1308,6 +1466,7 @@
      "compile": "Latest",
      "actual": "91",
      "progress": 103,
+     "driver": "d10",
      "id": "retailstores-KO2"
     },
     {
@@ -1382,6 +1541,7 @@
        "compile": "Latest",
        "actual": "55M",
        "progress": 106,
+       "driver": "d2",
        "id": "retailstores-P1-M2"
       },
       {
@@ -6063,6 +6223,17 @@
    "a_cycle": "none",
    "a_setup": "none"
   },
+  "capowner": {
+   "a_group": "view",
+   "a_unit_own": "none",
+   "a_unit_own_strat": "none",
+   "a_unit_other": "none",
+   "a_fn_own": "edit",
+   "a_fn_own_strat": "view",
+   "a_fn_other": "none",
+   "a_cycle": "none",
+   "a_setup": "none"
+  },
   "powner": {
    "a_group": "view",
    "a_unit_own": "none",
@@ -6112,65 +6283,114 @@
   {
    "key": "theme",
    "internal": "Theme",
-   "group": "Themes",
+   "group": "Theme",
    "bu": "Themes",
-   "note": "The group's standing columns. Also called pillars or motto elements by clients."
+   "note": "The general motto or themes the whole company is following"
   },
   {
    "key": "pillar",
    "internal": "Pillar",
-   "group": "Group capabilities",
+   "group": "Pillar",
    "bu": "Pillars",
-   "note": "A business unit's direction or capability. Carries key measures and tactics."
+   "note": "A business unit's direction or capability focus areas"
+  },
+  {
+   "key": "capability",
+   "internal": "Capability",
+   "group": "Capability",
+   "bu": "Capabilities",
+   "note": "The internal abilities built to achieve the strategic choices"
   },
   {
    "key": "keyobj",
-   "internal": "Key Objectives",
-   "group": "Key Objectives",
+   "internal": "Key Objective",
+   "group": "Key Objective",
    "bu": "Key Objectives",
-   "note": "A unit's own scorecard. Previously called North Star and Guiding Objectives."
+   "note": "The targets set for a business unit, a company or the group"
   },
   {
    "key": "aspiration",
    "internal": "Winning Aspiration",
-   "group": "Vision",
+   "group": "Winning Aspiration",
    "bu": "Winning Aspiration",
-   "note": "One entity. Vision, End State and Winning Aspiration are display labels for it."
+   "note": "A description of what success looks like"
   },
   {
    "key": "purpose",
-   "internal": "Purpose",
+   "internal": "Mission",
    "group": "Mission",
-   "bu": "—",
-   "note": "Held by the top unit only. Business units inherit it."
+   "bu": "Mission",
+   "note": "Answering the question: why do we exist"
   },
   {
    "key": "values",
    "internal": "Core Values",
    "group": "Core Values",
-   "bu": "—",
-   "note": "Group-level only. A unit never declares its own."
+   "bu": "Core Values",
+   "note": "The company culture elements"
   },
   {
    "key": "measure",
    "internal": "Key Measure",
-   "group": "Key measures",
+   "group": "Key measure",
    "bu": "Key measures",
-   "note": "The measures under a single pillar."
+   "note": "The measures under a single pillar"
   },
   {
    "key": "tactic",
    "internal": "Tactic",
-   "group": "Tactics",
+   "group": "Tactic",
    "bu": "Tactics",
-   "note": "The work under a pillar. Spans quarters, has an owner."
+   "note": "The work under a pillar: spans quarters and has an owner"
   },
   {
    "key": "unitword",
    "internal": "Business Unit",
-   "group": "Business units",
+   "group": "Business unit",
    "bu": "Business units",
-   "note": "What this client calls a business unit. Headings only — sentences keep the platform's own word."
+   "note": "A part of the business with a plan of its own"
+  },
+  {
+   "key": "division",
+   "internal": "Division",
+   "group": "Division",
+   "bu": "Divisions",
+   "note": "The layer between the company or group level and the units and functions"
+  },
+  {
+   "key": "fnword",
+   "internal": "Supporting Function",
+   "group": "Supporting Function",
+   "bu": "Supporting Functions",
+   "note": "The supporting functions that enable the strategy"
+  },
+  {
+   "key": "project",
+   "internal": "Project",
+   "group": "Project",
+   "bu": "Projects",
+   "note": "The group of activities with correlated timelines and outcomes"
+  },
+  {
+   "key": "topword",
+   "internal": "Group",
+   "group": "Group",
+   "bu": "Group",
+   "note": "The level at the top: the group, the company, or the client's own word"
+  },
+  {
+   "key": "brief",
+   "internal": "Brief",
+   "group": "Who we are",
+   "bu": "Who we are",
+   "note": "A short description of who this part of the business is"
+  },
+  {
+   "key": "swot",
+   "internal": "SWOT",
+   "group": "SWOT",
+   "bu": "SWOT",
+   "note": "Strengths, weaknesses, opportunities and threats"
   }
  ],
  "bands": [

@@ -167,7 +167,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(250)
     press(pg, '#units button[data-u="mobile"]')
     pg.wait_for_timeout(500)
-    press(pg, '.rail [data-urail="mobile|03"]')
+    press(pg, '.rail [data-urail="mobile|mobile-P3"]')
     pg.wait_for_timeout(400)
 
     # ── 2 · what the row reads BEFORE, so the change can be measured ────
@@ -191,7 +191,7 @@ with sync_playwright() as p:
     chips = ev(pg, """() => {
       const t = [...document.querySelectorAll('.pane table')]
         .find(x => x.querySelector('thead') &&
-                   x.querySelector('thead').textContent.indexOf('Measure') >= 0);
+                   x.querySelector('thead').textContent.indexOf(L1('measure')) >= 0 /* §395: the client's word for one measure, asked of the page (§218) */);
       const rows = [...t.querySelectorAll('tbody tr')].filter(r => !r.classList.contains('newrow'));
       return { rows: rows.length,
                withChip: rows.filter(r => r.querySelector('.mpopen')).length };
@@ -232,7 +232,7 @@ with sync_playwright() as p:
       m.monthly = [1,2,3,4,5,6,7,8,9,10,11,12]; paint();
       const t = [...document.querySelectorAll('.pane table')]
         .find(x => x.querySelector('thead') &&
-                   x.querySelector('thead').textContent.indexOf('Measure') >= 0);
+                   x.querySelector('thead').textContent.indexOf(L1('measure')) >= 0 /* §395: the client's word for one measure, asked of the page (§218) */);
       const rows = [...t.querySelectorAll('tbody tr')].filter(r => !r.classList.contains('newrow'));
       const on = rows.map(r => r.querySelector('.mpopen'))
                      .filter(b => b && b.classList.contains('on'));
@@ -259,7 +259,7 @@ with sync_playwright() as p:
       m.target = "Y/N"; paint();
       const t = [...document.querySelectorAll('.pane table')]
         .find(x => x.querySelector('thead') &&
-                   x.querySelector('thead').textContent.indexOf('Measure') >= 0);
+                   x.querySelector('thead').textContent.indexOf(L1('measure')) >= 0 /* §395: the client's word for one measure, asked of the page (§218) */);
       const row = [...t.querySelectorAll('tbody tr')].filter(r => !r.classList.contains('newrow'))[1];
       const has = !!row.querySelector('.mpopen');
       const other = [...t.querySelectorAll('tbody tr')]

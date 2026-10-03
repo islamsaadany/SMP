@@ -17,10 +17,11 @@ WHAT THIS ASSERTS — the problem, not the layout (§94.8):
   3. BOTH ENDS (§94.2): drawn for whoever may AUTHOR the page and drawn for
      nobody else — a build that removed it for everyone passes half of this.
   4. NOT ANYWHERE ELSE, which is the second half of the ask: no such control on
-     Performance or Reporting, and the GROUP's own Foundation and Temple are
-     UNTOUCHED — they are tabs with no section line, so their pens stay where
-     they are. Asserting only the absence would pass on a build that had taken
-     the group's pens away too.
+     Performance or Reporting; the GROUP's Temple is a tab with no section
+     line and keeps its Edit bar, and since §428 the group's Foundation lives
+     inside a Strategy tab of its own and wears the unit's one pen on the
+     section line. Asserting only the absence would pass on a build that had
+     taken the group's pens away too.
   5. ONE WAY OUT. With the mode open the row does not carry both *Done editing*
      and *Done filling* (§268's own duplication, and the wrong word for the
      office).
@@ -56,6 +57,7 @@ STATE = """() => ({
   fdone: document.querySelectorAll('#secrow-in .fdone').length,
   edit:  Object.keys(EDIT_PAGE).filter(k => EDIT_PAGE[k]),
   flds:  document.querySelectorAll('#panel .fld, #panel [data-fld]').length,
+  adds:  document.querySelectorAll('#panel .addrow button').length,
   sec:   (typeof CURSEC !== 'undefined') ? (CURSEC[currentSub] || '') : '',
   fill:  (document.querySelector('#secrow-in [data-fillcta]')||{dataset:{}}).dataset.fillcta
 })"""
@@ -187,8 +189,14 @@ with sync_playwright() as pw:
             # mode THIS page reads is among what opened — §1b asserts the set.
             ck("%s/%s · pressing it opens the mode the page reads" % (key, s),
                a["rowPage"] in o["edit"], (a["rowPage"], o["edit"]))
-            ck("%s/%s · ...and the page gains editable fields" % (key, s),
-               o["flds"] > 0, o["flds"])
+            # A WAY TO WRITE, NOT NECESSARILY A FIELD (§404.1). A pillars
+            # function's Overview carries no "What it is" card any more, so on
+            # one holding no objectives yet the only thing the pen opens is the
+            # table's Add — which is a way in, and the one §61 requires. Both
+            # ends: read mode offers neither, or "gains" proves nothing.
+            ck("%s/%s · ...and the page gains a way to write into it" % (key, s),
+               a["flds"] + a["adds"] == 0 and o["flds"] + o["adds"] > 0,
+               {"before": (a["flds"], a["adds"]), "after": (o["flds"], o["adds"])})
             ck("%s/%s · one way out, not two (§268)" % (key, s), o["fdone"] == 0, o)
             press(pg)
             c = pg.evaluate(STATE)
@@ -495,14 +503,22 @@ with sync_playwright() as pw:
     g = pg.query_selector('#units [data-u="group"]')
     if g:
         g.click(); pg.wait_for_timeout(700)
-        for t, sel, what in (("foundation", '#panel .hoverpen .penbtn[data-page="foundation"]',
-                              "the group's Foundation keeps its pen in the card"),
-                             ("temple", '#panel .pageact [data-page="temple"]',
-                              "the group's Temple keeps its Edit bar")):
-            tab(pg, t)
-            ck(what, pg.query_selector(sel) is not None)
-            ck("...and it is not on a section line (that tab has none)",
-               pg.evaluate("()=>document.querySelectorAll('#secrow-in .secpen').length") == 0)
+        # §428 REWROTE THIS HALF, NEVER LOOSENED IT (§218): the group's
+        # Foundation moved INSIDE a Strategy tab of its own (Foundation ·
+        # SWOT · Plan), so it now carries its pen exactly as a unit's does —
+        # ONE control on the section line and none left in the card. The
+        # Temple is still a tab with no section line and keeps its Edit bar.
+        tab(pg, "strategy")
+        gl = pg.evaluate("""()=>({line:[...document.querySelectorAll('#secrow-in .secpen')].length,
+          card:document.querySelectorAll('#panel .hoverpen .penbtn').length})""")
+        ck("the group's Strategy tab carries its pen on the section line, as a unit's does",
+           gl["line"] == 1, gl)
+        ck("...and none is left in the Foundation card", gl["card"] == 0, gl)
+        tab(pg, "temple")
+        ck("the group's Temple keeps its Edit bar",
+           pg.query_selector('#panel .pageact [data-page="temple"]') is not None)
+        ck("...and it is not on a section line (that tab has none)",
+           pg.evaluate("()=>document.querySelectorAll('#secrow-in .secpen').length") == 0)
 
     # ── 6 · IT IS DRESSED, and it fits ───────────────────────────────
     print("\n6 · it is a button, not a bare word, and the line holds")

@@ -35,10 +35,12 @@
        directly: no webfont, a small type scale, and shape carried by radius
        rather than by shadow. */
     /* The fallback stack, and what every embedded face falls back TO. Never
-       read directly by a rule — rules read --sans, which is set on the font
-       axis below. */
+       read directly by a rule — rules read --sans. */
     --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
-    --sans:var(--sys-sans);
+    /* ONE FACE, EVERYWHERE (§402). Islam: *"remove the font button and keep
+       the font source sans across the platform."* The system stack stays as
+       what a face that fails to decode falls back to, never as a choice. */
+    --sans:'Source Sans 3',var(--sys-sans);
     /* The mono stack stays a system stack. It carries person keys and unit
        codes — a dozen short strings — and a second embedded family to style
        those would be 40 KB for nothing. */
@@ -70,22 +72,8 @@
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
 
-  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
-     Its own axis for now, independent of the palette, so the four faces can be
-     compared IN the real product rather than from a specimen sheet. Islam:
-     *"B first"* — try them all, then settle which face belongs to which
-     palette and collapse the axis into it, at which point the faces nobody
-     picked come out of the file.
-
-     Each face names the system stack after it, so a face that fails to decode
-     degrades to the system font rather than to a default serif. Absence of the
-     attribute is the system stack, which is why there is no [data-font="system"]
-     block: nothing to set. */
-  /* ONE BLOCK, because there is one embedded face (§157). The other three
-     went with their .woff2 files rather than being left here unreachable — a
-     rule for a face the product no longer carries is exactly what §24 is
-     about, and the next reader would have no way to tell it was dead. */
-  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  /* THE FONT AXIS (§38.8, §157) IS GONE (§402): Source Sans 3 is --sans
+     above, for everybody, and there is no switch to answer. */
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every
@@ -138,7 +126,7 @@
     --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
-    --line:#E2E8F0; --line-soft:#F1F5F9;
+    --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -161,7 +149,7 @@
     --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
-    --line:#2B3852; --line-soft:#212C42;
+    --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -193,7 +181,7 @@
     --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
-    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
     --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
@@ -213,7 +201,7 @@
     --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
-    --line:#333A45; --line-soft:#2A303A;
+    --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
     --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
@@ -533,36 +521,8 @@
   .tabs button:hover { background:var(--ground); color:var(--ink); }
   .tabs button[aria-selected="true"] { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  /* ── THE REPORTING TAB WEARS THE REPORT ORANGE (§222) ──────────────────
-     Islam picked the solid fill of three drawn options: the volume the Report
-     button had, moved onto the tab that replaces it. Unmistakable while you
-     are in it, which is the point — everything typed there is going to the
-     office.
-
-     `--cta`/`--cta-ink` are the pair §94.8 declared TOGETHER: the fill and
-     the ink that survives on it. Never `--cta` as type on a light ground and
-     never white on the bright half, which is §38.4's trap in both
-     directions.
-
-     `.tabs button.cta` is (0,2,1) against `.tabs button`'s (0,1,1), so it
-     wins without an !important — the mistake §40 recorded, where an enforced
-     rule went on winning after the argument had changed. */
-  /* §222.2: THE FILL IS ALWAYS ON, not only while the tab is selected. Islam:
-     *"the reporting button should always become orange even if it's not open,
-     and it's appearing as long as the cycle is open."* The first build gave
-     the orange to the word when unselected and the fill only on selection,
-     which made it quiet exactly when somebody needs to notice it — the old
-     Report button was solid at all times, and that is the volume being moved
-     rather than a new one being added (§41's budget: the tab is drawn only
-     while a cycle is open, for somebody who may report).
-
-     SELECTION IS STILL SAID, in the deeper half of the same pair — a tab that
-     never changes when you are standing on it stops answering "where am I".
-     `--cta-hover` is that half and is declared for every palette beside
-     `--cta`, so this needs no new token and no literal (§25). */
-  .tabs button.cta { background:var(--cta); color:var(--cta-ink); font-weight:600; }
-  .tabs button.cta:hover { background:var(--cta-hover); color:var(--cta-ink); }
-  .tabs button.cta[aria-selected="true"] { background:var(--cta-hover); color:var(--cta-ink); }
+  /* The main tab row, Reporting's orange fill included, lives in
+     arrange.css with §409. */
 
   .view { padding-top:32px; }
   [hidden] { display:none !important; }
@@ -842,9 +802,8 @@ html[data-client-settings] .viewer { display:none; }
 .clientlogo{ height:26px; width:auto; max-width:120px; object-fit:contain;
              flex-shrink:0; align-self:center; display:block }
 
-  /* Sub-nav: Performance is the regular view and is marked as such */
-  .tabs button.primary { color:var(--gold-deep); font-weight:700; }
-  .tabs button.primary[aria-selected="true"] { color:var(--ink); }
+  /* `.primary` on a tab is a MARKER only (the landing tab, read by the
+     welcome screen); §409 took its colour and weight away. */
   /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
      It used to be `.tabs button.primary::before` — painted on whichever tab is
      the landing page, on every destination, always. So it said "this is the
@@ -1118,6 +1077,9 @@ html[data-client-settings] .viewer { display:none; }
 
   /* ── Core values box ──────────────────────────────────── */
   .valbox { margin-top:20px; }
+  .uvlist { display:flex; flex-direction:column; gap:8px; }
+  .uvrow { display:grid; grid-template-columns:minmax(140px,1fr) 2fr auto; gap:8px; align-items:start; }
+  @media (max-width:700px){ .uvrow { grid-template-columns:1fr auto; } .uvrow > :nth-child(2){ grid-column:1 / -1; } }
   .valgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
   details.valcard { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
   details.valcard[open] { border-color:var(--gold); }
@@ -1279,6 +1241,11 @@ html[data-client-settings] .viewer { display:none; }
   .rmconfirm .danger { background:var(--bad); border:1px solid var(--bad);
     color:var(--surface); }
   .rmconfirm .danger:hover { filter:brightness(1.08); }
+  /* §405: a change that hides and keeps is not destructive, so its button
+     wears the navigation bar's own ground, never the alarm. */
+  .rmconfirm .go { background:var(--panel); border:1px solid var(--panel);
+    color:var(--panel-ink); }
+  .rmconfirm .go:hover { filter:brightness(1.12); }
 
   /* ── TWO ANSWERS, EACH SAYING WHAT IT DOES (§325) ──────────────────────
      Keeping the projects and destroying them are not two flavours of one act,
@@ -2044,6 +2011,71 @@ html[data-client-settings] .viewer { display:none; }
   .editbtn.reopen:hover { background:var(--cta); color:var(--cta-ink);
                           border-color:var(--cta); }
 
+  /* ══════════════════════════════════════════════════════════════════
+     THE REPORTS, IN THE PLATFORM'S PANE (§376)
+
+     ONE MARKUP, TWO DRESSES (§364, §53.5). `libraryRows()` writes the same
+     rows for the module's own page and for this tab, so a report cannot
+     carry one date here and another there — and each host dresses them,
+     because a page whose whole window is the library and a pane sitting
+     under a tab row are not the same room.
+
+     EVERY RULE IS SCOPED TO `.libpane`, AND THAT IS NOT TIDINESS. The
+     module's classes are `.list`, `.item`, `.body` and `.none` — as generic
+     as a class name gets, and `.none` already has five rules in this product
+     (a pill, a chip, a setup row, a slide). A class name is ONE GLOBAL
+     NAMESPACE (§65.9), so scoping is what stops this block reaching them and
+     stops a rule written next month reaching this. Nothing outside the pane
+     is touched, asserted.
+
+     THE TOKENS ARE THE PRODUCT'S OWN. The module's stylesheet already draws
+     from --line, --surface, --ink, --ink-3 and --gold, which is why a
+     verbatim carry was possible at all; what is added here is the pane's own
+     furniture — the search row, the waiting line — in the sizes the rest of
+     the platform uses rather than in numbers chosen for this one screen. */
+  .libpane { padding:2px 0 8px; }
+  /* THE ROW THE LIST IS REWRITTEN UNDER, never rewritten itself: a hand may
+     be in the search box when an answer lands (§35, §271 one control over),
+     so `draw()` replaces the list and the count and leaves this alone. */
+  .libtools { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+              padding-bottom:2px; }
+  .libpane .libsrch { flex:1 1 260px; max-width:420px; width:auto; }
+  .libgo { flex:none; font:600 var(--fs-small)/1.3 var(--sans); cursor:pointer;
+           color:var(--ink); background:var(--surface);
+           border:1px solid var(--line); border-radius:var(--r-sm);
+           padding:6px 14px; }
+  .libgo:hover { border-color:var(--gold); }
+  .libgo:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* The count sits AFTER the controls and is pushed to the end, so it reads
+     as a fact about the list below rather than as a label on the box beside
+     it (§87: a number next to a control is read as that control's). */
+  .libcount { margin-left:auto; font-size:var(--fs-small); color:var(--ink-3);
+              white-space:nowrap; }
+  .libwait { padding:26px 2px 10px; color:var(--ink-3); font-size:var(--fs-small); }
+
+  /* ── THE ROWS, carried from the module's own stylesheet ───────────── */
+  .libpane .list { display:flex; flex-direction:column;
+                   border-top:1px solid var(--line); margin-top:12px; }
+  .libpane .item { display:flex; gap:16px; align-items:flex-start;
+                   padding:14px 2px; border-bottom:1px solid var(--line); }
+  .libpane .item .body { min-width:0; flex:1 1 auto; display:flex;
+                         flex-direction:column; gap:4px; }
+  .libpane .item h3 { margin:0; font-size:15.5px; font-weight:600; line-height:1.35; }
+  .libpane .item p { margin:0; font-size:13.5px; line-height:1.5; color:var(--ink-3); }
+  .libpane .item .facts { font:400 12px/1.5 var(--mono); color:var(--ink-3);
+                          overflow-wrap:anywhere; }
+  .libpane .item .facts b { font-weight:600; color:var(--ink); }
+  .libpane .dl { flex:none; border:1px solid var(--line); background:var(--surface);
+                 color:var(--ink); border-radius:8px; padding:7px 13px;
+                 font:600 13px/1.5 inherit; text-decoration:none; display:inline-block; }
+  .libpane .dl:hover, .libpane .dl:focus-visible { border-color:var(--gold); outline:none; }
+  .libpane .nofile { flex:none; font-size:12.5px; color:var(--ink-3); }
+  .libpane .none { padding:34px 4px 10px; color:var(--ink-3); font-size:14px;
+                   max-width:60ch; }
+  .libpane .none b { color:var(--ink); font-weight:600; display:block;
+                     font-size:15.5px; margin-bottom:6px; }
+  @media (max-width:560px){ .libpane .item { flex-direction:column; gap:9px; } }
+
   /* ── Viewer switcher ─────────────────────────────────────────────── */
   .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
@@ -2321,6 +2353,15 @@ html[data-client-settings] .viewer { display:none; }
   .cfg input.lbl, .cfg input.lvl { width:100%; max-width:none; text-align:left;
                                     font-family:var(--sans); font-size:13px; }
   .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
+  /* TERMINOLOGY (§392): the description is prose and wraps, as the signed-off
+     drawing shows — the one column on this table §88's one-line rule does not
+     govern. The default is two short words stacked; Reset sits beside the
+     word for many and only appears when a row differs from its default. */
+  .cfg table.lbltable td.lbldesc { white-space:normal; max-width:none; color:var(--ink); }
+  .cfg table.lbltable td.lbldef { max-width:none; color:var(--ink-2); line-height:1.45; }
+  .cfg table.lbltable td { max-width:none; vertical-align:top; }
+  .lblmany { display:flex; align-items:center; gap:10px; }
+  .lblmany .lblreset { font-size:12px; white-space:nowrap; flex:none; }
 
   /* ── Chrome: one sticky container, nothing measured ─────────────── */
   /* A background of its own, not just its children's. The container was
@@ -2477,6 +2518,14 @@ html[data-client-settings] .viewer { display:none; }
                    color:var(--ink-3); background:var(--surface); }
   .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+  /* A VALUE TAKEN WHOLE (§378). An email and a phone number are copied
+     entire or not at all, so every gesture selects the whole of one —
+     which is what makes the behaviour the same in every browser rather
+     than whatever that browser thinks a word is. The issued-password box
+     has said this since §43.8; this is that device, not a second one.
+     SCOPED, never on `.val` at large: a unit's name selected whole on a
+     click is a change nobody asked for (rule 1b). */
+  .cfg .val.selall { -webkit-user-select:all; user-select:all; }
 
   /* ══ The searchable dropdown (searchsel.js) ═════════════════════════
      The button stands where the <select> stood, so it inherits nothing it
@@ -3386,9 +3435,40 @@ html[data-client-settings] .viewer { display:none; }
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* ── AND THE SEAM WAS NEVER THERE (§373) ─────────────────────────
+     Islam, of this column: "you added the 3 dots to the roles whihc is wrong
+     the 3 dots is out of this column." They are not in Roles — they are this
+     frozen column, floating over whatever scrolls under it. Measured: at
+     1500px the table does not scroll and they sit after STATUS; at 1200px and
+     below they sit at x1129 inside a Roles column running 977→1186, which is
+     his screenshot to the pixel. Nothing is lost — scrolled fully right,
+     STATUS is whole again.
+
+     WHAT WAS WRONG IS THAT NOTHING SAID THIS COLUMN WAS FROZEN. The
+     `box-shadow` below HAS NEVER PAINTED: Chromium draws no box-shadow on a
+     `<td>` under `border-collapse:collapse`. Proved rather than reasoned —
+     a SOLID RED 10px shadow on this cell photographed byte-identical to none
+     at all, while a border, a `::before` and a background each changed the
+     pixels. It fails the way this file keeps recording, and the way the
+     vertical sticky twenty lines up failed: silently, with every property
+     reading back exactly as written (§93.11).
+
+     So the seam is a `::before`, which does paint — and it is a WASH rather
+     than a hairline, because a 1px line says "next column" and what this
+     column is doing is passing OVER the one beside it.
+
+     FOUND AND DELIBERATELY NOT SWEPT (rule 1b): `td.namecell` and
+     `.fnscfg td.fnamecell` carry the same dead declaration and are left
+     exactly as they are — Islam asked about this column. The name column
+     could not take this answer unchanged in any case: it is `overflow:hidden`
+     (§71.2, three rules up), so a `::before` of its own is clipped away —
+     measured. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
+  .peoplecfg td.kebcell::before, .peoplecfg thead th.kebcell::before {
+    content:""; position:absolute; right:100%; top:0; bottom:0; width:14px;
+    pointer-events:none;
+    background:linear-gradient(to left, var(--froze-wash), transparent); }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -3565,9 +3645,12 @@ html[data-client-settings] .viewer { display:none; }
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* The twin of the block above (§29.2's family — this rule is declared twice
+     in this file, byte for byte). Left as the second copy rather than deleted,
+     because removing one of a pair nobody has reconciled is a change of its
+     own; the seam is declared once, above. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -3836,6 +3919,129 @@ html[data-client-settings] .viewer { display:none; }
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
+  /* ── THE ROLES CELL IS THE BUTTON (§372, Islam 2026-09-17) ────────
+     "for the role I'm afraid it still overflows as a box it can open which a
+     button as you do but not overflowing on other voxes."
+
+     A `.ssbtn` sizes to its content and a ticking list's content is its widest
+     entry, so left alone it took the column from 209px to 477 and the table
+     behind it from 1355 to 1623 — and still overflowed. Capped to the cell it
+     holds exactly what the register draws today.
+
+     AND THE BOX MAY NOT MAKE THE ROW TALLER. `.ssbtn` carries `padding:6px 9px`
+     and a border, which is right for a control standing on its own and wrong
+     wrapped round chips that already have a height of their own: measured, it
+     took every row from 39px to 49, and thirty-one rows at 10px is 310px of
+     register moving for a control nobody pressed. A setup table row is one
+     line (§88), so the box takes the height the chips already had. What it
+     does cost is 27px of column — the box's own edges and the caret that says
+     it opens — and no other column moves. */
+  /* ── THE OPEN CELL (§372) ────────────────────────────────────────
+     One field, filling the cell it replaced. `width:100%` with `min-width:0`
+     rather than a cap: §110.8 measured a percentage doing nothing under
+     `table-layout:auto` — the cell is sized BY its child — and a definite
+     width is what stops the field contributing its intrinsic size to the
+     column. Measured, the row goes 39px to 40 and no column moves. */
+  .peoplecfg td.pcellopen { overflow:visible; }
+  /* A BLOCK, NEVER `width:100%` (§372). Measured: in an auto-layout table
+     Chromium resolves a percentage against the cell's PADDING box, so
+     `width:100%` in a 150px cell with 8px either side came out 150 and hung
+     8px past its own cell — §110.8's note that `max-width:100%` does nothing
+     in this table, met from the other side. A block-level element fills its
+     containing block's CONTENT box with no percentage to resolve, which is
+     the same answer without the quirk. */
+  /* AND CAPPED, BECAUSE `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+     BUTTON (§373). Islam, with the Unit cell open on a function called
+     "Strategy Management Office": the box ran into EMAIL. Measured, 261.1px of
+     control inside a 176px cell — 93.6px past its own right edge — and a click
+     20px inside the email cell returned the BUTTON, which is §110.1's fault
+     exactly: a control that is present, correctly sized and eating its
+     neighbour's clicks.
+
+     `max-width:none` assumed a block fills its container. That is true of the
+     `<input>` (measured: 145.1px in a 162.1px cell, the content box to the
+     pixel) and FALSE of `searchsel.js`'s `<button>`, which is shrink-to-fit —
+     and `.ssbtn` is `white-space:nowrap`, so its text IS its width.
+
+     AND §110's "`max-width:100%` DOES NOTHING HERE", eighty lines up, is about
+     an `<input>` whose own intrinsic width was sizing the column — circular, so
+     the cap had nothing to resolve against. A button capped here does not
+     contribute that width in the first place, and it was measured BOTH ways
+     before it was believed (§94.5): with the column's declared 176px and with
+     `width:auto` forced on it, the box ends at the content edge either way
+     (159 of 176, 156.2 of 173.2). The label clips with the "…" `.ssbtn
+     .sslabel` already carries, the row stays 38.6px beside its neighbours, and
+     the email gets its clicks back. */
+  .peoplecfg td.pcellopen .fld,
+  .peoplecfg td.pcellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:100%;
+    box-sizing:border-box; }
+
+  /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
+     Islam: "on opening something the arrow appears, no need for the arrow.
+     and for the roles as well no need for the arrow showng the the box is a
+     drop down box."
+
+     IT GOES BECAUSE IT IS POINTLESS, NOT BECAUSE IT IS BEING HIDDEN: the
+     double-click opens the LIST (shell.html), so by the time the box is drawn
+     the thing the arrow announces has already happened.
+
+     AND IT IS WHAT MADE THE ROW GROW. `.pcellopen .ssbtn` is `display:block`
+     — §372's answer to a percentage-width quirk — so the button's two children
+     stopped being flex items and the caret, an inline span after a block
+     label, fell to a line of its own: measured, the open row stood at 59.6px
+     against its neighbours' 38.6, which is the picture he sent. With the caret
+     gone there is nothing left to wrap.
+
+     SCOPED TO THE REGISTER'S TABLE. Every other searchable select in the
+     platform — Setup's dropdowns, the viewer switcher, a plan's owner pickers
+     — is a control standing on its own with nothing else to say it opens, and
+     none of them was asked about (rule 1b). */
+  .peoplecfg .sscar { display:none; }
+
+  /* The open roles cell takes `.pcellopen`'s block form (above) rather than a
+     percentage: §110.8's quirk resolves 100% against the cell's PADDING box in
+     this auto-layout table, so the button hung 8px past its own cell. The
+     dialog's copy keeps `width:100%` — it is in a form, not a table cell. */
+  /* The roles button holds CHIPS rather than a line of text, so it keeps its
+     own tighter padding — measured, `.cfg input`'s 4px puts that row at
+     45.1px where 1px puts it at the resting 39.1. Two paddings, one
+     height, which is the thing that matters. */
+  .peoplecfg td.roles.pcellopen .ssbtn { padding:1px 6px; }
+
+  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§372.14) ──
+     "the table in general should look everything fixed ... until I made the
+     double click which opens the box either for writing or a drop box."
+     TWO KINDS OF BOX, SO TWO HEIGHTS UNLESS SOMETHING SAYS OTHERWISE — and
+     something did not: `.cfg input` gives every field in a Setup table
+     12.5px/4px 7px, and `searchsel.js` draws a BUTTON, which that rule cannot
+     reach, so it kept its own 13px/6px 9px. Measured, the open drop cell's
+     row stood at 42.5px against a text cell's 40.4 and a resting row's 39.1 —
+     the 3.4px jump he is describing when he says the table should look fixed.
+     These are `.cfg input`'s own two numbers rather than new ones, and what
+     is ASSERTED is the AGREEMENT (§94.8) — the two kinds of open cell are one
+     height — so if that rule ever moves, the check goes red rather than the
+     two drifting apart in silence (§122.5). */
+  .peoplecfg td.pcellopen .ssbtn { font-size:12.5px; padding:4px 7px; }
+  .pdf .rolebox .ssbtn {
+    width:100%; max-width:100%; min-width:0; padding:1px 6px; }
+  .peoplecfg td.roles .ssbtn .sslabel, .pdf .rolebox .ssbtn .sslabel {
+    overflow:hidden; min-width:0; }
+  /* As a LABEL the "…" is a span (config-render.js): a button inside a button
+     is not markup, and one press opens the whole list anyway. It keeps the
+     control's look, because what it says — there are more roles than this —
+     is the same fact either way. */
+  .rolemore:not(button) { display:inline-flex; align-items:center; }
+  /* WHAT THE LIST CANNOT SET, ABOVE IT (searchsel's `data-sshead`). The chips
+     are the register's own, so nothing new is drawn; the key over them is the
+     platform's uppercase label at the size every other key wears. */
+  .sspop .sshead { padding:9px 11px 10px; border-bottom:1px solid var(--line);
+                   display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .sspop .sshead > b { width:100%; margin-bottom:2px; font-size:10.5px;
+                       letter-spacing:.09em; text-transform:uppercase;
+                       color:var(--ink-3); font-weight:500; }
+  .sspop .sshead .rolechip { margin:0; opacity:.72; }
+  .sspop .sshead .rolechip b { font-weight:500; }
   /* The rail's groups fold (§47.7). A button now, not a div — it does
      something, so it has to be reachable by keyboard and say what it is. */
   .setuprail .rgroup { display:flex; align-items:center; gap:7px; width:100%;
@@ -4461,19 +4667,15 @@ html[data-client-settings] .viewer { display:none; }
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
     max-width:260px; white-space:nowrap; }
 
-  /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
-     It has to look like the value, not like a control, or every row grows a
-     button — so it inherits the cell's type and only the underline on hover
-     says it does something. The tick is written into the element by the
-     handler, because paint() would replace the thing just pressed (§63). */
-  .copyval { font:inherit; font-size:13px; color:var(--ink); padding:0; border:0;
-             background:none; text-align:left; display:block; width:100%;
-             max-width:100%; overflow:hidden; text-overflow:ellipsis;
-             white-space:nowrap; cursor:pointer; }
-  .copyval.mono { font-family:var(--mono); font-size:12.5px; }
-  .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
-  .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-  .copyval.copied { color:var(--good-tx); text-decoration:none; }
+  /* ── THE NUMBER IS A VALUE IN THE REGISTER'S OWN SHAPE (§377) ─────
+     §93.6's five `.copyval` rules went with the control (the button's own
+     reset, its mono size, the hover underline, the focus ring and the green
+     "Copied"). What is left is the one thing they carried that was never
+     about the press: a phone reads a shade smaller than an address, so that
+     a monospaced number and a proportional address sit at the same weight.
+     The FAMILY comes from the global `.mono` the product already has; this is
+     the size alone, and `.cfg .val` (0,2,0) is what it has to outrank. */
+  .cfg .val.mono { font-size:12.5px; }
 
   /* The two columns a row's edit controls live in (§93.10). A width on the
      HEADER is what auto layout reads — a width on the body cells does nothing
@@ -4734,8 +4936,12 @@ html[data-client-settings] .viewer { display:none; }
      baseline its neighbouring inputs sit on, so the row does not go ragged,
      and the dashed edge and quiet ink are what the removed sentence used to
      say. `cursor:help` is the sign there is something on the hover. */
+  /* §410.2: the SAME padding as `.fld` (6px 9px, arrange.css), or the box
+     stands 10px taller than the inputs beside it — which is what this rule's
+     own comment above says must not happen, and what made the dialog scroll
+     at 1280×700. */
   .pdlg .pdro { display:block; border:1px dashed var(--line); border-radius:var(--r-sm);
-    padding:11px 12px; color:var(--ink-3); background:var(--surface-2);
+    padding:6px 9px; color:var(--ink-3); background:var(--surface-2);
     cursor:help; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdlg .pdsect { grid-column:1 / -1; font-size:10.5px; letter-spacing:.07em;
     text-transform:uppercase; font-weight:700; color:var(--gold-deep);
@@ -4860,6 +5066,7 @@ html[data-client-settings] .viewer { display:none; }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -4940,8 +5147,7 @@ html[data-client-settings] .viewer { display:none; }
   .drill:hover { color:var(--gold-deep); }
   .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
-  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
-  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
+  nav.tabs.sectionrow { background:var(--surface); border-bottom:1px solid var(--line); }
   .gwrap { display:block; }
   .gwrap .card-head { position:relative; }
   .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
@@ -5302,6 +5508,104 @@ html[data-client-settings] .viewer { display:none; }
               flex-shrink:0; }
   .themesvg { width:12px; height:12px; display:block; }
 
+  /* ── THE WHITE TOP BAR, ON THE PLATFORM'S OWN SCALE (§410) ──────────────
+     Islam, of the plan-page restyle: *"can you suggest a neat design for the
+     top bar white one as well"*, then of the mockup, *"drop the system button
+     and build both"*. The bar was 27px with the text touching both edges and
+     five sizes on it, 8.5px to 12px, none of them the platform's own. It is
+     40px now and every size is one the page already uses: the product name at
+     the body size, the client's name in the quiet ink after a hairline, the
+     "Viewing as" key in the same small capitals as a table heading, and the
+     role line as ordinary grey text rather than gold capitals — it says who
+     you are, which is not an alarm. Written AFTER the rules above on purpose:
+     they are the history of how the line got to one line, and this is only
+     what it measures now (§29.2: the later rule is the one the browser uses).
+
+     THE VIEWER MOVES RIGHT. It sat wherever the free space left it; it goes
+     beside the light/dark button with a hairline between, and the gap that
+     used to float it goes to the left of it instead. A viewer that is not
+     drawn (anybody but the office, and the client's own settings) hands the
+     push back to the buttons, or they would sit against the brand. */
+  .top-in { gap:16px; padding:0 24px; min-height:40px; align-items:center; }
+  .brand { align-items:center; gap:12px; margin-right:0; }
+  /* The product's and the client's names are never the thing that gives way
+     on a narrower window (measured at 1100: "Strategy Management Platf…").
+     The role line beside the viewer is, and it keeps the whole line on its
+     hover. */
+  .brand, .brand h1, .orgname { flex:none; }
+  .viewer { flex:0 1 auto; }
+  .brand h1 { font-family:var(--sans); font-size:var(--fs-body); font-weight:600;
+              color:var(--ink); line-height:1.2; }
+  .orgname { font-size:var(--fs-note); font-weight:400; color:var(--ink-3);
+             letter-spacing:0; line-height:16px; }
+  .orgname:not(:empty) { border-left:1px solid var(--line); padding-left:12px; }
+  .viewer { margin-left:auto; gap:8px; padding-right:16px; min-height:22px;
+            border-right:1px solid var(--line); justify-content:flex-end; }
+  .viewer label { font-size:10.5px; letter-spacing:.09em; }
+  .viewer .ssbtn { font-size:var(--fs-small); height:26px; padding:0 8px;
+                   border-radius:6px; line-height:24px; max-width:300px;
+                   flex:0 1 auto; min-width:120px; }
+  .viewer-note { font-size:var(--fs-small); font-weight:400; color:var(--ink-3);
+                 letter-spacing:0; text-transform:none; }
+  .topacts { margin-left:0; gap:8px; }
+  .viewer[hidden] + .topacts,
+  html[data-client-settings] .viewer + .topacts { margin-left:auto; }
+  .infobtn { font-size:10.5px; padding:4px 10px; letter-spacing:.09em; }
+  .themebtn { width:26px; height:26px; padding:0; }
+  .themesvg { width:14px; height:14px; }
+
+/* ── §410, THE PLAN PAGE: THE RAIL AS CARDS, THE BAND WITHOUT ITS EDGE ──────
+   Islam, from the signed-off mockup (design-mockups/plan-page-redesign/,
+   round 12): the rail "looks well with the cards under each other … we just
+   need to keep them the same size and the rail in general to be soft cornered
+   like the rest." Each row becomes a card with its own border and corners and
+   a gap between; the selected one keeps §41's quiet ground and gold edge, as
+   an inset shadow now so the card's own border is not replaced by it.
+
+   SAME SIZE IS A FLOOR, NOT A HEIGHT. A fixed height clips whatever a card
+   carries beyond the mockup's rows — a gap count, the arranging grip, a
+   reporting tally — so each state gets a minimum the ordinary card fills
+   exactly, and the name is held to two lines with the whole name on its hover.
+   Two floors because the detail switch (§119) is kept: terse is the code and
+   the name, detail adds the kind beside the code and the counts under it.
+
+   ABOVE 1200px ONLY, and never the Setup rail. Below that the pillar rail
+   reads ACROSS (§267.2), where a card of two lines would be the wrong shape;
+   Setup's rail is a list of pages and not a list of things (§296). One rule
+   for every pillar and project rail, on both sides of the switch (§53.5). */
+@media (min-width:1201px){
+  .rail:not(.setuprail) button.ritem {
+    width:calc(100% - 16px); margin:8px 8px 0; min-height:104px;
+    align-content:start; border:1px solid var(--line); border-radius:var(--r);
+    padding:10px 12px; }
+  .rail:not(.setuprail):has(.railterse.on) button.ritem { min-height:78px; }
+  .rail:not(.setuprail) button.ritem:last-of-type { margin-bottom:8px; border-bottom:1px solid var(--line); }
+  .rail:not(.setuprail) button.ritem:hover { border-color:var(--stone-soft); background:var(--surface); }
+  .rail:not(.setuprail) button.ritem.on,
+  .rail:not(.setuprail) button.ritem.on:hover {
+    background:var(--surface-2); border-color:var(--line);
+    box-shadow:inset 3px 0 0 var(--gold); }
+  .rail:not(.setuprail) .ritem b {
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden; }
+}
+/* The kind beside the code (detail only, drawn by railName). The code's own
+   size, in the sans rather than the mono: it is a word, not an identifier. */
+.rail .ritem .rkind { font-family:var(--sans); font-weight:600; letter-spacing:.02em;
+  color:var(--ink-3); }
+/* The plan pane's band: no gold edge (the rail's selected card already says
+   which), and the kind as a white tag at the far end. */
+.pband.planband { box-shadow:none; }
+.pane > .pband.planband { box-shadow:0 1px 0 var(--line); }
+.pband.planband .pill.kind { margin-left:auto; background:var(--surface); flex:none; }
+/* THE COUNT BESIDE THE HEADING (§410, replacing the grey clause, 1b-ii), and
+   the rule that makes Key measures and Tactics two blocks of one card —
+   pulled out through the pane's side padding so it runs edge to edge. */
+h4.mini .hn { font-size:var(--fs-small); font-weight:400; letter-spacing:0;
+  text-transform:none; color:var(--ink-3); margin-left:4px; }
+h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
+  padding:22px 18px 0; }
+
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
   .section { margin-top:26px; padding-top:0; border-top:0; }
@@ -5334,47 +5638,28 @@ html[data-client-settings] .viewer { display:none; }
      took the two name columns down to nothing. Written in config.css first and
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
-  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
-     cell answers where, so there is no second select to bound. */
-  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
-     and exactly the same 920px: the role picker's pair were bounded and the
-     pair that appear when a ROW is opened for editing were not, because they
-     are plain `select.fld` and nothing named them. Opening any row therefore
-     blew the table to 1516px inside a 920px box and pushed Email, Roles and
-     Status past the edge — a row you cannot finish editing.
+  /* ══ THE REGISTER'S OWN FIELD FLOORS AND CAPS, ALL SEVEN, DELETED ══
+     (§372; §24, and it is the second half of §24's own sentence — a rule
+     nothing wears is a rule the next reader takes for load-bearing.)
 
-     Converting some members of a family and leaving the others is how the
-     second one gets forgotten (§40); this is that, a version later, in the
-     file that records the rule. Named by their data attributes so the next
-     select added to this row is bounded by being given one. */
-  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
-  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
-  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
-     (§93.10). It computed — `max-width` read back as the value written — and
-     the field still measured 170px, at every value tried. Whatever the browser
-     is resolving it against under this auto layout, it is not the cap, so the
-     rule changed nothing and a rule that changes nothing is worse than no rule
-     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
-     than papered over; what actually closed the gap was capping the CELLS
-     (config.css, §93.10), which took the open table from 1608px to 1452px. */
+     They were written for a mode that no longer exists. §69 and §93.10 bounded
+     the selects and floored the text fields because turning the pen on
+     collapsed the two columns you edit the page FOR; §116 then moved every one
+     of those fields into the person DIALOG, which is `#modal-b` on <body> and
+     not inside `.peoplecfg`, so from that day all seven matched nothing.
+
+     MEASURED, NOT REASONED (§93.11): asked of the page at rest and with the
+     dialog open, every one of the seven returns 0.
+
+     AND THE FIRST THING TO PUT A FIELD BACK IN THE TABLE WAS BITTEN BY ONE
+     WITHIN THE HOUR. `input[data-ptitle] { min-width:150px }` in a 150px cell
+     with 8px of padding either side is a 150px box in a 134px space, so the
+     open cell hung 8px over its own neighbour at 1440 and below — the exact
+     overflow §372 exists to stop, from a rule written to prevent an overflow
+     in a mode that was removed. The open cell sizes itself instead
+     (config.css: a block, never a percentage). */
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
-  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
-     an input NO intrinsic minimum, so under the auto layout the register uses
-     (no table-layout:fixed — the name column fits the name, §46.6) the browser
-     hands those columns their minimum content width, which is nothing. Person
-     measured 216px reading and 86px editing, and 71px with a role picker open
-     beside it: the two columns you edit the page FOR were the two that
-     collapsed, and they collapsed further the more there was to do.
-
-     Beside the rule for the same reason the selects are (§69): this selector
-     is (0,3,1) and later in the concatenation than anything config.css can
-     say. The floors are the READ widths, so turning the pen on stops moving
-     the page. */
-  .cfg .peoplecfg input[data-pname] { min-width:170px; }
-  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
-  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
 
   /* A tooltip inherits white-space from its cell. Inside a table header, where
      nowrap keeps column titles on one line, the tooltip inherited it too and
@@ -5468,17 +5753,44 @@ html[data-client-settings] .viewer { display:none; }
      is a server to say which ones a client has. The offline copy (§306) has
      no modules, so a switcher baked into the frozen shell would be a control
      that could never open anything (§61). */
-  details.dlmenu.topmark { align-self:center; margin-right:2px; }
-  details.dlmenu.topmark > summary { list-style:none; display:grid; place-items:center;
-             width:28px; height:28px; border:1px solid var(--line); border-radius:8px;
-             color:var(--ink-3); background:none; cursor:pointer; }
-  details.dlmenu.topmark > summary::-webkit-details-marker { display:none; }
-  details.dlmenu.topmark > summary:hover { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  details.dlmenu.topmark[open] > summary { border-color:var(--stone-soft); color:var(--ink); }
-  details.dlmenu.topmark > summary svg { width:17px; height:17px; display:block; }
-  details.dlmenu.topmark > .menu { min-width:290px; top:calc(100% + 6px); left:0; }
-  details.dlmenu.topmark > .menu button[aria-current="true"] { font-weight:700; }
+  /* ══ THE TRAIL (§400) ═══════════════════════════════════════════════
+     Replaces the four-square switcher (deleted with its markup, §24) and the
+     client-name pill, for Forefront's own people only — `data-console`,
+     written by sync.js. One line: Forefront › client ▾ › module ▾ (no client mark since §401).
+     The menus are `details.dlmenu > .menu`'s own, unchanged (§53.5); what is
+     here is the line. The step you are ON is the ink colour and weight, the
+     steps above it the quieter ink, which is how a trail reads everywhere. */
+  nav.trail { display:flex; align-items:center; gap:6px; min-width:0; margin-right:auto;
+              font-size:13.5px; white-space:nowrap; }
+  nav.trail .trff { color:var(--ink-2); text-decoration:none; font-weight:600;
+                    letter-spacing:.04em; font-size:12px; text-transform:uppercase; }
+  nav.trail .trff:hover { color:var(--ink); text-decoration:underline; }
+  nav.trail .trff:focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:3px; }
+  nav.trail .trsep { color:var(--ink-3); font-size:15px; line-height:1; }
+  nav.trail details.trstep > summary { cursor:pointer; gap:6px; padding:3px 7px; border-radius:7px;
+                                       color:var(--ink); font-weight:600; min-width:0; }
+  nav.trail details.trclient > summary { color:var(--ink-2); }
+  nav.trail details.trstep > summary:hover,
+  nav.trail details.trstep[open] > summary { background:var(--surface-2); color:var(--ink); }
+  nav.trail details.trstep > summary > span { overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+  nav.trail details.trstep > summary > svg { width:10px; height:10px; flex:none; color:var(--ink-3); }
+  nav.trail .menu button[aria-current="true"] { font-weight:700; }
+  /* a line in a menu that is not a door ("Reading your clients…", "No other
+     clients"), §401 — said, never a button that goes nowhere (§94.15) */
+  nav.trail .trquiet { padding:9px 14px; font-size:13.5px; color:var(--ink-2); font-style:italic; }
+  nav.trail .trrule { height:1px; background:var(--line); margin:4px 0; }
+  /* THE TRAIL IS THE BRAND LINE FOR FOREFRONT'S PEOPLE, so the product's own
+     name, the client's mark and the old pill stand down under it — the
+     client is named once, in the trail (§120). */
+  html[data-console] .top .brand,
+  html[data-console] .top .clientlogo,
+  html[data-console] .top .clientback { display:none; }
+  /* The rail's own "‹ Back to the console" and "… settings ›" rows answered
+     the same question the trail now answers on every page; with the trail
+     drawn they are a second way to say it (§87), so they stand down. Kept
+     for the one reader with no trail: a client's own office on the client's
+     settings. */
+  html[data-console] .setuprail .railback-row { display:none; }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
@@ -5923,6 +6235,33 @@ html[data-client-settings] .viewer { display:none; }
   tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
   tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
 
+  /* §414: SEVERAL OUTCOMES PER TACTIC. A sub-line wears its tactic's stripe
+     rather than its own position's — the tactic's shared cells span it, so a
+     stripe of its own would cut the tactic in two. An odd run of sub-lines is
+     followed by a hidden `tr.opad` (group-render.js) so every row below keeps
+     its parity. Chained to five sub-lines, which is more than any tactic
+     needs. */
+  tbody tr:not(.osub):nth-child(even) + tr.osub > td,
+  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub > td
+    { background:var(--zebra); }
+  tbody tr:not(.osub):nth-child(odd) + tr.osub > td,
+  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub > td,
+  tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub > td
+    { background:none; }
+  tr.osub > td { border-top:1px dashed var(--line); }
+  .otag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;
+    color:var(--ink-3);border:1px solid var(--line);border-radius:4px;padding:0 4px;
+    margin-right:7px;vertical-align:1px;background:var(--surface)}
+  .outadd{display:block;margin-top:8px;font-size:12.5px;font-weight:600}
+  .oavg{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:600;margin-top:2px}
+  .oscore{font-size:11.5px;color:var(--ink-3);margin-left:6px}
+
   /* Each obligation announces whose it is: a unit's plan counts toward that
      unit, a group capability never does. */
   .oblband{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;
@@ -6009,6 +6348,12 @@ html[data-client-settings] .viewer { display:none; }
     outline-offset:-2px;border-radius:7px}
   .units-in.folded .navswitch{margin:0 3px}
   .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+  /* §464: on the company, the division whose page you are on wears the
+     row's own gold underline — the same mark a destination tab wears — and a
+     single word with nothing to switch to is not a control at all. */
+  .units .navswitch.multi .nsw.here{box-shadow:inset 0 -3px 0 var(--gold)}
+  .units .navswitch.one{cursor:default}
+  .units .navswitch.one:hover{background:rgba(255,255,255,.08)}
 
   /* `.foldgroup` and `.navfold` went with the two-button fold (§51.7) — §24:
      delete an element and delete its CSS with it, or the next person drawing
@@ -6176,6 +6521,26 @@ html[data-client-settings] .viewer { display:none; }
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
   .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  /* AND GOLD WHILE YOU ARE HOME (§400): Home is a page now, and on the
+     destination row gold is where you are (§197.2) — so the house wears it
+     while Home is open, whether or not anything is waiting. */
+  html[data-home-open] .units .navmenu-btn.homemark{ background:var(--gold);
+    border-color:var(--gold); color:var(--on-accent); }
+  /* AND NOTHING ELSE SAYS WHERE YOU ARE WHILE YOU ARE HOME (§403). Islam:
+     *"why on the welcome page I have strategy and overview & projects?"* —
+     Home sits under the chrome (§400), so the tab row and the section row
+     kept describing the page BEHIND it, and the destination row kept its
+     gold underline on that page's name: two answers to "where am I" beside
+     the lit house. Both rows are hidden and the underline dropped while Home
+     is open; the places themselves stay pressable, since pressing one is how
+     you leave Home, and every row comes back the moment Home steps aside.
+     `display:none`, never opacity (§3.2 — a hidden row must not take
+     clicks). Signed off from design-mockups/home-rows/. */
+  html[data-home-open] #tabrow,
+  html[data-home-open] #secrow { display:none !important; }
+  html[data-home-open] .units button[aria-selected="true"],
+  html[data-home-open] details.dlmenu.topsel > summary[aria-selected="true"] {
+    border-bottom-color:transparent; }
   .navmenusvg{width:15px;height:15px;display:block}
   /* The panel, its group bands, its buttons and the caret are all gone with
      the two-door split (§47.7): the gear is one destination now, so there is
@@ -7128,6 +7493,12 @@ html[data-client-settings] .viewer { display:none; }
     font-weight:700; color:var(--ink-3); margin-right:6px;
     white-space:nowrap;
   }
+/* §415: a tactic's requirements — the reported note's shape, holding a list. */
+td .reqnote ul.reqs { margin:3px 0 0; padding-left:16px; color:var(--ink-2); line-height:1.35; }
+td .reqnote ul.reqs li { margin:1px 0; }
+td .reqbox { display:block; margin-top:8px; }
+td .reqbox .repkey { display:block; font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+td .reqbox textarea.reqfld { width:100%; box-sizing:border-box; margin-top:3px; font-size:12.5px; resize:none; }
 
 /* THE OUTCOME'S FOUR CONTROLS, ONE CELL, FOUR EQUAL BOXES (Islam: "the 4
    boxes should be the same size and squeeze them where their hz size should
@@ -7410,6 +7781,16 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   border-top:1px solid var(--line); display:flex; align-items:center; gap:12px;
   flex-wrap:wrap; border-radius:0 0 10px 10px; }
 .fcard .ffoot .why { color:var(--ink-3); font-size:12.5px; margin-right:auto; max-width:56ch; }
+/* THE BUTTONS ARE A GROUP, AND THE GROUP IS WHAT WRAPS (§380). `.ffoot` wraps
+   and `.why` eats the free space, so three loose buttons split 2+1 below
+   ~1100px with the third stranded at the FAR LEFT under the sentence — the
+   flex line starting where the row starts, not where the buttons were.
+   Measured: grouped, the row breaks as a block and stays right-aligned at
+   1440 / 1280 / 1100 / 1000. The `auto` margin has to move onto the group,
+   because the first auto margin in a flex row takes every free pixel (§304's
+   own fault, on this same card). */
+.fcard .ffoot .fbtns { display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-left:auto; }
 .fcard .pickrow { display:flex; align-items:center; gap:14px; padding:15px 18px;
   flex-wrap:wrap; }
 .fcard .pickrow .lab { font-size:13px; color:var(--ink-2); }
@@ -7431,6 +7812,202 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
 .readbar b { font-size:14px; }
 .readbar .why { color:var(--ink-3); font-size:12.5px; }
 .readbar .linkbu { margin-left:auto; }
+
+  /* ── THE REVENUE TREE (spec 063) ──────────────────────────────────
+     Almost nothing here is new. The table is the plan's own `.scroll` table,
+     the period band is `tr.dxband` (§99) and the pane band is `.pband` — so
+     the tree reads as the same product as the plan beside it and adds no
+     vocabulary of its own (§53.5). What is declared is the four things this
+     page says that no other page says.
+
+     THE TOTAL LINE, above everything, because the figure the tree argues for
+     is the one thing somebody opens this page to read. */
+  .drvtot { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 14px;
+            margin:0 0 16px; }
+  .drvtot-n { font:650 clamp(26px, 3.2vw, 34px)/1 var(--sans); color:var(--ink);
+              letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .drvtot-w { font:500 12.5px/1.5 var(--sans); color:var(--ink-3); }
+  /* NOT RED AND NOT A COUNT OF GAPS (§214.4, §272). An unanswered connection
+     holds nothing up — Islam: *"just say so"* — so it is a fact in the quiet
+     register beside the number, and painting it `--bad` would teach people to
+     stop reading the red that does stop something. */
+  .drvtot-open { font:500 12.5px/1.5 var(--sans); color:var(--ink-3);
+                 padding-left:14px; border-left:1px solid var(--line); }
+
+  /* A DRIVER'S NAME AND ITS WHY, stacked — the way a tactic's description
+     already sits under its name (§248, §255), and for that section's own
+     measured reason: a column of its own takes about 150px off the name at
+     every width, and the name is the column that has to be readable. */
+  .drvtbl .dname { display:block; font:600 13.5px/1.35 var(--sans); color:var(--ink); }
+  .drvtbl .dname textarea.fld { font:600 13.5px/1.35 var(--sans); }
+  .drvtbl td .why { display:block; margin:3px 0 0; }
+  .drvtbl td.num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .drvtbl td.num .fld { width:100%; min-width:0; text-align:right; }
+  .drvtbl td.xcell { width:1%; }
+
+  /* VOLUME OR VALUE — a quiet key, never the accent. The two are read down a
+     column rather than picked out one at a time, so they take the page's own
+     chip treatment and spend none of §41's accent budget. */
+  .kindchip { display:inline-block; font:600 10px/1 var(--sans); letter-spacing:.09em;
+              text-transform:uppercase; color:var(--ink-3); background:var(--surface-2);
+              border:1px solid var(--line); border-radius:var(--r-pill);
+              padding:4px 8px; white-space:nowrap; }
+  /* VALUE KEEPS THE ACCENT AS A BORDER AND TAKES `--ink-2` FOR THE WORD —
+     §266.10's own answer for the FUNC chip, and for its reason: `--gold-deep`
+     as 10px type on `--surface-2` measures 4.45:1 (§38.5, recorded five times
+     in this project). The mark is the edge; the word stays readable. */
+  .kindchip.val { color:var(--ink-2); border-color:var(--gold-deep); }
+
+  /* THE THREE STATES OF THE LAST COLUMN (§6.2). `linked` is the only one that
+     is a name somebody wrote, so it is the only one set in the page's ink;
+     the other two are the platform SPEAKING, so they take its quiet voice and
+     the third is italic because it is an absence rather than a statement. */
+  .drvtbl .linked { display:block; font:600 12.5px/1.35 var(--sans); color:var(--ink); }
+  .drvtbl .assume { display:block; font:500 12.5px/1.35 var(--sans); color:var(--ink-3); }
+  .drvtbl .notyet { display:block; font:500 12.5px/1.35 var(--sans); color:var(--ink-3);
+                    font-style:italic; }
+
+  /* The band's own two controls, pushed to its far end so the period's name
+     and its figures read first. They are `.linkbu`, which on `--panel` takes
+     the panel's own accent (§259) rather than the page's. */
+  .dxacts { float:right; display:inline-flex; gap:14px; }
+  tr.dxband th .dxacts .linkbu { font:600 10.5px/1 var(--sans); letter-spacing:.09em;
+    text-transform:uppercase; color:var(--panel-accent); }
+  tr.dxband th .dxacts .linkbu:hover { color:var(--on-accent); }
+
+  .paneact.drvact { position:static; display:flex; flex-wrap:wrap; align-items:center;
+                    gap:10px; margin:14px 0 0; }
+  .paneact.drvact .fld { width:auto; min-width:0; }
+
+  /* THE REVIEW READING (spec 063 §6.3). An effect that cost money and one that
+     earned it, and the pair takes the platform's own scoring inks rather than
+     a colour of this page's — `--bad`/`--good` as TYPE is §38.4's own trap,
+     which is why both are the `-tx` twins. */
+  .drvtbl .drvdown { color:var(--bad-tx); font-weight:600; }
+  .drvtbl .drvup   { color:var(--good-tx); font-weight:600; }
+  /* A ROW NOBODY REPORTED AGAINST IS QUIET, NEVER HIDDEN. It is part of the
+     multiplication and part of why the period reads as it does — leaving it
+     out would make the column stop adding up to the gap above it (§99.7). */
+  .drvtbl tr.drvquiet td:first-child .dname { color:var(--ink-3); font-weight:500; }
+
+  /* ── THE TWO ROWS UNDER THE NAVIGATION (§409) ───────────────────────
+     Round 9 of design-mockups/plan-page-redesign, signed off: the main tabs
+     on grey as words with an underline, the sections below as one switch.
+     Only the selected tab is bold and underlined (§409.1). `#subtabs > button`
+     is (1,0,1), so it outranks `.tabs button` (0,1,1) with no !important (§40)
+     and reaches the tabs only — the report controls in `.tabacts` keep theirs.
+
+     REPORTING IS A FILLED BUTTON (§409.2, Islam's option C): `--cta` with
+     `--cta-ink` (5.54 light, 7.37 dark), `--cta-hover` when selected, its dot
+     in the ink because gold on this orange cannot be seen.
+
+     ONE LINE, AND CENTRED IN ITS BOX: every tab is centred on the row, and an
+     underlined tab's text is centred in its own box (12px over, 9+3 under), so
+     the words share a baseline. Measured on the ink (§302). In the system face
+     a symmetric 6/6 left "Reporting" 1.3px high, so it was 7/5; §402 made
+     Source Sans 3 the one face and there it sat 0.65px LOW and 0.55px right
+     at 7/5 while the BOLD selected word sat 1px high at 6/6 — the two
+     weights want different padding. So the regular word is 6/6 and the bold
+     one keeps 7/5 riding up 1px, which puts both words on the same line and
+     each box's ink centred (§410.1); half a pixel moves from the left to the
+     right for Source Sans's side bearing.
+
+     NO TAB DRAWS A BOX (§409.2): focus is the row's own vocabulary — the word
+     at full ink with a light underline, the selected tab keeping its gold one,
+     Reporting going to its deeper fill. */
+  nav.tabs#tabrow { background:var(--surface-2); }
+  #tabrow .tabs-in { padding:0 24px; gap:22px; min-height:46px; }
+  #subtabs .tabacts { margin-block:6px; }
+  #subtabs > button[role="tab"] { align-self:center; background:none; border-radius:0;
+    padding:12px 1px 9px; border-bottom:3px solid transparent; color:var(--ink-2);
+    font-weight:400; font-size:var(--fs-body); }
+  #subtabs > button[role="tab"]:hover { background:none; color:var(--ink); }
+  #subtabs > button[role="tab"][aria-selected="true"] { color:var(--ink); font-weight:700;
+    border-bottom-color:var(--gold); }
+  #subtabs > button[role="tab"]:focus-visible { outline:none; color:var(--ink);
+    border-bottom-color:var(--line); }
+  #subtabs > button[role="tab"][aria-selected="true"]:focus-visible { border-bottom-color:var(--gold); }
+  #subtabs > button.cta[role="tab"] { color:var(--cta-ink); background:var(--cta);
+    border-bottom:0; border-radius:6px; padding:6px 14.5px 6px 13.5px; position:relative; }
+  #subtabs > button.cta[role="tab"]:hover,
+  #subtabs > button.cta[role="tab"]:focus-visible,
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { color:var(--cta-ink); background:var(--cta-hover); }
+  #subtabs > button.cta[role="tab"][aria-selected="true"] { font-weight:700;
+    padding-top:7px; padding-bottom:5px; top:-1px; }
+  #subtabs > button.cta[role="tab"] .tabdot { background:var(--cta-ink); }
+
+  /* The sections as one switch, squared (§409.3, Islam's option A): the box
+     takes Reporting's 6px corner, a segment 4px inside its 3px of air. */
+  .tabs .secseg { display:inline-flex; flex:none; background:var(--surface);
+    border:1px solid var(--line); border-radius:6px; padding:3px; gap:2px; }
+  .tabs .secseg button { border:0; border-radius:4px; padding:5px 14px; background:none;
+    color:var(--ink-2); font-weight:500; }
+  .tabs .secseg button:hover { background:var(--surface-2); color:var(--ink); }
+  .tabs .secseg button[aria-selected="true"] { background:var(--stone); color:var(--surface);
+    font-weight:600; }
+  .tabs .secseg button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+/* ── A DIRECTION'S OVERVIEW, FOLDED UNDER ITS NAME (§413) ───────────────
+   Islam's own ask: expandable and collapsable, not always visible, with the
+   Objective's first line showing while it is shut. A real details element,
+   so no repaint can lose the state and no handler is needed to open it. */
+details.dov{margin:0 0 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+details.dov>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px}
+details.dov>summary::-webkit-details-marker{display:none}
+.dovt{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--ink-2);flex:none}
+.dovcar{flex:none;width:0;height:0;border-left:5px solid var(--ink-3);border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+details.dov[open]>summary .dovcar{transform:rotate(90deg)}
+.dovpeek{font-size:13px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+details.dov[open]>summary .dovpeek{display:none}
+.dovw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:2px 14px 14px}
+.dovk{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+.dovv{font-size:13.5px;line-height:1.45;color:var(--ink);white-space:pre-line}
+.dovv.dovnone{color:var(--ink-3)}
+.dovc textarea.dovta{width:100%;min-height:84px;resize:vertical}
+@media (max-width:900px){ .dovw{grid-template-columns:1fr} }
+
+/* ── YEARS 1 · 2 · 3 (§416) ─────────────────────────────────────────
+   From the signed-off mockup (design-mockups/rhi-directions/
+   2026-09-28_years.html). The marks are the quarter marks' own shape one
+   scale up; the year the plan stands in is RINGED, never filled, so "runs"
+   and "now" stay two facts. A direction that does not run this year is
+   greyed in its rail row and says when it runs under its name. */
+.yrtag { display:inline-block; margin-left:6px; font:600 10.5px/1 var(--mono, monospace);
+  color:var(--ink-3); border:1px solid var(--line); border-radius:4px; padding:2px 4px;
+  vertical-align:1px; }
+.ritem.later b, .ritem.later .rcode, .ritem.later .rnum { color:var(--ink-3); }
+.ritem.later { background:var(--surface-2); }
+.yrbox { display:inline-flex; align-items:center; gap:6px; }
+.yrbox .yk { font-size:10px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--ink-3); }
+.yrbox .qs i, .qs-edit.yrs .qtog { min-width:22px; }
+.yrbox .qs i.now, .qs-edit.yrs .qtog.now { outline:2px solid var(--gold); outline-offset:1px; }
+.yrline { margin:10px 18px 0; padding:9px 12px; border:1px dashed var(--line); border-radius:7px;
+  font-size:13px; color:var(--ink-2); }
+.planyears .yrchips { margin:6px 0 10px; display:flex; gap:8px; flex-wrap:wrap; }
+.planyears .yrchip { border:1px solid var(--line); border-radius:6px; padding:5px 9px; font-size:12.5px;
+  color:var(--ink-2); background:var(--surface); }
+.planyears .yrchip.now { border-color:var(--gold); color:var(--ink); font-weight:600; }
+.pcard-y { display:block; margin-top:6px; font-size:.7em; color:var(--ink-3); }
+
+/* §431: while the page is the saved copy from last time, a quiet mark says so
+   and the page body takes no input (the fresh copy replaces it in a moment). */
+.staleflag { display:inline-flex; align-items:center; font-size:var(--fs-label); font-weight:600;
+  letter-spacing:.04em; color:var(--ink-3); border:1px solid var(--line); border-radius:999px;
+  padding:2px 10px; margin-right:8px; white-space:nowrap; }
+html[data-stale] #panel { cursor:progress; }
+
+/* ── A COMPANY DIRECTION'S OWNER AND CUSTODIAN ON ITS BAND (§469) ────────
+   Beside the kind, in the band's own quiet ink, so the seats read as facts
+   about the direction rather than as a second heading. The kind pill carries
+   `margin-left:auto` on the plan band, so the seats follow it at a gap
+   rather than splitting the free space with it. An empty pair wears the
+   attention ink (§168): outstanding, never broken. */
+.pband.planband .pill.kind + .pband-r { margin-left:14px; }
+.pbseats { font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+.pbseats.none { color:var(--attn-tx); }
+.pbseat-k { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+            color:var(--ink-3); margin-right:5px; }
+.pbseats .pbseat-k + .pbseat-k, .pbseats > .pbseat-k:not(:first-child) { margin-left:2px; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -7519,6 +8096,19 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .dslide.tight .aimbottom table.dbig td { font-size:24px; padding:15px 18px; }
   .dslide tbody tr:last-child td { border-bottom:0; }
   .dslide table.zebra tbody tr:nth-child(even) td { background:var(--zebra); }
+  /* §414: an outcome line wears its tactic's stripe, never its own
+     position's (arrange.css carries the page's twin; this one is scoped to
+     the deck, whose own stripe rule would otherwise outrank it). */
+  .dslide table.zebra tbody tr:not(.osub):nth-child(even) + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(even) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub td { background:var(--zebra); }
+  .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub td,
+  .dslide table.zebra tbody tr:not(.osub):nth-child(odd) + tr.osub + tr.osub + tr.osub + tr.osub + tr.osub td { background:none; }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .dslide td.final { font-weight:700; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
@@ -7570,6 +8160,13 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
   .d-swot.t-bad h2 { border-left:5px solid var(--bad); }
   .d-swot.t-stone h2 { border-left:5px solid var(--panel); }
   .d-swot.t-warn h2 { border-left:5px solid var(--warn); }
+  /* §399: a function's S&W — two columns on one slide, the SWOT's own hues. */
+  .d-fnsw .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:56px; margin-top:6px; }
+  .d-fnsw .dswcol h3 { padding-left:14px; margin:0 0 6px; font-size:26px; }
+  .d-fnsw .dswcol.t-good h3 { border-left:5px solid var(--good); }
+  .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
+  .d-fnsw ol.dswot { columns:1; }
+  .d-fnsw .dswnone { color:var(--none); font-size:22px; }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
    Islam: *"make the wining aspiration filing the width of the presentaion
@@ -8616,6 +9213,20 @@ tr.mprow > td { background:var(--surface-2); border-top:0; }
     * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   }
 
+/* ── THE DIRECTION'S OVERVIEW SLIDE (§413) ─────────────────────────────── */
+.dovs .obody{display:grid;grid-template-columns:1.35fr 1fr;gap:48px;flex:1;min-height:0;margin-top:30px}
+.dovs .ok{font-size:15px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold-deep);margin-bottom:12px}
+.dovs .objq{font-size:34px;line-height:1.3;font-weight:600;color:var(--ink);border-left:6px solid var(--gold);padding:4px 0 4px 26px;margin:0 0 40px;white-space:pre-line}
+.dovs .two{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+.dovs .two p{font-size:21px;line-height:1.45;color:var(--ink-2);margin:0;white-space:pre-line}
+.dovs .two ul{list-style:none;margin:0;padding:0}
+.dovs .two li{font-size:21px;line-height:1.4;color:var(--ink-2);padding-left:24px;position:relative;margin-bottom:10px}
+.dovs .two li::before{content:"";position:absolute;left:0;top:.5em;width:9px;height:9px;background:var(--bad)}
+.dovs .side{background:var(--surface-2);border-radius:10px;padding:26px 28px;display:flex;flex-direction:column;gap:26px;align-self:start}
+.dovs .side .row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:19px;color:var(--ink)}
+.dovs .side .row b{font-family:var(--mono);font-weight:600;white-space:nowrap}
+.dovs .side .row i{font-style:normal;color:var(--ink-3);font-size:17px;white-space:nowrap}
+
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
 
@@ -9464,28 +10075,14 @@ body.presenting .tourdock { display:none; }
 
    LAYERING: above the chat dock (45) — its row on this screen IS the door —
    and below the tour (70), which the intro-round card hands the screen to. */
-.welcomeover { position:fixed; inset:0; z-index:60; overflow:auto;
+/* HOME IS A PAGE INSIDE THE CHROME (§400), not a screen over it: it starts
+   under the sticky chrome, so the navigation above stays on screen and is
+   the way on — and it sits BELOW the chrome's own layer (9), or a menu
+   opened from the trail would drop behind it. */
+.welcomeover { position:fixed; inset:0; top:var(--chrome-h, 0px); z-index:8; overflow:auto;
                background:var(--ground); color:var(--ink);
                -webkit-font-smoothing:antialiased; }
 .welcomeover .wwrap { max-width:1140px; margin:0 auto; padding:34px 24px 60px; }
-
-/* ── VIEWING AS, ABOVE THE GREETING (§179) ──────────────────────────────
-   Islam's pick of two drawn placements. It sits on the PAGE's ground, not on
-   the hero's navy, so it takes the page's own ink — the drawing that put it
-   here first wore `--panel-ink` inherited from the hero and measured as a
-   pale label on a pale ground, which is §38.5's fault in a mockup rather than
-   in the product. Right-aligned: it is the one thing on this screen that is
-   about the screen rather than about the person being greeted, so it keeps
-   out of the greeting's reading line. */
-.welcomeover .wviewbar { display:flex; justify-content:flex-end;
-  align-items:center; gap:9px; margin:0 0 12px; }
-.welcomeover .wviewbar label { font-size:var(--fs-micro); letter-spacing:.14em;
-  text-transform:uppercase; font-weight:700; color:var(--ink-3); }
-/* searchsel replaces the select with a `.ssbtn` past five options (§45.5) and
-   hides the native one in place, so both are sized here — never the button
-   alone, or a tenant with five people gets an unstyled dropdown. */
-.welcomeover .wviewbar select, .welcomeover .wviewbar .ssbtn {
-  font-size:var(--fs-small); max-width:min(340px, 60vw); }
 
 /* ── The navy band: greeting leads, tenant signs on the separator ───────── */
 /* ── THE ROLES STACK; THE TENANT HOLDS ITS PLACE (§187) ─────────────────
@@ -9573,34 +10170,6 @@ body.presenting .tourdock { display:none; }
 .welcomeover .wbtn.wcta { background:var(--cta); border-color:var(--cta);
   color:var(--cta-ink); }
 .welcomeover .wbtn.wcta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
-/* ── THE WAY OUT (§159) ──────────────────────────────────────────────────
-   It was a text link at the foot of the LEFT COLUMN, which is three faults at
-   once: it is the only exit (there is no ×, no Escape, no click-outside), it
-   was the quietest thing on a screen holding three bordered buttons and one
-   solid fill, and it read as the end of the "Waiting on you" list rather than
-   the way past the screen. Below 960px it was not even last — the columns
-   stack, so 411px of side column sat AFTER the way out at 900px wide.
-
-   One bar across both columns answers all three: a real control, spanning the
-   grid so its scope is the screen, and last at every width. It wears the wide
-   row shape .wpages already uses (§53.5) and spends none of §41's accent —
-   except on the one screen where there is no other act to spend it on. */
-.welcomeover .wexit { margin-top:22px; width:100%; display:flex;
-  align-items:center; justify-content:space-between; gap:16px; cursor:pointer;
-  text-align:left; font:inherit; padding:17px 22px; border-radius:var(--r);
-  border:1px solid var(--line); background:var(--surface); color:var(--stone); }
-.welcomeover .wexit .wexlab { font-size:15px; font-weight:800; letter-spacing:-.01em; }
-.welcomeover .wexit .wgo { font-family:var(--mono); font-size:var(--fs-lead);
-  color:var(--gold-deep); }
-.welcomeover .wexit:hover { border-color:var(--gold-deep); }
-.welcomeover .wexit:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-/* PROMOTED ONLY WHEN IT IS THE ONLY ACT (§41, §45.2): with nothing waiting
-   there is no CTA on the screen, so the exit takes the fill — its own class,
-   because .wcta means "an action row shouts" and this is not an action row. */
-.welcomeover .wexit.wloud { background:var(--cta); border-color:var(--cta);
-  color:var(--cta-ink); }
-.welcomeover .wexit.wloud .wgo { color:var(--cta-ink); }
-.welcomeover .wexit.wloud:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
 
 /* ── The side column ────────────────────────────────────────────────────── */
 .welcomeover .wside { display:flex; flex-direction:column; gap:22px; }
@@ -10020,3 +10589,496 @@ body.presenting #buildband { display:none; }
    "…as who on this client's registe" — a control asking a question it cannot
    finish. */
 .csetup .row.tmadd .fld { flex:0 1 auto; max-width:340px; }
+
+/* §404: the Structure step. Its pills are the flow's own .wzband (§53.5);
+   what is new is the card each level sits in, the row of name boxes, and
+   the Temple line — each the smallest shape that holds it. */
+.csetup .stcard { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface);
+  padding:12px 14px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px; }
+.csetup .stcard > .tag { align-self:flex-start; }
+/* §468: the card's name is its header — bold, a size up, on a shaded band
+   the width of the card, with its On/Off on the right. */
+.csetup .stcard > .sthd { display:flex; align-items:center; justify-content:space-between; gap:10px;
+  margin:-12px -14px 4px; padding:9px 14px; background:var(--surface-2); border-bottom:1px solid var(--line);
+  border-radius:var(--r-md) var(--r-md) 0 0; }
+.csetup .stcard > .sthd > .tag { font-size:15px; font-weight:700; color:var(--ink); }
+/* §468: two cards on one row — the company's pillars and capabilities, and
+   the bottom pair when both are off. Stacks below 900px (§158). */
+.csetup .stpair { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; margin-bottom:12px; }
+.csetup .stpair > .stcard { margin-bottom:0; min-width:0; }
+.csetup .stpair .sthid { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media (max-width:900px) { .csetup .stpair { grid-template-columns:minmax(0,1fr); } }
+.csetup .stcard > .lab { margin:4px 0 0; }
+.csetup .stnames, .csetup .strow { display:flex; flex-wrap:wrap; gap:8px 12px; }
+.csetup .stnm { display:flex; flex-direction:column; gap:3px; min-width:150px; flex:1 1 150px; max-width:240px; }
+.csetup .sttemple { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.csetup .sttemple .wzwhy { margin:0; }
+
+/* §418: a layer's three sections, from the signed-off mockup
+   (design-mockups/structure-sections/). Side by side, stacked below 980px. */
+.csetup .wzcol.wzwide { max-width:1240px; }
+.csetup .stsecs { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); border:1px solid var(--line);
+  border-radius:var(--r-md); overflow:hidden; margin-top:4px; }
+.csetup .stsec { padding:12px 14px; border-right:1px solid var(--line); display:grid; gap:8px; align-content:start; min-width:0; }
+.csetup .stsec:last-child { border-right:0; }
+.csetup .stsecs.stsecs1 { grid-template-columns:minmax(0,1fr); }
+.csetup .stsech { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+/* §450: the plan question reads as a question, so its answer sits under it
+   rather than at the far end of the line (Islam: "the buttons needs to come
+   under the question"). */
+.csetup .stsech.stplanq { flex-direction:column; align-items:flex-start; gap:8px; }
+.csetup .stkind { font-size:var(--fs-micro); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-2); }
+.csetup .stfixed { font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .stsec > .lab, .csetup .stway > .lab { margin:4px 0 0; }
+.csetup .sthid { margin:0; font-size:var(--fs-small); color:var(--ink-3); background:var(--surface-2); border-radius:6px; padding:8px 10px; }
+.csetup .stonoff { flex:none; }
+/* §427: a part, section or switch with no page on this layer — drawn off,
+   greyed and unpressable; the reason is on the hover. */
+.csetup .dummy { opacity:.45; }
+.csetup .dummy button, .csetup button.dummy, .csetup .dummy input { cursor:not-allowed; }
+.csetup .sttitle { font-weight:700; }
+.csetup .stparth, .csetup .stpart { display:grid; grid-template-columns:22px minmax(0,1fr) minmax(0,1fr); gap:6px; align-items:center; }
+.csetup .stpart.stquad { grid-template-columns:22px minmax(0,1fr); }
+.csetup .stpart .fld { width:100%; min-width:0; }
+.csetup .stpart.off .fld { opacity:.55; }
+/* §420: an extra-detail row carries its own caption, because its boxes are
+   absent while it is off and a placeholder cannot name a row with no box. */
+.csetup .stpart.stdet { grid-template-columns:22px 128px minmax(0,1fr) minmax(0,1fr); }
+.csetup .stdetn { font-size:12.5px; color:var(--ink); }
+.csetup .stpart.stdet.off .stdetn { color:var(--ink-3); }
+.csetup .stdetw { grid-column:3 / 5; font-size:12px; font-style:italic; color:var(--ink-3); }
+.csetup .stway { display:grid; gap:6px; padding:10px; border-radius:6px; background:var(--surface-2); }
+.csetup .sttick { width:18px; height:18px; border-radius:4px; border:1.5px solid var(--line); background:var(--surface);
+  display:grid; place-items:center; padding:0; cursor:pointer; flex:none; }
+.csetup .sttick.on { background:var(--panel); border-color:var(--panel); }
+.csetup .sttick.on::after { content:""; width:9px; height:5px; border:2px solid var(--panel-ink); border-top:0; border-right:0;
+  transform:rotate(-45deg) translate(1px,-1px); }
+.csetup .stcap { display:flex; align-items:center; gap:8px; font-size:var(--fs-small); }
+@media (max-width:980px){
+  .csetup .stsecs { grid-template-columns:1fr; }
+  .csetup .stsec { border-right:0; border-bottom:1px solid var(--line); }
+  .csetup .stsec:last-child { border-bottom:0; }
+}
+/* §422: the extra details in two groups, the overview's areas under it,
+   and the years shown as chips. */
+.csetup .stdetg { display:grid; gap:6px; border-top:1px solid var(--line); padding-top:6px; margin-top:4px; }
+.csetup .stpart.stsub .stdetn { padding-left:14px; color:var(--ink-2); }
+.csetup .styears { grid-column:3 / 5; display:flex; gap:6px; flex-wrap:wrap; }
+.csetup .styr { border:1px solid var(--line); border-radius:12px; padding:2px 10px; font-size:12px; color:var(--ink-2); background:var(--surface); }
+
+/* §435: EXCEPT FOR — the items on a layer that differ from its ticks, at the
+   foot of the layer's card. The chip is the Setup tick in a pill, so an
+   exception reads as the same control as the ticks above it; a gold ring
+   marks the part that differs from the layer. */
+.csetup .stexcept { margin-top:14px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; background:var(--surface); display:flex; flex-direction:column; gap:0; }
+.csetup .stexcept > .lab { margin:0 0 4px; }
+.csetup .stxnone { margin:4px 0 10px; font-size:var(--fs-small); color:var(--ink-3); }
+.csetup .stxrow { display:grid; grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto; gap:12px; align-items:center; padding:9px 0; border-top:1px solid var(--line); }
+.csetup .stxrow:first-of-type { border-top:0; }
+.csetup .stxrow > b { font-size:13.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.csetup .stxchips { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+.csetup .stxchip { display:inline-flex; align-items:center; gap:6px; font:inherit; font-size:12.5px; padding:4px 9px 4px 6px; border:1px solid var(--line); border-radius:999px; color:var(--ink-2); background:var(--surface); cursor:pointer; }
+.csetup .stxchip i { width:14px; height:14px; border-radius:3px; border:1.5px solid var(--ink-3); flex:none; }
+.csetup .stxchip.on i { background:var(--panel); border-color:var(--panel); }
+.csetup .stxchip.diff { border-color:var(--gold-deep); box-shadow:inset 0 0 0 1px var(--gold-deep); color:var(--ink); }
+.csetup .stxadd { margin-top:10px; max-width:280px; }
+@media (max-width:760px){ .csetup .stxrow { grid-template-columns:minmax(0,1fr) auto; } .csetup .stxchips { grid-column:1 / -1; grid-row:2; } }
+/* §447: the question asked before the business-unit layer goes off. */
+.csetup .stask { margin:8px 0; padding:10px 12px; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:6px; background:var(--surface-2); font-size:var(--fs-small); color:var(--ink-2); }
+.csetup .stask p { margin:0 0 8px; }
+.csetup .stbtns { display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ══ THE STRATEGY COPILOT TAB (spec 064, stage 1) ═══════════════════════
+   The picture signed off (design-mockups/copilot/2026-09-30_copilot-tab.html):
+   two stacked rails on the left — Chats above Deliverables — and the open
+   item on the right. EVERY RULE IS SCOPED TO `.coppane` or a `cop` class,
+   because a class name is one global namespace (§65.9). The tokens are the
+   product's own (§25): no literal colour in this file. */
+.coppane { display:grid; grid-template-columns:minmax(220px, 280px) minmax(0, 1fr); gap:18px;
+           align-items:start; padding:4px 0 10px; }
+@media (max-width:820px){ .coppane { grid-template-columns:minmax(0, 1fr); } }
+.coprails { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.coprail { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
+           overflow:hidden; }
+.coprh { display:flex; align-items:center; justify-content:space-between; gap:8px;
+         padding:9px 12px; background:var(--surface-2); border-bottom:1px solid var(--line);
+         font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.08em; text-transform:uppercase;
+         color:var(--ink-2); }
+.copnew { font:600 var(--fs-small, 12.5px)/1.2 var(--sans); text-transform:none; letter-spacing:0;
+          color:var(--ink); background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm, 6px); padding:4px 10px; cursor:pointer; }
+.copnew:hover, .copnew:focus-visible { border-color:var(--gold); outline:none; }
+.coplist { display:flex; flex-direction:column; max-height:42vh; overflow-y:auto; }
+.copitem { display:flex; flex-direction:column; gap:2px; text-align:left; width:100%;
+           background:transparent; border:0; border-bottom:1px solid var(--line);
+           padding:9px 12px; cursor:pointer; font:inherit; color:var(--ink); }
+.copitem:last-child { border-bottom:0; }
+.copitem:hover { background:var(--surface-2); }
+.copitem:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+.copitem.on { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+.copt { font-weight:600; font-size:var(--fs-note, 13.5px); line-height:1.35; overflow-wrap:anywhere; }
+.copm { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copnone { padding:12px; color:var(--ink-3); font-size:var(--fs-small, 12.5px); }
+
+.copmain { min-width:0; background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r-sm, 6px); padding:16px 18px; min-height:320px; }
+.copempty { color:var(--ink-3); font-size:var(--fs-note, 13.5px); padding:40px 4px; max-width:60ch; }
+.copempty b { display:block; color:var(--ink); font-size:15.5px; margin-bottom:6px; }
+.copsay { background:var(--surface-2); border-left:3px solid var(--gold); padding:8px 12px;
+          margin-bottom:12px; font-size:var(--fs-note, 13.5px); color:var(--ink); }
+.copheadrow { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+.coph { margin:0; font-size:17px; color:var(--ink); flex:1 1 auto; min-width:0; overflow-wrap:anywhere; }
+.copren { flex:1 1 240px; }
+.copbtn { font:600 var(--fs-small, 12.5px)/1.2 var(--sans); cursor:pointer; color:var(--ink);
+          background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
+          padding:5px 11px; }
+.copbtn:hover, .copbtn:focus-visible { border-color:var(--gold); outline:none; }
+.copbtn.quiet { color:var(--ink-2); }
+.copbtn.danger { color:var(--bad-tx); }
+.copask { background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm, 6px);
+          padding:10px 12px; margin-bottom:10px; font-size:var(--fs-note, 13.5px); color:var(--ink);
+          display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.copmsgs { display:flex; flex-direction:column; gap:10px; max-height:52vh; overflow-y:auto;
+           padding:4px 2px 10px; }
+/* §470: the conversation's text size. CSS zoom on a wrapper INSIDE the
+   scrolling box, so the box keeps its own height and only what is in it
+   scales — bubbles, drafts and quick replies together. */
+.copzoom { display:flex; flex-direction:column; gap:10px; zoom:var(--copz, 1); }
+.copsize { display:inline-flex; flex:none; border:1px solid var(--line); border-radius:var(--r-sm, 6px); overflow:hidden; }
+.copsz { font:600 12.5px/1 var(--sans); cursor:pointer; color:var(--ink-2); background:var(--surface);
+         border:0; padding:6px 10px; }
+.copsz + .copsz { border-left:1px solid var(--line); }
+.copsz.sm { font-size:11px; }
+.copsz.big { font-size:15px; }
+.copsz:hover:not(:disabled) { color:var(--ink); background:var(--surface-2); }
+.copsz:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:-2px; }
+.copsz:disabled { color:var(--ink-3); opacity:.5; cursor:default; }
+.copmsg { max-width:80%; display:flex; flex-direction:column; gap:3px; }
+.copmsg.me { align-self:flex-end; }
+.copmsg.me .copbody { background:var(--surface-2); border:1px solid var(--line); }
+.copmsg.ai .copbody { background:var(--surface); border:1px solid var(--line); }
+.copmsg.product { align-self:center; max-width:90%; }
+.copmsg.product .copbody { background:transparent; color:var(--ink-3); font-style:italic;
+                           font-size:var(--fs-small, 12.5px); padding:2px 4px; text-align:center; }
+.copwho { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copmsg.me .copwho { text-align:right; }
+.copbody { border-radius:8px; padding:8px 11px; white-space:pre-wrap; overflow-wrap:anywhere;
+           font-size:var(--fs-note, 13.5px); line-height:1.5; color:var(--ink); }
+.copsend { font:600 var(--fs-note, 13.5px)/1.2 var(--sans); cursor:pointer; color:var(--on-accent, var(--surface));
+           background:var(--gold); border:1px solid var(--gold); border-radius:var(--r-sm, 6px); padding:8px 16px; }
+.copsend:hover, .copsend:focus-visible { filter:brightness(.95); outline:2px solid var(--gold); outline-offset:1px; }
+.copchip { font:600 var(--fs-micro, 11px)/1.4 var(--sans); color:var(--ink-2); background:var(--surface-2);
+           border:1px solid var(--line); border-radius:999px; padding:2px 9px; white-space:nowrap; }
+.copdoc { white-space:pre-wrap; overflow-wrap:anywhere; font-size:var(--fs-note, 13.5px); line-height:1.55;
+          color:var(--ink); border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:12px 14px;
+          margin:10px 0 4px; background:var(--surface); }
+.copedit { width:100%; margin:10px 0 6px; resize:vertical; }
+.copbtns { display:flex; gap:8px; margin-top:8px; }
+.copvh { margin:18px 0 6px; font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.08em;
+         text-transform:uppercase; color:var(--ink-2); }
+.copvers { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.copver { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 2px; border-bottom:1px solid var(--line); }
+.copvn { font:700 var(--fs-note, 13.5px)/1.3 var(--sans); color:var(--ink); min-width:32px; }
+.copvnote { flex:1 1 200px; font-size:var(--fs-note, 13.5px); color:var(--ink-2); overflow-wrap:anywhere; }
+
+/* ── stage 2 (spec 064): what the AI sees, its answers, files ─────────────
+   Tokens only, every rule scoped to a cop class (§65.9). The AI's own bubble
+   carries the gold edge the signed-off round-2 mockup drew. */
+.copmsg.ai .copbody { border-left:3px solid var(--gold); }
+.copctx { display:flex; align-items:center; gap:7px; color:var(--ink-3);
+          font-size:var(--fs-small, 12.5px); line-height:1.4; padding:0 2px 9px;
+          margin-bottom:10px; border-bottom:1px solid var(--line); cursor:help; }
+.copctx svg { width:15px; height:15px; flex:none; color:var(--ink-3); }
+.copctx span { overflow-wrap:anywhere; }
+.copmiss { margin-top:6px; padding:8px 11px; border:1px solid var(--line); border-radius:8px;
+           background:var(--surface); font-size:var(--fs-small, 12.5px); color:var(--ink); }
+.copmiss b { color:var(--bad-tx); }
+.copmiss ul, .copgrp ul { margin:4px 0 0; padding-left:18px; }
+.copdraft { margin-top:6px; border:1px solid var(--line); border-radius:8px; background:var(--surface); padding:10px 12px; }
+.copdt { font-weight:700; font-size:var(--fs-note, 13.5px); color:var(--ink); margin-bottom:6px; }
+.copdg { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px 16px; }
+.copgt { font:700 var(--fs-micro, 11px)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); }
+.copgrp li { font-size:var(--fs-note, 13.5px); line-height:1.45; color:var(--ink); margin:2px 0; overflow-wrap:anywhere; }
+.copsrc { display:inline-block; font:600 var(--fs-micro, 11px)/1.4 var(--sans); color:var(--ink-2);
+          background:var(--surface-2); border:1px solid var(--line); border-radius:999px;
+          padding:0 7px; margin-left:4px; vertical-align:1px; white-space:nowrap; }
+.copsrc.assumed { border-style:dashed; }
+.copassume { margin-top:6px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copassume b { color:var(--ink); }
+.copopts { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:8px; }
+.copopt { font:600 var(--fs-small, 12.5px)/1.3 var(--sans); cursor:pointer; color:var(--ink);
+          background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:5px 12px; }
+.copopt:hover, .copopt:focus-visible { border-color:var(--gold); outline:none; }
+.copopt.rec { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+.copopt.rec:hover, .copopt.rec:focus-visible { border-color:var(--panel-accent); }
+.coppaste summary { cursor:pointer; list-style:none; font-size:var(--fs-small, 12.5px); color:var(--ink-2);
+                    background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:7px 10px; }
+.coppaste summary::-webkit-details-marker { display:none; }
+.coppaste[open] summary { border-radius:8px 8px 0 0; }
+.coppaste .copbody { border-radius:0 0 8px 8px; border-top:0; }
+.copfiles, .coppend { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+.copmsg.me .copfiles { justify-content:flex-end; }
+.coppend { margin:0 0 8px; }
+.copfile { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-small, 12.5px); color:var(--ink-2);
+           background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:4px 9px; }
+.copfile b { color:var(--ink); font-weight:600; }
+.copfile a { color:inherit; text-decoration:none; }
+.copfile a:hover b, .copfile a:focus-visible b { text-decoration:underline; }
+.copfm { width:14px; height:14px; flex:none; color:var(--ink-3); }
+.copx { font:600 15px/1 var(--sans); cursor:pointer; color:var(--ink-3); background:transparent; border:0; padding:0 2px; }
+.copx:hover, .copx:focus-visible { color:var(--bad-tx); outline:none; }
+.copsend:disabled { opacity:.55; cursor:default; filter:none; }
+
+/* ── §453 (Islam 2026-10-01, from the signed-off
+   design-mockups/copilot/2026-10-01_chat-composer.html) ─────────────────
+   THE PANE FILLS THE WINDOW. `--cop-top` is the pane's document offset,
+   written by fitPane() — the Platform Inbox's own answer (§100.5). The chat
+   column is a flex column whose messages take what is left, so the box sits
+   at the bottom of the screen; below 820px the rails stack and the page
+   scrolls as it always did. */
+@media (min-width:821px){
+  /* §458: the pane ends where the page ends. It took 16px and the page kept
+     its 80px foot (--page-foot), so the PAGE scrolled about 64px under a pane
+     that already fitted — the window moved and the chat did not. A page sized
+     to the window takes the small foot, as Setup's does (§167). */
+  .wrap:has(.coppane) { padding-bottom:var(--pane-foot, 20px); }
+  .coppane { height:calc(100dvh - var(--cop-top, 260px) - var(--pane-foot, 20px)); min-height:420px; align-items:stretch; }
+  .coprails { min-height:0; }
+  .coprail { display:flex; flex-direction:column; min-height:0; }
+  .coprail.copchats { flex:1 1 auto; }
+  .coprail.copchats .coplist { flex:1 1 auto; max-height:none; min-height:0; }
+  .coprail:not(.copchats) { flex:0 1 auto; max-height:40%; }
+  .coprail:not(.copchats) .coplist { max-height:none; min-height:0; }
+  .copmain { display:flex; flex-direction:column; min-height:0; overflow-y:auto; }
+  .copmain > .copchat { flex:1 1 auto; display:flex; flex-direction:column; min-height:0; }
+  .copchat > .copmsgs { flex:1 1 auto; max-height:none; min-height:0; }
+  .copchat > :not(.copmsgs) { flex:none; }
+}
+
+/* THE CHATS RAIL: a row holds the chat and its three dots, which show on
+   the open chat, on hover and on a touch screen (§280 — a tablet has no
+   hover). The menu sits under the dots, inside the row. */
+.coprow { position:relative; display:flex; align-items:center; border-bottom:1px solid var(--line); }
+.coprow:last-child { border-bottom:0; }
+.coprow .copitem { flex:1 1 auto; min-width:0; border-bottom:0; padding-right:4px; }
+.coprow .copt { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.coprow:hover, .coprow:hover .copitem { background:var(--surface-2); }
+.coprow.on { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+.coprow.on .copitem { background:transparent; box-shadow:none; }
+.copdots { flex:none; width:24px; height:24px; margin-right:8px; display:grid; place-items:center;
+           border:0; border-radius:5px; background:none; color:var(--ink-2); cursor:pointer; padding:0; opacity:0; }
+.copdots svg { width:16px; height:16px; fill:currentColor; }
+.coprow:hover .copdots, .coprow.on .copdots, .copdots[aria-expanded="true"], .copdots:focus-visible { opacity:1; }
+@media (hover:none){ .copdots { opacity:1; } }
+.copdots:hover { background:var(--line-soft, var(--line)); }
+.copdots:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:1px; }
+.copmenu { position:absolute; right:8px; top:calc(100% - 6px); z-index:5; display:flex; flex-direction:column;
+           min-width:140px; padding:4px; background:var(--surface); border:1px solid var(--line);
+           border-radius:8px; box-shadow:var(--shadow-md, 0 6px 20px rgba(0,0,0,.14)); }
+.copmenu button { font:var(--fs-note, 13.5px)/1.3 var(--sans); text-align:left; border:0; background:none;
+                  color:var(--ink); padding:6px 10px; border-radius:5px; cursor:pointer; }
+.copmenu button:hover, .copmenu button:focus-visible { background:var(--surface-2); outline:none; }
+.copmenu .danger { color:var(--bad-tx); }
+.coprow .copren { flex:1 1 auto; min-width:0; margin:6px 10px; font-weight:600; }
+.coprow.ask { flex-wrap:wrap; gap:6px; padding:8px 12px; }
+.coprow.ask .copt { flex:1 1 100%; min-width:0; }
+.copaskrow { display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:var(--fs-small, 12.5px); color:var(--ink); }
+.copbtn.danger.solid { color:var(--surface); background:var(--bad); border-color:var(--bad); }
+.copbtn.danger.solid:hover, .copbtn.danger.solid:focus-visible { filter:brightness(.95); }
+.copnote { padding:8px 12px; font-size:var(--fs-small, 12.5px); color:var(--ink-3); border-bottom:1px solid var(--line); }
+.coprft { flex:none; border-top:1px solid var(--line); padding:6px 10px; }
+.coparch { border:0; background:none; font:600 var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-2);
+           cursor:pointer; padding:3px 4px; border-radius:5px; }
+.coparch:hover, .coparch:focus-visible { background:var(--surface-2); color:var(--ink); outline:none; }
+.copparked { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:8px 0 0; }
+
+/* THE COMPOSER: one box shaped like Claude's — 10px corners, one line to
+   start (48px, the floor in the CSS as well as in fitBox(), because a page
+   drawn hidden measures 0), Send as the return-arrow in its corner, and the
+   paperclip on a tight line beneath it. */
+/* The clip sits in the middle of the strip under the box (Islam, 2026-10-01,
+   design-mockups/copilot-clip/): the strip takes the pane's own 16px bottom
+   padding, so box to edge is 30px with the 22px clip 4px from each side. */
+.copcompose { padding-top:8px; margin-bottom:-16px; }
+.copbox { position:relative; border:1px solid var(--line); border-radius:10px; background:var(--surface);
+          box-shadow:var(--shadow-sm, 0 1px 3px rgba(0,0,0,.06)); transition:border-color .12s; }
+.copbox:focus-within { border-color:var(--gold-deep, var(--gold)); }
+.copbox textarea { display:block; width:100%; box-sizing:border-box; border:0; outline:0; resize:none; background:transparent;
+                   color:var(--ink); font:calc(15px * var(--copz, 1))/calc(22px * var(--copz, 1)) var(--sans); padding:13px 46px 13px 14px;
+                   height:48px; min-height:48px; max-height:210px; overflow-y:hidden; }
+.copbox .copsend { position:absolute; right:8px; bottom:9px; width:30px; height:30px; padding:0; display:grid; place-items:center;
+                   border:0; border-radius:6px; background:none; color:var(--ink); }
+.copbox .copsend svg { width:18px; height:18px; }
+.copbox .copsend:hover:not(:disabled) { background:var(--surface-2); filter:none; outline:none; }
+.copbox .copsend:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:2px; filter:none; }
+.copbox .copsend:disabled { color:var(--ink-3); opacity:.6; }
+.copunder { display:flex; align-items:center; gap:8px; height:30px; padding:0 6px 0 8px; }
+.copclip { flex:none; width:22px; height:22px; display:inline-grid; place-items:center; padding:0;
+           border:0; border-radius:5px; background:none; color:var(--ink-2); cursor:pointer; }
+.copclip:hover { background:var(--surface-2); color:var(--ink); }
+.copclip:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:2px; }
+.copclip svg { width:16px; height:16px; }
+.cophint { margin-left:auto; font-size:11px; line-height:1; color:var(--ink-3); white-space:nowrap; }
+@media (prefers-reduced-motion:reduce){ .copbox { transition:none; } }
+
+/* ── VIEW ONLY (Islam, 2026-10-01, design-mockups/copilot-access/
+   2026-10-01_copilot-column.html) ─────────────────────────────────────────
+   Where the composer sits for somebody whose Copilot cell is View: the same
+   rule over it the composer has, and one quiet pill saying why there is no
+   box. Tokens only, so it reads in both palettes (§25). */
+.copviewonly{padding:14px 0 4px;border-top:1px solid var(--line);margin-top:auto}
+.copviewonly span{display:inline-flex;align-items:center;padding:6px 12px;border:1px solid var(--line);border-radius:999px;
+  background:var(--surface-2);font:600 12px/1.2 var(--sans);color:var(--ink-2)}
+
+/* §460: a drafted item in the method's own shape, and the "Following" line. */
+.copdraft li.copit { list-style:none; margin-left:-18px; padding:7px 0; border-top:1px solid var(--line); }
+.copdraft li.copit:first-child { border-top:0; padding-top:2px; }
+.copith { display:flex; justify-content:space-between; gap:10px; font-weight:700; color:var(--ink); }
+.copscore { font:700 var(--fs-micro, 11px)/1.6 var(--sans); color:var(--good-tx); white-space:nowrap; }
+.copev { font-size:var(--fs-small, 12.5px); color:var(--ink-3); margin-top:2px; }
+.copfollow { font-size:var(--fs-small, 12.5px); color:var(--ink-3); margin-top:4px; }
+
+/* §472: a saved draft says which version it became, and the working line
+   carries three moving dots (none under reduced motion). */
+.copsaved { font:600 var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--good-tx, var(--good)); }
+.copworking .copdots { display:inline-flex; gap:3px; margin-left:4px; vertical-align:middle; }
+.copworking .copdots i { width:4px; height:4px; border-radius:50%; background:var(--ink-3); animation:copdot 1.2s infinite ease-in-out; }
+.copworking .copdots i:nth-child(2) { animation-delay:.15s; }
+.copworking .copdots i:nth-child(3) { animation-delay:.3s; }
+@keyframes copdot { 0%, 80%, 100% { opacity:.25; transform:translateY(0); } 40% { opacity:1; transform:translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .copworking .copdots i { animation:none; opacity:.6; } }
+
+/* ── §465: THE GUIDED FOUNDATION (Islam 2026-10-02, "ok approved, build it",
+   from the signed-off design-mockups/copilot-foundation-flow/
+   2026-10-02_working-flow.html, Option A) ──────────────────────────────────
+   Three columns: the rail, the five parts as cards, the chat. The rail hides
+   behind a toggle and leaves a 44px strip with a way back and a "+".
+   Gold as TYPE is --gold-deep / --attn-tx, never --gold (§38.4); every
+   colour a token, so it reads in both palettes (§25). */
+.copslim { display:none; flex-direction:column; align-items:center; gap:8px; min-width:0; }
+.coptog { flex:none; width:30px; height:28px; padding:0; display:grid; place-items:center; cursor:pointer;
+          border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink-2);
+          font:600 16px/1 var(--sans); }
+.coptog svg { width:16px; height:16px; }
+.coptog:hover { border-color:var(--ink-3); color:var(--ink); }
+.coptog:focus-visible { outline:2px solid var(--focus, var(--gold)); outline-offset:1px; }
+/* §475 option A: the strip is 24px and stays a column at every width. */
+.coppane.copshut { grid-template-columns:24px minmax(0, 1fr); }
+.coppane.copshut .coprails { display:none; }
+.coppane.copshut .copslim { display:flex; gap:6px; }
+.copslim .coptog { width:24px; height:26px; border-radius:5px; font-size:14px; }
+.copslim .coptog svg { width:14px; height:14px; }
+.cophtog { width:22px; height:20px; border-radius:4px; }
+.cophtog svg { width:13px; height:13px; }
+.coprh .coprhl { flex:1 1 auto; }
+@media (max-width:820px){ .coppane.copshut { grid-template-columns:24px minmax(0, 1fr); } }
+
+.copflow { display:grid; grid-template-columns:minmax(0, .95fr) minmax(0, 1.1fr); gap:12px; min-height:0; }
+@media (max-width:980px){ .copflow { grid-template-columns:minmax(0, 1fr); } .copleft { display:none; } }
+.copleft { min-width:0; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
+.copvline { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copvline b { color:var(--ink); }
+.copcards { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
+@media (max-width:520px){ .copcards { grid-template-columns:1fr; } }
+.copcard { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface);
+           display:flex; flex-direction:column; gap:4px; min-width:0; }
+.copcard.wide { grid-column:1 / -1; }
+.copcard.now { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+.copcard h3 { margin:0; font-size:14px; display:flex; justify-content:space-between; gap:8px; color:var(--ink); }
+.copcard p { margin:0; font-size:13px; color:var(--ink-2); white-space:pre-line; overflow-wrap:anywhere; }
+.copst { font:600 11.5px/1.4 var(--sans); color:var(--ink-3); white-space:nowrap; }
+.copst.done { color:var(--good-tx); }
+.copst.now { color:var(--attn-tx, var(--gold-deep)); }
+.copst.plan { color:var(--good-tx); }
+.copst.opt { color:var(--gold-deep, var(--gold)); }
+.copflow.nocards { grid-template-columns:minmax(0, 1fr); }
+.copsh { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.copcx { flex:none; width:28px; height:26px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+         border:1px solid var(--line); border-radius:6px; background:var(--surface); color:var(--ink-3); font:600 15px/1 var(--sans); padding:0; }
+.copcx:hover, .copcx:focus-visible { color:var(--ink); background:var(--surface-2); outline:none; }
+button.copcard.pick { font:inherit; text-align:left; cursor:pointer; width:100%; color:inherit; }
+button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--surface-2); outline:none; border-color:var(--gold); }
+.copcard ul { margin:0; padding-left:16px; font-size:13px; color:var(--ink-2); display:flex; flex-direction:column; gap:2px; }
+.copcard li { overflow-wrap:anywhere; }
+.copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
+.copcard.empty p { color:var(--ink-3); font-style:italic; }
+.copchoice { display:inline-block; border:1px solid var(--line); border-radius:6px; padding:4px 10px; margin:2px 4px 0 0;
+             font:600 var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-3); background:var(--surface); }
+.copchoice.picked { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+
+.copfchat { border:1px solid var(--line); border-radius:8px; background:var(--surface-2); padding:0 10px 16px;
+            display:flex; flex-direction:column; min-width:0; min-height:0; }
+.copfhead { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
+.copfhead b { flex:1 1 auto; min-width:0; font-size:13.5px; color:var(--ink); overflow-wrap:anywhere; }
+.copprog { color:var(--ink-3); white-space:nowrap; }
+.coptrack { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin:6px 0 8px; flex:none; }
+.coptrack i { display:block; height:100%; background:var(--gold); transition:width .2s; }
+.copfchat .copmsgs { max-height:none; }
+.copmsg.copwide { max-width:100%; }
+.copfchat .copmsg.ai .copbody { white-space:normal; }
+.copexs { margin:-3px 0 0 8px; padding-left:11px; border-left:2px solid var(--line); max-width:88%; }
+.copeh { display:block; font:700 10.5px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:3px; }
+.copexs p { margin:0; font-size:12.5px; color:var(--ink-3); line-height:1.45; }
+.copwarn { background:var(--attn-bg, var(--surface)); border:1px solid var(--line); border-left:3px solid var(--attn, var(--gold));
+           border-radius:8px; padding:8px 11px; font-size:13px; color:var(--ink); }
+.copbtns { flex-wrap:wrap; }
+.copbtn.solid { color:var(--on-accent, var(--surface)); background:var(--gold); border-color:var(--gold); }
+.copbtn.solid:hover, .copbtn.solid:focus-visible { filter:brightness(.95); outline:2px solid var(--gold); outline-offset:1px; }
+.copbtn:disabled { opacity:.55; cursor:default; }
+.coprv { display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+.coprv label { display:flex; flex-direction:column; gap:3px; font-size:12px; color:var(--ink-3); }
+.copfed { width:100%; box-sizing:border-box; font:13px/1.4 var(--sans); color:var(--ink); background:var(--surface);
+          border:1px solid var(--line); border-radius:6px; padding:5px 7px; resize:vertical; }
+.copfed:focus { outline:2px solid var(--focus, var(--gold)); outline-offset:0; }
+.copfdraft { border:1px solid var(--line); border-radius:6px; background:var(--surface-2); padding:8px 10px; margin:4px 0 8px;
+             white-space:pre-line; overflow-wrap:anywhere; color:var(--ink); }
+.copchk { margin:4px 0 0; padding-left:18px; font-size:13px; }
+.copchk li { margin:2px 0; }
+.copchk.ok li::marker { color:var(--good-tx); }
+.copchk.issue li::marker { color:var(--bad-tx); }
+.copyr { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; margin-top:6px; }
+.copyr label { display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--ink-3); }
+.copyr input { width:80px; }
+.coppaths { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px; }
+@media (max-width:520px){ .coppaths { grid-template-columns:1fr; } }
+.coppcard { display:grid; grid-template-columns:24px minmax(0, 1fr); column-gap:10px; row-gap:4px; text-align:left; cursor:pointer;
+            border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 14px 13px; font:inherit; color:var(--ink); }
+.coppcard:hover, .coppcard:focus-visible { border-color:var(--gold); outline:none; }
+.coppcard svg { width:22px; height:22px; color:var(--gold-deep, var(--gold)); grid-row:1 / 3; }
+.coppt { display:flex; flex-direction:column; align-items:flex-start; gap:5px; font-weight:700; font-size:15px; line-height:1.3; }
+.coppd { grid-column:2; font-size:13px; color:var(--ink-2); line-height:1.45; }
+.copfroad { margin-top:8px; }
+@media (min-width:821px){
+  .copmain > .copflow { flex:1 1 auto; }
+  .copflow > .copfchat > .copmsgs { flex:1 1 auto; min-height:0; }
+  .copflow > .copfchat > :not(.copmsgs) { flex:none; }
+}
+
+/* ── MORE ROOM FOR THE COPILOT (§475, Islam's room options 1 and 2) ─────
+   1. FOLD THE BARS. With `data-cop-fold` (set by paint() only on the Copilot
+      tab, and only once somebody pressed "Fold bars"), the top bar, the unit
+      row and the tab row step aside and one thin line says where you are.
+      The section row stays: it is how you move between the five sections.
+   2. TIGHTER GAPS, the Copilot page only (`data-cop-page`): the page gutter,
+      the rail-to-chat gap and the section row's air. No other page moves. */
+.copthin { display:none; }
+:root[data-cop-fold] .chrome > header.top,
+:root[data-cop-fold] .chrome > nav.units,
+:root[data-cop-fold] .chrome > #tabrow { display:none !important; }
+:root[data-cop-fold] .copthin { display:flex; align-items:center; gap:7px; height:28px;
+  padding:0 12px; background:var(--panel); color:var(--panel-ink); font-size:12.5px;
+  white-space:nowrap; overflow:hidden; }
+.copthin .q { color:var(--panel-quiet); }
+.copthin b { font-weight:700; }
+.copthin .sp { flex:1 1 auto; }
+.copthin button { flex:none; border:1px solid var(--panel-quiet); border-radius:4px; background:none;
+  color:var(--panel-ink); font:inherit; font-size:12px; padding:2px 9px; cursor:pointer; }
+.copthin button:hover { border-color:var(--panel-ink); }
+.copfoldbtn { flex:none; align-self:center; margin-left:auto; border:1px solid var(--panel-quiet);
+  border-radius:4px; background:none; color:var(--panel-ink); font:inherit; font-size:12px;
+  padding:3px 9px; cursor:pointer; white-space:nowrap; }
+.copfoldbtn:hover { border-color:var(--panel-ink); }
+:root[data-cop-page] .wrap,
+:root[data-cop-page] .chrome .tabs-in { padding-left:12px; padding-right:12px; }
+:root[data-cop-page] #secrow .tabs-in { padding-top:3px; padding-bottom:3px; }
+:root[data-cop-page] .coppane { gap:10px; }

@@ -45,6 +45,9 @@ const PLACES = [
   ["IT Dist.", "IT Distribution"],
   ["Mobile", "Devices"],
   ["Care", "Customer Care"],
+  /* A real B2B ordering app the example's Devices plan is built around
+     (2026-09-29): read beside the brands, it points at the client. */
+  ["Sary", "TradeLink"],
 ];
 
 /* THE UNIT NAMES ARE THE SAME TABLE READ BY KEY, so a unit cannot end up
@@ -96,7 +99,11 @@ const MAIL_DOMAIN = "meridian.example";
    case-insensitively against every string in the finished graph INCLUDING the
    ones this file wrote — a rename table with a typo in it would otherwise pass
    its own guard. */
-const FORBIDDEN = ["raya", "mazaya", "rayatrade", "i2"];
+const FORBIDDEN = ["raya", "mazaya", "rayatrade", "i2",
+  /* The principals Devices was measured by, and the B2B app it sells
+     through (2026-09-29): none is a person, but read together they point at
+     the real client. */
+  "samsung", "vivo", "sary"];
 
 /* ── Reading the real names out of the example ────────────────────
    Never typed out again here: a copy would drift the day somebody edits the
@@ -257,6 +264,10 @@ function demoGraph() {
     if (!p.email) p.email = mailFor(p.name, p.key);
   });
   seed.group.org = "Meridian Group";
+  /* 5 · and the demo's own content, written in the invented world, AFTER the
+     rename so nothing here is swept and BEFORE the refusal so all of it is
+     scanned (scripts/demo-content.js). */
+  require("./demo-content.js").enrich(seed);
   return seed;
 }
 
@@ -347,7 +358,11 @@ async function main() {
 /* REQUIRABLE, SO IT CAN BE ASKED WHAT IT WOULD WRITE without a database:
    checks/multi-client.py and the eye both need the renamed graph, and a
    script that can only be run cannot be inspected. */
-module.exports = { demoGraph, refuseIfAnySurvives, realNames, CLIENT_KEY };
+/* The Tracker's and Meeting Notes' rows (scripts/demo-content.js) travel with
+   the graph so the one seeder that owns the tenant writes both. */
+const { moduleContent } = require("./demo-content.js");
+
+module.exports = { demoGraph, refuseIfAnySurvives, realNames, moduleContent, CLIENT_KEY };
 
 if (require.main === module) {
   main().catch(function (e) { console.error(e.message); process.exit(1); });

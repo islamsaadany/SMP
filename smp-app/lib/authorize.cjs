@@ -47,7 +47,10 @@ const REPORT = {
      exact fault §147 records for a milestone's `pct`. Its target, direction
      and compile rule are NOT here: those are the plan, and the plan is the
      office's (§94). */
-  tactic:    ["status", "actual", "note", "outActual"],
+  /* §414: and `outActs`, the figures for a tactic's SECOND and later
+     outcomes (keyed by the outcome's id), for the same reason — a figure is
+     reporting and the outcomes themselves (`outs`) are the plan. */
+  tactic:    ["status", "actual", "note", "outActual", "outActs"],
   capKO:     ["actual", "progress", "note"],
   outcome:   ["actual", "progress", "note"],
   /* `pct` on both since §147 — it arrived with migration 024 (§104.10: an In
@@ -85,7 +88,10 @@ const SRC = ["src"];
    left to the unknown fall-through. Both land on the SMO, so this changes
    no permission — it changes the REFUSAL, which then says Setup is the
    SMO's and sends the person to the page that holds it (§16.7). */
-const UNIT_CONFIG     = ["name", "navName", "codePrefix", "active", "real", "company", "logo"];
+const UNIT_CONFIG     = ["name", "navName", "codePrefix", "active", "real", "company", "logo",
+                         /* §405: how a unit plans is a setting, set on its row
+                            in Setup — the office's, like a function's format. */
+                         "format"];
 /* §256: which slides a review does not show. Its own kind rather than a
    setting, and the reason is §16.7's: both land on the office, so this
    changes no permission — it changes the REFUSAL, which must not send
@@ -105,14 +111,26 @@ const MASTER_FLOW     = R.MASTER_FLOW;
 const PRESENT_MINS    = R.PRESENT_MINS;
 const LANDING_PICK    = R.LANDING_PICK;
 const SETUP_DONE      = R.SETUP_DONE;
+const STRUCTURE       = R.STRUCTURE;
 const PLAN_FROM       = R.PLAN_FROM;
 const PLAN_TO         = R.PLAN_TO;
-const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses"];
+/* Spec 063: a unit's revenue driver tree, and the client's seasons. Named
+   from the shared module for HIDE_SLIDES' reason above — a field the screen
+   writes under one name and the server classifies under another is seen by
+   NOTHING at all (§191), and §234 is what that costs. */
+const DRIVERS         = R.DRIVERS;
+const SEASONS         = R.SEASONS;
+const DRIVERS_ON      = R.DRIVERS_ON;
+const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses", "mission", "values"];
 /* `pend` is §145's pending-fill marks — known here so a mark the gap pass
    did not accept falls to the PLAN comparison (office-only) rather than to
    `unknown`, which would be true but would name the wrong screen. */
 const UNIT_KNOWN      = UNIT_CONFIG.concat(UNIT_FOUNDATION,
-  ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend", HIDE_SLIDES]);
+  ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend",
+   HIDE_SLIDES, DRIVERS,
+   /* §405: a unit that plans in projects or actions holds them itself, and
+      they are classified below by the rules a function's own work gets. */
+   "projects", "actions"]);
 
 const GROUP_OWN = ["org", "horizon", "asOfQuarter", "aspiration", "endInMind",
                    "mission", "values", "clauses", "keyObjectives", "themes",
@@ -408,6 +426,19 @@ function collect(stored, incoming, w) {
     const a = sr[field] || {}, b = ir[field] || {};
     Object.keys(a).concat(Object.keys(b)).forEach(function (t) {
       if (same(a[t], b[t])) return;
+      /* §382: an owner locking their OWN lines in one subject. Never
+         `reportState`, which speaks for the whole unit and is refused to
+         every bounded role — this closes the handful of rows that name one
+         person and leaves the unit's report open, which is §309's control one
+         row kind over. The key carries who, so one owner cannot lock
+         another's. */
+      if (field === "lines") {
+        const cut = String(t).indexOf("|");
+        add("lineDone", cut < 0 ? null : String(t).slice(0, cut),
+            "saving your own lines as a draft",
+            [{ id: String(t), who: cut < 0 ? "" : String(t).slice(cut + 1) }]);
+        return;
+      }
       if (field === "parked" && UNPARK(a, b, t)) {
         if (out.some(function (c) { return c.kind === "reportUnpark" && c.target === t; })) return;
         add("reportUnpark", t, "reopening the saved draft");
@@ -478,6 +509,13 @@ function collect(stored, incoming, w) {
      one — it is the same argument as `naming` directly above. */
   if (!same(sg.focusOff, ig.focusOff))
     add("setup", null, "whether focus measures are used at all");
+  /* §382: whether reporting follows the Owner column. SETUP, and the same
+     argument as the two switches above it — it decides whether a whole second
+     way of entering a figure exists, so a switch anybody could flip would be
+     no switch at all. NAMED, or a refusal reads "the group's lineOwners" and
+     sends nobody anywhere (§16.7). */
+  if (!same(sg.lineOwners, ig.lineOwners))
+    add("setup", null, "whether tactic owners enter their own lines");
   /* §266: the master presentation's running order. Deliberately NOT `setup`
      and not `deckHide` either: it hides nothing and scores nothing, it is the
      order the office runs a review in — so it gets a sentence of its own that
@@ -504,6 +542,18 @@ function collect(stored, incoming, w) {
      field is swept as unknown by one build and invisible to the next. */
   if (!same(sg[SETUP_DONE], ig[SETUP_DONE]))
     add("setup", null, "whether the client's set-up is done");
+  /* §404: the client's structure — its levels, their components and every
+     per-item adjustment. SETUP, the office's, and NAMED so a refusal says
+     where it is set. Canonical, because it holds objects and jsonb hands
+     their keys back in its own order (§145, §249.3). The two edits go
+     together (§259.2): classified here AND in gExtra. */
+  if (!sameCanon(sg[STRUCTURE], ig[STRUCTURE]))
+    add("setup", null, "the client's structure");
+  /* §404: a company's own Foundation is the group's own strategy drawn over
+     the company's record, so it is judged as the group's is — and
+     canonically, because it rides jsonb (§145). In gExtra below too. */
+  if (!sameCanon(sg.coFound, ig.coFound))
+    add("group", "group", "a company's foundation");
   /* ── THE PLANNING PERIOD (§308) ─────────────────────────────────
      `cycle`, not `setup`: it is set in the Reporting cycle pen, by the person
      who sets the cycle's own dates, and asking a different grant for the two
@@ -513,6 +563,10 @@ function collect(stored, incoming, w) {
      moved, because half a period is not a second decision. */
   if (!same(sg[PLAN_FROM], ig[PLAN_FROM]) || !same(sg[PLAN_TO], ig[PLAN_TO]))
     add("cycle", null, "the planning period");
+  /* §416: the year the plan stands in. `cycle`, beside the planning period
+     it belongs to — the yearly revision is pressed in the same pen. The two
+     edits go together (§259.2): classified here AND in gExtra. */
+  if (!same(sg.planYear, ig.planYear)) add("cycle", null, "the plan's year");
   if (!same(sg.mainbus, ig.mainbus)) add("setup", null, "the BU list");
   /* Communication (§72): the display name on outgoing mail, the reply-to and
      the footer. SETUP for the same reason branding is - it is what the
@@ -524,10 +578,41 @@ function collect(stored, incoming, w) {
      SETUP, like comms — it is what the platform says on the office's behalf —
      and named here so a refusal sends somebody to the page with the pen. */
   if (!same(sg.kb, ig.kb)) add("setup", null, "the knowledge base's answers");
-  collectCapabilities(sg.capabilities, ig.capabilities, add);
-  const gExtra = GROUP_OWN.concat(["capabilities", "branding", "sets", "claims",
-                                   "naming", "focusOff", "mainbus", "comms", "kb", "logo",
-                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, PLAN_FROM, PLAN_TO]);
+  collectCapabilities(sg.capabilities, ig.capabilities, add, w);
+  /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
+     Defined once and used by name in any unit, so changing Ramadan's dates
+     moves every base period in the client at once — which is exactly why it
+     is not a per-unit field. Its own kind for the refusal's sake, and
+     canonically compared for the tree's reason above. */
+  if (!sameCanon(sg[SEASONS], ig[SEASONS]))
+    add("seasons", null, "the client's seasons");
+  /* THE SWITCH THAT SAYS WHETHER ANY OF IT IS SHOWN, the same page's and the
+     same grant's — a unit head who could flip it would hide the tree the
+     office built from the whole client. The two edits go together (§259.2):
+     classified here AND named in `gExtra` below, or it is swept unseen and
+     therefore allowed to everybody. */
+  if (!same(sg[DRIVERS_ON], ig[DRIVERS_ON]))
+    add("seasons", null, "whether revenue drivers are used at all");
+
+  /* ── §428: THE TOP LAYER'S OWN PLAN AND SWOT ─────────────────────────
+     Judged by exactly the rules a business unit's plan gets — the same
+     `collectUnit()` pass over a unit-shaped view, against the `group`
+     target — so the verdicts below read `mayAuthorPage(…, "group")`, which
+     makes the plan and the SWOT the office's alone, and the figures go
+     through `unitReporting` like a unit's (§53.5: one set of rules). The
+     view carries ONLY the plan and the SWOT; the group's own words and its
+     objectives are GROUP_OWN's, judged above, and passing them through would
+     report every change twice. Both keys are named in gExtra below, or they
+     are swept as unknown as well (§259.2). */
+  /* §466: and its projects, when it plans in projects — the §405 block of
+     `collectUnit` judges them as a unit's own projects, against "group". */
+  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !same(sg.topProjects, ig.topProjects))
+    collectUnit("group", topView(sg), topView(ig), add, w);
+
+  const gExtra = GROUP_OWN.concat(["items", "swot", "capabilities", "branding", "sets", "claims",
+                                   "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
+                                   MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
+                                   SEASONS, DRIVERS_ON, "planYear", "topProjects"]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */
@@ -662,6 +747,47 @@ function addFigures(w, unitKey, storedUnit, rows, what, add) {
   Object.keys(byOwner).forEach(function (who) {
     add("sourceReporting", unitKey, what + " entered by " +
         (byOwner[who][0].label || who), byOwner[who]);
+  });
+}
+
+/* §382: A TACTIC WHOSE OWNER ENTERS IT. `addFigures` above is the same split
+   one row kind over, and it is deliberately not reused: that one resolves a
+   register KEY off the figure's own `src`, and a plan's Owner is a NAME the
+   custodian picked (§130.1) — so the two identify their person differently and
+   say so differently when they refuse. What IS shared is the rule underneath:
+   the cycle is open and this row is yours, and nothing about a grant, a role or
+   where the person is attached is asked at all.
+
+   Resolved through the STORED row, so a save cannot name itself the owner and
+   enter the figure in the same request (§42.2). Unowned tactics — and every
+   tactic at all while the switch is off — fall through to the unit exactly as
+   before.
+
+   §387: AND A NAME THAT REACHES NOBODY IS NOT AN OWNER. `lineOwned` asks
+   whether the plan NAMES somebody and `lineOwnerIsHere` asks whether that name
+   is somebody the register holds — 32 of the worked example's 83 tactics
+   answer yes to the first and no to the second, because a plan is typed by a
+   custodian and a register is filled from HR. Classified as the owner's, such
+   a row is refused to everybody: `lineReporting` admits the owner alone by
+   name (below) and there is nobody to be them. So it falls to `mine` and the
+   unit enters it exactly as it did before the switch was turned on — the same
+   answer `canEnterLine()` gives on the screen, through the same predicate, so
+   the two cannot disagree about which rows are nobody's (§42).
+
+   The register comes off the STORED world by construction, so this cannot be
+   claimed in the request that uses it (§42.2 again, one field over). */
+function addOwnedTactics(w, unitKey, storedPillar, rows, add, mine) {
+  const byOwner = {};
+  rows.forEach(function (r) {
+    let stored = null;
+    (storedPillar.tactics || []).forEach(function (t) { if (t.id === r.id) stored = t; });
+    const who = R.lineOwned(w, stored) && R.lineOwnerIsHere(w, stored)
+      ? R.lineOwnerName(stored) : "";
+    if (!who) { mine.push(r); return; }
+    (byOwner[who] = byOwner[who] || []).push(Object.assign({}, r, { owner: who }));
+  });
+  Object.keys(byOwner).forEach(function (who) {
+    add("lineReporting", unitKey, "figures entered by " + who, byOwner[who]);
   });
 }
 
@@ -855,6 +981,9 @@ function gapPassUnit(target, su, iu, add) {
        fills the rows of the pillar that names them and nobody else's. */
     const pctx = function (row) { return { pillarOwner: sm[id].owner, row: row }; };
     gapRows("measure", sm[id].measures, im[id].measures, target, add, "a key measure", pctx);
+    /* §384 wrapped pctx here to carry the tactic's own Owner for its role;
+       §387 removed the role, so a tactic is filled through the pillar's ctx
+       exactly as a measure is (§24: the handle goes with what read it). */
     gapRows("tactic", sm[id].tactics, im[id].tactics, target, add, "a tactic", pctx);
   });
   return s2;
@@ -907,6 +1036,27 @@ function collectUnit(key, su, iu, add, w) {
      setting nor unknown, and a change to it produces exactly one sentence. */
   if (!same(su[HIDE_SLIDES], iu[HIDE_SLIDES]))
     add("deckHide", key, "which slides the review shows");
+
+  /* ── THE REVENUE DRIVER TREE (spec 063) ──────────────────────────
+     ITS OWN KIND, AND THE SAME GATE AS THE PLAN. Decision 1 put the tree in
+     Strategy's own section row beside SWOT and Plan, using `u_plan`'s
+     grant — so this moves nobody's access and adds no column to Roles &
+     access. What a kind of its own buys is the REFUSAL: `unitPlan` would
+     say *a plan is corrected by the SMO*, which is true and sends somebody
+     to the wrong section (§16.7).
+
+     COMPARED CANONICALLY, WHICH IS NOT OPTIONAL HERE. The tree is a deeply
+     nested object in a jsonb column, and Postgres hands an object's keys
+     back in its own order (§145, §249.3) — compared with `same()` an
+     UNTOUCHED tree would read as a change on every save, and since this
+     kind is office-only that would refuse every save by everybody else in
+     the tenant, for ever (§42's own `branding()` fault, one field along).
+
+     SWEPT ABOVE AND CLASSIFIED HERE, AND THE TWO GO TOGETHER (§259.2):
+     with only the classification removed the field is invisible to this
+     file and therefore ALLOWED TO EVERYBODY. */
+  if (!sameCanon(su[DRIVERS], iu[DRIVERS]))
+    add("unitDrivers", key, "the unit's revenue drivers");
 
   if (!same(pick(su, UNIT_CONFIG), pick(iu, UNIT_CONFIG))) add("setup", key, "the unit's settings");
   if (!same(pick(su, UNIT_FOUNDATION), pick(iu, UNIT_FOUNDATION)))
@@ -994,12 +1144,31 @@ function collectUnit(key, su, iu, add, w) {
         function () {},
         function (rows) { planMoved = true; keep(planRows, rows); });
       splitRows(a.tactics, b.tactics, REPORT.tactic,
-        function (rows) { rows.forEach(function (x) { moved.push(x); }); },
+        function (rows) { addOwnedTactics(w, key, a, rows, add, moved); },
         function (rows) { planMoved = true; keep(planRows, rows); });
     });
     if (moved.length) add("unitReporting", key, "reported figures", moved);
     if (planMoved) add("unitPlan", key, "the unit's plan", planRows.length ? planRows : null);
   }
+
+  /* ── §405: A UNIT'S OWN PROJECTS AND ACTIONS ────────────────────────────
+     Judged by exactly the rules a function's own work gets (`collectProjects`
+     and the action split `fnOwnWork` uses), against the UNIT's target — so the
+     verdicts below read the unit's columns (`planPageOf`, the unit area), and
+     a unit's reporter entering an action's figure means here what it means on
+     a function. One set of rules, never a copy (§53.5). */
+  (function () {
+    const spr = su.projects || [], ipr = iu.projects || [];
+    if (!same(spr, ipr)) collectProjects(spr, ipr, key, add);
+    const sac = su.actions || [], iac = iu.actions || [];
+    if (!same(sac, iac)) {
+      gapRows("action", sac, iac, key, add, "an action");
+      splitRows(sac, iac, REPORT.action,
+        function (rows) { add("capReporting", key, "action figures", rows); },
+        function (rows) { add("capPlan", key, "the unit's actions", rows); },
+        function () { add("arrange", key, "the order of the unit's actions"); });
+    }
+  })();
 
   const uUnknown = uniq(Object.keys(omit(su, UNIT_KNOWN)).concat(Object.keys(omit(iu, UNIT_KNOWN))))
     .filter(function (k) { return !same(su[k], iu[k]); });
@@ -1074,6 +1243,15 @@ function fnOwnWork(sf2, iff, target, add) {
       function () { say("arrange", target, "the order of a function's key objectives"); });
   }
   if (!same(spr, ipr)) collectProjects(spr, ipr, target, say);
+  /* §399: A FUNCTION'S S&W, whatever way it plans. The rule a unit's SWOT and
+     a pillars function's already get (`unitAnalysis`, judged on `k_found` by
+     strategyPageOf), so a projects or objectives function is not swept up as
+     "a supporting function's settings" — the same answer for one field on
+     every format (§53.5). */
+  const ssw = sf2.swot || {}, isw = iff.swot || {};
+  if (!same(ssw, isw))
+    say("unitAnalysis", target, "the function's strengths and weaknesses",
+        fieldRows(target, sf2.name || target, ssw, isw, ["s", "w", "o", "t"], "swot."));
   /* §342: AND ITS ACTIONS, judged by the rules a milestone's row already gets
      — reported figures are the reporter's, the row itself is the plan, and
      the order is `arrange` (§278.3). Without this the whole list falls to the
@@ -1150,12 +1328,28 @@ function asUnit(f, ukey) {
   return u;
 }
 
+/* §428: the top layer's own plan, in the shape collectUnit() reads. */
+function topView(g) {
+  return { ukey: "group", items: (g && g.items) || [], keyObjectives: [],
+           projects: (g && g.topProjects) || [],
+           swot: (g && g.swot) || {}, aspiration: "", endInMind: "", clauses: [] };
+}
+
 /* Capabilities. WHAT EXISTS and WHICH FUNCTION OWNS IT is Setup (c_caps);
    what a capability IS, its key objectives and its projects belong to the
    function that carries it (k_found, k_proj); the figures are its reporting
    (k_report). */
-const CAP_SETUP = ["id", "name", "fn"];
+/* §412: the capability's own Owner and Custodian are Setup, beside who holds
+   it -- the office names them, as it names a unit's head (§33). */
+const CAP_SETUP = ["id", "name", "fn", "head", "custodian"];
 const CAP_KNOWN = CAP_SETUP.concat(["def", "keyObjectives", "projects", "perf", "exec"]);
+/* §394: what the pillars form adds. Kept as a second list so CAP_KNOWN keeps
+   meaning what it meant to every other reader. */
+const CAP_KNOWN_ALL = CAP_KNOWN.concat(["format", "items"]);
+function capAsUnitView(c, ukey) {
+  return { ukey: ukey, items: (c && c.items) || [], keyObjectives: [],
+           swot: {}, aspiration: "", endInMind: "", clauses: [] };
+}
 
 /* ── A LIST OF PROJECTS, CLASSIFIED (§326) ────────────────────────────────
    Lifted out of collectCapabilities unchanged, because a supporting function
@@ -1234,10 +1428,11 @@ function targetWord(w, t) {
       return c && c.id === id; })[0];
     return hit && hit.name ? hit.name : id;
   }
+  if (s === "group") return "the top layer";
   return s.replace(/^fn:/, "");
 }
 
-function collectCapabilities(sList, iList, add) {
+function collectCapabilities(sList, iList, add, w) {
   if (same(sList, iList)) return;
   if (!same(idsOf(sList), idsOf(iList))) { add("setup", null, "the list of capabilities"); return; }
   const sm = byId(sList), im = byId(iList);
@@ -1245,7 +1440,7 @@ function collectCapabilities(sList, iList, add) {
     let a = sm[id];
     const b = im[id];
     if (same(a, b)) return;
-    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name or function");
+    if (!same(pick(a, CAP_SETUP), pick(b, CAP_SETUP))) add("setup", null, "a capability's name, function or owners");
     /* §334: THE CAPABILITY'S OWN TARGET. It is a destination now, with its own
        pages, its own submission and its own row on the cycle board — so a fill
        inside it is judged against the capability rather than against the
@@ -1289,7 +1484,27 @@ function collectCapabilities(sList, iList, add) {
       function () { add("arrange", target, "the order of a capability's key objectives"); });
 
     collectProjects(a.projects, b.projects, target, add);
-    if (!same(omit(a, CAP_KNOWN), omit(b, CAP_KNOWN))) add("unknown", target, "a capability");
+    /* §394: A CAPABILITY THAT PLANS IN PILLARS IS JUDGED AS A PILLARS FUNCTION
+       IS. §334 gave a capability the pillars form (`format: "pillars"`, its
+       plan in `items`) and this file was never told, so every change inside
+       one fell to the unknown sweep below — the Super user's alone. Measured:
+       the SMO team refused adding a pillar, and the function head refused
+       REPORTING A FIGURE, i.e. nobody but the Super user could report on such
+       a capability at all. The rows go through collectUnit(), the one set of
+       rules a unit's and a pillars function's plan already answer to (§53.5),
+       against the capability's own target — whose access resolves to the
+       holding function in lib/rules.js (§334). Read from the STORED side, as
+       collectFunction() does (§42.2). Its key objectives stay OUT of that
+       view: they are classified above by the capability's own rules, and
+       passing them through twice would judge one change twice. Switching
+       `format` is Setup, like a function's. */
+    if (String(a.format) === "pillars" || String(b.format) === "pillars") {
+      if (!same(a.format, b.format)) add("setup", null, "how a capability is planned");
+      if (String(a.format) === "pillars")
+        collectUnit(target, capAsUnitView(a, target), capAsUnitView(b, target), add, w);
+      else if (!same(a.items, b.items)) add("setup", null, "a capability's " + "pillars");
+    }
+    if (!same(omit(a, CAP_KNOWN_ALL), omit(b, CAP_KNOWN_ALL))) add("unknown", target, "a capability");
   });
 }
 
@@ -1317,11 +1532,24 @@ function ctxOfUnit(u) {
   (u && u.items || []).forEach(function (p) {
     (p.measures || []).forEach(function (m) {
       out[m.id] = { row: { owner: p.owner, collaborators: m.collaborators },
-                    pillarOwner: p.owner };
+                    pillarOwner: p.owner, pillarCust: p.custodian };
     });
     (p.tactics || []).forEach(function (t) {
-      out[t.id] = { row: t, pillarOwner: p.owner };
+      out[t.id] = { row: t, pillarOwner: p.owner, pillarCust: p.custodian };
     });
+  });
+  return out;
+}
+/* §405: the rows a unit that plans in projects or actions holds itself, with
+   the project each sits inside — `ctxOfFn`'s shape for the unit's own holder. */
+function ctxOfUnitOwn(u) {
+  const out = {};
+  (u && u.keyObjectives || []).forEach(function (x) { out[x.id] = { row: x }; });
+  (u && u.actions || []).forEach(function (x) {
+    if (x && x.id !== undefined) out[x.id] = { row: x }; });
+  (u && u.projects || []).forEach(function (pr) {
+    (pr.deliverables || []).concat(pr.outcomes || [], pr.milestones || [])
+      .forEach(function (x) { if (x && x.id !== undefined) out[x.id] = { row: x, project: pr }; });
   });
   return out;
 }
@@ -1389,7 +1617,8 @@ function containerIndex(stored) {
          which is the wrong shape of answer to leave to walk order. */
       if (seen[k]) { out[k] = null; return; }
       seen[k] = 1;
-      out[k] = { target: target, owner: x.owner, name: x.name || null };
+      out[k] = { target: target, owner: x.owner, custodian: x.custodian || null,
+                 name: x.name || null };
     });
   };
   Object.keys(stored.units || {}).forEach(function (uk) {
@@ -1403,6 +1632,10 @@ function containerIndex(stored) {
   ((stored.group || {}).capabilities || []).forEach(function (c) {
     if (c && c.id) take(c.projects, "cap:" + c.id);
   });
+  /* §469: and the company's own directions, so a direction's owner or
+     custodian can save their own direction as a draft — the act a project
+     owner has had since §309. */
+  take((stored.group || {}).items, "group");
   return out;
 }
 
@@ -1604,6 +1837,37 @@ function authorize(stored, incoming, person) {
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
         return;
 
+      /* ── THE REVENUE DRIVER TREE (spec 063) ──────────────────────────
+         THE SAME GATE AS THE PLAN AND A DIFFERENT SENTENCE. Islam, asked who
+         builds the trees: *"the smo build the trees."* That is `u_plan`'s
+         authoring grant, which §94 already makes the office's — so this
+         grants nothing new and refuses nobody who could edit the plan.
+         Asked through the shared rule, never re-derived, or the section that
+         draws the pen and the save that accepts it answer two questions
+         (§42).
+
+         NOT GATED ON THE CYCLE LOCK, and for the plan's own reason rather
+         than the deck's: a tree is the logic a plan was built to deliver, so
+         correcting a baseline somebody mistyped is exactly as legitimate
+         after the cycle locks as correcting a target is. */
+      case "unitDrivers":
+        if (!R.mayAuthorPage(w, person, R.strategyPageOf(ch.target, "u_plan"), ch.target))
+          no("The revenue drivers are built by the SMO — " + ch.what + where +
+             " is set in Strategy \u203a Drivers.");
+        return;
+
+      /* ── THE CLIENT'S SEASONS (spec 063 §6.5) ────────────────────────
+         One list for the whole client, so it is the office's and it is a
+         SETUP page — `a_setup` is the grant, and the sentence names the page
+         rather than the tree, because a season changed here moves every
+         unit's base period and somebody sent to a unit would find nothing to
+         change (§16.7). */
+      case "seasons":
+        if (!edits(w, person, "a_setup", "group"))
+          no("The seasons are set by the SMO — " + ch.what +
+             " is set in Setup \u203a Revenue drivers.");
+        return;
+
       /* REORDERING IS ITS OWN GRANT AGAIN (§101). Asked through the shared
          rule, never re-derived here — a screen that offers a handle the server
          then refuses is the drift this file exists to prevent, and it is
@@ -1644,6 +1908,33 @@ function authorize(stored, incoming, person) {
       case "unitReporting":
       case "reportState": {
         const t = String(ch.target || "");
+        /* §428: THE TOP LAYER IS REPORTED BY THE OFFICE AND THE GROUP'S CEO,
+           a rule and not a matrix cell, asked through the one function the
+           screen draws its boxes from (§42). */
+        if (t === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (R.mayReportTop(w, person)) return;
+          /* §447: with the business units off, a direction's owner reports
+             the rows of their own direction and nothing else — never the
+             company's submission, note or slides. Found through the STORED
+             top plan (§42), never the incoming one. */
+          if (ch.kind !== "unitReporting" || !ch.ids || !R.ownsTopPillar(w, person)) {
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+            return;
+          }
+          const tctx = ctxOfUnit(topView(stored.group));
+          const notMineT = ch.ids.filter(function (id) {
+            const c = tctx[id];
+            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "", c.pillarCust || "");
+          });
+          if (notMineT.length)
+            no("Your role reports only your own direction — " + notMineT.length +
+               (notMineT.length === 1 ? " figure" : " figures") + " is not yours.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
@@ -1703,6 +1994,13 @@ function authorize(stored, incoming, person) {
          untouched and stay `reportState` above. */
       case "reportUnpark": {
         const t = String(ch.target || "");
+        if (t === "group") {
+          if (!R.mayReportTop(w, person))
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+          else if (locked && !office)
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
@@ -1731,6 +2029,20 @@ function authorize(stored, incoming, person) {
           return;
         }
         const t = String(c.target || "");
+        /* §469: A COMPANY DIRECTION is saved by its owner or custodian, or by
+           whoever reports the whole top layer (the office and the CEO) —
+           the same two rules its figures are judged by, never a matrix cell. */
+        if (t === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (!R.mayReportTop(w, person) &&
+              !R.ownsTopPillar(w, person, c.owner || "", c.custodian || ""))
+            no("Saving " + (c.name ? "“" + c.name + "”" : "a direction") +
+               " is its owner's or its custodian's.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
@@ -1766,6 +2078,46 @@ function authorize(stored, incoming, person) {
           const label = (ch.rows || [])[0] && (ch.rows || [])[0].label;
           no("That figure is entered by " + (label || "somebody else") +
              " — " + t + " does not enter it.");
+        }
+        return;
+      }
+
+      /* §382: LOCKING YOUR OWN LINES. The key names the person, so the only
+         question is whether it names YOU — a bounded role holds no
+         `reportState` and must not gain one by another road (§309's own
+         reasoning: parking, submitting, the note and the slides stay the
+         unit's). */
+      case "lineDone": {
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
+        if (smo) return;
+        const notYou = (ch.rows || []).filter(function (r) { return r.who !== person.key; });
+        if (notYou.length) {
+          no("Those are somebody else's lines to save.");
+        }
+        return;
+      }
+
+      /* §382: A LINE ENTERED BY ITS OWNER. The same three gates
+         `sourceReporting` above applies, asking the plan's NAME rather than a
+         register key — `namedOn` is the one matcher (§130.7's runs, a typed
+         short name), so a name the page accepts is a name the server accepts.
+         The office still enters anything; the unit does not, which is the
+         whole of what the switch turns on. */
+      case "lineReporting": {
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+          return;
+        }
+        if (smo) return;
+        const notYours = (ch.rows || []).filter(function (r) {
+          return !R.ownedBy({ owner: r.owner }, person);
+        });
+        if (notYours.length) {
+          no("That line is entered by " + (notYours[0].owner || "its owner") +
+             " \u2014 it is not yours to report.");
         }
         return;
       }
@@ -1889,12 +2241,42 @@ function authorize(stored, incoming, person) {
          supporting function is exactly these. The pen has been the office's
          since §69.13; this side had never been told. */
       case "capPlan":
-        if (!R.mayAuthorPage(w, person, "k_proj", ch.target))
+        /* §405: `planPageOf`, never the literal — a business unit's own
+           projects and actions are judged by the unit's Plan column. */
+        if (!R.mayAuthorPage(w, person, R.planPageOf(ch.target), ch.target))
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
         return;
 
       case "capReporting": {
-        if (!edits(w, person, "fn", ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
+        /* §405: a business unit's own projects and actions report in the
+           UNIT area, where its access comes from. */
+        const capT = String(ch.target || "");
+        /* §466: THE COMPANY'S OWN PROJECTS are reported by the office and the
+           group's CEO (§428's rule), and a project's named Owner reports the
+           rows of their own project and nothing else (§301's rule). Found
+           through the STORED top plan (§42), never the incoming one. */
+        if (capT === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (R.mayReportTop(w, person)) return;
+          if (!ch.ids || !R.ownsTopProject(w, person)) {
+            no("The top layer's own plan is reported by the SMO team and the CEO.");
+            return;
+          }
+          const gctx = ctxOfUnitOwn(topView(stored.group));
+          const notMineP = ch.ids.filter(function (id) {
+            const c = gctx[id];
+            return !c || !c.project || !R.ownsTopProject(w, person, c.project.owner || "");
+          });
+          if (notMineP.length)
+            no("Your role reports only your own project — " + notMineP.length +
+               (notMineP.length === 1 ? " figure" : " figures") + " is not yours.");
+          return;
+        }
+        const capArea = (capT.indexOf("fn:") === 0 || capT.indexOf("cap:") === 0) ? "fn" : "unit";
+        if (!edits(w, person, capArea, ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
         if (locked && !office) {
           no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
           return;
@@ -1907,17 +2289,19 @@ function authorize(stored, incoming, person) {
            for anybody bounded they are refused. Resolved against the STORED
            capabilities (§42.2), through the same reach rule the screen asks
            (mayReportRow, §147.7). */
-        if (!R.onlyOwnLines(w, person, "fn", ch.target)) return;
+        if (!R.onlyOwnLines(w, person, capArea, ch.target)) return;
         if (!ch.ids) {
           no("Your role reports its own rows — " + ch.what + where +
              " is the " + (String(ch.target || "").indexOf("cap:") === 0
                             ? "capability's." : "function's."));
           return;
         }
-        const ctxs = ctxOfFn(w, ch.target);
+        const ctxs = capArea === "unit"
+          ? ctxOfUnitOwn((stored.units || {})[capT])
+          : ctxOfFn(w, ch.target);
         const notMine = ch.ids.filter(function (id) {
           const ctx = ctxs[id];
-          return !ctx || !R.mayReportRow(w, person, "fn", ch.target, ctx);
+          return !ctx || !R.mayReportRow(w, person, capArea, ch.target, ctx);
         });
         if (notMine.length)
           no("Your role reports only its own rows — " + notMine.length +

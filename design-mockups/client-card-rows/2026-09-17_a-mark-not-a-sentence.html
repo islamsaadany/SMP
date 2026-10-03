@@ -1,0 +1,626 @@
+<title>Neater client cards</title>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MOCKUP · Forefront console · 2026-09-17
+     design-mockups/client-card-rows/2026-09-17_a-mark-not-a-sentence.html
+     Rule 1c: drawn before a source moves. NOTHING in src/ or platform.html
+     is touched by this file.
+
+     Islam: "on the clients cards we don't needs notes that take 2 lines we
+     can just have a notificaiton here if something is new to check what do
+     you think? to keep it neat and clean nad let's make it compact."
+
+     The cards below are platform.html's OWN card CSS, lifted verbatim (the
+     first block), so these are the product's pixels and not a drawing of
+     them (§41.9). The four clients are the four on his screenshot, with
+     their real lines. The second block is this page's own chrome, every
+     rule prefixed `mk`.
+
+     There was no Playwright in the session this was written in, so the
+     console could not be driven: every figure on this page is measured BY
+     THE PAGE, in the browser it is read in, and the counts come from the
+     screenshot and the sources (lib/modules.ts). Said rather than left to
+     be assumed (§54.5).
+     ══════════════════════════════════════════════════════════════════ -->
+<style>
+/* ───────── platform.html <style>, verbatim ───────── */
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --good-bg:#E9F4EF; --warn:#8A6410; --warn-bg:#FBF2DC;
+    --bad:#B23025; --bad-bg:#FBEDEB; --bad-ink:#FFFFFF;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+      --line:#333B4A; --line-soft:#2A313E;
+      --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+      --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+      --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+      --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+      --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --good-bg:#1B2C26; --warn:#D7B04A; --warn-bg:#2A2515;
+    --bad:#E8776B; --bad-bg:#33211F; --bad-ink:#231010;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{ box-sizing:border-box }
+  body{ margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased }
+
+  /* ── client cards, verbatim ── */
+  .cards{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)) }
+  .ccard{ position:relative; text-align:left; border:1px solid var(--line); border-radius:12px;
+    background:var(--surface); display:flex; flex-direction:column;
+    min-height:152px; font:inherit; color:inherit; box-shadow:var(--shadow) }
+  .ccard.listed{ opacity:.72 }
+  .ccard .ctop{ display:flex; flex-direction:column; gap:7px; padding:15px }
+  .ccard .mods{ margin-top:auto; border-top:1px solid var(--line) }
+  .mrow{ display:flex; width:100%; align-items:baseline; gap:8px; padding:9px 15px;
+    font:inherit; font-size:13px; text-align:left; color:inherit; background:none;
+    border:0; border-bottom:1px solid var(--line); cursor:pointer }
+  .mrow:last-child{ border-bottom:0; border-radius:0 0 11px 11px }
+  .mrow i{ font-style:normal; font-size:11.5px; color:var(--ink-3); margin-left:auto }
+  .mrow .mline{ font-size:12px; color:var(--ink-2); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .mrow:hover, .mrow:focus-visible{ background:var(--surface-2); outline:none }
+  .ccard .cmark{ width:36px; height:36px; border-radius:9px; background:var(--ff); color:var(--amber);
+    font:700 12px/36px ui-monospace, SFMono-Regular, monospace; text-align:center; letter-spacing:.05em }
+  .ccard h2{ margin:0; font-size:17px; font-weight:600 }
+  .ccard .ind{ margin:0; color:var(--ink-3); font-size:12.5px }
+  .ccard .foot{ display:flex; gap:6px; flex-wrap:wrap }
+  .ccfg{ position:absolute; top:11px; right:11px; font:600 10px/1.6 ui-monospace, monospace;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--amber-tx);
+    border:1px solid var(--line); border-radius:6px; padding:2px 7px; background:var(--surface);
+    cursor:pointer }
+  .tag{ font:600 10.5px/1.5 ui-monospace, SFMono-Regular, monospace; letter-spacing:.05em;
+    text-transform:uppercase; border:1px solid var(--line); border-radius:5px; padding:2px 6px;
+    color:var(--ink-2); background:var(--surface-2) }
+  .tag.demo{ color:var(--amber-tx); border-color:var(--amber); background:var(--surface) }
+  .tag.seat{ color:var(--ff); border-color:var(--ff) }
+  :root[data-theme="dark"] .tag.seat, :root:not([data-theme="light"]) .tag.seat{ color:var(--ff-quiet) }
+  .ccard.demo{ border-color:var(--amber); background:var(--amber-wash) }
+
+/* ───────── this page's own chrome ───────── */
+  .mkwrap{ max-width:1180px; margin:0 auto; padding:26px 16px 80px }
+  .mkhead{ border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:26px }
+  .mkkey{ font:600 10.5px/1 ui-monospace, SFMono-Regular, monospace; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .mkhead h1{ margin:10px 0 0; font-size:27px; font-weight:600; letter-spacing:-.01em; text-wrap:balance }
+  .mksub{ margin:9px 0 0; color:var(--ink-2); font-size:14.5px; max-width:62ch }
+  .mkquote{ margin:14px 0 0; padding:10px 14px; border-left:3px solid var(--amber);
+    background:var(--surface); border-radius:0 8px 8px 0; color:var(--ink-2); font-size:13.5px; max-width:70ch }
+
+  .mksec{ margin-top:40px }
+  .mksec > h2{ margin:0; font-size:12px; font-weight:600; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--ink-3); font-family:ui-monospace, SFMono-Regular, monospace }
+  .mksec > h3{ margin:8px 0 0; font-size:20px; font-weight:600; letter-spacing:-.005em }
+  .mksec > p{ margin:8px 0 0; color:var(--ink-2); font-size:14px; max-width:66ch }
+
+  .mkcount{ display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 0; padding:0; list-style:none }
+  .mkcount li{ flex:1 1 168px; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:12px 14px }
+  .mkcount b{ display:block; font-size:25px; font-weight:600; letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums; line-height:1.1 }
+  .mkcount span{ display:block; margin-top:3px; font-size:12.5px; color:var(--ink-2) }
+  .mkcount li.hit{ border-color:var(--amber); background:var(--amber-wash) }
+  .mkcount li.hit b{ color:var(--amber-tx) }
+
+  .mkpanel{ margin-top:18px; background:var(--ground); border:1px solid var(--line);
+    border-radius:12px; padding:18px }
+  .mkpanel .mkbar{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:14px }
+  .mkpanel .mkbar strong{ font-size:14.5px; font-weight:600 }
+  .mkpanel .mkbar .mkmeasure{ margin-left:auto; font:600 11px/1 ui-monospace, SFMono-Regular, monospace;
+    letter-spacing:.05em; color:var(--ink-3); text-transform:uppercase }
+  .mkpanel.rec{ border-color:var(--good); box-shadow:0 0 0 1px var(--good) }
+  .mkpanel.rec .mkbar strong::after{ content:" · recommended"; color:var(--good); font-weight:600;
+    font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+    font-family:ui-monospace, SFMono-Regular, monospace }
+
+  .mkcost{ margin:14px 0 0; padding:12px 14px; background:var(--surface);
+    border:1px solid var(--line); border-radius:9px }
+  .mkcost dt{ font:600 10px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--ink-3) }
+  .mkcost dd{ margin:3px 0 0; font-size:13.5px; color:var(--ink-2) }
+  .mkcost dd + dt{ margin-top:10px }
+
+  .mkmark{ position:absolute; z-index:2; transform:translate(-4px,-11px);
+    font:600 9.5px/1.4 ui-monospace, SFMono-Regular, monospace; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--bad); background:var(--bad-bg);
+    border:1px solid var(--bad); border-radius:4px; padding:1px 5px; white-space:nowrap }
+
+  /* ═════ THE PROPOSAL'S ONE NEW BEHAVIOUR ═════
+     The row's tail stops being a sentence and becomes a MARK, and it may
+     never wrap — which is the reported fault: `.mrow i` has no
+     flex-shrink:0, so with a long line beside it the two-word state breaks
+     onto a second line. Nothing else about the row changes: the tail keeps
+     `.mrow i`'s own size, ink and margin-left:auto, so this invents no new
+     device (§53.5) — it shortens the words and drops the span beside them. */
+  .opt-a .mrow i{ flex:none }
+  .opt-a .mrow i.alarm{ color:var(--warn); font-weight:600 }
+  .opt-a .mrow i.due{ color:var(--ink-2); font-weight:600 }
+
+  /* B: one count on the card, rows bare. */
+  .opt-b .cnote{ position:absolute; top:11px; left:11px;
+    font:700 10.5px/1 ui-monospace, SFMono-Regular, monospace;
+    min-width:18px; height:18px; padding:0 5px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bad); color:var(--bad-ink) }
+
+  /* C: rows bare, the state as a tag in the identity block. */
+  .opt-c .tag.st{ color:var(--warn); border-color:var(--warn); background:var(--warn-bg) }
+
+  /* The compactness lever, applied to whichever panel is showing it. */
+  .tight .ccard{ min-height:0 }
+  .tight .ccard .ctop{ padding:13px 14px; gap:5px }
+  .tight .ccard .cmark{ width:30px; height:30px; font-size:11px; line-height:30px; border-radius:8px }
+  .tight .ccard h2{ font-size:16px }
+  .tight .mrow{ padding:6px 14px }
+
+  .mktoggle{ display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+    font-size:13.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+    border-radius:9px; padding:8px 12px; cursor:pointer }
+  .mktoggle input{ accent-color:var(--amber-tx); width:15px; height:15px; margin:0 }
+  .mktoggle:focus-within{ border-color:var(--amber-tx) }
+
+  .mkverdict{ margin-top:40px; background:var(--surface); border:1px solid var(--ff);
+    border-left:5px solid var(--ff); border-radius:10px; padding:18px 20px }
+  .mkverdict h3{ margin:0; font-size:17px; font-weight:600 }
+  .mkverdict p{ margin:9px 0 0; color:var(--ink-2); font-size:14px; max-width:68ch }
+  .mkverdict ol{ margin:12px 0 0; padding-left:20px; color:var(--ink-2); font-size:14px }
+  .mkverdict li{ margin-top:6px }
+  .mkverdict b{ color:var(--ink) }
+
+  .mkask{ margin-top:22px; background:var(--amber-wash); border:1px solid var(--amber);
+    border-radius:10px; padding:16px 18px }
+  .mkask .mkkey{ color:var(--amber-tx) }
+  .mkask p{ margin:8px 0 0; font-size:14px; color:var(--ink-2); max-width:68ch }
+  .mkask b{ color:var(--ink) }
+
+  @media (max-width:520px){
+    .mkhead h1{ font-size:23px }
+    .mkpanel{ padding:13px }
+  }
+  @media (prefers-reduced-motion:reduce){ *{ transition:none !important } }
+</style>
+
+<div class="mkwrap">
+
+  <header class="mkhead">
+    <div class="mkkey">Mockup · Forefront console · 17 Sep 2026 · nothing built yet</div>
+    <h1>Neater client cards</h1>
+    <p class="mksub">The cards below are <code>platform.html</code>'s own CSS, lifted verbatim, with
+      the four clients and the real lines from your screenshot. Every height on this page is
+      measured by the page itself, in this browser.</p>
+    <p class="mkquote">“we don't needs notes that take 2 lines we can just have a notificaiton here
+      if something is new to check … to keep it neat and clean nad let's make it compact.”</p>
+  </header>
+
+  <!-- ══ THE MEASUREMENT ══ -->
+  <section class="mksec">
+    <h2>What is on those rows</h2>
+    <h3>Nine pieces of text, and only one row is about something in flight</h3>
+    <p>Counted off your screenshot. This is the argument for taking the prose off: the platform
+      spends a line per row, and almost always to say that nothing is happening.</p>
+    <ul class="mkcount">
+      <li><b>5</b><span>say nothing is happening — “No cycle open” ×3, “No new reports this month” ×2</span></li>
+      <li><b>2</b><span>are a real alarm — “no plan yet” on El Abd and on Test Client</span></li>
+      <li class="hit"><b>2</b><span>are <strong>the same fact twice</strong> — Meridian's row says “Cycle open” in the line and “cycle open” again on the right</span></li>
+    </ul>
+    <p>And that duplicate pair is the row that wrapped. <code>.mrow i</code> has no
+      <code>flex-shrink:0</code>, so a long line beside it squeezes the two-word state until it
+      breaks onto a second line — which is the two-line row you are looking at.</p>
+  </section>
+
+  <!-- ══ TODAY ══ -->
+  <section class="mksec">
+    <h2>Today</h2>
+    <h3>As it ships</h3>
+    <div class="mkpanel" id="p-now">
+      <div class="mkbar"><strong>Today</strong>
+        <span class="mkmeasure" data-for="p-now"></span></div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">EF</div>
+            <h2>ElAbd Foods</h2>
+            <p class="ind">F&amp;B</p>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy<span class="mline">No cycle open</span><i>no plan yet</i></button>
+            <button class="mrow" type="button">Internal Tracker</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">RT</div>
+            <h2>Raya Trade</h2>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy<span class="mline">No cycle open</span></button>
+            <button class="mrow" type="button">Insights<span class="mline">No new reports this month</span></button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">TC</div>
+            <h2>Test Client</h2>
+            <p class="ind">Media &amp; Entertainment</p>
+            <div class="foot"><span class="tag seat">Super user</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy<span class="mline">No cycle open</span><i>no plan yet</i></button>
+          </div>
+        </div>
+
+        <div class="ccard demo">
+          <span class="mkmark">this row wraps</span>
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">MG</div>
+            <h2>Meridian Group</h2>
+            <div class="foot"><span class="tag demo">Demo</span><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy<span class="mline">Cycle open · reports due 30 Sep</span><i>cycle open</i></button>
+            <button class="mrow" type="button">Insights<span class="mline">No new reports this month</span></button>
+            <button class="mrow" type="button">Internal Tracker</button>
+            <button class="mrow" type="button">Meeting Notes</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ A ══ -->
+  <section class="mksec">
+    <h2>Option A</h2>
+    <h3>A mark, not a sentence</h3>
+    <p>The row keeps its name and gains a short mark on the right — and draws <strong>nothing at
+      all</strong> when there is nothing. Silence is the resting state, so the compactness comes
+      free rather than from squeezing anything. The tail keeps the size, ink and position it has
+      today; what changes is that the words get short and the sentence beside them goes.</p>
+    <div class="mkpanel rec opt-a" id="p-a">
+      <div class="mkbar"><strong>Option A</strong>
+        <span class="mkmeasure" data-for="p-a"></span></div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">EF</div>
+            <h2>ElAbd Foods</h2>
+            <p class="ind">F&amp;B</p>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button" title="No plan has been built for this client yet">Strategy<i class="alarm">No plan</i></button>
+            <button class="mrow" type="button">Internal Tracker</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">RT</div>
+            <h2>Raya Trade</h2>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Insights</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">TC</div>
+            <h2>Test Client</h2>
+            <p class="ind">Media &amp; Entertainment</p>
+            <div class="foot"><span class="tag seat">Super user</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button" title="No plan has been built for this client yet">Strategy<i class="alarm">No plan</i></button>
+          </div>
+        </div>
+
+        <div class="ccard demo">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">MG</div>
+            <h2>Meridian Group</h2>
+            <div class="foot"><span class="tag demo">Demo</span><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button" title="Cycle open · reports due 30 Sep · 3 of 10 units still to submit">Strategy<i class="due">3 of 10</i></button>
+            <button class="mrow" type="button">Insights</button>
+            <button class="mrow" type="button">Internal Tracker</button>
+            <button class="mrow" type="button">Meeting Notes</button>
+          </div>
+        </div>
+
+      </div>
+      <label class="mktoggle" for="tight-a">
+        <input type="checkbox" id="tight-a" data-tightens="p-a">
+        Tighter rows as well — see what compactness costs on its own
+      </label>
+    </div>
+    <dl class="mkcost">
+      <dt>What it says</dt>
+      <dd><code>3 of 10</code> when units still owe a report · <code>2 new</code> when reports
+        landed · <code>No plan</code> and <code>Not answering</code> in the warning ink, because
+        those two are the card's only alarm · nothing otherwise. Internal Tracker and Meeting Notes
+        say nothing at all today and go on saying nothing — they declare no line
+        (<code>lib/modules.ts</code>).</dd>
+      <dt>What it costs</dt>
+      <dd>A short mark needs a moment's learning where a sentence did not, so the full wording sits
+        on the hover — and a hover is not reachable on a tablet, where tapping the row opens the
+        module. Stated rather than solved: the mark is the fact in the fewest words, so the hover
+        is a nicety and not the only copy.</dd>
+      <dt>What it does not change</dt>
+      <dd>No row moves, no door moves, nothing is stored, and the mark is made from the same facts
+        the client's own landing reads — so the console cannot start saying one thing while the
+        landing says another.</dd>
+    </dl>
+  </section>
+
+  <!-- ══ B ══ -->
+  <section class="mksec">
+    <h2>Option B</h2>
+    <h3>One notification on the card — your ask, read literally</h3>
+    <p>Rows carry their name and nothing else; one count sits on the card. The most compact of the
+      three, and the one I would argue against — for a reason that is arithmetic rather than
+      taste.</p>
+    <div class="mkpanel opt-b" id="p-b">
+      <div class="mkbar"><strong>Option B</strong>
+        <span class="mkmeasure" data-for="p-b"></span></div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="cnote">1</span>
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">EF</div>
+            <h2>ElAbd Foods</h2>
+            <p class="ind">F&amp;B</p>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Internal Tracker</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">RT</div>
+            <h2>Raya Trade</h2>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Insights</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="cnote">1</span>
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">TC</div>
+            <h2>Test Client</h2>
+            <p class="ind">Media &amp; Entertainment</p>
+            <div class="foot"><span class="tag seat">Super user</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+          </div>
+        </div>
+
+        <div class="ccard demo">
+          <span class="cnote">3</span>
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">MG</div>
+            <h2>Meridian Group</h2>
+            <div class="foot"><span class="tag demo">Demo</span><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Insights</button>
+            <button class="mrow" type="button">Internal Tracker</button>
+            <button class="mrow" type="button">Meeting Notes</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <dl class="mkcost">
+      <dt>Why I would not ship it</dt>
+      <dd>A card-level number has to add things that cannot be added. Meridian's <code>3</code>
+        above is three units still to submit — but if two reports had also landed, is the card a
+        <code>3</code>, a <code>2</code>, or a <code>5</code>? Any answer is a number nobody can
+        read back. And it cannot tell <em>three units are late</em> from <em>this client is not
+        answering</em>, which is the one thing on that grid that means something is broken.</dd>
+      <dt>What survives from it</dt>
+      <dd>Its instinct is right and it is what A keeps: nothing drawn when there is nothing.</dd>
+    </dl>
+  </section>
+
+  <!-- ══ C ══ -->
+  <section class="mksec">
+    <h2>Option C</h2>
+    <h3>Names only, and the alarm moves up to the tags</h3>
+    <p>Rows are doors and say nothing at all; the client's health joins <em>Super user</em> and
+      <em>10 units</em>, where the card's other facts already live. Quietest, and shortest by a
+      row's worth of nothing.</p>
+    <div class="mkpanel opt-c" id="p-c">
+      <div class="mkbar"><strong>Option C</strong>
+        <span class="mkmeasure" data-for="p-c"></span></div>
+      <div class="cards">
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">EF</div>
+            <h2>ElAbd Foods</h2>
+            <p class="ind">F&amp;B</p>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span><span class="tag st">No plan</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Internal Tracker</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">RT</div>
+            <h2>Raya Trade</h2>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Insights</button>
+          </div>
+        </div>
+
+        <div class="ccard">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">TC</div>
+            <h2>Test Client</h2>
+            <p class="ind">Media &amp; Entertainment</p>
+            <div class="foot"><span class="tag seat">Super user</span><span class="tag st">No plan</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+          </div>
+        </div>
+
+        <div class="ccard demo">
+          <span class="ccfg">Settings</span>
+          <div class="ctop">
+            <div class="cmark">MG</div>
+            <h2>Meridian Group</h2>
+            <div class="foot"><span class="tag demo">Demo</span><span class="tag seat">Super user</span><span class="tag">10 units</span></div>
+          </div>
+          <div class="mods">
+            <button class="mrow" type="button">Strategy</button>
+            <button class="mrow" type="button">Insights</button>
+            <button class="mrow" type="button">Internal Tracker</button>
+            <button class="mrow" type="button">Meeting Notes</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <dl class="mkcost">
+      <dt>What it costs</dt>
+      <dd>Two things. Nothing on the grid then says a cycle is running or that work is owed — you
+        would open a client to find out, which is what the card exists to save. And it reverses a
+        decision already taken: the state was deliberately moved <em>out</em> of the tags and into
+        the row, because <em>cycle open</em> and <em>no plan yet</em> are Strategy's answers about
+        this client, and with two modules able to have a state the tags cannot say which one they
+        are about.</dd>
+    </dl>
+  </section>
+
+  <!-- ══ VERDICT ══ -->
+  <div class="mkverdict">
+    <h3>My recommendation: A, and the two-line row is a defect either way</h3>
+    <p>You are right that the notes are the cost, and right that the answer is a mark. Where I would
+      push back is on <b>“if something is new”</b> — and it is worth settling before anything is
+      built, because it decides what the mark can honestly say.</p>
+    <ol>
+      <li><b>Nothing stores when you last looked at a client.</b> The facts answer <em>state</em>,
+        not <em>new</em>: “new reports this month” is a calendar window, and a cycle being open is
+        true for eight weeks. A dot meaning “new” would light on Meridian for two months and stop
+        meaning anything.</li>
+      <li><b>So A's mark says what is outstanding, not what is new</b> — a figure you can act on,
+        which is the thing that decides which client you open next.</li>
+      <li><b>Truly “new since I last looked” is a separate, bigger thing:</b> it needs a
+        last-seen mark per consultant per client, which the platform stores nowhere today. Worth
+        doing if you want it; worth naming rather than quietly not doing.</li>
+    </ol>
+    <p>And the wrap is a one-line fix I would make whichever you pick: the row's tail can never be
+      allowed to break, whatever is beside it.</p>
+  </div>
+
+  <div class="mkask">
+    <div class="mkkey">One decision inside A, and it is yours</div>
+    <p><b>Whose answer is the mark?</b> The client picks the wording of their own landing line —
+      <em>the cycle's state</em> or <em>what is waiting</em>. If the console's mark follows that
+      pick, then a client who chose “the cycle's state” shows <em>no</em> count even when three
+      units are late. If the mark is Forefront's own and always says what is waiting, it is more
+      useful for scanning, and it is a second answer to keep in step with the first — though the
+      card already has one of those in the health word, so there is precedent.</p>
+    <p>My recommendation is <b>Forefront's own</b>: this card exists so you can pick which client
+      to open, and “3 of 10 still to submit” is the fact that decides it.</p>
+  </div>
+
+</div>
+
+<script>
+/* EVERY FIGURE ON THIS PAGE IS MEASURED HERE, in the browser it is read in —
+   there was no Playwright in the session it was written in, so a typed number
+   would have been a guess wearing a measurement's clothes. The tallest card
+   in each panel is what the grid's row height comes from, so that is what is
+   reported, with the saving against Today beside it. */
+(function () {
+  function tallest(panel) {
+    var max = 0;
+    panel.querySelectorAll(".ccard").forEach(function (c) {
+      max = Math.max(max, Math.round(c.getBoundingClientRect().height));
+    });
+    return max;
+  }
+  function measure() {
+    var base = tallest(document.getElementById("p-now"));
+    document.querySelectorAll(".mkmeasure").forEach(function (out) {
+      var panel = document.getElementById(out.dataset.for);
+      if (!panel) return;
+      var h = tallest(panel);
+      var txt = "tallest card " + h + "px";
+      if (panel.id !== "p-now" && base > 0 && h < base) {
+        txt += " · " + Math.round((1 - h / base) * 100) + "% shorter";
+      }
+      out.textContent = txt;
+    });
+  }
+  document.querySelectorAll("[data-tightens]").forEach(function (box) {
+    box.addEventListener("change", function () {
+      var panel = document.getElementById(box.dataset.tightens);
+      if (panel) panel.classList.toggle("tight", box.checked);
+      measure();
+    });
+  });
+  measure();
+  window.addEventListener("resize", measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+})();
+</script>

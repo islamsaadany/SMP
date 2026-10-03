@@ -298,64 +298,60 @@ def main():
            pg.locator(".welcomeover").count() == 0)
         ctx.close()
 
-        print("§3 Continue names where the platform already is, and steps aside")
+        print("§3 Home sits under the chrome, and the navigation is the way on (§400)")
+        # REWRITTEN, NEVER LOOSENED (§218). This section asserted the Continue
+        # bar — that it named the landing place, spanned both columns and
+        # stepped aside onto it. §400 DELETED that bar at Islam's word: Home
+        # is a page inside the chrome whose way out is pressing where you want
+        # to go. What the section was FOR survives whole: the screen does not
+        # trap anybody, it says it is Home, and leaving it lands on the place
+        # the platform was already on. Asserted as PAINT and a HIT TEST, never
+        # as a class (§94.8) — an overlay covering the chrome satisfies every
+        # "the tabs exist" assertion and takes every press.
         ctx, pg = fresh(browser, port)
-        word = pg.inner_text("[data-wcontinue]")
-        ck("Continue names the landing place", "Mobile" in word, word)
-        # §202: AND SETUP IS A PLACE TOO. Islam saw a bare "Continue"; every
-        # unit, function and company already named itself, and Setup — where
-        # the house button sits beside the gear (§193.2) — did not. Asserted
-        # of every kind, so a build that named none of them fails here too.
-        labs = pg.evaluate("""(function(){
-          var out={}, mine=PEOPLE.filter(function(x){return x.key==='mobhead';})[0]
-                       || PEOPLE[0];
-          ['setup','manage','mobile','fn:finance','group'].forEach(function(t){
-            WELCOME.dismiss(); current=t; WELCOME.open(mine);
-            var e=document.querySelector('[data-wcontinue] .wexlab');
-            out[t]=e?e.textContent:null; });
-          WELCOME.dismiss(); return out;})()""")
-        ck("...Setup names itself rather than reading a bare Continue",
-           labs.get("setup") == "Continue to Setup"
-           and labs.get("manage") == "Continue to Setup", labs)
-        ck("...and a unit, a function and the group each name themselves",
-           labs.get("mobile") == "Continue to Mobile"
-           and labs.get("fn:finance") == "Continue to Finance"
-           and "group" in (labs.get("group") or ""), labs)
-        # PUT THE SCREEN BACK THE WAY THE SECTION FOUND IT (§94.2 from the
-        # other side): the probe above dismissed the overlay, and everything
-        # below measures it. A reload would not do — the screen is once per
-        # session, so it would come back to no overlay at all.
-        pg.evaluate("""(function(){
-          current='mobile';
-          WELCOME.open(PEOPLE.filter(function(x){return x.key==='mobhead';})[0]
-                       || PEOPLE[0]);})()""")
-        pg.wait_for_timeout(200)
-        # §159 · THE WAY OUT IS THE SCREEN'S, NOT THE LIST'S. Asserted as the
-        # RELATIONSHIP (§94.8): outside the grid, last in the wrap, and as wide
-        # as the two columns together — never a pixel count, so a later change
-        # to the gutters stays green and a control put back inside the column
-        # does not.
+        ck("there is no Continue bar any more (§400)",
+           pg.locator("[data-wcontinue], .welcomeover .wexit").count() == 0)
+        ck("…and the house says Home is open",
+           pg.evaluate("document.documentElement.getAttribute('data-home-open')") == "1")
+        # §403 REWROTE the reachable half: the tab row and the section row
+        # describe the page BEHIND Home, so while Home is open they are not
+        # drawn and the lit place loses its underline — only the house says
+        # where you are. The way out is the PLACE on the destination row,
+        # which must still be reachable, or Home is a trap (§61).
         geo = pg.evaluate("""(function(){
-          var b=document.querySelector('[data-wcontinue]'),
-              w=document.querySelector('.welcomeover .wwrap'),
-              c=document.querySelector('.welcomeover .wcols');
-          if(!b||!w||!c) return null;
-          var rb=b.getBoundingClientRect(), rc=c.getBoundingClientRect();
-          return {inCols:!!b.closest('.wcols'), parent:b.parentElement.className,
-                  last:w.lastElementChild===b, tag:b.tagName,
-                  dl:Math.round(rb.left-rc.left), dr:Math.round(rb.right-rc.right),
-                  below:Math.round(rb.top-rc.bottom)};})()""")
-        ck("the way out is a real button", geo and geo["tag"] == "BUTTON", geo)
-        ck("…outside the list's column", geo and not geo["inCols"], geo)
-        ck("…and the last thing in the screen", geo and geo["last"], geo)
-        ck("…spanning both columns", geo and abs(geo["dl"]) <= 1 and abs(geo["dr"]) <= 1, geo)
-        ck("…and sitting below them", geo and geo["below"] > 0, geo)
-        ck("with rows waiting it does NOT wear the fill (§41)",
-           pg.locator("[data-wcontinue].wloud").count() == 0)
-        pg.click("[data-wcontinue]")
+          var o=document.querySelector('.welcomeover'), c=document.querySelector('.chrome'),
+              t=document.querySelector('.units button[aria-selected="true"][data-u]');
+          if(!o||!c||!t) return null;
+          var r=t.getBoundingClientRect(), hit=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+          var tr=document.querySelector('#tabrow'), sr=document.querySelector('#secrow');
+          return {top:Math.round(o.getBoundingClientRect().top), chrome:Math.round(c.getBoundingClientRect().bottom),
+                  tabs:tr?tr.getClientRects().length:0, secs:sr?sr.getClientRects().length:0,
+                  under:getComputedStyle(t).borderBottomColor,
+                  placeReached: !!(hit && (hit===t || t.contains(hit)))};})()""")
+        ck("Home starts under the chrome rather than over it", geo and geo["top"] >= geo["chrome"] - 1, geo)
+        ck("…the page's tab row and section row are not drawn under it (§403)",
+           geo and geo["tabs"] == 0 and geo["secs"] == 0, geo)
+        ck("…the place carries no gold underline while Home is open (§403)",
+           geo and geo["under"] in ("rgba(0, 0, 0, 0)", "transparent"), geo)
+        ck("…and the place is still reachable, which is the way out", geo and geo["placeReached"], geo)
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
+        ck("pressing it takes Home down and the house goes quiet",
+           pg.evaluate("document.documentElement.getAttribute('data-home-open')") is None)
         ck("…and the platform under it is on that place",
            pg.evaluate("current") == "mobile", pg.evaluate("current"))
+        # BOTH ENDS (§94.2): a press that is not somebody going somewhere —
+        # the theme button — must leave Home standing, or a build that took it
+        # down on every click passes the half above.
+        pg.evaluate("""(function(){ current='mobile';
+          WELCOME.open(PEOPLE.filter(function(x){return x.key==='mobhead';})[0] || PEOPLE[0]);})()""")
+        pg.wait_for_timeout(200)
+        tb = pg.locator(".themebtn").first
+        if tb.count():
+            tb.click(); pg.wait_for_timeout(300)
+            ck("…while a press that changes how the page looks leaves Home standing",
+               pg.locator(".welcomeover").count() == 1)
+            tb.click()
         ctx.close()
 
         print("§4 the intro round is a handoff to the real tour")
@@ -418,80 +414,52 @@ def main():
            pg.inner_text(".wacts")[:200])
         ck("…and no action row wears the fill",
            pg.locator(".welcomeover .wcta").count() == 0)
-        # §159 · and with no other act on the screen the exit is the loud one,
-        # which is what the approved round said and the first build did not do.
-        # BOTH ENDS, or a build that promoted it always would pass here and
-        # fail nothing (the "not loud" half is asserted in §3).
-        ck("…so the way out is the loud control instead",
-           pg.locator("[data-wcontinue].wloud").count() == 1)
-        fill = pg.evaluate("getComputedStyle(document.querySelector('[data-wcontinue]'))"
-                           ".backgroundColor")
-        ck("…and it is actually painted, not merely classed",
-           fill not in ("rgba(0, 0, 0, 0)", "rgb(255, 255, 255)"), fill)
+        # §159's loud Continue went with the bar (§400): with nothing waiting
+        # the navigation is the way on, and the screen promotes nothing to a
+        # fill. REWRITTEN, NEVER LOOSENED (§218) into the absence that is now
+        # the decision.
+        ck("…and there is no Continue to promote (§400)",
+           pg.locator("[data-wcontinue], .welcomeover .wloud").count() == 0)
         ctx.close()
 
-        # ── 8 · VIEWING AS, ON THE WELCOME SCREEN (§179) ───────────────────
-        # Islam: "the viewing as should be available from the welcome screen."
-        # BOTH ENDS, and the closed end is the one that matters: a switcher
-        # drawn for somebody who is not the SMO serves them another person's
-        # screen under their own name (sync.js §45.3).
-        print("§8 viewing as, above the greeting (§179)")
+        # ── 8 · VIEWING AS IS THE BAR'S, AND ONLY THE BAR'S (§402) ─────────
+        # Islam: "in the home page there is a viewing as while we already have
+        # a viewing as at the top, let's remove the page redundant one and keep
+        # the master one at the top." REWRITTEN, NEVER LOOSENED (§218): §179's
+        # second switcher existed because the screen then covered the bar;
+        # §400 put Home inside the chrome, so the bar's is on screen. What the
+        # page's copy DID survives and is asserted: switching from the bar
+        # redraws Home for the person now being looked at.
+        print("§8 viewing as, from the bar (§402)")
         PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
         STATE = BASE
         CHATANS = {"unread": 0, "queue": None}
         ctx, pg = fresh(browser, port)
-        has_bar = pg.locator(".welcomeover .wviewbar select").count() == 1
-        ck("the SMO gets the switcher", has_bar)
-        # WITHOUT IT THE REST OF §8 IS UNMEASURABLE, so it is SAID rather than
-        # crashed through: a check that dies on its first failure hides how
-        # many things are wrong, which is the one thing a "prove it can fail"
-        # run exists to count (§54.5 — a case nobody measured is named, never
-        # passed over).
-        if not has_bar:
-            print("  ----    the rest of §8 needs the switcher — not measured")
-        if has_bar:
-            # ABOVE the hero, which is the placement Islam picked of the two drawn
-            # — asserted as the RELATIONSHIP, never as a pixel (§94.8).
-            order = pg.evaluate("""()=>{const w=document.querySelector('.welcomeover .wwrap');
-                const bar=w.querySelector('.wviewbar'), hero=w.querySelector('.whero');
-                return [ [...w.children].indexOf(bar), [...w.children].indexOf(hero),
-                         Math.round(bar.getBoundingClientRect().bottom) <=
-                           Math.round(hero.getBoundingClientRect().top) ];}""")
-            ck("…above the greeting, not inside it", order[0] == 0 and order[0] < order[1] and order[2], order)
-            # ONE VOCABULARY: the options are the chrome's own (§53.5). Compared as
-            # a LIST, so a build that rebuilt them from a second source fails even
-            # when the two happen to hold the same people.
-            same = pg.evaluate("""()=>{const a=[...document.querySelectorAll('#asWho option')].map(o=>o.textContent);
-                const b=[...document.querySelectorAll('#wAsWho option')].map(o=>o.textContent);
-                return [a.length, b.length, JSON.stringify(a)===JSON.stringify(b)];}""")
-            ck("…listing exactly what the chrome's own switcher lists", same[2] and same[0] > 1, same)
-            # NEVER A DUPLICATE ID — a cloned select would put `asWho` in the
-            # document twice and getElementById would answer with whichever came
-            # first, which is a control that silently drives the wrong thing.
-            ck("…and `asWho` still names exactly one element",
-               pg.eval_on_selector_all("#asWho", "e=>e.length") == 1)
-            # PRESSED, and the platform read back (§70). Switching redraws the
-            # screen for that person AND moves the platform underneath.
-            pg.select_option("#wAsWho", "own_mob")
-            pg.wait_for_timeout(700)
-            got = pg.evaluate("""()=>({ viewer: window.VIEWER,
-                chrome: document.getElementById('asWho').value,
-                greet: (document.querySelector('.welcomeover .wgreet h2')||{}).textContent||'',
-                still: !!document.querySelector('.welcomeover') });""")
-            ck("switching moves the platform's own viewer", got["viewer"] == "own_mob", got)
-            ck("…and the chrome's control follows", got["chrome"] == "own_mob", got)
-            ck("…the screen stays up, redrawn for them", got["still"] and "Mennah" in got["greet"], got)
-            # A SWITCH IS NOT A DISMISSAL: marking it done would leave the screen
-            # unable to come back for the person you were about to look at.
-            ck("…and it was not marked as seen",
-               pg.evaluate("sessionStorage.getItem('smp.welcome.done')") is None)
-        ctx.close()
-
-        # The closed end.
-        PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
-        ctx, pg = fresh(browser, port)
-        ck("somebody who is not the SMO gets NO switcher",
-           pg.locator(".welcomeover .wviewbar").count() == 0)
+        ck("Home is up for the SMO", pg.locator(".welcomeover").count() == 1)
+        ck("Home draws no switcher of its own",
+           pg.locator(".welcomeover .wviewbar, #wAsWho, .welcomeover select").count() == 0)
+        # BOTH ENDS (§94.2): the master one is there, visible and reachable —
+        # a build that removed both passes the absence above.
+        bar = pg.evaluate("""()=>{const s=document.getElementById('asWho');
+            if(!s) return null; const v=s.closest('.viewer')||s;
+            const r=v.getBoundingClientRect();
+            const hit=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+            return {n: document.querySelectorAll('#asWho').length, opts: s.options.length,
+                    shown: r.width>0 && r.height>0, reach: !!(hit && v.contains(hit))};}""")
+        ck("the bar's Viewing as is on screen above Home, and reachable",
+           bar and bar["n"] == 1 and bar["opts"] > 1 and bar["shown"] and bar["reach"], bar)
+        # PRESSED THROUGH THE BAR'S OWN CONTROL, and the platform read back
+        # (§70): switching moves the viewer AND redraws Home for them.
+        pg.evaluate("""()=>{const s=document.getElementById('asWho'); s.value='own_mob';
+            s.dispatchEvent(new Event('change', {bubbles:true}));}""")
+        pg.wait_for_timeout(900)
+        got = pg.evaluate("""()=>({ viewer: window.VIEWER,
+            greet: (document.querySelector('.welcomeover .wgreet h2')||{}).textContent||'',
+            still: !!document.querySelector('.welcomeover') });""")
+        ck("switching from the bar moves the platform's viewer", got["viewer"] == "own_mob", got)
+        ck("...and Home stays up, redrawn for them", got["still"] and "Mennah" in got["greet"], got)
+        ck("...and it was not marked as seen",
+           pg.evaluate("sessionStorage.getItem('smp.welcome.done')") is None)
         ctx.close()
 
         # ── 9 · GREETED ON EVERY SIGN-IN (§179) ────────────────────────────
@@ -549,10 +517,18 @@ def main():
         # run — and walking it is the honest reproduction anyway.
         pg.goto("http://127.0.0.1:%d/raya-trade" % port)
         pg.wait_for_selector(".welcomeover", timeout=15000)
-        pg.click("[data-wcontinue]")
+        # Leaving Home is pressing the place (§403: the tab row is not drawn
+        # under Home, so it cannot be the way out).
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         pg.goto("http://127.0.0.1:%d/" % port)
         pg.wait_for_timeout(2500)
+        # The gate bounces a live session on through one or two redirects; a
+        # read made while the last one is still landing dies with "execution
+        # context destroyed" rather than reporting (§215), so wait it out.
+        try: pg.wait_for_load_state("networkidle", timeout=8000)
+        except Exception: pass
+        pg.wait_for_timeout(800)
         ck("…but resuming a live session does not",
            pg.locator(".welcomeover").count() == 0)
         ck("…and the memory it was told to keep is still there",
@@ -573,7 +549,9 @@ def main():
         PERSON = {"key": "own_mob", "name": "Mennah Farouk"}
         STATE = BASE
         ctx, pg = fresh(browser, port)
-        pg.click("[data-wcontinue]")
+        # Leaving Home is pressing the place (§403: the tab row is not drawn
+        # under Home, so it cannot be the way out).
+        pg.locator('.units button[aria-selected="true"][data-u]').first.click()
         pg.wait_for_selector(".welcomeover", state="detached", timeout=5000)
         ck("a projector is never greeted",
            pg.evaluate("(function(){try{sessionStorage.removeItem('smp.welcome.done');}catch(e){}"

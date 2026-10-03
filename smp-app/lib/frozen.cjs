@@ -220,6 +220,9 @@ function __smpBare(state) {
   g.companyKeys = []; g.companies = {};
   g.unitRoles = {}; g.koWeights = {};
   if (g.group) g.group.capabilities = [];
+  /* §404.5: a client is born with the division and business-unit defaults
+     Islam named; the top level and the functions stay everything-on. */
+  if (g.group) g.group[SMPRules.STRUCTURE] = SMPRules.newClientStructure();
   return g;
 }
 function __smpHydrateAnd(state) { __smpHydrate(state); return state; }

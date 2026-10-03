@@ -19,44 +19,82 @@
 import { clientHref } from "../../lib/modules.ts";
 import { shellHeaders } from "../../lib/shell.ts";
 import { libraryFile } from "../../lib/library-file.ts";
-import { withTenant } from "../../lib/tenant.ts";
-import { placeOf } from "../../lib/place.ts";
+import { viewerFor } from "../../lib/library-viewer.ts";
 import type { Viewer } from "../../lib/library.ts";
 import type { ServeArgs } from "../registry.ts";
-import { insightsDocument } from "./page.ts";
+import { insightsDocument, libraryFragment } from "./page.ts";
+import { withTenant } from "../../lib/tenant.ts";
+import { registerOf } from "../../lib/notes.ts";
+import { maySimulate } from "../../lib/view-as.ts";
+import type { TopViewer } from "../../lib/topbar.ts";
 
-/* THE OFFICE READS EVERYTHING, AND IT IS THE SEAT THAT SAYS SO (spec 046
-   §4.10). Whoever holds this client's Super user or SMO team seat sees every
-   report whatever its list says — which on every client today is us, because
-   there is no client-side strategy office (Islam, 2026-09-15). Written
-   against the seat rather than against who employs somebody, since the seat
-   is the only one of the two the platform holds.
-
-   WHERE THEY SIT IS ASKED OF THE SPINE, never worked out here: the register
-   is the client's and no module's (spec 046 §4.1, lib/place.ts).
-
-   NEITHER BRANCH THAT ALREADY KNOWS THE ANSWER ASKS THE DATABASE. A seat that
-   sees everything is not asked where it sits, because nothing about the place
-   could change what it reads — and it cannot then disagree with the seat.
-   Nobody on the register has no place to look up, which is not an
-   optimisation but the same answer arrived at without a connection: an office
-   login opening a client before `officeRow` has minted them a row (§313.32)
-   is exactly that person, and every request they make would otherwise open a
-   tenant connection to be told null. Found by checks/modules.mjs, which
-   drives each module's server with no database at all and went red on it. */
-async function viewerOf(a: ServeArgs): Promise<Viewer> {
-  if (a.seat === "super" || a.seat === "smoteam") return { place: null, seesAll: true };
-  if (!a.personKey) return { place: null, seesAll: false };
-  return { place: await withTenant(a.tenantId, (c) => placeOf(c, a.personKey)), seesAll: false };
+/* ── VIEWING AS, ON THE SHARED BAR (§444) ─────────────────────────────
+   Islam: Viewing as stays where it changes what is shown, and on Insights it
+   does — who sees which report is the person's (spec 046 §4.10). Offered by
+   the SIGNED-IN seat (`me`), never the one being looked through, because the
+   rule is lib/view-as.ts's and only a Super user may act through somebody
+   else's view (§185). The list is the client's register, active rows only,
+   with what each person is — their seat for the office, their place for
+   everybody else — so the office can tell two of a name apart. A register
+   that cannot be read draws no switcher rather than an empty one (§61). */
+async function viewerList(a: ServeArgs): Promise<TopViewer | null> {
+  const me = a.me || { personKey: a.personKey, seat: a.seat };
+  if (!me.personKey || !maySimulate(me)) return null;
+  try {
+    return await withTenant(a.tenantId, async (c) => {
+      const reg = await registerOf(c as any);
+      const seats = new Map<string, string>((await c.query(
+        "SELECT person_key, seat FROM tenant_users WHERE seat IN ('super', 'smoteam')")).rows
+        .map((x: any) => [String(x.person_key), String(x.seat)]));
+      const people = [...reg.entries()].filter(([, p]) => p.active).map(([key, p]) => ({
+        key, name: p.name,
+        note: seats.get(key) === "super" ? "Super user" : seats.get(key) === "smoteam" ? "SMO team" : p.place,
+      }));
+      return { current: a.personKey || me.personKey!, self: me.personKey!, people };
+    });
+  } catch (e) {
+    console.error("insights: reading the register for Viewing as:", (e as Error).message);
+    return null;
+  }
 }
+
+/* WHO IS LOOKING IS THE SPINE'S (§385). This rule was written here and then
+   COPIED into lib/landing-facts.ts under a comment naming this file, which is
+   §53.5 written down rather than closed — and the reports tab's own stamp
+   would have been the third copy. It is lib/library-viewer.ts's now: the
+   seat that reads everything, the place the register gives anybody else, and
+   the two branches that answer without opening a connection at all. Nothing
+   about the rule moved; what moved is how many places hold it. */
+const viewerOf = (a: ServeArgs): Promise<Viewer> => viewerFor(a.tenantId, a.seat, a.personKey);
 
 export async function serve(a: ServeArgs): Promise<Response> {
   if (!a.rest.length) {
     const q = new URL(a.req.url).searchParams;
     return new Response(
       await insightsDocument(a.slug, a.tenantId, a.tenantName, a.have,
-        { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a)),
+        { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a),
+        { consultant: !!a.consultant, viewer: a.consultant ? await viewerList(a) : null }),
       { status: 200, headers: shellHeaders() });
+  }
+  /* ── THE ROWS, FOR THE TAB INSIDE THE PLATFORM (§376) ──────────────
+     Islam picked the tab over the two other placements, and a tab that is a
+     link is still going to another module from a different button — which is
+     the thing he asked to stop. So the platform draws the reports in its own
+     pane, and this is where it gets them: the module's OWN markup, narrowed
+     by the module's OWN viewer, as JSON so the count can be drawn beside the
+     search without the shell counting nodes (§93 — an unreadable library
+     would otherwise count as nought reports).
+
+     A GET, because it is a read (§356.12's own line). No gate of its own: the
+     route has already asked whether this person may open this module at all
+     (lib/access.ts, before serverFor), and what they may SEE inside it is
+     `viewerOf`, the same answer the page and the file both take. */
+  if (a.rest.length === 1 && a.rest[0] === "list") {
+    const q = new URL(a.req.url).searchParams;
+    const body = await libraryFragment(a.slug, a.tenantId, a.tenantName,
+      { q: q.get("q") || "", category: q.get("category") || "" }, await viewerOf(a));
+    return new Response(JSON.stringify(body), { status: 200,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
   }
   if (a.rest.length === 2 && a.rest[1] === "file")
     return libraryFile(a.tenantId, "insights", a.rest[0]!, a.req.url, await viewerOf(a));

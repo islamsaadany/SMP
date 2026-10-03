@@ -26,13 +26,7 @@
    spec 054 §6 kept apart — change it, hand it on — collapse into ONE: the
    owner or the client's Super user. Two functions with one answer would be
    §94's drift the day one is widened, so there is one (§53.5). */
-import { createRequire } from "node:module";
 import type { PoolClient } from "pg";
-
-/* THE REGISTER'S OWN NAME RULE, never a second one (§53.5, §130.7): a first
-   name is the first NAME, and a particle is not a name — "Abd El Moniem" is
-   one word of somebody's name, not three. */
-const R = createRequire(import.meta.url)("./rules.cjs") as { nameWords: (name: string, n: number) => string };
 
 type Q = { query: PoolClient["query"] };
 const str = (v: unknown) => (v == null ? "" : String(v));
@@ -88,22 +82,20 @@ export const oneLine = (v: unknown): string => str(v).replace(/\s+/g, " ").trim(
 export const trimmed = (v: unknown): string => str(v).replace(/[ \t]+\n/g, "\n").trim();
 
 /* ══ days and weeks ═══════════════════════════════════════════════════ */
-export const TIME_ZONE = "Africa/Cairo";
+/* THE DAYS THEMSELVES ARE THE SPINE'S NOW (lib/day.ts). They were written
+   here, `lib/notes.ts` borrowed them with a note saying *a third module
+   wanting them is the day they move to a file of their own*, and Portfolio
+   is that third module. Re-exported under the same names, so every caller of
+   this file is untouched and the move is behaviour-neutral — asserted by this
+   module's own check rather than claimed.
+
+   THE WEEK STAYS HERE, and that is the line: Sunday to Thursday is spec 054's
+   own decision (Islam's week) and not a fact about days, so `weekOf`,
+   `thursdayOf`, `weekLabel` and `lateWord` are the tracker's. */
+export { TIME_ZONE, calendarDay, todayIn, readableDay } from "./day.ts";
+import { toDate, dayOf, readableDay as readDay } from "./day.ts";
 const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-export function calendarDay(v: unknown): string | null {
-  const s = str(v).trim();
-  if (!DAY.test(s)) return null;
-  const d = toDate(s);
-  return dayOf(d) === s ? s : null;   /* 2026-02-31 rolls over and is refused */
-}
-function toDate(day: string): Date {
-  const m = DAY.exec(day)!;
-  return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
-}
-function dayOf(d: Date): string {
-  return d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, "0") + "-" + String(d.getUTCDate()).padStart(2, "0");
-}
 export function addDays(day: string, n: number): string {
   const d = toDate(day);
   d.setUTCDate(d.getUTCDate() + n);
@@ -111,10 +103,6 @@ export function addDays(day: string, n: number): string {
 }
 /* 0 is Sunday, as the week starts. */
 export function weekday(day: string): number { return toDate(day).getUTCDay(); }
-
-export function todayIn(now: Date = new Date(), zone: string = TIME_ZONE): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: zone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
-}
 
 /* The Sunday-to-Thursday week a day belongs to. A Friday or a Saturday is
    NEXT week's (decision 8): the week that just ended is over, and work due
@@ -130,7 +118,6 @@ export function weekOf(day: string): Week {
    to thursday of this week") — the last working day of the week it names,
    so late and carried go on being worked out from a day exactly as before. */
 export function thursdayOf(day: string): string { return weekOf(day).to; }
-const WEEKDAY = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /* THE WEEK'S NUMBER IN THE YEAR is the ISO week holding its Thursday — ISO
@@ -191,7 +178,7 @@ export function weekOptions(today: string, n: number = WEEKS_AHEAD): WeekOption[
 /* "13 – 17 Sep", or "27 Sep – 1 Oct" across a month; the year only when it
    is not this one, on the far end. */
 export function weekDays(w: Week, today?: string): string {
-  const a = readableDay(w.from, today).replace(/^\w+ /, ""), b = readableDay(w.to, today).replace(/^\w+ /, "");
+  const a = readDay(w.from, today).replace(/^\w+ /, ""), b = readDay(w.to, today).replace(/^\w+ /, "");
   const am = a.split(" ")[1], bm = b.split(" ")[1];
   return (am === bm ? a.split(" ")[0] : a) + " – " + b;
 }
@@ -213,16 +200,10 @@ export function lateWord(carried: number): string {
   return carried > 0 ? "Late " + carried + " w" : "Late";
 }
 
-/* "Thu 17 Sep", and the year only when it is not this year — the product's
-   own three-letter months (SMPRules.MONTH_NAMES spells them the same). */
-export function readableDay(day: string | null, today?: string): string {
-  if (!day || !DAY.test(day)) return "";
-  const d = toDate(day);
-  const y = today && today.slice(0, 4) === day.slice(0, 4) ? "" : " " + d.getUTCFullYear();
-  return WEEKDAY[d.getUTCDay()] + " " + d.getUTCDate() + " " + MONTH[d.getUTCMonth()] + y;
-}
+/* "Thu 17 Sep", and the year only when it is not this year — lib/day.ts's, so
+   the office's three modules spell a date one way. */
 export function weekLabel(w: Week, today?: string): string {
-  return readableDay(w.from, today).replace(/^\w+ /, "") + " – " + readableDay(w.to, today).replace(/^\w+ /, "");
+  return readDay(w.from, today).replace(/^\w+ /, "") + " – " + readDay(w.to, today).replace(/^\w+ /, "");
 }
 
 /* ══ the action ═══════════════════════════════════════════════════════ */
@@ -289,25 +270,17 @@ export function mayChange(a: Action, who: Who): boolean {
   return who.seat === "super" || isMine(a, who);
 }
 
-/* THE SHORT NAME ON A ROW is the register's own first name (§130.7's rule,
-   asked of rules.cjs and never re-spelt), and a clashing pair on one client
-   is lengthened to two words for exactly that pair (§81.1) — two Ahmeds
-   reading as one name would tell them apart from nobody. Still equal at two
-   words, the whole name. Asked once over everybody named on the list, so a
-   former seat's owner is shortened by the same rule as a present one. */
-export function shortNames(people: Person[]): Map<string, string> {
-  const out = new Map<string, string>();
-  const at = (n: number) => people.map((p) => R.nameWords(p.name, n) || p.name);
-  const one = at(1), two = at(2);
-  const dup = (arr: string[], i: number) => arr.some((x, j) => j !== i && x.toLowerCase() === arr[i].toLowerCase());
-  people.forEach((p, i) => {
-    out.set(p.key, !dup(one, i) ? one[i] : !dup(two, i) ? two[i] : p.name);
-  });
-  return out;
-}
+/* THE SHORT NAME ON A ROW is the SPINE's answer now (lib/people.ts) — the
+   register's own first-name rule, a clashing pair lengthened, and the whole
+   name where even two words still clash. Moved there because Portfolio is
+   the third module printing a person's name and three copies of *what is
+   this person called* is the drift §53.5 exists to stop; re-exported here so
+   every caller of this file is untouched. */
+export { shortNames } from "./people.ts";
 
 /* ══ the rows ═════════════════════════════════════════════════════════ */
-export type Person = { key: string; name: string };
+export type { Person } from "./people.ts";
+import type { Person } from "./people.ts";
 /* The people on this register who hold a seat on this client — the office.
    `tenant_users` is the platform's own table and carries no tenant policy,
    so the join is written against THIS tenant's rows explicitly rather than

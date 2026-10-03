@@ -135,7 +135,14 @@ MEASURE = r"""() => {
           if (rc.width > 0.5 && rc.height > 0.5) tops[Math.round(rc.top)] = 1;
         });
         const lines = Object.keys(tops).length;
-        if (lines > 1)
+        /* TERMINOLOGY'S DESCRIPTION WRAPS ON PURPOSE (§392). Islam signed off
+           a drawing where it takes a second line, and the row is two lines
+           tall anyway because the Default cell stacks the word for one over
+           the word for many — so a description on two lines costs no height,
+           which is the whole of what §88 guards. Named rather than left out,
+           and held to TWO: a third line WOULD make the row taller. */
+        const cap = el.closest('td.lbldesc') ? 2 : 1;
+        if (lines > cap)
           out.wrapped.push({ row: ri + 1, lines: lines,
                              cls: el.className || el.tagName,
                              text: txt.slice(0, 46) });

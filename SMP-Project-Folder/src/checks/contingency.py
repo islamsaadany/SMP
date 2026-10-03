@@ -78,6 +78,50 @@ HTML = pathlib.Path(os.environ.get("SMP_BUILT") or
 SW = (ROOT / "sw.js").read_bytes()
 BASE = json.loads((ROOT / "db/seed-state.json").read_text())
 
+# ── THE PAGE PRODUCTION ACTUALLY SERVES (§379) ──────────────────────────────
+# Every assertion in section 6 was made against `HTML`, the frozen build, which
+# is ONE self-contained file — so `buildCopy()` fetched everything and the copy
+# opened perfectly, and had done since §306. The served document is a 12KB
+# shell that LINKS its code, and no check had ever made a copy from one: the
+# fault existed only on the stack the checks do not walk (§94.11, §329's family
+# on the half that has no guard).
+#
+# ASSEMBLED FROM THE REAL GENERATED PIECES, never a document typed out here
+# (§100.3): `shell/body.html` and the three files in `public/` are exactly what
+# `lib/shell.ts` serves and links. What it CANNOT take from that file is the
+# head, which is TypeScript — so the paths are asserted to AGREE with the ones
+# shell.ts emits (§94.8), and a fourth file linked there turns this red rather
+# than being quietly untested.
+SHELL_TS = (ROOT / "smp-app/lib/shell.ts").read_text()
+SERVED_LINKS = ["/platform.css", "/theme.js", "/shell.js"]
+ASSET = {p: (ROOT / "smp-app/public" / p.lstrip("/")) for p in SERVED_LINKS}
+SERVED_BODY = (ROOT / "smp-app/shell/body.html").read_text()
+SERVED = (
+    "<!doctype html>\n<html lang='en' data-setup-scope='strategy'>\n<head>\n"
+    "<meta charset='utf-8'>\n"
+    "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"
+    "<title>Raya Trade — Strategy Management Platform</title>\n"
+    '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n'
+    '<link rel="manifest" href="/manifest.webmanifest">\n'
+    '<link rel="stylesheet" href="/platform.css">\n'
+    '<script src="/theme.js"></script>\n'
+    "</head>\n<body>\n" + SERVED_BODY + '\n<script src="/shell.js"></script>\n</body>\n</html>\n'
+).encode()
+
+FACE = """()=>{
+  const out = [];
+  for (const sh of document.styleSheets) {
+    let rules; try { rules = sh.cssRules; } catch (e) { continue; }
+    for (const r of rules) {
+      if (r.constructor && r.constructor.name === 'CSSFontFaceRule') {
+        out.push(String(r.style.getPropertyValue('src')).slice(0, 30));
+      }
+    }
+  }
+  return out;
+}"""
+
+
 OFFICE = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 bad = 0
 person = dict(OFFICE)
@@ -135,6 +179,23 @@ class H(http.server.BaseHTTPRequestHandler):
         # request the product never makes (§100.3).
         if self.path.startswith("/raya-trade"):
             self._s(HTML, "text/html; charset=utf-8"); return
+        # §379: the same platform, served the way production serves it — a
+        # shell that links its code, with the code beside it.
+        if self.path.startswith("/served"):
+            self._s(SERVED, "text/html; charset=utf-8"); return
+        here = self.path.split("?")[0]
+        # The typeface the stylesheet itself points at (§379.3). Served it is a
+        # file; in the frozen build it is a data URI, which is what §38.7
+        # embedded it for — so a copy that inlined the CSS and stopped would
+        # open in the system stack.
+        if here.startswith("/fonts/"):
+            f = ROOT / "smp-app/public" / here.lstrip("/")
+            if f.exists():
+                self._s(f.read_bytes(), "font/woff2"); return
+        if here in ASSET:
+            self._s(ASSET[here].read_bytes(),
+                    "text/css" if here.endswith(".css") else "application/javascript")
+            return
         self._s(b"<!doctype html><title>gate</title>", "text/html; charset=utf-8")
 
     def do_POST(self):
@@ -162,6 +223,17 @@ def js(pg, expr, arg=None):
         return pg.evaluate(expr, arg) if arg is not None else pg.evaluate(expr)
     except Exception as e:                                        # noqa: BLE001
         return {"threw": str(e).strip().split("\n")[0][:160]}
+
+
+def num(v):
+    """A count that could not be taken is nought, never a dict being compared
+    with an integer (§379.2). The two blocks that OPEN a copy called
+    `evaluate` straight, and this file's own docstring above promises they do
+    not: on a build whose copy does not boot, `UNITS` is not there, the probe
+    threw, and the whole run ended at section 6 with one failure printed of
+    the forty it had left to make — the falsification reporting a fault it had
+    itself stopped measuring."""
+    return v if isinstance(v, (int, float)) and not isinstance(v, bool) else 0
 
 
 # The page reads scores off the real functions rather than off rendered text,
@@ -475,19 +547,141 @@ with sync_playwright() as pw:
         p2.goto(out.resolve().as_uri())
         p2.wait_for_timeout(2600)
         ck("the copy opens from a file with nothing running, and holds THIS tenant",
-           p2.evaluate("()=>UNITS[UNIT_KEYS[0]].name") == "ZZ-Copy-Proof",
-           p2.evaluate("()=>UNITS[UNIT_KEYS[0]].name"))
-        ck("it knows it is a copy", p2.evaluate("()=>SYNC.isOffline()") is True)
+           js(p2, "()=>UNITS[UNIT_KEYS[0]].name") == "ZZ-Copy-Proof",
+           js(p2, "()=>UNITS[UNIT_KEYS[0]].name"))
+        ck("it knows it is a copy", js(p2, "()=>SYNC.isOffline()") is True)
         ck("a deck opens in it and carries slides",
-           (p2.evaluate("""()=>{ const d=document.createElement('div');
+           num(js(p2, """()=>{ const d=document.createElement('div');
               d.innerHTML = deckHtmlFor(activeKeys()[0]);
-              return d.querySelectorAll('.dslide').length; }""") or 0) > 5)
+              return d.querySelectorAll('.dslide').length; }""")) > 5)
         ck("and nothing threw while it booted", not cerrs, cerrs[:2])
         p2.close()
         try: out.unlink()
         except OSError: pass
     else:
         ck("the copy could be built for opening", False)
+
+    # ── 6b · the copy taken from the page PRODUCTION serves (§379) ───────
+    # THE HALF NOTHING HAD EVER MEASURED. Everything above is made from the
+    # frozen build, which links nothing, so the copy was self-contained by
+    # construction and every assertion passed while the copy a person actually
+    # downloaded held 1.58MB of their figures and no platform at all.
+    #
+    # BOTH ENDS (§94.2). The frozen document is asserted to link NOTHING —
+    # without that, "the copy carries no link to the server" is satisfied by
+    # the shape that never had one, and a build that stopped inlining would
+    # pass the whole section.
+    head("6b · a copy made from the page production serves")
+    # ASKED OF THE DOCUMENT, NEVER GREPPED OUT OF THE BYTES (§379.2). The
+    # first draft of this section searched the text for `<script src="/` and
+    # went red on a CORRECT build, because `contingency.js`'s own comment
+    # spells the tag it exists to remove — so the copy carries that sentence
+    # inside the platform it inlined, and a text search cannot tell a tag from
+    # a sentence about one. §272.8's shape: the note recording a fault, written
+    # in the syntax of the fault. The parser can always tell them apart.
+    LINKED = ("()=>[...document.querySelectorAll('script[src],link[rel~=\"stylesheet\"]')]"
+              ".map(e=>e.getAttribute('src')||e.getAttribute('href'))")
+    ck("the frozen platform links nothing, which is why this went unseen",
+       js(pg, LINKED) == [], js(pg, LINKED))
+    # The stub's document is not shell.ts, so it is asserted to link the same
+    # set shell.ts does — never a list typed twice (§53.5, §94.8).
+    emits = sorted(set(re.findall(r'(?:src|href)="(/[A-Za-z0-9._-]+\.(?:js|css))"', SHELL_TS)))
+    ck("and the stub links exactly what lib/shell.ts links — an agreement, never a copy",
+       emits == sorted(SERVED_LINKS), [emits, sorted(SERVED_LINKS)])
+
+    p3 = ctx.new_page()
+    p3.goto("http://127.0.0.1:%d/served" % PORT)
+    p3.wait_for_timeout(2600)
+    ck("the served shell boots and paints",
+       num(js(p3, "()=>document.querySelectorAll('[data-u]').length")) > 5 and
+       num(js(p3, "()=>document.querySelectorAll('#panel *').length")) > 20,
+       [js(p3, "()=>document.querySelectorAll('[data-u]').length"),
+        js(p3, "()=>document.querySelectorAll('#panel *').length")])
+    # THE CONTROL (§113.8): the served page must really link its code, or
+    # "the copy links nothing" below is satisfied by a page that never did.
+    ck("and it DOES link its code and its design — which is the whole subject",
+       sorted(js(p3, LINKED) or []) == sorted(SERVED_LINKS), js(p3, LINKED))
+    # THE CONTROL FOR THE TYPEFACE (§113.8): served, the face is a FILE. If it
+    # were already a data URI here, "the copy carries it" below would be true
+    # of a copy that carried nothing.
+    served_face = js(p3, FACE) or []
+    ck("and its typeface is a file beside the stylesheet, not yet carried",
+       len(served_face) > 0 and not any(f.startswith('url("data:') for f in served_face),
+       served_face)
+    served_copy = p3.evaluate("""()=>new Promise(res=>{
+      UNITS[UNIT_KEYS[0]].name = 'ZZ-Served-Proof';
+      CONT.buildCopy((err, html)=>res(err ? {err:String(err.message||err)} : {html}));
+    })""")
+    ck("the copy builds from it", not served_copy.get("err"), served_copy.get("err"))
+    shtml = served_copy.get("html") or ""
+    if shtml:
+        ck("the platform is INSIDE it — it is bigger than the shell plus its own data",
+           len(shtml) > len(SERVED) + sum(p.stat().st_size for p in ASSET.values()) - 4096,
+           len(shtml))
+        # NOTHING RUNS BEFORE THE BLOCK, which is §306's own rule and is the
+        # property rather than one spelling of it: the first draft compared
+        # `index('id="smp-offline"')` with `index("<script>")`, and on a build
+        # that inlines nothing there IS no bare `<script>` — `.index` THREW
+        # and took the rest of the run with it (§215, in the assertion rather
+        # than in the probe). What matters is that no script of any shape
+        # precedes it.
+        at = shtml.find('id="smp-offline"')
+        own = shtml.rfind("<script", 0, at) if at > 0 else -1
+        ck("and the block still sits above every one of the platform's scripts",
+           own > 0 and "<script" not in shtml[:own], [at, own])
+        # OPENED, from a file, with the server it was made from unreachable —
+        # which is the day this exists for.
+        out3 = pathlib.Path(os.environ.get("TMPDIR") or "/tmp") / "smp-contingency-served.html"
+        out3.write_text(shtml, encoding="utf-8")
+        p4 = ctx.new_page()
+        serr = []
+        p4.on("pageerror", lambda e: serr.append(str(e)[:200]))
+        p4.goto(out3.resolve().as_uri())
+        p4.wait_for_timeout(2800)
+        ck("it carries NO link to the server for code or design — the whole fault",
+           js(p4, LINKED) == [], js(p4, LINKED))
+        ck("it opens from a file with nothing running, and holds THIS tenant",
+           js(p4, "()=>UNITS[UNIT_KEYS[0]].name") == "ZZ-Served-Proof",
+           js(p4, "()=>UNITS[UNIT_KEYS[0]].name"))
+        ck("it knows it is a copy", js(p4, "()=>SYNC.isOffline()") is True)
+        # PAINTED, not merely booted: the design travels in the same file, and
+        # a copy carrying the script and not the stylesheet reads as damaged
+        # exactly as the reported one did.
+        ck("it is PAINTED — the page is drawn and the navigation is in it",
+           num(js(p4, "()=>document.querySelectorAll('[data-u]').length")) > 5,
+           js(p4, "()=>document.querySelectorAll('[data-u]').length"))
+        # MEASURED AS PAINT (§94.8). The stylesheet is the half that makes the
+        # reported file read as damaged rather than merely empty, so what is
+        # asserted is a colour the browser cannot produce on its own: the
+        # page's own `--ground`, and the body actually painted in it.
+        styled = js(p4, """()=>{
+          const g = getComputedStyle(document.documentElement)
+                      .getPropertyValue('--ground').trim();
+          const d = document.createElement('div');
+          d.style.background = g; document.body.appendChild(d);
+          const want = getComputedStyle(d).backgroundColor;
+          d.remove();
+          return { token: g, body: getComputedStyle(document.body).backgroundColor, want,
+                   chrome: getComputedStyle(document.querySelector('.chrome')).position }; }""") or {}
+        ck("and it is STYLED — the page's own ground is defined and painted, and the chrome pins",
+           bool(styled.get("token")) and styled.get("body") == styled.get("want") and
+           styled.get("chrome") == "sticky", styled)
+        # ASKED OF THE STYLESHEET THE BROWSER HOLDS, never of the bytes
+        # (§379.2): the copy carries this file's own comment, which spells
+        # `url(/fonts/...)` while explaining why it must not be one.
+        copy_face = js(p4, FACE) or []
+        ck("and the typeface came with it — a data URI, not a path to the server",
+           len(copy_face) > 0 and all(f.startswith('url("data:') for f in copy_face),
+           copy_face)
+        ck("a deck opens in it and carries slides",
+           num(js(p4, """()=>{ const d=document.createElement('div');
+              d.innerHTML = deckHtmlFor(activeKeys()[0]);
+              return d.querySelectorAll('.dslide').length; }""")) > 5)
+        ck("and nothing threw while it booted", not serr, serr[:2])
+        p4.close()
+        try: out3.unlink()
+        except OSError: pass
+    p3.close()
 
     # ── 7 · the slides ──────────────────────────────────────────────────
     head("7 · the slides carry the figures")

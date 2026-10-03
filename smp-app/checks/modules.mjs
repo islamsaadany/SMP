@@ -32,13 +32,14 @@
      SMP_BREAK=any-module    node checks/modules.mjs   # must go red
      SMP_BREAK=open-address  node checks/modules.mjs   # must go red
      SMP_BREAK=static-hello  node checks/modules.mjs   # must go red
-     SMP_BREAK=switch-always node checks/modules.mjs   # must go red
+     SMP_BREAK=trail-for-staff node checks/modules.mjs # must go red
      SMP_BREAK=gate-open     node checks/modules.mjs   # must go red (§4c)      */
 import { readFileSync, existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { chromium } from "playwright-core";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { MODULES, MODULE_DEF, DEFAULT_MODULE, modulesFor, offerable, whereOf, clientHref, moduleRows, moduleMenu, isModule, landingLine, lineDef, NO_FACTS } from "../lib/modules.ts";
 import { SERVERS, serverFor } from "../modules/registry.ts";
 import { insightsDocument } from "../modules/insights/page.ts";
@@ -65,7 +66,19 @@ const BUILT_EXTRA = MODULES.filter((k) => MODULE_DEF[k].built && k !== DEFAULT_M
    assertions — and adding the next one means editing none. If there is no
    second built module at all the file says so once, here, rather than going
    quietly green over a list of one (§54.5, §113.8). */
-const OTHER = BUILT_EXTRA[0] || null;
+const OTHER = BUILT_EXTRA.filter((k) => !MODULE_DEF[k].inside)[0] || null;
+/* A MODULE THAT IS A TAB OF ANOTHER (spec 064, `inside`): the Copilot draws
+   no document of its own — it is a tab inside Strategy's pages — so it is
+   asserted the other way round below: its bare address and any unknown word
+   inside it go back to the module it lives in, and the switcher never lists
+   it (a door to a page that is a redirect is a door behind a door, §32). */
+const INSIDE = MODULES.filter((k) => MODULE_DEF[k].built && MODULE_DEF[k].inside);
+/* A module whose pages are Next's own route tree (MODULE_DEF.appRoute —
+   Processes, FFProcess carried in) has no server in the table to drive; its
+   pages are asserted to EXIST in §2b instead, so it is not let off. */
+const APP_ROUTE = (k) => !!MODULE_DEF[k].appRoute;
+const PAGED = () => offerable().filter((k) => !APP_ROUTE(k));
+const OWN_PAGE_OF = (k) => existsSync(join(APP, "modules", k, "page.ts"));
 
 let ok = 0;
 const bad = [];
@@ -166,7 +179,9 @@ check("a module's area is NOT in the client's carried matrix",
    today would be the door onto the wrong room, arriving quietly. */
 console.log("\n2b · every module serves itself");
 check("every BUILT module has a page of its own to serve",
-  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => typeof serverFor(k) === "function"),
+  MODULES.filter((k) => MODULE_DEF[k].built).every((k) => APP_ROUTE(k)
+    ? existsSync(join(APP, "app", "(ffp)", "[slug]", k, "layout.tsx")) && serverFor(k) === null
+    : typeof serverFor(k) === "function"),
   MODULES.map((k) => k + ":" + (serverFor(k) ? "serves" : "none")).join(" "));
 check("...and a word that is NOT built serves nothing, or it is a door onto the wrong room",
   UNBUILT.every((k) => serverFor(k) === null), UNBUILT.join(", "));
@@ -185,13 +200,24 @@ const argsFor = (module, rest) => ({
      a module the office alone may open (the Internal Tracker, spec 054) draws
      its page here rather than its refusal. */
   personKey: "islam", seat: "super",
+  /* ...and a CONSULTANT (§444): only Forefront's own people get the shared
+     bar's trail, which is where the module menu below lives. A client's own
+     person is asserted separately, in §5b. */
+  consultant: true, me: { personKey: "islam", seat: "super" },
 });
 const drawnBy = async (k, rest = []) => {
   const res = await serverFor(k)(argsFor(k, rest));
   return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
 };
 const drawn = {};
-for (const k of offerable()) {
+/* §456 REVERSES the redirect: the Copilot is still a tab inside Strategy,
+   AND it has a page of its own (every chat and deliverable on the client,
+   and its settings), so the switcher lists it like any other module. */
+for (const k of INSIDE) {
+  check("...and the switcher lists " + k + " too — it has a page of its own now (§456)", moduleMenu(offerable()).some((m) => m.key === k),
+    moduleMenu(offerable()).map((m) => m.key).join(", "));
+}
+for (const k of PAGED()) {
   drawn[k] = await drawnBy(k);
   check("...and " + k + "'s server answers with a page of its own",
     drawn[k].status === 200 && /<html/.test(drawn[k].html),
@@ -206,16 +232,19 @@ for (const k of offerable()) {
    A title is written by the page out of its own vocabulary and cannot be
    handed in, so two modules sharing one is two modules sharing a page —
    compared as a SET, naming nothing, so a fourth module is covered. */
-const titles = offerable().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
+const titles = PAGED().map((k) => (drawn[k].html.match(/<title>([^<]*)<\/title>/) || ["", ""])[1]);
 check("...and no two of them draw the same document — a table cannot point two words at one page",
   new Set(titles).size === titles.length, titles.join(" | "));
 /* A module's landing is its landing: an address inside one that it does not
    draw comes BACK to it, which is what every unknown word inside a client
    already gets (lib/modules.ts whereOf) rather than a second refusal. */
-for (const k of BUILT_EXTRA) {
+for (const k of BUILT_EXTRA.filter((k) => !APP_ROUTE(k))) {
   const out = await drawnBy(k, ["nothing-here"]);
+  /* A module with a page of its own is its own landing, inside another or
+     not (§456: the Copilot's unknown words come back to the Copilot page). */
+  const landing = MODULE_DEF[k].inside && !OWN_PAGE_OF(k) ? MODULE_DEF[k].inside : k;
   check("...and a word " + k + " does not draw comes back to its landing",
-    out.status === 302 && out.to.endsWith(clientHref("raya-trade", k, "")),
+    out.status === 302 && out.to.replace(/\/$/, "").endsWith(clientHref("raya-trade", landing, "").replace(/\/$/, "")),
     out.status + " " + out.to);
 }
 
@@ -278,8 +307,23 @@ for (const k of BUILT_EXTRA) {
     whereOf(clientHref("raya-trade", k, "").split("/").slice(2), HAVE_BOTH).module === k,
     clientHref("raya-trade", k, ""));
 }
-check("an unbuilt module's word is not an address either",
-  whereOf(["portfolio"], modulesFor(["portfolio"])).legacy, JSON.stringify(whereOf(["portfolio"], modulesFor(["portfolio"]))));
+/* AND THE UNBUILT ONE IS DERIVED, never typed (§214.3, §218). It named
+   `portfolio` outright and went red the day that module was built — which is
+   a check arguing with a decision rather than guarding one. What survives a
+   module being built is the RULE: a word MODULES reserves and MODULE_DEF has
+   not built is not an address, whichever word it is. With none left unbuilt
+   the assertion says so rather than passing over an empty list (§113.8).
+   `UNBUILT` is the file's own, declared at the top — a second `const` here
+   was §56.7's collision, caught by the parser rather than by reading. */
+/* AND WITH NONE LEFT UNBUILT (Processes, 2026-10-01, was the last) the
+   rule is asked of the case that survives it rather than passing over an
+   empty list (§113.8, §218): a module's word the CLIENT does not hold is not
+   an address for that client, which is the same door shut by the same rule. */
+check(UNBUILT.length ? "an unbuilt module's word is not an address either"
+    : "a module's word the client does not hold is not an address either (none is left unbuilt)",
+  UNBUILT.length ? UNBUILT.every((k) => whereOf([k], modulesFor([k])).legacy)
+    : BUILT_EXTRA.every((k) => whereOf([k], [DEFAULT_MODULE]).legacy),
+  UNBUILT.length ? UNBUILT.join(", ") : BUILT_EXTRA.join(", "));
 check("the client's Setup is the spine's and carries no module (spec 056 §4.1)", same(whereOf(["setup", "people"], HAVE_BOTH), { module: null, rest: ["setup", "people"], legacy: false }));
 /* BOTH ENDS (§94.2, §359.2): a module's own Setup reads as that module with
    `setup` inside it, so the route can serve it stamped with the module's
@@ -297,16 +341,106 @@ const facts = { unreadable: false, cycleOpen: true, planned: true };
 const rows = moduleRows(modulesFor(BUILT_EXTRA), facts);
 check("one row per module the client has, and no more, in the list's own order",
   same(rows.map((r) => r.key), HAVE_BOTH), rows.map((r) => r.key).join(", "));
-check("Strategy still says what it said", rows[0].state === "cycle open", rows[0].state);
+/* REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted `state === "cycle
+   open"` — the health word §368 replaced, and half of the pair that said one
+   fact twice. What survives is the claim it was making: Strategy is the row
+   that speaks about a running cycle, and it now does it as a MARK. */
+check("Strategy marks a running cycle", rows[0].mark === "Cycle open", rows[0].mark);
 /* A module with nothing to say draws its NAME alone — never a placeholder,
    which would read as a state nobody set (§45.2). Asked of EVERY other row
    rather than of the second one, or a third module could say anything at all
    and this would go on passing (§113.8). */
 check("a module with nothing to say says nothing, rather than a placeholder",
-  rows.slice(1).every((r) => r.state === ""),
-  rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.state)).join(" "));
+  rows.slice(1).every((r) => r.mark === ""),
+  rows.slice(1).map((r) => r.key + "=" + JSON.stringify(r.mark)).join(" "));
 check("every row carries the label the switcher and the drawer use",
   rows.every((r) => r.label === MODULE_DEF[r.key].label));
+
+/* ── 4a · THE MARK, AND NOTHING WHEN THERE IS NOTHING (§368) ──────────────
+   Islam, of the cards: "we don't needs notes that take 2 lines we can just
+   have a notificaiton here if something is new to check ... let's make it
+   compact." The row's tail says what is OUTSTANDING and is silent otherwise,
+   which is where the compactness comes from — so the silence is asserted as
+   hard as the marks are, or a build that marked every row would satisfy
+   every "it says the right thing" assertion here and be no shorter.
+
+   BOTH ENDS ON EVERY BRANCH (§94.2): each mark is asserted beside the state
+   that must NOT draw it. */
+const FULL = { cycleOpen: true, cycleName: "H1", due: "30 Sep", total: 10, sub: 7, newReports: 2, latestReport: "Egypt retail outlook, Q3" };
+const mk = (f) => moduleRows(modulesFor(BUILT_EXTRA), f);
+const markOf = (f, key) => (mk(f).find((r) => r.key === key) || {});
+const OWED = markOf({ unreadable: false, cycleOpen: true, planned: true, landing: FULL }, "strategy");
+check("what is owed is the mark: how many of how many",
+  OWED.mark === "3 of 10", OWED.mark);
+check("…and a count is not an alarm, however large", OWED.alarm === false);
+check("…and the whole sentence rides with it for the hover",
+  OWED.tip === "Cycle open · reports due 30 Sep · 3 of 10 still to submit", OWED.tip);
+/* THE OTHER END, and the cost Islam took with it stated where it is
+   asserted: a cycle running with every subject in owes nothing, so it marks
+   nothing — and therefore reads the same as no cycle at all. That is the
+   mark meaning *outstanding* rather than *state*, and it is the decision. */
+check("a cycle with every subject in marks nothing",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, sub: 10 } }, "strategy").mark === "");
+check("and no cycle open marks nothing at all",
+  markOf({ unreadable: false, cycleOpen: false, planned: true, landing: { ...FULL, cycleOpen: false } }, "strategy").mark === "");
+/* THE TWO ALARMS, which are what a count can never say and the reason the
+   card did not get one number for the whole client (the mockup's option B). */
+const NOPLAN = markOf({ unreadable: false, cycleOpen: false, planned: false, landing: FULL }, "strategy");
+check("a client with no plan says so, as an alarm",
+  NOPLAN.mark === "No plan" && NOPLAN.alarm === true, NOPLAN.mark + " alarm=" + NOPLAN.alarm);
+const DEAD = markOf({ unreadable: true, landing: null }, "strategy");
+check("a client that did not answer says so, as an alarm",
+  DEAD.mark === "Not answering" && DEAD.alarm === true, DEAD.mark + " alarm=" + DEAD.alarm);
+check("…and it outranks everything else, because it is why nothing else can be read",
+  markOf({ unreadable: true, cycleOpen: true, planned: false, landing: FULL }, "strategy").mark === "Not answering");
+/* AN UNREADABLE COUNT IS NOT NOUGHT (§35, §93). A cycle known open whose
+   totals cannot be read must not fall through to silence, which is what
+   "nothing is owed" looks like. */
+check("a cycle open with counts that cannot be read says the cycle is open",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, total: null, sub: null } }, "strategy").mark === "Cycle open");
+check("…and says it without an alarm, because nothing is broken",
+  markOf({ unreadable: false, cycleOpen: true, planned: true, landing: { ...FULL, total: null, sub: null } }, "strategy").alarm === false);
+const NEW = markOf({ unreadable: false, cycleOpen: false, planned: true, landing: FULL }, "insights");
+check("Insights marks this month's reports", NEW.mark === "2 new" && NEW.alarm === false, NEW.mark);
+check("…one report is singular in the hover, and none marks nothing",
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: 1 } }, "insights").tip === "1 new report this month" &&
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: 0 } }, "insights").mark === "" &&
+  markOf({ unreadable: false, planned: true, landing: { ...FULL, newReports: null } }, "insights").mark === "");
+/* DECLARED PER MODULE, so a fifth one marks its card by adding an entry
+   rather than by editing the console (§53.5, MODULE_DEF's own rule). Asked
+   of every module that declares NO mark, so the next one is covered. */
+const NOMARK = MODULES.filter((k) => !MODULE_DEF[k].mark);
+check("a module that declares no mark never marks anything",
+  NOMARK.length > 0 && NOMARK.every((k) => moduleRows([DEFAULT_MODULE, k].filter(isModule), { unreadable: false, cycleOpen: true, planned: false, landing: FULL })
+    .filter((r) => r.key === k).every((r) => r.mark === "" && r.alarm === false && r.tip === "")),
+  NOMARK.join(", "));
+/* THE MARK IS FOREFRONT'S OWN ANSWER, AND THIS IS THE ASSERTION THAT SAYS
+   SO (§368, Islam's call with the cost stated). It REVERSES the one that
+   stood here — *the card's row carries the picked line, from the one reader*
+   (§359.4) — and is written as the reversal rather than deleted, so a build
+   that quietly wired the client's pick back into the console goes red.
+   `moduleRows` takes no pick at all now, so the guard is that passing one
+   cannot change a thing: both spellings of a pick, and a third argument
+   ignored outright. */
+const PICK_A = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL }, { strategy: "waiting" });
+const PICK_B = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL }, { strategy: "cycle" });
+const PICK_N = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: FULL });
+/* AND THIS ONE IS THE CONTROL RATHER THAN THE ALARM, SAID SO (§113.8):
+   `moduleRows` has no pick parameter at all, so today it passes BY
+   CONSTRUCTION — which is stronger than a check, and worthless as one. It
+   is kept because it is what fails the day somebody gives the function a
+   third argument and reads it; the assertion that can fail today is the
+   source one further down (*no landing-line pick is handed to it*). */
+check("a client's landing-line pick cannot move the mark — it is Forefront's own answer",
+  same(PICK_A, PICK_N) && same(PICK_B, PICK_N),
+  PICK_A.map((r) => r.key + "=" + JSON.stringify(r.mark)).join(" "));
+/* AND THE ROW NO LONGER CARRIES A SENTENCE AT ALL, asserted as an absence
+   beside the presence that makes it mean something — a build that kept the
+   line and added a mark would pass everything above and be exactly as tall
+   as the cards Islam photographed. */
+check("no row carries a line or a health word any more",
+  PICK_N.every((r) => r.line === undefined && r.state === undefined) && PICK_N.some((r) => r.mark !== ""),
+  Object.keys(PICK_N[0]).join(","));
 
 console.log("\n4b · the landing line, declared and read (spec 056 §4.5, §359.4)");
 /* EVERY MODULE DECLARES ITS SENTENCES, the first one the default, `none`
@@ -339,25 +473,26 @@ check("Nothing draws no line, on every module", MODULES.every((k) => landingLine
 check("unreadable facts say nothing rather than a false figure",
   MODULES.every((k) => MODULE_DEF[k].lines.every((l) => landingLine(k, l.key, NO_FACTS) === "")),
   MODULES.map((k) => MODULE_DEF[k].lines.map((l) => JSON.stringify(landingLine(k, l.key, NO_FACTS))).join("|")).join(" "));
-/* THE CARD'S ROW IS THE SAME READER (§53.5): moduleRows' line equals
-   landingLine for the same pick and facts, both ends — a pick moves it, no
-   pick is the default, unreadable is empty. */
-const rowsL = moduleRows(modulesFor(BUILT_EXTRA), { unreadable: false, cycleOpen: true, planned: true, landing: F }, { strategy: "waiting" });
-check("the card's row carries the picked line, from the one reader",
-  rowsL[0].line === landingLine("strategy", "waiting", F) && rowsL[0].line === "3 of 10 still to submit", rowsL[0].line);
-/* REWRITTEN, NEVER LOOSENED (§218, §214.3). This named the trial module,
-   whose only declared line was `none`, so it read as "a module with no pick
-   says nothing" — true of that module and not the rule. The rule is that an
-   unchosen module says its FIRST DECLARED line, whatever that line is, which
-   is what makes `none` a choice rather than an absence; asserted of every
-   built module, so the next one is covered and the one that went (§363) took
-   no assertion with it. */
-const UNPICKED = rowsL.filter((r) => r.key !== "strategy");
-check("…and a module with no pick carries its FIRST DECLARED line",
-  UNPICKED.length > 0 && UNPICKED.every((r) => r.line === lineDef(r.key, undefined).read(F)),
-  rowsL.map((r) => r.key + "=" + JSON.stringify(r.line)).join(" "));
-check("…and an unreadable client says nothing under every module",
-  moduleRows(modulesFor(BUILT_EXTRA), { unreadable: true, landing: null }, { strategy: "waiting" }).every((r) => r.line === ""));
+/* ONE READER, AND ITS ONE REMAINING CONSUMER (§368). These two assertions
+   were written against `moduleRows`' `line`, which §368 removed — the
+   console draws Forefront's own mark instead (§4a above). They are REWRITTEN
+   onto `landingLine`, never deleted (§218), because the rule they guard is
+   still live: it is what the Landing line Setup page previews through
+   lib/landing.ts's stamp, and it is the page a client sets. So the claim
+   stands, and what changes is which caller it is asked of.
+
+   AND WHAT IS NOT ASSERTED IS SAID (§54.5): with the client's landing gone
+   (§360 made `/<client>` a redirect) and the console on its own mark, that
+   Setup page's pick is read by its own previewer and by nothing else. It is
+   recorded in the decisions log rather than guarded here, because a check
+   that froze it would freeze the oddity. */
+const UNPICKED = MODULES.filter((k) => k !== "strategy");
+check("a module with no pick reads its FIRST DECLARED line",
+  UNPICKED.length > 0 && UNPICKED.every((k) => landingLine(k, undefined, F) === lineDef(k, undefined).read(F)),
+  UNPICKED.map((k) => k + "=" + JSON.stringify(landingLine(k, undefined, F))).join(" "));
+check("…and a pick MOVES it, or the picker would be a control with nothing behind it",
+  landingLine("strategy", "waiting", F) !== landingLine("strategy", "cycle", F),
+  landingLine("strategy", "waiting", F) + " / " + landingLine("strategy", "cycle", F));
 check("a client holding nothing besides the default gets one row", moduleRows(modulesFor([]), facts).length === 1);
 
 
@@ -388,11 +523,47 @@ console.log("\n4c · who may open a module (§359.5)");
   /* absent = shipped, never none (§30.2) */
   check("with nothing stored a unit head opens Insights — absent is the shipped state, not a refusal",
     decideOpen("none", "insights", seed, head) === true);
-  const shutOwner = graphWith((g) => { g.access.owner.a_insights = "none"; });
-  check("…and with the owner row shut, the same person is REFUSED by the decision the route asks",
-    decideOpen("none", "insights", shutOwner, head) === false);
-  check("…while the custodian beside them, whose row is untouched, still opens it (the grant is per role)",
-    decideOpen("none", "insights", shutOwner, cust) === true);
+  /* SHUT EVERY ROW THIS PERSON HOLDS, ASKED RATHER THAN TYPED (§218,
+     §214.3, §255). Access is the MOST GENEROUS grant across the roles
+     somebody holds (§33), so shutting ONE row is not shutting a person. The
+     roles come from the product's own rule (personRoles, the one both sides
+     ask — §42), so the row derived by whatever somebody is named on NEXT is
+     shut here the day it is added.
+
+     AND WHICH PERSON MAKES §33's POINT BELONGS TO THE SEED, NOT TO THIS FILE
+     (§218, §385.5): the guard here read `headRoles.length >= 2`, true only
+     while §384's tactic-owner row existed — §385 took that row off the table
+     and the guard started reporting a correct build broken, which is the same
+     staleness §383.8 recorded in this file's own fixtures, arriving from the
+     other direction. What is asserted now is the CLAIM rather than a count,
+     and it is DRIVEN: the custodian beside the head holds two rows (25 of the
+     seed's 33 people hold more than one), so shutting one of theirs and
+     watching them still open is §33 measured rather than assumed.
+
+     THE CUSTODIAN BESIDE THEM IS WHAT MAKES THE SHUT MEAN ANYTHING (§113.8):
+     a build that refused everybody passes the line below perfectly, so their
+     rows are asserted UNTOUCHED and still open. */
+  const rulesOf = createRequire(import.meta.url)(join(ROOT, "lib", "rules.js"));
+  const rolesHeldBy = (key) => {
+    const w = rulesOf.worldOf(seed);
+    const p2 = (seed.people || []).find((x) => x.key === key);
+    return Array.from(new Set(rulesOf.personRoles(w, p2).map((r) => r.role)));
+  };
+  const headRoles = rolesHeldBy(head), custRoles = rolesHeldBy(cust);
+  check("the head's rows are the product's own answer, never a typed list (§42)",
+    headRoles.length > 0 && headRoles.includes("owner"), JSON.stringify(headRoles));
+  check("…and shutting ONE row of somebody who holds several is not shutting them (§33)",
+    custRoles.length >= 2 &&
+      decideOpen("none", "insights",
+        graphWith((g) => { g.access[custRoles[0]] = { ...(g.access[custRoles[0]] || {}), a_insights: "none" }; }),
+        cust) === true,
+    JSON.stringify({ [head]: headRoles, [cust]: custRoles }));
+  const shutOwner = graphWith((g) => { headRoles.forEach((r) => { g.access[r] = g.access[r] || {}; g.access[r].a_insights = "none"; }); });
+  check("…and with every row they hold shut, the same person is REFUSED by the decision the route asks",
+    decideOpen("none", "insights", shutOwner, head) === false, JSON.stringify(headRoles));
+  check("…while the custodian beside them, whose rows are untouched, still opens it (the grant is per role)",
+    decideOpen("none", "insights", shutOwner, cust) === true,
+    JSON.stringify([custRoles, custRoles.filter((r) => headRoles.includes(r))]));
   const openOwner = graphWith((g) => { g.access.owner.a_insights = "view"; });
   check("…and a stored view opens it", decideOpen("none", "insights", openOwner, head) === true);
   check("THE SEAT OPENS EVERYTHING: the Super user and the SMO team are served over a shut row (spec 046 §4.10)",
@@ -474,17 +645,63 @@ for (const k of OWN_PAGE) {
   check("...and the module you are IN is marked — " + k,
     new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
     (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
+  /* Asked of the MODULE MENU, not the whole document (§456; the menu is the
+     shared bar's `tbmod` since main's §444): a module's own
+     page links to itself (the Copilot's list is a form posting back to its
+     own address), which is the page and not a door. A switcher missing
+     altogether would pass this vacuously, so it is asserted present first
+     (§113.8). */
+  const oneDoc = await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE);
+  const sw = (oneDoc.match(/<details class="tbstep tbmod">[\s\S]*?<\/details>/) || [""])[0];
   check("a client holding only the default is offered no door it does not have — " + k,
-    !(await docOf(k, "raya-trade", "Raya Trade", HAVE_ONE))
-      .includes('href="' + clientHref("raya-trade", k, "") + '"'));
+    !!sw && !sw.includes('href="' + clientHref("raya-trade", k, "") + '"'), sw ? "" : "no switcher drawn");
   check("there is no row of units — a module brings its own navigation or none (spec 046 §4.2) — " + k,
     !/data-u=|class="units"/.test(doc));
   /* The page is served under the shell's policy, which is `script-src 'self'`
      (lib/shell.ts SHELL_CSP): an inline handler here would render perfectly
      and never run, so the switcher is a <details> and this asserts it stays
-     one. */
+     one.
+
+     REWRITTEN, NEVER LOOSENED (§218, §214.3). It asked for no `<script` of any
+     kind, which was true of every module while none of them had behaviour and
+     went red the day Portfolio served its own — a check arguing with a
+     decision rather than guarding one, and arguing with the very route the
+     policy EXISTS to leave open. What the policy forbids is the INLINE kind:
+     an `onclick=` and a <script> with a body. A `<script src>` from this
+     origin is what `'self'` means, so it is asserted to be served that way
+     rather than asserted absent, which is the both-ends version of the same
+     rule (§94.2) — a module that stopped serving its behaviour at all would
+     satisfy a bare absence perfectly (§113.8). */
   check("nothing inline needs a script, or the policy would silence it — " + k,
-    !/<script|onclick=/i.test(doc));
+    !/\son[a-z]+\s*=/i.test(doc) && !/<script(?![^>]*\ssrc=)/i.test(doc),
+    (doc.match(/<script[^>]*>/g) || []).join(" "));
+  check("...and any script it does serve comes from this origin, which is what `'self'` means — " + k,
+    (doc.match(/<script[^>]*>/g) || []).every((t) => /\ssrc="\/[^"]*"/.test(t)),
+    (doc.match(/<script[^>]*>/g) || []).join(" ") || "(no script — vacuously true)");
+  /* §444: and the one script the shared bar brings is a FILE with nothing
+     inside the tag, the both-ends half of main's rule above. */
+  check("...and no script carries a body, src or not — " + k,
+    (doc.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) || []).every((t) => /<script\b[^>]*>\s*<\/script>/i.test(t)));
+  /* §444: THE SHARED BAR, ON EVERY MODULE'S OWN PAGE. The trail's three
+     steps, the theme switch and Sign out — and its script, or the menus and
+     the switch would be drawn and dead (§96). */
+  check("it wears the shared top bar, trail and all — " + k,
+    /<header class="tb">/.test(doc) && /class="tbtrail"/.test(doc) && /href="\/platform"/.test(doc) &&
+    /id="tbtheme"/.test(doc) && /id="tbout"/.test(doc) && doc.includes('<script src="/topbar.js"></script>'));
+  check("...and the navy module bar it replaces is gone — " + k,
+    !/class="bar"|class="msw"|class="mmenu"/.test(doc));
+  check("...and the page's dark colours answer the switch, not only the device — " + k,
+    /:root\[data-theme="dark"\]\{/.test(doc) && !/@media \(prefers-color-scheme:dark\)\{:root\{/.test(doc));
+  /* 5b · A CLIENT'S OWN PERSON (§444, Islam: "they don't get it it's only for
+     the consutlants"). No trail and no module menu — and still a way back
+     into their platform, or a page reached by its address is a room with no
+     door (§61). Both ends, or a build that dropped the trail for everybody
+     passes the first half (§94.2). */
+  const staff = await (await serverFor(k)({ ...argsFor(k, []), consultant: false })).text();
+  check("a client's own person gets no trail — " + k,
+    /<header class="tb">/.test(staff) && !/class="tbtrail"/.test(staff) && !/class="tbmenu"/.test(staff));
+  check("...and their way back is the product's name — " + k,
+    staff.includes('class="tbbrand" href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"') && /id="tbout"/.test(staff));
 }
 
 console.log("\n6 · what lives in SQL, in the console and in the route (read, not driven)");
@@ -497,7 +714,13 @@ const mig = read("smp-app/db/migrations/005-a-module-per-client.sql");
 check("and a database already up gets it by migration", /ADD COLUMN IF NOT EXISTS modules jsonb/.test(mig));
 check("the migration can be run twice", /IF NOT EXISTS/.test(mig));
 const api = read("smp-app/lib/platform-api.ts");
-check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts, facts.picks)"));
+/* REWRITTEN, NEVER LOOSENED (§218): this held the call's exact text with
+   `facts.picks` in it, which §368 removed — the mark is Forefront's own
+   answer. Both halves of what it was guarding survive: the list is the
+   client's own, and NO pick reaches the call, asserted as an absence beside
+   it so wiring one back in goes red here as well as in §4a. */
+check("the card reads the client's own list rather than a constant", api.includes("moduleRows(modulesFor(row.modules), facts)"));
+check("…and no landing-line pick is handed to it", !/moduleRows\([^)]*picks/.test(api));
 check("the drawer is told what this client has AND what it could be given", /modules: modulesFor\(row\.modules\)/.test(api) && /offer: offerable\(\)/.test(api));
 check("turning one on is gated on the same rule as the rest of the configuration",
   /if \(action === "setModules"\)[\s\S]{0,900}mayConfigureClient/.test(api));
@@ -566,7 +789,10 @@ console.log("\n7 · the switcher in the platform's top bar (driven)");
    at once unless the address looks like /<client>/…, so a file:// page would
    pass every assertion here by never running the code (§94.11). The 3.4MB
    shell.js is deliberately NOT loaded: this asserts the switcher, not the
-   platform, and route.js builds it whether or not the app has hydrated. */
+   platform. It IS mounted from a paint since §383, so the stub carries a
+   one-line `paint` for route.js to wrap — the sentence that used to stand
+   here said route.js builds it whether or not the app has hydrated, which
+   stopped being true the day that moved (§104.8). */
 const BODY = readFileSync(join(APP, "shell", "body.html"), "utf8");
 const ROUTE = readFileSync(join(APP, "shell", "route.js"), "utf8");
 const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
@@ -576,16 +802,31 @@ const CSS = readFileSync(join(APP, "public", "platform.css"), "utf8");
    from — so what is driven below is the list a real client would be sent,
    and a module added or removed changes this file nowhere. */
 const MENU = moduleMenu(offerable());
+const CLIENTS = [{ key: "raya-trade", name: "Raya Trade", kind: "client" }, { key: "rhi", name: "RHI", kind: "client" }, { key: "el-abd", name: "El Abd", kind: "client" }];
 const attr = (v) => String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-const doc = (menu) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+/* AND THE STUB HAS TO CARRY A `paint`, BECAUSE THE SWITCHER IS A PAINT-TIME
+   CONTROL NOW (§383). It was an IIFE built at load, and the comment above
+   still said route.js "builds it whether or not the app has hydrated" — true
+   until §383 moved it, because the list has to ask whether the tab row
+   already reaches the library and at load that question is answered about the
+   BAKED viewer. route.js wraps `paint` if there is one, so a stub with none
+   never mounts the switcher at all and reported a correct build broken
+   (§100.3: a stand-in that models less than the thing it stands in for). It
+   is declared BEFORE route.js is parsed — that is when the wrap happens —
+   and called after, which is the one paint the real platform makes on boot. */
+const doc = (menu, staff) => "<!doctype html>\n<html lang='en' data-module='strategy'" +
+  (staff ? "" : " data-console='1' data-console-client='Raya Trade'") +
   (menu ? " data-modules='" + attr(JSON.stringify(menu)) + "'" : "") +
-  (BREAK === "switch-always" ? " data-break='switch-always'" : "") +
+  (BREAK === "trail-for-staff" ? " data-break='trail-for-staff'" : "") +
   "><head><meta charset='utf-8'><link rel='stylesheet' href='/platform.css'></head><body class='ready'>" +
-  BODY + "<script src='/route.js'></script></body></html>";
+  BODY + "<script>window.paint = function () {};</script>" +
+  "<script src='/route.js'></script><script>paint();</script></body></html>";
 const srv = createServer((req, res) => {
   const p = String(req.url).split("?")[0];
   if (p === "/platform.css") { res.writeHead(200, { "Content-Type": "text/css" }); return res.end(CSS); }
   if (p === "/route.js") { res.writeHead(200, { "Content-Type": "application/javascript" }); return res.end(ROUTE); }
+  /* the trail's client list (§401): the stub answers what the server would */
+  if (p === "/api/platform") { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ ok: true, clients: CLIENTS })); }
   res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   /* THE STUB HONOURS THE SAME BREAK AS THE SERVER: this section serves the
      shell's body itself rather than going through shellDocument(), so
@@ -599,7 +840,7 @@ const srv = createServer((req, res) => {
      across — and the "a menu of one is a door behind a door" test (§32)
      lives in route.js, which is what this section drives. A stub still
      omitting it would be testing a server that no longer exists. */
-  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU));
+  res.end(doc(p.startsWith("/one/") ? [MENU[0]] : MENU, p.startsWith("/staff/")));
 });
 await new Promise((r) => srv.listen(0, "127.0.0.1", r));
 const base = "http://127.0.0.1:" + srv.address().port;
@@ -615,45 +856,86 @@ if (browser) {
   page.on("pageerror", (e) => errs.push(String(e)));
   await page.goto(base + "/raya-trade/strategy/mobile/plan");
   await page.waitForTimeout(250);
-  check("the switcher is drawn in the top bar", (await page.locator(".topmark").count()) === 1);
-  /* FIRST IN THE ROW IS THE TOP LEFT (the mockup put it inside `.brand`, which
-     is a COLUMN in the product — copied, it would have stranded the mark on a
-     line of its own above the name). */
-  check("it is the first thing in the row, not inside the brand block",
-    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("topmark"));
-  const geo = await page.evaluate(`(() => { const a = document.querySelector('.topmark').getBoundingClientRect(),
-      b = document.querySelector('.brand h1').getBoundingClientRect();
-      return { w: Math.round(a.width), h: Math.round(a.height), left: Math.round(a.left), titleLeft: Math.round(b.left),
-               sameRow: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 10 }; })()`);
-  check("on the same line as the product's name, and before it", geo.sameRow && geo.left < geo.titleLeft, JSON.stringify(geo));
-  check("and it is a square", geo.w === geo.h, geo.w + "x" + geo.h);
-  /* MEASURED AS PAINT, never as a class (§94.8): a mark styled by nothing
-     renders as a bare button and satisfies every assertion about its markup. */
-  check("its shape is painted, not merely marked up",
-    await page.evaluate("(() => { const s = getComputedStyle(document.querySelector('.topmark > summary')); return s.borderTopWidth === '1px' && s.borderTopStyle === 'solid'; })()"));
-  check("the mark is DRAWN and not a font character (§52)", (await page.locator(".topmark > summary svg rect").count()) === 4);
-  await page.locator(".topmark > summary").click();
+  /* §400: THE FOUR-SQUARE SWITCHER IS GONE; THE OFFICE'S TRAIL OFFERS THE
+     MODULES. REWRITTEN, NEVER LOOSENED (§218): every claim this section made
+     about the switcher is made again about the trail's client step — drawn
+     first in the row, a real shape, a DRAWN chevron (§52), every module with
+     the server's own line, the one you are in marked, the menu on the page —
+     and the other end moves from "one module, no menu" to the decision §400
+     actually made: a client's OWN person gets no trail at all. */
+  check("the trail is drawn in the top bar", (await page.locator("nav.trail").count()) === 1);
+  check("it is the first thing in the row",
+    (await page.evaluate("document.querySelector('.top .top-in').firstElementChild.className")).includes("trail"));
+  const tr = await page.evaluate(`(() => { const n = document.querySelector('nav.trail');
+      return { text: n.innerText.replace(/\\s+/g, ' ').trim(), ff: (n.querySelector('a.trff') || {}).getAttribute ? n.querySelector('a.trff').getAttribute('href') : '',
+               where: ((n.querySelector('details.trstep:not(.trclient) > summary span') || {}).textContent || '').trim() }; })()`);
+  check("it reads Platform › the client › the module you are in",
+    tr.ff === "/platform" && /^platform\b/i.test(tr.text) && /Raya Trade/.test(tr.text) && tr.where === MODULE_DEF[DEFAULT_MODULE].label, JSON.stringify(tr));
+  check("the chevrons are DRAWN and not a font character (§52)", (await page.locator("nav.trail summary svg").count()) >= 2);
+  /* §401: THE TWO MENUS SWAP JOBS. Islam — the client step lists "the other
+     clients", the module step "the other modules and then the separator and
+     the client settings", and no client mark on the bar. Every claim the
+     §400 version made about the modules is made again of the MODULE step;
+     the client step is asserted against what the SERVER said (the stub's
+     `clients` answer), never a list typed here (§94.8). */
+  check("no client mark on the bar (§401)", (await page.locator("nav.trail img").count()) === 0);
+  await page.locator("nav.trail .trmod > summary").click();
   await page.waitForTimeout(200);
-  const items = await page.locator(".topmark .menu button").allInnerTexts();
-  check("the menu lists every module this client has",
-    items.length === MENU.length && MENU.every((m, i) => items[i].startsWith(m.label)),
-    items.map((t) => t.split("\n")[0]).join(", "));
-  check("each carries the line the server gave it, never one worked out from the key",
-    MENU.every((m, i) => items[i].includes(m.note)), items.map((t) => t.replace(/\n/g, " · ")).join(" | "));
-  check("the module you are IN is marked",
-    (await page.locator('.topmark .menu button[aria-current="true"]').innerText()).startsWith(MODULE_DEF[DEFAULT_MODULE].label));
-  /* THE MENU IS OPEN AND ON SCREEN — a panel positioned off its own edge
-     renders perfectly and cannot be read (§90: a control below the fold is a
-     control that does nothing). */
-  const box = await page.locator(".topmark .menu").boundingBox();
+  const items = await page.locator("nav.trail .trmod .menu button").allInnerTexts();
+  /* §425 REWRITTEN, NEVER LOOSENED (§218): the module step is ONE full list
+     everywhere — every module this client has (the one you are in included,
+     bold), a rule, every module's settings, then Client settings. */
+  const modItems = items.slice(0, MENU.length);
+  check("the module step lists every module this client has, in order, the one you are in included (§425)",
+    MENU.length > 0 && MENU.every((m, i) => (modItems[i] || "").startsWith(m.label)), items.map((t) => t.split("\n")[0]).join(", "));
+  check("…each with the line the server gave it, never one worked out from the key",
+    MENU.every((m, i) => (modItems[i] || "").includes(m.note)), modItems.map((t) => t.replace(/\n/g, " · ")).join(" | "));
+  const bold = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu [aria-current='true']")).map((e) => e.textContent.trim().split("\n")[0]));
+  check("…with the module you are in the one bold entry (§425)",
+    bold.length === 1 && bold[0].startsWith(MODULE_DEF[DEFAULT_MODULE].label), JSON.stringify(bold));
+  const tail = await page.evaluate(() => Array.from(document.querySelectorAll("nav.trail .trmod .menu > *")).map((e) => e.className === "trrule" ? "|" : e.textContent.trim().split("\n")[0]));
+  const wantTail = ["|"].concat(MENU.map((m) => m.label + " settings"), ["Client settings"]);
+  check("…then a rule, every module's settings, then Client settings, last (§425)",
+    JSON.stringify(tail.slice(MENU.length)) === JSON.stringify(wantTail), JSON.stringify(tail));
+  const box = await page.locator("nav.trail .trmod .menu").boundingBox();
   check("and the open menu is on the page", box && box.x >= 0 && box.y >= 0 && box.width > 200, JSON.stringify(box));
-  /* BOTH ENDS (§94.2, §32): a client with one module is offered no menu at
-     all — a build that always drew it would pass everything above. */
+  /* the client step is the server's list less the client you are on (§401) */
+  await page.locator("nav.trail .trclient > summary").click();
+  await page.waitForTimeout(200);
+  const cl = await page.locator("nav.trail .trclient .menu button").allInnerTexts();
+  const wantCl = CLIENTS.filter((c) => c.key !== "raya-trade").map((c) => c.name);
+  check("the client step lists the OTHER clients the server says this person may open",
+    wantCl.length > 0 && wantCl.every((n, i) => cl[i] === n) && !cl.includes("Raya Trade"), cl.join(" | "));
+  check("…and a way to all of them, so it is never a dead end (§61)", cl[cl.length - 1] === "All clients", cl.join(" | "));
+  check("opening one menu shuts the other",
+    (await page.locator("nav.trail details[open]").count()) === 1 && (await page.locator("nav.trail .trclient[open]").count()) === 1);
+  /* A PRESS ANYWHERE ELSE CLOSES IT (§401) — a real mouse press on the page,
+     never a programmatic close, or the listener is not what is measured. */
+  await page.mouse.click(700, 420);
+  await page.waitForTimeout(100);
+  check("a press outside the menu closes it (§401)", (await page.locator("nav.trail details[open]").count()) === 0);
+  await page.locator("nav.trail .trclient > summary").click();
+  await page.waitForTimeout(100);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(100);
+  check("…and so does Escape", (await page.locator("nav.trail details[open]").count()) === 0);
   const one = await browser.newPage({ viewport: { width: 1400, height: 400 } });
   await one.goto(base + "/one/strategy/mobile");
   await one.waitForTimeout(250);
-  check("a client with ONE module gets no switcher — a menu of one is a door behind a door",
-    (await one.locator(".topmark").count()) === 0);
+  await one.locator("nav.trail .trmod > summary").click().catch(() => {});
+  const oneItems = await one.locator("nav.trail .trmod .menu > *").allInnerTexts();
+  /* §425: the same full list with one module — the module, a rule, its
+     settings, Client settings */
+  const oneLabel = MODULE_DEF[DEFAULT_MODULE].label;
+  check("a client with ONE module offers it, a rule, its settings and Client settings (§425)",
+    oneItems.length === 4 && oneItems[0].trim().startsWith(oneLabel) && oneItems[2].trim() === oneLabel + " settings" && oneItems[3].trim() === "Client settings", JSON.stringify(oneItems));
+  /* BOTH ENDS (§94.2): a build that drew the trail for everybody passes
+     everything above. */
+  const staff = await browser.newPage({ viewport: { width: 1400, height: 400 } });
+  await staff.goto(base + "/staff/strategy/mobile");
+  await staff.waitForTimeout(250);
+  check("a client's own person gets no trail — they do not travel between clients (§400)",
+    (await staff.locator("nav.trail").count()) === 0);
   check("no page error from any of it", errs.length === 0, errs.join(" | "));
   await browser.close();
 }

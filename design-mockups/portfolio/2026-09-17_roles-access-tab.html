@@ -1,0 +1,313 @@
+<title>Portfolio Access Tab</title>
+<style>
+  :root{
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22; --stone:#16325C;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --zebra:#F5F7FA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --good-tx:#1F6248; --good-bg:#E4F0EA;
+    --attn:#B8860B; --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --on-fill:#FFFFFF;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+    --fs-lead:17px; --fs-title:20px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A;
+    color-scheme:dark;
+  }}
+  :root[data-theme="dark"]{
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8; --panel-accent:#E6C65C;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C; --stone:#7FA3D8;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --zebra:#212630;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --good-tx:#8FD3B0; --good-bg:#1B3129;
+    --attn:#D9B23C; --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --bad-tx:#E79A93; --bad-bg:#33201E;
+    --on-fill:#14161A;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:var(--fs-body)/1.55 var(--sans);
+       padding-block:28px 56px;padding-left:16px;padding-right:16px}
+  .wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+
+  .lede h1{font-size:var(--fs-title);margin:0 0 6px;font-weight:700;text-wrap:balance}
+  .lede p{margin:0;color:var(--ink-2);font-size:var(--fs-note);max-width:74ch}
+  .key{font-size:var(--fs-micro);letter-spacing:.09em;text-transform:uppercase;
+       color:var(--gold-deep);font-weight:700;margin:0 0 8px}
+
+  /* ── the screen, drawn as the platform draws it ─────────────── */
+  .screen{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+  .chrome{background:var(--panel);color:var(--panel-ink);padding:9px 14px;display:flex;
+          align-items:center;gap:14px;flex-wrap:wrap}
+  .chrome .mk{font-weight:800;letter-spacing:.02em;font-size:var(--fs-note)}
+  .chrome .sep{width:1px;height:16px;background:var(--panel-quiet);opacity:.5}
+  .chrome .dest{font-size:var(--fs-small);color:var(--panel-quiet)}
+  .chrome .here{color:var(--panel-accent);font-weight:700}
+
+  .pagehead{padding:13px 16px 0;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .pagehead h2{margin:0;font-size:var(--fs-lead);font-weight:700}
+  .pagehead .sub{font-size:var(--fs-small);color:var(--ink-3)}
+
+  .tabs{display:flex;gap:2px;padding:10px 16px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .tabs button{font:600 var(--fs-note)/1 var(--sans);color:var(--ink-3);background:none;border:0;
+    padding:9px 13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;border-radius:4px 4px 0 0}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold);background:var(--surface-2)}
+  .tabs button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px}
+
+  .tblbox{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:620px;font-size:var(--fs-note)}
+  thead th{background:var(--panel);color:var(--panel-ink);text-align:left;font-weight:700;
+    font-size:var(--fs-label);letter-spacing:.05em;text-transform:uppercase;padding:9px 12px;vertical-align:bottom}
+  thead th .anote{display:block;font-size:var(--fs-micro);letter-spacing:.02em;text-transform:none;
+    font-weight:400;color:var(--panel-quiet);margin-top:3px;max-width:19ch}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  tbody td,tbody th{padding:8px 12px;border-top:1px solid var(--line-soft);vertical-align:middle}
+  tbody th{text-align:left;font-weight:600;white-space:nowrap}
+  tbody th .rnote{display:block;font-weight:400;font-size:var(--fs-micro);color:var(--ink-3);white-space:normal;max-width:28ch}
+  .newrow th{background:var(--attn-bg)}
+  .newrow{background:var(--attn-bg)!important}
+  .tag{display:inline-block;font-size:var(--fs-micro);font-weight:700;letter-spacing:.06em;
+    text-transform:uppercase;padding:1px 5px;border-radius:3px;border:1px solid var(--attn);
+    color:var(--attn-tx);margin-left:6px;vertical-align:1px}
+
+  /* two toggles, never three buttons: nothing lit IS "none" */
+  .cell{display:flex;gap:4px}
+  .st{font:700 var(--fs-micro)/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface);
+    color:var(--ink-3);cursor:pointer}
+  .st:hover{border-color:var(--gold-deep);color:var(--ink-2)}
+  .st:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+  .st[aria-pressed="true"]{background:var(--good-bg);border-color:var(--good);color:var(--good-tx)}
+  .st.edit[aria-pressed="true"]{background:var(--gold);border-color:var(--gold-deep);color:var(--on-fill)}
+  .st[disabled]{opacity:.32;cursor:not-allowed}
+  td.na{color:var(--ink-3);font-size:var(--fs-small)}
+
+  .rules{padding:14px 16px 16px;border-top:1px solid var(--line);background:var(--surface-2)}
+  .rules ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:7px}
+  .rules li{font-size:var(--fs-small);color:var(--ink-2);max-width:88ch}
+  .rules b{color:var(--ink)}
+
+  /* ── commentary, deliberately not the screen ────────────────── */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+  .panel h3{margin:0 0 4px;font-size:var(--fs-body);font-weight:700}
+  .panel > p{margin:0 0 12px;font-size:var(--fs-note);color:var(--ink-2);max-width:82ch}
+  .map{width:100%;min-width:0;border-collapse:collapse;font-size:var(--fs-small)}
+  .map th{background:none;color:var(--ink-3);font-size:var(--fs-micro);letter-spacing:.07em;
+    text-transform:uppercase;text-align:left;padding:0 10px 7px 0;font-weight:700}
+  .map td{padding:8px 10px 8px 0;border-top:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+  .map td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  .map .drv{color:var(--good-tx);font-weight:600}
+  .map .seat{color:var(--stone);font-weight:600}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+  .open li{font-size:var(--fs-small);color:var(--ink-2);margin-bottom:8px}
+  .open b{color:var(--ink)}
+  .foot{font-size:var(--fs-small);color:var(--ink-3);max-width:84ch}
+  .foot b{color:var(--ink-2)}
+  @media (max-width:560px){ .pagehead h2{font-size:var(--fs-body)} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+
+  <div class="lede">
+    <p class="key">Mockup · for sign-off · nothing built</p>
+    <h1>Portfolio — the Roles &amp; access tab</h1>
+    <p>Spec 046 gives each module a tab of its own on Roles &amp; access. This is Portfolio's.
+       The proposal is that it needs <b>three areas and two rules</b> — not the six roles
+       ScopePlan carries — because SMP already works out “sees the whole plan, works only their
+       own rows” from being <em>named</em> on a row rather than from a grant.</p>
+  </div>
+
+  <div class="screen">
+    <div class="chrome">
+      <span class="mk">RAYA TRADE</span>
+      <span class="sep"></span>
+      <span class="dest">Strategy</span>
+      <span class="dest here">Portfolio</span>
+      <span class="dest">Insights</span>
+      <span class="sep"></span>
+      <span class="dest">Setup</span>
+    </div>
+
+    <div class="pagehead">
+      <h2>Roles &amp; access</h2>
+      <span class="sub">Who may do what, per module. The Super user sets it.</span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Access tabs">
+      <button role="tab" aria-selected="false">Client</button>
+      <button role="tab" aria-selected="false">Strategy</button>
+      <button role="tab" aria-selected="true">Portfolio</button>
+      <button role="tab" aria-selected="false">Insights</button>
+    </div>
+
+    <div class="tblbox">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Role</th>
+            <th scope="col">Own projects — Plan
+              <span class="anote">The structure: phases, activities, dates, dependencies</span></th>
+            <th scope="col">Own projects — Progress
+              <span class="anote">Status, per cent, comments, files</span></th>
+            <th scope="col">Other projects
+              <span class="anote">Every project that does not name them</span></th>
+          </tr>
+        </thead>
+        <tbody id="grid"></tbody>
+      </table>
+    </div>
+
+    <div class="rules">
+      <p class="key" style="margin:0">True whatever the table says</p>
+      <ul>
+        <li><b>Only a lead completes an activity.</b> Whoever is doing the work marks it Done.
+          Marking it <em>Completed</em> — and setting the real end date — is the project's lead
+          or the office. Everything sitting at Done queues for them.</li>
+        <li><b>An assignee reports; a collaborator comments.</b> Read off the activity, never
+          granted: being named as the assignee is what lets somebody enter a figure, being
+          tagged as a collaborator is what lets them write on it.</li>
+        <li><b>Restructuring is never partial.</b> Planning Mode moves rows belonging to other
+          people, so <em>Plan · Edit</em> is the whole project or nothing — a role bounded to its
+          own rows cannot hold it, and the table will not offer it.</li>
+        <li><b>Forefront's own team is not on this table.</b> Consultants reach every client by
+          their seat, the way the Internal Tracker and Meeting Notes already work. This page is
+          the client deciding about the client's own people.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h3>ScopePlan's six roles, landed</h3>
+      <p>Three of them are not grants at all here — SMP derives them from the plan naming
+        somebody, which is how a Project owner already works in Strategy.</p>
+      <table class="map">
+        <thead><tr><th>Theirs</th><th>Here</th></tr></thead>
+        <tbody>
+          <tr><td>Client Lead</td><td>The client's <b>Super user</b> row, with Plan at Edit. Forefront's own people come in by <span class="seat">seat</span>.</td></tr>
+          <tr><td>Scope Lead</td><td><span class="drv">Derived.</span> Named as the project's lead on the project itself — the shape a Strategy pillar owner already has.</td></tr>
+          <tr><td>Senior Contributor</td><td>Plan <b>View</b> + Progress <b>Edit</b>. Sees the whole tree, works only the rows that name them.</td></tr>
+          <tr><td>Contributor</td><td>Plan <b>none</b> + Progress <b>Edit</b>. Sees and works only their own activities.</td></tr>
+          <tr><td>Collaborator</td><td><span class="drv">Derived.</span> Tagged on an activity rather than assigned it — comments, does not report.</td></tr>
+          <tr><td>Viewer</td><td>Any role with View and no Edit. Not a role of its own.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel open">
+      <h3>What this costs, and what it opens</h3>
+      <ul style="margin:0;padding-left:18px">
+        <li><b>A module has nowhere to put a role.</b> Spec 046 promises a module brings “its own
+          roles and areas”, and only areas were built. <em>Portfolio lead</em> is the first role a
+          module has ever needed — marked on the table above. It is either added to the client's
+          shared role list, which puts a Portfolio word into the frozen Strategy product, or
+          modules get somewhere of their own to declare one.</li>
+        <li><b>Edit starts with the office alone</b>, every row below it reading — the shipped
+          answer Strategy already uses. A client's Super user opens it deliberately, and an
+          unanswered cell means <em>not decided yet</em> rather than <em>no</em>.</li>
+        <li><b>“Own projects” means a project that names you</b> — as its lead, or on any activity
+          inside it. Everything else is <em>Other projects</em>.</li>
+        <li><b>Three areas, not four.</b> Sign-off is deliberately not a column: it is a governance
+          rule, and a tick somebody could set on a bad afternoon is the wrong instrument for it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="foot"><b>Press the cells.</b> They behave as the real ones do — two toggles, and
+    nothing lit is itself the answer, which is why there is no third button for “none”.
+    <b>Not drawn yet:</b> the project list, the plan tree, the sign-off queue. This tab is first
+    because it decides what those three screens are allowed to show.</p>
+</div>
+
+<script>
+(function () {
+  var ROLES = [
+    { k:"super",  n:"Super user",         note:"The client's SMO. Everything, including this page.", d:["edit","edit","view"] },
+    { k:"smoteam",n:"SMO team",           note:"Runs the platform day to day.",                      d:["edit","edit","view"] },
+    { k:"gceo",   n:"Group CEO",          note:"Sees the whole group.",                              d:["view","none","view"] },
+    { k:"cceo",   n:"Company CEO",        note:"Sees their own company.",                            d:["view","none","view"] },
+    { k:"owner",  n:"BU owner",           note:"Accountable for one unit's strategy.",               d:["view","none","none"] },
+    { k:"custodian", n:"Strategy custodian", note:"Carries the strategy work for a unit.",           d:["view","none","none"] },
+    { k:"fnhead", n:"Function head",      note:"Runs a supporting function.",                        d:["view","none","none"] },
+    { k:"pflead", n:"Portfolio lead",     note:"Named as a project's lead. Derived, never granted.", d:["view","edit","none"], isNew:true },
+    { k:"contrib",n:"Contributor",        note:"Named on an activity. Bounded to rows that name them.", d:["none","none","none"], bounded:true },
+    { k:"none",   n:"Everyone else",      note:"Anybody holding no role. Not a role.",               d:["none","none","none"], bounded:true }
+  ];
+  var COLS = ["Own projects \u2014 Plan", "Own projects \u2014 Progress", "Other projects"];
+  var body = document.getElementById("grid");
+
+  function cell(role, col) {
+    var td = document.createElement("td");
+    var wrap = document.createElement("div");
+    wrap.className = "cell";
+    ["view", "edit"].forEach(function (want) {
+      /* Other projects is read or nothing — there is nothing to edit on a
+         project that does not name you, so the control is not offered. */
+      if (col === 2 && want === "edit") return;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "st" + (want === "edit" ? " edit" : "");
+      b.textContent = want === "edit" ? "Edit" : "View";
+      /* Rule 3, made true by the control rather than by a warning: a role
+         bounded to its own rows is never offered Plan · Edit. */
+      var barred = (col === 0 && want === "edit" && role.bounded);
+      if (barred) {
+        b.disabled = true;
+        b.title = "Restructuring moves other people's rows, so it cannot be bounded to your own.";
+      }
+      b.setAttribute("aria-pressed", String(
+        role.d[col] === "edit" ? true : role.d[col] === "view" ? want === "view" : false
+      ));
+      b.setAttribute("aria-label", role.n + " — " + COLS[col] + " — " + want);
+      b.addEventListener("click", function () {
+        var on = b.getAttribute("aria-pressed") === "true";
+        b.setAttribute("aria-pressed", String(!on));
+        /* Edit implies view; dropping view drops edit with it. */
+        var sibs = wrap.querySelectorAll(".st");
+        if (want === "edit" && !on && sibs[0]) sibs[0].setAttribute("aria-pressed", "true");
+        if (want === "view" && on && sibs[1]) sibs[1].setAttribute("aria-pressed", "false");
+      });
+      wrap.appendChild(b);
+    });
+    td.appendChild(wrap);
+    return td;
+  }
+
+  ROLES.forEach(function (role) {
+    var tr = document.createElement("tr");
+    if (role.isNew) tr.className = "newrow";
+    var th = document.createElement("th");
+    th.scope = "row";
+    th.textContent = role.n;
+    if (role.isNew) {
+      var tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = "new";
+      th.appendChild(tag);
+    }
+    var note = document.createElement("span");
+    note.className = "rnote";
+    note.textContent = role.note;
+    th.appendChild(note);
+    tr.appendChild(th);
+    [0, 1, 2].forEach(function (c) { tr.appendChild(cell(role, c)); });
+    body.appendChild(tr);
+  });
+})();
+</script>

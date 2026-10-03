@@ -1,0 +1,151 @@
+<title>Structure by Section</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  --ground:#F4F6F9;--surface:#FFFFFF;--surface2:#EFF2F6;--ink:#16325C;--ink2:#4A5A72;--ink3:#6B7A90;
+  --line:#D6DCE5;--panel:#16325C;--panelink:#FFFFFF;--gold:#C9A227;--golddeep:#8A6D12;--goldbg:#FBF5E3;
+  --on:#1F7A4D;--offbg:#E6EAF0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12161D;--surface:#1B212B;--surface2:#232A36;--ink:#E9ECF1;--ink2:#A9B3C2;--ink3:#8A95A6;
+  --line:#333A45;--panel:#223A63;--panelink:#FFFFFF;--gold:#D8B550;--golddeep:#E2C36A;--goldbg:#2A2517;
+  --on:#4CC08A;--offbg:#2A313D;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12161D;--surface:#1B212B;--surface2:#232A36;--ink:#E9ECF1;--ink2:#A9B3C2;--ink3:#8A95A6;
+  --line:#333A45;--panel:#223A63;--panelink:#FFFFFF;--gold:#D8B550;--golddeep:#E2C36A;--goldbg:#2A2517;
+  --on:#4CC08A;--offbg:#2A313D;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 "Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:20px;padding-block:28px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+h1{font-size:28px;margin:0;text-wrap:balance}
+.lede{max-width:70ch;color:var(--ink2);margin:6px 0 0}
+.layer{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.layer>header{background:var(--panel);color:var(--panelink);padding:12px 18px;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.layer>header h2{margin:0;font-size:17px}
+.layer>header .ln{display:flex;gap:8px;align-items:center;font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.layer>header input{width:170px}
+.secs{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.sec{padding:14px 16px;border-right:1px solid var(--line);display:grid;gap:10px;align-content:start}
+.sec:last-child{border-right:0}
+.sec.off .body{display:none}
+.sec.off .hid{display:block}
+.hid{display:none;font-size:13px;color:var(--ink3);background:var(--surface2);border-radius:6px;padding:8px 10px}
+.shead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kind{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.lab{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+input.fld{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:4px 7px;min-width:0;width:100%}
+input.title{font-weight:700;font-size:15px}
+.layer>header input.fld{background:rgba(255,255,255,.1);color:var(--panelink);border-color:rgba(255,255,255,.35)}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
+.sw span{font-size:12px;font-weight:600;padding:2px 9px;color:var(--ink3)}
+.sw span.lit{background:var(--panel);color:var(--panelink)}
+.fixed{font-size:12px;color:var(--ink3);font-style:italic}
+.fixedh{font-size:12px;opacity:.8;font-style:italic}
+.lsw{border-color:rgba(255,255,255,.4)}.lsw span{color:rgba(255,255,255,.75)}.lsw span.lit{background:var(--gold);color:#16325C}
+.loff{padding:16px 18px;color:var(--ink2);font-size:14px}
+.way{display:grid;gap:8px;padding:10px;border-radius:6px;background:var(--surface2)}
+.comps{display:grid;gap:6px}
+.crow{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;align-items:center}
+.crow.off input{opacity:.45}
+.tick{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);display:grid;place-items:center;flex:none}
+.tick.on{background:var(--on);border-color:var(--on)}
+.tick.on::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.colhead{display:grid;grid-template-columns:18px 1fr 1fr;gap:6px}
+.colhead span{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.via{font-size:12.5px;color:var(--ink2);background:var(--surface2);border-radius:6px;padding:6px 9px}
+.via b{color:var(--ink)}
+.new{outline:2px dashed var(--gold);outline-offset:2px;border-radius:5px}
+.key{display:flex;gap:10px;align-items:flex-start;background:var(--goldbg);border:1px solid var(--gold);border-radius:8px;padding:10px 14px;max-width:84ch;font-size:14px}
+.notes{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:grid;gap:8px;max-width:84ch}
+.notes h2{margin:0;font-size:17px}
+.notes ul{margin:0;padding-left:20px;display:grid;gap:5px}
+@media (max-width:980px){.secs{grid-template-columns:1fr}.sec{border-right:0;border-bottom:1px solid var(--line)}.sec:last-child{border-bottom:0}}
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>Structure, section by section</h1>
+    <p class="lede">Setup › Client set-up › Structure. Every layer gets the three sections its pages already have. For each one you choose whether it is there, what it is called, which parts it holds and what each part is called. Each layer is set on its own.</p>
+  </div>
+  <div class="key"><b>Dashed gold</b><span>marks what is new. Everything else on these cards exists today in a flatter list. The values shown are examples to show the choices, not a client's settings.</span></div>
+  <div id="layers"></div>
+
+  <section class="notes">
+    <h2>How it behaves</h2>
+    <ul>
+      <li>A section switched off is hidden from that layer's pages, its slides and its missing-items count. What was entered is kept, and switching it back on brings it back.</li>
+      <li>A layer with its first section off opens on the next section that is on.</li>
+      <li>The second layer and the supporting functions can be switched off as a whole, for a client that has none. The top level and the business units are always there.</li>
+      <li>The plan section cannot be switched off. Business units and functions each pick pillars, projects, or objectives and actions on their own row, so the plan section names all three ways; each unit or function shows the names of the way it uses. Parts are named, not mixed across ways.</li>
+      <li>Every name has a "one" and a "many" form, because the platform says "1 pillar" and "3 pillars".</li>
+      <li>Names are per layer, so a unit's "Pillars" and a function's "Themes of work" can differ. Menus, slides and workbooks read the name of the layer they are showing.</li>
+      <li>Capabilities stay their own item and are not part of these three sections.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const PLAN = {
+  pillars: ["Pillars",[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]],
+  projects:["Projects",[["Project","Projects"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]],
+  objectives:["Objectives and actions",[["Objective","Objectives"],["Action","Actions"]]]
+};
+const LAYERS = [
+  {name:"Top level", word:"Group", fixed:"Always on",
+   s1:{on:true,title:"Foundation",comps:[[1,"Brief","Briefs"],[1,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[1,"Theme","Themes"],[1,"Core Value","Core Values"]]},
+   s2:{on:true,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
+   s3:{title:"Plan",plan:"pillars",how:"Pillars",names:[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]}},
+  {name:"Second layer", word:"Division", layer:false,
+   s1:{on:false,title:"Overview",comps:[[1,"Brief","Briefs"],[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Theme","Themes"],[0,"Core Value","Core Values"]]},
+   s2:{on:false,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
+   s3:{title:"Performance",plan:"pillars",how:"Pillars",names:[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]}},
+  {name:"Business units", word:"Strategic Direction", fixed:"Always on",
+   s1:{on:true,title:"Overview",comps:[[1,"Brief","Briefs"],[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Theme","Themes"],[0,"Core Value","Core Values"]]},
+   s2:{on:true,title:"SWOT",q:[[1,"Strengths"],[1,"Weaknesses"],[1,"Opportunities"],[1,"Threats"]]},
+   s3:{ways:[["Pillars","Plan",[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]],["Projects","Projects",[["Project","Projects"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]],["Objectives and actions","Objectives",[["Objective","Objectives"],["Action","Actions"]]]]}},
+  {name:"Supporting functions", word:"Supporting Function", layer:true,
+   s1:{on:true,title:"Overview",comps:[[0,"Purpose","Purposes"],[1,"Aspiration","Aspirations"],[1,"North Star","Key Objectives"],[0,"Core Value","Core Values"]]},
+   s2:{on:true,title:"S&W",q:[[1,"Strengths"],[1,"Weaknesses"],[0,"Opportunities"],[0,"Threats"]]},
+   s3:{ways:[["Pillars","Plan",[["Pillar","Pillars"],["Key measure","Key measures"],["Tactic","Tactics"]]],["Projects","Projects",[["Workstream","Workstreams"],["Deliverable","Deliverables"],["Outcome","Outcomes"],["Milestone","Milestones"]]],["Objectives and actions","Objectives & actions",[["Objective","Objectives"],["Action","Actions"]]]]}}
+];
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+const sw = on => `<span class="sw new"><span class="${on?"lit":""}">On</span><span class="${on?"":"lit"}">Off</span></span>`;
+const tick = on => `<span class="tick ${on?"on":""}"></span>`;
+const inp = (v,cls="") => `<input class="fld ${cls}" value="${esc(v)}" aria-label="${esc(v)}">`;
+const colhead = (a,b) => `<div class="colhead"><span></span><span>${a}</span><span>${b}</span></div>`;
+function s1(L){ const s=L.s1; return `<div class="sec ${s.on?"":"off"}">
+  <div class="shead"><span class="kind">First section</span>${sw(s.on)}</div>
+  <div class="hid">Not shown on this layer. Nothing entered is lost.</div>
+  <div class="body" style="display:grid;gap:10px">
+    <div><div class="lab">Section title</div>${inp(s.title,"title new")}</div>
+    <div class="comps"><div class="lab">Parts</div>${colhead("One","Many")}
+    ${s.comps.map(c=>`<div class="crow ${c[0]?"":"off"}">${tick(c[0])}${inp(c[1],"new")}${inp(c[2],"new")}</div>`).join("")}</div>
+  </div></div>`;}
+function s2(L){ const s=L.s2; return `<div class="sec ${s.on?"":"off"}">
+  <div class="shead"><span class="kind">Second section</span>${sw(s.on)}</div>
+  <div class="hid">Not shown on this layer. Nothing entered is lost.</div>
+  <div class="body" style="display:grid;gap:10px">
+    <div><div class="lab">Section title</div>${inp(s.title,"title new")}</div>
+    <div class="comps"><div class="lab">Boxes</div>
+    ${s.q.map(q=>`<div class="crow ${q[0]?"":"off"}" style="grid-template-columns:auto 1fr">${`<span class="tick ${q[0]?"on":""} new"></span>`}${inp(q[1],"new")}</div>`).join("")}</div>
+  </div></div>`;}
+function s3(L){ const s=L.s3; if (s.ways) return `<div class="sec">
+  <div class="shead"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
+  <div class="via">Each one picks how it plans on its own row. Name all three ways here; each shows the names of the way it uses.</div>
+  ${s.ways.map(w=>`<div class="way new"><div class="kind">If planned in ${esc(w[0])}</div>
+    <div><div class="lab">Section title</div>${inp(w[1],"title")}</div>
+    <div class="comps">${colhead("One","Many")}
+    ${w[2].map(n=>`<div class="crow" style="grid-template-columns:18px 1fr 1fr"><span></span>${inp(n[0])}${inp(n[1])}</div>`).join("")}</div></div>`).join("")}
+  </div>`;
+  return `<div class="sec">
+  <div class="shead"><span class="kind">Plan section</span><span class="fixed">Always on</span></div>
+  <div class="body" style="display:grid;gap:10px">
+    <div><div class="lab">Section title</div>${inp(s.title,"title new")}</div>
+    <div class="via">Planned in: <b>${esc(s.how)}</b></div>
+    <div class="comps"><div class="lab">Parts</div>${colhead("One","Many")}
+    ${s.names.map(n=>`<div class="crow" style="grid-template-columns:18px 1fr 1fr"><span></span>${inp(n[0],"new")}${inp(n[1],"new")}</div>`).join("")}</div>
+  </div></div>`;}
+document.getElementById("layers").innerHTML = LAYERS.map(L=>`<section class="layer" style="margin-bottom:22px">
+  <header><h2>${esc(L.name)}</h2>${L.fixed?`<span class="fixedh">${L.fixed}</span>`:`<span class="sw lsw new"><span class="${L.layer?"lit":""}">On</span><span class="${L.layer?"":"lit"}">Off</span></span>`}<span class="ln">Called ${inp(L.word)}</span></header>
+  ${L.layer===false?`<div class="loff">This client has no ${esc(L.name.toLowerCase())}. It is not asked about in set-up, not drawn in the navigation, and nothing entered for it is lost.</div>`:`<div class="secs">${s1(L)}${s2(L)}${s3(L)}</div>`}</section>`).join("");
+</script>

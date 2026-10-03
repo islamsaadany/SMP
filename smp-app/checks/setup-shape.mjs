@@ -125,10 +125,17 @@ let asked = [];
      unchanged, because it is about the FLOW and never about which file holds
      it. Re-pointed, never loosened; `asked.length > 0` is what caught the
      move and is why it stays. */
+  /* §404.4 DELETED THE WORDS STEP and moved every word it asked onto the
+     Structure step, beside the level or component it names — so this reads
+     the words where they are asked NOW: the component keys, the two
+     sub-words under a pillar, the level names (namePick) and the two cards'
+     "Called" boxes (callBoxes). Re-pointed, never loosened (§218). */
   const page = read("SMP-Project-Folder/src/client-setup.js");
-  const blk = page.slice(page.indexOf("var WORDS = ["));
-  const arr = blk.slice(0, blk.indexOf("];"));
-  asked = [...arr.matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)].map((m) => m[1]);
+  const comps = page.slice(page.indexOf("var COMPONENTS = ["));
+  asked = [...comps.slice(0, comps.indexOf("];")).matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)].map((m) => m[1]);
+  for (const m of page.matchAll(/(?:namePick|callBoxes)\([a-z]+,\s*"([A-Za-z0-9_]+)"/g)) asked.push(m[1]);
+  const subs = page.match(/key === "pillar"\) \[(.*?)\]\.forEach/);
+  if (subs) for (const m of subs[1].matchAll(/\[\s*"([A-Za-z0-9_]+)"/g)) asked.push(m[1]);
   if (BREAK === "extra-word") asked.push("howevertheyspellit");
 }
 const held = (seed.labels || []).map((e) => e.key);
@@ -154,6 +161,16 @@ console.log("\n2 · the word is stored");
   const r2 = frozen.shape(clone(bare), { units: [{ name: "Mobile" }], companies: [], functions: [], words: {} });
   const e2 = (r2.state.labels.find((x) => x.key === "unitword") || {}).bu;
   check("a word left alone keeps the platform's own (§50.6)", e2 === "Business units", String(e2));
+  /* §395: the flow asks both forms now, as Setup › Terminology does. The
+     old string shape above still lands on MANY (a tab on an older build);
+     the pair lands on both, and an empty box keeps the word that was there. */
+  const r3 = frozen.shape(clone(bare), { units: [{ name: "Mobile" }], companies: [], functions: [],
+    words: { pillar: { one: "Theme of work", many: "Themes of work" }, measure: { one: "", many: "KPIs" } } });
+  const l3 = (k) => r3.state.labels.find((x) => x.key === k) || {};
+  check("the word for ONE is stored beside the word for many (§395)",
+    l3("pillar").group === "Theme of work" && l3("pillar").bu === "Themes of work", JSON.stringify(l3("pillar")));
+  check("…and an empty box keeps the word that was there",
+    l3("measure").group === "Key measure" && l3("measure").bu === "KPIs", JSON.stringify(l3("measure")));
 }
 
 /* ── 3 · a row that survives keeps what the flow never asked about ──────── */
@@ -317,6 +334,66 @@ console.log("\n8 · an empty capability is not authored work");
   check("…and one planned in pillars does", withCap({ items: [{ name: "x" }] }) === 1);
   check("and the worked example's own capability still counts",
     frozen.holds(clone(seed)).capabilities === 1, frozen.holds(clone(seed)).capabilities);
+}
+
+/* §404.5 — A NEW CLIENT IS BORN WITH THE DIVISION AND BUSINESS-UNIT DEFAULTS
+   ISLAM NAMED, and nothing else moves. Asserted as AGREEMENT with the rule's
+   own list (§94.8), both ends (§94.2): the top level and the functions stay
+   unsaid, so they read everything-on as before, and a client whose structure
+   is unsaid — every client set up before this — still reads everything on. */
+{
+  const R = require_(join(APP, "lib", "rules.cjs"));
+  const st = bare.group && bare.group[R.STRUCTURE];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  check("a new client's divisions start on the named defaults",
+    !!st && same(st.mid && st.mid.on, R.STRUCT_NEW_CLIENT.mid), st && st.mid);
+  check("…and its business units on theirs",
+    !!st && same(st.bu && st.bu.on, R.STRUCT_NEW_CLIENT.bu), st && st.bu);
+  check("the defaults are the ones asked for, word for word",
+    same(R.STRUCT_NEW_CLIENT.mid, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"]) &&
+    /* §479 reverses §478's default (Islam: "yes for all proceed"): a unit's
+       Purpose and Core Values are off until the office ticks them. */
+    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "aspiration", "keyobj", "pillar", "swot"]));
+  check("the top level and the functions are left unsaid (everything on)",
+    !!st && !st.top && !st.fn, st);
+  check("a unit on a new client shows no Themes, Capabilities or Values",
+    ["theme", "capability", "values"].every((c) => !R.compOn(bare.group, "mobile", c)) &&
+    ["brief", "pillar", "swot"].every((c) => R.compOn(bare.group, "mobile", c)));
+  check("the top level of a new client still carries everything",
+    R.STRUCT_COMPONENTS.every((c) => R.compOn(bare.group, "group", c)));
+  /* §427 moved this, REWRITTEN rather than loosened (§218): a unit's page
+     draws no purpose, themes or values, so they read off whatever is stored —
+     and every part a unit's page DOES draw still reads on, which is the claim
+     "existing clients unchanged" was always about. Both ends (§94.2). */
+  check("a client whose structure is unsaid still reads on everything a unit's page draws (existing clients unchanged)",
+    /* §479: except a unit's Purpose and Core Values, which an unsaid
+       Structure keeps off — exactly what the client saw before §478. */
+    R.STRUCT_COMPONENTS.filter((c) => R.compBuilt("mobile", c) && c !== "purpose" && c !== "values").every((c) => R.compOn(seed.group, "mobile", c)));
+  /* REWRITTEN, never loosened (§218): §478 gave a unit's purpose and values a
+     page, so they are BUILT now — and §479 keeps them off on a client that
+     never saved its Structure, which is what that client saw before. Themes
+     still have no page. */
+  check("…and a unit's themes have no page, while its purpose and values read off until ticked (§427, §479)",
+    !R.compBuilt("mobile", "theme") && !R.compOn(seed.group, "mobile", "theme") &&
+    ["purpose", "values"].every((c) => R.compBuilt("mobile", c) && !R.compOn(seed.group, "mobile", c)));
+  check("a shape pass keeps the defaults it was born with",
+    same((frozen.shape(clone(bare), ANSWERS).state.group || {})[R.STRUCTURE], st));
+}
+
+/* ── §438 · a business unit's way of planning travels with the flow ───── */
+console.log("\n10 · a unit says how it plans (§438)");
+{
+  const A = { companies: [], functions: [], words: {},
+              units: [{ name: "Mobile", format: "objectives" }, { name: "Retail", format: "pillars" }, { name: "Online" }] };
+  const g = frozen.shape(clone(bare), A).state;
+  const key = (nm) => Object.keys(g.units).find((k) => g.units[k].name === nm);
+  check("a unit answered objectives is stored so", g.units[key("Mobile")].format === "objectives", g.units[key("Mobile")].format);
+  check("pillars is stored as an absence, and an unanswered unit is pillars too",
+    !("format" in g.units[key("Retail")]) && !("format" in g.units[key("Online")]));
+  const back = frozen.shape(clone(g), Object.assign({}, A, { units: [{ name: "Mobile", format: "pillars" }, { name: "Retail", format: "projects" }, { name: "Online" }] })).state;
+  const k2 = (nm) => Object.keys(back.units).find((k) => back.units[k].name === nm);
+  check("a second pass writes the new way over the old one, both directions",
+    !("format" in back.units[k2("Mobile")]) && back.units[k2("Retail")].format === "projects");
 }
 
 console.log("\n" + ok + " ok, " + bad.length + " failed");

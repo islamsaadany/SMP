@@ -1,0 +1,143 @@
+<title>One Top Bar</title>
+<style>
+/* Layout: a stack of before/after pairs, one per module, each drawn at real bar size. */
+:root{
+  --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EFF2F6; --line:#D6DCE5;
+  --ink:#141C2B; --ink-2:#3E4C63; --ink-3:#5E6E85; --navy:#16325C; --navy-ink:#EAF0FA; --navy-quiet:#A9BBD8;
+  --gold:#9C5D08; --mark:#FBF3E4;
+  --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#12151C; --surface:#1A1F29; --surface-2:#232A36; --line:#333B4A;
+  --ink:#E7EBF2; --ink-2:#B9C2D0; --ink-3:#8590A3; --gold:#F5A623; --mark:#2A2416; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#12151C; --surface:#1A1F29; --surface-2:#232A36; --line:#333B4A;
+  --ink:#E7EBF2; --ink-2:#B9C2D0; --ink-3:#8590A3; --gold:#F5A623; --mark:#2A2416; color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px;display:grid;gap:34px}
+h1{margin:0;font-size:22px;font-weight:700;text-wrap:balance}
+.lede{margin:6px 0 0;color:var(--ink-2);max-width:68ch}
+.rules{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.rules li{display:flex;gap:10px;align-items:baseline}
+.rules b{min-width:150px;font-weight:600}
+section{display:grid;gap:10px}
+h2{margin:0;font-size:16px;font-weight:700}
+.tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--ground)}
+.frame .scroll{overflow-x:auto}
+.page{min-width:1040px}
+.body{padding:18px 24px;color:var(--ink-3);font-size:13px}
+.body .ph{height:10px;border-radius:5px;background:var(--surface-2);margin-top:8px;width:60%}
+.body .ph.s{width:38%}
+
+/* ── today's module bar (navy) ── */
+.old{background:var(--navy);color:var(--navy-ink);display:flex;align-items:center;gap:10px;padding:11px 16px}
+.old .sq{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(234,240,250,.28)}
+.old .sq svg{width:17px;height:17px}
+.old b{font-size:14.5px;font-weight:600}
+.old .org{color:var(--navy-quiet);font-size:13px}
+.old .org i{font-style:normal;color:var(--navy-ink);font-weight:600}
+
+/* ── the shared bar (copied from Strategy's) ── */
+.top{background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+.trail{display:flex;align-items:center;gap:6px;margin-right:auto;font-size:13.5px;white-space:nowrap}
+.trff{color:var(--ink-2);font-weight:600;letter-spacing:.04em;font-size:12px;text-transform:uppercase}
+.trsep{color:var(--ink-3);font-size:15px;line-height:1}
+.step{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border-radius:7px;font-weight:600;color:var(--ink)}
+.step.cl{color:var(--ink-2)}
+.step svg{width:10px;height:10px;color:var(--ink-3)}
+.co{font-weight:600;color:var(--ink);margin-right:auto;font-size:14px}
+.viewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--line)}
+.viewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;color:var(--ink-2)}
+.viewer .sel{font-size:12.5px;border:1px solid var(--line);border-radius:5px;padding:2px 22px 2px 8px;background:var(--surface);color:var(--ink);position:relative}
+.viewer .sel::after{content:"";position:absolute;right:8px;top:50%;width:5px;height:5px;border-right:1.5px solid var(--ink-3);border-bottom:1.5px solid var(--ink-3);transform:translateY(-70%) rotate(45deg)}
+.viewer .note{font-size:12.5px;color:var(--ink-3)}
+.acts{display:flex;align-items:center;gap:10px}
+.theme{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-2)}
+.theme svg{width:14px;height:14px}
+.out{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 12px}
+.flag{outline:2px dashed var(--gold);outline-offset:3px;border-radius:6px}
+.cap{font-size:13px;color:var(--ink-2);margin:0;max-width:72ch}
+.cap .k{background:var(--mark);padding:0 4px;border-radius:3px}
+.pair{display:grid;gap:8px}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>One top bar for every module</h1>
+    <p class="lede">Strategy's bar, drawn on Insights, the Internal Tracker and Meeting Notes. Strategy and the settings pages stay exactly as they are. The console keeps its own bar.</p>
+  </header>
+
+  <ul class="rules">
+    <li><b>Who sees the trail</b><span>Forefront's consultants only. A client's own staff never get it.</span></li>
+    <li><b>Viewing as</b><span>Only where it changes what is shown: Strategy and Insights. Not on the Tracker or Notes.</span></li>
+    <li><b>Colour</b><span>White everywhere. The navy module bars go.</span></li>
+    <li><b>Goes with it</b><span>The four-square module button and the "Strategy Management Platform · client › module" line. Their job is done by the trail's two menus.</span></li>
+  </ul>
+
+  <section>
+    <span class="tag">Reference, unchanged</span>
+    <h2>Strategy</h2>
+    <div class="frame"><div class="scroll"><div class="page" id="ref"></div></div></div>
+  </section>
+
+  <section>
+    <span class="tag">Insights</span>
+    <h2>Insights</h2>
+    <div class="pair">
+      <p class="cap">Today</p>
+      <div class="frame"><div class="scroll"><div class="page" data-old="Insights"></div></div></div>
+      <p class="cap">Proposed. <span class="k">Viewing as</span> stays, because who sees which report depends on the person.</p>
+      <div class="frame"><div class="scroll"><div class="page" data-new="Insights" data-viewer="1"></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Internal Tracker</span>
+    <h2>Internal Tracker</h2>
+    <div class="pair">
+      <p class="cap">Today</p>
+      <div class="frame"><div class="scroll"><div class="page" data-old="Internal Tracker"></div></div></div>
+      <p class="cap">Proposed. No Viewing as: the Tracker is the office's own list and reads the same for everybody who can open it.</p>
+      <div class="frame"><div class="scroll"><div class="page" data-new="Internal Tracker"></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">Meeting Notes</span>
+    <h2>Meeting Notes</h2>
+    <div class="pair">
+      <p class="cap">Today</p>
+      <div class="frame"><div class="scroll"><div class="page" data-old="Meeting Notes"></div></div></div>
+      <p class="cap">Proposed. No Viewing as, for the same reason as the Tracker.</p>
+      <div class="frame"><div class="scroll"><div class="page" data-new="Meeting Notes"></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">A client's own person</span>
+    <h2>Insights, opened by somebody at El Abd</h2>
+    <p class="cap">No trail and no module menu. The product's name with their company beside it, the theme switch and Sign out, which is what their Strategy bar already shows.</p>
+    <div class="frame"><div class="scroll"><div class="page" data-staff="1"></div></div></div>
+  </section>
+</div>
+
+<script>
+var DOWN='<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var SUN='<svg viewBox="0 0 20 20" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4"/></g></svg>';
+var SQ='<svg viewBox="0 0 20 20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" fill="none"><rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/></g></svg>';
+function bar(mod, viewer){
+  return '<div class="top"><nav class="trail"><span class="trff">Platform</span><span class="trsep">&rsaquo;</span>'+
+    '<span class="step cl">El Abd '+DOWN+'</span><span class="trsep">&rsaquo;</span>'+
+    '<span class="step">'+mod+' '+DOWN+'</span></nav>'+
+    (viewer?'<div class="viewer"><label>Viewing as</label><span class="sel">Islam Saadany &mdash; the group</span><span class="note">Super user</span></div>':'')+
+    '<div class="acts"><span class="theme">'+SUN+'</span><span class="out">Sign out</span></div></div>';
+}
+function body(t){return '<div class="body">'+t+'<div class="ph"></div><div class="ph s"></div></div>';}
+document.getElementById('ref').innerHTML=bar('Strategy',true)+body('Strategy pages');
+document.querySelectorAll('[data-old]').forEach(function(el){var m=el.dataset.old;
+  el.innerHTML='<div class="old"><span class="sq">'+SQ+'</span><b>Strategy Management Platform</b><span class="org">&middot; El Abd &rsaquo; <i>'+m+'</i></span></div>'+body(m+' page');});
+document.querySelectorAll('[data-new]').forEach(function(el){var m=el.dataset.new;el.innerHTML=bar(m,!!el.dataset.viewer)+body(m+' page');});
+document.querySelectorAll('[data-staff]').forEach(function(el){
+  el.innerHTML='<div class="top"><span class="co">Strategy Management Platform <span style="font-weight:400;color:var(--ink-3)">&middot; El Abd</span></span><div class="acts"><span class="theme">'+SUN+'</span><span class="out">Sign out</span></div></div>'+body('Insights page');});
+</script>

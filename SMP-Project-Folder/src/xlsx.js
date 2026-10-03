@@ -175,7 +175,23 @@ function sheetXml(sh){
       " characters, and Excel silently ignores an inline list over 255. " +
       "Put the values in a sheet and use `from` instead (" + v.range + ").");
   });
-  var dv = (sh.validations || []).map(function(v){
+  /* AND A LIST WITH NOTHING IN IT IS NOT WRITTEN AT ALL (§380) — §67.5's
+     mirror, and worse than the fault above. A list too long is DROPPED, so the
+     cell is merely unguarded; an EMPTY one still applies, and with
+     `showErrorMessage` on it refuses every value there is — the cell can be
+     neither picked from nor typed into, so the workbook cannot be filled in.
+
+     It is reachable rather than theoretical: since §380 the blank
+     objectives-and-actions template lists the functions that plan that way,
+     and the moment somebody most needs that file is before the tenant has
+     one — a template nobody can fill in is §61's trap wearing a dropdown.
+
+     A `from` range is left alone: it names a sheet, and whether that sheet has
+     anything on it is not knowable from here. */
+  var vals = (sh.validations || []).filter(function(v){
+    return v.from || (v.list && v.list.length);
+  });
+  var dv = vals.map(function(v){
     var f = v.from ? xesc(v.from) : '"' + xesc((v.list || []).join(",")) + '"';
     return '<dataValidation type="list" allowBlank="1" showInputMessage="1" ' +
       'showErrorMessage="' + (v.soft ? "0" : "1") + '" ' +
@@ -190,7 +206,7 @@ function sheetXml(sh){
     '</sheetView></sheetViews>' +
     '<sheetFormatPr defaultRowHeight="15"/>' + cols +
     '<sheetData>' + rows.join("") + '</sheetData>' +
-    (dv ? '<dataValidations count="' + (sh.validations || []).length + '">' + dv + '</dataValidations>' : '') +
+    (dv ? '<dataValidations count="' + vals.length + '">' + dv + '</dataValidations>' : '') +
     '</worksheet>';
 }
 
@@ -454,7 +470,12 @@ function readmeCell(sheets, label){
    still reads — and renaming it without this is the §51.11 fault exactly: the
    reader stops finding the cell, the upload reports "no business unit called
    ''", and nothing says why. */
-var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
+/* §380: and "Supporting function", which the objectives-and-actions template
+   writes because only a function can plan that way. Added here in the same
+   edit as the row that writes it — that is the whole of the rule above, and
+   the one place it can be broken. */
+var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability",
+                        "Supporting function"];
 /* WHICH KIND OF WORKBOOK THIS IS, off its own first cell (§304.4). Written by
    `readme()` and `capReadme()` for every file the platform produces, so it is
    the file's own word rather than a guess about its shape. "" when the sheet
@@ -479,7 +500,9 @@ function readmePick(sheets){
 /* Everything a pillars plan may be written for, in the order the dropdown
    offers it. Named once because the Import page shows the same count. */
 function planSubjectNames(){
-  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
+  /* §405: only a unit that still plans in pillars — the others are offered
+     by the projects file, so each unit is offered exactly once. */
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false && !unitOwnWay(UNITS[k]); })
            .map(function(k){ return UNITS[k].name; })
     .concat(FUNCTION_KEYS.filter(function(k){
       return FUNCTIONS[k].active !== false && fnPlansInPillars(FUNCTIONS[k]);
@@ -540,6 +563,15 @@ function planWorkbook(u){
       ] }
   ])
   .concat(isFn ? [
+    /* §399: a function's S&W — strengths and weaknesses only, read back by
+       the reader below under the SWOT sheet's own Type/Point shape. */
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:[["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+        (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+        return acc;
+      }, []) },
     /* A function's objectives, in its Overview's own columns. `numCols` and
        every validation range move with the columns — a range is a POSITION
        (§65), and leaving them where a unit's are would validate the wrong
@@ -601,12 +633,28 @@ function planWorkbook(u){
         }, []) }
   ])
   .concat([
-    { name:"Pillars", widths:[40, 14, 22, 22],
-      head:["Pillar", "Kind", "Theme", "Owner"],
+    /* §413: the direction's overview rides at the END of the sheet (a
+       validation range is a POSITION, §65), and only where it means something
+       — the client's Structure carries it, or a direction already holds some —
+       so every other client's file is byte-for-byte what it was. */
+    (function(){
+      var ov = (typeof planDetailOn === "function" && planDetailOn("overview", u)) ||
+        u.items.some(function(p){ return ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); }); });
+      /* §416: the years a direction runs in ride at the very END (§65), and
+         only where the client carries the switch or a direction already holds
+         some — every other client's file is byte-for-byte what it was. */
+      var yr = (typeof yearsOn === "function" && yearsOn(u)) ||
+        u.items.some(function(p){ return Array.isArray(p.years); });
+      return { name:"Pillars", widths:[40, 14, 22, 22].concat(ov ? [50, 40, 40] : []).concat(yr ? [12] : []),
+      head:["Pillar", "Kind", "Theme", "Owner"].concat(ov ? ["Objective", "Why now", "Risks & mitigations"] : [])
+        .concat(yr ? ["Years"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
                      error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
-      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
+      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
+        .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : [])
+        .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
+    })(),
 
     { name:"Measures", widths:[34, 40, 11, 14, 12, 12, 9].concat(monthWidths(8)),
       head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "Hidden"]
@@ -636,16 +684,23 @@ function planWorkbook(u){
        Q1–Q4 from G:J to J:M and Hidden from K to N. Getting that wrong
        validates the wrong cells in silence, which is why the ranges move in
        the same edit as the head. */
-    { name:"Tactics",
+    (function(){
+    /* §415: the tactic's requirements ride at the very END (§65), one cell
+       with a line per item, and only where they mean something — the client
+       carries the switch, or a tactic already holds some — so every other
+       client's file is byte-for-byte what it was. */
+    var rq = (typeof requirementsOn === "function" && requirementsOn(u)) ||
+      u.items.some(function(p){ return (p.tactics || []).some(function(t){ return reqsOf(t).length; }); });
+    return { name:"Tactics",
       widths:[30, 40, 40, 34, 8, 12, 12, 20, 24, 7, 7, 7, 7, 9]
-        .concat(monthWidths(9)),
+        .concat(monthWidths(9)).concat(rq ? [40] : []),
       /* PREFIXED, because these twelve belong to the OUTCOME and this sheet
          already says so of the outcome's other three columns — a bare "Jan"
          beside a tactic's own quarters would read as the tactic's month. */
       head:["Pillar", "Tactic", "Description", "Outcome",
             "Outcome direction", "Outcome target", "Outcome compiled",
             "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4", "Hidden"]
-        .concat(monthHead("Outcome ")),
+        .concat(monthHead("Outcome ")).concat(rq ? ["Requirements"] : []),
       numCols:monthNums(14),
       validations:[{ range:"A2:A400", from:PILLAR_RANGE,
                      error:"Choose a pillar from the Pillars sheet." },
@@ -659,10 +714,12 @@ function planWorkbook(u){
             t.outDir || "", t.outTarget || "", t.outCompile || "",
             t.owner, (t.collaborators || []).join(", "),
             t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly")));
+            SMPRules.isHidden(t) ? "Yes" : ""].concat(monthCells(t, "outMonthly"))
+            .concat(rq ? [reqsOf(t).join("\n")] : []));
         });
         return acc;
-      }, []) },
+      }, []) };
+    })(),
 
     /* ── §343: A PILLAR'S BREAKDOWN, IN LONG FORM ─────────────────────────
        §22's contract again: an upload AUTHORS, so a column the file does not
@@ -705,7 +762,34 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }
-  ]);
+  ]).concat((function(){
+    /* §414: A TACTIC'S EXTRA OUTCOMES, one line each. The first outcome stays
+       on the Tactics sheet where it has always been, so a file written before
+       this existed reads exactly as it did; the sheet is drawn only where it
+       means something — the client carries the switch, or a tactic already
+       holds extras — so every other client's file is byte-for-byte what it
+       was (§413's rule). The tactic is named by its pillar AND its name,
+       which is how the Tactics sheet itself is read (§22: no ids in a file). */
+    var hasEx = u.items.some(function(p){ return (p.tactics || []).some(function(t){
+      return (t.outs || []).length; }); });
+    if (!hasEx && !(typeof outcomesOn === "function" && outcomesOn(u))) return [];
+    return [{ name:"Outcomes", widths:[30, 40, 40, 8, 14, 12],
+      head:["Pillar", "Tactic", "Outcome", "Outcome direction", "Outcome target",
+            "Outcome compiled"],
+      validations:[{ range:"A2:A400", from:PILLAR_RANGE,
+                     error:"Choose a pillar from the Pillars sheet." },
+                   { range:"D2:D400", list:["\u2265", "\u2264"], soft:true },
+                   { range:"F2:F400", list:COMPILES, soft:true }],
+      rows:u.items.reduce(function(acc, p){
+        (p.tactics || []).forEach(function(t){
+          (t.outs || []).forEach(function(x){
+            acc.push([p.name, t.name, x.outcome || "", x.outDir || "",
+                      x.outTarget || "", x.outCompile || ""]);
+          });
+        });
+        return acc;
+      }, []) }];
+  })());
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -992,7 +1076,9 @@ function planFromWorkbook(u, sheets){
                 theme:themeAbOf(r["Theme"]), owner:r["Owner"], notes:"", parent_id:"",
                 description:"", outcome:"", collaborators:"", direction:"",
                 value:"", value_3y:"", unit:"", horizon:"", compile:"",
-                q1:"", q2:"", q3:"", q4:"", source_slide:"" });
+                q1:"", q2:"", q3:"", q4:"", source_slide:"",
+                ovObj:r["Objective"] || "", ovWhy:r["Why now"] || "", ovRisk:r["Risks & mitigations"] || "",
+                years:r["Years"] == null ? "" : String(r["Years"]) });
   });
 
   var fN = 0;
@@ -1027,7 +1113,8 @@ function planFromWorkbook(u, sheets){
   });
 
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
-  sheetObjects(sheets["SWOT"]).forEach(function(r){
+  /* §399: a function's file calls the sheet S&W; the rows are the same. */
+  sheetObjects(sheets["SWOT"] || sheets["S&W"]).forEach(function(r){
     var t = r["Type"];
     if (!swotN.hasOwnProperty(t) || !r["Point"]) return;
     swotN[t]++;
@@ -1063,7 +1150,29 @@ function planFromWorkbook(u, sheets){
         .filter(Boolean).join("|"),
       q1:yes(r["Q1"]) ? "1" : "0", q2:yes(r["Q2"]) ? "1" : "0",
       q3:yes(r["Q3"]) ? "1" : "0", q4:yes(r["Q4"]) ? "1" : "0",
-      hidden:yes(r["Hidden"]) ? "1" : "" });
+      hidden:yes(r["Hidden"]) ? "1" : "",
+      /* §415: a line per item; blank says nothing (a file written before
+         this existed carries no such column). */
+      reqs:r["Requirements"] || "" });
+  });
+
+  /* §414: a tactic's extra outcomes ride ON the tactic's row, minted O2,
+     O3… in the order the file lists them — never as rows of their own, so
+     nothing about how a plan's rows are numbered or placed changes. A line
+     whose tactic cannot be matched is said, never dropped (§96.2). */
+  sheetObjects(sheets["Outcomes"]).forEach(function(r){
+    if (!r["Outcome"] && !r["Outcome target"]) return;
+    var pid = pillarId[r["Pillar"]] || "";
+    var t = rows.filter(function(x){ return x.type === "TACTIC" && pid &&
+      x.parent_id === pid && x.name === r["Tactic"]; })[0];
+    if (!t) { rows.push({ type:"OUTORPHAN", name:r["Tactic"] || r["Outcome"] || "" }); return; }
+    t.outs = t.outs || [];
+    var x = { id:"O" + (t.outs.length + 2) };
+    if (r["Outcome direction"]) x.outDir = r["Outcome direction"];
+    if (r["Outcome"]) x.outcome = r["Outcome"];
+    if (r["Outcome target"]) x.outTarget = r["Outcome target"];
+    if (r["Outcome compiled"]) x.outCompile = r["Outcome compiled"];
+    t.outs.push(x);
   });
 
   /* §343: the breakdown's cells, long form — a line per cell, and the table
@@ -1153,25 +1262,49 @@ var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
    The ambiguity §51.2 worried about does not go unanswered — it is answered
    where it belongs, on arrival: two capabilities sharing a name are REFUSED BY
    NAME rather than resolved by whichever came first in the array. */
-function capReadme(kind, capNames, picked){
+/* \u2500\u2500 \u00a7380: THE ROW ABOVE THE NAME SAYS WHAT THE LIST HOLDS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   Only a supporting function can plan in objectives and actions \u2014 `capFormat`
+   has two values and neither of them is that \u2014 so the objectives file's
+   dropdown never holds a capability, and a row over it reading "Capability"
+   would be false on every copy of a file this round creates.
+
+   READ BACK BY `READ_PICK_LABELS`, which carries every label the platform has
+   ever written (\u00a758): a label is a contract with every file already sitting in
+   somebody's Downloads folder, and renaming one without adding it there is
+   \u00a751.11's fault exactly \u2014 the reader stops finding the cell and the upload
+   reports that nothing was chosen.
+
+   THE PROSE FOLLOWS THE SHEETS, not the format: `only` is what drops them
+   (below), so a per-subject download still carries every sheet and still gets
+   the full instructions. A Read me telling somebody to "fill Projects FIRST"
+   in a file with no Projects sheet is the same fault as the sheet itself. */
+function capReadme(kind, capNames, picked, opts){
+  var o = opts || {};
+  var who = o.fmt === "objectives" ? "Supporting function" : "Capability";
+  var objOnly = !!o.only && o.fmt === "objectives";
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
-       ["Capability", ""],
+       [who, ""],
        ["Cycle", REVIEW.name || ""],
        ["", ""],
-       ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
-       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
+       ["How to fill it", objOnly
+         ? "Two sheets. Objectives are what the function is judged on; Actions are the work it has committed to, each with an owner and a due date."
+         : "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
+       ["Dropdowns", objOnly
+         ? "Direction and Compile are lists. Unit suggests rather than insists: type your own if it is not offered."
+         : "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
-       ["Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."],
-       ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
+       [objOnly ? "Action due dates" : "Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."]]
+      .concat(objOnly ? [] : [["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."]])
+      .concat([
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
        ["What upload does", "Writes this plan from scratch. Whatever is recorded now is archived first and can be restored \u2014 nothing is deleted."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]])
     : [["Progress workbook", ""],
-       ["Capability", ""],
+       [who, ""],
        ["Cycle", REVIEW.name || ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
@@ -1211,9 +1344,29 @@ function impPlanWorkbookFor(v){
      and a function's holder is exactly that shape, so the projects template is
      built for both from one builder (§53.5). */
   var h = impHolderFor(v);
-  if (h) return capPlanWorkbook(h);
+  /* §380: the FORMAT and never `only` — the file keeps all seven sheets, and
+     what the format decides here is the Read me: which subjects its dropdown
+     offers, and whether the row above the name says Capability or Supporting
+     function. A subject downloading its own plan is already chosen, so the
+     list is a courtesy; getting it wrong is how a file downloaded for one
+     subject is uploaded for another. */
+  if (h) return capPlanWorkbook(h, { fmt:impSubjectFormat(v) });
   var u = unitLike(v);
   return u ? planWorkbook(u) : null;
+}
+/* Which way the ticked subject plans, in the template's own words. A
+   capability is never `objectives` (`capFormat` has two values), so the
+   question only ever has a third answer for a supporting function. */
+function impSubjectFormat(v){
+  var t = String(v || "");
+  /* §405: a business unit that plans in projects or in objectives and
+     actions downloads the function's file for that way. */
+  if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
+  if (t.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[t.slice(3)];
+    if (f && fnPlansInObjectives(f)) return "objectives";
+  }
+  return "projects";
 }
 /* The subject a download was asked for, resolved the same way the upload
    resolves the one it was handed — or the two disagree about what `fn:finance`
@@ -1221,6 +1374,8 @@ function impPlanWorkbookFor(v){
 function impHolderFor(v){
   var t = String(v || "");
   if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  /* §405: a unit that is not planned in pillars is its own holder. */
+  if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
   var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
@@ -1293,26 +1448,66 @@ function archiveWorkbook(a){
 
    A function with neither projects nor a capability is offered too: it is the
    one that most needs a plan, and `fnOwnsProjects` is exactly that question
-   (§61's trap — a subject unreachable until it already has content). */
-function projectSubjectNames(){
-  var out = [];
-  FUNCTION_KEYS.forEach(function(k){
+   (§61's trap — a subject unreachable until it already has content).
+
+   ── §380: AND THE LIST IS NARROWED BY THE FORMAT THE FILE WAS BUILT FOR ────
+   With no `fmt` it answers exactly what it answered before, which is what a
+   per-subject download and every existing caller want: that file carries every
+   sheet, so every subject fits it.
+
+   A BLANK template is built FOR one way of planning and carries only that
+   format's sheets, so listing a subject it does not fit offers a file that
+   cannot hold that subject's plan — and an upload AUTHORS, so filling in the
+   wrong blank does not fail, it writes a plan with the missing half empty
+   (§22). The list is the narrowing, because the dropdown is where somebody is
+   standing when they choose.
+
+   IT RETURNS KEYS AS WELL AS NAMES, and that is the load-bearing half: the
+   UPLOAD resolves the name in the file against its own predicate, and until
+   today that predicate asked `fnOwnsProjects`, which §342 makes false for an
+   objectives function — so the template offered a name the door could not
+   resolve and the upload answered "no business unit, supporting function or
+   capability called …". Measured on the shipped build. One question, one
+   answer (§53.5), and the door asks it with no `fmt` at all, because by then
+   the file exists and the only question left is who the name belongs to. */
+function projectSubjectFns(fmt){
+  return FUNCTION_KEYS.filter(function(k){
     var f = FUNCTIONS[k];
-    /* §342: AND A FUNCTION THAT PLANS IN OBJECTIVES AND ACTIONS. Its plan is
-       this template's subject too — the Objectives and Actions sheets — and
-       `fnOwnsProjects` rightly answers false for it, so without this clause
-       its plan downloads for nobody and cannot come back (§22, §61, and
-       §334.15's own finding one format along). */
-    if (f && f.active !== false && (fnPlansInObjectives(f) ||
-        (!fnPlansInPillars(f) && fnOwnsProjects(k)))) out.push(f.name);
+    if (!f || f.active === false || fnPlansInPillars(f)) return false;
+    return fnPlansInObjectives(f) ? fmt !== "projects"
+                                  : fmt !== "objectives" && fnOwnsProjects(k);
   });
-  return out.concat(GROUP.capabilities.map(function(x){ return x.name; }));
 }
-function capPlanWorkbook(c){
-  var names = projectSubjectNames();
+/* §405: the business units that plan the same way, offered in the same
+   file's dropdown — the pillars file offers every unit that still plans in
+   pillars, so between the two every unit is offered exactly once. */
+function projectSubjectUnits(fmt){
+  return UNIT_KEYS.filter(function(k){
+    var w = unitOwnWay(UNITS[k]);
+    return !!w && (w === "objectives" ? fmt !== "projects" : fmt !== "objectives");
+  });
+}
+function projectSubjectNames(fmt){
+  return projectSubjectUnits(fmt).map(function(k){ return UNITS[k].name; })
+    .concat(projectSubjectFns(fmt).map(function(k){ return FUNCTIONS[k].name; }))
+    .concat(fmt === "objectives" ? []
+            : GROUP.capabilities.map(function(x){ return x.name; }));
+}
+/* `opts` is `{fmt, only}`. `fmt` narrows the Read me's list and its prose;
+   `only` drops the sheets that format does not use, and is passed by the BLANK
+   template alone — a subject's own download carries all seven whatever it
+   plans, because §342 decided that and this round does not reverse it.
+
+   NAMED BY WHAT EACH FORMAT DROPS, never by what it keeps: a sheet added
+   tomorrow then rides in both blank templates until somebody decides it does
+   not, where a keep-list would silently leave it out of both — and a column
+   the file does not carry is a column the plan LOSES (§22). */
+function capPlanWorkbook(c, opts){
+  var o = opts || {};
+  var names = projectSubjectNames(o.fmt);
   var units = unitSuggestions();
-  return [
-    capReadme("plan", names, c ? c.name : ""),
+  var sheets = [
+    capReadme("plan", names, c ? c.name : "", o),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12, 9],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "Hidden"],
@@ -1326,6 +1521,23 @@ function capPlanWorkbook(c){
         return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile,
                 SMPRules.isHidden(m) ? "Yes" : ""];
       }) },
+
+    /* §399: A FUNCTION'S S&W TRAVELS, or a download and an untouched
+       re-upload would drop it (§22). Only for a function's own file or a
+       blank one — a capability has no S&W. Strength and Weakness only; the
+       market's two stay the business's. */
+  ].concat((c.own || !c.id) ? [
+    { name:"S&W", widths:[16, 78],
+      head:["Type", "Point"],
+      validations:[{ range:"A2:A200", list:["Strength","Weakness"] }],
+      rows:(function(){
+        var sw = (c.own && FUNCTIONS[c.fn] && FUNCTIONS[c.fn].swot) || {};
+        return [["s","Strength"],["w","Weakness"]].reduce(function(acc, pair){
+          (sw[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
+          return acc;
+        }, []);
+      })() }
+  ] : []).concat([
 
     /* §303: THE REPEAT MARK TRAVELS. §115 made "does this project run again"
        an editable fact in the front matter and the file never carried it, so
@@ -1423,7 +1635,17 @@ function capPlanWorkbook(c){
         });
         return acc;
       }, []) }
-  ];
+  ]);
+  if (!o.only) return sheets;
+  /* Every sheet a dropped one is referenced BY goes with it: the three project
+     sheets each validate their first column against the Projects sheet's own
+     range, so dropping Projects alone would leave three dropdowns pointing at
+     a sheet that is not in the file (§65 — a validation range is a POSITION,
+     and a range on a missing sheet is worse than none). */
+  var drop = o.fmt === "objectives"
+    ? ["Projects", "Deliverables", "Outcomes", "Milestones"]
+    : o.fmt === "projects" ? ["Actions"] : [];
+  return sheets.filter(function(s){ return drop.indexOf(s.name) < 0; });
 }
 
 function capProgressWorkbook(c){
@@ -1539,6 +1761,16 @@ function capPlanFromWorkbook(c, sheets){
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"],
       hidden:yes(r["Hidden"]) ? "1" : "" });
+  });
+
+  /* §399: a function's S&W, read by the same Type/Point shape as a unit's
+     SWOT sheet so one spelling serves both files. */
+  var swN = { Strength:0, Weakness:0 };
+  sheetObjects(sheets["S&W"]).forEach(function(r){
+    var t = r["Type"];
+    if (!swN.hasOwnProperty(t) || !r["Point"]) return;
+    swN[t]++;
+    rows.push({ id:c.id + "-" + t[0] + swN[t], type:t.toUpperCase(), name:r["Point"] });
   });
 
   /* §342: the actions, addressed to the HOLDER rather than to a project —
@@ -1663,7 +1895,7 @@ function peopleReadme(){
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
     ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
-    ["Adding somebody", "Fill Name, and Emp ID or Email. Everything else is optional — but a row with neither identifier cannot be matched by the next upload, so it gets added a second time."],
+    ["Adding somebody", "The columns marked * are essential: Full Name, Job title and Email. A new person missing any of the three stops the upload, and the review names the row and what it lacks. Everything else is optional. For somebody already on the register, a blank cell keeps what is recorded. Your own export works too: a sheet not called People is read from its first sheet, and headings like Title or E-mail are understood."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
@@ -1781,7 +2013,14 @@ function peopleWorkbook(){
       head:["Unit, function or company", "Official BU"],
       rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
-      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
+      /* THE ESSENTIALS WEAR AN ASTERISK (§390.1). Written on the header only,
+         never on PEOPLE_FILE_COLS: the validation ranges above look a column
+         up by its bare name, and the reader matches headings ignoring
+         punctuation, so "Email *" comes back as Email. In this file the
+         person's name is the FULL NAME column; "Name" is the short one. */
+      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]).map(function(h){
+        return PEOPLE_FILE_STARRED.indexOf(h) > -1 ? h + " *" : h;
+      }),
       /* "Also holds" is written and never read, so it is locked — and its
          index moved with the new column (§65). */
       lockedCols:[9],
@@ -1793,8 +2032,53 @@ function peopleWorkbook(){
 /* The sheet is named People and read by its header row, so a column moved or
    a column added later costs nothing — sheetObjects() keys on the heading, not
    on the position. */
+/* ── A CLIENT'S OWN FILE, NOT ONLY OURS (§390) ───────────────────────────
+   Islam: "accept the minimum of the name and the title and email for the
+   essentials." The planner already accepted those three alone; what turned
+   such a file away was the READER — it asked for a sheet called "People" and
+   for three headings spelled exactly as our download spells them, so a
+   client's own export ("Sheet1", "Title", "E-mail") read as NOTHING, with no
+   word said.
+
+   So: the "People" sheet when there is one, else the FIRST sheet, and the
+   sheet actually read is carried back so the page can say which. Headings are
+   matched ignoring case, spaces and punctuation, plus a short list of the
+   spellings an HR export uses. A heading it does not know is kept as it is,
+   which is what keeps "Main BU" and "BU" readable (§58, §65). */
+var PEOPLE_HEAD_ALIASES = {
+  title:"Job title", position:"Job title", designation:"Job title", jobtitle:"Job title",
+  mail:"Email", emailaddress:"Email", email:"Email", workemail:"Email",
+  employeename:"Name", employee:"Name",
+  employeeid:"Emp ID", employeenumber:"Emp ID", empno:"Emp ID", staffid:"Emp ID",
+  phone:"Mobile", mobilenumber:"Mobile", phonenumber:"Mobile"
+};
+var PEOPLE_ESSENTIALS = ["Name", "Job title", "Email"];
+/* What the downloaded template marks with an asterisk: the same three, with
+   the template's own full-name column standing for Name. */
+var PEOPLE_FILE_STARRED = ["Full Name", "Job title", "Email"];
+function peopleHeadKey(h){ return String(h || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function peopleCanonHead(h){
+  var k = peopleHeadKey(h);
+  var known = PEOPLE_FILE_COLS.concat(["Main BU", "BU", PEOPLE_FILE_EXTRA]);
+  for (var i = 0; i < known.length; i++) if (peopleHeadKey(known[i]) === k) return known[i];
+  return PEOPLE_HEAD_ALIASES[k] || String(h || "").trim();
+}
 function peopleFromWorkbook(sheets){
-  return sheetObjects(sheets["People"] || []);
+  var names = Object.keys(sheets || {});
+  var sheet = sheets && sheets["People"] ? "People"
+    : names.filter(function(n){ return n !== "Read me" && n !== "Lists"; })[0] || null;
+  var raw = sheet ? sheets[sheet] : [];
+  if (raw && raw.length) {
+    raw = [raw[0].map(peopleCanonHead)].concat(raw.slice(1));
+  }
+  var rows = sheetObjects(raw || []);
+  var head = raw && raw.length ? raw[0] : [];
+  rows.sheet = sheet;
+  /* "Full Name" answers for Name (fileFullName() reads either). */
+  rows.missing = PEOPLE_ESSENTIALS.filter(function(c){
+    return head.indexOf(c) < 0 && !(c === "Name" && head.indexOf("Full Name") > -1);
+  });
+  return rows;
 }
 
 /* ── THE QUESTIONS FILE (§161) ─────────────────────────────────────────────

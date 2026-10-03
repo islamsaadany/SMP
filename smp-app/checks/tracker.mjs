@@ -279,13 +279,35 @@ try {
   const d2 = await asTenant(A, (c) => setFields(c, a1.id, { due: "2026-09-16" }));
   check("moving the date moves DUE and leaves the first date where it was", d2.due === "2026-09-16" && d2.firstDue === "2026-09-03", JSON.stringify(d2));
   check("...so the carried count is still two weeks at the 15th, not nought", carriedWeeks(d2.firstDue, TODAY) === 2, String(carriedWeeks(d2.firstDue, TODAY)));
+  /* TWO DATES IN THIS SECTION WERE TYPED, AND THE CLOCK CAUGHT UP WITH ONE
+     (§13.9, §214.3): `2026-10-01` was a date in the future when it was written
+     and became a date in the past, so this file had been red for days on the
+     CALENDAR rather than on any commit — which is the rule the Portfolio check
+     was given at §440 and this one was not.
+
+     THEY ARE DERIVED FROM `TODAY` NOW, NOT FROM THE REAL CLOCK, and that is
+     the half the first fix got wrong: these documents are RENDERED as of the
+     fixed `TODAY`, so a date taken off the real clock puts the rows in one
+     calendar and the headings in another (§122.4's family, which is the fault
+     main found from the other side on the very same line). Derived from
+     `TODAY` they are the same two days that were typed — next week's Sunday
+     and the Thursday a fortnight out — and they are now fixed by
+     CONSTRUCTION, so the headings below can be named in words and stay true.
+     The one thing still read off the real clock is `realThu`, because §8's
+     rows were added through the product's own add path, which dates a new
+     line to this week's Thursday; the expectations dedupe on the WEEK, so a
+     real clock that lands in one of these two weeks costs a heading on both
+     sides and never only one. §442, combined with main's own fix at the
+     merge. */
+  const BACK = addDays(weekOf(TODAY).from, 7);
+  const AHEAD = thursdayOf(addDays(weekOf(TODAY).from, 14));
   const d3 = await asTenant(A, (c) => setFields(c, a1.id, { due: null }));
   check("clearing the date keeps the first date — a date taken away is not a reschedule to never", d3.due === null && d3.firstDue === "2026-09-03", JSON.stringify(d3));
   const d4 = await asTenant(A, (c) => setStatus(c, a1.id, "done", "noran"));
   check("Done clears the first date (spec 054 §5)", d4.firstDue === null, JSON.stringify(d4));
-  await asTenant(A, (c) => setFields(c, a1.id, { due: "2026-09-20" }));
+  await asTenant(A, (c) => setFields(c, a1.id, { due: BACK }));
   const d5 = await asTenant(A, (c) => setStatus(c, a1.id, "not_started", "noran"));
-  check("reopened, the first date starts again from the date it holds", d5.firstDue === "2026-09-20", JSON.stringify(d5));
+  check("reopened, the first date starts again from the date it holds", d5.firstDue === BACK, JSON.stringify(d5));
   const d6 = await asTenant(A, (c) => setFields(c, a1.id, { title: "Chase Finance", description: "  Nineteen of 26 entered.\n\n " }));
   check("the title and the notes write, and the row carries no collaborators at all (§356.11)", d6.title === "Chase Finance" && d6.description === "Nineteen of 26 entered." && !("collaborators" in d6), JSON.stringify(d6));
   check("a name on the row is read from the register, never stored on the action",
@@ -365,9 +387,9 @@ try {
     mine.ownerKey === "noran" && mine.status === "not_started" && mine.due === thursdayOf(todayIn()) && mine.firstDue === mine.due, JSON.stringify(mine));
   const noDay = await call(A, NORAN, ["api"], { act: "add", title: "Someday", due: null });
   check("a line that says 'no date' is born with none", noDay.j.ok === true && (await asTenant(A, (c) => oneAction(c, noDay.j.id))).due === null);
-  const full = await call(A, NORAN, ["api"], { act: "add", title: "Full line", due: "2026-10-01", description: "  with a note  ", ownerKey: "islam" });
+  const full = await call(A, NORAN, ["api"], { act: "add", title: "Full line", due: AHEAD, description: "  with a note  ", ownerKey: "islam" });
   const fullRow = await asTenant(A, (c) => oneAction(c, full.j.id));
-  check("a line arrives with its week, its owner and its note", full.j.ok === true && fullRow.due === "2026-10-01" && fullRow.firstDue === "2026-10-01" && fullRow.ownerKey === "islam" && fullRow.description === "with a note", JSON.stringify(fullRow));
+  check("a line arrives with its week, its owner and its note", full.j.ok === true && fullRow.due === AHEAD && fullRow.firstDue === AHEAD && fullRow.ownerKey === "islam" && fullRow.description === "with a note", JSON.stringify(fullRow));
   check("...and a day the list cannot read on the line is refused, nothing written", (await call(A, NORAN, ["api"], { act: "add", title: "x", due: "1/10/2026" })).status === 400);
   const forHend = await call(A, NORAN, ["api"], { act: "add", title: "x", ownerKey: "hend" });
   check("an action cannot be given to the client's own person", forHend.status === 400 && /office/.test(forHend.j.why), forHend.text);
@@ -423,9 +445,37 @@ try {
      Sun 20 Sep 2026, one on 1 Oct 2026, and the undated */
   const realThu = thursdayOf(todayIn());
   check("...by Due date as exact dates it is the day, soonest first, and the undated read 'No date', last",
-    heads(byDue).join("|") === [realThu, "2026-09-20", "2026-10-01"].sort().map((d) => readableDay(d, TODAY)).join("|") + "|No date", heads(byDue).join("|"));
+    heads(byDue).join("|") === [...new Set([realThu, BACK, AHEAD])].sort().map((d) => readableDay(d, TODAY)).join("|") + "|No date", heads(byDue).join("|"));
+  /* THE WORD IS ASKED OF THE CLOCK THE PAGE WAS DRAWN WITH, which is `TODAY`
+     and not the real one: these documents are rendered as of 2026-09-15 while
+     the rows' dates come off the real clock, so wording the expectation with
+     `todayIn()` compares two different todays and calls a correct page broken
+     (§122.4's family). Both sides read `TODAY` now, so the assertion is an
+     AGREEMENT that survives the clock moving rather than a string that goes
+     stale in it (§94.8). §442. */
   check("...and as weeks it is the WEEK, its word and its days, one heading for every day in it (§356.14, §356.15)",
-    heads(byWeek).join("|") === [...new Set([realThu, "2026-09-20", "2026-10-01"].map(thursdayOf))].sort().map((t) => weekWord(t, todayIn()) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+    /* ONE NOTION OF TODAY, NOT TWO — which both sides found independently and
+       fixed at opposite ends of this one line. The page is rendered with
+       `today: TODAY` (a fixed 2026-09-15); main corrected the WORDS, which
+       asked `weekWord(t, todayIn())` and therefore answered about a different
+       day, and this branch corrected the DATES, which were typed and went
+       stale. Both halves are kept: the words read `TODAY` and the dates are
+       derived from it (above). */
+    heads(byWeek).join("|") === [...new Set([realThu, BACK, AHEAD].map(thursdayOf))].sort().map((t) => weekWord(t, TODAY) + " · " + weekDays(weekOf(t), TODAY)).join("|") + "|No date", heads(byWeek).join("|"));
+  /* AND THE WORDS THEMSELVES, WHICH THE LINE ABOVE CANNOT SAY (§113.8). That
+     one is an AGREEMENT with `weekWord`, which is right for §53.5 — one
+     wording, two surfaces — and it is computed with the function the breaks
+     REPLACE, so both sides move together and it stays green on exactly the
+     build it is there to catch. These two headings are §356.16's decision in
+     words: two weeks have a WORD and every week after is its place in its
+     MONTH, never its number in the year. They are the only literals here, and
+     they are what goes red under `week-numbers` and `week-of-year` — and they
+     are LITERALS SAFELY, now that the dates they describe are derived from the
+     fixture's own fixed today rather than typed. (`realThu` is the real
+     clock's, so a THIRD heading is deliberately not named — it moves with the
+     week.) */
+  check("...and those words are the product's own decision — a week has a word, then its place in its month (§356.16)",
+    heads(byWeek).includes("Next week · 20 – 24 Sep") && heads(byWeek).includes("W1 Oct · 27 Sep – 1 Oct"), heads(byWeek).join("|"));
   check("...and by None there is no heading at all while the rows are all still there", heads(byNone).length === 0 && /class="row/.test(byNone) && /data-act="set-group" data-value="none" class="on"/.test(byNone));
   const cookied = await serve({ req: new Request("https://smp.example/x/tracker", { headers: { cookie: "a=b; smp.tracker.group=status" } }), slug: "x", module: "tracker", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], rest: [], personKey: "noran", seat: "smoteam" }).then((r) => r.text());
   check("the grouping this browser last chose is read off its cookie, so the page opens grouped that way", /data-value="status" class="on"/.test(cookied) && /data-group="status"/.test(cookied));
@@ -465,8 +515,14 @@ try {
      presses the controls while the DATABASE is read back (§70, §96). */
   section("§10 · the next empty line, pressed in a browser — and every press silent");
   const { createServer } = await import("node:http");
+  /* §444: the shared top bar loads /topbar.js, which the app serves from its
+     own route (app/topbar.js/route.ts) — served here from the same string, or
+     the page's one script answers with this server's 404 and every press
+     below reports a page error that is the harness's, not the product's. */
+  const { TOPBAR_SCRIPT } = await import("../lib/topbar.ts");
   const srv = createServer(async (rq, rs) => {
     try {
+      if (String(rq.url).split("?")[0] === "/topbar.js") { rs.writeHead(200, { "Content-Type": "application/javascript" }); rs.end(TOPBAR_SCRIPT); return; }
       const chunks = []; for await (const ch of rq) chunks.push(ch);
       const url = "http://smp.test" + rq.url;
       const rest = String(rq.url).split("?")[0].split("/").filter(Boolean).slice(2);
@@ -812,7 +868,12 @@ try {
        and the box is what its widest name needs plus the space the stylesheet
        reserves around it — an agreement worked out from the page's own
        padding, never a pixel count somebody typed (§94.8). */
-    const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('.team');if(!t)return null;var c=getComputedStyle(t);"
+    /* SCOPED TO THE ROW THAT WAS PRESSED, never the document's first `.team`
+       (§50.6, §100.3): every row carries one and all the others are CLOSED, so
+       an unscoped probe measured a hidden list and reported box 0 and row 0 —
+       a correct build called broken, with the assertion two lines above it
+       passing because THAT one is scoped. Found by running it. §442. */
+    const teamFit = () => pg.evaluate("(function(){var t=document.querySelector('" + row.trim() + " .team');if(!t)return null;var c=getComputedStyle(t);"
       + "var w=Math.max(...[...t.querySelectorAll('button')].map(b=>b.scrollWidth));var bc=getComputedStyle(t.querySelector('button'));"
       + "var slack=parseFloat(c.paddingLeft)+parseFloat(c.paddingRight)+parseFloat(c.borderLeftWidth)+parseFloat(c.borderRightWidth);"
       + "return {floor:c.minWidth,box:Math.round(t.getBoundingClientRect().width),need:Math.round(w+slack),"

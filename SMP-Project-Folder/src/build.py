@@ -7,7 +7,8 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read()
        + "\n" + open('tour.css').read() + "\n" + open('welcome.css').read()
        + "\n" + open('builder.css').read()
-       + "\n" + open('client-setup.css').read())
+       + "\n" + open('client-setup.css').read()
+       + "\n" + open('copilot.css').read())
 shell = open('shell.html').read()
 
 # lib/rules.js is the SHARED one — the same file api/state.js requires. It is
@@ -21,7 +22,7 @@ for tag, f in [("RULES","../../lib/rules.js"), ("DIFF","../../lib/graph-diff.js"
                ("PPTX","pptx.js"),
                ("MAIL","../../lib/mail-html.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("BUILDER","builder.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
-               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("SAFETY","safety.js"), ("CONTINGENCY","contingency.js"), ("CLIENTSETUP","client-setup.js"), ("SYNC","sync.js")]:
+               ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("WELCOME","welcome.js"), ("HISTORY","history.js"), ("LIBRARY","insights.js"), ("COPILOT","copilot.js"), ("SAFETY","safety.js"), ("CONTINGENCY","contingency.js"), ("CLIENTSETUP","client-setup.js"), ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 # The icon travels INSIDE the built file, as a data URI, because the file has
 # to carry everything it needs — opened from a memory stick it still shows its

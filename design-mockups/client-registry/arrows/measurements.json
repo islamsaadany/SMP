@@ -1,0 +1,43 @@
+{
+ "today_rest": {
+  "tableW": 1382,
+  "boxW": 1165,
+  "rolesColW": 236,
+  "boxesDrawn": 33,
+  "arrowsDrawn": 33,
+  "rowH": 39
+ },
+ "today_open": {
+  "openRowH": 60.1,
+  "otherRowH": 39,
+  "listOpen": false,
+  "arrow": true,
+  "arrowOnItsOwnLine": true
+ },
+ "now_rest": {
+  "tableW": 1355,
+  "boxW": 1165,
+  "rolesColW": 209,
+  "rowH": 39
+ },
+ "now_rest_more": {
+  "tableW": 1355,
+  "boxW": 1165,
+  "rolesColW": 209,
+  "boxesDrawn": 0,
+  "arrowsDrawn": 0,
+  "rowH": 39
+ },
+ "now_open": {
+  "openRowH": 42.5,
+  "otherRowH": 39,
+  "listOpen": true,
+  "arrow": false,
+  "listOpenedOnTheDoubleClick": true
+ },
+ "now_text": {
+  "openRowH": 40.4,
+  "otherRowH": 39,
+  "listOpen": false
+ }
+}

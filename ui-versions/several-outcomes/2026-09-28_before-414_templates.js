@@ -1,0 +1,1557 @@
+/* ── Templates ────────────────────────────────────────────────────────────
+   Two templates, one file per unit.
+
+   PLAN carries the whole authored strategy — foundation clauses, the winning
+   aspiration, the key objectives with both horizons, and every pillar with its
+   measures and tactics. It carries no actuals: a plan states what was
+   committed to.
+
+   PROGRESS carries only what is reported — an actual against each measure and
+   a percent complete against each tactic. It cannot create anything, and it
+   cannot change a target.
+
+   Every row carries the item's id. That is what lets the same file be uploaded
+   twice without duplicating a plan, and what lets a diff say "this target
+   changed" rather than "this measure is new".
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* The column contract follows the deck-extraction template the strategy team
+   already produces, so a file they build for a deck loads without reshaping.
+   Three columns are added to it:
+     value_3y      the three-year target beside this year's
+     collaborators everyone on a tactic who is not the owner
+     end_in_mind   carried as its own ASPIRATION row, as the source file does
+   ────────────────────────────────────────────────────────────────────── */
+
+/* §248: a tactic's outcome carries its own direction, target and compile rule,
+   so all three travel with the plan — an upload AUTHORS (§22), and a column the
+   file does not carry is one the plan loses on a download-and-re-upload. */
+var PLAN_COLS = ["id","type","parent_id","source_slide","name","description","outcome",
+                 "outcome_direction","outcome_target","outcome_compiled",
+                 "owner","collaborators","direction","value","value_3y","unit","horizon",
+                 "compile","q1","q2","q3","q4","theme","kind","notes","monthly"];
+
+/* ── THE TWELVE, ON THE WAY IN (§278) ──────────────────────────────────
+   The workbook writes twelve columns and the reader joins them into one
+   pipe-separated field, exactly as `collaborators` travels — so the plan
+   pipeline carries one column rather than twelve, and this is where it
+   becomes the array a row stores.
+
+   A BLANK CELL IS NULL AND NEVER NOUGHT (§278, §104.10). Twelve cells of
+   which five were filled must arrive as five months set, not as five plus
+   seven planned zeros — that would be a target nobody typed, arrived at by
+   arithmetic nobody could see, and it would put the row IN FORCE on a plan
+   the office had only started. A cell that is not a number is kept as typed
+   (§96.2), which leaves the plan out of force rather than silently corrected.
+
+   ANSWERS NULL WHERE THE FILE SAID NOTHING, so a workbook written before this
+   existed adds no key at all and the row is byte-identical to what it was
+   (§50.6, §58). */
+function monthsFromText(s) {
+  var parts = String(s == null ? "" : s).split("|"), out = [], any = false;
+  for (var i = 0; i < 12; i++) {
+    var v = parts[i] == null ? "" : String(parts[i]).trim();
+    if (v === "") { out.push(null); continue; }
+    any = true;
+    out.push(SMPRules.monthSet(v) ? Number(v.replace(/,/g, "")) : v);
+  }
+  return any ? out : null;
+}
+/* The progress template mirrors the plan template's shape rather than
+   inventing a second vocabulary: same ids, same types, same direction and
+   unit columns. It adds `current` and `new_value`, and covers NORTHSTAR as
+   well as measures and tactics \u2014 the unit's headline is its Key Objectives,
+   so leaving them out made the one number the page is built on unreportable. */
+/* §303: `new_note` beside `new_value`, for §105's reason — a figure at risk
+   needs its explanation before the report can be submitted, and a file that
+   carried one and not the other was a route that could never finish. Appended,
+   so a file written before today reads exactly as it did (§58, §65). */
+var PROG_COLS = ["id","type","parent_id","parent_name","name","direction",
+                 "value","unit","compile","current","new_value","new_note","notes"];
+
+function csvCell(v){
+  v = v == null ? "" : String(v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function csvRow(cols, o){ return cols.map(function(c){ return csvCell(o[c]); }).join(","); }
+
+/* A target is held as one string. The template splits it into a number and a
+   unit, which is how the source file carries it and the only form arithmetic
+   can use. Anything unparseable travels whole in `value`. */
+/* §201.2 moved the definition into lib/rules.js, because the SERVER now asks
+   the same question (is this change only a unit arriving?) and two regexes
+   answering "where does the number end" is §42's drift. This wrapper keeps
+   every existing call site working. */
+function splitTarget(s){ return SMPRules.targetParts(s); }
+/* §276: an uploaded compile rule is checked against the ONE list the pen
+   offers and the workbook validates, and the refusal names that list rather
+   than a copy of it that would go stale the day a fifth rule is added. */
+function compileKnown(c){ return SMPRules.COMPILES.indexOf(c) > -1; }
+function compileProblem(c){
+  var l = SMPRules.COMPILES;
+  return 'compile "' + c + '" is not ' + l.slice(0, -1).join(", ") + " or " + l[l.length - 1];
+}
+/* §251: THE WORKBOOK SPLITS A TARGET THE WAY THE SCREEN DOES. A target may
+   now hold its unit before its number ("%"), and `splitTarget` reads a value
+   FOLLOWED BY a unit — so the raw pair would write "%" into the Value column
+   and leave Unit empty, which is the round trip putting a fact in the wrong
+   box (§22: an upload AUTHORS a plan, so what the file says is what the plan
+   becomes). `targetKeep`/`unitOfTarget` answer identically for every value the
+   plan already holds — asserted: 208 of 208 non-blank targets are numeric —
+   so this moves nothing that exists and is right for the one state that is new. */
+function targetPair(v){ return { value: targetKeep(v), unit: unitOfTarget(v) }; }
+/* AND BACK THE OTHER WAY, FOR A PLAN TARGET ONLY (§251). `joinTarget` answers
+   "" for an empty value and must go on doing so: it also rebuilds a REPORTED
+   figure (§243), where a unit with no number is not an actual anybody entered
+   and storing one would put a word where a figure belongs. A plan TARGET is
+   the one place the pair may legitimately be unit-and-no-number, so it asks
+   this instead — and asks `joinTarget` for everything else, rather than
+   carrying a second copy of the separator rule it took §243 to get right.
+
+   THE ROUND TRIP IS THE POINT: without it a download and an untouched upload
+   DROPS a unit-only target, which is §22's contract broken in the quietest
+   way — an upload authors the plan, so what the file loses, the plan loses.
+   Found by the check, not by reading. */
+function targetFromPair(original, value, unit){
+  var v = String(value == null ? "" : value).trim();
+  var u = String(unit == null ? "" : unit).trim();
+  if (!v && u) return u;
+  return joinTarget(original, value, unit);
+}
+
+/* Rebuilding a target from its parts must give back the original spacing:
+   "6.2B EGP" splits to 6.2 and "B EGP" and has to rejoin without a space,
+   while "24 h" has to keep one. The separator is read from what is stored
+   rather than guessed from the unit. */
+function joinTarget(original, value, unit){
+  value = (value == null ? "" : String(value)).trim();
+  unit  = (unit  == null ? "" : String(unit)).trim();
+  if (!value) return "";
+  /* ── THE UNIT IS NEVER WRITTEN TWICE (§243) ──────────────────────────
+     Islam, from a reported figure: *"an actual number is showing the measure
+     twice — M EGP M EGP — despite being reported 8 only."* Reproduced exactly:
+     `joinTarget("", "8 M EGP", "M EGP")` returned **"8 M EGP M EGP"**.
+
+     The reporting box holds the BARE number and shows the unit beside it as a
+     suffix, and the unit is rejoined on save — which is right, and assumes
+     nobody types the unit in. Into an EMPTY box, typing "8 M EGP" is the
+     natural thing to do, and it was added a second time.
+
+     So a unit already on the value is not added again. It is compared
+     case-insensitively and with spacing ignored, because "8 m egp" and
+     "8  M EGP" are the same answer typed by a person.
+
+     A DIFFERENT unit is LEFT EXACTLY AS TYPED rather than replaced: somebody
+     entering "8 B EGP" against a target in M EGP has said something specific,
+     and quietly rewriting it as M EGP would change a figure by a thousandfold
+     without saying so. Doubling is a display fault; that would be a data one. */
+  if (unit) {
+    var got = splitTarget(value);
+    var flat = function(x){ return String(x).replace(/\s+/g, "").toLowerCase(); };
+    if (got.unit && flat(got.unit) === flat(unit)) value = got.value;
+    else if (got.unit) return value;
+  }
+  var m = String(original == null ? "" : original).match(/^(-?[\d.,]+)(\s*)(.*)$/);
+  /* §405.1: WITH NOTHING STORED TO COPY THE SPACING FROM — a row an upload
+     has just made, or a first figure — the unit's own convention decides:
+     a scaled currency is ONE TOKEN (`4.5B EGP`, §199.4's TIGHT_UNITS), so it
+     no longer comes back from a download-and-upload as `4.5 B EGP`. Every
+     other unit keeps the rule it had. A stored value is never rewritten, and
+     the screen reads both spellings the same (`unitTight`), so this changes
+     only how a NEW string is spelt. */
+  var tight = unit && typeof TIGHT_UNITS !== "undefined" && TIGHT_UNITS[unit];
+  var sep = m ? m[2] : tight ? "" : (unit && unit.length > 1 && /^[A-Za-z]/.test(unit) ? " " : "");
+  return unit ? value + sep + unit : value;
+}
+/* Compared part by part, so a difference in spacing is never reported as a
+   changed target. */
+function targetChanged(stored, value, unit){
+  /* §251: through the same pair reader as the writer above, or a downloaded
+     unit-only target reads back as a CHANGE to a plan nobody touched. */
+  var a = targetPair(stored);
+  return a.value !== String(value == null ? "" : value).trim() ||
+         a.unit  !== String(unit  == null ? "" : unit).trim();
+}
+
+function planTemplate(u){
+  var rows = [PLAN_COLS.join(",")];
+  /* Provenance is stored on whatever it arrived with and written back, so a
+     round trip through the platform does not destroy which slide a row
+     came from. */
+  var slide = function(id){ var h = findById(u, id); return h && h.obj ? (h.obj.slide || "") : ""; };
+  rows.push(csvRow(PLAN_COLS, { id:u.ukey + "-PLAN", type:"PLAN", name:u.name + " strategic plan",
+    horizon:GROUP.horizon, notes:"Generated by the platform" }));
+  /* One row, six clauses piped in order \u2014 the shape the strategy team's
+     extraction produces, so a file leaving the platform is the same shape as
+     one arriving. The labels lead each part, as they do in the source. */
+  rows.push(csvRow(PLAN_COLS, { id:u.clauses[0] ? u.clauses[0][2] : u.ukey + "-F1",
+    type:"FOUNDATION", source_slide:u.slideOf ? u.slideOf.foundation : "",
+    name:"Strategic foundation (Who we are)",
+    description:u.clauses.map(function(c){ return c[0] + " " + c[1]; }).join(" | "),
+    notes:"Labelled lines in source order: " + u.clauses.map(function(c){ return c[0]; }).join(" | ") }));
+  rows.push(csvRow(PLAN_COLS, { id:u.ukey + "-ASP1", type:"ASPIRATION", name:"Winning aspiration",
+    description:u.aspiration, horizon:GROUP.horizon, source_slide:slide(u.ukey + "-ASP1") }));
+  rows.push(csvRow(PLAN_COLS, { id:u.ukey + "-ASP2", type:"ASPIRATION", name:"End in mind",
+    description:u.endInMind, source_slide:slide(u.ukey + "-ASP2") }));
+  u.keyObjectives.forEach(function(m){
+    var a = targetPair(m.target), b = targetPair(m.target3y);
+    rows.push(csvRow(PLAN_COLS, { id:m.id, type:"NORTHSTAR", name:m.name, direction:m.dir,
+      value:a.value, value_3y:b.value, unit:a.unit, compile:m.compile,
+      source_slide:m.slide, horizon:m.horizon, notes:m.notes }));
+  });
+  [["s","STRENGTH"],["w","WEAKNESS"],["o","OPPORTUNITY"],["t","THREAT"]].forEach(function(pair){
+    (u.swot[pair[0]] || []).forEach(function(x, i){
+      rows.push(csvRow(PLAN_COLS, { id:u.ukey + "-" + pair[1][0] + (i+1), type:pair[1], name:x,
+        source_slide:slide(u.ukey + "-" + pair[1][0] + (i+1)) }));
+    });
+  });
+  u.items.forEach(function(p, pi){
+    rows.push(csvRow(PLAN_COLS, { id:p.id, type:"PILLAR", name:p.name, kind:p.kind,
+      theme:p.theme, owner:p.owner, source_slide:p.slide,
+      notes:p.notes || (p.kind + " " + pillarCode(u, pi).replace(/^\D+/, "")) }));
+    p.measures.forEach(function(m){
+      var a = targetPair(m.target);
+      rows.push(csvRow(PLAN_COLS, { id:m.id, type:"MEASURE", parent_id:p.id, name:m.name,
+        direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
+        source_slide:m.slide, horizon:m.horizon, notes:m.notes }));
+    });
+    p.tactics.forEach(function(t){
+      rows.push(csvRow(PLAN_COLS, { id:t.id, type:"TACTIC", parent_id:p.id, name:t.name,
+        description:t.description, outcome:t.outcome,
+        outcome_direction:t.outDir, outcome_target:t.outTarget,
+        outcome_compiled:t.outCompile, owner:t.owner,
+        collaborators:(t.collaborators || []).join("|"),
+        q1:t.q1 ? 1 : 0, q2:t.q2 ? 1 : 0, q3:t.q3 ? 1 : 0, q4:t.q4 ? 1 : 0,
+        source_slide:t.slide, notes:t.notes }));
+    });
+  });
+  return rows.join("\n");
+}
+
+function progressTemplate(u){
+  var rows = [PROG_COLS.join(",")];
+  u.keyObjectives.forEach(function(m){
+    var a = targetPair(m.target);
+    rows.push(csvRow(PROG_COLS, { id:m.id, type:"NORTHSTAR", parent_name:u.name, name:m.name,
+      direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
+      current:m.actual, new_value:"", new_note:"",
+      notes:m.target ? "" : "no target set \u2014 recorded, not scored" }));
+  });
+  u.items.forEach(function(p){
+    p.measures.forEach(function(m){
+      var a = targetPair(m.target);
+      rows.push(csvRow(PROG_COLS, { id:m.id, type:"MEASURE", parent_id:p.id, parent_name:p.name,
+        name:m.name, direction:m.dir, value:a.value, unit:a.unit, compile:m.compile,
+        current:m.actual, new_value:"", new_note:"",
+        notes:m.target ? (m.horizon ? "measured at " + m.horizon : "")
+                       : "no target set \u2014 recorded, not scored" }));
+    });
+    p.tactics.forEach(function(t){
+      /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+         FIGURE (§248), in the outcome's own unit — the same question the
+         reporting box asks, decided by the same function (§42, §53.5). */
+      var oc = outcomeOf(t), pl = tacticPlanned(t);
+      rows.push(csvRow(PROG_COLS, { id:t.id, type:"TACTIC", parent_id:p.id, parent_name:p.name,
+        name:t.name,
+        value:oc ? (t.outTarget || "") : (pl == null ? "" : pl),
+        unit:oc ? splitTarget(oc.target).unit : "%",
+        current:oc ? t.outActual : t.actual, new_value:"", new_note:"",
+        notes:oc ? "measured by its outcome: " + (t.outcome || "")
+                 : (tacticDue(t) ? "" : "not yet due \u2014 " + spanLabel(t)) }));
+    });
+  });
+  return rows.join("\n");
+}
+
+/* A parser that understands quoted fields, because a measure called
+   "Revenue, gross" would otherwise split into two columns. */
+function parseCSV(text){
+  var rows = [], row = [], cur = "", q = false;
+  text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i+1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === ",") { row.push(cur); cur = ""; }
+    else if (ch === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
+    else cur += ch;
+  }
+  if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+  if (!rows.length) return [];
+  var head = rows.shift().map(function(h){ return h.trim(); });
+  return rows.filter(function(r){ return r.join("").trim() !== ""; })
+             .map(function(r){
+    var o = {};
+    head.forEach(function(h, j){ o[h] = (r[j] == null ? "" : r[j]).trim(); });
+    return o;
+  });
+}
+
+/* ── Diff ─────────────────────────────────────────────────────────────────
+   Nothing is applied on arrival. The upload is compared against what is
+   recorded and the differences are put in front of the SMO. */
+
+/* ── Validation ───────────────────────────────────────────────────────────
+   Bad data that loads silently is worse than a file that refuses to load. A
+   pillar with a theme code that does not exist is created, renders nowhere,
+   and is found three months later by someone wondering why a theme is short.
+   Problems block the apply; notices do not.
+   ──────────────────────────────────────────────────────────────────────── */
+/* Two checks before anything row-level: is this file for THIS unit, and is it
+   the kind of template the toggle says. Every id carries its unit's key, so a
+   file for the wrong unit announces itself \u2014 applying one would duplicate a
+   whole plan into the wrong unit under foreign ids, which is the worst
+   plausible import accident. And a progress file under kind=Plan quietly reads
+   as a near-empty diff, which looks like an answer while being the wrong
+   question. */
+function checkFileShape(u, rows, kind){
+  var problems = [];
+  var foreign = {}, own = 0;
+  rows.forEach(function(r){
+    if (!r.id) return;
+    var m = /^([a-z0-9]+)-/i.exec(r.id);
+    if (!m) return;
+    if (m[1] === u.ukey) own++;
+    else if (UNITS[m[1]]) foreign[m[1]] = (foreign[m[1]] || 0) + 1;
+  });
+  var fk = Object.keys(foreign);
+  if (fk.length && fk.reduce(function(a, k){ return a + foreign[k]; }, 0) > own) {
+    var worst = fk.sort(function(a, b){ return foreign[b] - foreign[a]; })[0];
+    problems.push({ at: "the whole file",
+      msg: "this looks like " + UNITS[worst].name + "'s file \u2014 " + foreign[worst] +
+           " rows carry its ids, and " + u.name + " is selected. Switch the unit above, or download " +
+           u.name + "'s own template." });
+  }
+  var hasNewValue = rows.some(function(r){ return r.new_value != null && r.new_value !== undefined; });
+  var hasPlanTypes = rows.some(function(r){ return ["PILLAR","FOUNDATION","ASPIRATION"].indexOf(r.type) > -1; });
+  if (kind === "plan" && hasNewValue && !hasPlanTypes)
+    problems.push({ at: "the whole file",
+      msg: "this is a PROGRESS file \u2014 it carries new_value columns and no plan rows. Switch the toggle above to Progress." });
+  if (kind === "progress" && hasPlanTypes)
+    problems.push({ at: "the whole file",
+      msg: "this is a PLAN file \u2014 it carries pillars and foundation rows, not reported values. Switch the toggle above to Plan." });
+  return problems;
+}
+
+/* Codes are the platform's, never the file's. The workbook mints them as it
+   reads, matching a child to its pillar by the NAME typed on the sheet; a raw
+   CSV still carries whatever ids it was exported with, so they are renumbered
+   here and children follow their old parent id to its new one. Two linkages,
+   one scheme. */
+function mintPlanIds(u, rows){
+  var map = {}, p = 0, k = 0, f = 0, a = 0, mN = {}, tN = {};
+  var swotN = { STRENGTH:0, WEAKNESS:0, OPPORTUNITY:0, THREAT:0 };
+  rows.forEach(function(r){
+    if (r.type !== "PILLAR") return;
+    var id = u.ukey + "-P" + (++p);
+    map[r.id] = id; r.id = id;
+  });
+  rows.forEach(function(r){
+    /* §343: a breakdown's cells hang off a pillar exactly as a measure does,
+       and carry no id of their own — the table is assembled from them and its
+       row ids are minted there (§22). */
+    if (r.type === "BDCELL") { r.parent_id = map[r.parent_id] || ""; r.id = ""; }
+    if (r.type === "MEASURE" || r.type === "TACTIC") {
+      var pid = map[r.parent_id] || "";
+      r.parent_id = pid;
+      var box = r.type === "MEASURE" ? mN : tN, letter = r.type === "MEASURE" ? "M" : "T";
+      box[pid] = (box[pid] || 0) + 1;
+      r.id = pid ? pid + "-" + letter + box[pid] : "";
+    }
+    else if (r.type === "NORTHSTAR")  r.id = u.ukey + "-KO"  + (++k);
+    else if (r.type === "FOUNDATION") r.id = u.ukey + "-F"   + (++f);
+    else if (r.type === "ASPIRATION") r.id = u.ukey + "-ASP" + (++a);
+    else if (swotN.hasOwnProperty(r.type))
+      r.id = u.ukey + "-" + r.type[0] + (++swotN[r.type]);
+  });
+  return rows.filter(function(r){ return r.type !== "PLAN"; });
+}
+
+/* Bad data that loads silently is worse than a file that refuses to load.
+   What is checked changed with \u00a722: there are no ids to duplicate and no unit
+   prefix to read, because the file carries neither. What remains is whether
+   each row can be placed \u2014 a measure whose pillar was never typed \u2014 and
+   whether the few coded values are ones the platform knows. */
+function validatePlan(u, rows){
+  var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
+  var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
+
+  if (!rows.length)
+    problems.push({ at:"the whole file", msg:"nothing to read \u2014 every sheet is empty." });
+
+  rows.forEach(function(r, n){
+    var at = "row " + (n + 2) + (r.name ? " \u2014 " + r.name : "");
+    if (!r.type) { problems.push({ at:at, msg:"no type" }); return; }
+
+    if (r.type === "PILLAR") {
+      if (!r.name) problems.push({ at:at, msg:"a pillar with no name" });
+      if (r.theme && themes.indexOf(r.theme) < 0)
+        problems.push({ at:at, msg:'theme "' + r.theme + '" is not one of ' + themes.join(", ") });
+      var k = r.kind || kindFromNotes(r.notes);
+      if (k && ["Direction","Capability"].indexOf(k) < 0)
+        problems.push({ at:at, msg:'kind "' + k + '" is not Direction or Capability' });
+      if (!r.theme) notices.push({ at:at, msg:"no theme \u2014 will read as cross-cutting" });
+    }
+    if (r.type === "MEASURE" || r.type === "TACTIC" || r.type === "BDCELL") {
+      if (!r.parent_id)
+        problems.push({ at:at, msg: pillars.length
+          ? "its pillar could not be matched \u2014 choose one from the Pillar column"
+          : "there are no pillars in this file, so nothing can hang off one \u2014 fill the Pillars sheet first" });
+    }
+    if (r.direction && ["\u2265","\u2264",">=","<="].indexOf(r.direction) < 0)
+      problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
+    if (r.compile && !compileKnown(r.compile))
+      problems.push({ at:at, msg:compileProblem(r.compile) });
+    if (r.type === "TACTIC") {
+      ["q1","q2","q3","q4"].forEach(function(q){
+        if (r[q] !== "" && r[q] != null && ["0","1"].indexOf(String(r[q])) < 0)
+          problems.push({ at:at, msg:q + ' is "' + r[q] + '", not 0 or 1' });
+      });
+      if (["q1","q2","q3","q4"].every(function(q){ return !+r[q]; }))
+        notices.push({ at:at, msg:"no quarters marked \u2014 will never be due" });
+    }
+    if ((r.type === "MEASURE" || r.type === "NORTHSTAR") && !r.value)
+      notices.push({ at:at, msg:"no target \u2014 recorded, not scored" });
+  });
+  return { problems:problems, notices:notices };
+}
+
+function kindFromNotes(notes){
+  if (!notes) return "";
+  if (/capabilit/i.test(notes)) return "Capability";
+  if (/direction/i.test(notes)) return "Direction";
+  return "";
+}
+
+function diffPlan(u, rows){
+  var out = [], seen = {};
+
+  /* The deck-extraction file carries the foundation as ONE row with the six
+     clauses pipe-separated in source order, because that is how the slide
+     reads. Both shapes are accepted: a single piped row is expanded against
+     the unit's existing labels, six rows are taken as they come. */
+  var expanded = [];
+  rows.forEach(function(r){
+    if (r.type === "FOUNDATION" && (r.description || "").indexOf("|") > -1) {
+      (r.description).split("|").forEach(function(part, i){
+        var c = u.clauses[i];
+        if (!c) return;
+        var txt = part.trim();
+        /* The clause label is repeated at the head of each piped part in the
+           source; strip it so the label is not swallowed into the text. */
+        if (txt.toLowerCase().indexOf(c[0].toLowerCase()) === 0) txt = txt.slice(c[0].length).trim();
+        expanded.push({ id:c[2], type:"FOUNDATION", name:c[0], description:txt });
+      });
+      return;
+    }
+    /* The source file carries one pipe-separated `owners` column. The first
+       name is the owner and the rest are collaborators, which is the shape the
+       platform holds. Either column is accepted. */
+    if (r.owners && !r.owner) {
+      var who = r.owners.split("|").map(function(x){ return x.trim(); }).filter(Boolean);
+      r.owner = who.shift() || "";
+      r.collaborators = who.join("|");
+    }
+    expanded.push(r);
+  });
+  rows = expanded;
+  rows.forEach(function(r){
+    if (!r.id) return;
+    seen[r.id] = true;
+    var hit = findById(u, r.id);
+    var changes = [];
+    var cmp = function(label, was, now){
+      now = now == null ? "" : String(now);
+      was = was == null ? "" : String(was);
+      if (now !== "" && now !== was) changes.push({ f:label, was:was, now:now });
+    };
+    if (!hit) { out.push({ id:r.id, type:r.type, name:r.name || r.description, status:"new", changes:[], raw:r }); return; }
+    if (hit.kind === "ASPIRATION") {
+      cmp(hit.which === "end" ? "end in mind" : "statement",
+          hit.which === "end" ? hit.obj.endInMind : hit.obj.aspiration, r.description);
+    }
+    else if (hit.kind === "FOUNDATION") { cmp("label", hit.obj[0], r.name); cmp("text", hit.obj[1], r.description); }
+    else if (hit.swot) { cmp("text", hit.obj.name, r.name); }
+    else if (hit.kind === "OBJECTIVE") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value_3y !== "" && targetChanged(hit.obj.target3y, r.value_3y, r.unit))
+        changes.push({ f:"3-year", was:hit.obj.target3y || "", now:targetFromPair(hit.obj.target3y, r.value_3y, r.unit) });
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"this year", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+      cmp("compile", hit.obj.compile, r.compile);
+    } else if (hit.kind === "PILLAR") {
+      cmp("name", hit.obj.name, r.name);
+      /* The source deck encodes kind as prose in notes \u2014 "Direction 01". A real
+         column wins where present; the note is read only as a fallback, so
+         files written for slide extraction still load. */
+      cmp("kind", hit.obj.kind, r.kind || kindFromNotes(r.notes));
+      cmp("theme", hit.obj.theme, r.theme); cmp("owner", hit.obj.owner, r.owner);
+    } else if (hit.kind === "MEASURE") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
+      cmp("compile", hit.obj.compile, r.compile);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    } else if (hit.kind === "TACTIC") {
+      cmp("name", hit.obj.name, r.name); cmp("owner", hit.obj.owner, r.owner);
+      cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
+      cmp("description", hit.obj.description, r.description);
+      cmp("outcome", hit.obj.outcome, r.outcome);
+      cmp("outcome direction", hit.obj.outDir,     r.outDir     || r.outcome_direction);
+      cmp("outcome target",    hit.obj.outTarget,  r.outTarget  || r.outcome_target);
+      cmp("outcome compiled",  hit.obj.outCompile, r.outCompile || r.outcome_compiled);
+      ["q1","q2","q3","q4"].forEach(function(q){
+        if (r[q] !== "") cmp(q.toUpperCase(), hit.obj[q] ? 1 : 0, r[q]);
+      });
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    }
+    out.push({ id:r.id, type:hit.kind,
+               name:hit.kind === "ASPIRATION" ? (hit.which === "end" ? "End in mind" : "Winning Aspiration")
+                                             : (hit.obj.name || hit.obj[0]),
+               status:changes.length ? "changed" : "same", changes:changes, hit:hit, raw:r });
+  });
+  /* Anything the platform holds that the sheet omits is reported, never
+     removed. A missing row is far more often an editing slip than a decision
+     to delete a measure with reported history against it. */
+  var missing = [];
+  u.items.forEach(function(p){
+    if (!seen[p.id]) missing.push({ id:p.id, type:"PILLAR", name:p.name });
+    p.measures.forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"MEASURE", name:m.name }); });
+    p.tactics.forEach(function(t){ if (!seen[t.id]) missing.push({ id:t.id, type:"TACTIC", name:t.name }); });
+  });
+  u.keyObjectives.forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"OBJECTIVE", name:m.name }); });
+  return { rows:out, missing:missing };
+}
+
+function diffProgress(u, rows){
+  var out = [];
+  rows.forEach(function(r){
+    var hasVal = (r.new_value || "") !== "";
+    /* §303: A NOTE IS A CHANGE OF ITS OWN — §105 holds Submit while a figure
+       at risk carries no explanation, and a row whose figure is already right
+       and whose note is owed had nothing for the file to carry. */
+    var hasNote = (r.new_note || "") !== "";
+    if (!r.id || (!hasVal && !hasNote)) return;
+    /* §343: A BREAKDOWN'S FIGURE IS ADDRESSED BY ITS ROW AND ITS COLUMN.
+       That pair is what identifies a cell (§48) — the row alone is three
+       figures sharing one id, and the reader could not tell which one a
+       number was meant for. Split here rather than inside `findById`, which
+       resolves ROWS and must not learn a second kind of address. */
+    var bdSplit = String(r.id).split("|");
+    var hit = findById(u, bdSplit[0]);
+    if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    if (hit.kind === "BDROW") {
+      var bcol = SMPRules.bdCols(hit.pillar).filter(function(c){
+        return c.id === bdSplit[1]; })[0];
+      /* A column that has GONE since the file was downloaded is named rather
+         than applied to the wrong one (§87's rule: never guess an identity). */
+      if (!bcol) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+      var bWas = SMPRules.bdActual(hit.obj, bcol);
+      var bNow = hasVal ? r.new_value : bWas;
+      var bWasN = hit.obj.note == null ? "" : String(hit.obj.note);
+      var bNowN = hasNote ? String(r.new_note).trim() : bWasN;
+      if (String(bWas) === String(bNow) && bWasN === bNowN) return;
+      out.push({ id:r.id, type:"BDROW", col:bcol,
+                 name:hit.obj.name + " \u2014 " + (bcol.name || ""),
+                 pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
+                 was:bWas, now:bNow,
+                 note:hasNote ? bNowN : null, status:"changed", hit:hit });
+      return;
+    }
+    if (["MEASURE","TACTIC","OBJECTIVE"].indexOf(hit.kind) < 0) return;
+    /* §303: A TACTIC MEASURED BY ITS OUTCOME IS ASKED FOR THE OUTCOME'S
+       FIGURE (§248), which the screen has stored in `outActual` since that
+       section and this path never learned — so a file reported the outcome's
+       number into `actual`, which has always meant "% delivered", clamped it
+       to 0–100 and moved the status pill on the strength of it. One row, two
+       fields, depending on which door the figure came through (§53.5).
+
+       `outcomeOf` IS THE TEST, never a second reading of "has it a target"
+       (§42) — the same function the reporting box asks. */
+    var oc = hit.kind === "TACTIC" ? outcomeOf(hit.obj) : null;
+    var was = oc ? (hit.obj.outActual == null ? "" : String(hit.obj.outActual))
+            : hit.kind === "TACTIC" ? hit.obj.actual + "%" : hit.obj.actual;
+    var now = hasVal ? r.new_value : was;
+    var wasNote = hit.obj.note == null ? "" : String(hit.obj.note);
+    var nowNote = hasNote ? String(r.new_note).trim() : wasNote;
+    if (String(was) === String(now) && wasNote === nowNote) return;
+    out.push({ id:r.id, type:hit.kind, name:hit.obj.name,
+               pillar:hit.pillar ? hit.pillar.name : (r.parent_name || ""),
+               was:was, now:now, outcome:!!oc,
+               note:hasNote ? nowNote : null, status:"changed", hit:hit });
+  });
+  return { rows:out, missing:[] };
+}
+
+/* Rows the platform has never seen are created, not just reported. Without
+   this an upload could only ever edit a plan that already existed, and the
+   main use \u2014 loading a unit's plan for the first time \u2014 would import nothing.
+   Pillars are created before their children, so a measure always finds its
+   parent however the file is ordered. */
+function createFromPlan(u, d){
+  var news = d.rows.filter(function(r){ return r.status === "new"; });
+  var order = { PILLAR:0, NORTHSTAR:1, MEASURE:2, TACTIC:2, STRENGTH:3, WEAKNESS:3,
+                OPPORTUNITY:3, THREAT:3, FOUNDATION:3, ASPIRATION:3, PLAN:9 };
+  news.sort(function(a, b){ return (order[a.type] == null ? 5 : order[a.type]) -
+                                   (order[b.type] == null ? 5 : order[b.type]); });
+  var made = 0;
+  news.forEach(function(r){
+    var x = r.raw; if (!x) return;
+    /* §405.1: a row the file carries back keeps the spacing its stored target
+       had ("11 M EGP" stays spaced, "4.5B EGP" stays tight); only a row that is
+       genuinely new takes the tight convention for a scaled currency. */
+    var pri = (d.prior || {})[x.type + "|" + (x.name || "")] || {};
+    var t3 = targetFromPair(pri.t3 || "", x.value_3y, x.unit), t1 = targetFromPair(pri.t1 || "", x.value, x.unit);
+    if (x.type === "PILLAR") {
+      u.items.push({ id:x.id, name:x.name, sub:"", kind:x.kind || kindFromNotes(x.notes) || "Direction",
+        theme:x.theme || "", owner:x.owner || "", slide:x.source_slide, notes:x.notes,
+        measures:[], tactics:[] });
+      /* §413: set only where the file carried words, so a direction with none
+         is byte-identical to one that never had the fields (§50.6). */
+      ["ovObj","ovWhy","ovRisk"].forEach(function(k){
+        var v = String(x[k] == null ? "" : x[k]);
+        if (v.trim()) u.items[u.items.length - 1][k] = v;
+      });
+      made++;
+    } else if (x.type === "MEASURE") {
+      var p = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p) return;
+      var mRow = { id:x.id, name:x.name, dir:x.direction || "\u2265", target:t1,
+        compile:x.compile || "Latest", actual:"", progress:null,
+        slide:x.source_slide, horizon:x.horizon, notes:x.notes };
+      /* §278: set only where the file carried months, for §233's own reason —
+         a row that never had a monthly plan and one whose file said nothing
+         must be byte-identical. */
+      var mMon = monthsFromText(x.monthly);
+      if (mMon) mRow.monthly = mMon;
+      /* §233: set only when the file says Yes — an absent key and a shown
+         row must stay byte-identical (§50.6). */
+      if (+x.hidden) mRow.hide = true;
+      p.measures.push(mRow);
+      made++;
+    } else if (x.type === "TACTIC") {
+      var p2 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p2) return;
+      var col = (x.collaborators || "").split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+      var tRow = { id:x.id, name:x.name, description:x.description, outcome:x.outcome,
+                   outDir:x.outDir || x.outcome_direction || undefined,
+                   outTarget:x.outTarget || x.outcome_target || undefined,
+                   outCompile:x.outCompile || x.outcome_compiled || undefined,
+        owner:x.owner || "", collaborators:col,
+        q1:+x.q1 ? 1 : 0, q2:+x.q2 ? 1 : 0, q3:+x.q3 ? 1 : 0, q4:+x.q4 ? 1 : 0,
+        /* A plan that has just been loaded has no progress against it. Zero
+           would read as started-and-delivered-nothing, which is a false
+           failure on the day a plan arrives \u2014 the same trap as clearing. */
+        status:"Not started", actual:null, slide:x.source_slide, notes:x.notes };
+      /* §278: a tactic's twelve belong to its OUTCOME, and are stored under
+         the name the outcome's other four fields already use (§248). */
+      var tMon = monthsFromText(x.monthly);
+      if (tMon) tRow.outMonthly = tMon;
+      if (+x.hidden) tRow.hide = true;
+      p2.tactics.push(tRow);
+      made++;
+    } else if (x.type === "BDCELL") {
+      /* ── §343: A BREAKDOWN ARRIVES ONE CELL AT A TIME ─────────────────
+         The sheet is long form — a line per cell naming its pillar, its
+         column and its category — so the TABLE is assembled here from the
+         order the lines arrive in: first mention of a column makes the
+         column, first mention of a category makes the row. A file edited by
+         hand therefore reads the way it looks, and nothing needs an id typed
+         into a sheet (§22: the platform mints them on arrival).
+
+         AN EMPTY DIRECTION IS THE INDICATOR, kept exactly as the cell said —
+         the absence IS the signal, so defaulting it to `≥` here would make
+         every watched column a scored one on the way through the file. */
+      var p3 = u.items.filter(function(y){ return y.id === x.parent_id; })[0];
+      if (!p3 || !x.name) return;
+      if (!p3.breakdown) p3.breakdown = { name:x.group || "Categories", cols:[], rows:[] };
+      var bd = p3.breakdown;
+      var cn = String(x.outcome || "").trim();
+      var col = bd.cols.filter(function(c){ return (c.name || "") === cn; })[0];
+      if (!col) { col = { id:"c" + (bd.cols.length + 1), name:cn,
+                          dir:x.direction || "" }; bd.cols.push(col); }
+      var bRow = bd.rows.filter(function(y){ return y.name === x.name; })[0];
+      if (!bRow) { bRow = { id:p3.id + "-B" + (bd.rows.length + 1), name:x.name };
+                   if (+x.hidden) bRow.hide = true;
+                   bd.rows.push(bRow); }
+      if (t1) bRow["t_" + col.id] = t1;
+      made++;
+    } else if (x.type === "NORTHSTAR") {
+      /* §213: a supporting function's objectives carry a WEIGHT and no 3-year
+         target, a unit's the reverse. Both come through here, and an absent
+         column is an absent key — never a 0, which `Number("")` would make it
+         and which reads as a real weight of nought (§104.10). */
+      var ko = { id:x.id, name:x.name, dir:x.direction || "\u2265",
+        target3y:t3, target:t1, compile:x.compile || "Latest", actual:"", progress:null,
+        slide:x.source_slide };
+      if (x.weight != null && String(x.weight).trim() !== "")
+        ko.weight = Number(x.weight);
+      var kMon = monthsFromText(x.monthly);
+      if (kMon) ko.monthly = kMon;
+      if (+x.hidden) ko.hide = true;
+      u.keyObjectives.push(ko);
+      made++;
+    } else if (["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"].indexOf(x.type) > -1) {
+      var key = { STRENGTH:"s", WEAKNESS:"w", OPPORTUNITY:"o", THREAT:"t" }[x.type];
+      (u.swot[key] = u.swot[key] || []).push(x.name);
+      made++;
+    } else if (x.type === "FOUNDATION") {
+      u.clauses.push([x.name, x.description, x.id]);
+      made++;
+    }
+  });
+  return made;
+}
+
+function applyPlan(u, d){
+  createFromPlan(u, d);
+  d.rows.forEach(function(r){
+    if (!r.hit) return;
+    var o = r.hit.obj, raw = r.raw;
+    /* Provenance and free-text notes travel with the row whether or not
+       anything else changed, so they survive the round trip. */
+    if (raw && o && typeof o === "object" && !Array.isArray(o)) {
+      if (raw.source_slide) o.slide = raw.source_slide;
+      if (raw.notes != null && raw.notes !== "" && r.hit.kind !== "PILLAR") o.notes = raw.notes;
+      if (raw.horizon && r.hit.kind === "MEASURE") o.horizon = raw.horizon;
+    }
+    if (!r.changes.length) return;
+    r.changes.forEach(function(c){
+      if (r.hit.kind === "ASPIRATION" && c.f === "statement")   o.aspiration = c.now;
+      if (r.hit.kind === "ASPIRATION" && c.f === "end in mind")  o.endInMind = c.now;
+      if (r.hit.swot && c.f === "text") { r.hit.swot.arr[r.hit.swot.idx] = c.now; return; }
+      if (r.hit.kind === "FOUNDATION" && c.f === "label") o[0] = c.now;
+      if (r.hit.kind === "FOUNDATION" && c.f === "text")  o[1] = c.now;
+      if (c.f === "name" && r.hit.kind !== "ASPIRATION" && r.hit.kind !== "FOUNDATION") o.name = c.now;
+      if (c.f === "collaborators") o.collaborators = c.now ? c.now.split("|") : [];
+      if (c.f === "description")   o.description = c.now;
+      if (c.f === "outcome")       o.outcome = c.now;
+      /* Emptied, the key GOES (§50.6): a tactic whose outcome was cleared must
+         be byte-identical to one that never had one, or every later save
+         carries a phantom change and a non-office person is refused for it. */
+      if (c.f === "outcome direction") { if (c.now) o.outDir = c.now; else delete o.outDir; }
+      if (c.f === "outcome target")    { if (c.now) o.outTarget = c.now; else delete o.outTarget; }
+      if (c.f === "outcome compiled")  { if (c.now) o.outCompile = c.now; else delete o.outCompile; }
+      if (/^Q[1-4]$/.test(c.f))    o["q" + c.f[1]] = +c.now ? 1 : 0;
+      if (c.f === "direction")  o.dir = c.now;
+      if (c.f === "3-year")     o.target3y = c.now;
+      if (c.f === "this year" || c.f === "target") o.target = c.now;
+      if (c.f === "compile")    o.compile = c.now;
+      if (c.f === "kind")       o.kind = c.now;
+      if (c.f === "theme")      o.theme = c.now;
+      if (c.f === "owner")      o.owner = c.now;
+      /* §233: "Yes" hides, "No" shows again; the shown state is the ABSENT
+         key (§50.6). cmp never fires on a blank cell, so a file that says
+         nothing changes nothing (§54's adds-and-amends). */
+      if (c.f === "hidden")     { if (+c.now) o.hide = true; else delete o.hide; }
+    });
+  });
+}
+
+/* ── A plan upload REPLACES (\u00a722) ────────────────────────────────────────
+   Not a diff. The file is the plan; what is recorded is archived and then
+   written over. This is what let every code leave the template: with nothing
+   to match a row against, no row needs an identity typed into a sheet.
+
+   The summary is what the SMO agrees to before any of it happens \u2014 what is
+   arriving, what is going, and how much of what is going was reported.
+   \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 */
+function countRows(rows, type){
+  return rows.filter(function(r){ return r.type === type; }).length;
+}
+function planReplaceSummary(u, rows){
+  var swot = ["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"]
+    .reduce(function(a, t){ return a + countRows(rows, t); }, 0);
+  return {
+    replace: true,
+    incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
+                tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
+                swot:swot, clauses:countRows(rows, "FOUNDATION"),
+                /* §343: named in the summary the office agrees to BEFORE the
+                   replace happens, or fifteen targets arrive unannounced. */
+                breakdown:countRows(rows, "BDCELL") },
+    current: unitSnapshotCounts(unitPlanSnapshot(u)),
+    rows: rows
+  };
+}
+function capReplaceSummary(c, rows){
+  return {
+    replace: true,
+    incoming: { projects:countRows(rows, "PROJECT"), deliverables:countRows(rows, "DELIVERABLE"),
+                outcomes:countRows(rows, "OUTCOME"), milestones:countRows(rows, "MILESTONE"),
+                objectives:countRows(rows, "CAPOBJECTIVE") },
+    current: capSnapshotCounts(capPlanSnapshot(c)),
+    rows: rows
+  };
+}
+
+/* Every row is a creation, so the existing builder does the whole job \u2014 it is
+   the same code that has always created a new pillar arriving in a file. */
+function applyPlanReplace(u, rows){
+  /* clearUnitPlan archives on the way out (§49.2), so this is ONE archive,
+     not two — the import used to take its own and then take a second. */
+  /* §399: a pillars FUNCTION's S&W is kept when the file carries none — a
+     workbook downloaded before the S&W sheet existed must not wipe what the
+     office has written since (§58). A unit's SWOT is authored by the file
+     exactly as before. */
+  var keepSW = u.fnKey && !rows.some(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; })
+    ? { s:(u.swot.s || []).slice(), w:(u.swot.w || []).slice() } : null;
+  /* §405.1: the stored targets, by row type and name, read BEFORE the clear —
+     so an untouched download-and-upload gives every target back spelled
+     exactly as it was. */
+  var prior = {};
+  var rem = function(type, row){
+    if (!row || !row.name) return;
+    prior[type + "|" + row.name] = { t1: row.target || "", t3: row.target3y || "" };
+  };
+  (u.keyObjectives || []).forEach(function(k){ rem("NORTHSTAR", k); });
+  (u.items || []).forEach(function(p){ (p.measures || []).forEach(function(m){ rem("MEASURE", m); }); });
+  var archived = clearUnitPlan(u);
+  if (keepSW) { u.swot.s = keepSW.s; u.swot.w = keepSW.w; }
+  /* The foundation's LABELS are a skeleton the unit keeps when a file does not
+     carry one. A file that does carry clauses re-authors both label and text,
+     so the old ones are cleared out of the way first. */
+  if (rows.some(function(r){ return r.type === "FOUNDATION"; })) u.clauses.length = 0;
+  createFromPlan(u, { prior: prior, rows: rows.map(function(r){
+    return { status:"new", type:r.type, raw:r };
+  }) });
+  rows.forEach(function(r){
+    if (r.type !== "ASPIRATION") return;
+    if (/end in mind/i.test(r.name || "")) u.endInMind = r.description || "";
+    else u.aspiration = r.description || "";
+  });
+  renumberUnit(u);
+  return archived;
+}
+function applyCapPlanReplace(c, rows){
+  /* §405.1: as for a unit — the stored spelling of every target, by name. */
+  var prior = {};
+  ((c && c.keyObjectives) || []).forEach(function(k){ if (k.name) prior["CAPOBJECTIVE|" + k.name] = k.target || ""; });
+  ((c && c.projects) || []).forEach(function(p){ (p.outcomes || []).forEach(function(o){ if (o.name) prior["OUTCOME|" + o.name] = o.target || ""; }); });
+  var archived = clearCapability(c, "plan");
+  /* §399: a function's S&W is written onto the function itself, and only when
+     the file carries some — a file downloaded before the S&W sheet existed
+     must not wipe what the office has since written (§58). */
+  var swRows = rows.filter(function(r){ return r.type === "STRENGTH" || r.type === "WEAKNESS"; });
+  rows = rows.filter(function(r){ return r.type !== "STRENGTH" && r.type !== "WEAKNESS"; });
+  if (c && c.own && swRows.length) {
+    var sw = swotWritable("fn:" + c.fn);
+    if (sw) {
+      sw.s = swRows.filter(function(r){ return r.type === "STRENGTH"; }).map(function(r){ return r.name; });
+      sw.w = swRows.filter(function(r){ return r.type === "WEAKNESS"; }).map(function(r){ return r.name; });
+    }
+  }
+  createFromCapPlan(c, { prior: prior, rows: rows.map(function(r){
+    return { status:"new", type:r.type, raw:r };
+  }) });
+  renumberCapability(c);
+  return archived;
+}
+
+function applyProgress(u, d){
+  d.rows.forEach(function(r){
+    if (!r.hit) return;
+    /* §303: THE OUTCOME'S FIGURE GOES TO THE OUTCOME'S FIELD, in the unit the
+       outcome is measured in (§243's rejoin, the same one the reporting box
+       uses) — never through the per-cent clamp below, which would turn a
+       target of 80 M EGP into 80 and a status pill into "Done". */
+    if (r.hit.kind === "TACTIC" && r.outcome) {
+      var ov = String(r.now == null ? "" : r.now).trim();
+      var oc = outcomeOf(r.hit.obj);
+      if (ov === "") delete r.hit.obj.outActual;
+      else r.hit.obj.outActual =
+        joinTarget(r.hit.obj.outActual || "", ov, oc ? splitTarget(oc.target).unit : "");
+    } else if (r.hit.kind === "TACTIC") {
+      var n = parseInt(String(r.now).replace("%",""), 10);
+      if (!isNaN(n)) {
+        r.hit.obj.actual = Math.max(0, Math.min(100, n));
+        /* The status pill follows the number, or a row reads 100% delivered
+           beside "WIP". Statuses the number cannot infer \u2014 Blocked, On hold \u2014
+           are left alone unless the figure plainly contradicts them. */
+        var o = r.hit.obj;
+        if (o.actual >= 100) o.status = "Done";
+        else if (o.actual > 0 && (o.status === "Not started" || o.status === "Done")) o.status = "WIP";
+        else if (o.actual === 0 && o.status === "Done") o.status = "WIP";
+      }
+    } else if (r.hit.kind === "BDROW" && r.col) {
+      /* §343: into the cell's own field, rejoined with the target's unit the
+         way every other reported figure is (§199, §243) — and an emptied one
+         DELETES the key (§50.6), or a cleared cell and one never reported
+         stop being the same thing. */
+      var bv = String(r.now == null ? "" : r.now).trim();
+      var bk = "a_" + r.col.id;
+      if (bv === "") delete r.hit.obj[bk];
+      else r.hit.obj[bk] = joinTarget(r.hit.obj[bk] || "", bv,
+        splitTarget(SMPRules.bdTarget(r.hit.obj, r.col)).unit);
+    } else if (r.hit.kind === "MEASURE" || r.hit.kind === "OBJECTIVE") {
+      r.hit.obj.actual = r.now;
+      /* Progress is what the actual implies against the target, so it is
+         recomputed rather than typed into a sheet where it could disagree. */
+      var t = parseFloat(String(r.hit.obj.target).replace(/[^0-9.]/g, ""));
+      var a = parseFloat(String(r.now).replace(/[^0-9.]/g, ""));
+      if (!isNaN(t) && !isNaN(a) && t !== 0) {
+        var pct = r.hit.obj.dir === "\u2264" ? (t / a) * 100 : (a / t) * 100;
+        r.hit.obj.progress = Math.max(0, Math.min(150, Math.round(pct)));
+      }
+    }
+    /* §303: AND THE NOTE, on every kind — the field §105 holds Submit for. */
+    if (r.note != null) {
+      if (String(r.note) === "") delete r.hit.obj.note; else r.hit.obj.note = String(r.note);
+    }
+  });
+}
+
+/* ── WHAT COUNTS AS A DUE DATE (§103) ─────────────────────────────────────
+   A milestone's due date is written in its PROJECT'S units: a project run by
+   quarters says "Q1 2026", one run by dates says "20 Mar 2026". The field has
+   always taken any text and always will -- see the notice in validateCapPlan for
+   why -- so this decides only whether the platform SAYS something, never
+   whether it accepts something.
+
+   `Date.parse` is the same reader `projOverruns` and the overrun notice
+   already use, so a date this calls good is a date the platform can compare;
+   anything else would be a second definition of "a date" (§42's rule, in the
+   small). A bare quarter with no year passes, because 55 of the 60 milestones
+   in the worked example are written that way and they are not wrong -- the
+   project's own start and end carry the year.
+
+   With NO timeline on the project, either shape passes: the platform does not
+   know which units were meant, and inventing an answer to complain about is
+   worse than staying quiet. */
+var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
+                       "in progress", "wip", "ongoing", "todo", "open", "closed",
+                       "n/a", "na", "tbd", "planned", "delayed"];
+/* §104: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
+   timeline. A workshop lands on a day and a report lands in a month, and one
+   project has both -- the platform's job is to notice what is not a time at
+   all, which is still exactly the case that started this: "Done" and
+   "Pending" sitting in a due-date column.
+
+   `SMPRules.whenReadable` is the reader the PRODUCT uses to decide whether a
+   row is due, so anything it can read is a date the platform can compare.
+   Asking a second question here would be a second definition of "a date"
+   (§42, in the small) -- and since §184 it is also what decides whether an
+   unreadable date is a GAP, so the upload's notice and the fill grant agree
+   about the same values by construction.
+
+   THE SHAPE, NOT THE MONTH (§184). This asked `monthsOf(v) != null`, which
+   resolves a bare "Q3" against the CYCLE -- so on a tenant whose cycle names
+   no year, "Q3" read as not-a-date here while every due comparison read it
+   fine. `whenReadable` asks the shape alone, which is the question. */
+function dueFits(v){
+  return SMPRules.whenReadable(v);
+}
+
+/* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
+   Capability projects arrive the way a unit's plan does: Manage → Import,
+   with the capability as the scope. Same parser, same validation shape, same
+   id rules underneath — but its own columns and sheets, because the thing
+   being planned is a project with deliverables, outcomes and milestones, not
+   a pillar with measures and tactics.
+
+   PLAN carries the authored work: key objectives (optional), each project's
+   brief, and its deliverables, outcomes and milestones. No actuals and no
+   statuses — a plan states what was committed to.
+
+   PROGRESS mirrors the capability's reporting page: an actual against each
+   objective and outcome, delivered-or-not (or a percentage) against each
+   deliverable, and a status against each milestone. Only new values are read.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* NO `due` COLUMN. A deliverable had one and lost it (§53.4) — the project's
+   end is when it is delivered — so the column goes with the field rather than
+   staying behind for a value nothing writes. `owner` stays: a PROJECT and a
+   MILESTONE both have one. */
+var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
+                 "collaborators",
+                 "direction","value","unit","kind","measure_at","start","end",
+                 "finish","covers","weight","compile","timeline","notes","hidden"];
+/* §303: `new_pct` and `new_note`. The per-cent is what §104.10 REQUIRES of an
+   In progress row and there was no column for it at all here, so the CSV route
+   could set a status the platform then reported as unanswered. */
+var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
+                    "measure_at","finish","current","new_value","new_pct","new_note","notes"];
+
+/* Address any row inside ONE capability — the import must never write into a
+   neighbour, which is what scoping the finder (rather than reusing the global
+   holderItemById) guarantees. */
+function capFindById(c, id){
+  if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
+  var hit = null;
+  (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
+  /* §342: an action belongs to the holder, so it sits beside the objectives
+     rather than under a project — and without it every action reported by
+     file came back "unknown" and was set aside (§303's own finding). */
+  (c.actions || []).forEach(function(a){ if (a.id === id) hit = { kind:"ACTION", obj:a }; });
+  (c.projects || []).forEach(function(p){
+    if (p.id === id) hit = { kind:"PROJECT", obj:p };
+    (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"DELIVERABLE", obj:d, proj:p }; });
+    (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"OUTCOME", obj:o, proj:p }; });
+    (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"MILESTONE", obj:m, proj:p }; });
+  });
+  return hit;
+}
+
+function capPlanTemplate(c){
+  var rows = [CAPP_COLS.join(",")];
+  rows.push(csvRow(CAPP_COLS, { id:c.id + "-PLAN", type:"PLAN", name:c.name + " capability plan",
+    description:c.def, notes:"Generated by the platform" }));
+  (c.keyObjectives || []).forEach(function(m){
+    var a = targetPair(m.target);
+    rows.push(csvRow(CAPP_COLS, { id:m.id, type:"CAPOBJECTIVE", name:m.name, direction:m.dir,
+      value:a.value, unit:a.unit, weight:(m.weight == null ? "" : m.weight),
+      compile:m.compile, notes:m.notes, hidden:SMPRules.isHidden(m) ? "1" : "" }));
+  });
+  (c.projects || []).forEach(function(p){
+    rows.push(csvRow(CAPP_COLS, { id:p.id, type:"PROJECT", name:p.name, description:p.brief,
+      owner:p.owner, stakeholders:(p.stakeholders || []).join("|"),
+      timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
+    (p.deliverables || []).forEach(function(d){
+      rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
+        finish:d.due, hidden:SMPRules.isHidden(d) ? "1" : "" }));
+    });
+    (p.outcomes || []).forEach(function(o){
+      var a = targetPair(o.target);
+      rows.push(csvRow(CAPP_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id, name:o.name,
+        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt,
+        hidden:SMPRules.isHidden(o) ? "1" : "" }));
+    });
+    (p.milestones || []).forEach(function(m){
+      rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
+        covers:m.covers, owner:m.owner,
+        collaborators:(m.collaborators || []).join("|"), finish:m.finish,
+        hidden:SMPRules.isHidden(m) ? "1" : "" }));
+    });
+  });
+  return rows.join("\n");
+}
+
+/* Progress statuses are written as words and read back as either the words or
+   the stored keys — a sheet filled by hand should not need to know that "In
+   progress" is spelled "wip" inside the platform. */
+/* A deliverable says Delivered where a milestone says Completed; the stored
+   key is the same in both (§104), so one pair of functions with the word
+   passed in rather than two pairs that can drift. */
+function delivStatusWord(s){ return s === "done" ? "Delivered" : msStatusWord(s); }
+function delivStatusKey(v){
+  var t = String(v == null ? "" : v).trim().toLowerCase();
+  if (t === "delivered") return "done";
+  return msStatusKey(v);
+}
+function msStatusWord(s){
+  return s === "done" ? "Completed" : s === "wip" ? "In progress" : s === "todo" ? "Not started" : "";
+}
+function msStatusKey(v){
+  var s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return "";
+  if (s === "done" || s === "completed" || s === "complete") return "done";
+  if (s === "wip" || s === "in progress") return "wip";
+  if (s === "todo" || s === "not started") return "todo";
+  return null;
+}
+/* §303: HOW A STATUS AND A PER-CENT ARE WRITTEN, IN ONE PLACE.
+
+   The screen has had these two rules since §104 — leaving In progress CLEARS
+   the per-cent rather than stranding a 35% behind "Delivered", and a typed
+   figure is clamped rather than refused — and the file path had neither,
+   because the file path was still writing a field §104 removed. Two answers
+   to "what does reporting this row mean" is exactly how that drift happened
+   (§53.5), so the screen's handlers and the workbook reader now ask the same
+   pair. */
+function setRowStatus(o, key){
+  if (!o || key == null) return;
+  o.status = key || null;
+  if (o.status !== "wip") o.pct = null;
+}
+function setRowPct(o, v){
+  if (!o) return;
+  var t = String(v == null ? "" : v).replace("%", "").trim();
+  if (t === "" || isNaN(Number(t))) o.pct = null;
+  else o.pct = Math.max(0, Math.min(100, Math.round(Number(t))));
+}
+
+function timelineKey(v){
+  var s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return "";
+  if (s === "date" || s === "dates" || s.indexOf("date") === 0) return "date";
+  if (s === "quarter" || s === "quarters" || s.indexOf("quarter") === 0) return "quarter";
+  return null;
+}
+
+function capProgressTemplate(c){
+  var rows = [CAPPROG_COLS.join(",")];
+  (c.keyObjectives || []).forEach(function(m){
+    rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"CAPOBJECTIVE", parent_name:c.name,
+      name:m.name, target:m.target || "no target",
+      current:(m.actual == null ? "" : m.actual), new_value:"", new_note:"",
+      notes:m.target ? "" : "no target set — recorded, not scored" }));
+  });
+  (c.projects || []).forEach(function(p){
+    (p.deliverables || []).forEach(function(d){
+      /* §303: A DELIVERABLE IS A STATUS AND A PER-CENT (§104), not the
+         `actual` this read — a field migration 024 removed, so the column
+         headed "current" had been empty on every deliverable row since. */
+      rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
+        parent_name:p.name, name:d.name,
+        finish:d.due,
+        current:delivStatusWord(d.status), new_value:"", new_pct:"", new_note:"",
+        notes:d.pct == null ? "" : "currently " + d.pct + "%" }));
+    });
+    (p.outcomes || []).forEach(function(o){
+      rows.push(csvRow(CAPPROG_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id,
+        parent_name:p.name, name:o.name, target:o.target, measure_at:o.measureAt,
+        current:(o.actual == null ? "" : o.actual), new_value:"", new_note:"",
+        notes:outcomeDue(o) ? "" : "not asked — measured at " + o.measureAt }));
+    });
+    (p.milestones || []).forEach(function(m){
+      rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id,
+        parent_name:p.name, name:m.name, finish:m.finish,
+        current:msStatusWord(m.status), new_value:"", new_pct:"", new_note:"",
+        notes:m.pct == null ? "" : "currently " + m.pct + "%" }));
+    });
+  });
+  return rows.join("\n");
+}
+
+/* The same two whole-file refusals a unit's import makes (§9.4), scoped to
+   capabilities: a file whose ids mostly belong to another capability — or to a
+   business unit — is refused whole, and a file of the wrong kind is named. */
+function checkCapFileShape(c, rows, kind){
+  var problems = [];
+  var foreignCap = {}, own = 0, unitIds = {};
+  rows.forEach(function(r){
+    if (!r.id) return;
+    var m = /^(cap\d+)\b/.exec(r.id);
+    if (m) {
+      if (m[1] === c.id) own++;
+      else foreignCap[m[1]] = (foreignCap[m[1]] || 0) + 1;
+      return;
+    }
+    var u = /^([a-z0-9]+)-/i.exec(r.id);
+    if (u && UNITS[u[1]]) unitIds[u[1]] = (unitIds[u[1]] || 0) + 1;
+  });
+  var uk = Object.keys(unitIds);
+  if (uk.length && uk.reduce(function(a, k){ return a + unitIds[k]; }, 0) > own) {
+    var wu = uk.sort(function(a, b){ return unitIds[b] - unitIds[a]; })[0];
+    problems.push({ at:"the whole file",
+      msg:"this looks like " + UNITS[wu].name + "'s file — " + unitIds[wu] +
+          " rows carry a business unit's ids, and the capability " + c.name +
+          " is selected. Switch the scope above, or download this capability's own template." });
+  }
+  var fk = Object.keys(foreignCap);
+  if (fk.length && fk.reduce(function(a, k){ return a + foreignCap[k]; }, 0) > own) {
+    var worst = fk.sort(function(a, b){ return foreignCap[b] - foreignCap[a]; })[0];
+    var other = capById(worst);
+    problems.push({ at:"the whole file",
+      msg:"this looks like " + (other ? other.name : worst) + "'s file — " + foreignCap[worst] +
+          " rows carry its ids, and " + c.name + " is selected. Switch the capability above, or " +
+          "download " + c.name + "'s own template." });
+  }
+  var hasNewValue = rows.some(function(r){ return r.new_value != null && r.new_value !== undefined; });
+  var hasPlanTypes = rows.some(function(r){ return r.type === "PROJECT" || r.type === "PLAN"; });
+  if (kind === "plan" && hasNewValue && !hasPlanTypes)
+    problems.push({ at:"the whole file",
+      msg:"this is a PROGRESS file — it carries new_value columns and no project rows. Switch the toggle above to Progress." });
+  if (kind === "progress" && hasPlanTypes)
+    problems.push({ at:"the whole file",
+      msg:"this is a PLAN file — it carries project and brief rows, not reported values. Switch the toggle above to Plan." });
+  return problems;
+}
+
+var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE",
+                 /* §399: a function's S&W rows */ "STRENGTH","WEAKNESS"];
+
+/* The capability twin of mintPlanIds. */
+function mintCapPlanIds(c, rows){
+  var map = {}, p = 0, k = 0, n = {};
+  rows.forEach(function(r){
+    if (r.type !== "PROJECT") return;
+    var id = c.id + "-P" + (++p);
+    map[r.id] = id; r.id = id;
+  });
+  var letter = { DELIVERABLE:"D", OUTCOME:"O", MILESTONE:"M" };
+  rows.forEach(function(r){
+    if (letter[r.type]) {
+      var pid = map[r.parent_id] || "";
+      r.parent_id = pid;
+      var key = pid + letter[r.type];
+      n[key] = (n[key] || 0) + 1;
+      r.id = pid ? pid + "-" + letter[r.type] + n[key] : "";
+    } else if (r.type === "CAPOBJECTIVE") r.id = c.id + "-KO" + (++k);
+  });
+  return rows.filter(function(r){ return r.type !== "PLAN"; });
+}
+
+/* Same change as a unit's plan (§22): no ids in the file, so nothing to check
+   for duplicates and no capability prefix to read — what matters is whether a
+   deliverable, outcome or milestone found the project it names. */
+function validateCapPlan(c, rows){
+  var problems = [], notices = [];
+  var projects = rows.filter(function(r){ return r.type === "PROJECT"; });
+  if (!rows.length)
+    problems.push({ at:"the whole file", msg:"nothing to read — every sheet is empty." });
+
+  /* The overrun rule (§15.4): a milestone finishing after its project's end is
+     saved exactly as entered and said out loud — a notice, never a refusal. */
+  var projEnd = {};
+  (c.projects || []).forEach(function(p){
+    if (p.timeline === "date") projEnd[p.id] = p.end;
+  });
+  rows.forEach(function(r){
+    if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
+  });
+  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§103). A live plan
+     arrived with "Done" and "Pending" in the Due date column -- statuses,
+     which belong to the reporting cycle -- and the platform said nothing,
+     because the field takes any text. It still takes any text: refusing the
+     file would block work over a column nobody can fix without the file, and
+     §22's whole contract is that an upload AUTHORS a plan rather than
+     arguing with it. So it is a NOTICE, which is the same weight the overrun
+     rule carries, and for the same reason -- both are "we saved what you
+     typed, and here is what we noticed". */
+
+
+  rows.forEach(function(r, n){
+    var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
+    if (!r.type) { problems.push({ at:at, msg:"no type" }); return; }
+    if (CAP_TYPES.indexOf(r.type) < 0) {
+      problems.push({ at:at, msg:'type "' + r.type + '" is not one of ' + CAP_TYPES.join(", ") });
+      return;
+    }
+    if (r.type === "DELIVERABLE" || r.type === "OUTCOME" || r.type === "MILESTONE") {
+      if (!r.parent_id)
+        problems.push({ at:at, msg: projects.length
+          ? "its project could not be matched — choose one from the Project column"
+          : "there are no projects in this file, so nothing can hang off one — fill the Projects sheet first" });
+    }
+    if (r.direction && ["≥","≤",">=","<="].indexOf(r.direction) < 0)
+      problems.push({ at:at, msg:'direction "' + r.direction + '" is not ≥ or ≤' });
+    if (r.type === "CAPOBJECTIVE") {
+      if (r.compile && !compileKnown(r.compile))
+        problems.push({ at:at, msg:compileProblem(r.compile) });
+      if (r.weight !== "" && r.weight != null && isNaN(parseFloat(r.weight)))
+        problems.push({ at:at, msg:'weight "' + r.weight + '" is not a number' });
+      if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
+    }
+    if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
+      problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
+
+    /* §197.3: A PROJECT'S OWN DATES ARE READ TOO. A milestone's due date has
+       been checked since §103 and these two never were — so `On-going` in a
+       Start or an End came straight in, and every score that reads a date
+       then treated the project as having none. Islam's live tenant had
+       exactly that. Since §179 the pane cannot produce it (the field is a
+       month picker), which left the workbook as the one door still open.
+
+       A NOTICE, NOT A PROBLEM — the same weight the milestone's due date
+       carries. The value is saved exactly as entered and the plan still
+       loads, because refusing a whole upload over one cell would be worse
+       than importing it and marking it: §197.3 makes the pane say Missing
+       over that value, and the fill grant opens the picker on it (§184). */
+    if (r.type === "PROJECT") {
+      ["start", "end"].forEach(function(f){
+        var v = String(r[f] == null ? "" : r[f]).trim();
+        if (!v) return;
+        if (!dueFits(v))
+          notices.push({ at:at, msg:'the ' + f + ' date "' + v +
+            '" is not a date, a month or a quarter \u2014 saved exactly as entered, ' +
+            'and the plan will show it as Missing until somebody picks one' });
+      });
+    }
+
+    if (r.type === "OUTCOME") {
+      if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
+      if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
+    }
+    if (r.type === "MILESTONE" || r.type === "DELIVERABLE") {
+      var due = String(r.finish == null ? "" : r.finish).trim();
+      if (!due) {
+        notices.push({ at:at, msg:"no due date" });
+      } else if (!dueFits(due)) {
+        /* NAMED AS WHAT IT IS, never as "invalid". The two words this exists
+           for are Done and Pending, and telling somebody their status is
+           invalid does not tell them where it goes. */
+        notices.push({ at:at, msg:'due date "' + due + '" is not a date, a month or a quarter' +
+          (MS_STATUS_WORDS.indexOf(due.toLowerCase()) > -1
+            ? " \u2014 that is a status, and a status is reported each cycle rather than planned"
+            : "") + " \u2014 saved exactly as entered" });
+      }
+    }
+    if (r.type === "MILESTONE" && r.finish && r.parent_id && projEnd[r.parent_id]) {
+      var f = Date.parse(r.finish), e = Date.parse(projEnd[r.parent_id]);
+      if (!isNaN(f) && !isNaN(e) && f > e)
+        notices.push({ at:at, msg:"finishes after its project ends on " + projEnd[r.parent_id] +
+          " — saved as entered; either the timeline moves or the overrun stands" });
+    }
+  });
+  return { problems:problems, notices:notices };
+}
+
+function diffCapPlan(c, rows){
+  var out = [], seen = {};
+  rows.forEach(function(r){
+    if (!r.id) return;
+    seen[r.id] = true;
+    var hit = capFindById(c, r.id);
+    var changes = [];
+    var cmp = function(label, was, now){
+      now = now == null ? "" : String(now);
+      was = was == null ? "" : String(was);
+      if (now !== "" && now !== was) changes.push({ f:label, was:was, now:now });
+    };
+    if (!hit) { out.push({ id:r.id, type:r.type, name:r.name || r.description, status:"new", changes:[], raw:r }); return; }
+    if (hit.kind === "PLAN") {
+      cmp("definition", c.def, r.description);
+    } else if (hit.kind === "CAPOBJECTIVE") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
+      cmp("weight", hit.obj.weight == null ? "" : hit.obj.weight, r.weight);
+      cmp("compile", hit.obj.compile, r.compile);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    } else if (hit.kind === "PROJECT") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("brief", hit.obj.brief, r.description);
+      cmp("owner", hit.obj.owner, r.owner);
+      cmp("stakeholders", (hit.obj.stakeholders || []).join("|"), r.stakeholders);
+      cmp("timeline", hit.obj.timeline || "quarter", timelineKey(r.timeline) || "");
+      cmp("start", hit.obj.start, r.start);
+      cmp("end", hit.obj.end, r.end);
+    } else if (hit.kind === "DELIVERABLE") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("due", hit.obj.due, r.finish || "");
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    } else if (hit.kind === "OUTCOME") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"target", was:hit.obj.target || "", now:targetFromPair(hit.obj.target, r.value, r.unit) });
+      cmp("measured at", hit.obj.measureAt, r.measure_at);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    } else if (hit.kind === "MILESTONE") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("what it covers", hit.obj.covers, r.covers);
+      cmp("owner", hit.obj.owner, r.owner);
+      /* §227: compared pipe-joined, the shape both readers normalise to —
+         the same contract the project's stakeholders keep above. */
+      cmp("collaborators", (hit.obj.collaborators || []).join("|"), r.collaborators);
+      cmp("finish", hit.obj.finish, r.finish);
+      cmp("hidden", SMPRules.isHidden(hit.obj) ? "1" : "", r.hidden);
+    }
+    out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
+               status:changes.length ? "changed" : "same", changes:changes, hit:hit, raw:r });
+  });
+  /* Absent is reported, never removed — the same rule as a unit's plan. */
+  var missing = [];
+  (c.keyObjectives || []).forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"CAPOBJECTIVE", name:m.name }); });
+  (c.projects || []).forEach(function(p){
+    if (!seen[p.id]) missing.push({ id:p.id, type:"PROJECT", name:p.name });
+    (p.deliverables || []).forEach(function(d){ if (!seen[d.id]) missing.push({ id:d.id, type:"DELIVERABLE", name:d.name }); });
+    (p.outcomes || []).forEach(function(o){ if (!seen[o.id]) missing.push({ id:o.id, type:"OUTCOME", name:o.name }); });
+    (p.milestones || []).forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"MILESTONE", name:m.name }); });
+  });
+  return { rows:out, missing:missing };
+}
+
+/* Projects are created before their children, so a deliverable always finds
+   its parent whatever the file order — the same rule as pillars (§9.5). New
+   children arrive with nothing reported, never at zero. */
+function createFromCapPlan(c, d){
+  var news = d.rows.filter(function(r){ return r.status === "new"; });
+  var order = { CAPOBJECTIVE:0, ACTION:0, PROJECT:0,
+                DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
+  news.sort(function(a, b){ return (order[a.type] == null ? 5 : order[a.type]) -
+                                   (order[b.type] == null ? 5 : order[b.type]); });
+  var made = 0;
+  var projectById = function(id){
+    return (c.projects || []).filter(function(p){ return p.id === id; })[0];
+  };
+  news.forEach(function(r){
+    var x = r.raw; if (!x) return;
+    if (x.type === "PROJECT") {
+      c.projects.push({ id:x.id, capId:c.id, name:x.name, brief:x.description || "",
+        owner:x.owner || "",
+        stakeholders:(x.stakeholders || "").split(/[,|]/).map(function(s){ return s.trim(); }).filter(Boolean),
+        timeline:timelineKey(x.timeline) || "quarter", start:x.start || "", end:x.end || "",
+        deliverables:[], outcomes:[], milestones:[] });
+      /* §303: SET ONLY WHERE THE FILE MARKED IT (§50.6) — a project the file
+         left as "No", and one whose file predates the column, must both be
+         byte-identical to a project nobody ever asked, or every save carries a
+         phantom change and a non-office save is refused for ever (§42). */
+      if (x.repeats != null && x.repeats !== "")
+        c.projects[c.projects.length - 1].repeats = x.repeats;
+      made++;
+    } else if (x.type === "CAPOBJECTIVE") {
+      var w = parseFloat(x.weight);
+      var cko = { id:x.id, name:x.name, dir:x.direction || "≥",
+        target:targetFromPair((d.prior || {})["CAPOBJECTIVE|" + (x.name || "")] || "", x.value, x.unit), compile:x.compile || "Latest",
+        weight:isNaN(w) ? null : w, actual:null, progress:null };
+      if (+x.hidden) cko.hide = true;
+      c.keyObjectives.push(cko);
+      made++;
+    } else if (x.type === "ACTION") {
+      /* §342: the container is minted here rather than assumed — a function
+         given its first plan by file has never held the array (§50.6, §129's
+         audit: the first row is accepted on screen and written nowhere). */
+      if (!Array.isArray(c.actions)) c.actions = [];
+      var act = { id:x.id, name:x.name, owner:x.owner || "",
+                  due:x.finish || "", status:null };
+      if (+x.hidden) act.hide = true;
+      c.actions.push(act);
+      made++;
+    } else if (x.type === "DELIVERABLE") {
+      var p = projectById(x.parent_id); if (!p) return;
+      var dRow = { id:x.id, name:x.name, due:x.finish || "", actual:null };
+      if (+x.hidden) dRow.hide = true;
+      p.deliverables.push(dRow);
+      made++;
+    } else if (x.type === "OUTCOME") {
+      var p2 = projectById(x.parent_id); if (!p2) return;
+      var oRow = { id:x.id, name:x.name, dir:x.direction || "≥",
+        target:targetFromPair((d.prior || {})["OUTCOME|" + (x.name || "")] || "", x.value, x.unit), measureAt:x.measure_at || "",
+        actual:null, progress:null };
+      if (+x.hidden) oRow.hide = true;
+      p2.outcomes.push(oRow);
+      made++;
+    } else if (x.type === "MILESTONE") {
+      var p3 = projectById(x.parent_id); if (!p3) return;
+      var m3 = { id:x.id, name:x.name, covers:x.covers || "",
+        owner:x.owner || "", finish:x.finish || "", status:null };
+      /* §227: set only when somebody is named — an absent key and an empty
+         list must stay byte-identical (§50.6), so nothing writes []. */
+      var col = (x.collaborators || "").split(/[,|]/)
+        .map(function(s){ return s.trim(); }).filter(Boolean);
+      if (col.length) m3.collaborators = col;
+      if (+x.hidden) m3.hide = true;
+      p3.milestones.push(m3);
+      made++;
+    }
+  });
+  return made;
+}
+
+function applyCapPlan(c, d){
+  createFromCapPlan(c, d);
+  d.rows.forEach(function(r){
+    if (!r.hit || !r.changes.length) return;
+    var o = r.hit.obj;
+    r.changes.forEach(function(ch){
+      if (r.hit.kind === "PLAN" && ch.f === "definition") { c.def = ch.now; return; }
+      if (ch.f === "name")           o.name = ch.now;
+      if (ch.f === "direction")      o.dir = ch.now;
+      if (ch.f === "target")         o.target = ch.now;
+      if (ch.f === "compile")        o.compile = ch.now;
+      if (ch.f === "weight")         { var w = parseFloat(ch.now); o.weight = isNaN(w) ? null : w; }
+      if (ch.f === "brief")          o.brief = ch.now;
+      if (ch.f === "owner")          o.owner = ch.now;
+      if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+      /* §227: cmp never fires on an emptied value, so `ch.now` is always a
+         real list here — a file adds and amends, it never removes (§54). */
+      if (ch.f === "collaborators")  o.collaborators = ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean);
+      if (ch.f === "hidden")         { if (+ch.now) o.hide = true; else delete o.hide; }
+      if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
+      if (ch.f === "start")          o.start = ch.now;
+      if (ch.f === "end")            o.end = ch.now;
+      if (ch.f === "due")            o.due = ch.now;
+      if (ch.f === "measured at")    o.measureAt = ch.now;
+      if (ch.f === "what it covers") o.covers = ch.now;
+      if (ch.f === "finish")         o.finish = ch.now;
+    });
+  });
+}
+
+function diffCapProgress(c, rows){
+  var out = [];
+  rows.forEach(function(r){
+    var hasVal = (r.new_value || "") !== "";
+    /* §303: A PER-CENT AND A NOTE ARE CHANGES OF THEIR OWN. The gate used to
+       be the new value alone, so a row whose status was already right and
+       whose per-cent was owed had nothing to report — and §104.10 makes that
+       row OUTSTANDING on the page, so the file could not answer the very
+       thing the platform was asking for. */
+    var hasPct = (r.new_pct || "") !== "";
+    var hasNote = (r.new_note || "") !== "";
+    if (!r.id || (!hasVal && !hasPct && !hasNote)) return;
+    var hit = capFindById(c, r.id);
+    if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    var was, now = String(r.new_value == null ? "" : r.new_value).trim();
+    /* §342: an ACTION is a status row too — the same three words a milestone
+       answers in, and the same required per-cent (§300, §104.10). */
+    var isStatusRow = hit.kind === "MILESTONE" || hit.kind === "DELIVERABLE" ||
+                      hit.kind === "ACTION";
+    if (isStatusRow) {
+      /* §303: A DELIVERABLE IS A STATUS, exactly as a milestone is. It read
+         `hit.obj.actual` and `hit.obj.kind` — both removed by §104/§53.4 —
+         so an upload saying "In progress" was coerced down the binary branch
+         to "no" and written to a field nothing reads: the row went on saying
+         Not started on every screen while the file looked accepted. The two
+         differ by ONE WORD (Delivered against Completed) and that word is
+         what `delivStatusWord`/`delivStatusKey` already carry (§104). */
+      var word = hit.kind === "DELIVERABLE" ? delivStatusWord : msStatusWord;
+      var toKey = hit.kind === "DELIVERABLE" ? delivStatusKey : msStatusKey;
+      was = word(hit.obj.status);
+      if (hasVal) {
+        var key = toKey(now);
+        if (key == null) { out.push({ id:r.id, name:hit.obj.name, status:"unknown",
+          pillar:hit.proj ? hit.proj.name : "" }); return; }
+        now = word(key);
+      } else now = was;
+    } else if (hit.kind === "OUTCOME" || hit.kind === "CAPOBJECTIVE") {
+      was = hit.obj.actual == null ? "" : String(hit.obj.actual);
+      if (!hasVal) now = was;
+    } else return;
+    var wasPct = isStatusRow && hit.obj.pct != null ? String(hit.obj.pct) : "";
+    var nowPct = hasPct ? String(r.new_pct).replace("%", "").trim() : wasPct;
+    var wasNote = hit.obj.note == null ? "" : String(hit.obj.note);
+    var nowNote = hasNote ? String(r.new_note).trim() : wasNote;
+    if (String(was) === String(now) && wasPct === nowPct && wasNote === nowNote) return;
+    out.push({ id:r.id, type:hit.kind, name:hit.obj.name,
+               pillar:hit.proj ? hit.proj.name : (r.parent_name || c.name),
+               was:was, now:now,
+               pct:hasPct ? nowPct : null, note:hasNote ? nowNote : null,
+               status:"changed", hit:hit });
+  });
+  return { rows:out, missing:[] };
+}
+
+function applyCapProgress(c, d){
+  d.rows.forEach(function(r){
+    if (!r.hit || r.status !== "changed") return;
+    var o = r.hit.obj;
+    if (r.hit.kind === "MILESTONE" || r.hit.kind === "DELIVERABLE" ||
+        r.hit.kind === "ACTION") {          /* §342 */
+      /* §303: BOTH WRITE `status` AND `pct`, through the same pair the
+         screen's own handlers now ask (§53.5) — so a file that says In
+         progress leaves the row In progress with its per-cent set, which is
+         what §104.10 REQUIRES before the row counts at all. The deliverable
+         branch used to write `actual`, a field §104 removed. */
+      var key = (r.hit.kind === "DELIVERABLE" ? delivStatusKey : msStatusKey)(r.now);
+      if (key) setRowStatus(o, key);
+      /* AFTER the status, never before: leaving In progress clears the
+         per-cent, so setting it first would throw the figure away. And only
+         where the file said one — a row whose status was already right and
+         whose per-cent the file left blank keeps what it had. */
+      if (r.pct != null) setRowPct(o, r.pct);
+    } else if (r.hit.kind === "OUTCOME" || r.hit.kind === "CAPOBJECTIVE") {
+      o.actual = r.now;
+      /* Progress is what the actual implies against the target, worked out on
+         arrival — a stale percentage in a sheet can never contradict the
+         platform (§9.5). */
+      var t = parseFloat(String(o.target).replace(/[^0-9.\-]/g, ""));
+      var a = parseFloat(String(r.now).replace(/[^0-9.\-]/g, ""));
+      if (!isNaN(t) && !isNaN(a) && t !== 0) {
+        var pctv = o.dir === "≤" ? (t / a) * 100 : (a / t) * 100;
+        o.progress = Math.max(0, Math.min(150, Math.round(pctv)));
+      } else o.progress = null;
+    }
+    /* §303: THE NOTE, on every kind. §105 refuses a submission while a figure
+       at risk carries no explanation, so a file that could enter the figure
+       and not the note was a route that could never finish. */
+    if (r.note != null) {
+      if (String(r.note) === "") delete o.note; else o.note = String(r.note);
+    }
+  });
+}

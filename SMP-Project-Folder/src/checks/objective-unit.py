@@ -375,7 +375,7 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(700)
     pm = pg.evaluate("""() => {
       const tbl = [...document.querySelectorAll('.pane table')]
-        .find(t => (t.querySelector('thead')||{}).textContent.indexOf('Measure') > -1);
+        .find(t => (t.querySelector('thead')||{}).textContent.indexOf(L1('measure')) > -1 /* §395: the client's word, asked of the page (§218) */);
       if (!tbl) return { noTable: true };
       const row = tbl.querySelector('tbody tr');
       const sel = row.querySelectorAll('td')[3].querySelector('select');
@@ -402,7 +402,7 @@ with sync_playwright() as pw:
     pg.wait_for_timeout(300)
     hid = pg.evaluate("""() => {
       const tbl = [...document.querySelectorAll('.pane table')]
-        .find(t => (t.querySelector('thead')||{}).textContent.indexOf('Measure') > -1);
+        .find(t => (t.querySelector('thead')||{}).textContent.indexOf(L1('measure')) > -1 /* §395: the client's word, asked of the page (§218) */);
       return tbl ? [...tbl.querySelectorAll('thead th')].map(t=>t.textContent.trim()) : null; }""")
     ck("...and the column is gone again when the pen closes",
        hid and "Unit" not in hid, hid)

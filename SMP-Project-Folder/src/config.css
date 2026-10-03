@@ -275,6 +275,15 @@
   .cfg input.lbl, .cfg input.lvl { width:100%; max-width:none; text-align:left;
                                     font-family:var(--sans); font-size:13px; }
   .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
+  /* TERMINOLOGY (§392): the description is prose and wraps, as the signed-off
+     drawing shows — the one column on this table §88's one-line rule does not
+     govern. The default is two short words stacked; Reset sits beside the
+     word for many and only appears when a row differs from its default. */
+  .cfg table.lbltable td.lbldesc { white-space:normal; max-width:none; color:var(--ink); }
+  .cfg table.lbltable td.lbldef { max-width:none; color:var(--ink-2); line-height:1.45; }
+  .cfg table.lbltable td { max-width:none; vertical-align:top; }
+  .lblmany { display:flex; align-items:center; gap:10px; }
+  .lblmany .lblreset { font-size:12px; white-space:nowrap; flex:none; }
 
   /* ── Chrome: one sticky container, nothing measured ─────────────── */
   /* A background of its own, not just its children's. The container was
@@ -431,6 +440,14 @@
                    color:var(--ink-3); background:var(--surface); }
   .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+  /* A VALUE TAKEN WHOLE (§378). An email and a phone number are copied
+     entire or not at all, so every gesture selects the whole of one —
+     which is what makes the behaviour the same in every browser rather
+     than whatever that browser thinks a word is. The issued-password box
+     has said this since §43.8; this is that device, not a second one.
+     SCOPED, never on `.val` at large: a unit's name selected whole on a
+     click is a change nobody asked for (rule 1b). */
+  .cfg .val.selall { -webkit-user-select:all; user-select:all; }
 
   /* ══ The searchable dropdown (searchsel.js) ═════════════════════════
      The button stands where the <select> stood, so it inherits nothing it
@@ -1340,9 +1357,40 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* ── AND THE SEAM WAS NEVER THERE (§373) ─────────────────────────
+     Islam, of this column: "you added the 3 dots to the roles whihc is wrong
+     the 3 dots is out of this column." They are not in Roles — they are this
+     frozen column, floating over whatever scrolls under it. Measured: at
+     1500px the table does not scroll and they sit after STATUS; at 1200px and
+     below they sit at x1129 inside a Roles column running 977→1186, which is
+     his screenshot to the pixel. Nothing is lost — scrolled fully right,
+     STATUS is whole again.
+
+     WHAT WAS WRONG IS THAT NOTHING SAID THIS COLUMN WAS FROZEN. The
+     `box-shadow` below HAS NEVER PAINTED: Chromium draws no box-shadow on a
+     `<td>` under `border-collapse:collapse`. Proved rather than reasoned —
+     a SOLID RED 10px shadow on this cell photographed byte-identical to none
+     at all, while a border, a `::before` and a background each changed the
+     pixels. It fails the way this file keeps recording, and the way the
+     vertical sticky twenty lines up failed: silently, with every property
+     reading back exactly as written (§93.11).
+
+     So the seam is a `::before`, which does paint — and it is a WASH rather
+     than a hairline, because a 1px line says "next column" and what this
+     column is doing is passing OVER the one beside it.
+
+     FOUND AND DELIBERATELY NOT SWEPT (rule 1b): `td.namecell` and
+     `.fnscfg td.fnamecell` carry the same dead declaration and are left
+     exactly as they are — Islam asked about this column. The name column
+     could not take this answer unchanged in any case: it is `overflow:hidden`
+     (§71.2, three rules up), so a `::before` of its own is clipped away —
+     measured. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
+  .peoplecfg td.kebcell::before, .peoplecfg thead th.kebcell::before {
+    content:""; position:absolute; right:100%; top:0; bottom:0; width:14px;
+    pointer-events:none;
+    background:linear-gradient(to left, var(--froze-wash), transparent); }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -1519,9 +1567,12 @@
      same measurement, and the reason the pair on the left was worth freezing
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
+  /* The twin of the block above (§29.2's family — this rule is declared twice
+     in this file, byte for byte). Left as the second copy rather than deleted,
+     because removing one of a pair nobody has reconciled is a change of its
+     own; the seam is declared once, above. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:inherit;
-    box-shadow:-1px 0 0 var(--line-soft); }
+    position:sticky; right:0; z-index:2; background:inherit; }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
      otherwise slide under the frozen header the moment the box is scrolled. */
@@ -1790,6 +1841,129 @@
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
+  /* ── THE ROLES CELL IS THE BUTTON (§372, Islam 2026-09-17) ────────
+     "for the role I'm afraid it still overflows as a box it can open which a
+     button as you do but not overflowing on other voxes."
+
+     A `.ssbtn` sizes to its content and a ticking list's content is its widest
+     entry, so left alone it took the column from 209px to 477 and the table
+     behind it from 1355 to 1623 — and still overflowed. Capped to the cell it
+     holds exactly what the register draws today.
+
+     AND THE BOX MAY NOT MAKE THE ROW TALLER. `.ssbtn` carries `padding:6px 9px`
+     and a border, which is right for a control standing on its own and wrong
+     wrapped round chips that already have a height of their own: measured, it
+     took every row from 39px to 49, and thirty-one rows at 10px is 310px of
+     register moving for a control nobody pressed. A setup table row is one
+     line (§88), so the box takes the height the chips already had. What it
+     does cost is 27px of column — the box's own edges and the caret that says
+     it opens — and no other column moves. */
+  /* ── THE OPEN CELL (§372) ────────────────────────────────────────
+     One field, filling the cell it replaced. `width:100%` with `min-width:0`
+     rather than a cap: §110.8 measured a percentage doing nothing under
+     `table-layout:auto` — the cell is sized BY its child — and a definite
+     width is what stops the field contributing its intrinsic size to the
+     column. Measured, the row goes 39px to 40 and no column moves. */
+  .peoplecfg td.pcellopen { overflow:visible; }
+  /* A BLOCK, NEVER `width:100%` (§372). Measured: in an auto-layout table
+     Chromium resolves a percentage against the cell's PADDING box, so
+     `width:100%` in a 150px cell with 8px either side came out 150 and hung
+     8px past its own cell — §110.8's note that `max-width:100%` does nothing
+     in this table, met from the other side. A block-level element fills its
+     containing block's CONTENT box with no percentage to resolve, which is
+     the same answer without the quirk. */
+  /* AND CAPPED, BECAUSE `width:auto` FILLS FOR A BOX AND SHRINK-FITS FOR A
+     BUTTON (§373). Islam, with the Unit cell open on a function called
+     "Strategy Management Office": the box ran into EMAIL. Measured, 261.1px of
+     control inside a 176px cell — 93.6px past its own right edge — and a click
+     20px inside the email cell returned the BUTTON, which is §110.1's fault
+     exactly: a control that is present, correctly sized and eating its
+     neighbour's clicks.
+
+     `max-width:none` assumed a block fills its container. That is true of the
+     `<input>` (measured: 145.1px in a 162.1px cell, the content box to the
+     pixel) and FALSE of `searchsel.js`'s `<button>`, which is shrink-to-fit —
+     and `.ssbtn` is `white-space:nowrap`, so its text IS its width.
+
+     AND §110's "`max-width:100%` DOES NOTHING HERE", eighty lines up, is about
+     an `<input>` whose own intrinsic width was sizing the column — circular, so
+     the cap had nothing to resolve against. A button capped here does not
+     contribute that width in the first place, and it was measured BOTH ways
+     before it was believed (§94.5): with the column's declared 176px and with
+     `width:auto` forced on it, the box ends at the content edge either way
+     (159 of 176, 156.2 of 173.2). The label clips with the "…" `.ssbtn
+     .sslabel` already carries, the row stays 38.6px beside its neighbours, and
+     the email gets its clicks back. */
+  .peoplecfg td.pcellopen .fld,
+  .peoplecfg td.pcellopen .ssbtn {
+    display:block; width:auto; min-width:0; max-width:100%;
+    box-sizing:border-box; }
+
+  /* ── NO ARROW IN THIS TABLE (§372.14) ───────────────────────────────
+     Islam: "on opening something the arrow appears, no need for the arrow.
+     and for the roles as well no need for the arrow showng the the box is a
+     drop down box."
+
+     IT GOES BECAUSE IT IS POINTLESS, NOT BECAUSE IT IS BEING HIDDEN: the
+     double-click opens the LIST (shell.html), so by the time the box is drawn
+     the thing the arrow announces has already happened.
+
+     AND IT IS WHAT MADE THE ROW GROW. `.pcellopen .ssbtn` is `display:block`
+     — §372's answer to a percentage-width quirk — so the button's two children
+     stopped being flex items and the caret, an inline span after a block
+     label, fell to a line of its own: measured, the open row stood at 59.6px
+     against its neighbours' 38.6, which is the picture he sent. With the caret
+     gone there is nothing left to wrap.
+
+     SCOPED TO THE REGISTER'S TABLE. Every other searchable select in the
+     platform — Setup's dropdowns, the viewer switcher, a plan's owner pickers
+     — is a control standing on its own with nothing else to say it opens, and
+     none of them was asked about (rule 1b). */
+  .peoplecfg .sscar { display:none; }
+
+  /* The open roles cell takes `.pcellopen`'s block form (above) rather than a
+     percentage: §110.8's quirk resolves 100% against the cell's PADDING box in
+     this auto-layout table, so the button hung 8px past its own cell. The
+     dialog's copy keeps `width:100%` — it is in a form, not a table cell. */
+  /* The roles button holds CHIPS rather than a line of text, so it keeps its
+     own tighter padding — measured, `.cfg input`'s 4px puts that row at
+     45.1px where 1px puts it at the resting 39.1. Two paddings, one
+     height, which is the thing that matters. */
+  .peoplecfg td.roles.pcellopen .ssbtn { padding:1px 6px; }
+
+  /* ── AND AN OPEN CELL HAS ONE LOOK, WHICHEVER KIND IT IS (§372.14) ──
+     "the table in general should look everything fixed ... until I made the
+     double click which opens the box either for writing or a drop box."
+     TWO KINDS OF BOX, SO TWO HEIGHTS UNLESS SOMETHING SAYS OTHERWISE — and
+     something did not: `.cfg input` gives every field in a Setup table
+     12.5px/4px 7px, and `searchsel.js` draws a BUTTON, which that rule cannot
+     reach, so it kept its own 13px/6px 9px. Measured, the open drop cell's
+     row stood at 42.5px against a text cell's 40.4 and a resting row's 39.1 —
+     the 3.4px jump he is describing when he says the table should look fixed.
+     These are `.cfg input`'s own two numbers rather than new ones, and what
+     is ASSERTED is the AGREEMENT (§94.8) — the two kinds of open cell are one
+     height — so if that rule ever moves, the check goes red rather than the
+     two drifting apart in silence (§122.5). */
+  .peoplecfg td.pcellopen .ssbtn { font-size:12.5px; padding:4px 7px; }
+  .pdf .rolebox .ssbtn {
+    width:100%; max-width:100%; min-width:0; padding:1px 6px; }
+  .peoplecfg td.roles .ssbtn .sslabel, .pdf .rolebox .ssbtn .sslabel {
+    overflow:hidden; min-width:0; }
+  /* As a LABEL the "…" is a span (config-render.js): a button inside a button
+     is not markup, and one press opens the whole list anyway. It keeps the
+     control's look, because what it says — there are more roles than this —
+     is the same fact either way. */
+  .rolemore:not(button) { display:inline-flex; align-items:center; }
+  /* WHAT THE LIST CANNOT SET, ABOVE IT (searchsel's `data-sshead`). The chips
+     are the register's own, so nothing new is drawn; the key over them is the
+     platform's uppercase label at the size every other key wears. */
+  .sspop .sshead { padding:9px 11px 10px; border-bottom:1px solid var(--line);
+                   display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .sspop .sshead > b { width:100%; margin-bottom:2px; font-size:10.5px;
+                       letter-spacing:.09em; text-transform:uppercase;
+                       color:var(--ink-3); font-weight:500; }
+  .sspop .sshead .rolechip { margin:0; opacity:.72; }
+  .sspop .sshead .rolechip b { font-weight:500; }
   /* The rail's groups fold (§47.7). A button now, not a div — it does
      something, so it has to be reachable by keyboard and say what it is. */
   .setuprail .rgroup { display:flex; align-items:center; gap:7px; width:100%;
@@ -2415,19 +2589,15 @@
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
     max-width:260px; white-space:nowrap; }
 
-  /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
-     It has to look like the value, not like a control, or every row grows a
-     button — so it inherits the cell's type and only the underline on hover
-     says it does something. The tick is written into the element by the
-     handler, because paint() would replace the thing just pressed (§63). */
-  .copyval { font:inherit; font-size:13px; color:var(--ink); padding:0; border:0;
-             background:none; text-align:left; display:block; width:100%;
-             max-width:100%; overflow:hidden; text-overflow:ellipsis;
-             white-space:nowrap; cursor:pointer; }
-  .copyval.mono { font-family:var(--mono); font-size:12.5px; }
-  .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
-  .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
-  .copyval.copied { color:var(--good-tx); text-decoration:none; }
+  /* ── THE NUMBER IS A VALUE IN THE REGISTER'S OWN SHAPE (§377) ─────
+     §93.6's five `.copyval` rules went with the control (the button's own
+     reset, its mono size, the hover underline, the focus ring and the green
+     "Copied"). What is left is the one thing they carried that was never
+     about the press: a phone reads a shade smaller than an address, so that
+     a monospaced number and a proportional address sit at the same weight.
+     The FAMILY comes from the global `.mono` the product already has; this is
+     the size alone, and `.cfg .val` (0,2,0) is what it has to outrank. */
+  .cfg .val.mono { font-size:12.5px; }
 
   /* The two columns a row's edit controls live in (§93.10). A width on the
      HEADER is what auto layout reads — a width on the body cells does nothing
@@ -2688,8 +2858,12 @@
      baseline its neighbouring inputs sit on, so the row does not go ragged,
      and the dashed edge and quiet ink are what the removed sentence used to
      say. `cursor:help` is the sign there is something on the hover. */
+  /* §410.2: the SAME padding as `.fld` (6px 9px, arrange.css), or the box
+     stands 10px taller than the inputs beside it — which is what this rule's
+     own comment above says must not happen, and what made the dialog scroll
+     at 1280×700. */
   .pdlg .pdro { display:block; border:1px dashed var(--line); border-radius:var(--r-sm);
-    padding:11px 12px; color:var(--ink-3); background:var(--surface-2);
+    padding:6px 9px; color:var(--ink-3); background:var(--surface-2);
     cursor:help; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .pdlg .pdsect { grid-column:1 / -1; font-size:10.5px; letter-spacing:.07em;
     text-transform:uppercase; font-weight:700; color:var(--gold-deep);
@@ -2813,3 +2987,4 @@
 .cfg.landing .lk{ font-weight:600; min-width:110px }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
+

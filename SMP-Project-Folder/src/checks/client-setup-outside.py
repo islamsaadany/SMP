@@ -240,7 +240,7 @@ def path(pg):
 
 
 def console(pg):
-    pg.goto(BASE + "/platform"); pg.wait_for_timeout(600)
+    pg.goto("about:blank"); pg.goto(BASE + "/platform#clients"); pg.wait_for_timeout(600)
 
 
 srv = serve()

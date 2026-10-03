@@ -71,6 +71,8 @@
     if (v) document.documentElement.setAttribute("data-setup-scope", v);
     else document.documentElement.removeAttribute("data-setup-scope");
   }
+  var LIB_TAB_KEY = "insights";
+  function libAddr() { return "/" + SLUG + "/" + LIB_TAB_KEY; }
   function placeOf(rest) {
     var seg = (rest || "").split("/").filter(Boolean);
     /* the module leads every address but the spine's; `tour` and the
@@ -81,6 +83,11 @@
     if (led) seg = seg.slice(1);
     if (!seg.length) return null;
     var d, i = 1;
+    /* The reports' own address, which `addressOf` writes for the Insights
+       tab. Reached here only by a history entry carrying no state (above);
+       `null` leaves the page exactly where it is rather than reading the
+       word as a destination. */
+    if (seg.length === 1 && seg[0] === LIB_TAB_KEY) return null;
     if (seg[0] === "fn" && seg[1]) { d = "fn:" + seg[1]; i = 2; }
     else if (seg[0] === "co" && seg[1]) { d = "co:" + seg[1]; i = 2; }
     else if (seg[0] === "tour") { return { tour: true }; }
@@ -110,8 +117,32 @@
     }
     return { d: d, s: s, c: c };
   }
+  /* ── THE REPORTS KEEP THEIR OWN ADDRESS (§376, decision 2) ────────
+     The library is the CLIENT'S and is the same list whichever unit you are
+     standing on, so the ordinary address `addressOf` would write —
+     `/raya-trade/strategy/mobile/insights` — names a unit in a link that is
+     not about that unit. Worse than untidy: the screen's own untruth is
+     gone the moment you look away, and a link outlives the look.
+
+     So the tab writes the module's own address, which is where the reports
+     live from every other direction too. Spelled ONCE and read by both ends
+     of this file (§53.5).
+
+     A SHARED OR RELOADED LINK OPENS THE MODULE'S OWN PAGE — the same
+     reports, the whole window, its own way back — because that address is
+     served by the module and not by the shell. Stated rather than
+     discovered: the room differs, the reports do not.
+
+     BACK AND FORWARD ARE THE STATE OBJECT'S, NEVER THE ADDRESS'S.
+     `sync()` pushes `{d, s, c}` beside the address, and the popstate
+     handler reads `ev.state` first, so the destination somebody was
+     standing on is restored exactly. `placeOf` is the fallback for an entry
+     that carries no state, and there it answers NOTHING rather than reading
+     `insights` as a unit nobody has — landing on an arbitrary destination
+     is worse than staying put (§96.2, §61). */
   function addressOf(d, s, c) {
     var kind = kindOf(d);
+    if (kind !== "setup" && s === LIB_TAB_KEY) return libAddr();
     var seg = kind === "fn" ? "fn/" + d.slice(3) : kind === "co" ? "co/" + d.slice(3) : d;
     /* A module's Setup carries its module word and the client's carries
        none (spec 056 §4.2): the scope the shell resolved decides, so a door
@@ -125,110 +156,232 @@
     if (c && kind !== "setup") out += "/" + c;
     return out;
   }
-  /* ── THE MODULE SWITCHER (spec 046, E1 — signed off 2026-09-11) ──────
-     The four-square mark at the far left of the top bar, opening the list of
-     modules this client has with the one you are in marked.
+  /* ── THE TRAIL (§400) ─────────────────────────────────────────────
+     Islam, of moving between the console, a client and its modules: every
+     way out was a different control in a different place — a client-name
+     pill reading "change", a four-square mark with no word beside it, the
+     house, the gear, a "Save & close", and rows at the foot of a Setup rail
+     reading "‹ Back to the console" and "Client settings ›". Replaced, for
+     Forefront's own people, by ONE line reading where you are:
 
-     IT IS BUILT HERE AND NOT IN THE FROZEN SHELL, for the reason that decides
-     whether it is drawn at all: a module list only exists where there is a
-     server to say which ones a client has. The offline copy (§306) is the
-     built file with one tenant's graph baked in and no server behind it, so a
-     switcher in the frozen shell would be a control that could never open
-     anything (§61). Its SHAPE is in arrange.css beside the family it belongs
-     to (`details.dlmenu`), because a stylesheet is inert either way.
+         Platform  ›  Raya Trade ▾  ›  Strategy ▾
 
-     DRAWN ONLY WHERE THERE IS A CHOICE. `data-modules` is written by the
-     server only for a client holding more than one (lib/shell.ts), so a menu
-     of one is never built — that is a door behind a door (§32) — and the
-     ABSENT attribute is what says so, rather than a flag beside it (§50.6).
+     Each step is a place. Platform is the console (Islam, 2026-09-24:
+     the first word reads Platform, not Forefront). Since §401 the client
+     opens a menu of the OTHER clients this person may open (and "All
+     clients"); the module opens the other modules, a rule, and "Client
+     settings"; on the client's own settings the third step reads "Client
+     settings" and opens the same menu with each module's settings. No
+     client mark on the bar (§401).
 
-     THE NAMES COME FROM THE SERVER, never from the key. `moduleMenu()` is the
-     one answer to what the switcher lists, read by this and by a module's
-     own bar (modules/insights/page.ts, §53.5): a label worked out here by
-     capitalising a key is how two screens come to spell one module
-     differently.
+     ONLY FOR SOMEBODY WITH A CONSOLE (`data-console`, written by sync.js
+     off `person.cards`, which only the server can answer). A client's own
+     person gets NO trail and NO module switcher — his word: "he doesn't
+     really navigate, we bring everything to his view in the strategy
+     platform" — so their bar names their company and nothing else, and the
+     reports reach them as a tab (§376).
 
-     IT SITS BEFORE `.brand`, NOT INSIDE IT. The approved mockup put it
-     inside, and that drawing's `.brand` was a flex ROW while the product's is
-     a COLUMN — copying the markup would have stranded the mark on a line of
-     its own above the product's name. `.top-in` is already a row and
-     `.brand` carries `margin-right:auto`, so first-in-the-row is the top left
-     (§296.1: measure the paint, never the cascade).
-
-     NOTHING HERE IS REWIRED ON A PAINT. `paintUnits()` replaces the row
-     BELOW this one and nothing rewrites `.top-in`, so the markup is built and
-     wired exactly once, at load — no second handler on a repaint (§24, §47.2).
-     A press navigates, so the menu never has to be closed afterwards. */
-  (function modules() {
-    /* NOT ON THE CLIENT'S OWN SETTINGS (§362, spec 058). Those pages belong
-       to no module, so a switcher there offers a way out of somewhere you are
-       not — and it is the one piece of the chrome the frozen shell cannot
-       stand down, because this builds it once at load and nothing repaints
-       `.top-in`. The scope is read off the SERVER's stamp (lib/shell.ts), not
-       off placeOf's: placeOf runs a few lines BELOW this, so the attribute it
-       writes would not be there yet — the same answer, and the only one that
-       has arrived by now. */
-    if (document.documentElement.getAttribute("data-setup-scope") === "client") return;
-    var raw = document.documentElement.getAttribute("data-modules");
-    if (!raw) return;                               /* one module: no choice to offer */
-    var list;
-    try { list = JSON.parse(raw); } catch (e) { return; }
-    /* A MENU OF ONE IS A DOOR BEHIND A DOOR (§32), and that test lives HERE
-       rather than on the attribute (§362.1): `data-modules` is the list of
-       modules this person may open, read by this and by the client's own
-       Setup rail, which draws a row per module whatever the count. The
-       check's break forces the switcher on for a client holding one. */
-    var forceSwitch = document.documentElement.getAttribute("data-break") === "switch-always";
-    if (!Array.isArray(list) || (!forceSwitch && list.length < 2)) return;
+     DRAWN ON PAINT, REBUILT ONLY WHEN WHAT IT SAYS CHANGES — the client's
+     settings and a module's are one document (§367), so crossing between
+     them is a paint and the third step has to follow it; rebuilding on
+     every paint would shut a menu somebody has open. */
+  var ICO_DOWN = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.6 5 6.6 8 3.6" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function modulesOn() {
+    try { var l = JSON.parse(document.documentElement.getAttribute("data-modules") || "[]");
+      return Array.isArray(l) ? l.filter(function (x) { return x && x.key; }) : []; }
+    catch (e) { return []; }
+  }
+  function onClientSettings() {
+    return document.documentElement.hasAttribute("data-client-settings");
+  }
+  var trailSaid = null;
+  function menuHTML(items) {
+    return '<div class="menu" role="menu">' + items.map(function (it) {
+      if (it.rule) return '<div class="trrule" role="separator"></div>';
+      if (it.quiet) return '<div class="trquiet">' + esc(it.label) + "</div>";
+      return '<button type="button" role="menuitem" data-trgo="' + esc(it.go) + '"' +
+        (it.here ? ' aria-current="true"' : "") + ">" + esc(it.label) +
+        (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+  }
+  function mountTrail() {
+    var root = document.documentElement;
+    /* data-break="trail-for-staff" is checks/modules.mjs's falsification: a
+       client's own person drawn the trail they must never get. */
+    if (!root.hasAttribute("data-console") && root.getAttribute("data-break") !== "trail-for-staff") return;
     var bar = document.querySelector(".top .top-in");
-    if (!bar || bar.querySelector(".topmark")) return;
-
-    var d = document.createElement("details");
-    d.className = "dlmenu topmark";
-    var here = list.filter(function (m) { return m && m.key === MODULE; })[0];
-    var sum = document.createElement("summary");
-    sum.setAttribute("title", here ? "Modules — you are in " + here.label : "Modules");
-    sum.setAttribute("aria-label", sum.getAttribute("title"));
-    /* DRAWN, NEVER A FONT CHARACTER (§52): a glyph the subset does not carry
-       ships as a blank box, and this mark has no word beside it to recover
-       from that. */
-    sum.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-      '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">' +
-      '<rect x="3.2" y="3.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="3.2" width="5.6" height="5.6" rx="1.2"/>' +
-      '<rect x="3.2" y="11.2" width="5.6" height="5.6" rx="1.2"/><rect x="11.2" y="11.2" width="5.6" height="5.6" rx="1.2"/>' +
-      "</g></svg>";
-    d.appendChild(sum);
-
-    var menu = document.createElement("div");
-    menu.className = "menu";
-    menu.setAttribute("role", "menu");
-    list.forEach(function (m) {
-      if (!m || !m.key) return;
-      var b = document.createElement("button");
-      b.type = "button";
-      b.setAttribute("role", "menuitem");
-      b.dataset.module = m.key;
-      if (m.key === MODULE) b.setAttribute("aria-current", "true");
-      b.appendChild(document.createTextNode(m.label || m.key));
-      if (m.note) {
-        var sub = document.createElement("span");
-        sub.className = "dlsub";
-        sub.appendChild(document.createTextNode(m.note));
-        b.appendChild(sub);
-      }
-      menu.appendChild(b);
+    if (!bar) return;
+    var client = root.getAttribute("data-console-client") || SLUG;
+    var mods = modulesOn();
+    var here = mods.filter(function (x) { return x.key === MODULE; })[0];
+    var modLabel = here ? here.label : (root.getAttribute("data-module-label") || "");
+    var cs = onClientSettings();
+    var onSetup = typeof current !== "undefined" && current === "setup";
+    var said = [client, cs, onSetup, MODULE, mods.map(function (x) { return x.key; }).join(","),
+                trailClients ? trailClients.map(function (x) { return x.key; }).join(",") : "?"].join("|");
+    var nav = bar.querySelector("nav.trail");
+    if (nav && said === trailSaid) return;
+    trailSaid = said;
+    if (!nav) {
+      nav = document.createElement("nav");
+      nav.className = "trail";
+      nav.setAttribute("aria-label", "Where you are");
+      bar.insertBefore(nav, bar.firstChild);
+      /* ONE LISTENER FOR THE WHOLE TRAIL, wired once: the markup below is
+         rewritten when the place changes and this survives it (§24, §47.2). */
+      nav.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-trgo]") : null;
+        if (!b) return;
+        var go = b.dataset.trgo;
+        if (b.getAttribute("aria-current") === "true") { Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; }); return; }
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { d.open = false; });
+        /* A CROSSING BETWEEN THE TWO SETTINGS RAILS IS A PRESS (§367), the
+           same one the rail rows made: one document, one attribute. */
+        var cross = /^cross:/.test(go) ? go.slice(6) : null;
+        /* §433: A CROSSING DRAWS AT ONCE, THEN QUIETLY CATCHES UP (Islam:
+           "yes add the quiet refresh when crossing"). A press that is a paint
+           shows what this tab already holds; behind it, anything waiting is
+           saved first, then the server's copy is asked for and the page
+           redrawn only if it differs. A save that is refused or fails takes
+           nothing from the server — that is the work §184's banner offers to
+           put back — and SYNC.refresh drops the answer if a hand has since
+           touched the page. `window.__smpRefresh` counts landings, for the
+           check alone. */
+        var quietly = function () {
+          if (typeof SYNC === "undefined" || !SYNC.refresh || !SYNC.saveNow) return;
+          SYNC.saveNow(function (how) {
+            if (how !== "saved" && how !== "clean") return;
+            SYNC.refresh(function (ok, changed) {
+              if (ok) window.__smpRefresh = (window.__smpRefresh || 0) + 1;
+              if (ok && changed && typeof paint === "function") paint();
+            });
+          });
+        };
+        /* §432: AND SO IS THE CROSSING BETWEEN A SETTINGS PAGE AND THE MODULE
+           ITSELF (Islam: "when moving between client settings and strategy
+           the strategy page loads"). The client's settings, a module's
+           settings and that module's own pages are ONE document — the server
+           builds all three with the same arguments but the scope — so from
+           either side the press is a paint, not a page load. Only for THIS
+           document's module: another module is its own document and loads.
+           Setting `current` to null lands where the module always opens,
+           because the first paint's own question (entryDest) answers it and
+           the remembered place has already been spent (restoreWhere asks
+           once per page). */
+        if (!cross && MODULE && go === "/" + SLUG + "/" + MODULE &&
+            typeof current !== "undefined" && current === "setup" && typeof paint === "function") {
+          if (typeof leaveModes === "function") leaveModes();
+          setScope(null);
+          current = null; currentSub = null;
+          paint(); window.scrollTo(0, 0);
+          quietly();
+          return;
+        }
+        if (cross && typeof current !== "undefined" &&
+            typeof setupLandingKey === "function") {
+          var k = setupLandingKey(cross);
+          if (k) {
+            if (currentSub !== k && typeof leaveModes === "function") leaveModes();
+            setScope(cross);
+            current = "setup"; currentSub = k;
+            paint(); window.scrollTo(0, 0);
+            quietly();
+            return;
+          }
+        }
+        var href = cross ? (cross === "client" ? "/" + SLUG + "/setup" : "/" + SLUG + "/" + cross + "/setup") : go;
+        if (href === location.pathname) return;
+        location.assign(href);
+      });
+      /* A PRESS ANYWHERE ELSE CLOSES AN OPEN MENU (§401, Islam: "when I click
+         outside them the menue should close"). `<details>` has no such
+         behaviour of its own. On pointerdown, as the chat corner does
+         (§100.4): a menu that lingers until the mouse comes up reads as
+         having missed the press. Opening one menu shuts the other, and
+         Escape shuts either. Wired once, beside the one listener above. */
+      var shutAll = function (keep) {
+        Array.prototype.forEach.call(nav.querySelectorAll("details[open]"), function (d) { if (d !== keep) d.open = false; });
+      };
+      document.addEventListener("pointerdown", function (ev) {
+        var inside = ev.target && ev.target.closest ? ev.target.closest("nav.trail details") : null;
+        shutAll(inside);
+      }, true);
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape" && nav.querySelector("details[open]")) shutAll(null);
+      });
+    }
+    var sep = '<span class="trsep" aria-hidden="true">›</span>';
+    /* THE CLIENT STEP LISTS THE OTHER CLIENTS (§401, Islam: "when I click on
+       the name of the client drop down I should get the other clients"). The
+       list is the server's (`clients`: visible AND openable, the cards' own
+       two rules, §42), asked once per page. Until it answers the menu says
+       so, and if it cannot answer the console is still the way (§61). No
+       mark: the client's logo is not on this bar any more (Islam: "the logo
+       of the client shouldn't appear in the top navigation bar"). */
+    var clientItems = [];
+    var others = (trailClients || []).filter(function (x) { return x.key !== SLUG; });
+    if (trailClients === null) clientItems.push({ label: "Reading your clients…", quiet: true });
+    others.forEach(function (x) { clientItems.push({ label: x.name, go: "/" + x.key }); });
+    if (trailClients && !others.length) clientItems.push({ label: "No other clients", quiet: true });
+    clientItems.push({ rule: true });
+    clientItems.push({ label: "All clients", go: "/platform#clients" });
+    /* THE MODULE STEP LISTS THE OTHER MODULES, THEN THE CLIENT'S SETTINGS
+       (§401, his words: "the other modules and then the separator and the
+       client settings"). On the client's own settings the step reads "Client
+       settings" and opens the same menu, where each module goes to THAT
+       module's settings — from a settings page that is the next place, and
+       it keeps §362.1's one press. */
+    /* §424: THE MODULES THEMSELVES LEAD EVERY MENU (Islam: "I need to
+       reverse back to the modules from the drop down of the last part").
+       On the client's settings the menu held only the modules' SETTINGS, and
+       on a module's own settings it left out the module you are in — so
+       neither had a way back into a module. Now: the modules, a rule, then
+       the settings pages. (Its leaving out the module you are on, on that
+       module's normal page, is reversed by §425 below.) */
+    /* §425: ONE FULL LIST IN EVERY CASE (Islam: "why don't I see the 2nd
+       full list in all cases?"). Every module, a rule, every module's
+       settings, then Client settings — on a module's page, on its settings
+       and on the client's settings alike. The page you are on is the bold
+       entry (aria-current) and pressing it does nothing. */
+    var modItems = [];
+    mods.forEach(function (x) {
+      modItems.push({ label: x.label, note: x.note, go: "/" + SLUG + "/" + x.key,
+                      here: !cs && !onSetup && x.key === MODULE });
     });
-    /* ONE LISTENER ON THE MENU, not one per item — and the module you are
-       ALREADY in does nothing rather than reloading the page under somebody
-       (§61's other half: a control that appears to act and does not). */
-    menu.addEventListener("click", function (ev) {
-      var b = ev.target.closest ? ev.target.closest("[data-module]") : null;
-      if (!b || b.dataset.module === MODULE) return;
-      location.assign("/" + SLUG + "/" + b.dataset.module);
+    if (modItems.length) modItems.push({ rule: true });
+    mods.forEach(function (x) {
+      modItems.push({ label: x.label + " settings", go: "cross:" + x.key,
+                      here: !cs && onSetup && x.key === MODULE });
     });
-    d.appendChild(menu);
-    bar.insertBefore(d, bar.firstChild);
-  })();
+    modItems.push({ label: "Client settings", go: "cross:client", here: cs });
+    var third = '<details class="dlmenu trstep trmod"><summary' + (cs ? ' aria-current="page"' : "") + "><span>" +
+      esc(cs ? "Client settings" : (modLabel || "Module")) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(modItems) + "</details>";
+    nav.innerHTML =
+      '<a class="trff" href="/platform">Platform</a>' + sep +
+      '<details class="dlmenu trstep trclient"><summary>' +
+        "<span>" + esc(client) + "</span>" + ICO_DOWN + "</summary>" + menuHTML(clientItems) + "</details>" +
+      sep + third;
+    if (trailClients === null && !trailAsked) askClients();
+  }
+  /* the clients this person may open, asked once per page (§401) */
+  var trailClients = null, trailAsked = false;
+  function askClients() {
+    trailAsked = true;
+    try {
+      fetch("/api/platform", { method: "POST", credentials: "same-origin",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "clients" }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { trailClients = (j && j.ok !== false && Array.isArray(j.clients)) ? j.clients : []; })
+        .catch(function () { trailClients = []; })
+        .then(function () { try { mountTrail(); } catch (e) {} });
+    } catch (e) { trailClients = []; }
+  }
 
   /* ── on arrival: the address is the place ── */
   var here = placeOf(m[2] || "");
@@ -313,7 +466,9 @@
   }
   if (typeof paint === "function") {
     var painted = paint;
-    paint = function () { var r = painted.apply(this, arguments); try { sync(true); scrollToWanted(); } catch (e) {} return r; };
+    paint = function () { var r = painted.apply(this, arguments);
+      try { mountTrail(); } catch (e) {}
+      try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {
     var st = ev.state || placeOf(restOf(location.pathname));

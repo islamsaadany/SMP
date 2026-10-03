@@ -1,0 +1,50 @@
+<title>Fold bars button</title>
+<style>
+:root{--bg:#F4F6FA;--fg:#1B2433;--mute:#5A6577;--line:#D6DCE5;--card:#FFFFFF;--panel:#16325C;--pink:#FFFFFF;--pq:#B7C4D8;--gold:#E6C65C;--goldd:#8A6A12;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E141F;--fg:#E8EDF5;--mute:#A3AEC0;--line:#2B3546;--card:#161E2C;--goldd:#E6C65C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E141F;--fg:#E8EDF5;--mute:#A3AEC0;--line:#2B3546;--card:#161E2C;--goldd:#E6C65C;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);padding:24px 16px 48px}
+.w{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-size:22px;margin:0}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.opt h2{font-size:16px;margin:0}.opt h2 b{color:var(--goldd)}
+.opt p{margin:0;color:var(--mute);font-size:14px}
+.cap{font:700 11px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.scroll{overflow-x:auto}
+.bar{min-width:900px;height:46px;background:var(--panel);color:#E4EBF5;display:flex;align-items:center;gap:22px;padding:0 10px;font-size:15px}
+.bar .home{width:34px;height:34px;border-radius:5px;background:var(--gold);flex:none}
+.bar .on{color:#fff;font-weight:700;box-shadow:inset 0 -3px 0 var(--gold);padding:12px 0}
+.bar .sp{flex:1}
+.gear{flex:none;width:36px;height:30px;border-radius:20px;border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.09);display:grid;place-items:center}
+.gear svg,.ico svg{width:16px;height:16px;stroke:#E4EBF5;fill:none;stroke-width:2}
+.today{color:#E4EBF5;font-size:12px;border:1px solid var(--pq);border-color:rgba(183,196,216,.25);border-radius:4px;padding:3px 9px;opacity:.9}
+.pill{flex:none;display:inline-flex;align-items:center;gap:6px;border-radius:20px;border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.09);color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
+.pill svg{width:13px;height:13px;stroke:#E4EBF5;fill:none;stroke-width:2}
+.ico{flex:none;width:36px;height:30px;border-radius:20px;border:1px solid rgba(255,255,255,.34);background:rgba(255,255,255,.09);display:grid;place-items:center;position:relative}
+.tip{position:absolute;top:36px;right:0;background:#1B2433;color:#fff;font-size:12px;padding:4px 8px;border-radius:4px;white-space:nowrap}
+.thin{min-width:900px;height:28px;background:var(--panel);color:#fff;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12.5px}
+.thin .q{color:var(--pq)}.thin .sp{flex:1}
+.ring{outline:2px dashed var(--gold);outline-offset:4px}
+.pair{display:grid;grid-template-columns:1fr;gap:8px}
+</style>
+<div class="w">
+<h1>Fold bars: the button</h1>
+<p>Drawn at real size in the unit row, right end, beside the settings button. The dashed gold ring marks the button in each picture. The ring is only for this page.</p>
+
+<div class="opt"><h2>Today</h2><p>A thin border nearly the same colour as the bar, so it reads as a faint label rather than a button.</p>
+<div class="scroll"><div class="bar"><span class="home"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail</span><span>Mazaya</span><span>CE</span><span>Online</span><span class="sp"></span><span class="today ring">Fold bars ▴</span><span class="gear"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span></div></div></div>
+
+<div class="opt"><h2>Option 1 <b>(recommended)</b>: a button with the words</h2><p>The same rounded shape, border and fill as the settings button, with the words in its small capitals and an icon in front. It says what it does on first sight. About 115px wide.</p>
+<div class="pair"><span class="cap">Bars showing</span>
+<div class="scroll"><div class="bar"><span class="home"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail</span><span>Mazaya</span><span>CE</span><span>Online</span><span class="sp"></span><span class="pill ring"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M9 5l3-3 3 3"/></svg>Fold bars</span><span class="gear"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span></div></div>
+<span class="cap">Bars folded: the way back uses the same button shape</span>
+<div class="scroll"><div class="thin"><b>Raya Trade</b><span class="q">›</span>Mobile<span class="q">›</span>Copilot<span class="sp"></span><span class="pill ring" style="padding:4px 10px"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M9 19l3 3 3-3"/></svg>Show navigation</span></div></div></div></div>
+
+<div class="opt"><h2>Option 2: an icon only</h2><p>The same size and shape as the settings button, with the words on hover. It takes less room and sits quietly beside the settings button, but you only learn what it does by hovering.</p>
+<div class="pair"><span class="cap">Bars showing (pictured with the hover note open)</span>
+<div class="scroll" style="padding-bottom:30px"><div class="bar"><span class="home"></span><span>Group ▾</span><span class="on">Mobile</span><span>Retail</span><span>Mazaya</span><span>CE</span><span>Online</span><span class="sp"></span><span class="ico ring"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M9 5l3-3 3 3"/></svg><span class="tip">Fold bars</span></span><span class="gear"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></span></div></div>
+<span class="cap">Bars folded</span>
+<div class="scroll"><div class="thin"><b>Raya Trade</b><span class="q">›</span>Mobile<span class="q">›</span>Copilot<span class="sp"></span><span class="ico ring" style="height:22px;width:30px"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16M9 19l3 3 3-3"/></svg></span></div></div></div></div>
+
+<div class="opt"><h2>Which one?</h2><p>Reply with 1 or 2. Either way the button only shows on the Copilot tab, as it does now.</p></div>
+</div>

@@ -61419,3 +61419,62 @@ owner-picker. **Recorded, not done**: the plan workbook carries no Custodian
 column for a direction, so a download-and-upload of the company plan drops
 the custodian — whether it should is a separate question.
 **Merged to `main` 2026-10-03 on Islam's word**, a clean fast-forward, shell `v5.89-direction-seats`. Checked first against a units-on client (Raya Trade's shape): `ownsTopPillar` returns false whenever `buExists`, the seats and the Custodian row draw only inside the top plan (off unless ticked), and the rowDone group branch judges only `group-*` ids — project-done, submit-gate, report-saves, my-reporting, capability-first, top-plan, single-company and `qa.py` all green. Screen and rule change; no sign-out owed, since the rule only ever allows more and never refuses a save that worked before.
+
+## §470 — The cycle board, one line per direction (2026-10-03)
+
+Islam, of Setup › Reporting cycle on a client planned on the company: the
+board drew one row for the whole company, so the office could not see which
+direction was behind or whose it is. Drawn and signed off
+(`design-mockups/cycle-board-directions/2026-10-03_direction-and-project-lines.html`):
+*"A. separate row B. ok C. projects too, draw it"*, then *"1. reporting line
+2. agreed, build it"*.
+
+**THE BLOCK, ONLY WITH THE UNITS OFF.** With `buExists()` false the company's
+row becomes a band (the client's name, *the company's own report · submitted
+by the office*), a row for the company's own objectives carrying the real
+submission state, and one line per running direction (or per project when
+`topWay()` is projects). With the units on nothing here is drawn — Raya Trade's
+board is what it was but for one word.
+
+**NOTHING NEW IS COUNTED.** Every line is a slice of the company's own
+`askedItems()` — a direction's rows by the pillar they sit in (`cid`), a
+project's by the place they report into (`pr:<id>`) — so the lines add up to
+the company's figure and `cycleTotals()` is untouched (§108.1). Asserted as an
+agreement, never as literals (§94.8).
+
+**WHO, AND THE STATE.** Who is §469's custodian, else the owner, else *None
+yet* in `--attn-tx` — outstanding, not a description (§168). A line's state
+is *Submitted* when the company is, *Draft saved* when §469's `doneMark` is
+set on that direction, otherwise read from its rows.
+
+**"REPORTING LINE"** replaces the client's unit word as the first column's
+header for every client (his 1): the column now holds units, the company's
+objectives, directions, projects, capabilities and functions.
+
+**THE COMPANY'S OBJECTIVES ARE ASKED (his 2).** Measuring the mockup found the
+company's key objectives were on no report at all once the units were off —
+nobody below to roll them up from. `topReportKOs()` puts `GROUP.keyObjectives`
+on the company report (`reportItems`, `fnReportItems`, `findById`,
+`holderItemById`) only while the units are off, and nowhere else — not on
+`topAsUnit()`, or the projects card's score and the plan pages would move.
+On the server, `topView()` carries the objectives' REPORTED fields alone
+(`topKoView`), so a figure is judged as the company report's (`mayReportTop`:
+the office and the group CEO; a direction's owner is refused) while a rename
+stays GROUP_OWN's, office-only, and is judged once. **And the first build
+carried them in the view while nothing ever compared them** — `collectUnit` ran
+only when the plan, SWOT or projects changed — so a figure went unjudged and
+three of the new tests passed for nothing; found because the refusal test went
+green. The allowed cases now assert the change was JUDGED (§113.8). Cost
+stated: a refused objective figure is named by its row, not its words — the
+name is left out of the view so a rename is never judged twice, and a copy
+elsewhere would drop any hidden carrier.
+
+`checks/cycle-board-lines.py` all good, red from the SOURCES four ways
+(the block off 4, the objectives off 3, the warning ink 1, the draft mark 1).
+`test-authorize.js` §470 921/0, red 3 with the new compare removed. Neighbours
+green: cycle-board, top-projects, single-company, direction-seats, top-plan,
+report-blockers, submit-gate, attention-rows, cycle-edit. Shell
+`v5.90-cycle-board-lines`. **Recorded, not this work's**: `setup-header.py` fails one
+assertion on the Focus page (`'thead': ['Key measure','Target','Focus']`), identically
+on the build before this change (§303). **On the branch, not merged.**
+

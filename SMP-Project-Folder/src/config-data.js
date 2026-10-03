@@ -5519,7 +5519,7 @@ function reportItems(u){
      how a chip comes to open a pillar the count was never about. */
   var koPlace = { key:"ko", label:L("keyobj","bu") };
   /* §437: a function whose objectives are switched off is not asked for them. */
-  (fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives) : []).forEach(function(m){
+  (fnKoCounted(u.ukey) ? SMPRules.shown(u.topLayer ? topReportKOs() : u.keyObjectives) : []).forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"",
                place:koPlace });
   });
@@ -5694,7 +5694,11 @@ function fnReportItems(subject){
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    (!c.own || fnKoCounted(c.id) ? SMPRules.shown(c.keyObjectives) : []).forEach(function(m){
+    /* §470: the company's holder ("u:group") reads the Foundation's own
+       objectives, with the units off — never put on the holder itself, or
+       the company's projects card would start scoring them (§466). */
+    var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
+    (!c.own || fnKoCounted(c.id) ? SMPRules.shown(kos) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
                  place:koPlace });
     });
@@ -8371,6 +8375,17 @@ function topAsUnit(){
            projects:topProjectsList(),
            active:true };
 }
+/* §470: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
+   OFF. Islam, of the board drawn for him: *"agreed"*. While units exist the
+   company's objectives are rolled up from them and asking for them here would
+   be figures nobody enters (§428's reason, kept); planned on the company
+   there is nobody below, so the office enters them before submitting. The
+   list is the Foundation's own (GROUP.keyObjectives) — one list, read here,
+   never copied onto the top layer's view (§53.5). */
+function topReportKOs(){
+  if (SMPRules.buExists(GROUP)) return FN_NO_ROWS;
+  return Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : FN_NO_ROWS;
+}
 function topWritable(){
   if (!Array.isArray(GROUP.items)) GROUP.items = [];
   if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
@@ -10670,6 +10685,10 @@ function holderItemById(id){
       (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
+  /* §470: the company's own objectives, on its report in projects. */
+  if (!hit) topReportKOs().forEach(function(m){
+    if (m.id === id) hit = { kind:"ko", obj:m, holder:unitOwnHolder("group") };
+  });
   return hit;
 }
 /* WHICH HOLDER A PROJECT BELONGS TO (§334, correcting §326).
@@ -10710,6 +10729,8 @@ function findById(u, id){
                                    obj:{ name:arr[idx] }, swot:{ arr:arr, idx:idx } };
   }
   u.keyObjectives.forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
+  /* §470: the company's report asks the Foundation's objectives. */
+  if (u.topLayer) topReportKOs().forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
   u.items.forEach(function(p){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };
     p.measures.forEach(function(m){ if (m.id === id) hit = { kind:"MEASURE", obj:m, pillar:p }; });

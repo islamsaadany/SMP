@@ -12336,7 +12336,7 @@ function reportItems(u){
      how a chip comes to open a pillar the count was never about. */
   var koPlace = { key:"ko", label:L("keyobj","bu") };
   /* §437: a function whose objectives are switched off is not asked for them. */
-  (fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives) : []).forEach(function(m){
+  (fnKoCounted(u.ukey) ? SMPRules.shown(u.topLayer ? topReportKOs() : u.keyObjectives) : []).forEach(function(m){
     out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"",
                place:koPlace });
   });
@@ -12511,7 +12511,11 @@ function fnReportItems(subject){
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    (!c.own || fnKoCounted(c.id) ? SMPRules.shown(c.keyObjectives) : []).forEach(function(m){
+    /* §470: the company's holder ("u:group") reads the Foundation's own
+       objectives, with the units off — never put on the holder itself, or
+       the company's projects card would start scoring them (§466). */
+    var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
+    (!c.own || fnKoCounted(c.id) ? SMPRules.shown(kos) : []).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true,
                  place:koPlace });
     });
@@ -15188,6 +15192,17 @@ function topAsUnit(){
            projects:topProjectsList(),
            active:true };
 }
+/* §470: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
+   OFF. Islam, of the board drawn for him: *"agreed"*. While units exist the
+   company's objectives are rolled up from them and asking for them here would
+   be figures nobody enters (§428's reason, kept); planned on the company
+   there is nobody below, so the office enters them before submitting. The
+   list is the Foundation's own (GROUP.keyObjectives) — one list, read here,
+   never copied onto the top layer's view (§53.5). */
+function topReportKOs(){
+  if (SMPRules.buExists(GROUP)) return FN_NO_ROWS;
+  return Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : FN_NO_ROWS;
+}
 function topWritable(){
   if (!Array.isArray(GROUP.items)) GROUP.items = [];
   if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
@@ -17487,6 +17502,10 @@ function holderItemById(id){
       (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
+  /* §470: the company's own objectives, on its report in projects. */
+  if (!hit) topReportKOs().forEach(function(m){
+    if (m.id === id) hit = { kind:"ko", obj:m, holder:unitOwnHolder("group") };
+  });
   return hit;
 }
 /* WHICH HOLDER A PROJECT BELONGS TO (§334, correcting §326).
@@ -17527,6 +17546,8 @@ function findById(u, id){
                                    obj:{ name:arr[idx] }, swot:{ arr:arr, idx:idx } };
   }
   u.keyObjectives.forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
+  /* §470: the company's report asks the Foundation's objectives. */
+  if (u.topLayer) topReportKOs().forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
   u.items.forEach(function(p){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };
     p.measures.forEach(function(m){ if (m.id === id) hit = { kind:"MEASURE", obj:m, pillar:p }; });
@@ -31141,8 +31162,10 @@ function renderReport(u){
   return waitingNote + reportBar(u.ukey) +
     bar +
     /* §428: the top layer's own report asks its pillars alone — its key
-       objectives are the group's Foundation, not figures entered here. */
-    (u.topLayer ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+       objectives are the group's Foundation, not figures entered here.
+       §470: until the business units are off, when there is nobody below to
+       roll them up from and the office enters them here (`topReportKOs`). */
+    (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -41699,7 +41722,91 @@ function renderCycle(){
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   };
-  var rows = boardUnitTargets().map(boardRow).join("");
+  /* ── §470: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
+     Islam, of the board on El Abd: the whole company was ONE row ("the group
+     · SMO team"), every direction added together, so nobody could see which
+     direction was behind or whose it is. Drawn and signed off (*"A. separate
+     row B. ok C. projects too"*, then *"1. reporting line 2. agreed"*): with
+     the business units off, the company's row becomes a block — its own
+     objectives on a row of their own carrying the real submission state, then
+     one row per direction (or per project, when it plans in projects).
+
+     NOTHING NEW IS COUNTED. Every line is a slice of the company's own
+     `askedItems()` — a direction's rows by the pillar they sit in (`cid`), a
+     project's by the place they report into — so the lines add up to the
+     company's figure and the headline still counts the company ONCE
+     (`cycleTotals` is untouched, §108.1). With the units on, nothing here is
+     drawn and the board is byte-for-byte what it was (Raya Trade). */
+  var lineRow = function(name, who, nobody, list, st, koRow){
+    var by = { obj:[0,0], mea:[0,0], tac:[0,0] }, done = 0, miss = 0;
+    list.forEach(function(x){
+      var slot = x.kind === "objective" ? "obj"
+               : (x.kind === "measure" || x.kind === "outcome" || x.kind === "bdcell") ? "mea" : "tac";
+      by[slot][1]++;
+      if (rowAnswered(x)) { by[slot][0]++; done++; }
+      if (needsNote(x)) miss++;
+    });
+    var pctD = list.length ? Math.round(done / list.length * 100) : 0;
+    var cell = function(k, show){
+      return '<td class="num">' + (show ? by[k][0] + '/' + by[k][1] : '\u2014') + '</td>';
+    };
+    return '<tr data-line><td><b>' + esc(name) + '</b></td>' +
+      '<td class="why' + (nobody ? ' nobody' : '') + '" style="margin:0">' + esc(who) + '</td>' +
+      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
+        '<i style="width:' + pctD + '%"></i></span>' +
+        '<span class="mono why" style="margin:0">' + done + '/' + list.length + '</span></div></td>' +
+      cell("obj", koRow) + cell("mea", !koRow) + cell("tac", !koRow) +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
+      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
+  };
+  /* A line's own state: the company's submission covers every line; short of
+     that, a direction or project its owner has pressed Save draft on says so
+     (§469's own mark, `doneMark`), and otherwise it is read from its rows. */
+  var lineState = function(id, list){
+    if (REVIEW.submitted && REVIEW.submitted.group) return { key:"done", label:"Submitted" };
+    if (doneMark(id)) return { key:"part", label:"Draft saved" };
+    var any = list.some(rowAnswered);
+    return any ? { key:"part", label:"In progress" } : { key:"late", label:"Not started" };
+  };
+  var lineWho = function(x){
+    var n = String((x && (x.custodian || x.owner)) || "").trim();
+    return n ? { name:n, nobody:false } : { name:"None yet", nobody:true };
+  };
+  var topLines = function(){
+    var u = unitLike("group");
+    var asked = askedItems(u);
+    var kos = asked.filter(function(x){ return x.kind === "objective"; });
+    var out = '<tr class="dxband"><th colspan="8">' + esc(GROUP.org || placeLabel("group")) +
+      '<em>the company\u2019s own report \u00b7 submitted by the office</em></th></tr>' +
+      lineRow(L1("topword") + " objectives", boardWho("group"), false, kos, unitState(u), true);
+    var lines = [];
+    if (topWay() === "projects") {
+      var h = unitOwnHolder("group");
+      topProjectsList().forEach(function(p){
+        var mine = asked.filter(function(x){ return x.place && x.place.key === "pr:" + p.id; });
+        var w = lineWho(p);
+        lines.push(lineRow(projCode(holderCodeOwner(h), p) + "  " + (p.name || ""),
+          w.name, w.nobody, mine, lineState(p.id, mine), false));
+      });
+      out += '<tr class="dxband"><th colspan="8">' + L("project","bu") +
+        '<em>' + lines.length + ' reporting</em></th></tr>';
+    } else {
+      (u.items || []).forEach(function(p, pi){
+        if (!runsNow(p)) return;
+        var mine = asked.filter(function(x){ return x.cid === p.id && x.kind !== "objective"; });
+        var w = lineWho(p);
+        lines.push(lineRow(pillarCode(u, pi) + "  " + (p.name || ""),
+          w.name, w.nobody, mine, lineState(p.id, mine), false));
+      });
+      out += '<tr class="dxband"><th colspan="8">' + L("pillar","bu") +
+        '<em>' + lines.length + ' reporting</em></th></tr>';
+    }
+    return out + lines.join("");
+  };
+  var splitTop = !SMPRules.buExists(GROUP);
+  var rows = boardUnitTargets().map(function(t){
+    return (t === "group" && splitTop) ? topLines() : boardRow(t);
+  }).join("");
 
   /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105), ALL OF THEM (§245) ──
      A submission the SMO cannot see anywhere is half a feature. They go in the
@@ -42093,7 +42200,7 @@ function renderCycle(){
       : '') +
     section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
     section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">' + L1("unitword") + '</th><th>Reporting</th>' +
+      '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
         '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
         '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +

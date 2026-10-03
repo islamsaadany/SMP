@@ -1340,6 +1340,12 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-03 — the cycle board, one line per direction (§470)
+
+Built from the signed-off mockup. On Setup › Reporting cycle › Who has reported, a client planned on the company with its business units switched off no longer shows one row for the whole company. It shows a block: the company's name, then a **company objectives** row (the office's, with the company's real submission state), then one line per **direction** — or per **project** when the company plans in projects. Each line names who reports it (the custodian, else the owner, else **"None yet"** in the warning colour), its progress, its measures and tactics, notes owed, and its state: Not started, In progress, **Draft saved** once its owner pressed Save draft, or **Submitted** once the company has. The lines add up to the company's own count, and the totals at the top count the company once. The first column is now called **Reporting line** for every client. And the company's own key objectives are now asked for on the company's Reporting page when the units are off: the office and the group CEO enter them, a direction's owner cannot, and renaming one stays the office's. Raya Trade, which has business units, sees only the new column name. Checked on the server (921/0, red when the new rule is taken out) and in the browser (red three ways). On the branch, not merged.
+
+**Next** (agreed, mockup first): the per-direction decks.
+
 ## 2026-10-03 — a direction's owner and custodian (§469)
 
 Built from the signed-off mockup. Each direction on the company's own plan now names an **owner and a custodian**, both picked from the register in the plan's Edit. Both of them read the whole company plan, enter the figures of their own direction only, and save it as a draft (Save draft / Reopen on that direction's band) — nobody else's. Where nobody is named, the band says **"None yet — the Strategy office fills this in"**, and the office does. Nothing new appears on Roles & access: it is a rule, like the owner's was. The company's Capabilities section now shows each capability's own **Owner** and **Custodian** (set on Setup › Capabilities), read-only. Server and screen agree: 914/0 on the rules, the new browser check red when either half is broken. Merged to `main` 2026-10-03. Raya Trade, which plans on its business units, sees no change: the new rights only exist while the units are switched off.

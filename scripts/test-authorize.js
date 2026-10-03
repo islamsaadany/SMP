@@ -5269,5 +5269,43 @@ console.log("\n§469 · a direction's owner and custodian");
   check("§469: the office names a custodian", v.ok, (v.refusals || []).join(" / "));
 })();
 
+/* ── §470: THE COMPANY'S OBJECTIVES ARE ENTERED ON ITS OWN REPORT ─────────
+   With the business units off there is nobody below to roll the company's key
+   objectives up from, so the office (and the group CEO, who may report the
+   company) enters their figures on the company report. Their PLAN stays the
+   office's, and a direction's owner reaches only their own direction. BOTH
+   ENDS (§94.2): with the units on, nobody but the office moves them at all. */
+console.log("\n§470 · the company's objectives on its own report");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([{ key: "t470_own", name: "Testcase Direction Owner", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner",
+      measures: [{ id: "group-P1-M1", name: "Revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+      tactics: [] }];
+  function as(base, who, mutate) { const inc = clone(base); mutate(inc); return A.authorize(base, inc, personOf(base, who)); }
+  const fig = function (inc) { inc.group.keyObjectives[0].actual = "9 B EGP"; };
+  /* "Allowed" also passes when nothing looked at the change at all, so each
+     allowed case asserts the figure was JUDGED as the company report's. */
+  const seen = function (v) { return (v.changes || []).some(function (c) { return c.kind === "unitReporting" && c.target === "group"; }); };
+  let v = as(B, "smo", fig);
+  check("§470: the office enters a company objective's figure", v.ok && seen(v), JSON.stringify(v.changes));
+  v = as(B, "ceo", fig);
+  check("§470: …so does the group CEO", v.ok && seen(v), JSON.stringify(v.changes));
+  v = as(B, "t470_own", fig);
+  check("§470 REFUSED: a direction's owner on the company objectives", !v.ok, "was ALLOWED");
+  v = as(B, "ceo", function (inc) { inc.group.keyObjectives[0].name = "Renamed"; });
+  check("§470 REFUSED: the group CEO renaming an objective (the plan stays the office's)", !v.ok, "was ALLOWED");
+  v = as(B, "ceo", function (inc) { inc.group.keyObjectives[0].name = "Renamed"; inc.group.keyObjectives[0].actual = "9 B EGP"; });
+  check("§470 REFUSED: a figure does not carry a rename in with it", !v.ok, "was ALLOWED");
+  const U = clone(SEED);
+  v = as(U, "ceo", fig);
+  check("§470 REFUSED: with business units the company objectives stay the office's", !v.ok, "was ALLOWED");
+  v = as(U, "smo", fig);
+  check("§470: …and the office still edits them there", v.ok, (v.refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

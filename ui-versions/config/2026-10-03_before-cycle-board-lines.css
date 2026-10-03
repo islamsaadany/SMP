@@ -2988,6 +2988,3 @@
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
-  /* §470: a reporting line with nobody named over it says so in the warning
-     ink, never the quiet grey — "None yet" is outstanding, not a description. */
-  .cfg td.why.nobody { color:var(--attn-tx); }

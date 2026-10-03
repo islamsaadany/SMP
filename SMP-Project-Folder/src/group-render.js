@@ -6527,8 +6527,10 @@ function renderReport(u){
   return waitingNote + reportBar(u.ukey) +
     bar +
     /* §428: the top layer's own report asks its pillars alone — its key
-       objectives are the group's Foundation, not figures entered here. */
-    (u.topLayer ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+       objectives are the group's Foundation, not figures entered here.
+       §470: until the business units are off, when there is nobody below to
+       roll them up from and the office enters them here (`topReportKOs`). */
+    (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }

@@ -61370,3 +61370,51 @@ plan section) — red 7 on the build before. Structure, client-setup,
 detail-layers, top-plan, top-projects, single-company, plan-switch,
 structure-sections, fn-sw-default and setup-live-rows green.
 
+
+
+## §469 — A company direction's owner and custodian (2026-10-03)
+
+Islam, of `design-mockups/owner-custodian/2026-10-02_direction-seats.html`:
+*"ok agreed, build it"* — after the content was aligned in chat: each
+direction has an owner AND a custodian; where nobody is named the Strategy
+office fills it in; capabilities keep their own head and custodian (§412).
+
+**A RULE, NOT A ROW.** `SMPRules.ownsTopPillar` already let a direction's
+named owner report it while the business units are off (§447); it now takes
+the custodian beside the owner, through the same `namedOn` match, and the
+general form reads both seats across `GROUP.items`. Nothing is added to Roles
+& access — the seat is a property of the THING (§33), like §447's owner.
+**Naming either seat stays the office's**: `custodian` is a plan field on the
+pillar, so a change falls to `unitPlan` like the owner (asserted both ways).
+
+**SAVE DRAFT, ONE DIRECTION WIDE.** §309's control is the bounded owner's,
+asked through `boundedHere` — false for the group — so a direction's seat had
+no way to close its direction. `doneCtl` gains a group branch (`seated` =
+not `mayReportTop` and `ownsTopPillar(owner, custodian)`), `ownDraftShut`
+shuts a saved direction for everybody except those `mayReportTop` allows (the
+office and the CEO report the whole top layer and are never bounded by a
+draft), and `lib/authorize.js`'s `rowDone` gains a `group` branch:
+`containerIndex` now carries the company's own directions with their
+custodian, and the save is refused unless the person may report the top layer
+or holds that direction's seat. The reporting row carries `pcust` beside
+`pown` so `canReportRow` asks the same pair.
+
+**THE EMPTY SEAT IS SAID**, in the attention ink and never the alarm (§168):
+*"None yet — the Strategy office fills this in"*, because an empty seat is a
+state of a healthy plan, not a fault. Seats show on the PLAN band only (the
+mockup's own placement); read and pen, same builder.
+
+**THE CAPABILITIES SHOW THEIR OWN SEATS, READ-ONLY**: two columns on the
+company's Strategy › Capabilities section, read from `c.head` / `c.custodian`
+through `personName`; a key the register no longer holds reads as a dash.
+Set on Setup › Capabilities, the one door for them (§53.5).
+
+`checks/direction-seats.py` makes its state (§255) and asserts both ends;
+falsified from the SOURCES (§276): the band's seats removed **3 red**, the
+custodian dropped from Save draft **2 red**. `test-authorize.js` §469, 8 new
+assertions, 914/0, red **2** with the custodian dropped from the rule and
+**2** with the rowDone group branch refusing everyone. Neighbours green:
+top-plan, plan-level, single-company, top-projects, project-done, pillar-kind,
+owner-picker. **Recorded, not done**: the plan workbook carries no Custodian
+column for a direction, so a download-and-upload of the company plan drops
+the custodian — whether it should is a separate question.

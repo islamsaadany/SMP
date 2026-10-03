@@ -7993,6 +7993,19 @@ details.dov[open]>summary .dovpeek{display:none}
   padding:2px 10px; margin-right:8px; white-space:nowrap; }
 html[data-stale] #panel { cursor:progress; }
 
+/* ── A COMPANY DIRECTION'S OWNER AND CUSTODIAN ON ITS BAND (§469) ────────
+   Beside the kind, in the band's own quiet ink, so the seats read as facts
+   about the direction rather than as a second heading. The kind pill carries
+   `margin-left:auto` on the plan band, so the seats follow it at a gap
+   rather than splitting the free space with it. An empty pair wears the
+   attention ink (§168): outstanding, never broken. */
+.pband.planband .pill.kind + .pband-r { margin-left:14px; }
+.pbseats { font-size:12.5px; color:var(--ink-2); white-space:nowrap; }
+.pbseats.none { color:var(--attn-tx); }
+.pbseat-k { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+            color:var(--ink-3); margin-right:5px; }
+.pbseats .pbseat-k + .pbseat-k, .pbseats > .pbseat-k:not(:first-child) { margin-left:2px; }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.

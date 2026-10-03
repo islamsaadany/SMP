@@ -5037,8 +5037,7 @@ function canReportRow(unitKey, x){
      direction's owner enters the rows of their own direction. */
   if (unitKey === "group")
     return SMPRules.mayReportTop(world(), viewer()) ||
-           SMPRules.ownsTopPillar(world(), viewer(), (x && x.pown) || "",
-                                  (x && x.pcust) || "");
+           SMPRules.ownsTopPillar(world(), viewer(), (x && x.pown) || "");
   /* §341: `areaOfTarget()`, for the reason it was named once (§330.5) — this
      ternary is the same question one function below, and it answered "unit"
      for a capability while `boundedHere` two hundred lines down answered
@@ -5553,12 +5552,12 @@ function reportItems(u){
        pages disagree about whether a row is shut. */
     SMPRules.shown(p.measures).forEach(function(m){
       out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"",
-                 owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
     SMPRules.shown(p.tactics).forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
                  sub:spanLabel(t), asked:tacticDue(t),
-                 owner:t.owner, collaborators:t.collaborators, pown:p.owner, pcust:p.custodian,
+                 owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                  cid:p.id, place:place });
     });
     /* §343: AND A BREAKDOWN'S CELLS, one item per cell rather than one per
@@ -5575,7 +5574,7 @@ function reportItems(u){
       out.push({ id:c.row.id + "|" + c.col.id, noteId:c.row.id,
                  obj:c.row, col:c.col, kind:"bdcell",
                  group:head, sub:bdColWord(p, c.col),
-                 owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id, place:place });
+                 owner:p.owner, pown:p.owner, cid:p.id, place:place });
     });
   });
   return out;
@@ -5838,11 +5837,6 @@ function setDoneMark(id, on){
    a cell the server would accept and the screen refuses, or the reverse. */
 function ownDraftShut(target, id){
   if (!id) return false;
-  /* §469: a company direction saved by its owner or custodian shuts for
-     them, never for the office or the CEO, who report the whole top layer
-     and are not bounded by anybody's draft (§309's shape, one layer up). */
-  if (String(target) === "group")
-    return !!doneMark(id) && !SMPRules.mayReportTop(world(), viewer());
   return !!doneMark(id) && boundedHere(target);
 }
 /* Whose mark it is, asked of the SHARED rule so the screen draws exactly what

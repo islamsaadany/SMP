@@ -1532,10 +1532,10 @@ function ctxOfUnit(u) {
   (u && u.items || []).forEach(function (p) {
     (p.measures || []).forEach(function (m) {
       out[m.id] = { row: { owner: p.owner, collaborators: m.collaborators },
-                    pillarOwner: p.owner };
+                    pillarOwner: p.owner, pillarCust: p.custodian };
     });
     (p.tactics || []).forEach(function (t) {
-      out[t.id] = { row: t, pillarOwner: p.owner };
+      out[t.id] = { row: t, pillarOwner: p.owner, pillarCust: p.custodian };
     });
   });
   return out;
@@ -1617,7 +1617,8 @@ function containerIndex(stored) {
          which is the wrong shape of answer to leave to walk order. */
       if (seen[k]) { out[k] = null; return; }
       seen[k] = 1;
-      out[k] = { target: target, owner: x.owner, name: x.name || null };
+      out[k] = { target: target, owner: x.owner, custodian: x.custodian || null,
+                 name: x.name || null };
     });
   };
   Object.keys(stored.units || {}).forEach(function (uk) {
@@ -1631,6 +1632,10 @@ function containerIndex(stored) {
   ((stored.group || {}).capabilities || []).forEach(function (c) {
     if (c && c.id) take(c.projects, "cap:" + c.id);
   });
+  /* §469: and the company's own directions, so a direction's owner or
+     custodian can save their own direction as a draft — the act a project
+     owner has had since §309. */
+  take((stored.group || {}).items, "group");
   return out;
 }
 
@@ -1923,7 +1928,7 @@ function authorize(stored, incoming, person) {
           const tctx = ctxOfUnit(topView(stored.group));
           const notMineT = ch.ids.filter(function (id) {
             const c = tctx[id];
-            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "");
+            return !c || !R.ownsTopPillar(w, person, c.pillarOwner || "", c.pillarCust || "");
           });
           if (notMineT.length)
             no("Your role reports only your own direction — " + notMineT.length +
@@ -2024,6 +2029,20 @@ function authorize(stored, incoming, person) {
           return;
         }
         const t = String(c.target || "");
+        /* §469: A COMPANY DIRECTION is saved by its owner or custodian, or by
+           whoever reports the whole top layer (the office and the CEO) —
+           the same two rules its figures are judged by, never a matrix cell. */
+        if (t === "group") {
+          if (locked && !office) {
+            no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
+            return;
+          }
+          if (!R.mayReportTop(w, person) &&
+              !R.ownsTopPillar(w, person, c.owner || "", c.custodian || ""))
+            no("Saving " + (c.name ? "“" + c.name + "”" : "a direction") +
+               " is its owner's or its custodian's.");
+          return;
+        }
         /* §334: A CAPABILITY IS JUDGED IN THE FUNCTION AREA, because that is
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head

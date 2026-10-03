@@ -5230,5 +5230,44 @@ console.log("\n§466 · a company project's owner");
   check("§466 REFUSED: an owner switching how the company plans", !v.ok, "was ALLOWED");
 })();
 
+/* ── §469: A DIRECTION'S OWNER AND ITS CUSTODIAN ──────────────────────────
+   Each company direction names an owner and a custodian; both report their
+   own direction and save it as a draft, neither touches another direction,
+   and naming either stays the office's. BOTH ENDS (§94.2). */
+console.log("\n§469 · a direction's owner and custodian");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t469_own", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t469_cus", name: "Testcase Direction Custodian", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian",
+      measures: [{ id: "group-P1-M1", name: "Revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+      tactics: [] },
+    { id: "group-P2", code: "EA02", name: "Direction two", sub: "", kind: "", theme: "", owner: "Somebody Else Entirely",
+      measures: [{ id: "group-P2-M1", name: "Share", dir: ">=", target: "10%", compile: "Latest", actual: "" }],
+      tactics: [] }];
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  function done(id) { return function (inc) { inc.review = Object.assign({}, inc.review); inc.review.done = Object.assign({}, inc.review.done); inc.review.done[id] = { by: "x", at: "3 Oct 2026" }; }; }
+  let v = as("t469_cus", function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; });
+  check("§469: a direction's custodian reports their own direction", v.ok, (v.refusals || []).join(" / "));
+  v = as("t469_cus", function (inc) { inc.group.items[1].measures[0].actual = "5%"; });
+  check("§469 REFUSED: the custodian on another direction", !v.ok, "was ALLOWED");
+  v = as("t469_own", done("group-P1"));
+  check("§469: the owner saves their direction as a draft", v.ok, (v.refusals || []).join(" / "));
+  v = as("t469_cus", done("group-P1"));
+  check("§469: …so does the custodian", v.ok, (v.refusals || []).join(" / "));
+  v = as("t469_own", done("group-P2"));
+  check("§469 REFUSED: saving somebody else's direction", !v.ok, "was ALLOWED");
+  v = as("smo", done("group-P2"));
+  check("§469: the office saves any direction", v.ok, (v.refusals || []).join(" / "));
+  v = as("t469_cus", function (inc) { inc.group.items[0].custodian = "Testcase Direction Owner"; });
+  check("§469 REFUSED: a custodian renaming who holds the seat", !v.ok, "was ALLOWED");
+  v = as("smo", function (inc) { inc.group.items[1].custodian = "Testcase Direction Custodian"; });
+  check("§469: the office names a custodian", v.ok, (v.refusals || []).join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

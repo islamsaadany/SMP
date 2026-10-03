@@ -1619,14 +1619,6 @@ function capsTable(){
    El Abd, planned in pillars). One row per capability with the way into its
    own pages, which are unchanged — the navigation row no longer carries a
    Capabilities side, so this is where they are reached. */
-/* §469 — the capability's own Owner and Custodian (§412), READ here: they
-   are set on Setup › Capabilities, the one door for them, so this column says
-   who holds the seat and never offers to change it (§53.5). A key the
-   register no longer holds reads as nobody (&mdash;), never as the key. */
-function seatName(key){
-  var n = key ? personName(key) : "";
-  return n && n !== key ? esc(n) : '<span class="why">&mdash;</span>';
-}
 function renderTopCaps(){
   var caps = capsReachable();
   if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
@@ -1637,13 +1629,12 @@ function renderTopCaps(){
     var v = pil ? unitPillars(cu) : capPerf(c);
     return '<tr><td>' + esc(c.name) + (fn ? '<span class="why">' + esc(fn.name) + '</span>' : '') + '</td>' +
       '<td>' + (pil ? L("pillar", "bu") : L("project", "bu")) + '</td>' +
-      '<td>' + seatName(c.head) + '</td><td>' + seatName(c.custodian) + '</td>' +
       '<td class="num">' + n + '</td>' +
       '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td>' +
       '<td class="num"><button type="button" class="linkbtn" data-gocap="cap:' + esc(c.id) + '">Open</button></td></tr>';
   }).join("");
   return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
-    '<th style="width:30%">' + L1("capability") + '</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th class="num">Rows</th>' +
+    '<th style="width:44%">' + L1("capability") + '</th><th>Planned in</th><th class="num">Rows</th>' +
     '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
@@ -6244,13 +6235,13 @@ function renderReport(u){
        still answer alike. */
     var ms = [];
     SMPRules.shown(p.measures).forEach(function(m){
-      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner, pcust:p.custodian,
+      ms.push({ id:m.id, obj:m, kind:"measure", owner:p.owner, pown:p.owner,
                 cid:p.id });
     });
     var ts = [];
     SMPRules.shown(p.tactics).forEach(function(t){
       ts.push({ id:t.id, obj:t, kind:"tactic", sub:spanLabel(t), asked:tacticDue(t),
-                owner:t.owner, collaborators:t.collaborators, pown:p.owner, pcust:p.custodian,
+                owner:t.owner, collaborators:t.collaborators, pown:p.owner,
                 cid:p.id });
     });
     /* §343: AND THE BREAKDOWN'S CELLS ARE ASKED FOR HERE TOO. One item per
@@ -6260,11 +6251,11 @@ function renderReport(u){
        the same object and one line clears them all. */
     var bds = bdCells(p).map(function(c){
       return { id:c.row.id + "|" + c.col.id, obj:c.row, col:c.col, kind:"bdcell",
-               owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+               owner:p.owner, pown:p.owner, cid:p.id };
     });
     var bdRowItem = function(r){
       return { id:r.id, obj:r, kind:"bdrow", pillar:p,
-               owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+               owner:p.owner, pown:p.owner, cid:p.id };
     };
     var askedT = ts.filter(function(x){ return x.asked; });
     var done = doneOf(ms) + doneOf(askedT) + doneOf(bds),
@@ -6364,7 +6355,7 @@ function renderReport(u){
                 if (!SMPRules.bdAsked(r, c))
                   return '<td class="cc"><span class="nobody">&mdash;</span></td>';
                 var x = { id:r.id, obj:r, col:c, kind:"bdcell",
-                          owner:p.owner, pown:p.owner, pcust:p.custodian, cid:p.id };
+                          owner:p.owner, pown:p.owner, cid:p.id };
                 return '<td class="cc">' + bdEntry(x) +
                   '<span class="subhd">/ ' + tgtShown(SMPRules.bdTarget(r, c)) + '</span></td>';
               }).join("") +
@@ -6388,7 +6379,7 @@ function renderReport(u){
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
         '</span>' + tally(done, total) +
         /* §301: the finished mark, on the pillar it is about. */
-        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi), p.custodian), p.kind) +
+        doneCtl(u.ukey, p.id, p.owner, pillarCode(u, pi)), p.kind) +
       mTable + bdTable + tTable;
   };
 
@@ -8578,15 +8569,8 @@ function unitRailFor(u, sel){
    NO NEW VOCABULARY: `Mark done` is the ordinary small button every pen bar
    wears, and marked reads as the pill-and-way-back pair the report already
    uses for Submitted · Reopen. Nothing new in the stylesheets. */
-function doneCtl(target, id, owner, code, cust){
+function doneCtl(target, id, owner, code){
   var on = !!doneMark(id);
-  /* §469: a company direction is saved by the person in its seat — its
-     owner or its custodian — through the rule its figures are judged by.
-     The office and the CEO see the state and get no button (§309). */
-  var seated = String(target) === "group"
-    ? !SMPRules.mayReportTop(world(), viewer()) &&
-      SMPRules.ownsTopPillar(world(), viewer(), owner || "", cust || "")
-    : boundedHere(target) && mayMarkDoneOn(target, owner);
   /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
@@ -8604,7 +8588,7 @@ function doneCtl(target, id, owner, code, cust){
      project, which are finished. Drawn only when it is SET, because "not
      saved yet" is the ordinary state and a word for it on every band would
      be furniture (§94.15). */
-  if (!seated)
+  if (!boundedHere(target) || !mayMarkDoneOn(target, owner))
     return on ? '<span class="pbdone" title="' +
       esc("Its owner has saved it as a draft and closed it. They can reopen it.") +
       '">Draft saved</span>' : "";
@@ -8748,22 +8732,6 @@ function yearsLine(it){
 /* The short tag in a rail row, and the greyed row's reason under it. */
 function yearsTagHtml(it){
   return yearsOn(it) ? '<span class="yrtag">' + esc(yearsTag(it)) + '</span>' : "";
-}
-/* ── WHO ANSWERS FOR A COMPANY DIRECTION (§469) ──────────────────────
-   Islam: *"each direction has an owner and a custodian"*, and *"if no owner
-   per direction then the smo fills it by default"*. Read off the band in the
-   band's own quiet type, so nobody has to open the pen to learn whose it is;
-   and where NEITHER seat is named the band says so and says who fills it,
-   in the warning ink, because an empty seat is outstanding rather than broken
-   (§168). A named seat beside an empty one shows the dash (§15.1). */
-function topSeats(it){
-  var o = it && it.owner, c = it && it.custodian;
-  var key = function(w){ return '<span class="pbseat-k">' + w + '</span>'; };
-  if (!o && !c)
-    return '<span class="pbseats none">' + key("Owner") +
-      'None yet &mdash; the Strategy office fills this in</span>';
-  return '<span class="pbseats">' + key("Owner") + (o ? esc(o) : '&mdash;') +
-    ' &middot; ' + key("Custodian") + (c ? esc(c) : '&mdash;') + '</span>';
 }
 function pillarBand(code, name, right, kind, cls){
   /* `cls` (§410) marks the PLAN pane's band, the one the approved restyle
@@ -9178,8 +9146,7 @@ function unitPlanBody(it, u, railed){
            section changes and there is only ever one of it. The head keeps
            what is the PILLAR'S — its code, its name field and Remove. */
         '</div>'
-    : pillarBand(code, it.name, yearsMarks(it) +
-        (u.ukey === "group" ? topSeats(it) : ""), it.kind, "planband") + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name, yearsMarks(it), it.kind, "planband") + paneActs("plan", "u_plan");
   return head +
     /* ── THE PILLAR'S OWNER, CORRECTABLE AT LAST (§130.1) ────────────────
        Islam, asked whether the pillar's owner should join the other four:
@@ -9237,16 +9204,6 @@ function unitPlanBody(it, u, railed){
           '<div class="pfrow"><em>Owner</em><div class="pfval">' +
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
           '</div></div>' +
-          /* §469: a company direction also has a CUSTODIAN, picked from the
-             register the way the owner is. The top layer's alone, because the
-             rule that lets the seat report (`ownsTopPillar`) reads only the
-             company's directions. An emptied seat DELETES its key (§50.6):
-             nobody minted it, so its absence is the default. */
-          (u.ukey === "group"
-            ? '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
-                ownerSel("plan", it.custodian, function(v){
-                  if (v) it.custodian = v; else delete it.custodian; }) +
-              '</div></div>' : '') +
           '<div class="pfrow"><em>Kind</em><div class="pfval">' +
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +

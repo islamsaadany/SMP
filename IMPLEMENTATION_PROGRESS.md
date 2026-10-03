@@ -1340,6 +1340,12 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-03 — a direction's owner and custodian (§469)
+
+Built from the signed-off mockup. Each direction on the company's own plan now names an **owner and a custodian**, both picked from the register in the plan's Edit. Both of them read the whole company plan, enter the figures of their own direction only, and save it as a draft (Save draft / Reopen on that direction's band) — nobody else's. Where nobody is named, the band says **"None yet — the Strategy office fills this in"**, and the office does. Nothing new appears on Roles & access: it is a rule, like the owner's was. The company's Capabilities section now shows each capability's own **Owner** and **Custodian** (set on Setup › Capabilities), read-only. Server and screen agree: 914/0 on the rules, the new browser check red when either half is broken. On the branch, not merged.
+
+**Next** (agreed, each mockup first): the cycle board — one line per direction and capability; then the per-direction decks.
+
 ## 2026-10-02 — the Structure cards in the agreed order (§468)
 
 Built from the signed-off mockup. On Client set-up › Structure each card's name is now its header, bold on a shaded band, with its On/Off beside it; the extra labels on the switches ("This client has them" and the like) are gone. The order is: top level, then the company's pillars and capabilities side by side, then the second layer, then functions, then the third layer and independent capabilities. Those last two sit one under the other when on, and side by side only when both are off. Capabilities inside the company plan show only their plan. Nothing stored changes.

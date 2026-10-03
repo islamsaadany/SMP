@@ -61741,3 +61741,132 @@ skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
 values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
 other two reds (`desc`, the top level) are main's, recorded before.
 
+
+---
+
+## §480 — The edge of a box, and a remove button with a size of its own (2026-10-03)
+
+Islam, of the audit put to him against `PRODUCT_RULES.md` and then of the two
+fixes drawn side by side with today: ***"go with Standard and fix the remove
+button."*** Both are WCAG 2.2 AA items, both were drawn in the platform's own
+pixels before a source moved (rule 1c,
+`design-mockups/rules-audit/2026-10-03_today-and-proposed.html`, published as an
+artifact), and the one worth reading is the second.
+
+**THE REMOVE BUTTON IS A REGRESSION AND NOTHING IN THE PRODUCT CAUSED IT.**
+`.xbtn` had no size at all — it was as wide as the × glyph inside it plus 4px
+of padding either side — so when §402 made Source Sans 3 the one typeface and
+the narrower × came with it, the button went **19.7px → 15px wide**. Not one
+line of its CSS moved. *A control sized by its own content is a control sized
+by whatever typeface it happens to be rendered in*, and the fault arrived three
+hundred commits after the last time anybody edited it.
+
+**THE COST IS NOT THE BUTTON, IT IS THE PAIR, and it is measured.** On a plan
+row the eye that hides a row from the presentation (§233) sits immediately
+before the ×, and the two centres came to **23.5px apart against the standard's
+floor of 24** (WCAG 2.5.8's *spacing exception*, which is what a 24×22 control
+relies on to pass at all) — **18 rows on one plan**. A thumb aiming for the eye
+lands on the ×, and one of the two throws a row away. 15 × 14 → **24 × 24**,
+and the pair gains the two pixels the mockup drew (28 → 30 apart), which cost
+nothing: the field already gives up 62px for the trio and 24 + 6 + 24 + 4 is
+58.
+
+**THE MINIMUM IS ON THE BUTTON, NEVER ON THE PAIR'S SEAT.** The × is drawn in
+thirteen places and only two of them sit beside an eye — a rule keyed on
+`td:has(> .fld + .eyebtn)` would have fixed the reported case and left the other
+eleven at 15px for the next person to find (§53.5 from the other side: one
+answer to *how big is this control*, not one answer per place it appears).
+`inline-flex`, because a 14px glyph in a 24px box has to be centred in it; the
+hover's rounded ground becomes a circle, which is what `border-radius:99px` was
+always drawing towards.
+
+**`--field-line` IS A TOKEN OF ITS OWN AND DELIBERATELY NOT `--line`
+DARKENED.** `--line` is a HAIRLINE: it divides a table's columns and draws a
+card's edge, and at `#D6DCE5` it reads **1.38:1** against the white inside a
+field. For a gridline that is right — it is *meant* to recede. For the edge of
+a box somebody types into it is the whole of what says the box is there, and the
+standard asks 3:1 (WCAG 1.4.11). But `--line` is a border in **332 places**, so
+darkening it would turn every table in the platform into a grid — the fix
+reaching further than the fault. The new token is read by the **14 rules where
+a border IS the control's own boundary**, listed in `arrange.css` beside `.fld`
+so the next one goes on the list rather than into `--line`.
+
+**AND IT IS MEASURED AGAINST BOTH SIDES, WHICH MOVED THE VALUE AWAY FROM THE
+PICTURE HE APPROVED.** The mockup measured the border against the field's own
+inside and offered "Standard" at `#8496B1` — **3.01:1** on white, which is the
+standard met. Measuring what a field actually SITS on found **90 of them on the
+zebra stripe** and 14 more on a grey card, where that same colour reads **2.80
+and 2.68**: so the approved value cleared 3:1 on one edge of the border and
+missed it on the other. `#78899F` is the LIGHTEST colour that clears 3:1 on
+**every** ground a control in this product sits on (white 3.57, zebra 3.33, card
+3.18, page 3.36), which honours the decision — *Standard* means the standard —
+while staying as near the signed-off picture as the rule allows. **A shade
+darker than the shot, and said so** rather than shipped quietly; one line to
+revert if he prefers the picture. **The mockup is left saying `#8496B1`** — it
+is the record of what was signed off, not of what was built (Principle II,
+§302's own handling of the same gap). Dark needed its own measurement rather than a
+mirror (`#68758C`: surface 3.51, zebra 3.26, card 3.14, page 3.89), and all four
+palette blocks carry the token, or a palette switched to would lose it (§38.5's
+own rule: a family converted in part is worse than not converted).
+
+**WHAT IS DELIBERATELY NOT ON THE LIST**, each for its own reason and recorded
+rather than found later: every table, card and chrome border (above);
+**`.fld.off`**, a field the row's own unit has disabled — the standard exempts
+an inactive control, and reading quiet is what `off` is FOR (§251), so following
+the live edge would undo it; and **BUTTONS bordered with `--line`**
+(`.eqcta`, `.segsw`, `.cbtns button`, `.ustrip button`, `.qual button`, the
+wizard's and the flow's), the same rule and the same shortfall — **Islam's
+picture was of FIELDS**, so widening to them without one is a quiet restyle of
+every page in the product (rule 1b).
+
+**`checks/control-targets.py` CLOSES THE WHOLE CLASS, which is why the
+regression lived** — no check in this product measured how big a control is or
+how far it is from its neighbour, so §402's typeface change could move a button
+by 5px with 170 files green. Five sections: the reported pair (**both ends** —
+the pair must be FOUND before it is measured, or an absence passes, §94.2); the
+standard's own spacing test over five pages (a 24px circle on each undersized
+target's box, against every other target's box and every other circle, which is
+the rule as written rather than a paraphrase of it); the edge of a box measured
+against **both** its sides; the CONTROL, reading the tokens directly and
+asserting `--line` is still under 3:1 and still differs from `--field-line`, so
+a later sweep that merged the two goes red; and both palettes. **9 FAILED on
+the build before**, the first printing `eye [24, 22] · × [15, 14] · 23.5 apart`
+verbatim.
+
+**THREE OF ITS OWN FIRST FAILURES WERE THE CHECK.** `.ss-native` reported as an
+18×12 target — it is `opacity:0; pointer-events:none; clip:rect(0 0 0 0)`,
+hidden in place so every existing `change` handler keeps working (§45.5), which
+is my probe modelling less than the thing it measures (§100.3); every probe now
+asks `checkVisibility`, `disabled`/`aria-disabled` and `pointer-events`. §4 read
+`thead th`, which is **navy**, so it reported `#FFFFFF` at 1.00 and would have
+passed whatever happened to `--line` (§113.8) — it reads the tokens now. And the
+token parser read a hex value as `rgb()`, so `--line` came back as `#0605` with
+a NaN ratio **and the assertion that the two differ passed anyway**.
+
+**`.grip` IS THE ONE NAMED, PRINTED EXCEPTION** (§313.34's discipline): the drag
+handle on a Setup row is 20 × 26 and its circle intersects its own row, which is
+a real finding of exactly this class, nested inside the thing it moves, and
+outside what was asked. It is printed on every run so the cost stays visible,
+and asserted to be the ONLY one, so a second undersized control cannot join it
+quietly.
+
+**NO REGRESSION, MEASURED ON BOTH BUILDS** rather than reasoned about. The
+register is byte-identical (33 rows, tallest 39px, chips 78 × 24 and 72 × 24,
+table 1165 in a 1165 box). §270 records the × having dropped to a line of its
+own on the two pages whose rows are not `<td>` — the SWOT's `<li>` and Who we
+are's `<dd>` — so both were measured with the pen open: **Who we are 6 of 6 on
+its field's line before and after**, and the SWOT's 23 rows **64px tall before
+and 64px after**, the × taking its 9px out of the field's own grid track
+(595 → 586px) without the row growing. The SWOT's × sits at the TOP of its track
+rather than the middle, because `.swotlist li` is `align-items:start` — true on
+both builds, and what made my first probe (centres within 8px) read 0 on a
+correct build.
+
+Screen only: no `api/`, `lib/` or `db/` file touched, read off the diff; nothing
+stored moves, nothing is migrated, no rule about who may change what is
+different. `control-targets` all passed · `plan-fields`, `plan-wrap`, `no-jump`,
+`table-fit`, `plan-edit-line`, `setup-arrange`, `gap-fill` green · the four
+`smp-app/public/` generators re-run, because production serves the new stack and
+a frozen stylesheet that stops at `src/` reaches nobody (§329, §332) · `sw.js`
+SHELL bumped, the built file's bytes having changed (§91), confirmed against
+`origin/main` immediately before the push (§94.16).

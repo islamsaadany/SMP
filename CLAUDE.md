@@ -10187,6 +10187,40 @@ python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS
                                 # six assertions here passed for the wrong reason on
                                 # the build before (§113.8). 12 red reverted, from the
                                 # SOURCES (§276)
+python3 checks/control-targets.py # how big a control is, and how far from its
+                                # neighbour (&sect;480). NO CHECK IN THIS PRODUCT HAD
+                                # EVER MEASURED EITHER, which is why &sect;402's move to
+                                # one typeface could shrink the remove button from
+                                # 19.7px to 15px with 170 files green: `.xbtn` had no
+                                # size of its own, so it was as wide as the glyph the
+                                # typeface happened to draw. &sect;1 is the reported pair
+                                # &mdash; the eye and the &times; on a plan row &mdash; with BOTH
+                                # ENDS, the pair asserted FOUND before it is measured
+                                # or an absence passes (&sect;94.2). &sect;2 applies WCAG
+                                # 2.5.8's *spacing exception* as written rather than
+                                # paraphrased: a 24px circle on every undersized
+                                # target's box, tested against every other target's
+                                # box AND every other circle, over five pages with
+                                # the pen open. &sect;3 measures the edge of a box
+                                # against BOTH its sides, which is what moved
+                                # `--field-line` off the value the mockup offered (90
+                                # fields sit on the zebra stripe, where "Standard"
+                                # read 2.80). &sect;4 is the CONTROL and reads the TOKENS
+                                # directly: `--line` must still be UNDER 3:1 and must
+                                # still differ from `--field-line`, so a later sweep
+                                # that merged the two goes red &mdash; its first draft read
+                                # `thead th`, which is navy, so it reported `#FFFFFF`
+                                # at 1.00 and would have passed whatever happened to
+                                # either token (&sect;113.8). &sect;5 both palettes. Every
+                                # probe asks `checkVisibility`, `disabled` and
+                                # `pointer-events`, because `.ss-native` is
+                                # `opacity:0` and clipped to a strip (&sect;45.5) and
+                                # reported as an 18&times;12 target (&sect;100.3). `.grip`
+                                # is the one NAMED, PRINTED exception (&sect;313.34) and
+                                # is asserted to be the ONLY one, so a second
+                                # undersized control cannot join it quietly. 9 FAILED
+                                # on the build before, the first printing
+                                # `eye [24, 22] &middot; &times; [15, 14] &middot; 23.5 apart`
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/plan-edit-line.py # the strategy pen is ON the section line (§268): every
@@ -10920,7 +10954,51 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-03 — **§479: Structure decides, and nothing is optional.** Reverses §478's optional model: a unit's Purpose and Core Values are drawn only where Client set-up › Structure has them on (`compOn`), and on-and-empty they are Missing, counted (`GAP_FIELDS.unit`) and fillable, through one `unitGapOff(u)` passed to `gapMissing`/`gapEmptyFields`; the Foundation chat skips exactly what Structure has off (`skip`, `cleanSkip` to `pur`/`val`, `allAgreed` waits for the rest), the "Optional" status deleted. New clients start with both off, and `STRUCT_UNSAID.bu` keeps them off on any client that never saved its units' Structure, so no live tenant suddenly owes them. `unit-purpose-values.py` red 3/3, `copilot.mjs` 188/0 red 1, `test-authorize.js` 902/0 red 1; `setup-shape.mjs` and `structure.py` rewritten. On the branch, not merged.*
+*Last Updated: 2026-10-03 &mdash; **&sect;480: the edge of a box is not a gridline,
+and a destructive control has a size of its own.** Islam, of the two fixes drawn
+beside today out of the rules audit &mdash; ***"go with Standard and fix the remove
+button."*** **THE REMOVE BUTTON IS A REGRESSION AND NOTHING IN THE PRODUCT CAUSED
+IT**: `.xbtn` had no size at all, so when &sect;402 made Source Sans 3 the one
+typeface the narrower &times; took the button **19.7px &rarr; 15px** with not one line
+of its CSS moved &mdash; *a control sized by its own content is sized by whatever
+typeface it is rendered in.* **THE COST IS THE PAIR**: the eye that hides a row
+(&sect;233) sits immediately before it, centres **23.5px apart against WCAG
+2.5.8's floor of 24**, on **18 rows of one plan** &mdash; a thumb aiming for the eye
+throws a row away. 24&times;24, the minimum on the BUTTON rather than on
+`td:has(> .fld + .eyebtn)`, because the &times; is drawn in thirteen places and two
+of them sit beside an eye (&sect;53.5). **`--field-line` IS ITS OWN TOKEN AND
+DELIBERATELY NOT `--line` DARKENED** &mdash; that one is a border in **332 places** and
+is *meant* to recede, so darkening it turns every table into a grid (the fix
+reaching further than the fault); the new token is read by the **14 rules where a
+border IS the control's own boundary**, listed beside `.fld`. **AND MEASURING BOTH
+SIDES MOVED THE VALUE OFF THE PICTURE HE APPROVED**: the mockup measured against
+the field's own inside and "Standard" was **3.01** on white, while **90 fields sit
+on the zebra stripe** and 14 on a grey card, where it reads **2.80 and 2.68** &mdash;
+so it met the standard on one edge of the border and missed it on the other.
+`#78899F` is the LIGHTEST value clearing 3:1 on every ground a control sits on
+(3.57 / 3.33 / 3.18 / 3.36), **a shade darker than the shot and said so**, one line
+to revert; dark measured separately (`#68758C`), all four palette blocks carrying
+it (&sect;38.5). **RECORDED, NOT DONE, each for its own reason**: `.fld.off` (the
+standard exempts an inactive control, and reading quiet is what `off` is FOR,
+&sect;251), the buttons bordered `--line` (same shortfall &mdash; his picture was of
+FIELDS, so widening without one is a quiet restyle of every page, rule 1b), and
+`.grip`, 20&times;26 and clashing with its own row, the one NAMED, PRINTED exception
+(&sect;313.34) asserted to be the ONLY one. **`checks/control-targets.py` CLOSES THE
+CLASS THAT LET IT LIVE** &mdash; nothing measured a control's size or its distance from
+its neighbour &mdash; **9 FAILED** on the build before, printing
+`eye [24, 22] &middot; &times; [15, 14] &middot; 23.5 apart`; **three of its own first failures
+were the CHECK** (`.ss-native` read as an 18&times;12 target, &sect;100.3; &sect;4 reading
+navy `thead th` so it would have passed whatever happened to the tokens,
+&sect;113.8; and a hex value parsed as `rgb()`, giving `--line` a NaN ratio while
+*"they differ"* passed anyway). **NO REGRESSION, MEASURED ON BOTH BUILDS**: the
+register byte-identical, and &sect;270's two non-`<td>` pages measured with the pen
+open &mdash; Who we are **6 of 6 on its field's line** before and after, the SWOT's 23
+rows **64px before and 64px after** with the &times; taking its 9px out of the field's
+own grid track (595 &rarr; 586). Screen only; nothing stored, nothing migrated, no
+rule moved. Eight neighbours green, the four `smp-app/public/` generators re-run
+(&sect;329, &sect;332), `sw.js` SHELL bumped (&sect;91). On the branch, not merged.*
+
+*Earlier: 2026-10-03 — **§479: Structure decides, and nothing is optional.** Reverses §478's optional model: a unit's Purpose and Core Values are drawn only where Client set-up › Structure has them on (`compOn`), and on-and-empty they are Missing, counted (`GAP_FIELDS.unit`) and fillable, through one `unitGapOff(u)` passed to `gapMissing`/`gapEmptyFields`; the Foundation chat skips exactly what Structure has off (`skip`, `cleanSkip` to `pur`/`val`, `allAgreed` waits for the rest), the "Optional" status deleted. New clients start with both off, and `STRUCT_UNSAID.bu` keeps them off on any client that never saved its units' Structure, so no live tenant suddenly owes them. `unit-purpose-values.py` red 3/3, `copilot.mjs` 188/0 red 1, `test-authorize.js` 902/0 red 1; `setup-shape.mjs` and `structure.py` rewritten. On the branch, not merged.*
 
 *Earlier: 2026-10-03 — **§478: a Foundation chat starts from what is there.** The Guided button is removed; a new Foundation chat asks *start from it / start fresh* (`newFlow(hasPlan)`), six cards (End in Mind, optional Purpose via `OPTIONAL`), plan mode lands in `loaded` with no years. A unit's Foundation gains optional Purpose (`mission`) and Core Values (`values`) in `units.extra`, no migration. `copilot.mjs` 185/0, `shell.mjs` §3i, `checks/unit-purpose-values.py`. On the branch, not merged.*
 

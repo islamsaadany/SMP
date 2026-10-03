@@ -10920,7 +10920,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-02 — **§471: a change claimed is a change shown.** A Copilot answer that says it changed the text but sends no draft is asked again once for the whole revised text; a second miss is replaced by an honest line (`NO_DRAFT`), never a Save that is not there. `claimsDraft()` in `lib/copilot.ts`, break `trust-claim`, `check:copilot` 179/0. On the branch, not merged.*
+*Last Updated: 2026-10-03 — **§472: the second try can only return the text.** A draftless claimed change is asked again with a shape holding only the draft (`askDraftOnly`, `DRAFT_ONLY_SCHEMA`), no reply field; break `full-retry`; `check:copilot` 180/0. On the branch, not merged.*
+
+*Earlier: 2026-10-02 — **§471: a change claimed is a change shown.** A Copilot answer that says it changed the text but sends no draft is asked again once for the whole revised text; a second miss is replaced by an honest line (`NO_DRAFT`), never a Save that is not there. `claimsDraft()` in `lib/copilot.ts`, break `trust-claim`, `check:copilot` 179/0. On the branch, not merged.*
 
 *Earlier: 2026-10-02 — **§470: more room for the Copilot.** The Guided road card's Recommended pill is gone. On the Copilot tab *Fold bars* folds the top bar, unit row and tab row into one 28px line (`#copthin`, root `data-cop-fold`, `localStorage` `smp.copilot.bars`, Copilot tab only, set in `paint()` by `copThinPaint()` before the tab renders); the page gutter, rail gap and section row are tighter there (`data-cop-page`); the rail's hide control sits in the Chats header (option A) and the hidden strip is 24px. `check:shell` 241 ok, the fold red 5 with `copThinPaint()` removed; two My work reds are a Cairo-midnight fixture artefact, recorded. On the branch, not merged.*
 

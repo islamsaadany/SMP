@@ -30,7 +30,7 @@ import {
   saveDraftFrom, latestDraftId, isSaveAsk, isBareEnhance, claimsDraft, NO_DRAFT,
 } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
-import { askCopilot, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
+import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
   FLOW_ELEMENTS, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
@@ -397,11 +397,12 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
      settings takes effect on the next message (§456). A database that will
      not answer gives the Copilot no method rather than no answer. */
   const method = configured() && brk() !== "no-method" ? await methodFor(doorPool(), chat.section).catch(() => "") : "";
-  const ask = (q: string) => askCopilot({ method, templates: templateNamesFor(chat.section),
+  const askIn = (q: string) => ({ method, templates: templateNamesFor(chat.section),
     section: chat.section, place: chat.place, placeWord: oneLine(b.placeWord).slice(0, 120),
     context: String(b.context ?? "").slice(0, MAX_CONTEXT), question: q, pasted,
     history: material.history, assumptions: material.assumptions, files: material.files,
   });
+  const ask = (q: string) => askCopilot(askIn(q));
   let r = configured() ? await ask(question) : { ok: false as const, noKey: true, why: "no key is set" };
   /* A CHANGE CLAIMED IS A CHANGE SHOWN (§471). Asked to refine, the model
      answered "I've removed the year … press Save under the draft" and sent
@@ -411,8 +412,14 @@ async function sayFlow(tenantId: string, b: any, who: Who): Promise<Out> {
      without one, the false claim is replaced by a line saying so. */
   let noDraft = false;
   if (r.ok && !askFirst && !r.part.draft && claimsDraft(r.reply) && brk() !== "trust-claim") {
-    const r2 = await ask(question + "\n\n[FOR THIS TURN ONLY: your answer said the change was made but returned no draft. Return the whole revised text in `draft` (every item, not only what changed), and keep `reply` to one short line.]");
-    if (r2.ok && r2.part.draft) r = r2; else noDraft = true;
+    const hint = "\n\n[FOR THIS TURN ONLY: your answer said the change was made but returned no draft. Return the whole revised text in `draft` (every item, not only what changed).]";
+    if (brk() === "full-retry") {
+      const r2 = await ask(question + hint);
+      if (r2.ok && r2.part.draft) r = r2; else noDraft = true;
+    } else {
+      const d = await askDraftOnly(askIn(question + hint));
+      if (d.ok) r = { ...r, part: { ...r.part, draft: d.draft } }; else noDraft = true;
+    }
   }
 
   await withTenant(tenantId, async (c) => {

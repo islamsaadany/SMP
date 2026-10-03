@@ -216,6 +216,34 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
   return { ok: true, reply: shaped.reply, part: shaped.part };
 }
 
+/* THE SECOND TRY HAS ONLY ONE PLACE TO PUT AN ANSWER (§472). §471 asked a
+   draftless "I've made the change" again in the same full shape, and on
+   Islam's tenant it talked a second time and sent nothing — most likely
+   copying its own earlier draftless replies in the history. So the second
+   try is a different, smaller ask: a shape holding ONLY the draft, required,
+   with no `reply` to talk in. Same instruction, corpus and history, so it
+   still knows what was asked; NO_DRAFT stays the last resort. */
+export const DRAFT_ONLY_SCHEMA = {
+  type: "OBJECT",
+  properties: { draft: (SCHEMA.properties as any).draft },
+  required: ["draft"],
+};
+export async function askDraftOnly(a: AskInput): Promise<{ ok: true; draft: NonNullable<Answer["draft"]> } | { ok: false; why: string }> {
+  if (!A.configured()) return { ok: false, why: "no key is set" };
+  const call = (model?: string) => A.askJson({
+    question: a.question, history: a.history, maxTurns: 20, schema: DRAFT_ONLY_SCHEMA, needsCorpus: false,
+    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [],
+    think: true, maxOutput: 8192, timeoutMs: 55_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
+  if (!r.ok) return { ok: false, why: r.why || "no answer" };
+  const j: any = r.json && typeof r.json === "object" ? r.json : {};
+  const shaped = shapeAnswer({ reply: "", draft: j.draft }, a.files.map((f) => f.name));
+  if (!shaped || !shaped.part.draft) return { ok: false, why: "no draft came back" };
+  return { ok: true, draft: shaped.part.draft };
+}
+
 /* The ladder, shared by every ask the Copilot makes (§465): the guided
    Foundation's draft, refine and check are asked of the same busy provider. */
 async function withRetry(call: (model?: string) => Promise<any>): Promise<any> {

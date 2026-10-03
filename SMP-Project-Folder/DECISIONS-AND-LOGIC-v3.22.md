@@ -61416,3 +61416,22 @@ Islam, asked a refinement of the Winning Aspiration ("Remove specific target yea
 - The guidance line about refining existing text now says the revised text goes in `draft` in the same turn, and never to claim a change or point to Save without it.
 - Kept as Islam asked: the Fold bars button stays as it is. The fold-button mockup is committed as the record of what was offered.
 - `checks/copilot.mjs` 179/0; red under `SMP_BREAK=trust-claim` (2 red). Server only — no frozen file changed, no `sw.js` bump.
+
+## §472 — The second try can only return the text (2026-10-03)
+
+Islam, with the §471 message on his screen after *"remvoe the specific target
+year"*: *"here is the error today"*, then *"yes build the fix"*. §471 worked as
+designed — the model said it had made the change, sent no draft, was asked again
+in the same full shape, and talked a second time — so he got the honest line
+and no revised text. Not reproduced here (no key in this environment); the
+likely cause is the model copying its own earlier draftless replies, which ride
+in the history.
+
+**The second try is a different, smaller ask.** `askDraftOnly()` in
+`lib/copilot-ask.ts` sends the same instruction, corpus and history with a
+shape holding ONLY the draft, required, and no `reply` field — there is nowhere
+to talk. The first answer's words are kept (the claim is now true), the draft
+is attached. `NO_DRAFT` stays the last resort. Asserted off the wire in
+`checks/copilot.mjs` (the second request's schema has a required draft and no
+reply); 180/0, and `full-retry` puts the §471 same-shape retry back and goes red.
+

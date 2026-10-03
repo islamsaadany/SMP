@@ -615,14 +615,20 @@ try {
        second miss says so instead of the claim, and an answer that claims
        nothing is asked once only. */
     NEXT = [{ answer: { reply: "I've removed the hardcoded year. Click the Save button under the draft." } },
-            { answer: { reply: "Revised.", draft: DR } }];
+            { answer: { draft: DR } }];
     const bC = seen.length;
     const c1 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
     const ac1 = c1.j.messages[c1.j.messages.length - 1];
     const qC = JSON.stringify(seen[seen.length - 1].body.contents);
     check("an answer that claims a change with no draft is asked again, and the revised text is shown with its Save (§471)",
-      seen.length === bC + 2 && !!(ac1.part.draft && ac1.part.draft.groups) && ac1.body === "Revised." && /whole revised text in `draft`/.test(qC),
+      seen.length === bC + 2 && !!(ac1.part.draft && ac1.part.draft.groups) && /removed the hardcoded year/.test(ac1.body) && /whole revised text in `draft`/.test(qC),
       seen.length - bC + " asks · " + JSON.stringify(ac1).slice(0, 200));
+    /* §472: the second try is a SMALLER ask — its shape holds only the
+       draft, required, with no `reply` to talk in. Read off the wire. */
+    const sch2 = (seen[seen.length - 1].body.generationConfig || {}).responseSchema || {};
+    check("...and that second ask can only return the draft — no reply field, the draft required (§472)",
+      !!(sch2.properties && sch2.properties.draft) && !(sch2.properties && sch2.properties.reply) && (sch2.required || []).includes("draft"),
+      JSON.stringify(sch2).slice(0, 160));
     NEXT = [{ answer: { reply: "I've removed the year. Press Save below." } }, { answer: { reply: "I've removed it." } }];
     const c2 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
     const ac2 = c2.j.messages[c2.j.messages.length - 1];

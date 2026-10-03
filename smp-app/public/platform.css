@@ -1077,9 +1077,6 @@ html[data-client-settings] .viewer { display:none; }
 
   /* ── Core values box ──────────────────────────────────── */
   .valbox { margin-top:20px; }
-  /* §473: a unit's optional boxes — the word says it may stay empty. */
-  .optag { font:600 10.5px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase;
-    color:var(--ink-3); margin-left:8px; vertical-align:middle; }
   .uvlist { display:flex; flex-direction:column; gap:8px; }
   .uvrow { display:grid; grid-template-columns:minmax(140px,1fr) 2fr auto; gap:8px; align-items:start; }
   @media (max-width:700px){ .uvrow { grid-template-columns:1fr auto; } .uvrow > :nth-child(2){ grid-column:1 / -1; } }

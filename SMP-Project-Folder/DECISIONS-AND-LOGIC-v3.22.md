@@ -61479,3 +61479,51 @@ Checks: `checks/copilot.mjs` §6 rewritten for the start question and six parts,
 `checks/shell.mjs` §3i presses the real start question, plan mode and fresh
 mode, 32/0, red from the source; new `checks/unit-purpose-values.py`, all good,
 red 2 / 1 from the source; `test-authorize.js` 900/0.
+
+## §474 — Structure decides, and nothing is optional (2026-10-03)
+
+Islam, of the five changes put to him in plain words: *"yes for all proceed."*
+This reverses §473's "optional" model and is recorded as a reversal
+(Principle II): §473 drew a unit's Purpose and Core Values as optional boxes
+and made Purpose an optional card in the Foundation chat; §474 says a part is
+either switched on in Client set-up › Structure, and then OWED, or switched
+off, and then not drawn and not asked.
+
+**One question decides both places.** The Foundation chat sends the parts the
+Structure has off (`skip`, cut by `cleanSkip` to `pur` and `val` only, so a
+page can never talk its way past the Aspiration); `allAgreed` waits for every
+part that is on and for nothing that is off. The "Optional" status, its line
+and its "Leave it empty" button are deleted (§24). The unit's Foundation page
+draws each box only where `compOn` says so, pen open or not; off, whatever is
+stored stays stored (§404) and is simply not shown.
+
+**On and empty is Missing and counted, like the Aspiration.** `mission` and
+`values` join `GAP_FIELDS.unit`, so they count, walk and hold Submit (§221);
+being counted they are FILLABLE (`GAP_FILLABLE` is derived), because a counted
+gap with no control is §223. Structure-awareness for a static list is an
+`off` argument to `gapMissing`/`gapEmptyFields`, supplied by the browser's one
+`unitGapOff(u)` and read by the count, the page and the walk (§53.5). The
+server needed nothing beyond the list: its gap pass reads `GAP_FILLABLE`, and
+`test-authorize.js` §474 asserts both ends — a filler fills an empty Purpose
+and Core Values, and is refused rewriting a settled Purpose (902/0; 901/1 with
+the list put back).
+
+**New clients start with both off** (`STRUCT_NEW_CLIENT.bu` back to five
+parts), **and so does every client that never saved its units' Structure**:
+an unsaid level reads every part on, which would have put two Missing parts on
+every unit of every live tenant and held Submit across the product overnight.
+`STRUCT_UNSAID.bu` leaves `purpose` and `values` out, which is exactly what
+those clients saw before §473 drew them (§427 had them read off on a unit).
+Found by reading `levelComponents` before shipping rather than by a check.
+
+**Checks.** `checks/unit-purpose-values.py` rewritten for §474 — unsaid, off
+and on, both ends, every press read back from the data, fill mode opening both
+— red 3 / 3 from the SOURCES (gate removed; count list put back).
+`copilot.mjs` 188/0: nothing optional, an empty switched-on Purpose holds the
+check, switched off it is not asked, only Purpose and Core Values can be
+skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
+§473's literals and were REWRITTEN, never loosened (§218): `setup-shape.mjs`
+(the new-client list; unsaid keeps the two off), `structure.py` (purpose and
+values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
+other two reds (`desc`, the top level) are main's, recorded before.
+

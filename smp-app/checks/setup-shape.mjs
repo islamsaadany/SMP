@@ -351,9 +351,9 @@ console.log("\n8 · an empty capability is not authored work");
     !!st && same(st.bu && st.bu.on, R.STRUCT_NEW_CLIENT.bu), st && st.bu);
   check("the defaults are the ones asked for, word for word",
     same(R.STRUCT_NEW_CLIENT.mid, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"]) &&
-    /* §473: a unit's optional Purpose and Core Values join the default
-       (Islam: "purpose needs to be there"; "add core values as optional box"). */
-    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"]));
+    /* §474 reverses §473's default (Islam: "yes for all proceed"): a unit's
+       Purpose and Core Values are off until the office ticks them. */
+    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "aspiration", "keyobj", "pillar", "swot"]));
   check("the top level and the functions are left unsaid (everything on)",
     !!st && !st.top && !st.fn, st);
   check("a unit on a new client shows no Themes, Capabilities or Values",
@@ -366,9 +366,16 @@ console.log("\n8 · an empty capability is not authored work");
      and every part a unit's page DOES draw still reads on, which is the claim
      "existing clients unchanged" was always about. Both ends (§94.2). */
   check("a client whose structure is unsaid still reads on everything a unit's page draws (existing clients unchanged)",
-    R.STRUCT_COMPONENTS.filter((c) => R.compBuilt("mobile", c)).every((c) => R.compOn(seed.group, "mobile", c)));
-  check("…and the parts with no page on a unit read off (§427)",
-    ["purpose", "theme", "values"].every((c) => !R.compBuilt("mobile", c) && !R.compOn(seed.group, "mobile", c)));
+    /* §474: except a unit's Purpose and Core Values, which an unsaid
+       Structure keeps off — exactly what the client saw before §473. */
+    R.STRUCT_COMPONENTS.filter((c) => R.compBuilt("mobile", c) && c !== "purpose" && c !== "values").every((c) => R.compOn(seed.group, "mobile", c)));
+  /* REWRITTEN, never loosened (§218): §473 gave a unit's purpose and values a
+     page, so they are BUILT now — and §474 keeps them off on a client that
+     never saved its Structure, which is what that client saw before. Themes
+     still have no page. */
+  check("…and a unit's themes have no page, while its purpose and values read off until ticked (§427, §474)",
+    !R.compBuilt("mobile", "theme") && !R.compOn(seed.group, "mobile", "theme") &&
+    ["purpose", "values"].every((c) => R.compBuilt("mobile", c) && !R.compOn(seed.group, "mobile", c)));
   check("a shape pass keeps the defaults it was born with",
     same((frozen.shape(clone(bare), ANSWERS).state.group || {})[R.STRUCTURE], st));
 }

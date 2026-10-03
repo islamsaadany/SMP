@@ -5242,7 +5242,7 @@ function renderUnitFoundation(u){
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
   return fillBarOr("foundation", "u_found",
-      SMPRules.gapMissing("unit", u).length +
+      SMPRules.gapMissing("unit", u, unitGapOff(u)).length +
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
@@ -5267,42 +5267,76 @@ function renderUnitFoundation(u){
     koBand(u.keyObjectives, "foundation", "u_found", u, false) +
     unitValuesBox(u, upg);
 }
-/* §473 — A UNIT'S PURPOSE AND CORE VALUES, BOTH OPTIONAL. Islam: *"purpose
-   needs to be there as optional box in the unit foundation"*, then of the
-   values, *"add core values as optional box"*. The group's own shapes
-   (`mission`, `values` of {name, def}, §404's foundationBody), so one
-   vocabulary for one thing (§53.5); stored on the unit and riding
-   `units.extra` (no migration). OPTIONAL means two things: never a counted
-   gap, and in reading mode an empty box is not drawn at all — it appears
-   only once somebody has written in it, or while the pen is open to write.
-   The Structure step decides whether a layer carries them (compOn). */
+/* §473 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
+   `values` of {name, def}, §404's foundationBody), so one vocabulary for one
+   thing (§53.5); stored on the unit and riding `units.extra` (no migration).
+
+   §474 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
+   proceed"*, to five points, of which these two are the page's: a box is drawn
+   exactly when Client set-up › Structure carries that part for this unit,
+   with the pen open or not — off, it is not drawn at all and whatever is
+   stored stays stored (§404: off hides, never deletes); and switched on and
+   empty it reads **Missing**, counted like the aspiration (unitGapOff, one
+   answer for the bar, the walk and Submit, §116.2). So the *Optional* tag
+   goes: §473's "optional" meant both "never a gap" and "not drawn when empty",
+   and §474 reverses both.
+
+   THE FILL GRANT CAN CLOSE BOTH, OR THE COUNT WOULD PROMISE A CONTROL THAT IS
+   NOT THERE (§223, §61). The Purpose is a gapCell exactly as the aspiration
+   is; the Core Values list opens to a filler while it is empty or still
+   pending, every write stamping the mark the server's gap pass already judges
+   (`values` is in GAP_FILLABLE.unit, so add, amend and undo are gapFill and
+   the office's own write confirms, §145). */
 function unitPurposeAnd(u, upg, asp){
-  var t = String(u.mission || "").trim();
-  var show = compOn(u.ukey, "purpose") && (upg || t);
-  if (!show) return asp;
+  if (!compOn(u.ukey, "purpose")) return asp;
   return '<div class="fcol"><div class="card upurpose"><h2 class="sec first">' + L1("purpose") +
-    ' <span class="optag">Optional</span></h2>' +
-    '<p class="statement">' + fieldOr(upg, u.mission || "", "big-field", function(v){
-      if (String(v).trim()) u.mission = v; else delete u.mission; }) + '</p></div>' + asp + '</div>';
+    '</h2><p class="statement">' +
+    gapCell("foundation", "u_found", u, "mission",
+      { kind:"area", cls:"big-field", flow:true, del:true, fillKind:"unit" }) +
+    '</p></div>' + asp + '</div>';
+}
+/* May the person looking write the Core Values list right now — as its
+   author (the pen), or as a filler while the list is still owed (§474)? */
+function unitValuesWrite(u){
+  if (authoring("foundation", "u_found")) return "edit";
+  var vals = Array.isArray(u.values) ? u.values : [];
+  if (filling("foundation", "u_found", {}) && !SMPRules.isHidden(u) &&
+      (!vals.length || SMPRules.pendOf(u).values)) return "fill";
+  return "";
+}
+/* A write to the list: an author's settles (lifting any mark — correcting is
+   confirming), a filler's is pending while the list holds anything and is
+   lifted when it is emptied again (the undo, §145). An emptied list loses its
+   key (§50.6). */
+function unitValuesTouch(u, how){
+  if (Array.isArray(u.values) && !u.values.length) delete u.values;
+  if (how === "fill" && Array.isArray(u.values)) gapStamp(u, "values");
+  else gapLift(u, "values");
+  gapBandRefresh();
 }
 function unitValuesBox(u, upg){
+  if (!compOn(u.ukey, "values")) return "";
   var vals = Array.isArray(u.values) ? u.values : [];
-  if (!compOn(u.ukey, "values") || !(upg || vals.length)) return "";
-  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") +
-    ' <span class="optag">Optional</span></h2>' +
-    (upg
+  var how = unitValuesWrite(u), pg = how ? "foundation" : null;
+  var pend = how === "fill" && SMPRules.pendOf(u).values ? "pendfld" : "";
+  var walk = !vals.length ? " gapwalk" : "";
+  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
+    (how
       ? '<div class="uvlist">' + vals.map(function(v, i){
           return '<div class="uvrow">' +
-            inputOr(upg, v.name || "", "", function(x){ v.name = x; }) +
-            fieldOr(upg, v.def || "", "", function(x){ v.def = x; }) +
+            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
+            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
             '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
             '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
         }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn" data-uvaladd="' + esc(u.ukey) + '">+ Add a value</button></div>'
-      : '<div class="valgrid">' + vals.map(function(v){
-          return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
-            '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
-        }).join("") + '</div>') +
+        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
+        '">+ Add a value</button></div>'
+      : vals.length
+        ? '<div class="valgrid">' + vals.map(function(v){
+            return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
+              '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
+          }).join("") + '</div>'
+        : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
 }
 

@@ -1027,7 +1027,12 @@
      whitespace, never a typed 0 (§104.10 — Number("") is 0, and an empty
      box must not read as a genuine nought). */
   var GAP_FIELDS = {
-    unit:    ["aspiration"],
+    /* §474: a unit's Purpose (`mission`) and Core Values (`values`) are owed
+       like its aspiration — but ONLY where the client's Structure carries
+       them, which this static table cannot know. The caller hands the parts
+       Structure has switched off to gapMissing/gapEmptyFields as `off`
+       (unitGapOff in the browser), so a part that is off is never a gap. */
+    unit:    ["aspiration", "mission", "values"],
     ko:      ["dir", "target", "target3y", "compile"],
     measure: ["dir", "target", "compile"],
     /* `quarters` is VIRTUAL and covers q1–q4 as one mark: a tactic set to
@@ -1847,8 +1852,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     }
     return !!GAP_ANY[field];
   }
-  function gapMissing(kind, row) {
+  function gapMissing(kind, row, off) {
     return (GAP_FIELDS[kind] || []).filter(function (f) {
+      if (off && off.indexOf(f) > -1) return false;
       /* §249.2: A MARK ON A VALUE THAT IS STILL EMPTY DOES NOT ANSWER IT.
          A pending fill is answered, not missing — true of a fill that put
          something usable there, and a marked field was ALWAYS non-blank until
@@ -1876,8 +1882,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      field is never empty and the clause above would never fire. What is
      `gapEmpty` here is exactly what the cell opens and the server accepts
      (§205's pair, kept together). */
-  function gapEmptyFields(kind, row) {
+  function gapEmptyFields(kind, row, off) {
     return (GAP_FILLABLE[kind] || []).filter(function (f) {
+      if (off && off.indexOf(f) > -1) return false;
       return gapEmpty(f, row);
     });
   }
@@ -3920,7 +3927,10 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the two levels named here have a default of their own. */
   var STRUCT_NEW_CLIENT = {
     mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
-    bu:  ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"]
+    /* §474 reverses §473 here at Islam's word: a NEW client's units carry
+       no Purpose and no Core Values until somebody ticks them on Client
+       set-up › Structure, because a switched-on part is now owed (Missing). */
+    bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
   };
   function newClientStructure() {
     return { mid: { on: STRUCT_NEW_CLIENT.mid.slice() },
@@ -3979,7 +3989,12 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      before §428, so no page a client already sees moves. */
   var STRUCT_UNSAID = {
     top: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot" && c !== "pillar"; }),
-    fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; })
+    fn: STRUCT_COMPONENTS.filter(function (c) { return c !== "swot"; }),
+    /* §474: a unit's Purpose and Core Values are asked only once the office
+       ticks them. Unsaid they stay off, which is exactly what an existing
+       client saw before §473 drew them (§427 had them read off on a unit),
+       so no unit on a live tenant suddenly owes two Missing parts. */
+    bu: STRUCT_COMPONENTS.filter(function (c) { return c !== "purpose" && c !== "values"; })
   };
   function levelComponents(group, level) {
     level = effLevel(group, level);
@@ -6920,6 +6935,18 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §474: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
+   and Core Values are owed (Missing) only while Client set-up › Structure
+   carries them for this unit; off, they are not drawn and not counted, and
+   whatever is stored stays stored (§404: off hides, never deletes). Handed to
+   SMPRules.gapMissing/gapEmptyFields as `off` by every reader of the unit's
+   own gaps, so the bar, the walk and Submit cannot disagree (§116.2). */
+function unitGapOff(u){
+  var t = (u && u.ukey) || "group", off = [];
+  if (!compOn(t, "purpose")) off.push("mission");
+  if (!compOn(t, "values")) off.push("values");
+  return off;
+}
 /* §437 (Islam, 2026-09-30: *"keep them in the first section as an option"*):
    A SUPPORTING FUNCTION'S KEY OBJECTIVES ARE A TICK ON ITS FIRST SECTION, and
    when it is off they are hidden AND stop counting — no longer asked for on
@@ -14465,7 +14492,7 @@ function gapMap(target, all, fillable){
     if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
-  var G = function(acKey, ctx, kind, row){
+  var G = function(acKey, ctx, kind, row, off){
     /* §233: a hidden row's blanks are not gaps — it is not counted, not
        asked, and not walked; gapCell() closes the same row's controls, so
        the count and the walk stay one list (§192.4). */
@@ -14475,8 +14502,8 @@ function gapMap(target, all, fillable){
        SECOND — the machinery is main's (§223, §272) and is untouched here.
        WHO is shown it is the decision §301.3 changed, and that question is
        asked in ONE place, `seesEmpty()` below. */
-    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
-    return SMPRules.gapMissing(kind, row).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row, off).length;
+    return SMPRules.gapMissing(kind, row, off).length;
   };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
@@ -14545,7 +14572,7 @@ function gapMap(target, all, fillable){
     if (!u) return;
     w = w || UNIT_WORDS;
     if (w.found) {
-      var found = G(w.found, {}, "unit", u);
+      var found = G(w.found, {}, "unit", u, unitGapOff(u));
       entry("found", "Foundation", found, { sec: "found", page: "foundation" });
       var ko = 0;
       (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });
@@ -29755,7 +29782,7 @@ function renderUnitFoundation(u){
      (§61's trap on the oldest surface in the product). The lead opens with
      the pen because the leads are the unit's own words, not a fixed form. */
   return fillBarOr("foundation", "u_found",
-      SMPRules.gapMissing("unit", u).length +
+      SMPRules.gapMissing("unit", u, unitGapOff(u)).length +
       (u.keyObjectives || []).reduce(function(a, m){
         return a + SMPRules.gapMissing("ko", m).length; }, 0),
       "the Foundation") +
@@ -29780,42 +29807,76 @@ function renderUnitFoundation(u){
     koBand(u.keyObjectives, "foundation", "u_found", u, false) +
     unitValuesBox(u, upg);
 }
-/* §473 — A UNIT'S PURPOSE AND CORE VALUES, BOTH OPTIONAL. Islam: *"purpose
-   needs to be there as optional box in the unit foundation"*, then of the
-   values, *"add core values as optional box"*. The group's own shapes
-   (`mission`, `values` of {name, def}, §404's foundationBody), so one
-   vocabulary for one thing (§53.5); stored on the unit and riding
-   `units.extra` (no migration). OPTIONAL means two things: never a counted
-   gap, and in reading mode an empty box is not drawn at all — it appears
-   only once somebody has written in it, or while the pen is open to write.
-   The Structure step decides whether a layer carries them (compOn). */
+/* §473 — A UNIT'S PURPOSE AND CORE VALUES. The group's own shapes (`mission`,
+   `values` of {name, def}, §404's foundationBody), so one vocabulary for one
+   thing (§53.5); stored on the unit and riding `units.extra` (no migration).
+
+   §474 — STRUCTURE DECIDES, AND NOTHING IS OPTIONAL. Islam: *"yes for all
+   proceed"*, to five points, of which these two are the page's: a box is drawn
+   exactly when Client set-up › Structure carries that part for this unit,
+   with the pen open or not — off, it is not drawn at all and whatever is
+   stored stays stored (§404: off hides, never deletes); and switched on and
+   empty it reads **Missing**, counted like the aspiration (unitGapOff, one
+   answer for the bar, the walk and Submit, §116.2). So the *Optional* tag
+   goes: §473's "optional" meant both "never a gap" and "not drawn when empty",
+   and §474 reverses both.
+
+   THE FILL GRANT CAN CLOSE BOTH, OR THE COUNT WOULD PROMISE A CONTROL THAT IS
+   NOT THERE (§223, §61). The Purpose is a gapCell exactly as the aspiration
+   is; the Core Values list opens to a filler while it is empty or still
+   pending, every write stamping the mark the server's gap pass already judges
+   (`values` is in GAP_FILLABLE.unit, so add, amend and undo are gapFill and
+   the office's own write confirms, §145). */
 function unitPurposeAnd(u, upg, asp){
-  var t = String(u.mission || "").trim();
-  var show = compOn(u.ukey, "purpose") && (upg || t);
-  if (!show) return asp;
+  if (!compOn(u.ukey, "purpose")) return asp;
   return '<div class="fcol"><div class="card upurpose"><h2 class="sec first">' + L1("purpose") +
-    ' <span class="optag">Optional</span></h2>' +
-    '<p class="statement">' + fieldOr(upg, u.mission || "", "big-field", function(v){
-      if (String(v).trim()) u.mission = v; else delete u.mission; }) + '</p></div>' + asp + '</div>';
+    '</h2><p class="statement">' +
+    gapCell("foundation", "u_found", u, "mission",
+      { kind:"area", cls:"big-field", flow:true, del:true, fillKind:"unit" }) +
+    '</p></div>' + asp + '</div>';
+}
+/* May the person looking write the Core Values list right now — as its
+   author (the pen), or as a filler while the list is still owed (§474)? */
+function unitValuesWrite(u){
+  if (authoring("foundation", "u_found")) return "edit";
+  var vals = Array.isArray(u.values) ? u.values : [];
+  if (filling("foundation", "u_found", {}) && !SMPRules.isHidden(u) &&
+      (!vals.length || SMPRules.pendOf(u).values)) return "fill";
+  return "";
+}
+/* A write to the list: an author's settles (lifting any mark — correcting is
+   confirming), a filler's is pending while the list holds anything and is
+   lifted when it is emptied again (the undo, §145). An emptied list loses its
+   key (§50.6). */
+function unitValuesTouch(u, how){
+  if (Array.isArray(u.values) && !u.values.length) delete u.values;
+  if (how === "fill" && Array.isArray(u.values)) gapStamp(u, "values");
+  else gapLift(u, "values");
+  gapBandRefresh();
 }
 function unitValuesBox(u, upg){
+  if (!compOn(u.ukey, "values")) return "";
   var vals = Array.isArray(u.values) ? u.values : [];
-  if (!compOn(u.ukey, "values") || !(upg || vals.length)) return "";
-  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") +
-    ' <span class="optag">Optional</span></h2>' +
-    (upg
+  var how = unitValuesWrite(u), pg = how ? "foundation" : null;
+  var pend = how === "fill" && SMPRules.pendOf(u).values ? "pendfld" : "";
+  var walk = !vals.length ? " gapwalk" : "";
+  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") + '</h2>' +
+    (how
       ? '<div class="uvlist">' + vals.map(function(v, i){
           return '<div class="uvrow">' +
-            inputOr(upg, v.name || "", "", function(x){ v.name = x; }) +
-            fieldOr(upg, v.def || "", "", function(x){ v.def = x; }) +
+            inputOr(pg, v.name || "", pend, function(x){ v.name = x; unitValuesTouch(u, how); }) +
+            fieldOr(pg, v.def || "", pend, function(x){ v.def = x; unitValuesTouch(u, how); }) +
             '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
             '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
         }).join("") + '</div>' +
-        '<div class="addrow"><button class="editbtn" data-uvaladd="' + esc(u.ukey) + '">+ Add a value</button></div>'
-      : '<div class="valgrid">' + vals.map(function(v){
-          return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
-            '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
-        }).join("") + '</div>') +
+        '<div class="addrow"><button class="editbtn' + walk + '" data-uvaladd="' + esc(u.ukey) +
+        '">+ Add a value</button></div>'
+      : vals.length
+        ? '<div class="valgrid">' + vals.map(function(v){
+            return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
+              '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
+          }).join("") + '</div>'
+        : '<p class="statement"><span class="missing">Missing</span></p>') +
     '</div>';
 }
 
@@ -56179,7 +56240,7 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
-  function doneCount(f){ return f.done.filter(Boolean).length; }
+  function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -56208,9 +56269,25 @@ var COPILOT = (function(){
         .map(function(v){ return clean(v.name) + (clean(v.def) ? " — " + clean(v.def) : ""); }).join("\n")
     };
   }
-  function planHas(p){ for (var k in p) if (p[k]) return true; return false; }
-  function optional(i){ var el = steps()[i]; return !!(el && el.optional); }
-  function agreedAll(f){ return steps().every(function(el, i){ return f.done[i] || (el.optional && !String(f.drafts[i] || "").trim()); }); }
+  function planHas(p){ var off = skipNow(); for (var k in p) if (p[k] && off.indexOf(k) < 0) return true; return false; }
+  /* §474 — THE CARDS FOLLOW THE STRUCTURE. Purpose and Core Values are
+     asked only where Client set-up › Structure switches them on for this
+     place's Foundation; off, they have no card and no question, whatever
+     was written before. Nothing is "optional" any more: a part that is on
+     is owed like the others. Read from the client's graph each time, and
+     sent with every save so the server's "is everything agreed" asks the
+     same list. */
+  var SKIP_COMP = { pur: "purpose", val: "values" };
+  function skipNow(){
+    var out = [];
+    for (var k in SKIP_COMP) {
+      var on; try { on = typeof compOn === "function" ? compOn(place(), SKIP_COMP[k]) : true; } catch (e) { on = true; }
+      if (!on) out.push(k);
+    }
+    return out;
+  }
+  function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
+  function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -56225,6 +56302,7 @@ var COPILOT = (function(){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
     var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
     return '<div class="copcards">' + S.map(function(el, i){
+      if (!on(i)) return "";
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
       if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
@@ -56232,7 +56310,7 @@ var COPILOT = (function(){
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
       else if (txt) { st = "In progress"; }
-      else { empty = true; st = el.optional ? (f.done[i] || plan ? "Optional · empty" : "Optional") : "Empty"; if (el.optional) cls += " opt"; }
+      else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
         : '<p>' + (now ? E(el.questions.length + " questions") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
       var wide = el.key === "who" || el.key === "asp";
@@ -56253,7 +56331,7 @@ var COPILOT = (function(){
       p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
     }
     var total = 0, answered = 0;
-    S.forEach(function(x, i){ total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
+    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
       '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
@@ -56296,18 +56374,17 @@ var COPILOT = (function(){
     }
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
+      if (!on(i)) return;
       var current = !all && i === f.e;
       if (!current) {
         if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
         return;
       }
       if (f.phase === "loaded") return;
-      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + (el.optional ? " (optional — you can leave it empty)" : "") + "."));
+      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
-        if (el.optional && ed && !(NUDGE && NUDGE.id === PANE.chat.id))
-          out.push('<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-fskip>Leave ' + E(el.name) + ' empty</button></div>');
         if (NUDGE && NUDGE.id === PANE.chat.id) {
           out.push(meMsg(NUDGE.text));
           out.push('<div class="copwarn" role="status">That answer is quite short. A little more detail makes a better draft.' +
@@ -56349,14 +56426,14 @@ var COPILOT = (function(){
   }
   function nextUndone(f, from){
     var n = steps().length;
-    for (var i = from + 1; i < n; i++) if (!f.done[i]) return i;
-    for (var j = 0; j < from; j++) if (!f.done[j]) return j;
+    for (var i = from + 1; i < n; i++) if (on(i) && !f.done[i]) return i;
+    for (var j = 0; j < from; j++) if (on(j) && !f.done[j]) return j;
     return -1;
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
     var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
-      ' · ' + doneCount(f) + ' of ' + S.length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
+      ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
       (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
@@ -56393,7 +56470,7 @@ var COPILOT = (function(){
       draw(); if (then) then();
     });
   }
-  function flowCopy(){ return JSON.parse(JSON.stringify(PANE.flow)); }
+  function flowCopy(){ var f = JSON.parse(JSON.stringify(PANE.flow)); f.skip = skipNow(); return f; }
   function flowAsk(body){
     if (!PANE || !PANE.chat || THINKING) return;
     var id = PANE.chat.id, ctx = contextOf();
@@ -56468,13 +56545,6 @@ var COPILOT = (function(){
       gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
       flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
-    if ((b = hit(ev, "[data-cop-fskip]"))) {
-      var gk = flowCopy(); gk.drafts[gk.e] = ""; gk.done[gk.e] = true; NUDGE = null;
-      if (gk.start === "plan") { gk.phase = "loaded"; flowSave(gk); return true; }
-      var nk = nextUndone(gk, gk.e);
-      if (nk < 0) { flowAsk({ act:"flowCheck", flow:gk }); return true; }
-      gk.e = nk; gk.qi = 0; gk.phase = gk.drafts[nk] ? "draft" : "ask"; flowSave(gk); return true;
-    }
     if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-nudge-more]"))) {
       if (NUDGE) DRAFT[PANE.chat.id] = NUDGE.text.replace(/\s+$/, "") + ", ";
@@ -56501,7 +56571,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;
       var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord() }, function(j){
+      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
         loadList(true); draw(); });
       return true;
@@ -56754,7 +56824,7 @@ var COPILOT = (function(){
          the place already has a Foundation, and on the four roads where it
          has none — the page knows which, because it holds the plan. */
       if (section() === "foundation") {
-        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()) }, function(j){
+        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
           PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
           OPEN[key()] = { kind:"chat", id: j.chat.id };
@@ -70841,27 +70911,32 @@ var SYNC = (function () {
         fieldSaved(); paint();
       });
     });
-    /* §473: a unit's optional Core Values — add and remove, re-asked on the
-       click (§48.2). An emptied list loses its key (§50.6). */
+    /* §473: a unit's Core Values — add and remove, re-asked on the click
+       (§48.2). An emptied list loses its key (§50.6). §474: the fill grant
+       may write the list while it is owed, and unitValuesWrite answers who
+       may, from the stored state at press time — never from the drawn one. */
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        if (!mayAuthor(foundKeyFor(t), t)) return;
         var o = unitLikeWritable(t);
         if (!o) return;
+        var how = unitValuesWrite(o);
+        if (!how) return;
         if (!Array.isArray(o.values)) o.values = [];
         o.values.push({ name: "", def: "" });
+        unitValuesTouch(o, how);
         fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(foundKeyFor(t), t)) return;
         var o = unitLikeWritable(t);
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
+        var how = unitValuesWrite(o);
+        if (!how) return;
         o.values.splice(i, 1);
-        if (!o.values.length) delete o.values;
+        unitValuesTouch(o, how);
         fieldSaved(); paint();
       });
     });

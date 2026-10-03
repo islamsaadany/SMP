@@ -115,29 +115,40 @@ export type Phase = (typeof PHASES)[number];
 export const PATHS = ["guided", "notes", "template", "import"] as const;
 export type Flow = {
   phase: Phase; start: string; y0: number | null; y1: number | null; path: string; e: number; qi: number;
-  ans: string[][]; drafts: string[]; done: boolean[]; from: boolean[];
+  ans: string[][]; drafts: string[]; done: boolean[]; from: boolean[]; skip: string[];
   check: { agree: string[]; issues: { el: string; text: string }[] } | null;
   saved: { deliverableId: string; n: number; title: string } | null;
 };
 export const MAX_ANSWER = 2000;
 export const MAX_DRAFT = 6000;
 export const SHORT_ANSWER = 15;
-/* PURPOSE IS OPTIONAL (§473, Islam: "purpose needs to be there as optional
-   box"): it may be skipped, and a Foundation with no Purpose may still be
-   checked and saved. */
-export const OPTIONAL = new Set(["pur"]);
+/* §474 — WHAT IS ASKED FOLLOWS THE STRUCTURE, AND NOTHING IS "OPTIONAL"
+   (Islam, of §473's Optional mark: *"yes for all proceed"* to: a part
+   switched on in Client set-up › Structure is asked and owed like any other,
+   a part switched off is left out of the chat entirely). Purpose and Core
+   Values are the two a Structure can switch off for a Foundation; the page
+   names which are off (`skip`), because the Structure is the client's graph
+   and the page holds it. Nothing outside this list can be skipped, so a
+   page cannot talk its way past the Aspiration. Reversing §473's
+   OPTIONAL set, recorded as a reversal. */
+export const SKIPPABLE = ["pur", "val"];
+export function cleanSkip(v: unknown): string[] {
+  return Array.isArray(v) ? SKIPPABLE.filter((k) => v.includes(k)) : [];
+}
+export const live = (f: Flow, i: number) => !f.skip.includes(FLOW_ELEMENTS[i].key);
 export const STARTS = ["plan", "fresh"] as const;
 
 /* A new flow opens on the start question only where the place already has a
    Foundation to start from; otherwise straight on the four roads. */
-export function newFlow(hasPlan = false): Flow {
+export function newFlow(hasPlan = false, skip: string[] = []): Flow {
   return { phase: hasPlan ? "start" : "path", start: "", y0: null, y1: null, path: "", e: 0, qi: 0,
     ans: FLOW_ELEMENTS.map((el) => el.questions.map(() => "")), drafts: FLOW_ELEMENTS.map(() => ""),
-    done: FLOW_ELEMENTS.map(() => false), from: FLOW_ELEMENTS.map(() => false), check: null, saved: null };
+    done: FLOW_ELEMENTS.map(() => false), from: FLOW_ELEMENTS.map(() => false), skip: cleanSkip(skip), check: null, saved: null };
 }
-/* Every part agreed, an optional one counting as agreed when left empty. */
+/* Every part the Structure asks for agreed WITH a draft (§474); a part
+   switched off is not asked, so it waits for nothing. */
 export function allAgreed(f: Flow): boolean {
-  return FLOW_ELEMENTS.every((el, i) => f.done[i] || (OPTIONAL.has(el.key) && !f.drafts[i].trim()));
+  return FLOW_ELEMENTS.every((_, i) => !live(f, i) || (f.done[i] && !!f.drafts[i].trim()));
 }
 const year = (v: unknown) => { const n = Number(v); return Number.isInteger(n) && n >= 2000 && n <= 2100 ? n : null; };
 const int = (v: unknown, lo: number, hi: number) => { const n = Number(v); return Number.isInteger(n) ? Math.min(hi, Math.max(lo, n)) : lo; };
@@ -158,7 +169,8 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   f.qi = int(j.qi, 0, FLOW_ELEMENTS[f.e].questions.length - 1);
   f.ans = FLOW_ELEMENTS.map((el, i) => el.questions.map((_, k) => str(Array.isArray(j.ans) && Array.isArray(j.ans[i]) ? j.ans[i][k] : "").slice(0, MAX_ANSWER)));
   f.drafts = FLOW_ELEMENTS.map((_, i) => str(Array.isArray(j.drafts) ? j.drafts[i] : "").slice(0, MAX_DRAFT));
-  f.done = FLOW_ELEMENTS.map((el, i) => !!(Array.isArray(j.done) && j.done[i]) && (!!f.drafts[i].trim() || OPTIONAL.has(el.key)));
+  f.done = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.done) && j.done[i]) && !!f.drafts[i].trim());
+  f.skip = Array.isArray(j.skip) ? cleanSkip(j.skip) : base.skip;
   f.from = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.from) && j.from[i]) && !!f.drafts[i].trim());
   f.check = base.check; f.saved = base.saved;
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
@@ -242,7 +254,7 @@ export function flowCorpus(f: Flow, placeWord: string, context: string, upTo?: n
   out.push("PLACE: " + (placeWord || "this place"));
   out.push("STRATEGY PERIOD: " + (f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "not set — use the horizon the plan names, if any"));
   out.push("\nTHE PLAN AS IT IS WRITTEN ON THE PLATFORM:\n" + (context.trim() || "Nothing yet."));
-  const parts = FLOW_ELEMENTS.map((el, i) => (f.done[i] && f.drafts[i].trim() && (upTo == null || i !== upTo) ? el.name + ":\n" + f.drafts[i].trim() : "")).filter(Boolean);
+  const parts = FLOW_ELEMENTS.map((el, i) => (live(f, i) && f.done[i] && f.drafts[i].trim() && (upTo == null || i !== upTo) ? el.name + ":\n" + f.drafts[i].trim() : "")).filter(Boolean);
   if (parts.length) out.push("\nPARTS OF THIS FOUNDATION ALREADY AGREED:\n" + parts.join("\n\n"));
   return out.join("\n");
 }
@@ -258,13 +270,13 @@ export function refineQuestion(f: Flow, i: number, how: string): string {
 }
 export function checkQuestion(f: Flow): string {
   return "Check these parts of one Foundation against each other. Say in `agree` where two parts support each other, and in `issues` where they do not (a gap, a contradiction, an objective that measures nothing the other parts promise), naming the part to change in `element`. At most three of each. Short sentences.\n\n" +
-    FLOW_ELEMENTS.map((el, i) => el.name.toUpperCase() + " (" + el.key + "):\n" + (f.drafts[i].trim() || "(left empty — this part is optional)")).join("\n\n");
+    FLOW_ELEMENTS.map((el, i) => live(f, i) ? el.name.toUpperCase() + " (" + el.key + "):\n" + f.drafts[i].trim() : "").filter(Boolean).join("\n\n");
 }
 
 /* ── THE FOUNDATION AS ONE TEXT, AND SAVING IT ──────────────────────── */
 export function foundationText(f: Flow, placeWord: string): string {
   const out = ["Foundation — " + placeWord, f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "", ""];
-  FLOW_ELEMENTS.forEach((el, i) => { if (f.drafts[i].trim()) out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
+  FLOW_ELEMENTS.forEach((el, i) => { if (live(f, i) && f.drafts[i].trim()) out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
   return out.join("\n").trim();
 }
 export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
@@ -274,7 +286,7 @@ export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneL
    and section gains a version; otherwise it is made at v1. */
 export async function saveFoundation(c: Q, chat: { id: string; place: string; section: Section; title: string }, f: Flow, placeWord: string, by: string): Promise<{ deliverableId: string; n: number; title: string; isNew: boolean }> {
   const title = foundationTitle(placeWord);
-  const body = { text: foundationText(f, placeWord), foundation: FLOW_ELEMENTS.map((el, i) => ({ key: el.key, name: el.name, text: f.drafts[i] })), years: [f.y0, f.y1] };
+  const body = { text: foundationText(f, placeWord), foundation: FLOW_ELEMENTS.filter((_, i) => live(f, i)).map((el) => ({ key: el.key, name: el.name, text: f.drafts[FLOW_ELEMENTS.indexOf(el)] })), years: [f.y0, f.y1] };
   const note = "Built in “" + chat.title + "”";
   const hit = await c.query(
     "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",

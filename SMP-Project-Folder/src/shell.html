@@ -9358,27 +9358,32 @@
         fieldSaved(); paint();
       });
     });
-    /* §473: a unit's optional Core Values — add and remove, re-asked on the
-       click (§48.2). An emptied list loses its key (§50.6). */
+    /* §473: a unit's Core Values — add and remove, re-asked on the click
+       (§48.2). An emptied list loses its key (§50.6). §474: the fill grant
+       may write the list while it is owed, and unitValuesWrite answers who
+       may, from the stored state at press time — never from the drawn one. */
     document.querySelectorAll("[data-uvaladd]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.uvaladd;
-        if (!mayAuthor(foundKeyFor(t), t)) return;
         var o = unitLikeWritable(t);
         if (!o) return;
+        var how = unitValuesWrite(o);
+        if (!how) return;
         if (!Array.isArray(o.values)) o.values = [];
         o.values.push({ name: "", def: "" });
+        unitValuesTouch(o, how);
         fieldSaved(); paint();
       });
     });
     document.querySelectorAll("[data-uvalrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        if (!mayAuthor(foundKeyFor(t), t)) return;
         var o = unitLikeWritable(t);
         if (!o || !Array.isArray(o.values) || !o.values[i]) return;
+        var how = unitValuesWrite(o);
+        if (!how) return;
         o.values.splice(i, 1);
-        if (!o.values.length) delete o.values;
+        unitValuesTouch(o, how);
         fieldSaved(); paint();
       });
     });

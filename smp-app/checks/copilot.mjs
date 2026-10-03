@@ -703,9 +703,9 @@ try {
     check("...and a client's own person cannot start one", hendNf.st === 403, hendNf.st + "");
     const fid = nf.j.chat.id;
     const g0 = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
-    check("the chat comes with its flow, the six parts' questions and examples, Purpose marked optional, the short-answer line and the next version",
+    check("the chat comes with its flow, the six parts' questions and examples, nothing marked optional (§474: Structure decides, never the card), the short-answer line and the next version",
       g0.j.flow && g0.j.flowSteps.length === 6 && g0.j.flowSteps.map((e) => e.key).join() === "who,asp,eim,pur,obj,val" &&
-      g0.j.flowSteps.filter((e) => e.optional).map((e) => e.key).join() === "pur" && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
+      !g0.j.flowSteps.some((e) => e.optional) && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
       g0.j.shortAnswer === 15 && g0.j.nextVersion === 1, JSON.stringify(Object.keys(g0.j)));
     const lst = await call("GET", "list", null, NORAN, "?place=mobile&section=foundation");
     check("...and the rail marks it guided", lst.j && (lst.j.chats || []).some((c) => c.id === fid && c.guided), JSON.stringify(lst.j && lst.j.chats).slice(0, 200));
@@ -744,6 +744,16 @@ try {
     F = r1.j.flow;
     F.drafts = F.drafts.map((d, i) => d || (i === 3 ? "" : "Part " + (i + 1) + " draft for {Y}")); F.done = F.done.map((_, i) => i !== 3); F.phase = "check";
     await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
+    /* §474: nothing is optional — a part the Structure carries is owed, and
+       one it does not is never asked. Both ends (§94.2). */
+    const owedPur = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
+    check("with Purpose switched on in Structure, an empty Purpose holds the check (§474)", owedPur.st === 400 && /Every part needs/.test(owedPur.j.why), owedPur.st + "");
+    F.skip = ["pur"];
+    const sv = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
+    check("...and switched off it is not asked", sv.st === 200 && sv.j.flow.skip.join() === "pur", JSON.stringify(sv.j.flow && sv.j.flow.skip));
+    const sk = await call("POST", "api", { act: "newFlow", place: "mobile", skip: ["asp", "val", "nope"] }, NORAN);
+    check("only Purpose and Core Values can be switched off — never the Aspiration", sk.st === 200 && sk.j.flow.skip.join() === "val", JSON.stringify(sk.j.flow && sk.j.flow.skip));
+    if (sk.j.chat) await call("POST", "api", { act: "delete", id: sk.j.chat.id }, NORAN);
     NEXT = { answer: { agree: ["The purpose and the aspiration point the same way."], issues: [{ element: "val", text: "One value repeats the purpose." }, { element: "nothing", text: "A general note." }] } };
     const ck = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
     check("the check comes back as agreements and issues, each issue naming a real part or none",
@@ -752,11 +762,11 @@ try {
     const fin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
     check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
     const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
-    check("...Purpose left empty does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
+    check("...Purpose switched off does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
     const again = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
     check("a saved flow is done — it cannot be changed or saved twice", again.st === 400 && (await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN)).st === 400);
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
-    const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done };
+    const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);
     const g2 = await call("GET", "chat", null, NORAN, "?id=" + nf2.j.chat.id + "&placeWord=Mobile");
     check("a second run says before the press that it will be version 2", g2.j.nextVersion === 2, g2.j.nextVersion + "");

@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-03 — Structure decides what a unit's Foundation asks (§474), on the branch, not merged.** Purpose and Core Values are no longer "optional": where Client set-up › Structure has them on, the unit's Foundation page shows them, an empty one reads Missing and counts like the Aspiration, and the Foundation chat asks for them; where they are off, they are not shown and not asked, and anything already written is kept. New clients start with both off, and so does every existing client that never saved its units' Structure, so nobody suddenly owes two new parts.
+
 **2026-10-03 — a Foundation chat starts from what is there (§473), on the branch, not merged.** The Guided Foundation button is gone: a new Foundation chat asks whether to start from the existing Foundation or fresh, shows six cards (Purpose optional, End in Mind new), and fills them from the plan when you start from it. A unit's Foundation page has optional Purpose and Core Values boxes.
 
 **2026-10-03 — the second try can only return the text (§472), on the branch, not merged.** When the Copilot says it changed something but sends no text, the second try is now a small request that can only return the revised text, with nowhere to just talk. The honest "did not come back" line stays as the last resort.

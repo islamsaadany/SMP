@@ -657,7 +657,7 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
-  function doneCount(f){ return f.done.filter(Boolean).length; }
+  function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -686,9 +686,25 @@ var COPILOT = (function(){
         .map(function(v){ return clean(v.name) + (clean(v.def) ? " — " + clean(v.def) : ""); }).join("\n")
     };
   }
-  function planHas(p){ for (var k in p) if (p[k]) return true; return false; }
-  function optional(i){ var el = steps()[i]; return !!(el && el.optional); }
-  function agreedAll(f){ return steps().every(function(el, i){ return f.done[i] || (el.optional && !String(f.drafts[i] || "").trim()); }); }
+  function planHas(p){ var off = skipNow(); for (var k in p) if (p[k] && off.indexOf(k) < 0) return true; return false; }
+  /* §474 — THE CARDS FOLLOW THE STRUCTURE. Purpose and Core Values are
+     asked only where Client set-up › Structure switches them on for this
+     place's Foundation; off, they have no card and no question, whatever
+     was written before. Nothing is "optional" any more: a part that is on
+     is owed like the others. Read from the client's graph each time, and
+     sent with every save so the server's "is everything agreed" asks the
+     same list. */
+  var SKIP_COMP = { pur: "purpose", val: "values" };
+  function skipNow(){
+    var out = [];
+    for (var k in SKIP_COMP) {
+      var on; try { on = typeof compOn === "function" ? compOn(place(), SKIP_COMP[k]) : true; } catch (e) { on = true; }
+      if (!on) out.push(k);
+    }
+    return out;
+  }
+  function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
+  function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -703,6 +719,7 @@ var COPILOT = (function(){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
     var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
     return '<div class="copcards">' + S.map(function(el, i){
+      if (!on(i)) return "";
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
       if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
@@ -710,7 +727,7 @@ var COPILOT = (function(){
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
       else if (txt) { st = "In progress"; }
-      else { empty = true; st = el.optional ? (f.done[i] || plan ? "Optional · empty" : "Optional") : "Empty"; if (el.optional) cls += " opt"; }
+      else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
         : '<p>' + (now ? E(el.questions.length + " questions") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
       var wide = el.key === "who" || el.key === "asp";
@@ -731,7 +748,7 @@ var COPILOT = (function(){
       p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
     }
     var total = 0, answered = 0;
-    S.forEach(function(x, i){ total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
+    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
       '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
@@ -774,18 +791,17 @@ var COPILOT = (function(){
     }
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
+      if (!on(i)) return;
       var current = !all && i === f.e;
       if (!current) {
         if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
         return;
       }
       if (f.phase === "loaded") return;
-      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + (el.optional ? " (optional — you can leave it empty)" : "") + "."));
+      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
-        if (el.optional && ed && !(NUDGE && NUDGE.id === PANE.chat.id))
-          out.push('<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-fskip>Leave ' + E(el.name) + ' empty</button></div>');
         if (NUDGE && NUDGE.id === PANE.chat.id) {
           out.push(meMsg(NUDGE.text));
           out.push('<div class="copwarn" role="status">That answer is quite short. A little more detail makes a better draft.' +
@@ -827,14 +843,14 @@ var COPILOT = (function(){
   }
   function nextUndone(f, from){
     var n = steps().length;
-    for (var i = from + 1; i < n; i++) if (!f.done[i]) return i;
-    for (var j = 0; j < from; j++) if (!f.done[j]) return j;
+    for (var i = from + 1; i < n; i++) if (on(i) && !f.done[i]) return i;
+    for (var j = 0; j < from; j++) if (on(j) && !f.done[j]) return j;
     return -1;
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
     var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
-      ' · ' + doneCount(f) + ' of ' + S.length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
+      ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
       (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
@@ -871,7 +887,7 @@ var COPILOT = (function(){
       draw(); if (then) then();
     });
   }
-  function flowCopy(){ return JSON.parse(JSON.stringify(PANE.flow)); }
+  function flowCopy(){ var f = JSON.parse(JSON.stringify(PANE.flow)); f.skip = skipNow(); return f; }
   function flowAsk(body){
     if (!PANE || !PANE.chat || THINKING) return;
     var id = PANE.chat.id, ctx = contextOf();
@@ -946,13 +962,6 @@ var COPILOT = (function(){
       gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
       flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
-    if ((b = hit(ev, "[data-cop-fskip]"))) {
-      var gk = flowCopy(); gk.drafts[gk.e] = ""; gk.done[gk.e] = true; NUDGE = null;
-      if (gk.start === "plan") { gk.phase = "loaded"; flowSave(gk); return true; }
-      var nk = nextUndone(gk, gk.e);
-      if (nk < 0) { flowAsk({ act:"flowCheck", flow:gk }); return true; }
-      gk.e = nk; gk.qi = 0; gk.phase = gk.drafts[nk] ? "draft" : "ask"; flowSave(gk); return true;
-    }
     if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-nudge-more]"))) {
       if (NUDGE) DRAFT[PANE.chat.id] = NUDGE.text.replace(/\s+$/, "") + ", ";
@@ -979,7 +988,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;
       var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord() }, function(j){
+      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
         loadList(true); draw(); });
       return true;
@@ -1232,7 +1241,7 @@ var COPILOT = (function(){
          the place already has a Foundation, and on the four roads where it
          has none — the page knows which, because it holds the plan. */
       if (section() === "foundation") {
-        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()) }, function(j){
+        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
           PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
           OPEN[key()] = { kind:"chat", id: j.chat.id };

@@ -32,7 +32,7 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
-  FLOW_ELEMENTS, OPTIONAL, allAgreed, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
+  FLOW_ELEMENTS, cleanSkip, allAgreed, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
   saveFoundation, nextFoundationVersion,
 } from "../../lib/copilot-flow.ts";
@@ -113,7 +113,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
         const pw = oneLine(q("placeWord")).slice(0, 120);
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
-          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS.map((el) => ({ ...el, optional: OPTIONAL.has(el.key) })), shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}) };
+          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -190,7 +190,8 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     /* §473: whether the place already HAS a Foundation only decides which
        question opens the chat — start from it, or the four roads — so the
        page's word is enough; nothing is read or written by it. */
-    const flow = newFlow(b.hasPlan === true);
+    /* §474: which parts the Structure switches off rides the same word. */
+    const flow = newFlow(b.hasPlan === true, cleanSkip(b.skip));
     await writeFlow(c, chat.id, flow);
     return out(200, { ok: true, chat: { ...chat, guided: true }, flow });
   }
@@ -291,8 +292,11 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const chat = await oneChat(c, id);
     if (!chat) return refused(404, "That chat is not here any more.");
     if (chat.archived) return refused(400, ARCHIVED);
-    const stored = await flowOf(c, id);
+    let stored = await flowOf(c, id);
     if (!stored) return refused(400, "This is not a guided Foundation chat.");
+    /* §474: the Structure may have changed since the flow was last written,
+       so the finish carries the page's current answer of what is off. */
+    if (Array.isArray(b.skip)) stored = { ...stored, skip: cleanSkip(b.skip) };
     if (stored.saved && brk() !== "flow-reopen") return refused(400, SAVED_ALREADY);
     if (kind === "flowSave") {
       const f = sanitizeFlow(b.flow, stored);
@@ -301,7 +305,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     }
     /* SAVED AS A VERSION OF "Foundation — <place>" — only when all five parts
        are agreed, asked of the STORED flow (§42), never of the page. */
-    if (!(allAgreed(stored) || brk() === "finish-any")) return refused(400, "Every part needs a draft you have agreed before the Foundation can be saved (Purpose may be left empty).");
+    if (!(allAgreed(stored) || brk() === "finish-any")) return refused(400, "Every part needs a draft you have agreed before the Foundation can be saved.");
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
     const s = await saveFoundation(c, chat, stored, placeWord, by);
     const f: Flow = { ...stored, phase: "saved", saved: { deliverableId: s.deliverableId, n: s.n, title: s.title } };
@@ -475,7 +479,7 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
     const f = b.flow ? sanitizeFlow(b.flow, stored) : stored;
     if (kind === "flowDraft" && !f.ans[el].some((x) => x.trim())) return refused(400, "Answer at least one question first.");
     if (kind === "flowRefine" && !f.drafts[el].trim()) return refused(400, "There is no draft of this part to change yet.");
-    if (kind === "flowCheck" && !allAgreed(f)) return refused(400, "Every part needs a draft you have agreed before they can be checked together (Purpose may be left empty).");
+    if (kind === "flowCheck" && !allAgreed(f)) return refused(400, "Every part needs a draft you have agreed before they can be checked together.");
     if (b.flow) await writeFlow(c, id, f);
     return { chat, f };
   });

@@ -75,8 +75,11 @@ with sync_playwright() as p:
     # read OFF whatever is stored — both ends, the brief still ON beside them.
     ck("a unit keeps its brief, and its themes are not available (§427)",
        safe(pg, "()=>compOn('%s','brief')===true && compOn('%s','theme')===false" % (unit, unit)) is True)
-    ck("a stored 'on' cannot bring a unit's purpose or a company's SWOT back (§427)",
-       safe(pg, "()=>{GROUP.structure={over:{'%s':{purpose:true},'co:x':{swot:true}}}; var r=[compOn('%s','purpose'),compOn('co:x','swot'),compOn('co:x','brief')]; delete GROUP.structure; return r.join(',')}" % (unit, unit)) == "false,false,true")
+    # REWRITTEN, never loosened (§218): §473 gave a unit's Purpose and Core
+    # Values a page, so a stored 'on' brings them back now (§474) — themes and
+    # a company's SWOT still cannot be, and unsaid the two stay off.
+    ck("a stored 'on' cannot bring a unit's themes or a company's SWOT back, but does bring its purpose (§427, §474)",
+       safe(pg, "()=>{GROUP.structure={over:{'%s':{purpose:true,theme:true},'co:x':{swot:true}}}; var r=[compOn('%s','theme'),compOn('%s','purpose'),compOn('co:x','swot'),compOn('co:x','brief')]; delete GROUP.structure; r.push(compOn('%s','purpose'),compOn('%s','values')); return r.join(',')}" % (unit, unit, unit, unit, unit)) == "false,true,false,true,false,false")
     ck("a capability keeps its brief (§334's definition)",
        safe(pg, "()=>compOn('cap:x','brief')") is True)
     ck("a stored per-function 'on' cannot bring the brief back",
@@ -210,8 +213,10 @@ with sync_playwright() as p:
     # the three it does not are drawn, off and disabled.
     ck("…while the business units' level offers a live brief and aspiration",
        safe(pg, "()=>['brief','aspiration'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&!t.disabled})") is True)
-    ck("…and draws purpose, themes and values off, greyed and unpressable (§427)",
-       safe(pg, "()=>['purpose','theme','values'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')&&!!t.closest('.dummy')})") is True)
+    ck("…and draws themes off, greyed and unpressable (§427)",
+       safe(pg, "()=>['theme'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')&&!!t.closest('.dummy')})") is True)
+    ck("…while purpose and values are live ticks, off until pressed (§474)",
+       safe(pg, "()=>['purpose','values'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&!t.disabled&&!t.classList.contains('on')})") is True)
     ck("the second layer's themes tick is greyed and off, its brief live (§427)",
        safe(pg, "()=>['theme'].every(c=>{var t=document.querySelector('[data-stcomp=\"mid|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')}) && !document.querySelector('[data-stcomp=\"mid|brief\"]').disabled") is True)
     ck("…its SWOT and plan switches are greyed with Off lit and cannot be pressed (§427)",

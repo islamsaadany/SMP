@@ -838,7 +838,17 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "two rails, Chats above Deliverables", JSON.stringify(rails));
 
     const c0 = await count("copilot_chats"), m0 = await count("copilot_messages");
-    await page.click(".coprh [data-cop-newchat]"); await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
+    /* REWRITTEN, never loosened (§218): since §473 "+ New chat" in Foundation
+       starts the FLOW (§3i presses that), so the plain Foundation chat this
+       section is about is made through the module's own api, as §3h does,
+       and opened by its own link — the rest of the section presses it. */
+    const mkc = await page.evaluate(async () => (await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "newChat", place: "mobile", section: "foundation" }) })).json());
+    /* A goto that differs only by the hash is not a load, and the link is
+       read once at load — so leave the page first. */
+    await page.goto("about:blank");
+    await open("/raya-trade/strategy/mobile/copilot/foundation#cop=chat-" + (mkc.chat && mkc.chat.id));
+    await page.waitForSelector("[data-cop-text]", { timeout: 8000 });
     const ctxLine = await page.evaluate(() => { const e = document.querySelector(".copctx"); return e ? e.textContent.trim() : ""; });
     check(/Mobile/.test(ctxLine) && /pillar/i.test(ctxLine), "the chat says in one line what the AI can see for the place", ctxLine);
     /* A file, attached through the real control and read back (§96). */
@@ -851,7 +861,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copmiss"), null, { timeout: 15000 }).catch(() => {});
-    check((await count("copilot_chats")) === c0 + 1, "+ New chat writes a chat to the database");
+    check((await count("copilot_chats")) === c0 + 1, "a Foundation chat is written to the database");
     check((await count("copilot_messages")) === m0 + 2, "…and sending stores what was typed and the Copilot's answer");
     const sent = MODEL_SEEN[seen0];
     const sys = sent && sent.systemInstruction ? sent.systemInstruction.parts.map((x) => x.text).join("") : "";
@@ -1165,6 +1175,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
   const shot = async (n) => { if (SHOT) await page.screenshot({ path: SHOT + "/flow-" + n + ".png" }); };
   const keep = { ...MODEL_ANSWER };
   const flowRow = async (id) => (await asTenant(tenantId, (c) => c.query("select extra->'flow' f from copilot_chats where id = $1", [id]))).rows[0].f;
+  let ST0 = undefined;
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await fresh(); await signIn("office@forefront.example");
@@ -1188,7 +1199,22 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "…and the strip's button brings it back");
 
     /* §473: a new Foundation chat on a place with a Foundation asks first. */
+    /* §474: the cards follow Client set-up › Structure. The dev tenant never
+       saved its units' Structure, so Purpose and Core Values are OFF — four
+       cards. Ticked on through the stored graph, it is six, nothing optional. */
+    ST0 = await page.evaluate(() => GROUP.structure ? JSON.parse(JSON.stringify(GROUP.structure)) : null);
     await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
+    await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 5000 }).catch(() => {});
+    const off4 = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()));
+    check(off4.join("|") === "Who We Are|Winning Aspiration|End in Mind|Key Objectives",
+      "with Purpose and Core Values off in Structure, the chat has no card for either (§474)", JSON.stringify(off4));
+    await page.evaluate(() => { GROUP.structure = { bu: { on: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"] } }; paint(); });
+    const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
+    await page.click(".copnew[data-cop-newchat]");
+    /* the first chat's own Start buttons are still on screen, so wait for the
+       NEW chat to be the current one before reading its id (§222). */
+    await page.waitForFunction((w) => { const e = document.querySelector(".copitem[aria-current]"); return e && e.dataset.copChat !== w; }, was4, { timeout: 10000 });
     await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     const pid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
     await page.waitForFunction(() => document.querySelectorAll(".copcard").length === 6, null, { timeout: 5000 }).catch(() => {});
@@ -1205,7 +1231,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     let P = await flowRow(pid);
     check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /From the plan/.test(pl[0].st) && /From the plan/.test(pl[1].st),
       "Start from it fills the cards from the plan, each marked From the plan, and stores it", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
-    check(/Optional/.test(pl[3].st), "Purpose is marked optional", pl[3].st);
+    check(!pl.some((c) => /Optional/.test(c.st || "")), "nothing is marked optional — switched on, Purpose is asked like the rest (§474)", JSON.stringify(pl.map((c) => c.st)));
     check(/loaded what Mobile/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says what it loaded and asks no years");
     await shot("0c-loaded");
     await page.click("[data-cop-cards=hide]");
@@ -1326,6 +1352,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "…and it is on the rail under Deliverables");
     check(errs.length === 0, "no page errors", errs.join(" | "));
   } finally {
+    if (ST0 !== undefined) await page.evaluate((st) => { if (st) GROUP.structure = st; else delete GROUP.structure; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, ST0).catch(() => {});
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});

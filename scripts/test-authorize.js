@@ -1570,6 +1570,21 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
   });
   check("FILL: an empty aspiration is fillable", v.ok, v.refusals.join(" / "));
 
+  /* 9b · §474: the Purpose and the Core Values are owed like the aspiration,
+     so the fill grant may close them — and may not rewrite a settled one. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].mission = "Filled purpose";
+    i.units[UNIT].values = [{ name: "Customer first", def: "" }];
+    i.units[UNIT].pend = { mission: MARK, values: MARK };
+  });
+  check("FILL §474: an empty Purpose and Core Values are fillable", v.ok, v.refusals.join(" / "));
+  s = gappy(); s.units[UNIT].mission = "Settled purpose";
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].mission = "Rewritten purpose"; i.units[UNIT].pend = { mission: MARK };
+  });
+  check("FILL §474: a settled Purpose is NOT the filler's to rewrite", !v.ok, "allowed");
+
   /* 10 · quarters move as ONE mark, and only from nothing. */
   s = gappy();
   v = fromStored(s, custKey, function (i) {

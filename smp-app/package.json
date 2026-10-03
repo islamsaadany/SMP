@@ -38,6 +38,8 @@
     "check:deploy:red": "for b in ignore-app unanchored ignore-scripts; do node checks/deploy-context.mjs --break=$b >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
     "check:modules": "node checks/modules.mjs",
     "check:modules:red": "for b in any-module open-address static-hello trail-for-staff no-server wrong-server module-own-colour gate-open mark-always; do SMP_BREAK=$b node checks/modules.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",
+    "check:look": "node --experimental-strip-types checks/module-look.mjs",
+    "check:look:red": "SMP_BREAK=bar-ink node --experimental-strip-types checks/module-look.mjs >/dev/null 2>&1 && { echo \"NOT RED: bar-ink\"; exit 1; }; echo \"red: bar-ink\"",
     "check:store": "node --experimental-strip-types checks/store-seam.mjs",
     "check:viewas": "node --experimental-strip-types checks/view-as.mjs",
     "check:viewas:red": "for b in viewas-any-seat viewas-unknown-ok viewas-keeps-seat; do SMP_BREAK=$b node --experimental-strip-types checks/view-as.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",

@@ -9358,6 +9358,30 @@
         fieldSaved(); paint();
       });
     });
+    /* §473: a unit's optional Core Values — add and remove, re-asked on the
+       click (§48.2). An emptied list loses its key (§50.6). */
+    document.querySelectorAll("[data-uvaladd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.uvaladd;
+        if (!mayAuthor(foundKeyFor(t), t)) return;
+        var o = unitLikeWritable(t);
+        if (!o) return;
+        if (!Array.isArray(o.values)) o.values = [];
+        o.values.push({ name: "", def: "" });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-uvalrm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor(foundKeyFor(t), t)) return;
+        var o = unitLikeWritable(t);
+        if (!o || !Array.isArray(o.values) || !o.values[i]) return;
+        o.values.splice(i, 1);
+        if (!o.values.length) delete o.values;
+        fieldSaved(); paint();
+      });
+    });
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];

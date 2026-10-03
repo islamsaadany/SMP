@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-03 — a Foundation chat starts from what is there (§473), on the branch, not merged.** The Guided Foundation button is gone: a new Foundation chat asks whether to start from the existing Foundation or fresh, shows six cards (Purpose optional, End in Mind new), and fills them from the plan when you start from it. A unit's Foundation page has optional Purpose and Core Values boxes.
+
 **2026-10-03 — the second try can only return the text (§472), on the branch, not merged.** When the Copilot says it changed something but sends no text, the second try is now a small request that can only return the revised text, with nowhere to just talk. The honest "did not come back" line stays as the last resort.
 
 **2026-10-02 — a refinement shows the revised text and its Save button (§471), on the branch, not merged.** When the Copilot says it changed something but sends no revised text, it is asked again once for the full text; if it still sends none, the page says so plainly instead of pointing to a Save button that is not there. The Fold bars button is kept as it is.

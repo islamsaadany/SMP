@@ -5259,11 +5259,51 @@ function renderUnitFoundation(u){
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' : '') +
-      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u, u.ukey) +
+      unitPurposeAnd(u, upg,
+        aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+          function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
+          false, u, u.ukey)) +
     '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false);
+    koBand(u.keyObjectives, "foundation", "u_found", u, false) +
+    unitValuesBox(u, upg);
+}
+/* §473 — A UNIT'S PURPOSE AND CORE VALUES, BOTH OPTIONAL. Islam: *"purpose
+   needs to be there as optional box in the unit foundation"*, then of the
+   values, *"add core values as optional box"*. The group's own shapes
+   (`mission`, `values` of {name, def}, §404's foundationBody), so one
+   vocabulary for one thing (§53.5); stored on the unit and riding
+   `units.extra` (no migration). OPTIONAL means two things: never a counted
+   gap, and in reading mode an empty box is not drawn at all — it appears
+   only once somebody has written in it, or while the pen is open to write.
+   The Structure step decides whether a layer carries them (compOn). */
+function unitPurposeAnd(u, upg, asp){
+  var t = String(u.mission || "").trim();
+  var show = compOn(u.ukey, "purpose") && (upg || t);
+  if (!show) return asp;
+  return '<div class="fcol"><div class="card upurpose"><h2 class="sec first">' + L1("purpose") +
+    ' <span class="optag">Optional</span></h2>' +
+    '<p class="statement">' + fieldOr(upg, u.mission || "", "big-field", function(v){
+      if (String(v).trim()) u.mission = v; else delete u.mission; }) + '</p></div>' + asp + '</div>';
+}
+function unitValuesBox(u, upg){
+  var vals = Array.isArray(u.values) ? u.values : [];
+  if (!compOn(u.ukey, "values") || !(upg || vals.length)) return "";
+  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") +
+    ' <span class="optag">Optional</span></h2>' +
+    (upg
+      ? '<div class="uvlist">' + vals.map(function(v, i){
+          return '<div class="uvrow">' +
+            inputOr(upg, v.name || "", "", function(x){ v.name = x; }) +
+            fieldOr(upg, v.def || "", "", function(x){ v.def = x; }) +
+            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
+            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
+        }).join("") + '</div>' +
+        '<div class="addrow"><button class="editbtn" data-uvaladd="' + esc(u.ukey) + '">+ Add a value</button></div>'
+      : '<div class="valgrid">' + vals.map(function(v){
+          return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
+            '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
+        }).join("") + '</div>') +
+    '</div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────

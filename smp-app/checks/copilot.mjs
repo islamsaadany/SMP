@@ -678,24 +678,42 @@ try {
        parts, and saved as the NEXT version of one deliverable — never from
        what the page claims (§42). */
     {
-    section("§6 · the guided Foundation: the years, the road, the draft, the check, a new version each run");
+    section("§6 · the Foundation chat: from the plan or fresh, the years, the draft, the check, a new version each run");
     const nf = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
-    check("the office starts a guided Foundation: a Foundation chat carrying a flow at the years step",
-      nf.st === 200 && nf.j.chat.section === "foundation" && nf.j.flow.phase === "year" && nf.j.flow.ans.length === 5, JSON.stringify(nf.j).slice(0, 200));
+    check("a new Foundation chat on a place with no Foundation opens on the roads — no question to ask (§473)",
+      nf.st === 200 && nf.j.chat.section === "foundation" && nf.j.flow.phase === "path" && nf.j.flow.ans.length === 6, JSON.stringify(nf.j).slice(0, 200));
+    const np = await call("POST", "api", { act: "newFlow", place: "mobile", hasPlan: true }, NORAN);
+    check("...and on a place that has one it asks first: start from it, or start fresh", np.st === 200 && np.j.flow.phase === "start" && np.j.flow.start === "", JSON.stringify(np.j.flow).slice(0, 120));
+    {
+      const P = JSON.parse(JSON.stringify(np.j.flow));
+      const pl = await call("POST", "api", { act: "flowSave", id: np.j.chat.id, flow: { ...P, start: "plan", drafts: ["We sell phones", "Lead by 2028", "", "", "Grow share", ""], from: [true, true, true, false, true, false], done: [true, true, false, false, true, false] } }, NORAN);
+      check("Start from it loads the plan's parts into the cards, marked as from the plan, and asks no years",
+        pl.st === 200 && pl.j.flow.phase === "loaded" && pl.j.flow.path === "guided" && pl.j.flow.from.join() === "true,true,false,false,true,false" && pl.j.flow.y0 === null,
+        JSON.stringify(pl.j.flow).slice(0, 200));
+      const back = await call("POST", "api", { act: "flowSave", id: np.j.chat.id, flow: { ...pl.j.flow, phase: "path" } }, NORAN);
+      check("...a flow started from the plan never drops back to the roads", back.j.flow.phase === "loaded");
+      const fr = await call("POST", "api", { act: "newFlow", place: "mobile", hasPlan: true }, NORAN);
+      const fr1 = await call("POST", "api", { act: "flowSave", id: fr.j.chat.id, flow: { ...fr.j.flow, start: "fresh" } }, NORAN);
+      check("Start fresh goes to the roads", fr1.j.flow.phase === "path" && fr1.j.flow.start === "fresh");
+      const fr2 = await call("POST", "api", { act: "flowSave", id: fr.j.chat.id, flow: { ...fr1.j.flow, start: "", phase: "start" } }, NORAN);
+      check("...and the page cannot go back to the question once it is answered", fr2.j.flow.phase === "path", fr2.j.flow.phase);
+      await call("POST", "api", { act: "delete", id: fr.j.chat.id }, NORAN);
+    }
     const hendNf = await call("POST", "api", { act: "newFlow", place: "mobile" }, HEND);
     check("...and a client's own person cannot start one", hendNf.st === 403, hendNf.st + "");
     const fid = nf.j.chat.id;
     const g0 = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
-    check("the chat comes with its flow, the five parts' questions and examples, the short-answer line and the next version",
-      g0.j.flow && g0.j.flowSteps.length === 5 && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
+    check("the chat comes with its flow, the six parts' questions and examples, Purpose marked optional, the short-answer line and the next version",
+      g0.j.flow && g0.j.flowSteps.length === 6 && g0.j.flowSteps.map((e) => e.key).join() === "who,asp,eim,pur,obj,val" &&
+      g0.j.flowSteps.filter((e) => e.optional).map((e) => e.key).join() === "pur" && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
       g0.j.shortAnswer === 15 && g0.j.nextVersion === 1, JSON.stringify(Object.keys(g0.j)));
     const lst = await call("GET", "list", null, NORAN, "?place=mobile&section=foundation");
     check("...and the rail marks it guided", lst.j && (lst.j.chats || []).some((c) => c.id === fid && c.guided), JSON.stringify(lst.j && lst.j.chats).slice(0, 200));
     let F = JSON.parse(JSON.stringify(nf.j.flow));
-    const bad1 = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, y0: 2026, y1: 2024, phase: "path" } }, NORAN);
-    check("years that run backwards keep the flow on the years step", bad1.st === 200 && bad1.j.flow.phase === "year");
-    const s1f = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, y0: 2026, y1: 2028, phase: "year" } }, NORAN);
-    check("good years move it on to choosing the road", s1f.j.flow.phase === "path" && s1f.j.flow.y1 === 2028);
+    const bad1 = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "guided", y0: 2026, y1: 2024, phase: "ask" } }, NORAN);
+    check("the guided road with years that run backwards stays on the years step", bad1.st === 200 && bad1.j.flow.phase === "year");
+    const s1f = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "guided", y0: 2026, y1: 2028, phase: "year" } }, NORAN);
+    check("good years move it on to the questions", s1f.j.flow.phase === "ask" && s1f.j.flow.y1 === 2028);
     F = s1f.j.flow;
     const sneak = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "notes", phase: "ask" } }, NORAN);
     check("another road never enters the guided steps — it stays at the road and goes on as a chat", sneak.j.flow.phase === "path" && sneak.j.flow.path === "notes");
@@ -720,11 +738,11 @@ try {
     const r1 = await call("POST", "api", { act: "flowRefine", id: fid, el: 0, how: "concise", placeWord: "Mobile" }, NORAN);
     check("a refine rewrites that part's draft", r1.st === 200 && r1.j.flow.drafts[0] === "Connect Egypt to what matters.");
     const early = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
-    check("the check across the five waits for all five to be agreed", early.st === 400 && /All five parts/.test(early.j.why));
+    check("the check across the parts waits for every part to be agreed", early.st === 400 && /Every part needs/.test(early.j.why));
     const earlyFin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
-    check("...and so does saving it", earlyFin.st === 400 && /All five parts/.test(earlyFin.j.why));
+    check("...and so does saving it", earlyFin.st === 400 && /Every part needs/.test(earlyFin.j.why));
     F = r1.j.flow;
-    F.drafts = F.drafts.map((d, i) => d || "Part " + (i + 1) + " draft for {Y}"); F.done = F.done.map(() => true); F.phase = "check";
+    F.drafts = F.drafts.map((d, i) => d || (i === 3 ? "" : "Part " + (i + 1) + " draft for {Y}")); F.done = F.done.map((_, i) => i !== 3); F.phase = "check";
     await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
     NEXT = { answer: { agree: ["The purpose and the aspiration point the same way."], issues: [{ element: "val", text: "One value repeats the purpose." }, { element: "nothing", text: "A general note." }] } };
     const ck = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
@@ -734,7 +752,7 @@ try {
     const fin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
     check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
     const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
-    check("...and the version holds the five parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /PURPOSE\nPart 2 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
+    check("...Purpose left empty does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
     const again = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
     check("a saved flow is done — it cannot be changed or saved twice", again.st === 400 && (await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN)).st === 400);
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);

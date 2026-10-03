@@ -1151,7 +1151,7 @@ await section("3h · the Copilot column on Roles & access, and View on the tab (
   }
 });
 
-await section("3i · the guided Foundation: rail toggle, years, the road cards, a part drafted and agreed, the check, the save (§465)", async () => {
+await section("3i · the Foundation chat: rail toggle, start from the plan or fresh, years, the road cards, a part drafted and agreed, the check, the save (§465)", async () => {
   /* PRESSED AND READ BACK (§96). The screen is the approved mockup
      (design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html,
      Option A): three columns, the rail hides to a slim strip, the years come
@@ -1172,7 +1172,7 @@ await section("3i · the guided Foundation: rail toggle, years, the road cards, 
     await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.rail"); } catch (e) {} });
 
     /* The rail hides to a strip and comes back; the choice outlives a reload. */
-    check(await page.$(".copguided[data-cop-newflow]") !== null, "the Foundation rail offers the guided Foundation");
+    check(!(await page.$(".copguided")) && !(await page.$("[data-cop-newflow]")), "the Guided Foundation button is gone — a Foundation chat is the start (§473)");
     check(await page.evaluate(() => !document.querySelector(".coprtop") && !!document.querySelector(".coprh [data-cop-railtog]")),
       "the hide control sits in the Chats header, with no row of its own above the rails (§470 option A)");
     await page.click(".coprh [data-cop-railtog]");
@@ -1187,37 +1187,71 @@ await section("3i · the guided Foundation: rail toggle, years, the road cards, 
     check(await page.evaluate(() => !document.querySelector("[data-cop-pane]").classList.contains("copshut") && getComputedStyle(document.querySelector(".coprails")).display !== "none"),
       "…and the strip's button brings it back");
 
-    /* Start: the years come first. */
-    await page.click("[data-cop-newflow]");
-    await page.waitForSelector("[data-cop-setyears]", { timeout: 10000 });
+    /* §473: a new Foundation chat on a place with a Foundation asks first. */
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
+    const pid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
+    await page.waitForFunction(() => document.querySelectorAll(".copcard").length === 6, null, { timeout: 5000 }).catch(() => {});
+    const q0 = await page.evaluate(() => ({ q: document.querySelector("[data-cop-msgs]").textContent, b: Array.from(document.querySelectorAll("[data-cop-start]")).map((x) => x.textContent.trim()),
+      cards: Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()), wide: document.querySelectorAll(".copcard.wide").length, roads: document.querySelectorAll("[data-cop-path]").length }));
+    check(/already has a Foundation/.test(q0.q) && q0.b.join("|") === "Start from it|Start fresh" && q0.roads === 0,
+      "a place that has a Foundation is asked: start from it, or start fresh — before any road", JSON.stringify(q0).slice(0, 300));
+    check(q0.cards.join("|") === "Who We Are|Winning Aspiration|End in Mind|Purpose|Key Objectives|Core Values" && q0.wide === 2,
+      "six cards in order, Who We Are and Winning Aspiration full width", JSON.stringify(q0.cards) + " " + q0.wide);
+    await shot("0b-start");
+    await page.click('[data-cop-start="plan"]');
+    await page.waitForSelector(".copcard.pick", { timeout: 10000 });
+    const pl = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard")).map((c) => ({ st: (c.querySelector(".copst") || {}).textContent, p: c.textContent })));
+    let P = await flowRow(pid);
+    check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /From the plan/.test(pl[0].st) && /From the plan/.test(pl[1].st),
+      "Start from it fills the cards from the plan, each marked From the plan, and stores it", JSON.stringify({ phase: P && P.phase, from: P && P.from, st: pl.map((c) => c.st) }));
+    check(/Optional/.test(pl[3].st), "Purpose is marked optional", pl[3].st);
+    check(/loaded what Mobile/.test(await page.textContent("[data-cop-msgs]")) && !(await page.$("[data-cop-setyears]")), "the Copilot says what it loaded and asks no years");
+    await shot("0c-loaded");
+    await page.click("[data-cop-cards=hide]");
+    check(await page.evaluate(() => !document.querySelector(".copleft") && document.querySelector(".copflow").classList.contains("nocards") && !!document.querySelector('[data-cop-cards="show"]')),
+      "× closes the cards and the chat takes the width, with Show cards to bring them back");
+    await page.click('[data-cop-cards="show"]');
+    check(!!(await page.$(".copleft .copcard")), "…Show cards brings them back");
+    await page.click('[data-cop-card="1"]');
+    await page.waitForFunction(() => /Let's work on/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
+    for (let i = 0; i < 20 && (P = await flowRow(pid)).e !== 1; i++) await page.waitForTimeout(250);
+    check(P.e === 1 && (P.phase === "draft" || P.phase === "ask"), "pressing a card works on that part", JSON.stringify({ e: P.e, phase: P.phase }));
+    await shot("0d-part");
+
+    /* Start fresh: the roads, then the years on the guided road. */
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     const cid = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
-    await page.waitForFunction(() => document.querySelectorAll(".copcard").length === 5, null, { timeout: 5000 }).catch(() => {});
-    await shot("1-years");
+    await page.click('[data-cop-start="fresh"]');
+    await page.waitForSelector("[data-cop-path]", { timeout: 10000 });
     const cols = await page.evaluate(() => {
       const r = (q) => { const e = document.querySelector(q); return e ? e.getBoundingClientRect() : null; };
       return { rail: r(".coprails"), left: r(".copleft"), chat: r(".copfchat"), cards: document.querySelectorAll(".copcard").length,
-        wide: document.querySelectorAll(".copcard.wide").length, pageW: document.documentElement.scrollWidth, winW: innerWidth };
+        empty: Array.from(document.querySelectorAll(".copcard p")).filter((p) => /Not started/.test(p.textContent)).length,
+        pageW: document.documentElement.scrollWidth, winW: innerWidth };
     });
     check(cols.rail && cols.left && cols.chat && cols.rail.right <= cols.left.left + 1 && cols.left.right <= cols.chat.left + 1,
-      "three columns: the rail, the five cards, the chat", JSON.stringify(cols));
-    check(cols.cards === 5 && cols.wide === 1, "five part cards, the last one full width", cols.cards + " cards, " + cols.wide + " wide");
+      "three columns: the rail, the six cards, the chat", JSON.stringify(cols));
+    check(cols.cards === 6 && cols.empty === 6, "Start fresh shows six empty cards, Not started", cols.cards + " cards, " + cols.empty + " empty");
     check(cols.pageW <= cols.winW, "nothing pushes the page sideways", cols.pageW + " > " + cols.winW);
-    check(!(await page.$("[data-cop-path]")), "the roads are not offered before the years are set");
-    await page.fill("[data-cop-y0]", "2026"); await page.fill("[data-cop-y1]", "2028");
-    await page.click("[data-cop-setyears]");
-    await page.waitForSelector("[data-cop-path]", { timeout: 10000 });
+    check(!(await page.$("[data-cop-setyears]")), "the years are not asked before the road is chosen");
     await shot("2-roads");
     const roads = await page.evaluate(() => Array.from(document.querySelectorAll(".coppcard")).map((b) => ({ k: b.dataset.copPath, rec: b.classList.contains("rec"),
       t: b.querySelector(".coppt").textContent, d: (b.querySelector(".coppd") || {}).textContent || "" })));
     check(roads.length === 4 && roads[0].k === "guided" && !roads.some((r) => r.rec || /Recommended/i.test(r.t)) &&
       roads.every((r) => r.d.length > 20) && !roads.some((r) => /research/i.test(r.t + r.d)),
       "four road cards, each with a sentence, none marked Recommended (§470), no deep research", JSON.stringify(roads));
+    await page.click('[data-cop-path="guided"]');
+    await page.waitForSelector("[data-cop-setyears]", { timeout: 10000 });
+    await shot("1-years");
+    await page.fill("[data-cop-y0]", "2026"); await page.fill("[data-cop-y1]", "2028");
+    await page.click("[data-cop-setyears]");
+    await page.waitForSelector(".copexs", { timeout: 10000 });
     let F = await flowRow(cid);
-    check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "path", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
+    check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start === "fresh", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 
     /* The guided road: a question, its examples, a short answer held. */
-    await page.click('[data-cop-path="guided"]');
-    await page.waitForSelector(".copexs", { timeout: 10000 });
     const q1 = await page.evaluate(() => ({ ex: document.querySelectorAll(".copexs p").length, prog: (document.querySelector(".copprog") || {}).textContent,
       now: (document.querySelector(".copcard.now .copst") || {}).textContent }));
     check(q1.ex === 3 && /Question 1 of/.test(q1.prog) && /Answering 1\//.test(q1.now), "the first question comes with three examples, and its card says Answering", JSON.stringify(q1));
@@ -1256,7 +1290,7 @@ await section("3i · the guided Foundation: rail toggle, years, the road cards, 
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
     const dr = await page.evaluate(() => ({ t: document.querySelector(".copfdraft").textContent, card: document.querySelector('[data-cop-card="0"] p').textContent,
       refines: document.querySelectorAll("[data-cop-refine]").length, save: (document.querySelector("[data-cop-fsave]") || {}).textContent }));
-    check(/connect every Egyptian/.test(dr.t) && /connect every Egyptian/.test(dr.card) && dr.refines === 3 && /Save and continue to Purpose/.test(dr.save),
+    check(/connect every Egyptian/.test(dr.t) && /connect every Egyptian/.test(dr.card) && dr.refines === 3 && /Save and continue to Winning Aspiration/.test(dr.save),
       "the draft shows in the chat and on its card, with three refines and Save and continue to the next part", JSON.stringify(dr));
     Object.assign(MODEL_ANSWER, { text: "We connect Egypt." });
     await page.click('[data-cop-refine="concise"]');

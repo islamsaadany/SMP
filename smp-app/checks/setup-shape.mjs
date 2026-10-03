@@ -351,7 +351,9 @@ console.log("\n8 · an empty capability is not authored work");
     !!st && same(st.bu && st.bu.on, R.STRUCT_NEW_CLIENT.bu), st && st.bu);
   check("the defaults are the ones asked for, word for word",
     same(R.STRUCT_NEW_CLIENT.mid, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"]) &&
-    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "aspiration", "keyobj", "pillar", "swot"]));
+    /* §473: a unit's optional Purpose and Core Values join the default
+       (Islam: "purpose needs to be there"; "add core values as optional box"). */
+    same(R.STRUCT_NEW_CLIENT.bu, ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"]));
   check("the top level and the functions are left unsaid (everything on)",
     !!st && !st.top && !st.fn, st);
   check("a unit on a new client shows no Themes, Capabilities or Values",

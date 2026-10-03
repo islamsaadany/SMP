@@ -3920,7 +3920,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the two levels named here have a default of their own. */
   var STRUCT_NEW_CLIENT = {
     mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
-    bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
+    bu:  ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"]
   };
   function newClientStructure() {
     return { mid: { on: STRUCT_NEW_CLIENT.mid.slice() },
@@ -4052,7 +4052,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      taken away and these are a different answer: the part exists on other
      layers, it simply has no page on this one yet. Read as OFF everywhere,
      whatever a client stored before today, so nothing can claim to show one. */
-  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["purpose", "theme", "values"] };
+  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["theme"] };
   function compBuilt(target, comp) {
     var n = STRUCT_NOT_BUILT[structLevelOf(target)];
     return !(n && n.indexOf(comp) >= 0);
@@ -29772,11 +29772,51 @@ function renderUnitFoundation(u){
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
         '">+ Add a line</button></div>' : '') + '</div>' : '') +
-      aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u, u.ukey) +
+      unitPurposeAnd(u, upg,
+        aspirationCard(L1("aspiration"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
+          function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
+          false, u, u.ukey)) +
     '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false);
+    koBand(u.keyObjectives, "foundation", "u_found", u, false) +
+    unitValuesBox(u, upg);
+}
+/* §473 — A UNIT'S PURPOSE AND CORE VALUES, BOTH OPTIONAL. Islam: *"purpose
+   needs to be there as optional box in the unit foundation"*, then of the
+   values, *"add core values as optional box"*. The group's own shapes
+   (`mission`, `values` of {name, def}, §404's foundationBody), so one
+   vocabulary for one thing (§53.5); stored on the unit and riding
+   `units.extra` (no migration). OPTIONAL means two things: never a counted
+   gap, and in reading mode an empty box is not drawn at all — it appears
+   only once somebody has written in it, or while the pen is open to write.
+   The Structure step decides whether a layer carries them (compOn). */
+function unitPurposeAnd(u, upg, asp){
+  var t = String(u.mission || "").trim();
+  var show = compOn(u.ukey, "purpose") && (upg || t);
+  if (!show) return asp;
+  return '<div class="fcol"><div class="card upurpose"><h2 class="sec first">' + L1("purpose") +
+    ' <span class="optag">Optional</span></h2>' +
+    '<p class="statement">' + fieldOr(upg, u.mission || "", "big-field", function(v){
+      if (String(v).trim()) u.mission = v; else delete u.mission; }) + '</p></div>' + asp + '</div>';
+}
+function unitValuesBox(u, upg){
+  var vals = Array.isArray(u.values) ? u.values : [];
+  if (!compOn(u.ukey, "values") || !(upg || vals.length)) return "";
+  return '<div class="card valbox uvalues"><h2 class="sec first">' + L("values", "group") +
+    ' <span class="optag">Optional</span></h2>' +
+    (upg
+      ? '<div class="uvlist">' + vals.map(function(v, i){
+          return '<div class="uvrow">' +
+            inputOr(upg, v.name || "", "", function(x){ v.name = x; }) +
+            fieldOr(upg, v.def || "", "", function(x){ v.def = x; }) +
+            '<button class="xbtn" data-uvalrm="' + esc(u.ukey) + '|' + i +
+            '" title="Remove this value" aria-label="Remove this value">&times;</button></div>';
+        }).join("") + '</div>' +
+        '<div class="addrow"><button class="editbtn" data-uvaladd="' + esc(u.ukey) + '">+ Add a value</button></div>'
+      : '<div class="valgrid">' + vals.map(function(v){
+          return '<details class="valcard"><summary>' + esc(v.name || "") + '</summary>' +
+            '<div class="valcard-body">' + esc(v.def || "") + '</div></details>';
+        }).join("") + '</div>') +
+    '</div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -55690,8 +55730,6 @@ var COPILOT = (function(){
     var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
     var o = OPEN[key()] || {};
-    if (!arch && canEdit() && section() === "foundation") head = '<button type="button" class="copguided" data-cop-newflow>' +
-      icon(PATH_CARDS[0].i) + '<span><b>Guided Foundation</b><span class="copm">Build it part by part, from questions</span></span></button>' + head;
     if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
@@ -56083,7 +56121,8 @@ var COPILOT = (function(){
   function boxWord(pend){
     if (flowView()) {
       var ph = PANE.flow.phase;
-      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…" : "Use the buttons above to carry on…";
+      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…"
+        : ph === "loaded" ? "Pick a part on the left to work on it…" : "Use the buttons above to carry on…";
     }
     return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
@@ -56107,7 +56146,7 @@ var COPILOT = (function(){
      design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html,
      Option A) ═══════════════════════════════════════════════════════════
      Islam: "ok approved, build it". A Foundation chat can carry a FLOW: the
-     years first, then the way to build it, then the five parts in order —
+     years first, then the way to build it, then each part in order —
      each question with its examples, the answers back in boxes, a draft, a
      refine, save and on — then one check across all five and the whole saved
      as the next version of "Foundation — <place>".
@@ -56149,24 +56188,65 @@ var COPILOT = (function(){
     return '<div class="copexs"><div class="copeh">Examples to inspire you</div>' +
       ex.map(function(x){ return '<p>• ' + E(withY(x, f)) + '</p>'; }).join("") + '</div>';
   }
+  /* WHAT THE PLAN ALREADY SAYS, PART BY PART (§473), read off the place
+     the way its own Foundation page draws it — a unit's fields, the group's
+     own GROUP — keyed by the flow's element keys. Hidden objectives are left
+     out, as they are everywhere they are counted. */
+  function planParts(){
+    var t = place(), o = null;
+    if (t === "group" && typeof GROUP !== "undefined") o = GROUP;
+    else { try { o = typeof unitLike === "function" ? unitLike(t) : null; } catch (e) { o = null; } }
+    o = o || {};
+    var hid = function(r){ return SMPRules.isHidden && SMPRules.isHidden(r); };
+    return {
+      who: (o.clauses || []).filter(function(c){ return c && clean(c[1]); })
+        .map(function(c){ return (clean(c[0]) ? clean(c[0]) + " " : "") + clean(c[1]); }).join("\n"),
+      asp: clean(o.aspiration), eim: clean(o.endInMind), pur: clean(o.mission),
+      obj: (o.keyObjectives || []).filter(function(k){ return k && !hid(k) && clean(k.name); })
+        .map(function(k){ return clean(k.name); }).join("\n"),
+      val: (o.values || []).filter(function(v){ return v && clean(v.name); })
+        .map(function(v){ return clean(v.name) + (clean(v.def) ? " — " + clean(v.def) : ""); }).join("\n")
+    };
+  }
+  function planHas(p){ for (var k in p) if (p[k]) return true; return false; }
+  function optional(i){ var el = steps()[i]; return !!(el && el.optional); }
+  function agreedAll(f){ return steps().every(function(el, i){ return f.done[i] || (el.optional && !String(f.drafts[i] || "").trim()); }); }
+  /* A part's text on its card: one line reads as a sentence, several as a
+     list, and a long list stops at four with how many more (the mockup). */
+  function cardBody(text){
+    var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
+    if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
+    var cut = lines.length > 4 ? 3 : lines.length;
+    return '<ul>' + lines.slice(0, cut).map(function(l){ return '<li>' + E(l) + '</li>'; }).join("") +
+      (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
+  }
+  var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   function cardsHtml(f){
-    var S = steps();
+    var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
+    var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
     return '<div class="copcards">' + S.map(function(el, i){
-      var st, cls = "copst", body;
-      if (f.done[i]) { st = "Done"; cls += " done"; }
-      else if (i === f.e && f.path === "guided" && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
-      else if (i === f.e && f.phase === "review") { st = "Reviewing"; cls += " now"; }
-      else if (i === f.e && f.phase === "draft") { st = "Drafting"; cls += " now"; }
-      else st = "Waiting";
-      body = f.drafts[i] && (f.done[i] || (i === f.e && f.phase === "draft")) ? E(withY(f.drafts[i], f)) : el.questions.length + " questions";
-      var now = cls.indexOf(" now") > 0;
-      return '<div class="copcard' + (i === S.length - 1 ? " wide" : "") + (now ? " now" : "") + '" data-cop-card="' + i + '">' +
-        '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + st + '</span></h3><p>' + body + '</p></div>';
+      var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
+      var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
+      if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
+      else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
+      else if (now) { st = "Drafting"; cls += " now"; }
+      else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
+      else if (txt) { st = "In progress"; }
+      else { empty = true; st = el.optional ? (f.done[i] || plan ? "Optional · empty" : "Optional") : "Empty"; if (el.optional) cls += " opt"; }
+      var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
+        : '<p>' + (now ? E(el.questions.length + " questions") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+      var wide = el.key === "who" || el.key === "asp";
+      var head = '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
+      var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
+      return pick
+        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') +
+            ' aria-label="Work on ' + E(el.name) + '">' + head + body + '</button>'
+        : '<div class="' + c + '" data-cop-card="' + i + '">' + head + body + '</div>';
     }).join("") + '</div>';
   }
   function flowHead(f){
     var S = steps(), el = S[f.e] || {}, t, p = "";
-    if (f.phase === "year" || f.phase === "path") t = "Copilot · Foundation";
+    if (f.phase === "year" || f.phase === "path" || f.phase === "start" || f.phase === "loaded") t = "Copilot · Foundation";
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + el.name;
@@ -56174,35 +56254,60 @@ var COPILOT = (function(){
     }
     var total = 0, answered = 0;
     S.forEach(function(x, i){ total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
-    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + sizeHtml() + '</div>' +
+    var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
+    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
       '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
-    out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
-    out.push(aiMsg("Before we start: how long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
-      (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
-        '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
-        '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
-    if (f.phase === "year") return out.join("");
-    out.push(meMsg(yearsWord(f)));
-    out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
-      return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
-        '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
-    }).join("") + '</div>' : ''), true));
-    if (f.phase === "path") return out.join("");
-    out.push(meMsg(pathWord(f.path)));
-    out.push(aiMsg("Good. We'll build the five parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
+    var plan = f.start === "plan";
+    /* §473: where the place already HAS a Foundation the chat opens by
+       asking whether to start from it; the answer stays on the page with
+       the chosen button lit, as the mockup draws it. */
+    if (f.phase === "start" || f.start) {
+      var ch = function(k, w){
+        return f.phase === "start" && ed ? '<button type="button" class="copbtn' + (k === "plan" ? " solid" : "") + '" data-cop-start="' + k + '">' + w + '</button>'
+          : '<span class="copchoice' + (f.start === k ? " picked" : "") + '">' + w + '</span>'; };
+      out.push(aiMsg(E(placeWord()) + " already has a Foundation. Do you want to start from what’s there, or start fresh?" +
+        '<div class="copbtns">' + ch("plan", "Start from it") + ch("fresh", "Start fresh") + '</div>'));
+      if (f.phase === "start") return out.join("");
+    } else out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
+    if (plan) {
+      out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Pick a part to work on, or tell me what you want to change."));
+      if (f.phase === "loaded" && ed && agreedAll(f))
+        out.push(aiMsg("When the parts read as you want them, check them together and save the Foundation." +
+          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck' + (busyHere ? ' disabled' : '') + '>Check the whole Foundation</button></div>'));
+    } else {
+      out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
+        return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
+          '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
+      }).join("") + '</div>' : ''), true));
+      if (f.phase === "path") return out.join("");
+      out.push(meMsg(pathWord(f.path)));
+      /* The years are the guided road's question, asked once the road is
+         chosen (§473); a Foundation started from the plan never asks them. */
+      out.push(aiMsg("How long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
+        (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
+          '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
+          '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
+      if (f.phase === "year") return out.join("");
+      out.push(meMsg(yearsWord(f)));
+      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
+    }
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
       var current = !all && i === f.e;
       if (!current) {
-        if (f.done[i]) out.push(aiMsg(E(el.name) + " agreed for " + E(fname()) + "."));
+        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
         return;
       }
+      if (f.phase === "loaded") return;
+      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + (el.optional ? " (optional — you can leave it empty)" : "") + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
+        if (el.optional && ed && !(NUDGE && NUDGE.id === PANE.chat.id))
+          out.push('<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-fskip>Leave ' + E(el.name) + ' empty</button></div>');
         if (NUDGE && NUDGE.id === PANE.chat.id) {
           out.push(meMsg(NUDGE.text));
           out.push('<div class="copwarn" role="status">That answer is quite short. A little more detail makes a better draft.' +
@@ -56223,13 +56328,13 @@ var COPILOT = (function(){
             '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
             '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
             '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
+              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
       }
     });
     if (all && f.check) {
       var byKey = {}; S.forEach(function(el, i){ byKey[el.key] = i; });
       var issues = f.check.issues || [], agree = f.check.agree || [];
-      out.push(aiMsg('<span class="copeh">Consistency check across the five parts</span>' +
+      out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
         (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
@@ -56252,8 +56357,10 @@ var COPILOT = (function(){
     var c = PANE.chat, f = PANE.flow, S = steps();
     var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
       ' · ' + doneCount(f) + ' of ' + S.length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
-    return '<div class="copflow">' +
-      '<div class="copleft">' + vline + cardsHtml(f) + '</div>' +
+    var shut = !!CARDSHUT[c.id];
+    return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
+      (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
+        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
@@ -56269,7 +56376,7 @@ var COPILOT = (function(){
     var f = PANE.flow, w;
     if (f.path === "notes") w = "You chose to upload raw notes. Attach them with the paperclip below and say what they are, and the Copilot turns them into a Foundation.";
     else if (f.path === "template") w = "You chose a template. Download it from Copilot settings › Templates, fill it in, and attach it here.";
-    else w = "You chose to import a finished Foundation. Paste it below and the Copilot structures it into the five parts.";
+    else w = "You chose to import a finished Foundation. Paste it below and the Copilot structures it into its parts.";
     return '<div class="copsay copfroad">' + E(w) +
       (f.path === "template" ? ' <a class="linkbu" href="/' + E(slug()) + '/copilot/settings/templates">Open the templates</a>' : '') +
       (canEdit() && !PANE.chat.archived ? ' <button type="button" class="linkbu" data-cop-path="guided">Answer the guided questions instead</button>' : '') + '</div>';
@@ -56322,7 +56429,7 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    SAY = "Noted. Use the buttons above to carry on."; draw();
+    SAY = f.phase === "loaded" ? "Press the part you want to change on the left, then say what to change." : "Noted. Use the buttons above to carry on."; draw();
   }
   function flowClick(ev){
     var b, f = PANE && PANE.flow;
@@ -56331,13 +56438,44 @@ var COPILOT = (function(){
       var y0 = Number((document.querySelector("[data-cop-y0]") || {}).value), y1 = Number((document.querySelector("[data-cop-y1]") || {}).value);
       if (!(Number.isInteger(y0) && y0 >= 2000 && y0 <= 2100 && Number.isInteger(y1) && y1 >= 2000 && y1 <= 2100)) { SAY = "Type each year as four digits."; draw(); return true; }
       if (y1 < y0) { SAY = "The end year has to be the same as or after the start year."; draw(); return true; }
-      var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "path"; SAY = ""; flowSave(g); return true;
+      var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "ask"; g.e = 0; g.qi = 0; SAY = "";
+      flowSave(g, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
     if ((b = hit(ev, "[data-cop-path]"))) {
       var g2 = flowCopy(); g2.path = b.getAttribute("data-cop-path");
-      if (g2.path === "guided") { g2.phase = "ask"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
+      if (g2.path === "guided") { g2.phase = g2.y0 && g2.y1 ? "ask" : "year"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
       flowSave(g2, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
+    if ((b = hit(ev, "[data-cop-start]"))) {
+      /* START FROM IT fills the cards from the plan, each part already
+         agreed and marked as the plan's; START FRESH goes to the roads. */
+      var gs = flowCopy(), how = b.getAttribute("data-cop-start");
+      gs.start = how;
+      if (how === "plan") {
+        var pp = planParts();
+        steps().forEach(function(el, i){ var t = pp[el.key] || ""; gs.drafts[i] = t; gs.from[i] = gs.done[i] = !!t; });
+        gs.path = "guided"; gs.phase = "loaded";
+      } else gs.phase = "path";
+      flowSave(gs); return true;
+    }
+    if ((b = hit(ev, "[data-cop-cards]"))) {
+      if (b.getAttribute("data-cop-cards") === "hide") CARDSHUT[PANE.chat.id] = true; else delete CARDSHUT[PANE.chat.id];
+      draw(); return true;
+    }
+    if ((b = hit(ev, "button[data-cop-card]"))) {
+      var gc = flowCopy(), ci = Number(b.getAttribute("data-cop-card"));
+      gc.e = ci; gc.qi = 0; gc.done[ci] = false; NUDGE = null;
+      gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
+      flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
+    }
+    if ((b = hit(ev, "[data-cop-fskip]"))) {
+      var gk = flowCopy(); gk.drafts[gk.e] = ""; gk.done[gk.e] = true; NUDGE = null;
+      if (gk.start === "plan") { gk.phase = "loaded"; flowSave(gk); return true; }
+      var nk = nextUndone(gk, gk.e);
+      if (nk < 0) { flowAsk({ act:"flowCheck", flow:gk }); return true; }
+      gk.e = nk; gk.qi = 0; gk.phase = gk.drafts[nk] ? "draft" : "ask"; flowSave(gk); return true;
+    }
+    if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-nudge-more]"))) {
       if (NUDGE) DRAFT[PANE.chat.id] = NUDGE.text.replace(/\s+$/, "") + ", ";
       NUDGE = null; draw();
@@ -56350,6 +56488,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-fsave]"))) {
       if (b.disabled) return true;
       var g3 = flowCopy(); g3.done[g3.e] = true;
+      if (g3.start === "plan") { g3.phase = "loaded"; flowSave(g3); return true; }
       var nx = nextUndone(g3, g3.e);
       if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
       g3.e = nx; g3.qi = 0; g3.phase = g3.drafts[nx] ? "draft" : "ask";
@@ -56605,20 +56744,24 @@ var COPILOT = (function(){
     var b;
     if (flowClick(ev)) return;
     if ((b = hit(ev, "[data-cop-railtog]"))) { setRail(!railShut()); return; }
-    if ((b = hit(ev, "[data-cop-newflow]"))) {
-      act({ act:"newFlow", place: place() }, function(j){
-        var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-        PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
-        OPEN[key()] = { kind:"chat", id: j.chat.id };
-        openItem("chat", j.chat.id);
-      });
-      return;
-    }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
+      /* A NEW FOUNDATION CHAT IS A FLOW (§473, Islam: "remove the guided
+         button"). It opens on "start from what is there, or fresh?" where
+         the place already has a Foundation, and on the four roads where it
+         has none — the page knows which, because it holds the plan. */
+      if (section() === "foundation") {
+        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()) }, function(j){
+          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+          PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
+          OPEN[key()] = { kind:"chat", id: j.chat.id };
+          openItem("chat", j.chat.id);
+        });
+        return;
+      }
       act({ act:"newChat", place: place(), section: section() }, function(j){
         var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
         PANE = { id: j.chat.id, chat: j.chat, messages: [] };
@@ -70695,6 +70838,30 @@ var SYNC = (function () {
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
+        fieldSaved(); paint();
+      });
+    });
+    /* §473: a unit's optional Core Values — add and remove, re-asked on the
+       click (§48.2). An emptied list loses its key (§50.6). */
+    document.querySelectorAll("[data-uvaladd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.uvaladd;
+        if (!mayAuthor(foundKeyFor(t), t)) return;
+        var o = unitLikeWritable(t);
+        if (!o) return;
+        if (!Array.isArray(o.values)) o.values = [];
+        o.values.push({ name: "", def: "" });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-uvalrm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor(foundKeyFor(t), t)) return;
+        var o = unitLikeWritable(t);
+        if (!o || !Array.isArray(o.values) || !o.values[i]) return;
+        o.values.splice(i, 1);
+        if (!o.values.length) delete o.values;
         fieldSaved(); paint();
       });
     });

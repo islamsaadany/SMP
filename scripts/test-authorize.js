@@ -210,6 +210,14 @@ refuses(headKey, function (s) { s.units[UNIT].aspiration = "A new aspiration"; }
   "a unit head may not rewrite their own aspiration");
 refuses(headKey, function (s) { s.units[UNIT].swot.s = ["Something"]; },
   "a unit head may not rewrite their own SWOT");
+/* §473: a unit's optional Purpose and Core Values are its own words, judged
+   exactly as its aspiration is — the office may, a unit head may not. */
+refuses(headKey, function (s) { s.units[UNIT].mission = "A purpose"; },
+  "a unit head may not write their own purpose (§473)");
+refuses(headKey, function (s) { s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+  "a unit head may not write their own core values (§473)");
+allows("smo", function (s) { s.units[UNIT].mission = "A purpose"; s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+  "the office may write a unit's purpose and core values (§473)");
 refuses(headKey, function (s) { s.units[UNIT].clauses = [["Who we are", "Rewritten"]]; },
   "...nor the clauses beside it");
 
@@ -1157,6 +1165,11 @@ console.log("\n12 · the SMO team, and the three it does not get");
          "...and may correct a plan, which it could not before §94", true);
   asTeam(function (s) { s.units[UNIT].aspiration = "The office rewrote this"; },
          "...and the aspiration above it", true);
+  /* §473: the SMO team writes a unit's purpose and core values too — which
+     fails if they are left out of UNIT_FOUNDATION, because an unknown field
+     is the Super user's alone. */
+  asTeam(function (s) { s.units[UNIT].mission = "Why we exist"; s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+         "...and a unit's purpose and core values (§473)", true);
 
   /* And the three it does not. */
   /* A REAL MOVE, not a value the cell already held: the seed stores the team's

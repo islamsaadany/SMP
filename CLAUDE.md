@@ -10920,7 +10920,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-03 — **§472: the second try can only return the text.** A draftless claimed change is asked again with a shape holding only the draft (`askDraftOnly`, `DRAFT_ONLY_SCHEMA`), no reply field; break `full-retry`; `check:copilot` 180/0. On the branch, not merged.*
+*Last Updated: 2026-10-03 — **§473: a Foundation chat starts from what is there.** The Guided button is removed; a new Foundation chat asks *start from it / start fresh* (`newFlow(hasPlan)`), six cards (End in Mind, optional Purpose via `OPTIONAL`), plan mode lands in `loaded` with no years. A unit's Foundation gains optional Purpose (`mission`) and Core Values (`values`) in `units.extra`, no migration. `copilot.mjs` 185/0, `shell.mjs` §3i, `checks/unit-purpose-values.py`. On the branch, not merged.*
+
+*Earlier: 2026-10-03 — **§472: the second try can only return the text.** A draftless claimed change is asked again with a shape holding only the draft (`askDraftOnly`, `DRAFT_ONLY_SCHEMA`), no reply field; break `full-retry`; `check:copilot` 180/0. On the branch, not merged.*
 
 *Earlier: 2026-10-02 — **§471: a change claimed is a change shown.** A Copilot answer that says it changed the text but sends no draft is asked again once for the whole revised text; a second miss is replaced by an honest line (`NO_DRAFT`), never a Save that is not there. `claimsDraft()` in `lib/copilot.ts`, break `trust-claim`, `check:copilot` 179/0. On the branch, not merged.*
 

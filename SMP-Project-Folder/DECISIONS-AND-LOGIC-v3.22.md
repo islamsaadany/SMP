@@ -61435,3 +61435,47 @@ is attached. `NO_DRAFT` stays the last resort. Asserted off the wire in
 `checks/copilot.mjs` (the second request's schema has a required draft and no
 reply); 180/0, and `full-retry` puts the §471 same-shape retry back and goes red.
 
+
+## §473 — A Foundation chat starts from what is there, and a unit's Purpose and Core Values (2026-10-03)
+
+Islam, of the published mockup *Foundation Chat Start*: *"yes build the fix,
+add core values as optional box"*.
+
+**The Guided Foundation button is gone.** A new chat on the Foundation section
+IS the flow now. Where the place already has a Foundation it first asks
+*"<Place> already has a Foundation. Do you want to start from what's there, or
+start fresh?"* — **Start from it** / **Start fresh**; with nothing written the
+question is skipped (`newFlow(hasPlan)`, the client answering `hasPlan` from
+the plan's own parts). **Start from it** fills the cards from the plan, each
+tagged *From the plan*, asks no years (the plan already has its period) and
+lands in a `loaded` phase; **Start fresh** shows the four roads and then, on
+the guided road, the years. `sanitizeFlow` will not let a page go back to the
+start question once answered, nor put a plan-mode flow back on the roads.
+
+**Six cards, not five**: Who We Are, Winning Aspiration, End in Mind, Purpose,
+Key Objectives, Core Values. **End in Mind** is the endless long-term vision;
+the **Winning Aspiration** is bounded by the planning years. **Purpose is
+optional** (`OPTIONAL`): an empty optional part counts as agreed, so the flow
+saves without it, and the server's refusal says so in its own words. A draft
+or refine clears that part's *From the plan* tag. Pressing a card works on
+that part; × hides the cards and *Show cards* brings them back. The close
+button is `.copcx` because `.copx` is already the file-detach button
+(§65.9). Narrow screens (below 980px) hide the cards, so a part cannot be
+picked by card there — recorded, not built, because it wants a mockup.
+
+**A unit's Foundation page gains Purpose and Core Values, both optional.**
+Purpose writes `units.mission`, Core Values `units.values` (a list of
+name + meaning) — both ride `units.extra`, **no migration**, proved by a round
+trip on a real Postgres with the table asserted to gain no column. Reading mode
+draws neither box when empty; the pen draws both, marked *Optional*; neither is
+a gap; emptying either DELETES its key (§50.6). Both join `UNIT_FOUNDATION` in
+the authoriser, so they are judged as the unit's Foundation, and Purpose and
+Values leave `STRUCT_NOT_BUILT.bu` and join a new client's unit defaults
+(`STRUCT_NEW_CLIENT.bu`). The seed regenerated (it also picks up the
+`capowner` row an earlier round had not regenerated).
+
+Checks: `checks/copilot.mjs` §6 rewritten for the start question and six parts,
+185/0, red with `newFlow` ignoring `hasPlan` and with the optional rule removed;
+`checks/shell.mjs` §3i presses the real start question, plan mode and fresh
+mode, 32/0, red from the source; new `checks/unit-purpose-values.py`, all good,
+red 2 / 1 from the source; `test-authorize.js` 900/0.

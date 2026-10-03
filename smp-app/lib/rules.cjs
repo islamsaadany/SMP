@@ -3918,7 +3918,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the two levels named here have a default of their own. */
   var STRUCT_NEW_CLIENT = {
     mid: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot"],
-    bu:  ["brief", "aspiration", "keyobj", "pillar", "swot"]
+    bu:  ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"]
   };
   function newClientStructure() {
     return { mid: { on: STRUCT_NEW_CLIENT.mid.slice() },
@@ -4050,7 +4050,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      taken away and these are a different answer: the part exists on other
      layers, it simply has no page on this one yet. Read as OFF everywhere,
      whatever a client stored before today, so nothing can claim to show one. */
-  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["purpose", "theme", "values"] };
+  var STRUCT_NOT_BUILT = { mid: ["theme", "pillar", "swot"], bu: ["theme"] };
   function compBuilt(target, comp) {
     var n = STRUCT_NOT_BUILT[structLevelOf(target)];
     return !(n && n.indexOf(comp) >= 0);

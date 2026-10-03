@@ -43,17 +43,6 @@ export const FLOW_ELEMENTS: FlowElement[] = [
     ["Central kitchens supplying all outlets with standardized recipes", "Own fleet with real-time tracking and warehouse network", "Project-based teams with senior partner oversight"],
     ["Consistent food quality through standardized central production", "Real-time visibility and faster delivery than competitors", "Deep sector expertise in healthcare and financial services"],
   ] },
-  { key: "pur", name: "Purpose", questions: [
-    "Take me back to the beginning — why was this organization created? What problem sparked it all?",
-    "Who benefits most from what you do? How are their lives or businesses better because of you?",
-    "Here's a thought experiment: if your organization disappeared tomorrow, what would the world actually lose?",
-    "When your team wakes up for work, what feeling do you want them to have about why they're coming in?",
-  ], examples: [
-    ["To make quality food accessible to everyday families", "To solve the inefficiencies in regional logistics", "To help businesses navigate digital transformation"],
-    ["Busy professionals who get reliable, delicious meals without cooking", "Businesses that can now deliver products faster and more reliably", "Companies that become more competitive through better strategy"],
-    ["A trusted source of comfort food that brings people together", "A logistics partner that truly understands local market needs", "Strategic thinking that helps businesses thrive, not just survive"],
-    ["Proud to make someone's day better with every meal served", "Part of something that's transforming an entire industry", "That their ideas directly shape the future of our clients"],
-  ] },
   { key: "asp", name: "Winning Aspiration", questions: [
     "Close your eyes and imagine it's the end of {Y} — you've \"won.\" Paint me that picture. What does success look like?",
     "What specific achievements would make you say \"we made it\"? Give me something measurable.",
@@ -64,6 +53,26 @@ export const FLOW_ELEMENTS: FlowElement[] = [
     ["100 outlets across 5 countries with 90%+ customer satisfaction", "Processing 1M+ shipments annually with 99% on-time delivery", "50+ enterprise clients with 80% renewal rate"],
     ["Become a household name that people recommend to friends", "Disrupt the industry with tech that competitors try to copy", "Be invited to advise on national-level strategic initiatives"],
     ["The #1 choice for quality-conscious diners in our category", "The premier logistics partner that others benchmark against", "The strategic consultancy that top executives trust most"],
+  ] },
+  { key: "eim", name: "End in Mind", questions: [
+    "Now look far past {Y} — past any plan. If everything goes right for decades, what does this organization become?",
+    "What lasting mark do you want to leave on your market, your customers or your country — one with no finish date?",
+    "Whatever products or markets change, what should still be true about you in twenty years?",
+  ], examples: [
+    ["The name every household trusts for everyday meals", "The backbone that moves the region's trade", "The partner leaders call before every big decision"],
+    ["Raised the standard of service everyone in the industry is judged by", "Made reliable delivery normal in places that never had it", "Built a generation of local strategy talent"],
+    ["We keep our promises to customers", "We stay the most dependable link in the chain", "Our advice is honest, even when it is unwelcome"],
+  ] },
+  { key: "pur", name: "Purpose", questions: [
+    "Take me back to the beginning — why was this organization created? What problem sparked it all?",
+    "Who benefits most from what you do? How are their lives or businesses better because of you?",
+    "Here's a thought experiment: if your organization disappeared tomorrow, what would the world actually lose?",
+    "When your team wakes up for work, what feeling do you want them to have about why they're coming in?",
+  ], examples: [
+    ["To make quality food accessible to everyday families", "To solve the inefficiencies in regional logistics", "To help businesses navigate digital transformation"],
+    ["Busy professionals who get reliable, delicious meals without cooking", "Businesses that can now deliver products faster and more reliably", "Companies that become more competitive through better strategy"],
+    ["A trusted source of comfort food that brings people together", "A logistics partner that truly understands local market needs", "Strategic thinking that helps businesses thrive, not just survive"],
+    ["Proud to make someone's day better with every meal served", "Part of something that's transforming an entire industry", "That their ideas directly shape the future of our clients"],
   ] },
   { key: "obj", name: "Key Objectives", questions: [
     "Let's talk numbers. What financial metric would tell you the business is healthy and growing?",
@@ -94,26 +103,41 @@ export const FLOW_ELEMENTS: FlowElement[] = [
 ];
 const N = FLOW_ELEMENTS.length;
 
-/* WHERE A FLOW STANDS. `year` asks the years, `path` the way to build it,
-   `ask` one question of element `e`, `review` its answers back in boxes,
-   `draft` its draft, `check` the look across all five, `saved` done. */
-export const PHASES = ["year", "path", "ask", "review", "draft", "check", "saved"] as const;
+/* WHERE A FLOW STANDS (§473). `start` asks whether to begin from the
+   Foundation the place already has or from nothing — drawn only where the
+   place HAS one; `path` the way to build it, `year` the years (the guided
+   road from nothing), `loaded` the cards filled from the plan with nobody
+   working on one yet, `ask` one question of element `e`, `review` its answers
+   back in boxes, `draft` its draft, `check` the look across every part,
+   `saved` done. */
+export const PHASES = ["start", "path", "year", "loaded", "ask", "review", "draft", "check", "saved"] as const;
 export type Phase = (typeof PHASES)[number];
 export const PATHS = ["guided", "notes", "template", "import"] as const;
 export type Flow = {
-  phase: Phase; y0: number | null; y1: number | null; path: string; e: number; qi: number;
-  ans: string[][]; drafts: string[]; done: boolean[];
+  phase: Phase; start: string; y0: number | null; y1: number | null; path: string; e: number; qi: number;
+  ans: string[][]; drafts: string[]; done: boolean[]; from: boolean[];
   check: { agree: string[]; issues: { el: string; text: string }[] } | null;
   saved: { deliverableId: string; n: number; title: string } | null;
 };
 export const MAX_ANSWER = 2000;
 export const MAX_DRAFT = 6000;
 export const SHORT_ANSWER = 15;
+/* PURPOSE IS OPTIONAL (§473, Islam: "purpose needs to be there as optional
+   box"): it may be skipped, and a Foundation with no Purpose may still be
+   checked and saved. */
+export const OPTIONAL = new Set(["pur"]);
+export const STARTS = ["plan", "fresh"] as const;
 
-export function newFlow(): Flow {
-  return { phase: "year", y0: null, y1: null, path: "", e: 0, qi: 0,
+/* A new flow opens on the start question only where the place already has a
+   Foundation to start from; otherwise straight on the four roads. */
+export function newFlow(hasPlan = false): Flow {
+  return { phase: hasPlan ? "start" : "path", start: "", y0: null, y1: null, path: "", e: 0, qi: 0,
     ans: FLOW_ELEMENTS.map((el) => el.questions.map(() => "")), drafts: FLOW_ELEMENTS.map(() => ""),
-    done: FLOW_ELEMENTS.map(() => false), check: null, saved: null };
+    done: FLOW_ELEMENTS.map(() => false), from: FLOW_ELEMENTS.map(() => false), check: null, saved: null };
+}
+/* Every part agreed, an optional one counting as agreed when left empty. */
+export function allAgreed(f: Flow): boolean {
+  return FLOW_ELEMENTS.every((el, i) => f.done[i] || (OPTIONAL.has(el.key) && !f.drafts[i].trim()));
 }
 const year = (v: unknown) => { const n = Number(v); return Number.isInteger(n) && n >= 2000 && n <= 2100 ? n : null; };
 const int = (v: unknown, lo: number, hi: number) => { const n = Number(v); return Number.isInteger(n) ? Math.min(hi, Math.max(lo, n)) : lo; };
@@ -127,22 +151,37 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   const base = stored || newFlow();
   const f = newFlow();
   f.phase = (PHASES as readonly string[]).includes(j.phase) ? j.phase : base.phase;
+  f.start = (STARTS as readonly string[]).includes(j.start) ? j.start : "";
   f.y0 = year(j.y0); f.y1 = year(j.y1);
   f.path = (PATHS as readonly string[]).includes(j.path) ? j.path : "";
   f.e = int(j.e, 0, N - 1);
   f.qi = int(j.qi, 0, FLOW_ELEMENTS[f.e].questions.length - 1);
   f.ans = FLOW_ELEMENTS.map((el, i) => el.questions.map((_, k) => str(Array.isArray(j.ans) && Array.isArray(j.ans[i]) ? j.ans[i][k] : "").slice(0, MAX_ANSWER)));
   f.drafts = FLOW_ELEMENTS.map((_, i) => str(Array.isArray(j.drafts) ? j.drafts[i] : "").slice(0, MAX_DRAFT));
-  f.done = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.done) && j.done[i]) && !!f.drafts[i].trim());
+  f.done = FLOW_ELEMENTS.map((el, i) => !!(Array.isArray(j.done) && j.done[i]) && (!!f.drafts[i].trim() || OPTIONAL.has(el.key)));
+  f.from = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.from) && j.from[i]) && !!f.drafts[i].trim());
   f.check = base.check; f.saved = base.saved;
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
-  if (f.y0 == null || f.y1 == null || f.y1 < f.y0) { f.y0 = f.y0 ?? null; f.phase = "year"; }
-  else if (f.phase === "year") f.phase = "path";
-  /* The guided steps belong to the guided road; another road leaves the
-     flow and goes on as an ordinary chat (the screen draws it so). */
-  if (f.path !== "guided" && f.phase !== "year" && f.phase !== "path") f.phase = "path";
-  if (f.phase === "saved" && !base.saved) f.phase = f.done.every(Boolean) ? "check" : "draft";
-  if (f.phase === "check" && !f.done.every(Boolean)) f.phase = "draft";
+  const yearsOk = f.y0 != null && f.y1 != null && f.y1 >= f.y0;
+  if (f.phase === "start" && f.start) f.phase = f.start === "plan" ? "loaded" : "path";
+  if (f.start === "plan") {
+    /* STARTED FROM THE PLAN: the cards hold the plan's parts and the person
+       works on one at a time. The years were never asked, so nothing waits
+       on them; the road is the guided one. */
+    f.path = "guided";
+    if (f.phase === "start" || f.phase === "path" || f.phase === "year") f.phase = "loaded";
+  } else {
+    if (f.phase === "loaded") f.phase = "path";
+    /* The page may not go BACK to the question once it has been answered. */
+    if (f.phase === "start" && stored && stored.phase !== "start") f.phase = "path";
+    /* The guided steps belong to the guided road; another road leaves the
+       flow and goes on as an ordinary chat (the screen draws it so). */
+    if (f.path !== "guided" && f.phase !== "start" && f.phase !== "path") f.phase = "path";
+    else if (f.path === "guided" && !yearsOk && f.phase !== "start" && f.phase !== "path") f.phase = "year";
+    else if (f.path === "guided" && yearsOk && f.phase === "year") f.phase = "ask";
+  }
+  if (f.phase === "saved" && !base.saved) f.phase = allAgreed(f) ? "check" : "draft";
+  if (f.phase === "check" && !allAgreed(f)) f.phase = "draft";
   return f;
 }
 export function storedFlow(raw: unknown): Flow | null {
@@ -201,7 +240,7 @@ export function flowInstruction(method: string): string {
 export function flowCorpus(f: Flow, placeWord: string, context: string, upTo?: number): string {
   const out: string[] = [];
   out.push("PLACE: " + (placeWord || "this place"));
-  out.push("STRATEGY PERIOD: " + (f.y0 ?? "?") + " to the end of " + (f.y1 ?? "?"));
+  out.push("STRATEGY PERIOD: " + (f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "not set — use the horizon the plan names, if any"));
   out.push("\nTHE PLAN AS IT IS WRITTEN ON THE PLATFORM:\n" + (context.trim() || "Nothing yet."));
   const parts = FLOW_ELEMENTS.map((el, i) => (f.done[i] && f.drafts[i].trim() && (upTo == null || i !== upTo) ? el.name + ":\n" + f.drafts[i].trim() : "")).filter(Boolean);
   if (parts.length) out.push("\nPARTS OF THIS FOUNDATION ALREADY AGREED:\n" + parts.join("\n\n"));
@@ -218,14 +257,14 @@ export function refineQuestion(f: Flow, i: number, how: string): string {
   return "Rewrite this " + el.name.toUpperCase() + " draft. " + (REFINES[how] || ("The person asked: " + how)) + "\n\nTHE DRAFT:\n" + f.drafts[i];
 }
 export function checkQuestion(f: Flow): string {
-  return "Check these five parts of one Foundation against each other. Say in `agree` where two parts support each other, and in `issues` where they do not (a gap, a contradiction, an objective that measures nothing the other parts promise), naming the part to change in `element`. At most three of each. Short sentences.\n\n" +
-    FLOW_ELEMENTS.map((el, i) => el.name.toUpperCase() + " (" + el.key + "):\n" + f.drafts[i]).join("\n\n");
+  return "Check these parts of one Foundation against each other. Say in `agree` where two parts support each other, and in `issues` where they do not (a gap, a contradiction, an objective that measures nothing the other parts promise), naming the part to change in `element`. At most three of each. Short sentences.\n\n" +
+    FLOW_ELEMENTS.map((el, i) => el.name.toUpperCase() + " (" + el.key + "):\n" + (f.drafts[i].trim() || "(left empty — this part is optional)")).join("\n\n");
 }
 
 /* ── THE FOUNDATION AS ONE TEXT, AND SAVING IT ──────────────────────── */
 export function foundationText(f: Flow, placeWord: string): string {
-  const out = ["Foundation — " + placeWord, (f.y0 ?? "") + " to the end of " + (f.y1 ?? ""), ""];
-  FLOW_ELEMENTS.forEach((el, i) => { out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
+  const out = ["Foundation — " + placeWord, f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "", ""];
+  FLOW_ELEMENTS.forEach((el, i) => { if (f.drafts[i].trim()) out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
   return out.join("\n").trim();
 }
 export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);

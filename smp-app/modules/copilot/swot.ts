@@ -56,10 +56,13 @@ export async function swotProgress(c: any, ids: string[]): Promise<Record<string
 }
 
 /* ── THE SOURCES SHELF ────────────────────────────────────────────────── */
-export async function sourcesGet(tenantId: string, place: string): Promise<Out> {
+export async function sourcesGet(tenantId: string, place: string, who: Who): Promise<Out> {
   const p = placeOf(place);
   if (!p) return refused(400, "Which place?");
-  return withTenant(tenantId, async (c) => out(200, { ok: true, sources: await sourcesFor(c, p), words: SOURCE_WORD }));
+  /* Each row says whether THIS person may delete it, asked of the same rule
+     the delete asks (§61: a × the server refuses is not drawn). */
+  return withTenant(tenantId, async (c) => out(200, { ok: true,
+    sources: (await sourcesFor(c, p)).map((x) => ({ ...x, mayDelete: mayDeleteSource(x, who) })), words: SOURCE_WORD }));
 }
 export async function sourceFile(tenantId: string, id: string): Promise<Response | null> {
   if (!UUID.test(id)) return null;
@@ -160,7 +163,7 @@ export async function swotAct(c: any, b: any, who: Who): Promise<Out> {
     const s: Swot = { ...stored, promptAt: { ...stored.promptAt, [area]: new Date().toISOString() } };
     await writeSwot(c, id, s);
     const pw = oneLine(b.placeWord) || chat.place;
-    return out(200, { ok: true, text, name: (area === "micro" ? "Porter research prompt — " : "DESTEP research prompt — ") + pw + ".txt",
+    return out(200, { ok: true, text, name: (area === "micro" ? "Porter research prompt - " : "DESTEP research prompt - ") + pw.replace(/[\\/:*?"<>|]/g, " ") + ".txt",
       ...(await swotView(c, chat, pw)) });
   }
 

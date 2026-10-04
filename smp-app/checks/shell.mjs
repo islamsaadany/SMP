@@ -32,6 +32,7 @@ import { chromium } from "playwright-core";
 import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
 import { MODULE_DEF } from "../lib/modules.ts";
+import { QUESTIONS } from "../lib/copilot-swot.ts";
 import { categoriesPresent, insertItem, setState, draftOf, CATEGORIES } from "../lib/library.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
@@ -1357,6 +1358,145 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     Object.assign(MODEL_ANSWER, keep);
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+  }
+});
+
+await section("3j · the SWOT chat: methods, the to-do list, sources, both analyses, the SWOT, the save (§480)", async () => {
+  /* PRESSED AND READ BACK (§96), from the approved mockup
+     (design-mockups/copilot-swot-flow/2026-10-04_v2.html). Every step is
+     asserted from the DATABASE as well as the page. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const SHOT = process.env.SMP_SHOTS;
+  const shot = async (n) => { if (SHOT) await page.screenshot({ path: SHOT + "/swot-" + n + ".png", fullPage: false }); };
+  const keep = { ...MODEL_ANSWER };
+  const it = (t) => ({ title: t, description: "Because of " + t.toLowerCase() + ".", evidence: "The plan" });
+  const fac = (keys) => keys.map((k) => ({ key: k, factors: [it(k + " factor one"), it(k + " factor two")], from: "the report" }));
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    answer: "Customers praise the store network and the after-sales care.", used: ["the plan"],
+    items: fac(["rivalry", "entrants", "substitutes", "suppliers", "buyers", "demographic", "economic", "social", "technological", "environmental", "political"]),
+    s: ["Wide store network", "Trusted brand", "Strong after-sales", "Supplier ties", "Retail know-how"].map(it),
+    w: ["Thin online presence", "Slow pricing", "Stock gaps", "Legacy systems", "Few data skills"].map(it),
+    o: ["Young population", "Financing demand", "Device upgrades", "B2B tenders", "Rural reach"].map(it),
+    t: ["Price wars", "FX swings", "Grey imports", "New entrants", "Rising rents"].map(it),
+    agree: ["The SWOT follows from both analyses."], issues: [{ letter: "w", text: "Two weaknesses overlap." }],
+  });
+  const swotRow = async (id) => (await asTenant(tenantId, (c) => c.query("select extra->'swot' s from copilot_chats where id = $1", [id]))).rows[0].s;
+  const chatId = async () => { const r = (await asTenant(tenantId, (c) => c.query("select id from copilot_chats where section = 'analysis' order by created_at desc limit 1"))).rows[0]; return r ? r.id : null; };
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables; delete from copilot_sources")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await page.evaluate(() => { try { for (const k of ["chats", "delivs", "sources"]) localStorage.removeItem("smp.copilot.fold." + k); } catch (e) {} });
+    await open("/raya-trade/strategy/mobile/copilot/analysis");
+    const folds = await page.evaluate(() => Array.from(document.querySelectorAll(".coprail")).map((r) => r.classList.contains("copfolded")));
+    check(folds.length === 3 && !folds[0] && folds[1] && folds[2], "the rail has Chats open and Deliverables and Sources folded by default", JSON.stringify(folds));
+    await page.click('[data-cop-fold="sources"]');
+    check(await page.evaluate(() => !document.querySelector("[data-cop-sources-rail]").classList.contains("copfolded")), "…and a fold button opens its section");
+
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-sw-start], .copsw-grid", { timeout: 10000 });
+    await shot("1-start");
+    const id = await chatId();
+    check(!!id, "a new SWOT chat is opened", page.url());
+    if (await page.$("[data-cop-sw-start]")) await page.click('[data-cop-sw-start="plan"]');
+    await page.waitForSelector(".copsw-grid", { timeout: 10000 });
+    const resCell = await page.evaluate(() => { const rows = Array.from(document.querySelectorAll(".copsw-grid tbody tr")); const r = rows[0]; return r ? r.lastElementChild.textContent.trim() : null; });
+    check(resCell === "—", "Internal has no Deep research — its cell reads a dash", resCell);
+    for (const m of ["internal|guided", "micro|report", "macro|research"]) { await page.click('[data-cop-sw-m="' + m + '"]'); await page.waitForTimeout(300); }
+    await shot("2-methods");
+    let sw = await swotRow(id);
+    check(sw.methods.internal.join() === "guided" && sw.methods.micro.join() === "report" && sw.methods.macro.join() === "research", "the ticks are stored", JSON.stringify(sw.methods));
+    await page.click('[data-cop-sw-go="gather"]');
+    await page.waitForSelector(".copsw-li", { timeout: 10000 });
+    const todo = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
+    check(/0 of 5 done/.test(todo), "the to-do list counts its lines — three to gather, the analyses, the SWOT", todo);
+
+    /* the guided question is the original's, word for word */
+    await page.click('[data-cop-sw-line="internal|guided"]');
+    await page.waitForSelector(".copsw-qt", { timeout: 10000 });
+    const qt = await page.evaluate(() => document.querySelector(".copsw-qt").textContent.trim());
+    check(qt === QUESTIONS.internal[0].question, "the guided question is asked word for word", qt);
+    await page.click("[data-cop-sw-answer]");
+    await page.waitForFunction(() => { const a = document.querySelector("[data-cop-sw-ans]"); return a && a.value.length > 5; }, null, { timeout: 10000 });
+    check(/Used:/.test(await page.evaluate(() => document.querySelector(".copsw-used") ? document.querySelector(".copsw-used").textContent : "")), "Answer for me fills the box and says what it used");
+    await page.waitForTimeout(500);
+    sw = await swotRow(id);
+    check(/store network/.test(sw.ans.internal[0]), "…and the answer is saved", sw.ans.internal[0]);
+    await shot("3-guided");
+    /* the rest answered through the same save, then a reload */
+    await page.evaluate(async ({ cid, n }) => { const r = await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ act: "swotSave", id: cid, placeWord: "Mobile", swot: { ans: { internal: Array.from({ length: n }, (_, k) => "Answer " + k) } } }) }); return r.status; }, { cid: id, n: QUESTIONS.internal.length });
+
+    /* micro: a ready report, uploaded */
+    await open("/raya-trade/strategy/mobile/copilot/analysis#cop=chat-" + id);
+    await page.waitForSelector('[data-cop-sw-line="micro|report"]', { timeout: 10000 });
+    await page.click('[data-cop-sw-line="micro|report"]');
+    await page.waitForSelector("[data-cop-sw-file]", { state: "attached", timeout: 10000 });
+    await page.setInputFiles("[data-cop-sw-file]", { name: "market-report.txt", mimeType: "text/plain", buffer: Buffer.from("Competition is fierce among five retailers.") });
+    await page.waitForFunction(() => /market-report/.test((document.querySelector("[data-cop-sources]") || {}).textContent || ""), null, { timeout: 10000 });
+    check(true, "an uploaded report appears in the Sources rail");
+    check(await page.evaluate(() => !!document.querySelector("[data-cop-sources] [data-cop-src-del]")), "…with a delete for whoever added it");
+    /* macro: deep research — the prompt, then the pasted answer */
+    await page.click('[data-cop-sw-line="macro|research"]');
+    await page.waitForSelector("[data-cop-sw-prompt]", { timeout: 10000 });
+    const dl = page.waitForEvent("download", { timeout: 10000 }).catch(() => null);
+    await page.click("[data-cop-sw-prompt]");
+    const d = await dl;
+    check(!!d && /^DESTEP research prompt - Mobile\.txt$/.test(d.suggestedFilename()), "the research prompt downloads as a named .txt (a long dash made Chromium drop the name)", d && d.suggestedFilename());
+    await page.fill("[data-cop-sw-paste]", "The economy is recovering; inflation is easing.");
+    await page.click("[data-cop-sw-keep]");
+    await page.waitForFunction(() => /3 of 5 done/.test((document.querySelector(".copsw-n") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    const t3 = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
+    check(/3 of 5 done/.test(t3), "with every gather line done the list says so", t3);
+    await shot("4-gathered");
+
+    /* the two analyses, each shown and agreed */
+    await page.click('[data-cop-sw-go="analyses"]');
+    for (const a of ["micro", "macro"]) {
+      await page.waitForSelector('[data-cop-sw-an="' + a + '"]', { timeout: 10000 });
+      await page.click('[data-cop-sw-an="' + a + '"]');
+      await page.waitForSelector('[data-cop-sw-agree="' + a + '"]', { timeout: 15000 });
+      await shot("5-" + a);
+      await page.click('[data-cop-sw-agree="' + a + '"]');
+      await page.waitForTimeout(500);
+    }
+    sw = await swotRow(id);
+    check(sw.micro && sw.micro.agreed && sw.macro && sw.macro.agreed, "both the Micro and the Macro analysis are written and agreed", JSON.stringify([sw.micro && sw.micro.agreed, sw.macro && sw.macro.agreed]));
+
+    await page.waitForSelector("[data-cop-sw-draft]", { timeout: 10000 });
+    await page.click("[data-cop-sw-draft]");
+    await page.waitForSelector("[data-cop-sw-check]", { timeout: 15000 });
+    const letters = await page.evaluate(() => Array.from(document.querySelectorAll(".copsw-l")).map((l) => l.querySelectorAll("li").length));
+    check(letters.length === 4 && letters.every((n) => n === 5), "the SWOT draft shows five items per letter", JSON.stringify(letters));
+    await page.click("[data-cop-sw-check]");
+    await page.waitForSelector("[data-cop-sw-finish]", { timeout: 15000 });
+    await shot("6-check");
+    await page.click("[data-cop-sw-finish]");
+    await page.waitForTimeout(1500);
+    const sv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title ilike 'SWOT%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!sv && /SWOT/.test(sv.title), "Save writes a SWOT deliverable", JSON.stringify(sv));
+    const plan = await page.evaluate(() => { try { const u = UNITS.mobile; return u && u.swot ? u.swot.s : null; } catch (e) { return String(e); } });
+    check(Array.isArray(plan) && plan.includes("Wide store network"), "…and the titles are written into the plan's SWOT", JSON.stringify(plan));
+    await shot("7-saved");
+    await page.waitForTimeout(800);
+    const meta = await page.evaluate(() => Array.from(document.querySelectorAll("[data-cop-chats] *")).map((e) => e.textContent).join(" "));
+    check(/of \d+ done/.test(meta), "the chat row in the rail reads N of M done", meta.slice(0, 160));
+
+    /* deleting a source asks in the row */
+    await page.click("[data-cop-sources] [data-cop-src-del]");
+    await page.waitForSelector("[data-cop-src-del-yes]", { timeout: 5000 });
+    const n0 = (await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_sources"))).rows[0].n;
+    await page.click("[data-cop-src-del-yes]");
+    await page.waitForTimeout(800);
+    const n1 = (await asTenant(tenantId, (c) => c.query("select count(*)::int n from copilot_sources"))).rows[0].n;
+    check(n1 === n0 - 1, "deleting a source asks in its row, then removes it", n0 + " → " + n1);
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables; delete from copilot_sources")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
   }
 });
 

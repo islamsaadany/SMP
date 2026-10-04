@@ -147,7 +147,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
         "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
     }
     if (first === "sources") {
-      const r = await sourcesGet(a.tenantId, q("place"));
+      const r = await sourcesGet(a.tenantId, q("place"), who);
       return json(r.status, r.body);
     }
     if (first === "source") {

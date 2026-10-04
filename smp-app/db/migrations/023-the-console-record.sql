@@ -1,4 +1,4 @@
-/* WHAT FOREFRONT HAS DONE IN ITS OWN CONSOLE (§483, audit fix 04).
+/* WHAT FOREFRONT HAS DONE IN ITS OWN CONSOLE (§487, audit fix 04).
 
    `tenant_log` has been here since the rebuild and has never had a row
    written by anything in the product — its only readers are two checks

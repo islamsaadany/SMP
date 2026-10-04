@@ -82,7 +82,7 @@ function officePersonKey(email: string): string {
 }
 function tempPassword(): string { return crypto.randomBytes(9).toString("base64").replace(/[^A-Za-z0-9]/g, "").slice(0, 12); }
 
-/* ── THE RECORD OF WHAT FOREFRONT HAS DONE (§483, audit fix 04) ──────────
+/* ── THE RECORD OF WHAT FOREFRONT HAS DONE (§487, audit fix 04) ──────────
    Islam, of the rules audit: *"let's do the recording on console"*, then
    *"the console record should sit as a separate page as history"*.
 
@@ -1032,7 +1032,7 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     return ok({});
   }
 
-  /* ── HISTORY: WHAT HAS BEEN DONE IN THIS CONSOLE (§483) ──────────────
+  /* ── HISTORY: WHAT HAS BEEN DONE IN THIS CONSOLE (§487) ──────────────
      A READ and nothing else — the record is written at the acts themselves
      (logAct above), so there is no second answer to what happened.
 

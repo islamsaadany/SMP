@@ -1,4 +1,4 @@
-"""A CONTROL IS BIG ENOUGH TO HIT, AND ITS EDGE CAN BE SEEN (§480).
+"""A CONTROL IS BIG ENOUGH TO HIT, AND ITS EDGE CAN BE SEEN (§484).
 
 qa-run: file — the subject is the built platform's own CSS, which is the same
 CSS the served app is handed verbatim by `scripts/sync-css.mjs`, so opening the

@@ -88,7 +88,7 @@
 
   /* Foundation and analysis in edit: the field replaces the text in place, so
      the page keeps its shape and nothing moves when the mode changes. */
-  /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§480) ──────────────────────────
+  /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§484) ──────────────────────────
      `--field-line` rather than `--line`, declared in `_shared.css` with the
      measurement that chose it. THESE ARE THE PLACES THAT READ IT, and the
      list is short on purpose — a border earns it only where the border IS
@@ -1695,7 +1695,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
   td:has(> .fld + .eyebtn) > .eyebtn,
   td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
-  /* §480: AND THE PAIR GETS A LITTLE MORE AIR. With the × back at its
+  /* §484: AND THE PAIR GETS A LITTLE MORE AIR. With the × back at its
      minimum (24px, config.css) the centres are already 28px apart and the
      floor is 24 — this is the two pixels that were in the picture Islam
      signed off, taking it to 30. It costs nothing: the field gives up 62px

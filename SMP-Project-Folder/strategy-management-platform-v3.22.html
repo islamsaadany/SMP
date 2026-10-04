@@ -137,7 +137,7 @@
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
     --line:#E2E8F0; --line-soft:#F1F5F9; --froze-wash:rgba(15,23,42,.22);
-    --field-line:#78899F;   /* §480 — see FOREFRONT below for the reasoning */
+    --field-line:#78899F;   /* §484 — see FOREFRONT below for the reasoning */
     --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
     --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
@@ -161,7 +161,7 @@
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
     --line:#2B3852; --line-soft:#212C42; --froze-wash:rgba(0,0,0,.50);
-    --field-line:#6A7793;   /* §480 — see FOREFRONT below for the reasoning */
+    --field-line:#6A7793;   /* §484 — see FOREFRONT below for the reasoning */
     --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
@@ -194,7 +194,7 @@
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
     --line:#D6DCE5; --line-soft:#E6EAF0; --froze-wash:rgba(22,50,92,.22);
-    /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§480) ─────────────────────
+    /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§484) ─────────────────────
        `--line` is a HAIRLINE: it divides a table's columns and draws a
        card's edge, and at #D6DCE5 it reads 1.38:1 against the white inside
        a field. For a gridline that is right — it is meant to recede. For
@@ -244,7 +244,7 @@
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
     --line:#333A45; --line-soft:#2A303A; --froze-wash:rgba(0,0,0,.50);
-    /* §480. Dark needed its own measurement rather than a mirror of the light
+    /* §484. Dark needed its own measurement rather than a mirror of the light
        one: #333A45 reads 1.43:1 against the inside of a field here. #68758C is
        the lightest that clears 3:1 on every ground a control sits on (surface
        3.51, zebra 3.26, card 3.14, page 3.89). */
@@ -2290,7 +2290,7 @@ html[data-client-settings] .viewer { display:none; }
               background:var(--surface-2); line-height:1.55; }
   .rolechip b { font-size:11.5px; }
   .rolechip .why { font-size:10.5px; margin-top:0; }
-  /* ── A DESTRUCTIVE CONTROL HAS A SIZE OF ITS OWN (§480) ──────────────────
+  /* ── A DESTRUCTIVE CONTROL HAS A SIZE OF ITS OWN (§484) ──────────────────
      This button removes a ROW. It had no size at all — it was as wide as the
      × inside it — so when §402 made Source Sans 3 the one typeface and the
      narrower glyph came with it, the button quietly went 19.7px → 15px wide.
@@ -5227,7 +5227,7 @@ html[data-client-settings] .viewer { display:none; }
 
   /* Foundation and analysis in edit: the field replaces the text in place, so
      the page keeps its shape and nothing moves when the mode changes. */
-  /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§480) ──────────────────────────
+  /* ── THE EDGE OF A BOX IS NOT A GRIDLINE (§484) ──────────────────────────
      `--field-line` rather than `--line`, declared in `_shared.css` with the
      measurement that chose it. THESE ARE THE PLACES THAT READ IT, and the
      list is short on purpose — a border earns it only where the border IS
@@ -6834,7 +6834,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   td:has(> .fld + .eyebtn) > .fld { width: calc(100% - 62px); vertical-align: middle; }
   td:has(> .fld + .eyebtn) > .eyebtn,
   td:has(> .fld + .eyebtn) > .xbtn { vertical-align: middle; margin-left: 4px; }
-  /* §480: AND THE PAIR GETS A LITTLE MORE AIR. With the × back at its
+  /* §484: AND THE PAIR GETS A LITTLE MORE AIR. With the × back at its
      minimum (24px, config.css) the centres are already 28px apart and the
      floor is 24 — this is the two pixels that were in the picture Islam
      signed off, taking it to 30. It costs nothing: the field gives up 62px

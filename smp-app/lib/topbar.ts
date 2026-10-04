@@ -159,7 +159,7 @@ const TOPBAR_CSS_RAW = `
 @media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
 `;
 
-/* ── THE COLOUR SWEEP'S BREAK (§480's own audit, constitution XVI) ─────────
+/* ── THE COLOUR SWEEP'S BREAK (§484's own audit, constitution XVI) ─────────
    `bar-ink` makes this bar's own ink unreadable, which must turn
    `checks/module-look.mjs` red on EVERY ONE of the five served module pages
    (§94.5) — one edit for one claim, and the claim is that all five are

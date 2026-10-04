@@ -61744,7 +61744,7 @@ other two reds (`desc`, the top level) are main's, recorded before.
 
 ---
 
-## §480 — The edge of a box, and a remove button with a size of its own (2026-10-03)
+## §484 — The edge of a box, and a remove button with a size of its own (2026-10-03)
 
 Islam, of the audit put to him against `PRODUCT_RULES.md` and then of the two
 fixes drawn side by side with today: ***"go with Standard and fix the remove

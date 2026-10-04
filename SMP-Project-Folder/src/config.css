@@ -165,7 +165,7 @@
               background:var(--surface-2); line-height:1.55; }
   .rolechip b { font-size:11.5px; }
   .rolechip .why { font-size:10.5px; margin-top:0; }
-  /* ── A DESTRUCTIVE CONTROL HAS A SIZE OF ITS OWN (§480) ──────────────────
+  /* ── A DESTRUCTIVE CONTROL HAS A SIZE OF ITS OWN (§484) ──────────────────
      This button removes a ROW. It had no size at all — it was as wide as the
      × inside it — so when §402 made Source Sans 3 the one typeface and the
      narrower glyph came with it, the button quietly went 19.7px → 15px wide.

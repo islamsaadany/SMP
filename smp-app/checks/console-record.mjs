@@ -1,4 +1,4 @@
-/* A RECORD OF WHAT FOREFRONT HAS DONE, AND THE PAGE THAT READS IT (§483).
+/* A RECORD OF WHAT FOREFRONT HAS DONE, AND THE PAGE THAT READS IT (§487).
 
    Islam, of the rules audit's fix 04: *"let's do the recording on console"* —
    then, of the drawing, *"the console record should sit as a separate page as

@@ -10188,7 +10188,7 @@ python3 checks/band-corner.py   # the pinned title's corners, measured in PIXELS
                                 # the build before (§113.8). 12 red reverted, from the
                                 # SOURCES (§276)
 python3 checks/control-targets.py # how big a control is, and how far from its
-                                # neighbour (&sect;480). NO CHECK IN THIS PRODUCT HAD
+                                # neighbour (&sect;484). NO CHECK IN THIS PRODUCT HAD
                                 # EVER MEASURED EITHER, which is why &sect;402's move to
                                 # one typeface could shrink the remove button from
                                 # 19.7px to 15px with 170 files green: `.xbtn` had no
@@ -10954,7 +10954,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-03 &mdash; **&sect;480: the edge of a box is not a gridline,
+*Last Updated: 2026-10-03 &mdash; **&sect;484: the edge of a box is not a gridline,
 and a destructive control has a size of its own.** Islam, of the two fixes drawn
 beside today out of the rules audit &mdash; ***"go with Standard and fix the remove
 button."*** **THE REMOVE BUTTON IS A REGRESSION AND NOTHING IN THE PRODUCT CAUSED

@@ -104,7 +104,7 @@ CREATE TABLE platform_access (
   PRIMARY KEY (role_key, area_key)
 );
 
--- WHAT FOREFRONT HAS DONE IN ITS OWN CONSOLE (§483, audit fix 04).
+-- WHAT FOREFRONT HAS DONE IN ITS OWN CONSOLE (§487, audit fix 04).
 -- Every act that CHANGES something out here is recorded: a client made,
 -- archived, brought back, renamed, shaped, deleted; a module switched; a
 -- consultant added, retired, brought back, removed; a password handed out; a

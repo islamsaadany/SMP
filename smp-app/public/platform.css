@@ -2477,8 +2477,8 @@ html[data-client-settings] .viewer { display:none; }
      replaced used for the same state (`.ico.on`) — a worded button rather than
      an icon, because it sits in a row of worded controls (Columns, Register
      file) and a lone glyph among words reads as something else. */
-  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
-  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .editbtn.on:hover { background:var(--gold); border-color:var(--gold); color:var(--on-accent); filter:brightness(.94); }
 
   /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
      column in a table cell (§93.15's note above it), which is right there and
@@ -4163,7 +4163,7 @@ html[data-client-settings] .viewer { display:none; }
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */
   .editbtn.penon, .editbtn.penon:hover {
-    background:var(--gold); border-color:var(--gold); color:var(--panel); }
+    background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -5449,7 +5449,7 @@ html[data-client-settings] .viewer { display:none; }
   .penbtn.on { visibility:visible; opacity:1; }
   .penbtn:hover { border-color:var(--gold); color:var(--gold-deep); }
   .penbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
   /* §268: THE PLAN'S TITLE ROW HELD 34px OPEN FOR A PEN THAT HAS MOVED to the
@@ -6571,7 +6571,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .ico{background:var(--surface);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;
     display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);padding:0}
   .ico:hover{border-color:var(--gold);color:var(--gold-deep)}
-  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--on-accent)}
   .ico:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;
     stroke-linecap:round;stroke-linejoin:round}
@@ -6696,7 +6696,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     font:600 11px/1 var(--mono); color:var(--ink-3);
     background:var(--surface); border:1px solid var(--line);
     border-radius:5px; cursor:pointer; }
-  .qs-edit .qtog.on { background:var(--gold-deep); color:var(--on-accent);
+  .qs-edit .qtog.on { background:var(--gold); color:var(--on-accent);
     border-color:var(--gold-deep); }
   .qs-edit .qtog:hover { border-color:var(--gold-deep); }
 
@@ -6862,7 +6862,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      is `--surface` at rest and not `--surface-2`, because `--gold-deep` on
      `--surface-2` is 4.45 and §38.5 has been paid for five times. */
   .secpen.on, .tabs .secttail button.secpen.on {
-    border-color:var(--gold); background:var(--gold); color:var(--panel); }
+    border-color:var(--gold); background:var(--gold); color:var(--on-accent); }
   .tabs .secttail button.secpen:focus-visible {
     outline:2px solid var(--gold); outline-offset:2px; }
   .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
@@ -8906,7 +8906,7 @@ tr.topcapopen > td { padding:0 !important; white-space:normal; }
      accent carries a mark and cannot carry words. `transform` is dropped with
      it — scaling a pill blurs the letters it exists to show. */
   .ddots.bysub .ddot.on {
-    background:var(--gold); border-color:var(--gold); color:#12161C;
+    background:var(--gold); border-color:var(--gold); color:var(--on-accent);
     transform:none;
   }
   /* ── ONE DECK'S PILLS ARE GROUPED (§266.12) ────────────────────────

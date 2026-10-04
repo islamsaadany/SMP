@@ -2590,6 +2590,42 @@ function whereNext(keys){
       arrangeBar("themes", GROUP.themes.length) +
       '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME()) });
 
+  /* §483: THE COMPANY'S DIRECTIONS GET A SECTION OF THEIR OWN. Islam: *"in
+     the performance it should show the company, directions & capabilties"*.
+     One card per direction, the themes' own two-box card (§53.5), each read
+     from the same pillarPerf / pillarExec / pillarPlan the drill in the
+     company's headline card already prints — nothing new is computed. Only
+     while the top layer plans in pillars (§466: a projects company is scored
+     by its projects in the headline card). */
+  if (topHasPlan() && planOn("group") && topWay() !== "projects") {
+    var dtu = topAsUnit(), ditems = itemsNow(dtu);
+    var dirs = ditems.map(function(p, di){
+      var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
+      var code = pillarCode(dtu, dtu.items.indexOf(p));
+      var mrows = SMPRules.shown(p.measures || []);
+      var pd = miniTable([L1("measure"), "Target", "Actual", "Progress"],
+        mrows.map(function(m){
+          var sc = measureScore(m);
+          return '<tr><td>' + esc(m.name) + '</td><td class="num">' + tgtShown(m.target) + '</td>' +
+            '<td class="num">' + figShown(m) + '</td>' +
+            '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">Mean across <b>' + mrows.length + '</b> ' + L("measure") + ': <b>' + pct(pf) + '</b>.</p>';
+      var trows = SMPRules.shown(p.tactics || []);
+      var ed = miniTable([L1("tactic"), "Delivered"],
+        trows.map(function(t){
+          return '<tr><td>' + esc(t.name) + '</td><td class="num">' + pct(tacticProgress(t)) + '</td></tr>';
+        }).join("")) +
+        '<p class="sub">Delivered <b>' + pct(ex) + '</b> against <b>' + pct(pl) + '</b> planned.</p>';
+      return '<div class="gwrap" data-oi="' + di + '" data-topdir="' + esc(p.id || "") + '">' +
+        splitCard(esc(code) + ' ' + esc(p.name || ""),
+          plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
+          pf, ex, pl, pd, ed, p.name || code) + '</div>';
+    }).join("");
+    SECS.push({ t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+      '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
+  }
+
   if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"

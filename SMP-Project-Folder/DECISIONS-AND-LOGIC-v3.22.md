@@ -61776,3 +61776,27 @@ as an artifact), *"no need for open button"*, *"capabilities take the C"* and
   the band), `top-plan.py` (D001). `qa.py` ERRORS none; `plan-level`,
   `pillar-breakdown`, `home-mark`, `tab-row`, `nav-scroll`, `setup-pages`,
   `welcome` green.
+
+## §483 — The company's directions on Performance, and the ink on the accent (2026-10-04)
+
+Islam: *"in the performance it should show the company, directions &
+capabilties"* and *"done eidting is not appearing well … so this color becomes
+reelvant to the company brand setting"*.
+
+**Directions.** The company's Performance gains a section of its own for its
+directions (the tenant's word for pillars), between the company headline and
+Capabilities: one card per direction, the themes' own two-box card, each read
+from `pillarPerf` / `pillarExec` / `pillarPlan` — the same figures the
+headline card's drill already prints, so nothing new is computed. Drawn only
+while the top layer plans in pillars; a company that plans in projects is
+scored by them in the headline card (§466).
+
+**The ink on the accent.** "Done editing" (and five other lit controls: the
+pen, the Setup pen, the icon toggles, the quarter toggles, a flow's subject
+pill) filled with the tenant's accent and wrote their text in `--panel`, the
+BAR colour. On the house palette the two happen to be navy and gold and read
+fine; on El Abd's (pink accent, tan bar) it is tan on pink. Every accent fill
+now writes `--on-accent`, which `brandTokens()` derives from the accent itself
+(`inkFor`), so it is readable on any accent a client picks. The `.editbtn.on`
+hover no longer moves to `--gold-deep` (whose ink is not derived) — it keeps
+the accent and darkens it by a filter. Screen only; nothing stored.

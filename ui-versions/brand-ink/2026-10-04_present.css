@@ -880,7 +880,7 @@
      accent carries a mark and cannot carry words. `transform` is dropped with
      it — scaling a pill blurs the letters it exists to show. */
   .ddots.bysub .ddot.on {
-    background:var(--gold); border-color:var(--gold); color:var(--on-accent);
+    background:var(--gold); border-color:var(--gold); color:#12161C;
     transform:none;
   }
   /* ── ONE DECK'S PILLS ARE GROUPED (§266.12) ────────────────────────

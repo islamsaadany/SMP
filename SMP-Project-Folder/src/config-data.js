@@ -1796,6 +1796,12 @@ function placeLabel(at){
     var cc = capById(String(at).slice(4));
     return cc ? navName(cc) : String(at).slice(4);
   }
+  /* §471: a direction is a place in the company's flow, named by itself. */
+  if (String(at).indexOf("dir:") === 0) {
+    var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
+      return p && p.id === String(at).slice(4); })[0];
+    return dp ? dp.name : String(at).slice(4);
+  }
   if (String(at).indexOf("co:") === 0) {
     var c = COMPANIES[String(at).slice(3)];
     return c ? navName(c) : String(at).slice(3);
@@ -5141,8 +5147,25 @@ function canReportFnWhole(target){
    own-lines exclusion the unit's always has. The sentence that stood here
    ("a function has no contributors to exclude") described the code truly and
    stopped being true the day the floor reached the projects. */
+/* A direction, by the id it is stored under (§48: never by position). */
+function dirPillar(t){
+  var id = String(t || "").slice(4), xs = Array.isArray(GROUP.items) ? GROUP.items : [];
+  for (var i = 0; i < xs.length; i++) if (xs[i] && xs[i].id === id) return { p: xs[i], i: i };
+  return null;
+}
+/* §471: a direction's own deck is spoken for by the office, the group's CEO,
+   or THAT direction's owner or custodian — the one rule the server asks
+   (ownsTopPillar with the stored pillar's own two seats). */
+function canSpeakForDir(t){
+  var d = dirPillar(t);
+  if (!d || REVIEW.state !== "open" || !planOn("group")) return false;
+  if (CYCLE.locked && !inOffice()) return false;
+  return SMPRules.mayReportTop(world(), viewer()) ||
+         SMPRules.ownsTopPillar(world(), viewer(), d.p.owner || "", d.p.custodian || "");
+}
 function canSpeakFor(target){
   var t = subjKey(target);
+  if (String(target || "").indexOf("dir:") === 0) return canSpeakForDir(String(target));
   /* §447: a direction's owner reports their own rows and never submits the
      company's report — that stays the office's and the CEO's (§428). */
   if (t === "group") return canReport("group") && SMPRules.mayReportTop(world(), viewer());

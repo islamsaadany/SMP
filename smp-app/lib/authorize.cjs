@@ -439,6 +439,16 @@ function collect(stored, incoming, w) {
             [{ id: String(t), who: cut < 0 ? "" : String(t).slice(cut + 1) }]);
         return;
       }
+      /* §471: a DIRECTION's deck keeps its own picture slides, keyed
+         `dir:<pillar id>`. That is the only report state a direction has —
+         it is never submitted or parked on its own, so anything else under
+         such a key is refused rather than guessed at. */
+      if (String(t).indexOf("dir:") === 0) {
+        if (out.some(function (c) { return c.target === t; })) return;
+        add(field === "slides" ? "dirSlides" : "dirBad", t,
+            field === "slides" ? "the direction's picture slides" : "a direction's report state");
+        return;
+      }
       if (field === "parked" && UNPARK(a, b, t)) {
         if (out.some(function (c) { return c.kind === "reportUnpark" && c.target === t; })) return;
         add("reportUnpark", t, "reopening the saved draft");
@@ -1934,6 +1944,26 @@ function authorize(stored, incoming, person) {
         if (!R.mayAuthorPage(w, person, R.planPageOf(ch.target), ch.target))
           no("Confirming " + ch.what + where + " is the Strategy Office's — " +
              "a fill stays pending, and yours to correct, until they accept it.");
+        return;
+
+      /* §471: a direction's own picture slides — the office and the group's
+         CEO, or that direction's owner or custodian, read off the STORED top
+         plan (§42), never the incoming one. */
+      case "dirSlides": {
+        const id = String(ch.target || "").slice(4);
+        const p = ((stored.group || {}).items || []).filter(function (x) { return x && x.id === id; })[0];
+        if (!p) { no("That direction is not in the plan."); return; }
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before adding slides.");
+          return;
+        }
+        if (R.mayReportTop(w, person)) return;
+        if (R.ownsTopPillar(w, person, p.owner || "", p.custodian || "")) return;
+        no("Only the direction's owner and custodian, the SMO team and the CEO add its slides.");
+        return;
+      }
+      case "dirBad":
+        no("A direction is presented, never submitted on its own — its report is the company's.");
         return;
 
       case "unitReporting":

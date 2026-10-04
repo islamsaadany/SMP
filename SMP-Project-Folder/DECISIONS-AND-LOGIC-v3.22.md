@@ -61478,3 +61478,63 @@ report-blockers, submit-gate, attention-rows, cycle-edit. Shell
 assertion on the Focus page (`'thead': ['Key measure','Target','Focus']`), identically
 on the build before this change (§303). **On the branch, not merged.**
 
+
+## §471 — A direction's own deck, and the company's short review (2026-10-04)
+
+Islam, of the round-2 mockup
+(`design-mockups/direction-decks/2026-10-03_direction-decks-round2.html`):
+no Present button per direction or capability (*"that's very long"*); keep
+*Present the whole company*; arrange directions, capabilities and functions
+with timers in the Master presentation, **the company last**; an owner's
+Present *"will only see his slides"*, with no direction named on the menu;
+the company review is *"1 flow … short … the foundation, the analysis, the
+directions & capabilities and then their performance"*; the owner and
+custodian add picture slides, and so do the functions. Then *"proceed"*.
+
+**ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN** — the units off and the
+directions in pillars (`companyReviewOn()`). Everywhere else every deck is
+byte-identical: the nineteen unit, function and group decks of the worked
+example compared before and after, 0 differ.
+
+**THE SHORT REVIEW** is the group deck with `short` set: the Foundation
+(aspiration, end in mind, the company's key objectives, read off `GROUP`
+because the unit-shaped view carries none), the four SWOT boxes on ONE slide,
+the directions-and-capabilities roll-call, then the existing *where we stand*
+and *stands* slides and Thank you. No dividers, no per-direction slides —
+those are the directions' own decks.
+
+**A DIRECTION'S DECK IS `dir:<pillar id>`** — keyed by id, never position
+(§48): a cover naming who presents it (owner · custodian), that direction's
+slides through the very builder the full plan deck uses (`pillarSlidesOf`,
+lifted out of `deckSlides` and proven neutral), and Thank you. It is a subject
+everywhere a deck is one: `placeLabel`, `deckSubject` (its hidden slides live
+on the pillar), the strip code, Manage slides, picture slides, the PDF.
+
+**THE MASTER FLOW** in this mode is directions, capabilities, functions and
+the company LAST, each kind named in the picker (DIR · CAP · FUNC · CO). The
+timers ride `presentMins`, which already took any key.
+
+**THE MENU.** The office: *Present the whole company*, the PDF, Manage slides,
+Download the plan, and the Master presentation with its new subtitle. A
+direction's owner or custodian (`ownsTopPillar` against the pillar's own two
+seats): *Present* opens only their directions back to back, the PDF is the
+same deck, Manage slides per owned direction — named only if they own
+several. Somebody who owns none and is not the office gets no menu.
+
+**THE SERVER.** `review.slides["dir:<id>"]` classifies as `dirSlides`: the
+office and the group CEO, or that direction's owner or custodian read off the
+STORED top plan (§42); refused in a locked cycle for anyone but the office.
+Any other report state under a `dir:` key is `dirBad` and refused — a
+direction is presented, never submitted on its own. `test-authorize.js` §471
+928/0, red 2 with both refusals opened.
+
+`checks/direction-decks.py` 24/0, red from the SOURCES three ways (the menu
+branch removed 6, the short flag off 3, the flow order off 2). Shell
+`v5.91-direction-decks`. Screen and server; nothing stored moves, nothing is
+migrated. Neighbours green: master-presentation 44/0, hide-slide 42/0,
+deck-strip 32/0, deck-pdf, contingency, video-slides 73/0, presentation-timer
+55/0, present-loop, deck-dividers, direction-seats, single-company, top-plan,
+cycle-board-lines, plan-level; full `qa.py` ERRORS none; the 19 unit and
+function decks byte-identical before and after. **Recorded, not this work's**
+(&sect;303): `master-picker` 57/1 (the Kind column reads CAP against BU for
+Product Mindset) fails identically on the build before. **On the branch, not merged.**

@@ -1459,61 +1459,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
    (§61) — so a menu's action cannot unmount the button the click is still in
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
    keeps the name §51.8 settled on rather than gaining a second one. */
-/* §471: the company's menu while the company's plan IS the whole plan.
-   The office keeps "Present the whole company" (the short review) and the
-   Master presentation; a direction's owner or custodian, who speaks for no
-   company, gets their own directions' slides and nothing else — no names on
-   the entries, his ruling: pressing Present shows only theirs. */
-function dirsOwnedByViewer(){
-  var w = world(), v = viewer();
-  return (Array.isArray(GROUP.items) ? SMPRules.shown(GROUP.items) : []).filter(function(p){
-    return p && p.id && SMPRules.ownsTopPillar(w, v, p.owner || "", p.custodian || "");
-  });
-}
-function companyPresentMenu(){
-  var office = SMPRules.mayReportTop(world(), viewer());
-  var mine = office ? [] : dirsOwnedByViewer();
-  if (!office && !mine.length) return "";
-  var items;
-  if (office) {
-    var slides = canSpeakFor("group")
-      ? '<button role="menuitem" data-picedit="unit" data-pickey="group">Manage slides' +
-          (pslidesOf("group").length ? ' <span class="pill kind">' + pslidesOf("group").length + '</span>' : '') +
-          '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-      : "";
-    var dl = SMPRules.mayDownloadPlan(world(), viewer(), "group")
-      ? '<button role="menuitem" data-dlpptx="group">Download the plan' +
-        '<span class="dlsub">The plan as editable slides (.pptx) &mdash; no reported figures</span></button>'
-      : "";
-    var master = SMPRules.mayMasterPresent(world(), viewer())
-      ? '<button role="menuitem" data-master="1">Master presentation' +
-        '<span class="dlsub">Directions, capabilities and functions in order, with timers; the company last</span></button>'
-      : "";
-    items = '<button role="menuitem" data-present="group">Present the whole company' +
-        '<span class="dlsub">The short company review: foundation, analysis, directions, performance</span></button>' +
-      '<button role="menuitem" data-deckpdf="group">Download the presentation' +
-        '<span class="dlsub">The review deck as a PDF &mdash; exactly what the projector shows</span></button>' +
-      slides + dl + master;
-  } else {
-    var list = mine.map(function(p){ return "dir:" + p.id; }).join(",");
-    items = '<button role="menuitem" data-present="' + esc(list) + '">Present' +
-        '<span class="dlsub">Only the slides of the ' + esc(mine.length > 1 ? L("pillar","bu") : L1("pillar")) + ' you own</span></button>' +
-      '<button role="menuitem" data-deckpdf="' + esc(list) + '">Download the presentation' +
-        '<span class="dlsub">Your slides as a PDF &mdash; exactly what the projector shows</span></button>' +
-      mine.filter(function(p){ return canSpeakFor("dir:" + p.id); }).map(function(p){
-        var n = pslidesOf("dir:" + p.id).length;
-        return '<button role="menuitem" data-picedit="dir" data-pickey="' + esc(p.id) + '">Manage slides' +
-          (mine.length > 1 ? ' &middot; ' + esc(p.name) : '') +
-          (n ? ' <span class="pill kind">' + n + '</span>' : '') +
-          '<span class="dlsub">Add your own picture slides to your ' + esc(L1("pillar")) + '</span></button>';
-      }).join("");
-  }
-  return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
-    '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + items + '</div></details>';
-}
 function presentMenu(kind, key){
-  if (kind === "unit" && key === "group" && companyReviewOn()) return companyPresentMenu();
   /* §334: three kinds now — a unit, a supporting function, and a capability,
      which presents its own review exactly as they do. */
   var target = kind === "fn" ? "fn:" + key : kind === "cap" ? "cap:" + key : key;

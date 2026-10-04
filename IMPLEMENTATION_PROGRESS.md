@@ -1340,6 +1340,12 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-04 — a direction's own deck, and the company's short review (§471)
+
+Built from the round-2 mockup, for a client planned on the company with its business units off. **Present the whole company** is now a short review: the Foundation, the analysis on one slide, the directions and capabilities, their performance, Thank you. Each direction has **a deck of its own** — its cover naming who presents it, its own slides, Thank you. There is no Present button per direction: the **Master presentation** arranges directions, capabilities and functions, with timers, and puts the company last. A direction's owner or custodian opens **Presentation** and sees only theirs — Present, the PDF, and Manage slides to add their own picture slides; nobody else can add slides to their direction (checked on the server too). Raya Trade, which has business units, sees no change: all its decks were compared and are identical. On the branch, not merged.
+
+**Next**: the same for a company that plans in projects (his 5, later).
+
 ## 2026-10-03 — the cycle board, one line per direction (§470)
 
 Built from the signed-off mockup. On Setup › Reporting cycle › Who has reported, a client planned on the company with its business units switched off no longer shows one row for the whole company. It shows a block: the company's name, then a **company objectives** row (the office's, with the company's real submission state), then one line per **direction** — or per **project** when the company plans in projects. Each line names who reports it (the custodian, else the owner, else **"None yet"** in the warning colour), its progress, its measures and tactics, notes owed, and its state: Not started, In progress, **Draft saved** once its owner pressed Save draft, or **Submitted** once the company has. The lines add up to the company's own count, and the totals at the top count the company once. The first column is now called **Reporting line** for every client. And the company's own key objectives are now asked for on the company's Reporting page when the units are off: the office and the group CEO enter them, a direction's owner cannot, and renaming one stays the office's. Raya Trade, which has business units, sees only the new column name. Checked on the server (921/0, red when the new rule is taken out) and in the browser (red three ways). On the branch, not merged.

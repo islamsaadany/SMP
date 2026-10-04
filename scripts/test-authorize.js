@@ -5307,5 +5307,44 @@ console.log("\n§470 · the company's objectives on its own report");
   check("§470: …and the office still edits them there", v.ok, (v.refusals || []).join(" / "));
 })();
 
+/* ── §471: A DIRECTION'S OWN PICTURE SLIDES ───────────────────────────────
+   A direction's deck keeps its own slides under `dir:<id>`. The owner and the
+   custodian add them, so does the office; nobody else, and nothing else may
+   be stored under such a key. BOTH ENDS (§94.2). */
+console.log("\n§471 · a direction's picture slides");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t471_own", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t471_cus", name: "Testcase Direction Custodian", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian", measures: [], tactics: [] },
+    { id: "group-P2", code: "EA02", name: "Direction two", sub: "", kind: "", theme: "",
+      owner: "Somebody Else Entirely", measures: [], tactics: [] }];
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  function slide(t) { return function (inc) {
+    inc.review = Object.assign({}, inc.review);
+    inc.review.slides = Object.assign({}, inc.review.slides);
+    inc.review.slides[t] = [{ id: "s1", title: "Site visit", at: "end", layout: "1", pics: [] }];
+  }; }
+  const judged = function (v, t) { return (v.changes || []).some(function (c) { return c.kind === "dirSlides" && c.target === t; }); };
+  let v = as("t471_own", slide("dir:group-P1"));
+  check("§471: the owner adds a slide to their direction", v.ok && judged(v, "dir:group-P1"), JSON.stringify(v.changes) + (v.refusals || []).join(" / "));
+  v = as("t471_cus", slide("dir:group-P1"));
+  check("§471: …so does its custodian", v.ok, (v.refusals || []).join(" / "));
+  v = as("smo", slide("dir:group-P2"));
+  check("§471: the office adds to any direction", v.ok, (v.refusals || []).join(" / "));
+  v = as("t471_own", slide("dir:group-P2"));
+  check("§471 REFUSED: the owner on another direction", !v.ok, "was ALLOWED");
+  v = as("t471_own", slide("dir:nope"));
+  check("§471 REFUSED: a direction the plan does not hold", !v.ok, "was ALLOWED");
+  v = as("t471_own", function (inc) { inc.review = Object.assign({}, inc.review); inc.review.submitted = Object.assign({}, inc.review.submitted, { "dir:group-P1": true }); });
+  check("§471 REFUSED: submitting a direction on its own", !v.ok, "was ALLOWED");
+  v = as("t471_own", slide("group"));
+  check("§471 REFUSED: the owner on the company's own slides", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

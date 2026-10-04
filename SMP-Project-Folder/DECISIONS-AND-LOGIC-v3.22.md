@@ -61855,3 +61855,62 @@ list scrolling you need to keep the header freezed"*.
   to-do scrolling in its own box, the work beside it not moving, and the header
   still at the top of the column AND the thing a click lands on (`elementFromPoint`,
   never a computed `position`, §94.8).
+
+### §482.2 — One rail width, a compact to-do, the old help library, a Foundation to-do, tight equal space (2026-10-04)
+Islam, of the SWOT and Foundation chats: the left panel changing size between
+phases, a to-do that was too tall, *"help me understand is not working, the
+copilot had a big library of answers for this for each question"*, a to-do for
+the Foundation too, and the space above and below the panels. Drawn in two
+mockups (`design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html` and
+`2026-10-04_spacing-and-fold.html`, both published as artifacts) and signed off
+with *"proceed"*, after his own answers: *"fetch the old library dont' write a
+new one"*, *"let's keep all the surrounding space tight and equal"*, the to-do
+the same width as the chats panel, the chats panel folding when a chat starts,
+and the columns reaching the bottom of the page.
+- **The chats rail is 200px in every phase**, not only in a SWOT chat (§482.1's
+  `:has(.copsw)` scope goes); its folded strip stays 24px.
+- **A chat that starts or opens folds the rail to its strip**, so the work gets
+  the room. Pressed open again it stays open for the rest of the visit (`RAILKEPT`,
+  per page load) — the fold is the platform's suggestion, never an override of
+  somebody who asked for the list back.
+- **The to-do is compact**: each line's count sits beside its title (`0/16`), the
+  status sentence moves onto the hover, titles wrap rather than clip, and the
+  header reads `done/n`. *Change methods* stays on the title line.
+- **"Help me understand" is the old Copilot's library, carried verbatim**
+  (`smp-app/lib/copilot-swot-help.ts` — `strategy_copilot/lib/data/
+  expanded-explanations.ts` unchanged below its marker): In simpler terms, Think
+  about, an Example answer, and which industry it was written for. The entry is
+  chosen by the client's own industry (`tenants.industry`, the GICS-style name the
+  set-up flow stores, mapped to the library's sixteen), falling back to *Other*,
+  and the line says when it fell back. **Only what is added is the mapping**: the
+  SWOT's five competition and six market questions to the library's keys. The
+  sixteen internal questions have no library entry and keep their own short line.
+  The server attaches it to the question (`more`), so the page never carries a
+  second copy of the library (§53.5).
+- **A Foundation chat has a to-do**, a 200px third column beside the chat with the
+  cards still open: *Start* (starting point, plan years), *The parts* (each part
+  with answered/asked and Agreed · Answering · To do), *Then* (consistency check,
+  save). Its count is worked out from the flow's own state, never stored. Below
+  980px it is not drawn and the flow is one column, as before.
+- **Every gap round the panels is 8px** — the page's side gutter, the space under
+  the section row, between the rail and the work, inside the work, and to the
+  foot of the page — and **the columns reach the bottom**: the question card, the
+  answer box and the to-do grow to fill.
+- **Found by the check, not the drawing**: with the work reaching the foot of the
+  page, a plain chat's Send sat **under the office chat button** that floats over
+  the bottom-right corner, and a press there opened the corner instead. The box
+  now ends at the panel's 8px (the old `-16px` margin matched the old 16px
+  padding) and, only where it is flush with that corner (a plain chat — the flows
+  put a to-do there), keeps 64px clear of the button. Asserted as a hit test on
+  Send (§94.8).
+- **Recorded, not changed**: the same button still sits over the foot of the to-do
+  column in a SWOT or Foundation chat (flagged at §482.1); in those columns it
+  covers the last line, not a control that has no other way in.
+- Checks: `check:copilot` 210/0 (the help attached to a micro and a macro question
+  and not to an internal one, the industry pick and its fallback); `shell.mjs`
+  280/0 — the rail folding when a chat opens and coming back at 200px, Send
+  pressable, the SWOT to-do and rail both 200px, the count read as `0/5`. Three
+  §482.1 assertions REWRITTEN to the new numbers, never loosened (§218), and the
+  years assertion made to wait for its save rather than racing it (one red in
+  three runs). An earlier `check:copilot` red was two runs sharing one database,
+  not the product; alone it is green.

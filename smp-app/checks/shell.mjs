@@ -860,6 +860,11 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "a Word file attaches through the paperclip and waits above the box as a chip");
     const seen0 = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Draft the Foundation from the plan");
+    /* §482.2: the panels reach the foot of the page, and Send must not sit
+       under the office chat button floating over that corner (§94.8: a hit
+       test, never a coordinate). */
+    const sendHit = await page.evaluate(() => { const b = document.querySelector("[data-cop-send]"); const r = b.getBoundingClientRect(); const h = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return !!(h && b.contains(h)) || (h && h.className) || "nothing"; });
+    check(sendHit === true, "Send is pressable — the office chat button does not sit on it", String(sendHit));
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => document.querySelector("[data-cop-msgs] .copmsg.ai .copmiss"), null, { timeout: 15000 }).catch(() => {});
     check((await count("copilot_chats")) === c0 + 1, "a Foundation chat is written to the database");
@@ -1012,6 +1017,14 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(zb.stored === null && Math.abs(zb.h - z0.h) < 1, "back at normal the stored preference is removed (an absence, §50.6)", JSON.stringify(zb));
     await page.fill("[data-cop-text]", ""); await page.dispatchEvent("[data-cop-text]", "input");
 
+    /* §482.2: opening a chat folds the chats rail to its strip, so the work
+       gets the room; pressed open again it stays open for the rest of the
+       visit. Asserted at both ends (§94.2), then the rail is used open. */
+    const railNow = () => page.evaluate(() => { const r = document.querySelector(".coprails"); return r ? Math.round(r.getBoundingClientRect().width) : null; });
+    const shut0 = await page.evaluate(() => { try { return localStorage.getItem("smp.copilot.rail"); } catch (e) { return null; } });
+    check(shut0 === "shut" && !(await railNow()), "opening a chat folds the chats rail to its strip (§482.2)", String(shut0) + " " + (await railNow()));
+    await page.click(".copslim [data-cop-railtog]"); await page.waitForTimeout(200);
+    check((await railNow()) === 200, "…and pressed open it is the same 200px as in every other phase", String(await railNow()));
     const chatId = await page.evaluate(() => document.querySelector("[data-cop-chats] [data-cop-chat]").dataset.copChat);
     const dotsShown = await page.evaluate(() => { const d = document.querySelector("[data-cop-chats] .coprow.on [data-cop-menu]"); return d ? getComputedStyle(d).opacity : "none"; });
     check(dotsShown === "1", "the open chat shows its three dots", dotsShown);
@@ -1068,7 +1081,7 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
     check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
       "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§456)", JSON.stringify(lp));
     await page.click('a[href*="#cop=chat-"]');
-    const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { timeout: 10000 }).then(() => true).catch(() => false);
+    const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { state: "attached", timeout: 10000 }).then(() => true).catch(() => false);
     check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
     /* §475 (Islam's room options 1 and 2): "Fold bars" in the unit row folds
        the top bar, the unit row and the tab row into one thin line; the
@@ -1279,7 +1292,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.fill("[data-cop-y0]", "2026"); await page.fill("[data-cop-y1]", "2028");
     await page.click("[data-cop-setyears]");
     await page.waitForSelector(".copexs", { timeout: 10000 });
+    /* the screen draws the next step as the save goes out; read the row once
+       it has landed rather than racing it (one red in three runs, §482.2) */
     let F = await flowRow(cid);
+    for (let k = 0; k < 20 && !(F && F.y0); k++) { await page.waitForTimeout(150); F = await flowRow(cid); }
     check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start === "fresh", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 
     /* The guided road: a question, its examples, a short answer held. */
@@ -1414,11 +1430,13 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     await page.click('[data-cop-sw-go="gather"]');
     await page.waitForSelector(".copsw-li", { timeout: 10000 });
     const todo = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
-    check(/0 of 5 done/.test(todo), "the to-do list counts its lines — three to gather, the analyses, the SWOT", todo);
+    check(/^0\/5$/.test(todo.trim()), "the to-do list counts its lines — three to gather, the analyses, the SWOT — as done/n in its title (§482.2)", todo);
 
-    /* §482.1 compact columns: a 200px chats rail, a 270px to-do, the work and
+    /* §482.1 compact columns: a 200px chats rail, a 200px to-do (§482.2; 270 at §482.1), the work and
        the to-do each scrolling in their own box, the to-do's header frozen.
        A short window, or there is nothing for the to-do to scroll (§94.2). */
+    /* opening the chat folded the rail (§482.2); pressed open, it stays open */
+    if (await page.$(".coppane.copshut")) await page.click(".copslim [data-cop-railtog]");
     await page.setViewportSize({ width: 1440, height: 560 });
     await page.waitForTimeout(300);
     const cols = await page.evaluate(() => {
@@ -1426,7 +1444,7 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
       const nb = document.querySelector(".copnew[data-cop-newchat]");
       return { rails: r(".coprails"), side: r(".copsw-side"), newH: nb ? Math.round(nb.getBoundingClientRect().height) : null, lh: nb ? parseFloat(getComputedStyle(nb).lineHeight) || 15 : null };
     });
-    check(cols.rails === 200 && cols.side === 270, "in a SWOT chat the chats rail is 200px and the to-do 270px", JSON.stringify(cols));
+    check(cols.rails === 200 && cols.side === 200, "in a SWOT chat the chats rail and the to-do are both 200px, for symmetry (§482.2)", JSON.stringify(cols));
     check(cols.newH != null && cols.newH < cols.lh * 2, "…and + New chat stays on one line", JSON.stringify(cols));
     const scr = await page.evaluate(() => {
       const side = document.querySelector(".copsw-side"), main = document.querySelector(".copsw-main"), cm = document.querySelector(".copmain");
@@ -1480,9 +1498,9 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     check(!!d && /^DESTEP research prompt - Mobile\.txt$/.test(d.suggestedFilename()), "the research prompt downloads as a named .txt (a long dash made Chromium drop the name)", d && d.suggestedFilename());
     await page.fill("[data-cop-sw-paste]", "The economy is recovering; inflation is easing.");
     await page.click("[data-cop-sw-keep]");
-    await page.waitForFunction(() => /3 of 5 done/.test((document.querySelector(".copsw-n") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    await page.waitForFunction(() => /^3\/5$/.test((document.querySelector(".copsw-n") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     const t3 = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
-    check(/3 of 5 done/.test(t3), "with every gather line done the list says so", t3);
+    check(/^3\/5$/.test(t3.trim()), "with every gather line done the list says so", t3);
     await shot("4-gathered");
 
     /* the two analyses, each shown and agreed */

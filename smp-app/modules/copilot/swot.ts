@@ -5,6 +5,7 @@
    between a read and a write against what is stored THEN; and a failure is
    said in words (§171). The rules themselves live in lib/copilot-swot.ts and
    lib/copilot-sources.ts — this file only carries them to the page. */
+import { helpFor } from "../../lib/copilot-swot-help.ts";
 import { withTenant } from "../../lib/tenant.ts";
 import { type Who, oneLine, isPlace, oneChat, newChat, MAX_TITLE, NO_KEY, failedLine } from "../../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
@@ -41,8 +42,13 @@ export async function swotView(c: any, chat: { id: string; place: string; sectio
   const s = await swotOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
+  /* "Help me understand" is the old Copilot's library (§482.2), chosen by
+     the client's own industry; a question it does not cover keeps its line. */
+  const ind = (await c.query("SELECT industry FROM tenants WHERE id = NULLIF(current_setting('app.tenant_id', true), '')::uuid")).rows[0]?.industry || "";
+  const questions: Record<string, any[]> = {};
+  for (const a of Object.keys(QUESTIONS)) questions[a] = (QUESTIONS as any)[a].map((q: any) => { const h = helpFor(q.key, ind); return h ? { ...q, more: h } : q; });
   return { swot: s, swotTodo: todo, swotDone: doneCount(todo), swotCover: coverageOf(s), swotGatherDone: gatherDone(s),
-    swotQuestions: QUESTIONS, swotOffered: OFFERED, swotMethodWord: METHOD_WORD, swotAreaWord: AREA_WORD, swotTemplateOf: TEMPLATE_OF,
+    swotQuestions: questions, swotOffered: OFFERED, swotMethodWord: METHOD_WORD, swotAreaWord: AREA_WORD, swotTemplateOf: TEMPLATE_OF,
     swotNextVersion: await nextSwotVersion(c, chat, pw || chat.place) };
 }
 

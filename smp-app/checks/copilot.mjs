@@ -832,6 +832,18 @@ try {
   const sw_sv = await call("POST", "api", { act: "swotSave", id: sw_sid, placeWord: "Mobile",
     swot: { methods: { internal: ["guided"], micro: ["report"], macro: [] }, ans: { internal: SWQ.internal.map(() => "") } } }, NORAN);
   check("ticks are kept and the list says 0 of 4", sw_sv.st === 200 && sw_sv.j.swotDone === 0 && sw_sv.j.swotTodo.length === 4, JSON.stringify(sw_sv.j && sw_sv.j.swotTodo));
+  /* §482.2 — "Help me understand" is the old library, chosen by the client's industry. */
+  const sw_q = sw_sv.j && sw_sv.j.swotQuestions || {};
+  const sw_mi = (sw_q.micro || []).find((q) => q.key === "rivalry"), sw_ma = (sw_q.macro || []).find((q) => q.key === "economic");
+  check("a micro and a macro question carry the old library's help (simpler terms, things to think about, an example)",
+    !!(sw_mi && sw_mi.more && sw_mi.more.simplerTerms && sw_mi.more.thinkAbout.length && sw_mi.more.exampleResponse) &&
+    !!(sw_ma && sw_ma.more && sw_ma.more.simplerTerms), JSON.stringify(sw_mi && sw_mi.more).slice(0, 160));
+  check("...and an internal question keeps its own short line and no library entry",
+    (sw_q.internal || []).length > 0 && (sw_q.internal || []).every((q) => !q.more), "");
+  const { helpFor: sw_help } = await import("../lib/copilot-swot-help.ts");
+  check("the library picks the client's industry and falls back to Other",
+    sw_help("rivalry", "Retail & E-commerce").industry === "Retail" && sw_help("rivalry", "Something unknown").industry === "Other" &&
+    sw_help("nope", "Retail & E-commerce") === null, JSON.stringify([sw_help("rivalry","Retail & E-commerce")?.industry, sw_help("rivalry","x")?.industry]));
   const sw_early = await call("POST", "api", { act: "swotAnalysis", id: sw_sid, area: "micro", placeWord: "Mobile" }, NORAN);
   check("an analysis is refused, in words, until the lines of the list are done", sw_early.st === 400 && /to-do list/.test(sw_early.j && sw_early.j.why), sw_early.st + " " + JSON.stringify(sw_early.j));
   const sw_fin0 = await call("POST", "api", { act: "swotFinish", id: sw_sid, placeWord: "Mobile" }, NORAN);

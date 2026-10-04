@@ -61741,3 +61741,38 @@ skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
 values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
 other two reds (`desc`, the top level) are main's, recorded before.
 
+
+## §482 — The company's capabilities, drawn like its directions (2026-10-04)
+
+Islam, of the company's Strategy › Capabilities list: *"the capabilities should
+look like the pillars view not like that list!"* — then, of the mockup
+(`design-mockups/company-capabilities/2026-10-04_pillars-view.html`, published
+as an artifact), *"no need for open button"*, *"capabilities take the C"* and
+*"proceed"*.
+
+- **A rail and a pane, the directions' own shape.** Cards down the left (code,
+  name, what it holds, a red *N Missing* from `SMPRules.gapMissing`); the
+  chosen one on the right under `pillarBand` with its Owner and Custodian read
+  from the capability (§412, §469 — read here, set on Setup). Its projects are
+  a table (# · Project · Owner · Start · End · Deliverables · Outcomes ·
+  Milestones); pressing a row unfolds `projPlanBody` beneath it — the tables
+  the capability's own Plan page draws (§53.5). A capability planned in pillars
+  lists its pillars. **No Open button**: the plan is already on the right.
+- **C001, C002…** — the capability's position in the GROUP's list, never the
+  viewer's (§48), so a code means one thing to everybody. **The company's own
+  directions become D001…** through a `pillarPrefix` on `topAsUnit()`, read by
+  `pillarCode()`; the top layer's projects keep their letters. Codes appear on
+  cards and the pane's band, never in tab labels (his correction on the mockup).
+- **Screen state only** (`TOPCAP`, `TOPCAPPROJ`, like `RAIL`); nothing stored
+  moves, no migration, no server rule.
+- **The breakdown table's + and × wear the bar's own ink.** `--panel-accent` is
+  a fixed gold and vanished on a tan bar; `--panel-ink` is derived from the
+  tenant's bar colour. **And the navigation row's segmented switch, the house
+  and the gear** (his screenshot: *"the white on this color is not clear"*) were
+  hard-coded white; they take `--panel-ink` and washes of it now, so they read
+  on navy exactly as before and on a light bar for the first time.
+- Checks rewritten, never loosened (§218): `single-company.py` (cards, codes,
+  no Open, the pane, a project unfolding), `direction-seats.py` (the seats on
+  the band), `top-plan.py` (D001). `qa.py` ERRORS none; `plan-level`,
+  `pillar-breakdown`, `home-mark`, `tab-row`, `nav-scroll`, `setup-pages`,
+  `welcome` green.

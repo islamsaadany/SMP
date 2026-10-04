@@ -4542,6 +4542,20 @@
     });
     /* §447: a capability opened from the company page lands where its own
        row would have landed it. */
+    /* §482: the company's Capabilities rail — a card picks the capability,
+       a project row unfolds its plan below it. Screen state only. */
+    document.querySelectorAll("[data-topcap]").forEach(function(b){
+      b.addEventListener("click", function(){ TOPCAP = b.dataset.topcap; paint(); });
+    });
+    document.querySelectorAll("[data-topcapproj]").forEach(function(r){
+      var go = function(e){
+        if (e.target.closest && e.target.closest("button, a, input, select, textarea")) return;
+        var kv = r.dataset.topcapproj.split("|");
+        TOPCAPPROJ[kv[0]] = TOPCAPPROJ[kv[0]] === kv[1] ? null : kv[1]; paint();
+      };
+      r.addEventListener("click", go);
+      r.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(e); } });
+    });
     document.querySelectorAll("[data-gocap]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.preventDefault();

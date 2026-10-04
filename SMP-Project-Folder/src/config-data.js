@@ -8073,6 +8073,9 @@ function setKoThisYear(on){
 }
 
 function pillarCode(u, i){
+  /* §482: the company's own directions are D001, D002… (Islam: capabilities
+     take the C, directions another code); everything else is unchanged. */
+  if (u.pillarPrefix) return u.pillarPrefix + String(i + 1).padStart(3, "0");
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
@@ -8373,7 +8376,7 @@ function topPrefix(){
 }
 function topAsUnit(){
   return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
-           navName:null, codePrefix:topPrefix(),
+           navName:null, codePrefix:topPrefix(), pillarPrefix:"D",
            items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
            keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
            swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,

@@ -82,8 +82,8 @@ with sync_playwright() as p:
     ck("pressing it adds the first pillar to the group's own row", press(pg, '[data-rowadd="pillar|group"]')
        and safe(pg, "()=>GROUP.items.length===1 && GROUP.items[0].id==='group-P1'") is True,
        safe(pg, "()=>JSON.stringify(GROUP.items)"))
-    ck("…with its code from the top layer's own letters",
-       safe(pg, "()=>pillarCode(topAsUnit(), 0)", "") == "GR01", safe(pg, "()=>pillarCode(topAsUnit(), 0)"))
+    ck("…with its code D001 — a direction's own letter (§482)",
+       safe(pg, "()=>pillarCode(topAsUnit(), 0)", "") == "D001", safe(pg, "()=>pillarCode(topAsUnit(), 0)"))
     ck("the section line carries the one pen", press(pg, "button.secpen"))
     ck("…and the pen opens the add controls for a measure and a tactic",
        press(pg, '[data-rowadd="measure|group|0"]') and press(pg, '[data-rowadd="tactic|group|0"]')
@@ -124,8 +124,8 @@ with sync_playwright() as p:
     ck("…reported by the SMO team", safe(pg, "()=>boardWho('group')", "") == "SMO team", safe(pg, "()=>boardWho('group')"))
     heads = safe(pg, "()=>{var d=document.createElement('div'); d.innerHTML=deckHtmlFor('group'); return [...d.querySelectorAll('.dslide')].map(s=>((s.querySelector('h2,h1')||{}).textContent||''))}", []) or []
     ck("the deck carries the SWOT and, per pillar, key measures and tactics",
-       any("SWOT" in h for h in heads) and any("GR01" in h and "Key measures" in h for h in heads)
-       and any("GR01" in h and "Tactics" in h for h in heads), heads[:14])
+       any("SWOT" in h for h in heads) and any("D001" in h and "Key measures" in h for h in heads)
+       and any("D001" in h and "Tactics" in h for h in heads), heads[:14])
 
     # ── 5. The Capabilities card ──────────────────────────────────────
     safe(pg, "()=>{delete GROUP.structure;}")

@@ -1627,79 +1627,24 @@ function seatName(key){
   var n = key ? personName(key) : "";
   return n && n !== key ? esc(n) : '<span class="why">&mdash;</span>';
 }
-/* §482 — THE COMPANY'S CAPABILITIES ARE DRAWN LIKE ITS DIRECTIONS. Islam:
-   *"the capabilities should look like the pillars view not like that list!"*
-   — then, of the mockup, *"no need for open button"* and *"capabilities take
-   the C"*. A rail of cards down the left (code, name, what it holds, a red
-   count of what is still missing) and the chosen one's plan on the right:
-   its band (code, name, Owner, Custodian), then its projects — each opening
-   below its own row with the same tables the capability's own Plan page
-   draws (projPlanBody, §53.5) — or, planned in pillars, its pillars.
-   Nothing is stored differently. The code is the capability's POSITION in
-   the group's list, never the viewer's (§48), so C003 is C003 for everybody;
-   which card is open and which project row is unfolded are screen state,
-   held like RAIL (§177.2). */
-var TOPCAP = null, TOPCAPPROJ = {};
-function topCapCode(c){
-  var i = GROUP.capabilities.indexOf(c);
-  return i < 0 ? "" : "C" + String(i + 1).padStart(3, "0");
-}
-function topCapMissing(c){
-  if (capPlansInPillars(c)) return itemsNow(capAsUnit("cap:" + c.id)).reduce(function(a, it){
-    return a + (it.measures || []).reduce(function(b, m){ return b + SMPRules.gapMissing("measure", m).length; }, 0) +
-               (it.tactics || []).reduce(function(b, t){ return b + SMPRules.gapMissing("tactic", t).length; }, 0); }, 0);
-  return (c.projects || []).reduce(function(a, p){ return a + SMPRules.gapMissing("project", p).length; }, 0);
-}
-function topCapBody(c){
-  var tgt = "cap:" + c.id;
-  if (capPlansInPillars(c)) {
-    var items = itemsNow(capAsUnit(tgt));
-    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>';
-    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
-      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead><tbody>' +
-      items.map(function(it, i){
-        return '<tr><td class="num mono">' + esc(pillarCode(capAsUnit(tgt), i)) + '</td><td>' + esc(it.name || "") +
-          '</td><td>' + (it.owner ? esc(it.owner) : '<span class="missing">Missing</span>') +
-          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td></tr>';
-      }).join("") + '</tbody></table></div>';
-  }
-  var ps = c.projects || [];
-  if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>';
-  var openId = TOPCAPPROJ[c.id];
-  var miss = function(v){ return v ? esc(v) : '<span class="missing">Missing</span>'; };
-  return '<div class="tblscroll"><table data-topcapprojects="1"><thead><tr><th class="num">#</th><th>' + L1("project") +
-    '</th><th>Owner</th><th>Start</th><th>End</th><th class="num">Deliverables</th><th class="num">Outcomes</th>' +
-    '<th class="num">Milestones</th></tr></thead><tbody>' +
-    ps.map(function(p, i){
-      var on = p.id === openId;
-      return '<tr class="topcapprow' + (on ? ' on' : '') + '" data-topcapproj="' + esc(c.id) + '|' + esc(p.id) +
-          '" aria-expanded="' + on + '" tabindex="0"><td class="num">' + (i + 1) + '</td><td><b>' + esc(p.name || "") + '</b></td>' +
-        '<td>' + miss(p.owner) + '</td><td class="mono">' + miss(p.start) + '</td><td class="mono">' + miss(p.end) + '</td>' +
-        '<td class="num">' + (p.deliverables || []).length + '</td><td class="num">' + (p.outcomes || []).length + '</td>' +
-        '<td class="num">' + (p.milestones || []).length + '</td></tr>' +
-        (on ? '<tr class="topcapopen"><td colspan="8"><div class="topcapplan">' + projPlanBody(p, tgt) + '</div></td></tr>' : '');
-    }).join("") + '</tbody></table></div>';
-}
 function renderTopCaps(){
   var caps = capsReachable();
   if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
-  var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
-  var rail = '<div class="rail" data-topcaprail="1">' + railHead(L("capability", "bu"), caps.length) +
-    caps.map(function(c){
-      var pil = capPlansInPillars(c);
-      var n = pil ? itemsNow(capAsUnit("cap:" + c.id)).length : (c.projects || []).length;
-      var g = topCapMissing(c);
-      return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
-        railName(topCapCode(c), c.name) +
-        (g ? '<span class="rgap">' + g + ' Missing</span>' : '') +
-        railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
-        '</button>';
-    }).join("") + '</div>';
-  var seats = '<span class="topcapseat"><b>Owner</b> ' + seatName(sel.head) + '</span>' +
-              '<span class="topcapseat"><b>Custodian</b> ' + seatName(sel.custodian) + '</span>';
-  var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
-    '<div class="topcapbody">' + topCapBody(sel) + '</div>';
-  return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
+  var rows = caps.map(function(c){
+    var fn = c.fn ? functionOf(c.fn) : null, pil = capPlansInPillars(c);
+    var cu = pil ? capAsUnit("cap:" + c.id) : null;
+    var n = pil ? itemsNow(cu).length : (c.projects || []).length;
+    var v = pil ? unitPillars(cu) : capPerf(c);
+    return '<tr><td>' + esc(c.name) + (fn ? '<span class="why">' + esc(fn.name) + '</span>' : '') + '</td>' +
+      '<td>' + (pil ? L("pillar", "bu") : L("project", "bu")) + '</td>' +
+      '<td>' + seatName(c.head) + '</td><td>' + seatName(c.custodian) + '</td>' +
+      '<td class="num">' + n + '</td>' +
+      '<td class="num final" style="color:' + bandInk(v) + '">' + pct(v) + '</td>' +
+      '<td class="num"><button type="button" class="linkbtn" data-gocap="cap:' + esc(c.id) + '">Open</button></td></tr>';
+  }).join("");
+  return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
+    '<th style="width:30%">' + L1("capability") + '</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th class="num">Rows</th>' +
+    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
 /* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).

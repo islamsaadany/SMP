@@ -1,0 +1,203 @@
+<title>Notes buttons in dark</title>
+<style>
+  /* The SHEET's own chrome follows the reader's theme. The two PANELS below
+     are deliberately fixed to Meeting Notes' own light and dark colours,
+     because those grounds are the subject. Tokens copied out of
+     smp-app/modules/notes/page.ts, lines 42 and 44, unchanged. */
+  :root{
+    --sheet:#F5F6F9; --card:#FFFFFF; --edge:#D8DEE8;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --bad:#B23025; --good:#1B6E4E;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --sheet:#12151C; --card:#1A1F29; --edge:#333B4A;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --bad:#E8776B; --good:#63BE96;
+    color-scheme: dark;
+  }}
+  :root[data-theme="dark"]{
+    --sheet:#12151C; --card:#1A1F29; --edge:#333B4A;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --bad:#E8776B; --good:#63BE96;
+    color-scheme: dark;
+  }
+
+  body{
+    margin:0; background:var(--sheet); color:var(--ink);
+    font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding-block:28px 56px; padding-left:20px; padding-right:20px}
+
+  h1{margin:0 0 6px; font-size:23px; font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .lede{margin:0 0 4px; color:var(--ink-2); font-size:15px; max-width:62ch}
+  .sub{margin:0 0 26px; color:var(--ink-3); font-size:13.5px; max-width:62ch}
+
+  .key{
+    font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+    margin:26px 0 8px;
+  }
+
+  /* ── a panel painted in Meeting Notes' own grounds ── */
+  .panel{
+    border:1px solid var(--edge); border-radius:12px; overflow:hidden;
+    margin-bottom:14px;
+  }
+  .panel > .bar{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:8px 14px; border-bottom:1px solid var(--edge);
+    background:var(--card);
+  }
+  .bar b{font:600 12.5px/1.6 inherit}
+  .bar span{color:var(--ink-3); font-size:12.5px}
+  .bar .verdict{margin-left:auto; font:600 11px/1.6 ui-monospace,SFMono-Regular,monospace; letter-spacing:.06em; text-transform:uppercase}
+  .bar .verdict.no{color:var(--bad)}
+  .bar .verdict.yes{color:var(--good)}
+
+  /* The page's own body, at its own colours. Each panel sets them locally. */
+  .page{padding:16px 14px 18px}
+  .page.light{
+    --n-ink:#141C2B; --n-ink-3:#5E6E85; --n-line:#D8DEE8;
+    --n-ground:#F5F6F9; --n-surface:#FFF; --n-gold:#9C5D08;
+    background:var(--n-ground); color:var(--n-ink);
+  }
+  .page.dark{
+    --n-ink:#E7EBF2; --n-ink-3:#8590A3; --n-line:#333B4A;
+    --n-ground:#12151C; --n-surface:#1A1F29; --n-gold:#F5A623;
+    background:var(--n-ground); color:var(--n-ink);
+  }
+
+  /* ── the real controls, copied from page.ts ── */
+  .tools{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .srch{
+    flex:1 1 200px; min-width:0; border:1px solid var(--n-line); border-radius:8px;
+    background:var(--n-surface); color:var(--n-ink); padding:8px 11px; font:400 14px/1.5 inherit;
+  }
+  .go{
+    border:1px solid var(--n-line); background:var(--n-surface); color:var(--n-ink);
+    border-radius:8px; padding:8px 13px; font:600 13px/1.5 inherit; flex:none;
+  }
+  .btn{
+    font:600 13px/1 inherit; padding:9px 13px; border-radius:8px;
+    border:1px solid var(--n-line); background:var(--n-surface); color:var(--n-ink);
+    white-space:nowrap;
+  }
+  .btn.gold{background:var(--n-gold); border-color:var(--n-gold); color:#FFF}
+  .btn.gold.fixed{color:var(--n-ground)}
+  .cnt{
+    font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--n-ink-3); margin-left:auto; flex:none;
+  }
+  .foot{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid var(--n-line)}
+  .hint{color:var(--n-ink-3); font-size:12.5px}
+
+  .ratio{
+    display:inline-flex; align-items:baseline; gap:6px;
+    font:600 11px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.04em;
+  }
+
+  .note{
+    border-left:2px solid var(--edge); padding:2px 0 2px 14px;
+    color:var(--ink-2); font-size:14px; max-width:60ch; margin:0 0 10px;
+  }
+  .note b{color:var(--ink); font-weight:600}
+  code{
+    font:400 12.5px/1.6 ui-monospace,SFMono-Regular,monospace;
+    background:var(--card); border:1px solid var(--edge); border-radius:6px;
+    padding:1px 5px; white-space:nowrap;
+  }
+  .onelineBox{
+    border:1px solid var(--edge); border-radius:10px; background:var(--card);
+    padding:12px 14px; margin-top:10px; overflow-x:auto;
+  }
+  .onelineBox pre{margin:0; font:400 12.5px/1.75 ui-monospace,SFMono-Regular,monospace; color:var(--ink-2)}
+  .onelineBox .was{color:var(--bad)}
+  .onelineBox .is{color:var(--good)}
+  @media (max-width:560px){ .cnt{margin-left:0} }
+</style>
+
+<div class="wrap">
+  <h1>The gold buttons in dark</h1>
+  <p class="lede">Three buttons in Meeting Notes are hard to read when the platform is in dark mode — including the one that actually sends the minutes.</p>
+  <p class="sub">The two panels below are the real page, in its own colours. Nothing here is a redrawing: the buttons, the search box and the grey count are copied out of the source.</p>
+
+  <p class="key">Light mode &mdash; nothing changes, and nothing needs to</p>
+  <div class="panel">
+    <div class="bar">
+      <b>As it is today</b>
+      <span>white word on the deep gold</span>
+      <span class="verdict yes">reads &middot; 5.3</span>
+    </div>
+    <div class="page light">
+      <div class="tools">
+        <input class="srch" value="" placeholder="Search meetings" aria-label="Search meetings" readonly>
+        <span class="go">Search</span>
+        <span class="btn gold">+ New meeting</span>
+        <span class="cnt">4 meetings</span>
+      </div>
+      <div class="foot">
+        <span class="btn gold">Refine again</span>
+        <span class="btn gold">Send to 3 attendees</span>
+        <span class="hint">Nour Hassan has no email and will not receive them.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">Dark mode &mdash; as it is today</p>
+  <div class="panel">
+    <div class="bar">
+      <b>The word stayed white</b>
+      <span>and the gold was brightened for dark</span>
+      <span class="verdict no">too faint &middot; 2.0</span>
+    </div>
+    <div class="page dark">
+      <div class="tools">
+        <input class="srch" value="" placeholder="Search meetings" aria-label="Search meetings" readonly>
+        <span class="go">Search</span>
+        <span class="btn gold">+ New meeting</span>
+        <span class="cnt">4 meetings</span>
+      </div>
+      <div class="foot">
+        <span class="btn gold">Refine again</span>
+        <span class="btn gold">Send to 3 attendees</span>
+        <span class="hint">Nour Hassan has no email and will not receive them.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">Dark mode &mdash; proposed</p>
+  <div class="panel">
+    <div class="bar">
+      <b>The word takes the page's own dark</b>
+      <span>the way a warning sign is painted</span>
+      <span class="verdict yes">reads &middot; 9.0</span>
+    </div>
+    <div class="page dark">
+      <div class="tools">
+        <input class="srch" value="" placeholder="Search meetings" aria-label="Search meetings" readonly>
+        <span class="go">Search</span>
+        <span class="btn gold fixed">+ New meeting</span>
+        <span class="cnt">4 meetings</span>
+      </div>
+      <div class="foot">
+        <span class="btn gold fixed">Refine again</span>
+        <span class="btn gold fixed">Send to 3 attendees</span>
+        <span class="hint">Nour Hassan has no email and will not receive them.</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="key">Why it happened</p>
+  <p class="note">The gold has to get <b>brighter</b> for dark mode, or it would disappear against the dark page. When it was brightened, the <b>white word on it</b> was never changed to follow &mdash; so the brighter the button got, the fainter its own label became.</p>
+  <p class="note">It is the same gold everywhere else on the page &mdash; a border, a tick, a line of text &mdash; and those are all fine. Only the three <b>filled</b> buttons have it.</p>
+
+  <p class="key">What changes, if you say yes</p>
+  <p class="note">One line. The word on those three buttons stops being white in dark mode and takes the colour of the page behind them. <b>Light mode is untouched.</b> No other screen in the platform has this.</p>
+  <div class="onelineBox">
+    <pre><span class="was">&minus;</span>  .btn.gold { color: #FFF }                      <span class="was">white, in both themes</span>
+<span class="is">+</span>  .btn.gold { color: #FFF }                      <span class="is">light: unchanged</span>
+<span class="is">+</span>  dark: .btn.gold { color: var(--ground) }       <span class="is">the page's own dark</span></pre>
+  </div>
+</div>

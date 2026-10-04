@@ -828,7 +828,7 @@
   /* THE CONSOLE OPENS ON MY WORK (§400), and the tab you are on is the
      address's hash, so a reload keeps it and a link can name one
      ("Switch client…" from a client is /platform#clients). */
-  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks"];
+  var TABS_KNOWN = ["mywork", "clients", "consultants", "access", "memory", "frameworks", "history"];
   var TAB = (function () {
     var h = String(location.hash || "").replace(/^#/, "");
     return TABS_KNOWN.indexOf(h) >= 0 ? h : "mywork";
@@ -893,7 +893,17 @@
                    decision 1): every consultant reads the whole library, and
                    only an admin adds to it — which is a gate on the ACT, asked
                    on the server, never a gate on the tab. */
-                ["frameworks", "Frameworks", true]];
+                ["frameworks", "Frameworks", true],
+                /* HISTORY IS LAST AND UNGATED (§487), and both halves are
+                   decisions. Last, because it is where you go to look back
+                   rather than to work — Islam's own placement, from the
+                   drawing. Ungated, because every consultant may read what
+                   has been done to the clients they can already open, and
+                   the narrowing is in the READ's own WHERE (§355): a row
+                   about a client whose card this person is not shown is not
+                   in the answer at all, so there is nothing for a tab gate
+                   to protect. */
+                ["history", "History", true]];
     tabs.forEach(function (t) {
       if (!t[2]) return;
       var b = el("button", TAB === t[0] ? "on" : null, t[1]);
@@ -924,7 +934,7 @@
   var KEPT = {};
   var ONLIST = null;
   var REVAL = null;
-  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client"];
+  var READS = ["me", "cards", "mywork", "consultants", "access", "list", "one", "library", "client", "history"];
   function revalStop() {
     if (!REVAL) return;
     REVAL = null;
@@ -992,6 +1002,7 @@
     if (TAB === "access") return drawAccess();
     if (TAB === "memory") return drawMemory();
     if (TAB === "frameworks") return drawFrameworks();
+    if (TAB === "history") return drawHistory();
   }
 
   /* `quiet` is passed by every control that is UPDATING what is already on
@@ -3303,6 +3314,140 @@
   }
 
   /* ── Who sees what ───────────────────────────────────────────── */
+  /* ════ HISTORY: WHAT HAS BEEN DONE IN THIS CONSOLE (§487) ═══════════
+     Islam, of the rules audit's fourth finding: *"let's do the recording on
+     console"*, then *"the console record should sit as a separate page as
+     history"*. Signed off from a drawing of the page in the console's own
+     chrome (rule 1c).
+
+     IT READS AND NOTHING ELSE. Every row is written at the act itself
+     (lib/platform-api.ts's logAct), so this page cannot disagree with what
+     happened — there is no second answer to assemble and nothing here to
+     get wrong but the words.
+
+     THE SENTENCE COMES OFF THE ROW. It was written when the act was made,
+     because two of the acts recorded destroy their own subject (a client
+     deleted, a consultant removed) and a page re-deriving the words from a
+     key would lose exactly those two (§49.2).
+
+     GROUPED BY DAY, NEWEST FIRST, through the table's OWN band — `tr.grp`
+     is what My work already heads its groups with, so this page invents no
+     second device for "a heading inside a table" (§53.5). The two days
+     somebody is actually looking for read as words; everything older reads
+     as its date, because "6 days ago" is a sum the reader has to do.
+
+     TYPING NEVER REPAINTS (constitution XV, and the clients grid's own
+     answer one tab over): the search hides rows IN PLACE, and a day band
+     whose rows have all gone is hidden with them — or the page shows a
+     heading over nothing, which reads as a result rather than as an
+     absence. */
+  function dayOf(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return { key: "?", label: "Undated" };
+    var mid = function (x) { return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime(); };
+    var days = Math.round((mid(new Date()) - mid(d)) / 86400000);
+    var key = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    if (days === 0) return { key: key, label: "Today" };
+    if (days === 1) return { key: key, label: "Yesterday" };
+    /* the year only once it is not this one — "2 October 2026" on a page
+       whose every other row is this year says the year nine times for nothing */
+    var opts = { day: "numeric", month: "long" };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
+    return { key: key, label: d.toLocaleDateString(undefined, opts) };
+  }
+  function clockOf(iso) {
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return "\u2014";
+    return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false });
+  }
+
+  function drawHistory() {
+    lead(false, "Reading\u2026");
+    post({ action: "history" }).then(function (j) {
+      clear();
+      if (!j.ok) { say(j.error || "Could not read the history.", true); return; }
+      var acts = j.acts || [];
+
+      /* NOTHING RECORDED YET IS A BEGINNING, NOT A FAULT (§45.2) — and it
+         says the one thing somebody would otherwise wonder about: the record
+         starts from the day the page went in, and nothing before that is
+         here. Saying so is cheaper than letting an empty page imply that
+         nothing has ever been done (§35, §124). */
+      if (!acts.length) {
+        title("History");
+        page.appendChild(el("p", "note",
+          "Nothing recorded yet. Every act in this console is recorded from the day " +
+          "this page went in \u2014 anything done before that is not here."));
+        return;
+      }
+
+      var right = el("div");
+      var search = el("input", "fld");
+      search.type = "search";
+      search.placeholder = "Search who, client or act";
+      search.setAttribute("aria-label", "Search the history");
+      search.style.width = "230px";
+      var count = el("span", "tag", nOf(acts.length, "act"));
+      right.appendChild(search);
+      right.appendChild(count);
+      title("History", right);
+
+      var box = el("div", "tscroll");
+      var t = el("table", "work");
+      var thead = el("thead"), head = el("tr");
+      ["When", "Who", "Client", "What"].forEach(function (h) { head.appendChild(el("th", null, h)); });
+      thead.appendChild(head); t.appendChild(thead);
+
+      var body = el("tbody");
+      var day = null;
+      acts.forEach(function (a) {
+        var d = dayOf(a.at);
+        if (d.key !== day) {
+          day = d.key;
+          var band = el("tr", "grp");
+          var bc = el("td", null, d.label);
+          bc.colSpan = 4;
+          band.appendChild(bc);
+          band.dataset.day = d.key;
+          body.appendChild(band);
+        }
+        var tr = el("tr", "wrow");
+        tr.dataset.day = d.key;
+        /* what the search looks through, worked out ONCE here rather than
+           read back off three cells on every keystroke */
+        tr.dataset.find = [a.who, a.client, a.detail].join(" ").toLowerCase();
+        tr.appendChild(el("td", "when", clockOf(a.at)));
+        tr.appendChild(el("td", null, a.who || "\u2014"));
+        tr.appendChild(el("td", "cl", a.client || "\u2014"));
+        tr.appendChild(el("td", "act", a.detail || a.what));
+        body.appendChild(tr);
+      });
+      t.appendChild(body);
+      box.appendChild(t);
+      page.appendChild(box);
+
+      search.addEventListener("input", function () {
+        var q = search.value.trim().toLowerCase();
+        var left = 0, seen = {};
+        Array.prototype.forEach.call(body.querySelectorAll("tr.wrow"), function (r) {
+          var hit = !q || r.dataset.find.indexOf(q) >= 0;
+          r.hidden = !hit;
+          if (hit) { left++; seen[r.dataset.day] = true; }
+        });
+        Array.prototype.forEach.call(body.querySelectorAll("tr.grp"), function (r) {
+          r.hidden = !seen[r.dataset.day];
+        });
+        count.textContent = q ? nOf(left, "act") + " of " + acts.length : nOf(acts.length, "act");
+      });
+
+      page.appendChild(el("p", "note",
+        "The last " + j.cap + " acts, newest first."));
+    }).catch(function (e) {
+      if (String(e.message) === "sign in") return;
+      clear(); say("Could not reach the server.", true);
+    });
+  }
+
   function drawAccess() {
     page.appendChild(el("p", "muted", "Reading…"));
     post({ action: "access" }).then(function (j) {

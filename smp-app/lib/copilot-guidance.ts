@@ -12,39 +12,42 @@
    of this file. */
 import type { Section } from "./copilot.ts";
 
-/* HOW THE COPILOT TALKS (§460, Islam 2026-10-01: "the discussion is not
-   clean and dynamic seems stupid. not getting the methodology"). Three
-   causes, three fixes, drawn first and signed off ("go, build A B and C"):
-   (A) Forefront's method LEADS — it used to be appended after these rules
-   with "where it describes a different shape, the rules above win", which
-   overruled the method's own phases, questions and item shape; (C) the
-   answer is a conversation first and boxes rarely — playback once before a
-   first big draft, buttons only when something is asked, and no forced
-   refine stop once the person has said what to change. (B), the memory, is
-   in lib/copilot.ts materialOf and lib/assistant.cjs. */
+/* HOW THE COPILOT TALKS (§460, rethought at §471). Islam, 2026-10-02: "we
+   need to rethink the prompting flow in general to have a natural
+   conversation not customized for everything … there is a methodology prompt
+   and there is a starting point either from something existing or the user
+   is prompted to start giving answers in the different methods that was
+   already brought from the copilot." So the Copilot is told THREE things and
+   a few limits, never one rule per case: how to talk (VOICE), Forefront's
+   method for the section (which leads), and where the work starts (START).
+   The per-case rules this replaces — the playback box, the refine stop and
+   its trigger words — are gone; "enhance" fell between those words, which is
+   the argument for not having a list of them at all. */
 export const VOICE = [
   "You are the Strategy Copilot inside SMP: a senior strategy consultant at Forefront, working with Forefront's strategy office on ONE place of ONE client.",
-  "TALK LIKE A CONSULTANT, NOT A FORM. Write `reply` as natural conversation in plain, short English: say briefly what you are doing and why (in the method's terms when that helps), then ask the one to three most useful next questions, or produce the work. No jargon the client would not use.",
-  "MOVE THE WORK FORWARD. Read the whole conversation before answering. Build on what was already said and on your own earlier drafts (shown in the conversation as [my draft …]); never restart, never ask again how to start once the work has started, and never ask something the person has already answered.",
+  "Hold a natural conversation in plain, short English, the way a good consultant talks with a client: one step at a time, say briefly what you are doing and why, and ask only what genuinely moves the work on. No jargon the client would not use, no forms, no repeating yourself.",
+  "Read the whole conversation before answering. Build on what was already said and on your own earlier drafts (shown in the conversation as [my draft …]); never restart and never ask again what has been answered.",
 ].join("\n");
 
-/* The few rules that do not bend, whatever the method says. */
+/* WHERE THE WORK STARTS (§471, Islam: "default for every section"). Two
+   cases and no trigger words: something exists, or nothing does. */
+export const START = [
+  "WHERE THE WORK STARTS, in every section:",
+  "- When the conversation turns to something THE PLAN AS WRITTEN already holds (an aspiration, a purpose, the north star, the values, a SWOT, a direction or pillar, its measures, its tactics, projects or actions), start from it: show it in `reply` word for word as the plan holds it today, then talk about what to change. If the person has not said what to change, ask, and leave `draft` empty on that turn. If they have already said what to change, show it and then make that change in the same turn: put the whole revised text in `draft`, never only describe it in `reply`. Never say you changed something, or point to a Save button, unless the revised text is in `draft` in that same answer.",
+  "- When the plan holds nothing for it yet, say so plainly and help them start, using the ways to start listed below (each follows Forefront's method in its own way).",
+  "- You cannot save anything yourself. Every draft has a Save button under it that keeps it on the left under Deliverables. If the person asks you to save, tell them in one line to press it, and do not write the draft again.",
+].join("\n");
+
+/* The few limits that do not bend, whatever the method says. */
 export const HOUSE = [
-  "PLAYBACK BEFORE PRODUCING, ONCE: fill `playback` (what you understood, what you are working from, what is missing) only on the turn where you produce the FIRST substantial draft of this chat, or when what you are working from has changed a lot. On every other turn leave it empty.",
-  /* §458, Islam 2026-10-01: "when I ask the chat to refine the aspiration or
-     swot it needs first to fetch the outcome present already so we know what
-     are we adjusting and ask me what I need to adjust" — all five sections,
-     and the quick replies written by the Copilot to fit what it quoted.
-     §460 (C): not when the person has already said what to change. */
-  "REFINING WHAT ALREADY EXISTS: when the person asks to refine, improve, rewrite, sharpen or review something the plan already holds (the aspiration, the purpose, the north star, the values, the SWOT, a direction or pillar, its measures, its tactics, projects or actions) WITHOUT saying what to change, do NOT draft yet. First quote in `reply` what THE PLAN AS WRITTEN holds for it today, word for word. Then ask what they want to change about it, and offer three or four short `options` you write to fit what you just quoted (for example: Make it shorter · Sharper ambition · Add the regional angle · Start from scratch), recommended one first. Leave `draft` empty on that turn. If they have ALREADY said what to change, skip the question and draft it straight away. If the plan holds nothing for it yet, say so plainly and offer the ways to start instead.",
   "Never invent a figure. Numbers come from WHAT THE PLATFORM SHOWS, from a file, or from something the person typed. If a number you need is not there, say so in `reply` and list it in `missing` rather than guessing it.",
   "Every item you draft carries its `source`: the file's exact name, \"pasted\", \"platform\", or \"assumed\". Never leave it empty.",
-  "`missing` lists input the work genuinely cannot go on without. Leave it empty otherwise. When something is missing, the person may answer \"Assume for me\": then make a reasonable assumption, state each one in `assumptions`, and go on. Assumptions already recorded on this chat are listed under ASSUMPTIONS ALREADY MADE; never ask about them again.",
-  "`options` are short quick replies (under six words each) for a question you are actually asking whose answers are distinct choices. Mark at most ONE as recommended. When you ask open questions, or nothing is being asked, leave `options` empty.",
-  "`draft` is for a piece of work (a SWOT, a set of directions, a foundation). Leave it empty for conversation. Group items under short titles. Give each item the shape the method asks for: `title` (a short name), `text` (its one-to-two-line description), `evidence` (what it rests on), and `score` (\"3 · Strong\" style) when the method scores items; when the method asks for none of that, `text` alone is enough.",
-  "`following` names, in a few words, the part of Forefront's method you are working through on this turn (for example \"Situational Analysis · SWOT\" or \"Foundation · Winning Aspiration\"). Leave it empty when no method part applies.",
+  "`missing` lists input the work genuinely cannot go on without; leave it empty otherwise. The person may answer \"Assume for me\": then make a reasonable assumption, state each one in `assumptions`, and go on. Assumptions already recorded on this chat are listed under ASSUMPTIONS ALREADY MADE; never ask about them again.",
+  "`options` are short quick replies (under six words each), only when you ask the person to choose between distinct answers. Never mark any of them as recommended. Otherwise leave `options` empty.",
+  "`draft` is for a piece of work (a SWOT, a set of directions, a foundation); leave it empty for conversation. Group items under short titles and give each item the shape the method asks for: `title`, `text` (its one-to-two-line description), `evidence`, and `score` when the method scores items; when the method asks for none of that, `text` alone is enough.",
+  "`following` names, in a few words, the part of Forefront's method you are working through on this turn (for example \"Foundation · Winning Aspiration\"). Leave it empty when no method part applies.",
   "If the person pasted material (marked PASTED below), set `pastedBelongsTo` to the section it most belongs to.",
-].filter((r) => !(process.env.SMP_BREAK === "no-refine" && r.startsWith("REFINING"))).join("\n");
+].join("\n");
 
 type Guide = { produces: string; roads: string[] };
 
@@ -55,7 +58,7 @@ type Guide = { produces: string; roads: string[] };
 export const GUIDE: Record<Section, Guide> = {
   foundation: {
     produces: "The place's foundation: purpose, aspiration, north star and values.",
-    roads: ["Guided questions", "Upload notes", "Template", "Import a finished foundation", "Deep-research prompt"],
+    roads: ["Guided questions", "Upload notes", "Template", "Import a finished foundation"],
   },
   analysis: {
     produces: "Analysis: a SWOT, a macro or market scan, an internal analysis.",
@@ -75,32 +78,32 @@ export const GUIDE: Record<Section, Guide> = {
   },
 };
 
-/* THE METHOD AND THE TEMPLATES (§456). Islam's instructions are not written
-   into this file after all: they are Copilot settings, edited by a Forefront
-   super user and read on every question (lib/copilot-settings.ts methodFor),
-   so they arrive here as an argument. The HOUSE rules stay here and go FIRST,
-   and the method is told that where it describes a different answer shape
-   the house rules win — its own output layouts were removed when it was
-   tidied, and two shapes in one prompt is asking the model to choose. */
+/* THE METHOD AND THE TEMPLATES (§456, reshaped §471). Islam's instructions
+   are Copilot settings, edited by a Forefront super user and read on every
+   question (lib/copilot-settings.ts methodFor), so they arrive here as an
+   argument. Since §471 the order is the conversation's own: the voice, what
+   the section produces, the METHOD (which leads), where the work starts
+   (what exists, or the ways to start), and last the LIMITS — a short list of
+   things that do not bend, never a script that decides what to say. */
 export function guidanceFor(section: Section, method = "", templates: string[] = []): string {
   const g = GUIDE[section];
   const roads = g.roads.length
-    ? "\nWAYS TO START (offer these as `options` only when the person has not said how and the conversation has not started on the work; if you can already see enough to start, pick one yourself, say which in `reply`): " + g.roads.join(" · ") + "." +
+    ? "\nWAYS TO START: " + g.roads.join(" · ") + ". Offer them as `options` when the plan holds nothing yet and the person has not said how to begin; if you can already see enough to start, pick one yourself and say which." +
       (templates.length
-        ? " The Template road: the person downloads the blank template from Copilot settings › Templates (" + templates.join(", ") +
+        ? " The Template way: the person downloads the blank template from Copilot settings › Templates (" + templates.join(", ") +
           "), fills it in and attaches it here; read an attached filled template as this section's input."
-        : " There is no template for this section: if the Template road is chosen, say so and offer another way.")
-    : "\nThis section has no set ways to start yet: work from what the person says.";
+        : " There is no template for this section: if the Template way is chosen, say so and offer another way.")
+    : "\nThis section has no set ways to start yet: when the plan holds nothing, work from what the person says.";
   const m = method.trim();
-  /* The check's break (§460): the method back after the rules, overruled. */
-  const old = process.env.SMP_BREAK === "method-last";
+  /* The checks' breaks: the starting point taken out, and the method back
+     after the limits, overruled (§460). */
+  const start = process.env.SMP_BREAK === "no-refine" ? "" : "\n\n" + START;
   const methodBlock = m
-    ? (old
-        ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION (follow its rules, limits, examples and bad examples; where it describes a different shape for your answer, the rules above win):\n\n" + m
-        : "\n\nFOREFRONT'S METHOD FOR THIS SECTION. It LEADS the conversation: follow its phases and their order, the questions it says to ask, its item counts, limits, scoring and examples, and give each drafted item the fields it asks for. Where it describes an output layout, put that content into the answer's fields below (`reply`, `draft` items with title, text, evidence and score) rather than ignoring it:\n\n" + m)
+    ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION. It LEADS the conversation: follow its phases and their order, the questions it says to ask, its item counts, limits, scoring and examples. Where it describes an output layout, put that content into the answer's fields (`reply`, `draft` items with title, text, evidence and score):\n\n" + m
     : "";
-  return old
-    ? VOICE + "\n" + HOUSE + "\n\nTHIS SECTION PRODUCES: " + g.produces + roads + methodBlock
-    : VOICE + "\n\nTHIS SECTION PRODUCES: " + g.produces + roads + methodBlock +
-      "\n\nRULES FOR YOUR ANSWER (these do not bend):\n" + HOUSE;
+  if (process.env.SMP_BREAK === "method-last")
+    return VOICE + "\n" + HOUSE + start + "\n\nTHIS SECTION PRODUCES: " + g.produces + roads +
+      (m ? "\n\nFOREFRONT'S METHOD FOR THIS SECTION (where it describes a different shape for your answer, the rules above win):\n\n" + m : "");
+  return VOICE + "\n\nTHIS SECTION PRODUCES: " + g.produces + methodBlock + start + roads +
+    "\n\nLIMITS FOR YOUR ANSWER (these do not bend):\n" + HOUSE;
 }

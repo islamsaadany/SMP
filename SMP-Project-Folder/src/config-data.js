@@ -146,6 +146,18 @@ function personRoles(p){ return SMPRules.personRoles(world(), p); }
    level's default, so an untouched client keeps no structure at all
    (§50.6). */
 function compOn(target, comp){ return SMPRules.compOn(GROUP, target, comp); }
+/* §479: WHICH OF A UNIT'S FOUNDATION GAPS STRUCTURE HAS SWITCHED OFF. Purpose
+   and Core Values are owed (Missing) only while Client set-up › Structure
+   carries them for this unit; off, they are not drawn and not counted, and
+   whatever is stored stays stored (§404: off hides, never deletes). Handed to
+   SMPRules.gapMissing/gapEmptyFields as `off` by every reader of the unit's
+   own gaps, so the bar, the walk and Submit cannot disagree (§116.2). */
+function unitGapOff(u){
+  var t = (u && u.ukey) || "group", off = [];
+  if (!compOn(t, "purpose")) off.push("mission");
+  if (!compOn(t, "values")) off.push("values");
+  return off;
+}
 /* §437 (Islam, 2026-09-30: *"keep them in the first section as an option"*):
    A SUPPORTING FUNCTION'S KEY OBJECTIVES ARE A TICK ON ITS FIRST SECTION, and
    when it is off they are hidden AND stop counting — no longer asked for on
@@ -7746,7 +7758,7 @@ function gapMap(target, all, fillable){
     if (!(acKey in canAuthor)) canAuthor[acKey] = mayAuthor(acKey, target);
     return canAuthor[acKey] || mayFillRow(acKey, ctx, target);
   };
-  var G = function(acKey, ctx, kind, row){
+  var G = function(acKey, ctx, kind, row, off){
     /* §233: a hidden row's blanks are not gaps — it is not counted, not
        asked, and not walked; gapCell() closes the same row's controls, so
        the count and the walk stay one list (§192.4). */
@@ -7756,8 +7768,8 @@ function gapMap(target, all, fillable){
        SECOND — the machinery is main's (§223, §272) and is untouched here.
        WHO is shown it is the decision §301.3 changed, and that question is
        asked in ONE place, `seesEmpty()` below. */
-    if (fillable) return SMPRules.gapEmptyFields(kind, row).length;
-    return SMPRules.gapMissing(kind, row).length;
+    if (fillable) return SMPRules.gapEmptyFields(kind, row, off).length;
+    return SMPRules.gapMissing(kind, row, off).length;
   };
   var entry = function(key, label, count, go){
     out.push({ key: key, label: label, count: count, go: go });
@@ -7826,7 +7838,7 @@ function gapMap(target, all, fillable){
     if (!u) return;
     w = w || UNIT_WORDS;
     if (w.found) {
-      var found = G(w.found, {}, "unit", u);
+      var found = G(w.found, {}, "unit", u, unitGapOff(u));
       entry("found", "Foundation", found, { sec: "found", page: "foundation" });
       var ko = 0;
       (u.keyObjectives || []).forEach(function(m){ ko += G(w.found, {}, "ko", m); });

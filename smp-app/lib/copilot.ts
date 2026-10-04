@@ -113,10 +113,10 @@ export function oneLine(v: unknown): string { return str(v).replace(/\s+/g, " ")
 /* `archived` is when it was archived, or "" — stored in `extra` as an
    ABSENCE (§50.6), so no migration and a restored chat is byte-shaped like
    one never archived. */
-export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number; archived: string };
-const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at, c.extra->>'archivedAt' AS archived";
+export type Chat = { id: string; place: string; section: Section; title: string; by: string; at: string; last: string; count: number; archived: string; guided: boolean };
+const CHAT_COLS = "c.id, c.place, c.section, c.title, c.created_by, c.created_at, c.last_at, c.extra->>'archivedAt' AS archived, (c.extra ? 'flow') AS guided";
 const chatOf = (r: any): Chat => ({ id: str(r.id), place: str(r.place), section: r.section, title: str(r.title),
-  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0, archived: str(r.archived) });
+  by: str(r.created_by), at: iso(r.created_at), last: iso(r.last_at), count: Number(r.count) || 0, archived: str(r.archived), guided: r.guided === true });
 
 /* The live list, or (`archived`) the archived one — never both at once, so
    the rail draws exactly one of them. */
@@ -150,7 +150,7 @@ export async function oneChat(c: Q, id: string): Promise<Chat | null> {
 export async function newChat(c: Q, a: { place: string; section: Section; title: string; by: string }): Promise<Chat> {
   const r = await c.query(
     "INSERT INTO copilot_chats (place, section, title, created_by) VALUES ($1, $2, $3, $4) " +
-    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count, '' AS archived",
+    "RETURNING id, place, section, title, created_by, created_at, last_at, 0 AS count, '' AS archived, false AS guided",
     [a.place, a.section, a.title, a.by]);
   return chatOf(r.rows[0]);
 }
@@ -224,6 +224,10 @@ export function partMemo(part: any): string {
   }
   if (Array.isArray(part.options) && part.options.length) out.push("[options I offered: " + part.options.map((o: any) => str(o.label)).join(" · ") + "]");
   if (part.following) out.push("[following: " + str(part.following) + "]");
+  /* §472: the turn that asked what to improve says so, so the next "enhance"
+     is read as the answer to it rather than asked again. */
+  if (part.askFirst) out.push("[asked what to improve]");
+  if (part.saved && part.saved.n) out.push("[this draft was saved as v" + str(part.saved.n) + "]");
   const t = out.join("\n");
   return t ? "\n" + (t.length > 3000 ? t.slice(0, 3000) + "…]" : t) : "";
 }
@@ -396,3 +400,91 @@ export async function restoreVersion(c: Q, id: string, from: number, by: string)
      JSON.stringify(s.assumptions ?? []), !!s.pasted, JSON.stringify(s.gaps ?? [])]);
   return n;
 }
+
+/* ── SAVING A DRAFT FROM THE CHAT (§472, Islam 2026-10-02) ─────────────
+   "when I tried looks great save it it kept working … it should be saved to
+   the deliverables rail on the left." There was no way to keep a draft at
+   all, so "save it" only started another answer. A draft is now saved by
+   the product, never by the model: a button under every draft, or a short
+   "save it" typed into the chat, which saves the LATEST draft without
+   asking the model anything.
+
+   The deliverable stores the draft as text, because that is what a
+   deliverable's version holds and what its edit box edits; the structured
+   draft rides beside it. A draft whose title matches a deliverable already
+   in this place and section is a NEW VERSION of it, never a second row —
+   "the same thing" is the same title, which is what the rail shows. */
+export function draftText(d: any): string {
+  if (!d || !Array.isArray(d.groups)) return "";
+  const out: string[] = [];
+  if (d.title) out.push(str(d.title), "");
+  for (const g of d.groups) {
+    if (g && g.title) out.push(str(g.title).toUpperCase());
+    for (const it of Array.isArray(g && g.items) ? g.items : []) {
+      const head = (it.title ? str(it.title) : "") + (it.score ? (it.title ? " " : "") + "(" + str(it.score) + ")" : "");
+      out.push("- " + (head ? head + ": " : "") + str(it.text));
+      if (it.evidence) out.push("  Evidence: " + str(it.evidence));
+    }
+    out.push("");
+  }
+  return out.join("\n").trim();
+}
+export type SavedDraft = { deliverableId: string; n: number; title: string; isNew: boolean };
+export async function saveDraftFrom(c: Q, chat: { id: string; place: string; section: Section; title: string }, messageId: string, by: string): Promise<SavedDraft | "notDraft" | "already"> {
+  const m = await oneMessage(c, chat.id, messageId);
+  const p: any = m && m.part;
+  if (!m || m.who !== "ai" || !p || p.kind !== "answer" || !p.draft || !Array.isArray(p.draft.groups) || !p.draft.groups.length) return "notDraft";
+  if (p.saved && p.saved.deliverableId) return "already";
+  const title = (oneLine(p.draft.title) || (SECTION_WORD[chat.section] + " draft")).slice(0, MAX_TITLE);
+  const body = { text: draftText(p.draft), draft: p.draft };
+  const note = "Saved from “" + chat.title + "”";
+  const hit = await c.query(
+    "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",
+    [chat.place, chat.section, title]);
+  let id: string, n: number, isNew: boolean;
+  if (hit.rows[0]) { id = str(hit.rows[0].id); n = await addVersion(c, id, { body, note, by }); isNew = false; }
+  else {
+    id = await newDeliverable(c, { place: chat.place, section: chat.section, title, type: "free", kind: "copilot-only",
+      approach: "", body, note, by, chatId: chat.id, chatTitle: chat.title });
+    n = 1; isNew = true;
+  }
+  await c.query("UPDATE copilot_messages SET part = part || $3::jsonb WHERE chat_id = $1 AND id = $2",
+    [chat.id, messageId, JSON.stringify({ saved: { deliverableId: id, n } })]);
+  return { deliverableId: id, n, title, isNew };
+}
+/* The latest draft in a chat, for a typed "save it". */
+export async function latestDraftId(c: Q, chatId: string): Promise<string | null> {
+  const r = await c.query(
+    "SELECT id FROM copilot_messages WHERE chat_id = $1 AND who = 'ai' AND part->>'kind' = 'answer' AND jsonb_typeof(part->'draft'->'groups') = 'array' AND jsonb_array_length(part->'draft'->'groups') > 0 ORDER BY id DESC LIMIT 1",
+    [chatId]);
+  return r.rows[0] ? str(r.rows[0].id) : null;
+}
+/* "save it", "looks great, save it", "save this please": a short message
+   asking to save, and nothing else. Narrow on purpose — a longer message
+   that mentions saving ("how would this save us money") goes to the model. */
+export function isSaveAsk(text: string): boolean {
+  const t = String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  if (!t || t.length > 60) return false;
+  if (!/\bsave\b/.test(t)) return false;
+  if (/\b(don'?t|do not|not|no|never|without)\b/.test(t)) return false;
+  return t.split(" ").length <= 8;
+}
+/* AN ENHANCEMENT ASKS FIRST (§472): a short ask to improve something the
+   plan already holds, with nothing said about WHAT to improve. */
+export function isBareEnhance(text: string): boolean {
+  const t = String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  if (!/\b(enhanc\w*|improv\w*|refin\w*|sharpen\w*|polish\w*|strengthen\w*|rework\w*|rewrit\w*|tweak\w*|better)\b/.test(t)) return false;
+  return t.split(" ").length <= 8;
+}
+
+/* §476: an answer that says a revised text is waiting — "I've removed …",
+   "here is the updated …", "press Save under the draft" — is a claim the page
+   can only honour with a draft. Narrow on purpose: talk ABOUT a draft in
+   general ("shall I draft one?") is not a claim that one is here. */
+export function claimsDraft(reply: string): boolean {
+  const t = String(reply || "").toLowerCase();
+  return /\b(i'?ve|i have) (now )?(removed|updated|refined|revised|changed|rewritten|reworded|edited|adjusted|sharpened|tightened|replaced|added|dropped)\b/.test(t) ||
+    /\bhere(?:'s| is) (?:the |your |a )?(?:revised|updated|refined|new|adjusted|reworded|sharper|tighter)\b/.test(t) ||
+    /\b(press|click|use|hit) (the )?save\b/.test(t) || /\bsave button\b/.test(t) || /\b(under|below) the draft\b/.test(t);
+}
+export const NO_DRAFT = "The revised text did not come back with this answer, so there is nothing to save yet. Send your change again and it will be shown here with a Save button.";

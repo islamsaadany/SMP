@@ -61420,6 +61420,327 @@ column for a direction, so a download-and-upload of the company plan drops
 the custodian — whether it should is a separate question.
 **Merged to `main` 2026-10-03 on Islam's word**, a clean fast-forward, shell `v5.89-direction-seats`. Checked first against a units-on client (Raya Trade's shape): `ownsTopPillar` returns false whenever `buExists`, the seats and the Custodian row draw only inside the top plan (off unless ticked), and the rowDone group branch judges only `group-*` ids — project-done, submit-gate, report-saves, my-reporting, capability-first, top-plan, single-company and `qa.py` all green. Screen and rule change; no sign-out owed, since the rule only ever allows more and never refuses a save that worked before.
 
+## §470 — the Copilot chat's text size (2026-10-02)
+
+Islam: *"can we add a clean buttong to increaes and decrease the font size in the chat panel?"* Drawn first (rule 1c, `design-mockups/copilot-font-size/2026-10-02_text-size.html`, published as an artifact) and signed off: *"build 2"*.
+
+- **A− / A+ on the chat's own title line**, a two-button group, four steps — 90% · 100% · 115% · 130% — the button at an end greyed (`disabled`, because there is nothing left for it to do, unlike §221's refusals that carry a reason).
+- **The conversation and the reply box only.** The side lists, the context line and the page stay as they are, which is what *"in the chat panel"* asked for.
+- **CSS `zoom` on a wrapper INSIDE the scrolling box**, never on the box itself: zoom scales a declared height too, so on `.copmsgs` it would have changed how much of the window the conversation takes. Inside it the box keeps its height and everything in it — bubbles, drafts, quick replies — scales together, with no font size restated per element. The reply box takes `calc(15px × --copz)` and the existing `fitBox()` grows it, so no new sizing code. Cost stated: a browser without CSS `zoom` (Firefox before 126) shows the normal size and the buttons do nothing visible there.
+- **A screen preference, never the state graph** (§25, §47.1): `localStorage` key `smp.copilot.textsize`, the normal size stored as an ABSENCE (§50.6), a throwing store reading as normal.
+- **The press never repaints** (§35): it sets the variable and the two buttons' state in place, so a half-typed message survives it — asserted.
+- `smp-app/checks/shell.mjs` §3f measures it as PAINT (a bubble's height, the box's line height), never as the stored number: larger after two A+, smaller after three A−, both ends greyed, the side lists unchanged, the absence back at normal. **206/0**, and red with the `zoom` declaration removed from the source (§276).
+
+Screen only — no `api/`, `lib/` or `db/` file — nothing stored on the server, nothing migrated, nobody signed out.
+
+## §471 — The Copilot talks naturally: one starting point, no playback box (2026-10-02)
+
+Islam, after the Copilot answered *"Let's enhance the winning aspiration"* with an immediate draft under an Understood / Working-from box: *"rethink the prompting flow in general to have a natural conversation not customized for everything … there is a methodology prompt and there is a starting point either from something existing or the user is prompted to start giving answers in the different methods that was already brought from the copilot."* His three answers: remove the box, keep the method-step line, and make show-what-exists-and-ask the default for every section.
+
+**The cause was the shape, not one missing word.** §458's refine rule fired on a list of trigger words and "enhance" was not on it — but adding it would have been the next case of the same fault. The prompt had grown one rule per case (playback, refine stop, already-said), and rules placed after the method lost to it. So the prompt is now four parts in the conversation's own order: VOICE (talk like a consultant, one step at a time, build on the conversation and earlier drafts), what the section produces, Forefront's method (it leads), and START — two cases with no trigger words: *something the plan holds* is shown word for word and the person is asked what to change (or, if they already said, it is shown and changed in the same turn); *nothing yet* is said plainly and the ways to start are offered. Last, a short list of LIMITS that do not bend (no invented figures, every item sourced, missing input named, options only for a real choice, the draft's shape, `following`, where pasted material belongs).
+
+**The playback box is removed, not hidden.** It is out of the answer schema, the stored answer, and the screen; an older stored answer that still carries one is simply not drawn. `following` stays — Islam's answer 2.
+
+**Checks.** `checks/copilot.mjs` asserts the starting rule is in every section's guidance, that the method comes before it and it before the ways to start, that no playback reaches the model's instructions or a stored answer, and what the model was actually sent. 139/0; red under `no-refine` (5) and `method-last` (2). The §458 leak test moved from the removed field to `assumptions`, which runs through the same cutter. `checks/shell.mjs` 206/0; its "no playback box" assertion is the CONTROL and says so — it stays green with the old drawing put back, because the server already drops the field (§113.8). Nothing stored moves, nothing is migrated.
+
+## §472 — The Copilot asks before it improves, saves a draft, and shows one word while it works (2026-10-02)
+
+Islam, testing §471 with a screenshot: *"the reply needs to fetch in case of
+something existing and the enhancement needs to ask first what to enahnce"*;
+*"when I tried looks great save it it kept working no idea why it should be
+saved to the deliverables rail on the left"*; and *"change the copilot is
+working on it maybe with a variety of changing words and 3 dots after like
+what claude do"*. Drawn first (`design-mockups/copilot-save-working/`,
+published), and approved: *"go ahead with all three but for the working line
+keep it one word like reading, thinking, checking, fetching, drafting, etc.
+and ok for the message after 40 seconds"*.
+
+**§472.1 — ASKING FIRST IS THE PRODUCT'S, NOT THE MODEL'S.** §471 told the
+model to show what exists and ask what to change, and the model drafted
+anyway. A rule the model may ignore is a request, so the server now enforces
+it for exactly one case: a SHORT ask to improve (`isBareEnhance` — eight words
+or fewer, an improve/enhance/refine/sharpen/polish/strengthen/rework/rewrite/
+tweak/better stem), with the plan's own text in the context, no file, no paste,
+and the Copilot not having just asked. That turn carries a one-turn
+instruction to quote the plan word for word and offer three or four specific
+improvements, and **any draft it writes anyway is dropped** before it is
+stored (`part.askFirst`). The next turn is never held, so the person's answer
+goes straight to a draft. This is a short list of words, which §471 argued
+against; it is narrowed to the one case the model kept getting wrong and is
+written down here so it is a decision rather than a drift.
+
+**§472.2 — A DRAFT IS SAVED FROM UNDER IT.** There was no path from a chat to
+the Deliverables rail at all, so *"save it"* was just another question, and
+the page waited with no limit. Every draft now carries **Save to <Section>
+deliverables**; pressing it keeps the draft as a deliverable, written out as
+text (title, each group in capitals, `- ` items, `Evidence:` lines) with the
+structured draft beside it. **A later draft with the same title in the same
+place and section becomes the next version** of that deliverable, never a
+second row. The pressed answer then reads *✓ Saved as vN* with **Open it**;
+saving the same draft twice is refused by name. **Typing "save it"** (a short
+message with *save* and no negation) saves the latest draft the same way and
+**does not ask the model at all**; with no draft in the chat it says so. The
+model is also told it cannot save and should point at the button.
+
+**§472.3 — ONE WORD AND THREE DOTS.** *"The Copilot is working on it…"* is now
+one word — Reading · Thinking · Checking · Fetching · Weighing · Drafting ·
+Writing — changing every two seconds **in place** (no redraw, so nothing typed
+is touched), with three moving dots (still under reduced motion), and after 40
+seconds *"Still working — this one is taking a little longer"*. **The page
+stops waiting after two minutes** and says the answer, if it arrives, will be
+in the chat when it is opened again. **Departure from the mockup, stated**:
+the mockup put the typed text back in the box on a timeout; it is not put
+back, because what was typed is already stored as the person's message.
+
+**Checks.** `check:copilot` 153/0, red under `no-ask-first` (2) and
+`save-to-model` (2). `check:shell` 213/0 — the Save button pressed and read
+back from the database, the working word measured as one word with three dots
+and seen to change on the same element. One older assertion read the first
+`.copopt.rec` and now meets the Save button, which also wears that style; it
+asks for the recommended quick reply instead (§218, rewritten not loosened).
+Built file and served copies regenerated, `sw.js` → `smp-shell-v5.86-save-working`.
+
+
+## §473 — The guided Foundation flow (2026-10-02)
+
+Islam, of the approved mockup (`design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html`,
+Option A): **"ok approved, build it"**. Built as §468 because `main` had taken
+§464–§467 for other work while this branch was in flight; at the merge
+(2026-10-03) main had also taken §461 and §464–§469, so this branch's whole run
+§462–§474 was renumbered §470–§479 before the merge (§264.3).
+
+**What it is.** A Copilot chat in the Foundation section can run as a guided
+flow: pick the years first, then one of four roads (Guided is marked
+Recommended; there is no deep research in the Foundation, his correction of
+the first drawing), then each of the five parts — Who we are, Purpose,
+Aspiration, Key objectives, Core values — is asked one question at a time with
+three examples under each. An answer under 15 characters gets a nudge rather
+than a refusal. When a part's questions are done the answers come back in
+editable boxes, then **Draft**, then refine by one of three buttons or by
+typing, then **Save and continue to <next>**. At the end a consistency check
+lists what agrees and what does not, with **Go back to <part>** for each
+issue, and **Save as Foundation — <place> vN** keeps the result as a
+deliverable; each run adds a new version.
+
+**The layout.** Three columns: the rail, the five element cards (Core values
+full width), and the chat. A Claude-style button hides the rail to a 44px strip
+carrying a "+"; the choice is remembered per browser (`localStorage`, wrapped).
+The composer is unchanged.
+
+**Stored on the chat, cut to shape on the server.** The flow lives in
+`copilot_chats.extra.flow` — no migration — and `sanitizeFlow`
+(`lib/copilot-flow.ts`) keeps only the known keys and lengths, so a browser
+cannot store anything the flow does not use. Four server acts drive it:
+`newFlow`, `flowSave`, `flowDraft`/`flowRefine`/`flowCheck` (one model call
+each, answering a fixed shape) and `flowFinish`, which writes the version
+through the same writer every deliverable uses. The office's alone, as every
+Copilot act is.
+
+**One fault found by driving it.** An edit in an answer box was shown and not
+stored until the next press — a box left after typing wrote nothing. Each box
+now saves when the cursor leaves it (§35's rule), and the check edits, leaves
+and reads the database.
+
+**Checks.** `check:copilot` 175/0, red under four server breaks. `check:shell`
+236/0 with a new section 3i driving the whole flow in a browser and reading the
+stored flow and the saved version from Postgres; red three ways from the
+sources (roads before the years, no nudge, an answer box not kept). Two older
+assertions pressed the first new-chat button on the page, which is now the
+hidden strip's "+"; scoped to the rail's own head (§51.11). One read the rail a
+moment too early after a save and now waits for it. `qa.py` ERRORS none;
+`check:modules` 233/0, `door-landing` 145/0. Built file and served copies
+regenerated, `sw.js` → `smp-shell-v5.88-guided-foundation`.
+
+## §474 — No quick reply is marked recommended (2026-10-02)
+
+Islam: *"remove recommended from answering questions."* The Copilot's quick
+replies under an answer carried one option filled navy with *(recommended)*
+beside it, because the guidance told the model to mark at most one and
+`shapeAnswer` kept the first one marked. **All three halves go together**, or
+one survives the other two: the guidance now says never to mark one, the
+answer's schema stops offering the field, and `shapeAnswer` drops whatever the
+model sends in it, so the mark cannot come back through a model that ignores
+the instruction (§96.2, an answer is checked and never trusted as written).
+The screen draws every quick reply the same way and the `.coprec` rules are
+deleted (§24). **`.copopt.rec` STAYS**: it is also the dress of *Save to …
+deliverables* (§472), a button that acts rather than a recommendation, and
+taking it off would quietly restyle a control nobody asked about (rule 1b).
+**DELIBERATELY NOT TOUCHED**: the guided flow's road cards still mark *Guided*
+as recommended (§473). That is the platform choosing how to start, not an answer
+to a question, and the request named answers. **Islam's own methodology text**
+also asks for a clear recommendation in places. It is his content, editable on
+Copilot settings, so it is left as written; the answer's shape now simply has no
+field to carry the mark. Proved: `check:copilot` 175/0, with **2 red** when the
+model's mark is trusted again; `check:shell`'s answer section asserts no option
+wears the dress or the word, while its stub still sends `recommended:true`.
+
+
+
+## §475 — More room for the Copilot, the rail control in its header, and no Recommended road (2026-10-02)
+
+Islam, after §474: *"still saying recommended"*, the left panel's hide control
+*"is taking a big space"*, and *"let's think of different options to gain space
+for the copilot work"*. Drawn first
+(`design-mockups/copilot-space/2026-10-02_rail-and-room.html`, published), and
+answered: *"1 and 2 for the room … remove the label"*, then *"A ok"*.
+
+**The Recommended that was left was the Guided road card**, not a quick reply.
+The pill and its rules are deleted; the four roads are offered as equals, as
+the quick replies are (§474). `.copopt.rec` stays for the Save buttons.
+
+**Room 1, the bars fold.** On the Copilot tab the unit row carries *Fold bars*,
+which folds the top bar, the unit row and the tab row into one 28px line naming
+the client, the place and *Copilot*, with *Show navigation* to bring them back.
+The section row stays, because it is how you move between the five sections.
+The choice is this device's (`localStorage` `smp.copilot.bars`, stored as an
+absence when the bars show, §50.6) and it only applies on the Copilot tab: the
+root attribute `data-cop-fold` is set by `copThinPaint()` in `paint()` before
+the tab renders (so `fitPane()` measures the folded chrome) and cleared on every
+other page. Measured: the chrome 188 → about 70px and the chat taller by more
+than 100px, with the page still not scrolling (§458). The buttons are wired by
+one delegated listener, because the unit row is rewritten on every paint
+(§29.5).
+
+**Room 2, tighter gaps, the Copilot page only** (`data-cop-page`): the page
+and chrome gutters 24 → 12px, the rail-to-chat gap 18 → 10px, the section row's
+padding 8 → 3px. No other page moves.
+
+**Rail option A.** The hide control moves from a row of its own above the rails
+into the start of the Chats header, so an open rail spends no line on it.
+Hidden, the strip is 24px (was 44px) and stays a column at every width, with
+its two small buttons: show the rail, and start a new chat.
+
+Checks: `smp-app/checks/shell.mjs` §3f, both ends of the fold (folded, the
+chrome shrinks and the chat grows, remembered after a reload, gone off the
+Copilot tab, and Show navigation brings it back), the header control, and the
+24px strip. 241 ok on the served app. Falsified from the sources with
+`copThinPaint()` removed: 5 red. **Recorded, not this work's**: two *My work*
+assertions are red when run after midnight in Cairo, because the fixture dates
+by the database's UTC day while the page groups by the Cairo week, so a
+"this week" action reads as late on the Saturday. Screen only; nothing stored
+on the server, nothing migrated.
+
+## §476 — A change claimed is a change shown (2026-10-02)
+
+Islam, asked a refinement of the Winning Aspiration ("Remove specific target year"): the Copilot answered *"I've removed the hardcoded year … Click the Save button under the draft"* and sent no draft, so the page claimed a change it never showed and pointed at a button that was not there. Not the §472 ask-first rule (that request is not a bare "enhance"); the model returned prose and no `draft`.
+
+- **The product holds the model to it.** An answer with no draft whose reply claims a change (`claimsDraft()` — "I've removed/updated/…", "here is the revised …", "press Save", "save button", "under the draft") is asked again once, told FOR THIS TURN ONLY to return the whole revised text in `draft`. If the second answer has one, that answer is shown with its Save button.
+- **A second miss says so.** The false claim is replaced by `NO_DRAFT` ("The revised text did not come back … nothing to save yet. Send your change again …"), `part.noDraft` set. Never a Save the page cannot draw (§124).
+- **Narrow on purpose**: talk about a draft in general ("Shall I draft one?") and a question back ("Which year …?") are not claims, and are asked once only — asserted.
+- The guidance line about refining existing text now says the revised text goes in `draft` in the same turn, and never to claim a change or point to Save without it.
+- Kept as Islam asked: the Fold bars button stays as it is. The fold-button mockup is committed as the record of what was offered.
+- `checks/copilot.mjs` 179/0; red under `SMP_BREAK=trust-claim` (2 red). Server only — no frozen file changed, no `sw.js` bump.
+
+## §477 — The second try can only return the text (2026-10-03)
+
+Islam, with the §476 message on his screen after *"remvoe the specific target
+year"*: *"here is the error today"*, then *"yes build the fix"*. §476 worked as
+designed — the model said it had made the change, sent no draft, was asked again
+in the same full shape, and talked a second time — so he got the honest line
+and no revised text. Not reproduced here (no key in this environment); the
+likely cause is the model copying its own earlier draftless replies, which ride
+in the history.
+
+**The second try is a different, smaller ask.** `askDraftOnly()` in
+`lib/copilot-ask.ts` sends the same instruction, corpus and history with a
+shape holding ONLY the draft, required, and no `reply` field — there is nowhere
+to talk. The first answer's words are kept (the claim is now true), the draft
+is attached. `NO_DRAFT` stays the last resort. Asserted off the wire in
+`checks/copilot.mjs` (the second request's schema has a required draft and no
+reply); 180/0, and `full-retry` puts the §476 same-shape retry back and goes red.
+
+
+## §478 — A Foundation chat starts from what is there, and a unit's Purpose and Core Values (2026-10-03)
+
+Islam, of the published mockup *Foundation Chat Start*: *"yes build the fix,
+add core values as optional box"*.
+
+**The Guided Foundation button is gone.** A new chat on the Foundation section
+IS the flow now. Where the place already has a Foundation it first asks
+*"<Place> already has a Foundation. Do you want to start from what's there, or
+start fresh?"* — **Start from it** / **Start fresh**; with nothing written the
+question is skipped (`newFlow(hasPlan)`, the client answering `hasPlan` from
+the plan's own parts). **Start from it** fills the cards from the plan, each
+tagged *From the plan*, asks no years (the plan already has its period) and
+lands in a `loaded` phase; **Start fresh** shows the four roads and then, on
+the guided road, the years. `sanitizeFlow` will not let a page go back to the
+start question once answered, nor put a plan-mode flow back on the roads.
+
+**Six cards, not five**: Who We Are, Winning Aspiration, End in Mind, Purpose,
+Key Objectives, Core Values. **End in Mind** is the endless long-term vision;
+the **Winning Aspiration** is bounded by the planning years. **Purpose is
+optional** (`OPTIONAL`): an empty optional part counts as agreed, so the flow
+saves without it, and the server's refusal says so in its own words. A draft
+or refine clears that part's *From the plan* tag. Pressing a card works on
+that part; × hides the cards and *Show cards* brings them back. The close
+button is `.copcx` because `.copx` is already the file-detach button
+(§65.9). Narrow screens (below 980px) hide the cards, so a part cannot be
+picked by card there — recorded, not built, because it wants a mockup.
+
+**A unit's Foundation page gains Purpose and Core Values, both optional.**
+Purpose writes `units.mission`, Core Values `units.values` (a list of
+name + meaning) — both ride `units.extra`, **no migration**, proved by a round
+trip on a real Postgres with the table asserted to gain no column. Reading mode
+draws neither box when empty; the pen draws both, marked *Optional*; neither is
+a gap; emptying either DELETES its key (§50.6). Both join `UNIT_FOUNDATION` in
+the authoriser, so they are judged as the unit's Foundation, and Purpose and
+Values leave `STRUCT_NOT_BUILT.bu` and join a new client's unit defaults
+(`STRUCT_NEW_CLIENT.bu`). The seed regenerated (it also picks up the
+`capowner` row an earlier round had not regenerated).
+
+Checks: `checks/copilot.mjs` §6 rewritten for the start question and six parts,
+185/0, red with `newFlow` ignoring `hasPlan` and with the optional rule removed;
+`checks/shell.mjs` §3i presses the real start question, plan mode and fresh
+mode, 32/0, red from the source; new `checks/unit-purpose-values.py`, all good,
+red 2 / 1 from the source; `test-authorize.js` 900/0.
+
+## §479 — Structure decides, and nothing is optional (2026-10-03)
+
+Islam, of the five changes put to him in plain words: *"yes for all proceed."*
+This reverses §478's "optional" model and is recorded as a reversal
+(Principle II): §478 drew a unit's Purpose and Core Values as optional boxes
+and made Purpose an optional card in the Foundation chat; §479 says a part is
+either switched on in Client set-up › Structure, and then OWED, or switched
+off, and then not drawn and not asked.
+
+**One question decides both places.** The Foundation chat sends the parts the
+Structure has off (`skip`, cut by `cleanSkip` to `pur` and `val` only, so a
+page can never talk its way past the Aspiration); `allAgreed` waits for every
+part that is on and for nothing that is off. The "Optional" status, its line
+and its "Leave it empty" button are deleted (§24). The unit's Foundation page
+draws each box only where `compOn` says so, pen open or not; off, whatever is
+stored stays stored (§404) and is simply not shown.
+
+**On and empty is Missing and counted, like the Aspiration.** `mission` and
+`values` join `GAP_FIELDS.unit`, so they count, walk and hold Submit (§221);
+being counted they are FILLABLE (`GAP_FILLABLE` is derived), because a counted
+gap with no control is §223. Structure-awareness for a static list is an
+`off` argument to `gapMissing`/`gapEmptyFields`, supplied by the browser's one
+`unitGapOff(u)` and read by the count, the page and the walk (§53.5). The
+server needed nothing beyond the list: its gap pass reads `GAP_FILLABLE`, and
+`test-authorize.js` §479 asserts both ends — a filler fills an empty Purpose
+and Core Values, and is refused rewriting a settled Purpose (902/0; 901/1 with
+the list put back).
+
+**New clients start with both off** (`STRUCT_NEW_CLIENT.bu` back to five
+parts), **and so does every client that never saved its units' Structure**:
+an unsaid level reads every part on, which would have put two Missing parts on
+every unit of every live tenant and held Submit across the product overnight.
+`STRUCT_UNSAID.bu` leaves `purpose` and `values` out, which is exactly what
+those clients saw before §478 drew them (§427 had them read off on a unit).
+Found by reading `levelComponents` before shipping rather than by a check.
+
+**Checks.** `checks/unit-purpose-values.py` rewritten for §479 — unsaid, off
+and on, both ends, every press read back from the data, fill mode opening both
+— red 3 / 3 from the SOURCES (gate removed; count list put back).
+`copilot.mjs` 188/0: nothing optional, an empty switched-on Purpose holds the
+check, switched off it is not asked, only Purpose and Core Values can be
+skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
+§478's literals and were REWRITTEN, never loosened (§218): `setup-shape.mjs`
+(the new-client list; unsaid keeps the two off), `structure.py` (purpose and
+values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
+other two reds (`desc`, the top level) are main's, recorded before.
+
 ## §480 — The cycle board, one line per direction (2026-10-03)
 
 Islam, of Setup › Reporting cycle on a client planned on the company: the

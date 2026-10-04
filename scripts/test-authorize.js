@@ -210,6 +210,14 @@ refuses(headKey, function (s) { s.units[UNIT].aspiration = "A new aspiration"; }
   "a unit head may not rewrite their own aspiration");
 refuses(headKey, function (s) { s.units[UNIT].swot.s = ["Something"]; },
   "a unit head may not rewrite their own SWOT");
+/* §478: a unit's optional Purpose and Core Values are its own words, judged
+   exactly as its aspiration is — the office may, a unit head may not. */
+refuses(headKey, function (s) { s.units[UNIT].mission = "A purpose"; },
+  "a unit head may not write their own purpose (§478)");
+refuses(headKey, function (s) { s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+  "a unit head may not write their own core values (§478)");
+allows("smo", function (s) { s.units[UNIT].mission = "A purpose"; s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+  "the office may write a unit's purpose and core values (§478)");
 refuses(headKey, function (s) { s.units[UNIT].clauses = [["Who we are", "Rewritten"]]; },
   "...nor the clauses beside it");
 
@@ -1157,6 +1165,11 @@ console.log("\n12 · the SMO team, and the three it does not get");
          "...and may correct a plan, which it could not before §94", true);
   asTeam(function (s) { s.units[UNIT].aspiration = "The office rewrote this"; },
          "...and the aspiration above it", true);
+  /* §478: the SMO team writes a unit's purpose and core values too — which
+     fails if they are left out of UNIT_FOUNDATION, because an unknown field
+     is the Super user's alone. */
+  asTeam(function (s) { s.units[UNIT].mission = "Why we exist"; s.units[UNIT].values = [{ name: "Trust", def: "x" }]; },
+         "...and a unit's purpose and core values (§478)", true);
 
   /* And the three it does not. */
   /* A REAL MOVE, not a value the cell already held: the seed stores the team's
@@ -1556,6 +1569,21 @@ console.log("\n16 · fill the gaps (§145, spec 023)");
     i.units[UNIT].pend = { aspiration: MARK };
   });
   check("FILL: an empty aspiration is fillable", v.ok, v.refusals.join(" / "));
+
+  /* 9b · §479: the Purpose and the Core Values are owed like the aspiration,
+     so the fill grant may close them — and may not rewrite a settled one. */
+  s = gappy();
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].mission = "Filled purpose";
+    i.units[UNIT].values = [{ name: "Customer first", def: "" }];
+    i.units[UNIT].pend = { mission: MARK, values: MARK };
+  });
+  check("FILL §479: an empty Purpose and Core Values are fillable", v.ok, v.refusals.join(" / "));
+  s = gappy(); s.units[UNIT].mission = "Settled purpose";
+  v = fromStored(s, custKey, function (i) {
+    i.units[UNIT].mission = "Rewritten purpose"; i.units[UNIT].pend = { mission: MARK };
+  });
+  check("FILL §479: a settled Purpose is NOT the filler's to rewrite", !v.ok, "allowed");
 
   /* 10 · quarters move as ONE mark, and only from nothing. */
   s = gappy();

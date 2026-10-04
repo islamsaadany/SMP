@@ -6,8 +6,8 @@
 
    THE ANSWER IS CHECKED, NEVER TRUSTED AS WRITTEN (§96.2): every list is
    capped, every string trimmed, a `source` naming a file nobody attached is
-   read as "assumed" rather than drawn as a file, and at most one option is
-   the recommended one. An answer with nothing in it is a failure, not an
+   read as "assumed" rather than drawn as a file, and no option is ever
+   marked recommended (§474). An answer with nothing in it is a failure, not an
    empty bubble (§124). */
 import { createRequire } from "node:module";
 import { SECTIONS, type Section } from "./copilot.ts";
@@ -26,7 +26,7 @@ const str = (v: unknown) => (v == null ? "" : String(v));
    the next field of its JSON INSIDE this one. A string that runs on into
    `", "<one of our own field names>":` is cut there; anything else is kept
    exactly as written (§96.2). */
-const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|recommended|evidence|score|following";
+const OWN_KEYS = "understood|workingFrom|missing|reply|options|assumptions|draft|pastedBelongsTo|title|groups|items|text|source|label|evidence|score|following";
 const LEAK = new RegExp('["\u201d]\\s*,\\s*"(?:' + OWN_KEYS + ')"\\s*:[\\s\\S]*$');
 export const unleak = (v: string) => (process.env.SMP_BREAK === "keep-leak" ? v : v.replace(LEAK, "").trim());
 const clip = (v: unknown, n: number) => unleak(str(v).replace(/\s+/g, " ").trim()).slice(0, n);
@@ -43,14 +43,10 @@ export const SCHEMA = {
   type: "OBJECT",
   properties: {
     reply: { type: "STRING" },
-    playback: {
-      type: "OBJECT",
-      properties: { understood: { type: "STRING" }, workingFrom: { type: "STRING" }, missing: { type: "STRING" } },
-    },
     missing: { type: "ARRAY", items: { type: "STRING" } },
     options: {
       type: "ARRAY",
-      items: { type: "OBJECT", properties: { label: { type: "STRING" }, recommended: { type: "BOOLEAN" } }, required: ["label"] },
+      items: { type: "OBJECT", properties: { label: { type: "STRING" } }, required: ["label"] },
     },
     assumptions: { type: "ARRAY", items: { type: "STRING" } },
     draft: {
@@ -80,9 +76,8 @@ export const SCHEMA = {
 
 export type Answer = {
   kind: "answer";
-  playback: { understood: string; workingFrom: string; missing: string } | null;
   missing: string[];
-  options: { label: string; recommended: boolean }[];
+  options: { label: string }[];
   assumptions: string[];
   draft: { title: string; groups: { title: string; items: DraftItem[] }[] } | null;
   pastedBelongsTo: Section | null;
@@ -99,16 +94,14 @@ export type DraftItem = { text: string; source: string; title?: string; evidence
 export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string; part: Answer } | null {
   const j: any = raw && typeof raw === "object" ? raw : {};
   const reply = unleak(str(j.reply).trim()).slice(0, 8000);
-  const pb = j.playback && typeof j.playback === "object" ? j.playback : null;
-  const playback = pb && (clip(pb.understood, 600) || clip(pb.workingFrom, 600) || clip(pb.missing, 600))
-    ? { understood: clip(pb.understood, 600), workingFrom: clip(pb.workingFrom, 600), missing: clip(pb.missing, 600) } : null;
   const list = (v: unknown, n: number, m: number) => (Array.isArray(v) ? v : []).map((x) => clip(x, m)).filter(Boolean).slice(0, n);
-  let seenRec = false;
+  // §474: a quick reply is never marked recommended (Islam: "remove
+  // recommended from answering questions"), so whatever the model sends
+  // in that field is dropped here rather than trusted.
   const options = (Array.isArray(j.options) ? j.options : [])
-    .map((o: any) => ({ label: clip(o && o.label, 60), recommended: !!(o && o.recommended) }))
+    .map((o: any) => ({ label: clip(o && o.label, 60) }))
     .filter((o: any) => o.label)
-    .slice(0, 5)
-    .map((o: any) => { const r = o.recommended && !seenRec; if (r) seenRec = true; return { label: o.label, recommended: r }; });
+    .slice(0, 5);
   const names = new Set(fileNames);
   const source = (s: unknown) => {
     const v = clip(s, 160);
@@ -136,11 +129,11 @@ export function shapeAnswer(raw: unknown, fileNames: string[]): { reply: string;
   }
   const pastedBelongsTo = (SECTIONS as readonly string[]).includes(j.pastedBelongsTo) ? (j.pastedBelongsTo as Section) : null;
   const part: Answer = {
-    kind: "answer", playback, missing: list(j.missing, 8, 300), options,
+    kind: "answer", missing: list(j.missing, 8, 300), options,
     assumptions: list(j.assumptions, 10, 300), draft, pastedBelongsTo,
     following: clip(j.following, 120),
   };
-  if (!reply && !playback && !draft) return null;
+  if (!reply && !draft) return null;
   return { reply, part };
 }
 
@@ -216,6 +209,44 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
      Only the statuses that mean "not now" — a refusal of the question or the
      key would only be repeated — and a busy answer comes back fast, so the
      whole ladder stays well inside one request's life. */
+  const r = await withRetry(call);
+  if (!r.ok) return { ok: false, why: r.why || "no answer" };
+  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
+  if (!shaped) return { ok: false, why: "the answer had nothing in it" };
+  return { ok: true, reply: shaped.reply, part: shaped.part };
+}
+
+/* THE SECOND TRY HAS ONLY ONE PLACE TO PUT AN ANSWER (§477). §476 asked a
+   draftless "I've made the change" again in the same full shape, and on
+   Islam's tenant it talked a second time and sent nothing — most likely
+   copying its own earlier draftless replies in the history. So the second
+   try is a different, smaller ask: a shape holding ONLY the draft, required,
+   with no `reply` to talk in. Same instruction, corpus and history, so it
+   still knows what was asked; NO_DRAFT stays the last resort. */
+export const DRAFT_ONLY_SCHEMA = {
+  type: "OBJECT",
+  properties: { draft: (SCHEMA.properties as any).draft },
+  required: ["draft"],
+};
+export async function askDraftOnly(a: AskInput): Promise<{ ok: true; draft: NonNullable<Answer["draft"]> } | { ok: false; why: string }> {
+  if (!A.configured()) return { ok: false, why: "no key is set" };
+  const call = (model?: string) => A.askJson({
+    question: a.question, history: a.history, maxTurns: 20, schema: DRAFT_ONLY_SCHEMA, needsCorpus: false,
+    instruction: guidanceFor(a.section, a.method || "", a.templates || []),
+    corpusName: "THIS CHAT'S MATERIAL", corpusText: corpusOf(a), parts: [],
+    think: true, maxOutput: 8192, timeoutMs: 55_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
+  if (!r.ok) return { ok: false, why: r.why || "no answer" };
+  const j: any = r.json && typeof r.json === "object" ? r.json : {};
+  const shaped = shapeAnswer({ reply: "", draft: j.draft }, a.files.map((f) => f.name));
+  if (!shaped || !shaped.part.draft) return { ok: false, why: "no draft came back" };
+  return { ok: true, draft: shaped.part.draft };
+}
+
+/* The ladder, shared by every ask the Copilot makes (§465): the guided
+   Foundation's draft, refine and check are asked of the same busy provider. */
+async function withRetry(call: (model?: string) => Promise<any>): Promise<any> {
   const busy = (x: { ok: boolean }) => !x.ok && BUSY.has(Number((x as { status?: number }).status));
   let r = await call();
   if (busy(r) && process.env.SMP_BREAK !== "no-retry") {
@@ -225,8 +256,20 @@ export async function askCopilot(a: AskInput): Promise<AskResult> {
       if (f.ok) r = f;
     }
   }
+  return r;
+}
+
+/* ONE SMALL ASK IN ONE SMALL SHAPE (§465): the guided Foundation's draft,
+   refine and check. No history — what the flow knows is in the corpus. */
+export async function askFlowJson(a: { instruction: string; corpus: string; question: string; schema: unknown }):
+  Promise<{ ok: true; json: any } | { ok: false; why: string; noKey?: boolean }> {
+  if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
+  const call = (model?: string) => A.askJson({
+    question: a.question, history: [], maxTurns: 0, schema: a.schema, needsCorpus: false,
+    instruction: a.instruction, corpusName: "THIS FOUNDATION", corpusText: a.corpus, parts: [],
+    think: true, maxOutput: 4096, timeoutMs: 55_000, ...(model ? { model } : {}),
+  });
+  const r = await withRetry(call);
   if (!r.ok) return { ok: false, why: r.why || "no answer" };
-  const shaped = shapeAnswer(r.json, a.files.map((f) => f.name));
-  if (!shaped) return { ok: false, why: "the answer had nothing in it" };
-  return { ok: true, reply: shaped.reply, part: shaped.part };
+  return { ok: true, json: r.json };
 }

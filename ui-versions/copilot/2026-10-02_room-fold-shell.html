@@ -118,13 +118,6 @@
   <div class="tabs-in" role="tablist" id="subtabs"></div>
 </nav>
 
-<!-- THE COPILOT'S THIN LINE (§475, Islam's room option 1). On the Copilot
-     tab only, and only once somebody has pressed "Fold bars", the three rows
-     above are stood down by CSS off `data-cop-fold` and this one line says
-     where you are, with the way back. Hidden everywhere else, so no other page
-     moves a pixel. Filled by paint(); textContent only. -->
-<div class="copthin" id="copthin" aria-label="Where you are"></div>
-
 <nav class="tabs sectionrow" id="secrow" hidden>
   <div class="tabs-in" role="tablist" id="secrow-in"></div>
 </nav>
@@ -312,14 +305,7 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
-  /* §466: the top's plan is drawn while it is switched on and either it
-     plans in projects or its pillars component is on. */
-  function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §465: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  function topExtrasOn(){ return compOn("group", "swot") || (planOn("group") && compOn("group", "pillar")); }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -330,14 +316,14 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
-                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
+                  { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", "pillars") || (buExists() ? "Plan" : L("pillar", "bu")),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    when: function(){ return planOn("group") && compOn("group", "pillar"); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    when: topCapsOn }];
+                    when: function(){ return !buExists() && SMPRules.capExists(GROUP) && capsReachable().length > 0; } }];
       } };
   }
   var SUBS = {
@@ -1375,7 +1361,6 @@
      this next. Nothing stored holds it (it is a plain var, re-initialised on
      every load), so the rename costs no tenant anything. */
   var NAVFOLD = "units";
-  var NAVFOLDAT = null;   /* §464: the destination the company-level list last followed */
 
   function myUnits(){
     return activeKeys().filter(function(k){ return ownTabs(SUBS.unit, k).length; });
@@ -1409,39 +1394,10 @@
       keys:us });
     /* §447: with the units off, capabilities are a section of the company
        page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
+    if (cs.length && buExists()) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
     if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
-    return out;
-  }
-  /* ── PLANNED ON THE COMPANY, THE ROW IS THE FUNCTIONS (§464) ───────────
-     Islam, of the company-level row: *"having the functions button and the
-     functions beside it like the units level and if the divisions are there
-     the divisions become the buttons ... no drop downs"*, then *"remove the
-     2nd word ... just retail wholesale group"*. So with no division the side
-     is one lit word with every function beside it, and with divisions the
-     side becomes one segment per division holding a function, in the order
-     they are declared, plus a last segment named with the top-level word for
-     the functions linked to none. A segment carries its division (`co`), so
-     pressing it opens that division's page as well as its list. A division
-     linking no function this viewer reaches has nothing to list and no
-     segment (&sect;61 from the other side: a segment that lists nothing is a
-     control with nothing behind it). */
-  function companyFnSides(fs){
-    var left = fs.slice(), out = [];
-    activeCompanyKeys().forEach(function(ck){
-      var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
-      if (!mine.length) return;
-      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
-      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
-        keys:mine.map(function(k){ return "fn:" + k; }) });
-    });
-    if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
-      keys:fs.map(function(k){ return "fn:" + k; }) }];
-    if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),
-      keys:left.map(function(k){ return "fn:" + k; }) });
     return out;
   }
   /* A TENANT WITH NO CAPABILITIES SEES EXACTLY THE SWITCH IT HAS TODAY, which
@@ -1470,10 +1426,6 @@
 
   function foldsNeeded(){
     var sides = navSides();
-    /* §464: planned on the company the switch is always drawn — one lit word
-       with no divisions, the divisions with them — because that word is what
-       says what the row beside it lists. */
-    if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
     return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
   }
@@ -1543,21 +1495,11 @@
          list with no way to see that Functions has anything. §334: asked of
          the sides that exist rather than of two named lists, so a capability
          created this morning is a side the switch can rest on by tonight. */
-      var sides = navSides(), atCo = !buExists();
-      /* §464: on the company the list follows where you ARE when you arrive
-         somewhere new — a function opened from a link, or a division's page —
-         and is left alone while you are only browsing the switch. */
-      if (atCo && current !== NAVFOLDAT) {
-        NAVFOLDAT = current;
-        sides.forEach(function(x){
-          if (x.keys.indexOf(current) !== -1 || (x.co && current === "co:" + x.co)) NAVFOLD = x.fold;
-        });
-      }
+      var sides = navSides();
       if (!sides.some(function(x){ return x.fold === NAVFOLD; }))
         NAVFOLD = sides.length ? sides[0].fold : "units";
-      out.push({ multi:atCo, folds: sides.map(function(x){
-        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold, co:x.co || null,
-          here:!!(x.co && current === "co:" + x.co), one:!!x.one };
+      out.push({ folds: sides.map(function(x){
+        return { fold:x.fold, label:x.label, open:NAVFOLD === x.fold };
       }) });
       /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
          (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
@@ -2362,22 +2304,13 @@
            segmented control means and the opposite of what §41.8 decided for
            the two-sided one (there, lighting the other half made the state
            unreadable exactly when somebody was looking at it). */
-        /* §464: one side on the company is a WORD, not a control — there is
-           nothing to switch to, and a button that switches to itself is a
-           control that lies about having somewhere to go (§61). */
-        if (t.folds.length === 1 && t.folds[0].one) {
-          return '<span class="sep"></span>' +
-            '<span class="navswitch one"><span class="nsw on">' + esc(t.folds[0].label) + '</span></span>';
-        }
-        if (t.folds.length > 2 || t.multi) {
+        if (t.folds.length > 2) {
           return '<span class="sep"></span>' +
             '<div class="navswitch multi" role="group" aria-label="Which list to show">' +
             t.folds.map(function(f){
-              return '<button class="nsw' + (f.open ? " on" : "") + (f.here ? " here" : "") + '"' +
-                ' data-fold="' + esc(f.fold) + '"' + (f.co ? ' data-co="' + esc(f.co) + '"' : '') +
-                (f.here ? ' aria-current="page"' : '') +
-                ' aria-pressed="' + (f.open ? "true" : "false") +
-                '">' + esc(f.label) + '</button>';
+              return '<button class="nsw' + (f.open ? " on" : "") + '"' +
+                ' data-fold="' + f.fold + '" aria-pressed="' + (f.open ? "true" : "false") +
+                '">' + f.label + '</button>';
             }).join("") + '</div>';
         }
         var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
@@ -2452,16 +2385,6 @@
            stay exactly as they are. A SWITCH, not a toggle — pressing the lit
            side leaves it lit (§47.6). */
         NAVFOLD = b.dataset.fold;
-        /* §464: a division's segment is also a door — its own page, read
-           from the functions linked to it — when this viewer may open it. */
-        var co = b.dataset.co;
-        if (co && ownTabs(SUBS.co, "co:" + co).length) {
-          if (current !== "co:" + co) leaveModes();
-          current = NAVFOLDAT = "co:" + co;
-          currentSub = entrySub(current);
-          paint(); window.scrollTo(0,0);
-          return;
-        }
         paintUnits();
       });
     });
@@ -2662,53 +2585,7 @@
   }
   function chromeActsHTML(){
     var gear = menuHTML();
-    /* §475: on the Copilot the row also offers to fold the three bars away.
-       Wired by a delegated listener (copFoldWire) because this row's
-       innerHTML is rewritten on every paint (§29.5). */
-    var fold = currentSub === "copilot"
-      ? '<button type="button" class="copfoldbtn" data-copfold="fold" title="Fold the three bars into one line for more room">Fold bars \u25B4</button>'
-      : "";
-    return fold + (gear ? '<span class="sep pinsep"></span>' + gear : "");
-  }
-  /* ── FOLD THE BARS ON THE COPILOT (§475, room option 1) ────────────────
-     The choice is this device's (localStorage), stored as an ABSENCE when
-     the bars show (§50.6), and it only ever applies on the Copilot tab:
-     every other page draws the full bars whatever is remembered. A throwing
-     store reads as "not folded", which is the page as it always was. */
-  var COPFOLD_KEY = "smp.copilot.bars";
-  function copFolded(){ try { return localStorage.getItem(COPFOLD_KEY) === "folded"; } catch (e) { return false; } }
-  function copSetFolded(on){
-    try { if (on) localStorage.setItem(COPFOLD_KEY, "folded"); else localStorage.removeItem(COPFOLD_KEY); } catch (e) {}
-  }
-  (function copFoldWire(){
-    document.addEventListener("click", function(e){
-      var b = e.target && e.target.closest && e.target.closest("[data-copfold]");
-      if (!b) return;
-      e.preventDefault(); e.stopPropagation();
-      copSetFolded(b.getAttribute("data-copfold") === "fold");
-      paint();
-    });
-  })();
-  function copThinPaint(){
-    var on = currentSub === "copilot" && copFolded();
-    var root = document.documentElement;
-    if (currentSub === "copilot") root.setAttribute("data-cop-page", "on");
-    else root.removeAttribute("data-cop-page");
-    if (on) root.setAttribute("data-cop-fold", "on");
-    else root.removeAttribute("data-cop-fold");
-    var el = document.getElementById("copthin");
-    if (!el) return;
-    el.textContent = "";
-    if (!on) return;
-    var bits = [GROUP.org || "", (current && current !== "group") ? placeLabel(current) : "The group", "Copilot"];
-    bits.forEach(function(t, i){
-      if (!t) return;
-      if (el.childNodes.length) { var q = document.createElement("span"); q.className = "q"; q.textContent = "\u203A"; el.appendChild(q); }
-      var w = document.createElement(i === 0 ? "b" : "span"); w.textContent = t; el.appendChild(w);
-    });
-    var sp = document.createElement("span"); sp.className = "sp"; el.appendChild(sp);
-    var bt = document.createElement("button"); bt.type = "button"; bt.setAttribute("data-copfold", "show");
-    bt.textContent = "Show navigation \u25BE"; el.appendChild(bt);
+    return gear ? '<span class="sep pinsep"></span>' + gear : "";
   }
   function menuHTML(){
     var gs = menuGroups();
@@ -3024,7 +2901,6 @@
 
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
-    copThinPaint();
     TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     TARGET_SETUP = current === "setup" || current === "manage";
     /* Repainted rather than set once: Labels can rename the tenant while you
@@ -9428,35 +9304,6 @@
         fieldSaved(); paint();
       });
     });
-    /* §478: a unit's Core Values — add and remove, re-asked on the click
-       (§48.2). An emptied list loses its key (§50.6). §479: the fill grant
-       may write the list while it is owed, and unitValuesWrite answers who
-       may, from the stored state at press time — never from the drawn one. */
-    document.querySelectorAll("[data-uvaladd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var t = b.dataset.uvaladd;
-        var o = unitLikeWritable(t);
-        if (!o) return;
-        var how = unitValuesWrite(o);
-        if (!how) return;
-        if (!Array.isArray(o.values)) o.values = [];
-        o.values.push({ name: "", def: "" });
-        unitValuesTouch(o, how);
-        fieldSaved(); paint();
-      });
-    });
-    document.querySelectorAll("[data-uvalrm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = b.dataset.uvalrm.split("|"), t = a[0], i = +a[1];
-        var o = unitLikeWritable(t);
-        if (!o || !Array.isArray(o.values) || !o.values[i]) return;
-        var how = unitValuesWrite(o);
-        if (!how) return;
-        o.values.splice(i, 1);
-        unitValuesTouch(o, how);
-        fieldSaved(); paint();
-      });
-    });
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
@@ -11300,51 +11147,7 @@
      plan or … capabilities it needs to be changable with a warning"*). It
      had none — Setup's control switched in silence — and it plans two ways
      only, pillars or projects (capFormat), absent being projects. */
-  /* §466: THE TOP LAYER TAKES THE SAME SWITCH — the company's plan in
-     pillars or in projects. Its way lives on the structure, not on a row
-     (`structure.top.plan.way`, an ABSENCE for pillars, §50.6), and what is
-     held is `GROUP.items` or `GROUP.topProjects`; hidden and kept either
-     way, exactly as a unit's switch. */
-  function switchTopWay(value, sel){
-    var was = topWay(), now = value === "projects" ? "projects" : "pillars";
-    var back = function(){ if (sel) sel.value = was; };
-    if (now === was) return;
-    var apply = function(){
-      var st = GROUP.structure || (GROUP.structure = {});
-      var top = st.top || (st.top = {}), pl = top.plan || (top.plan = {});
-      if (now === "projects") pl.way = "projects";
-      else {
-        delete pl.way;
-        if (!Object.keys(pl).length) delete top.plan;
-        if (!Object.keys(top).length) delete st.top;
-        if (!Object.keys(st).length) delete GROUP.structure;
-      }
-      fieldSaved();
-      paint();
-    };
-    var n = was === "pillars" ? (Array.isArray(GROUP.items) ? GROUP.items.length : 0)
-          : (Array.isArray(GROUP.topProjects) ? GROUP.topProjects.length : 0);
-    if (!n) { apply(); return; }
-    var wordOf = function(k){ return k === "pillars" ? L("pillar","bu") : L("project","bu"); };
-    var held = was === "pillars" ? plural(n, L1("pillar"), L("pillar")) : plural(n, L1("project"), L("project"));
-    var who = labelWord("topword", "group") || "The company";
-    openModalHtml(esc("Change how " + who + " plans?"),
-      esc(wordOf(was) + " \u2192 " + wordOf(now)),
-      '<div class="rmconfirm">' +
-        '<p><b>' + esc(who) + '</b>\u2019s ' + esc(held) +
-          ' will be hidden and kept. Switching back brings them back.</p>' +
-        '<div class="mrow"><button class="quiet" data-rmno="1">Cancel</button>' +
-        '<button class="go" data-rmyes="1">Change how it plans</button></div>' +
-      '</div>');
-    var box = document.getElementById("modal-b");
-    if (!box) return;
-    var no = box.querySelector("[data-rmno]");
-    if (no) no.addEventListener("click", function(){ back(); closeModal(); });
-    var yes = box.querySelector("[data-rmyes]");
-    if (yes) yes.addEventListener("click", function(){ closeModal(); apply(); });
-  }
   function switchPlanWay(kind, key, value, sel){
-    if (kind === "top") { switchTopWay(value, sel); return; }
     var isUnit = kind === "unit", isCap = kind === "cap";
     var rec = isUnit ? UNITS[key] : isCap ? capById(key) : FUNCTIONS[key];
     if (!rec) return;

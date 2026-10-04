@@ -12,7 +12,7 @@
        a client's own person refused at the api AND every read, in words —
        and every act refused where it must be;
      · §1b (stage 2) a Word or Excel file read, or refused in words; an
-       answer checked rather than trusted (one recommended option, a source
+       answer checked rather than trusted (no option marked recommended, a source
        naming a file nobody attached read as assumed);
      · §5 (stage 2) the AI READ OFF THE WIRE — a stand-in model on
        GEMINI_ENDPOINT (§100.3) records what it was sent: the guidance, the
@@ -35,6 +35,7 @@ import { deflateRawSync } from "node:zlib";
 import {
   SECTIONS, isSection, isPlace, mayDeleteChat, MAX_MESSAGE, NO_KEY, copilotStampFor, copilotGrant,
   chatsOn, newChat, messagesOf, recordSaid, recordAnswer, deliverablesOn, newDeliverable, versionsOf, addVersion, restoreVersion,
+  isSaveAsk, isBareEnhance, draftText, claimsDraft, NO_DRAFT,
   partMemo,
 } from "../lib/copilot.ts";
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
@@ -129,13 +130,13 @@ const sh = shapeAnswer({ reply: " Here is a start. ", options: [{ label: "Assume
   draft: { title: "SWOT", groups: [{ title: "Strengths", items: [{ text: "Coverage", source: "Q3 deck.pdf" }, { text: "Brand", source: "made-up.xlsx" }, { text: "Share", source: "platform" }, { text: "" }] }, { title: "Empty", items: [] }] },
   assumptions: ["Margins flat"], pastedBelongsTo: "nowhere" }, ["Q3 deck.pdf"]);
 check("an answer is trimmed, empty options and empty groups dropped", sh && sh.reply === "Here is a start." && sh.part.options.length === 2 && sh.part.draft.groups.length === 1 && sh.part.draft.groups[0].items.length === 3, JSON.stringify(sh));
-check("...only ONE option can be the recommended one", sh && sh.part.options.filter((o) => o.recommended).length === 1 && sh.part.options[0].recommended);
+check("...and no option is ever marked recommended, whatever the model sends (§474)", sh && sh.part.options.length === 2 && sh.part.options.every((o) => !("recommended" in o)));
 check("...a source naming a file nobody attached is read as assumed, never drawn as a file (§96.2)",
   sh && sh.part.draft.groups[0].items.map((x) => x.source).join("|") === "Q3 deck.pdf|assumed|platform", sh && JSON.stringify(sh.part.draft.groups[0].items));
 check("...and a section that is not a section is not an offer", sh && sh.part.pastedBelongsTo === null);
 check("an answer with nothing in it is a failure, not an empty bubble (§124)", shapeAnswer({ reply: "  ", options: [{ label: "x" }] }, []) === null);
 check("each section's guidance carries the house rules; the roads only where the record defines them",
-  /PLAYBACK BEFORE PRODUCING/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
+  /WHERE THE WORK STARTS/.test(guidanceFor("analysis")) && /Never invent a figure/.test(guidanceFor("analysis")) && /Guided questions/.test(guidanceFor("analysis")) && /There is no template for this section/.test(guidanceFor("foundation")) &&
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
@@ -144,11 +145,17 @@ check("each section's guidance carries the house rules; the roads only where the
   const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
   const gi = guidanceFor("analysis", M, []);
   check("§460 A: the method LEADS — it is sent before the answer rules and is not overruled by them",
-    gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("RULES FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
+    gi.indexOf("Phase one") >= 0 && gi.indexOf("Phase one") < gi.indexOf("LIMITS FOR YOUR ANSWER") && /It LEADS the conversation/.test(gi) && !/the rules above win/.test(gi), gi.slice(0, 200));
   check("§460 A: a drafted item takes the method's shape — title, evidence, score — and a turn names the method part it follows",
     /`title`[\s\S]*`evidence`[\s\S]*`score`/.test(gi) && /`following`/.test(gi));
-  check("§460 C: talk first — playback once, buttons only for a real question, no refine stop once they said what to change",
-    /TALK LIKE A CONSULTANT/.test(gi) && /PLAYBACK BEFORE PRODUCING, ONCE/.test(gi) && /leave `options` empty/.test(gi) && /ALREADY said what to change/.test(gi));
+  check("§471: a natural conversation — no playback box, buttons only for a real choice, and one starting point for every section",
+    /natural conversation/.test(gi) && !/PLAYBACK/.test(gi) && !/playback/.test(gi) && /leave `options` empty/.test(gi) &&
+    /WHERE THE WORK STARTS, in every section/.test(gi) && /word for word/.test(gi) && /already said what to change/.test(gi) &&
+    ["foundation", "analysis", "directions", "execution", "advisory"].every((k) => /WHERE THE WORK STARTS/.test(guidanceFor(k))));
+  check("§471: what exists comes before the ways to start, and the method before both",
+    gi.indexOf("Phase one") < gi.indexOf("WHERE THE WORK STARTS") && gi.indexOf("WHERE THE WORK STARTS") < gi.indexOf("WAYS TO START"));
+  check("§471: an answer's old playback field is not kept",
+    !("playback" in (shapeAnswer({ reply: "Hi", playback: { understood: "x" } }, []) || { part: { playback: 1 } }).part));
   const sh2 = shapeAnswer({ reply: "Here is the internal half.", following: "Situational Analysis · SWOT",
     draft: { title: "Mobile SWOT", groups: [{ title: "Strengths", items: [
       { title: "Brand partnerships", text: "Samsung and Xiaomi deals.", evidence: "your message", score: "3 · Strong", source: "pasted" },
@@ -461,7 +468,6 @@ try {
 
     NEXT = { answer: {
       reply: "I read your deck and notes. Here is a first SWOT.",
-      playback: { understood: "Refresh the Q3 SWOT", workingFrom: "Q3 deck.pdf, notes.docx, the platform", missing: "Competitor prices" },
       missing: ["Competitor prices for Q3"],
       options: [{ label: "Assume for me", recommended: true }, { label: "I'll send them" }],
       assumptions: ["Competitor prices held flat", "Competitor prices held flat"],
@@ -473,9 +479,9 @@ try {
     check("the model was asked, once, with the key", seen.length === 1 && w.key === "stand-in-key", seen.length + "");
     const sys = w && w.body && w.body.systemInstruction ? w.body.systemInstruction.parts.map((p) => p.text).join("") : "";
     check("...told the section's guidance and what the platform shows for the place",
-      /PLAYBACK BEFORE PRODUCING/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
-    check("...told to quote what the plan holds and ask what to change before refining it (§458)",
-      /REFINING WHAT ALREADY EXISTS/.test(sys) && /First quote in `reply` what THE PLAN AS WRITTEN holds/.test(sys));
+      /WHERE THE WORK STARTS/.test(sys) && /THIS SECTION PRODUCES: Analysis/.test(sys) && /2 measures off track/.test(sys) && /PLACE: Mobile \(mobile\)/.test(sys), sys.slice(0, 160));
+    check("...told to start from what the plan holds, word for word, and ask what to change (§471)",
+      /start from it: show it in `reply` word for word/.test(sys) && /If the person has not said what to change, ask/.test(sys));
     check("...and Forefront's own method for that section, read from Copilot settings (§456)",
       /FOREFRONT'S METHOD FOR THIS SECTION/.test(sys) && /## Situational Analysis - SWOT/.test(sys) && /Copilot settings › Templates \(/.test(sys));
     check("...the Word file as its words, by name", /=== FILE: notes\.docx ===\nMobile & Accessories/.test(sys));
@@ -484,9 +490,9 @@ try {
       !!lastTurn && lastTurn.parts.some((p) => p.inlineData && p.inlineData.mimeType === "application/pdf" && Buffer.from(p.inlineData.data, "base64").equals(pdf)) &&
       lastTurn.parts.some((p) => /\[attached with this message: Q3 deck\.pdf, notes\.docx\]/.test(p.text || "")), JSON.stringify(lastTurn && lastTurn.parts.map((p) => Object.keys(p))));
     const ans = s1.j && s1.j.messages[s1.j.messages.length - 1];
-    check("the answer is kept as an answer: playback, the missing input, two ways on, the draft with its sources",
-      s1.st === 200 && ans.who === "ai" && ans.part.kind === "answer" && ans.part.playback.missing === "Competitor prices" &&
-      ans.part.options.length === 2 && ans.part.options[0].recommended && ans.part.draft.groups[0].items[0].source === "notes.docx",
+    check("the answer is kept as an answer: the missing input, two ways on, the draft with its sources",
+      s1.st === 200 && ans.who === "ai" && ans.part.kind === "answer" && ans.part.missing[0] === "Competitor prices for Q3" && !("playback" in ans.part) &&
+      ans.part.options.length === 2 && !ans.part.options.some((o) => "recommended" in o) && ans.part.draft.groups[0].items[0].source === "notes.docx",
       JSON.stringify(ans).slice(0, 300));
     check("...a source naming a file nobody attached reads as assumed", ans && ans.part.draft.groups[0].items[1].source === "assumed");
     check("...and the files it read are named on it", ans && (ans.part.read || []).join(",") === "Q3 deck.pdf,notes.docx");
@@ -576,12 +582,202 @@ try {
     /* §458: the answer's own format never reaches the screen. Both ends: a
        field that ran on into the next JSON key is cut, and a quote-comma-quote
        that is not one of our keys is kept as written. */
-    NEXT = { answer: { reply: "Refined.", playback: { understood: "He said \"yes\", \"no\" and left", workingFrom: "The plan's aspiration (MENA expansion).\", \"missing\": \"None.", missing: "" } } };
+    NEXT = { answer: { reply: "Refined.", following: "Foundation \u00b7 Aspiration", assumptions: ["He said \"yes\", \"no\" and left", "The plan's aspiration (MENA expansion).\", \"missing\": \"None."] } };
     const rL = await call("POST", "api", { act: "say", id: ch.id, text: "Leak test" }, NORAN);
-    const pL = rL.j.messages[rL.j.messages.length - 1].part.playback || {};
-    check("a playback line that ran on into the answer's next field is cut there (§458)", pL.workingFrom === "The plan's aspiration (MENA expansion).", JSON.stringify(pL.workingFrom));
-    check("...and ordinary quotes in what the model wrote are kept", pL.understood === 'He said "yes", "no" and left', JSON.stringify(pL.understood));
+    const pA = (rL.j.messages[rL.j.messages.length - 1].part.assumptions) || [];
+    check("a line that ran on into the answer's next field is cut there (§458)", pA[1] === "The plan's aspiration (MENA expansion).", JSON.stringify(pA[1]));
+    check("...and ordinary quotes in what the model wrote are kept", pA[0] === 'He said "yes", "no" and left', JSON.stringify(pA[0]));
+
+    /* §472: AN ENHANCEMENT ASKS FIRST, held by the product. A short "enhance"
+       about something the plan holds is told so on that turn, and a draft
+       written anyway is dropped; the answer to that question is not held. */
+    const qL = JSON.stringify(seen.find((x) => /Can we enhance the winning aspiration/.test(JSON.stringify(x.body.contents))).body.contents);
+    check("a short ask to improve what the plan holds is told, on that turn, to quote it and ask what to improve (§472)", /FOR THIS TURN ONLY/.test(qL) && /word for word/.test(qL), qL.slice(-300));
+    const ctxA = "Mobile\n\nTHE PLAN AS WRITTEN:\nWinning Aspiration: Be first.";
+    const DR = { title: "Aspiration — Mobile", groups: [{ title: "Aspiration", items: [{ text: "Be the first choice for a phone", source: "platform" }] }] };
+    NEXT = { answer: { reply: "Today it reads: Be first. What should improve?", options: [{ label: "Make it measurable" }], draft: DR } };
+    const e1 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: ctxA }, NORAN);
+    const ae1 = e1.j.messages[e1.j.messages.length - 1];
+    check("...and a draft it writes anyway is dropped, so the page shows the question, not a draft", !ae1.part.draft && ae1.part.askFirst === true && ae1.part.options.length === 1, JSON.stringify(ae1.part).slice(0, 200));
+    NEXT = { answer: { reply: "Here it is, sharper.", draft: DR } };
+    const e2 = await call("POST", "api", { act: "say", id: ch.id, text: "improve it, make it measurable", context: ctxA }, NORAN);
+    const ae2 = e2.j.messages[e2.j.messages.length - 1];
+    const q2 = JSON.stringify(seen[seen.length - 1].body.contents);
+    check("...the answer to that question is not held: the draft comes (§472, both ends)", !!(ae2.part.draft && ae2.part.draft.groups) && !/FOR THIS TURN ONLY/.test(q2.slice(-600)), JSON.stringify(ae2.part).slice(0, 160));
+    NEXT = { answer: { reply: "A first aspiration.", draft: DR } };
+    const e3 = await call("POST", "api", { act: "say", id: ch.id, text: "enhance the aspiration", context: "Mobile" }, NORAN);
+    check("...and where the plan holds nothing, nothing is held back", !!e3.j.messages[e3.j.messages.length - 1].part.draft);
+
+    /* §476: A CHANGE CLAIMED IS A CHANGE SHOWN. Islam's report: asked to
+       remove the year, the model said "I've removed the hardcoded year …
+       Click the Save button under the draft" and sent no draft. Asked again
+       once; the second answer's draft is what the page shows. Both ends: a
+       second miss says so instead of the claim, and an answer that claims
+       nothing is asked once only. */
+    NEXT = [{ answer: { reply: "I've removed the hardcoded year. Click the Save button under the draft." } },
+            { answer: { draft: DR } }];
+    const bC = seen.length;
+    const c1 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    const ac1 = c1.j.messages[c1.j.messages.length - 1];
+    const qC = JSON.stringify(seen[seen.length - 1].body.contents);
+    check("an answer that claims a change with no draft is asked again, and the revised text is shown with its Save (§476)",
+      seen.length === bC + 2 && !!(ac1.part.draft && ac1.part.draft.groups) && /removed the hardcoded year/.test(ac1.body) && /whole revised text in `draft`/.test(qC),
+      seen.length - bC + " asks · " + JSON.stringify(ac1).slice(0, 200));
+    /* §477: the second try is a SMALLER ask — its shape holds only the
+       draft, required, with no `reply` to talk in. Read off the wire. */
+    const sch2 = (seen[seen.length - 1].body.generationConfig || {}).responseSchema || {};
+    check("...and that second ask can only return the draft — no reply field, the draft required (§477)",
+      !!(sch2.properties && sch2.properties.draft) && !(sch2.properties && sch2.properties.reply) && (sch2.required || []).includes("draft"),
+      JSON.stringify(sch2).slice(0, 160));
+    NEXT = [{ answer: { reply: "I've removed the year. Press Save below." } }, { answer: { reply: "I've removed it." } }];
+    const c2 = await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    const ac2 = c2.j.messages[c2.j.messages.length - 1];
+    check("...a second miss says so, and never claims a Save that is not there", !ac2.part.draft && ac2.body === NO_DRAFT && ac2.part.noDraft === true, JSON.stringify(ac2).slice(0, 200));
+    NEXT = { answer: { reply: "Which year would you like it to name instead?" } };
+    const bN = seen.length;
+    await call("POST", "api", { act: "say", id: ch.id, text: "Remove specific target year", context: ctxA }, NORAN);
+    check("...and an answer that claims nothing is asked once only", seen.length === bN + 1, seen.length - bN + " asks");
+    check("the claim words are narrow", claimsDraft("I've removed the hardcoded year") && claimsDraft("Here is the revised aspiration.") && claimsDraft("Click the Save button under the draft") &&
+      !claimsDraft("Shall I draft one for you?") && !claimsDraft("Which year would you like it to name instead?") && !claimsDraft("What should improve?"));
+
+    /* §472: A DRAFT IS SAVED TO THE RAIL by the product. The button makes v1;
+       the same title again is v2 of the same deliverable; a saved draft is
+       not saved twice; and a typed "save it" saves without asking the model. */
+    const dm2 = ae2.id;
+    const sv1 = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: dm2 }, NORAN);
+    const shelfS = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
+    const dS = shelfS.find((d) => d.title === "Aspiration — Mobile");
+    const vS = dS ? await asTenant(A, (c) => versionsOf(c, dS.id)) : [];
+    check("Save under a draft puts it on the rail as v1, its text written out (§472)",
+      sv1.st === 200 && sv1.j.saved.n === 1 && !!dS && vS.length === 1 && /Be the first choice for a phone/.test(vS[0].body.text), JSON.stringify(sv1.j).slice(0, 200));
+    check("...and the draft now says it was saved", sv1.j.messages.find((m) => m.id === dm2).part.saved.n === 1);
+    const again = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: dm2 }, NORAN);
+    check("...a saved draft is not saved twice, in words", again.st === 400 && /already saved/.test(again.j.why));
+    const notD = await call("POST", "api", { act: "saveDraft", id: ch.id, messageId: e1.j.messages[e1.j.messages.length - 2].id }, NORAN);
+    check("...and the person's own message is not a draft — judged on the stored row (§42)", notD.st === 400 && /not a draft/.test(notD.j.why));
+    const bS = seen.length;
+    const ty = await call("POST", "api", { act: "say", id: ch.id, text: "looks great, save it" }, NORAN);
+    const tyL = ty.j.messages[ty.j.messages.length - 1];
+    const vS2 = await asTenant(A, (c) => versionsOf(c, dS.id));
+    check("a typed 'looks great, save it' saves the latest draft at once, asking the model nothing (§472)",
+      ty.st === 200 && seen.length === bS && tyL.part.kind === "saved" && /Saved: Aspiration — Mobile, v2/.test(tyL.body) && vS2.length === 2, seen.length - bS + " asks · " + tyL.body);
+    const shelfS2 = await asTenant(A, (c) => deliverablesOn(c, "mobile", "analysis"));
+    check("...as v2 of the SAME deliverable, never a second row with the same title", shelfS2.filter((d) => d.title === "Aspiration — Mobile").length === 1);
+    const ch2 = (await call("POST", "api", { act: "newChat", place: "mobile", section: "analysis", title: "Empty" }, NORAN)).j.chat;
+    const ty2 = await call("POST", "api", { act: "say", id: ch2.id, text: "save it" }, NORAN);
+    check("...and in a chat with no draft it says so rather than pretending", /no draft in this chat/.test(ty2.j.messages[ty2.j.messages.length - 1].body));
+    check("the save words are narrow: a question that mentions saving goes to the model",
+      isSaveAsk("save it") && isSaveAsk("Looks great, save it!") && !isSaveAsk("how would this save us money in Q3 and beyond") && !isSaveAsk("don't save it yet"));
+    check("...and a short 'enhance' is the bare kind, a long one is not", isBareEnhance("enhance it") && !isBareEnhance("enhance the aspiration so it names online sales and the 2028 target clearly"));
+    check("a draft is written out as readable text", /^Aspiration — Mobile\n\nASPIRATION\n- Be the first choice/.test(draftText(DR)), JSON.stringify(draftText(DR)));
     NEXT = null;
+
+    /* ══ §6 · THE GUIDED FOUNDATION (§465) ══════════════════════════════
+       The flow is the office's, stored on the chat, cut to shape by the
+       server, drafted by the model from the answers, checked across the five
+       parts, and saved as the NEXT version of one deliverable — never from
+       what the page claims (§42). */
+    {
+    section("§6 · the Foundation chat: from the plan or fresh, the years, the draft, the check, a new version each run");
+    const nf = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
+    check("a new Foundation chat on a place with no Foundation opens on the roads — no question to ask (§478)",
+      nf.st === 200 && nf.j.chat.section === "foundation" && nf.j.flow.phase === "path" && nf.j.flow.ans.length === 6, JSON.stringify(nf.j).slice(0, 200));
+    const np = await call("POST", "api", { act: "newFlow", place: "mobile", hasPlan: true }, NORAN);
+    check("...and on a place that has one it asks first: start from it, or start fresh", np.st === 200 && np.j.flow.phase === "start" && np.j.flow.start === "", JSON.stringify(np.j.flow).slice(0, 120));
+    {
+      const P = JSON.parse(JSON.stringify(np.j.flow));
+      const pl = await call("POST", "api", { act: "flowSave", id: np.j.chat.id, flow: { ...P, start: "plan", drafts: ["We sell phones", "Lead by 2028", "", "", "Grow share", ""], from: [true, true, true, false, true, false], done: [true, true, false, false, true, false] } }, NORAN);
+      check("Start from it loads the plan's parts into the cards, marked as from the plan, and asks no years",
+        pl.st === 200 && pl.j.flow.phase === "loaded" && pl.j.flow.path === "guided" && pl.j.flow.from.join() === "true,true,false,false,true,false" && pl.j.flow.y0 === null,
+        JSON.stringify(pl.j.flow).slice(0, 200));
+      const back = await call("POST", "api", { act: "flowSave", id: np.j.chat.id, flow: { ...pl.j.flow, phase: "path" } }, NORAN);
+      check("...a flow started from the plan never drops back to the roads", back.j.flow.phase === "loaded");
+      const fr = await call("POST", "api", { act: "newFlow", place: "mobile", hasPlan: true }, NORAN);
+      const fr1 = await call("POST", "api", { act: "flowSave", id: fr.j.chat.id, flow: { ...fr.j.flow, start: "fresh" } }, NORAN);
+      check("Start fresh goes to the roads", fr1.j.flow.phase === "path" && fr1.j.flow.start === "fresh");
+      const fr2 = await call("POST", "api", { act: "flowSave", id: fr.j.chat.id, flow: { ...fr1.j.flow, start: "", phase: "start" } }, NORAN);
+      check("...and the page cannot go back to the question once it is answered", fr2.j.flow.phase === "path", fr2.j.flow.phase);
+      await call("POST", "api", { act: "delete", id: fr.j.chat.id }, NORAN);
+    }
+    const hendNf = await call("POST", "api", { act: "newFlow", place: "mobile" }, HEND);
+    check("...and a client's own person cannot start one", hendNf.st === 403, hendNf.st + "");
+    const fid = nf.j.chat.id;
+    const g0 = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
+    check("the chat comes with its flow, the six parts' questions and examples, nothing marked optional (§479: Structure decides, never the card), the short-answer line and the next version",
+      g0.j.flow && g0.j.flowSteps.length === 6 && g0.j.flowSteps.map((e) => e.key).join() === "who,asp,eim,pur,obj,val" &&
+      !g0.j.flowSteps.some((e) => e.optional) && g0.j.flowSteps.every((e) => e.questions.length && e.examples.length === e.questions.length) &&
+      g0.j.shortAnswer === 15 && g0.j.nextVersion === 1, JSON.stringify(Object.keys(g0.j)));
+    const lst = await call("GET", "list", null, NORAN, "?place=mobile&section=foundation");
+    check("...and the rail marks it guided", lst.j && (lst.j.chats || []).some((c) => c.id === fid && c.guided), JSON.stringify(lst.j && lst.j.chats).slice(0, 200));
+    let F = JSON.parse(JSON.stringify(nf.j.flow));
+    const bad1 = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "guided", y0: 2026, y1: 2024, phase: "ask" } }, NORAN);
+    check("the guided road with years that run backwards stays on the years step", bad1.st === 200 && bad1.j.flow.phase === "year");
+    const s1f = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "guided", y0: 2026, y1: 2028, phase: "year" } }, NORAN);
+    check("good years move it on to the questions", s1f.j.flow.phase === "ask" && s1f.j.flow.y1 === 2028);
+    F = s1f.j.flow;
+    const sneak = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "notes", phase: "ask" } }, NORAN);
+    check("another road never enters the guided steps — it stays at the road and goes on as a chat", sneak.j.flow.phase === "path" && sneak.j.flow.path === "notes");
+    const offRoad = await call("POST", "api", { act: "flowDraft", id: fid, el: 0, placeWord: "Mobile" }, NORAN);
+    check("...and drafting off the guided road is refused in words", offRoad.st === 400 && /guided questions first/.test(offRoad.j.why), JSON.stringify(offRoad.j));
+    const fake = await call("POST", "api", { act: "flowSave", id: fid, flow: { ...F, path: "guided", phase: "saved", saved: { deliverableId: "x", n: 9, title: "fake" } } }, NORAN);
+    check("the page cannot say it is saved — `saved` is the product's", fake.j.flow.saved === null && fake.j.flow.phase !== "saved", JSON.stringify(fake.j.flow.saved));
+    F = fake.j.flow;
+    const noAns = await call("POST", "api", { act: "flowDraft", id: fid, el: 0, placeWord: "Mobile" }, NORAN);
+    check("a part with no answer is not drafted", noAns.st === 400 && /Answer at least one/.test(noAns.j.why));
+    F.ans[0][0] = "Connect every Egyptian to the people and services they rely on"; F.phase = "review";
+    const before6 = seen.length;
+    NEXT = { answer: { text: "Connect every Egyptian to what matters, by " + "{Y}" + "." } };
+    const d1 = await call("POST", "api", { act: "flowDraft", id: fid, el: 0, flow: F, placeWord: "Mobile", context: "Mobile · 4 pillars" }, NORAN);
+    const wq = seen[seen.length - 1];
+    const sysF = wq && wq.body && wq.body.systemInstruction ? wq.body.systemInstruction.parts.map((p) => p.text).join("") : "";
+    const qText = wq && wq.body ? JSON.stringify(wq.body.contents) : "";
+    check("drafting asks the model once, with the answers given as they stand on the page",
+      seen.length === before6 + 1 && (sysF + qText).includes("Connect every Egyptian to the people and services they rely on"), (sysF + qText).slice(0, 200));
+    check("...and the draft lands on the flow, not yet agreed", d1.st === 200 && d1.j.flow.phase === "draft" && /Connect every Egyptian/.test(d1.j.flow.drafts[0]) && !d1.j.flow.done[0], JSON.stringify(d1.j).slice(0, 200));
+    NEXT = { answer: { text: "Connect Egypt to what matters." } };
+    const r1 = await call("POST", "api", { act: "flowRefine", id: fid, el: 0, how: "concise", placeWord: "Mobile" }, NORAN);
+    check("a refine rewrites that part's draft", r1.st === 200 && r1.j.flow.drafts[0] === "Connect Egypt to what matters.");
+    const early = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
+    check("the check across the parts waits for every part to be agreed", early.st === 400 && /Every part needs/.test(early.j.why));
+    const earlyFin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
+    check("...and so does saving it", earlyFin.st === 400 && /Every part needs/.test(earlyFin.j.why));
+    F = r1.j.flow;
+    F.drafts = F.drafts.map((d, i) => d || (i === 3 ? "" : "Part " + (i + 1) + " draft for {Y}")); F.done = F.done.map((_, i) => i !== 3); F.phase = "check";
+    await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
+    /* §479: nothing is optional — a part the Structure carries is owed, and
+       one it does not is never asked. Both ends (§94.2). */
+    const owedPur = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
+    check("with Purpose switched on in Structure, an empty Purpose holds the check (§479)", owedPur.st === 400 && /Every part needs/.test(owedPur.j.why), owedPur.st + "");
+    F.skip = ["pur"];
+    const sv = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
+    check("...and switched off it is not asked", sv.st === 200 && sv.j.flow.skip.join() === "pur", JSON.stringify(sv.j.flow && sv.j.flow.skip));
+    const sk = await call("POST", "api", { act: "newFlow", place: "mobile", skip: ["asp", "val", "nope"] }, NORAN);
+    check("only Purpose and Core Values can be switched off — never the Aspiration", sk.st === 200 && sk.j.flow.skip.join() === "val", JSON.stringify(sk.j.flow && sk.j.flow.skip));
+    if (sk.j.chat) await call("POST", "api", { act: "delete", id: sk.j.chat.id }, NORAN);
+    NEXT = { answer: { agree: ["The purpose and the aspiration point the same way."], issues: [{ element: "val", text: "One value repeats the purpose." }, { element: "nothing", text: "A general note." }] } };
+    const ck = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
+    check("the check comes back as agreements and issues, each issue naming a real part or none",
+      ck.st === 200 && ck.j.flow.phase === "check" && ck.j.flow.check.agree.length === 1 &&
+      ck.j.flow.check.issues[0].el === "val" && ck.j.flow.check.issues[1].el === "", JSON.stringify(ck.j.flow && ck.j.flow.check));
+    const fin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
+    check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
+    const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
+    check("...Purpose switched off does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
+    const again = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
+    check("a saved flow is done — it cannot be changed or saved twice", again.st === 400 && (await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN)).st === 400);
+    const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
+    const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
+    await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);
+    const g2 = await call("GET", "chat", null, NORAN, "?id=" + nf2.j.chat.id + "&placeWord=Mobile");
+    check("a second run says before the press that it will be version 2", g2.j.nextVersion === 2, g2.j.nextVersion + "");
+    const fin2 = await call("POST", "api", { act: "flowFinish", id: nf2.j.chat.id, placeWord: "Mobile" }, NORAN);
+    const nd = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title = 'Foundation — Mobile'"))).rows[0].n;
+    check("...and becomes version 2 of the SAME deliverable, never a second one", fin2.j.saved && fin2.j.saved.n === 2 && fin2.j.saved.deliverableId === fin.j.saved.deliverableId && nd === 1,
+      JSON.stringify(fin2.j.saved) + " · " + nd);
+    const hendSave = await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, HEND);
+    check("a client's own person cannot write a flow", hendSave.st === 403);
+    NEXT = null;
+    }
 
     NEXT = { status: 500 };
     const b2 = seen.length;

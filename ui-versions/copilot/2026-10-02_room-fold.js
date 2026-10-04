@@ -163,6 +163,7 @@ var COPILOT = (function(){
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
       '<aside class="coprails">' +
+        '<div class="coprtop"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button><span>Copilot</span></div>' +
         '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
           '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
           '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
@@ -185,13 +186,9 @@ var COPILOT = (function(){
      Delete asks once more in its row (§62 — never a browser dialog, §95). */
   var DOTS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.4"/><circle cx="8" cy="8" r="1.4"/><circle cx="12.5" cy="8" r="1.4"/></svg>';
   function archView(){ return !!ARCH[key()]; }
-  /* §475 option A (Islam, 2 Oct: "A ok"): the hide control sits at the
-     start of the Chats header rather than on a row of its own above the
-     rails, so an open rail spends no line on it. */
   function chatsHead(){
-    var tog = '<button type="button" class="coptog cophtog" data-cop-railtog aria-expanded="' + !railShut() + '" aria-label="Hide chats and deliverables" title="Hide chats and deliverables">' + TOGMARK + '</button>';
-    return archView() ? tog + '<span class="coprhl">Archived chats</span>'
-      : tog + '<span class="coprhl">Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
+    return archView() ? '<span>Archived chats</span>'
+      : '<span>Chats</span>' + (canEdit() ? '<button type="button" class="copnew" data-cop-newchat>+ New chat</button>' : '');
   }
   function chatsFoot(){
     var l = list();
@@ -208,6 +205,8 @@ var COPILOT = (function(){
     var head = arch && canEdit() ? '<div class="copnote">' + (l.mayDelete ? "Restore brings a chat back. Delete removes it for good."
       : "Restore brings a chat back. Only the Super user can delete.") + '</div>' : '';
     var o = OPEN[key()] || {};
+    if (!arch && canEdit() && section() === "foundation") head = '<button type="button" class="copguided" data-cop-newflow>' +
+      icon(PATH_CARDS[0].i) + '<span><b>Guided Foundation</b><span class="copm">Build it part by part, from questions</span></span></button>' + head;
     if (!rows.length) return head + '<div class="copnone">' + (arch ? "Nothing archived." : "No chats here yet.") + '</div>';
     return head + rows.map(function(c){
       var on = o.kind === "chat" && o.id === c.id;
@@ -599,8 +598,7 @@ var COPILOT = (function(){
   function boxWord(pend){
     if (flowView()) {
       var ph = PANE.flow.phase;
-      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…"
-        : ph === "loaded" ? "Pick a part on the left to work on it…" : "Use the buttons above to carry on…";
+      return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…" : "Use the buttons above to carry on…";
     }
     return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
@@ -624,7 +622,7 @@ var COPILOT = (function(){
      design-mockups/copilot-foundation-flow/2026-10-02_working-flow.html,
      Option A) ═══════════════════════════════════════════════════════════
      Islam: "ok approved, build it". A Foundation chat can carry a FLOW: the
-     years first, then the way to build it, then each part in order —
+     years first, then the way to build it, then the five parts in order —
      each question with its examples, the answers back in boxes, a draft, a
      refine, save and on — then one check across all five and the whole saved
      as the next version of "Foundation — <place>".
@@ -635,10 +633,8 @@ var COPILOT = (function(){
      draft is written from (§53.5). Every press saves the flow at once; the
      server cuts it to shape (§96.2) and decides alone what was saved. */
   var NUDGE = null;              /* {id, text}: a short answer held for "Add more detail" / "Continue anyway" */
-  /* No road is marked Recommended (§475, Islam 2026-10-02: "remove the
-     label") — the four are offered as equals, as the quick replies are (§474). */
   var PATH_CARDS = [
-    { k:"guided", t:"Answer guided questions", d:"I ask you a few questions and draft your Foundation from your answers.",
+    { k:"guided", t:"Answer guided questions", rec:true, d:"I ask you a few questions and draft your Foundation from your answers.",
       i:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>' },
     { k:"notes", t:"Upload raw notes", d:"Upload interview notes or a workshop export and I turn them into a Foundation.",
       i:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/>' },
@@ -657,7 +653,7 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
-  function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
+  function doneCount(f){ return f.done.filter(Boolean).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -666,139 +662,57 @@ var COPILOT = (function(){
     return '<div class="copexs"><div class="copeh">Examples to inspire you</div>' +
       ex.map(function(x){ return '<p>• ' + E(withY(x, f)) + '</p>'; }).join("") + '</div>';
   }
-  /* WHAT THE PLAN ALREADY SAYS, PART BY PART (§478), read off the place
-     the way its own Foundation page draws it — a unit's fields, the group's
-     own GROUP — keyed by the flow's element keys. Hidden objectives are left
-     out, as they are everywhere they are counted. */
-  function planParts(){
-    var t = place(), o = null;
-    if (t === "group" && typeof GROUP !== "undefined") o = GROUP;
-    else { try { o = typeof unitLike === "function" ? unitLike(t) : null; } catch (e) { o = null; } }
-    o = o || {};
-    var hid = function(r){ return SMPRules.isHidden && SMPRules.isHidden(r); };
-    return {
-      who: (o.clauses || []).filter(function(c){ return c && clean(c[1]); })
-        .map(function(c){ return (clean(c[0]) ? clean(c[0]) + " " : "") + clean(c[1]); }).join("\n"),
-      asp: clean(o.aspiration), eim: clean(o.endInMind), pur: clean(o.mission),
-      obj: (o.keyObjectives || []).filter(function(k){ return k && !hid(k) && clean(k.name); })
-        .map(function(k){ return clean(k.name); }).join("\n"),
-      val: (o.values || []).filter(function(v){ return v && clean(v.name); })
-        .map(function(v){ return clean(v.name) + (clean(v.def) ? " — " + clean(v.def) : ""); }).join("\n")
-    };
-  }
-  function planHas(p){ var off = skipNow(); for (var k in p) if (p[k] && off.indexOf(k) < 0) return true; return false; }
-  /* §479 — THE CARDS FOLLOW THE STRUCTURE. Purpose and Core Values are
-     asked only where Client set-up › Structure switches them on for this
-     place's Foundation; off, they have no card and no question, whatever
-     was written before. Nothing is "optional" any more: a part that is on
-     is owed like the others. Read from the client's graph each time, and
-     sent with every save so the server's "is everything agreed" asks the
-     same list. */
-  var SKIP_COMP = { pur: "purpose", val: "values" };
-  function skipNow(){
-    var out = [];
-    for (var k in SKIP_COMP) {
-      var on; try { on = typeof compOn === "function" ? compOn(place(), SKIP_COMP[k]) : true; } catch (e) { on = true; }
-      if (!on) out.push(k);
-    }
-    return out;
-  }
-  function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
-  function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
-  /* A part's text on its card: one line reads as a sentence, several as a
-     list, and a long list stops at four with how many more (the mockup). */
-  function cardBody(text){
-    var lines = String(text).split("\n").map(function(x){ return x.replace(/^\s*(?:[-•]|\d+[.)])\s*/, "").trim(); }).filter(Boolean);
-    if (lines.length < 2) return '<p>' + E(lines[0] || "") + '</p>';
-    var cut = lines.length > 4 ? 3 : lines.length;
-    return '<ul>' + lines.slice(0, cut).map(function(l){ return '<li>' + E(l) + '</li>'; }).join("") +
-      (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
-  }
-  var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   function cardsHtml(f){
-    var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
-    var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
+    var S = steps();
     return '<div class="copcards">' + S.map(function(el, i){
-      if (!on(i)) return "";
-      var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
-      var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
-      else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
-      else if (now) { st = "Drafting"; cls += " now"; }
-      else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
-      else if (txt) { st = "In progress"; }
-      else { empty = true; st = "Empty"; }
-      var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
-        : '<p>' + (now ? E(el.questions.length + " questions") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
-      var wide = el.key === "who" || el.key === "asp";
-      var head = '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
-      var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
-      return pick
-        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') +
-            ' aria-label="Work on ' + E(el.name) + '">' + head + body + '</button>'
-        : '<div class="' + c + '" data-cop-card="' + i + '">' + head + body + '</div>';
+      var st, cls = "copst", body;
+      if (f.done[i]) { st = "Done"; cls += " done"; }
+      else if (i === f.e && f.path === "guided" && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
+      else if (i === f.e && f.phase === "review") { st = "Reviewing"; cls += " now"; }
+      else if (i === f.e && f.phase === "draft") { st = "Drafting"; cls += " now"; }
+      else st = "Waiting";
+      body = f.drafts[i] && (f.done[i] || (i === f.e && f.phase === "draft")) ? E(withY(f.drafts[i], f)) : el.questions.length + " questions";
+      var now = cls.indexOf(" now") > 0;
+      return '<div class="copcard' + (i === S.length - 1 ? " wide" : "") + (now ? " now" : "") + '" data-cop-card="' + i + '">' +
+        '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + st + '</span></h3><p>' + body + '</p></div>';
     }).join("") + '</div>';
   }
   function flowHead(f){
     var S = steps(), el = S[f.e] || {}, t, p = "";
-    if (f.phase === "year" || f.phase === "path" || f.phase === "start" || f.phase === "loaded") t = "Copilot · Foundation";
+    if (f.phase === "year" || f.phase === "path") t = "Copilot · Foundation";
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + el.name;
       p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
     }
     var total = 0, answered = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
-    var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
-    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
+    S.forEach(function(x, i){ total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
+    return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + sizeHtml() + '</div>' +
       '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
-    var plan = f.start === "plan";
-    /* §478: where the place already HAS a Foundation the chat opens by
-       asking whether to start from it; the answer stays on the page with
-       the chosen button lit, as the mockup draws it. */
-    if (f.phase === "start" || f.start) {
-      var ch = function(k, w){
-        return f.phase === "start" && ed ? '<button type="button" class="copbtn' + (k === "plan" ? " solid" : "") + '" data-cop-start="' + k + '">' + w + '</button>'
-          : '<span class="copchoice' + (f.start === k ? " picked" : "") + '">' + w + '</span>'; };
-      out.push(aiMsg(E(placeWord()) + " already has a Foundation. Do you want to start from what’s there, or start fresh?" +
-        '<div class="copbtns">' + ch("plan", "Start from it") + ch("fresh", "Start fresh") + '</div>'));
-      if (f.phase === "start") return out.join("");
-    } else out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
-    if (plan) {
-      out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Pick a part to work on, or tell me what you want to change."));
-      if (f.phase === "loaded" && ed && agreedAll(f))
-        out.push(aiMsg("When the parts read as you want them, check them together and save the Foundation." +
-          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck' + (busyHere ? ' disabled' : '') + '>Check the whole Foundation</button></div>'));
-    } else {
-      out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
-        return '<button type="button" class="coppcard" data-cop-path="' + c.k + '">' + icon(c.i) +
-          '<span class="coppt">' + E(c.t) + '</span><span class="coppd">' + E(c.d) + '</span></button>';
-      }).join("") + '</div>' : ''), true));
-      if (f.phase === "path") return out.join("");
-      out.push(meMsg(pathWord(f.path)));
-      /* The years are the guided road's question, asked once the road is
-         chosen (§478); a Foundation started from the plan never asks them. */
-      out.push(aiMsg("How long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
-        (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
-          '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
-          '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
-      if (f.phase === "year") return out.join("");
-      out.push(meMsg(yearsWord(f)));
-      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
-    }
+    out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
+    out.push(aiMsg("Before we start: how long does this strategy run, and which year does it end? Everything we build for " + E(placeWord()) + " will use that year." +
+      (f.phase === "year" && ed ? '<div class="copyr"><label>Starts<input class="fld" data-cop-y0 inputmode="numeric" maxlength="4" value="' + E(f.y0 || new Date().getFullYear()) + '"></label>' +
+        '<label>Ends at the end of<input class="fld" data-cop-y1 inputmode="numeric" maxlength="4" value="' + E(f.y1 || (new Date().getFullYear() + 2)) + '"></label>' +
+        '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
+    if (f.phase === "year") return out.join("");
+    out.push(meMsg(yearsWord(f)));
+    out.push(aiMsg("How would you like to build it?" + (f.phase === "path" && ed ? '<div class="coppaths">' + PATH_CARDS.map(function(c){
+      return '<button type="button" class="coppcard' + (c.rec ? " rec" : "") + '" data-cop-path="' + c.k + '">' + icon(c.i) +
+        '<span class="coppt">' + E(c.t) + (c.rec ? ' <span class="coppill">Recommended</span>' : '') + '</span><span class="coppd">' + E(c.d) + '</span></button>';
+    }).join("") + '</div>' : ''), true));
+    if (f.phase === "path") return out.join("");
+    out.push(meMsg(pathWord(f.path)));
+    out.push(aiMsg("Good. We'll build the five parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
-      if (!on(i)) return;
       var current = !all && i === f.e;
       if (!current) {
-        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
+        if (f.done[i]) out.push(aiMsg(E(el.name) + " agreed for " + E(fname()) + "."));
         return;
       }
-      if (f.phase === "loaded") return;
-      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
@@ -822,13 +736,13 @@ var COPILOT = (function(){
             '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
             '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
             '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
+              (nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
       }
     });
     if (all && f.check) {
       var byKey = {}; S.forEach(function(el, i){ byKey[el.key] = i; });
       var issues = f.check.issues || [], agree = f.check.agree || [];
-      out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
+      out.push(aiMsg('<span class="copeh">Consistency check across the five parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
         (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
@@ -843,18 +757,16 @@ var COPILOT = (function(){
   }
   function nextUndone(f, from){
     var n = steps().length;
-    for (var i = from + 1; i < n; i++) if (on(i) && !f.done[i]) return i;
-    for (var j = 0; j < from; j++) if (on(j) && !f.done[j]) return j;
+    for (var i = from + 1; i < n; i++) if (!f.done[i]) return i;
+    for (var j = 0; j < from; j++) if (!f.done[j]) return j;
     return -1;
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
     var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
-      ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
-    var shut = !!CARDSHUT[c.id];
-    return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
-      (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
-        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + '</div>') +
+      ' · ' + doneCount(f) + ' of ' + S.length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
+    return '<div class="copflow">' +
+      '<div class="copleft">' + vline + cardsHtml(f) + '</div>' +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
@@ -870,7 +782,7 @@ var COPILOT = (function(){
     var f = PANE.flow, w;
     if (f.path === "notes") w = "You chose to upload raw notes. Attach them with the paperclip below and say what they are, and the Copilot turns them into a Foundation.";
     else if (f.path === "template") w = "You chose a template. Download it from Copilot settings › Templates, fill it in, and attach it here.";
-    else w = "You chose to import a finished Foundation. Paste it below and the Copilot structures it into its parts.";
+    else w = "You chose to import a finished Foundation. Paste it below and the Copilot structures it into the five parts.";
     return '<div class="copsay copfroad">' + E(w) +
       (f.path === "template" ? ' <a class="linkbu" href="/' + E(slug()) + '/copilot/settings/templates">Open the templates</a>' : '') +
       (canEdit() && !PANE.chat.archived ? ' <button type="button" class="linkbu" data-cop-path="guided">Answer the guided questions instead</button>' : '') + '</div>';
@@ -887,7 +799,7 @@ var COPILOT = (function(){
       draw(); if (then) then();
     });
   }
-  function flowCopy(){ var f = JSON.parse(JSON.stringify(PANE.flow)); f.skip = skipNow(); return f; }
+  function flowCopy(){ return JSON.parse(JSON.stringify(PANE.flow)); }
   function flowAsk(body){
     if (!PANE || !PANE.chat || THINKING) return;
     var id = PANE.chat.id, ctx = contextOf();
@@ -923,7 +835,7 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    SAY = f.phase === "loaded" ? "Press the part you want to change on the left, then say what to change." : "Noted. Use the buttons above to carry on."; draw();
+    SAY = "Noted. Use the buttons above to carry on."; draw();
   }
   function flowClick(ev){
     var b, f = PANE && PANE.flow;
@@ -932,37 +844,13 @@ var COPILOT = (function(){
       var y0 = Number((document.querySelector("[data-cop-y0]") || {}).value), y1 = Number((document.querySelector("[data-cop-y1]") || {}).value);
       if (!(Number.isInteger(y0) && y0 >= 2000 && y0 <= 2100 && Number.isInteger(y1) && y1 >= 2000 && y1 <= 2100)) { SAY = "Type each year as four digits."; draw(); return true; }
       if (y1 < y0) { SAY = "The end year has to be the same as or after the start year."; draw(); return true; }
-      var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "ask"; g.e = 0; g.qi = 0; SAY = "";
-      flowSave(g, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
+      var g = flowCopy(); g.y0 = y0; g.y1 = y1; g.phase = "path"; SAY = ""; flowSave(g); return true;
     }
     if ((b = hit(ev, "[data-cop-path]"))) {
       var g2 = flowCopy(); g2.path = b.getAttribute("data-cop-path");
-      if (g2.path === "guided") { g2.phase = g2.y0 && g2.y1 ? "ask" : "year"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
+      if (g2.path === "guided") { g2.phase = "ask"; g2.e = 0; g2.qi = 0; } else g2.phase = "path";
       flowSave(g2, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
-    if ((b = hit(ev, "[data-cop-start]"))) {
-      /* START FROM IT fills the cards from the plan, each part already
-         agreed and marked as the plan's; START FRESH goes to the roads. */
-      var gs = flowCopy(), how = b.getAttribute("data-cop-start");
-      gs.start = how;
-      if (how === "plan") {
-        var pp = planParts();
-        steps().forEach(function(el, i){ var t = pp[el.key] || ""; gs.drafts[i] = t; gs.from[i] = gs.done[i] = !!t; });
-        gs.path = "guided"; gs.phase = "loaded";
-      } else gs.phase = "path";
-      flowSave(gs); return true;
-    }
-    if ((b = hit(ev, "[data-cop-cards]"))) {
-      if (b.getAttribute("data-cop-cards") === "hide") CARDSHUT[PANE.chat.id] = true; else delete CARDSHUT[PANE.chat.id];
-      draw(); return true;
-    }
-    if ((b = hit(ev, "button[data-cop-card]"))) {
-      var gc = flowCopy(), ci = Number(b.getAttribute("data-cop-card"));
-      gc.e = ci; gc.qi = 0; gc.done[ci] = false; NUDGE = null;
-      gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
-      flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
-    }
-    if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
     if ((b = hit(ev, "[data-cop-nudge-more]"))) {
       if (NUDGE) DRAFT[PANE.chat.id] = NUDGE.text.replace(/\s+$/, "") + ", ";
       NUDGE = null; draw();
@@ -975,7 +863,6 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-fsave]"))) {
       if (b.disabled) return true;
       var g3 = flowCopy(); g3.done[g3.e] = true;
-      if (g3.start === "plan") { g3.phase = "loaded"; flowSave(g3); return true; }
       var nx = nextUndone(g3, g3.e);
       if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
       g3.e = nx; g3.qi = 0; g3.phase = g3.drafts[nx] ? "draft" : "ask";
@@ -988,7 +875,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;
       var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow() }, function(j){
+      act({ act:"flowFinish", id:cid, placeWord:placeWord() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
         loadList(true); draw(); });
       return true;
@@ -1231,24 +1118,20 @@ var COPILOT = (function(){
     var b;
     if (flowClick(ev)) return;
     if ((b = hit(ev, "[data-cop-railtog]"))) { setRail(!railShut()); return; }
+    if ((b = hit(ev, "[data-cop-newflow]"))) {
+      act({ act:"newFlow", place: place() }, function(j){
+        var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+        PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
+        OPEN[key()] = { kind:"chat", id: j.chat.id };
+        openItem("chat", j.chat.id);
+      });
+      return;
+    }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
-      /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
-         button"). It opens on "start from what is there, or fresh?" where
-         the place already has a Foundation, and on the four roads where it
-         has none — the page knows which, because it holds the plan. */
-      if (section() === "foundation") {
-        act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
-          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
-          PANE = { id: j.chat.id, chat: j.chat, messages: [], flow: j.flow, flowSteps: null };
-          OPEN[key()] = { kind:"chat", id: j.chat.id };
-          openItem("chat", j.chat.id);
-        });
-        return;
-      }
       act({ act:"newChat", place: place(), section: section() }, function(j){
         var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
         PANE = { id: j.chat.id, chat: j.chat, messages: [] };

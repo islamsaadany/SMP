@@ -273,6 +273,9 @@
 
   /* ── Core values box ──────────────────────────────────── */
   .valbox { margin-top:20px; }
+  .uvlist { display:flex; flex-direction:column; gap:8px; }
+  .uvrow { display:grid; grid-template-columns:minmax(140px,1fr) 2fr auto; gap:8px; align-items:start; }
+  @media (max-width:700px){ .uvrow { grid-template-columns:1fr auto; } .uvrow > :nth-child(2){ grid-column:1 / -1; } }
   .valgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
   details.valcard { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
   details.valcard[open] { border-color:var(--gold); }

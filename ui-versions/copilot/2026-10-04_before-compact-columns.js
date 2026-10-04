@@ -1190,9 +1190,9 @@ var COPILOT = (function(){
     }).join("");
     var cov = PANE.swotCover || {};
     return '<aside class="copsw-side">' +
-      '<div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + ' of ' + n + ' done</span>' +
+      '<div class="copsw-box"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + ' of ' + n + ' done</span>' +
         (s.phase !== "saved" && canEdit() ? '<button type="button" class="linkbu" data-cop-sw-go="methods">Change methods</button>' : '') + '</div>' +
-        '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
+        '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div>' +
         body + '</div>' +
       '<div class="copsw-box"><div class="copsw-bh"><b>What we have so far</b> <span class="copsw-n">Per letter</span></div>' +
         '<div class="copsw-cov">' + LETTERS.map(function(L){

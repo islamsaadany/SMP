@@ -61828,3 +61828,30 @@ rule, red under four new breaks (`source-any-delete`, `swot-trust-saved`,
 browser and the whole file re-run; `built-in-step` and `generated-in-step`
 clear; typecheck clean. **RECORDED, NOT DONE**: main has moved ahead of this
 branch; nothing is merged.
+
+### §482.1 — Compact columns, and a to-do header that stays put (2026-10-04)
+Islam asked for the SWOT chat to be compacted: a narrower chats column on the
+left, a narrower to-do column on the right, and the work and the to-do list
+scrolling separately. Drawn first (`design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html`,
+published as an artifact) and signed off with one addition: *"for the to do
+list scrolling you need to keep the header freezed"*.
+- **In a SWOT chat** the chats rail is 200px (from about 250) and the to-do 270px
+  (from 340); the work in the middle takes the space back. Scoped with
+  `:has(.copsw)`, so the other Copilot chats keep their rail — the mockup was of
+  the SWOT chat and nothing else was asked.
+- **The work and the to-do each scroll in their own box**; scrolling to the end of
+  the list no longer scrolls the work away.
+- **The to-do's header — title, count and progress bar — is frozen** at the top of
+  its column while the list scrolls under it. The header and the bar are one
+  wrapper (`.copsw-todoh`), so a single sticky element carries both; it paints the
+  card's own surface and covers the card's top padding, so the list cannot show
+  through above it.
+- **"+ New chat" keeps one line** at 200px by tightening its padding (the mockup
+  named the wrap as the cost and the build answered it); a long chat's date line
+  may still wrap.
+- **Below 1021px nothing changes** — the to-do drops under the work as before.
+- Checked in `smp-app/checks/shell.mjs` §3i at a short window (or there is nothing
+  for the to-do to scroll, §94.2): the two widths, the button on one line, the
+  to-do scrolling in its own box, the work beside it not moving, and the header
+  still at the top of the column AND the thing a click lands on (`elementFromPoint`,
+  never a computed `position`, §94.8).

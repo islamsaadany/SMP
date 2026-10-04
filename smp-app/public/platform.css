@@ -11090,6 +11090,23 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 @media (max-width:1020px){ .copsw { grid-template-columns:minmax(0,1fr); } }
 .copsw-main { min-width:0; display:flex; flex-direction:column; gap:12px; }
 .copsw-side { display:flex; flex-direction:column; gap:12px; min-width:0; }
+/* §482.1 COMPACT COLUMNS (design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html,
+   signed off with one addition): in a SWOT chat the chats rail is 200px and the
+   to-do 270px, and the work and the to-do each scroll in their own box, so
+   reading the end of the list no longer scrolls the work away. The to-do's
+   header (title, count, meter) stays frozen while its list scrolls (Islam:
+   "keep the header freezed"). Scoped to the SWOT chat (`:has(.copsw)`); other
+   chats keep their rail. Below 1020px nothing changes. */
+.copsw-todoh { background:var(--surface); }
+@media (min-width:1021px){
+  .coppane:has(.copsw):not(.copshut) { grid-template-columns:200px minmax(0,1fr); }
+  .coppane:has(.copsw) .copnew { padding:4px 7px; white-space:nowrap; }
+  .copmain:has(.copsw) { overflow:hidden; }
+  .copmain:has(.copsw) .copsw { flex:1 1 auto; min-height:0; grid-template-columns:minmax(0,1fr) 270px; align-items:stretch; }
+  .copsw-main, .copsw-side { overflow-y:auto; min-height:0; padding-right:4px; }
+  .copsw-todoh { position:sticky; top:0; z-index:1; margin:-12px -14px 0; padding:12px 14px 2px;
+                 border-radius:var(--r-sm, 6px) var(--r-sm, 6px) 0 0; }
+}
 .copsw-box, .copsw-card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:12px 14px; }
 .copsw-card h3 { margin:0 0 6px; font:700 var(--fs-body, 14px)/1.3 var(--sans); color:var(--ink); }
 .copsw-card p { margin:0 0 8px; color:var(--ink-2); font-size:var(--fs-small, 12.5px); }

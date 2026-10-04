@@ -1416,6 +1416,36 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     const todo = await page.evaluate(() => (document.querySelector(".copsw-n") || {}).textContent || "");
     check(/0 of 5 done/.test(todo), "the to-do list counts its lines — three to gather, the analyses, the SWOT", todo);
 
+    /* §482.1 compact columns: a 200px chats rail, a 270px to-do, the work and
+       the to-do each scrolling in their own box, the to-do's header frozen.
+       A short window, or there is nothing for the to-do to scroll (§94.2). */
+    await page.setViewportSize({ width: 1440, height: 560 });
+    await page.waitForTimeout(300);
+    const cols = await page.evaluate(() => {
+      const r = (q) => { const e = document.querySelector(q); return e ? Math.round(e.getBoundingClientRect().width) : null; };
+      const nb = document.querySelector(".copnew[data-cop-newchat]");
+      return { rails: r(".coprails"), side: r(".copsw-side"), newH: nb ? Math.round(nb.getBoundingClientRect().height) : null, lh: nb ? parseFloat(getComputedStyle(nb).lineHeight) || 15 : null };
+    });
+    check(cols.rails === 200 && cols.side === 270, "in a SWOT chat the chats rail is 200px and the to-do 270px", JSON.stringify(cols));
+    check(cols.newH != null && cols.newH < cols.lh * 2, "…and + New chat stays on one line", JSON.stringify(cols));
+    const scr = await page.evaluate(() => {
+      const side = document.querySelector(".copsw-side"), main = document.querySelector(".copsw-main"), cm = document.querySelector(".copmain");
+      const hd = document.querySelector(".copsw-todoh"), li = document.querySelector(".copsw-li");
+      const out = { over: side.scrollHeight - side.clientHeight, cmScroll: cm.scrollHeight - cm.clientHeight };
+      const hd0 = hd.getBoundingClientRect().top, li0 = li.getBoundingClientRect().top, main0 = main.getBoundingClientRect().top;
+      side.scrollTop = side.scrollHeight;
+      const st = side.scrollTop, sideTop = side.getBoundingClientRect().top;
+      const hit = document.elementFromPoint(hd.getBoundingClientRect().left + 20, hd.getBoundingClientRect().top + 8);
+      return Object.assign(out, { scrolled: st, liMoved: li0 - li.getBoundingClientRect().top, mainMoved: main0 - main.getBoundingClientRect().top,
+        hdMoved: Math.round(hd0 - hd.getBoundingClientRect().top), hdAtTop: Math.round(hd.getBoundingClientRect().top - sideTop), hdHit: !!(hit && hd.contains(hit)) });
+    });
+    check(scr.over > 0 && scr.scrolled > 0, "the to-do column scrolls in its own box", JSON.stringify(scr));
+    check(scr.cmScroll <= 1 && scr.mainMoved === 0, "…and scrolling it does not move the work beside it", JSON.stringify(scr));
+    check(scr.liMoved > 0 && scr.hdAtTop <= 1 && scr.hdAtTop >= -1 && scr.hdHit, "…while the to-do's header stays frozen at the top, drawn over the list", JSON.stringify(scr));
+    await page.evaluate(() => { document.querySelector(".copsw-side").scrollTop = 0; });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.waitForTimeout(300);
+
     /* the guided question is the original's, word for word */
     await page.click('[data-cop-sw-line="internal|guided"]');
     await page.waitForSelector(".copsw-qt", { timeout: 10000 });

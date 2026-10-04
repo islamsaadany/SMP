@@ -61954,3 +61954,23 @@ capability's plan has always been judged by its own target.
 
 `checks/single-company.py` gains eight assertions read back from the data,
 red 3 with the edit branch forced off.
+
+### §488.1 — One list, not a list inside a list
+
+Islam, of that build: *"why does it open as a list inside a list? why don't we
+just follow the pillars page behavior?"* Right: drawing the capability's own
+Projects page in the pane put its own rail of projects inside a pane already
+beside a rail of capabilities. **With the pen on, the pane keeps its read
+table** — a row still unfolds its plan below it, and that plan is the editable
+one (`projPlanBody`, or `unitPlanBody` for a capability planned in pillars;
+both read the pen themselves, §53.5), carrying *Remove this project*; the rows
+carry grips and reorder the stored list; and *+ Add a project* (or pillar) sits
+under the table, opening what it made. `renderFnProjects` is no longer called
+here. **And the reorder found a dead branch**: a `data-kind="projects"`
+container fell through the shell's commit into the measures branch and threw,
+so a project's grip moved nothing anywhere (§99.6's recorded fault); it applies
+to the holder's projects now (`holderByIdWritable`), which also fixes a
+capability's own Projects rail. `single-company.py` §488 rewritten, never
+loosened (§218): no rail in the pane, add line under the table, the new row
+unfolded and editable, grips, a keyboard move read back from the data, Remove —
+red 6 with the first build's pane put back.

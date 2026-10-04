@@ -1683,10 +1683,7 @@ function seatName(key){
 }
 function renderTopCaps(){
   var caps = capsReachable();
-  /* §482: the office adds the first one here rather than going round to Setup. */
-  var add = grant("c_caps") === "edit"
-    ? '<div class="addrow"><button type="button" class="editbtn" data-topaddcap="1">+ Add a ' + L1("capability") + '</button></div>' : "";
-  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>' + add);
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
   var rows = caps.map(function(c){
     var fn = c.fn ? functionOf(c.fn) : null, pil = capPlansInPillars(c);
     var cu = pil ? capAsUnit("cap:" + c.id) : null;
@@ -1701,7 +1698,7 @@ function renderTopCaps(){
   }).join("");
   return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
     '<th style="width:30%">' + L1("capability") + '</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th class="num">Rows</th>' +
-    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>' + add);
+    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
 /* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).

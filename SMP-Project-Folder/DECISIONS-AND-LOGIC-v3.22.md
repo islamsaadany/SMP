@@ -61859,3 +61859,25 @@ cycle-board-lines, plan-level; full `qa.py` ERRORS none; the 19 unit and
 function decks byte-identical before and after. **Recorded, not this work's**
 (&sect;303): `master-picker` 57/1 (the Kind column reads CAP against BU for
 Product Mindset) fails identically on the build before. **On the branch, not merged.**
+
+## §482 — The company's Capabilities section appears when it is switched on (2026-10-04)
+
+Islam, on RHI (planned at company level, Capabilities switched on): *"they are
+not appearing in the bar here. maybe because they are empty but just turning
+them for any of the items like founation, swot and directions should show so I
+can get in an build."* **He is right, and it was one condition.** Foundation,
+SWOT and the directions are drawn the moment their switch is on; `topCapsOn()`
+alone also asked `capsReachable().length > 0`, so with no capability yet there
+was no section and therefore no place to make the first one (§61). The gate is
+now *switched on, and either something to show or the right to add one*
+(`grant("c_caps") === "edit"`, Setup's own key for the same act, §42) —
+somebody who reaches none and cannot add one still gets no section, because an
+empty section with nothing to do is furniture. `renderTopCaps()`'s empty state
+was already written and never reached; it gains **+ Add a capability**
+(`data-topaddcap`, behind the same key, `addCapability()` then `paint()`), and
+the button stays under the table once there are rows. The new row is named and
+given an owner in Setup › Capabilities as before. Screen only — no `api/`,
+`lib/` or `db/` file. Checked: a probe making the state (capabilities at the
+top, none existing) 6/6 and **3 red** with the old gate put back from the
+SOURCES; `single-company`, `plan-level`, `top-plan`, `top-projects`,
+`structure` green. **On the branch, not merged.**

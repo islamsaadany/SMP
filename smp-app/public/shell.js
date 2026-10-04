@@ -26368,7 +26368,10 @@ function seatName(key){
 }
 function renderTopCaps(){
   var caps = capsReachable();
-  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
+  /* §482: the office adds the first one here rather than going round to Setup. */
+  var add = grant("c_caps") === "edit"
+    ? '<div class="addrow"><button type="button" class="editbtn" data-topaddcap="1">+ Add a ' + L1("capability") + '</button></div>' : "";
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>' + add);
   var rows = caps.map(function(c){
     var fn = c.fn ? functionOf(c.fn) : null, pil = capPlansInPillars(c);
     var cu = pil ? capAsUnit("cap:" + c.id) : null;
@@ -26383,7 +26386,7 @@ function renderTopCaps(){
   }).join("");
   return section("", "", null, '<div class="cfg"><table data-topcaps="1"><thead><tr>' +
     '<th style="width:30%">' + L1("capability") + '</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th class="num">Rows</th>' +
-    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>');
+    '<th class="num">Performance</th><th class="num"></th></tr></thead><tbody>' + rows + '</tbody></table></div>' + add);
 }
 
 /* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).
@@ -62480,7 +62483,12 @@ var SYNC = (function () {
   /* §465: the capabilities are a section of this tab wherever the office put
      them in the company plan — always at company level, by choice at units
      level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §482: switched on is enough for whoever can add one — an empty section
+     is where the first capability is built, the way Foundation, SWOT and the
+     plan appear empty the moment they are switched on. Somebody who reaches
+     none and cannot add one still gets no section (§61: nothing to do). */
+  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) &&
+    (capsReachable().length > 0 || grant("c_caps") === "edit"); }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -66709,6 +66717,14 @@ var SYNC = (function () {
         if (!capsReachable().some(function(c){ return "cap:" + c.id === b.dataset.gocap; })) return;
         leaveModes(); current = b.dataset.gocap; currentSub = entrySub(current);
         paint(); window.scrollTo(0,0);
+      });
+    });
+    /* §482: the company page's own Add, behind Setup's key. */
+    document.querySelectorAll("[data-topaddcap]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.preventDefault();
+        if (grant("c_caps") !== "edit") return;
+        addCapability(); paint();
       });
     });
     document.querySelectorAll("[data-go]").forEach(function(b){

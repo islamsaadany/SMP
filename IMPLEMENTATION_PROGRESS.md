@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-04 — the company's Capabilities section appears as soon as it is switched on (§482), on the branch, not merged.** With planning on the company level and Capabilities switched on, the section used to appear only once a capability existed, so a client with none (RHI) had nowhere to start. It now appears for the office as soon as it is on, says "No capabilities yet", and has an "+ Add a capability" button. Somebody who can see no capability and cannot add one still gets no section.
+
 **2026-10-03 — Structure decides what a unit's Foundation asks (§479), merged to main 2026-10-03.** Purpose and Core Values are no longer "optional": where Client set-up › Structure has them on, the unit's Foundation page shows them, an empty one reads Missing and counts like the Aspiration, and the Foundation chat asks for them; where they are off, they are not shown and not asked, and anything already written is kept. New clients start with both off, and so does every existing client that never saved its units' Structure, so nobody suddenly owes two new parts.
 
 **2026-10-03 — a Foundation chat starts from what is there (§478), merged to main 2026-10-03.** The Guided Foundation button is gone: a new Foundation chat asks whether to start from the existing Foundation or fresh, shows six cards (Purpose optional, End in Mind new), and fills them from the plan when you start from it. A unit's Foundation page has optional Purpose and Core Values boxes.

@@ -319,12 +319,7 @@
   /* §465: the capabilities are a section of this tab wherever the office put
      them in the company plan — always at company level, by choice at units
      level — and never while they are a layer of their own. */
-  /* §482: switched on is enough for whoever can add one — an empty section
-     is where the first capability is built, the way Foundation, SWOT and the
-     plan appear empty the moment they are switched on. Somebody who reaches
-     none and cannot add one still gets no section (§61: nothing to do). */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) &&
-    (capsReachable().length > 0 || grant("c_caps") === "edit"); }
+  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -4553,14 +4548,6 @@
         if (!capsReachable().some(function(c){ return "cap:" + c.id === b.dataset.gocap; })) return;
         leaveModes(); current = b.dataset.gocap; currentSub = entrySub(current);
         paint(); window.scrollTo(0,0);
-      });
-    });
-    /* §482: the company page's own Add, behind Setup's key. */
-    document.querySelectorAll("[data-topaddcap]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.preventDefault();
-        if (grant("c_caps") !== "edit") return;
-        addCapability(); paint();
       });
     });
     document.querySelectorAll("[data-go]").forEach(function(b){

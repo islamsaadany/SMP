@@ -27,7 +27,9 @@ h1{font-size:20px;margin:0 0 4px}
 .rhead{background:var(--head);padding:12px 18px;font-size:12px;letter-spacing:.12em;font-weight:700;color:var(--ink)}
 .ritem{margin:10px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .ritem.on{background:var(--surface-2);box-shadow:inset 3px 0 0 #D98A9A}
-.ritem b{font-weight:600}
+.ritem b{font-weight:600;display:block}
+.code{font-family:var(--mono);font-size:13px;color:var(--ink);display:block;margin-bottom:4px}
+.code.big{display:inline;font-size:18px;margin:0 12px 0 0}
 .ritem .sub{font-size:12px;color:var(--ink-3);margin-top:3px}
 .miss{color:var(--bad);font-style:italic;font-weight:600;font-size:13px;white-space:nowrap}
 .pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
@@ -52,23 +54,23 @@ td.c{text-align:center} .mono{font-family:var(--mono);font-size:13px}
 <p class="lede">Today it is a list with an Open button per row. The proposal draws it like Directions: the capabilities down the left, the chosen one's plan on the right.</p>
 
 <div class="lab">Proposal</div>
-<div class="tabs"><span>Foundation</span><span>SWOT</span><span>Directions</span><span class="on">Capabilities</span></div>
+<div class="tabs"><span>Foundation</span><span>SWOT</span><span>Directions (D001…)</span><span class="on">Capabilities</span></div>
 
 <div class="split">
   <div class="rail">
     <div class="rhead">CAPABILITIES&nbsp;&nbsp;7</div>
-    <div class="ritem on"><div><b>Operational excellence</b><div class="sub">2 projects</div></div><span class="miss">4 Missing</span></div>
-    <div class="ritem"><div><b>Continuous Improvement</b><div class="sub">1 project</div></div><span class="miss">3 Missing</span></div>
-    <div class="ritem"><div><b>End-to-End Quality Mindset</b><div class="sub">No projects yet</div></div></div>
-    <div class="ritem"><div><b>Talent &amp; Workforce Optimization</b><div class="sub">No projects yet</div></div></div>
-    <div class="ritem"><div><b>ERP Enhancement</b><div class="sub">No projects yet</div></div></div>
-    <div class="ritem"><div><b>Digital Transformation</b><div class="sub">No projects yet</div></div></div>
-    <div class="ritem"><div><b>ESG introductory and E&amp;S Management System</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem on"><div><span class="code">C001</span><b>Operational excellence</b><div class="sub">2 projects</div></div><span class="miss">4 Missing</span></div>
+    <div class="ritem"><div><span class="code">C002</span><b>Continuous Improvement</b><div class="sub">1 project</div></div><span class="miss">3 Missing</span></div>
+    <div class="ritem"><div><span class="code">C003</span><b>End-to-End Quality Mindset</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C004</span><b>Talent &amp; Workforce Optimization</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C005</span><b>ERP Enhancement</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C006</span><b>Digital Transformation</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C007</span><b>ESG introductory and E&amp;S Management System</b><div class="sub">No projects yet</div></div></div>
   </div>
 
   <div class="pane">
     <div class="pband">
-      <h2>Operational excellence</h2>
+      <h2><span class="code big">C001</span>Operational excellence</h2>
       <span class="pill">Capability</span>
       <span class="seat"><b>OWNER</b><em>None yet — the Strategy office fills this in</em></span>
       <span class="seat"><b>CUSTODIAN</b><em>None yet</em></span>
@@ -92,6 +94,7 @@ td.c{text-align:center} .mono{font-family:var(--mono);font-size:13px}
   <ol>
     <li>The list goes. Each capability becomes a card on the left, like a direction: its name, how many projects it holds, and a red count of what is still missing.</li>
     <li>Pressing a card shows that capability on the right: its name, Owner and Custodian, then its projects (or its pillars, if it is planned in pillars).</li>
+    <li>Capabilities are coded C001, C002… and directions change to D001, D002…. There is no Open button: the capability's plan is on the right.</li>
     <li>Nothing is stored differently. It is the same capability and the same plan, drawn where the directions are drawn.</li>
   </ol>
 </div>

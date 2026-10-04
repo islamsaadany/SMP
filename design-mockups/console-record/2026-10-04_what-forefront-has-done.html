@@ -1,0 +1,239 @@
+<title>What Forefront has done</title>
+<style>
+  /* Drawn in the console's own vocabulary. Tokens, the navy tab row, the
+     client cards, the set-aside band and the table are copied out of
+     smp-app/shell/platform.html unchanged (§41.9, §53.5) — the only new
+     thing proposed here is WHERE the record sits and WHICH acts it holds. */
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --bad:#B23025;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber-wash:#2A2515; --good:#63BE96; --bad:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber-wash:#2A2515; --good:#63BE96; --bad:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:1060px; margin:0 auto; padding-block:26px 64px; padding-left:18px; padding-right:18px}
+
+  h1{margin:0 0 6px; font-size:23px; font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .lede{margin:0 0 4px; color:var(--ink-2); font-size:15px; max-width:64ch}
+  .sub{margin:0 0 8px; color:var(--ink-3); font-size:13.5px; max-width:64ch}
+
+  .skey{
+    font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3);
+    margin:32px 0 10px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+  }
+  .skey em{font-style:normal; text-transform:none; letter-spacing:0; font-weight:400; font-size:12.5px}
+  .skey .pick{color:var(--amber-tx); font-weight:600}
+
+  .note{
+    border-left:2px solid var(--line); padding:2px 0 2px 14px;
+    color:var(--ink-2); font-size:14px; max-width:62ch; margin:0 0 10px;
+  }
+  .note b{color:var(--ink); font-weight:600}
+
+  /* ── the console page, framed ── */
+  .screen{
+    border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    box-shadow:var(--shadow); background:var(--ground);
+  }
+  .screen > .caption{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    padding:8px 14px; background:var(--surface); border-bottom:1px solid var(--line);
+    font-size:12.5px; color:var(--ink-3);
+  }
+  .caption b{color:var(--ink); font:600 12.5px/1.6 inherit}
+  .caption .tag{margin-left:auto; font:600 10px/1.6 ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--line); border-radius:6px; padding:2px 7px}
+  .caption .tag.rec{color:var(--amber-tx); border-color:var(--amber-tx)}
+
+  .top{display:flex; align-items:center; gap:12px; padding:9px 16px; background:var(--surface); border-bottom:1px solid var(--line)}
+  .mk{font:700 13px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.16em; color:var(--ff-tx)}
+  .top .right{margin-left:auto; color:var(--ink-3); font-size:12.5px}
+  .nav{background:var(--ff); display:flex; padding:0 10px; gap:2px; overflow-x:auto}
+  .nav span{color:var(--ff-quiet); font:600 13.5px/1 inherit; padding:12px 13px; border-bottom:3px solid transparent; white-space:nowrap}
+  .nav span.on{color:var(--ff-ink); border-bottom-color:var(--amber)}
+  .body{padding:18px 16px 20px}
+
+  .ptitle{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-bottom:11px; border-bottom:1px solid var(--line); margin-bottom:16px}
+  .ptitle h2{font-size:19px; margin:0; font-weight:600}
+  .ptitle .right{margin-left:auto; display:flex; gap:8px; align-items:center}
+  .btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 12px; font:600 13px/1.5 inherit}
+  .srch{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 11px; font:400 13px/1.5 inherit; width:150px}
+
+  .cards{display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+  .ccard{border:1px solid var(--line); border-radius:12px; background:var(--surface); display:flex; flex-direction:column; min-height:96px}
+  .ccard .ctop{display:flex; flex-direction:column; gap:4px; padding:12px 13px}
+  .ccard h3{margin:0; font-size:15.5px; font-weight:600}
+  .ccard .ind{margin:0; color:var(--ink-3); font-size:12.5px}
+  .ccard .mods{margin-top:auto; border-top:1px solid var(--line); padding:6px 13px; color:var(--ink-3); font-size:12px}
+  .ccard.add{align-items:center; justify-content:center; border-style:dashed; font-weight:600; color:var(--ink-3); font-size:13.5px}
+
+  /* ── the set-aside band, the page's own ── */
+  .apart{margin-top:24px; padding-top:13px; border-top:1px solid var(--line)}
+  .apart > .akey{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:11px;
+    font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+  }
+  .akey a{margin-left:auto; color:var(--amber-tx); text-decoration:none; font-weight:600; letter-spacing:.06em}
+
+  /* ── the record itself: the console's own table ── */
+  .tscroll{overflow-x:auto; border-radius:8px}
+  table{border-collapse:collapse; width:100%; font-size:14px; min-width:620px}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap}
+  thead th{
+    background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.09em; text-transform:uppercase; border-bottom:0;
+  }
+  thead th:first-child{border-top-left-radius:8px}
+  thead th:last-child{border-top-right-radius:8px}
+  tbody tr:nth-child(even) td{background:var(--surface-2)}
+  td.when{color:var(--ink-3); font-variant-numeric:tabular-nums}
+  td.who{color:var(--ink-2)}
+  td.cl{font-weight:600}
+  td.cl.none{font-weight:400; color:var(--ink-3)}
+  td.what{white-space:normal; width:46%}
+  tbody tr.read td{color:var(--ink-3)}
+  tbody tr.read td.cl{font-weight:400}
+
+  .mono{font:600 10px/1.6 ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line); border-radius:6px; padding:1px 6px}
+
+  .two{display:grid; gap:14px; grid-template-columns:1fr 1fr; margin-top:4px}
+  @media (max-width:760px){ .two{grid-template-columns:1fr} }
+  .two > div{border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:12px 14px}
+  .two h4{margin:0 0 5px; font-size:14px; font-weight:600}
+  .two p{margin:0; color:var(--ink-2); font-size:13.5px}
+  .two .cost{margin-top:8px; color:var(--ink-3); font-size:12.5px}
+  .two .cost b{color:var(--ink-2); font-weight:600}
+
+  ul.acts{margin:0; padding:0; list-style:none; columns:2; column-gap:26px; font-size:13.5px; color:var(--ink-2); max-width:70ch}
+  ul.acts li{margin:0 0 5px; break-inside:avoid}
+  ul.acts li b{color:var(--ink); font-weight:600}
+  @media (max-width:560px){ ul.acts{columns:1} }
+</style>
+
+<div class="sheet">
+  <h1>What Forefront has done</h1>
+  <p class="lede">Everything we do from the console &mdash; adding a client, archiving one, handing somebody a seat, publishing a report &mdash; currently leaves no trace at all. Nobody can see who did what, or when.</p>
+  <p class="sub">Drawn in the console's own page. The tab row, the cards, the band and the table are the platform's; what is new is the band at the bottom and what sits in it.</p>
+
+  <p class="skey">Where it sits &mdash; <span class="pick">this one</span><em>the last few lines under the client cards, with a press to the whole list</em></p>
+
+  <div class="screen">
+    <div class="caption"><b>Clients</b><span>the page we open every day</span><span class="tag rec">new band</span></div>
+    <div class="top"><span class="mk">FOREFRONT</span><span class="right">Islam Saadany &middot; Sign out</span></div>
+    <div class="nav"><span>My work</span><span class="on">Clients</span><span>Consultants</span><span>Who sees what</span></div>
+    <div class="body">
+      <div class="ptitle">
+        <h2>Clients</h2>
+        <div class="right"><span class="srch">Search clients</span><span class="btn">Add a client</span></div>
+      </div>
+      <div class="cards">
+        <div class="ccard"><div class="ctop"><h3>Raya Trade</h3><p class="ind">Distribution &amp; retail</p></div><div class="mods">Strategy &middot; Insights &middot; Notes</div></div>
+        <div class="ccard"><div class="ctop"><h3>El Abd</h3><p class="ind">Food &amp; beverage</p></div><div class="mods">Strategy</div></div>
+        <div class="ccard"><div class="ctop"><h3>RHI</h3><p class="ind">Healthcare</p></div><div class="mods">Strategy &middot; Insights</div></div>
+        <div class="ccard add">+ Add a client</div>
+      </div>
+
+      <div class="apart">
+        <span class="akey">What Forefront has done <a href="#all">See all &rsaquo;</a></span>
+        <div class="tscroll">
+          <table>
+            <thead><tr><th>When</th><th>Who</th><th>Client</th><th>What</th></tr></thead>
+            <tbody>
+              <tr><td class="when">4 Oct 09:14</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="what">Turned Meeting Notes on</td></tr>
+              <tr><td class="when">3 Oct 17:02</td><td class="who">Noran Essam</td><td class="cl">El Abd</td><td class="what">Put Hend Fathy on the team, as Strategy office</td></tr>
+              <tr><td class="when">3 Oct 16:48</td><td class="who">Islam Saadany</td><td class="cl">El Abd</td><td class="what">Gave the super user seat to Mahmoud Adel</td></tr>
+              <tr><td class="when">3 Oct 11:30</td><td class="who">Omar Sharaf</td><td class="cl">RHI</td><td class="what">Published &ldquo;Macro outlook &mdash; Q4&rdquo;, to Finance and Retail only</td></tr>
+              <tr><td class="when">2 Oct 14:05</td><td class="who">Islam Saadany</td><td class="cl none">&mdash;</td><td class="what">Added Noran Essam as a consultant</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="skey">Or &mdash; a tab of its own</p>
+  <div class="two">
+    <div>
+      <h4>The band under the cards</h4>
+      <p>You see the last five without going anywhere, so something odd catches your eye on the page you already open. <em>See all</em> opens the rest.</p>
+      <p class="cost"><b>What it costs:</b> the Clients page gets about 180px longer.</p>
+    </div>
+    <div>
+      <h4>A fifth tab</h4>
+      <p>Nothing changes on any page you use today. The record is somewhere you go on purpose.</p>
+      <p class="cost"><b>What it costs:</b> nobody looks at it, because nothing ever points at it.</p>
+    </div>
+  </div>
+
+  <p class="skey">What gets a line</p>
+  <p class="note">Only the things that <b>change something</b>. Eleven acts:</p>
+  <ul class="acts">
+    <li><b>Made</b> a client</li>
+    <li><b>Archived</b> a client, or brought one back</li>
+    <li><b>Deleted</b> a client</li>
+    <li><b>Renamed</b> one, or changed its mark</li>
+    <li><b>Set its shape</b> &mdash; units, functions, divisions</li>
+    <li><b>Turned a module</b> on or off</li>
+    <li><b>Put somebody on a client's team</b>, or took them off</li>
+    <li><b>Gave or moved the super user seat</b></li>
+    <li><b>Added or removed a consultant</b></li>
+    <li><b>Handed out a password</b></li>
+    <li><b>Published or withdrew a report</b></li>
+  </ul>
+
+  <p class="skey">And the one I would leave off <em>&mdash; your call</em></p>
+  <p class="note"><b>Opening a client.</b> We open clients all day, so those lines would bury the eleven that matter. Here is the same five lines with opens on them:</p>
+  <div class="screen">
+    <div class="caption"><b>With opens recorded</b><span>the same five acts are still there, underneath</span><span class="tag">not recommended</span></div>
+    <div class="body" style="padding-top:14px">
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>When</th><th>Who</th><th>Client</th><th>What</th></tr></thead>
+          <tbody>
+            <tr class="read"><td class="when">4 Oct 09:21</td><td class="who">Noran Essam</td><td class="cl">RHI</td><td class="what">Opened the client</td></tr>
+            <tr class="read"><td class="when">4 Oct 09:19</td><td class="who">Islam Saadany</td><td class="cl">El Abd</td><td class="what">Opened the client</td></tr>
+            <tr class="read"><td class="when">4 Oct 09:16</td><td class="who">Omar Sharaf</td><td class="cl">Raya Trade</td><td class="what">Opened the client</td></tr>
+            <tr><td class="when">4 Oct 09:14</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="what">Turned Meeting Notes on</td></tr>
+            <tr class="read"><td class="when">4 Oct 09:12</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="what">Opened the client</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <p class="skey">Two things it is not</p>
+  <p class="note">It is <b>not</b> a copy of a client's own History page. That one records what happens inside a client &mdash; a target moved, a figure entered. This records what we do from outside, which today nothing sees.</p>
+  <p class="note">It is <b>not</b> something a client can see. It is Forefront's own console and stays there.</p>
+
+  <p class="skey">What it takes to build</p>
+  <p class="note">Everything the console does goes through <b>one door</b>, and the table for this already exists in the database and has never had a row written into it. So it is one line of writing at that door, plus the band you see above &mdash; not a change to fourteen screens.</p>
+</div>

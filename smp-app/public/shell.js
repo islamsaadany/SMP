@@ -26437,10 +26437,20 @@ function renderTopCaps(){
         railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
         '</button>';
     }).join("") + '</div>';
-  var seats = '<span class="topcapseat"><b>Owner</b> ' + seatName(sel.head) + '</span>' +
-              '<span class="topcapseat"><b>Custodian</b> ' + seatName(sel.custodian) + '</span>';
+  /* §488: WITH THE PEN ON, THE PANE IS THE CAPABILITY'S OWN PLAN PAGE —
+     renderFnProjects() for a cap: target is what its own Projects (or
+     pillars) section draws in edit mode, so the fields, the Add buttons and
+     the rail are the same controls and write the same rows (§53.5). The two
+     seats become the register's own picker, Setup's (§412), so the People
+     page and this header read one fact (§33). */
+  var ed = projEditing();
+  var seat = function(role, cur){
+    return ed ? assignPicker("cap:" + sel.id, role, cur, true) : seatName(cur);
+  };
+  var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
+              '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
   var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
-    '<div class="topcapbody">' + topCapBody(sel) + '</div>';
+    '<div class="topcapbody">' + (ed ? renderFnProjects("cap:" + sel.id) : topCapBody(sel)) + '</div>';
   return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
@@ -27982,7 +27992,10 @@ var SEC_PENS = {
 };
 /* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
    page and grant (g_found), and its SWOT and Plan take the unit's. */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"] };
+/* §488: the company's Capabilities section takes the plan's own pen, so one
+   Edit opens the chosen capability for editing in place — the same fields its
+   own Plan page draws (Islam: "there is no edit here in the capability"). */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];

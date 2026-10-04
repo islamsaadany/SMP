@@ -61930,3 +61930,27 @@ main's copy with this branch's one line re-applied at a name never held,
 `v5.97-directions-perf` (§146.2, §94.12). The duplicate-declaration scan over
 build.py's list reads only the six §281.1 leaves. No forced sign-out is owed
 (spec 029): no rule about how a save is judged moves on this branch's side.
+
+## §488 — The company's capabilities can be edited in place
+
+Islam, of the Capabilities section §482 drew: *"there is no edit here in the
+capability."* He was right and it was §482's doing: the table it replaced had
+an **Open** button leading to the capability's own page, where the pen is; he
+asked for that button to go and the new view gave nothing in its place, so the
+company page could read a capability and change nothing about it. Two answers
+were put to him (edit in place, or put Open back) and he took the first.
+
+**The section line carries the plan's own pen** (`SEC_PENS_TOP.caps` is the
+plan's page and grant), so one Edit opens it and Done editing closes it like
+every other section (§268, §269). **With the pen on, the pane IS the
+capability's own plan page** — `renderFnProjects("cap:<id>")`, which already
+draws a capability planned in projects or in pillars in edit mode — so the
+fields, the rail, *Add a project* and *Remove this project* are the same
+controls writing the same rows, never a second editor (§53.5). **The two seats
+become the register's own picker**, the one Setup › Capabilities uses (§412),
+so the People page and this header read one fact (§33). Read mode is exactly
+§482's, asserted. Nothing stored moves and no server rule changes — a
+capability's plan has always been judged by its own target.
+
+`checks/single-company.py` gains eight assertions read back from the data,
+red 3 with the edit branch forced off.

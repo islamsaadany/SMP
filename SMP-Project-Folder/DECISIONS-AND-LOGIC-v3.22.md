@@ -61771,3 +61771,60 @@ door). Rewritten at both ends: the colours and the client's door mark are
 inside the set-up flow, and the separate group-mark upload is ABSENT. 146/0.
 
 No product file changes; nothing stored, nothing migrated, no `sw.js` bump.
+
+## §482 — The SWOT Copilot flow (spec 064, 2026-10-04)
+
+Islam, of the signed-off mockup `design-mockups/copilot-swot-flow/2026-10-04_v2.html`:
+*"proceed"*, then *"continue"*. Numbered §482 because main took §480 and §481
+while this was built; the renumber touched only this work's own lines
+(§264.3), and `checks/door-landing.mjs` and `checks/setup-shape.mjs` keep
+main's §480.
+
+**THE FLOW.** A SWOT chat starts from the subject's existing SWOT or fresh,
+then a methods grid — rows Internal · Micro · Macro, columns Guided questions ·
+Template · Ready reports · Deep research, with no Deep research on Internal
+(the inside of a business is not on the web). The ticks become a to-do list
+(*"N of M done"*) in a right column, beside one box per letter showing what has
+been gathered. Guided questions are asked word for word from the original
+method. Micro and Macro each get an analysis page that is agreed on its own,
+then the SWOT is drafted at 5–7 items per letter, and saving writes the titles
+into the plan's SWOT. The original names two macro factors *Environmental* and
+*Political*, and the flow keeps those words.
+
+**SOURCES ARE THE CLIENT'S, NOT THE CHAT'S** (*"per client is better"*): a
+report, a filled template, a deep-research answer or a set of guided answers
+is a row in `copilot_sources` (migration 023, RLS-forced like every tenant
+table), tagged to one unit or to *all*, so a report brought in for Mobile can
+be picked again for Retail or next year. **Only whoever added a source, or the
+Super user, may delete it** — asked of the stored row on the server
+(`mayDeleteSource`), never of what the page drew (§42).
+
+**DEEP RESEARCH IS A PROMPT OUT AND AN ANSWER IN**: the platform cannot browse,
+so it hands over a `.txt` prompt to run elsewhere, and the answer comes back as
+an upload or a paste and becomes a source. The download's name carries a long
+dash, which a plain `filename=` header cannot carry; it goes as
+`filename*=UTF-8''` like the platform's other downloads.
+
+**THE GATES READ THE STORED FLOW** (`modules/copilot/swot.ts`): the analysis
+step is refused until the to-do list is done, the SWOT cannot be saved before
+it is drafted, and the page cannot claim a SWOT is already saved
+(`sanitizeSwot`). Every rail section folds; Deliverables and Sources open
+folded.
+
+**TWO FAULTS FOUND BY LOOKING AT THE BUILT PAGE**: a letter's count rendered as
+a bare digit beside its heading, so *Opportunities* read *"Opportunities s"* —
+it reads *"5 items"* now; and the source row reused the `.copsrc` pill class,
+so it is `copsrcrow` (§65.9).
+
+**A CHECK WAS FLAKY AND IT WAS THE CHECK**: §472's working-word assertion looked
+at 2.2s for a word that turns at 2s on a 0.5s tick, so it raced the tick and
+failed one run in two. It looks at 2.9s inside a 4s answer now. And §453's
+deliverable press had to open the Deliverables rail first, since it opens
+folded.
+
+**VERIFIED**: `checks/copilot.mjs` 207/0 with a new §7 at both ends of every
+rule, red under four new breaks (`source-any-delete`, `swot-trust-saved`,
+`swot-any-gather`, `swot-finish-any`); `checks/shell.mjs` §3j 20/0 driven in a
+browser and the whole file re-run; `built-in-step` and `generated-in-step`
+clear; typecheck clean. **RECORDED, NOT DONE**: main has moved ahead of this
+branch; nothing is merged.

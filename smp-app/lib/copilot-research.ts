@@ -1,4 +1,4 @@
-/* ══ THE DEEP RESEARCH PROMPTS (§480), CARRIED VERBATIM ════════════════
+/* ══ THE DEEP RESEARCH PROMPTS (§482), CARRIED VERBATIM ════════════════
    Copied unchanged from the original Copilot
    (strategy-formulation/lib/prompts/deep-research-prompts.ts). Islam's rule:
    the questions and prompts are the original's, word for word — never

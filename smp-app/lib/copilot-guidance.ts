@@ -9,7 +9,7 @@
    from Copilot settings (the shipped text in copilot-defaults.generated.ts, generated from
    assets/copilot/instructions-source.md, with edits in `copilot_assets`), and since §460 it leads every
    question. This file holds the voice, the starting point and the house
-   rules that wrap it — not the method itself. (§480: this comment used to
+   rules that wrap it — not the method itself. (§482: this comment used to
    call the guidance a placeholder, which stopped being true at §456.) */
 import type { Section } from "./copilot.ts";
 

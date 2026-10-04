@@ -1069,7 +1069,7 @@ var COPILOT = (function(){
   }
   window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 
-  /* ── THE SWOT FLOW (§480, Islam 4 Oct 2026, from the signed-off
+  /* ── THE SWOT FLOW (§482, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
      A SWOT chat is a to-do list rather than a conversation: which areas
      (internal, micro, macro) and which methods each uses are ticked in a
@@ -1155,7 +1155,7 @@ var COPILOT = (function(){
       if (SRCASK === r.id) return '<div class="coprow ask"><span class="copt">' + E(r.name) + '</span><span class="copaskrow">Delete? ' +
         '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button>' +
         '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button></span></div>';
-      return '<div class="coprow copsrc" data-cop-src="' + E(r.id) + '">' +
+      return '<div class="coprow copsrcrow" data-cop-src="' + E(r.id) + '">' +
         '<a class="copitem" href="' + E(url("source", ["id=" + encodeURIComponent(r.id)])) + '" target="_blank" rel="noopener">' +
           '<span class="copt">' + E(r.name) + '</span>' +
           '<span class="copm">' + E(srcWord(r.kind)) + ' · ' + (r.place === "all" ? "All units" : "This unit") + ' · ' + E(when(r.at)) + '</span></a>' +
@@ -1336,7 +1336,7 @@ var COPILOT = (function(){
     var d = s.draft;
     if (!d) return '<div class="copsw-card"><p>The SWOT is not drafted yet.</p>' + (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-draft' + (busyHere ? ' disabled' : '') + '>Draft the SWOT</button></div>' : '') + '</div>';
     var grid = '<div class="copsw-swot">' + LETTERS.map(function(L){
-      return '<section class="copsw-l ' + L + '"><h3>' + E(LETTER_WORD[L]) + ' <span class="copsw-n">' + d[L].length + '</span></h3><ol>' +
+      return '<section class="copsw-l ' + L + '"><h3>' + E(LETTER_WORD[L]) + ' <span class="copsw-n">' + d[L].length + (d[L].length === 1 ? ' item' : ' items') + '</span></h3><ol>' +
         d[L].map(function(it){ return '<li><b>' + E(it.title) + '</b>' + (it.description ? '<span>' + E(it.description) + '</span>' : '') +
           (it.evidence ? '<span class="copsw-ev">' + E(it.evidence) + '</span>' : '') + '</li>'; }).join("") + '</ol></section>';
     }).join("") + '</div>';
@@ -1468,7 +1468,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  /* ── the rail folds (§480: "the deliverables and sources open folded") ── */
+  /* ── the rail folds (§482: "the deliverables and sources open folded") ── */
   var FOLD_DEFAULT = { chats: false, delivs: true, sources: true }, FOLD = {};
   function folded(k){
     if (k in FOLD) return FOLD[k];

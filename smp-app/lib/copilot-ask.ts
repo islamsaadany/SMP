@@ -261,7 +261,7 @@ async function withRetry(call: (model?: string) => Promise<any>): Promise<any> {
 
 /* ONE SMALL ASK IN ONE SMALL SHAPE (§465): the guided Foundation's draft,
    refine and check. No history — what the flow knows is in the corpus. */
-/* §480: the SWOT flow asks the same way and names its own corpus, may send
+/* §482: the SWOT flow asks the same way and names its own corpus, may send
    a PDF source as itself (`parts`), and wants room for a whole analysis. */
 export async function askFlowJson(a: { instruction: string; corpus: string; question: string; schema: unknown;
   corpusName?: string; parts?: unknown[]; maxOutput?: number }):

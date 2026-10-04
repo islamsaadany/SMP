@@ -1,4 +1,4 @@
-/* ── THE SWOT CHAT AND THE SOURCES, ON THE SERVER (§480) ────────────────
+/* ── THE SWOT CHAT AND THE SOURCES, ON THE SERVER (§482) ────────────────
    Split from index.ts so that file stays the Foundation's and the gate's.
    The same three rules hold here as there: every write is judged against
    the STORED row (§42); the model is asked with no transaction open (§289),

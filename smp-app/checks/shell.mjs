@@ -922,14 +922,16 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       "…the pressed draft now says Saved as v1 with a way to open it, and the other draft keeps its button", JSON.stringify(sv));
     check(/Mobile foundation/.test(sv.rail), "…and it is on the left under Deliverables", sv.rail);
 
-    MODEL_DELAY = 2600;
+    /* §482: the word turns at 2s and the page re-reads it every 0.5s, so a look
+       at 2.2s raced the tick; it looks at 2.9s, inside a 4s answer. */
+    MODEL_DELAY = 4000;
     await page.fill("[data-cop-text]", "Tighten the purpose");
     await page.click("[data-cop-send]");
     await page.waitForSelector("[data-cop-msgs] .copworking", { timeout: 5000 }).catch(() => {});
     const w1 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] .copworking");
       window.__copW = el && el.querySelector("[data-cop-wword]");
       return el ? { word: window.__copW ? window.__copW.textContent : "", dots: el.querySelectorAll(".copdots i").length, role: el.getAttribute("role"), all: el.textContent } : null; });
-    await page.waitForTimeout(2200);
+    await page.waitForTimeout(2900);
     const w2 = await page.evaluate(() => { const el = document.querySelector("[data-cop-msgs] [data-cop-wword]"); return { word: el ? el.textContent : "", same: el === window.__copW }; });
     const words = await page.evaluate(() => window.__copWork && window.__copWork.words);
     check(w1 && words && words.includes(w1.word) && !/\s/.test(w1.word) && w1.dots === 3 && w1.role === "status" && !/working on it/i.test(w1.all),
@@ -1040,6 +1042,8 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       body: JSON.stringify({ act: "newDeliverable", place: "mobile", section: "foundation", title: "Mobile foundation", kind: "promotable", text: "Purpose: first draft" }) })).json());
     check(made && made.ok && made.id, "a deliverable can be filed (through the api until stage 3)", JSON.stringify(made));
     await open("/raya-trade/strategy/mobile/copilot/foundation");
+    /* §482: the Deliverables rail opens folded, so it is opened the way a person would */
+    if (await page.$('[data-cop-fold="delivs"][aria-expanded="false"]')) await page.click('[data-cop-fold="delivs"]');
     await page.click('[data-cop-deliv="' + made.id + '"]'); await page.waitForSelector("[data-cop-edit]", { timeout: 8000 });
     await page.click("[data-cop-edit]"); await page.waitForSelector("[data-cop-edit-text]", { timeout: 8000 });
     await page.fill("[data-cop-edit-text]", "Purpose: second draft");
@@ -1361,7 +1365,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
   }
 });
 
-await section("3j · the SWOT chat: methods, the to-do list, sources, both analyses, the SWOT, the save (§480)", async () => {
+await section("3j · the SWOT chat: methods, the to-do list, sources, both analyses, the SWOT, the save (§482)", async () => {
   /* PRESSED AND READ BACK (§96), from the approved mockup
      (design-mockups/copilot-swot-flow/2026-10-04_v2.html). Every step is
      asserted from the DATABASE as well as the page. */

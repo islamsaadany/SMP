@@ -1,4 +1,4 @@
-/* The Copilot's sources (spec 064, the SWOT flow, §480)
+/* The Copilot's sources (spec 064, the SWOT flow, §482)
 
    Islam, of the SWOT flow: everything brought in — a filled template, a
    ready report, the answer to a deep-research prompt, the guided answers

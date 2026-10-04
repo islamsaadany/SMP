@@ -82,6 +82,38 @@ function officePersonKey(email: string): string {
 }
 function tempPassword(): string { return crypto.randomBytes(9).toString("base64").replace(/[^A-Za-z0-9]/g, "").slice(0, 12); }
 
+/* ── THE RECORD OF WHAT FOREFRONT HAS DONE (§483, audit fix 04) ──────────
+   Islam, of the rules audit: *"let's do the recording on console"*, then
+   *"the console record should sit as a separate page as history"*.
+
+   ONE DOOR, SO ONE LINE OF WRITING. Every act out here arrives at
+   `platformAction` below, so recording is a call at each act rather than a
+   change to fourteen screens — and the acts recorded are the eleven Islam
+   signed off, named at their call sites. Opening a client is deliberately
+   NOT one of them (*"opened a client is not really important"*), which is
+   what `tenant_log` was originally for and what nothing writes now.
+
+   THE SENTENCE IS WRITTEN HERE AND STORED, never re-derived on the read.
+   Two of the eleven acts DESTROY their own subject — deleting a client,
+   removing a consultant — and both foreign keys are ON DELETE SET NULL, so
+   a page that read the names through a join would lose exactly the two acts
+   most worth keeping (§49.2). `what` carries the act's own key so the page
+   can group or filter by act without reading English.
+
+   AND IT CAN NEVER FAIL THE ACT IT RECORDS. A record is worth having and is
+   worth less than the thing it records: a database that refuses this INSERT
+   must not turn a client that was made into an error on the screen, so the
+   failure goes to the runtime log and the act answers as it would have
+   (§231.3's rule — a helper degrades to no record, never to no feature). */
+async function logAct(c: Q, who: Account, on: ClientRow | Tenant | null, what: string, detail: string) {
+  if (process.env.SMP_BREAK === "no-record") return;   /* falsification (§276) */
+  try {
+    await c.query(
+      "INSERT INTO tenant_log (user_id, tenant_id, what, who_name, tenant_name, detail) VALUES ($1,$2,$3,$4,$5,$6)",
+      [who.id, on ? on.id : null, what, who.name || who.email, on ? on.name : "", detail]);
+  } catch (e) { console.error("[platform] recording " + what + ":", (e as Error).message); }
+}
+
 /* What a card says — every number read, never stored (constitution V). */
 async function factsFor(t: ClientRow) {
   try {
@@ -244,6 +276,10 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     /* sessions go with the account (they cascade, and saying so is cheaper
        than somebody wondering whether a signed-in tab survives) */
     await pool.query("DELETE FROM users WHERE id = $1", [target.id]);
+    /* act 9 — and the row keeps their NAME, because the account it pointed at
+       is gone one statement above this (logAct's reason for storing it) */
+    await logAct(pool, account, null, "consultant.removed",
+      "Removed " + (target.name || target.email) + " as a consultant");
     console.log("[platform] " + account.email + " deleted consultant " + target.email);
     return ok({ deleted: target.email });
   }
@@ -274,6 +310,13 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       }
       await pool.query("UPDATE users SET status = $2, updated_at = now() WHERE id = $1", [existing.id, want]);
       if (want === "retired") await pool.query("DELETE FROM sessions WHERE user_id = $1", [existing.id]);
+      /* act 9, and recorded because RETIRING is the ordinary way somebody
+         leaves (§338: deleting is the exception and is refused until this has
+         happened) — so a record that only knew about deletions would be silent
+         on most departures. A rename, a change of address and the admin flag
+         are deliberately NOT recorded and are flagged in the handover. */
+      await logAct(pool, account, null, want === "retired" ? "consultant.retired" : "consultant.restored",
+        (want === "retired" ? "Retired " : "Brought back ") + (existing.name || existing.email) + " as a consultant");
     }
     if (existing) {
       await pool.query("UPDATE users SET name = COALESCE($2, name), updated_at = now() WHERE id = $1", [existing.id, body.name || null]);
@@ -299,6 +342,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const pw = tempPassword();
     await pool.query("INSERT INTO users (email, name, kind, is_admin, password_hash, must_change) VALUES ($1,$2,'office',$3,$4,true)",
       [email, body.name || "", !!body.isAdmin && FF.isAdmin(account), hashPassword(pw)]);
+    /* act 9 — and the password that comes with it is not a second row: adding
+       somebody IS handing them one, and act 10 is the later reset (§87's
+       twins, in a record rather than on a screen) */
+    await logAct(pool, account, null, "consultant.added",
+      "Added " + (body.name || email) + " as a consultant");
     return ok({ created: true, password: pw });
   }
 
@@ -309,6 +357,12 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const pw = tempPassword();
     await pool.query("UPDATE users SET password_hash = $2, must_change = true, updated_at = now() WHERE id = $1", [target.id, hashPassword(pw)]);
     await pool.query("DELETE FROM sessions WHERE user_id = $1", [target.id]);
+    /* act 10. The password itself is NEVER on the row — a record of who was
+       handed one is the point; a record of what it was is a second place to
+       read it from (the house rule: nothing a credential reader returns
+       carries the credential). */
+    await logAct(pool, account, null, "password.issued",
+      "Handed a password to " + (target.name || target.email));
     return ok({ password: pw });
   }
 
@@ -419,6 +473,20 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       "mark = CASE WHEN $5::text IS NULL THEN mark WHEN $5 = '' THEN NULL ELSE $5 END WHERE id = $1",
       [row.id, body.name || null, body.industry == null ? null : String(body.industry), body.notes == null ? null : String(body.notes), mark,
        body.size == null ? null : String(body.size)]);
+    /* act 4 — and the sentence names only what this press actually changed,
+       because the drawer saves every field at once and a row reading "changed
+       its details" on every keystroke is a record nobody can scan. The name
+       is recorded with BOTH spellings, since the row's own `tenant_name`
+       is the one it had at the time (logAct) and the new one would otherwise
+       be lost the next time it moves. */
+    const renamed = body.name && String(body.name).trim() !== String(row.name).trim();
+    const moved: string[] = [];
+    if (renamed) moved.push("renamed it " + String(body.name).trim());
+    if (mark !== null) moved.push(mark === "" ? "took its mark off" : "changed its mark");
+    if (moved.length) {
+      await logAct(pool, account, row, renamed ? "client.renamed" : "client.mark",
+        moved.join(" and ").replace(/^./, (ch) => ch.toUpperCase()));
+    }
     return ok({});
   }
 
@@ -493,6 +561,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         ". Set-up rewrites the units and functions, so it stops here rather than " +
         "losing that. Change them on the client's own Setup pages instead.");
     }
+    /* act 5, recorded only once the write has LANDED — the two refusals above
+       return before this, so a row never says a shape was set on a press that
+       was turned away (§124: a record claiming more than happened). */
+    const counts = [
+      [answers.companies.length, "division", "divisions"],
+      [answers.units.length, "business unit", "business units"],
+      [answers.functions.length, "supporting function", "supporting functions"]
+    ].filter((x) => (x[0] as number) > 0)
+     .map((x) => x[0] + " " + ((x[0] as number) === 1 ? x[1] : x[2]));
+    await logAct(pool, account, row, "client.shape",
+      counts.length ? "Set its shape — " + counts.join(", ") : "Set its shape — nothing in it yet");
     return ok({});
   }
 
@@ -528,6 +607,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     } else {
       await pool.query("UPDATE tenants SET status = 'active', archived_at = NULL, archived_by = NULL WHERE id = $1", [row.id]);
     }
+    /* act 2, both directions from one handler because it is one right and one
+       row (this action's own reason) — and the two read as two acts, since
+       "archived" and "brought back" are what a person is looking for */
+    await logAct(pool, account, row, on ? "client.archived" : "client.restored",
+      on ? "Archived the client" : "Brought the client back");
     return ok({ status: on ? "retired" : "active" });
   }
 
@@ -565,6 +649,17 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (String(body.confirm || "").trim() !== String(row.name).trim()) {
       return no(400, "Type the client's name exactly as it is written to confirm.");
     }
+    /* act 3, RECORDED BEFORE THE DELETE — and with the ROW, not null, which
+       is the one line here the check had to correct. `tenant_log`'s FK is ON
+       DELETE SET NULL, so passing the row and passing null end with the same
+       empty id a statement later; what they do NOT share is the NAME, which
+       logAct takes off whatever it is handed. Passing null looked honest (*
+       there is nothing left to point at *) and dropped the name as well, so
+       the one row that most needs to say which client went said nothing
+       (§49.2, §104.8 — the comment above this said the name survived while
+       the code threw it away). Recorded first, so a delete that fails half
+       way still leaves a record that it was attempted. */
+    await logAct(pool, account, row, "client.deleted", "Deleted the client " + row.name);
     const { counts } = await deleteTenant(ownerPool(), row.id);
     console.log("[platform] " + account.email + " deleted " + row.key + " (" + row.name + ") — " +
       Object.keys(counts).length + " tenant tables at zero");
@@ -606,6 +701,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const have = modulesFor(row.modules).filter((k) => k !== key);
     const next = on ? modulesFor([...have, key]) : have;
     await pool.query("UPDATE tenants SET modules = $2::jsonb WHERE id = $1", [row.id, JSON.stringify(next)]);
+    /* act 6 — the module's own LABEL, read from MODULE_DEF rather than spelt
+       here, so a module renamed tomorrow reads right in every row written
+       after it and the record never holds a second vocabulary (§53.5) */
+    await logAct(pool, account, row, on ? "module.on" : "module.off",
+      (on ? "Turned " : "Turned off ") + MODULE_DEF[key].label + (on ? " on" : ""));
     return ok({ modules: next });
   }
 
@@ -673,6 +773,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       if (want !== "published" && want !== "draft") return no(400, "A report is published or it is a draft.");
       const saved = await withTenant(row.id, (c) => LIB.setState(c, String(body.id || ""), want, account.email));
       if (!saved) return no(404, "That report is not there any more.");
+      /* act 11, and the TITLE is on the row: a report may be renamed or
+         deleted afterwards, so an id would make the record unreadable the one
+         time somebody goes looking for it (logAct's whole argument) */
+      await logAct(pool, account, row, want === "published" ? "report.published" : "report.withdrawn",
+        (want === "published" ? "Published " : "Withdrew ") + "“" + String(saved.title || "a report") + "”");
       return ok({ item: LIB.shape(saved, false) });
     }
 
@@ -836,6 +941,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         "INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,'super') ON CONFLICT (tenant_id, user_id) DO NOTHING",
         [t.id, me.id, personKey]);
     } catch (e) { console.error("placing the creator on " + key + ":", (e as Error).message); }
+    /* act 1. The row is built by hand rather than re-read, because the only
+       thing logAct wants off a client is its id and its name and both are
+       already here — and a SELECT after an INSERT to record the INSERT is a
+       round trip for nothing. */
+    await logAct(pool, account, { id: t.id, name } as ClientRow, "client.made", "Made the client " + name);
     return ok({ key });
   }
 
@@ -848,6 +958,10 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (!who || who.kind !== "office") return no(400, "That is not somebody at Forefront.");
     if (body.on === false) {
       const seat = (await pool.query("SELECT person_key FROM tenant_users WHERE user_id = $1 AND tenant_id = $2", [who.id, row.id])).rows[0];
+      /* act 7, recorded BEFORE the row goes: after the DELETE there is nothing
+         left to read the seat off, and "took X off the team" is the whole of
+         what this press does */
+      await logAct(pool, account, row, "team.off", "Took " + (who.name || who.email) + " off the team");
       await pool.query("DELETE FROM tenant_users WHERE user_id = $1 AND tenant_id = $2", [who.id, row.id]);
       /* retired, never deleted (§35, §62): the seat goes with the row's standing */
       if (seat && seat.person_key) {
@@ -876,6 +990,14 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       personKey = asKey;
     }
     const seat = FF.SEAT_KEYS.indexOf(String(body.seat)) > -1 ? String(body.seat) : "smoteam";
+    /* ACTS 7 AND 8 ARE ONE PRESS AND TWO ACTS, which is why the standing is
+       read BEFORE the upsert below: this handler both PLACES somebody and
+       sets their seat, so the honest record is "added X to the team as Y" the
+       first time and "moved X to Y" when only the seat changed — and a press
+       that changes neither (the drawer saves the row as it stands) records
+       nothing at all, or the page fills with rows nobody caused. */
+    const was = (await pool.query("SELECT seat FROM tenant_users WHERE user_id = $1 AND tenant_id = $2", [who.id, row.id])).rows[0];
+    const seatWord = (k: string) => k === "super" ? "super user" : "SMO team";
     /* THE ROW IS WRITTEN FIRST on a client made here (§313.31), so the
        deferred FK on tenant_users has a row to point at when it commits. */
     if (row.made_here) {
@@ -889,6 +1011,13 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       "INSERT INTO tenant_users (tenant_id, user_id, person_key, seat) VALUES ($1,$2,$3,$4) " +
       "ON CONFLICT (tenant_id, user_id) DO UPDATE SET seat = EXCLUDED.seat, person_key = COALESCE($5, tenant_users.person_key)",
       [row.id, who.id, personKey, seat, asKey || null]);
+    if (!was) {
+      await logAct(pool, account, row, "team.on",
+        "Added " + (who.name || who.email) + " to the team as " + seatWord(seat));
+    } else if (was.seat !== seat) {
+      await logAct(pool, account, row, "team.seat",
+        "Moved " + (who.name || who.email) + " to " + seatWord(seat));
+    }
     const landed = (await pool.query("SELECT person_key FROM tenant_users WHERE user_id = $1 AND tenant_id = $2", [who.id, row.id])).rows[0];
     const key2 = landed ? landed.person_key : personKey;
     const team = (await pool.query("SELECT person_key FROM tenant_users WHERE tenant_id = $1", [row.id])).rows.map((x: any) => x.person_key);
@@ -901,6 +1030,44 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
       });
     } catch (e) { console.error("seat into " + row.key + ":", (e as Error).message); }
     return ok({});
+  }
+
+  /* ── HISTORY: WHAT HAS BEEN DONE IN THIS CONSOLE (§483) ──────────────
+     A READ and nothing else — the record is written at the acts themselves
+     (logAct above), so there is no second answer to what happened.
+
+     THE LAST 200, NEWEST FIRST, AND THE PAGE SAYS SO. A cap rather than a
+     window, because a window is a number that means something different on
+     a busy platform from a quiet one; the page prints the cap, so a record
+     that has run out is a fact somebody can read rather than a silence
+     (§35, §124).
+
+     WHO SEES WHICH ROW IS THE SAME TWO RULES THE CARDS ASK (§42, §355):
+     `visibleClients` then `mayOpenClient`, so the record cannot name a
+     client whose card this person is not shown — asked in the WHERE's own
+     terms rather than filtered on the screen, which is the half a console
+     walks past. A row that names NO client is the platform's own act (a
+     consultant, a password, a client deleted) and is the admin's, because
+     those are the admin's acts and nobody else can make one.
+
+     THE NAMES COME OFF THE ROW, NEVER A JOIN, which is logAct's whole
+     argument: the two acts most worth keeping destroy their own subject. */
+  if (action === "history") {
+    const admin = FF.isAdmin(account);
+    const all: ClientRow[] = (await pool.query("SELECT " + CLIENT_COLS + " FROM tenants")).rows;
+    const mine = FF.visibleClients(world, account, all)
+      .filter((row: ClientRow) => FF.mayOpenClient(world, account, row))
+      .map((row: ClientRow) => row.id);
+    /* nobody to show and no admin flag is an EMPTY record rather than a
+       refusal: the page is reachable by every consultant and says what it
+       holds (§45.2) */
+    const rows = (await pool.query(
+      "SELECT at, what, who_name, tenant_name, detail FROM tenant_log " +
+      (process.env.SMP_BREAK === "history-all" ? "WHERE ($1::uuid[] IS NULL OR true) " :   /* falsification (§276): $1 is kept, or the bind count breaks the statement rather than widening it */
+       "WHERE what <> 'open' AND (tenant_id = ANY($1::uuid[])" + (admin ? " OR tenant_id IS NULL" : "") + ") ") +
+      "ORDER BY at DESC, id DESC LIMIT 200", [mine])).rows;
+    return ok({ cap: 200, acts: rows.map((r: any) => ({
+      at: r.at, what: r.what, who: r.who_name, client: r.tenant_name, detail: r.detail })) });
   }
 
   /* ── Who sees what ── */

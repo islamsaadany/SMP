@@ -580,6 +580,9 @@ function slidesAssemble(){
        continuation (§52.9). */
     if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
       deckFootMarks(box, UNITS[SLED.target]);
+    } else if (SLED.target.indexOf("dir:") === 0) {
+      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
+      deckFootMarks(box, null);
     }
     deckFitPass(box);
     /* The keys are minted AFTER the fit pass, or a continuation slide it mints
@@ -654,7 +657,8 @@ function slidesOpen(kind, key){
   /* §334: three kinds — a unit, a supporting function and a capability, which
      carries its own picture slides for its own review. */
   var target = kind === "fn" ? "fn:" + key
-             : kind === "cap" ? "cap:" + key : key;
+             : kind === "cap" ? "cap:" + key
+             : kind === "dir" ? "dir:" + key : key;
   if (!canSpeakFor(target)) return;
   SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
   var root = document.getElementById("slideroot");
@@ -686,6 +690,7 @@ function slidesOpen(kind, key){
 function picTargetName(kind, key){
   return kind === "fn"  ? (FUNCTIONS[key] || {}).name || key
        : kind === "cap" ? ((capById(key) || {}).name || key)
+       : kind === "dir" ? placeLabel("dir:" + key)
                         : (UNITS[key] || {}).name || key;
 }
 /* ── PLAY, AND COMING BACK (§295) ────────────────────────────────────────
@@ -1041,6 +1046,7 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
+  if (String(target || "").indexOf("dir:") === 0) return L1("pillar");
   return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 

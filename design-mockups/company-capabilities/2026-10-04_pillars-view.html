@@ -1,0 +1,110 @@
+<title>Company capabilities view</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: today's list beside the proposal — the Directions page's rail + pane, applied to capabilities. */
+:root{
+  --ground:#F3F4F7; --surface:#FFFFFF; --surface-2:#F7F8FA; --line:#E2E5EB;
+  --ink:#16325C; --ink-2:#3B4A63; --ink-3:#6B7686;
+  --head:#D9BC8E; --gold:#A87A2E; --bad:#9B2C2C; --good:#2E7D4F;
+  --sans:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#14181F; --surface:#1C222B; --surface-2:#222933; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C5CCD8; --ink-3:#9AA4B3; --head:#7A6340; --gold:#E2B86A; --bad:#F08A8A; --good:#7FD3A0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#14181F; --surface:#1C222B; --surface-2:#222933; --line:#333A45;
+  --ink:#E9ECF1; --ink-2:#C5CCD8; --ink-3:#9AA4B3; --head:#7A6340; --gold:#E2B86A; --bad:#F08A8A; --good:#7FD3A0; color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;padding:24px 16px 48px}
+h1{font-size:20px;margin:0 0 4px}
+.lede{color:var(--ink-3);margin:0 0 20px;max-width:70ch}
+.lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink-3);margin:28px 0 10px}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px;width:max-content;max-width:100%;flex-wrap:wrap}
+.tabs span{padding:7px 18px;border-radius:4px;color:var(--ink-2);font-size:14px}
+.tabs .on{background:#16325C;color:#fff;font-weight:600}
+.split{display:grid;grid-template-columns:270px minmax(0,1fr);gap:24px;margin-top:22px;align-items:start}
+@media (max-width:820px){.split{grid-template-columns:1fr}}
+.rail{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.rhead{background:var(--head);padding:12px 18px;font-size:12px;letter-spacing:.12em;font-weight:700;color:var(--ink)}
+.ritem{margin:10px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.ritem.on{background:var(--surface-2);box-shadow:inset 3px 0 0 #D98A9A}
+.ritem b{font-weight:600;display:block}
+.code{font-family:var(--mono);font-size:13px;color:var(--ink);display:block;margin-bottom:4px}
+.code.big{display:inline;font-size:18px;margin:0 12px 0 0}
+.ritem .sub{font-size:12px;color:var(--ink-3);margin-top:3px}
+.miss{color:var(--bad);font-style:italic;font-weight:600;font-size:13px;white-space:nowrap}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:0}
+.pband{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:18px 24px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.pband h2{margin:0;font-size:22px;flex:1;min-width:200px}
+.pill{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px}
+.seat{font-size:13px;color:var(--ink-3)} .seat b{letter-spacing:.1em;font-size:11px;margin-right:4px}
+.seat em{color:var(--gold);font-style:normal}
+.pbody{padding:6px 24px 24px}
+.tw{overflow-x:auto;border-radius:10px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th{background:var(--head);text-align:left;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;padding:12px 14px;white-space:nowrap}
+td{padding:12px 14px;border-top:1px solid var(--line);white-space:nowrap}
+tbody tr:nth-child(even) td{background:var(--surface-2)}
+td.c{text-align:center} .mono{font-family:var(--mono);font-size:13px}
+.note{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px}
+.note ol{margin:6px 0 0 18px;padding:0} .note li{margin:6px 0}
+.today{opacity:.85}
+</style>
+
+<h1>Company › Strategy › Capabilities</h1>
+<p class="lede">Today it is a list with an Open button per row. The proposal draws it like Directions: the capabilities down the left, the chosen one's plan on the right.</p>
+
+<div class="lab">Proposal</div>
+<div class="tabs"><span>Foundation</span><span>SWOT</span><span>Directions</span><span class="on">Capabilities</span></div>
+
+<div class="split">
+  <div class="rail">
+    <div class="rhead">CAPABILITIES&nbsp;&nbsp;7</div>
+    <div class="ritem on"><div><span class="code">C001</span><b>Operational excellence</b><div class="sub">2 projects</div></div><span class="miss">4 Missing</span></div>
+    <div class="ritem"><div><span class="code">C002</span><b>Continuous Improvement</b><div class="sub">1 project</div></div><span class="miss">3 Missing</span></div>
+    <div class="ritem"><div><span class="code">C003</span><b>End-to-End Quality Mindset</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C004</span><b>Talent &amp; Workforce Optimization</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C005</span><b>ERP Enhancement</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C006</span><b>Digital Transformation</b><div class="sub">No projects yet</div></div></div>
+    <div class="ritem"><div><span class="code">C007</span><b>ESG introductory and E&amp;S Management System</b><div class="sub">No projects yet</div></div></div>
+  </div>
+
+  <div class="pane">
+    <div class="pband">
+      <h2><span class="code big">C001</span>Operational excellence</h2>
+      <span class="pill">Capability</span>
+      <span class="seat"><b>OWNER</b><em>None yet — the Strategy office fills this in</em></span>
+      <span class="seat"><b>CUSTODIAN</b><em>None yet</em></span>
+    </div>
+    <div class="pbody">
+      <div class="lab">Projects&nbsp;&nbsp;2</div>
+      <div class="tw"><table>
+        <thead><tr><th>#</th><th>Project</th><th>Owner</th><th>Start</th><th>End</th><th>Deliverables</th><th>Outcomes</th><th>Milestones</th></tr></thead>
+        <tbody>
+          <tr><td class="c">1</td><td>Store operations SOP rollout</td><td>Mahmoud Adel</td><td class="mono">Jan 26</td><td class="mono">Jun 26</td><td class="c">3</td><td class="c">1</td><td class="c">4</td></tr>
+          <tr><td class="c">2</td><td>Lean back-office</td><td><span class="miss">Missing</span></td><td class="mono">Apr 26</td><td><span class="miss">Missing</span></td><td class="c">2</td><td class="c">0</td><td class="c">3</td></tr>
+        </tbody>
+      </table></div>
+      <p class="seat" style="margin-top:14px">Each project opens below its row with its deliverables, outcomes and milestones — the same tables a capability's own Plan page draws today.</p>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>What changes, in plain words</b>
+  <ol>
+    <li>The list goes. Each capability becomes a card on the left, like a direction: its name, how many projects it holds, and a red count of what is still missing.</li>
+    <li>Pressing a card shows that capability on the right: its name, Owner and Custodian, then its projects (or its pillars, if it is planned in pillars).</li>
+    <li>Capabilities are coded C001, C002… and directions change to D001, D002…. There is no Open button: the capability's plan is on the right.</li>
+    <li>Nothing is stored differently. It is the same capability and the same plan, drawn where the directions are drawn.</li>
+  </ol>
+</div>
+
+<div class="lab">Today</div>
+<div class="tw today"><table>
+  <thead><tr><th>Capability</th><th>Planned in</th><th>Owner</th><th>Custodian</th><th>Rows</th><th>Performance</th><th></th></tr></thead>
+  <tbody>
+    <tr><td>Operational excellence</td><td>Projects</td><td>—</td><td>—</td><td class="c">0</td><td class="c">—</td><td>Open</td></tr>
+    <tr><td>Continuous Improvement</td><td>Projects</td><td>—</td><td>—</td><td class="c">0</td><td class="c">—</td><td>Open</td></tr>
+    <tr><td>End-to-End Quality Mindset</td><td>Projects</td><td>—</td><td>—</td><td class="c">0</td><td class="c">—</td><td>Open</td></tr>
+  </tbody>
+</table></div>

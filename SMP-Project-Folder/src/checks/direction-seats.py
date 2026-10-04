@@ -99,15 +99,14 @@ with sync_playwright() as p:
     # ── 4. The company's capabilities show their own seats ────────────
     safe(pg, "()=>{var c=GROUP.capabilities[0]; if(c){c.head='mobhead'; delete c.custodian} return true}")
     go(pg, "strategy", "caps")
-    heads = safe(pg, "()=>[...document.querySelectorAll('[data-topcaps] thead th')].map(t=>t.textContent.trim())", []) or []
-    ck("the capabilities table has Owner and Custodian columns", "Owner" in heads and "Custodian" in heads, heads)
-    first = safe(pg, "()=>{var r=document.querySelector('[data-topcaps] tbody tr'); return r?[...r.cells].map(c=>c.textContent.trim()):null}")
-    if first:
-        oi, ci = heads.index("Owner"), heads.index("Custodian")
-        ck("…the owner is read from the capability", first[oi] == safe(pg, "()=>personName('mobhead')"), first)
-        ck("…an empty seat reads a dash", first[ci] == "—", first)
-    else:
-        ck("…a capability row is drawn", False, first)
+    # §482 (rewritten, never loosened, §218): the seats sit on the open
+    # capability's band now, not in table columns.
+    seats = safe(pg, "()=>[...document.querySelectorAll('[data-topcaps] .pband .topcapseat')].map(s=>[s.querySelector('b').textContent.trim(), s.textContent.replace(s.querySelector('b').textContent,'').trim()])", []) or []
+    sd = dict(seats)
+    ck("the open capability's band carries Owner and Custodian", "Owner" in sd and "Custodian" in sd, seats)
+    if "Owner" in sd and "Custodian" in sd:
+        ck("…the owner is read from the capability", sd["Owner"] == safe(pg, "()=>personName('mobhead')"), seats)
+        ck("…an empty seat reads a dash", sd["Custodian"] == "—", seats)
     ck("…and offers no control to change them",
        safe(pg, "()=>document.querySelectorAll('[data-topcaps] select, [data-topcaps] input').length", 1) == 0)
 

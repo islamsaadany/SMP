@@ -156,19 +156,6 @@
   .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
   .d-fnsw ol.dswot { columns:1; }
   .d-fnsw .dswnone { color:var(--none); font-size:22px; }
-  /* §481: the company's analysis on ONE slide, two by two, in the SWOT's own
-     hues; smaller items, because four lists share the page. */
-  .d-coswot .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:22px 56px; margin-top:4px; }
-  .d-coswot .dswcol h3 { padding-left:14px; margin:0 0 4px; font-size:24px; }
-  .d-coswot .dswcol.t-good h3 { border-left:5px solid var(--good); }
-  .d-coswot .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
-  .d-coswot .dswcol.t-stone h3 { border-left:5px solid var(--panel); }
-  .d-coswot .dswcol.t-warn h3 { border-left:5px solid var(--warn); }
-  .d-coswot ol.dswot { columns:1; }
-  .d-coswot ol.dswot li { padding:7px 0; font-size:20px; grid-template-columns:30px 1fr; gap:10px; }
-  .d-coswot .dswnone { color:var(--none); font-size:20px; }
-  /* §481: who presents a direction's deck, under its cover line. */
-  .coversub.dwho { margin-top:6px; font-size:22px; color:var(--ink-3); }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
    Islam: *"make the wining aspiration filing the width of the presentaion
@@ -688,7 +675,7 @@
   .picfield > span { font-size:var(--fs-micro); letter-spacing:var(--track);
                      text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
-                     border:1px solid var(--field-line); border-radius:var(--r-sm);
+                     border:1px solid var(--line); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
   /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
      the slide uses, so four across in a 940px dialog gave 200px frames, and
@@ -893,7 +880,7 @@
      accent carries a mark and cannot carry words. `transform` is dropped with
      it — scaling a pill blurs the letters it exists to show. */
   .ddots.bysub .ddot.on {
-    background:var(--gold); border-color:var(--gold); color:var(--on-accent);
+    background:var(--gold); border-color:var(--gold); color:#12161C;
     transform:none;
   }
   /* ── ONE DECK'S PILLS ARE GROUPED (§266.12) ────────────────────────

@@ -61741,6 +61741,195 @@ skipped — red 1 with `allAgreed` ignoring the Structure. Three neighbours held
 values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
 other two reds (`desc`, the top level) are main's, recorded before.
 
+## §480 — The cycle board, one line per direction (2026-10-03)
+
+Islam, of Setup › Reporting cycle on a client planned on the company: the
+board drew one row for the whole company, so the office could not see which
+direction was behind or whose it is. Drawn and signed off
+(`design-mockups/cycle-board-directions/2026-10-03_direction-and-project-lines.html`):
+*"A. separate row B. ok C. projects too, draw it"*, then *"1. reporting line
+2. agreed, build it"*.
+
+**THE BLOCK, ONLY WITH THE UNITS OFF.** With `buExists()` false the company's
+row becomes a band (the client's name, *the company's own report · submitted
+by the office*), a row for the company's own objectives carrying the real
+submission state, and one line per running direction (or per project when
+`topWay()` is projects). With the units on nothing here is drawn — Raya Trade's
+board is what it was but for one word.
+
+**NOTHING NEW IS COUNTED.** Every line is a slice of the company's own
+`askedItems()` — a direction's rows by the pillar they sit in (`cid`), a
+project's by the place they report into (`pr:<id>`) — so the lines add up to
+the company's figure and `cycleTotals()` is untouched (§108.1). Asserted as an
+agreement, never as literals (§94.8).
+
+**WHO, AND THE STATE.** Who is §469's custodian, else the owner, else *None
+yet* in `--attn-tx` — outstanding, not a description (§168). A line's state
+is *Submitted* when the company is, *Draft saved* when §469's `doneMark` is
+set on that direction, otherwise read from its rows.
+
+**"REPORTING LINE"** replaces the client's unit word as the first column's
+header for every client (his 1): the column now holds units, the company's
+objectives, directions, projects, capabilities and functions.
+
+**THE COMPANY'S OBJECTIVES ARE ASKED (his 2).** Measuring the mockup found the
+company's key objectives were on no report at all once the units were off —
+nobody below to roll them up from. `topReportKOs()` puts `GROUP.keyObjectives`
+on the company report (`reportItems`, `fnReportItems`, `findById`,
+`holderItemById`) only while the units are off, and nowhere else — not on
+`topAsUnit()`, or the projects card's score and the plan pages would move.
+On the server, `topView()` carries the objectives' REPORTED fields alone
+(`topKoView`), so a figure is judged as the company report's (`mayReportTop`:
+the office and the group CEO; a direction's owner is refused) while a rename
+stays GROUP_OWN's, office-only, and is judged once. **And the first build
+carried them in the view while nothing ever compared them** — `collectUnit` ran
+only when the plan, SWOT or projects changed — so a figure went unjudged and
+three of the new tests passed for nothing; found because the refusal test went
+green. The allowed cases now assert the change was JUDGED (§113.8). Cost
+stated: a refused objective figure is named by its row, not its words — the
+name is left out of the view so a rename is never judged twice, and a copy
+elsewhere would drop any hidden carrier.
+
+`checks/cycle-board-lines.py` all good, red from the SOURCES four ways
+(the block off 4, the objectives off 3, the warning ink 1, the draft mark 1).
+`test-authorize.js` §480 921/0, red 3 with the new compare removed. Neighbours
+green: cycle-board, top-projects, single-company, direction-seats, top-plan,
+report-blockers, submit-gate, attention-rows, cycle-edit. Shell
+`v5.90-cycle-board-lines`. **Recorded, not this work's**: `setup-header.py` fails one
+assertion on the Focus page (`'thead': ['Key measure','Target','Focus']`), identically
+on the build before this change (§303). **On the branch, not merged.**
+
+
+## §481 — A direction's own deck, and the company's short review (2026-10-04)
+
+Islam, of the round-2 mockup
+(`design-mockups/direction-decks/2026-10-03_direction-decks-round2.html`):
+no Present button per direction or capability (*"that's very long"*); keep
+*Present the whole company*; arrange directions, capabilities and functions
+with timers in the Master presentation, **the company last**; an owner's
+Present *"will only see his slides"*, with no direction named on the menu;
+the company review is *"1 flow … short … the foundation, the analysis, the
+directions & capabilities and then their performance"*; the owner and
+custodian add picture slides, and so do the functions. Then *"proceed"*.
+
+**ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN** — the units off and the
+directions in pillars (`companyReviewOn()`). Everywhere else every deck is
+byte-identical: the nineteen unit, function and group decks of the worked
+example compared before and after, 0 differ.
+
+**THE SHORT REVIEW** is the group deck with `short` set: the Foundation
+(aspiration, end in mind, the company's key objectives, read off `GROUP`
+because the unit-shaped view carries none), the four SWOT boxes on ONE slide,
+the directions-and-capabilities roll-call, then the existing *where we stand*
+and *stands* slides and Thank you. No dividers, no per-direction slides —
+those are the directions' own decks.
+
+**A DIRECTION'S DECK IS `dir:<pillar id>`** — keyed by id, never position
+(§48): a cover naming who presents it (owner · custodian), that direction's
+slides through the very builder the full plan deck uses (`pillarSlidesOf`,
+lifted out of `deckSlides` and proven neutral), and Thank you. It is a subject
+everywhere a deck is one: `placeLabel`, `deckSubject` (its hidden slides live
+on the pillar), the strip code, Manage slides, picture slides, the PDF.
+
+**THE MASTER FLOW** in this mode is directions, capabilities, functions and
+the company LAST, each kind named in the picker (DIR · CAP · FUNC · CO). The
+timers ride `presentMins`, which already took any key.
+
+**THE MENU.** The office: *Present the whole company*, the PDF, Manage slides,
+Download the plan, and the Master presentation with its new subtitle. A
+direction's owner or custodian (`ownsTopPillar` against the pillar's own two
+seats): *Present* opens only their directions back to back, the PDF is the
+same deck, Manage slides per owned direction — named only if they own
+several. Somebody who owns none and is not the office gets no menu.
+
+**THE SERVER.** `review.slides["dir:<id>"]` classifies as `dirSlides`: the
+office and the group CEO, or that direction's owner or custodian read off the
+STORED top plan (§42); refused in a locked cycle for anyone but the office.
+Any other report state under a `dir:` key is `dirBad` and refused — a
+direction is presented, never submitted on its own. `test-authorize.js` §481
+928/0, red 2 with both refusals opened.
+
+`checks/direction-decks.py` 24/0, red from the SOURCES three ways (the menu
+branch removed 6, the short flag off 3, the flow order off 2). Shell
+`v5.91-direction-decks`. Screen and server; nothing stored moves, nothing is
+migrated. Neighbours green: master-presentation 44/0, hide-slide 42/0,
+deck-strip 32/0, deck-pdf, contingency, video-slides 73/0, presentation-timer
+55/0, present-loop, deck-dividers, direction-seats, single-company, top-plan,
+cycle-board-lines, plan-level; full `qa.py` ERRORS none; the 19 unit and
+function decks byte-identical before and after. **Recorded, not this work's**
+(&sect;303): `master-picker` 57/1 (the Kind column reads CAP against BU for
+Product Mindset) fails identically on the build before. **On the branch, not merged.**
+
+
+## §482 — The company's capabilities, drawn like its directions (2026-10-04)
+
+Islam, of the company's Strategy › Capabilities list: *"the capabilities should
+look like the pillars view not like that list!"* — then, of the mockup
+(`design-mockups/company-capabilities/2026-10-04_pillars-view.html`, published
+as an artifact), *"no need for open button"*, *"capabilities take the C"* and
+*"proceed"*.
+
+- **A rail and a pane, the directions' own shape.** Cards down the left (code,
+  name, what it holds, a red *N Missing* from `SMPRules.gapMissing`); the
+  chosen one on the right under `pillarBand` with its Owner and Custodian read
+  from the capability (§412, §469 — read here, set on Setup). Its projects are
+  a table (# · Project · Owner · Start · End · Deliverables · Outcomes ·
+  Milestones); pressing a row unfolds `projPlanBody` beneath it — the tables
+  the capability's own Plan page draws (§53.5). A capability planned in pillars
+  lists its pillars. **No Open button**: the plan is already on the right.
+- **C001, C002…** — the capability's position in the GROUP's list, never the
+  viewer's (§48), so a code means one thing to everybody. **The company's own
+  directions become D001…** through a `pillarPrefix` on `topAsUnit()`, read by
+  `pillarCode()`; the top layer's projects keep their letters. Codes appear on
+  cards and the pane's band, never in tab labels (his correction on the mockup).
+- **Screen state only** (`TOPCAP`, `TOPCAPPROJ`, like `RAIL`); nothing stored
+  moves, no migration, no server rule.
+- **The breakdown table's + and × wear the bar's own ink.** `--panel-accent` is
+  a fixed gold and vanished on a tan bar; `--panel-ink` is derived from the
+  tenant's bar colour. **And the navigation row's segmented switch, the house
+  and the gear** (his screenshot: *"the white on this color is not clear"*) were
+  hard-coded white; they take `--panel-ink` and washes of it now, so they read
+  on navy exactly as before and on a light bar for the first time.
+- Checks rewritten, never loosened (§218): `single-company.py` (cards, codes,
+  no Open, the pane, a project unfolding), `direction-seats.py` (the seats on
+  the band), `top-plan.py` (D001). `qa.py` ERRORS none; `plan-level`,
+  `pillar-breakdown`, `home-mark`, `tab-row`, `nav-scroll`, `setup-pages`,
+  `welcome` green.
+
+## §483 — The company's directions on Performance, and the ink on the accent (2026-10-04)
+
+Islam: *"in the performance it should show the company, directions &
+capabilties"* and *"done eidting is not appearing well … so this color becomes
+reelvant to the company brand setting"*.
+
+**Directions.** The company's Performance gains a section of its own for its
+directions (the tenant's word for pillars), between the company headline and
+Capabilities: one card per direction, the themes' own two-box card, each read
+from `pillarPerf` / `pillarExec` / `pillarPlan` — the same figures the
+headline card's drill already prints, so nothing new is computed. Drawn only
+while the top layer plans in pillars; a company that plans in projects is
+scored by them in the headline card (§466).
+
+**The ink on the accent.** "Done editing" (and five other lit controls: the
+pen, the Setup pen, the icon toggles, the quarter toggles, a flow's subject
+pill) filled with the tenant's accent and wrote their text in `--panel`, the
+BAR colour. On the house palette the two happen to be navy and gold and read
+fine; on El Abd's (pink accent, tan bar) it is tan on pink. Every accent fill
+now writes `--on-accent`, which `brandTokens()` derives from the accent itself
+(`inkFor`), so it is readable on any accent a client picks. The `.editbtn.on`
+hover no longer moves to `--gold-deep` (whose ink is not derived) — it keeps
+the accent and darkens it by a filter. Screen only; nothing stored.
+
+**Merged to `main` 2026-10-04 on Islam's word**, with main's §480/§481
+(the cycle board per direction, a direction's own deck) brought in first. The
+three record files were combined, never picked — and `main`'s own `CLAUDE.md`
+had shipped with a merge conflict's markers still in it, removed here with
+every line on both sides kept. The built file was rebuilt from the merged
+sources (§91), `smp-app/public/` regenerated (§329), and `sw.js` rebuilt from
+main's copy with this branch's one line re-applied at a name never held,
+`v5.97-directions-perf` (§146.2, §94.12). The duplicate-declaration scan over
+build.py's list reads only the six §281.1 leaves. No forced sign-out is owed
+(spec 029): no rule about how a save is judged moves on this branch's side.
 
 ---
 
@@ -61870,3 +62059,167 @@ different. `control-targets` all passed · `plan-fields`, `plan-wrap`, `no-jump`
 a frozen stylesheet that stops at `src/` reaches nobody (§329, §332) · `sw.js`
 SHELL bumped, the built file's bytes having changed (§91), confirmed against
 `origin/main` immediately before the push (§94.16).
+
+---
+
+## §485 — The gold has an ink of its own (2026-10-04)
+
+The second half of Islam's *"1. let's do the recording on console. 2. let's do
+the color sweep"*, and of the mockup published for what the sweep found,
+*"ok for the gold button"*.
+
+**ONE LIVE FINDING, AND IT IS §38.4 FOR THE NINTH TIME.** Meeting Notes draws
+three filled gold buttons — *+ New meeting*, *Refine into minutes* and
+*Send to N attendees*, the one that actually sends them — each with a white
+label. The page BRIGHTENS its gold for dark mode, so the brighter the button
+got the fainter its own word became: measured **2.03 against the 4.5 floor**,
+while light reads **5.27** and is correct. That split is why nothing had
+noticed, and why it is the colour that moves and not the label.
+
+**ONE TOKEN, READ BY THE THREE BUTTONS**, never a sweep of every gold thing on
+the page — the gold is right everywhere it is a mark or an edge, and what is
+wrong is one pairing (§40: converting some members of a family is worse than
+converting none, so the pairing is named rather than the hue).
+
+**WHAT THE SWEEP FOUND AND LEFT ALONE** is the larger part of it: every other
+ink-on-ground pair across the console, the client platform and the five modules
+measured at or above the floor in both palettes, so nothing else is touched and
+saying so is the finding (§3a — a sweep that reports one fault has told you
+about every other pair it measured).
+
+---
+
+## §486 — The console's record as a History page (drawn, not built) (2026-10-04)
+
+Islam, of §485's two drawings for where the record is read: *"the console
+record should sit as a separate page as history, ok for the acts and opened a
+client is not really important."*
+
+**THE PLACEMENT HE CHOSE WAS THE ALTERNATIVE THE LAST MOCKUP DESCRIBED RATHER
+THAN DREW**, so rule 1c was left with no signed-off picture of what would
+actually ship. This is that picture
+(`design-mockups/console-history/2026-10-04_history-page.html`), with nothing
+under `smp-app/` touched.
+
+A fifth nav entry, **last**, in the console's own chrome; When · Who · Client ·
+What; the day headings as `table.work tr.grp` — the uppercase band row that page
+already draws, never a second device for a heading (§53.5) — and an em-dash in
+Client for an act that belongs to no client (§15.1). The eleven acts are
+carried across verbatim from the mockup he approved, grepped out of the
+published file rather than retyped.
+
+§487 built it.
+
+---
+
+## §487 — The console keeps a record, and reads it back as History (2026-10-04)
+
+Islam: *"let's do the recording on console"*, then §486's placement, then
+*"proceed"*.
+
+**THE TABLE WAS ALREADY THERE AND HAD NO WRITER.** `tenant_log` has shipped
+since the rebuild, sits on `lib/schema-check.ts`'s PLATFORM_TABLES and
+`schema.sql`'s RLS exclusion list, and the only two references to it in the
+whole product were checks counting its rows as a control (§331). Forefront's
+console had a place to write down what it does and wrote nothing — not a
+feature waiting to be designed, a door with nobody walking through it.
+
+**ONE DOOR, SO RECORDING IS A CALL AND NEVER A CHANGE TO FOURTEEN SCREENS.**
+Every console act arrives at `platformAction`, so `logAct()` is one helper with
+fourteen call sites covering the eleven acts he approved: a client made,
+archived, restored, deleted, renamed, re-marked and re-shaped; a module on and
+off; somebody put on a client's team, taken off, or their seat changed; a
+consultant added, retired, restored and removed; a password issued; a report
+published and withdrawn.
+
+**A RECORD MUST NOT CHANGE WHEN THE WORLD CHANGES** (§49.2). Both of
+`tenant_log`'s foreign keys are `ON DELETE SET NULL`, and *deleting a client*
+and *removing a consultant* are two of the eleven — so the names and the human
+sentence are STORED ON THE ROW (migration 023: `who_name`, `tenant_name`,
+`detail`, plus an index on `at DESC`) and the read joins nothing.
+
+**WHICH IS THE ONE PRODUCT FAULT THE CHECK FOUND.** `deleteClient` passed
+`null` for the tenant, which looked honest — *there is nothing left to point
+at* — and threw the NAME away with the id, so the one row that most needs to
+say which client went said nothing; the comment above it claimed the name
+survived while the code discarded it (§104.8). It passes the row, because the
+FK clears the id a statement later either way.
+
+**OPENING A CLIENT IS NOT RECORDED** (his), so the column's `'open'` default
+stands unused and the read drops it — asserted at BOTH ENDS (§94.2), because a
+build that quietly started recording every page view satisfies every assertion
+about the eleven. **The generated password is never on the row**, and the check
+asserts the `pw` variable is not among the arguments rather than searching for
+the word *password*, which the act key itself contains.
+
+**A RECORD THAT CANNOT BE WRITTEN NEVER COSTS THE ACT** (§231.3): the insert is
+inside a `try` whose catch logs and does not re-throw, so the helper degrades to
+no record and never to no console.
+
+**THE PAGE IS A FIFTH TAB, LAST, AND NEEDS NO NEW CSS** (§53.5): the table is My
+work's own `table.work` with its `tr.grp` day bands and `td.when`, inside the
+page's own `.tscroll`, `.ptitle`, `.tag` and `.fld`, built from §486's drawing
+rather than from a description. The search filters in place and never repaints
+(§35); the count says how many of how many while a term is typed; **an empty
+record SAYS what it holds** rather than reading as a page that failed (§45.2,
+§35) and names the one thing it cannot — anything done before the page went in
+is not there; **and a failed read says so** rather than drawing as nought (§93).
+
+**THE NARROWING IS IN THE READ'S OWN WHERE** (§42, §355): the history asks the
+same two rules the client cards ask (`visibleClients`, then `mayOpenClient`), so
+a consultant sees the acts of the clients they can open and an admin sees those
+plus the acts belonging to no client — never a list filtered on the screen —
+asserted at both ends, or a build showing a consultant nothing would pass the
+half that matters.
+
+**AND THE TWELFTH ACT IS FLAGGED RATHER THAN ADDED** (rule 1b): `saveAccess` —
+the *Who sees what* table — is a real permission-changing act through that same
+one door and is absent from the eleven. *Proceed* did not answer the question,
+so it stays off and is named in the code, with a consultant's rename, their
+change of address and the admin flag beside it.
+
+**MIGRATION 023 PROVED ON BOTH PATHS A DEPLOYMENT CAN TAKE** (§33.5) — a fresh
+database from `schema.sql`, and one shaped as an existing deployment with the
+columns and the index dropped — and twice over for idempotency, the second run
+reading *nothing to apply*.
+
+`smp-app/checks/console-record.mjs` **58 assertions, all good**, and it PRESSES
+the real door rather than reading it (§96): every act driven through
+`platformAction` against a real Postgres with the rows read back, including that
+a press changing nothing records nothing. Red both ways (§276) — `no-record`
+**21 red** with the acts happening and nothing written, `history-all` **2 red**
+with the record naming a client the reader cannot open, the first printing the
+whole list it should never have seen — **and the break keeps `$1`**, because
+`WHERE true` drops the bind and breaks the STATEMENT rather than reproducing the
+defect (§375).
+
+**NINE OF THE CHECK'S OWN FOURTEEN FIRST FAILURES WERE THE CHECK** (§100.3),
+every one found by reading the handler rather than guessing at it: a non-greedy
+regex took only the first act key per call, so all five ternary second branches
+read as missing; the password assertion matched the act key; `setModules` and
+`setTeam` were handed bodies they do not read; `deleteConsultant` and
+`deleteClient` each refuse until a state the fixture had not made (retired, and
+archived with the name typed back); and two markup assertions looked for
+`data-find` and `table class="work"` in a page that builds both with `el()`.
+
+**THE MERGE.** `main` had taken §480–§483 for four other rounds while this was
+built, so this branch's §480–§483 were renumbered §484–§487 **before** the merge
+— the only moment a renumber is provably scoped to the branch's own lines
+(§264.3), with the merge base asserted to hold none of 480–487, all three
+spellings swept (§336.1), every count declared in advance and the pass refusing
+on a mismatch (§344.1, §353.4), descending by source so no pass ate the next
+(§365.5), and proved by masking the citations on both sides and showing every
+changed file otherwise byte-identical (§385.3b). The three record files were
+COMBINED, never picked, with every non-blank line of each side asserted to
+survive (§318.7, §356.17). `sw.js` was rebuilt from main's copy with the one
+line re-applied at `v5.98-console-history` — past both sides and never held
+anywhere in the history — `node --check`ed, with exactly one live `const SHELL`
+(§146.2, §94.12, §94.16). **No forced sign-out is owed** (spec 029), read off
+the diff: this side adds a console record and a read, and no rule about how a
+client's save is judged moves.
+
+**RECORDED, NOT DONE.** Sixty-four blocks in `CLAUDE.md` still read *"On the
+branch, not merged"* over work `main` demonstrably holds, back to §408 — a
+drift of its own, and sweeping sixty-four blocks inside a merge commit is a fix
+reaching far beyond the fault (rule 1b), so only this round's own block was
+corrected and the rest is named here for its own pass.

@@ -2537,8 +2537,8 @@ html[data-client-settings] .viewer { display:none; }
      replaced used for the same state (`.ico.on`) — a worded button rather than
      an icon, because it sits in a row of worded controls (Columns, Register
      file) and a lone glyph among words reads as something else. */
-  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
-  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .editbtn.on:hover { background:var(--gold); border-color:var(--gold); color:var(--on-accent); filter:brightness(.94); }
 
   /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
      column in a table cell (§93.15's note above it), which is right there and
@@ -4223,7 +4223,7 @@ html[data-client-settings] .viewer { display:none; }
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */
   .editbtn.penon, .editbtn.penon:hover {
-    background:var(--gold); border-color:var(--gold); color:var(--panel); }
+    background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -5126,6 +5126,9 @@ html[data-client-settings] .viewer { display:none; }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
+  /* §480: a reporting line with nobody named over it says so in the warning
+     ink, never the quiet grey — "None yet" is outstanding, not a description. */
+  .cfg td.why.nobody { color:var(--attn-tx); }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -5534,7 +5537,7 @@ html[data-client-settings] .viewer { display:none; }
   .penbtn.on { visibility:visible; opacity:1; }
   .penbtn:hover { border-color:var(--gold); color:var(--gold-deep); }
   .penbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
   /* §268: THE PLAN'S TITLE ROW HELD 34px OPEN FOR A PEN THAT HAS MOVED to the
@@ -6401,20 +6404,20 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      property that rule sets is overridden here; this one was not, because
      nothing about the markup suggested a gap existed. */
   .units .navswitch{display:inline-flex;align-items:center;align-self:center;
-    background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;
+    background:color-mix(in srgb,var(--panel-ink) 8%,transparent);border:0;border-radius:7px;overflow:hidden;
     padding:0;gap:0;margin:0 6px;cursor:pointer;font:inherit}
   .units .navswitch:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;
-    font-weight:700;color:rgba(255,255,255,.62);letter-spacing:-.005em;
+    font-weight:700;color:color-mix(in srgb,var(--panel-ink) 72%,transparent);letter-spacing:-.005em;
     transition:background .12s,color .12s}
-  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
-  .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 color-mix(in srgb,var(--panel-ink) 16%,transparent)}
+  .units .navswitch .nsw.on{color:var(--panel-ink);background:color-mix(in srgb,var(--panel-ink) 20%,transparent)}
   /* HOVER LIFTS THE CONTROL, NOT THE OTHER HALF. Lighting the unselected word
      on hover was right while these were two buttons — you were pointing at the
      side you meant. With one button it made both halves look lit and the state
      unreadable exactly when somebody was looking at it. */
-  .units .navswitch:hover{background:rgba(255,255,255,.15)}
-  .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  .units .navswitch:hover{background:color-mix(in srgb,var(--panel-ink) 15%,transparent)}
+  .units .navswitch:hover .nsw:not(.on){color:color-mix(in srgb,var(--panel-ink) 80%,transparent)}
   /* ── THREE SIDES (§334) ────────────────────────────────────────────────
      A segmented control of real buttons rather than one button of words, for
      the reason the shell states: with three sides "press to switch" has no
@@ -6426,9 +6429,9 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .units .navswitch.multi{cursor:default}
   .units .navswitch.multi .nsw{border:0;background:transparent;font:inherit;
     cursor:pointer;letter-spacing:-.005em}
-  .units .navswitch.multi:hover{background:rgba(255,255,255,.08)}
-  .units .navswitch.multi:hover .nsw:not(.on){color:rgba(255,255,255,.62)}
-  .units .navswitch.multi .nsw:not(.on):hover{color:#fff;background:rgba(255,255,255,.1)}
+  .units .navswitch.multi:hover{background:color-mix(in srgb,var(--panel-ink) 8%,transparent)}
+  .units .navswitch.multi:hover .nsw:not(.on){color:color-mix(in srgb,var(--panel-ink) 62%,transparent)}
+  .units .navswitch.multi .nsw:not(.on):hover{color:var(--panel-ink);background:color-mix(in srgb,var(--panel-ink) 10%,transparent)}
   .units .navswitch.multi .nsw:focus-visible{outline:2px solid var(--gold);
     outline-offset:-2px;border-radius:7px}
   .units-in.folded .navswitch{margin:0 3px}
@@ -6438,7 +6441,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      single word with nothing to switch to is not a control at all. */
   .units .navswitch.multi .nsw.here{box-shadow:inset 0 -3px 0 var(--gold)}
   .units .navswitch.one{cursor:default}
-  .units .navswitch.one:hover{background:rgba(255,255,255,.08)}
+  .units .navswitch.one:hover{background:color-mix(in srgb,var(--panel-ink) 8%,transparent)}
 
   /* `.foldgroup` and `.navfold` went with the two-button fold (§51.7) — §24:
      delete an element and delete its CSS with it, or the next person drawing
@@ -6533,18 +6536,18 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      lets the panel hang below the row instead of being clipped by it. */
   .units .sep.pinsep{margin-left:auto}
   .navmenu{position:relative;display:inline-flex;align-items:center}
-  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
-    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+  .units .navmenu-btn{background:color-mix(in srgb,var(--panel-ink) 9%,transparent);border:1px solid color-mix(in srgb,var(--panel-ink) 34%,transparent);
+    opacity:1;border-radius:20px;color:color-mix(in srgb,var(--panel-ink) 90%,transparent);font:700 11px/1 var(--sans);letter-spacing:.07em;
     text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
     align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
-  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
-    border-color:rgba(255,255,255,.65)}
+  .units .navmenu-btn:hover{color:var(--panel-ink);background:color-mix(in srgb,var(--panel-ink) 18%,transparent);
+    border-color:color-mix(in srgb,var(--panel-ink) 65%,transparent)}
   .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   /* `here` is where you ARE, `open` is the menu showing. They are different
      states and both can be true, so they do not share a style. */
   .units .navmenu-btn.here{color:var(--on-accent);background:var(--gold);border-color:var(--gold)}
-  .navmenu-btn:not(.here):hover{color:#fff;background:rgba(255,255,255,.22);
-    border-color:rgba(255,255,255,.7)}
+  .navmenu-btn:not(.here):hover{color:var(--panel-ink);background:color-mix(in srgb,var(--panel-ink) 22%,transparent);
+    border-color:color-mix(in srgb,var(--panel-ink) 70%,transparent)}
   /* The face is a mark now, not a word. Tighter padding because a 15px glyph
      in a pill sized for 11px uppercase text floats; the caret stays, because
      it is what says this opens a list rather than going somewhere. */
@@ -6577,7 +6580,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      right, at every width, in both states. `justify-content` was `normal`
      and had simply never been asked. */
   .units .navmenu-btn.homemark{ background:none; border-color:transparent;
-    color:rgba(255,255,255,.86); border-radius:5px; padding:0;
+    color:color-mix(in srgb,var(--panel-ink) 86%,transparent); border-radius:5px; padding:0;
     width:34px; height:34px; flex:none; align-self:center;
     justify-content:center; }
   /* AND THE SLACK HAS TO HALVE INTO WHOLE PIXELS (§302). A 21px mark in a
@@ -6597,15 +6600,15 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      The next size up would be 26, at 4 a side, which is where the drawing
      starts meeting the corners of a 5px radius rather than sitting in it. */
   .units .navmenu-btn.homemark .navmenusvg{ width:24px; height:24px; }
-  .units .navmenu-btn.homemark:hover{ background:rgba(255,255,255,.16);
-    border-color:transparent; color:#fff; }
+  .units .navmenu-btn.homemark:hover{ background:color-mix(in srgb,var(--panel-ink) 16%,transparent);
+    border-color:transparent; color:var(--panel-ink); }
   /* AND GOLD WHEN THERE IS SOMETHING TO ANSWER. Same box, same mark size, so
      the row does not move when the state changes — only the fill arrives. */
   .units .navmenu-btn.homemark.homemark-on{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); }
   .units .navmenu-btn.homemark.homemark-on:hover{ background:var(--gold);
     border-color:var(--gold); color:var(--on-accent); filter:brightness(1.08); }
-  .units .navmenu-btn.homemark:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+  .units .navmenu-btn.homemark:focus-visible{ outline:2px solid var(--panel-ink); outline-offset:2px; }
   /* AND GOLD WHILE YOU ARE HOME (§400): Home is a page now, and on the
      destination row gold is where you are (§197.2) — so the house wears it
      while Home is open, whether or not anything is waiting. */
@@ -6656,7 +6659,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
   .ico{background:var(--surface);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;
     display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);padding:0}
   .ico:hover{border-color:var(--gold);color:var(--gold-deep)}
-  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--on-accent)}
   .ico:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;
     stroke-linecap:round;stroke-linejoin:round}
@@ -6781,7 +6784,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
     font:600 11px/1 var(--mono); color:var(--ink-3);
     background:var(--surface); border:1px solid var(--line);
     border-radius:5px; cursor:pointer; }
-  .qs-edit .qtog.on { background:var(--gold-deep); color:var(--on-accent);
+  .qs-edit .qtog.on { background:var(--gold); color:var(--on-accent);
     border-color:var(--gold-deep); }
   .qs-edit .qtog:hover { border-color:var(--gold-deep); }
 
@@ -6953,7 +6956,7 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      is `--surface` at rest and not `--surface-2`, because `--gold-deep` on
      `--surface-2` is 4.45 and §38.5 has been paid for five times. */
   .secpen.on, .tabs .secttail button.secpen.on {
-    border-color:var(--gold); background:var(--gold); color:var(--panel); }
+    border-color:var(--gold); background:var(--gold); color:var(--on-accent); }
   .tabs .secttail button.secpen:focus-visible {
     outline:2px solid var(--gold); outline-offset:2px; }
   .missbar { margin-left:auto; display:flex; gap:6px; align-items:center;
@@ -7694,7 +7697,7 @@ th .subhd { font-weight:400; }
 .bdhead > * { min-width:0; }
 .bdhead > input.fld { flex:1 1 auto; }
 .bdhead > select.fld { flex:0 0 auto; width:var(--tw); }
-.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-quiet); }  /* ink: §343.11 below */
+.bdhead > .xbtn { flex:0 0 auto; color:var(--panel-ink); opacity:.8; }  /* ink: §343.11 below */
 /* The table's own name, in the head of the column it belongs to — it grows
    with the cell rather than claiming it, for the same reason. */
 .bdname { width:100%; min-width:0; }
@@ -7720,7 +7723,8 @@ th .subhd { font-weight:400; }
    where it is. And dark was already clear (7.37 / 6.44), which is half of why
    nothing saw this — the other half being that no pillar in the worked example
    carries a breakdown, so no sweep has ever walked this band (§255). */
-.bdadd > .linkbu { color:var(--panel-accent); font-weight:700; }
+/* §482: the bar's own derived ink — a fixed gold vanished on a tan bar. */
+  .bdadd > .linkbu { color:var(--panel-ink); font-weight:700; }
 .bdadd > .linkbu:hover, .bdhead > .xbtn:hover { color:var(--panel-ink); }
 
 .tacfold { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px 16px;
@@ -8100,6 +8104,20 @@ html[data-stale] #panel { cursor:progress; }
             color:var(--ink-3); margin-right:5px; }
 .pbseats .pbseat-k + .pbseat-k, .pbseats > .pbseat-k:not(:first-child) { margin-left:2px; }
 
+/* §482 — the company's Capabilities, drawn like its directions: the band
+   carries the two seats, the body pads like a plan pane, and a project row
+   says it can be opened. */
+.pband-r .topcapseat { display:inline-flex; align-items:baseline; gap:6px; font-size:13px; color:var(--ink-2); margin-left:18px; white-space:nowrap; }
+.pband-r .topcapseat b { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); }
+.pband-r:has(.topcapseat) { display:flex; flex-direction:row; align-items:baseline; }
+.topcapbody { padding:14px 20px 20px; }
+.topcapbody table { width:100%; }
+.topcapbody table td.num, .topcapbody table th.num { width:1%; white-space:nowrap; }
+tr.topcapprow { cursor:pointer; }
+tr.topcapprow.on > td { background:var(--surface-2); }
+tr.topcapopen > td { padding:0 !important; white-space:normal; }
+.topcapplan { padding:12px 14px 16px; border-left:3px solid var(--line); }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.
@@ -8258,6 +8276,19 @@ html[data-stale] #panel { cursor:progress; }
   .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
   .d-fnsw ol.dswot { columns:1; }
   .d-fnsw .dswnone { color:var(--none); font-size:22px; }
+  /* §481: the company's analysis on ONE slide, two by two, in the SWOT's own
+     hues; smaller items, because four lists share the page. */
+  .d-coswot .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:22px 56px; margin-top:4px; }
+  .d-coswot .dswcol h3 { padding-left:14px; margin:0 0 4px; font-size:24px; }
+  .d-coswot .dswcol.t-good h3 { border-left:5px solid var(--good); }
+  .d-coswot .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
+  .d-coswot .dswcol.t-stone h3 { border-left:5px solid var(--panel); }
+  .d-coswot .dswcol.t-warn h3 { border-left:5px solid var(--warn); }
+  .d-coswot ol.dswot { columns:1; }
+  .d-coswot ol.dswot li { padding:7px 0; font-size:20px; grid-template-columns:30px 1fr; gap:10px; }
+  .d-coswot .dswnone { color:var(--none); font-size:20px; }
+  /* §481: who presents a direction's deck, under its cover line. */
+  .coversub.dwho { margin-top:6px; font-size:22px; color:var(--ink-3); }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────
    Islam: *"make the wining aspiration filing the width of the presentaion
@@ -8982,7 +9013,7 @@ html[data-stale] #panel { cursor:progress; }
      accent carries a mark and cannot carry words. `transform` is dropped with
      it — scaling a pill blurs the letters it exists to show. */
   .ddots.bysub .ddot.on {
-    background:var(--gold); border-color:var(--gold); color:#12161C;
+    background:var(--gold); border-color:var(--gold); color:var(--on-accent);
     transform:none;
   }
   /* ── ONE DECK'S PILLS ARE GROUPED (§266.12) ────────────────────────

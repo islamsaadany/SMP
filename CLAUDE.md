@@ -10954,7 +10954,106 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-03 &mdash; **&sect;484: the edge of a box is not a gridline,
+*Last Updated: 2026-10-04 &mdash; **&sect;487: the console keeps a record, and
+reads it back as History.** Islam: *"let's do the recording on console"*, then
+*"the console record should sit as a separate page as history, ok for the acts
+and opened a client is not really important"*, then *"proceed."*
+**THE TABLE WAS ALREADY THERE AND HAD NO WRITER**: `tenant_log` has shipped
+since the rebuild, sits on `lib/schema-check.ts`'s PLATFORM_TABLES and
+`schema.sql`'s RLS exclusion list, and the only two references to it in the
+whole product were checks counting its rows as a control (&sect;331) &mdash; so
+Forefront's console had a place to write what it does and wrote nothing. Not a
+feature waiting to be designed; a door with nobody walking through it.
+**ONE DOOR, SO RECORDING IS A CALL AND NEVER A CHANGE TO FOURTEEN SCREENS**:
+every console act arrives at `platformAction`, so `logAct()` is one helper with
+fourteen call sites covering the eleven acts he approved &mdash; a client made,
+archived, restored, deleted, renamed, re-marked and re-shaped; a module on and
+off; somebody put on a client's team, taken off, or their seat changed; a
+consultant added, retired, restored and removed; a password issued; a report
+published and withdrawn. **A RECORD MUST NOT CHANGE WHEN THE WORLD CHANGES**
+(&sect;49.2): both of `tenant_log`'s foreign keys are `ON DELETE SET NULL`, and
+*deleting a client* and *removing a consultant* are two of the eleven &mdash; so
+the names and the human sentence are STORED ON THE ROW and the read joins
+nothing. **Which is the one product fault the check found**: `deleteClient`
+passed `null` for the tenant, which looked honest (*there is nothing left to
+point at*) and threw the NAME away with the id, so the one row that most needs
+to say which client went said nothing &mdash; and the comment above it claimed
+the name survived while the code discarded it (&sect;104.8). It passes the row,
+because the FK clears the id a statement later either way. **OPENING A CLIENT
+IS NOT RECORDED** (his), so the column's `'open'` default stands unused and the
+read drops it &mdash; asserted at BOTH ENDS (&sect;94.2), because a build that
+quietly started recording every page view satisfies every assertion about the
+eleven. **THE GENERATED PASSWORD IS NEVER ON THE ROW**, and the check asserts
+the `pw` variable is not among the arguments rather than searching for the word
+*password*, which the act key itself contains. **A RECORD THAT CANNOT BE
+WRITTEN NEVER COSTS THE ACT** (&sect;231.3): the insert is inside a `try` whose
+catch logs and does not re-throw, so the helper degrades to no record and never
+to no console. **THE PAGE IS A FIFTH TAB, LAST, AND NEEDS NO NEW CSS**
+(&sect;53.5): the When &middot; Who &middot; Client &middot; What table is My
+work's own `table.work` with its `tr.grp` day bands and `td.when`, inside the
+page's own `.tscroll`, `.ptitle`, `.tag` and `.fld` &mdash; built from the
+drawing he signed off rather than from a description (rule 1c). **The search
+filters in place and never repaints** (&sect;35), the count says how many of how
+many while a term is typed, **an empty record SAYS what it holds** rather than
+reading as a page that failed (&sect;45.2, &sect;35) and names the one thing it
+cannot &mdash; anything done before the page went in is not there &mdash; and
+**a failed read says so** rather than drawing as nought (&sect;93).
+**THE NARROWING IS IN THE READ'S OWN WHERE** (&sect;42, &sect;355): the history
+asks the same two rules the client cards ask, so a consultant sees the acts of
+the clients they can open and an admin sees those plus the acts belonging to no
+client &mdash; never a list filtered on the screen &mdash; asserted at both
+ends, or a build showing a consultant nothing would pass the half that matters.
+**AND THE TWELFTH ACT IS FLAGGED RATHER THAN ADDED** (rule 1b): `saveAccess`
+&mdash; the *Who sees what* table &mdash; is a real permission-changing act
+through that same one door and is absent from the eleven; *proceed* did not
+answer the question, so it stays off and is named in the code, with a
+consultant's rename, their change of address and the admin flag beside it.
+**Migration 023 proved on BOTH paths a deployment can take** (&sect;33.5)
+&mdash; a fresh database from `schema.sql` and one shaped as an existing
+deployment with the columns and the index dropped &mdash; and twice over for
+idempotency, the second run reading *nothing to apply*.
+`smp-app/checks/console-record.mjs` **58 assertions, all good**, and it PRESSES
+the real door rather than reading it (&sect;96): every act driven through
+`platformAction` against a real Postgres with the rows read back, including that
+a press changing nothing records nothing. Red both ways (&sect;276) &mdash;
+`no-record` **21 red** with the acts happening and nothing written, `history-all`
+**2 red** with the record naming a client the reader cannot open, the first
+printing the whole list it should never have seen &mdash; **and the break keeps
+`$1`**, because `WHERE true` drops the bind and breaks the STATEMENT rather than
+reproducing the defect (&sect;375). **NINE OF THE CHECK'S OWN FOURTEEN FIRST
+FAILURES WERE THE CHECK** (&sect;100.3), every one found by reading the handler
+rather than guessing at it: a non-greedy regex took only the first act key per
+call, so all five ternary second branches read as missing; the password
+assertion matched the act key; `setModules` and `setTeam` were handed bodies
+they do not read; `deleteConsultant` and `deleteClient` each refuse until a
+state the fixture had not made (retired, and archived with the name typed
+back); and two markup assertions looked for `data-find` and `table class="work"`
+in a page that builds both with `el()`.*
+
+*Earlier: 2026-10-04 &mdash; **&sect;486 (drawn, not built): the console's
+record as a History page.** Islam, of &sect;485's two drawings: *"the console
+record should sit as a separate page as history, ok for the acts and opened a
+client is not really important."* **THE PLACEMENT HE CHOSE WAS THE ALTERNATIVE
+THE LAST MOCKUP DESCRIBED RATHER THAN DREW**, so rule 1c left no signed-off
+picture of what would ship &mdash; this is that picture, with nothing under
+`smp-app/` touched. A fifth nav entry, last, in the console's own chrome, with
+the day headings as `table.work tr.grp` &mdash; the uppercase band row that page
+already draws, never a second device for a heading (&sect;53.5) &mdash; and an
+em-dash in Client for an act that belongs to none (&sect;15.1). The eleven acts
+are carried across verbatim from the mockup he approved, grepped out of the
+published file rather than retyped. &sect;487 built it.*
+
+*Earlier: 2026-10-04 &mdash; **&sect;485: the gold has an ink of its own.**
+Islam, of the mockup published for it: *"ok for the gold button."* **THE COLOUR
+SWEEP'S ONE LIVE FINDING, AND IT IS &sect;38.4 FOR THE NINTH TIME**: Meeting
+Notes' three filled gold buttons &mdash; *+ New meeting*, *Refine into minutes*
+and *Send to N attendees*, the one that actually sends them &mdash; carried a
+white label on a gold the page BRIGHTENS for dark mode, so the brighter the
+button got the fainter its own word became. Measured, **2.03 against a 4.5
+floor**; light is 5.27 and correct, which is why nothing had noticed. One token
+read by the three buttons, never a sweep of every gold thing on the page.*
+
+*Earlier: 2026-10-03 &mdash; **&sect;484: the edge of a box is not a gridline,
 and a destructive control has a size of its own.** Islam, of the two fixes drawn
 beside today out of the rules audit &mdash; ***"go with Standard and fix the remove
 button."*** **THE REMOVE BUTTON IS A REGRESSION AND NOTHING IN THE PRODUCT CAUSED
@@ -10996,8 +11095,16 @@ open &mdash; Who we are **6 of 6 on its field's line** before and after, the SWO
 rows **64px before and 64px after** with the &times; taking its 9px out of the field's
 own grid track (595 &rarr; 586). Screen only; nothing stored, nothing migrated, no
 rule moved. Eight neighbours green, the four `smp-app/public/` generators re-run
-(&sect;329, &sect;332), `sw.js` SHELL bumped (&sect;91). On the branch, not merged.*
+(&sect;329, &sect;332), `sw.js` SHELL bumped (&sect;91). Merged to `main` 2026-10-04 with &sect;485&ndash;&sect;487 on Islam's word.*
 
+
+*Earlier: 2026-10-04 — **§483: the company's directions on Performance, and the ink on the accent.** The company Performance gains a Directions section (one themes-style card per direction, from pillarPerf/pillarExec/pillarPlan, only while the top layer plans in pillars). Every accent-filled lit control (Done editing / `.secpen.on`, `.penbtn.on`, `.editbtn.on`/`.penon`, `.ico.on`, `.qtog.on`, a flow pill) writes `--on-accent` (derived from the accent by `inkFor`) instead of `--panel`, which was tan on pink on El Abd. On the branch, not merged.*
+
+*Earlier: 2026-10-04 — **§482: the company's capabilities, drawn like its directions.** A rail of cards (C001…, name, what it holds, N Missing) and the chosen one in the pane with its Owner and Custodian and its projects, each unfolding its plan below its row; no Open button. The company's own directions are D001… (`pillarPrefix` on `topAsUnit`). The breakdown table's + / × and the navigation's switch, house and gear take the bar's derived `--panel-ink` instead of fixed gold/white, so they read on a tan bar. Three checks rewritten; `qa.py` ERRORS none. On the branch, not merged.*
+
+*Earlier: 2026-10-04 — **§481: a direction's own deck, and the company's short review.** With the units off, the company's Presentation menu is the office's (Present the whole company: foundation, analysis, directions and capabilities, their performance — short; the PDF; Manage slides; the plan; Master presentation with the company last), and a direction's owner or custodian gets *Present* of only their own directions plus Manage slides to add picture slides (`dir:<id>` targets, `dirSlides` on the server, anything else under `dir:` refused). No per-direction Present button. `checks/direction-decks.py` 24/0, red 3 ways; `test-authorize.js` 928/0, red 2. Merged to `main` 2026-10-04 on Islam's word, renumbered §470/§471 → §480/§481 because main took them.*
+
+*Earlier: 2026-10-03 — **§480: the cycle board, one line per direction.** With the units off, Setup › Reporting cycle draws the company as a block — its objectives row (the real submission state) and one line per direction or project, each naming custodian, else owner, else "None yet" in `--attn-tx`, with Draft saved from `doneMark` — every line a slice of `askedItems()` so the totals count the company once. The first column is "Reporting line" for every client. The company's key objectives are asked on its own report while the units are off (`topReportKOs`), judged on the server through `topKoView` (office and gceo, never a direction owner; renames stay GROUP_OWN's). `checks/cycle-board-lines.py` red 4 ways; `test-authorize.js` 921/0, red 3. On the branch, not merged.*
 *Earlier: 2026-10-03 — **§479: Structure decides, and nothing is optional.** Reverses §478's optional model: a unit's Purpose and Core Values are drawn only where Client set-up › Structure has them on (`compOn`), and on-and-empty they are Missing, counted (`GAP_FIELDS.unit`) and fillable, through one `unitGapOff(u)` passed to `gapMissing`/`gapEmptyFields`; the Foundation chat skips exactly what Structure has off (`skip`, `cleanSkip` to `pur`/`val`, `allAgreed` waits for the rest), the "Optional" status deleted. New clients start with both off, and `STRUCT_UNSAID.bu` keeps them off on any client that never saved its units' Structure, so no live tenant suddenly owes them. `unit-purpose-values.py` red 3/3, `copilot.mjs` 188/0 red 1, `test-authorize.js` 902/0 red 1; `setup-shape.mjs` and `structure.py` rewritten. On the branch, not merged.*
 
 *Earlier: 2026-10-03 — **§478: a Foundation chat starts from what is there.** The Guided button is removed; a new Foundation chat asks *start from it / start fresh* (`newFlow(hasPlan)`), six cards (End in Mind, optional Purpose via `OPTIONAL`), plan mode lands in `loaded` with no years. A unit's Foundation gains optional Purpose (`mission`) and Core Values (`values`) in `units.extra`, no migration. `copilot.mjs` 185/0, `shell.mjs` §3i, `checks/unit-purpose-values.py`. On the branch, not merged.*

@@ -121,10 +121,17 @@ with sync_playwright() as p:
         secs2 = safe(pg, "()=>allowed(SUBS.group.filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k)", [])
         ck("capabilities are a section of their own", "caps" in secs2, secs2)
         safe(pg, "()=>{currentSub='strategy'; CURSEC.strategy='caps'; paint()}"); pg.wait_for_timeout(250)
-        ck("…one row each, with the way into their own pages",
-           safe(pg, "()=>document.querySelectorAll('[data-topcaps] [data-gocap]').length===capsReachable().length") is True)
-        press(pg, '[data-gocap]')
-        ck("…and Open lands on the capability", safe(pg, "()=>String(current).indexOf('cap:')===0") is True)
+        # §482 (rewritten, never loosened, §218): a rail of cards like the
+        # directions, no Open button, the chosen one's plan in the pane.
+        ck("…one card each on the rail, coded C001…",
+           safe(pg, "()=>{var r=[...document.querySelectorAll('[data-topcaps] [data-topcap]')]; return r.length===capsReachable().length && r.every((b,i)=>b.querySelector('.rcode').textContent===topCapCode(capsReachable()[i]))}") is True)
+        ck("…and no Open button", safe(pg, "()=>!document.querySelector('[data-topcaps] [data-gocap]')") is True)
+        ck("…the pane names the open one, with its seats",
+           safe(pg, "()=>{var t=document.querySelector('[data-topcaps] .pane .pband').textContent; var c=capsReachable()[0]; return t.indexOf(topCapCode(c))>-1 && t.indexOf(c.name)>-1 && /Owner/i.test(t) && /Custodian/i.test(t)}") is True)
+        if safe(pg, "()=>!capPlansInPillars(capsReachable()[0]) && (capsReachable()[0].projects||[]).length>0"):
+            press(pg, '[data-topcapproj]'); pg.wait_for_timeout(200)
+            ck("…a project row unfolds its plan below it",
+               safe(pg, "()=>!!document.querySelector('[data-topcaps] tr.topcapopen .topcapplan .pband')") is True)
     else:
         print("  note  no capability in this build, the Capabilities section is not measured")
 

@@ -1796,7 +1796,7 @@ function placeLabel(at){
     var cc = capById(String(at).slice(4));
     return cc ? navName(cc) : String(at).slice(4);
   }
-  /* §471: a direction is a place in the company's flow, named by itself. */
+  /* §481: a direction is a place in the company's flow, named by itself. */
   if (String(at).indexOf("dir:") === 0) {
     var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
       return p && p.id === String(at).slice(4); })[0];
@@ -5153,7 +5153,7 @@ function dirPillar(t){
   for (var i = 0; i < xs.length; i++) if (xs[i] && xs[i].id === id) return { p: xs[i], i: i };
   return null;
 }
-/* §471: a direction's own deck is spoken for by the office, the group's CEO,
+/* §481: a direction's own deck is spoken for by the office, the group's CEO,
    or THAT direction's owner or custodian — the one rule the server asks
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
@@ -5717,7 +5717,7 @@ function fnReportItems(subject){
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    /* §470: the company's holder ("u:group") reads the Foundation's own
+    /* §480: the company's holder ("u:group") reads the Foundation's own
        objectives, with the units off — never put on the holder itself, or
        the company's projects card would start scoring them (§466). */
     var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
@@ -8398,7 +8398,7 @@ function topAsUnit(){
            projects:topProjectsList(),
            active:true };
 }
-/* §470: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
+/* §480: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
    OFF. Islam, of the board drawn for him: *"agreed"*. While units exist the
    company's objectives are rolled up from them and asking for them here would
    be figures nobody enters (§428's reason, kept); planned on the company
@@ -10708,7 +10708,7 @@ function holderItemById(id){
       (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
-  /* §470: the company's own objectives, on its report in projects. */
+  /* §480: the company's own objectives, on its report in projects. */
   if (!hit) topReportKOs().forEach(function(m){
     if (m.id === id) hit = { kind:"ko", obj:m, holder:unitOwnHolder("group") };
   });
@@ -10752,7 +10752,7 @@ function findById(u, id){
                                    obj:{ name:arr[idx] }, swot:{ arr:arr, idx:idx } };
   }
   u.keyObjectives.forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
-  /* §470: the company's report asks the Foundation's objectives. */
+  /* §480: the company's report asks the Foundation's objectives. */
   if (u.topLayer) topReportKOs().forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
   u.items.forEach(function(p){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };

@@ -581,7 +581,7 @@ function slidesAssemble(){
     if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
       deckFootMarks(box, UNITS[SLED.target]);
     } else if (SLED.target.indexOf("dir:") === 0) {
-      /* §471: footed as the projector foots it (deckBuild), with the group's mark. */
+      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
       deckFootMarks(box, null);
     }
     deckFitPass(box);

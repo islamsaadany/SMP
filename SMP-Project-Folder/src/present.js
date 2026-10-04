@@ -129,7 +129,7 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || "");
-  /* §471: a direction's own deck, presented by whoever owns it. */
+  /* §481: a direction's own deck, presented by whoever owns it. */
   if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
@@ -302,7 +302,7 @@ function deckSlides(u){
   var ko = unitObjectives(u), ex = unitRatio(u);
   /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
   var pOn = planOn(u);
-  /* §471: the company's own review is SHORT when its plan is the whole plan
+  /* §481: the company's own review is SHORT when its plan is the whole plan
      (units off): foundation, analysis, the directions and capabilities, then
      their performance. Each direction's detail is its owner's own deck. */
   var short = !!u.topLayer && companyReviewOn();
@@ -646,7 +646,7 @@ function pillarCols(n){
   return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
 }
 
-/* §471: ONE DIRECTION'S SLIDES, lifted out of deckSlides so a direction can
+/* §481: ONE DIRECTION'S SLIDES, lifted out of deckSlides so a direction can
    be presented on its own by whoever owns it (Islam, round 2: *"when press
    present he will only see his slides"*). deckSlides calls this for every
    direction, so the whole-plan deck and a direction's own deck cannot
@@ -881,7 +881,7 @@ function pillarSlidesOf(u, p, pi){
   }
 }
 
-/* ── §471: THE COMPANY'S SHORT REVIEW, AND A DIRECTION'S OWN DECK ────────
+/* ── §481: THE COMPANY'S SHORT REVIEW, AND A DIRECTION'S OWN DECK ────────
    Islam, round 2: *"it will be 1 flow … it needs to be short yes as a company
    performance the foundation, the analysis, the directions & capbilities and
    then thier performance"*, and of the owner, *"when press present he wll
@@ -1336,7 +1336,7 @@ function insertPictureSlides(deck, target, blank){
    the three cannot disagree about whose list they are reading (§53.5). */
 function deckSubject(target){
   if (!target) return null;
-  /* §471: a direction hides its own slides on the direction itself. */
+  /* §481: a direction hides its own slides on the direction itself. */
   if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
   return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
 }
@@ -1516,7 +1516,7 @@ function openDeckFn(subject, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
-  /* §471: one direction, or the several a person owns ("dir:a,dir:b"),
+  /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
      each its own deck back to back — the owner's Present shows only theirs. */
   if (t.indexOf("dir:") === 0) {
     var ds = t.split(",").filter(function(x){ return dirPillar(x); });
@@ -1647,7 +1647,7 @@ function flowToPdf(){
 function masterSubjects(){
   /* §334: the capabilities between them, in the board's own order — the flow
      and the board must never disagree about who presents (§245). */
-  /* §471: with the company's plan the whole plan, the flow is its directions,
+  /* §481: with the company's plan the whole plan, the flow is its directions,
      its capabilities and its functions, and the short company review LAST —
      Islam: *"company comes last"*. */
   if (companyReviewOn()) {
@@ -1830,7 +1830,7 @@ function masterCount(t){
    again to a person who believes they are reading their results. */
 function masterKind(t){
   t = String(t);
-  /* §471: four kinds in the company's flow, said in the picker's own chips. */
+  /* §481: four kinds in the company's flow, said in the picker's own chips. */
   if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
   if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
   if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';

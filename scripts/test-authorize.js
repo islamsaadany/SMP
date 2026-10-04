@@ -5269,13 +5269,13 @@ console.log("\n§469 · a direction's owner and custodian");
   check("§469: the office names a custodian", v.ok, (v.refusals || []).join(" / "));
 })();
 
-/* ── §470: THE COMPANY'S OBJECTIVES ARE ENTERED ON ITS OWN REPORT ─────────
+/* ── §480: THE COMPANY'S OBJECTIVES ARE ENTERED ON ITS OWN REPORT ─────────
    With the business units off there is nobody below to roll the company's key
    objectives up from, so the office (and the group CEO, who may report the
    company) enters their figures on the company report. Their PLAN stays the
    office's, and a direction's owner reaches only their own direction. BOTH
    ENDS (§94.2): with the units on, nobody but the office moves them at all. */
-console.log("\n§470 · the company's objectives on its own report");
+console.log("\n§480 · the company's objectives on its own report");
 (function () {
   const B = clone(SEED);
   B.people = B.people.concat([{ key: "t470_own", name: "Testcase Direction Owner", unit: "group" }]);
@@ -5291,27 +5291,27 @@ console.log("\n§470 · the company's objectives on its own report");
      allowed case asserts the figure was JUDGED as the company report's. */
   const seen = function (v) { return (v.changes || []).some(function (c) { return c.kind === "unitReporting" && c.target === "group"; }); };
   let v = as(B, "smo", fig);
-  check("§470: the office enters a company objective's figure", v.ok && seen(v), JSON.stringify(v.changes));
+  check("§480: the office enters a company objective's figure", v.ok && seen(v), JSON.stringify(v.changes));
   v = as(B, "ceo", fig);
-  check("§470: …so does the group CEO", v.ok && seen(v), JSON.stringify(v.changes));
+  check("§480: …so does the group CEO", v.ok && seen(v), JSON.stringify(v.changes));
   v = as(B, "t470_own", fig);
-  check("§470 REFUSED: a direction's owner on the company objectives", !v.ok, "was ALLOWED");
+  check("§480 REFUSED: a direction's owner on the company objectives", !v.ok, "was ALLOWED");
   v = as(B, "ceo", function (inc) { inc.group.keyObjectives[0].name = "Renamed"; });
-  check("§470 REFUSED: the group CEO renaming an objective (the plan stays the office's)", !v.ok, "was ALLOWED");
+  check("§480 REFUSED: the group CEO renaming an objective (the plan stays the office's)", !v.ok, "was ALLOWED");
   v = as(B, "ceo", function (inc) { inc.group.keyObjectives[0].name = "Renamed"; inc.group.keyObjectives[0].actual = "9 B EGP"; });
-  check("§470 REFUSED: a figure does not carry a rename in with it", !v.ok, "was ALLOWED");
+  check("§480 REFUSED: a figure does not carry a rename in with it", !v.ok, "was ALLOWED");
   const U = clone(SEED);
   v = as(U, "ceo", fig);
-  check("§470 REFUSED: with business units the company objectives stay the office's", !v.ok, "was ALLOWED");
+  check("§480 REFUSED: with business units the company objectives stay the office's", !v.ok, "was ALLOWED");
   v = as(U, "smo", fig);
-  check("§470: …and the office still edits them there", v.ok, (v.refusals || []).join(" / "));
+  check("§480: …and the office still edits them there", v.ok, (v.refusals || []).join(" / "));
 })();
 
-/* ── §471: A DIRECTION'S OWN PICTURE SLIDES ───────────────────────────────
+/* ── §481: A DIRECTION'S OWN PICTURE SLIDES ───────────────────────────────
    A direction's deck keeps its own slides under `dir:<id>`. The owner and the
    custodian add them, so does the office; nobody else, and nothing else may
    be stored under such a key. BOTH ENDS (§94.2). */
-console.log("\n§471 · a direction's picture slides");
+console.log("\n§481 · a direction's picture slides");
 (function () {
   const B = clone(SEED);
   B.people = B.people.concat([
@@ -5331,19 +5331,19 @@ console.log("\n§471 · a direction's picture slides");
   }; }
   const judged = function (v, t) { return (v.changes || []).some(function (c) { return c.kind === "dirSlides" && c.target === t; }); };
   let v = as("t471_own", slide("dir:group-P1"));
-  check("§471: the owner adds a slide to their direction", v.ok && judged(v, "dir:group-P1"), JSON.stringify(v.changes) + (v.refusals || []).join(" / "));
+  check("§481: the owner adds a slide to their direction", v.ok && judged(v, "dir:group-P1"), JSON.stringify(v.changes) + (v.refusals || []).join(" / "));
   v = as("t471_cus", slide("dir:group-P1"));
-  check("§471: …so does its custodian", v.ok, (v.refusals || []).join(" / "));
+  check("§481: …so does its custodian", v.ok, (v.refusals || []).join(" / "));
   v = as("smo", slide("dir:group-P2"));
-  check("§471: the office adds to any direction", v.ok, (v.refusals || []).join(" / "));
+  check("§481: the office adds to any direction", v.ok, (v.refusals || []).join(" / "));
   v = as("t471_own", slide("dir:group-P2"));
-  check("§471 REFUSED: the owner on another direction", !v.ok, "was ALLOWED");
+  check("§481 REFUSED: the owner on another direction", !v.ok, "was ALLOWED");
   v = as("t471_own", slide("dir:nope"));
-  check("§471 REFUSED: a direction the plan does not hold", !v.ok, "was ALLOWED");
+  check("§481 REFUSED: a direction the plan does not hold", !v.ok, "was ALLOWED");
   v = as("t471_own", function (inc) { inc.review = Object.assign({}, inc.review); inc.review.submitted = Object.assign({}, inc.review.submitted, { "dir:group-P1": true }); });
-  check("§471 REFUSED: submitting a direction on its own", !v.ok, "was ALLOWED");
+  check("§481 REFUSED: submitting a direction on its own", !v.ok, "was ALLOWED");
   v = as("t471_own", slide("group"));
-  check("§471 REFUSED: the owner on the company's own slides", !v.ok, "was ALLOWED");
+  check("§481 REFUSED: the owner on the company's own slides", !v.ok, "was ALLOWED");
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

@@ -7094,7 +7094,7 @@ function renderCycle(){
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   };
-  /* ── §470: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
+  /* ── §480: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
      Islam, of the board on El Abd: the whole company was ONE row ("the group
      · SMO team"), every direction added together, so nobody could see which
      direction was behind or whose it is. Drawn and signed off (*"A. separate

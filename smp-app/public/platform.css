@@ -5063,7 +5063,7 @@ html[data-client-settings] .viewer { display:none; }
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
-  /* §470: a reporting line with nobody named over it says so in the warning
+  /* §480: a reporting line with nobody named over it says so in the warning
      ink, never the quiet grey — "None yet" is outstanding, not a description. */
   .cfg td.why.nobody { color:var(--attn-tx); }
 
@@ -8167,7 +8167,7 @@ html[data-stale] #panel { cursor:progress; }
   .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
   .d-fnsw ol.dswot { columns:1; }
   .d-fnsw .dswnone { color:var(--none); font-size:22px; }
-  /* §471: the company's analysis on ONE slide, two by two, in the SWOT's own
+  /* §481: the company's analysis on ONE slide, two by two, in the SWOT's own
      hues; smaller items, because four lists share the page. */
   .d-coswot .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:22px 56px; margin-top:4px; }
   .d-coswot .dswcol h3 { padding-left:14px; margin:0 0 4px; font-size:24px; }
@@ -8178,7 +8178,7 @@ html[data-stale] #panel { cursor:progress; }
   .d-coswot ol.dswot { columns:1; }
   .d-coswot ol.dswot li { padding:7px 0; font-size:20px; grid-template-columns:30px 1fr; gap:10px; }
   .d-coswot .dswnone { color:var(--none); font-size:20px; }
-  /* §471: who presents a direction's deck, under its cover line. */
+  /* §481: who presents a direction's deck, under its cover line. */
   .coversub.dwho { margin-top:6px; font-size:22px; color:var(--ink-3); }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────

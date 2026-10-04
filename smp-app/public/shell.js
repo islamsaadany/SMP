@@ -8613,7 +8613,7 @@ function placeLabel(at){
     var cc = capById(String(at).slice(4));
     return cc ? navName(cc) : String(at).slice(4);
   }
-  /* §471: a direction is a place in the company's flow, named by itself. */
+  /* §481: a direction is a place in the company's flow, named by itself. */
   if (String(at).indexOf("dir:") === 0) {
     var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
       return p && p.id === String(at).slice(4); })[0];
@@ -11970,7 +11970,7 @@ function dirPillar(t){
   for (var i = 0; i < xs.length; i++) if (xs[i] && xs[i].id === id) return { p: xs[i], i: i };
   return null;
 }
-/* §471: a direction's own deck is spoken for by the office, the group's CEO,
+/* §481: a direction's own deck is spoken for by the office, the group's CEO,
    or THAT direction's owner or custodian — the one rule the server asks
    (ownsTopPillar with the stored pillar's own two seats). */
 function canSpeakForDir(t){
@@ -12534,7 +12534,7 @@ function fnReportItems(subject){
        one rail row, so the two are two places on one page. */
     var koPlace = { key:"c:" + c.id, label:c.name };
     /* §233: hidden rows are not asked, exactly as reportItems() skips them. */
-    /* §470: the company's holder ("u:group") reads the Foundation's own
+    /* §480: the company's holder ("u:group") reads the Foundation's own
        objectives, with the units off — never put on the holder itself, or
        the company's projects card would start scoring them (§466). */
     var kos = (c.own && c.unit === "group") ? topReportKOs() : c.keyObjectives;
@@ -15215,7 +15215,7 @@ function topAsUnit(){
            projects:topProjectsList(),
            active:true };
 }
-/* §470: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
+/* §480: THE COMPANY'S OWN KEY OBJECTIVES ARE ON ITS REPORT, WITH THE UNITS
    OFF. Islam, of the board drawn for him: *"agreed"*. While units exist the
    company's objectives are rolled up from them and asking for them here would
    be figures nobody enters (§428's reason, kept); planned on the company
@@ -17525,7 +17525,7 @@ function holderItemById(id){
       (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, holder:c, proj:p }; });
     });
   });
-  /* §470: the company's own objectives, on its report in projects. */
+  /* §480: the company's own objectives, on its report in projects. */
   if (!hit) topReportKOs().forEach(function(m){
     if (m.id === id) hit = { kind:"ko", obj:m, holder:unitOwnHolder("group") };
   });
@@ -17569,7 +17569,7 @@ function findById(u, id){
                                    obj:{ name:arr[idx] }, swot:{ arr:arr, idx:idx } };
   }
   u.keyObjectives.forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
-  /* §470: the company's report asks the Foundation's objectives. */
+  /* §480: the company's report asks the Foundation's objectives. */
   if (u.topLayer) topReportKOs().forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
   u.items.forEach(function(p){
     if (p.id === id) hit = { kind:"PILLAR", obj:p };
@@ -26117,7 +26117,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
    (§61) — so a menu's action cannot unmount the button the click is still in
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
    keeps the name §51.8 settled on rather than gaining a second one. */
-/* §471: the company's menu while the company's plan IS the whole plan.
+/* §481: the company's menu while the company's plan IS the whole plan.
    The office keeps "Present the whole company" (the short review) and the
    Master presentation; a direction's owner or custodian, who speaks for no
    company, gets their own directions' slides and nothing else — no names on
@@ -31240,7 +31240,7 @@ function renderReport(u){
     bar +
     /* §428: the top layer's own report asks its pillars alone — its key
        objectives are the group's Foundation, not figures entered here.
-       §470: until the business units are off, when there is nobody below to
+       §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
     (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
@@ -41799,7 +41799,7 @@ function renderCycle(){
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   };
-  /* ── §470: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
+  /* ── §480: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
      Islam, of the board on El Abd: the whole company was ONE row ("the group
      · SMO team"), every direction added together, so nobody could see which
      direction was behind or whose it is. Drawn and signed off (*"A. separate
@@ -45273,7 +45273,7 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || "");
-  /* §471: a direction's own deck, presented by whoever owns it. */
+  /* §481: a direction's own deck, presented by whoever owns it. */
   if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
@@ -45446,7 +45446,7 @@ function deckSlides(u){
   var ko = unitObjectives(u), ex = unitRatio(u);
   /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
   var pOn = planOn(u);
-  /* §471: the company's own review is SHORT when its plan is the whole plan
+  /* §481: the company's own review is SHORT when its plan is the whole plan
      (units off): foundation, analysis, the directions and capabilities, then
      their performance. Each direction's detail is its owner's own deck. */
   var short = !!u.topLayer && companyReviewOn();
@@ -45790,7 +45790,7 @@ function pillarCols(n){
   return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
 }
 
-/* §471: ONE DIRECTION'S SLIDES, lifted out of deckSlides so a direction can
+/* §481: ONE DIRECTION'S SLIDES, lifted out of deckSlides so a direction can
    be presented on its own by whoever owns it (Islam, round 2: *"when press
    present he will only see his slides"*). deckSlides calls this for every
    direction, so the whole-plan deck and a direction's own deck cannot
@@ -46025,7 +46025,7 @@ function pillarSlidesOf(u, p, pi){
   }
 }
 
-/* ── §471: THE COMPANY'S SHORT REVIEW, AND A DIRECTION'S OWN DECK ────────
+/* ── §481: THE COMPANY'S SHORT REVIEW, AND A DIRECTION'S OWN DECK ────────
    Islam, round 2: *"it will be 1 flow … it needs to be short yes as a company
    performance the foundation, the analysis, the directions & capbilities and
    then thier performance"*, and of the owner, *"when press present he wll
@@ -46480,7 +46480,7 @@ function insertPictureSlides(deck, target, blank){
    the three cannot disagree about whose list they are reading (§53.5). */
 function deckSubject(target){
   if (!target) return null;
-  /* §471: a direction hides its own slides on the direction itself. */
+  /* §481: a direction hides its own slides on the direction itself. */
   if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
   return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
 }
@@ -46660,7 +46660,7 @@ function openDeckFn(subject, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
-  /* §471: one direction, or the several a person owns ("dir:a,dir:b"),
+  /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
      each its own deck back to back — the owner's Present shows only theirs. */
   if (t.indexOf("dir:") === 0) {
     var ds = t.split(",").filter(function(x){ return dirPillar(x); });
@@ -46791,7 +46791,7 @@ function flowToPdf(){
 function masterSubjects(){
   /* §334: the capabilities between them, in the board's own order — the flow
      and the board must never disagree about who presents (§245). */
-  /* §471: with the company's plan the whole plan, the flow is its directions,
+  /* §481: with the company's plan the whole plan, the flow is its directions,
      its capabilities and its functions, and the short company review LAST —
      Islam: *"company comes last"*. */
   if (companyReviewOn()) {
@@ -46974,7 +46974,7 @@ function masterCount(t){
    again to a person who believes they are reading their results. */
 function masterKind(t){
   t = String(t);
-  /* §471: four kinds in the company's flow, said in the picker's own chips. */
+  /* §481: four kinds in the company's flow, said in the picker's own chips. */
   if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
   if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
   if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
@@ -48505,7 +48505,7 @@ function slidesAssemble(){
     if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
       deckFootMarks(box, UNITS[SLED.target]);
     } else if (SLED.target.indexOf("dir:") === 0) {
-      /* §471: footed as the projector foots it (deckBuild), with the group's mark. */
+      /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
       deckFootMarks(box, null);
     }
     deckFitPass(box);

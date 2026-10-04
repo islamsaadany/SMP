@@ -1,5 +1,5 @@
 """A direction's own deck, the company's short review, and who presents
-what (§471).
+what (§481).
 
 Islam, on the round-2 mockup (design-mockups/direction-decks/): one short
 company flow — the foundation, the analysis, the directions & capabilities,

@@ -1459,7 +1459,7 @@ function repChrome(target, done, total, pct, mayAll, subd, parked, submitWhy, ow
    (§61) — so a menu's action cannot unmount the button the click is still in
    (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
    keeps the name §51.8 settled on rather than gaining a second one. */
-/* §471: the company's menu while the company's plan IS the whole plan.
+/* §481: the company's menu while the company's plan IS the whole plan.
    The office keeps "Present the whole company" (the short review) and the
    Master presentation; a direction's owner or custodian, who speaks for no
    company, gets their own directions' slides and nothing else — no names on
@@ -6582,7 +6582,7 @@ function renderReport(u){
     bar +
     /* §428: the top layer's own report asks its pillars alone — its key
        objectives are the group's Foundation, not figures entered here.
-       §470: until the business units are off, when there is nobody below to
+       §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
     (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +

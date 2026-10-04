@@ -61420,7 +61420,7 @@ column for a direction, so a download-and-upload of the company plan drops
 the custodian — whether it should is a separate question.
 **Merged to `main` 2026-10-03 on Islam's word**, a clean fast-forward, shell `v5.89-direction-seats`. Checked first against a units-on client (Raya Trade's shape): `ownsTopPillar` returns false whenever `buExists`, the seats and the Custodian row draw only inside the top plan (off unless ticked), and the rowDone group branch judges only `group-*` ids — project-done, submit-gate, report-saves, my-reporting, capability-first, top-plan, single-company and `qa.py` all green. Screen and rule change; no sign-out owed, since the rule only ever allows more and never refuses a save that worked before.
 
-## §470 — The cycle board, one line per direction (2026-10-03)
+## §480 — The cycle board, one line per direction (2026-10-03)
 
 Islam, of Setup › Reporting cycle on a client planned on the company: the
 board drew one row for the whole company, so the office could not see which
@@ -61471,7 +61471,7 @@ elsewhere would drop any hidden carrier.
 
 `checks/cycle-board-lines.py` all good, red from the SOURCES four ways
 (the block off 4, the objectives off 3, the warning ink 1, the draft mark 1).
-`test-authorize.js` §470 921/0, red 3 with the new compare removed. Neighbours
+`test-authorize.js` §480 921/0, red 3 with the new compare removed. Neighbours
 green: cycle-board, top-projects, single-company, direction-seats, top-plan,
 report-blockers, submit-gate, attention-rows, cycle-edit. Shell
 `v5.90-cycle-board-lines`. **Recorded, not this work's**: `setup-header.py` fails one
@@ -61479,7 +61479,7 @@ assertion on the Focus page (`'thead': ['Key measure','Target','Focus']`), ident
 on the build before this change (§303). **On the branch, not merged.**
 
 
-## §471 — A direction's own deck, and the company's short review (2026-10-04)
+## §481 — A direction's own deck, and the company's short review (2026-10-04)
 
 Islam, of the round-2 mockup
 (`design-mockups/direction-decks/2026-10-03_direction-decks-round2.html`):
@@ -61525,7 +61525,7 @@ several. Somebody who owns none and is not the office gets no menu.
 office and the group CEO, or that direction's owner or custodian read off the
 STORED top plan (§42); refused in a locked cycle for anyone but the office.
 Any other report state under a `dir:` key is `dirBad` and refused — a
-direction is presented, never submitted on its own. `test-authorize.js` §471
+direction is presented, never submitted on its own. `test-authorize.js` §481
 928/0, red 2 with both refusals opened.
 
 `checks/direction-decks.py` 24/0, red from the SOURCES three ways (the menu

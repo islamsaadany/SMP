@@ -1,4 +1,4 @@
-"""The cycle board's company lines (§470).
+"""The cycle board's company lines (§480).
 
 Islam, of Setup › Reporting cycle on a client planned on the company: *"A.
 separate row B. ok C. projects too"*, then *"1. reporting line 2. agreed,

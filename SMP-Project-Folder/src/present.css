@@ -156,7 +156,7 @@
   .d-fnsw .dswcol.t-bad h3 { border-left:5px solid var(--bad); }
   .d-fnsw ol.dswot { columns:1; }
   .d-fnsw .dswnone { color:var(--none); font-size:22px; }
-  /* §471: the company's analysis on ONE slide, two by two, in the SWOT's own
+  /* §481: the company's analysis on ONE slide, two by two, in the SWOT's own
      hues; smaller items, because four lists share the page. */
   .d-coswot .dswgrid { display:grid; grid-template-columns:1fr 1fr; gap:22px 56px; margin-top:4px; }
   .d-coswot .dswcol h3 { padding-left:14px; margin:0 0 4px; font-size:24px; }
@@ -167,7 +167,7 @@
   .d-coswot ol.dswot { columns:1; }
   .d-coswot ol.dswot li { padding:7px 0; font-size:20px; grid-template-columns:30px 1fr; gap:10px; }
   .d-coswot .dswnone { color:var(--none); font-size:20px; }
-  /* §471: who presents a direction's deck, under its cover line. */
+  /* §481: who presents a direction's deck, under its cover line. */
   .coversub.dwho { margin-top:6px; font-size:22px; color:var(--ink-3); }
 
 /* ── THE ASPIRATION RUNS THE WIDTH OF THE SLIDE (§254.9) ───────────────

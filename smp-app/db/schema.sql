@@ -1427,6 +1427,30 @@ CREATE TABLE copilot_files (
 );
 CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
 
+-- A source the Copilot reads (§480): belongs to the CLIENT, not to a chat, so
+-- one brought in for one unit's SWOT can be picked again for another's.
+-- place is the unit it is about, or 'all'. bytes is NULL for a text source.
+CREATE TABLE copilot_sources (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  place text NOT NULL,
+  kind text NOT NULL,
+  name text NOT NULL,
+  file_kind text,
+  size integer NOT NULL DEFAULT 0,
+  bytes bytea,
+  text text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_source_kind CHECK (kind IN ('guided','template','report','research')),
+  CONSTRAINT copilot_source_file_kind CHECK (file_kind IS NULL OR file_kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_source_size CHECK (size >= 0 AND size <= 3145728),
+  CONSTRAINT copilot_source_name CHECK (btrim(name) <> '')
+);
+CREATE INDEX copilot_sources_shelf ON copilot_sources (tenant_id, place, at DESC);
+
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.
 ALTER TABLE tenant_users

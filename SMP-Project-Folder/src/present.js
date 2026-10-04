@@ -129,6 +129,8 @@ function anch(key, label, where){
    done since §224. */
 function deckHtmlFor(target){
   var t = String(target || "");
+  /* §481: a direction's own deck, presented by whoever owns it. */
+  if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
@@ -300,6 +302,10 @@ function deckSlides(u){
   var ko = unitObjectives(u), ex = unitRatio(u);
   /* §422: a plan switched off draws no plan slides (Islam's *"yes"*). */
   var pOn = planOn(u);
+  /* §481: the company's own review is SHORT when its plan is the whole plan
+     (units off): foundation, analysis, the directions and capabilities, then
+     their performance. Each direction's detail is its owner's own deck. */
+  var short = !!u.topLayer && companyReviewOn();
   var dl = deltaFor(u.ukey);
   var dtag = (!dl || !dl.d) ? "" :
     '<span class="ddelta ' + (dl.d > 0 ? "up" : "down") + '">' +
@@ -348,7 +354,7 @@ function deckSlides(u){
 
      A BUSINESS UNIT'S SLIDE KEEPS ITS ASPIRATION AND ITS HORIZON, and it is
      asserted, because a unit authors both. */
-  S = S.concat(unitAimSlides(u));
+  S = S.concat(short ? companyFoundationSlides() : unitAimSlides(u));
 
   /* ── 3 · THE THREE READINGS, AT THE SIZE THEY DESERVE (§243) ───────
      Islam: *"where the units stands needs to show the 3 main numbers not only
@@ -467,7 +473,7 @@ function deckSlides(u){
      §404: AND A CLIENT THAT SWITCHED THE SWOT OFF IS NOT SHOWN ONE, on either
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
-  S = S.concat(unitSwotSlides(u));
+  S = S.concat(short ? companyAnalysisSlides(u) : unitSwotSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -503,7 +509,14 @@ function deckSlides(u){
      title."* The cost he took with it is one slide per deck; what it buys is
      that all four sections are announced the same way, and that the roll-call
      goes on reading as the content slide it is. */
-  if (pOn && u.items.length)
+  var capCards = !short ? "" : boardCapTargets().map(function(t){
+    var c = capById(t.slice(4)), nm = placeLabel(t);
+    return '<div class="pcard"><span class="pcard-c">' + esc(deckCode(t, nm)) + '</span>' +
+      '<span class="pcard-n">' + esc(nm) + '</span>' +
+      '<span class="pcard-s">' + esc(L1("capability")) + '</span></div>';
+  }).join("");
+  var nCards = u.items.length + (short ? boardCapTargets().length : 0);
+  if (pOn && u.items.length && !short)
     S.push(sectSlide("spillars", "After the Strategic " + labelWord("pillar","bu") + " divider",
       "Strategic " + L("pillar","bu"),
       "The " + u.items.length + " " + L("pillar","bu") +
@@ -511,11 +524,11 @@ function deckSlides(u){
 
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    '><h2>' + L("pillar","bu") + '</h2>' +
-    '<div class="pcards" style="--n:' + u.items.length +
-      ';--c:' + pillarCols(u.items.length) +
-      ';--r:' + Math.ceil(u.items.length / pillarCols(u.items.length)) + '">' +
-    pNames + '</div></section>');
+    '><h2>' + L("pillar","bu") + (capCards ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
+    '<div class="pcards" style="--n:' + nCards +
+      ';--c:' + pillarCols(nCards) +
+      ';--r:' + Math.ceil(nCards / pillarCols(nCards)) + '">' +
+    pNames + capCards + '</div></section>');
 
   /* The score table, built here and pushed at the END (§254.4). */
   var pRows = u.items.map(function(p, i){
@@ -543,232 +556,8 @@ function deckSlides(u){
     '<th class="num">' + L("measure") + '</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>';
 
-  (pOn ? u.items : []).forEach(function(p, pi){
-    /* §416: and it gets no slides of its own until its year comes. */
-    if (!runsNow(p)) return;
-    var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
-    S.push('<section class="dslide d-cover"' +
-      anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
-      sec(pillarCode(u, pi), p.name) +
-      '><span class="seclab">' + esc(p.kind) +
-      ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
-      '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
-        esc(p.name) + '</h1>' +
-      (p.sub ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
-      '<div class="coverrule"></div><div class="leadstats">' +
-        '<div><span class="dlab">' + L("measure") + '</span><b class="' + dBand(pillarPerf(p)) + '">' +
-          dPct(pillarPerf(p)) + '</b></div>' +
-        '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
-      '</div></section>');
+  (pOn && !short ? u.items : []).forEach(function(p, pi){ S = S.concat(pillarSlidesOf(u, p, pi)); });
 
-    /* ── THE DIRECTION'S OVERVIEW, ONE SLIDE AFTER ITS TITLE (§413) ────
-       Islam, of the mockup: "approved, keep the objective preview, build it".
-       Drawn only while the client's Structure carries the Direction overview
-       AND this direction has something in it: an empty slide on a projector
-       says the plan owes an answer nobody asked it for (§253, §45.2). The
-       right-hand panel is READ from the direction's own tables, never typed a
-       second time (§53.5). */
-    if (planDetailOn("overview", p) && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
-      var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
-        return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
-      }).join("");
-      var ovTs = SMPRules.shown(p.tactics || []).slice(0, 5).map(function(t){
-        return '<div class="row"><span>' + esc(t.name) + '</span><i>' + esc(t.owner || "") + '</i></div>';
-      }).join("");
-      var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
-      S.push('<section class="dslide dovs"' +
-        anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
-        deckPillarHead(u, p, pi, DW("overview", "one", p)) +
-        '<div class="obody"><div>' +
-          (String(p.ovObj || "").trim() ? '<div class="ok">' + ovArea("ovobj", p) + '</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
-          '<div class="two">' +
-            (String(p.ovWhy || "").trim() ? '<div><div class="ok">' + ovArea("ovwhy", p) + '</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
-            (ovRisks.length ? '<div><div class="ok">' + ovArea("ovrisk", p) + '</div><ul>' +
-              ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
-          '</div></div>' +
-          ((ovMs || ovTs) ? '<div class="side">' +
-            (ovMs ? '<div><div class="ok">' + L("measure") + '</div>' + ovMs + '</div>' : '') +
-            (ovTs ? '<div><div class="ok">' + L("tactic") + '</div>' + ovTs + '</div>' : '') +
-          '</div>' : '') +
-        '</div></section>');
-    }
-
-    var mRows = SMPRules.shown(p.measures).map(function(m, i){
-      return '<tr><td class="idx">' + (i+1) + '</td>' +
-        '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
-        '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-        '<td class="num">' + figVsDue(m) + '</td>' +
-        '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
-        (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
-        '</tr>';
-    }).join("");
-    /* §236.2: Islam — "the slide can be set between the measures and tactics
-       because that's a valid place to be." The lowercase suffix keeps the key
-       clear of the tactics anchor below ("p" + code), which stored slides
-       already name. */
-    if (mRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
-      anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — " + labelWord("measure","bu")) + '>' +
-      deckPillarHead(u, p, pi, L("measure")) +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th>' +
-      '<th class="num">Annual target</th><th class="num">Actual</th>' +
-      '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
-
-    /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
-       After that pillar's targets, because the columns ARE two of the numbers
-       the heading above already averages — a room reading "Key measures 95%"
-       needs the five rows that make it, not three of them.
-
-       DRAWN ONLY WHERE THERE IS ONE, exactly as it is on the three screens: a
-       pillar with no breakdown mints no slide and no anchor (§253 — a table
-       with no rows is not a slide).
-
-       A COLUMN'S HEAD CARRIES ITS DIRECTION and a scored figure wears its
-       band, which is what says which columns count with no total row under
-       the table. The INDICATOR is drawn plain — deliberately the same rule as
-       the page, or the projector says something the screen does not (§53.5).
-
-       ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
-       `m` and the tactics slide's bare code, both of which stored picture
-       slides already name (§236.2, §50.3). */
-    var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
-    var bdRows = !bdShow ? "" :
-      SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
-        return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
-          bdCols.map(function(c){
-            var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
-            if (!String(a).trim())
-              return '<td class="num">' + (String(t).trim()
-                ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
-                : '<span class="dmuted">&mdash;</span>') + '</td>';
-            var sc = bdCellScore(r, c);
-            return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
-              esc(a) + (String(t).trim()
-                ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
-          }).join("") +
-          (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
-                  : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-      }).join("");
-    if (bdRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'B"' +
-      anch("p" + pillarCode(u, pi) + "b",
-           "After " + pillarCode(u, pi) + " — " + SMPRules.bdName(p)) + '>' +
-      deckPillarHead(u, p, pi, SMPRules.bdName(p)) +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
-      '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
-      bdCols.map(function(c){
-        return '<th class="num">' + esc(bdColWord(p, c)) +
-          (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
-      }).join("") +
-      '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
-
-    /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
-       Islam: *"presentations doesn't change when the plan performance is
-       done."* Measured on Mobile before a line was written: a tactic reported
-       through its outcome read **&mdash; / 50%** and **&mdash;** here, while
-       the Performance page read **4# / 3 #** and **133%** for that same row --
-       and the heading three inches above it on this very slide already said
-       **Delivered 98%**, a number that COUNTS the outcome the table under it
-       was calling empty. The deck was reading `t.actual`, and §248 puts the
-       figure in `outActual`.
-
-       THE OUTCOME TAKES A COLUMN OF ITS OWN, Islam's pick from three drawn in
-       the real deck (design-mockups/tactic-outcome-slide/). It is what the
-       figure beside it is measured against, so it belongs on the line where an
-       audience can run an eye down it -- the same shape the Performance page
-       has worn since §248, because a projector must not say something
-       different from the page behind it (§53.5). The cost was measured and
-       accepted: Mobile's deck goes from 24 slides to 27, all of them
-       continuations of a table the deck already splits (§69.5).
-
-       AND THE TWO HEADINGS TAKE PERFORMANCE'S WORDS -- *YTD actual* and
-       *Progress* -- for §239.2's own reason: "delivery" is wrong for a row
-       measured in stores or in EGP, and one number should not have two names.
-
-       A ROW THAT IS OWED A FIGURE SAYS SO. It printed the same em-dash as an
-       unmeasurable row, so a review could not tell "nobody has entered this"
-       from "there is nothing to enter" (§35). */
-    var tRows = SMPRules.shown(p.tactics).map(function(t, i){
-      /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
-         each outcome takes a line of its own, as on the page behind it. */
-      var xs = scoredExtras(t), rs = outRowspan(xs.length);
-      var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
-        '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
-        '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
-        '<td' + rs + '>' + esc(t.owner) + '</td>' +
-        '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
-        '<td class="cc"' + rs + '>' + qs(t) + '</td>';
-      var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
-                        : '<td class="dnote empty"' + rs + '>&mdash;</td>';
-      if (xs.length) return deckOutRows(t, lead, note, xs, rs);
-      /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
-         normally it has the comment of not due this cycle anyway."* The cell
-         already says it in words, and dimming says it a second time in a way
-         that also costs the owner and the quarters their legibility on a
-         projector. */
-      if (!tacticDue(t))
-        return '<tr>' + lead +
-          '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
-      /* What this row is measured against RIGHT NOW: an outcome answers with
-         its own target, prorated where it compiles by Sum or Count (§276); everything else
-         with the share of its plan that is due (§239). One function, so the
-         slide and the page cannot differ about it. */
-      var bench = tacticBenchmark(t);
-      if (!tacticAnswered(t))
-        return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
-          (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
-          note + '</tr>';
-      var r = tacticProgress(t);
-      var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
-      return '<tr>' + lead +
-        '<td class="num"><b>' + esc(shown) + '</b>' +
-          (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
-        '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
-        note + '</tr>';
-    }).join("");
-    if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
-      anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
-      deckPillarHead(u, p, pi, L("tactic")) +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
-      '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
-      '<th>Collabs.</th>' +
-      '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
-      '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
-  });
-
-  /* §414: a tactic with several outcomes on the review deck — one line per
-     outcome with its own figure against its own benchmark, and the tactic's
-     Progress as their average, spanning the lines. `deckFitPass()` moves a
-     tactic's lines as one group, so a continuation never splits them. */
-  function deckOutFig(t, x){
-    var o = outcomeOf(x);
-    if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
-    var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
-    if (shown == null)
-      return '<td class="cc">Not reported' +
-        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
-    return '<td class="num"><b>' + esc(shown) + '</b>' +
-      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
-  }
-  function deckOutRows(t, lead, note, xs, rs){
-    var due = tacticDue(t), sub = outSubCls(t), out;
-    if (!due) {
-      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
-      xs.forEach(function(x){
-        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
-      });
-      return out + outPad(xs.length);
-    }
-    var r = tacticProgress(t);
-    var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
-                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
-    prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
-    out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
-    xs.forEach(function(x){
-      var e = exAsT(t, x);
-      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
-        deckOutFig(t, e) + '</tr>';
-    });
-    return out + outPad(xs.length);
-  }
 
   /* ── 7 · THE NOTE, DRAWN ONLY WHEN THERE IS ONE (§243) ────────────────
      Islam: *"make the notes and achievements slide optional and they can add
@@ -817,7 +606,7 @@ function deckSlides(u){
      on last cycle: the room reads them once flat and once properly and
      cannot tell which is the real one (§87's twins, in figures). The stand
      slide always draws, so there is always something behind this. */
-  S.push(sectSlide("sperf", "After the Overall performance divider",
+  if (!short) S.push(sectSlide("sperf", "After the Overall performance divider",
     "Overall performance",
     "Where the " + L("pillar","bu") + " stand, where " +
       (u.fnKey ? u.name : "the unit") + " stands, and what the cycle is remembered for.",
@@ -855,6 +644,321 @@ function deckSlides(u){
    a grid would push them left. */
 function pillarCols(n){
   return n <= 3 ? Math.max(1, n) : Math.ceil(Math.sqrt(n));
+}
+
+/* §481: ONE DIRECTION'S SLIDES, lifted out of deckSlides so a direction can
+   be presented on its own by whoever owns it (Islam, round 2: *"when press
+   present he will only see his slides"*). deckSlides calls this for every
+   direction, so the whole-plan deck and a direction's own deck cannot
+   disagree about what a direction's slides are (§53.5). */
+function pillarSlidesOf(u, p, pi){
+  var S = [];
+  /* §416: and it gets no slides of its own until its year comes. */
+  if (!runsNow(p)) return S;
+  var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
+  S.push('<section class="dslide d-cover"' +
+    anch("p" + pillarCode(u, pi) + "d", "After the " + pillarCode(u, pi) + " title page") +
+    sec(pillarCode(u, pi), p.name) +
+    '><span class="seclab">' + esc(p.kind) +
+    ' &middot; ' + L1("theme") + ' ' + esc(p.theme) + ' &middot; ' + esc(p.owner) + '</span>' +
+    '<h1 class="pillarname"><span class="dcode huge">' + pillarCode(u, pi) + '</span> ' +
+      esc(p.name) + '</h1>' +
+    (p.sub ? '<p class="coversub">' + esc(p.sub) + '</p>' : '') +
+    '<div class="coverrule"></div><div class="leadstats">' +
+      '<div><span class="dlab">' + L("measure") + '</span><b class="' + dBand(pillarPerf(p)) + '">' +
+        dPct(pillarPerf(p)) + '</b></div>' +
+      '<div><span class="dlab">Execution</span><b class="' + dBand(r) + '">' + dPct(r) + '</b></div>' +
+    '</div></section>');
+
+  /* ── THE DIRECTION'S OVERVIEW, ONE SLIDE AFTER ITS TITLE (§413) ────
+     Islam, of the mockup: "approved, keep the objective preview, build it".
+     Drawn only while the client's Structure carries the Direction overview
+     AND this direction has something in it: an empty slide on a projector
+     says the plan owes an answer nobody asked it for (§253, §45.2). The
+     right-hand panel is READ from the direction's own tables, never typed a
+     second time (§53.5). */
+  if (planDetailOn("overview", p) && ["ovObj","ovWhy","ovRisk"].some(function(k){ return String(p[k] || "").trim(); })) {
+    var ovMs = SMPRules.shown(p.measures || []).slice(0, 5).map(function(m){
+      return '<div class="row"><span>' + esc(m.name) + '</span><b>' + (m.target ? tgtShown(m.target) : '&mdash;') + '</b></div>';
+    }).join("");
+    var ovTs = SMPRules.shown(p.tactics || []).slice(0, 5).map(function(t){
+      return '<div class="row"><span>' + esc(t.name) + '</span><i>' + esc(t.owner || "") + '</i></div>';
+    }).join("");
+    var ovRisks = String(p.ovRisk || "").split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+    S.push('<section class="dslide dovs"' +
+      anch("p" + pillarCode(u, pi) + "o", "After " + pillarCode(u, pi) + " — " + detailWord("overview", "one", p)) + '>' +
+      deckPillarHead(u, p, pi, DW("overview", "one", p)) +
+      '<div class="obody"><div>' +
+        (String(p.ovObj || "").trim() ? '<div class="ok">' + ovArea("ovobj", p) + '</div><p class="objq">' + esc(p.ovObj) + '</p>' : '') +
+        '<div class="two">' +
+          (String(p.ovWhy || "").trim() ? '<div><div class="ok">' + ovArea("ovwhy", p) + '</div><p>' + esc(p.ovWhy) + '</p></div>' : '<div></div>') +
+          (ovRisks.length ? '<div><div class="ok">' + ovArea("ovrisk", p) + '</div><ul>' +
+            ovRisks.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></div>' : '<div></div>') +
+        '</div></div>' +
+        ((ovMs || ovTs) ? '<div class="side">' +
+          (ovMs ? '<div><div class="ok">' + L("measure") + '</div>' + ovMs + '</div>' : '') +
+          (ovTs ? '<div><div class="ok">' + L("tactic") + '</div>' + ovTs + '</div>' : '') +
+        '</div>' : '') +
+      '</div></section>');
+  }
+
+  var mRows = SMPRules.shown(p.measures).map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num">' + figVsDue(m) + '</td>' +
+      '<td class="num final ' + dBand(measureScore(m)) + '">' + dPct(measureScore(m)) + '</td>' +
+      (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
+      '</tr>';
+  }).join("");
+  /* §236.2: Islam — "the slide can be set between the measures and tactics
+     because that's a valid place to be." The lowercase suffix keeps the key
+     clear of the tactics anchor below ("p" + code), which stored slides
+     already name. */
+  if (mRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'M"' +
+    anch("p" + pillarCode(u, pi) + "m", "After " + pillarCode(u, pi) + " — " + labelWord("measure","bu")) + '>' +
+    deckPillarHead(u, p, pi, L("measure")) +
+    '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("measure") + '</th>' +
+    '<th class="num">Annual target</th><th class="num">Actual</th>' +
+    '<th class="num">Progress</th><th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+
+  /* ── §343: AND THE BREAKDOWN GETS A SLIDE OF ITS OWN ────────────────
+     After that pillar's targets, because the columns ARE two of the numbers
+     the heading above already averages — a room reading "Key measures 95%"
+     needs the five rows that make it, not three of them.
+
+     DRAWN ONLY WHERE THERE IS ONE, exactly as it is on the three screens: a
+     pillar with no breakdown mints no slide and no anchor (§253 — a table
+     with no rows is not a slide).
+
+     A COLUMN'S HEAD CARRIES ITS DIRECTION and a scored figure wears its
+     band, which is what says which columns count with no total row under
+     the table. The INDICATOR is drawn plain — deliberately the same rule as
+     the page, or the projector says something the screen does not (§53.5).
+
+     ITS ANCHOR IS THE PILLAR'S CODE PLUS `b`, clear of the measures slide's
+     `m` and the tactics slide's bare code, both of which stored picture
+     slides already name (§236.2, §50.3). */
+  var bdCols = SMPRules.bdCols(p), bdShow = SMPRules.bdHas(p);
+  var bdRows = !bdShow ? "" :
+    SMPRules.shown(SMPRules.bdRows(p)).map(function(r, ri){
+      return '<tr><td class="idx">' + (ri + 1) + '</td><td>' + esc(r.name) + '</td>' +
+        bdCols.map(function(c){
+          var t = SMPRules.bdTarget(r, c), a = SMPRules.bdActual(r, c);
+          if (!String(a).trim())
+            return '<td class="num">' + (String(t).trim()
+              ? '<span class="dmuted">&mdash; / ' + esc(t) + '</span>'
+              : '<span class="dmuted">&mdash;</span>') + '</td>';
+          var sc = bdCellScore(r, c);
+          return '<td class="num' + (sc == null ? '' : ' final ' + dBand(sc)) + '">' +
+            esc(a) + (String(t).trim()
+              ? '<span class="dsub">/ ' + esc(t) + '</span>' : '') + '</td>';
+        }).join("") +
+        (r.note ? '<td class="dnote">' + esc(r.note) + '</td>'
+                : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+    }).join("");
+  if (bdRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'B"' +
+    anch("p" + pillarCode(u, pi) + "b",
+         "After " + pillarCode(u, pi) + " — " + SMPRules.bdName(p)) + '>' +
+    deckPillarHead(u, p, pi, SMPRules.bdName(p)) +
+    '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
+    '<th>' + esc(SMPRules.bdName(p)) + '</th>' +
+    bdCols.map(function(c){
+      return '<th class="num">' + esc(bdColWord(p, c)) +
+        (SMPRules.bdScored(c) ? ' ' + esc(c.dir) : '') + '</th>';
+    }).join("") +
+    '<th>Note</th></tr></thead><tbody>' + bdRows + '</tbody></table></section>');
+
+  /* ── 6 · A TACTIC IS SHOWN BY WHAT IT PRODUCED (§252) ──────────────
+     Islam: *"presentations doesn't change when the plan performance is
+     done."* Measured on Mobile before a line was written: a tactic reported
+     through its outcome read **&mdash; / 50%** and **&mdash;** here, while
+     the Performance page read **4# / 3 #** and **133%** for that same row --
+     and the heading three inches above it on this very slide already said
+     **Delivered 98%**, a number that COUNTS the outcome the table under it
+     was calling empty. The deck was reading `t.actual`, and §248 puts the
+     figure in `outActual`.
+
+     THE OUTCOME TAKES A COLUMN OF ITS OWN, Islam's pick from three drawn in
+     the real deck (design-mockups/tactic-outcome-slide/). It is what the
+     figure beside it is measured against, so it belongs on the line where an
+     audience can run an eye down it -- the same shape the Performance page
+     has worn since §248, because a projector must not say something
+     different from the page behind it (§53.5). The cost was measured and
+     accepted: Mobile's deck goes from 24 slides to 27, all of them
+     continuations of a table the deck already splits (§69.5).
+
+     AND THE TWO HEADINGS TAKE PERFORMANCE'S WORDS -- *YTD actual* and
+     *Progress* -- for §239.2's own reason: "delivery" is wrong for a row
+     measured in stores or in EGP, and one number should not have two names.
+
+     A ROW THAT IS OWED A FIGURE SAYS SO. It printed the same em-dash as an
+     unmeasurable row, so a review could not tell "nobody has entered this"
+     from "there is nothing to enter" (§35). */
+  var tRows = SMPRules.shown(p.tactics).map(function(t, i){
+    /* §414: SEVERAL OUTCOMES. The shared cells span the tactic's lines and
+       each outcome takes a line of its own, as on the page behind it. */
+    var xs = scoredExtras(t), rs = outRowspan(xs.length);
+    var lead = '<td class="idx"' + rs + '>' + (i+1) + '</td>' +
+      '<td class="lead"' + rs + '>' + esc(t.name) + '</td>' +
+      '<td>' + (xs.length ? otag("O1") : '') + outcomeCell(t) + '</td>' +
+      '<td' + rs + '>' + esc(t.owner) + '</td>' +
+      '<td class="collabs"' + rs + '>' + collabCell(t) + '</td>' +
+      '<td class="cc"' + rs + '>' + qs(t) + '</td>';
+    var note = t.note ? '<td class="dnote"' + rs + '>' + esc(t.note) + '</td>'
+                      : '<td class="dnote empty"' + rs + '>&mdash;</td>';
+    if (xs.length) return deckOutRows(t, lead, note, xs, rs);
+    /* §254.3: NOT DIMMED. Islam: *"for a non due tactic don't dim it show it
+       normally it has the comment of not due this cycle anyway."* The cell
+       already says it in words, and dimming says it a second time in a way
+       that also costs the owner and the quarters their legibility on a
+       projector. */
+    if (!tacticDue(t))
+      return '<tr>' + lead +
+        '<td colspan="2" class="cc">Outside this cycle</td>' + note + '</tr>';
+    /* What this row is measured against RIGHT NOW: an outcome answers with
+       its own target, prorated where it compiles by Sum or Count (§276); everything else
+       with the share of its plan that is due (§239). One function, so the
+       slide and the page cannot differ about it. */
+    var bench = tacticBenchmark(t);
+    if (!tacticAnswered(t))
+      return '<tr>' + lead + '<td colspan="2" class="cc">Not reported' +
+        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>' +
+        note + '</tr>';
+    var r = tacticProgress(t);
+    var shown = onOutcome(t) ? outcomeShown(t) : t.actual + "%";
+    return '<tr>' + lead +
+      '<td class="num"><b>' + esc(shown) + '</b>' +
+        (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>' +
+      '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
+      note + '</tr>';
+  }).join("");
+  if (tRows) S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
+    anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
+    deckPillarHead(u, p, pi, L("tactic")) +
+    '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>' + L1("tactic") + '</th>' +
+    '<th>' + DW("outcomes", "one", p) + '</th><th>Owner</th>' +
+    '<th>Collabs.</th>' +
+    '<th class="num">Quarters</th><th class="num">YTD actual</th><th class="num">Progress</th>' +
+    '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
+
+  return S;
+
+  /* §414: a tactic with several outcomes on the review deck — one line per
+     outcome with its own figure against its own benchmark, and the tactic's
+     Progress as their average, spanning the lines. `deckFitPass()` moves a
+     tactic's lines as one group, so a continuation never splits them. */
+  function deckOutFig(t, x){
+    var o = outcomeOf(x);
+    if (!o) return '<td class="cc"><span class="missing">Missing</span></td>';
+    var bench = benchBeside(o, tacticShare(t)), shown = outcomeShown(x);
+    if (shown == null)
+      return '<td class="cc">Not reported' +
+        (bench ? ' <i>&middot; due at ' + esc(bench) + '</i>' : '') + '</td>';
+    return '<td class="num"><b>' + esc(shown) + '</b>' +
+      (bench ? ' <i>/ ' + esc(bench) + '</i>' : '') + '</td>';
+  }
+  function deckOutRows(t, lead, note, xs, rs){
+    var due = tacticDue(t), sub = outSubCls(t), out;
+    if (!due) {
+      out = '<tr>' + lead + '<td colspan="2" class="cc"' + rs + '>Outside this cycle</td>' + note + '</tr>';
+      xs.forEach(function(x){
+        out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(exAsT(t, x)) + '</td></tr>';
+      });
+      return out + outPad(xs.length);
+    }
+    var r = tacticProgress(t);
+    var prog = r == null ? '<td class="num"' + rs + '>&mdash;'
+                         : '<td class="num final ' + dBand(r) + '"' + rs + '>' + dPct(r);
+    prog += '<span class="oavg">average of ' + (xs.length + 1) + '</span></td>';
+    out = '<tr>' + lead + deckOutFig(t, t) + prog + note + '</tr>';
+    xs.forEach(function(x){
+      var e = exAsT(t, x);
+      out += '<tr class="' + sub + '"><td>' + otag(x.id) + outcomeCell(e) + '</td>' +
+        deckOutFig(t, e) + '</tr>';
+    });
+    return out + outPad(xs.length);
+  }
+}
+
+/* ── §481: THE COMPANY'S SHORT REVIEW, AND A DIRECTION'S OWN DECK ────────
+   Islam, round 2: *"it will be 1 flow … it needs to be short yes as a company
+   performance the foundation, the analysis, the directions & capbilities and
+   then thier performance"*, and of the owner, *"when press present he wll
+   only see his slides"*.
+
+   ONLY WHERE THE COMPANY'S PLAN IS THE WHOLE PLAN: the units off and the
+   directions in pillars. Everywhere else the group deck is exactly what it
+   was, asserted. */
+function companyReviewOn(){
+  return !SMPRules.buExists(GROUP) && topWay() !== "projects";
+}
+/* The Foundation: the aspiration, the end in mind and the company's key
+   objectives — the Foundation tab's own three, read off GROUP (§428 put them
+   there; the unit-shaped view carries none). Nothing to say draws nothing
+   (§253). */
+function companyFoundationSlides(){
+  var asp = String(GROUP.aspiration || "").trim(), end = String(GROUP.endInMind || "").trim();
+  var kos = SMPRules.shown(Array.isArray(GROUP.keyObjectives) ? GROUP.keyObjectives : []);
+  if (!asp && !end && !kos.length) return [];
+  var rows = kos.map(function(m, i){
+    return '<tr><td class="idx">' + (i+1) + '</td><td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
+      '<td class="num">' + (m.target ? tgtShown(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+      '<td class="num big3">' + (m.target3y ? tgtShown(m.target3y) : "&mdash;") + '</td></tr>';
+  }).join("");
+  return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
+    ((asp || end) ? '<div class="aimtop">' +
+      (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
+      (end ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
+      '</div>' : '') +
+    (rows ? '<div class="aimbottom"><span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>' +
+      '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+      '<th class="num">This year</th><th class="num">' + horizonColLabel() + '</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody></table></div>' : '') +
+    '</section>'];
+}
+/* The analysis: the four boxes on ONE slide, two by two, in the SWOT's own
+   hues — the full section is four slides and a divider, which is the length
+   this review exists to lose. */
+function companyAnalysisSlides(u){
+  if (!compOn("group", "swot")) return [];
+  var hues = { s:"good", w:"bad", o:"stone", t:"warn" };
+  var quads = SMPRules.swotQuads(GROUP, "group");
+  var has = function(q){ return (u.swot[q] || []).filter(function(t){ return String(t || "").trim(); }); };
+  if (!quads.some(function(q){ return has(q).length; })) return [];
+  return ['<section class="dslide d-coswot"' + anch("swot", "After the Analysis") + '>' +
+    '<h2>' + (esc(SMPRules.swotTitle(GROUP, "group")) || "Analysis") + '</h2><div class="dswgrid">' +
+    quads.map(function(q){
+      var items = has(q);
+      return '<div class="dswcol t-' + hues[q] + '"><h3>' + esc(LTraw("group", SMPRules.QUAD_KEYS[q])) + '</h3>' +
+        (items.length ? '<ol class="dswot">' + items.map(function(t, i){
+          return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
+        }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
+    }).join("") + '</div></section>'];
+}
+/* A direction's own deck: its cover naming who presents it, the direction's
+   own slides — the very ones the full plan deck draws, through the one
+   builder (§53.5) — and Thank you. */
+function dirDeckHtml(t){
+  var d = dirPillar(t);
+  if (!d) return "";
+  var u = topAsUnit(), p = d.p, code = pillarCode(u, d.i);
+  var who = [p.owner ? "Presented by " + esc(p.owner) : "",
+             p.custodian ? "custodian " + esc(p.custodian) : ""].filter(Boolean).join(" &middot; ");
+  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", p.name, true) + '>' +
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(p.name) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">' + esc(code) + ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
+    (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
+  if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i));
+  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
+    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+  return S.join("");
 }
 
 function deckPillarHead(u, p, pi, which){
@@ -1232,6 +1336,8 @@ function insertPictureSlides(deck, target, blank){
    the three cannot disagree about whose list they are reading (§53.5). */
 function deckSubject(target){
   if (!target) return null;
+  /* §481: a direction hides its own slides on the direction itself. */
+  if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
   return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
 }
 
@@ -1410,6 +1516,14 @@ function openDeckFn(subject, from){
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
   var t = String(target);
+  /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
+     each its own deck back to back — the owner's Present shows only theirs. */
+  if (t.indexOf("dir:") === 0) {
+    var ds = t.split(",").filter(function(x){ return dirPillar(x); });
+    if (!ds.length) return;
+    openDeckWith(ds.map(function(x){ return esc(placeLabel(x)); }).join(" &middot; "), ds, from);
+    return;
+  }
   /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
@@ -1533,6 +1647,15 @@ function flowToPdf(){
 function masterSubjects(){
   /* §334: the capabilities between them, in the board's own order — the flow
      and the board must never disagree about who presents (§245). */
+  /* §481: with the company's plan the whole plan, the flow is its directions,
+     its capabilities and its functions, and the short company review LAST —
+     Islam: *"company comes last"*. */
+  if (companyReviewOn()) {
+    var dirs = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
+      return p && p.id && runsNow(p) && planOn("group"); }).map(function(p){ return "dir:" + p.id; });
+    return dirs.concat(boardCapTargets()).concat(boardFunctionTargets())
+      .concat(topHasPlan() && planOn("group") ? ["group"] : []);
+  }
   return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
 }
 /* The running order to open the picker on: the stored one, filtered to
@@ -1706,7 +1829,12 @@ function masterCount(t){
    a repaint KEEPS the filter, or ticking somebody quietly shows the whole list
    again to a person who believes they are reading their results. */
 function masterKind(t){
-  return String(t).indexOf("fn:") === 0
+  t = String(t);
+  /* §481: four kinds in the company's flow, said in the picker's own chips. */
+  if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
+  if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
+  if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
+  return t.indexOf("fn:") === 0
     ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
 }
 function masterPaint(){
@@ -2112,6 +2240,10 @@ function deckFitPass(deck){
    and not yet given a prefix. Two letters, because one is not a name and three
    from an unknown word is a guess. */
 function deckCode(target, name){
+  if (String(target).indexOf("dir:") === 0) {
+    var dd = dirPillar(target);
+    if (dd) return pillarCode(topAsUnit(), dd.i);
+  }
   var o = String(target).indexOf("fn:") === 0
     ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
   var pre = o && o.codePrefix;

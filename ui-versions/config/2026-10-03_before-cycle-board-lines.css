@@ -399,8 +399,8 @@
      replaced used for the same state (`.ico.on`) — a worded button rather than
      an icon, because it sits in a row of worded controls (Columns, Register
      file) and a lone glyph among words reads as something else. */
-  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
-  .editbtn.on:hover { background:var(--gold); border-color:var(--gold); color:var(--on-accent); filter:brightness(.94); }
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
 
   /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
      column in a table cell (§93.15's note above it), which is right there and
@@ -2085,7 +2085,7 @@
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */
   .editbtn.penon, .editbtn.penon:hover {
-    background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+    background:var(--gold); border-color:var(--gold); color:var(--panel); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -2988,6 +2988,3 @@
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
-  /* §480: a reporting line with nobody named over it says so in the warning
-     ink, never the quiet grey — "None yet" is outstanding, not a description. */
-  .cfg td.why.nobody { color:var(--attn-tx); }

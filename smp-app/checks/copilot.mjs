@@ -48,6 +48,7 @@ import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
 import { methodFor } from "../lib/copilot-settings.ts";
 import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
+import { scoreOf as dvScore, finishBlocker as dvBlock, newDirs, modelCaps as dvCaps, modelOptions as dvOpts, todoOf as dvTodo } from "../lib/copilot-directions.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
 import { moduleMenu } from "../lib/modules.ts";
@@ -163,6 +164,23 @@ check("each section's guidance carries the house rules; the roads only where the
   check("...a 20-point gap is Leaning", lr.gap === 20 && lr.clarity === "leaning", JSON.stringify(lr.pct));
 }
 
+/* §494: Directions — the one score, the blockers, the model's rows cut to shape. */
+{
+  check("§494 a Direction's score is Urgency × Importance × Ease, out of 64", dvScore({ urgency: 4, importance: 4, ease: 3 }) === 48 && dvScore({ urgency: 1, importance: 2, ease: 2 }) === 4);
+  check("...a row missing a score has no score, never a nought (§35)", dvScore({ urgency: 4, importance: 0, ease: 3 }) === null);
+  const d = newDirs("directions", true, 0);
+  check("...nothing chosen blocks the save", /Tick the Directions/.test(dvBlock(d)));
+  check("...Directions chosen with Capabilities owed still block", /Keep at least one Capability/.test(dvBlock({ ...d, chose: true, options: [{ title: "A", urgency: 1, importance: 1, ease: 1, ownedBy: "", go: true, mark: "", planId: "" }] })));
+  check("...a plan holding Directions asks plan-or-fresh first; an empty one starts fresh", newDirs("directions", false, 4).start === "" && newDirs("directions", false, 0).start === "fresh");
+  check("...the to-do has Choose Capabilities only when capabilities are chosen here", dvTodo(newDirs("directions", true, 0)).some((t) => t.key === "caps") && !dvTodo(newDirs("directions", false, 0)).some((t) => t.key === "caps"));
+  const fns = [{ key: "commercial", name: "Commercial" }];
+  const o = dvOpts([{ title: "Win families", urgency: 9, importance: 3, ease: 3, ownedBy: "nobody" }, { title: "Mine", urgency: 3, importance: 3, ease: 3, ownedBy: "commercial" }], fns, ["mine"]);
+  check("...a score out of range is dropped, an owner not on the list is dropped, the client's own row is marked theirs",
+    o[0].urgency === 0 && o[0].ownedBy === "" && o[0].mark === "new" && o[1].mark === "yours" && o[1].ownedBy === "commercial", JSON.stringify(o));
+  const c = dvCaps([{ title: "Supply chain", kind: "gap", serves: ["win families", "Made up"], ownedBy: "commercial" }, { title: "X", kind: "weird", serves: [], ownedBy: "" }], fns, ["Win families"], [], true);
+  check("...a Capability serves only Directions on the table, spelt as they are, and a kind not on the list is none",
+    c[0].serves.join() === "Win families" && c[0].kind === "gap" && c[1].kind === "" && c[0].keep === true, JSON.stringify(c));
+}
 /* §460: the conversation fixes, A B C, each asked of the rule itself. */
 {
   const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
@@ -868,6 +886,85 @@ try {
     check("a second chat saves as version 2 of the SAME deliverable", fn2.j.saved && fn2.j.saved.n === 2 && fn.j.saved && fn2.j.saved.deliverableId === fn.j.saved.deliverableId, JSON.stringify(fn2.j.saved));
     const notCp = await call("POST", "api", { act: "competeSave", id: ch.id, compete: {} }, NORAN);
     check("a chat that is not How we compete is refused", notCp.st === 400 && /not a How we compete chat/.test(notCp.j.why));
+    NEXT = null;
+    }
+
+    /* ══ §9 · the Directions and Capabilities chats (§494) ════════════ */
+    {
+    section("§9 · the Directions chat: plan or fresh, scored, chosen, capabilities, saved");
+    const FNS = [{ key: "commercial", name: "Commercial" }, { key: "it", name: "IT" }];
+    const hn = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "directions", withCaps: true, hadPlan: 2, title: "Directions 2026" }, HEND);
+    check("a client's own person cannot start one", hn.st === 403, hn.st + "");
+    const nd = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "directions", withCaps: true, hadPlan: 2, title: "Directions 2026" }, NORAN);
+    check("the office starts a Directions chat that asks plan-or-fresh first", nd.st === 200 && nd.j.chat?.section === "directions" && nd.j.dirs?.start === "" && nd.j.dirs?.withCaps === true && nd.j.dirsTodo?.length === 4,
+      String(JSON.stringify(nd.j)).slice(0, 200));
+    const did = nd.j.chat?.id;
+    const tooSoon = await call("POST", "api", { act: "dirSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("nothing is suggested before plan-or-fresh is answered", tooSoon.st === 400 && /Start from the plan/.test(tooSoon.j.why), JSON.stringify(tooSoon.j));
+    const st = await call("POST", "api", { act: "dirStart", id: did, start: "plan", existing: [{ id: "mobile-P1", title: "Grow accessories" }, { id: "mobile-P2", title: "Win families" }] }, NORAN);
+    check("starting from the plan puts its Directions on the table, marked and keyed to their pillars", st.st === 200 && st.j.dirs?.options.length === 2 && st.j.dirs.options.every((o) => o.mark === "plan" && o.planId) && st.j.dirs?.start === "plan",
+      String(JSON.stringify(st.j.dirs)).slice(0, 200));
+    const again = await call("POST", "api", { act: "dirStart", id: did, start: "fresh" }, NORAN);
+    check("...and it cannot start twice", again.st === 400 && /already started/.test(again.j.why));
+    NEXT = { answer: { reply: "From the SWOT.", options: [
+      { title: "Win families", urgency: 4, importance: 4, ease: 3, ownedBy: "commercial" }, { title: "Grow accessories", urgency: 2, importance: 2, ease: 2, ownedBy: "" },
+      { title: "Upper Egypt", urgency: 3, importance: 4, ease: 3, ownedBy: "nobody" }, { title: "Own label", urgency: 3, importance: 3, ease: 3, ownedBy: "it" },
+      { title: "Delivery", urgency: 2, importance: 3, ease: 2, ownedBy: "" }, { title: "B2B", urgency: 1, importance: 2, ease: 2, ownedBy: "" } ] } };
+    const sg = await call("POST", "api", { act: "dirSuggest", id: did, placeWord: "Mobile", fns: FNS, context: "SWOT: strong stores" }, NORAN);
+    const so = sg.j.dirs?.options || [];
+    check("suggested and scored: the plan's rows keep their key and mark, new rows follow, the four best are ticked",
+      sg.st === 200 && so.length === 6 && so[0].planId === "mobile-P1" && so[0].urgency === 2 && so[1].mark === "plan" && so[1].ownedBy === "commercial" &&
+      so.filter((o) => o.go).length === 4 && !so.find((o) => o.title === "B2B").go && sg.j.dirsScores?.[1] === 48,
+      String(JSON.stringify(so)).slice(0, 300));
+    check("...an owner the model named that is not a function is dropped", so.find((o) => o.title === "Upper Egypt")?.ownedBy === "");
+    check("...and the model was told the plan's own rows and the functions", /THE PLAN'S EXISTING DIRECTIONS[\s\S]*Grow accessories/.test(JSON.stringify(seen[seen.length - 1] || "")) && /commercial: Commercial/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    NEXT = { answer: { reply: "Added yours.", options: [{ title: "Small stores", urgency: 3, importance: 4, ease: 3, ownedBy: "commercial" }, { title: "Win families", urgency: 1, importance: 1, ease: 1, ownedBy: "" }] } };
+    const mo = await call("POST", "api", { act: "dirMore", id: did, placeWord: "Mobile", fns: FNS, own: ["Small stores"] }, NORAN);
+    check("adding your own: scored, marked yours, and a row already on the table is not added twice",
+      mo.st === 200 && mo.j.dirs?.options.length === 7 && mo.j.dirs.options[6].mark === "yours" && mo.j.dirs.options.filter((o) => o.title === "Win families").length === 1,
+      JSON.stringify(mo.j.dirs?.options.map((o) => o.title + ":" + o.mark)));
+    const capEarly = await call("POST", "api", { act: "capSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("Capabilities are refused before the Directions are chosen", capEarly.st === 400 && /Choose the Directions/.test(capEarly.j.why));
+    const finEarly = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("saving is refused while nothing is chosen — asked of the stored chat", finEarly.st === 400 && /Tick the Directions/.test(finEarly.j.why), JSON.stringify(finEarly.j));
+    const fake = await call("POST", "api", { act: "dirSave", id: did, dirs: { saved: { deliverableId: "x", n: 9, title: "fake" } } }, NORAN);
+    check("the page cannot say it is saved — `saved` is the product's", fake.st === 200 && fake.j.dirs?.saved === null);
+    const none = await call("POST", "api", { act: "dirSave", id: did, dirs: { options: mo.j.dirs.options.map((o) => ({ ...o, go: false })), chose: true } }, NORAN);
+    check("'chosen' with nothing ticked does not stick", none.j.dirs?.chose === false);
+    const ch2 = await call("POST", "api", { act: "dirSave", id: did, dirs: { options: mo.j.dirs.options, chose: true } }, NORAN);
+    check("choosing the ticked ones moves the to-do on, and Capabilities are now owed", ch2.j.dirs?.chose === true && /Keep at least one Capability/.test(ch2.j.dirsBlocker), ch2.j.dirsBlocker);
+    const chosen = (ch2.j?.dirs?.options || []).filter((o) => o.go).map((o) => o.title);
+    NEXT = { answer: { reply: "To deliver them.", capabilities: [
+      { title: "Low-cost supply chain", kind: "gap", serves: [chosen[0], "Not a direction"], ownedBy: "commercial" },
+      { title: "Data-led pricing", kind: "transformation", serves: [chosen[1]], ownedBy: "it" } ] } };
+    const cs = await call("POST", "api", { act: "capSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("Capabilities suggested from the chosen Directions, kept, serving only Directions on the table",
+      cs.st === 200 && cs.j.dirs?.caps.length === 2 && cs.j.dirs.caps.every((x) => x.keep) && cs.j.dirs.caps[0].serves.join() === chosen[0] && cs.j.dirs.caps[0].kind === "gap" && cs.j.dirsBlocker === "",
+      String(JSON.stringify(cs.j.dirs?.caps)).slice(0, 300));
+    check("...and the model was asked with the chosen Directions", chosen.every((t) => JSON.stringify(seen[seen.length - 1] || "").includes(t)));
+    const hf = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, HEND);
+    check("a client's own person cannot save it", hf.st === 403);
+    const fin = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("saving makes version 1 of Directions — Mobile", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
+    const vrow = fin.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fin.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the chosen Directions and kept Capabilities, owners by name",
+      vrow.length === 1 && vrow[0].body.directions.length === chosen.length && vrow[0].body.capabilities.length === 2 && /Commercial/.test(vrow[0].body.text) && /48\/64/.test(vrow[0].body.text),
+      String(JSON.stringify(vrow)).slice(0, 300));
+    const after = await call("POST", "api", { act: "dirSave", id: did, dirs: { chose: false } }, NORAN);
+    check("a saved chat refuses further changes", after.st === 400 && /Start a new chat/.test(after.j.why));
+
+    section("§9b · the Capabilities chat, when capabilities are their own layer");
+    const nc = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "capabilities", title: "Capabilities 2026" }, NORAN);
+    check("a Capabilities chat starts with nothing to choose first", nc.st === 200 && nc.j.chat?.section === "capabilities" && nc.j.dirs?.start === "fresh" && nc.j.dirs?.withCaps === false && nc.j.dirsTodo?.length === 3);
+    const cfin0 = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("...nothing kept, nothing saved", cfin0.st === 400 && /Keep at least one Capability/.test(cfin0.j.why));
+    NEXT = { answer: { reply: "From the saved Directions.", capabilities: [{ title: "One retail system", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "it" }] } };
+    const cc = await call("POST", "api", { act: "capSuggest", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS, dirTitles: ["Upper Egypt"] }, NORAN);
+    check("...suggested from the saved Directions the page sends", cc.st === 200 && cc.j.dirs?.caps[0]?.serves.join() === "Upper Egypt" && cc.j.dirs.caps[0].kind === "enabler");
+    const cfin = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("...and saves as Capabilities — Mobile", cfin.st === 200 && cfin.j.saved?.title === "Capabilities \u2014 Mobile");
+    const notDv = await call("POST", "api", { act: "dirSave", id: ch.id, dirs: {} }, NORAN);
+    check("a chat that is not Directions is refused", notDv.st === 400 && /not a Directions/.test(notDv.j.why));
     NEXT = null;
     }
 

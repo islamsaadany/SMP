@@ -62479,3 +62479,19 @@ Islam: *"proceed with all until you need someting from me"*, on the signed-off s
 
 **Recorded, not done**: Directions and Capabilities (stage 2) and Execution with the Planning & reporting cycle page (stage 3).
 
+## §494 — Directions and Capabilities, in the Copilot (spec 064 stage 2)
+
+Islam: *"proceed with all until you need someting from me"*, on the signed-off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`). Stage 2 is the Directions chat: start from the plan's own directions or fresh, score the candidates, tick the ones to keep, choose the capabilities, and save them into the plan.
+
+**The rules are one file, `lib/copilot-directions.ts`, and the page never adds a score** (§94.8): `scoreOf` is urgency × importance × ease, each 1–4, out of 64; `tickBest` ticks the top four; a plan row keeps its `planId` and its mark "plan" so saving updates the direction it came from rather than minting a second one.
+
+**The server keeps the chat honest** (§42), §493's shape: the state lives in `copilot_chats.extra.directions`, every write is judged against the STORED chat, `saved` belongs to the product and is ignored when the page sends it, and Finish is refused until the stored chat holds a ticked direction. The model is asked with no transaction open (§289).
+
+**Where capabilities are chosen follows the structure**: where `SMPRules.capAtTop(GROUP)` is true they are a step inside the Directions chat; otherwise they are the separate Capabilities section §493 opened. One question, asked in one place (`dvCapsHere`).
+
+**The save writes the plan in the browser, after the press** (`dvWritePlan`, §35): a direction is updated by its `planId` or created with `addPillar`; a capability is created with `addCapability` carrying `capKind` and `serves` (the pillar ids it supports). The authoriser learned both fields — `CAP_KNOWN` and a capPlan classification "what a capability is" — so a change to them is the plan's and not an unknown (§42's fall-through would otherwise make it the Super user's alone).
+
+**Proved**: `checks/copilot.mjs` 269/0, red under `dir-score-sum` 3, `dir-trust-saved` 6, `dir-finish-any` 10 (two probes made to degrade rather than die, §215); `scripts/test-authorize.js` 946/0, red 3/3 two ways; `checks/shell.mjs` §3l pressed in a browser — plan or fresh, scored, ticked, capabilities, and the save read back from the plan — red 2 with the plan-row lookup broken. The full shell run's two My work reds are §475's recorded fixture artefact. `tsc` clean; the shipped file is `build.py`'s output; `sw.js` SHELL `v6.04-directions-copilot`.
+
+**Recorded, not done**: owners are not written by the save (a direction's owner stays the plan's to set); stage 3 — the Execution chat and Setup › Planning & reporting cycle.
+

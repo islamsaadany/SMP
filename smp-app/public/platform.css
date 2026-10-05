@@ -11434,3 +11434,15 @@ button.copcp-sc:hover, button.copcp-sc:focus-visible { border-color:var(--ink-3)
 .copcp-table textarea.cmpbox { min-height:64px; }
 .copcp-ask { display:flex; gap:8px; align-items:flex-end; }
 .copcp-ask textarea { flex:1 1 auto; min-width:0; }
+
+/* §494: the Directions Copilot (spec 064 §4–5). The compete table's own shape
+   (§53.5); only what is new to a Directions row is styled here. */
+.copdv-tab tr.on th[scope=row] { box-shadow:inset 3px 0 0 var(--panel); }
+.copdv-tab td.copdv-score { font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+.copdv-mk { display:inline-block; margin-left:6px; padding:0 6px; border-radius:9px; border:1px solid var(--line); font:600 10.5px/1.5 var(--sans); color:var(--ink-2); vertical-align:1px; white-space:nowrap; }
+.copdv-mk.plan { color:var(--ink-2); }
+.copdv-mk.yours { color:var(--attn-tx, var(--gold-deep)); border-color:var(--gold); }
+.copdv-mk.new { color:var(--good-tx); border-color:var(--good); }
+select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; font-size:var(--fs-small, 12.5px); }
+.copdv-serves { text-align:left !important; }
+.copdv-chip { display:inline-block; margin:1px 4px 1px 0; padding:0 7px; border-radius:9px; background:var(--surface-2); color:var(--ink-2); font-size:11.5px; line-height:1.6; }

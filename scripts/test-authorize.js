@@ -4882,6 +4882,37 @@ console.log("\n44 · revenue drivers (spec 063)");
         k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
 })();
 
+/* ── §494: WHAT A CAPABILITY IS — its kind and the Directions it serves ──
+   The Copilot's Directions chat writes both onto a capability. They are the
+   plan, so the office's, classified as "what a capability is" and never
+   swept into unknown — both ends asserted (§94.2). */
+(function () {
+  const raw = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  const base = clone(raw);
+  const holder = base.group.capabilities[0].fn;
+  let team = base.people.find(function (p) { return p.role === "smoteam"; });
+  if (!team) { team = base.people.find(function (p) { return p.key !== "smo" && p.role !== "super"; }); team.role = "smoteam"; }
+  const head = base.functions[holder].head;
+  function run(who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  }
+  const kind = function (c) { c.capKind = "enabler"; };
+  const serves = function (c) { c.serves = ["mobile-P1"]; };
+  let v = run(team.key, kind);
+  check("§494: the SMO team sets what kind a capability is", v.ok, v.refusals.join(" / "));
+  v = run(team.key, serves);
+  check("§494: ...and which Directions it serves", v.ok, v.refusals.join(" / "));
+  v = run(head, kind);
+  check("§494 REFUSED: the holding head may not set its kind (the office's)", !v.ok, "was ALLOWED");
+  v = run(head, serves);
+  check("§494 REFUSED: ...nor what it serves", !v.ok, "was ALLOWED");
+  const inc = clone(base); kind(inc.group.capabilities[0]); serves(inc.group.capabilities[0]);
+  const ks = (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  check("§494: both are a plan change, never unknown",
+        ks.indexOf("capPlan") > -1 && ks.indexOf("unknown") < 0, ks.join(",") || "(nothing)");
+})();
+
 /* ── 46 · the client's structure, and a company's own Foundation (§404) ──
    The structure is SETUP (the office's); a company's Foundation is the
    group's own strategy drawn over the company's record, so it is judged as

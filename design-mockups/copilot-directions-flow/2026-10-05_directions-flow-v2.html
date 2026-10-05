@@ -75,6 +75,19 @@ table.mg tr.res td{font-weight:700}
 .q span{width:22px;height:20px;border-radius:4px;border:1px solid var(--line);font-size:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3)}
 .q span.on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
 .q span.off{background:var(--surface-2);opacity:.45;text-decoration:line-through}
+.vpt{display:grid;grid-template-columns:118px repeat(3,minmax(170px,1fr));gap:8px;min-width:660px}
+.vpt>div{border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vpt .lab{background:var(--goldfill);color:#171B22;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;text-align:center}
+.vpt .lab.d{background:var(--panel);color:var(--panel-ink)}
+.vpt .dh{grid-column:2/-1;background:var(--panel);color:var(--panel-ink);font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.vpt .vh{background:var(--line);color:var(--ink);font-weight:700;font-size:15px;text-align:center;display:flex;align-items:center;justify-content:center}
+.vpt .c{background:var(--surface-2);color:var(--ink-2)}
+.vpt .c.wip{outline:2px dashed var(--goldfill);outline-offset:-2px}
+.vpt ul{margin:0;padding-left:16px}.vpt li{margin:2px 0}
+.vpwrap{overflow-x:auto;padding:12px}
+.vel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vel h4{margin:0 0 6px;font-size:14.5px}.vel .lb{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+.vel ul{margin:2px 0 0;padding-left:18px}
 .vp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
 .vp .box h4{margin:0 0 4px;font-size:14px}
 .vp .box p{margin:0;font-size:13px;color:var(--ink-2)}
@@ -118,7 +131,7 @@ table.mg tr.res td{font-weight:700}
 <div class="wrap">
 <header>
   <h1>Strategy Copilot &middot; How we compete, Directions, Execution</h1>
-  <p class="lede">Redrawn after your answers. How we compete is a section of its own, between the SWOT and the Plan, switched on from Structure. The Directions chat ends when Directions and Capabilities are chosen. Measures and tactics are planned in Execution. The side column holds only the to-do. Drawn for El Abd's words. Nothing is built.</p>
+  <p class="lede">Round 3: the value proposition is agreed one value at a time and kept as your slide&rsquo;s table; capabilities get their own Copilot section when they are their own layer. Redrawn after your answers. How we compete is a section of its own, between the SWOT and the Plan, switched on from Structure. The Directions chat ends when Directions and Capabilities are chosen. Measures and tactics are planned in Execution. The side column holds only the to-do. Drawn for El Abd's words. Nothing is built.</p>
 </header>
 
 <!-- A. Structure -->
@@ -173,18 +186,30 @@ table.mg tr.res td{font-weight:700}
           </tbody></table></div>
         <div class="m ai"><p><b>Best Total Cost</b> leads the market by 30 points <span class="pill clear">Clear</span>. Your internal scores point the same way. Go with it?</p></div>
         <div class="choices"><span class="choice picked">Yes, Best Total Cost</span><span class="choice">Let me change scores</span></div>
-        <div class="m ai"><p>Now the value proposition: what we promise, how we deliver it, how we measure it. Here is a draft of four.</p></div>
-        <div class="vp">
-          <div class="box"><h4>Lowest price in the region</h4><p><b>How:</b> central buying, fewer brands per shelf</p><p><b>Measure:</b> price index vs top 3 competitors</p></div>
-          <div class="box"><h4>Always in stock</h4><p><b>How:</b> one warehouse, daily replenishment</p><p><b>Measure:</b> on-shelf availability %</p></div>
-          <div class="box"><h4>Fast, simple checkout</h4><p><b>How:</b> self-checkout in large stores</p><p><b>Measure:</b> average queue time</p></div>
-          <div class="box"><h4>No-argument returns</h4><p><b>How:</b> 14-day returns at any branch</p><p><b>Measure:</b> returns resolved same day %</p></div>
-        </div>
+        <div class="m ai"><p>Now the value proposition. We'll agree it one value at a time: the value we promise, how we deliver it (about 3 points), and how we measure it (1 to 3 measures, with targets).</p><p>Values 1 and 2 are agreed. For the third I suggest <b>Easy, fast visit</b>:</p></div>
+        <div class="vel"><h4>Easy, fast visit</h4><div class="lb">How</div><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li><li>Click-and-collect counter at the entrance</li></ul><div class="lb">Measure</div><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div>
+        <div class="m me"><p>Drop click-and-collect, we're not there yet. Keep the rest.</p></div>
+        <div class="m ai"><p>Done. Here is the value proposition so far &mdash; you can still change any cell before saving.</p></div>
+        <div class="tw vpwrap"><div class="vpt">
+<div class="lab d">Discipline</div><div class="dh">Best Total Cost</div>
+<div class="lab">Value</div>
+<div class="vh">Lowest price in the region</div>
+<div class="vh">Always in stock</div>
+<div class="vh">Easy, fast visit</div>
+<div class="lab">How</div>
+<div class="c"><ul><li>Central buying across all branches</li><li>Fewer brands per shelf, bigger volumes</li><li>Price checks against the top 3 every week</li></ul></div>
+<div class="c"><ul><li>One central warehouse</li><li>Daily replenishment to every branch</li><li>Fast movers reordered automatically</li></ul></div>
+<div class="c wip"><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li></ul></div>
+<div class="lab">Measure</div>
+<div class="c"><ul><li>Price index &le; 97 vs top 3 competitors</li></ul></div>
+<div class="c"><ul><li>On-shelf availability 96%</li><li>Out-of-stock lines &lt; 2%</li></ul></div>
+<div class="c wip"><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div>
+</div></div>
         <div class="row"><span class="btn pri">Save to How we compete</span></div>
       </div>
       <aside class="side">
-        <div class="box"><div class="bh">To do <small>2/4</small></div>
-          <ul class="todo"><li class="done"><i class="dot done"></i>Score the disciplines</li><li class="done"><i class="dot done"></i>Choose the discipline</li><li class="now"><i class="dot now"></i>Value proposition</li><li><i class="dot"></i>Save</li></ul></div>
+        <div class="box"><div class="bh">To do <small>4/6</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Score the disciplines</li><li class="done"><i class="dot done"></i>Choose the discipline</li><li class="done"><i class="dot done"></i>Value 1 &middot; Lowest price</li><li class="done"><i class="dot done"></i>Value 2 &middot; Always in stock</li><li class="now"><i class="dot now"></i>Value 3 &middot; Easy, fast visit</li><li><i class="dot"></i>Save</li></ul></div>
       </aside>
     </div>
   </div>
@@ -193,7 +218,7 @@ table.mg tr.res td{font-weight:700}
 <!-- C. Strategy tab section -->
 <section>
   <h2 class="step"><span>Strategy tab</span>Where it is kept: a section between SWOT and Plan</h2>
-  <p class="k">The Copilot saves here, as it saves the SWOT. Editable with the pen like the other sections.</p>
+  <p class="k">The Copilot saves here, as it saves the SWOT. The value proposition is drawn as your own slide is: one column per value, with How and Measure as short bullet points. Editable with the pen like the other sections, and the same table goes on the deck.</p>
   <div class="frame">
     <div class="bar"><span>Group</span><b>El Abd Company</b><span>Performance</span><span>Strategy</span><span>Copilot</span></div>
     <div class="secs"><span class="sec">Foundation</span><span class="sec">SWOT</span><span class="sec on">How we compete</span><span class="sec">Plan</span></div>
@@ -205,14 +230,21 @@ table.mg tr.res td{font-weight:700}
       </div>
       <div class="block">
         <div class="blockh"><span>Value proposition</span></div>
-        <div class="tw" style="padding:12px"><table class="mg">
-          <thead><tr><th>We promise</th><th>How we deliver it</th><th>How we measure it</th></tr></thead>
-          <tbody>
-            <tr><td>Lowest price in the region</td><td>Central buying, fewer brands per shelf</td><td>Price index vs top 3 competitors</td></tr>
-            <tr><td>Always in stock</td><td>One warehouse, daily replenishment</td><td>On-shelf availability %</td></tr>
-            <tr><td>Fast, simple checkout</td><td>Self-checkout in large stores</td><td>Average queue time</td></tr>
-            <tr><td>No-argument returns</td><td>14-day returns at any branch</td><td>Returns resolved same day %</td></tr>
-          </tbody></table></div>
+        <div class="tw vpwrap"><div class="vpt">
+<div class="lab d">Discipline</div><div class="dh">Best Total Cost</div>
+<div class="lab">Value</div>
+<div class="vh">Lowest price in the region</div>
+<div class="vh">Always in stock</div>
+<div class="vh">Easy, fast visit</div>
+<div class="lab">How</div>
+<div class="c"><ul><li>Central buying across all branches</li><li>Fewer brands per shelf, bigger volumes</li><li>Price checks against the top 3 every week</li></ul></div>
+<div class="c"><ul><li>One central warehouse</li><li>Daily replenishment to every branch</li><li>Fast movers reordered automatically</li></ul></div>
+<div class="c"><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li></ul></div>
+<div class="lab">Measure</div>
+<div class="c"><ul><li>Price index &le; 97 vs top 3 competitors</li></ul></div>
+<div class="c"><ul><li>On-shelf availability 96%</li><li>Out-of-stock lines &lt; 2%</li></ul></div>
+<div class="c"><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div>
+</div></div>
       </div>
     </div>
   </div>
@@ -251,8 +283,8 @@ table.mg tr.res td{font-weight:700}
 
 <!-- E. Capabilities -->
 <section>
-  <h2 class="step"><span>Copilot &middot; Directions, continued</span>Choose Capabilities</h2>
-  <p class="k">The Copilot suggests 3&ndash;5, worked out from the chosen Directions and the SWOT. Not scored. Each has a kind and says what it serves. Tick, edit the wording, or add your own.</p>
+  <h2 class="step"><span>Copilot &middot; Directions, continued</span>Choose Capabilities &mdash; when capabilities are part of the plan</h2>
+  <p class="k">When Structure keeps capabilities inside the company plan (not as their own layer), they are chosen here, in the Directions chat. The Copilot suggests 3&ndash;5, worked out from the chosen Directions and the SWOT. Not scored. Each has a kind and says what it serves. Tick, edit the wording, or add your own.</p>
   <div class="frame">
     <div class="body">
       <aside class="rail"><div class="rh">Chats</div><div class="ri on">Directions 2026</div></aside>
@@ -276,6 +308,35 @@ table.mg tr.res td{font-weight:700}
       </aside>
     </div>
   </div>
+</section>
+
+<!-- E2. Capabilities as their own Copilot section -->
+<section>
+  <h2 class="step"><span>Copilot &middot; Capabilities</span>When capabilities are their own layer, they get their own Copilot section</h2>
+  <p class="k">If Structure sets capabilities as a layer of their own, the Directions chat stops at Save Directions, and a <b>Capabilities</b> section appears between Directions and Execution. It starts from the saved Directions and the SWOT. Same table, same three kinds, same owner per row.</p>
+  <div class="frame">
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec on">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">Capabilities 2026</div><div class="rh" style="margin-top:12px">Deliverables</div><div class="ri">Directions 2026 v1</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>I read your <b>3 saved Directions</b> and the SWOT. These are the Capabilities I'd build to deliver them.</p></div>
+        <div class="tw"><table class="mg">
+          <thead><tr><th>Capability</th><th>Kind</th><th>Serves</th><th>Owned by</th><th class="n">Keep</th></tr></thead>
+          <tbody>
+            <tr><td>Low-cost supply chain</td><td><span class="kind gap">Gap-closing</span></td><td><span class="pill ext">Family shopper</span> <span class="pill ext">Upper Egypt</span></td><td><span class="sel">Supply Chain</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Data-led pricing</td><td><span class="kind tr">Transformation</span></td><td><span class="pill ext">Family shopper</span></td><td><span class="sel">Commercial</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>One retail system across stores</td><td><span class="kind en">Enabler</span></td><td><span class="pill ext">Upper Egypt</span></td><td><span class="sel">IT</span></td><td class="n"><span class="tk on"></span></td></tr>
+          </tbody></table></div>
+        <div class="row"><span class="btn">+ Add your own</span></div>
+        <div class="row"><span class="btn pri">Save 3 Capabilities</span></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>1/3</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Suggest Capabilities</li><li class="now"><i class="dot now"></i>Choose and set owners</li><li><i class="dot"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+  <p class="k" style="margin-top:10px">In this case the Directions to-do ends <i>Options &middot; Choose Directions &middot; Save</i>, and Execution lists the Directions and the Capabilities from both saves.</p>
 </section>
 
 <!-- F. Execution -->

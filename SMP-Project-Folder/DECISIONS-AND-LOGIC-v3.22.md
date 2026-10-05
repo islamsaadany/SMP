@@ -62299,3 +62299,37 @@ Typecheck clean once the container had Next's generated route types and the
 Prisma client, both missing from a fresh install and neither caused by this
 change. Not driven inside the running app: the Processes pages need a seeded
 `ffprocess` workspace, which this container does not have.
+
+## §490 — The Processes list folds: a plus opens a main process's subs (2026-10-05)
+
+Islam, of the Processes list: *"can we make a plus next to each main to open
+and drop all subs, instead of having big list?"* — then, of the mockup
+(`design-mockups/processes-list-fold/2026-10-05_plus-to-open-subs.html`,
+published as an artifact), *"yes great. do it on the branch"*, taking its
+three stated defaults as drawn.
+
+- **Main processes only, closed on arrival.** A plus beside a process with
+  sub-processes opens them underneath, shaded and indented by depth; it turns
+  into a minus. A process with none keeps the plus's space so codes line up.
+- **One level at a time**: a sub-process with subs of its own gets its own
+  plus. Closing a main hides everything under it.
+- **Open all · Close all** above the table, drawn only when something folds.
+- **Search stays flat and is never folded** — a closed plus must never hide a
+  match, and a match's parent may not itself match.
+- *"sub-process of X"* is now said only where the parent is NOT the row the
+  sub is folded under: a search result, or one whose parent is deleted.
+  Under its own parent it would say the same thing twice.
+
+**The rows stay server-rendered** — their cells hold the edit, clone and delete
+forms — and only the `<tr>` is a client component (`process-fold.tsx`), so a
+row hides without the page rebuilding what is inside it. Which rows sit under
+which is `fold-chains.ts`, pure, read off `orderProcessTree`'s own order, so
+the page and its check ask one function. The open state is screen-only and not
+stored; nothing on the server moves.
+
+Proved in Chromium against the real components and the real tree helper (nine
+assertions: closed start, counts on the plus's label, one level, nesting,
+closing a main, Open/Close all, search flat) — and red 4 with rows made never
+to hide. The real page could not be driven in this container (no seeded
+`ffprocess` workspace), which is stated rather than glossed. Snapshot:
+`ui-versions/ffp-processes-list/2026-10-05_before-fold.tsx`.

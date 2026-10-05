@@ -1371,6 +1371,15 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-05 — the Processes list folds: a plus opens a main process's subs (§490)
+
+**Built** on the branch from the mockup Islam approved. The list shows main
+processes only; a plus beside one opens its sub-processes (one level at a
+time), with Open all / Close all above the table. Search still shows every
+match as a flat list. Checked in a browser against the real pieces; the full
+page could not be opened here because this container has no Processes data.
+**Waiting on Islam:** look at it on the branch; merge to main is his call.
+
 ## 2026-10-05 — a process export starts empty, with a box to select all (§489)
 
 On Processes › Export, every process now starts unticked, so nothing goes into a report until you tick it. A box at the top of the tick column selects every process, and pressing it again clears them all. When only some are ticked it shows a half-filled mark. **Preview report** stays shut until at least one process is ticked, and hovering it says why. Ticks move with their row when you reorder, and the report comes out in the order shown. Nothing is saved, and the section panels above the list are unchanged. Checked by pressing every control in a real browser and reading what the form sends: 11 checks pass, and 4 fail if the old "everything ticked" start is put back. On the branch, not merged.

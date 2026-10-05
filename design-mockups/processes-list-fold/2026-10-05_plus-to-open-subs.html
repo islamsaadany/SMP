@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Processes List Folding</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#ffffff; --line:#e2e8f0; --head:#f8fafc; --ink:#0f172a; --ink2:#475569; --ink3:#64748b;
+  --chip-bg:#eef2ff; --chip-tx:#4338ca; --fin-bg:#ecfdf5; --fin-tx:#047857; --drf-bg:#fffbeb; --drf-tx:#b45309;
+  --tog-bd:#cbd5e1; --tog-bg:#ffffff; --tog-hv:#f1f5f9; --sub-bg:#f8fafc; --accent:#16325C; --note:#fffbeb; --note-bd:#fde68a;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --head:#0f1828; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8;
+  --chip-bg:#1e2350; --chip-tx:#c7cdff; --fin-bg:#0f2a22; --fin-tx:#6ee7b7; --drf-bg:#2a2210; --drf-tx:#fcd34d;
+  --tog-bd:#3a4a66; --tog-bg:#111a2b; --tog-hv:#1a2539; --sub-bg:#0d1626; --accent:#9fb8e6; --note:#2a2210; --note-bd:#5c4a1c;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --head:#0f1828; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8;
+  --chip-bg:#1e2350; --chip-tx:#c7cdff; --fin-bg:#0f2a22; --fin-tx:#6ee7b7; --drf-bg:#2a2210; --drf-tx:#fcd34d;
+  --tog-bd:#3a4a66; --tog-bg:#111a2b; --tog-hv:#1a2539; --sub-bg:#0d1626; --accent:#9fb8e6; --note:#2a2210; --note-bd:#5c4a1c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--ink3);margin:0 0 20px}
+h2{font-size:15px;margin:28px 0 8px;display:flex;gap:8px;align-items:center}
+.tag{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--ink2)}
+.tag.new{background:var(--accent);color:var(--card)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{background:var(--head);text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.name{font-weight:600}
+.hint{font-size:12px;color:var(--ink3);font-weight:400}
+.chip{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--chip-bg);color:var(--chip-tx)}
+.raci{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:999px}
+.fin{background:var(--fin-bg);color:var(--fin-tx)} .drf{background:var(--drf-bg);color:var(--drf-tx)}
+.num{color:var(--ink2)}
+.open{color:var(--accent);font-weight:600;white-space:nowrap}
+.tog{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-right:8px;border:1px solid var(--tog-bd);border-radius:6px;background:var(--tog-bg);color:var(--ink);cursor:pointer;vertical-align:-5px;padding:0}
+.tog:hover{background:var(--tog-hv)}
+.tog svg{width:12px;height:12px}
+.spacer{display:inline-block;width:30px}
+.count{font-size:12px;color:var(--ink3);font-weight:400;margin-left:6px}
+tr.subrow td{background:var(--sub-bg)}
+tr.subrow td.code{padding-left:42px}
+tr.subrow[hidden]{display:none}
+.bar{display:flex;gap:8px;justify-content:space-between;align-items:center;margin:0 0 8px;flex-wrap:wrap}
+.bar input{flex:1;min-width:200px;max-width:360px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 2px}
+.notes{margin-top:28px;border:1px solid var(--note-bd);background:var(--note);border-radius:12px;padding:14px 16px}
+.notes h3{margin:0 0 6px;font-size:14px}
+.notes ol{margin:0;padding-left:20px} .notes li{margin:4px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Processes list: a plus to open the sub-processes</h1>
+<p class="sub">Today on the left of each comparison, proposed underneath. Press the plus to try it.</p>
+
+<h2><span class="tag">Today</span> every sub-process is always listed</h2>
+<div class="wrap"><table>
+<thead><tr><th>Code</th><th>Process</th><th>Category</th><th>Steps</th><th>RACI</th><th></th></tr></thead>
+<tbody>
+<tr><td class="code">ADM105</td><td class="name">Admin - End2End</td><td><span class="chip">Admin</span></td><td class="num">9</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">↳ ADM100</td><td><div class="name">Admin - transpiration - cars</div><div class="hint">sub-process of ADM105</div></td><td><span class="chip">Admin</span></td><td class="num">7</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">↳ ADM102</td><td><div class="name">Admin - Petty cash - garden, rent, printer, utilities , etc</div><div class="hint">sub-process of ADM105</div></td><td><span class="chip">Admin</span></td><td class="num">6</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">↳ ADM103</td><td><div class="name">Admin - Operations</div><div class="hint">sub-process of ADM105</div></td><td><span class="chip">Admin</span></td><td class="num">11</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">↳ ADM104</td><td><div class="name">Admin - Requests and Invoicing</div><div class="hint">sub-process of ADM105</div></td><td><span class="chip">Admin</span></td><td class="num">8</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">ADM106</td><td class="name">Admin - Assets Management</td><td><span class="chip">Admin</span></td><td class="num">5</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code">ETE100</td><td class="name">RHI End2End - high-level</td><td><span class="chip">End to end</span></td><td class="num">14</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+</tbody></table></div>
+
+<h2><span class="tag new">Proposed</span> main processes only, a plus opens their subs</h2>
+<div class="bar">
+  <input type="search" placeholder="Search processes…" aria-label="Search processes">
+  <span><button class="linkbtn" id="openAll">Open all</button> · <button class="linkbtn" id="closeAll">Close all</button></span>
+</div>
+<div class="wrap"><table id="prop">
+<thead><tr><th>Code</th><th>Process</th><th>Category</th><th>Steps</th><th>RACI</th><th></th></tr></thead>
+<tbody>
+<tr data-main="adm105"><td class="code"><button class="tog" aria-expanded="false" aria-label="Show 4 sub-processes of ADM105" data-for="adm105"></button>ADM105</td><td><span class="name">Admin - End2End</span><span class="count">4 sub-processes</span></td><td><span class="chip">Admin</span></td><td class="num">9</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+<tr class="subrow" data-of="adm105" hidden><td class="code">ADM100</td><td class="name">Admin - transpiration - cars</td><td><span class="chip">Admin</span></td><td class="num">7</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr class="subrow" data-of="adm105" hidden><td class="code">ADM102</td><td class="name">Admin - Petty cash - garden, rent, printer, utilities , etc</td><td><span class="chip">Admin</span></td><td class="num">6</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr class="subrow" data-of="adm105" hidden><td class="code">ADM103</td><td class="name">Admin - Operations</td><td><span class="chip">Admin</span></td><td class="num">11</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+<tr class="subrow" data-of="adm105" hidden><td class="code">ADM104</td><td class="name">Admin - Requests and Invoicing</td><td><span class="chip">Admin</span></td><td class="num">8</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code"><span class="spacer"></span>ADM106</td><td class="name">Admin - Assets Management</td><td><span class="chip">Admin</span></td><td class="num">5</td><td><span class="raci drf">Draft</span></td><td class="open">Open →</td></tr>
+<tr><td class="code"><span class="spacer"></span>ETE100</td><td class="name">RHI End2End - high-level</td><td><span class="chip">End to end</span></td><td class="num">14</td><td><span class="raci fin">Final</span></td><td class="open">Open →</td></tr>
+</tbody></table></div>
+
+<div class="notes">
+<h3>What stays the same, and three things to decide</h3>
+<ol>
+<li>Sub-processes start <b>closed</b>; the plus turns into a minus when open. A main process with no subs gets no plus, just the space so codes still line up.</li>
+<li><b>Search</b> keeps showing every match as a flat list, subs included, so nothing is hidden behind a closed plus. Agree?</li>
+<li><b>Open all / Close all</b> links above the table: keep them, or drop them?</li>
+<li>If a sub-process has subs of its own, it gets its own plus inside. Or should one plus open everything under a main?</li>
+</ol>
+</div>
+</main>
+<script>
+const PLUS='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 2v8M2 6h8"/></svg>';
+const MINUS='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 6h8"/></svg>';
+const togs=[...document.querySelectorAll('#prop .tog')];
+function set(t,open){t.setAttribute('aria-expanded',open);t.innerHTML=open?MINUS:PLUS;
+  document.querySelectorAll('#prop tr[data-of="'+t.dataset.for+'"]').forEach(r=>r.hidden=!open);}
+togs.forEach(t=>{set(t,false);t.addEventListener('click',()=>set(t,t.getAttribute('aria-expanded')!=='true'));});
+document.getElementById('openAll').onclick=()=>togs.forEach(t=>set(t,true));
+document.getElementById('closeAll').onclick=()=>togs.forEach(t=>set(t,false));
+</script>
+</body>
+</html>

@@ -10954,7 +10954,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-05 — **§491: a capability planned in pillars is shaped like one direction.** Islam: *"a cpability planning in a pillar approach is typical to a direction"*. On the company's Strategy › Capabilities page such a capability draws its key measures, breakdown and tactics straight under its own band — no directions inside it, no "Add a Direction", and no nested pinned plan head (the clipped OWNER row). `unitPlanBody(…, bare)` draws no head and no pillar owner; an empty one offers *Start this capability's plan*, minting one pillar named as the capability. Nothing stored moves. `single-company.py` §491, red 4 on the build before; `qa.py` ERRORS none. Main's §489/§490 brought in first. On the branch, not merged.*
+*Last Updated: 2026-10-05 — **§491: a capability planned in pillars is shaped like one direction.** Islam: *"a cpability planning in a pillar approach is typical to a direction"*. On the company's Strategy › Capabilities page such a capability draws its key measures, breakdown and tactics straight under its own band — no directions inside it, no "Add a Direction", and no nested pinned plan head (the clipped OWNER row). `unitPlanBody(…, bare)` draws no head and no pillar owner; an empty one offers *Start this capability's plan*, minting one pillar named as the capability. Nothing stored moves. `single-company.py` §491, red 4 on the build before; `qa.py` ERRORS none. Main's §487.1–§490 brought in first. Merged to `main` 2026-10-05 on Islam's word.*
 
 *Earlier: 2026-10-04 — **§490.2: one rail width, a compact to-do, the old help library, a Foundation to-do.** The chats rail is 200px in every phase and folds to its strip when a chat starts or opens (`RAILKEPT` keeps it open once pressed back). The SWOT to-do is 200px and compact (count beside the title, header `done/n`); "Help me understand" is the old Copilot's library carried verbatim in `smp-app/lib/copilot-swot-help.ts`, picked by `tenants.industry` with an Other fallback and attached server-side as `more`; a Foundation chat gets a 200px to-do column. Every gap round the panels is 8px and the columns reach the bottom; a plain chat's composer keeps 64px clear of the office chat button, which had covered Send. `check:copilot` 210/0, `shell.mjs` 280/0. Merged to `main` 2026-10-05 on Islam's word, with main's §480–§488 brought in first (ours renumbered from §480/§482).*
 
@@ -10963,6 +10963,90 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 *Earlier: 2026-10-04 — **§490: the SWOT Copilot flow (spec 064).** A SWOT chat: start from the existing SWOT or fresh, a methods grid (Internal/Micro/Macro × Guided/Template/Ready reports/Deep research, none for Internal), a to-do list and a box per letter in a right column, guided questions word for word, Micro and Macro analyses agreed separately, then 5–7 items per letter saved into the plan's SWOT. Sources are the CLIENT's (`copilot_sources`, migration 023), tagged to a unit or all, deleted only by whoever added one or the Super user, asked on the server. Deep research is a .txt prompt out and an upload or paste in. Every rail section folds; Deliverables and Sources open folded. `copilot.mjs` 207/0 red under four breaks; §472's working-word check raced its own tick and looks at 2.9s now. Renumbered §480 → §482 → §490 as main took those numbers (§480–§488).*
 
 *Earlier: 2026-10-04 — **§488: the company's capabilities can be edited in place.** Islam: *"there is no edit here in the capability."* §482 removed the Open button that led to the capability's own page and drew nothing in its place. The Capabilities section now takes the plan's pen on the section line (`SEC_PENS_TOP.caps`); pressed, the pane is the capability's own plan page in edit mode (`renderFnProjects("cap:<id>")`) and the Owner/Custodian become the register's picker. Read mode unchanged; no server rule moves. `single-company.py` +8, red 3 with the branch off. **§488.1**: Islam — *"why does it open as a list inside a list?"* — so editing keeps the read table: a row unfolds its plan editable below it, rows carry grips (a dead `data-kind="projects"` commit branch fixed), *+ Add* sits under the table; `renderFnProjects` is no longer drawn there. Red 6 with the first build's pane. On the branch, not merged.*
+
+*Earlier: 2026-10-04 &mdash; **&sect;487.1: the four acts the console
+record was still silent about.** Islam, of the recommendation handed over with
+the last merge: *"let's do it (my fear is would that slow down the platform?
+because if this will imapct the performance we need to rethink)."* **THE FEAR
+WAS ANSWERED WITH MEASUREMENTS BEFORE ANYTHING WAS BUILT** (rule 3a), and it
+is a measurement rather than a reassurance: **nothing a client's own people
+touch writes a record** &mdash; not a page load, not the plan, not reporting,
+not a save &mdash; because every one of these acts arrives at Forefront's own
+`platformAction`, which is pressed a few dozen times a year. One act costs one
+extra INSERT on a connection the request already holds; a record that cannot
+be written never costs the act (&sect;231.3); and the History read is
+`LIMIT 200` against an indexed `at DESC`, so it does not slow as the record
+grows. **AND WHERE THE ANSWER WOULD CHANGE IS NAMED RATHER THAN LEFT**:
+recording something a client's people do INSIDE the platform is thousands of
+writes a day rather than dozens a year, and that is a different decision to
+bring back to him. **&sect;487 NAMED THESE FOUR IN ITS OWN CODE AND LEFT
+THEM** &mdash; *proceed* had not reached them (rule 1b) &mdash; so what ships
+is the twelfth to fifteenth acts: the platform admin flag, a consultant's
+rename, a consultant's change of address, and a column of *Who sees what*.
+**THREE OF THE FOUR RIDE HANDLERS THAT WRITE WHATEVER ARRIVES**, identical or
+not, which is the finding rather than a detail: `saveConsultant` and
+`saveAccess` both re-write the value on every press, so recording the press
+would fill the record with rows for presses nobody made anything with &mdash;
+**and a record people learn to scroll past has stopped being one**
+(&sect;280.1's own lesson, pointed at a log). `moved()` compares before it
+writes, and **the line claimed as the fix is proved to be one** (&sect;276,
+&sect;298.2): `--break=record-always` reddens **10** assertions, printing the
+defect verbatim &mdash; `Set Demo to Edit (was Edit)`. **THE OLD VALUE IS READ
+THROUGH THE RULE, NEVER RE-DERIVED**: an absent access row means *not answered
+yet* and never *denied* (&sect;30.2), so `was` is `FF.grantIn(world, areaKey)`
+and a row the tenant has never saved is recorded as the shipped default rather
+than as nothing. **AND THE WORD FOR A SETTING IS DECIDED ONCE** (&sect;53.5):
+the page capitalised the state key for its own button and the sentence would
+have spelt it again &mdash; **a stored sentence outlives the screen that wrote
+it**, so a drift there is a record disagreeing with the table it is about.
+`STATE_NAMES`/`stateName()` live in the shared rules module and are handed to
+the page with the `access` answer, because that page loads no rules of its own
+(grepped, not assumed) &mdash; one source, one line changed on each side, the
+payload unreshaped. **AND THE FIRST MAP REWORDED A BUTTON ON THAT TABLE**,
+caught before it shipped and worth recording: it spelt `none` as *Nothing*
+where the page drew *None* &mdash; **a round about a RECORD quietly restyling
+the page the record is about**, which is rule 1b's own fault committed by the
+section quoting &sect;53.5. **ONE BUTTON AND NOT THREE, AND THAT HAD TO BE
+MEASURED RATHER THAN COUNTED OFF THE DATA** &mdash; this block first said three,
+because four areas hold the word; the page's own line skips `none` wherever an
+area offers more than two states, so *Add a client* is the only column that ever
+draws one. The right word was never a choice: it is **the word
+already on screen**. Asserted now (&sect;94.2) against the OLD EXPRESSION rather
+than a list typed in the check, so the two cannot drift the next time a state is
+added &mdash; proved able to fail, printing `reworded: ["none"]`. **THE ADDRESS ACT RECORDS BOTH ADDRESSES** (&sect;87: an
+address IS the identity here, so the row that loses it must name what it was),
+**and it is recorded BEFORE the per-client register sweep**, or a failure
+halfway leaves the change made and unrecorded. **The History page needed no
+edit at all** &mdash; it draws `a.detail` verbatim &mdash; which is &sect;487's
+*the sentence is written at the act and stored* paying for itself the first
+time the acts grew. **VERIFIED**: `checks/console-record.mjs` **58 &rarr;
+73 assertions, all good**, with &sect;7b driving all four through
+`platformAction` and reading the rows back FROM POSTGRES (&sect;96), **both
+ends every time** (&sect;94.2 &mdash; the press that changes nothing must
+record nothing), the words asserted through the module that decides them
+rather than typed (&sect;94.8), and every value it moves PUT BACK so the
+sections after it are not measuring state this one changed. Red both ways
+&mdash; `no-record` **30**, `record-always` **10**. Beside it: modules 233/0,
+shell 252/0, state 92/0, insights 137/0, memory 14/0, platform rules **69/0**
+with &sect;323's two-copies assertion green and the two files `diff`'d
+byte-identical, and the five frozen console checks green **against both copies
+of the page** (&sect;53.5). **THE FROZEN PRODUCT IS UNTOUCHED AND MEASURED**
+&mdash; `built-in-step.py` all good, the shipped file byte-identical &mdash; so
+**no `sw.js` SHELL bump is owed** (&sect;91's trigger is the built file's bytes
+changing and they did not); the SERVED worker's release stamp DID move
+(`ab2d2649` &rarr; `8d8ca684`), which is &sect;397 working as designed, since
+`public/platform-page.js` is a file a tab holds, and it is the witness the next
+merge reads. `generated-in-step`'s one FAIL is &sect;349.4's guard refusing an
+uncommitted tree and SAYING SO, with every comparison line ok. **RECORDED, NOT
+DONE**: `client-setup-outside.py` and `client-archive.py` do not honour
+`SMP_PAGE`, so &sect;369.4's repair reached three files of five &mdash; green
+against the root copy, which is the source; and `checks/door-landing.mjs` is
+**1 red** on `main` itself (`[2,0]` &mdash; &sect;461 removed the group-mark
+upload and the check was never told), established as not this work's
+(&sect;303) and Islam's to settle, since putting the control back and rewriting
+the assertion are two different answers (&sect;218). **Merged to `main`
+2026-10-05 on Islam's word**, with main's &sect;488&ndash;&sect;490.2 brought in
+first (&sect;487.2).*
 
 *Earlier: 2026-10-04 &mdash; **&sect;487: the console keeps a record, and
 reads it back as History.** Islam: *"let's do the recording on console"*, then

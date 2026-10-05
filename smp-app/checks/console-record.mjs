@@ -32,6 +32,9 @@ import { platformAction } from "../lib/platform-api.ts";
 
 const require = createRequire(import.meta.url);
 const frozen = require("../lib/frozen.cjs");
+/* the platform's own rules, so the words in a recorded sentence are asserted
+   through the one module that decides them rather than spelled here (§487.1) */
+const FF = require("../lib/platform-rules.cjs");
 const here = dirname(fileURLToPath(import.meta.url));
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
 const brk = (process.argv.find((a) => a.startsWith("--break=")) || "").slice(8);
@@ -45,8 +48,14 @@ const say = (s) => console.log("\n── " + s);
 const API = readFileSync(join(here, "..", "lib", "platform-api.ts"), "utf8");
 const PAGE = readFileSync(join(here, "..", "..", "platform.html"), "utf8");
 
-/* the eleven acts Islam signed off, in the drawing's own order
-   (design-mockups/console-record/2026-10-04_what-forefront-has-done.html) */
+/* the acts Islam signed off, in the drawing's own order
+   (design-mockups/console-record/2026-10-04_what-forefront-has-done.html).
+   THE LAST FOUR ARE §487.1's, added on his word — §487 flagged them in its
+   own code and left them off because *proceed* had not reached them, so this
+   list grew rather than being loosened (§218): all four change what somebody
+   can REACH, and the admin flag hands over every column of Who sees what at
+   once. ASSERTED AS A SET, never a count, so adding one here is what reddens
+   the file until its door records it (§94.8). */
 const ACTS = [
   ["client.made", "Made a client"],
   ["client.archived", "Archived a client"], ["client.restored", "or brought one back"],
@@ -60,6 +69,9 @@ const ACTS = [
   ["consultant.retired", "retired"], ["consultant.restored", "or restored"],
   ["password.issued", "Handed out a password"],
   ["report.published", "Published a report"], ["report.withdrawn", "or withdrew one"],
+  ["access.set", "Changed Who sees what"],
+  ["consultant.admin", "Gave or took the admin flag"],
+  ["consultant.renamed", "Renamed a consultant"], ["consultant.address", "or changed their address"],
 ];
 
 /* ────────────────────────────────────────────────────────────────── §1 */
@@ -258,6 +270,90 @@ try {
     "and the removal keeps their name, the account being gone",
     got.length ? got[got.length - 1].detail : "none");
   check(got.every((r) => r.tenant_name === ""), "a consultant's act names no client");
+
+  /* ── 7b. the four §487 flagged and left (§487.1) — every one of them
+     changes what somebody can REACH, which is why they are here and why
+     each compares before it writes. BOTH ENDS on all four: the press that
+     changes nothing must record nothing, or the record fills with rows for
+     acts nobody made and the page stops being worth reading (§94.2). */
+  was = await n();
+  /* the admin flag, pressed to the value it already holds */
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, isAdmin: false });
+  check((await since(was)).length === 0, "setting the admin flag to what it already is records nothing",
+    JSON.stringify((await since(was)).map((r) => r.what)));
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, isAdmin: true });
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, isAdmin: false });
+  got = await since(was);
+  check(got.map((r) => r.what).join(",") === "consultant.admin,consultant.admin",
+    "giving the admin flag and taking it back are two acts",
+    JSON.stringify(got.map((r) => r.what)));
+  check(got.length === 2 && /^Gave Record Insider/.test(got[0].detail || "") &&
+        /^Took the platform admin flag off Record Insider/.test(got[1].detail || ""),
+    "and each says which way it went, by name",
+    JSON.stringify(got.map((r) => r.detail)));
+
+  /* the name */
+  was = await n();
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, name: "Record Insider" });
+  check((await since(was)).length === 0, "a press that re-types the same name records nothing",
+    JSON.stringify((await since(was)).map((r) => r.what)));
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, name: "Record Insider Renamed" });
+  got = await since(was);
+  check(got.length === 1 && got[0].what === "consultant.renamed", "a rename is recorded",
+    JSON.stringify(got.map((r) => r.what)));
+  check(got.length === 1 && /Record Insider to Record Insider Renamed/.test(got[0].detail || ""),
+    "and names what it was and what it became", got.length ? got[0].detail : "none");
+
+  /* the address — the identity, so the row carries BOTH (§87) */
+  was = await n();
+  const MOVED = "record-moved@forefront.example";
+  a = await press(AS_ADMIN, { action: "saveConsultant", email: IN_, newEmail: MOVED });
+  check(a.code === 200, "an address is changed", JSON.stringify(a.body).slice(0, 140));
+  got = await since(was);
+  check(got.length === 1 && got[0].what === "consultant.address", "and recorded",
+    JSON.stringify(got.map((r) => r.what)));
+  check(got.length === 1 && String(got[0].detail).includes(IN_) && String(got[0].detail).includes(MOVED),
+    "with BOTH addresses on the row, the old one being who this was (§87)",
+    got.length ? got[0].detail : "none");
+  /* put it back, or every assertion after this one is about a person whose
+     address this section moved (§94.2) */
+  await press(AS_ADMIN, { action: "saveConsultant", email: MOVED, newEmail: IN_ });
+  await press(AS_ADMIN, { action: "saveConsultant", email: IN_, name: "Record Insider" });
+
+  /* Who sees what — the act §487 named and left, and the widest of the four */
+  was = await n();
+  await press(AS_ADMIN, { action: "saveAccess", area: "demo", grant: "edit" });   /* the shipped default */
+  check((await since(was)).length === 0, "setting a column to the setting already in force records nothing",
+    JSON.stringify((await since(was)).map((r) => r.what)));
+  a = await press(AS_ADMIN, { action: "saveAccess", area: "demo", grant: "view" });
+  check(a.code === 200, "a column of Who sees what is narrowed", JSON.stringify(a.body).slice(0, 140));
+  got = await since(was);
+  check(got.length === 1 && got[0].what === "access.set", "and it is recorded",
+    JSON.stringify(got.map((r) => r.what)));
+  /* THE WORDS ARE THE SHARED MODULE'S, asserted through it rather than
+     spelled here, so renaming a setting moves the sentence and this check
+     together and cannot move one (§94.8) */
+  check(got.length === 1 && String(got[0].detail) ===
+        "Set " + FF.AREAS.find((x) => x.key === "demo").name + " to " + FF.stateName("view") + " (was " + FF.stateName("edit") + ")",
+    "saying the column, what it became and what it was", got.length ? got[0].detail : "none");
+  check(got.length === 1 && got[0].tenant_name === "" && got[0].tenant_id === null,
+    "and it names no client, being the platform's own act");
+  /* AND NOT ONE BUTTON ON THAT TABLE MOVES (§94.2, rule 1b). The page drew
+     these words by capitalising the state key, so the shared map has to
+     produce exactly that or a round about a RECORD has quietly reworded the
+     Who sees what table — which is how the first build of this turned `None`
+     into `Nothing`. It would have reached ONE button and not three: four areas
+     hold that word, and the page skips `none` wherever an area offers more
+     than two states, so *Add a client* is the only column that ever draws one.
+     Measured against the old expression rather than against a list typed here,
+     or the two drift the next time a state is added. */
+  const oldWord = (st) => st.charAt(0).toUpperCase() + st.slice(1);
+  const everyState = [...new Set(FF.AREAS.flatMap((a) => a.states || []))];
+  const reworded = everyState.filter((st) => FF.stateName(st) !== oldWord(st));
+  check(everyState.length >= 5 && reworded.length === 0,
+    "and every setting still reads the word the table already drew",
+    everyState.length + " states, reworded: " + JSON.stringify(reworded));
+  await press(AS_ADMIN, { action: "saveAccess", area: "demo", grant: "edit" });   /* back as found */
 
   /* ── 8. archived, brought back ── */
   was = await n();

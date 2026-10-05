@@ -62224,6 +62224,141 @@ drift of its own, and sweeping sixty-four blocks inside a merge commit is a fix
 reaching far beyond the fault (rule 1b), so only this round's own block was
 corrected and the rest is named here for its own pass.
 
+## §487.1 — The four acts the console record was still silent about (2026-10-04)
+
+**Islam, of the recommendation handed over with the last merge:** *"let's do it
+(my fear is would that slow down the platform? because if this will imapct the
+performance we need to rethink)"*, and *"what chceks?"*
+
+### The fear was answered with measurements, before anything was built
+
+Rule 3a, and it matters that these are measurements rather than reassurance:
+
+- **Nothing a client's own people touch writes a record.** Not a page load, not
+  the plan, not reporting, not a save. Every one of the acts recorded arrives at
+  Forefront's own `platformAction` — the console — which is pressed a few dozen
+  times a year by a handful of consultants.
+- **One act costs one extra INSERT**, on a connection the request is already
+  holding, after the act itself has already written.
+- **A record that cannot be written never costs the act** (§231.3): `logAct`'s
+  INSERT sits inside a try that logs and does not re-throw.
+- **The read does not slow as the record grows**: `LIMIT 200` against an indexed
+  `at DESC`.
+- **A row is a few hundred characters**, so a thousand acts a year is under a
+  megabyte.
+
+**AND WHERE THE ANSWER WOULD CHANGE IS NAMED RATHER THAN LEFT OUT.** Recording
+something a client's own people do *inside* the platform is thousands of writes
+a day rather than dozens a year, and that is a different decision to bring back
+to him rather than something to decide here.
+
+### What ships, and why it was not in §487
+
+§487 recorded eleven acts and **named these four in its own code as
+unanswered** — *proceed* had not reached them, and widening a record to cover
+permission changes is not a thing to ride in on a defect fix (rule 1b). So they
+are the twelfth to fifteenth acts now:
+
+| act | sentence |
+| --- | --- |
+| `consultant.admin` | *Gave N the platform admin flag* / *Took the platform admin flag off N* |
+| `consultant.renamed` | *Renamed N to M* |
+| `consultant.address` | *Changed N's address from a to b* |
+| `access.set` | *Set Demo to View (was Edit)* |
+
+### Three of the four ride handlers that write whatever arrives
+
+This is the finding rather than a detail. `saveConsultant` and `saveAccess` both
+re-write the value on every press, identical or not — so recording **the press**
+would fill the record with rows for presses nobody made anything with, and **a
+record people learn to scroll past has stopped being one** (§280.1's lesson,
+pointed at a log rather than at a check).
+
+`moved(a, b)` compares before it writes, and **the line claimed as the fix is
+proved to be one** (§276, §298.2): `SMP_BREAK=record-always` reddens **10**
+assertions and prints the defect verbatim — `Set Demo to Edit (was Edit)`.
+
+### The old value is read through the rule, never re-derived
+
+An absent access row means *nobody has answered yet* and never *denied*
+(§30.2), so `was` is `FF.grantIn(world, areaKey)` rather than
+`stored ?? default` — a column the tenant has never saved is recorded as the
+shipped default, which is what the table in front of them says.
+
+### And the word for a setting is decided once (§53.5)
+
+The console capitalised the state key for its own button, and the sentence
+would have spelt it again. **A stored sentence outlives the screen that wrote
+it**, so a drift there is a record disagreeing with the table it is about.
+`STATE_NAMES` / `stateName()` live in `lib/platform-rules.js` (and its
+byte-identical `.cjs` twin, §323) and are **handed to the page with the
+`access` answer**, because that page loads no rules of its own — grepped, not
+assumed. One source, one line changed on each side, and the payload is not
+reshaped.
+
+**AND THE FIRST MAP REWORDED A BUTTON ON THAT TABLE.** It spelt `none` as
+*Nothing* where the page drew *None* — **a round
+about a record quietly restyling the page the record is about**, which is rule
+1b's own fault committed by the section quoting §53.5. Caught before it shipped,
+and the right word was never a choice: it is **the word already on screen**.
+**One button and not three, and that had to be measured rather than counted off
+the data**: this section first said three, because four areas hold the word
+— and the page skips `none` wherever an area offers more than two states, so
+*Add a client* is the only column that ever draws one.
+What is asserted now is that not one button moves (§94.2), measured against the
+OLD EXPRESSION rather than a list typed into the check, so the two cannot drift
+the next time a state is added — proved able to fail, printing
+`reworded: ["none"]`.
+
+### Two smaller decisions
+
+- **The address act records BOTH addresses** (§87): an address *is* the identity
+  here, so the row that loses it has to name what it was.
+- **It is recorded BEFORE the per-client register sweep**, or a failure halfway
+  through leaves the change made and unrecorded.
+- **The History page needed no edit at all** — it draws `a.detail` verbatim.
+  That is §487's *the sentence is written at the act and stored* paying for
+  itself the first time the acts grew.
+
+### Verified
+
+`checks/console-record.mjs` **58 → 73 assertions, all good**. §7b drives all
+four acts through `platformAction` and reads the rows back **from Postgres**
+(§96), **both ends every time** (§94.2 — the press that changes nothing must
+record nothing), the words asserted through the module that decides them rather
+than typed (§94.8), and **every value it moves is put back**, so the sections
+after it are not measuring state this one changed.
+
+Red both ways: `no-record` **30**, `record-always` **10**.
+
+Beside it: modules 233/0, shell 252/0, state 92/0, insights 137/0, memory 14/0,
+platform rules **69/0** with §323's two-copies assertion green and the two
+files `diff`'d byte-identical, and the five frozen console checks green
+**against both copies of the page** (§53.5).
+
+**The frozen product is untouched and measured** — `built-in-step.py` all good,
+the shipped file byte-identical — so **no `sw.js` SHELL bump is owed** (§91's
+trigger is the built file's bytes changing, and they did not). The **served**
+worker's release stamp did move (`ab2d2649` → `8d8ca684`), which is §397
+working as designed, since `public/platform-page.js` is a file a tab holds; it
+is the witness the next merge reads off the live site. `generated-in-step`'s one
+FAIL is §349.4's guard refusing an uncommitted tree and saying which errand
+that is, with every comparison line ok.
+
+### Recorded, not done
+
+- `client-setup-outside.py` and `client-archive.py` do not honour `SMP_PAGE`, so
+  §369.4's repair reached three of five files. Both are green against the root
+  copy, which is the source, and the generated copy is proved in step by
+  `generated-in-step.mjs`.
+- `checks/door-landing.mjs` is **1 red on `main` itself** — `[2,0]`, because
+  §461 removed the group-mark upload and the check was never told. Established
+  as not this work's (§303) and **Islam's to settle**, since putting the control
+  back and rewriting the assertion are two different answers (§218).
+- `smp-app/.env.local` is tracked in git, which `CLAUDE.md`'s own pre-commit
+  rule forbids by name. Nothing is exposed today (a password-less local
+  address); the habit is what is wrong. Flagged, not changed (rule 1b).
+
 ---
 
 ## §488 — The company's capabilities can be edited in place
@@ -62474,3 +62609,5 @@ in a pillar approach is typical to a direction"*.
   the sources (§276). `qa.py` ERRORS none; capability-entry, capability-pillar-edit,
   pillar-rail, plan-edit-head green. Main took §489/§490 while this was built, so it
   is numbered §491 and was merged with main's Copilot work before commit.
+
+**Merged to `main` 2026-10-05 on Islam's word** (*"merge to main"*), with main's §487.1 brought in first; the built file rebuilt from the merged sources (byte-identical), the served copies regenerated, `sw.js` SHELL `v6.01-capability-as-direction` against main's `v6.00`. Screen only — no `api/`, `lib/` or `db/` file of this round changed, so no forced sign-out is owed.

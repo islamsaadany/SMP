@@ -68,6 +68,16 @@
 
   var RANK = { none: 0, hidden: 0, view: 1, listed: 1, edit: 2, open: 2, yes: 2 };
 
+  /* WHAT A SETTING IS CALLED, IN ONE PLACE (§487.1, §53.5). The console
+     capitalised these on the page and the record writes them into a sentence
+     at the act (`access.set`), so two places were deciding one word — and a
+     stored sentence outlives the screen that wrote it, so a drift here is a
+     record that disagrees with the table it is about. The page is handed this
+     map in the `access` answer rather than keeping a copy. */
+  var STATE_NAMES = { none: "None", hidden: "Hidden", listed: "Listed",
+    view: "View", edit: "Edit", open: "Open", yes: "Yes" };
+  function stateName(st) { return STATE_NAMES[st] || String(st || ""); }
+
   function frozen(o) { return Object.freeze(o); }
   var NO_MAP = frozen({});
   var NO_LIST = frozen([]);
@@ -298,6 +308,7 @@
   return {
     SEATS: SEATS, SEAT_KEYS: SEAT_KEYS, AREAS: AREAS, AREA_KEYS: AREA_KEYS,
     EVERYONE: EVERYONE, ACCESS_DEFAULTS: ACCESS_DEFAULTS, RANK: RANK,
+    STATE_NAMES: STATE_NAMES, stateName: stateName,
     grantIn: grantIn, atLeast: atLeast,
     isActive: isActive, isAdmin: isAdmin, isClientPerson: isClientPerson,
     seatOn: seatOn, seatFor: seatFor, myClientKeys: myClientKeys,

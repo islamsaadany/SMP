@@ -62269,3 +62269,33 @@ capability's own Projects rail. `single-company.py` §488 rewritten, never
 loosened (§218): no rail in the pane, add line under the table, the new row
 unfolded and editable, grips, a keyboard move read back from the data, Remove —
 red 6 with the first build's pane put back.
+
+## §489 — A process export starts empty, with a box to select all (2026-10-05)
+
+Islam, of Processes › Export: *"the default should be all non selected with an
+option to select all."* Every row's box arrived ticked (`defaultChecked`), so
+each export started as a list of what to take OUT, while a pack is picked FOR
+an audience. Now every row starts unticked, the header gets the select-all box
+(the empty space over the row boxes, which held only a screen-reader label),
+ticking it ticks every row and pressing it again clears them, and between the
+two it shows the half-filled mark. Islam agreed both placements before it was
+built: the box in the header, and **Preview held until something is ticked**.
+`aria-disabled` rather than `disabled`, with the reason on a hover and the
+click refused by the handler (§221, §163), so the reason can still be read.
+
+Selection is STATE now, keyed by process id rather than by row position (§48),
+so a tick travels with its row when the arrows move it, and the GET form still
+posts `ids` in on-screen order, which is the report's order. Nothing is stored
+and nothing moves on the server: the arrangement panels above are untouched,
+and so is the report page.
+
+Proved by bundling this one form with the real React and the real arrangement
+module (the server action, the router and the edit flag stubbed), rendering it
+in Chromium and pressing every control, with what the form submits read off the
+request: 11/0. **Red 4** with the old "everything ticked" start put back.
+One of the harness's own failures was the harness: Playwright treats
+`aria-disabled` as disabled (§222), so the refused press has to be forced.
+Typecheck clean once the container had Next's generated route types and the
+Prisma client, both missing from a fresh install and neither caused by this
+change. Not driven inside the running app: the Processes pages need a seeded
+`ffprocess` workspace, which this container does not have.

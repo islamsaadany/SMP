@@ -43,20 +43,6 @@ export function ExportPickerForm({
   emptyBlockIds?: EmptyBlockIds;
 }) {
   const [ordered, setOrdered] = useState(processes);
-  // Nothing is in the pack until somebody ticks it: a pack is chosen for an
-  // audience, and starting from everything made every export a list of what
-  // to take out. Held as state (not defaultChecked) so the header box can
-  // tick or clear every row and show a mixed mark between the two.
-  const [picked, setPicked] = useState<ReadonlySet<string>>(() => new Set());
-  const allPicked = ordered.length > 0 && picked.size === ordered.length;
-  const somePicked = picked.size > 0 && !allPicked;
-
-  function pick(id: string, on: boolean) {
-    const next = new Set(picked);
-    if (on) next.add(id);
-    else next.delete(id);
-    setPicked(next);
-  }
 
   function move(index: number, direction: -1 | 1) {
     const to = index + direction;
@@ -81,19 +67,7 @@ export function ExportPickerForm({
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
             <tr>
               <th scope="col" className="w-10 px-4 py-2">
-                <input
-                  type="checkbox"
-                  checked={allPicked}
-                  ref={(el) => {
-                    if (el) el.indeterminate = somePicked;
-                  }}
-                  onChange={(e) =>
-                    setPicked(e.target.checked ? new Set(ordered.map((p) => p.id)) : new Set())
-                  }
-                  disabled={ordered.length === 0}
-                  aria-label="Select all processes"
-                  className="h-4 w-4 rounded border-slate-300"
-                />
+                <span className="sr-only">Include</span>
               </th>
               <th scope="col" className="px-4 py-2">
                 Code
@@ -114,8 +88,7 @@ export function ExportPickerForm({
                     type="checkbox"
                     name="ids"
                     value={p.id}
-                    checked={picked.has(p.id)}
-                    onChange={(e) => pick(p.id, e.target.checked)}
+                    defaultChecked
                     aria-label={`Include ${p.code} — ${p.name}`}
                     className="h-4 w-4 rounded border-slate-300"
                   />
@@ -155,17 +128,9 @@ export function ExportPickerForm({
         Processes page and every other export are left as they are.
       </p>
 
-      {/* aria-disabled, not disabled: a disabled button takes no hover or
-          focus, so the reason it is shut could never be read. The handler
-          refuses the submit itself. */}
       <button
         type="submit"
-        aria-disabled={picked.size === 0}
-        title={picked.size === 0 ? "Tick at least one process to preview the report" : undefined}
-        onClick={(e) => {
-          if (picked.size === 0) e.preventDefault();
-        }}
-        className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 aria-disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:hover:bg-slate-900"
+        className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
       >
         Preview report →
       </button>

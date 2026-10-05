@@ -1371,6 +1371,10 @@ is Islam's *"for now"* left open.
 
 ---
 
+## 2026-10-05 — a process export starts empty, with a box to select all (§489)
+
+On Processes › Export, every process now starts unticked, so nothing goes into a report until you tick it. A box at the top of the tick column selects every process, and pressing it again clears them all. When only some are ticked it shows a half-filled mark. **Preview report** stays shut until at least one process is ticked, and hovering it says why. Ticks move with their row when you reorder, and the report comes out in the order shown. Nothing is saved, and the section panels above the list are unchanged. Checked by pressing every control in a real browser and reading what the form sends: 11 checks pass, and 4 fail if the old "everything ticked" start is put back. On the branch, not merged.
+
 ## 2026-10-04 — a direction's own deck, and the company's short review (§481)
 
 Built from the round-2 mockup, for a client planned on the company with its business units off. **Present the whole company** is now a short review: the Foundation, the analysis on one slide, the directions and capabilities, their performance, Thank you. Each direction has **a deck of its own** — its cover naming who presents it, its own slides, Thank you. There is no Present button per direction: the **Master presentation** arranges directions, capabilities and functions, with timers, and puts the company last. A direction's owner or custodian opens **Presentation** and sees only theirs — Present, the PDF, and Manage slides to add their own picture slides; nobody else can add slides to their direction (checked on the server too). Raya Trade, which has business units, sees no change: all its decks were compared and are identical. On the branch, not merged.

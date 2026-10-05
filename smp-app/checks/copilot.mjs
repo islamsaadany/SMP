@@ -19,6 +19,9 @@
        platform's line, the Word file's words, the PDF as itself; then the
        answer kept, assumptions recorded once and sent back, the paste offer,
        a failure and no key each saying so and keeping what was typed;
+     · §7 (§490) the SWOT chat and the sources shelf — who may delete a
+       source at both ends, a saved state the page cannot claim, an analysis
+       refused until the to-do list is done and a save until there is a draft;
      · §4 the catalogue — every table RLS-forced with the policy IDENTICAL to
        `tracker_actions`', and none on PLATFORM_TABLES.
 
@@ -41,6 +44,8 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
 import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
+import { mayDeleteSource } from "../lib/copilot-sources.ts";
+import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
 import { methodFor } from "../lib/copilot-settings.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
@@ -799,11 +804,75 @@ try {
     await new Promise((r) => stand.close(r));
   }
 
+  /* ══ §7 · the SWOT chat and the sources shelf (§490) ═════════════════
+     Every gate asked of the STORED row, never of the page (§42), and each
+     at both ends (§94.2): who may delete a source, a saved SWOT the page
+     cannot claim, an analysis refused until the to-do list is done, and a
+     save refused until there is a draft. None of it needs the model. */
+  section("§7 · the SWOT chat and the sources shelf");
+  check("whoever added a source may delete it", mayDeleteSource({ by: "noran" }, NORAN));
+  check("...and the Super user may", mayDeleteSource({ by: "noran" }, ISLAM));
+  check("...and nobody else may — another of the office, or nobody signed in",
+    !mayDeleteSource({ by: "noran" }, OMAR) && !mayDeleteSource({ by: "noran" }, { personKey: null, seat: null }));
+  const sw_fresh = newSwot(null);
+  check("a fresh SWOT opens on the methods with nothing saved", sw_fresh.phase === "methods" && sw_fresh.saved === null);
+  const sw_claimed = sanitizeSwot({ phase: "saved", saved: { deliverableId: "x", n: 9, title: "Faked" } }, sw_fresh);
+  check("the page cannot claim a SWOT is saved — `saved` is the product's", sw_claimed.saved === null && sw_claimed.phase !== "saved", JSON.stringify(sw_claimed.saved));
+  const sw_ticked = sanitizeSwot({ methods: { internal: ["guided", "research"], micro: ["report"], macro: [] } }, sw_fresh);
+  check("a method an area does not offer is dropped (Internal has no deep research)",
+    sw_ticked.methods.internal.join() === "guided" && sw_ticked.methods.micro.join() === "report", JSON.stringify(sw_ticked.methods));
+  const sw_td = todoOf(sw_ticked);
+  check("the to-do list counts what is ticked plus the analyses and the draft, nothing done yet",
+    sw_td.length === 4 && doneCount(sw_td) === 0, sw_td.map((x) => x.title + ":" + x.state).join(" | "));
+
+  const sw_ns = await call("POST", "api", { act: "newSwot", place: "mobile" }, NORAN);
+  const sw_sid = sw_ns.j && sw_ns.j.chat && sw_ns.j.chat.id;
+  check("the office starts a SWOT chat", sw_ns.st === 200 && !!sw_sid, sw_ns.st + " " + JSON.stringify(sw_ns.j).slice(0, 160));
+  check("...a client's own person cannot", (await call("POST", "api", { act: "newSwot", place: "mobile" }, HEND)).st === 403);
+  const sw_sv = await call("POST", "api", { act: "swotSave", id: sw_sid, placeWord: "Mobile",
+    swot: { methods: { internal: ["guided"], micro: ["report"], macro: [] }, ans: { internal: SWQ.internal.map(() => "") } } }, NORAN);
+  check("ticks are kept and the list says 0 of 4", sw_sv.st === 200 && sw_sv.j.swotDone === 0 && sw_sv.j.swotTodo.length === 4, JSON.stringify(sw_sv.j && sw_sv.j.swotTodo));
+  /* §490.2 — "Help me understand" is the old library, chosen by the client's industry. */
+  const sw_q = sw_sv.j && sw_sv.j.swotQuestions || {};
+  const sw_mi = (sw_q.micro || []).find((q) => q.key === "rivalry"), sw_ma = (sw_q.macro || []).find((q) => q.key === "economic");
+  check("a micro and a macro question carry the old library's help (simpler terms, things to think about, an example)",
+    !!(sw_mi && sw_mi.more && sw_mi.more.simplerTerms && sw_mi.more.thinkAbout.length && sw_mi.more.exampleResponse) &&
+    !!(sw_ma && sw_ma.more && sw_ma.more.simplerTerms), JSON.stringify(sw_mi && sw_mi.more).slice(0, 160));
+  check("...and an internal question keeps its own short line and no library entry",
+    (sw_q.internal || []).length > 0 && (sw_q.internal || []).every((q) => !q.more), "");
+  const { helpFor: sw_help } = await import("../lib/copilot-swot-help.ts");
+  check("the library picks the client's industry and falls back to Other",
+    sw_help("rivalry", "Retail & E-commerce").industry === "Retail" && sw_help("rivalry", "Something unknown").industry === "Other" &&
+    sw_help("nope", "Retail & E-commerce") === null, JSON.stringify([sw_help("rivalry","Retail & E-commerce")?.industry, sw_help("rivalry","x")?.industry]));
+  const sw_early = await call("POST", "api", { act: "swotAnalysis", id: sw_sid, area: "micro", placeWord: "Mobile" }, NORAN);
+  check("an analysis is refused, in words, until the lines of the list are done", sw_early.st === 400 && /to-do list/.test(sw_early.j && sw_early.j.why), sw_early.st + " " + JSON.stringify(sw_early.j));
+  const sw_fin0 = await call("POST", "api", { act: "swotFinish", id: sw_sid, placeWord: "Mobile" }, NORAN);
+  check("saving is refused until there is a draft and the analyses are agreed", sw_fin0.st === 400 && /Draft the SWOT/.test(sw_fin0.j && sw_fin0.j.why), sw_fin0.st + " " + JSON.stringify(sw_fin0.j));
+  const sw_nsaved = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title LIKE 'SWOT%'"))).rows[0].n;
+  check("...and nothing was written", sw_nsaved === 0, sw_nsaved + "");
+
+  const sw_add = await call("POST", "api", { act: "addSource", place: "mobile", kind: "report", name: "market.txt", text: "Competitors cut prices.",
+    chatId: sw_sid, area: "micro", method: "report", placeWord: "Mobile" }, NORAN);
+  const sw_srcId = sw_add.j && sw_add.j.source && sw_add.j.source.id;
+  check("a pasted ready report is kept on the client's shelf and ticks its line", sw_add.st === 200 && !!sw_srcId && sw_add.j.swotDone === 1, sw_add.st + " " + JSON.stringify(sw_add.j).slice(0, 200));
+  const sw_shelf = await call("GET", "sources", null, OMAR, "?place=mobile");
+  const sw_row = sw_shelf.j && sw_shelf.j.sources.find((x) => x.id === sw_srcId);
+  check("another of the office sees it on the shelf, with no delete offered", !!sw_row && sw_row.mayDelete === false, JSON.stringify(sw_row));
+  check("...and its delete is refused on the server too", (await call("POST", "api", { act: "deleteSource", sourceId: sw_srcId }, OMAR)).st === 403);
+  const sw_shelfI = await call("GET", "sources", null, ISLAM, "?place=mobile");
+  check("the Super user is offered the delete", !!sw_shelfI.j.sources.find((x) => x.id === sw_srcId && x.mayDelete));
+  check("a source added for this unit shows on another unit's shelf only when retagged to all units",
+    !(await call("GET", "sources", null, NORAN, "?place=retail")).j.sources.some((x) => x.id === sw_srcId) &&
+    (await call("POST", "api", { act: "retagSource", sourceId: sw_srcId, place: "all" }, NORAN)).st === 200 &&
+    (await call("GET", "sources", null, NORAN, "?place=retail")).j.sources.some((x) => x.id === sw_srcId));
+  check("whoever added it deletes it", (await call("POST", "api", { act: "deleteSource", sourceId: sw_srcId }, NORAN)).st === 200 &&
+    !(await call("GET", "sources", null, NORAN, "?place=mobile")).j.sources.some((x) => x.id === sw_srcId));
+
   /* ══ §4 · the catalogue ═══════════════════════════════════════ */
   section("§4 · every table is the tenant's, fenced like the tracker's");
-  const T = ["copilot_chats", "copilot_messages", "copilot_deliverables", "copilot_versions", "copilot_files"];
+  const T = ["copilot_chats", "copilot_messages", "copilot_deliverables", "copilot_versions", "copilot_files", "copilot_sources"];
   const rls = await owner("SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = $1 AND relname = ANY($2)", [SCHEMA, T]);
-  check("all five tables exist, RLS on and FORCED", rls.length === 5 && rls.every((x) => x.relrowsecurity && x.relforcerowsecurity), JSON.stringify(rls));
+  check("all six tables exist, RLS on and FORCED", rls.length === 6 && rls.every((x) => x.relrowsecurity && x.relforcerowsecurity), JSON.stringify(rls));
   const pol = await owner("SELECT tablename, qual, with_check FROM pg_policies WHERE schemaname = $1 AND tablename = ANY($2)", [SCHEMA, T.concat(["tracker_actions"])]);
   const ref = pol.find((p) => p.tablename === "tracker_actions");
   check("each carries the policy IDENTICAL to tracker_actions' (§94.8)",

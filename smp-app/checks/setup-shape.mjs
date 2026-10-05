@@ -139,8 +139,19 @@ let asked = [];
   if (BREAK === "extra-word") asked.push("howevertheyspellit");
 }
 const held = (seed.labels || []).map((e) => e.key);
+/* §489: A PART'S WORD HAS TWO HOMES NOW, and the check knew one. §418 names
+   a section's parts per LAYER on the structure, and a part that has no row on
+   Setup › Terminology (§436's `desc`, a function's description) falls back to
+   SMPRules.PART_DEFAULTS — which is exactly what the product's own reader,
+   labelWord(), consults after LABELS. So "unheld" means what it always meant:
+   a word the reader can only answer with its raw key. Re-pointed at the
+   reader's own two sources, never loosened (§218): a key in neither still
+   goes red, which --break=extra-word proves. */
+const partDefaults = Object.keys(require_(join(APP, "lib", "rules.cjs")).PART_DEFAULTS || {});
 check("the words step asks for something", asked.length > 0, JSON.stringify(asked));
-const orphans = asked.filter((k) => held.indexOf(k) < 0);
+check("…and the part defaults the reader falls back to are there", partDefaults.indexOf("desc") >= 0,
+  partDefaults.join(","));
+const orphans = asked.filter((k) => held.indexOf(k) < 0 && partDefaults.indexOf(k) < 0);
 check("every word the flow asks for is a key the registry holds (§53.5)",
   orphans.length === 0, orphans.length ? "asked and unheld: " + orphans.join(", ") : "");
 /* THE OTHER END, or a registry emptied of everything would satisfy the line
@@ -359,8 +370,19 @@ console.log("\n8 · an empty capability is not authored work");
   check("a unit on a new client shows no Themes, Capabilities or Values",
     ["theme", "capability", "values"].every((c) => !R.compOn(bare.group, "mobile", c)) &&
     ["brief", "pillar", "swot"].every((c) => R.compOn(bare.group, "mobile", c)));
-  check("the top level of a new client still carries everything",
-    R.STRUCT_COMPONENTS.every((c) => R.compOn(bare.group, "group", c)));
+  /* §489: "carries everything" was true when §404.5 wrote it and stopped
+     being true at Islam's word twice since — §427 holds the parts a company
+     page cannot draw off, and §428.2 starts the group's own SWOT off. What
+     §404.5 actually claimed is that a NEW client's defaults leave the top
+     ALONE, so it reads exactly what an unsaid top reads. Asserted as that
+     agreement (§94.8), with the Brief asserted on so an all-off top cannot
+     pass it vacuously (§113.8). Rewritten, never loosened (§218). */
+  const unsaid = JSON.parse(JSON.stringify(bare.group));
+  delete unsaid[R.STRUCTURE];
+  const diff = R.STRUCT_COMPONENTS.filter((c) => R.compOn(bare.group, "group", c) !== R.compOn(unsaid, "group", c));
+  check("the top level of a new client reads exactly what an unsaid top reads",
+    diff.length === 0, diff.join(","));
+  check("…and that top still carries its Brief", R.compOn(bare.group, "group", "brief"));
   /* §427 moved this, REWRITTEN rather than loosened (§218): a unit's page
      draws no purpose, themes or values, so they read off whatever is stored —
      and every part a unit's page DOES draw still reads on, which is the claim

@@ -1730,19 +1730,24 @@ function topCapBody(c, ed){
   var tbody = function(kind, extra){
     return ed ? '<tbody class="sortable" data-item="tr.topcapprow" data-kind="' + kind + '"' + extra + '>' : '<tbody>';
   };
+  /* §491: A CAPABILITY PLANNED IN PILLARS IS SHAPED LIKE A DIRECTION. Islam,
+     of §488.1's table of directions inside a capability: *"a capability
+     planning in a pillar approach is typical to a direction"*, showing the
+     Directions pane as the picture. So the capability holds its key measures
+     and tactics itself — drawn by the Directions pane's own body
+     (unitPlanBody, bare) under the capability's band, never a list of
+     directions inside it. Stored exactly as before: the capability's one
+     pillar row carries them, so reporting, scoring and the deck are unmoved. */
   if (capPlansInPillars(c)) {
     var u = ed ? capWritable(c.id) : capAsUnit(tgt);
     var items = ed ? u.items : itemsNow(u);
-    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>' + addLine("pillar", L1("pillar"));
-    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
-      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead>' +
-      tbody("pillars", ' data-u="' + esc(tgt) + '"') +
-      items.map(function(it, i){
-        return row(it.id, i, '<td class="num mono">' + grip(it.name || "") + esc(pillarCode(u, u.items.indexOf(it))) +
-          '</td><td><b>' + esc(it.name || "") + '</b></td><td>' + miss(it.owner) +
-          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td>',
-          5, function(){ return unitPlanBody(it, u, false); });
-      }).join("") + '</tbody></table></div>' + addLine("pillar", L1("pillar"));
+    if (!items.length) return ed
+      ? '<div class="topcapadd"><button class="linkbu" data-rowadd="pillar|' + esc(tgt) +
+          '">+ Start this ' + esc(L1("capability").toLowerCase()) + '\'s plan</button></div>'
+      : '<p class="sub">Nothing planned yet.</p>';
+    return unitPlanBody(items[0], u, true, true) + (items.length > 1
+      ? '<p class="sub">This ' + esc(L1("capability").toLowerCase()) + ' holds ' + items.length +
+        ' plans from before; the first is shown.</p>' : '');
   }
   var ps = c.projects || [];
   if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>' + addLine("project", L1("project"));
@@ -1769,7 +1774,10 @@ function renderTopCaps(){
       return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
         railName(topCapCode(c), c.name) +
         (g ? '<span class="rgap">' + g + ' Missing</span>' : '') +
-        railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
+        /* §491: a pillars capability IS its plan, so its line is not a count
+           of directions inside it — a direction's own rail says none. */
+        (pil ? (n ? "" : railSub("Nothing planned yet", ""))
+             : railSub(n ? plural(n, "project") : "No projects yet", "")) +
         '</button>';
     }).join("") + '</div>';
   /* §488: WITH THE PEN ON, THE PANE KEEPS ITS TABLE (topCapBody's own note)
@@ -9079,7 +9087,7 @@ if (typeof document !== "undefined") document.addEventListener("toggle", functio
   }
 }, true);
 
-function unitPlanBody(it, u, railed){
+function unitPlanBody(it, u, railed, bare){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
   var code = pillarCode(u, u.items.indexOf(it));
@@ -9407,7 +9415,11 @@ function unitPlanBody(it, u, railed){
      one answer, and the two are different questions). The column takes
      `flex:1` so the growing box (§189) fills the line instead of taking a
      slice of it. */
-  var head = showHead
+  /* §491: `bare` is a capability planned in pillars on the company's
+     Capabilities pane — the capability's band IS the head, and its owner and
+     custodian are on it, so neither the pillar's head nor its front matter is
+     drawn a second time. */
+  var head = bare ? "" : showHead
     ? '<div class="ptitle' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
         '<span class="ptcode">' + code + '</span>' +
         (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
@@ -9486,7 +9498,7 @@ function unitPlanBody(it, u, railed){
        wide (§109, §130.1): a pillar's kind and its owner are two facts about
        the pillar itself, and a second block for the second fact is a component
        nobody needed. */
-    (ed
+    (ed && !bare
       ? '<div class="pfront one"><div class="pfcol">' +
           '<div class="pfrow"><em>Owner</em><div class="pfval">' +
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +

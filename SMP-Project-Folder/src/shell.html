@@ -8955,7 +8955,13 @@
           var pu = unitLikeWritable(a[1]);
           addPillar(pu);
           /* §488: on the company's Capabilities pane, open what was just made. */
-          if (pu && pu.capKey && pu.items.length) TOPCAPPROJ[pu.capKey] = pu.items[pu.items.length - 1].id;
+          /* §491: a capability's one plan row takes the capability's name, so
+             reporting and the deck name it as the capability. */
+          if (pu && pu.capKey && pu.items.length) {
+            var nw = pu.items[pu.items.length - 1], cc = capById(pu.capKey);
+            if (cc && !nw.name) nw.name = cc.name;
+            TOPCAPPROJ[pu.capKey] = nw.id;
+          }
         }
         /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */

@@ -62358,3 +62358,226 @@ that is, with every comparison line ok.
 - `smp-app/.env.local` is tracked in git, which `CLAUDE.md`'s own pre-commit
   rule forbids by name. Nothing is exposed today (a password-less local
   address); the habit is what is wrong. Flagged, not changed (rule 1b).
+
+---
+
+## §488 — The company's capabilities can be edited in place
+
+Islam, of the Capabilities section §482 drew: *"there is no edit here in the
+capability."* He was right and it was §482's doing: the table it replaced had
+an **Open** button leading to the capability's own page, where the pen is; he
+asked for that button to go and the new view gave nothing in its place, so the
+company page could read a capability and change nothing about it. Two answers
+were put to him (edit in place, or put Open back) and he took the first.
+
+**The section line carries the plan's own pen** (`SEC_PENS_TOP.caps` is the
+plan's page and grant), so one Edit opens it and Done editing closes it like
+every other section (§268, §269). **With the pen on, the pane IS the
+capability's own plan page** — `renderFnProjects("cap:<id>")`, which already
+draws a capability planned in projects or in pillars in edit mode — so the
+fields, the rail, *Add a project* and *Remove this project* are the same
+controls writing the same rows, never a second editor (§53.5). **The two seats
+become the register's own picker**, the one Setup › Capabilities uses (§412),
+so the People page and this header read one fact (§33). Read mode is exactly
+§482's, asserted. Nothing stored moves and no server rule changes — a
+capability's plan has always been judged by its own target.
+
+`checks/single-company.py` gains eight assertions read back from the data,
+red 3 with the edit branch forced off.
+
+### §488.1 — One list, not a list inside a list
+
+Islam, of that build: *"why does it open as a list inside a list? why don't we
+just follow the pillars page behavior?"* Right: drawing the capability's own
+Projects page in the pane put its own rail of projects inside a pane already
+beside a rail of capabilities. **With the pen on, the pane keeps its read
+table** — a row still unfolds its plan below it, and that plan is the editable
+one (`projPlanBody`, or `unitPlanBody` for a capability planned in pillars;
+both read the pen themselves, §53.5), carrying *Remove this project*; the rows
+carry grips and reorder the stored list; and *+ Add a project* (or pillar) sits
+under the table, opening what it made. `renderFnProjects` is no longer called
+here. **And the reorder found a dead branch**: a `data-kind="projects"`
+container fell through the shell's commit into the measures branch and threw,
+so a project's grip moved nothing anywhere (§99.6's recorded fault); it applies
+to the holder's projects now (`holderByIdWritable`), which also fixes a
+capability's own Projects rail. `single-company.py` §488 rewritten, never
+loosened (§218): no rail in the pane, add line under the table, the new row
+unfolded and editable, grips, a keyboard move read back from the data, Remove —
+red 6 with the first build's pane put back.
+
+
+## §489 — two checks main was red on, both stale, both rewritten (never loosened)
+
+Islam: *"do 1"* — clear the two failures recorded at §479 as main's own.
+**Neither was a product fault**; each asserted a literal that a later,
+deliberate decision had moved (§214.3), and each is rewritten to the property
+that survives the decision (§218).
+
+**`setup-shape.mjs` §1 — `desc` is answered by the part defaults.** The words
+step asks for a function's Description (§436), and the check required every
+key it asks to be a key in `LABELS`. `labelWord` falls back through
+`SMPRules.PART_DEFAULTS`, which holds `desc` since §418 — so the word was
+never unanswered. The check now accepts a key held by either, and asserts
+`PART_DEFAULTS` is there with `desc` in it, or a build that dropped the
+fallback would pass by both lists being empty (§113.8).
+
+**`setup-shape.mjs` — the new client's top level.** It asserted the top carried
+a written structure; §427/§428.2 deliberately left the top UNSAID on a new
+client (`STRUCT_NEW_CLIENT` holds `mid` and `bu` only). Rewritten as an
+AGREEMENT (§94.8): every component reads the same on a new client's top as on a
+top with nothing stored, and that top still carries its Brief — the control,
+or "they agree" passes on a build where both read nothing. 49/0; red under all
+six breaks.
+
+**`door-landing.mjs` — Branding inside the flow.** It counted the group's own
+mark upload, which §461 removed (one mark per client, set on the client's
+door). Rewritten at both ends: the colours and the client's door mark are
+inside the set-up flow, and the separate group-mark upload is ABSENT. 146/0.
+
+No product file changes; nothing stored, nothing migrated, no `sw.js` bump.
+
+## §490 — The SWOT Copilot flow (spec 064, 2026-10-04)
+
+Islam, of the signed-off mockup `design-mockups/copilot-swot-flow/2026-10-04_v2.html`:
+*"proceed"*, then *"continue"*. Numbered §482 when it
+was built; renumbered §490 at the 2026-10-05 merge, because main had taken
+§480&ndash;§488 for its own work meanwhile (the company's directions, the
+console record). This branch's own §480 (two stale checks) became §489 in the
+same pass. Both renumbers ran before the merge and touched only this work's
+own lines (§264.3).
+
+**THE FLOW.** A SWOT chat starts from the subject's existing SWOT or fresh,
+then a methods grid — rows Internal · Micro · Macro, columns Guided questions ·
+Template · Ready reports · Deep research, with no Deep research on Internal
+(the inside of a business is not on the web). The ticks become a to-do list
+(*"N of M done"*) in a right column, beside one box per letter showing what has
+been gathered. Guided questions are asked word for word from the original
+method. Micro and Macro each get an analysis page that is agreed on its own,
+then the SWOT is drafted at 5–7 items per letter, and saving writes the titles
+into the plan's SWOT. The original names two macro factors *Environmental* and
+*Political*, and the flow keeps those words.
+
+**SOURCES ARE THE CLIENT'S, NOT THE CHAT'S** (*"per client is better"*): a
+report, a filled template, a deep-research answer or a set of guided answers
+is a row in `copilot_sources` (migration 023, RLS-forced like every tenant
+table), tagged to one unit or to *all*, so a report brought in for Mobile can
+be picked again for Retail or next year. **Only whoever added a source, or the
+Super user, may delete it** — asked of the stored row on the server
+(`mayDeleteSource`), never of what the page drew (§42).
+
+**DEEP RESEARCH IS A PROMPT OUT AND AN ANSWER IN**: the platform cannot browse,
+so it hands over a `.txt` prompt to run elsewhere, and the answer comes back as
+an upload or a paste and becomes a source. The download's name carries a long
+dash, which a plain `filename=` header cannot carry; it goes as
+`filename*=UTF-8''` like the platform's other downloads.
+
+**THE GATES READ THE STORED FLOW** (`modules/copilot/swot.ts`): the analysis
+step is refused until the to-do list is done, the SWOT cannot be saved before
+it is drafted, and the page cannot claim a SWOT is already saved
+(`sanitizeSwot`). Every rail section folds; Deliverables and Sources open
+folded.
+
+**TWO FAULTS FOUND BY LOOKING AT THE BUILT PAGE**: a letter's count rendered as
+a bare digit beside its heading, so *Opportunities* read *"Opportunities s"* —
+it reads *"5 items"* now; and the source row reused the `.copsrc` pill class,
+so it is `copsrcrow` (§65.9).
+
+**A CHECK WAS FLAKY AND IT WAS THE CHECK**: §472's working-word assertion looked
+at 2.2s for a word that turns at 2s on a 0.5s tick, so it raced the tick and
+failed one run in two. It looks at 2.9s inside a 4s answer now. And §453's
+deliverable press had to open the Deliverables rail first, since it opens
+folded.
+
+**VERIFIED**: `checks/copilot.mjs` 207/0 with a new §7 at both ends of every
+rule, red under four new breaks (`source-any-delete`, `swot-trust-saved`,
+`swot-any-gather`, `swot-finish-any`); `checks/shell.mjs` §3j 20/0 driven in a
+browser and the whole file re-run; `built-in-step` and `generated-in-step`
+clear; typecheck clean. **RECORDED, NOT DONE**: main has moved ahead of this
+branch; nothing is merged.
+
+### §490.1 — Compact columns, and a to-do header that stays put (2026-10-04)
+Islam asked for the SWOT chat to be compacted: a narrower chats column on the
+left, a narrower to-do column on the right, and the work and the to-do list
+scrolling separately. Drawn first (`design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html`,
+published as an artifact) and signed off with one addition: *"for the to do
+list scrolling you need to keep the header freezed"*.
+- **In a SWOT chat** the chats rail is 200px (from about 250) and the to-do 270px
+  (from 340); the work in the middle takes the space back. Scoped with
+  `:has(.copsw)`, so the other Copilot chats keep their rail — the mockup was of
+  the SWOT chat and nothing else was asked.
+- **The work and the to-do each scroll in their own box**; scrolling to the end of
+  the list no longer scrolls the work away.
+- **The to-do's header — title, count and progress bar — is frozen** at the top of
+  its column while the list scrolls under it. The header and the bar are one
+  wrapper (`.copsw-todoh`), so a single sticky element carries both; it paints the
+  card's own surface and covers the card's top padding, so the list cannot show
+  through above it.
+- **"+ New chat" keeps one line** at 200px by tightening its padding (the mockup
+  named the wrap as the cost and the build answered it); a long chat's date line
+  may still wrap.
+- **Below 1021px nothing changes** — the to-do drops under the work as before.
+- Checked in `smp-app/checks/shell.mjs` §3i at a short window (or there is nothing
+  for the to-do to scroll, §94.2): the two widths, the button on one line, the
+  to-do scrolling in its own box, the work beside it not moving, and the header
+  still at the top of the column AND the thing a click lands on (`elementFromPoint`,
+  never a computed `position`, §94.8).
+
+### §490.2 — One rail width, a compact to-do, the old help library, a Foundation to-do, tight equal space (2026-10-04)
+Islam, of the SWOT and Foundation chats: the left panel changing size between
+phases, a to-do that was too tall, *"help me understand is not working, the
+copilot had a big library of answers for this for each question"*, a to-do for
+the Foundation too, and the space above and below the panels. Drawn in two
+mockups (`design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html` and
+`2026-10-04_spacing-and-fold.html`, both published as artifacts) and signed off
+with *"proceed"*, after his own answers: *"fetch the old library dont' write a
+new one"*, *"let's keep all the surrounding space tight and equal"*, the to-do
+the same width as the chats panel, the chats panel folding when a chat starts,
+and the columns reaching the bottom of the page.
+- **The chats rail is 200px in every phase**, not only in a SWOT chat (§490.1's
+  `:has(.copsw)` scope goes); its folded strip stays 24px.
+- **A chat that starts or opens folds the rail to its strip**, so the work gets
+  the room. Pressed open again it stays open for the rest of the visit (`RAILKEPT`,
+  per page load) — the fold is the platform's suggestion, never an override of
+  somebody who asked for the list back.
+- **The to-do is compact**: each line's count sits beside its title (`0/16`), the
+  status sentence moves onto the hover, titles wrap rather than clip, and the
+  header reads `done/n`. *Change methods* stays on the title line.
+- **"Help me understand" is the old Copilot's library, carried verbatim**
+  (`smp-app/lib/copilot-swot-help.ts` — `strategy_copilot/lib/data/
+  expanded-explanations.ts` unchanged below its marker): In simpler terms, Think
+  about, an Example answer, and which industry it was written for. The entry is
+  chosen by the client's own industry (`tenants.industry`, the GICS-style name the
+  set-up flow stores, mapped to the library's sixteen), falling back to *Other*,
+  and the line says when it fell back. **Only what is added is the mapping**: the
+  SWOT's five competition and six market questions to the library's keys. The
+  sixteen internal questions have no library entry and keep their own short line.
+  The server attaches it to the question (`more`), so the page never carries a
+  second copy of the library (§53.5).
+- **A Foundation chat has a to-do**, a 200px third column beside the chat with the
+  cards still open: *Start* (starting point, plan years), *The parts* (each part
+  with answered/asked and Agreed · Answering · To do), *Then* (consistency check,
+  save). Its count is worked out from the flow's own state, never stored. Below
+  980px it is not drawn and the flow is one column, as before.
+- **Every gap round the panels is 8px** — the page's side gutter, the space under
+  the section row, between the rail and the work, inside the work, and to the
+  foot of the page — and **the columns reach the bottom**: the question card, the
+  answer box and the to-do grow to fill.
+- **Found by the check, not the drawing**: with the work reaching the foot of the
+  page, a plain chat's Send sat **under the office chat button** that floats over
+  the bottom-right corner, and a press there opened the corner instead. The box
+  now ends at the panel's 8px (the old `-16px` margin matched the old 16px
+  padding) and, only where it is flush with that corner (a plain chat — the flows
+  put a to-do there), keeps 64px clear of the button. Asserted as a hit test on
+  Send (§94.8).
+- **Recorded, not changed**: the same button still sits over the foot of the to-do
+  column in a SWOT or Foundation chat (flagged at §490.1); in those columns it
+  covers the last line, not a control that has no other way in.
+- Checks: `check:copilot` 210/0 (the help attached to a micro and a macro question
+  and not to an internal one, the industry pick and its fallback); `shell.mjs`
+  280/0 — the rail folding when a chat opens and coming back at 200px, Send
+  pressable, the SWOT to-do and rail both 200px, the count read as `0/5`. Three
+  §490.1 assertions REWRITTEN to the new numbers, never loosened (§218), and the
+  years assertion made to wait for its save rather than racing it (one red in
+  three runs). An earlier `check:copilot` red was two runs sharing one database,
+  not the product; alone it is green.
+

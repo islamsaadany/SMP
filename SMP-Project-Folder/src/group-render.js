@@ -1704,35 +1704,58 @@ function topCapMissing(c){
                (it.tactics || []).reduce(function(b, t){ return b + SMPRules.gapMissing("tactic", t).length; }, 0); }, 0);
   return (c.projects || []).reduce(function(a, p){ return a + SMPRules.gapMissing("project", p).length; }, 0);
 }
-function topCapBody(c){
+/* §488: ONE LIST, AND EDITING IS THE SAME TABLE. Islam, of the first build
+   (which drew the capability's own Projects page, rail and all, inside this
+   pane): *"why does it open as a list inside a list? why don't we just follow
+   the pillars page behavior?"* So with the pen on the pane keeps this table:
+   a row still unfolds its plan below it, and that plan is the editable one
+   (projPlanBody / unitPlanBody read the pen themselves, §53.5); the rows carry
+   grips and reorder the stored list; and the add line sits under the table.
+   Both ways a capability plans are drawn the same way. */
+function topCapBody(c, ed){
   var tgt = "cap:" + c.id;
-  if (capPlansInPillars(c)) {
-    var items = itemsNow(capAsUnit(tgt));
-    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>';
-    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
-      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead><tbody>' +
-      items.map(function(it, i){
-        return '<tr><td class="num mono">' + esc(pillarCode(capAsUnit(tgt), i)) + '</td><td>' + esc(it.name || "") +
-          '</td><td>' + (it.owner ? esc(it.owner) : '<span class="missing">Missing</span>') +
-          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td></tr>';
-      }).join("") + '</tbody></table></div>';
-  }
-  var ps = c.projects || [];
-  if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>';
   var openId = TOPCAPPROJ[c.id];
   var miss = function(v){ return v ? esc(v) : '<span class="missing">Missing</span>'; };
+  var grip = function(label){ return ed ? handle(label) + ' ' : ''; };
+  var addLine = function(what, label){
+    return ed ? '<div class="topcapadd"><button class="linkbu" data-rowadd="' + what + '|' +
+      esc(what === "pillar" ? tgt : c.id) + '">+ Add a ' + esc(label) + '</button></div>' : '';
+  };
+  var row = function(id, i, cells, n, open){
+    var on = id === openId;
+    return '<tr class="topcapprow' + (on ? ' on' : '') + '" data-topcapproj="' + esc(c.id) + '|' + esc(id) +
+        '"' + (ed ? ' data-oi="' + i + '"' : '') + ' aria-expanded="' + on + '" tabindex="0">' + cells + '</tr>' +
+      (on ? '<tr class="topcapopen"><td colspan="' + n + '"><div class="topcapplan">' + open() + '</div></td></tr>' : '');
+  };
+  var tbody = function(kind, extra){
+    return ed ? '<tbody class="sortable" data-item="tr.topcapprow" data-kind="' + kind + '"' + extra + '>' : '<tbody>';
+  };
+  if (capPlansInPillars(c)) {
+    var u = ed ? capWritable(c.id) : capAsUnit(tgt);
+    var items = ed ? u.items : itemsNow(u);
+    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>' + addLine("pillar", L1("pillar"));
+    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
+      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead>' +
+      tbody("pillars", ' data-u="' + esc(tgt) + '"') +
+      items.map(function(it, i){
+        return row(it.id, i, '<td class="num mono">' + grip(it.name || "") + esc(pillarCode(u, u.items.indexOf(it))) +
+          '</td><td><b>' + esc(it.name || "") + '</b></td><td>' + miss(it.owner) +
+          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td>',
+          5, function(){ return unitPlanBody(it, u, false); });
+      }).join("") + '</tbody></table></div>' + addLine("pillar", L1("pillar"));
+  }
+  var ps = c.projects || [];
+  if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>' + addLine("project", L1("project"));
   return '<div class="tblscroll"><table data-topcapprojects="1"><thead><tr><th class="num">#</th><th>' + L1("project") +
     '</th><th>Owner</th><th>Start</th><th>End</th><th class="num">Deliverables</th><th class="num">Outcomes</th>' +
-    '<th class="num">Milestones</th></tr></thead><tbody>' +
+    '<th class="num">Milestones</th></tr></thead>' + tbody("projects", ' data-cap="' + esc(c.id) + '"') +
     ps.map(function(p, i){
-      var on = p.id === openId;
-      return '<tr class="topcapprow' + (on ? ' on' : '') + '" data-topcapproj="' + esc(c.id) + '|' + esc(p.id) +
-          '" aria-expanded="' + on + '" tabindex="0"><td class="num">' + (i + 1) + '</td><td><b>' + esc(p.name || "") + '</b></td>' +
+      return row(p.id, i, '<td class="num">' + grip(p.name || "") + (i + 1) + '</td><td><b>' + esc(p.name || "") + '</b></td>' +
         '<td>' + miss(p.owner) + '</td><td class="mono">' + miss(p.start) + '</td><td class="mono">' + miss(p.end) + '</td>' +
         '<td class="num">' + (p.deliverables || []).length + '</td><td class="num">' + (p.outcomes || []).length + '</td>' +
-        '<td class="num">' + (p.milestones || []).length + '</td></tr>' +
-        (on ? '<tr class="topcapopen"><td colspan="8"><div class="topcapplan">' + projPlanBody(p, tgt) + '</div></td></tr>' : '');
-    }).join("") + '</tbody></table></div>';
+        '<td class="num">' + (p.milestones || []).length + '</td>',
+        8, function(){ return projPlanBody(p, tgt); });
+    }).join("") + '</tbody></table></div>' + addLine("project", L1("project"));
 }
 function renderTopCaps(){
   var caps = capsReachable();
@@ -1749,10 +1772,17 @@ function renderTopCaps(){
         railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
         '</button>';
     }).join("") + '</div>';
-  var seats = '<span class="topcapseat"><b>Owner</b> ' + seatName(sel.head) + '</span>' +
-              '<span class="topcapseat"><b>Custodian</b> ' + seatName(sel.custodian) + '</span>';
+  /* §488: WITH THE PEN ON, THE PANE KEEPS ITS TABLE (topCapBody's own note)
+     and the two seats become the register's own picker, Setup's (§412), so
+     the People page and this header read one fact (§33). */
+  var ed = projEditing();
+  var seat = function(role, cur){
+    return ed ? assignPicker("cap:" + sel.id, role, cur, true) : seatName(cur);
+  };
+  var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
+              '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
   var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
-    '<div class="topcapbody">' + topCapBody(sel) + '</div>';
+    '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
   return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
@@ -3294,7 +3324,10 @@ var SEC_PENS = {
 };
 /* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
    page and grant (g_found), and its SWOT and Plan take the unit's. */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"] };
+/* §488: the company's Capabilities section takes the plan's own pen, so one
+   Edit opens the chosen capability for editing in place — the same fields its
+   own Plan page draws (Islam: "there is no edit here in the capability"). */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];

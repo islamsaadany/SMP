@@ -26392,35 +26392,58 @@ function topCapMissing(c){
                (it.tactics || []).reduce(function(b, t){ return b + SMPRules.gapMissing("tactic", t).length; }, 0); }, 0);
   return (c.projects || []).reduce(function(a, p){ return a + SMPRules.gapMissing("project", p).length; }, 0);
 }
-function topCapBody(c){
+/* §488: ONE LIST, AND EDITING IS THE SAME TABLE. Islam, of the first build
+   (which drew the capability's own Projects page, rail and all, inside this
+   pane): *"why does it open as a list inside a list? why don't we just follow
+   the pillars page behavior?"* So with the pen on the pane keeps this table:
+   a row still unfolds its plan below it, and that plan is the editable one
+   (projPlanBody / unitPlanBody read the pen themselves, §53.5); the rows carry
+   grips and reorder the stored list; and the add line sits under the table.
+   Both ways a capability plans are drawn the same way. */
+function topCapBody(c, ed){
   var tgt = "cap:" + c.id;
-  if (capPlansInPillars(c)) {
-    var items = itemsNow(capAsUnit(tgt));
-    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>';
-    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
-      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead><tbody>' +
-      items.map(function(it, i){
-        return '<tr><td class="num mono">' + esc(pillarCode(capAsUnit(tgt), i)) + '</td><td>' + esc(it.name || "") +
-          '</td><td>' + (it.owner ? esc(it.owner) : '<span class="missing">Missing</span>') +
-          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td></tr>';
-      }).join("") + '</tbody></table></div>';
-  }
-  var ps = c.projects || [];
-  if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>';
   var openId = TOPCAPPROJ[c.id];
   var miss = function(v){ return v ? esc(v) : '<span class="missing">Missing</span>'; };
+  var grip = function(label){ return ed ? handle(label) + ' ' : ''; };
+  var addLine = function(what, label){
+    return ed ? '<div class="topcapadd"><button class="linkbu" data-rowadd="' + what + '|' +
+      esc(what === "pillar" ? tgt : c.id) + '">+ Add a ' + esc(label) + '</button></div>' : '';
+  };
+  var row = function(id, i, cells, n, open){
+    var on = id === openId;
+    return '<tr class="topcapprow' + (on ? ' on' : '') + '" data-topcapproj="' + esc(c.id) + '|' + esc(id) +
+        '"' + (ed ? ' data-oi="' + i + '"' : '') + ' aria-expanded="' + on + '" tabindex="0">' + cells + '</tr>' +
+      (on ? '<tr class="topcapopen"><td colspan="' + n + '"><div class="topcapplan">' + open() + '</div></td></tr>' : '');
+  };
+  var tbody = function(kind, extra){
+    return ed ? '<tbody class="sortable" data-item="tr.topcapprow" data-kind="' + kind + '"' + extra + '>' : '<tbody>';
+  };
+  if (capPlansInPillars(c)) {
+    var u = ed ? capWritable(c.id) : capAsUnit(tgt);
+    var items = ed ? u.items : itemsNow(u);
+    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>' + addLine("pillar", L1("pillar"));
+    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
+      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead>' +
+      tbody("pillars", ' data-u="' + esc(tgt) + '"') +
+      items.map(function(it, i){
+        return row(it.id, i, '<td class="num mono">' + grip(it.name || "") + esc(pillarCode(u, u.items.indexOf(it))) +
+          '</td><td><b>' + esc(it.name || "") + '</b></td><td>' + miss(it.owner) +
+          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td>',
+          5, function(){ return unitPlanBody(it, u, false); });
+      }).join("") + '</tbody></table></div>' + addLine("pillar", L1("pillar"));
+  }
+  var ps = c.projects || [];
+  if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>' + addLine("project", L1("project"));
   return '<div class="tblscroll"><table data-topcapprojects="1"><thead><tr><th class="num">#</th><th>' + L1("project") +
     '</th><th>Owner</th><th>Start</th><th>End</th><th class="num">Deliverables</th><th class="num">Outcomes</th>' +
-    '<th class="num">Milestones</th></tr></thead><tbody>' +
+    '<th class="num">Milestones</th></tr></thead>' + tbody("projects", ' data-cap="' + esc(c.id) + '"') +
     ps.map(function(p, i){
-      var on = p.id === openId;
-      return '<tr class="topcapprow' + (on ? ' on' : '') + '" data-topcapproj="' + esc(c.id) + '|' + esc(p.id) +
-          '" aria-expanded="' + on + '" tabindex="0"><td class="num">' + (i + 1) + '</td><td><b>' + esc(p.name || "") + '</b></td>' +
+      return row(p.id, i, '<td class="num">' + grip(p.name || "") + (i + 1) + '</td><td><b>' + esc(p.name || "") + '</b></td>' +
         '<td>' + miss(p.owner) + '</td><td class="mono">' + miss(p.start) + '</td><td class="mono">' + miss(p.end) + '</td>' +
         '<td class="num">' + (p.deliverables || []).length + '</td><td class="num">' + (p.outcomes || []).length + '</td>' +
-        '<td class="num">' + (p.milestones || []).length + '</td></tr>' +
-        (on ? '<tr class="topcapopen"><td colspan="8"><div class="topcapplan">' + projPlanBody(p, tgt) + '</div></td></tr>' : '');
-    }).join("") + '</tbody></table></div>';
+        '<td class="num">' + (p.milestones || []).length + '</td>',
+        8, function(){ return projPlanBody(p, tgt); });
+    }).join("") + '</tbody></table></div>' + addLine("project", L1("project"));
 }
 function renderTopCaps(){
   var caps = capsReachable();
@@ -26437,10 +26460,17 @@ function renderTopCaps(){
         railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
         '</button>';
     }).join("") + '</div>';
-  var seats = '<span class="topcapseat"><b>Owner</b> ' + seatName(sel.head) + '</span>' +
-              '<span class="topcapseat"><b>Custodian</b> ' + seatName(sel.custodian) + '</span>';
+  /* §488: WITH THE PEN ON, THE PANE KEEPS ITS TABLE (topCapBody's own note)
+     and the two seats become the register's own picker, Setup's (§412), so
+     the People page and this header read one fact (§33). */
+  var ed = projEditing();
+  var seat = function(role, cur){
+    return ed ? assignPicker("cap:" + sel.id, role, cur, true) : seatName(cur);
+  };
+  var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
+              '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
   var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
-    '<div class="topcapbody">' + topCapBody(sel) + '</div>';
+    '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
   return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
@@ -27982,7 +28012,10 @@ var SEC_PENS = {
 };
 /* §428: the top layer's Strategy tab. Its Foundation keeps the group's own
    page and grant (g_found), and its SWOT and Plan take the unit's. */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"] };
+/* §488: the company's Capabilities section takes the plan's own pen, so one
+   Edit opens the chosen capability for editing in place — the same fields its
+   own Plan page draws (Islam: "there is no edit here in the capability"). */
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
@@ -56294,12 +56327,7 @@ var COPILOT = (function(){
     return '<div class="coppane' + (shut ? " copshut" : "") + '" data-cop-pane>' +
       '<div class="copslim"><button type="button" class="coptog" data-cop-railtog aria-expanded="' + !shut + '" aria-label="Show chats and deliverables" title="Show chats and deliverables">' + TOGMARK + '</button>' +
         (canEdit() ? '<button type="button" class="coptog" data-cop-newchat aria-label="New chat" title="New chat">+</button>' : '') + '</div>' +
-      '<aside class="coprails">' +
-        '<section class="coprail copchats"><div class="coprh" data-cop-chatshead>' + chatsHead() + '</div>' +
-          '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
-          '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
-        '<section class="coprail"><div class="coprh"><span>Deliverables</span></div>' +
-          '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
+      '<aside class="coprails" data-cop-rails>' + railsInner() +
       '</aside>' +
       '<div class="copmain" data-cop-main>' + mainHtml() + '</div>' +
     '</div>';
@@ -56356,7 +56384,7 @@ var COPILOT = (function(){
       return '<div class="coprow' + (on ? " on" : "") + '" data-cop-row="' + E(c.id) + '">' +
         '<button type="button" class="copitem" data-cop-chat="' + E(c.id) + '"' + (on ? ' aria-current="true"' : '') + '>' +
           '<span class="copt">' + E(c.title) + '</span>' +
-          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + '</span></button>' +
+          '<span class="copm">' + E(nameOf(c.by)) + ' · ' + E(when(c.last)) + (c.guided ? ' · Guided' : '') + (function(){ var sp = (l.swotProgress || {})[c.id]; return sp ? ' · ' + sp.done + ' of ' + sp.of + ' done' : ''; })() + '</span></button>' +
         (!canEdit() ? '' : '<button type="button" class="copdots" data-cop-menu="' + E(c.id) + '" aria-haspopup="menu" aria-expanded="' + (MENU === c.id) +
           '" aria-label="Actions for ' + E(c.title) + '" title="Rename, archive…">' + DOTS + '</button>' + menu) + '</div>';
     }).join("");
@@ -56386,7 +56414,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
       ' <button type="button" class="linkbu" data-cop-reopen>Try again</button></div>';
-    return say + (o.kind === "chat" ? (flowView() ? flowHtml() : chatHtml()) : delivHtml());
+    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
   }
   function placeWord(){
     var t = place();
@@ -56994,7 +57022,36 @@ var COPILOT = (function(){
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
               '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
           : composerHtml(c, false)) +
-      '</div></div>';
+      '</div>' + ftodoHtml(f) + '</div>';
+  }
+  /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
+     carries, worked out from the flow as it stands — nothing is stored for it.
+     Start, each part with its answers counted, then the check and the save. */
+  function ftodoHtml(f){
+    var S = steps(), li = function(name, state, cnt, part){
+      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : "To do";
+      return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
+        '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
+        '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
+    };
+    var started = !!f.start || (f.phase !== "start");
+    var yearsOk = !!(f.y0 && f.y1), early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded";
+    var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
+    var g2 = S.map(function(el, i){
+      if (!on(i)) return "";
+      var a = (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length, q = el.questions.length;
+      var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
+      return li(el.name, f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+    }).join("");
+    var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
+              li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
+    var n = 2 + 2 + S.filter(function(_, i){ return on(i); }).length;
+    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (f.phase === "saved" ? 2 : 0);
+    return '<aside class="copftodo"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+      '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + Math.round(done * 100 / n) + '%"></i></div></div>' +
+      '<div class="copsw-tg"><div class="copsw-th">Start</div><ul>' + g1.join("") + '</ul></div>' +
+      '<div class="copsw-tg"><div class="copsw-th">The parts</div><ul>' + g2 + '</ul></div>' +
+      '<div class="copsw-tg"><div class="copsw-th">Then</div><ul>' + g3.join("") + '</ul></div></div></aside>';
   }
   /* The other three roads go on as an ordinary chat, told in one product
      line what to do next — and the guided road is one press away. */
@@ -57129,7 +57186,7 @@ var COPILOT = (function(){
   }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
-  var RAILKEY = "smp.copilot.rail";
+  var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
   function railShut(){ try { return localStorage.getItem(RAILKEY) === "shut"; } catch (e) { return false; } }
   function setRail(shut){
     try { if (shut) localStorage.setItem(RAILKEY, "shut"); else localStorage.removeItem(RAILKEY); } catch (e) {}
@@ -57175,10 +57232,7 @@ var COPILOT = (function(){
   }
   function draw(){
     keepDraft();
-    var a = document.querySelector("[data-cop-chats]"); if (a) a.innerHTML = chatsHtml();
-    var ah = document.querySelector("[data-cop-chatshead]"); if (ah) ah.innerHTML = chatsHead();
-    var af = document.querySelector("[data-cop-chatsfoot]"); if (af) af.innerHTML = chatsFoot();
-    var b = document.querySelector("[data-cop-delivs]"); if (b) b.innerHTML = delivsHtml();
+    var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
@@ -57209,14 +57263,451 @@ var COPILOT = (function(){
   }
   window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 
+  /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
+     design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
+     A SWOT chat is a to-do list rather than a conversation: which areas
+     (internal, micro, macro) and which methods each uses are ticked in a
+     grid, and the list on the right is worked out by the SERVER from what
+     is stored (lib/copilot-swot.ts), so a line cannot read done on one
+     screen and open on another. The guided questions are the original
+     Copilot's, word for word, asked one at a time — never invented.
+     An answer written for the client is a SUGGESTION in the box and is
+     stored only through the ordinary save, like anything typed (§35). */
+  var SRC = {}, SRCASK = null, SWSEL = {}, SWHELP = {}, SWSUG = null, SWEDIT = null, SWPASTE = "", SWALL = false;
+  var LETTERS = ["s", "w", "o", "t"], LETTER_WORD = { s: "Strengths", w: "Weaknesses", o: "Opportunities", t: "Threats" };
+  function swotOn(){ return !!(PANE && PANE.chat && PANE.swot); }
+  function swCopy(){ return JSON.parse(JSON.stringify(PANE.swot)); }
+  function swView(j){ ["swot","swotTodo","swotDone","swotCover","swotGatherDone","swotQuestions","swotOffered","swotMethodWord","swotAreaWord","swotTemplateOf","swotNextVersion"]
+    .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function swSave(s, then){
+    if (!swotOn()) return;
+    var id = PANE.chat.id;
+    PANE.swot = s; draw();
+    act({ act:"swotSave", id:id, swot:s, placeWord:placeWord() }, function(j){
+      if (PANE && PANE.chat && PANE.chat.id === id) swView(j);
+      draw(); if (then) then();
+      var l = list(); if (l && l.swotProgress && PANE && PANE.swotTodo) { l.swotProgress[id] = { done: PANE.swotDone, of: PANE.swotTodo.length }; draw(); }
+    });
+  }
+  function swContext(){
+    var ctx = contextOf();
+    return ctx.line + (ctx.detail ? "\n" + ctx.detail : "") + (ctx.text ? "\n\nTHE PLAN AS WRITTEN:\n" + ctx.text : "");
+  }
+  function swAsk(body, then){
+    if (!swotOn() || THINKING) return;
+    var id = PANE.chat.id;
+    THINKING = id; SAY = ""; THINK_AT = Date.now();
+    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
+    draw();
+    body.id = id; body.placeWord = placeWord(); body.context = swContext();
+    post(body, WAIT_MS).then(function(x){
+      THINKING = null;
+      if (x.st === 200 && x.j && x.j.ok) {
+        if (PANE && PANE.chat && PANE.chat.id === id) { if (then) then(x.j); else swView(x.j); }
+        draw(); return;
+      }
+      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again."; draw();
+    }, function(err){
+      THINKING = null;
+      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Try again in a moment."
+        : "The server could not be reached. Nothing was lost — try again.";
+      draw();
+    });
+  }
+  /* The plan's own SWOT, read for "start from what is there". */
+  function planSwot(){
+    var t = place(), sw = null;
+    try {
+      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[t.slice(3)] || {}).swot;
+      else if (t === "group" && typeof GROUP !== "undefined") sw = GROUP.swot;
+      else { var u = typeof unitLike === "function" ? unitLike(t) : null; sw = u && u.swot; }
+    } catch (e) { sw = null; }
+    var out = { s: [], w: [], o: [], t: [] };
+    LETTERS.forEach(function(L){ out[L] = ((sw && sw[L]) || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); });
+    return out;
+  }
+  function swTitle(){ return "SWOT — " + placeWord(); }
+  /* ── the rail's Sources section ── */
+  function srcList(){ return SRC[place()] || null; }
+  function loadSources(force){
+    if (section() !== "analysis" || !live()) return;
+    var p = place();
+    if (!force && SRC[p]) return;
+    SRC[p] = SRC[p] || { asking: true };
+    getJ("sources", ["place=" + encodeURIComponent(p)]).then(function(x){
+      SRC[p] = x.st === 200 && x.j && x.j.ok ? { list: x.j.sources || [], words: x.j.words || {} } : { failed: true };
+      draw();
+    }, function(){ SRC[p] = { failed: true }; draw(); });
+  }
+  function srcWord(k){ var s = srcList(); return (s && s.words && s.words[k]) || k; }
+  function sourcesHtml(){
+    var s = srcList();
+    if (!s || s.asking) return '<div class="copnone">Asking…</div>';
+    if (s.failed) return '<div class="copnone">The sources could not be read just now. <button type="button" class="linkbu" data-cop-src-retry>Try again</button></div>';
+    if (!s.list.length) return '<div class="copnone">No sources yet. Reports and answers brought into a SWOT are kept here.</div>';
+    return s.list.map(function(r){
+      if (SRCASK === r.id) return '<div class="coprow ask"><span class="copt">' + E(r.name) + '</span><span class="copaskrow">Delete? ' +
+        '<button type="button" class="copbtn danger solid" data-cop-src-del-yes="' + E(r.id) + '">Delete</button>' +
+        '<button type="button" class="copbtn quiet" data-cop-src-del-no>Cancel</button></span></div>';
+      return '<div class="coprow copsrcrow" data-cop-src="' + E(r.id) + '">' +
+        '<a class="copitem" href="' + E(url("source", ["id=" + encodeURIComponent(r.id)])) + '" target="_blank" rel="noopener">' +
+          '<span class="copt">' + E(r.name) + '</span>' +
+          '<span class="copm">' + E(srcWord(r.kind)) + ' · ' + (r.place === "all" ? "All units" : "This unit") + ' · ' + E(when(r.at)) + '</span></a>' +
+        (canEdit() ? '<span class="copsrcacts"><button type="button" class="linkbu" data-cop-src-retag="' + E(r.id) + '" data-cop-to="' + (r.place === "all" ? E(place()) : "all") + '">' +
+          (r.place === "all" ? "Only this unit" : "All units") + '</button>' +
+          (r.mayDelete ? '<button type="button" class="xbtn" data-cop-src-del="' + E(r.id) + '" title="Delete this source" aria-label="Delete ' + E(r.name) + '">&times;</button>' : '') + '</span>' : '') +
+      '</div>';
+    }).join("");
+  }
+  /* ── the right column: the to-do list and the count per letter ── */
+  function swLineKey(t){ return (t.area || "") + "|" + t.method; }
+  function swSel(){
+    var id = PANE.chat.id, todo = PANE.swotTodo || [], sel = SWSEL[id];
+    var lines = todo.filter(function(t){ return t.area; });
+    if (sel && lines.some(function(t){ return swLineKey(t) === sel; })) return sel;
+    var open = lines.filter(function(t){ return t.state !== "done"; })[0] || lines[0];
+    return open ? swLineKey(open) : "";
+  }
+  function swSideHtml(){
+    var s = PANE.swot, todo = PANE.swotTodo || [], done = PANE.swotDone || 0, n = todo.length, cur = s.phase === "gather" ? swSel() : "";
+    var groups = [], seen = {};
+    todo.forEach(function(t){ var g = t.area || "_"; if (!seen[g]) { seen[g] = []; groups.push(g); } seen[g].push(t); });
+    var body = groups.map(function(g){
+      return '<div class="copsw-tg"><div class="copsw-th">' + (g === "_" ? "Then" : E((PANE.swotAreaWord || {})[g] || g)) + '</div><ul>' +
+        seen[g].map(function(t){
+          var on = swLineKey(t) === cur, pill = t.state === "done" ? "Done" : t.state === "wait" ? "Waiting" : "To do";
+          /* Compact (§490.2): the line's "n of m" rides in its title as n/m; the
+             status sentence stays on the hover rather than a second line. */
+          var nm = /(\d+)\s+of\s+(\d+)/.exec(String(t.status || "")), cnt = nm ? '<i>' + nm[1] + '/' + nm[2] + '</i>' : '';
+          var label = '<span class="copsw-tt" title="' + E(t.status || "") + '"><span>' + E(t.title) + '</span>' + cnt + '</span><span class="copsw-ts">' + E(t.status) + '</span>';
+          return '<li class="copsw-li ' + t.state + (on ? " on" : "") + '"><span class="copsw-dot" aria-hidden="true"></span>' +
+            (t.area && s.phase !== "saved" ? '<button type="button" class="copsw-lb" data-cop-sw-line="' + E(swLineKey(t)) + '"' + (on ? ' aria-current="true"' : '') + '>' + label + '</button>' : '<span class="copsw-lb">' + label + '</span>') +
+            '<span class="copsw-pill ' + t.state + '">' + pill + '</span></li>';
+        }).join("") + '</ul></div>';
+    }).join("");
+    var cov = PANE.swotCover || {};
+    return '<aside class="copsw-side">' +
+      '<div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span>' +
+        (s.phase !== "saved" && canEdit() ? '<button type="button" class="linkbu" data-cop-sw-go="methods">Change methods</button>' : '') + '</div>' +
+        '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
+        body + '</div>' +
+      '<div class="copsw-box"><div class="copsw-bh"><b>What we have so far</b> <span class="copsw-n">Per letter</span></div>' +
+        '<div class="copsw-cov">' + LETTERS.map(function(L){
+          var k = cov[L] || 0;
+          return '<div class="copsw-ci' + (k ? "" : " none") + '"><b>' + E(LETTER_WORD[L]) + '</b><span>' + (k ? k + (k === 1 ? " source" : " sources") : "Nothing yet") + '</span></div>';
+        }).join("") + '</div></div>' +
+    '</aside>';
+  }
+  /* "Help me understand" (§490.2): the old Copilot's library, in the
+     client's industry, where the question has an entry; its short line
+     otherwise (the sixteen internal questions keep theirs). */
+  function swHelpHtml(q){
+    var m = q.more;
+    if (!m) return '<div class="copsw-help">' + E(q.help) + '</div>';
+    return '<div class="copsw-help copswhelp"><h4>In simpler terms</h4><p>' + E(m.simplerTerms) + '</p>' +
+      '<h4>Think about</h4><ul>' + (m.thinkAbout || []).map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' +
+      '<h4>Example answer</h4><p class="ex">' + E(m.exampleResponse) + '</p>' +
+      '<p class="src">Written for ' + E(m.industry) + (m.industry === "Other" ? ' · no closer match for this client' : ' · the client\'s industry') + '</p></div>';
+  }
+  /* ── the main column, by phase ── */
+  function swotHtml(){
+    var s = PANE.swot, busyHere = THINKING === PANE.chat.id, ed = canEdit();
+    var head = '<div class="copvline"><b>' + E(swTitle()) + ' v' + E(s.saved ? s.saved.n : (PANE.swotNextVersion || 1)) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
+    if (s.phase === "start") {
+      var n = LETTERS.reduce(function(a, L){ return a + ((s.fromPlan || {})[L] || []).length; }, 0);
+      return head + '<div class="copsw-card"><h3>This place already has a SWOT</h3>' +
+        '<p>' + n + ' lines are on the plan today. Start from them, or start fresh?</p>' +
+        (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-start="plan">Start from it</button>' +
+          '<button type="button" class="copbtn" data-cop-sw-start="fresh">Start fresh</button></div>' : '') + '</div>';
+    }
+    var main;
+    if (s.phase === "methods") main = swMethodsHtml(s, ed);
+    else if (s.phase === "gather") main = swGatherHtml(s, ed, busyHere);
+    else if (s.phase === "analyses") main = swAnalysesHtml(s, ed, busyHere);
+    else main = swDraftHtml(s, ed, busyHere);
+    return head + '<div class="copsw">' + '<div class="copsw-main">' + main + work + '</div>' + swSideHtml() + '</div>';
+  }
+  function swMethodsHtml(s, ed){
+    var off = PANE.swotOffered || {}, mw = PANE.swotMethodWord || {}, aw = PANE.swotAreaWord || {};
+    var cols = ["guided", "template", "report", "research"], any = ["internal","micro","macro"].some(function(a){ return (s.methods[a] || []).length; });
+    return '<div class="copsw-card"><h3>How will we gather it?</h3>' +
+      '<p>Tick one or more methods for each area. An area with nothing ticked is left out.</p>' +
+      '<div class="copsw-gridwrap"><table class="copsw-grid"><thead><tr><th></th>' + cols.map(function(m){ return '<th>' + E(mw[m] || m) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      ["internal","micro","macro"].map(function(a){
+        return '<tr><th scope="row">' + E(aw[a] || a) + '</th>' + cols.map(function(m){
+          if ((off[a] || []).indexOf(m) < 0) return '<td class="na">—</td>';
+          var on = (s.methods[a] || []).indexOf(m) >= 0;
+          return '<td><button type="button" class="copsw-tick' + (on ? " on" : "") + '" data-cop-sw-m="' + a + '|' + m + '" aria-pressed="' + on + '"' + (ed ? '' : ' disabled') +
+            ' aria-label="' + E((aw[a] || a) + " — " + (mw[m] || m)) + '">' + (on ? '&#10003;' : '') + '</button></td>';
+        }).join("") + '</tr>';
+      }).join("") + '</tbody></table></div>' +
+      (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-go="gather"' + (any ? '' : ' disabled') + '>Continue</button>' +
+        (any ? '' : '<span class="copnote">Tick at least one method to carry on.</span>') + '</div>' : '') + '</div>';
+  }
+  function swGatherHtml(s, ed, busyHere){
+    var sel = swSel(), area = sel.split("|")[0], method = sel.split("|")[1];
+    var aw = PANE.swotAreaWord || {}, mw = PANE.swotMethodWord || {};
+    var next = PANE.swotGatherDone
+      ? '<div class="copsw-next"><b>Every line is done.</b> ' + (["micro","macro"].some(function(a){ return (s.methods[a] || []).length; })
+          ? 'Next, the micro and macro analyses.' : 'Next, the SWOT itself.') +
+        (ed ? ' <button type="button" class="copbtn solid" data-cop-sw-go="analyses">Carry on</button>' : '') + '</div>' : '';
+    if (!area) return next;
+    var head = '<div class="copsw-lh">' + E(aw[area] || area) + ' · ' + E(mw[method] || method) + '</div>';
+    if (method === "guided") return next + head + swQuestionHtml(s, area, ed, busyHere);
+    return next + head + swSourceLineHtml(s, area, method, ed, busyHere);
+  }
+  function swQuestionHtml(s, area, ed, busyHere){
+    var qs = (PANE.swotQuestions || {})[area] || [];
+    var i = s.q && s.q.area === area ? s.q.i : 0;
+    if (!qs.length) return '';
+    i = Math.max(0, Math.min(qs.length - 1, i));
+    var q = qs[i], hk = PANE.chat.id + "|" + area + "|" + i, ans = (s.ans[area] || [])[i] || "";
+    var sug = SWSUG && SWSUG.id === PANE.chat.id && SWSUG.area === area && SWSUG.i === i ? SWSUG : null;
+    return '<div class="copsw-card copsw-q">' +
+      '<div class="copsw-qn">Question ' + (i + 1) + ' of ' + qs.length + ' · ' + E(q.name) + '</div>' +
+      '<p class="copsw-qt">' + E(q.question) + '</p>' +
+      (SWHELP[hk] ? swHelpHtml(q) : '') +
+      '<textarea class="fld copsw-ans" data-cop-sw-ans="' + area + '|' + i + '" rows="4" maxlength="2000" placeholder="Type the answer"' + (ed ? '' : ' disabled') + '>' + E(ans) + '</textarea>' +
+      (sug && sug.used && sug.used.length ? '<div class="copsw-used">Used: ' + E(sug.used.join(" · ")) + '</div>' : sug ? '<div class="copsw-used">Written from the plan and what is attached here.</div>' : '') +
+      '<div class="copbtns">' +
+        '<button type="button" class="copbtn quiet" data-cop-sw-help="' + E(hk) + '">' + (SWHELP[hk] ? "Hide the help" : "Help me understand") + '</button>' +
+        (ed ? '<button type="button" class="copbtn" data-cop-sw-answer="' + area + '|' + i + '"' + (busyHere ? ' disabled' : '') + '>Answer for me</button>' : '') +
+        '<span class="copsw-sp"></span>' +
+        (i > 0 ? '<button type="button" class="copbtn quiet" data-cop-sw-q="' + area + '|' + (i - 1) + '">Previous</button>' : '') +
+        (i < qs.length - 1 ? '<button type="button" class="copbtn solid" data-cop-sw-q="' + area + '|' + (i + 1) + '">Next question</button>' : '') +
+      '</div></div>';
+  }
+  function swSourceLineHtml(s, area, method, ed, busyHere){
+    var linked = (s.links || []).filter(function(l){ return l.area === area && l.method === method; });
+    var kind = method, sl = srcList(), ids = linked.map(function(l){ return l.sourceId; });
+    var pick = sl && sl.list ? sl.list.filter(function(r){ return ids.indexOf(r.id) < 0 && r.kind === kind; }) : [];
+    var intro = method === "template"
+      ? 'Download the interview template, fill it in with the people concerned, and upload it here. <a class="linkbu" href="/' + E(slug()) + '/copilot/settings/templates" target="_blank" rel="noopener">Open the templates</a>'
+      : method === "research"
+        ? 'Download the research prompt, run it in a deep-research tool, then upload or paste the answer here.'
+        : 'Upload a ready report, or pick one already kept for this client.';
+    return '<div class="copsw-card">' +
+      '<p>' + intro + '</p>' +
+      (method === "research" && ed ? '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-prompt="' + area + '"' + (busyHere ? ' disabled' : '') + '>Download the research prompt (.txt)</button></div>' : '') +
+      (linked.length ? '<ul class="copsw-links">' + linked.map(function(l){
+        return '<li><span>' + E(l.name) + '</span>' + (ed ? '<button type="button" class="xbtn" data-cop-sw-unlink="' + E(l.sourceId) + '" title="Take it off this line" aria-label="Take ' + E(l.name) + ' off this line">&times;</button>' : '') + '</li>';
+      }).join("") + '</ul>' : '') +
+      (ed ? '<div class="copsw-add">' +
+        '<label class="copsw-where">Keep it for <select class="fld" data-cop-sw-for><option value="unit"' + (SWALL ? '' : ' selected') + '>This unit</option><option value="all"' + (SWALL ? ' selected' : '') + '>All units</option></select></label>' +
+        '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-upload>Upload a file</button>' +
+          '<input type="file" hidden data-cop-sw-file accept=".docx,.pdf,.xlsx,.txt,.md"></div>' +
+        (method !== "template" ? '<textarea class="fld" rows="4" data-cop-sw-paste placeholder="Or paste the text here">' + E(SWPASTE) + '</textarea>' +
+          '<div class="copbtns"><button type="button" class="copbtn" data-cop-sw-keep>Keep the pasted text</button></div>' : '') +
+        (pick.length ? '<div class="copsw-pick"><b>Or pick one already kept</b>' + pick.map(function(r){
+          return '<button type="button" class="copbtn quiet" data-cop-sw-use="' + E(r.id) + '">' + E(r.name) + '</button>';
+        }).join("") + '</div>' : '') +
+      '</div>' : '') +
+    '</div>';
+  }
+  function swAnalysisPage(s, area, ed, busyHere){
+    var an = s[area], aw = PANE.swotAreaWord || {}, qs = (PANE.swotQuestions || {})[area] || [];
+    var title = area === "micro" ? "Micro analysis — the five forces" : "Macro analysis — DESTEP";
+    if (!an) return '<div class="copsw-card"><h3>' + E(title) + '</h3><p>Not written yet.</p>' +
+      (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-an="' + area + '"' + (busyHere ? ' disabled' : '') + '>Write the ' + E(area) + ' analysis</button></div>' : '') + '</div>';
+    var editing = SWEDIT && SWEDIT.area === area, src = editing ? SWEDIT.data : an;
+    return '<div class="copsw-card copsw-an"><h3>' + E(title) + (an.agreed ? ' <span class="copsw-pill done">Agreed</span>' : '') + '</h3>' +
+      '<div class="copsw-forces">' + src.items.map(function(it, k){
+        var q = qs.filter(function(x){ return x.key === it.key; })[0] || { name: it.key };
+        return '<div class="copsw-force"><h4>' + E(q.name) + '</h4>' +
+          (it.factors.length ? '<ul>' + it.factors.map(function(f, j){
+            return editing
+              ? '<li><input class="fld" data-cop-sw-fe="' + k + '|' + j + '|title" value="' + E(f.title) + '" aria-label="Title">' +
+                '<textarea class="fld" rows="2" data-cop-sw-fe="' + k + '|' + j + '|description" aria-label="Description">' + E(f.description) + '</textarea></li>'
+              : '<li><b>' + E(f.title) + '</b>' + (f.description ? '<span>' + E(f.description) + '</span>' : '') +
+                (f.evidence ? '<span class="copsw-ev">' + E(f.evidence) + '</span>' : '') + '</li>';
+          }).join("") + '</ul>' : '<p class="copnote">Nothing found here.</p>') +
+          (it.from && !editing ? '<div class="copsw-used">Used: ' + E(it.from) + '</div>' : '') + '</div>';
+      }).join("") + '</div>' +
+      (ed ? '<div class="copbtns">' + (editing
+        ? '<button type="button" class="copbtn solid" data-cop-sw-ansave="' + area + '">Save the changes</button><button type="button" class="copbtn quiet" data-cop-sw-anedit-no>Cancel</button>'
+        : '<button type="button" class="copbtn" data-cop-sw-anedit="' + area + '">Edit</button>' +
+          (an.agreed ? '' : '<button type="button" class="copbtn solid" data-cop-sw-agree="' + area + '">Looks right</button>') +
+          '<button type="button" class="copbtn quiet" data-cop-sw-an="' + area + '"' + (busyHere ? ' disabled' : '') + '>Write it again</button>') + '</div>' : '') + '</div>';
+  }
+  function swExternal(s){ return ["micro","macro"].filter(function(a){ return (s.methods[a] || []).length; }); }
+  function swAnalysesHtml(s, ed, busyHere){
+    var ext = swExternal(s), agreed = ext.every(function(a){ return s[a] && s[a].agreed; });
+    if (!PANE.swotGatherDone && ext.some(function(a){ return !s[a]; }))
+      return '<div class="copsw-card"><p>Finish the lines of the to-do list first. ' + (ed ? '<button type="button" class="linkbu" data-cop-sw-go="gather">Back to the list</button>' : '') + '</p></div>';
+    return ext.map(function(a){ return swAnalysisPage(s, a, ed, busyHere); }).join("") +
+      (ed ? '<div class="copsw-next">' + (agreed ? '<b>' + (ext.length ? 'The analyses are agreed.' : 'Every line is done.') + '</b> ' : 'Agree each analysis to draft the SWOT. ') +
+        '<button type="button" class="copbtn solid" data-cop-sw-draft' + (agreed && !busyHere ? '' : ' disabled') + '>Draft the SWOT</button>' +
+        ' <button type="button" class="linkbu" data-cop-sw-go="gather">Back to the list</button></div>' : '');
+  }
+  function swDraftHtml(s, ed, busyHere){
+    var d = s.draft;
+    if (!d) return '<div class="copsw-card"><p>The SWOT is not drafted yet.</p>' + (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-sw-draft' + (busyHere ? ' disabled' : '') + '>Draft the SWOT</button></div>' : '') + '</div>';
+    var grid = '<div class="copsw-swot">' + LETTERS.map(function(L){
+      return '<section class="copsw-l ' + L + '"><h3>' + E(LETTER_WORD[L]) + ' <span class="copsw-n">' + d[L].length + (d[L].length === 1 ? ' item' : ' items') + '</span></h3><ol>' +
+        d[L].map(function(it){ return '<li><b>' + E(it.title) + '</b>' + (it.description ? '<span>' + E(it.description) + '</span>' : '') +
+          (it.evidence ? '<span class="copsw-ev">' + E(it.evidence) + '</span>' : '') + '</li>'; }).join("") + '</ol></section>';
+    }).join("") + '</div>';
+    var chk = s.check ? '<div class="copsw-card copsw-check"><h3>The check</h3>' +
+      (s.check.agree.length ? '<ul class="ok">' + s.check.agree.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' : '') +
+      (s.check.issues.length ? '<ul class="bad">' + s.check.issues.map(function(x){ return '<li>' + (x.letter ? '<b>' + E(LETTER_WORD[x.letter] || x.letter) + ':</b> ' : '') + E(x.text) + '</li>'; }).join("") + '</ul>' : '') + '</div>' : '';
+    if (s.phase === "saved") return grid + '<div class="copsw-next"><b>Saved as ' + E(s.saved.title) + ' v' + E(s.saved.n) + '</b>, and written into the plan’s SWOT. It is under Deliverables on the left.</div>';
+    return grid + chk + (ed ? '<div class="copbtns copsw-end">' +
+      (swExternal(s).length ? '<button type="button" class="copbtn quiet" data-cop-sw-go="analyses">Go back to the analyses</button>' : '') +
+      '<button type="button" class="copbtn" data-cop-sw-draft' + (busyHere ? ' disabled' : '') + '>Draft it again</button>' +
+      '<button type="button" class="copbtn" data-cop-sw-check' + (busyHere ? ' disabled' : '') + '>Check it</button>' +
+      '<button type="button" class="copbtn solid" data-cop-sw-finish' + (busyHere ? ' disabled' : '') + '>Save to the plan’s SWOT</button></div>' : '');
+  }
+  /* SAVING WRITES THE PLAN TOO: the server keeps the deliverable; the
+     plan's SWOT is the page's graph, so the titles are written here, into
+     the same writable view the SWOT page's own Add writes (swotWritable),
+     and the ordinary autosave carries them — the one deliberate paint()
+     in this file, after a press rather than inside a fetch's tail. */
+  function swWritePlan(d){
+    var w = null;
+    try { w = typeof swotWritable === "function" ? swotWritable(place()) : null; } catch (e) { w = null; }
+    if (!w || !d) return false;
+    LETTERS.forEach(function(L){ w[L] = (d[L] || []).map(function(x){ return x.title; }).filter(Boolean); });
+    return true;
+  }
+  function swUpload(file){
+    if (!file || !swotOn()) return;
+    var sel = swSel(), area = sel.split("|")[0], method = sel.split("|")[1], id = PANE.chat.id;
+    var asText = /\.(txt|md)$/i.test(file.name);
+    if (!asText && !/\.(docx|pdf|xlsx)$/i.test(file.name)) { SAY = "The Copilot reads Word (.docx), PDF, Excel (.xlsx) and text (.txt) files. Save it as one of those and upload it again."; draw(); return; }
+    if (file.size > MAX_FILE) { SAY = "That file is larger than 3 MB, so it was not kept. Split it, or paste the part that matters."; draw(); return; }
+    var r = new FileReader();
+    r.onload = function(){
+      var body = { act:"addSource", place: SWALL ? "all" : place(), kind: method, name: file.name, chatId: id, area: area, method: method, placeWord: placeWord() };
+      if (asText) body.text = String(r.result || "");
+      else { body.data = String(r.result || "").replace(/^data:[^,]*,/, ""); body.type = file.type || ""; }
+      act(body, function(j){ if (PANE && PANE.chat && PANE.chat.id === id) swView(j); SAY = "Kept: " + (j.source ? j.source.name : file.name) + "."; loadSources(true); draw(); });
+    };
+    r.onerror = function(){ SAY = "That file could not be read by the browser. Try again."; draw(); };
+    if (asText) r.readAsText(file); else r.readAsDataURL(file);
+  }
+  function swClick(ev){
+    var b;
+    if ((b = hit(ev, "[data-cop-fold]"))) { var fk = b.getAttribute("data-cop-fold"); setFold(fk, !folded(fk)); return true; }
+    if ((b = hit(ev, "[data-cop-src-retry]"))) { loadSources(true); return true; }
+    if ((b = hit(ev, "[data-cop-src-del]"))) { SRCASK = b.getAttribute("data-cop-src-del"); draw(); return true; }
+    if ((b = hit(ev, "[data-cop-src-del-no]"))) { SRCASK = null; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-src-del-yes]"))) {
+      act({ act:"deleteSource", sourceId: b.getAttribute("data-cop-src-del-yes") }, function(){ SRCASK = null; SAY = "The source was deleted."; loadSources(true); });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-src-retag]"))) {
+      act({ act:"retagSource", sourceId: b.getAttribute("data-cop-src-retag"), place: b.getAttribute("data-cop-to") }, function(){ loadSources(true); });
+      return true;
+    }
+    if (!swotOn()) return false;
+    var s = PANE.swot, id = PANE.chat.id, g;
+    if ((b = hit(ev, "[data-cop-sw-start]"))) { g = swCopy(); g.start = b.getAttribute("data-cop-sw-start"); g.phase = "methods"; swSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-sw-m]"))) {
+      var am = b.getAttribute("data-cop-sw-m").split("|"); g = swCopy();
+      var ms = g.methods[am[0]] || [], at = ms.indexOf(am[1]);
+      if (at >= 0) ms.splice(at, 1); else ms.push(am[1]);
+      g.methods[am[0]] = ms; swSave(g); return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-go]"))) { g = swCopy(); g.phase = b.getAttribute("data-cop-sw-go"); SAY = ""; swSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-sw-line]"))) {
+      var lk = b.getAttribute("data-cop-sw-line"); SWSEL[id] = lk; SWPASTE = "";
+      if (s.phase !== "gather") { g = swCopy(); g.phase = "gather"; if (lk.split("|")[1] === "guided") g.q = { area: lk.split("|")[0], i: 0 }; swSave(g); return true; }
+      if (lk.split("|")[1] === "guided" && (!s.q || s.q.area !== lk.split("|")[0])) { g = swCopy(); g.q = { area: lk.split("|")[0], i: 0 }; swSave(g); return true; }
+      draw(); return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-q]"))) { var qi = b.getAttribute("data-cop-sw-q").split("|"); g = swCopy(); g.q = { area: qi[0], i: +qi[1] }; SWSUG = null; swSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-sw-help]"))) { var hk = b.getAttribute("data-cop-sw-help"); SWHELP[hk] = !SWHELP[hk]; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-sw-answer]"))) {
+      var ai = b.getAttribute("data-cop-sw-answer").split("|");
+      swAsk({ act:"swotAnswer", area: ai[0], i: +ai[1], swot: swCopy() }, function(j){
+        SWSUG = { id: id, area: ai[0], i: +ai[1], used: j.used || [] };
+        g = swCopy(); g.ans[ai[0]] = g.ans[ai[0]] || []; g.ans[ai[0]][+ai[1]] = j.answer; swSave(g);
+      });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-upload]"))) { var fi = document.querySelector("[data-cop-sw-file]"); if (fi) fi.click(); return true; }
+    if ((b = hit(ev, "[data-cop-sw-keep]"))) {
+      if (!SWPASTE.trim()) { SAY = "Paste the text first."; draw(); return true; }
+      var sl = swSel().split("|");
+      act({ act:"addSource", place: SWALL ? "all" : place(), kind: sl[1], name: "", text: SWPASTE, chatId: id, area: sl[0], method: sl[1], placeWord: placeWord() }, function(j){
+        SWPASTE = ""; if (PANE && PANE.chat && PANE.chat.id === id) swView(j); SAY = "Kept."; loadSources(true); draw(); });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-use]")) || (b = hit(ev, "[data-cop-sw-unlink]"))) {
+      var un = b.hasAttribute("data-cop-sw-unlink"), sp = swSel().split("|");
+      act({ act: un ? "swotUnlink" : "swotLink", id: id, area: sp[0], method: sp[1], sourceId: b.getAttribute(un ? "data-cop-sw-unlink" : "data-cop-sw-use"), placeWord: placeWord() },
+        function(j){ if (PANE && PANE.chat && PANE.chat.id === id) swView(j); draw(); });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-prompt]"))) {
+      var pa = b.getAttribute("data-cop-sw-prompt"), pp = planParts();
+      act({ act:"swotPrompt", id: id, area: pa, placeWord: placeWord(), company: { companyName: placeWord(), whoWeAre: pp.who, purpose: pp.pur,
+        winningAspiration: pp.asp, northStar: pp.eim } }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) swView(j);
+        try {
+          var a = document.createElement("a"), blob = new Blob([j.text || ""], { type: "text/plain;charset=utf-8" });
+          a.href = URL.createObjectURL(blob); a.download = j.name || "research-prompt.txt"; document.body.appendChild(a); a.click();
+          setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+        } catch (e) {}
+        SAY = "The prompt is downloaded. Run it, then upload or paste the answer here."; draw();
+      });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-an]"))) { SWEDIT = null; swAsk({ act:"swotAnalysis", area: b.getAttribute("data-cop-sw-an"), swot: swCopy() }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-anedit]"))) { var ea = b.getAttribute("data-cop-sw-anedit"); SWEDIT = { area: ea, data: JSON.parse(JSON.stringify(s[ea])) }; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-sw-anedit-no]"))) { SWEDIT = null; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-sw-ansave]"))) {
+      if (!SWEDIT) return true;
+      g = swCopy(); g[SWEDIT.area] = SWEDIT.data; g[SWEDIT.area].agreed = false; SWEDIT = null; swSave(g); return true;
+    }
+    if ((b = hit(ev, "[data-cop-sw-agree]"))) { var ga = b.getAttribute("data-cop-sw-agree"); g = swCopy(); g[ga].agreed = true; swSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-sw-draft]"))) { if (!b.disabled) swAsk({ act:"swotDraft", swot: swCopy() }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-check]"))) { swAsk({ act:"swotCheck", swot: swCopy() }); return true; }
+    if ((b = hit(ev, "[data-cop-sw-finish]"))) {
+      act({ act:"swotFinish", id: id, placeWord: placeWord() }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) swView(j);
+        var wrote = swWritePlan(PANE.swot && PANE.swot.draft);
+        SAY = wrote ? "" : "Saved as a deliverable. The plan’s SWOT could not be written from here — copy it across on the SWOT page.";
+        LISTS[key()] = null; loadList(true);
+        if (wrote && typeof paint === "function") paint(); else draw();
+      });
+      return true;
+    }
+    return false;
+  }
+  /* ── the rail folds (§490: "the deliverables and sources open folded") ── */
+  var FOLD_DEFAULT = { chats: false, delivs: true, sources: true }, FOLD = {};
+  function folded(k){
+    if (k in FOLD) return FOLD[k];
+    try { var v = localStorage.getItem("smp.copilot.fold." + k); if (v === "1" || v === "0") return (FOLD[k] = v === "1"); } catch (e) {}
+    return !!FOLD_DEFAULT[k];
+  }
+  function setFold(k, v){ FOLD[k] = v; try { localStorage.setItem("smp.copilot.fold." + k, v ? "1" : "0"); } catch (e) {} draw(); }
+  function foldBtn(k, label){
+    var f = folded(k);
+    return '<button type="button" class="copfoldb" data-cop-fold="' + k + '" aria-expanded="' + !f + '" aria-label="' + (f ? "Show " : "Hide ") + E(label) + '" title="' + (f ? "Show " : "Hide ") + E(label) + '">' +
+      '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 6l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  }
+  function railsInner(){
+    return '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
+        '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
+        '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
+      '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +
+        '<div class="coplist" data-cop-delivs>' + delivsHtml() + '</div></section>' +
+      (section() === "analysis" ? '<section class="coprail' + (folded("sources") ? " copfolded" : "") + '" data-cop-sources-rail><div class="coprh"><span class="coprhl">Sources</span>' + foldBtn("sources", "sources") + '</div>' +
+        '<div class="coplist" data-cop-sources>' + sourcesHtml() + '</div></section>' : '');
+  }
+
   /* ── THE ASKS ──────────────────────────────────────────────────────── */
   function loadList(force){
     if (!shown()) return;
     var k = key(), p = place(), s = section();
+    if (s === "analysis") loadSources(false);
     if (!force && LISTS[k] && !LISTS[k].failed) { draw(); openIfNeeded(); return; }
     askedFor = k;
     getJ("list", ["place=" + encodeURIComponent(p), "section=" + encodeURIComponent(s)]).then(function(x){
-      if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [] };
+      if (x.st === 200 && x.j && x.j.ok) LISTS[k] = { chats: x.j.chats || [], archived: x.j.archived || [], mayDelete: !!x.j.mayDelete, deliverables: x.j.deliverables || [], swotProgress: x.j.swotProgress || {} };
       else LISTS[k] = { failed: true };
       if (DEEP && !LISTS[k].failed) {
         var pool = DEEP.kind === "chat" ? LISTS[k].chats.concat(LISTS[k].archived) : LISTS[k].deliverables;
@@ -57231,6 +57722,9 @@ var COPILOT = (function(){
   }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
+    /* A chat opening folds the chats rail to its strip (§490.2) — unless
+       the person has opened it again themselves this visit; then it stays. */
+    if (kind === "chat" && !RAILKEPT && !railShut()) setRail(true);
     if (!PANE || PANE.id !== id) PANE = null;
     draw();
     var k = key();
@@ -57259,10 +57753,20 @@ var COPILOT = (function(){
     var e = hit(ev, "[data-cop-edit-text]"); if (e && EDIT) EDIT.text = e.value;
     var fa = hit(ev, "[data-cop-fans]"); if (fa && flowOn()) PANE.flow.ans[PANE.flow.e][+fa.getAttribute("data-cop-fans")] = fa.value;
     var n = hit(ev, "[data-cop-edit-note]"); if (n && EDIT) EDIT.note = n.value;
+    var sa = hit(ev, "[data-cop-sw-ans]");
+    if (sa && swotOn()) { var sp = sa.getAttribute("data-cop-sw-ans").split("|"); var aa = PANE.swot.ans[sp[0]] = (PANE.swot.ans[sp[0]] || []).slice(); aa[+sp[1]] = sa.value; }
+    var sq = hit(ev, "[data-cop-sw-paste]"); if (sq) SWPASTE = sq.value;
+    var fe = hit(ev, "[data-cop-sw-fe]");
+    if (fe && SWEDIT) { var fp = fe.getAttribute("data-cop-sw-fe").split("|"); var ff = SWEDIT.data.items[+fp[0]].factors[+fp[1]]; if (ff) ff[fp[2]] = fe.value; }
   });
   /* An answer changed in its box is kept when the box is left, like every
      other field in the platform (§35) — not only when Draft is pressed. */
   document.addEventListener("change", function(ev){
+    var sa = hit(ev, "[data-cop-sw-ans]");
+    if (sa && swotOn() && canEdit() && !THINKING) { swSave(swCopy()); return; }
+    var sf = hit(ev, "[data-cop-sw-file]");
+    if (sf) { var sfile = sf.files && sf.files[0]; sf.value = ""; if (sfile) swUpload(sfile); return; }
+    var sw = hit(ev, "[data-cop-sw-for]"); if (sw) { SWALL = sw.value === "all"; return; }
     var fa = hit(ev, "[data-cop-fans]");
     if (fa && flowOn() && canEdit() && !THINKING) {
       var f = flowCopy(); f.ans[f.e][+fa.getAttribute("data-cop-fans")] = fa.value;
@@ -57362,7 +57866,8 @@ var COPILOT = (function(){
   document.addEventListener("click", function(ev){
     var b;
     if (flowClick(ev)) return;
-    if ((b = hit(ev, "[data-cop-railtog]"))) { setRail(!railShut()); return; }
+    if (swClick(ev)) return;
+    if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railShut(); RAILKEPT = !sh; setRail(sh); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
@@ -57372,6 +57877,14 @@ var COPILOT = (function(){
          button"). It opens on "start from what is there, or fresh?" where
          the place already has a Foundation, and on the four roads where it
          has none — the page knows which, because it holds the plan. */
+      if (section() === "analysis") {
+        act({ act:"newSwot", place: place(), title: swTitle(), fromPlan: planSwot() }, function(j){
+          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+          OPEN[key()] = { kind:"chat", id: j.chat.id };
+          openItem("chat", j.chat.id);
+        });
+        return;
+      }
       if (section() === "foundation") {
         act({ act:"newFlow", place: place(), title: fname(), hasPlan: planHas(planParts()), skip: skipNow() }, function(j){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
@@ -66804,7 +67317,8 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-topcapproj]").forEach(function(r){
       var go = function(e){
-        if (e.target.closest && e.target.closest("button, a, input, select, textarea")) return;
+        /* §488: the grip is a role=button span, and a press on it is a drag. */
+        if (e.target.closest && e.target.closest("button, a, input, select, textarea, [role=button]")) return;
         var kv = r.dataset.topcapproj.split("|");
         TOPCAPPROJ[kv[0]] = TOPCAPPROJ[kv[0]] === kv[1] ? null : kv[1]; paint();
       };
@@ -71205,7 +71719,12 @@ var SYNC = (function () {
            applies through the same minters, so the two paths cannot drift. */
         if (BUILDER && BUILDER.target === current && builderFormFromRowadd(this.dataset.rowadd)) return;
         var a = this.dataset.rowadd.split("|"), what = a[0];
-        if (what === "pillar")  { addPillar(unitLikeWritable(a[1])); }
+        if (what === "pillar")  {
+          var pu = unitLikeWritable(a[1]);
+          addPillar(pu);
+          /* §488: on the company's Capabilities pane, open what was just made. */
+          if (pu && pu.capKey && pu.items.length) TOPCAPPROJ[pu.capKey] = pu.items[pu.items.length - 1].id;
+        }
         /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
         else if (what === "action") { if (!addAction(a[1])) return; }
@@ -71238,6 +71757,7 @@ var SYNC = (function () {
           /* Select what was just made, or the new project is added to a rail
              that goes on showing the old one and nothing says it worked. */
           if (np) RAIL[railKeyFor(c)] = np.id;
+          if (np && GROUP.capabilities.indexOf(c) >= 0) TOPCAPPROJ[c.id] = np.id;
         }
         else {
           var pr = projById(a[1]);
@@ -71898,6 +72418,13 @@ var SYNC = (function () {
           if (ko && ko.list) applyOrder(ko.list, order);
         }
         else if (kind === "caps") applyOrder(GROUP.capabilities, order);
+        /* §488: a holder's projects, named by the container's `data-cap`.
+           Before this a "projects" container fell through to the measures
+           branch below and threw, so a project's grip moved nothing. */
+        else if (kind === "projects") {
+          var ph = holderByIdWritable(c.dataset.cap);
+          if (ph && Array.isArray(ph.projects)) { applyOrder(ph.projects, order); holderWriteBack(c.dataset.cap, ph); }
+        }
         else if (kind === "themes") applyOrder(GROUP.themes, order); else {
           /* The plan states the pillar outright; the Performance accordion
              still answers by walking up to the row above it. */

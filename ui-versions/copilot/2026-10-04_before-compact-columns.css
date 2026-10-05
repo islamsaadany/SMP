@@ -393,30 +393,13 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 :root[data-cop-page] #secrow .tabs-in { padding-top:3px; padding-bottom:3px; }
 :root[data-cop-page] .coppane { gap:10px; }
 
-/* ── THE SWOT FLOW (§490, from design-mockups/copilot-swot-flow/2026-10-04_v2.html)
+/* ── THE SWOT FLOW (§482, from design-mockups/copilot-swot-flow/2026-10-04_v2.html)
    Platform tokens only (§25). The to-do column is 340px (Islam: "more
    compact horizontally") and drops under the work below 1020px. ── */
 .copsw { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px; align-items:start; margin-top:10px; }
 @media (max-width:1020px){ .copsw { grid-template-columns:minmax(0,1fr); } }
 .copsw-main { min-width:0; display:flex; flex-direction:column; gap:12px; }
 .copsw-side { display:flex; flex-direction:column; gap:12px; min-width:0; }
-/* §490.1 COMPACT COLUMNS (design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html,
-   signed off with one addition): in a SWOT chat the chats rail is 200px and the
-   to-do 270px, and the work and the to-do each scroll in their own box, so
-   reading the end of the list no longer scrolls the work away. The to-do's
-   header (title, count, meter) stays frozen while its list scrolls (Islam:
-   "keep the header freezed"). Scoped to the SWOT chat (`:has(.copsw)`); other
-   chats keep their rail. Below 1020px nothing changes. */
-.copsw-todoh { background:var(--surface); }
-@media (min-width:1021px){
-  .coppane:has(.copsw):not(.copshut) { grid-template-columns:200px minmax(0,1fr); }
-  .coppane:has(.copsw) .copnew { padding:4px 7px; white-space:nowrap; }
-  .copmain:has(.copsw) { overflow:hidden; }
-  .copmain:has(.copsw) .copsw { flex:1 1 auto; min-height:0; grid-template-columns:minmax(0,1fr) 270px; align-items:stretch; }
-  .copsw-main, .copsw-side { overflow-y:auto; min-height:0; padding-right:4px; }
-  .copsw-todoh { position:sticky; top:0; z-index:1; margin:-12px -14px 0; padding:12px 14px 2px;
-                 border-radius:var(--r-sm, 6px) var(--r-sm, 6px) 0 0; }
-}
 .copsw-box, .copsw-card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:12px 14px; }
 .copsw-card h3 { margin:0 0 6px; font:700 var(--fs-body, 14px)/1.3 var(--sans); color:var(--ink); }
 .copsw-card p { margin:0 0 8px; color:var(--ink-2); font-size:var(--fs-small, 12.5px); }
@@ -483,7 +466,7 @@ span.copsw-lb { cursor:default; }
 .copsw-check ul.ok li { color:var(--good-tx); }
 .copsw-check ul.bad li { color:var(--bad-tx); }
 .copsw-end { margin-top:4px; }
-/* ── the rail folds (§490) ── */
+/* ── the rail folds (§482) ── */
 .copfoldb { flex:none; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-3); cursor:pointer; border-radius:4px; }
 .copfoldb:hover, .copfoldb:focus-visible { color:var(--ink); background:var(--surface-2); outline:none; }
 .copfoldb svg { width:14px; height:14px; transition:transform .12s; }
@@ -495,60 +478,3 @@ span.copsw-lb { cursor:default; }
 .copsrcrow { display:flex; align-items:flex-start; gap:8px; }
 .copsrcrow .copitem { flex:1 1 auto; min-width:0; text-decoration:none; color:inherit; }
 .copsrcacts { display:flex; align-items:center; gap:10px; flex:none; padding-top:4px; }
-
-/* ── §490.2 ONE RAIL WIDTH, A COMPACT TO-DO, A FOUNDATION TO-DO, TIGHT EQUAL
-   SPACE (design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html and
-   2026-10-04_spacing-and-fold.html, both signed off). The chats rail is 200px
-   in every phase (it no longer jumps between chats), every gap around the
-   panels is 8px, the to-do matches the rail at 200px, and the columns reach
-   the foot of the page. Later in the file on purpose: it settles the earlier
-   rules. Below 821px nothing here applies but the help panel's shape. ── */
-@media (min-width:821px){
-  :root[data-cop-page] { --pane-foot:8px; }
-  :root[data-cop-page] .view { padding-top:8px; }
-  :root[data-cop-page] .wrap { padding-left:8px; padding-right:8px; }
-  :root[data-cop-page] .coppane { grid-template-columns:200px minmax(0,1fr); gap:8px; padding:0; }
-  :root[data-cop-page] .coppane.copshut { grid-template-columns:24px minmax(0,1fr); }
-  .coppane .copnew { padding:4px 7px; white-space:nowrap; }
-  .coppane .copmain { padding:8px; }
-  .copflow { gap:8px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 200px; }
-  .copflow.nocards { grid-template-columns:minmax(0,1fr) 200px; }
-  .copftodo { display:flex; flex-direction:column; gap:8px; min-width:0; min-height:0; overflow-y:auto; align-self:stretch; }
-  .copftodo > .copsw-box { flex:1 1 auto; }
-  .copsw { margin-top:4px; gap:8px; }
-  .copmain:has(.copsw) .copsw { grid-template-columns:minmax(0,1fr) 200px; }
-  .copsw-side { gap:8px; }
-  .copsw-box { padding:8px 10px; }
-  .copsw-todoh { margin:-8px -10px 0; padding:8px 10px 2px; }
-  .copsw-main > .copsw-q { flex:1 1 auto; }
-  .copsw-q .copsw-ans { flex:1 1 auto; min-height:120px; resize:vertical; }
-  .copsw-side > .copsw-box:first-child { flex:1 1 auto; }
-}
-@media (max-width:980px){ .copftodo { display:none; } .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); } }
-@media (min-width:821px) and (max-width:1020px){ .copmain:has(.copsw) .copsw { grid-template-columns:minmax(0,1fr); } }
-.copsw-meter { height:4px; margin-bottom:6px; }
-.copsw-tg + .copsw-tg { margin-top:4px; }
-.copsw-th { margin-bottom:1px; }
-.copsw-li { padding:2px 4px; gap:5px; align-items:flex-start; }
-.copsw-li .copsw-dot { margin-top:4px; }
-.copsw-ts { display:none; }
-.copsw-tt { display:flex; gap:6px; align-items:baseline; white-space:normal; flex-wrap:wrap; overflow:visible; line-height:1.3; }
-.copsw-tt i { font-style:normal; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
-.copsw-pill { font-size:10px; padding:0 5px; }
-.copsw-bh { flex-wrap:nowrap; align-items:baseline; gap:6px; }
-.copsw-bh .linkbu { margin-left:auto; font-size:11.5px; white-space:nowrap; }
-.copswhelp { display:flex; flex-direction:column; gap:6px; }
-.copswhelp h4 { margin:0; font:700 11px/1.3 var(--sans); text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); }
-.copswhelp ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:2px; }
-.copswhelp p { margin:0; }
-.copswhelp .ex { font-style:italic; color:var(--ink-2); }
-.copswhelp .src { font-size:11px; color:var(--ink-3); }
-/* §490.2 — with the panels reaching the foot of the page, a plain chat's box
-   reaches the corner the office chat button floats over (18px in, 50px
-   round), and that button sat ON Send. The box ends where the panel's 8px
-   ends (the old -16px matched the old 16px padding), and only where the box
-   is flush with that corner it keeps clear of the button. */
-@media (min-width:821px) {
-  :root[data-cop-page] .copcompose { margin-bottom:-8px; }
-  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)) .copcompose { padding-right:64px; }
-}

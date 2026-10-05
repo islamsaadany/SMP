@@ -2985,3 +2985,6 @@ tr.topcapprow { cursor:pointer; }
 tr.topcapprow.on > td { background:var(--surface-2); }
 tr.topcapopen > td { padding:0 !important; white-space:normal; }
 .topcapplan { padding:12px 14px 16px; border-left:3px solid var(--line); }
+/* §488: the add line under the table, and a grip beside the row's number. */
+.topcapadd { padding:10px 2px 0; }
+.topcapprow .grip { vertical-align:middle; margin-right:4px; }

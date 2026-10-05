@@ -857,36 +857,7 @@ var COPILOT = (function(){
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
               '<button type="button" class="copbtn" data-cop-restore-chat="' + E(c.id) + '">Restore</button></div>'
           : composerHtml(c, false)) +
-      '</div>' + ftodoHtml(f) + '</div>';
-  }
-  /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
-     carries, worked out from the flow as it stands — nothing is stored for it.
-     Start, each part with its answers counted, then the check and the save. */
-  function ftodoHtml(f){
-    var S = steps(), li = function(name, state, cnt, part){
-      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : "To do";
-      return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
-        '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
-        '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
-    };
-    var started = !!f.start || (f.phase !== "start");
-    var yearsOk = !!(f.y0 && f.y1), early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded";
-    var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
-    var g2 = S.map(function(el, i){
-      if (!on(i)) return "";
-      var a = (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length, q = el.questions.length;
-      var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(el.name, f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
-    }).join("");
-    var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
-              li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
-    var n = 2 + 2 + S.filter(function(_, i){ return on(i); }).length;
-    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (f.phase === "saved" ? 2 : 0);
-    return '<aside class="copftodo"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
-      '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + Math.round(done * 100 / n) + '%"></i></div></div>' +
-      '<div class="copsw-tg"><div class="copsw-th">Start</div><ul>' + g1.join("") + '</ul></div>' +
-      '<div class="copsw-tg"><div class="copsw-th">The parts</div><ul>' + g2 + '</ul></div>' +
-      '<div class="copsw-tg"><div class="copsw-th">Then</div><ul>' + g3.join("") + '</ul></div></div></aside>';
+      '</div></div>';
   }
   /* The other three roads go on as an ordinary chat, told in one product
      line what to do next — and the guided road is one press away. */
@@ -1021,7 +992,7 @@ var COPILOT = (function(){
   }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
-  var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
+  var RAILKEY = "smp.copilot.rail";
   function railShut(){ try { return localStorage.getItem(RAILKEY) === "shut"; } catch (e) { return false; } }
   function setRail(shut){
     try { if (shut) localStorage.setItem(RAILKEY, "shut"); else localStorage.removeItem(RAILKEY); } catch (e) {}
@@ -1098,7 +1069,7 @@ var COPILOT = (function(){
   }
   window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 
-  /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
+  /* ── THE SWOT FLOW (§482, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
      A SWOT chat is a to-do list rather than a conversation: which areas
      (internal, micro, macro) and which methods each uses are ticked in a
@@ -1211,10 +1182,7 @@ var COPILOT = (function(){
       return '<div class="copsw-tg"><div class="copsw-th">' + (g === "_" ? "Then" : E((PANE.swotAreaWord || {})[g] || g)) + '</div><ul>' +
         seen[g].map(function(t){
           var on = swLineKey(t) === cur, pill = t.state === "done" ? "Done" : t.state === "wait" ? "Waiting" : "To do";
-          /* Compact (§490.2): the line's "n of m" rides in its title as n/m; the
-             status sentence stays on the hover rather than a second line. */
-          var nm = /(\d+)\s+of\s+(\d+)/.exec(String(t.status || "")), cnt = nm ? '<i>' + nm[1] + '/' + nm[2] + '</i>' : '';
-          var label = '<span class="copsw-tt" title="' + E(t.status || "") + '"><span>' + E(t.title) + '</span>' + cnt + '</span><span class="copsw-ts">' + E(t.status) + '</span>';
+          var label = '<span class="copsw-tt">' + E(t.title) + '</span><span class="copsw-ts">' + E(t.status) + '</span>';
           return '<li class="copsw-li ' + t.state + (on ? " on" : "") + '"><span class="copsw-dot" aria-hidden="true"></span>' +
             (t.area && s.phase !== "saved" ? '<button type="button" class="copsw-lb" data-cop-sw-line="' + E(swLineKey(t)) + '"' + (on ? ' aria-current="true"' : '') + '>' + label + '</button>' : '<span class="copsw-lb">' + label + '</span>') +
             '<span class="copsw-pill ' + t.state + '">' + pill + '</span></li>';
@@ -1222,9 +1190,9 @@ var COPILOT = (function(){
     }).join("");
     var cov = PANE.swotCover || {};
     return '<aside class="copsw-side">' +
-      '<div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span>' +
+      '<div class="copsw-box"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + ' of ' + n + ' done</span>' +
         (s.phase !== "saved" && canEdit() ? '<button type="button" class="linkbu" data-cop-sw-go="methods">Change methods</button>' : '') + '</div>' +
-        '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
+        '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div>' +
         body + '</div>' +
       '<div class="copsw-box"><div class="copsw-bh"><b>What we have so far</b> <span class="copsw-n">Per letter</span></div>' +
         '<div class="copsw-cov">' + LETTERS.map(function(L){
@@ -1232,17 +1200,6 @@ var COPILOT = (function(){
           return '<div class="copsw-ci' + (k ? "" : " none") + '"><b>' + E(LETTER_WORD[L]) + '</b><span>' + (k ? k + (k === 1 ? " source" : " sources") : "Nothing yet") + '</span></div>';
         }).join("") + '</div></div>' +
     '</aside>';
-  }
-  /* "Help me understand" (§490.2): the old Copilot's library, in the
-     client's industry, where the question has an entry; its short line
-     otherwise (the sixteen internal questions keep theirs). */
-  function swHelpHtml(q){
-    var m = q.more;
-    if (!m) return '<div class="copsw-help">' + E(q.help) + '</div>';
-    return '<div class="copsw-help copswhelp"><h4>In simpler terms</h4><p>' + E(m.simplerTerms) + '</p>' +
-      '<h4>Think about</h4><ul>' + (m.thinkAbout || []).map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' +
-      '<h4>Example answer</h4><p class="ex">' + E(m.exampleResponse) + '</p>' +
-      '<p class="src">Written for ' + E(m.industry) + (m.industry === "Other" ? ' · no closer match for this client' : ' · the client\'s industry') + '</p></div>';
   }
   /* ── the main column, by phase ── */
   function swotHtml(){
@@ -1302,7 +1259,7 @@ var COPILOT = (function(){
     return '<div class="copsw-card copsw-q">' +
       '<div class="copsw-qn">Question ' + (i + 1) + ' of ' + qs.length + ' · ' + E(q.name) + '</div>' +
       '<p class="copsw-qt">' + E(q.question) + '</p>' +
-      (SWHELP[hk] ? swHelpHtml(q) : '') +
+      (SWHELP[hk] ? '<div class="copsw-help">' + E(q.help) + '</div>' : '') +
       '<textarea class="fld copsw-ans" data-cop-sw-ans="' + area + '|' + i + '" rows="4" maxlength="2000" placeholder="Type the answer"' + (ed ? '' : ' disabled') + '>' + E(ans) + '</textarea>' +
       (sug && sug.used && sug.used.length ? '<div class="copsw-used">Used: ' + E(sug.used.join(" · ")) + '</div>' : sug ? '<div class="copsw-used">Written from the plan and what is attached here.</div>' : '') +
       '<div class="copbtns">' +
@@ -1511,7 +1468,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  /* ── the rail folds (§490: "the deliverables and sources open folded") ── */
+  /* ── the rail folds (§482: "the deliverables and sources open folded") ── */
   var FOLD_DEFAULT = { chats: false, delivs: true, sources: true }, FOLD = {};
   function folded(k){
     if (k in FOLD) return FOLD[k];
@@ -1557,9 +1514,6 @@ var COPILOT = (function(){
   }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
-    /* A chat opening folds the chats rail to its strip (§490.2) — unless
-       the person has opened it again themselves this visit; then it stays. */
-    if (kind === "chat" && !RAILKEPT && !railShut()) setRail(true);
     if (!PANE || PANE.id !== id) PANE = null;
     draw();
     var k = key();
@@ -1702,7 +1656,7 @@ var COPILOT = (function(){
     var b;
     if (flowClick(ev)) return;
     if (swClick(ev)) return;
-    if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railShut(); RAILKEPT = !sh; setRail(sh); return; }
+    if ((b = hit(ev, "[data-cop-railtog]"))) { setRail(!railShut()); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }

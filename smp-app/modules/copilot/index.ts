@@ -40,6 +40,7 @@ import { methodFor, templateNamesFor, partsOf, templatesOf, templateFile, savePa
 import { shellHeaders } from "../../lib/shell.ts";
 import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
 import { doorPool, getSession, readCookie } from "../../lib/auth.ts";
+import { SWOT_ACTS, SWOT_ASKS, swotAct, swotAsk, swotView, swotProgress, sourcesGet, sourceFile } from "./swot.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
@@ -54,7 +55,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
   /* THE GATE. The check's break opens it to anybody with a membership, which
      must turn checks/copilot.mjs red (§94.5). Never set on a deployment. */
   const office = brk() === "no-office-gate" ? a.seat != null : isOffice(a.seat);
-  const isApi = (first === "api" || first === "list" || first === "chat" || first === "deliverable" || first === "file") && a.rest.length === 1;
+  const isApi = (first === "api" || first === "list" || first === "chat" || first === "deliverable" || first === "file"
+    || first === "sources" || first === "source") && a.rest.length === 1;
   /* THE COPILOT'S OWN PAGES (§456): the list at the module's bare address,
      its settings under `settings`. Any other address inside the module goes
      back to the list rather than to Strategy, now that the module has a page
@@ -98,8 +100,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
       const place = q("place"), section = q("section");
       if (!isPlace(place) || !isSection(section)) return no(400, "Which place and which section?");
       return json(200, await withTenant(a.tenantId, async (c) =>
-        ({ ok: true, chats: await chatsOn(c, place, section), archived: await chatsOn(c, place, section, true),
-           mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section) })));
+{ const chats = await chatsOn(c, place, section);
+          return { ok: true, chats, archived: await chatsOn(c, place, section, true),
+            mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section),
+            /* The rail's "N of M done" under a SWOT chat (§490). */
+            swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id)) : {} }; }));
     }
     if (first === "chat") {
       const id = q("id");
@@ -113,7 +118,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
         const pw = oneLine(q("placeWord")).slice(0, 120);
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
-          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}) };
+          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}),
+          ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -140,6 +146,15 @@ export async function serve(a: ServeArgs): Promise<Response> {
         "Content-Type": type, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
         "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
     }
+    if (first === "sources") {
+      const r = await sourcesGet(a.tenantId, q("place"), who);
+      return json(r.status, r.body);
+    }
+    if (first === "source") {
+      /* A source comes back as itself, as a download (the file rule above). */
+      const r = await sourceFile(a.tenantId, q("id"));
+      return r || no(404, "That source is not here any more.");
+    }
     /* api */
     if (a.req.method !== "POST") return no(405, "POST only.");
     let body: any = null;
@@ -151,6 +166,14 @@ export async function serve(a: ServeArgs): Promise<Response> {
     }
     if (body.act === "flowDraft" || body.act === "flowRefine" || body.act === "flowCheck") {
       const r = await flowAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (SWOT_ASKS.includes(String(body.act))) {
+      const r = await swotAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (SWOT_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => swotAct(c, body, who));
       return json(r.status, r.body);
     }
     const out = await withTenant(a.tenantId, (c) => act(c, body, who));

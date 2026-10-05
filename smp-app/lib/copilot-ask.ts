@@ -261,13 +261,16 @@ async function withRetry(call: (model?: string) => Promise<any>): Promise<any> {
 
 /* ONE SMALL ASK IN ONE SMALL SHAPE (§465): the guided Foundation's draft,
    refine and check. No history — what the flow knows is in the corpus. */
-export async function askFlowJson(a: { instruction: string; corpus: string; question: string; schema: unknown }):
+/* §490: the SWOT flow asks the same way and names its own corpus, may send
+   a PDF source as itself (`parts`), and wants room for a whole analysis. */
+export async function askFlowJson(a: { instruction: string; corpus: string; question: string; schema: unknown;
+  corpusName?: string; parts?: unknown[]; maxOutput?: number }):
   Promise<{ ok: true; json: any } | { ok: false; why: string; noKey?: boolean }> {
   if (!A.configured()) return { ok: false, noKey: true, why: "no key is set" };
   const call = (model?: string) => A.askJson({
     question: a.question, history: [], maxTurns: 0, schema: a.schema, needsCorpus: false,
-    instruction: a.instruction, corpusName: "THIS FOUNDATION", corpusText: a.corpus, parts: [],
-    think: true, maxOutput: 4096, timeoutMs: 55_000, ...(model ? { model } : {}),
+    instruction: a.instruction, corpusName: a.corpusName || "THIS FOUNDATION", corpusText: a.corpus, parts: a.parts || [],
+    think: true, maxOutput: a.maxOutput || 4096, timeoutMs: 55_000, ...(model ? { model } : {}),
   });
   const r = await withRetry(call);
   if (!r.ok) return { ok: false, why: r.why || "no answer" };

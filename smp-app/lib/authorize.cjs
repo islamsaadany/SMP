@@ -439,6 +439,16 @@ function collect(stored, incoming, w) {
             [{ id: String(t), who: cut < 0 ? "" : String(t).slice(cut + 1) }]);
         return;
       }
+      /* §481: a DIRECTION's deck keeps its own picture slides, keyed
+         `dir:<pillar id>`. That is the only report state a direction has —
+         it is never submitted or parked on its own, so anything else under
+         such a key is refused rather than guessed at. */
+      if (String(t).indexOf("dir:") === 0) {
+        if (out.some(function (c) { return c.target === t; })) return;
+        add(field === "slides" ? "dirSlides" : "dirBad", t,
+            field === "slides" ? "the direction's picture slides" : "a direction's report state");
+        return;
+      }
       if (field === "parked" && UNPARK(a, b, t)) {
         if (out.some(function (c) { return c.kind === "reportUnpark" && c.target === t; })) return;
         add("reportUnpark", t, "reopening the saved draft");
@@ -468,8 +478,15 @@ function collect(stored, incoming, w) {
 
   /* — the group's own strategy — */
   const sg = stored.group || {}, ig = incoming.group || {};
+  /* §480: with the units off, an objective's FIGURE is the company report's
+     and is judged through topView below, so it is left out of this compare. */
+  const koFig = !R.buExists(sg) && !R.buExists(ig);
+  const koPlan = function (g) {
+    return (g.keyObjectives || []).map(function (m) { return omit(m, REPORT.unitKO); });
+  };
   GROUP_OWN.forEach(function (k) {
     if (same(sg[k], ig[k])) return;
+    if (k === "keyObjectives" && koFig && same(koPlan(sg), koPlan(ig))) return;
     /* Only a field that IS a value carries a row: the group's lists (its
        objectives, its themes, its weighting) are judged by their own rows. */
     const scalar = function (v) { return v == null || typeof v !== "object"; };
@@ -606,7 +623,12 @@ function collect(stored, incoming, w) {
      are swept as unknown as well (§259.2). */
   /* §466: and its projects, when it plans in projects — the §405 block of
      `collectUnit` judges them as a unit's own projects, against "group". */
-  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !same(sg.topProjects, ig.topProjects))
+  /* §480: and the company objectives' FIGURES, when the units are off — the
+     reported fields alone (`topKoView`), so a figure is judged as the company
+     report's while the plan stays GROUP_OWN's above. Without this line the
+     view carried them and nothing ever looked, so a figure went unjudged. */
+  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !same(sg.topProjects, ig.topProjects) ||
+      !same(topKoView(sg), topKoView(ig)))
     collectUnit("group", topView(sg), topView(ig), add, w);
 
   const gExtra = GROUP_OWN.concat(["items", "swot", "capabilities", "branding", "sets", "claims",
@@ -1329,8 +1351,27 @@ function asUnit(f, ukey) {
 }
 
 /* §428: the top layer's own plan, in the shape collectUnit() reads. */
+/* §480: AND, WITH THE BUSINESS UNITS OFF, THE COMPANY'S OWN KEY OBJECTIVES'
+   FIGURES. Islam, of the board drawn for him: *"agreed"* — the company's
+   report asks for them and the office counts them before submitting. Only
+   the REPORTED fields travel in this view (the id and §43's three), so a
+   figure or a note is judged here as the company report's while every plan
+   change to an objective stays with GROUP_OWN above, the office's alone,
+   and is not classified twice. With the units on nothing moves. */
+function topKoView(g) {
+  if (!g || R.buExists(g) || !Array.isArray(g.keyObjectives)) return [];
+  return g.keyObjectives.map(function (m) {
+    const o = { id: m && m.id };
+    REPORT.unitKO.forEach(function (k) { if (m && m[k] !== undefined) o[k] = m[k]; });
+    /* The name is deliberately NOT carried: a rename is the plan's, judged
+       once by GROUP_OWN, and carrying it here would judge it twice. The cost,
+       stated: a refused figure on a company objective is named by its row
+       but not by its words in the refusal sentence. */
+    return o;
+  });
+}
 function topView(g) {
-  return { ukey: "group", items: (g && g.items) || [], keyObjectives: [],
+  return { ukey: "group", items: (g && g.items) || [], keyObjectives: topKoView(g),
            projects: (g && g.topProjects) || [],
            swot: (g && g.swot) || {}, aspiration: "", endInMind: "", clauses: [] };
 }
@@ -1903,6 +1944,26 @@ function authorize(stored, incoming, person) {
         if (!R.mayAuthorPage(w, person, R.planPageOf(ch.target), ch.target))
           no("Confirming " + ch.what + where + " is the Strategy Office's — " +
              "a fill stays pending, and yours to correct, until they accept it.");
+        return;
+
+      /* §481: a direction's own picture slides — the office and the group's
+         CEO, or that direction's owner or custodian, read off the STORED top
+         plan (§42), never the incoming one. */
+      case "dirSlides": {
+        const id = String(ch.target || "").slice(4);
+        const p = ((stored.group || {}).items || []).filter(function (x) { return x && x.id === id; })[0];
+        if (!p) { no("That direction is not in the plan."); return; }
+        if (locked && !office) {
+          no("This cycle is locked. Ask the SMO to reopen it before adding slides.");
+          return;
+        }
+        if (R.mayReportTop(w, person)) return;
+        if (R.ownsTopPillar(w, person, p.owner || "", p.custodian || "")) return;
+        no("Only the direction's owner and custodian, the SMO team and the CEO add its slides.");
+        return;
+      }
+      case "dirBad":
+        no("A direction is presented, never submitted on its own — its report is the company's.");
         return;
 
       case "unitReporting":

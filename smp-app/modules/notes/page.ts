@@ -39,9 +39,9 @@ const plural = (n: number, one: string, many: string) => n + " " + (n === 1 ? on
 
 const CSS = `
 *{box-sizing:border-box}
-:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-ink:#FFF;
   --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB}
-@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+@media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-ink:var(--ground);
   --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
@@ -55,7 +55,7 @@ h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px}
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto;flex:none}
 .btn{font:600 13px/1 inherit;padding:9px 13px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
 .btn:hover,.btn:focus-visible{background:var(--ground);outline:none}
-.btn.gold{background:var(--gold);border-color:var(--gold);color:#FFF}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
 .btn.gold:hover{filter:brightness(1.06);background:var(--gold)}
 .btn[disabled],.btn[aria-disabled="true"]{opacity:.55;cursor:default}
 .btn.quiet{color:var(--ink-3)}

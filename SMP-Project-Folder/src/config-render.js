@@ -7094,7 +7094,91 @@ function renderCycle(){
       '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   };
-  var rows = boardUnitTargets().map(boardRow).join("");
+  /* ── §480: A COMPANY PLANNED ON ITSELF REPORTS LINE BY LINE ─────────────
+     Islam, of the board on El Abd: the whole company was ONE row ("the group
+     · SMO team"), every direction added together, so nobody could see which
+     direction was behind or whose it is. Drawn and signed off (*"A. separate
+     row B. ok C. projects too"*, then *"1. reporting line 2. agreed"*): with
+     the business units off, the company's row becomes a block — its own
+     objectives on a row of their own carrying the real submission state, then
+     one row per direction (or per project, when it plans in projects).
+
+     NOTHING NEW IS COUNTED. Every line is a slice of the company's own
+     `askedItems()` — a direction's rows by the pillar they sit in (`cid`), a
+     project's by the place they report into — so the lines add up to the
+     company's figure and the headline still counts the company ONCE
+     (`cycleTotals` is untouched, §108.1). With the units on, nothing here is
+     drawn and the board is byte-for-byte what it was (Raya Trade). */
+  var lineRow = function(name, who, nobody, list, st, koRow){
+    var by = { obj:[0,0], mea:[0,0], tac:[0,0] }, done = 0, miss = 0;
+    list.forEach(function(x){
+      var slot = x.kind === "objective" ? "obj"
+               : (x.kind === "measure" || x.kind === "outcome" || x.kind === "bdcell") ? "mea" : "tac";
+      by[slot][1]++;
+      if (rowAnswered(x)) { by[slot][0]++; done++; }
+      if (needsNote(x)) miss++;
+    });
+    var pctD = list.length ? Math.round(done / list.length * 100) : 0;
+    var cell = function(k, show){
+      return '<td class="num">' + (show ? by[k][0] + '/' + by[k][1] : '\u2014') + '</td>';
+    };
+    return '<tr data-line><td><b>' + esc(name) + '</b></td>' +
+      '<td class="why' + (nobody ? ' nobody' : '') + '" style="margin:0">' + esc(who) + '</td>' +
+      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
+        '<i style="width:' + pctD + '%"></i></span>' +
+        '<span class="mono why" style="margin:0">' + done + '/' + list.length + '</span></div></td>' +
+      cell("obj", koRow) + cell("mea", !koRow) + cell("tac", !koRow) +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
+      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
+  };
+  /* A line's own state: the company's submission covers every line; short of
+     that, a direction or project its owner has pressed Save draft on says so
+     (§469's own mark, `doneMark`), and otherwise it is read from its rows. */
+  var lineState = function(id, list){
+    if (REVIEW.submitted && REVIEW.submitted.group) return { key:"done", label:"Submitted" };
+    if (doneMark(id)) return { key:"part", label:"Draft saved" };
+    var any = list.some(rowAnswered);
+    return any ? { key:"part", label:"In progress" } : { key:"late", label:"Not started" };
+  };
+  var lineWho = function(x){
+    var n = String((x && (x.custodian || x.owner)) || "").trim();
+    return n ? { name:n, nobody:false } : { name:"None yet", nobody:true };
+  };
+  var topLines = function(){
+    var u = unitLike("group");
+    var asked = askedItems(u);
+    var kos = asked.filter(function(x){ return x.kind === "objective"; });
+    var out = '<tr class="dxband"><th colspan="8">' + esc(GROUP.org || placeLabel("group")) +
+      '<em>the company\u2019s own report \u00b7 submitted by the office</em></th></tr>' +
+      lineRow(L1("topword") + " objectives", boardWho("group"), false, kos, unitState(u), true);
+    var lines = [];
+    if (topWay() === "projects") {
+      var h = unitOwnHolder("group");
+      topProjectsList().forEach(function(p){
+        var mine = asked.filter(function(x){ return x.place && x.place.key === "pr:" + p.id; });
+        var w = lineWho(p);
+        lines.push(lineRow(projCode(holderCodeOwner(h), p) + "  " + (p.name || ""),
+          w.name, w.nobody, mine, lineState(p.id, mine), false));
+      });
+      out += '<tr class="dxband"><th colspan="8">' + L("project","bu") +
+        '<em>' + lines.length + ' reporting</em></th></tr>';
+    } else {
+      (u.items || []).forEach(function(p, pi){
+        if (!runsNow(p)) return;
+        var mine = asked.filter(function(x){ return x.cid === p.id && x.kind !== "objective"; });
+        var w = lineWho(p);
+        lines.push(lineRow(pillarCode(u, pi) + "  " + (p.name || ""),
+          w.name, w.nobody, mine, lineState(p.id, mine), false));
+      });
+      out += '<tr class="dxband"><th colspan="8">' + L("pillar","bu") +
+        '<em>' + lines.length + ' reporting</em></th></tr>';
+    }
+    return out + lines.join("");
+  };
+  var splitTop = !SMPRules.buExists(GROUP);
+  var rows = boardUnitTargets().map(function(t){
+    return (t === "group" && splitTop) ? topLines() : boardRow(t);
+  }).join("");
 
   /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105), ALL OF THEM (§245) ──
      A submission the SMO cannot see anywhere is half a feature. They go in the
@@ -7488,7 +7572,7 @@ function renderCycle(){
       : '') +
     section("", "How figures are entered", null, lineOwnersSwitch(can, can)) +
     section("", "Who has reported", null,
-      '<div class="cfg"><table><thead><tr><th style="width:17%">' + L1("unitword") + '</th><th>Reporting</th>' +
+      '<div class="cfg"><table><thead><tr><th style="width:17%">Reporting line</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">' + L("keyobj") + '</th><th class="cc">' + L("measure") + '</th>' +
         '<th class="cc">' + L("tactic") + '</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
         '<tbody>' + rows + capRows + fnRows + '</tbody></table></div>' +

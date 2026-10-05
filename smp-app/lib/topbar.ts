@@ -118,7 +118,7 @@ function viewerHtml(t: TopBar): string {
    body paints. */
 export const TOPBAR_SCRIPT_TAG = '<script src="/topbar.js"></script>\n';
 
-export const TOPBAR_CSS = `
+const TOPBAR_CSS_RAW = `
 @font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 800;font-display:swap;src:url(/fonts/Source_Sans_3.woff2) format('woff2')}
 :root{--tb-surface:#FFFFFF;--tb-surface-2:#EFF2F6;--tb-line:#D6DCE5;--tb-ink:#171B22;--tb-ink-2:#414A58;--tb-ink-3:#636C79;--tb-soft:#24487A;--tb-gold:#C9A24D}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--tb-surface:#1C2027;--tb-surface-2:#242932;--tb-line:#333A45;--tb-ink:#E9ECF1;--tb-ink-2:#B4BCC8;--tb-ink-3:#949DAA;--tb-soft:#5C82BC;--tb-gold:#D9B665}}
@@ -158,6 +158,34 @@ export const TOPBAR_CSS = `
 .tb a:focus-visible,.tb button:focus-visible,.tb summary:focus-visible,.tb select:focus-visible{outline:2px solid var(--tb-gold);outline-offset:2px}
 @media (max-width:760px){.tbin{flex-wrap:wrap;padding:6px 16px;gap:8px}.tbviewer{border-right:0;padding-right:0}}
 `;
+
+/* ── THE COLOUR SWEEP'S BREAK (§484's own audit, constitution XVI) ─────────
+   `bar-ink` makes this bar's own ink unreadable, which must turn
+   `checks/module-look.mjs` red on EVERY ONE of the five served module pages
+   (§94.5) — one edit for one claim, and the claim is that all five are
+   genuinely opened and measured rather than listed. A break per module would
+   be five edits saying the same thing once each. Never set on a deployment.
+
+   TWO SUBSTITUTIONS, BECAUSE NO ONE COLOUR FAILS AGAINST BOTH GROUNDS: a
+   value dark enough to fail on white passes on #1C2027 and the other way
+   round (#808A96 is 3.50 on white and 4.66 on the dark surface), so the
+   light token and the dark one each move — the dark value is spelt twice,
+   once per dark block, so it is `replaceAll` or the explicit-dark half of
+   every page stays readable and the break only half lands (§94.2).
+
+   THE RATIOS BELOW ARE MEASURED AND NOT PREDICTED. The first version of this
+   comment stated the dark one as 1.54 from its own arithmetic, and the run
+   reads 1.30 on the menu's surface and 1.16 on the open summary's — worth
+   correcting rather than leaving, because a figure in a comment is read as an
+   observation (§124). Its first red run printed 2.07 in BOTH themes, which is
+   the light value on a white ground: that is what exposed the dark half of
+   the sweep measuring light twice (checks/module-look.mjs's `call()`). */
+const BARBRK = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
+export const TOPBAR_CSS = BARBRK === "bar-ink"
+  ? TOPBAR_CSS_RAW
+      .replace("--tb-ink:#171B22", "--tb-ink:#AEB5BE")        /* 2.07 on #FFFFFF */
+      .replaceAll("--tb-ink:#E9ECF1", "--tb-ink:#2E343D")     /* 1.30 on #1C2027 */
+  : TOPBAR_CSS_RAW;
 
 /* A page's dark block, made to answer the switch as well as the device. The
    page's values are taken as they are — nothing about its colours moves —

@@ -121,10 +121,58 @@ with sync_playwright() as p:
         secs2 = safe(pg, "()=>allowed(SUBS.group.filter(d=>d.k==='strategy')[0].sections(),'group').map(d=>d.k)", [])
         ck("capabilities are a section of their own", "caps" in secs2, secs2)
         safe(pg, "()=>{currentSub='strategy'; CURSEC.strategy='caps'; paint()}"); pg.wait_for_timeout(250)
-        ck("…one row each, with the way into their own pages",
-           safe(pg, "()=>document.querySelectorAll('[data-topcaps] [data-gocap]').length===capsReachable().length") is True)
-        press(pg, '[data-gocap]')
-        ck("…and Open lands on the capability", safe(pg, "()=>String(current).indexOf('cap:')===0") is True)
+        # §482 (rewritten, never loosened, §218): a rail of cards like the
+        # directions, no Open button, the chosen one's plan in the pane.
+        ck("…one card each on the rail, coded C001…",
+           safe(pg, "()=>{var r=[...document.querySelectorAll('[data-topcaps] [data-topcap]')]; return r.length===capsReachable().length && r.every((b,i)=>b.querySelector('.rcode').textContent===topCapCode(capsReachable()[i]))}") is True)
+        ck("…and no Open button", safe(pg, "()=>!document.querySelector('[data-topcaps] [data-gocap]')") is True)
+        ck("…the pane names the open one, with its seats",
+           safe(pg, "()=>{var t=document.querySelector('[data-topcaps] .pane .pband').textContent; var c=capsReachable()[0]; return t.indexOf(topCapCode(c))>-1 && t.indexOf(c.name)>-1 && /Owner/i.test(t) && /Custodian/i.test(t)}") is True)
+        if safe(pg, "()=>!capPlansInPillars(capsReachable()[0]) && (capsReachable()[0].projects||[]).length>0"):
+            press(pg, '[data-topcapproj]'); pg.wait_for_timeout(200)
+            ck("…a project row unfolds its plan below it",
+               safe(pg, "()=>!!document.querySelector('[data-topcaps] tr.topcapopen .topcapplan .pband')") is True)
+        # §488: the capability is edited in place. Islam: "there is no edit
+        # here in the capability". The section line carries the plan's pen;
+        # pressed, the pane is the capability's own plan page in edit mode and
+        # the seats are the register's picker. Read back from the DATA (§96).
+        safe(pg, "()=>{currentSub='strategy'; CURSEC.strategy='caps'; paint()}"); pg.wait_for_timeout(200)
+        ck("§488 the section line carries Edit",
+           safe(pg, "()=>{var b=document.querySelector('.secpen'); return !!b && b.textContent==='Edit'}") is True)
+        ck("…and read mode draws no control in the pane",
+           safe(pg, "()=>!document.querySelector('[data-topcaps] .pane [data-pick-open], [data-topcaps] .pane [data-rowadd]')") is True)
+        press(pg, '.secpen'); pg.wait_for_timeout(250)
+        ck("…pressed, it reads Done editing", safe(pg, "()=>document.querySelector('.secpen').textContent") == "Done editing")
+        ck("…the seats become pickers",
+           safe(pg, "()=>document.querySelectorAll('[data-topcaps] .pband [data-pick-open]').length") == 2)
+        cid = safe(pg, "()=>{var c=capsReachable()[0]; c.format=undefined; delete c.format; return c.id}")
+        safe(pg, "()=>paint()"); pg.wait_for_timeout(200)
+        n0 = safe(pg, "()=>capsReachable()[0].projects.length")
+        # Islam, of the first build: "why does it open as a list inside a
+        # list?" — so editing keeps the read table: no second rail in the pane.
+        ck("…editing keeps ONE list: no rail inside the pane",
+           safe(pg, "()=>!document.querySelector('[data-topcaps] .pane .rail')") is True)
+        ck("…a project can be added from a line under the table",
+           safe(pg, "()=>!!document.querySelector('[data-topcaps] .topcapadd [data-rowadd^=\"project|\"]')") is True)
+        press(pg, '[data-topcaps] [data-rowadd^="project|"]'); pg.wait_for_timeout(300)
+        ck("…and the press adds it to the capability", safe(pg, "()=>capsReachable()[0].projects.length") == (n0 or 0) + 1,
+           [n0, safe(pg, "()=>capsReachable()[0].projects.length")])
+        ck("…the new project's row is unfolded below it, editable",
+           safe(pg, "()=>{var o=document.querySelector('[data-topcaps] tr.topcapopen'); return !!o && o.querySelectorAll('[data-fld]').length>0}") is True)
+        press(pg, '[data-topcaps] [data-rowadd^="project|"]'); pg.wait_for_timeout(300)
+        pids0 = safe(pg, "()=>capsReachable()[0].projects.map(p=>p.id)", [])
+        ck("…the rows carry grips in a projects sortable",
+           safe(pg, "()=>document.querySelectorAll('[data-topcaps] tbody.sortable[data-kind=\"projects\"] tr.topcapprow .grip').length") == len(pids0))
+        safe(pg, "()=>{var g=document.querySelector('[data-topcaps] tr.topcapprow .grip'); g.focus(); g.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true}))}")
+        pg.wait_for_timeout(300)
+        pids1 = safe(pg, "()=>capsReachable()[0].projects.map(p=>p.id)", [])
+        ck("…and moving one reorders the stored projects",
+           len(pids0) > 1 and pids1 == [pids0[1], pids0[0]] + pids0[2:], [pids0, pids1])
+        ck("…each unfolded project carries its Remove",
+           safe(pg, "()=>!!document.querySelector('[data-topcaps] tr.topcapopen') && /Remove this/.test(document.querySelector('[data-topcaps] tr.topcapopen').textContent)") is True)
+        safe(pg, "()=>{currentSub='strategy'; CURSEC.strategy='caps'; paint()}"); pg.wait_for_timeout(150)
+        press(pg, '.secpen'); pg.wait_for_timeout(250)
+        ck("…Done editing closes it", safe(pg, "()=>!document.querySelector('[data-topcaps] .pband [data-pick-open]')") is True)
     else:
         print("  note  no capability in this build, the Capabilities section is not measured")
 

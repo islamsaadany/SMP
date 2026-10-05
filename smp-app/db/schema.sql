@@ -104,15 +104,33 @@ CREATE TABLE platform_access (
   PRIMARY KEY (role_key, area_key)
 );
 
--- Who opened which tenant, when (client_log renamed with the vocabulary).
+-- WHAT FOREFRONT HAS DONE IN ITS OWN CONSOLE (§487, audit fix 04).
+-- Every act that CHANGES something out here is recorded: a client made,
+-- archived, brought back, renamed, shaped, deleted; a module switched; a
+-- consultant added, retired, brought back, removed; a password handed out; a
+-- report published or withdrawn. Opening a client is not recorded (Islam:
+-- "opened a client is not really important"), so the `what` default below is
+-- what the table was for before this and nothing writes it any more.
+--
+-- THE NAMES ARE STORED ON THE ROW. Both foreign keys are ON DELETE SET NULL,
+-- and *deleting a client* and *removing a consultant* are two of the acts
+-- recorded — so a row reading its subject through a join would lose exactly
+-- the two acts most worth keeping (§49.2: a record somebody tidied is no
+-- longer the record). `who_name` and `tenant_name` are what was true at the
+-- time; `detail` is the sentence a person reads, written once at the act
+-- rather than re-derived from a key that may since have moved.
 CREATE TABLE tenant_log (
-  id         bigserial PRIMARY KEY,
-  at         timestamptz NOT NULL DEFAULT now(),
-  user_id    uuid REFERENCES users (id) ON DELETE SET NULL,
-  tenant_id  uuid REFERENCES tenants (id) ON DELETE SET NULL,
-  what       text NOT NULL DEFAULT 'open'
+  id          bigserial PRIMARY KEY,
+  at          timestamptz NOT NULL DEFAULT now(),
+  user_id     uuid REFERENCES users (id) ON DELETE SET NULL,
+  tenant_id   uuid REFERENCES tenants (id) ON DELETE SET NULL,
+  what        text NOT NULL DEFAULT 'open',
+  who_name    text NOT NULL DEFAULT '',
+  tenant_name text NOT NULL DEFAULT '',
+  detail      text NOT NULL DEFAULT ''
 );
 CREATE INDEX tenant_log_tenant ON tenant_log (tenant_id, at DESC);
+CREATE INDEX tenant_log_at     ON tenant_log (at DESC);
 
 -- One VAPID pair per DEPLOYMENT (§231), not per tenant.
 CREATE TABLE push_keys (

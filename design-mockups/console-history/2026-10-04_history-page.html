@@ -1,0 +1,210 @@
+<title>Console History page</title>
+<style>
+  /* Every token below is copied out of smp-app/shell/platform.html — the
+     console's own palette, nav, page title, table and search — so this is the
+     console drawn in its own pixels rather than a picture of one (§41.9).
+     Three theme states, because the console has three (§38.5). */
+  :root{
+    --ground:#F5F6F9; --surface:#FFFFFF; --surface-2:#EDF0F5;
+    --line:#D8DEE8; --line-soft:#E6EAF1;
+    --ink:#141C2B; --ink-2:#465268; --ink-3:#5E6E85;
+    --ff:#0F2C69; --ff-ink:#FFFFFF; --ff-quiet:#A9BAD8; --ff-tx:#0F2C69;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#9C5D08; --amber-wash:#FEF4E2;
+    --good:#1B6E4E; --bad:#B23025;
+    --shadow:0 1px 2px rgba(20,28,43,.06), 0 8px 26px rgba(20,28,43,.07);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --bad:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#12151C; --surface:#1A1F29; --surface-2:#222834;
+    --line:#333B4A; --line-soft:#2A313E;
+    --ink:#E7EBF2; --ink-2:#AAB4C6; --ink-3:#8590A3;
+    --ff:#0D2350; --ff-ink:#F0F4FB; --ff-quiet:#95A9CC; --ff-tx:#95A9CC;
+    --amber:#F5A623; --amber-ink:#231500; --amber-tx:#F5A623; --amber-wash:#2B2210;
+    --good:#63BE96; --bad:#E8776B;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 26px rgba(0,0,0,.35);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:1020px; margin:0 auto; padding-block:28px 60px; padding-left:18px; padding-right:18px}
+
+  h1{margin:0 0 6px; font-size:23px; font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .lede{margin:0 0 4px; color:var(--ink-2); font-size:15px; max-width:64ch}
+  .sub{margin:0 0 26px; color:var(--ink-3); font-size:13.5px; max-width:64ch}
+
+  .key{
+    font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+    margin:30px 0 10px;
+  }
+
+  /* ── the drawn console ── */
+  .shot{
+    border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    box-shadow:var(--shadow); background:var(--surface); margin-bottom:12px;
+  }
+  .top{ background:var(--surface); border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:12px; padding:9px 18px }
+  .top .mk{ font:700 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;
+    letter-spacing:.16em; color:var(--ff-tx) }
+  .top .nm{ font-weight:600; font-size:14px }
+  .top .right{ margin-left:auto; display:flex; align-items:center; gap:10px;
+    color:var(--ink-3); font-size:12.5px }
+  .nav{ background:var(--ff); display:flex; padding:0 10px; gap:2px; flex-wrap:wrap }
+  .nav span{ color:var(--ff-quiet); font:600 13.5px/1 inherit; padding:13px 14px;
+    border-bottom:3px solid transparent }
+  .nav span.on{ color:var(--ff-ink); border-bottom-color:var(--amber) }
+  .wrap{ background:var(--ground); padding:20px 18px 26px }
+
+  .ptitle{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding-bottom:12px; border-bottom:1px solid var(--line); margin-bottom:16px }
+  .ptitle h2{ font-size:20px; margin:0; font-weight:600 }
+  .ptitle .right{ margin-left:auto; display:flex; gap:8px; align-items:center }
+  .srch{ border:1px solid var(--line); border-radius:8px; background:var(--surface);
+    color:var(--ink); padding:6px 11px; font:400 13px/1.5 inherit; min-width:0; width:230px }
+  .cnt{ font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace; letter-spacing:.09em;
+    text-transform:uppercase; color:var(--ink-3) }
+
+  table{ border-collapse:collapse; width:100%; font-size:14px }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap }
+  thead th{ background:var(--ff); color:var(--ff-ink);
+    font:600 10.5px/1.4 ui-monospace,SFMono-Regular,monospace; letter-spacing:.09em;
+    text-transform:uppercase; border-bottom:0 }
+  thead th:first-child{ border-top-left-radius:8px } thead th:last-child{ border-top-right-radius:8px }
+  tbody tr:nth-child(even) td{ background:var(--surface-2) }
+  .tscroll{ overflow-x:auto }
+  /* the day band is table.work's own tr.grp, not a new device (§53.5) */
+  tr.grp td{ background:var(--surface-2); font-weight:600; font-size:11px; line-height:1.6;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); padding:6px 10px }
+  td.act{ white-space:normal; color:var(--ink) }
+  td.who{ color:var(--ink) }
+  td.cl{ color:var(--ink-2) }
+  td.when{ color:var(--ink-3); font:400 13px/1.5 ui-monospace,SFMono-Regular,monospace }
+  .foot{ margin-top:10px; color:var(--ink-3); font-size:12.5px }
+  .none{ padding:34px 10px 24px; color:var(--ink-3); font-size:14px; max-width:58ch }
+  .none b{ display:block; color:var(--ink); font-weight:600; font-size:15.5px; margin-bottom:6px }
+
+  /* ── notes ── */
+  .note{
+    border-left:2px solid var(--line); padding:2px 0 2px 14px;
+    color:var(--ink-2); font-size:14px; max-width:62ch; margin:0 0 11px;
+  }
+  .note b{color:var(--ink); font-weight:600}
+  .acts{ margin:0; padding-left:20px; columns:2; column-gap:30px; color:var(--ink-2); font-size:14px }
+  .acts li{ margin-bottom:5px; break-inside:avoid }
+  .acts b{ color:var(--ink); font-weight:600 }
+  .ask{
+    border:1px solid var(--amber); background:var(--amber-wash); border-radius:10px;
+    padding:12px 14px; color:var(--ink); font-size:14px; max-width:62ch; margin-top:14px;
+  }
+  .ask .k{ display:block; font:600 10.5px/1.7 ui-monospace,SFMono-Regular,monospace;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--amber-tx); margin-bottom:4px }
+  @media (max-width:620px){ .acts{columns:1} .srch{width:100%} }
+</style>
+
+<div class="sheet">
+  <h1>History, in the console</h1>
+  <p class="lede">A page of its own, beside the other four, holding what Forefront has done: who did it, to which client, and when.</p>
+  <p class="sub">Drawn in the console's own chrome &mdash; its navy bar, its page title, its table, its search box. Nothing here is a new piece of design; it is the table the console already draws, on a page of its own.</p>
+
+  <p class="key">The page</p>
+  <div class="shot">
+    <div class="top">
+      <span class="mk">FOREFRONT</span>
+      <span class="nm">Islam Saadany</span>
+      <span class="right">Sign out</span>
+    </div>
+    <div class="nav">
+      <span>My work</span>
+      <span>Clients</span>
+      <span>Consultants</span>
+      <span>Who sees what</span>
+      <span class="on">History</span>
+    </div>
+    <div class="wrap">
+      <div class="ptitle">
+        <h2>History</h2>
+        <span class="right">
+          <input class="srch" value="" placeholder="Search who, client or act" aria-label="Search history" readonly>
+          <span class="cnt">9 acts</span>
+        </span>
+      </div>
+      <div class="tscroll">
+        <table>
+          <thead><tr><th>When</th><th>Who</th><th>Client</th><th>What</th></tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="4">Today</td></tr>
+            <tr><td class="when">09:41</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="act">Turned Meeting Notes on</td></tr>
+            <tr><td class="when">09:38</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="act">Put Hend Fathy on the team, as SMO team</td></tr>
+            <tr><td class="when">09:12</td><td class="who">Noran Essam</td><td class="cl">El Abd</td><td class="act">Published &ldquo;Macro outlook &mdash; Q4&rdquo;, to Finance and Retail Stores only</td></tr>
+            <tr class="grp"><td colspan="4">Yesterday</td></tr>
+            <tr><td class="when">16:20</td><td class="who">Islam Saadany</td><td class="cl">&mdash;</td><td class="act">Added Noran Essam as a consultant</td></tr>
+            <tr><td class="when">11:05</td><td class="who">Mohamed Essam</td><td class="cl">RHI</td><td class="act">Gave Yara Kamal the super user seat</td></tr>
+            <tr><td class="when">10:52</td><td class="who">Mohamed Essam</td><td class="cl">RHI</td><td class="act">Set its shape &mdash; 4 units, 3 supporting functions</td></tr>
+            <tr><td class="when">10:48</td><td class="who">Mohamed Essam</td><td class="cl">RHI</td><td class="act">Made the client</td></tr>
+            <tr class="grp"><td colspan="4">2 October</td></tr>
+            <tr><td class="when">15:30</td><td class="who">Islam Saadany</td><td class="cl">El Abd</td><td class="act">Handed out a password to Ashraf Laithy</td></tr>
+            <tr><td class="when">09:02</td><td class="who">Islam Saadany</td><td class="cl">Raya Trade</td><td class="act">Renamed it from &ldquo;Raya&rdquo; to &ldquo;Raya Trade&rdquo;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="foot">The last 200 acts, newest first.</p>
+    </div>
+  </div>
+
+  <p class="key">Before there is anything on it</p>
+  <div class="shot">
+    <div class="wrap">
+      <div class="ptitle"><h2>History</h2></div>
+      <div class="none">
+        <b>Nothing recorded yet.</b>
+        Every act in this console is recorded from the day this page goes in. Anything done before that is not here.
+      </div>
+    </div>
+  </div>
+
+  <p class="key">The eleven acts, as you approved them</p>
+  <ul class="acts">
+    <li><b>Made</b> a client</li>
+    <li><b>Archived</b> a client, or brought one back</li>
+    <li><b>Deleted</b> a client</li>
+    <li><b>Renamed</b> one, or changed its mark</li>
+    <li><b>Set its shape</b> &mdash; units, functions, divisions</li>
+    <li><b>Turned a module</b> on or off</li>
+    <li><b>Put somebody on a client's team</b>, or took them off</li>
+    <li><b>Gave or moved the super user seat</b></li>
+    <li><b>Added or removed a consultant</b></li>
+    <li><b>Handed out a password</b></li>
+    <li><b>Published or withdrew a report</b></li>
+  </ul>
+  <div class="ask">
+    <span class="k">One act is not on your list</span>
+    Changes to the <b>Who sees what</b> table &mdash; which consultant may open which client. It is a permission, so it belongs on a record of permissions. Say if you want it on, and it goes on; say nothing and it stays off.
+  </div>
+
+  <p class="key">The small decisions inside the page</p>
+  <p class="note"><b>Newest first, grouped by day.</b> The day band is the one the My work table already uses, so the <em>When</em> column only has to carry the time.</p>
+  <p class="note"><b>Opening a client is not recorded</b> &mdash; your call. Without it the page is nine real acts; with it, the same nine would sit under forty &ldquo;so-and-so opened the client&rdquo;.</p>
+  <p class="note"><b>The last 200, and the page says so.</b> A record is scanned, not paged through; if 200 ever stops being enough, that is the moment to add more, not now.</p>
+  <p class="note"><b>The search filters the rows in place</b> and matches the person, the client and the words of the act. Typing never reloads the page.</p>
+  <p class="note"><b>Forefront only.</b> This is the console, which no client's own people can reach at all. It is not the client's own History page inside the platform, which is a different record and stays as it is.</p>
+
+  <p class="key">What it takes to build</p>
+  <p class="note">Every one of those acts already goes through <b>one door</b> in the code, so recording them is one line of writing at that door rather than a change to fourteen screens.</p>
+  <p class="note">The table to hold them <b>already exists</b> &mdash; it was built with the platform and has never had a single row written into it. Nothing new is stored, nothing is migrated.</p>
+</div>

@@ -11,7 +11,7 @@
      for in 2.9 was never actually one line for anyone signed in. The name
      truncates instead; the note beside it already says the level and the
      reach, so nothing is lost that is not said twice. */
-  .viewer select { font:inherit; border:1px solid var(--line);
+  .viewer select { font:inherit; border:1px solid var(--field-line);
                    border-radius:var(--r); background:var(--surface); color:var(--ink);
                    max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
@@ -165,8 +165,31 @@
               background:var(--surface-2); line-height:1.55; }
   .rolechip b { font-size:11.5px; }
   .rolechip .why { font-size:10.5px; margin-top:0; }
+  /* ── A DESTRUCTIVE CONTROL HAS A SIZE OF ITS OWN (§484) ──────────────────
+     This button removes a ROW. It had no size at all — it was as wide as the
+     × inside it — so when §402 made Source Sans 3 the one typeface and the
+     narrower glyph came with it, the button quietly went 19.7px → 15px wide.
+     Nothing about it was touched and nothing could have caught it: no check
+     in this product measures how big a control is or how far it is from its
+     neighbour (closed by `checks/control-targets.py`, written with this).
+
+     THE COST IS NOT THE BUTTON, IT IS THE PAIR. On a plan row the eye that
+     hides a row from the presentation sits immediately before it, and the
+     two centres came to 23.5px apart where the standard's floor is 24
+     (WCAG 2.5.8, the spacing exception a 24×22 control relies on). 18 rows
+     on one plan: a thumb aiming for the eye lands on the ×, and one of the
+     two throws a row away. Measured, not inferred.
+
+     The minimum is on the BUTTON rather than on the pair's seat, because the
+     × is drawn in thirteen places and only two of them sit beside an eye —
+     a rule keyed on the pair would leave the other eleven at 15px for the
+     next person to find. inline-flex because a 14px glyph in a 24px box has
+     to be centred in it; the hover's round ground becomes a circle, which is
+     what it was always drawing towards. */
   .xbtn { font:inherit; font-size:14px; line-height:1; color:var(--none); background:none;
-          border:none; cursor:pointer; padding:0 4px; border-radius:99px; }
+          border:none; cursor:pointer; padding:0 4px; border-radius:99px;
+          display:inline-flex; align-items:center; justify-content:center;
+          min-width:24px; min-height:24px; }
   .xbtn:hover { color:var(--bad); background:var(--bad-bg); }
   .xbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .roleadd { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
@@ -213,7 +236,7 @@
   .brandpick { display:inline-flex; align-items:center; gap:8px; }
   .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
                display:inline-block; flex:none; }
-  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--field-line);
                      border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
   input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
   input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
@@ -399,8 +422,8 @@
      replaced used for the same state (`.ico.on`) — a worded button rather than
      an icon, because it sits in a row of worded controls (Columns, Register
      file) and a lone glyph among words reads as something else. */
-  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
-  .editbtn.on:hover { background:var(--gold-deep); border-color:var(--gold-deep); }
+  .editbtn.on { background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
+  .editbtn.on:hover { background:var(--gold); border-color:var(--gold); color:var(--on-accent); filter:brightness(.94); }
 
   /* The mark's two controls sit SIDE BY SIDE in the dialog. `.rowacts` is a
      column in a table cell (§93.15's note above it), which is right there and
@@ -458,7 +481,7 @@
                margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
                border:0; opacity:0; pointer-events:none; }
   .ssbtn { font:inherit; font-size:13px; color:var(--ink); background:var(--surface);
-           border:1px solid var(--line); border-radius:var(--r); padding:6px 9px;
+           border:1px solid var(--field-line); border-radius:var(--r); padding:6px 9px;
            cursor:pointer; text-align:left; display:inline-flex; align-items:center;
            justify-content:space-between; gap:8px; max-width:100%; min-width:0;
            line-height:1.35; }
@@ -1099,7 +1122,7 @@
   .srchbox svg { position:absolute; left:9px; top:50%; transform:translateY(-50%);
                  width:14px; height:14px; color:var(--ink-3); pointer-events:none; }
   .srchbox input { width:100%; font:inherit; font-size:13px; padding:6px 10px 6px 30px;
-                   border:1px solid var(--line); border-radius:var(--r);
+                   border:1px solid var(--field-line); border-radius:var(--r);
                    background:var(--surface); color:var(--ink); }
   .srchbox input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .srctally { margin-left:auto; font:600 11.5px/1 var(--mono); color:var(--ink-3);
@@ -2085,7 +2108,7 @@
      (§53.5): `.penbtn.on` is gold with the panel's ink, and this is the same
      control in a worded shape. */
   .editbtn.penon, .editbtn.penon:hover {
-    background:var(--gold); border-color:var(--gold); color:var(--panel); }
+    background:var(--gold); border-color:var(--gold); color:var(--on-accent); }
 
   /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
   .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
@@ -2988,3 +3011,6 @@
 .cfg.landing .lll{ color:var(--ink-3); font-size:var(--fs-small); flex:1 }
 .cfg.landing .lgo{ color:var(--gold-deep); font-weight:600; font-size:var(--fs-small); white-space:nowrap }
 
+  /* §480: a reporting line with nobody named over it says so in the warning
+     ink, never the quiet grey — "None yet" is outstanding, not a description. */
+  .cfg td.why.nobody { color:var(--attn-tx); }

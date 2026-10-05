@@ -5374,5 +5374,33 @@ console.log("\n§481 · a direction's picture slides");
   check("§481 REFUSED: the owner on the company's own slides", !v.ok, "was ALLOWED");
 })();
 
+/* ── §492: HOW WE COMPETE ────────────────────────────────────────────────
+   On a unit it is the unit's analysis (the SWOT's own kind, the office's
+   Strategy half); on the group it is the group's own strategy. Classified
+   AND swept (§259.2): never "unknown", and a reordered copy is no change. */
+console.log("\n§492 · how we compete");
+(function () {
+  const rec = { discipline: "btc", values: [{ title: "Hassle-free", how: ["One visit"], measure: ["NPS 45+"] }] };
+  const put = function (inc) { inc.units.mobile.compete = clone(rec); };
+  allows("smo", put, "§492: the office writes a unit's How we compete");
+  refuses("own_mob", put, "§492 REFUSED: the unit's own owner may not (the Strategy half is the office's)");
+  const inc = clone(SEED); put(inc);
+  const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+  check("§492: a unit's How we compete is classified as its analysis",
+        kinds.length && kinds.every(function (k) { return k === "unitAnalysis"; }), kinds.join(",") || "(nothing — INVISIBLE)");
+  const stored = clone(SEED); stored.units.mobile.compete = clone(rec);
+  const re = clone(SEED); re.units.mobile.compete = { values: [{ measure: ["NPS 45+"], how: ["One visit"], title: "Hassle-free" }], discipline: "btc" };
+  const same = (A.collect(stored, re, R.worldOf(stored)) || []);
+  check("§492: the same record with its keys reordered is no change (§145)", same.length === 0,
+        same.map(function (c) { return c.kind; }).join(","));
+  const gput = function (inc) { inc.group.compete = clone(rec); };
+  allows("smo", gput, "§492: the office writes the top layer's How we compete");
+  refuses("own_mob", gput, "§492 REFUSED: a unit owner may not write the top layer's");
+  const ginc = clone(SEED); gput(ginc);
+  const gk = (A.collect(SEED, ginc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+  check("§492: the top layer's How we compete is never unknown or setup",
+        gk.length && gk.indexOf("unknown") < 0 && gk.indexOf("setup") < 0, gk.join(",") || "(nothing — INVISIBLE)");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

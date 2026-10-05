@@ -4063,9 +4063,27 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      the office ticks it — "if needed". It is offered on functions only. */
   var STRUCT_NEVER_FN = ["brief", "purpose", "aspiration", "theme", "pillar", "capability", "values"];
   var FN_DESC = "desc";
+  /* Spec 064 §3.1 — HOW WE COMPETE: a section after the SWOT and before
+     the plan, carrying the discipline the business competes on and its
+     value proposition. Its own key, like `desc`, so it is in no stored
+     list and in no fallback: OFF for every client until the office ticks
+     it on the Structure step, and off hides and keeps. It is about a
+     business facing its market, so it is offered on the top layer and on
+     a business unit only — a company page draws no SWOT either (§427), and
+     a function or a capability supports the business rather than
+     competing in a market. */
+  var COMPETE = "compete";
+  var COMPETE_LEVELS = ["top", "bu"];
+  /* The three value disciplines, in the order a tie breaks (§3.2). */
+  var DISCIPLINES = [["btc", "Best Total Cost"], ["bts", "Best Total Solution"], ["bp", "Best Product"]];
+  function disciplineName(k) {
+    for (var i = 0; i < DISCIPLINES.length; i++) if (DISCIPLINES[i][0] === k) return DISCIPLINES[i][1];
+    return "";
+  }
   function compOffered(target, comp) {
     var isFn = String(target || "").indexOf("fn:") === 0;
     if (comp === FN_DESC) return isFn;
+    if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
   }
   /* The part that draws a function's or a capability's "What it is" card:
@@ -4090,7 +4108,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   function compOn(group, target, comp) {
     if (!compOffered(target, comp) || !compBuilt(target, comp)) return false;
-    if (STRUCT_COMPONENTS.indexOf(comp) < 0 && comp !== FN_DESC) return true;
+    if (STRUCT_COMPONENTS.indexOf(comp) < 0 && comp !== FN_DESC && comp !== COMPETE) return true;
     var s = structureOf(group);
     var o = s && s.over && s.over[String(target || "group")];
     if (o && typeof o[comp] === "boolean") return o[comp];
@@ -4838,7 +4856,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRUCT_NEW_CLIENT: STRUCT_NEW_CLIENT, newClientStructure: newClientStructure,
     STRUCT_LEVELS: STRUCT_LEVELS, TEMPLE_NEEDS: TEMPLE_NEEDS,
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
-    FN_DESC: FN_DESC, descPart: descPart,
+    FN_DESC: FN_DESC, descPart: descPart, COMPETE: COMPETE, DISCIPLINES: DISCIPLINES, disciplineName: disciplineName,
     STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
     structureOf: structureOf, structLevelOf: structLevelOf,
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
@@ -15370,6 +15388,42 @@ function swotWritable(target){
   }
   var u = unitLikeWritable(t);
   return u && u.swot ? u.swot : null;
+}
+/* ── HOW WE COMPETE (spec 064 §3) ────────────────────────────────────
+   `compete` rides the subject itself — a unit's on UNITS[k] (units.extra),
+   the top layer's on GROUP (org.extra) — so there is no migration. Shape:
+   { discipline: "btc"|"bts"|"bp", values: [{ title, how:[…], measure:[…] }] }.
+   The reader hands out a shared frozen empty and never creates the field
+   (§50.6); the writer mints it. */
+var COMPETE_NONE = Object.freeze({ values: Object.freeze([]) });
+function competeHolder(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("co:") === 0) return null;
+  return UNITS[t] || null;
+}
+function competeOf(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c || typeof c !== "object") return COMPETE_NONE;
+  return { discipline: c.discipline, values: Array.isArray(c.values) ? c.values : [] };
+}
+function competeWritable(target){
+  var h = competeHolder(target);
+  if (!h) return null;
+  if (!h.compete || typeof h.compete !== "object") h.compete = { values: [] };
+  if (!Array.isArray(h.compete.values)) h.compete.values = [];
+  h.compete.values.forEach(function(v){
+    if (!Array.isArray(v.how)) v.how = [];
+    if (!Array.isArray(v.measure)) v.measure = [];
+  });
+  return h.compete;
+}
+/* An emptied record goes back to an absence (§50.6). */
+function competeTidy(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c) return;
+  if (!c.discipline) delete c.discipline;
+  if (!c.discipline && !(c.values || []).length) delete h.compete;
 }
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
@@ -28006,6 +28060,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
+  compete: { unit: "analysis",                        ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -28015,7 +28070,7 @@ var SEC_PENS = {
 /* §488: the company's Capabilities section takes the plan's own pen, so one
    Edit opens the chosen capability for editing in place — the same fields its
    own Plan page draws (Islam: "there is no edit here in the capability"). */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], compete: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
@@ -30258,6 +30313,60 @@ function renderFnSW(t){
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
   return swotBoxes({ ukey:"fn:" + fk, swot:sw }, SMPRules.swotQuads(GROUP, "fn:" + fk), "capfoundation", "k_found");
+}
+/* ── HOW WE COMPETE (spec 064 §3.1, §3.4) ─────────────────────────────
+   A section after the SWOT, drawn while the layer's Structure has it on.
+   The table is Islam's own slide: the discipline across the top, then a
+   Value / How / Measure row, one column per value. It shares the SWOT's
+   page and grant (`analysis`, `u_anal`), so one Edit opens both and nobody's
+   rights move. In edit mode every cell is a box: a How or a Measure is one
+   line per bullet. */
+function renderUnitCompete(u){
+  var t = u.ukey, page = "analysis", ac = "u_anal";
+  var c = competeOf(t), ed = authoring(page, ac);
+  var vals = c.values;
+  var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };
+  var setLines = function(i, key){
+    return function(v){
+      var w = competeWritable(t); if (!w || !w.values[i]) return;
+      w.values[i][key] = String(v || "").split(/\n/).map(function(x){ return x.replace(/^\s*[-\u2022*]\s*/, "").trim(); }).filter(Boolean);
+    };
+  };
+  var disc = ed
+    ? selectOr(page, c.discipline || "", [{ v:"", label:"Not chosen" }].concat(SMPRules.DISCIPLINES.map(function(d){ return { v:d[0], label:d[1] }; })), "cmpdisc", function(v){
+        var w = competeWritable(t); if (!w) return;
+        if (v) w.discipline = v; else delete w.discipline;
+        competeTidy(t);
+      })
+    : (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : '<span class="cmpnone">Not chosen</span>');
+  if (!ed && !c.discipline && !vals.length)
+    return '<div class="cmp" data-compete="' + esc(t) + '"><p class="cmpnone">Nothing written yet.</p></div>';
+  var head = '<tr><th class="cmprow">Discipline</th><th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' + disc + '</th></tr>';
+  var row = function(label, cell){
+    return '<tr><th class="cmprow">' + label + '</th>' +
+      (vals.length ? vals.map(cell).join("") : '<td class="cmpnone">' + (ed ? "Add a value to start." : "&mdash;") + '</td>') + '</tr>';
+  };
+  var bullets = function(a){
+    var l = lines(a);
+    return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;';
+  };
+  var body =
+    row("Value", function(v, i){
+      return '<td class="cmpval">' + (ed
+        ? inputOr(page, v.title || "", "", function(x){ var w = competeWritable(t); if (w && w.values[i]) w.values[i].title = String(x || "").trim(); }) +
+          '<button class="xbtn" data-cmprm="' + esc(t) + '|' + i + '" title="Remove this value" aria-label="Remove this value">&times;</button>'
+        : esc(v.title || "")) + '</td>';
+    }) +
+    row("How", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.how).join("\n"), "cmpbox", setLines(i, "how")) : bullets(v.how)) + '</td>';
+    }) +
+    row("Measure", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.measure).join("\n"), "cmpbox", setLines(i, "measure")) : bullets(v.measure)) + '</td>';
+    });
+  return '<div class="cmp" data-compete="' + esc(t) + '"><div class="tblscroll"><table class="cmptab"><thead>' + head +
+    '</thead><tbody>' + body + '</tbody></table></div>' +
+    (ed ? '<div class="addrow"><button class="editbtn" data-cmpadd="' + esc(t) + '">+ Add a value</button></div>' : '') +
+    '</div>';
 }
 function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
@@ -45669,6 +45778,26 @@ function unitSwotSlides(u){
 
   return S;
 }
+/* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
+   only when the layer carries the section AND it holds something (§253: a
+   table with no rows is not a slide). The same table as the page. */
+function competeSlides(u){
+  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
+    return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
+  if (!c.discipline && !vals.length) return [];
+  var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
+    return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
+  var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
+  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
+    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+    '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
+    (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
+    '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +
+    '<tr><th class="cmprow">How</th>' + cells(function(v){ return '<td>' + ul(v.how) + '</td>'; }) + '</tr>' +
+    '<tr><th class="cmprow">Measure</th>' + cells(function(v){ return '<td>' + ul(v.measure) + '</td>'; }) + '</tr>' +
+    '</tbody></table></section>'];
+}
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -45846,6 +45975,7 @@ function deckSlides(u){
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
   S = S.concat(short ? companyAnalysisSlides(u) : unitSwotSlides(u));
+  S = S.concat(competeSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -46443,7 +46573,7 @@ function deckSlidesFn(subject){
      sits after its foundation. Never on a capability's own deck. */
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
   /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
-  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
+  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
@@ -60505,6 +60635,19 @@ var CLIENTSETUP = (function () {
       });
     }
     secs.appendChild(s2);
+
+    /* Spec 064 §3.1 — How we compete, between the SWOT and the plan, on the
+       layers that face a market (SMPRules.compOffered). Its on/off IS the
+       `compete` component: off until ticked, and off hides and keeps. */
+    if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
+      var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
+      var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
+      hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
+      sc.appendChild(hc);
+      if (!cOn) sc.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
+      secs.appendChild(sc);
+    }
     /* §465: the top card stops here — its plan is the Directions card. */
     if (noPlan) { box.appendChild(secs); structTail(box, L, k); return; }
 
@@ -63080,7 +63223,7 @@ var SYNC = (function () {
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
+  function topExtrasOn(){ return compOn("group", "swot") || compOn("group", SMPRules.COMPETE) || topPlanOn() || topCapsOn(); }
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
@@ -63098,6 +63241,9 @@ var SYNC = (function () {
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
+                  { k:"compete", ac:"g_found", label:"How we compete",
+                    render: function(){ return renderUnitCompete(topAsUnit()); },
+                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -63321,6 +63467,9 @@ var SYNC = (function () {
                     when: function(t){ return SMPRules.foundOn(GROUP, t) && ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* spec 064 §3.1: How we compete, after the SWOT. */
+                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
@@ -72015,6 +72164,31 @@ var SYNC = (function () {
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q])) return;
         sw[q].push("");
+        fieldSaved(); paint();
+      });
+    });
+    /* spec 064 §3.4: How we compete's columns. Add asks the SWOT's own
+       rule (the section shares its grant); remove asks in the platform's
+       words when the column holds anything. */
+    document.querySelectorAll("[data-cmpadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.cmpadd;
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w) return;
+        w.values.push({ title:"", how:[], measure:[] });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-cmprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.cmprm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w || !w.values[i]) return;
+        var v = w.values[i];
+        if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
+            !confirm("Remove this value? This cannot be undone here.")) return;
+        w.values.splice(i, 1);
+        competeTidy(t);
         fieldSaved(); paint();
       });
     });

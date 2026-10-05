@@ -8539,6 +8539,42 @@ function swotWritable(target){
   var u = unitLikeWritable(t);
   return u && u.swot ? u.swot : null;
 }
+/* ── HOW WE COMPETE (spec 064 §3) ────────────────────────────────────
+   `compete` rides the subject itself — a unit's on UNITS[k] (units.extra),
+   the top layer's on GROUP (org.extra) — so there is no migration. Shape:
+   { discipline: "btc"|"bts"|"bp", values: [{ title, how:[…], measure:[…] }] }.
+   The reader hands out a shared frozen empty and never creates the field
+   (§50.6); the writer mints it. */
+var COMPETE_NONE = Object.freeze({ values: Object.freeze([]) });
+function competeHolder(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("co:") === 0) return null;
+  return UNITS[t] || null;
+}
+function competeOf(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c || typeof c !== "object") return COMPETE_NONE;
+  return { discipline: c.discipline, values: Array.isArray(c.values) ? c.values : [] };
+}
+function competeWritable(target){
+  var h = competeHolder(target);
+  if (!h) return null;
+  if (!h.compete || typeof h.compete !== "object") h.compete = { values: [] };
+  if (!Array.isArray(h.compete.values)) h.compete.values = [];
+  h.compete.values.forEach(function(v){
+    if (!Array.isArray(v.how)) v.how = [];
+    if (!Array.isArray(v.measure)) v.measure = [];
+  });
+  return h.compete;
+}
+/* An emptied record goes back to an absence (§50.6). */
+function competeTidy(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c) return;
+  if (!c.discipline) delete c.discipline;
+  if (!c.discipline && !(c.values || []).length) delete h.compete;
+}
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
   var t = String(target || "");

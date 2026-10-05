@@ -312,7 +312,7 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
+  function topExtrasOn(){ return compOn("group", "swot") || compOn("group", SMPRules.COMPETE) || topPlanOn() || topCapsOn(); }
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
@@ -330,6 +330,9 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
+                  { k:"compete", ac:"g_found", label:"How we compete",
+                    render: function(){ return renderUnitCompete(topAsUnit()); },
+                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -553,6 +556,9 @@
                     when: function(t){ return SMPRules.foundOn(GROUP, t) && ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* spec 064 §3.1: How we compete, after the SWOT. */
+                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
@@ -9247,6 +9253,31 @@
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q])) return;
         sw[q].push("");
+        fieldSaved(); paint();
+      });
+    });
+    /* spec 064 §3.4: How we compete's columns. Add asks the SWOT's own
+       rule (the section shares its grant); remove asks in the platform's
+       words when the column holds anything. */
+    document.querySelectorAll("[data-cmpadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.cmpadd;
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w) return;
+        w.values.push({ title:"", how:[], measure:[] });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-cmprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.cmprm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w || !w.values[i]) return;
+        var v = w.values[i];
+        if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
+            !confirm("Remove this value? This cannot be undone here.")) return;
+        w.values.splice(i, 1);
+        competeTidy(t);
         fieldSaved(); paint();
       });
     });

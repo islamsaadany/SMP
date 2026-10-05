@@ -62446,3 +62446,19 @@ and the columns reaching the bottom of the page.
   three runs). An earlier `check:copilot` red was two runs sharing one database,
   not the product; alone it is green.
 
+
+## §492 — How we compete, in the plan (spec 064 stage 1a, 2026-10-05)
+
+Islam signed off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`) and said *"start the build"*. Stage 1a is the plan half: the section, its switch, its table and its slide. The Copilot's scoring and value-proposition chat are stage 1b.
+
+**A Structure component, off until ticked.** `SMPRules.COMPETE` is a component like the SWOT, but `compOn` treats it as `FN_DESC` is treated: an unsaid level reads it OFF, so no existing client moves. `compOffered` allows the top level and business units only (`COMPETE_LEVELS`) — a function or capability is answered false before anything stored is read. The switch is a section on the Structure step's top and units cards (`data-stcompete`), through the same `compToggle` every other section uses; off says *"Not shown on this layer. Nothing entered is lost."* (§44: off hides, never forgets).
+
+**The record rides the subject's `extra`, no migration** (§8 of the spec asked for this to be said when built): `UNITS[k].compete` (units.extra) or `GROUP.compete` (org.extra), shaped `{discipline, values:[{title, how:[…], measure:[…]}]}`. `competeWritable` mints it, `competeTidy` deletes an emptied record (§50.6). Discipline keys and names live once in `SMPRules.DISCIPLINES` (btc · bts · bp), so the Copilot stage reads the same list.
+
+**Same pen as the SWOT.** The section sits after `swot` with `ac:"u_anal"` (the top: `g_found`), and `SEC_PENS.compete` names the analysis page, so one Edit opens both and nobody's rights move. **The server classifies it with the SWOT**: on a unit `collectUnit` adds `unitAnalysis` ("how the unit competes"); on the group it joins `gExtra` and the top view. Both compare with `sameCanon` because jsonb reorders keys (§145, §249.3). `test-authorize.js` §492: the office writes, a unit owner is refused, a reorder of keys is no change, and the group's is not swept to setup or unknown — 941/0.
+
+**The table is the slide's shape**: discipline across the top on the tenant's `--panel`, then Value / How / Measure rows on the accent, one column per value; How and Measure are bullets, typed one per line, with a leading `-`, `•` or `*` stripped. **One deck slide**, anchored `compete`, after the SWOT, drawn only when the section is on and holds something (§253: an empty table is not a slide).
+
+**Proved**: `checks/how-we-compete.py` all good — the rule at both ends, the Structure switch pressed, the section's place, every pen control pressed and the stored graph read back, the slide, and off hiding and keeping. Falsified from the sources (§276): the section's `when` forced true → 2 red; the slide call removed → 2 red. `checks/structure.py` held a count of sections per card that this moves (§214.3) — rewritten, never loosened (§218): the three-section count excludes How we compete, and a new assertion says it is on the top and units cards and no other. Neighbours green (structure-sections, plan-switch, slide-move, deck-blank-slides, client-setup, top-plan, fn-sw-default, function-sw, hide-slide, deck-strip); 140/0 differ, 69/0 platform rules.
+
+**Recorded, not done**: the top level's section has been proved as a rule and on the server but not walked visually; the plan download (.pptx of the plan) does not carry the table; the workbook has no sheet for it — an upload leaves it untouched.

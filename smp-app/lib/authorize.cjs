@@ -128,6 +128,9 @@ const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses", "mission", "value
 const UNIT_KNOWN      = UNIT_CONFIG.concat(UNIT_FOUNDATION,
   ["ukey", "weight", "perf", "keyObjectives", "swot", "items", "pend",
    HIDE_SLIDES, DRIVERS,
+   /* spec 064 §3: How we compete rides the unit (units.extra) and is
+      judged with the SWOT below — swept here, classified there (§259.2). */
+   "compete",
    /* §405: a unit that plans in projects or actions holds them itself, and
       they are classified below by the rules a function's own work gets. */
    "projects", "actions"]);
@@ -627,11 +630,12 @@ function collect(stored, incoming, w) {
      reported fields alone (`topKoView`), so a figure is judged as the company
      report's while the plan stays GROUP_OWN's above. Without this line the
      view carried them and nothing ever looked, so a figure went unjudged. */
-  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !same(sg.topProjects, ig.topProjects) ||
+  if (!same(sg.items, ig.items) || !same(sg.swot, ig.swot) || !sameCanon(sg.compete, ig.compete) ||
+      !same(sg.topProjects, ig.topProjects) ||
       !same(topKoView(sg), topKoView(ig)))
     collectUnit("group", topView(sg), topView(ig), add, w);
 
-  const gExtra = GROUP_OWN.concat(["items", "swot", "capabilities", "branding", "sets", "claims",
+  const gExtra = GROUP_OWN.concat(["items", "swot", "compete", "capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
                                    SEASONS, DRIVERS_ON, "planYear", "topProjects"]);
@@ -1085,6 +1089,11 @@ function collectUnit(key, su, iu, add, w) {
     add("unitFoundation", key, "the unit's own words", fieldRows(key, su.name || key, su, iu, UNIT_FOUNDATION));
   if (!same(su.swot, iu.swot))
     add("unitAnalysis", key, "the unit's SWOT", fieldRows(key, su.name || key, su.swot, iu.swot, ["s", "w", "o", "t"], "swot."));
+  /* spec 064 §3: How we compete sits beside the SWOT and is written by
+     whoever may write the SWOT. Compared canonically: it is an object of
+     lists, and jsonb hands an object's keys back in its own order (§145). */
+  if (!sameCanon(su.compete, iu.compete))
+    add("unitAnalysis", key, "how the unit competes");
 
   /* Key objectives: figure and note travel separately, because a figure may
      be somebody else's and a note never is. */
@@ -1373,7 +1382,7 @@ function topKoView(g) {
 function topView(g) {
   return { ukey: "group", items: (g && g.items) || [], keyObjectives: topKoView(g),
            projects: (g && g.topProjects) || [],
-           swot: (g && g.swot) || {}, aspiration: "", endInMind: "", clauses: [] };
+           swot: (g && g.swot) || {}, compete: g && g.compete, aspiration: "", endInMind: "", clauses: [] };
 }
 
 /* Capabilities. WHAT EXISTS and WHICH FUNCTION OWNS IT is Setup (c_caps);

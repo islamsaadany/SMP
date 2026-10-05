@@ -8121,6 +8121,34 @@ tr.topcapopen > td { padding:0 !important; white-space:normal; }
 .topcapadd { padding:10px 2px 0; }
 .topcapprow .grip { vertical-align:middle; margin-right:4px; }
 
+/* ── HOW WE COMPETE (spec 064 §3.4) ──────────────────────────────────
+   Islam's own slide: the discipline across the top in the tenant's bar
+   colour, then Value / How / Measure rows, one column per value. Spaced
+   cells rather than ruled ones, the signed-off mockup's shape. Every colour
+   is a token: --panel/--panel-ink is the tenant's brand, the row labels are
+   the accent as a FILL with --on-accent as its ink (§38.4: the accent
+   fails as type, never as a fill with its own ink). */
+.cmp { margin-top: 4px; }
+.cmp .tblscroll { overflow-x: auto; }
+table.cmptab { border-collapse: separate; border-spacing: 8px; width: calc(100% + 16px); min-width: 660px; margin: -8px; background: transparent; }
+table.cmptab th, table.cmptab td { border: 0; border-radius: 10px; padding: 10px 12px; vertical-align: top; font-size: 13.5px; white-space: normal; max-width: none; }
+table.cmptab tr > *:first-child { width: 118px; }
+table.cmptab thead th.cmprow, table.cmptab th.cmprow { background: var(--gold); color: var(--on-accent); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: 12px; text-align: center; vertical-align: middle; }
+table.cmptab thead th.cmprow { background: var(--panel); color: var(--panel-ink); }
+table.cmptab thead th.cmpd { background: var(--panel); color: var(--panel-ink); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; text-align: center; vertical-align: middle; }
+table.cmptab thead th.cmpd select.fld { width: auto; min-width: 200px; text-transform: none; letter-spacing: 0; }
+table.cmptab td { background: var(--surface-2); color: var(--ink-2); }
+table.cmptab td.cmpval { background: var(--line); color: var(--ink); font-weight: 700; font-size: 15px; text-align: center; vertical-align: middle; }
+table.cmptab td.cmpval .fld { font-weight: 700; text-align: center; }
+table.cmptab tbody tr:nth-child(even) > td, table.cmptab tbody tr:hover > td { background: var(--surface-2); }
+table.cmptab tbody tr:nth-child(even) > td.cmpval, table.cmptab tbody tr:hover > td.cmpval { background: var(--line); }
+.cmpul { margin: 0; padding-left: 16px; }
+.cmpul li + li { margin-top: 4px; }
+.cmpnone { color: var(--ink-3); }
+table.cmptab td.cmpnone { text-align: center; vertical-align: middle; }
+textarea.fld.cmpbox { min-height: 84px; width: 100%; }
+.cmp .addrow { margin-top: 10px; }
+
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
      and Exit returns to exactly where the presenter was standing.
@@ -9351,6 +9379,11 @@ tr.topcapopen > td { padding:0 !important; white-space:normal; }
 .dovs .side .row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:19px;color:var(--ink)}
 .dovs .side .row b{font-family:var(--mono);font-weight:600;white-space:nowrap}
 .dovs .side .row i{font-style:normal;color:var(--ink-3);font-size:17px;white-space:nowrap}
+  /* §492: How we compete on a slide — the page's table at projector size. */
+  .d-compete table.cmptab { min-width:0; margin:0; width:100%; }
+  .d-compete table.cmptab th, .d-compete table.cmptab td { font-size:17px; padding:14px 16px; }
+  .d-compete table.cmptab td.cmpval { font-size:20px; }
+  .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
 
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.

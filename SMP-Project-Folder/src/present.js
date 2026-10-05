@@ -297,6 +297,26 @@ function unitSwotSlides(u){
 
   return S;
 }
+/* §492: HOW WE COMPETE (spec 064 §3.1), one slide after the SWOT, drawn
+   only when the layer carries the section AND it holds something (§253: a
+   table with no rows is not a slide). The same table as the page. */
+function competeSlides(u){
+  if (!u || u.fnKey || !compOn(u.ukey, SMPRules.COMPETE)) return [];
+  var c = competeOf(u.ukey), vals = (c.values || []).filter(function(v){
+    return String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length; });
+  if (!c.discipline && !vals.length) return [];
+  var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
+    return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
+  var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
+  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
+    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+    '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
+    (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
+    '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +
+    '<tr><th class="cmprow">How</th>' + cells(function(v){ return '<td>' + ul(v.how) + '</td>'; }) + '</tr>' +
+    '<tr><th class="cmprow">Measure</th>' + cells(function(v){ return '<td>' + ul(v.measure) + '</td>'; }) + '</tr>' +
+    '</tbody></table></section>'];
+}
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -474,6 +494,7 @@ function deckSlides(u){
      side of the switch. */
   if (u.fnKey && compOn(u.ukey, "swot")) { var fsw = fnSWSlide(FUNCTIONS[u.fnKey]); if (fsw) S.push(fsw); }
   S = S.concat(short ? companyAnalysisSlides(u) : unitSwotSlides(u));
+  S = S.concat(competeSlides(u));
 
   /* ── 6 · THE PILLARS ARE NAMED BEFORE THEY ARE SCORED (§254.5) ────────
      Islam: *"before the pillars performance we need 1 slide with just the 2
@@ -1071,7 +1092,7 @@ function deckSlidesFn(subject){
      sits after its foundation. Never on a capability's own deck. */
   if (!isCap && !isUnit && compOn("fn:" + fk, "swot")) { var fsw = fnSWSlide(f); if (fsw) S.push(fsw); }
   /* §405: a unit presents its aspiration and its SWOT whichever way it plans. */
-  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); }
+  if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
     var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);

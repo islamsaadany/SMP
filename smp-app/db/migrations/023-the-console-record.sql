@@ -7,7 +7,7 @@
 
    THE NAMES ARE STORED ON THE ROW, AND THAT IS THE WHOLE MIGRATION. Both
    foreign keys are ON DELETE SET NULL, and *deleting a client* and *removing
-   a consultant* are two of the eleven acts recorded — so a row that read its
+   a consultant* are two of the acts recorded — so a row that read its
    subject through a join would lose exactly the two acts most worth keeping
    (§49.2: a record somebody tidied is no longer the record).
 

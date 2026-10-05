@@ -88,13 +88,13 @@ function tempPassword(): string { return crypto.randomBytes(9).toString("base64"
 
    ONE DOOR, SO ONE LINE OF WRITING. Every act out here arrives at
    `platformAction` below, so recording is a call at each act rather than a
-   change to fourteen screens — and the acts recorded are the eleven Islam
+   change to fourteen screens — and the acts recorded are the fifteen Islam
    signed off, named at their call sites. Opening a client is deliberately
    NOT one of them (*"opened a client is not really important"*), which is
    what `tenant_log` was originally for and what nothing writes now.
 
    THE SENTENCE IS WRITTEN HERE AND STORED, never re-derived on the read.
-   Two of the eleven acts DESTROY their own subject — deleting a client,
+   Two of the fifteen acts DESTROY their own subject — deleting a client,
    removing a consultant — and both foreign keys are ON DELETE SET NULL, so
    a page that read the names through a join would lose exactly the two acts
    most worth keeping (§49.2). `what` carries the act's own key so the page
@@ -105,6 +105,16 @@ function tempPassword(): string { return crypto.randomBytes(9).toString("base64"
    must not turn a client that was made into an error on the screen, so the
    failure goes to the runtime log and the act answers as it would have
    (§231.3's rule — a helper degrades to no record, never to no feature). */
+/* DID THIS PRESS ACTUALLY CHANGE ANYTHING (§487.1). Three of the four acts
+   added here ride handlers that write whatever arrives, identical or not, so
+   without this the record fills with rows for presses nobody made anything
+   with — and a record people learn to scroll past has stopped being one.
+   `record-always` is the falsification (§276, §298.2): a line claimed as the
+   fix has to be provable as one. */
+function moved(a: unknown, b: unknown) {
+  return process.env.SMP_BREAK === "record-always" || a !== b;
+}
+
 async function logAct(c: Q, who: Account, on: ClientRow | Tenant | null, what: string, detail: string) {
   if (process.env.SMP_BREAK === "no-record") return;   /* falsification (§276) */
   try {
@@ -291,7 +301,20 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     const existing = await accountByEmail(pool, email);
     if (body.isAdmin !== undefined && existing) {
       if (!FF.maySetAdmin(world, account, existing)) return no(403, existing.email === account.email ? "You cannot change your own admin rights." : "Only the platform admin sets that.");
-      await pool.query("UPDATE users SET is_admin = $2, updated_at = now() WHERE id = $1", [existing.id, !!body.isAdmin]);
+      const adminWas = !!existing.is_admin, adminNow = !!body.isAdmin;
+      await pool.query("UPDATE users SET is_admin = $2, updated_at = now() WHERE id = $1", [existing.id, adminNow]);
+      /* act 12 (§487.1). THE FLAG IS THE WIDEST THING THIS CONSOLE HANDS
+         OVER — it carries every column of Who sees what at once — so of the
+         four acts added on Islam's word this is the one the record most
+         needed. COMPARED BEFORE IT IS WRITTEN: the handler writes whatever
+         arrives, identical or not, so recording every press would put a row
+         on the record for a press that changed nothing. */
+      if (moved(adminNow, adminWas)) {
+        const who = existing.name || existing.email;
+        await logAct(pool, account, null, "consultant.admin",
+          adminNow ? "Gave " + who + " the platform admin flag"
+                   : "Took the platform admin flag off " + who);
+      }
     }
     /* RETIRING IS ITS OWN ACT, ASKED OF THE TARGET (§338). It used to ride
        the blanket UPDATE below with no test at all, so whoever manages
@@ -320,6 +343,13 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     }
     if (existing) {
       await pool.query("UPDATE users SET name = COALESCE($2, name), updated_at = now() WHERE id = $1", [existing.id, body.name || null]);
+      /* act 13 (§487.1) — and the comparison is against what the UPDATE
+         above actually STORED, not against a trimmed reading of it, so the
+         record says a name changed exactly when the stored name changed. */
+      if (body.name && moved(body.name, existing.name || "")) {
+        await logAct(pool, account, null, "consultant.renamed",
+          "Renamed " + (existing.name || existing.email) + " to " + body.name);
+      }
       /* THE ADDRESS ITSELF CAN CHANGE (§313.27). Keyed by id here, so a rename
          is one UPDATE; the sessions still end (§43's rule for a password
          change) and the address on each client's register follows, best
@@ -330,6 +360,14 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
         if (await accountByEmail(pool, to)) return { code: 409, body: { ok: false, error: "That address already belongs to somebody on this platform." } };
         await pool.query("UPDATE users SET email = $2, updated_at = now() WHERE id = $1", [existing.id, to]);
         await pool.query("DELETE FROM sessions WHERE user_id = $1", [existing.id]);
+        /* act 14 (§487.1), and it names BOTH addresses: the address IS the
+           identity here (§313.2, §87 — a name is never an identifier), so a
+           row naming only the new one cannot be traced back to the account
+           this was. Recorded before the registers are swept, which is best
+           effort per client and must not decide whether the act is on the
+           record (§231.3). */
+        await logAct(pool, account, null, "consultant.address",
+          "Changed " + (existing.name || email) + "'s address from " + email + " to " + to);
         for (const m of (await pool.query("SELECT tenant_id, person_key FROM tenant_users WHERE user_id = $1", [existing.id])).rows) {
           try {
             await withTenant(m.tenant_id, (c) => c.query("UPDATE people SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{email}', to_jsonb($2::text)) WHERE key = $1", [m.person_key, to]));
@@ -1072,7 +1110,11 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
 
   /* ── Who sees what ── */
   if (action === "access") {
-    return ok({ areas: FF.AREAS, defaults: FF.ACCESS_DEFAULTS[FF.EVERYONE], stored: world.access[FF.EVERYONE] || {}, canEdit: FF.mayEditAccess(world, account) });
+    /* `words` is the shared module's own map (§487.1): the page drew these by
+       capitalising the state key, and the record now writes them into a
+       sentence, so the word is answered once and sent rather than decided in
+       two places (§53.5). */
+    return ok({ areas: FF.AREAS, defaults: FF.ACCESS_DEFAULTS[FF.EVERYONE], stored: world.access[FF.EVERYONE] || {}, canEdit: FF.mayEditAccess(world, account), words: FF.STATE_NAMES });
   }
   if (action === "saveAccess") {
     if (!FF.mayEditAccess(world, account)) return no(403, "This table is the platform admin's.");
@@ -1081,8 +1123,25 @@ export async function platformAction(pool: Q, me: SessionUser, body: any): Promi
     if (!area) return no(400, "There is no such column.");
     const state = String(body.grant || "");
     if (area.states.indexOf(state) < 0) return no(400, "That is not a setting for that column.");
+    /* READ THE SETTING BEFORE THE WRITE, THROUGH THE RULE THAT ANSWERS IT
+       EVERYWHERE ELSE (§53.5): `grantIn` already knows that an absent row
+       means the shipped default rather than "denied" (§30.2), so the record
+       cannot describe a change from a state the platform was never in. */
+    const was = FF.grantIn(world, areaKey);
     if (state === FF.ACCESS_DEFAULTS[FF.EVERYONE][areaKey]) await pool.query("DELETE FROM platform_access WHERE role_key = $1 AND area_key = $2", [FF.EVERYONE, areaKey]);
     else await pool.query("INSERT INTO platform_access (role_key, area_key, grant_) VALUES ($1,$2,$3) ON CONFLICT (role_key, area_key) DO UPDATE SET grant_ = EXCLUDED.grant_", [FF.EVERYONE, areaKey, state]);
+    /* act 15 (§487.1) — Islam: *"yes let's do it"*, of the one act §487
+       flagged and left. IT NAMES WHAT IT WAS, which no other act here does:
+       everywhere else the detail describes a thing that now exists, and a
+       permission is only readable against what it replaced — "Demo is Open"
+       says nothing about whether somebody opened it. A press that puts the
+       lit setting back (the table's own way to say "nothing", §37) is a real
+       change and is recorded; a press on the setting already in force
+       changes nothing and records nothing. */
+    if (moved(state, was)) {
+      await logAct(pool, account, null, "access.set",
+        "Set " + area.name + " to " + FF.stateName(state) + " (was " + FF.stateName(was) + ")");
+    }
     return ok({});
   }
   return no(400, "unknown action");

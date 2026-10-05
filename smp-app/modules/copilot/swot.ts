@@ -1,4 +1,4 @@
-/* ── THE SWOT CHAT AND THE SOURCES, ON THE SERVER (§482) ────────────────
+/* ── THE SWOT CHAT AND THE SOURCES, ON THE SERVER (§490) ────────────────
    Split from index.ts so that file stays the Foundation's and the gate's.
    The same three rules hold here as there: every write is judged against
    the STORED row (§42); the model is asked with no transaction open (§289),
@@ -42,7 +42,7 @@ export async function swotView(c: any, chat: { id: string; place: string; sectio
   const s = await swotOf(c, chat.id);
   if (!s) return {};
   const todo = todoOf(s);
-  /* "Help me understand" is the old Copilot's library (§482.2), chosen by
+  /* "Help me understand" is the old Copilot's library (§490.2), chosen by
      the client's own industry; a question it does not cover keeps its line. */
   const ind = (await c.query("SELECT industry FROM tenants WHERE id = NULLIF(current_setting('app.tenant_id', true), '')::uuid")).rows[0]?.industry || "";
   const questions: Record<string, any[]> = {};

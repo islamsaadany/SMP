@@ -393,14 +393,14 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 :root[data-cop-page] #secrow .tabs-in { padding-top:3px; padding-bottom:3px; }
 :root[data-cop-page] .coppane { gap:10px; }
 
-/* ── THE SWOT FLOW (§482, from design-mockups/copilot-swot-flow/2026-10-04_v2.html)
+/* ── THE SWOT FLOW (§490, from design-mockups/copilot-swot-flow/2026-10-04_v2.html)
    Platform tokens only (§25). The to-do column is 340px (Islam: "more
    compact horizontally") and drops under the work below 1020px. ── */
 .copsw { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px; align-items:start; margin-top:10px; }
 @media (max-width:1020px){ .copsw { grid-template-columns:minmax(0,1fr); } }
 .copsw-main { min-width:0; display:flex; flex-direction:column; gap:12px; }
 .copsw-side { display:flex; flex-direction:column; gap:12px; min-width:0; }
-/* §482.1 COMPACT COLUMNS (design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html,
+/* §490.1 COMPACT COLUMNS (design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html,
    signed off with one addition): in a SWOT chat the chats rail is 200px and the
    to-do 270px, and the work and the to-do each scroll in their own box, so
    reading the end of the list no longer scrolls the work away. The to-do's
@@ -483,7 +483,7 @@ span.copsw-lb { cursor:default; }
 .copsw-check ul.ok li { color:var(--good-tx); }
 .copsw-check ul.bad li { color:var(--bad-tx); }
 .copsw-end { margin-top:4px; }
-/* ── the rail folds (§482) ── */
+/* ── the rail folds (§490) ── */
 .copfoldb { flex:none; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-3); cursor:pointer; border-radius:4px; }
 .copfoldb:hover, .copfoldb:focus-visible { color:var(--ink); background:var(--surface-2); outline:none; }
 .copfoldb svg { width:14px; height:14px; transition:transform .12s; }
@@ -496,7 +496,7 @@ span.copsw-lb { cursor:default; }
 .copsrcrow .copitem { flex:1 1 auto; min-width:0; text-decoration:none; color:inherit; }
 .copsrcacts { display:flex; align-items:center; gap:10px; flex:none; padding-top:4px; }
 
-/* ── §482.2 ONE RAIL WIDTH, A COMPACT TO-DO, A FOUNDATION TO-DO, TIGHT EQUAL
+/* ── §490.2 ONE RAIL WIDTH, A COMPACT TO-DO, A FOUNDATION TO-DO, TIGHT EQUAL
    SPACE (design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html and
    2026-10-04_spacing-and-fold.html, both signed off). The chats rail is 200px
    in every phase (it no longer jumps between chats), every gap around the
@@ -543,7 +543,7 @@ span.copsw-lb { cursor:default; }
 .copswhelp p { margin:0; }
 .copswhelp .ex { font-style:italic; color:var(--ink-2); }
 .copswhelp .src { font-size:11px; color:var(--ink-3); }
-/* §482.2 — with the panels reaching the foot of the page, a plain chat's box
+/* §490.2 — with the panels reaching the foot of the page, a plain chat's box
    reaches the corner the office chat button floats over (18px in, 50px
    round), and that button sat ON Send. The box ends where the panel's 8px
    ends (the old -16px matched the old 16px padding), and only where the box

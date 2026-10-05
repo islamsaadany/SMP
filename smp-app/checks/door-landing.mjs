@@ -623,7 +623,7 @@ await section("7 · the client's set-up lives in its own Setup rail (§360, spec
        rather than a Words step of their own. Still seven, still client first. */
     "…on step 1 of seven, the client itself (§404.4's order)", JSON.stringify([r.steps, r.step]));
   check(r.name === nameBefore, "step 1 shows the name the registry holds — AGREEMENT with tenants.name", JSON.stringify([r.name, nameBefore]));
-  /* §480: REWRITTEN, NEVER LOOSENED (§218, §214.3). §461 made the client's
+  /* §489: REWRITTEN, NEVER LOOSENED (§218, §214.3). §461 made the client's
      door mark the decks' mark too and DELETED Branding's group-mark upload
      (`data-glogo`), so this asked for a control a decision removed. What it
      was for — the colours AND a mark are set inside the flow — still holds:

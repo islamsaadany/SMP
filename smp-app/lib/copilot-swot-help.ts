@@ -1,5 +1,5 @@
 /* The "Help me understand" library, carried verbatim from the old Strategy
-   Copilot (strategy_copilot/lib/data/expanded-explanations.ts), §482.2.
+   Copilot (strategy_copilot/lib/data/expanded-explanations.ts), §490.2.
    Islam: "fetch the old library don't write a new one". The text below the
    marker is that file unchanged; what is added after it is only how a SWOT
    question key and a client's industry find their entry. */
@@ -1843,7 +1843,7 @@ export function getExplanation(
   return questionExplanations[industry as Industry] || questionExplanations['Other']
 }
 
-/* ── SMP side (§482.2) ─────────────────────────────────────────────── */
+/* ── SMP side (§490.2) ─────────────────────────────────────────────── */
 
 /* A SWOT question key → which library and which entry. The sixteen
    internal questions have no entry and keep their short help. */

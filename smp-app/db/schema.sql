@@ -1427,7 +1427,7 @@ CREATE TABLE copilot_files (
 );
 CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
 
--- A source the Copilot reads (§482): belongs to the CLIENT, not to a chat, so
+-- A source the Copilot reads (§490): belongs to the CLIENT, not to a chat, so
 -- one brought in for one unit's SWOT can be picked again for another's.
 -- place is the unit it is about, or 'all'. bytes is NULL for a text source.
 CREATE TABLE copilot_sources (

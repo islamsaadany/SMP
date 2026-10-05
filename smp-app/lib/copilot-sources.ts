@@ -1,4 +1,4 @@
-/* ══ THE COPILOT'S SOURCES (§482, spec 064 — the SWOT flow) ═════════════
+/* ══ THE COPILOT'S SOURCES (§490, spec 064 — the SWOT flow) ═════════════
    Islam, of the mockup: "per client is better". A source is anything brought
    in for an analysis — a ready report, a filled interview template, a deep
    research answer, a set of guided answers — and it belongs to the CLIENT,

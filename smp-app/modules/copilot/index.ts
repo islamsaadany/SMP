@@ -103,7 +103,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
 { const chats = await chatsOn(c, place, section);
           return { ok: true, chats, archived: await chatsOn(c, place, section, true),
             mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section),
-            /* The rail's "N of M done" under a SWOT chat (§482). */
+            /* The rail's "N of M done" under a SWOT chat (§490). */
             swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id)) : {} }; }));
     }
     if (first === "chat") {

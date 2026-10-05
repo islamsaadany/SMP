@@ -61742,7 +61742,7 @@ values are live ticks, off until pressed; themes still greyed). `setup-shape`'s
 other two reds (`desc`, the top level) are main's, recorded before.
 
 
-## §480 — two checks main was red on, both stale, both rewritten (never loosened)
+## §489 — two checks main was red on, both stale, both rewritten (never loosened)
 
 Islam: *"do 1"* — clear the two failures recorded at §479 as main's own.
 **Neither was a product fault**; each asserted a literal that a later,
@@ -61772,13 +61772,15 @@ inside the set-up flow, and the separate group-mark upload is ABSENT. 146/0.
 
 No product file changes; nothing stored, nothing migrated, no `sw.js` bump.
 
-## §482 — The SWOT Copilot flow (spec 064, 2026-10-04)
+## §490 — The SWOT Copilot flow (spec 064, 2026-10-04)
 
 Islam, of the signed-off mockup `design-mockups/copilot-swot-flow/2026-10-04_v2.html`:
-*"proceed"*, then *"continue"*. Numbered §482 because main took §480 and §481
-while this was built; the renumber touched only this work's own lines
-(§264.3), and `checks/door-landing.mjs` and `checks/setup-shape.mjs` keep
-main's §480.
+*"proceed"*, then *"continue"*. Numbered §482 when it
+was built; renumbered §490 at the 2026-10-05 merge, because main had taken
+§480&ndash;§488 for its own work meanwhile (the company's directions, the
+console record). This branch's own §480 (two stale checks) became §489 in the
+same pass. Both renumbers ran before the merge and touched only this work's
+own lines (§264.3).
 
 **THE FLOW.** A SWOT chat starts from the subject's existing SWOT or fresh,
 then a methods grid — rows Internal · Micro · Macro, columns Guided questions ·
@@ -61829,7 +61831,7 @@ browser and the whole file re-run; `built-in-step` and `generated-in-step`
 clear; typecheck clean. **RECORDED, NOT DONE**: main has moved ahead of this
 branch; nothing is merged.
 
-### §482.1 — Compact columns, and a to-do header that stays put (2026-10-04)
+### §490.1 — Compact columns, and a to-do header that stays put (2026-10-04)
 Islam asked for the SWOT chat to be compacted: a narrower chats column on the
 left, a narrower to-do column on the right, and the work and the to-do list
 scrolling separately. Drawn first (`design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html`,
@@ -61856,7 +61858,7 @@ list scrolling you need to keep the header freezed"*.
   still at the top of the column AND the thing a click lands on (`elementFromPoint`,
   never a computed `position`, §94.8).
 
-### §482.2 — One rail width, a compact to-do, the old help library, a Foundation to-do, tight equal space (2026-10-04)
+### §490.2 — One rail width, a compact to-do, the old help library, a Foundation to-do, tight equal space (2026-10-04)
 Islam, of the SWOT and Foundation chats: the left panel changing size between
 phases, a to-do that was too tall, *"help me understand is not working, the
 copilot had a big library of answers for this for each question"*, a to-do for
@@ -61867,7 +61869,7 @@ with *"proceed"*, after his own answers: *"fetch the old library dont' write a
 new one"*, *"let's keep all the surrounding space tight and equal"*, the to-do
 the same width as the chats panel, the chats panel folding when a chat starts,
 and the columns reaching the bottom of the page.
-- **The chats rail is 200px in every phase**, not only in a SWOT chat (§482.1's
+- **The chats rail is 200px in every phase**, not only in a SWOT chat (§490.1's
   `:has(.copsw)` scope goes); its folded strip stays 24px.
 - **A chat that starts or opens folds the rail to its strip**, so the work gets
   the room. Pressed open again it stays open for the rest of the visit (`RAILKEPT`,
@@ -61904,13 +61906,13 @@ and the columns reaching the bottom of the page.
   put a to-do there), keeps 64px clear of the button. Asserted as a hit test on
   Send (§94.8).
 - **Recorded, not changed**: the same button still sits over the foot of the to-do
-  column in a SWOT or Foundation chat (flagged at §482.1); in those columns it
+  column in a SWOT or Foundation chat (flagged at §490.1); in those columns it
   covers the last line, not a control that has no other way in.
 - Checks: `check:copilot` 210/0 (the help attached to a micro and a macro question
   and not to an internal one, the industry pick and its fallback); `shell.mjs`
   280/0 — the rail folding when a chat opens and coming back at 200px, Send
   pressable, the SWOT to-do and rail both 200px, the count read as `0/5`. Three
-  §482.1 assertions REWRITTEN to the new numbers, never loosened (§218), and the
+  §490.1 assertions REWRITTEN to the new numbers, never loosened (§218), and the
   years assertion made to wait for its save rather than racing it (one red in
   three runs). An earlier `check:copilot` red was two runs sharing one database,
   not the product; alone it is green.

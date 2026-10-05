@@ -19,7 +19,7 @@
        platform's line, the Word file's words, the PDF as itself; then the
        answer kept, assumptions recorded once and sent back, the paste offer,
        a failure and no key each saying so and keeping what was typed;
-     · §7 (§482) the SWOT chat and the sources shelf — who may delete a
+     · §7 (§490) the SWOT chat and the sources shelf — who may delete a
        source at both ends, a saved state the page cannot claim, an analysis
        refused until the to-do list is done and a save until there is a draft;
      · §4 the catalogue — every table RLS-forced with the policy IDENTICAL to
@@ -804,7 +804,7 @@ try {
     await new Promise((r) => stand.close(r));
   }
 
-  /* ══ §7 · the SWOT chat and the sources shelf (§482) ═════════════════
+  /* ══ §7 · the SWOT chat and the sources shelf (§490) ═════════════════
      Every gate asked of the STORED row, never of the page (§42), and each
      at both ends (§94.2): who may delete a source, a saved SWOT the page
      cannot claim, an analysis refused until the to-do list is done, and a
@@ -832,7 +832,7 @@ try {
   const sw_sv = await call("POST", "api", { act: "swotSave", id: sw_sid, placeWord: "Mobile",
     swot: { methods: { internal: ["guided"], micro: ["report"], macro: [] }, ans: { internal: SWQ.internal.map(() => "") } } }, NORAN);
   check("ticks are kept and the list says 0 of 4", sw_sv.st === 200 && sw_sv.j.swotDone === 0 && sw_sv.j.swotTodo.length === 4, JSON.stringify(sw_sv.j && sw_sv.j.swotTodo));
-  /* §482.2 — "Help me understand" is the old library, chosen by the client's industry. */
+  /* §490.2 — "Help me understand" is the old library, chosen by the client's industry. */
   const sw_q = sw_sv.j && sw_sv.j.swotQuestions || {};
   const sw_mi = (sw_q.micro || []).find((q) => q.key === "rivalry"), sw_ma = (sw_q.macro || []).find((q) => q.key === "economic");
   check("a micro and a macro question carry the old library's help (simpler terms, things to think about, an example)",

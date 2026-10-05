@@ -139,7 +139,7 @@ let asked = [];
   if (BREAK === "extra-word") asked.push("howevertheyspellit");
 }
 const held = (seed.labels || []).map((e) => e.key);
-/* §480: A PART'S WORD HAS TWO HOMES NOW, and the check knew one. §418 names
+/* §489: A PART'S WORD HAS TWO HOMES NOW, and the check knew one. §418 names
    a section's parts per LAYER on the structure, and a part that has no row on
    Setup › Terminology (§436's `desc`, a function's description) falls back to
    SMPRules.PART_DEFAULTS — which is exactly what the product's own reader,
@@ -370,7 +370,7 @@ console.log("\n8 · an empty capability is not authored work");
   check("a unit on a new client shows no Themes, Capabilities or Values",
     ["theme", "capability", "values"].every((c) => !R.compOn(bare.group, "mobile", c)) &&
     ["brief", "pillar", "swot"].every((c) => R.compOn(bare.group, "mobile", c)));
-  /* §480: "carries everything" was true when §404.5 wrote it and stopped
+  /* §489: "carries everything" was true when §404.5 wrote it and stopped
      being true at Islam's word twice since — §427 holds the parts a company
      page cannot draw off, and §428.2 starts the group's own SWOT off. What
      §404.5 actually claimed is that a NEW client's defaults leave the top

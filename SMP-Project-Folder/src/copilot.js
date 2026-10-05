@@ -859,7 +859,7 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
-  /* THE FOUNDATION'S TO-DO (§482.2): the same compact list the SWOT chat
+  /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
      carries, worked out from the flow as it stands — nothing is stored for it.
      Start, each part with its answers counted, then the check and the save. */
   function ftodoHtml(f){
@@ -1098,7 +1098,7 @@ var COPILOT = (function(){
   }
   window.addEventListener("resize", function(){ fitPane(); fitBox(); });
 
-  /* ── THE SWOT FLOW (§482, Islam 4 Oct 2026, from the signed-off
+  /* ── THE SWOT FLOW (§490, Islam 4 Oct 2026, from the signed-off
      design-mockups/copilot-swot-flow/2026-10-04_v2.html) ──────────────
      A SWOT chat is a to-do list rather than a conversation: which areas
      (internal, micro, macro) and which methods each uses are ticked in a
@@ -1211,7 +1211,7 @@ var COPILOT = (function(){
       return '<div class="copsw-tg"><div class="copsw-th">' + (g === "_" ? "Then" : E((PANE.swotAreaWord || {})[g] || g)) + '</div><ul>' +
         seen[g].map(function(t){
           var on = swLineKey(t) === cur, pill = t.state === "done" ? "Done" : t.state === "wait" ? "Waiting" : "To do";
-          /* Compact (§482.2): the line's "n of m" rides in its title as n/m; the
+          /* Compact (§490.2): the line's "n of m" rides in its title as n/m; the
              status sentence stays on the hover rather than a second line. */
           var nm = /(\d+)\s+of\s+(\d+)/.exec(String(t.status || "")), cnt = nm ? '<i>' + nm[1] + '/' + nm[2] + '</i>' : '';
           var label = '<span class="copsw-tt" title="' + E(t.status || "") + '"><span>' + E(t.title) + '</span>' + cnt + '</span><span class="copsw-ts">' + E(t.status) + '</span>';
@@ -1233,7 +1233,7 @@ var COPILOT = (function(){
         }).join("") + '</div></div>' +
     '</aside>';
   }
-  /* "Help me understand" (§482.2): the old Copilot's library, in the
+  /* "Help me understand" (§490.2): the old Copilot's library, in the
      client's industry, where the question has an entry; its short line
      otherwise (the sixteen internal questions keep theirs). */
   function swHelpHtml(q){
@@ -1511,7 +1511,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  /* ── the rail folds (§482: "the deliverables and sources open folded") ── */
+  /* ── the rail folds (§490: "the deliverables and sources open folded") ── */
   var FOLD_DEFAULT = { chats: false, delivs: true, sources: true }, FOLD = {};
   function folded(k){
     if (k in FOLD) return FOLD[k];
@@ -1557,7 +1557,7 @@ var COPILOT = (function(){
   }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
-    /* A chat opening folds the chats rail to its strip (§482.2) — unless
+    /* A chat opening folds the chats rail to its strip (§490.2) — unless
        the person has opened it again themselves this visit; then it stays. */
     if (kind === "chat" && !RAILKEPT && !railShut()) setRail(true);
     if (!PANE || PANE.id !== id) PANE = null;

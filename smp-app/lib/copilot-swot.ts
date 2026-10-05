@@ -1,4 +1,4 @@
-/* ══ THE SWOT FLOW (§482, the signed-off
+/* ══ THE SWOT FLOW (§490, the signed-off
    design-mockups/copilot-swot-flow/2026-10-04_v2.html) ═══════════════════
    Islam: "proceed". A SWOT chat starts from the place's SWOT or from nothing,
    asks which METHODS feed each of the three areas — internal (strengths and

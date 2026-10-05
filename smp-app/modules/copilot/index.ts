@@ -41,6 +41,7 @@ import { shellHeaders } from "../../lib/shell.ts";
 import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
 import { doorPool, getSession, readCookie } from "../../lib/auth.ts";
 import { SWOT_ACTS, SWOT_ASKS, swotAct, swotAsk, swotView, swotProgress, sourcesGet, sourceFile } from "./swot.ts";
+import { COMPETE_ACTS, COMPETE_ASKS, competeAct, competeAsk, competeView, competeProgress } from "./compete.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
@@ -104,7 +105,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
           return { ok: true, chats, archived: await chatsOn(c, place, section, true),
             mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section),
             /* The rail's "N of M done" under a SWOT chat (§490). */
-            swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id)) : {} }; }));
+            swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id))
+              : section === "compete" ? await competeProgress(c, chats.map((x: any) => x.id)) : {} }; }));
     }
     if (first === "chat") {
       const id = q("id");
@@ -119,7 +121,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
           ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}),
-          ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}) };
+          ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
+          ...(chat.section === "compete" ? await competeView(c, chat) : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -170,6 +173,14 @@ export async function serve(a: ServeArgs): Promise<Response> {
     }
     if (SWOT_ASKS.includes(String(body.act))) {
       const r = await swotAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (COMPETE_ASKS.includes(String(body.act))) {
+      const r = await competeAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (COMPETE_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => competeAct(c, body, who));
       return json(r.status, r.body);
     }
     if (SWOT_ACTS.includes(String(body.act))) {

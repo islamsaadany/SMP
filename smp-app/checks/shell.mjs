@@ -33,6 +33,7 @@ import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
 import { MODULE_DEF } from "../lib/modules.ts";
 import { QUESTIONS } from "../lib/copilot-swot.ts";
+import { MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { categoriesPresent, insertItem, setState, draftOf, CATEGORIES } from "../lib/library.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
@@ -1548,6 +1549,76 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables; delete from copilot_sources")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup
+     (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
+     One stand-in answer holds every key the three asks need. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  const mk = (fs, f) => Object.fromEntries(fs.map((x) => [x.id, f()]));
+  const val = (t) => ({ title: t, how: ["One " + t.toLowerCase(), "Clear prices"], measure: [t + " under 2%"] });
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    market: mk(CP_M, () => ({ btc: 2, bts: 1, bp: 0 })), internal: mk(CP_I, () => ({ btc: 2, bts: 0, bp: 1 })),
+    values: ["Hassle-free", "Lowest price", "Wide reach", "Fast service", "Easy finance"].map(val),
+    reply: "Done — the first value is renamed.", alternatives: ["Effortless", "No fuss"],
+  });
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'compete' s from copilot_chats where section = 'compete' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/compete");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-cp-sc], [data-cop-cp-score]", { timeout: 15000 });
+    if (!(await page.$("[data-cop-cp-sc]")) && (await page.$("[data-cop-cp-score]"))) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); }
+    let r = await row();
+    check(!!r && r.s && r.s.phase === "discipline", "a new chat scores itself and moves on to the discipline", JSON.stringify(r && r.s && r.s.phase));
+    const rec = await page.evaluate(() => (document.querySelector('[data-cop-cp-choose].rec') || {}).getAttribute ? document.querySelector('[data-cop-cp-choose].rec').getAttribute("data-cop-cp-choose") : null);
+    check(rec === "btc", "the page recommends the discipline the scores lead with", rec);
+    const few = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
+    check(few === 9, "the market table opens on three factors, a pill per discipline", few);
+    await page.click(".copcp-more [data-cop-cp-more]"); await page.waitForTimeout(300);
+    const all = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
+    check(all === CP_M.length * 3, "…and + more shows every market factor", all);
+    const k0 = "market:" + CP_M[0].id + ":bp";
+    await page.click('[data-cop-cp-sc="' + k0 + '"]');
+    await page.waitForTimeout(700);
+    r = await row();
+    check(r.s.market[CP_M[0].id].bp === 1 && (r.s.edited || []).includes(k0), "pressing a pill changes that score and marks it edited, stored", JSON.stringify(r.s.market[CP_M[0].id]));
+    check(await page.evaluate((k) => { const b = document.querySelector('[data-cop-cp-sc="' + k + '"]'); return !!b && b.classList.contains("ed"); }, k0), "…and the pill shows it was changed by hand");
+    await page.click('[data-cop-cp-choose="btc"]');
+    await page.waitForSelector("[data-cop-cp-pick]", { timeout: 15000 });
+    check((await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "choosing the discipline brings five value cards");
+    await page.click('[data-cop-cp-pick="0"]'); await page.waitForTimeout(400);
+    await page.click('[data-cop-cp-pick="2"]'); await page.waitForTimeout(400);
+    await page.click("[data-cop-cp-use]");
+    await page.waitForSelector("table.cmptab, [data-cop-cp-cell]", { timeout: 15000 });
+    r = await row();
+    check(r.s.table && r.s.table.discipline === "btc" && r.s.table.values.map((v) => v.title).join() === "Hassle-free,Wide reach", "the two ticked values become the table, stored", JSON.stringify(r.s.table && r.s.table.values.map((v) => v.title)));
+    const cells = await page.$$eval("[data-cop-cp-cell]", (a) => a.length);
+    check(cells === 6, "every cell of the table is editable before saving", cells);
+    await page.fill("[data-cop-cp-ask]", "Rename the first value");
+    await page.click("[data-cop-cp-refine]");
+    await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
+    const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
+    check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
+    await page.click("[data-cop-cp-finish]");
+    await page.waitForTimeout(1500);
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'How we compete%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "How we compete — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
+    const plan = await page.evaluate(() => { try { const w = UNITS.mobile.compete; return w ? [w.discipline, w.values.length] : null; } catch (e) { return String(e); } });
+    check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and the table is written into the plan's How we compete", JSON.stringify(plan));
+    check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
   }
 });

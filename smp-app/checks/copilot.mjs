@@ -1,7 +1,7 @@
 /* ── THE STRATEGY COPILOT, STAGES 1 AND 2 (spec 064) ─────────────────────────────
    The shelf with no AI yet, checked against a real Postgres:
 
-     · §1 the pure rules — the five sections, the shape of a place word, who
+     · §1 the pure rules — the seven sections, the shape of a place word, who
        may delete a chat (both ends, §94.2), and the stamp's own rule;
      · §2 every statement run as `smp_app` with the tenant set — a chat keeps
        what is typed and answers with the product's line, versions only go
@@ -47,6 +47,7 @@ import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
 import { methodFor } from "../lib/copilot-settings.ts";
+import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
 import { moduleMenu } from "../lib/modules.ts";
@@ -67,7 +68,7 @@ const probe = async (what, fn) => { try { return await fn(); } catch (e) { check
 
 /* ══ §1 · the rules ══════════════════════════════════════════════════ */
 section("§1 · the sections, the place word, and who may delete");
-check("five sections, in the record's order", SECTIONS.join(",") === "foundation,analysis,directions,execution,advisory");
+check("seven sections, in the record's order (§493: How we compete after the analysis, Capabilities before Execution)", SECTIONS.join(",") === "foundation,analysis,compete,directions,capabilities,execution,advisory");
 check("a near miss is not a section", !isSection("Foundation") && !isSection("plan") && isSection("advisory"));
 check("a place is the product's own word — group, a unit, fn:, co:, cap:",
   ["group", "mobile", "fn:finance", "co:distribution", "cap:cap6"].every(isPlace));
@@ -145,6 +146,23 @@ check("each section's guidance carries the house rules; the roads only where the
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
+/* §493: How we compete — the one scoring function (§94.8). */
+{
+  const all = (fs, sc) => Object.fromEntries(fs.map((f) => [f.id, sc]));
+  const r = cpResult("market", all(CP_M, { btc: 2, bts: 1, bp: 0 }));
+  check("§493 a side totals out of 20 and reads as a per-cent", r.complete && r.total.btc === 20 && r.pct.btc === 100 && r.pct.bts === 50 && r.pct.bp === 0, JSON.stringify(r));
+  check("...a gap over 25 points is Clear", r.leader === "btc" && r.second === "bts" && r.gap === 50 && r.clarity === "clear");
+  const tie = cpResult("market", all(CP_M, { btc: 1, bts: 1, bp: 1 }));
+  check("...a tie breaks btc, then bts, then bp, and reads Unclear", tie.leader === "btc" && tie.second === "bts" && tie.clarity === "unclear", JSON.stringify(tie));
+  const tie2 = cpResult("market", all(CP_M, { btc: 0, bts: 2, bp: 2 }));
+  check("...bts before bp when they tie at the top", tie2.leader === "bts" && tie2.second === "bp", tie2.leader + "," + tie2.second);
+  const part = cpResult("internal", { operations: { btc: 2, bts: 0, bp: 0 } });
+  check("...one factor scored is not complete", part.complete === false);
+  const lean = Object.fromEntries(CP_I.map((f, k) => [f.id, k < 2 ? { btc: 2, bts: 0, bp: 0 } : { btc: 1, bts: 1, bp: 0 }]));
+  const lr = cpResult("internal", lean);
+  check("...a 20-point gap is Leaning", lr.gap === 20 && lr.clarity === "leaning", JSON.stringify(lr.pct));
+}
+
 /* §460: the conversation fixes, A B C, each asked of the rule itself. */
 {
   const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
@@ -781,6 +799,75 @@ try {
       JSON.stringify(fin2.j.saved) + " · " + nd);
     const hendSave = await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, HEND);
     check("a client's own person cannot write a flow", hendSave.st === 403);
+    NEXT = null;
+    }
+
+    /* ══ §8 · the How-we-compete chat (§493) ═══════════════════════════
+       Scored, chosen, valued, refined and saved through the stand-in; every
+       gate asked of the STORED chat (§42), both ends (§94.2). */
+    {
+    section("§8 · the How-we-compete chat: scored, chosen, valued, refined, saved");
+    const mk = (fs, f) => Object.fromEntries(fs.map((x, k) => [x.id, f(k)]));
+    const SC = { market: mk(CP_M, () => ({ btc: 2, bts: 1, bp: 0 })), internal: mk(CP_I, () => ({ btc: 1, bts: 2, bp: 0 })) };
+    const VALS = [1, 2, 3, 4, 5].map((n) => ({ title: "Value " + n, how: ["How " + n], measure: ["Measure " + n] }));
+    const hn = await call("POST", "api", { act: "newCompete", place: "mobile" }, HEND);
+    check("a client's own person cannot start one", hn.st === 403, hn.st + "");
+    const nc = await call("POST", "api", { act: "newCompete", place: "mobile" }, NORAN);
+    check("the office starts a How we compete chat, on the score step, with the twenty factors",
+      nc.st === 200 && nc.j.chat?.section === "compete" && nc.j.compete?.phase === "score" && nc.j.competeFactors?.market.length === 10 && nc.j.competeFactors?.internal.length === 10 && nc.j.competeTodo.length === 5,
+      JSON.stringify(nc.j).slice(0, 200));
+    const cid = nc.j.chat?.id;
+    const early = await call("POST", "api", { act: "competeValues", id: cid, placeWord: "Mobile" }, NORAN);
+    check("values are refused before a discipline is chosen", early.st === 400 && /Choose the discipline/.test(early.j.why), JSON.stringify(early.j));
+    const noTab = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, NORAN);
+    check("saving is refused while there is no table — asked of the stored chat", noTab.st === 400 && /check the table/.test(noTab.j.why), JSON.stringify(noTab.j));
+    NEXT = { answer: { market: { [CP_M[0].id]: { btc: 2, bts: 1, bp: 0 } }, internal: SC.internal } };
+    const half = await call("POST", "api", { act: "competeScore", id: cid, placeWord: "Mobile" }, NORAN);
+    check("scores that come back incomplete are refused, never half-kept", half.st === 503, half.st + "");
+    NEXT = { answer: SC };
+    const sc = await call("POST", "api", { act: "competeScore", id: cid, placeWord: "Mobile", context: "SWOT: strong stores" }, NORAN);
+    check("scored through the model, the chat moves to choosing and recommends what the market rewards",
+      sc.st === 200 && sc.j.compete?.phase === "discipline" && sc.j.competeResult?.recommended === "btc" && sc.j.competeResult?.market.pct.btc === 100 &&
+      sc.j.competeResult?.internal.leader === "bts" && sc.j.competeResult?.aligned === false, JSON.stringify(sc.j.competeResult || sc.j).slice(0, 200));
+    check("...and the model was asked for every factor", /operations/.test(JSON.stringify(seen[seen.length - 1] || "")) && /switching_costs/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    let C = sc.j.compete;
+    const fake = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...(C||{}), phase: "saved", saved: { deliverableId: "x", n: 7, title: "fake" } } }, NORAN);
+    check("the page cannot say it is saved — `saved` is the product's", fake.st === 200 && fake.j.compete?.saved === null && fake.j.compete?.phase !== "saved", JSON.stringify(fake.j.compete && fake.j.compete?.saved));
+    const ahead = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...(C||{}), phase: "table" } }, NORAN);
+    check("the phase never runs ahead of the work", ahead.j.compete?.phase === "discipline", ahead.j.compete?.phase);
+    const ed = JSON.parse(JSON.stringify(C || {market:{}})); (ed.market = ed.market || {})[CP_M[1].id] = { btc: 0, bts: 2, bp: 2 }; ed.edited = ["market:" + CP_M[1].id + ":btc"];
+    const es = await call("POST", "api", { act: "competeSave", id: cid, compete: ed }, NORAN);
+    check("a changed score is kept, marked edited, and the result follows", es.j.compete?.edited.length === 1 && es.j.competeResult?.market.pct.btc === 90, JSON.stringify(es.j.competeResult && es.j.competeResult?.market.pct));
+    NEXT = { answer: { values: VALS } };
+    const vv = await call("POST", "api", { act: "competeValues", id: cid, placeWord: "Mobile", compete: { ...es.j.compete, chosen: "bts", phase: "values" } }, NORAN);
+    check("choosing a discipline and asking gives five values to tick", vv.st === 200 && vv.j.compete?.chosen === "bts" && vv.j.compete?.suggested.length === 5 && vv.j.compete?.phase === "values",
+      JSON.stringify(vv.j.compete || vv.j).slice(0, 200));
+    const tb = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...vv.j.compete, picked: [0, 2, 9], table: { discipline: "bts", values: [VALS[0], VALS[2]] }, phase: "table" } }, NORAN);
+    check("ticking two makes the table, and a tick past the list is dropped", tb.j.compete?.picked.join() === "0,2" && tb.j.compete?.table.values.length === 2 && tb.j.compete?.phase === "table", JSON.stringify(tb.j.compete?.picked));
+    const noAsk = await call("POST", "api", { act: "competeRefine", id: cid, placeWord: "Mobile" }, NORAN);
+    check("a refine with nothing asked is refused in words", noAsk.st === 400 && /Say what to change/.test(noAsk.j.why));
+    NEXT = { answer: { reply: "Sharper titles.", values: [{ ...VALS[0], title: "Hassle-free" }, VALS[2]], alternatives: ["Easy to buy", "One visit"] } };
+    const rf = await call("POST", "api", { act: "competeRefine", id: cid, placeWord: "Mobile", ask: "Make the first title warmer" }, NORAN);
+    check("refining changes the table in place and offers alternatives", rf.st === 200 && rf.j.compete?.table.values[0].title === "Hassle-free" && rf.j.compete?.alts.length === 2 && rf.j.compete?.reply === "Sharper titles.",
+      JSON.stringify(rf.j.compete || rf.j).slice(0, 200));
+    const hf = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, HEND);
+    check("a client's own person cannot save it", hf.st === 403);
+    const fn = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, NORAN);
+    check("saving makes version 1 of How we compete — Mobile", fn.st === 200 && fn.j.saved && fn.j.saved.n === 1 && fn.j.saved.title === "How we compete \u2014 Mobile" && fn.j.compete?.phase === "saved",
+      JSON.stringify(fn.j).slice(0, 200));
+    const vrow = fn.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fn.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the table and the scores", vrow.length === 1 && vrow[0].body.compete.discipline === "bts" && vrow[0].body.compete.values.length === 2 && !!vrow[0].body.scores.market,
+      JSON.stringify(vrow).slice(0, 200));
+    const after = await call("POST", "api", { act: "competeSave", id: cid, compete: tb.j.compete }, NORAN);
+    check("a saved chat refuses further changes", after.st === 400 && /Start a new How we compete chat/.test(after.j.why));
+    const nc2 = await call("POST", "api", { act: "newCompete", place: "mobile" }, OMAR);
+    NEXT = { answer: SC }; await call("POST", "api", { act: "competeScore", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
+    const g2 = await call("GET", "chat", null, OMAR, "?id=" + nc2.j.chat?.id);
+    await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { ...g2.j.compete, chosen: "btc", table: { discipline: "btc", values: [VALS[1]] }, phase: "table" } }, OMAR);
+    const fn2 = await call("POST", "api", { act: "competeFinish", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
+    check("a second chat saves as version 2 of the SAME deliverable", fn2.j.saved && fn2.j.saved.n === 2 && fn.j.saved && fn2.j.saved.deliverableId === fn.j.saved.deliverableId, JSON.stringify(fn2.j.saved));
+    const notCp = await call("POST", "api", { act: "competeSave", id: ch.id, compete: {} }, NORAN);
+    check("a chat that is not How we compete is refused", notCp.st === 400 && /not a How we compete chat/.test(notCp.j.why));
     NEXT = null;
     }
 

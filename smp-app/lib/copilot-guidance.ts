@@ -65,8 +65,16 @@ export const GUIDE: Record<Section, Guide> = {
     produces: "Analysis: a SWOT, a macro or market scan, an internal analysis.",
     roads: ["Guided questions", "Upload notes", "Template", "Import", "Deep-research prompt"],
   },
+  compete: {
+    produces: "How the place competes: the value discipline it leads with, and the value proposition table (values, how, measure).",
+    roads: [],
+  },
   directions: {
     produces: "Strategic directions (pillars) with their key measures, resting on the analysis.",
+    roads: [],
+  },
+  capabilities: {
+    produces: "Core capabilities that serve the chosen directions, each with its kind and the function that owns it.",
     roads: [],
   },
   execution: {

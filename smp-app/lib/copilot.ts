@@ -23,10 +23,11 @@ type Q = { query: PoolClient["query"] };
 const str = (v: unknown) => (v == null ? "" : String(v));
 const iso = (v: unknown) => (v instanceof Date ? v.toISOString() : str(v));
 
-export const SECTIONS = ["foundation", "analysis", "directions", "execution", "advisory"] as const;
+export const SECTIONS = ["foundation", "analysis", "compete", "directions", "capabilities", "execution", "advisory"] as const;
 export type Section = (typeof SECTIONS)[number];
 export const SECTION_WORD: Record<Section, string> = {
-  foundation: "Foundation", analysis: "Analysis", directions: "Directions", execution: "Execution", advisory: "Advisory",
+  foundation: "Foundation", analysis: "Analysis", compete: "How we compete", directions: "Directions",
+  capabilities: "Capabilities", execution: "Execution", advisory: "Advisory",
 };
 export function isSection(s: unknown): s is Section { return typeof s === "string" && (SECTIONS as readonly string[]).includes(s); }
 

@@ -1355,7 +1355,7 @@ CREATE TABLE copilot_chats (
   last_at timestamptz NOT NULL DEFAULT now(),
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
-  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','compete','directions','capabilities','execution','advisory')),
   CONSTRAINT copilot_chat_title CHECK (btrim(title) <> '')
 );
 CREATE INDEX copilot_chats_shelf ON copilot_chats (tenant_id, place, section, last_at DESC);
@@ -1393,7 +1393,7 @@ CREATE TABLE copilot_deliverables (
   created_at timestamptz NOT NULL DEFAULT now(),
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
-  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','compete','directions','capabilities','execution','advisory')),
   CONSTRAINT copilot_deliverable_kind CHECK (kind IN ('promotable','copilot-only')),
   CONSTRAINT copilot_deliverable_title CHECK (btrim(title) <> '')
 );

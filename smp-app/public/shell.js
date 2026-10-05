@@ -56332,6 +56332,7 @@ var COPILOT = (function(){
   var SECTIONS = [
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
+    { k:"compete",    label:"How we compete" },
     { k:"directions", label:"Directions" },
     { k:"execution",  label:"Execution" },
     { k:"advisory",   label:"Advisory" }
@@ -56392,14 +56393,26 @@ var COPILOT = (function(){
   function canEdit(){ return grant() === "edit"; }
   function shown(){ return stamped() && live() && (typeof inOffice !== "function" || inOffice()) && grant() !== "none"; }
 
+  /* How we compete is a section only where the plan can hold one — the top
+     layer and the business units (SMPRules.compOffered, §492), never a
+     function or a company; the Structure switch hides the PLAN's section,
+     not the chat that writes it. */
+  function here(){
+    var t = typeof TARGET !== "undefined" ? String(TARGET || "") : "";
+    return SECTIONS.filter(function(s){
+      if (s.k !== "compete") return true;
+      try { return SMPRules.compOffered(t, SMPRules.COMPETE); } catch (e) { return false; }
+    });
+  }
   function sections(){
     if (!shown()) return [];
-    return SECTIONS.map(function(s){ return { k:s.k, ac:"c_kb", label:s.label, render:renderPane }; });
+    return here().map(function(s){ return { k:s.k, ac:"c_kb", label:s.label, render:renderPane }; });
   }
   function place(){ return typeof TARGET !== "undefined" ? String(TARGET || "") : ""; }
   function section(){
     var s = (typeof CURSEC !== "undefined" && CURSEC.copilot) || "foundation";
-    for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === s) return s;
+    var hs = here();
+    for (var i = 0; i < hs.length; i++) if (hs[i].k === s) return s;
     return "foundation";
   }
   function key(){ return place() + "|" + section(); }
@@ -56544,7 +56557,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
       ' <button type="button" class="linkbu" data-cop-reopen>Try again</button></div>';
-    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
+    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : competeOn() ? competeHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
   }
   function placeWord(){
     var t = place();
@@ -57850,6 +57863,246 @@ var COPILOT = (function(){
     var o = OPEN[key()];
     if (o && (!PANE || PANE.id !== o.id)) openItem(o.kind, o.id);
   }
+  /* ── HOW WE COMPETE (spec 064 §3.2–§3.5, §493, from the signed-off
+     design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html,
+     panel B) ─────────────────────────────────────────────────────────────
+     The SWOT chat's own shape: the to-do column holds ONLY the list, and the
+     results — the scores, the recommendation, the value cards, the table —
+     appear in the conversation in the order they were reached. Nothing here
+     adds a score up: the totals, the leader, the gap and the clarity are the
+     server's (lib/copilot-compete.ts resultOf), so the page cannot recommend
+     one discipline while the to-do says another (§94.8). A score pressed is
+     marked as edited, so what the Copilot said and what the person changed
+     stay told apart. Nothing reaches the plan until Save is pressed. */
+  var CPMORE = {}, CPINT = {}, CPASKTXT = {}, CPPEND = null;
+  function competeOn(){ return !!(PANE && PANE.chat && PANE.compete); }
+  function cpCopy(){ return JSON.parse(JSON.stringify(PANE.compete)); }
+  function cpView(j){ ["compete","competeTodo","competeDone","competeFactors","competeResult","competeWords"]
+    .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function cpProgress(id){
+    var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
+  }
+  function cpTitle(){ return "How we compete — " + placeWord(); }
+  function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
+  /* A press made while an earlier save is still on its way is not dropped:
+     the latest patch waits and goes when the line is free. */
+  function cpSave(patch, quiet){
+    if (!competeOn()) return;
+    if (busy) { CPPEND = Object.assign(CPPEND || {}, patch); return; }
+    var id = PANE.chat.id;
+    act({ act:"competeSave", id:id, compete:patch, placeWord:placeWord() }, function(j){
+      if (PANE && PANE.chat && PANE.chat.id === id) cpView(j);
+      cpProgress(id);
+      if (CPPEND) { var p = CPPEND; CPPEND = null; cpSave(p, quiet); return; }
+      if (!quiet) draw();
+    });
+  }
+  function cpAsk(body){
+    if (!competeOn() || THINKING) return;
+    var id = PANE.chat.id;
+    THINKING = id; SAY = ""; THINK_AT = Date.now();
+    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
+    draw();
+    body.id = id; body.placeWord = placeWord(); body.context = swContext();
+    post(body, WAIT_MS).then(function(x){
+      THINKING = null;
+      if (x.st === 200 && x.j && x.j.ok) {
+        if (PANE && PANE.chat && PANE.chat.id === id) { cpView(x.j); cpProgress(id); }
+        draw(); return;
+      }
+      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again."; draw();
+    }, function(err){
+      THINKING = null;
+      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Try again in a moment."
+        : "The server could not be reached. Nothing was lost — try again.";
+      draw();
+    });
+  }
+  function cpSideHtml(){
+    var todo = PANE.competeTodo || [], done = PANE.competeDone || 0, n = todo.length;
+    return '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+      '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
+      '<div class="copsw-tg"><ul>' + todo.map(function(t){
+        return '<li class="copsw-li ' + t.state + '" data-cop-cp-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
+          '<span class="copsw-lb"><span class="copsw-tt" title="' + E(t.status) + '"><span>' + E(t.title) + '</span></span><span class="copsw-ts">' + E(t.status) + '</span></span>' +
+          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "To do") + '</span></li>';
+      }).join("") + '</ul></div></div></aside>';
+  }
+  function cpMsg(who, html){ return '<div class="copmsg ' + who + '"><div class="copbody">' + html + '</div></div>'; }
+  function cpScoreTable(side, ed){
+    var s = PANE.compete, f = ((PANE.competeFactors || {})[side]) || [], sc = s[side] || {}, r = ((PANE.competeResult || {})[side]) || {};
+    var discs = (PANE.competeWords || {}).discs || ["btc","bts","bp"], id = PANE.chat.id;
+    var open = side === "internal" || CPMORE[id], shown = open ? f : f.slice(0, 3), edited = {};
+    (s.edited || []).forEach(function(k){ edited[k] = true; });
+    var rows = shown.map(function(x){
+      var v = sc[x.id] || {};
+      return '<tr><th scope="row" title="' + E(x.description) + '">' + E(x.name) + '</th>' + discs.map(function(d){
+        var k = side + ":" + x.id + ":" + d, n = v[d] == null ? "–" : String(v[d]);
+        return '<td>' + (ed ? '<button type="button" class="copcp-sc' + (edited[k] ? " ed" : "") + '" data-cop-cp-sc="' + E(k) + '" aria-label="' + E(x.name + ", " + cpWord(d)) + ': ' + n + '"' +
+          (edited[k] ? ' title="You changed this score"' : ' title="Press to change: 0, 1 or 2"') + '>' + n + '</button>'
+          : '<span class="copcp-sc' + (edited[k] ? " ed" : "") + '">' + n + '</span>') + '</td>';
+      }).join("") + '</tr>';
+    }).join("");
+    var more = side === "market" && f.length > 3
+      ? '<tr class="copcp-more"><td colspan="4"><button type="button" class="linkbu" data-cop-cp-more>' +
+        (open ? "Show fewer" : "+ " + (f.length - 3) + " more market factors") + '</button></td></tr>' : '';
+    var tot = r.total ? '<tr class="copcp-tot"><th scope="row">Total</th>' + discs.map(function(d){
+      return '<td' + (r.complete && r.leader === d ? ' class="lead"' : '') + '>' + E(String(r.total[d])) + ' · ' + E(String(r.pct[d])) + '%</td>';
+    }).join("") + '</tr>' : '';
+    return '<div class="copcp-wrap"><table class="copcp-tab"><thead><tr><th scope="col">' + (side === "market" ? "Market factor" : "Internal factor") + '</th>' +
+      discs.map(function(d){ return '<th scope="col">' + E(cpWord(d)) + '</th>'; }).join("") + '</tr></thead><tbody>' + rows + more + tot + '</tbody></table></div>';
+  }
+  function cpRecHtml(ed){
+    var s = PANE.compete, R = PANE.competeResult || {}, m = R.market || {}, i = R.internal || {}, W = PANE.competeWords || {};
+    if (!m.complete) return '';
+    var clar = (W.clarity || {})[m.clarity] || m.clarity;
+    var line = '<b>' + E(cpWord(m.leader)) + '</b> leads the market by ' + E(String(m.gap)) + ' points <span class="copcp-cl ' + E(m.clarity) + '">' + E(clar) + '</span>. ' +
+      (!i.complete ? '' : R.aligned ? 'Your internal scores point the same way.' : 'Your internal scores lean to ' + E(cpWord(i.leader)) + '.');
+    var h = cpMsg("ai", line + (s.chosen ? '' : ' Go with it?'));
+    if (!s.chosen) {
+      if (ed) h += '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-choose="' + E(m.leader) + '">Yes, ' + E(cpWord(m.leader)) + '</button>' +
+        ((W.discs || []).filter(function(d){ return d !== m.leader; }).map(function(d){
+          return '<button type="button" class="copopt" data-cop-cp-choose="' + E(d) + '">Choose ' + E(cpWord(d)) + ' instead</button>'; }).join("")) +
+        '<button type="button" class="copopt" data-cop-cp-more="1">Let me change scores</button></div>';
+      return h;
+    }
+    return h + cpMsg("me", "Go with " + E(cpWord(s.chosen)) + ".");
+  }
+  function cpCardsHtml(ed){
+    var s = PANE.compete, picked = {};
+    (s.picked || []).forEach(function(n){ picked[n] = true; });
+    var n = (s.picked || []).length;
+    var h = cpMsg("ai", 'Here are ' + s.suggested.length + ' values for <b>' + E(cpWord(s.chosen)) + '</b>. Tick the ones closest to how you want to win — usually 3 or 4.') +
+      '<div class="copcp-cards">' + s.suggested.map(function(v, k){
+        var on = !!picked[k];
+        return '<div class="copcp-card' + (on ? " on" : "") + '">' +
+          (ed ? '<button type="button" class="copsw-tick' + (on ? " on" : "") + '" data-cop-cp-pick="' + k + '" aria-pressed="' + on + '" aria-label="Tick ' + E(v.title) + '">&#10003;</button>'
+            : '<span class="copsw-tick' + (on ? " on" : "") + '">&#10003;</span>') +
+          '<h4>' + E(v.title) + '</h4><div class="copsw-lh">How</div><ul>' + v.how.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' +
+          '<div class="copsw-lh">Measure</div><ul>' + v.measure.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul></div>';
+      }).join("") + '</div>';
+    if (ed) h += '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-use' + (n ? '' : ' aria-disabled="true" title="Tick at least one value first"') + '>Use the ' + n + ' I ticked</button>' +
+      '<button type="button" class="copopt" data-cop-cp-again>Suggest other values</button></div>';
+    return h;
+  }
+  function cpTableHtml(ed){
+    var t = PANE.compete.table, vals = t.values;
+    var bullets = function(a){ return a.length ? '<ul class="cmpul">' + a.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
+    var row = function(label, cell){ return '<tr><th class="cmprow">' + label + '</th>' + vals.map(cell).join("") + '</tr>'; };
+    return '<div class="cmp copcp-table"><div class="tblscroll"><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th><th class="cmpd" colspan="' + vals.length + '">' + E(cpWord(t.discipline)) + '</th></tr></thead><tbody>' +
+      row("Value", function(v, i){ return '<td class="cmpval">' + (ed ? '<input class="fld" data-cop-cp-cell="' + i + '|title" value="' + E(v.title) + '" aria-label="Value ' + (i + 1) + '">' : E(v.title)) + '</td>'; }) +
+      row("How", function(v, i){ return '<td>' + (ed ? '<textarea class="fld cmpbox" data-cop-cp-cell="' + i + '|how" aria-label="How, value ' + (i + 1) + '">' + E(v.how.join("\n")) + '</textarea>' : bullets(v.how)) + '</td>'; }) +
+      row("Measure", function(v, i){ return '<td>' + (ed ? '<textarea class="fld cmpbox" data-cop-cp-cell="' + i + '|measure" aria-label="Measure, value ' + (i + 1) + '">' + E(v.measure.join("\n")) + '</textarea>' : bullets(v.measure)) + '</td>'; }) +
+      '</tbody></table></div></div>';
+  }
+  function competeHtml(){
+    var s = PANE.compete, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
+    var head = '<div class="copvline"><b>' + E(PANE.chat.title || cpTitle()) + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
+    var m = ((PANE.competeResult || {}).market) || {};
+    var main = '';
+    if (!m.complete) {
+      main = cpMsg("ai", "I will score the three value disciplines — Best Total Cost, Best Total Solution and Best Product — against 10 market factors and 10 internal ones, from what the plan says about " + E(placeWord()) + ". You can change any score.") +
+        (ed && !busyHere ? '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-score>Score them</button></div>' : '');
+    } else {
+      main = cpMsg("ai", "Each factor is scored 0, 1 or 2 for each discipline. The market decides; the internal scores are a check." + (ed ? " Press a score to change it." : "")) +
+        cpScoreTable("market", ed && s.phase !== "table") +
+        '<div class="copopts"><button type="button" class="linkbu" data-cop-cp-int aria-expanded="' + !!CPINT[id] + '">' + (CPINT[id] ? "Hide internal factors" : "Show internal factors (" + (((PANE.competeFactors || {}).internal) || []).length + ")") + '</button></div>' +
+        (CPINT[id] ? cpScoreTable("internal", ed && s.phase !== "table") : '') +
+        cpRecHtml(ed);
+      if (s.chosen && s.suggested.length && !s.table) main += cpCardsHtml(ed);
+      else if (s.chosen && !s.suggested.length && ed && !busyHere) main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-cp-again>Suggest values</button></div>';
+      if (s.table) {
+        main += cpMsg("me", "Use these " + s.table.values.length + ".");
+        if (s.reply) main += cpMsg("ai", E(s.reply));
+        if (ed && s.alts && s.alts.length) main += '<div class="copopts">' + s.alts.map(function(a){
+          return '<button type="button" class="copopt" data-cop-cp-alt="' + E(a) + '">' + E(a) + '</button>'; }).join("") + '</div>';
+        main += cpTableHtml(ed);
+        if (ed) main += '<p class="copnote">Every cell is editable here before saving.</p>' +
+          '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
+          '<button type="button" class="copbtn" data-cop-cp-refine' + (busyHere ? ' disabled' : '') + '>Send</button></div>' +
+          '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
+          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to How we compete</button></div>';
+        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under How we compete.");
+      }
+    }
+    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
+  }
+  /* The plan is written after a press, never inside a fetch's tail with a
+     hand on the page (§35): the same order the SWOT's Save keeps. */
+  function cpWritePlan(t){
+    var w = null;
+    try { w = typeof competeWritable === "function" ? competeWritable(place()) : null; } catch (e) { w = null; }
+    if (!w || !t) return false;
+    w.discipline = t.discipline;
+    w.values = t.values.map(function(v){ return { title: v.title, how: v.how.slice(), measure: v.measure.slice() }; });
+    if (typeof competeTidy === "function") competeTidy(place());
+    return true;
+  }
+  function cpCell(el){
+    var p = el.getAttribute("data-cop-cp-cell").split("|"), v = PANE.compete.table && PANE.compete.table.values[+p[0]];
+    if (!v) return;
+    if (p[1] === "title") v.title = el.value;
+    else v[p[1]] = String(el.value || "").split(/\n/).map(function(x){ return x.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean);
+  }
+  function cpClick(ev){
+    if (!competeOn()) return false;
+    var b, s = PANE.compete, id = PANE.chat.id;
+    if ((b = hit(ev, "[data-cop-cp-int]"))) { CPINT[id] = !CPINT[id]; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-cp-more]"))) { CPMORE[id] = b.getAttribute("data-cop-cp-more") === "1" ? true : !CPMORE[id]; draw(); return true; }
+    if (!canEdit() || s.saved) return false;
+    if ((b = hit(ev, "[data-cop-cp-score]"))) { cpAsk({ act:"competeScore" }); return true; }
+    if ((b = hit(ev, "[data-cop-cp-sc]"))) {
+      if (THINKING) return true;
+      var k = b.getAttribute("data-cop-cp-sc").split(":"), side = k[0], g = cpCopy();
+      var row = (g[side] = g[side] || {})[k[1]] = g[side][k[1]] || {};
+      row[k[2]] = ((Number(row[k[2]]) || 0) + 1) % 3;
+      var ek = k.join(":"); if (g.edited.indexOf(ek) < 0) g.edited.push(ek);
+      PANE.compete = g; draw();
+      var patch = { edited: g.edited }; patch[side] = g[side];
+      cpSave(patch);
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-cp-choose]"))) { cpAsk({ act:"competeValues", compete:{ chosen: b.getAttribute("data-cop-cp-choose") } }); return true; }
+    if ((b = hit(ev, "[data-cop-cp-again]"))) { cpAsk({ act:"competeValues" }); return true; }
+    if ((b = hit(ev, "[data-cop-cp-pick]"))) {
+      var n = +b.getAttribute("data-cop-cp-pick"), pk = (s.picked || []).slice(), at = pk.indexOf(n);
+      if (at < 0) pk.push(n); else pk.splice(at, 1);
+      pk.sort(function(a, c){ return a - c; });
+      PANE.compete.picked = pk; draw(); cpSave({ picked: pk });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-cp-use]"))) {
+      if (!(s.picked || []).length) { SAY = "Tick at least one value first."; draw(); return true; }
+      var vals = s.picked.map(function(i){ return s.suggested[i]; }).filter(Boolean);
+      cpSave({ table: { discipline: s.chosen, values: vals }, phase: "table" });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-cp-alt]"))) { cpAsk({ act:"competeRefine", ask: "Use “" + b.getAttribute("data-cop-cp-alt") + "” as the title." }); return true; }
+    if ((b = hit(ev, "[data-cop-cp-refine]"))) {
+      var q = String(CPASKTXT[id] || "").trim();
+      if (!q) { var bx = document.querySelector("[data-cop-cp-ask]"); if (bx) bx.focus(); return true; }
+      CPASKTXT[id] = "";
+      cpAsk({ act:"competeRefine", ask: q });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-cp-chat]"))) { var bx2 = document.querySelector("[data-cop-cp-ask]"); if (bx2) bx2.focus(); return true; }
+    if ((b = hit(ev, "[data-cop-cp-finish]"))) {
+      if (THINKING) return true;
+      act({ act:"competeFinish", id:id, placeWord:placeWord() }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) cpView(j);
+        cpProgress(id);
+        var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
+        var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
+        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the How we compete page."
+          : on ? "" : "Saved. How we compete is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
+        LISTS[key()] = null; loadList(true);
+        if (wrote && typeof paint === "function") paint(); else draw();
+      });
+      return true;
+    }
+    return false;
+  }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
     /* A chat opening folds the chats rail to its strip (§490.2) — unless
@@ -57886,6 +58139,8 @@ var COPILOT = (function(){
     var sa = hit(ev, "[data-cop-sw-ans]");
     if (sa && swotOn()) { var sp = sa.getAttribute("data-cop-sw-ans").split("|"); var aa = PANE.swot.ans[sp[0]] = (PANE.swot.ans[sp[0]] || []).slice(); aa[+sp[1]] = sa.value; }
     var sq = hit(ev, "[data-cop-sw-paste]"); if (sq) SWPASTE = sq.value;
+    var ck = hit(ev, "[data-cop-cp-ask]"); if (ck && competeOn()) CPASKTXT[PANE.chat.id] = ck.value;
+    var cc = hit(ev, "[data-cop-cp-cell]"); if (cc && competeOn()) cpCell(cc);
     var fe = hit(ev, "[data-cop-sw-fe]");
     if (fe && SWEDIT) { var fp = fe.getAttribute("data-cop-sw-fe").split("|"); var ff = SWEDIT.data.items[+fp[0]].factors[+fp[1]]; if (ff) ff[fp[2]] = fe.value; }
   });
@@ -57894,6 +58149,8 @@ var COPILOT = (function(){
   document.addEventListener("change", function(ev){
     var sa = hit(ev, "[data-cop-sw-ans]");
     if (sa && swotOn() && canEdit() && !THINKING) { swSave(swCopy()); return; }
+    var cc = hit(ev, "[data-cop-cp-cell]");
+    if (cc && competeOn() && canEdit() && !THINKING && PANE.compete.table) { cpCell(cc); cpSave({ table: PANE.compete.table }, true); return; }
     var sf = hit(ev, "[data-cop-sw-file]");
     if (sf) { var sfile = sf.files && sf.files[0]; sf.value = ""; if (sfile) swUpload(sfile); return; }
     var sw = hit(ev, "[data-cop-sw-for]"); if (sw) { SWALL = sw.value === "all"; return; }
@@ -57996,6 +58253,7 @@ var COPILOT = (function(){
   document.addEventListener("click", function(ev){
     var b;
     if (flowClick(ev)) return;
+    if (cpClick(ev)) return;
     if (swClick(ev)) return;
     if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railShut(); RAILKEPT = !sh; setRail(sh); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
@@ -58012,6 +58270,18 @@ var COPILOT = (function(){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
           OPEN[key()] = { kind:"chat", id: j.chat.id };
           openItem("chat", j.chat.id);
+        });
+        return;
+      }
+      if (section() === "compete") {
+        act({ act:"newCompete", place: place(), title: cpTitle() }, function(j){
+          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+          PANE = Object.assign({ id: j.chat.id, chat: j.chat, messages: [] }, {});
+          cpView(j);
+          OPEN[key()] = { kind:"chat", id: j.chat.id };
+          if (!RAILKEPT && !railShut()) setRail(true);
+          draw();
+          cpAsk({ act:"competeScore" });
         });
         return;
       }

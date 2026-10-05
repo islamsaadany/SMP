@@ -62446,3 +62446,31 @@ and the columns reaching the bottom of the page.
   three runs). An earlier `check:copilot` red was two runs sharing one database,
   not the product; alone it is green.
 
+
+## §491 — A capability planned in pillars is shaped like one direction (2026-10-05)
+
+Islam, of the company's Strategy › Capabilities pane with a capability planned in
+pillars: *"why is it asking me to add a direction? and the view is damaged"*, then,
+showing the Directions pane, *"that's how it should be"* and *"a capability planning
+in a pillar approach is typical to a direction"*.
+
+- **The model was wrong, not the styling.** §482/§488 drew a pillars capability as a
+  CONTAINER of pillars, so the add row used the client's word for a pillar and asked
+  for a Direction inside a capability. A capability planned in pillars IS one
+  direction-shaped plan: its key measures, breakdown and tactics sit straight under
+  the capability's own band (code, name, Owner, Custodian).
+- **The damage was a nested pinned head.** `unitPlanBody()` draws a sticky
+  `.ptitle.edhead` and a pillar Owner block; nested under the capability band in edit
+  mode they pinned over the rows and clipped the OWNER row. `unitPlanBody` gains a
+  `bare` argument: no head and no pillar owner, because the capability's band IS the
+  head and carries the seats.
+- **Nothing stored moves.** The capability still holds one pillar row in `items`, so
+  reporting, scoring and the deck read it as before. An empty capability offers
+  *Start this capability's plan*, which mints one pillar named as the capability
+  (shell's `[data-rowadd]` pillar branch). A capability holding more than one from
+  before shows the first and says how many there are. The rail shows no direction
+  count for it. Capabilities planned in projects are unchanged.
+- `checks/single-company.py` §491: 7 assertions, **4 red** on the build before, from
+  the sources (§276). `qa.py` ERRORS none; capability-entry, capability-pillar-edit,
+  pillar-rail, plan-edit-head green. Main took §489/§490 while this was built, so it
+  is numbered §491 and was merged with main's Copilot work before commit.

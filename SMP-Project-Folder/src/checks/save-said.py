@@ -103,7 +103,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 pass
             return
         if POST["status"] != 200:
-            self._s(POST["status"], b'{"ok":false,"error":"boom"}', "application/json")
+            body = {"ok": False, "error": "boom"}
+            if POST.get("ref"):
+                body.update(ref=POST["ref"], reason=POST["reason"])
+            self._s(POST["status"], json.dumps(body).encode(), "application/json")
             return
         self._s(200, b'{"ok":true}', "application/json")
 
@@ -132,11 +135,14 @@ def change(pg, mark):
 
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 1440, "height": 900})
+    cx = b.new_context(viewport={"width": 1440, "height": 900})
+    cx.grant_permissions(["clipboard-read", "clipboard-write"], origin="http://127.0.0.1:%d" % PORT)
+    pg = cx.new_page()
     pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
                        "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
-    errs = []
+    errs, cons = [], []
     pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("console", lambda m: m.type == "error" and cons.append(m.text))
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_timeout(1800)
     ck("the platform hydrated", pg.evaluate("()=>SYNC.isLive()") is True)
@@ -158,6 +164,31 @@ with sync_playwright() as p:
     ck("...telling them to keep the tab open", "keep this tab open" in said.lower(), said)
     ck("...with the status on the hover for whoever can act on it",
        "500" in (pg.evaluate("()=>{const s=document.querySelector('#refused strong');return s?s.title:''}") or ""))
+
+    # ── 2b · THE DETAILS TRAVEL WITH IT (§502) ──────────────────────────
+    #    Islam: "write an actual error here so we can get back to you". The
+    #    server's reason and its log reference reach the hover, the console
+    #    and the clipboard — and the sentence on the page stays the user's.
+    print("\n2b · the details travel with the bar")
+    POST["ref"], POST["reason"] = "SMP-TEST42", "a value is not in the shape this field takes · table measures · code 22P02"
+    change(pg, "boom-2")
+    hover = pg.evaluate("()=>{const s=document.querySelector('#refused strong');return s?s.title:''}") or ""
+    ck("the hover carries the reference and the reason", "SMP-TEST42" in hover and "table measures" in hover, hover)
+    ck("...and the server's own sentence", "boom" in hover, hover)
+    said = banner(pg)
+    ck("the sentence on the page still carries no status", "HTTP" not in said and "SMP-TEST42" not in said, said)
+    ck("the console carries it as an error", any("SMP-TEST42" in c for c in cons), cons)
+    n1 = sum(1 for c in cons if "SMP-TEST42" in c)
+    pg.wait_for_timeout(5600)   # one retry, same failure
+    ck("...once per failure, not once per retry", sum(1 for c in cons if "SMP-TEST42" in c) == n1, cons)
+    btn = pg.query_selector("#refused [data-copyerr]")
+    ck("the bar offers to copy it", btn is not None and "Copy error" in (btn.inner_text() if btn else ""))
+    if btn:
+        btn.click(); pg.wait_for_timeout(300)
+        clip = pg.evaluate("()=>navigator.clipboard.readText()")
+        ck("...and the copy is the whole account", "SMP-TEST42" in clip and "22P02" in clip and "/raya-trade" in clip, clip)
+        ck("...and the button says it copied", "Copied" in (pg.query_selector("#refused [data-copyerr]").inner_text()))
+    POST["ref"] = None
 
     # ── 3 · IT CLEARS WHEN A SAVE LANDS ──────────────────────────────────
     # A WARNING THAT OUTLIVES ITS CAUSE IS WORSE THAN NONE (§35).

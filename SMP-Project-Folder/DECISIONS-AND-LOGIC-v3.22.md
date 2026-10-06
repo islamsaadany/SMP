@@ -62749,6 +62749,101 @@ Islam, of §498's masthead following the client's band: *"for the top banner I d
 
 **§497–§499 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main had moved to §496 under the branch; it was merged in first, the three record files combined with both sides kept, and nothing in the frozen product had changed on the branch, so nothing was rebuilt and `sw.js` was not bumped. Migration 025 (topics) runs after main's 024; both applied in order on the check database. Re-run on the merged tree: tracker 247/0, copilot 311/0 (main's own figure, once 024 was applied to the local database), modules 233/0, notes 170/0, shell 334/0 against a fresh build, `generated-in-step` and `built-in-step` clear. No forced sign-out is owed: no `api/`, `lib/` or `db/` file of the frozen product moved, and nothing about how a save is judged changed.
 
+## §500 — the company's capability is edited like a direction
+
+Islam, with the pen open on Company › Strategy › Capabilities: *"I'm not able
+to edit the name nor add a capability!! … the capability view should be the
+same like the directions same functionality same work."* **He was right, and it
+was an omission rather than a breakage**: §482 drew the capability's band with
+`pillarBand()` in BOTH modes, and §488 added the pen without giving that band
+an editing form or the rail an Add — while a direction's pane, in edit mode,
+draws `unitPlanBody`'s pinned `edhead` (code, name box, Remove, §194/§232) and
+its rail draws "+ Add a Direction" (§69.13). Measured on the build before: no
+name box, no Add, no Remove.
+
+**The same controls, not new ones** (§53.5): editing draws the direction's own
+`edhead` — the code, a `textOr` name box writing the capability's name (and its
+one plan row's while that still wears the old name, §491, so reporting and the
+deck follow), the two seats, and **Remove this Capability** through §325's own
+dialog (`data-caprm`) — and the rail gets the direction rail's own `.railadd`.
+**A new capability plans the way the one beside it plans**, and a pillars one
+gets its single plan row at once (§491's rule), so it opens exactly as an added
+direction does: empty Key measures and Tactics. Read mode is untouched.
+`checks/single-company.py` §500: six assertions, the name read back from the
+DATA (§96), **10 red** on the build before; the §491 "no nested head" assertion
+REWRITTEN, never loosened (§218) — exactly one `edhead`, and it is the
+capability's. Neighbours (capability-remove, -pillar-edit, -seats, -entry,
+direction-seats, top-plan, plan-edit-line) and `qa.py` green. Screen only;
+nothing stored moves, nothing migrated, no server rule. SHELL v6.08.
+
+**Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main took §497–§499 (Internal Tracker) while this was built, so this section was renumbered §497 → §500 before the merge; the record files were combined, the built file and the served copies regenerated, SHELL v6.08 past main's v6.07.
+
+## §501 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
+
+Islam: *"When I enable Copilot on the platform, the module appears on the outside of the platform. When someone clicks on it, it opens the settings, which I don't think is relevant."* Then, of the mockup (`design-mockups/copilot-placement/2026-10-06_copilot-placement.html`): *"go ahead"*, *"proceed"*.
+
+**WHAT TURNING IT ON DOES IS ONE THING**: it draws the Copilot tab inside Strategy. The console card no longer draws a Copilot row and the client's module menu and switcher no longer list Copilot or Copilot settings — `shownOutside()` in `lib/modules.ts` filters any module marked `inside` out of `moduleMenu` and `moduleRows`, and the top bar marks the host (Strategy) as current on the Copilot's own list page (`lib/topbar.ts`), so an inside module is never named as a place of its own.
+
+**THE SETTINGS ARE THE SAME FOR EVERY CLIENT, SO THEY LIVE WHERE EVERY CLIENT IS**: a console tab, *Copilot*, after Frameworks and before History — title *Copilot settings*, tag *Same for every client*, an AI instructions | Templates switch, the section switch, each part with Edit, and the templates table (download, replace, put back). Served by `/api/copilot` (`lib/copilot-settings-api.ts`): every consultant reads, only a Forefront super user (`isAdmin`) edits, a client login is refused — the rule asked on the server, never only by hiding a button (§42). The store is unchanged (`copilot_assets`, §456).
+
+**OLD ADDRESSES ARE DOORS** (§61): `/<client>/copilot/settings…` redirects to `/platform#copilot` rather than drawing a page that no longer exists. **AND THE WAY TO ALL CHATS STAYS**: Strategy's Copilot chats rail carries *All chats on this client ›* to the list page, which is still reachable from inside, never from the menu. Roles & access keeps its Copilot column (§454).
+
+**CHECKS**: `copilot.mjs` 315/0 (red under `copilot-settings-any` 3 and `copilot-settings-client` 1); `modules.mjs` 234/0 with an inside module asserted absent from the switcher and the card and its host present; `shell.mjs` §3f rewritten (the redirect, the console tab, the All chats link, no menu entry) 258/0; the five console checks green on both copies. **RECORDED, NOT DONE**: `check:modules:red`'s `any-module` break no longer reddens because every module in `MODULE_DEF` is now built — measured identical with this change stashed, so it is the break's subject that has gone (§214.3), not this change.
+
+
+**§501.1 — Merged to `main` 2026-10-06 on Islam's word** (*"proceed"*). Main took §497–§500 (the Internal Tracker's topics and colours, and the company capability edited like a direction) while this was built, so it was renumbered §497 → §501 BEFORE the merge, in all three spellings (the merge base held none, so every one was this branch's own — §264.3). The three record files were COMBINED, never picked (§318.7); the built file and `smp-app/public/` were REBUILT from the merged sources (§91, §329). **And §94.12 recurred**: both sides independently wrote shell `smp-shell-v6.08-…`, so the merged name goes past both, `v6.09-copilot-placement`, checked against every name the history has held. One red on the merged tree was my own litter rather than the product: `checks/shell.mjs`'s console-card assertion reads the FIRST card, and two fixture tenants left by a killed copilot run (`RHI` sorting first) answered instead — deleted, 338/0 (§442.15's road). Verified on the merged tree: copilot 315/0, modules 234/0, shell 338/0, tracker 247/0, door 146/0, `typecheck` clean, `built-in-step` and `generated-in-step` clear, `qa.py` ERRORS none, platform-cards 30/0, console-boot 13/0. No forced sign-out is owed: no rule about how a save is judged moved.
+
+## §502 — a capability's Target box can be read, and a failed save says enough to trace
+
+Islam, on El Abd, Company › Strategy › Capabilities with the pen open: *"Target
+field is very small, no. are recorded but not visible / and on saving we got
+this message ths shouldn't happen by any means!!!"*, then *"you need to write
+an actual error here so we can get back to you to fix it properly"*, and of the
+first mockup *"the proposed is too big"*; the second was signed off (*"ok build
+both, units stay as is"*).
+
+**THE BOX.** §482's `.topcapbody table td.num { width:1% }` was written for the
+capability projects table's count columns and, as a bare selector, also reached
+a pillars capability's Key measures, whose Target cell is `td.num` — so the
+cell shrank to its content and the `width:100%` box inside it to a sliver. The
+1% stays (a compact column is what he chose), and the box gets a width of its
+own, **110px** — enough for 1,250,000 — scoped away from the projects table.
+The unit plan's Target (about 320px) is untouched at his word. Screen only.
+
+**THE ERROR.** The bar said "The server could not take your change just now"
+with `HTTP 500` on a hover, and `sync.js` never read the response body, so the
+server's own sentence and anything that could find the failure again were lost
+— a failure on a client's tenant could not be traced. Now:
+- the server's `failed()` (both state routes) gives every failure a reference
+  (`SMP-` + six characters), writes it to the runtime log beside the full
+  stack, and returns it with a **reason made of names only** — the database's
+  error code put into words, the table, the column, the constraint
+  (`lib/fail-ref.ts`). Never the database's own message, which can carry the
+  values being written (§43). `state-io.ts`'s statement runner marks the table
+  it was writing, because a type error names a type and not a table (§316.2);
+- the browser reads that body (and a 400's own sentence), puts the whole
+  account — time, page, status, reference, reason, the server's sentence — on
+  the hover of "Not saved.", into the console as an error **once per distinct
+  failure** (not once per five-second retry), and onto the clipboard from a
+  new link at the end of the bar, **Copy error for the Strategy Office**;
+- the sentence on the page stays the user's, with no status in it (§258.3).
+
+The link is wired once on the document, because the bar is rewritten on every
+retry (§24); the copy falls back to `execCommand` where the clipboard API is
+not offered (§93.6).
+
+**Verified.** `checks/save-said.py` §2b (8 new assertions, over HTTP with a
+stub) — red 2 with the reason read and the link removed, from the sources;
+`lib/fail-ref.ts` asked directly with an error carrying a value in its message
+— the value does not reach the reason. Screenshot of the built capability
+matches the signed-off mockup (cell 169px, box 110px). `single-company`,
+`refusal-keeps-work`, `table-fit`, `top-plan`, `capability-pillar-edit`,
+`pillar-breakdown`, `built-in-step` green, `tsc` clean cold. SHELL v6.09.
+Nothing stored moves, nothing migrated, no save rule moves — no sign-out owed.
+
+**Not done**: the El Abd save failure itself is not yet found — this is what
+will name it the next time it happens.
+
 ## §503 — The topic has its own column, immediately before the week (spec 054, 2026-10-06)
 
 Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and when there is no topic, there should be a "Add a topic" button somehow. It should look cleaner and neater."* Drawn first (`design-mockups/internal-tracker/2026-10-06_topic-beside-timeline.html`, published as an artifact) and approved with *"proceed"*.
@@ -62760,4 +62855,4 @@ Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and w
 - **Grouped by topic, the cell is empty** (the group heading already says it, §87); a read-only row shows the tag without a press, or nothing.
 - On a phone the topic drops to the second line beside the week.
 
-`checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **On the branch, not merged.**
+`checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §501–§502 brought in first; renumbered §501 → §503 before the merge.

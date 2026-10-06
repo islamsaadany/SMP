@@ -1073,14 +1073,19 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
 
     /* §456 — THE COPILOT PAGE, and a row that opens its chat in its tab. The
        tab opens nothing by itself, so a chat drawn as current after the press
-       is the link's doing; the switcher lists the Copilot now — asked of the
+       is the link's doing; the switcher no longer lists the Copilot (§501) — asked of the
        shared bar's module menu (main's §444), where it is the current item. */
     await open("/raya-trade/copilot");
     const lp = await page.evaluate(() => ({ rows: document.querySelectorAll("table tbody tr").length,
       link: (document.querySelector('a[href*="#cop=chat-"]') || {}).getAttribute ? document.querySelector('a[href*="#cop=chat-"]').getAttribute("href") : "",
       sw: Array.from(document.querySelectorAll('.tbmod .tbmenu a[aria-current="true"]')).map((x) => x.textContent) }));
-    check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Copilot/.test(t)),
-      "the Copilot page lists the chat, linked to its place's tab, with the Copilot in the switcher (§456)", JSON.stringify(lp));
+    /* REWRITTEN, NEVER LOOSENED (§218): §501 took the Copilot out of the
+       switcher, so the list page wears the module it lives inside — Strategy
+       is the current item, and the Copilot is in the menu nowhere. */
+    const lpMenu = await page.evaluate(() => Array.from(document.querySelectorAll(".tbmod .tbmenu a")).map((x) => x.textContent));
+    check(lp.rows >= 1 && /\/raya-trade\/strategy\/mobile\/copilot\/foundation#cop=chat-/.test(lp.link) && lp.sw.some((t) => /^Strategy/.test(t)) &&
+      lpMenu.length > 0 && !lpMenu.some((t) => /^Copilot/.test(t)),
+      "the Copilot page lists the chat, linked to its place's tab, marking Strategy in the switcher and never offering the Copilot (§501)", JSON.stringify({ lp, lpMenu }));
     await page.click('a[href*="#cop=chat-"]');
     const opened = await page.waitForSelector('[data-cop-chats] [data-cop-chat][aria-current="true"]', { state: "attached", timeout: 10000 }).then(() => true).catch(() => false);
     check(opened && /\/strategy\/mobile\/copilot\/foundation/.test(page.url()), "…and pressing the row opens that chat in the Mobile Foundation Copilot tab", page.url());
@@ -1120,9 +1125,28 @@ await section("3f · the Copilot tab, pressed end to end (spec 064 stages 1 and 
       const f4 = await rd();
       check(f4.top && f4.units && f4.tabs && !f4.thin && f4.btn, "…and Show navigation brings the three bars back", JSON.stringify(f4));
     }
-    await open("/raya-trade/copilot/settings?section=analysis");
-    const stg = await page.evaluate(() => ({ swot: /SWOT/.test(document.body.textContent), same: /Same for all clients/.test(document.body.textContent) }));
-    check(stg.swot && stg.same, "Copilot settings › AI instructions draws the analysis method, the same for all clients", JSON.stringify(stg));
+    /* §501: the Copilot is a tab inside Strategy and nowhere else. Its
+       chats rail carries the one way to the page listing every chat on the
+       client, and its settings live on the console (the same for every
+       client). Pressed and read, never only found (§96). */
+    await open("/raya-trade/strategy/mobile/copilot/foundation");
+    const all = await page.evaluate(() => { const a = document.querySelector("a[data-cop-all]"); return a ? { href: a.getAttribute("href"), text: a.textContent.trim() } : null; });
+    check(!!all && all.href === "/raya-trade/copilot" && /All chats on this client/.test(all.text),
+      "the chats rail carries 'All chats on this client' to the client's Copilot page (§501)", JSON.stringify(all));
+    const mm = await page.evaluate(() => Array.from(document.querySelectorAll(".modsw a, [data-modules] a, .tbmod a")).map((a) => a.textContent.trim()));
+    check(!mm.some((t) => /Copilot/.test(t)), "...and no module menu on the page offers the Copilot (§501)", JSON.stringify(mm));
+    await page.goto(BASE + "/raya-trade/copilot/settings?section=analysis", { waitUntil: "networkidle" });
+    check(/\/platform$/.test(new URL(page.url()).pathname) && new URL(page.url()).hash === "#copilot",
+      "an old Copilot settings address lands on the console's Copilot tab", page.url());
+    await page.waitForSelector("body.ready", { timeout: 15000 });
+    await page.waitForSelector("[data-cpsec]", { timeout: 15000 }).catch(() => {});
+    const navCp = await page.evaluate(() => Array.from(document.querySelectorAll("#nav a, #nav button, nav a")).map((a) => a.textContent.trim()));
+    check(navCp.includes("Copilot"), "the console carries a Copilot tab", JSON.stringify(navCp));
+    await page.click('[data-cpsec="analysis"]').catch(() => {});
+    await page.waitForTimeout(300);
+    const stg = await page.evaluate(() => ({ swot: /SWOT/.test(document.body.textContent), same: /Same for every client/.test(document.body.textContent),
+      parts: document.querySelectorAll("[data-part]").length, edit: document.querySelectorAll("[data-cpedit]").length }));
+    check(stg.swot && stg.same && stg.parts > 0, "the console's Copilot tab draws the analysis method, the same for every client", JSON.stringify(stg));
 
     await fresh(); await signIn("mobhead@raya.example");
     await open("/raya-trade/strategy/mobile/strategy");

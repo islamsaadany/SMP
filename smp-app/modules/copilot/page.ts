@@ -6,8 +6,7 @@
    chose for the same reason (modules/insights/page.ts):
 
      /<client>/copilot                       every chat (or deliverable) on the client
-     /<client>/copilot/settings              AI instructions, per section
-     /<client>/copilot/settings/templates    the five blank templates
+     (its settings moved to Forefront's console in §497 — /platform#copilot)
 
    THE PAGE FINDS, THE TAB WORKS. A row is a link into its place's Copilot
    tab inside Strategy, ending in `#cop=chat-<id>` so the tab opens that chat
@@ -24,7 +23,6 @@ import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss } from "../../lib/topbar.ts";
 import { barFor } from "../../lib/branding.ts";
 import { SECTIONS, SECTION_WORD, type Chat, type Deliverable } from "../../lib/copilot.ts";
-import { SECTION_ORDER, type Part, type Template } from "../../lib/copilot-settings.ts";
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -213,120 +211,9 @@ export function listDocument(
   }
 
   const body = '<div class="head"><h2>' + esc(MODULE_DEF.copilot.label) + "</h2>" +
-    '<a class="btn" href="' + esc(clientHref(slug, "copilot", "settings")) + '">Settings</a></div>' +
+    (consultant ? '<a class="btn" href="/platform#copilot">Copilot settings &rsaquo;</a>' : "") + "</div>" +
     '<div class="filters">' + seg + form + count + "</div>" + table;
   return frame(slug, tenantName, have, bar, "", "Copilot", body, consultant);
-}
-
-/* ── THE SETTINGS RAIL ─────────────────────────────────────────────────
-   Two pages under "The AI". No Roles & access entry: who may use the
-   Copilot is a column on Strategy's own table (Islam: "stay"), so the foot
-   says where rather than drawing a second copy of it. */
-function rail(slug: string, page: "instructions" | "templates"): string {
-  const it = (p: "instructions" | "templates", label: string, rest: string) =>
-    '<a class="it" href="' + esc(clientHref(slug, "copilot", rest)) + '"' + (page === p ? ' aria-current="true"' : "") + ">" + label + "</a>";
-  return '<nav class="rail" aria-label="Copilot settings"><div class="rh">Copilot &middot; Setup</div><div class="g">The AI</div>' +
-    it("instructions", "AI instructions", "settings") + it("templates", "Templates", "settings/templates") +
-    '<div class="foot"><span>Who may use the Copilot is set on Strategy&rsquo;s Roles &amp; access.</span>' +
-    '<a href="' + esc(clientHref(slug, "strategy", "setup/access")) + '">Roles &amp; access &rsaquo;</a>' +
-    '<a href="' + esc(clientHref(slug, null, "setup")) + '">Client settings &rsaquo;</a></div></nav>';
-}
-
-/* A SMALL, SAFE MARKDOWN READER for the method's own text — headings, lists,
-   bold and paragraphs, which is all the tidied text uses. Everything is
-   escaped first and only then given its few tags, so nothing typed into a
-   part can become markup (§235). */
-export function mdToHtml(src: string): string {
-  const out: string[] = [];
-  let list = false, para: string[] = [];
-  const inline = (s: string) => esc(s).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
-  const flush = () => { if (para.length) { out.push("<p>" + inline(para.join(" ")) + "</p>"); para = []; } };
-  const endList = () => { if (list) { out.push("</ul>"); list = false; } };
-  for (const raw of String(src || "").split("\n")) {
-    const l = raw.replace(/\s+$/, "");
-    const h = /^(#{1,6})\s+(.*)$/.exec(l);
-    const li = /^\s*[-*]\s+(.*)$/.exec(l);
-    if (!l.trim()) { flush(); endList(); continue; }
-    if (h) { flush(); endList(); const n = Math.min(6, Math.max(3, h[1].length)); out.push("<h" + n + ">" + inline(h[2]) + "</h" + n + ">"); continue; }
-    if (li) { flush(); if (!list) { out.push("<ul>"); list = true; } out.push("<li>" + inline(li[1]) + "</li>"); continue; }
-    endList(); para.push(l.trim());
-  }
-  flush(); endList();
-  return out.join("");
-}
-
-function headingsOf(text: string): string {
-  const hs = String(text).split("\n").map((l) => /^#{3,4}\s+(.*)$/.exec(l)).filter(Boolean).map((m) => (m as RegExpExecArray)[1]);
-  return hs.slice(0, 6).join(" · ") + (hs.length > 6 ? " · …" : "");
-}
-
-export type Flash = { ok: boolean; text: string } | null;
-const flashHtml = (f: Flash) => f ? '<p class="flash' + (f.ok ? "" : " bad") + '" role="status">' + esc(f.text) + "</p>" : "";
-
-export function instructionsDocument(
-  slug: string, tenantName: string, have: ModuleKey[], bar: string, parts: Part[], section: string,
-  admin: boolean, editing: string, flash: Flash, consultant = false,
-): string {
-  const sec = (SECTION_ORDER as readonly string[]).includes(section) ? section : "foundation";
-  const segs = '<nav class="seg" aria-label="Section">' + SECTION_ORDER.map((s) =>
-    '<a href="' + esc(clientHref(slug, "copilot", "settings") + "?section=" + s) + '"' + (s === sec ? ' aria-current="true"' : "") + ">" +
-    esc(SECTION_WORD[s as keyof typeof SECTION_WORD]) + "</a>").join("") + "</nav>";
-  const action = clientHref(slug, "copilot", "settings") + "?section=" + sec;
-  const mine = parts.filter((p) => p.section === sec);
-  const blocks = mine.map((p) => {
-    const isEditing = admin && editing === p.key;
-    const tools = admin
-      ? '<div class="edit">' + (isEditing
-        ? '<form method="post" action="' + esc(action) + '"><input type="hidden" name="act" value="save"><input type="hidden" name="key" value="' + esc(p.key) + '">' +
-          '<textarea name="text" aria-label="' + esc(p.title) + '">' + esc(p.text) + "</textarea>" +
-          '<div class="row"><button class="btn solid" type="submit">Save</button><a class="btn quiet" href="' + esc(action) + '">Cancel</a></div></form>'
-        : '<div class="row"><a class="btn" href="' + esc(action + "&edit=" + p.key + "#" + p.key) + '">Edit</a>' +
-          (p.edited ? '<form method="post" action="' + esc(action) + '" style="margin:0"><input type="hidden" name="act" value="reset"><input type="hidden" name="key" value="' + esc(p.key) + '">' +
-            '<button class="btn quiet" type="submit">Put back the shipped text</button></form>' : "") + "</div>") + "</div>"
-      : "";
-    return '<details class="part" id="' + esc(p.key) + '"' + (isEditing || mine.length === 1 ? " open" : "") + "><summary><b>" + p.n + "</b>" +
-      '<span class="t">' + esc(p.title) + "</span>" + (p.edited ? '<span class="edited">Edited</span>' : "") +
-      '<span class="m">' + esc(headingsOf(p.text)) + "</span></summary>" +
-      '<div class="md">' + mdToHtml(p.text) + "</div>" + tools + "</details>";
-  }).join("");
-  const body = '<div class="split">' + rail(slug, "instructions") + '<div class="pane">' +
-    '<div class="head"><h2>AI instructions</h2><span class="chip">Same for all clients</span>' +
-    (admin ? "" : '<span class="chip">Read only</span>') + "</div>" + flashHtml(flash) + segs + blocks +
-    '<p class="why">What the Copilot is told for this section, read on every message. ' +
-    (admin ? "An edit here changes it for every client." : "Only a Forefront super user can change it.") + "</p></div></div>";
-  return frame(slug, tenantName, have, bar,
-    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot settings", body, consultant);
-}
-
-function sizeOf(n: number): string {
-  return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
-}
-
-export function templatesDocument(
-  slug: string, tenantName: string, have: ModuleKey[], bar: string, ts: Template[], admin: boolean, flash: Flash, consultant = false,
-): string {
-  const action = clientHref(slug, "copilot", "settings/templates");
-  const rows = ts.map((t, i) =>
-    "<tr><td>" + (i + 1) + "</td><td>" + esc(t.name) + (t.edited ? ' <span class="edited">Replaced</span>' : "") + "</td>" +
-    "<td>" + esc(SECTION_WORD[t.section as keyof typeof SECTION_WORD] || t.section) + "</td><td>" + esc(t.use) + "</td>" +
-    '<td class="q">' + esc(sizeOf(t.size)) + "</td>" +
-    '<td><a class="btn" href="' + esc(action + "/" + t.key) + '">Download</a></td>' +
-    (admin ? '<td><form class="up" method="post" enctype="multipart/form-data" action="' + esc(action) + '">' +
-      '<input type="hidden" name="key" value="' + esc(t.key) + '"><input type="hidden" name="act" value="replace">' +
-      '<input type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-label="Replace ' + esc(t.name) + '" required>' +
-      '<button class="btn" type="submit">Replace</button></form>' +
-      (t.edited ? '<form method="post" enctype="multipart/form-data" action="' + esc(action) + '" style="margin-top:4px"><input type="hidden" name="key" value="' + esc(t.key) + '"><input type="hidden" name="act" value="reset">' +
-        '<button class="btn quiet" type="submit">Put back the shipped file</button></form>' : "") + "</td>" : "") +
-    "</tr>").join("");
-  const body = '<div class="split">' + rail(slug, "templates") + '<div class="pane">' +
-    '<div class="head"><h2>Templates</h2><span class="chip">Same for all clients</span>' + (admin ? "" : '<span class="chip">Read only</span>') + "</div>" +
-    flashHtml(flash) +
-    '<div class="tw"><table><thead><tr><th>#</th><th>Template</th><th>Section</th><th>Used for</th><th>Size</th><th></th>' + (admin ? "<th>Replace</th>" : "") + "</tr></thead><tbody>" +
-    rows + "</tbody></table></div>" +
-    '<p class="why">A filled template attached in a Copilot chat is read as that section&rsquo;s input.' +
-    (admin ? " A replaced file is what every client downloads." : "") + "</p></div></div>";
-  return frame(slug, tenantName, have, bar,
-    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot templates", body, consultant);
 }
 
 export async function barOf(tenantId: string): Promise<string> { return barFor(tenantId); }

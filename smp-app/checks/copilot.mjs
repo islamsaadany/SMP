@@ -46,13 +46,14 @@ import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.
 import { guidanceFor } from "../lib/copilot-guidance.ts";
 import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
-import { methodFor } from "../lib/copilot-settings.ts";
+import { methodFor, templateFile } from "../lib/copilot-settings.ts";
+import { copilotSettingsAction } from "../lib/copilot-settings-api.ts";
 import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { periodQuarters as exQs, periodWords as exWords, validPeriod as exValid, periodChoices as exChoices, withPeriod as exWith, cleanItem as exItem, newExec, todoOf as exTodo, finishBlocker as exBlock } from "../lib/copilot-execution.ts";
 import { scoreOf as dvScore, finishBlocker as dvBlock, newDirs, modelCaps as dvCaps, modelOptions as dvOpts, todoOf as dvTodo } from "../lib/copilot-directions.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
-import { moduleMenu } from "../lib/modules.ts";
+import { moduleMenu, moduleRows } from "../lib/modules.ts";
 import { decideOpen } from "../lib/access.ts";
 
 /* The key decides whether the model is asked at all; this check sets it per
@@ -432,54 +433,66 @@ try {
   check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
-  /* ══ §3c · the Copilot's own settings (§456) ═══════════════════════
-     The same for every client; read by the office, changed by a Forefront
-     super user only (the account's admin flag, never the client's seat). */
-  section("§3c · Copilot settings: the office reads, only a Forefront super user changes");
+  /* ══ §3c · the Copilot's own settings, on the console (§456, §497) ══
+     The same for every client; read by every consultant, changed by a
+     Forefront super user only (the account's admin flag, never a client's
+     seat). Since §497 they are reached from Forefront's console rather than
+     from inside a client, so this drives the console's own endpoint
+     (lib/copilot-settings-api.ts) — the same function the route calls. */
+  section("§3c · Copilot settings: every consultant reads, only a Forefront super user changes");
   const KEY = "part2";
+  const CONSULT = { id: null, email: "c@ff", name: "C", kind: "office", isAdmin: false, mustChange: false };
+  const ADMIN = { ...CONSULT, isAdmin: true };
+  const CLIENTP = { ...CONSULT, kind: "client" };
+  const act = (me, body) => copilotSettingsAction(doorPool(), me, body, null);
   await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]);
   try {
-    const ins = await page("GET", "settings", null, NORAN, "?section=analysis");
-    check("the AI instructions page draws the analysis parts for the office, read only",
-      ins.st === 200 && /SWOT/.test(ins.text) && /Same for all clients/.test(ins.text) && /Read only/.test(ins.text) && !/edit=part/.test(ins.text), ins.st + "");
-    const insAdm = await page("GET", "settings", null, NORAN, "?section=analysis", true);
-    check("...and offers Edit to a Forefront super user, and only to one", /edit=part2/.test(insAdm.text) && !/Read only/.test(insAdm.text));
-    const fd = (o) => { const f = new FormData(); for (const [k, v] of Object.entries(o)) f.append(k, v); return f; };
-    const nope = await page("POST", "settings", fd({ act: "save", key: KEY, text: "Hijacked" }), NORAN, "?section=analysis");
+    const rd = await act(CONSULT, { action: "read" });
+    check("a consultant reads every part and all five templates, told they may not change them",
+      rd.code === 200 && rd.body.canEdit === false && (rd.body.parts || []).some((p) => p.section === "analysis" && /SWOT/.test(p.text)) &&
+      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 5, JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
+    const rdA = await act(ADMIN, { action: "read" });
+    check("...and a Forefront super user is told they may", rdA.code === 200 && rdA.body.canEdit === true);
+    const nope = await act(CONSULT, { action: "save", key: KEY, text: "Hijacked" });
     const rowNope = await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY]);
-    check("a POST from somebody who is not a Forefront super user changes nothing and says why",
-      nope.st === 400 && /Only a Forefront super user/.test(nope.text) && rowNope.rowCount === 0, nope.st + " " + rowNope.rowCount);
-    const yes = await page("POST", "settings", fd({ act: "save", key: KEY, text: "## General\n\nOur own SWOT rule." }), NORAN, "?section=analysis", true);
+    check("a save from somebody who is not a Forefront super user changes nothing and says why",
+      nope.code === 403 && /Only a Forefront super user/.test(nope.body.error) && rowNope.rowCount === 0, nope.code + " " + rowNope.rowCount);
+    const yes = await act(ADMIN, { action: "save", key: KEY, text: "## General\n\nOur own SWOT rule." });
     const rowYes = await doorPool().query("SELECT text FROM copilot_assets WHERE key = $1", [KEY]);
-    check("an admin's save is stored and answers 303 to the page, so a refresh does not resend it",
-      yes.st === 303 && /done=saved/.test(yes.to) && rowYes.rowCount === 1 && /Our own SWOT rule/.test(rowYes.rows[0].text), yes.st + " " + yes.to);
+    check("an admin's save is stored and answers with the whole state again",
+      yes.code === 200 && yes.body.changed === true && rowYes.rowCount === 1 && /Our own SWOT rule/.test(rowYes.rows[0].text) &&
+      (yes.body.parts || []).some((p) => p.key === KEY && p.edited), yes.code + "");
     check("...and the next question is told it (methodFor reads the stored row)", /Our own SWOT rule/.test(await methodFor(doorPool(), "analysis")));
-    const empty = await page("POST", "settings", fd({ act: "save", key: KEY, text: "   " }), NORAN, "?section=analysis", true);
-    check("an empty part is refused in words, the stored text kept", empty.st === 400 && /cannot be empty/.test(empty.text) &&
+    const empty = await act(ADMIN, { action: "save", key: KEY, text: "   " });
+    check("an empty part is refused in words, the stored text kept", empty.code === 400 && /cannot be empty/.test(empty.body.error) &&
       (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 1);
+    const reset = await act(ADMIN, { action: "reset", key: KEY });
+    check("putting the shipped text back DELETES the row — the default is an absence (§50.6)",
+      reset.code === 200 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 0, reset.code + "");
     const shipped = DEFAULT_PARTS.find((x) => x.key === KEY).text;
-    const back = await page("POST", "settings", fd({ act: "save", key: KEY, text: shipped }), NORAN, "?section=analysis", true);
-    check("saving the shipped text DELETES the row — the default is an absence (§50.6)",
-      back.st === 303 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 0, back.st + "");
-    const tp = await page("GET", "settings/templates", null, NORAN);
-    check("the templates page lists all five, each downloadable, read only for the office",
-      tp.st === 200 && (tp.text.match(/settings\/templates\/t[1-5]"/g) || []).length === 5 && /Read only/.test(tp.text), tp.st + "");
-    const dl = await page("GET", "settings/templates/t3", null, NORAN);
-    check("a template downloads as the shipped Excel file", dl.st === 200 && dl.bytes && dl.bytes[0] === 0x50 && dl.bytes[1] === 0x4b && /Porters/.test(decodeURIComponent(dl.disp)), dl.st + " " + dl.disp);
-    const notX = fd({ act: "replace", key: "t3" }); notX.append("file", new Blob([Buffer.from("not excel")]), "porter.xlsx");
-    const rep = await page("POST", "settings/templates", notX, NORAN, "", true);
-    check("a file that only CALLS itself .xlsx is refused by its shape", rep.st === 400 && /not an Excel file/.test(rep.text) &&
-      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 0, rep.st + "");
-    const realX = fd({ act: "replace", key: "t3" }); realX.append("file", new Blob([XLSX]), "Porter v2.xlsx");
-    const rep2 = await page("POST", "settings/templates", realX, NORAN, "", true);
-    const dl2 = await page("GET", "settings/templates/t3", null, NORAN);
-    check("an admin's replacement is what every client downloads next", rep2.st === 303 && dl2.bytes && dl2.bytes.equals(XLSX) && /Porter v2/.test(decodeURIComponent(dl2.disp)), rep2.st + " " + dl2.disp);
-    const repNo = await page("POST", "settings/templates", fd({ act: "reset", key: "t3" }), NORAN);
-    check("...and somebody else cannot put it back either", repNo.st === 400 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 1);
-    const hendSet = await page("GET", "settings", null, HEND);
-    check("a client's own person is refused the settings too", hendSet.st === 403, hendSet.st + "");
-    check("the switcher offers the Copilot to the office, and the door refuses a client's person",
-      moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && decideOpen("none", "copilot", {}, null) === false);
+    check("...and the part reads the shipped text again", (reset.body.parts || []).some((p) => p.key === KEY && p.text === shipped && !p.edited));
+    const before = await templateFile(doorPool(), "t3");
+    check("a template is the shipped Excel file until replaced", before && before.bytes[0] === 0x50 && before.bytes[1] === 0x4b && /Porters/.test(before.name), before && before.name);
+    const notX = await act(ADMIN, { action: "replace", key: "t3", name: "porter.xlsx", data: Buffer.from("not excel").toString("base64") });
+    check("a file that only CALLS itself .xlsx is refused by its shape", notX.code === 400 && /not an Excel file/.test(notX.body.error) &&
+      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 0, notX.code + "");
+    const rep2 = await act(ADMIN, { action: "replace", key: "t3", name: "Porter v2.xlsx", data: XLSX.toString("base64") });
+    const after = await templateFile(doorPool(), "t3");
+    check("an admin's replacement is what every client downloads next", rep2.code === 200 && after.bytes.equals(XLSX) && /Porter v2/.test(after.name) &&
+      (rep2.body.templates || []).some((t) => t.key === "t3" && t.edited), rep2.code + " " + after.name);
+    const repNo = await act(CONSULT, { action: "reset", key: "t3" });
+    check("...and somebody else cannot put it back either", repNo.code === 403 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 1);
+    const cl = await act(CLIENTP, { action: "read" });
+    check("a client's own login is refused even the reading, in words", cl.code === 403 && /not something this account opens/.test(cl.body.error), cl.code + "");
+    const old = await page("GET", "settings", null, NORAN, "?section=analysis");
+    check("an old settings address inside a client sends you to the console's Copilot tab",
+      old.st === 302 && /\/platform#copilot$/.test(old.to || ""), old.st + " " + old.to);
+    const oldT = await page("GET", "settings/templates/t3", null, NORAN);
+    check("...and so does an old template link", oldT.st === 302 && /\/platform#copilot$/.test(oldT.to || ""), oldT.st + "");
+    check("the Copilot is not offered in the client's module menu — it lives inside Strategy (§497)",
+      !moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && moduleMenu(["strategy", "copilot"]).some((m) => m.key === "strategy"));
+    check("...nor as a row on the client's console card", !moduleRows(["strategy", "copilot"], {}).some((r) => r.key === "copilot"));
+    check("the door still refuses a client's person the Copilot", decideOpen("none", "copilot", {}, null) === false);
   } finally {
     await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]).catch(() => {});
   }

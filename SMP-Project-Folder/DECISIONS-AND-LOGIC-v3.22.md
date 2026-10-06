@@ -62690,3 +62690,16 @@ Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_adv
 **Found while building**: a clash is itself the question, and the model may not word one — the platform words it (*"Which Store count should I use?"*) rather than refusing a good answer.
 
 **Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**
+
+## §497 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
+
+Islam: *"When I enable Copilot on the platform, the module appears on the outside of the platform. When someone clicks on it, it opens the settings, which I don't think is relevant."* Then, of the mockup (`design-mockups/copilot-placement/2026-10-06_copilot-placement.html`): *"go ahead"*, *"proceed"*.
+
+**WHAT TURNING IT ON DOES IS ONE THING**: it draws the Copilot tab inside Strategy. The console card no longer draws a Copilot row and the client's module menu and switcher no longer list Copilot or Copilot settings — `shownOutside()` in `lib/modules.ts` filters any module marked `inside` out of `moduleMenu` and `moduleRows`, and the top bar marks the host (Strategy) as current on the Copilot's own list page (`lib/topbar.ts`), so an inside module is never named as a place of its own.
+
+**THE SETTINGS ARE THE SAME FOR EVERY CLIENT, SO THEY LIVE WHERE EVERY CLIENT IS**: a console tab, *Copilot*, after Frameworks and before History — title *Copilot settings*, tag *Same for every client*, an AI instructions | Templates switch, the section switch, each part with Edit, and the templates table (download, replace, put back). Served by `/api/copilot` (`lib/copilot-settings-api.ts`): every consultant reads, only a Forefront super user (`isAdmin`) edits, a client login is refused — the rule asked on the server, never only by hiding a button (§42). The store is unchanged (`copilot_assets`, §456).
+
+**OLD ADDRESSES ARE DOORS** (§61): `/<client>/copilot/settings…` redirects to `/platform#copilot` rather than drawing a page that no longer exists. **AND THE WAY TO ALL CHATS STAYS**: Strategy's Copilot chats rail carries *All chats on this client ›* to the list page, which is still reachable from inside, never from the menu. Roles & access keeps its Copilot column (§454).
+
+**CHECKS**: `copilot.mjs` 315/0 (red under `copilot-settings-any` 3 and `copilot-settings-client` 1); `modules.mjs` 234/0 with an inside module asserted absent from the switcher and the card and its host present; `shell.mjs` §3f rewritten (the redirect, the console tab, the All chats link, no menu entry) 258/0; the five console checks green on both copies. **RECORDED, NOT DONE**: `check:modules:red`'s `any-module` break no longer reddens because every module in `MODULE_DEF` is now built — measured identical with this change stashed, so it is the break's subject that has gone (§214.3), not this change.
+

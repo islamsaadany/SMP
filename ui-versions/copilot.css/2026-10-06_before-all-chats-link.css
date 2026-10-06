@@ -645,7 +645,3 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .adoh { display:flex; justify-content:space-between; gap:8px; font-weight:700; align-items:baseline; }
 .adopt p { color:var(--ink-2); margin-top:2px; }
 .adrec { flex:none; font-size:var(--fs-micro, 11px); font-weight:700; border-radius:var(--r-pill, 999px); padding:1px 8px; background:var(--gold); color:var(--on-accent); }
-
-/* §497: the door to every chat on this client, above the chats rail. */
-.copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
-.copall:hover { color:var(--ink); text-decoration:underline; }

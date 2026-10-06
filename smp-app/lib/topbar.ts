@@ -84,7 +84,11 @@ export function topBarHtml(t: TopBar): string {
       '<span class="tborg">' + esc(t.tenantName) + "</span>" + right + "</div></header>";
   }
   const mods = moduleMenu(t.have);
-  const modItems = mods.map((m) => item(m.label, clientHref(t.slug, m.key, ""), m.key === t.module, m.note)).join("") +
+  /* A module that lives inside another (the Copilot, §497) is not in this
+     menu, so its own page wears and marks the module it lives in — the trail
+     reads Strategy, which is where it is reached from. */
+  const here: ModuleKey = MODULE_DEF[t.module].inside || t.module;
+  const modItems = mods.map((m) => item(m.label, clientHref(t.slug, m.key, ""), m.key === here, m.note)).join("") +
     (mods.length ? '<div class="tbrule" role="separator"></div>' : "") +
     mods.map((m) => item(m.label + " settings", clientHref(t.slug, m.key, "setup"), false)).join("") +
     item("Client settings", "/" + t.slug + "/setup", false);
@@ -96,7 +100,7 @@ export function topBarHtml(t: TopBar): string {
         '<div class="tbmenu" role="menu" data-clients="' + esc(t.slug) + '">' +
           '<div class="tbquiet">Reading your clients…</div><div class="tbrule" role="separator"></div>' +
           item("All clients", "/platform#clients", false) + "</div></details>" + sep +
-      '<details class="tbstep tbmod"><summary><span>' + esc(MODULE_DEF[t.module].label) + "</span>" + DOWN + "</summary>" +
+      '<details class="tbstep tbmod"><summary><span>' + esc(MODULE_DEF[here].label) + "</span>" + DOWN + "</summary>" +
         '<div class="tbmenu" role="menu">' + modItems + "</div></details>" +
     "</nav>" + right + "</div></header>";
 }

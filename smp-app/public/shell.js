@@ -57928,8 +57928,15 @@ var COPILOT = (function(){
     return '<button type="button" class="copfoldb" data-cop-fold="' + k + '" aria-expanded="' + !f + '" aria-label="' + (f ? "Show " : "Hide ") + E(label) + '" title="' + (f ? "Show " : "Hide ") + E(label) + '">' +
       '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 6l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
   }
+  /* EVERY CHAT ON THIS CLIENT IS ONE PRESS FROM HERE (§497): the list page
+     left the module menu with the settings, so its door is the rail it
+     lists. Drawn only where there is a client address to go to. */
+  function allChatsLink(){
+    var s = slug();
+    return s ? '<a class="copall" data-cop-all href="/' + E(s) + '/copilot">All chats on this client &rsaquo;</a>' : '';
+  }
   function railsInner(){
-    return '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
+    return allChatsLink() + '<section class="coprail copchats' + (folded("chats") ? " copfolded" : "") + '"><div class="coprh" data-cop-chatshead>' + chatsHead() + foldBtn("chats", "chats") + '</div>' +
         '<div class="coplist" data-cop-chats>' + chatsHtml() + '</div>' +
         '<div class="coprft" data-cop-chatsfoot>' + chatsFoot() + '</div></section>' +
       '<section class="coprail' + (folded("delivs") ? " copfolded" : "") + '"><div class="coprh"><span class="coprhl">Deliverables</span>' + foldBtn("delivs", "deliverables") + '</div>' +

@@ -36,10 +36,10 @@ import {
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
   saveFoundation, nextFoundationVersion,
 } from "../../lib/copilot-flow.ts";
-import { methodFor, templateNamesFor, partsOf, templatesOf, templateFile, savePart, saveTemplate, resetAsset, MAX_TEMPLATE } from "../../lib/copilot-settings.ts";
+import { methodFor, templateNamesFor } from "../../lib/copilot-settings.ts";
 import { shellHeaders } from "../../lib/shell.ts";
-import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
-import { doorPool, getSession, readCookie } from "../../lib/auth.ts";
+import { listDocument, refusedCopilot, barOf, type Names, type ListAsk } from "./page.ts";
+import { doorPool } from "../../lib/auth.ts";
 import { SWOT_ACTS, SWOT_ASKS, swotAct, swotAsk, swotView, swotProgress, sourcesGet, sourceFile } from "./swot.ts";
 import { COMPETE_ACTS, COMPETE_ASKS, competeAct, competeAsk, competeView, competeProgress } from "./compete.ts";
 import { DIRS_ACTS, DIRS_ASKS, dirsAct, dirsAsk, dirsView, dirsProgress } from "./directions.ts";
@@ -590,16 +590,14 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
   });
 }
 
-/* ── THE PAGES (§456) ──────────────────────────────────────────────────
-   The list, and the two settings pages. A write is a plain form POST that
-   answers with the page drawn again and a sentence saying what happened
-   (§171: a save that fails says so), so no script is needed anywhere here. */
+/* ── THE PAGE (§456, §497) ─────────────────────────────────────────────
+   The list of every chat and deliverable on this client, reached from the
+   Copilot tab's own rail. The settings were here until §497 moved them to
+   the console; their old addresses redirect there. */
 async function pages(a: ServeArgs): Promise<Response> {
   const u = new URL(a.req.url);
   const q = (k: string) => u.searchParams.get(k) || "";
   const bar = await barOf(a.tenantId);
-  const sub = a.rest[1] || "";
-  const by = await adminId(a);
   try {
     if (a.rest[0] !== "settings") {
       if (a.rest.length) return Response.redirect(new URL(clientHref(a.slug, "copilot", ""), a.req.url), 302);
@@ -614,74 +612,15 @@ async function pages(a: ServeArgs): Promise<Response> {
       } catch (e) { console.error("copilot: list " + a.slug + ":", (e as Error).message); }
       return html(200, listDocument(a.slug, a.tenantName, a.have, bar, names, ask, chats, delivs, !!a.consultant));
     }
-    const pool = doorPool();
-    if (sub === "" ) {
-      let flash: Flash = null;
-      if (a.req.method === "POST") {
-        if (!a.admin && brk() !== "settings-any-office") flash = { ok: false, text: "Only a Forefront super user can change the AI instructions." };
-        else {
-          const f = await a.req.formData();
-          const key = String(f.get("key") || ""), act = String(f.get("act") || "");
-          const r = act === "reset" ? await resetAsset(pool, key) : act === "save" ? await savePart(pool, key, String(f.get("text") ?? ""), by) : { ok: false as const, why: "Not something this page does." };
-          /* A write that landed answers with the page's own address (303), so
-             a refresh reads the page rather than sending the form again. */
-          if (r.ok) return seeOther(a, "settings", { section: q("section") || "foundation", done: act === "reset" ? "reset" : r.changed ? "saved" : "same" }, key);
-          flash = { ok: false, text: r.why };
-        }
-      } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped text is back." : q("done") === "saved" ? "Saved. Every client's Copilot reads it from the next message." : "Nothing changed." };
-      const parts = await partsOf(pool);
-      return html(flash && !flash.ok ? 400 : 200, instructionsDocument(a.slug, a.tenantName, a.have, bar, parts, q("section") || "foundation",
-        a.admin, flash && flash.ok ? "" : q("edit"), flash, !!a.consultant));
-    }
-    if (sub === "templates" && a.rest.length === 2) {
-      let flash: Flash = null;
-      if (a.req.method === "POST") {
-        if (!a.admin && brk() !== "settings-any-office") flash = { ok: false, text: "Only a Forefront super user can replace a template." };
-        else {
-          const f = await a.req.formData();
-          const key = String(f.get("key") || ""), act = String(f.get("act") || "");
-          let r: { ok: true; changed: boolean } | { ok: false; why: string };
-          if (act === "reset") r = await resetAsset(pool, key);
-          else if (act === "replace") {
-            const file = f.get("file");
-            if (!file || typeof file === "string") r = { ok: false, why: "Choose the file to put in its place." };
-            else if (file.size > MAX_TEMPLATE) r = { ok: false, why: "A template can be up to 3 MB." };
-            else r = await saveTemplate(pool, key, file.name, Buffer.from(await file.arrayBuffer()), by);
-          } else r = { ok: false, why: "Not something this page does." };
-          if (r.ok) return seeOther(a, "settings/templates", { done: act === "reset" ? "reset" : "replaced" }, "");
-          flash = { ok: false, text: r.why };
-        }
-      } else if (q("done")) flash = { ok: true, text: q("done") === "reset" ? "The shipped file is back." : "Replaced. Every client now downloads the new file." };
-      return html(flash && !flash.ok ? 400 : 200, templatesDocument(a.slug, a.tenantName, a.have, bar, await templatesOf(pool), a.admin, flash, !!a.consultant));
-    }
-    if (sub === "templates" && a.rest.length === 3) {
-      const f = await templateFile(pool, a.rest[2]);
-      if (!f) return html(404, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId, "That template is not here.", !!a.consultant));
-      return new Response(new Uint8Array(f.bytes), { status: 200, headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Cache-Control": "no-store",
-        "X-Content-Type-Options": "nosniff", "Content-Disposition": "attachment; filename*=UTF-8''" + encodeURIComponent(f.name) } });
-    }
-    return Response.redirect(new URL(clientHref(a.slug, "copilot", "settings"), a.req.url), 302);
+    /* THE SETTINGS LIVE ON THE CONSOLE NOW (§497): they are the same for
+       every client, so an address under one client was saying something
+       untrue. An old bookmark is a door, so it lands where they went (§61). */
+    return Response.redirect(new URL("/platform#copilot", a.req.url), 302);
   } catch (e) {
     console.error("copilot: page " + a.rest.join("/") + " " + a.slug + ":", (e as Error).message);
     return html(500, await refusedCopilot(a.slug, a.tenantName, a.have, a.tenantId,
       a.req.method === "POST" ? "That did not save. Nothing was changed — try again." : "This could not be read just now. Nothing has been lost — try again in a moment.", !!a.consultant));
   }
-}
-
-function seeOther(a: ServeArgs, rest: string, params: Record<string, string>, anchor: string): Response {
-  const u = new URL(clientHref(a.slug, "copilot", rest), a.req.url);
-  for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v);
-  if (anchor) u.hash = anchor;
-  return new Response(null, { status: 303, headers: { Location: u.toString(), "Cache-Control": "no-store" } });
-}
-
-/* The account behind an admin's write, for `updated_by`; null for anybody
-   else, who cannot write here anyway. */
-async function adminId(a: ServeArgs): Promise<string | null> {
-  if (!a.admin) return null;
-  /* lib/session.ts would pull Next in; the two readers it wraps are here. */
-  try { const u = await getSession(doorPool(), readCookie(a.req.headers.get("cookie"))); return u ? u.id : null; } catch { return null; }
 }
 
 /* The client's names for every place word and every person, read once per

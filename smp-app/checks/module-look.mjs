@@ -362,11 +362,10 @@ try {
     { mod: "notes", what: "Meeting Notes — the list", url: "/x/notes", must: "Q3 review preparation" },
     { mod: "notes", what: "Meeting Notes — one note, with its minutes", url: "/x/notes?note=" + noteId, must: "circulate" },
     { mod: "copilot", what: "the Copilot — chats and deliverables", url: "/x/copilot", must: "End in Mind" },
-    /* No `must` here, deliberately: the settings page draws the SHIPPED
-       instructions and templates rather than anything this fixture wrote, so
-       a word asserted here would be a literal about that prose (§214.3). The
-       200-and-a-body assertion above is what stands for it. */
-    { mod: "copilot", what: "the Copilot — its settings", url: "/x/copilot/settings", must: "" },
+    /* The Copilot's settings left this list at §497: they moved to the
+       console's own Copilot tab (they are the same for every client), and
+       the old address now redirects there, so there is no module page left
+       here to sweep. The console tab is measured by checks/shell.mjs §3e. */
     { mod: "portfolio", what: "Portfolio — the landing", url: "/x/portfolio", must: "Culture Transformation" },
     { mod: "portfolio", what: "Portfolio — a project's charter", url: "/x/portfolio/" + projId, must: "managed by" },
     { mod: "portfolio", what: "Portfolio — the plan, as a list", url: "/x/portfolio/" + projId + "/plan", must: "Leadership interviews" },

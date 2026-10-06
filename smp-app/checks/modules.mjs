@@ -210,12 +210,20 @@ const drawnBy = async (k, rest = []) => {
   return { status: res.status, html: res.status === 200 ? await res.text() : "", to: res.headers.get("location") || "" };
 };
 const drawn = {};
-/* §456 REVERSES the redirect: the Copilot is still a tab inside Strategy,
-   AND it has a page of its own (every chat and deliverable on the client,
-   and its settings), so the switcher lists it like any other module. */
+/* §497 REVERSES §456's listing, at Islam's word: a module that lives inside
+   another is turned on from the client's card and shown as a tab of the one
+   it lives in — never in the switcher, never as its own row on the card.
+   Its page is still served (the list of every chat, reached from the tab's
+   "All chats on this client" link), which the next loop asserts; what is
+   asserted here is only where it is OFFERED. Both ends (§94.2): the module
+   it lives inside is still listed, or an empty menu passes. */
 for (const k of INSIDE) {
-  check("...and the switcher lists " + k + " too — it has a page of its own now (§456)", moduleMenu(offerable()).some((m) => m.key === k),
-    moduleMenu(offerable()).map((m) => m.key).join(", "));
+  const menu = moduleMenu(offerable()).map((m) => m.key);
+  check("...and the switcher does NOT list " + k + " — it lives inside " + MODULE_DEF[k].inside + " (§497)",
+    !menu.includes(k) && menu.includes(MODULE_DEF[k].inside), menu.join(", "));
+  const rows = moduleRows(offerable(), {}).map((r) => r.key);
+  check("...nor does the client's card draw it a row of its own (§497)",
+    !rows.includes(k) && rows.includes(MODULE_DEF[k].inside), rows.join(", "));
 }
 for (const k of PAGED()) {
   drawn[k] = await drawnBy(k);
@@ -339,8 +347,11 @@ check("and Setup's address carries none", clientHref("raya-trade", null, "setup/
 console.log("\n4 · the card's rows");
 const facts = { unreadable: false, cycleOpen: true, planned: true };
 const rows = moduleRows(modulesFor(BUILT_EXTRA), facts);
+/* A module that lives inside another draws no row of its own (§497), so the
+   expectation is the client's list less those — derived, not typed. */
+const ROWS_WANT = HAVE_BOTH.filter((k) => !MODULE_DEF[k].inside);
 check("one row per module the client has, and no more, in the list's own order",
-  same(rows.map((r) => r.key), HAVE_BOTH), rows.map((r) => r.key).join(", "));
+  same(rows.map((r) => r.key), ROWS_WANT), rows.map((r) => r.key).join(", "));
 /* REWRITTEN, NEVER LOOSENED (§218, §214.3). This asserted `state === "cycle
    open"` — the health word §368 replaced, and half of the pair that said one
    fact twice. What survives is the claim it was making: Strategy is the row
@@ -642,8 +653,11 @@ for (const k of OWN_PAGE) {
   check("it offers a door OUT, back to the default module — " + k,
     doc.includes('href="' + clientHref("raya-trade", DEFAULT_MODULE, "") + '"'),
     (doc.match(/href="\/raya-trade\/[a-z]*"/g) || []).join(" "));
+  /* A module that lives inside another is not in the menu at all (§497),
+     so its page marks the module it lives in rather than itself. */
+  const youAre = MODULE_DEF[k].inside || k;
   check("...and the module you are IN is marked — " + k,
-    new RegExp('aria-current="true">' + MODULE_DEF[k].label).test(doc),
+    new RegExp('aria-current="true">' + MODULE_DEF[youAre].label).test(doc),
     (doc.match(/aria-current="true">[A-Za-z]+/) || [""])[0]);
   /* Asked of the MODULE MENU, not the whole document (§456; the menu is the
      shared bar's `tbmod` since main's §444): a module's own

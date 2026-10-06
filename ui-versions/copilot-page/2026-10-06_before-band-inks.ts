@@ -22,7 +22,7 @@
    where in one row rather than drawing a page that would be a second copy. */
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss } from "../../lib/topbar.ts";
-import { barFor, barVars } from "../../lib/branding.ts";
+import { barFor } from "../../lib/branding.ts";
 import { SECTIONS, SECTION_WORD, type Chat, type Deliverable } from "../../lib/copilot.ts";
 import { SECTION_ORDER, type Part, type Template } from "../../lib/copilot-settings.ts";
 
@@ -32,7 +32,7 @@ const esc = (s: unknown) =>
 
 const CSS = `
 *{box-sizing:border-box}
-:root{%BARVARS%;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EFF2F6;--gold:#9C5D08;--good-tx:#1E6B41;--bad-tx:#A23123;--note:#FFF7E3}
+:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EFF2F6;--gold:#9C5D08;--good-tx:#1E6B41;--bad-tx:#A23123;--note:#FFF7E3}
 @media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#B4BCC8;--ink-3:#8F9AAD;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222833;--gold:#F5A623;--good-tx:#6FCF97;--bad-tx:#F19A8E;--note:#2E2A1C}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .crumbs{color:var(--ink-3);font-size:13px}.crumbs a{color:inherit}
@@ -42,12 +42,12 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--ink-2);background:var(--surface)}
 .btn{border:1px solid var(--line);border-radius:7px;padding:6px 13px;font:600 13px/1.4 inherit;background:var(--surface);color:var(--ink);text-decoration:none;cursor:pointer;display:inline-block}
 .btn:hover,.btn:focus-visible{border-color:var(--gold);outline:none}
-.btn.solid{background:var(--bar);color:var(--bar-ink);border-color:var(--bar)}
+.btn.solid{background:var(--bar);color:#fff;border-color:var(--bar)}
 .btn.quiet{border-color:transparent;background:transparent;color:var(--ink-3);padding-inline:6px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
 .seg a{padding:6px 13px;font-size:13.5px;border-right:1px solid var(--line);color:var(--ink-2);text-decoration:none}
 .seg a:last-child{border-right:0}
-.seg a[aria-current="true"]{background:var(--bar);color:var(--bar-ink)}
+.seg a[aria-current="true"]{background:var(--bar);color:#fff}
 .seg a:hover:not([aria-current]),.seg a:focus-visible{background:var(--surface-2);outline:none}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filters form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1 1 420px;min-width:0}
@@ -56,7 +56,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 table{border-collapse:collapse;width:100%;min-width:640px}
-th{background:var(--bar);color:var(--bar-ink);text-align:left;font:600 11.5px/1.3 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
+th{background:var(--bar);color:#fff;text-align:left;font:600 11.5px/1.3 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
 td{padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 tr:last-child td{border-bottom:0}
 tbody tr:nth-child(even) td{background:var(--surface-2)}
@@ -113,7 +113,7 @@ function frame(slug: string, tenantName: string, have: ModuleKey[], bar: string,
     "<title>" + esc(tenantName) + " &mdash; " + esc(title) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BARVARS%", barVars(bar))) + "</style>\n</head>\n<body>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + "</style>\n</head>\n<body>\n" +
     topBarHtml({ slug, tenantName, module: "copilot", have, consultant, viewer: null }) + "\n" +
     '<main class="pg">\n' + (crumbs ? '<div class="crumbs">' + crumbs + "</div>\n" : "") + body + "\n</main>\n</body>\n</html>\n";
 }

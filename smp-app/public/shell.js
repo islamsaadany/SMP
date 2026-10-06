@@ -26567,7 +26567,7 @@ function renderTopCaps(){
   };
   var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
               '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
-  /* §497: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
+  /* §500: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
      open on this pane: *"I'm not able to edit the name nor add a capability …
      the capability view should be the same like the directions same
      functionality same work."* §482/§488 drew the band read-only in both modes
@@ -68560,7 +68560,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-topcap]").forEach(function(b){
       b.addEventListener("click", function(){ TOPCAP = b.dataset.topcap; paint(); });
     });
-    /* §497: "+ Add a Capability" on the company's Capabilities rail, the
+    /* §500: "+ Add a Capability" on the company's Capabilities rail, the
        direction rail's own add (§69.13). The new one plans the way the one it
        was added beside plans, and a pillars one gets its single plan row at
        once (§491), so it opens exactly as an added direction does: empty

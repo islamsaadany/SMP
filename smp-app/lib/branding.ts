@@ -57,3 +57,65 @@ export async function barFor(tenantId: string): Promise<string> {
     return BAR_DEFAULT;
   }
 }
+
+/* WHAT CAN BE READ ON THE CLIENT'S COLOUR (§498). A band painted in the
+   client's own bar carried FIXED inks — white words, pale-blue quiet words,
+   a salmon "late", a gold rule — chosen for the shipped navy. On a client
+   who picked a light colour (a tan, measured at 1.9:1 for the white title)
+   the band went unreadable. The frozen product solved this once
+   (config-data.js's inkFor / readableOn, §38.4); this is that same rule for
+   the modules, so the two cannot answer differently (§53.5):
+     · ink    — white or near-black, whichever reads better on the bar;
+     · quiet  — the ink pulled toward the bar, then walked back until it
+                clears 4.5:1, so a secondary word stays secondary AND legible;
+     · accent — the house gold, walked until it clears 4.5:1 (it is a word —
+                the week line — as well as a rule);
+     · late   — a red that reads on the bar, from the light or dark side;
+     · hover  — a wash in the ink's own direction.
+   Returned as CSS declarations, so a page writes `:root{%BARVARS%;…}` and
+   every rule asks a token rather than a literal. */
+type RGB = [number, number, number];
+const hexRgb = (h: string): RGB => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const rgbHex = (c: number[]) => "#" + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("").toUpperCase();
+const relLum = (c: number[]) => {
+  const s = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+  return 0.2126 * s[0] + 0.7152 * s[1] + 0.0722 * s[2];
+};
+export function contrastOf(a: string, b: string): number {
+  const l1 = relLum(hexRgb(a)), l2 = relLum(hexRgb(b));
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+const mix = (a: number[], b: number[], t: number) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const WHITE: RGB = [255, 255, 255], DARK: RGB = [12, 17, 26];
+/* Walked toward the INK's side — not decided again from the bar's own
+   lightness, which on a mid tone (a tan, a grey) picks the side the ink did
+   not and walks a word away from legibility. */
+function readableOn(fg: number[], bg: string, need: number, towardWhite: boolean): string {
+  const target = towardWhite ? [255, 255, 255] : [0, 0, 0];
+  for (let t = 0; t <= 1.001; t += 0.04) {
+    const c = rgbHex(mix(fg, target, t));
+    if (contrastOf(c, bg) >= need) return c;
+  }
+  return rgbHex(target);
+}
+export type BarInks = { ink: string; quiet: string; accent: string; late: string; hover: string };
+export function barInks(barValue: unknown): BarInks {
+  const bar = barFrom(barValue), b = hexRgb(bar);
+  const light = contrastOf(rgbHex(WHITE), bar) >= contrastOf(rgbHex(DARK), bar);
+  const inkRgb = light ? WHITE : DARK;
+  /* THE CHECK'S BREAK: the fixed light inks put back (§94.5). */
+  if ((typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "") === "bar-fixed-inks") {
+    return { ink: "#FFFFFF", quiet: "#C6D2E5", accent: "#E8A33A", late: "#FF9B8F", hover: "rgba(255,255,255,.1)" };
+  }
+  return {
+    ink: rgbHex(inkRgb),
+    quiet: readableOn(mix(inkRgb, b, 0.3), bar, 4.5, light),
+    accent: readableOn(hexRgb("#E8A33A"), bar, 4.5, light),
+    late: readableOn(hexRgb(light ? "#FF9B8F" : "#A23123"), bar, 4.5, light),
+    hover: light ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.07)",
+  };
+}
+export function barVars(barValue: unknown): string {
+  const i = barInks(barValue);
+  return "--bar:" + barFrom(barValue) + ";--bar-ink:" + i.ink + ";--bar-quiet:" + i.quiet + ";--bar-accent:" + i.accent + ";--bar-late:" + i.late + ";--bar-hover:" + i.hover;
+}

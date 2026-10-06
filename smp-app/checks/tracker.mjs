@@ -57,10 +57,11 @@ import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
 import { trackerDocument, whenText } from "../modules/tracker/page.ts";
+import { barInks, barVars, contrastOf } from "../lib/branding.ts";
 import {
   STATUSES, STATUS_WORD, VIEWS, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
-  officeRows, listActions, oneAction, addAction, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
+  officeRows, listActions, oneAction, addAction, addTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
 } from "../lib/tracker.ts";
 
 let ok = 0;
@@ -157,9 +158,23 @@ check("as weeks a row reads the week in words, and nothing marks this one twice"
 check("...a late row says how late and nothing else", wk("2026-09-03").text === "Late 2 w" && wk("2026-09-03").late && wk("2026-09-14").text === "Late", wk("2026-09-03").text);
 check("...and Done is a day either way", whenText(shape({ ...lateRow, status: "done", done_day: "2026-09-15" }), TODAY).text === "Done Tue 15 Sep");
 check("the same week is the same week whichever day names it", sameWeek("2026-09-13", "2026-09-17") && !sameWeek("2026-09-17", "2026-09-18"));
-check("the grouping is four choices, Owner first, and a near miss is not one", GROUPS.join(",") === "owner,status,due,none" && GROUP_WORD.due === "Due date" && !isGroup("Owner") && isGroup("none"));
+check("the grouping is five choices, Owner first, and a near miss is not one", GROUPS.join(",") === "owner,topic,status,due,none" && GROUP_WORD.topic === "Topic" && GROUP_WORD.due === "Due date" && !isGroup("Owner") && isGroup("none"));
 
 /* ══ §2 · the views, and who may do what ══════════════════════════════ */
+section("§1b · what can be read on the client's colour (§498)");
+/* The band wears the client's bar, so its words are derived from it, never
+   fixed for the shipped navy. Asked over the colours a client actually
+   picks — the navy, a tan (the reported one), white, black, a mid grey, a
+   pink — every word must clear 4.5:1 on the bar. */
+for (const bar of ["#16325C", "#C8A27A", "#FFFFFF", "#000000", "#808080", "#E9A6C0"]) {
+  const k = barInks(bar);
+  const low = ["ink", "quiet", "accent", "late"].map((w) => [w, contrastOf(k[w], bar)]).filter(([, r]) => r < 4.5);
+  check("on " + bar + " every word on the band reads at 4.5:1 or better", low.length === 0, JSON.stringify(low.map(([w, r]) => w + " " + r.toFixed(2))));
+}
+check("the navy keeps white words — the shipped look does not move", barInks("#16325C").ink === "#FFFFFF");
+check("a light colour takes dark words", barInks("#C8A27A").ink !== "#FFFFFF");
+check("the tokens reach the page as one declaration list", /^--bar:#C8A27A;--bar-ink:#[0-9A-F]{6};--bar-quiet:#[0-9A-F]{6};--bar-accent:#[0-9A-F]{6};--bar-late:#[0-9A-F]{6};--bar-hover:/.test(barVars("#C8A27A")), barVars("#C8A27A"));
+
 section("§2 · the four views, the strip, and who may do what");
 const mk = (o) => shape({ id: o.id || "x", title: "t", description: "", owner_key: o.owner || "islam",
   due: o.due || null, first_due: o.first || o.due || null, status: o.status || "not_started", done_day: o.doneDay || null, created_by: "islam" });
@@ -362,12 +377,19 @@ try {
   check("the views row carries the two settings behind the dots, Owner and Weeks in force, and the body says which list it is",
     !/class="gby"/.test(page.text) && /data-act="settings"/.test(page.text) && /data-act="set-group" data-value="owner" class="on"/.test(page.text) && /data-act="set-dates" data-value="weeks" class="on"/.test(page.text) &&
     /data-group="owner"/.test(page.text) && /data-dates="weeks"/.test(page.text) && /data-list="[^"]*\/tracker\/list"/.test(page.text));
-  check("the way back sits above the title and goes to the client", /<a class="back" href="\/x">[^<]*<svg[^]*?<\/svg>Raya Trade<\/a><h2 class="pt">/.test(page.text));
+  check("there is no way back on the page — the top bar's trail is the way back (§497) — and the title is the module's, under this week's line", !/class="back"/.test(page.text) && /<div class="wkof">[^<]+<\/div><h2 class="pt">Internal Tracker<\/h2>/.test(page.text));
   check("no font shorthand ends in 'inherit' — a browser drops such a line, which is the pill at two sizes (§356.14)", !/font:[^;}]*\binherit\b/.test(page.text), (page.text.match(/font:[^;}]*\binherit\b/) || [""])[0]);
   check("nothing on it is inline script — the policy would silence it", !/<script>|onclick=/i.test(page.text) && /app\.js"><\/script>/.test(page.text));
   const client = await call(A, HEND, [], null);
   check("the client's own person is turned away with a sentence, not a page", client.status === 403 && /The Internal Tracker is the office/.test(client.text) && !/id="add"/.test(client.text), String(client.status));
   check("...and at the api too, not only on the page (§42)", (await call(A, HEND, ["api"], { act: "add", title: "sneak" })).status === 403);
+  /* TOPICS ARE THE OFFICE'S, NOT THE SUPER USER'S ALONE (§497, Islam's third
+     answer): the SMO team makes one and deletes it, and a client's own person
+     is refused — both ends (§94.2). */
+  const tNew = await call(A, NORAN, ["api"], { act: "topic-new", name: "Check topic" });
+  check("the SMO team makes a topic, not only the Super user", tNew.status === 200 && !!(tNew.j && tNew.j.topicId), tNew.status + " " + tNew.text.slice(0, 120));
+  check("...and deletes it again", tNew.j && (await call(A, NORAN, ["api"], { act: "topic-delete", topicId: tNew.j.topicId })).status === 200);
+  check("...while a client's own person is refused a topic", (await call(A, HEND, ["api"], { act: "topic-new", name: "sneak" })).status === 403);
   check("somebody with no membership at all is turned away", (await call(A, { personKey: null, seat: null }, [], null)).status === 403);
   const js = await call(A, NORAN, ["app.js"], null);
   check("the script is served by the module itself, as script, talking to the two addresses on the body", js.status === 200 && /fetch\(url/.test(js.text) && /data-api/.test(js.text) && /data-list/.test(js.text) && !/location\.reload/.test(js.text));
@@ -434,7 +456,7 @@ try {
   check("...and is plain text for somebody who is not — with the tick and the name not pressable either", /<span class="who">Noran<\/span>/.test(rowOf(asOmar)) && !/who pick/.test(rowOf(asOmar)) && /<button class="tick"[^>]*disabled/.test(rowOf(asOmar)) && !/data-rename/.test(rowOf(asOmar)), rowOf(asOmar).slice(0, 200));
   check("...and the team is first names only, no surnames", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).map((x) => x.replace(/^.*>/, "").replace(/<$/, "")).join("|") === "Islam|Noran|Omar", (rowOf(opened).match(/data-act="pick-owner"[^>]*>([^<]*)</g) || []).join());
   /* GROUPED THREE OTHER WAYS: the headings are the words, in their order. */
-  const heads = (html) => (html.match(/class="grp" data-key="[^"]*">[^<]*/g) || []).map((x) => x.replace(/^.*">/, "").trim());
+  const heads = (html) => [...html.matchAll(/class="grp sh[^"]*" data-key="[^"]*"><span class="ix">[^<]*<\/span><h3>([^<]*)<\/h3>/g)].map((m) => m[1].trim());
   const byStatus = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "status" }, who: NORAN, today: TODAY });
   const byDue = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "dates" }, who: NORAN, today: TODAY });
   const byWeek = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "", open: null, group: "due", dates: "weeks" }, who: NORAN, today: TODAY });
@@ -486,7 +508,7 @@ try {
   const searched = await trackerDocument({ slug: "x", tenantId: A, tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "all", q: "zzz", open: null, group: "owner" }, who: NORAN, today: TODAY });
   check("a search that finds nothing says so and offers the way back", /Nothing matches/.test(searched) && /see all of them/.test(searched));
   const empty = await trackerDocument({ slug: "x", tenantId: B, tenantName: "RHI", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: { personKey: "omar", seat: "super" }, today: TODAY });
-  check("an empty client is only the next empty line and one sentence", /Type the first action for RHI/.test(empty) && /Nothing on the list for RHI yet/.test(empty) && !/class="tools"/.test(empty));
+  check("an empty client is only the next empty line and one sentence — no search over nothing", /Write the first action for RHI and press Enter/.test(empty) && /Nothing on the list for RHI yet/.test(empty) && /class="tools solo"/.test(empty) && !/class="find"/.test(empty));
   const noDb = await trackerDocument({ slug: "x", tenantId: "not-a-tenant-id", tenantName: "Raya Trade", have: ["strategy", "tracker"], ask: { view: "week", q: "", open: null, group: "owner" }, who: NORAN });
   check("a list that could not be read says so, and is not drawn as empty (§35)", /could not be read/.test(noDb) && !/Nothing on the list/.test(noDb) && !/id="add"/.test(noDb));
 
@@ -504,7 +526,7 @@ try {
   }
   const cols = await owner("SELECT column_name FROM information_schema.columns WHERE table_schema = $1 AND table_name = 'tracker_actions' ORDER BY ordinal_position", [SCHEMA]);
   check("the action row holds exactly what spec 054 §5 says and no more — the collaborators column is GONE (migration 013)",
-    cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,due,first_due,status,done_at,created_by,created_at,updated_at,extra",
+    cols.map((c) => c.column_name).join(",") === "tenant_id,id,title,description,owner_key,due,first_due,status,done_at,created_by,created_at,updated_at,extra,topic_id",
     cols.map((c) => c.column_name).join(","));
 
   /* ══ §10 · the script, driven ═══════════════════════════════════════
@@ -551,7 +573,33 @@ try {
     const settle = () => pg.waitForTimeout(350).then(() => pg.waitForLoadState("load"));
     const stayed = () => pg.evaluate("window.__stay === 1");
     await pg.goto(base); await settle();
+    /* SMP_SHOT_BAR paints the client's band another colour for the picture
+       alone (§498): the band is the client's, so a check made on the navy
+       default cannot show what a pale one does to the words on it. */
+    if (process.env.SMP_SHOT && process.env.SMP_SHOT_BAR) {
+      await owner("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Raya Trade', jsonb_build_object('branding', jsonb_build_object('bar', $2::text)))", [A, process.env.SMP_SHOT_BAR]);
+      await pg.reload(); await settle();
+    }
     if (process.env.SMP_SHOT) await pg.screenshot({ path: process.env.SMP_SHOT, fullPage: true });
+    /* §499 — THE WHOLE MODULE IS FOREFRONT'S, NEVER THE CLIENT'S. The client
+       is given a tan band and the page asked again: the masthead and the
+       browser's theme colour must still be Forefront's navy. BOTH ENDS
+       (§94.2): the tan is asserted stored first, or "still navy" is true of a
+       client that never had a colour (§113.8). Put back afterwards. */
+    if (!process.env.SMP_SHOT_BAR) {
+      const had = await owner("SELECT extra FROM org WHERE tenant_id=$1", [A]);
+      if (had.length) await owner("UPDATE org SET extra = jsonb_set(coalesce(extra,'{}'::jsonb), '{branding}', jsonb_build_object('bar','#C8A27A')) WHERE tenant_id=$1", [A]);
+      else await owner("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Raya Trade', jsonb_build_object('branding', jsonb_build_object('bar','#C8A27A')))", [A]);
+      const stored = await owner("SELECT extra->'branding'->>'bar' AS b FROM org WHERE tenant_id=$1", [A]);
+      check("the client really has a tan band stored", stored[0] && stored[0].b === "#C8A27A", JSON.stringify(stored));
+      await pg.reload(); await settle();
+      const look = await pg.evaluate("({mast:getComputedStyle(document.querySelector('.mast')).backgroundColor, theme:(document.querySelector('meta[name=theme-color]')||{}).content})");
+      check("the masthead keeps Forefront's navy over a client's tan band (§499)", look.mast === "rgb(22, 50, 92)", JSON.stringify(look));
+      check("and so does the browser's theme colour", String(look.theme).toUpperCase() === "#16325C", JSON.stringify(look));
+      if (had.length) await owner("UPDATE org SET extra = $2::jsonb WHERE tenant_id=$1", [A, JSON.stringify(had[0].extra)]);
+      else await owner("DELETE FROM org WHERE tenant_id=$1", [A]);
+      await pg.reload(); await settle();
+    }
     await pg.evaluate("window.__stay = 1");
     check("the mark is really planted, or 'it stayed' proves nothing", await stayed());
     /* THE TWO SETTINGS BEHIND THE DOTS (§356.14): Group by has left the
@@ -577,7 +625,7 @@ try {
     }).join(',')`);
     check("every card is held open at the taller size rather than hugging its own line",
       (await tileSlack()).split(",").length === 4 && (await tileSlack()).split(",").every((n) => Number(n) > 0), await tileSlack());
-    check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due this week",
+    check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due",
       await pg.locator(".strip .tile:nth-child(3) span").innerText());
     check("the views row carries no Group by select any more, and a three-dots button", (await pg.locator(".gby").count()) === 0 && (await pg.locator("[data-act=settings]").count()) === 1);
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
@@ -587,9 +635,7 @@ try {
       (await pg.locator(".setmenu .col").count()) === 2);
     await pg.locator("h2.pt").click();
     check("...and a press elsewhere closes it", !(await pg.locator(".setmenu").isVisible()));
-    const backHref = await pg.locator("a.back").getAttribute("href");
-    check("the way back sits above the title, naming the client, and goes to the client's platform", backHref === "/x" && (await pg.locator("a.back").innerText()).trim() === "Raya Trade" &&
-      (await pg.evaluate("document.querySelector('a.back').getBoundingClientRect().bottom <= document.querySelector('h2.pt').getBoundingClientRect().top")), backHref);
+    check("no back link: the top bar is the way back (§497)", (await pg.locator("a.back").count()) === 0);
     /* ENTER ADDS, AND THE LINE IS READ BACK OUT OF POSTGRES (§96) — due
        THIS WEEK'S THURSDAY by default (§356.14), the row reading the week in
        WORDS (§356.15) with nothing bold on it. */
@@ -603,13 +649,13 @@ try {
     const addBox = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();return Math.round(r.left)+','+Math.round(r.width)})()");
     const restBox = await addBox(".addrow .tn");
     check("the add line holds its details back until something is typed", !(await pg.locator(".addrow .when").isVisible()) &&
-      !(await pg.locator(".addrow .who").isVisible()) && !(await pg.locator(".addrow .st").isVisible()) &&
+      !(await pg.locator(".addrow .who").isVisible()) &&
       !(await pg.locator(".addrow [data-act=add-note]").isVisible()));
     check("...and they are still drawn, so their place is held", (await pg.locator(".addrow .when").count()) === 1 &&
       (await pg.evaluate("document.querySelector('.addrow .when').getBoundingClientRect().width")) > 0);
     await pg.locator("#add").fill("x");
-    check("...the first letter brings them back, and nothing moved to make room", (await pg.locator(".addrow .when").isVisible()) &&
-      (await pg.locator(".addrow .who").isVisible()) && (await pg.locator(".addrow .st").isVisible()) &&
+    check("...the first letter brings them back, and nothing moved to make room — the status never shows there, a new line is Not started (§497)", (await pg.locator(".addrow .when").isVisible()) &&
+      (await pg.locator(".addrow .who").isVisible()) && !(await pg.locator(".addrow .st").isVisible()) &&
       (await pg.locator(".addrow [data-act=add-note]").isVisible()) && (await addBox(".addrow .tn")) === restBox,
       restBox + " -> " + (await addBox(".addrow .tn")));
     check("the add line opens on This week in words, owned by me", (await pg.locator(".addrow .when .wk").innerText()) === "This week" &&
@@ -671,7 +717,7 @@ try {
       (await pg.locator("#add").inputValue()) === "" && (await pg.evaluate("document.activeElement && document.activeElement.id")) === "add");
     const row = '.row[data-id="' + (born && born.id) + '"] ';
     check("...and the new row is on the page, under my own name, reading my first name and This week", (await pg.locator(row).count()) === 1 &&
-      /^Noran Essam/.test(await pg.locator('.grp[data-key="noran"]').innerText()) && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
+      (await pg.locator('.grp[data-key="noran"] h3').innerText()) === "Noran Essam" && (await pg.locator(row + ".who .wn").innerText()) === "Noran" &&
       (await pg.locator(row + ".when .wk").innerText()) === "This week" && (await pg.locator(".wk.now").count()) === 0);
     /* textContent, not innerText: the count is uppercased by CSS (§301.6). */
     check("...with the count moved in place", /^\d+ actions on this week$/.test(await pg.locator("#count").textContent()) && +(await pg.locator("#count").textContent()).split(" ")[0] === (await asTenant(A, (c) => listActions(c))).filter((r) => inView(r, "week", NORAN, real)).length, await pg.locator("#count").textContent());
@@ -735,9 +781,9 @@ try {
        stops a row being made must leave this REPORTING, not dying. */
     const box = (sel) => pg.evaluate("(function(){var e=document.querySelector('" + sel + "');if(!e)return '';var r=e.getBoundingClientRect();var c=getComputedStyle(e);return [e.tagName,Math.round(r.width),Math.round(r.height),c.fontSize,c.fontFamily.split(',')[0]].join(' ')})()");
     const pillSel = await box(row.trim() + " .st"), pillSpan = await box(frow.trim() + " .st"), pillAdd = await box(".addrow .st");
-    check("the status pill is one box whether it is a select, a span, or the add line's", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
-      pillSel.slice(6) === pillSpan.slice(4) && pillSpan === pillAdd, pillSel + " | " + pillSpan + " | " + pillAdd);
-    check("...in the page's own font, never the browser's control font", /system-ui/.test(pillSel) && /11px/.test(pillSel), pillSel);
+    check("the status pill is one box whether it is a select or a span — and the add line draws none (§497)", pillSel.startsWith("SELECT") && pillSpan.startsWith("SPAN") &&
+      pillSel.slice(6) === pillSpan.slice(4) && /^SPAN 0 /.test(pillAdd), pillSel + " | " + pillSpan + " | " + pillAdd);
+    check("...in the page's own font, never the browser's control font", /Source Sans 3/.test(pillSel) && /11px/.test(pillSel), pillSel);
     await pg.goto(base); await settle();
     await pg.evaluate("window.__stay = 1");
     /* THE TICK is Done; pressed again it is Not started — both ends. And a
@@ -777,6 +823,7 @@ try {
     const twoAhead = await asTenant(A, (c) => oneAction(c, born.id));
     check("a week two ahead is written as its Thursday, the first date staying where it was — and the row leaves This week", twoAhead.due === addDays(thu, 14) && twoAhead.firstDue === thu &&
       (await pg.locator(row).count()) === 0 && await stayed(), JSON.stringify(twoAhead));
+    const roomTopic = await asTenant(A, (c) => addTopic(c, "Facilities", "islam"));
     await pg.goto(base + "?view=all"); await settle();
     await pg.evaluate("window.__stay = 1");
     check("...under All it reads that week's place in its MONTH, which is what the third week on is", (await pg.locator(row + ".when .wk").innerText()) === weekWord(addDays(thu, 14), real) &&
@@ -830,6 +877,22 @@ try {
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
+    /* THE TOPIC IS SET FROM THE DOUBLE-CLICK TOO (§497): a topic list
+       stands beside the name box, set to the row's own; leaving both boxes
+       saves it, and Escape writes nothing. Both ends (§94.2). */
+    await pg.locator(row + ".t").dblclick();
+    check("a double-click also offers the topic, beside the name box, set to the row's own (none)", (await pg.locator(row + ".tn2 select.tsel").count()) === 1 &&
+      (await pg.locator(row + ".tn2 select.tsel").inputValue()) === "" && (await pg.locator(row + '.tn2 select.tsel option[value="' + roomTopic.id + '"]').count()) === 1);
+    if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
+    await pg.locator(row + ".tn2 select.tsel").selectOption(roomTopic.id);
+    await pg.locator("h2.pt").click(); await settle();
+    check("...and leaving the boxes puts the action under that topic, the name unchanged, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
+      (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tg").innerText()).toLowerCase() === "facilities" && await stayed());
+    await pg.locator(row + ".t").dblclick();
+    await pg.locator(row + ".tn2 select.tsel").selectOption("");
+    await pg.locator(row + "input.ttl").press("Escape");
+    check("...Escape takes the topic change back too, and writes nothing", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id && (await pg.locator(row + ".tn2 select.tsel").count()) === 0);
+    await asTenant(A, (c) => setFields(c, born.id, { topicId: null }));
     /* THE ARROW opens the row in place for its notes and history, on the
        address, and folds it again; no Title box; the history is small type
        in a box that scrolls — measured as PAINT, not read off a class. */
@@ -849,7 +912,7 @@ try {
        browser (a cookie the page reads on the next visit). */
     await pg.locator("[data-act=settings]").click();
     await pg.locator('.setmenu [data-act=set-group][data-value="status"]').click(); await settle();
-    const heads = async () => pg.locator(".grp").allInnerTexts().then((a) => a.map((t) => t.replace(/\s*\d+$/, "").trim()));
+    const heads = async () => pg.locator(".grp h3").allInnerTexts().then((a) => a.map((t) => t.trim()));
     check("grouped by Status the headings are the three words, drawn in place", (await heads()).every((h) => Object.values(STATUS_WORD).includes(h)) && (await heads()).length >= 1 && await stayed(), (await heads()).join("|"));
     await pg.goto(base); await settle();
     await pg.locator("[data-act=settings]").click();

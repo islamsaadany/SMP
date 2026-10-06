@@ -63063,7 +63063,7 @@ var SYNC = (function () {
       : "The server could not take your change just now.";
     /* The trailing space is load-bearing: the two spans are inline and ran
        together as "just now.Keep" without it — §171's own bar had "500.Your". */
-    /* §501: THE DETAILS TRAVEL WITH THE BAR. Islam: *"you need to write an
+    /* §502: THE DETAILS TRAVEL WITH THE BAR. Islam: *"you need to write an
        actual error here so we can get back to you."* One block of text — the
        time, what failed, the server's reason and its log reference — goes on
        the hover, into the console as an error, and onto the clipboard from the
@@ -63400,7 +63400,7 @@ var SYNC = (function () {
       else {
         say("failed");
         /* the server's own sentence, reason and reference, when it sent any
-           (§501) — a body that will not parse still leaves the status */
+           (§502) — a body that will not parse still leaves the status */
         var head = "HTTP " + r.status;
         return r.json().then(function (j) { return j || {}; }, function () { return {}; }).then(function (j) {
           var lines = [head + (j.ref ? " \u00b7 reference " + j.ref : "")];

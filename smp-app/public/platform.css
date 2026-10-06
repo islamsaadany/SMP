@@ -8153,7 +8153,7 @@ html[data-stale] #panel { cursor:progress; }
 .topcapbody { padding:14px 20px 20px; }
 .topcapbody table { width:100%; }
 .topcapbody table td.num, .topcapbody table th.num { width:1%; white-space:nowrap; }
-/* §501: the 1% above also reaches a pillars capability's Key measures, whose
+/* §502: the 1% above also reaches a pillars capability's Key measures, whose
    Target cell is `td.num` — so the box inside shrank to a sliver and a typed
    target could not be read (Islam, El Abd). The column stays compact, signed
    off that way ("units stay as is"): the box gets a width of its own, enough

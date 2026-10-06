@@ -165,7 +165,7 @@ with sync_playwright() as p:
     ck("...with the status on the hover for whoever can act on it",
        "500" in (pg.evaluate("()=>{const s=document.querySelector('#refused strong');return s?s.title:''}") or ""))
 
-    # ── 2b · THE DETAILS TRAVEL WITH IT (§501) ──────────────────────────
+    # ── 2b · THE DETAILS TRAVEL WITH IT (§502) ──────────────────────────
     #    Islam: "write an actual error here so we can get back to you". The
     #    server's reason and its log reference reach the hover, the console
     #    and the clipboard — and the sentence on the page stays the user's.

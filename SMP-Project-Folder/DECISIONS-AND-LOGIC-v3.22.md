@@ -62778,7 +62778,7 @@ nothing stored moves, nothing migrated, no server rule. SHELL v6.08.
 
 **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main took §497–§499 (Internal Tracker) while this was built, so this section was renumbered §497 → §500 before the merge; the record files were combined, the built file and the served copies regenerated, SHELL v6.08 past main's v6.07.
 
-## §501 — a capability's Target box can be read, and a failed save says enough to trace
+## §502 — a capability's Target box can be read, and a failed save says enough to trace
 
 Islam, on El Abd, Company › Strategy › Capabilities with the pen open: *"Target
 field is very small, no. are recorded but not visible / and on saving we got

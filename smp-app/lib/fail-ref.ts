@@ -1,4 +1,4 @@
-/* A FAILED REQUEST SAYS ENOUGH TO BE TRACED (§501). Islam, of the red
+/* A FAILED REQUEST SAYS ENOUGH TO BE TRACED (§502). Islam, of the red
    "Not saved" bar on El Abd: *"you need to write an actual error here so we
    can get back to you to fix it properly."* The bar carried "HTTP 500" and
    nothing else, and the server's own sentence never left the response, so a

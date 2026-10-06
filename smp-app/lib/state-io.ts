@@ -150,7 +150,7 @@ export async function writeChanges(c: PoolClient, stored: any, incoming: any): P
   const run = async (sql: string, params: unknown[]) => {
     try { return (await c.query(sql, params)).rowCount || 0; }
     catch (e: any) {
-      /* the table for the browser's reference line (§501) — a name, never a value */
+      /* the table for the browser's reference line (§502) — a name, never a value */
       if (!e.table) e.smpTable = tableOf(sql);
       e.message = e.message + " — while running: " + sql.slice(0, 160) +
         " with " + JSON.stringify(params).slice(0, 300);

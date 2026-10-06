@@ -614,3 +614,34 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copex-q:disabled:not(.off) { cursor:default; }
 .copex-pick { flex-wrap:wrap; align-items:center; font-size:13px; }
 .copex-y { width:72px; }
+
+/* ── ADVISORY (§496, from design-mockups/copilot-advisory/2026-10-06_advisory.html)
+   Platform tokens only (§25). The SWOT chat's columns (.copsw) carry it; what
+   is its own is the question count over each question, the clash card, the
+   source tags, the question budget in the right column, and the brief. ── */
+.adv .adq { font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px; }
+.adv .copbody p { margin:0 0 6px; } .adv .copbody p:last-child { margin-bottom:0; }
+.adclash { border:1px solid var(--line); border-left:3px solid var(--attn); background:var(--attn-bg); border-radius:0 var(--r-sm, 6px) var(--r-sm, 6px) 0; padding:9px 12px; margin-top:6px; color:var(--ink); }
+.adsrc { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; margin-top:6px; align-items:baseline; }
+.adtag { display:inline-block; font-size:var(--fs-micro, 11px); font-weight:700; border-radius:4px; padding:0 6px; letter-spacing:.03em; line-height:1.6; white-space:nowrap; }
+.adtag.p { background:var(--panel); color:var(--panel-ink); }
+.adtag.y { background:var(--good-bg); color:var(--good-tx); }
+.adtag.f { background:var(--surface-2); color:var(--ink-2); box-shadow:inset 0 0 0 1px var(--line); }
+.adtag.a { background:var(--attn-bg); color:var(--attn-tx); }
+.adbudget .adpips { display:flex; gap:4px; }
+.adpips i { width:22px; height:8px; border-radius:3px; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line); }
+.adpips i.u { background:var(--gold); box-shadow:none; }
+.adwhy { margin:8px 0 0; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.adlist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.adbrief { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md, 10px); padding:14px 16px; max-width:76ch; display:flex; flex-direction:column; gap:12px; color:var(--ink); }
+.adbrief h3 { margin:0; font-size:18px; text-wrap:balance; }
+.adbrief h4 { margin:0 0 4px; font-size:var(--fs-micro, 11px); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); }
+.adbrief p { margin:0; }
+.adbrief ul, .adbrief ol { margin:0; padding-left:18px; } .adbrief li { margin:3px 0; }
+.adbrief ul { list-style:none; padding-left:0; }
+.adopts { display:flex; flex-direction:column; gap:6px; }
+.adopt { border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:8px 11px; }
+.adopt.rec { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
+.adoh { display:flex; justify-content:space-between; gap:8px; font-weight:700; align-items:baseline; }
+.adopt p { color:var(--ink-2); margin-top:2px; }
+.adrec { flex:none; font-size:var(--fs-micro, 11px); font-weight:700; border-radius:var(--r-pill, 999px); padding:1px 8px; background:var(--gold); color:var(--on-accent); }

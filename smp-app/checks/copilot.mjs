@@ -1024,6 +1024,76 @@ try {
     NEXT = null;
     }
 
+    {
+    section("§9d · the Advisory chat: asked one at a time, counted, a brief with one recommendation, saved");
+    const ah = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, HEND);
+    check("a client's own person cannot start one", ah.st === 403, ah.st + "");
+    const an = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, NORAN);
+    const aid = an.j.chat?.id;
+    check("the office starts one: nothing asked, a to-do of ask + questions + brief + save, round 1 of 2",
+      an.st === 200 && an.j.chat?.section === "advisory" && an.j.advisory?.ask === "" && an.j.advisoryTodo?.length === 4 && an.j.advisoryCount?.round === 1 && an.j.advisoryCount?.rounds === 2 && an.j.advisoryCount?.of === 5,
+      String(JSON.stringify(an.j)).slice(0, 200));
+    const a0 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "" }, NORAN);
+    check("an empty first ask is refused in words", a0.st === 400 && /advice on/.test(a0.j.why), JSON.stringify(a0.j));
+    NEXT = { answer: { kind: "question", lead: "Good question.", question: "How many stores do you run today?", seen: ["Revenue 300M EGP"] } };
+    const a1 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "Should we open stores in Upper Egypt?", context: "PLAN: mobile", placeWord: "Mobile" }, NORAN);
+    check("the first ask is kept and ONE question comes back, counted 1 of 5",
+      a1.st === 200 && a1.j.advisory?.ask === "Should we open stores in Upper Egypt?" && a1.j.advisory?.turns.length === 1 && a1.j.advisoryCount?.asked === 1 && a1.j.advisory?.seen[0] === "Revenue 300M EGP",
+      String(JSON.stringify(a1.j.advisory)).slice(0, 200));
+    check("...and the model was given the platform's text and told how many it has asked", /PLAN: mobile/.test(JSON.stringify(seen[seen.length - 1] || "")) && /asked 0 of 5 questions in round 1/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    const b1 = seen.length;
+    const a1b = await call("POST", "api", { act: "advisoryTurn", id: aid }, NORAN);
+    check("a question still waiting is not asked again", a1b.st === 200 && seen.length === b1 && a1b.j.advisory?.turns.length === 1);
+    NEXT = { answer: { kind: "clash", lead: "Two sources disagree.", clash: { what: "Store count", platform: "42", file: "45" } } };
+    const a2 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "assume", context: "" }, NORAN);
+    check("'assume for me' answers the waiting question, and a clash comes back naming both figures",
+      a2.st === 200 && a2.j.advisory?.turns[0].how === "assumed" && a2.j.advisory?.turns[1].clash?.platform === "42" && a2.j.advisory?.turns[1].clash?.file === "45",
+      a2.st + " " + String(JSON.stringify(a2.j)).slice(0, 400));
+    NEXT = { answer: { kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "you", text: "Rents are rising" }],
+      options: [{ title: "Open 5", detail: "Phased", recommended: false }, { title: "Open 2", detail: "Pilot", recommended: false }], why: "Lower risk", next: ["Pick sites"] } } };
+    const a3 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "proceed", context: "" }, NORAN);
+    check("a brief with NO recommended option is not a brief — refused in words, nothing written",
+      a3.st === 503 && !(a3.j.advisory?.brief), JSON.stringify(a3.j).slice(0, 200));
+    NEXT = { answer: { kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "bogus", text: "Rents are rising" }],
+      options: [{ title: "Open 5", detail: "Phased", recommended: true }, { title: "Open 2", detail: "Pilot", recommended: true }, { title: "Wait", detail: "Hold", recommended: false }], why: "Lower risk", next: ["Pick sites"] } } };
+    const a4 = await call("POST", "api", { act: "advisoryTurn", id: aid, context: "" }, NORAN);
+    const bf = a4.j.advisory?.brief;
+    check("proceed writes the brief: exactly ONE recommended (the first), an unknown source read as assumed, the assumption kept",
+      a4.st === 200 && bf && bf.options.filter((o) => o.recommended).length === 1 && bf.options[0].recommended && bf.known[1].source === "assumed" && a4.j.advisory?.assumed.includes("Rents flat") && a4.j.advisoryCount?.stopped === true,
+      String(JSON.stringify(a4.j.advisory)).slice(0, 300));
+    const aRe0 = await call("POST", "api", { act: "advisoryRevise", id: aid, ask: "" }, NORAN);
+    check("a change with no words is refused", aRe0.st === 400 && /what to change/.test(aRe0.j.why));
+    NEXT = { answer: { reply: "Made it a pilot first.", brief: { ...bf, title: "Upper Egypt stores", options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }] } } };
+    const aRe = await call("POST", "api", { act: "advisoryRevise", id: aid, ask: "Lead with the pilot" }, NORAN);
+    check("asking for changes rewrites the brief and says what changed", aRe.st === 200 && aRe.j.advisory?.brief.options[0].title === "Open 2" && aRe.j.advisory?.reply === "Made it a pilot first.", JSON.stringify(aRe.j).slice(0, 200));
+    const afh = await call("POST", "api", { act: "advisoryFinish", id: aid }, HEND);
+    check("a client's own person cannot save it", afh.st === 403);
+    const af = await call("POST", "api", { act: "advisoryFinish", id: aid }, NORAN);
+    check("saving makes version 1 of the brief, as an Advisory deliverable", af.st === 200 && af.j.saved?.n === 1 && af.j.saved?.title === "Upper Egypt stores" && af.j.advisoryDone === 4, String(JSON.stringify(af.j)).slice(0, 200));
+    const ad = af.j.saved ? (await asTenant(A, (c) => c.query("SELECT d.kind, d.type, d.section, v.body FROM copilot_deliverables d JOIN copilot_versions v ON v.deliverable_id = d.id WHERE d.id = $1", [af.j.saved.deliverableId]))).rows : [];
+    check("...it stays in the Copilot (never promoted to the plan) and holds the brief's text", ad.length === 1 && ad[0].kind === "copilot-only" && ad[0].type === "advisory" && ad[0].section === "advisory" && /Open 2 \(recommended\)/.test(ad[0].body.text), String(JSON.stringify(ad)).slice(0, 300));
+    const aafter = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "One more?" }, NORAN);
+    const aafter2 = await call("POST", "api", { act: "advisoryFinish", id: aid }, NORAN);
+    check("a saved chat refuses more questions and a second save", aafter.st === 400 && /saved/.test(aafter.j.why) && aafter2.st === 400 && /saved/.test(aafter2.j.why));
+    const notAd = await call("POST", "api", { act: "advisoryFinish", id: ch.id }, NORAN);
+    check("a chat that is not Advisory is refused", notAd.st === 400 && /not an Advisory/.test(notAd.j.why));
+
+    /* The budget: ten questions, then the model may not ask an eleventh. */
+    const bn = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, NORAN);
+    const bid = bn.j.chat?.id;
+    NEXT = { answer: { kind: "question", lead: "Next.", question: "And?" } };
+    let bl = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Which market first?", context: "" }, NORAN);
+    for (let k = 0; k < 9; k++) bl = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Answer " + k, context: "" }, NORAN);
+    check("ten questions are asked across two rounds of five", bl.st === 200 && bl.j.advisory?.turns.length === 10 && bl.j.advisory?.turns[5].round === 2 && bl.j.advisoryCount?.round === 2,
+      String(JSON.stringify(bl.j.advisoryCount)));
+    const bq = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Answer 9", context: "" }, NORAN);
+    check("with the budget spent an eleventh question is refused — the count is the server's", bq.st === 503 && /brief was owed/.test(bq.j.why), JSON.stringify(bq.j).slice(0, 200));
+    check("...and the model was told to write the brief", /questions are used up/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    NEXT = null;
+    }
+
     NEXT = { status: 500 };
     const b2 = seen.length;
     const n0 = (await asTenant(A, (c) => messagesOf(c, ch.id))).length;

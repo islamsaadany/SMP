@@ -56653,7 +56653,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
       ' <button type="button" class="linkbu" data-cop-reopen>Try again</button></div>';
-    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : competeOn() ? competeHtml() : dirsOn() ? dirsHtml() : execOn() ? execHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
+    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : competeOn() ? competeHtml() : advOn() ? advHtml() : dirsOn() ? dirsHtml() : execOn() ? execHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
   }
   function placeWord(){
     var t = place();
@@ -58199,6 +58199,175 @@ var COPILOT = (function(){
     }
     return false;
   }
+  /* ── ADVISORY (spec 064 decisions-v0.4 §6, §496, from the signed-off
+     design-mockups/copilot-advisory/2026-10-06_advisory.html; Islam: "ok for
+     both" — the question count sits in the right column, and "Proceed with
+     what you have" is offered from the first question) ─────────────────────
+     The person brings a question; the Copilot asks one question a turn, five
+     a round, two rounds, then writes a Decision Brief. The COUNT is the
+     server's (advisoryCount) — the pips are drawn from it, never counted
+     here, so the column and the rule cannot disagree (§53.5). The page never
+     sends the state: every press names what the person did (reply + words)
+     and the server works the rest out from the stored row (§42). */
+  var ADTXT = {}, ADASK = {};
+  function advOn(){ return !!(PANE && PANE.chat && PANE.advisory); }
+  function adView(j){ ["advisory","advisoryTodo","advisoryDone","advisoryCount","advisoryFiles","advisoryWords"]
+    .forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function adProgress(id){
+    var l = list(); if (l && l.swotProgress && PANE && PANE.advisoryTodo) l.swotProgress[id] = { done: PANE.advisoryDone, of: PANE.advisoryTodo.length };
+  }
+  function adTitle(){ return "Advisory — " + placeWord(); }
+  function adAsk(body){
+    if (!advOn() || THINKING) return;
+    var id = PANE.chat.id;
+    THINKING = id; SAY = ""; THINK_AT = Date.now();
+    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
+    draw();
+    body.id = id; body.placeWord = placeWord(); body.context = swContext();
+    post(body, WAIT_MS).then(function(x){
+      THINKING = null;
+      if (x.st === 200 && x.j && x.j.ok) {
+        if (PANE && PANE.chat && PANE.chat.id === id) { adView(x.j); adProgress(id); }
+        draw(); return;
+      }
+      /* A reply the server stored before the model failed is not lost: the
+         chat is read again so the screen shows what was kept. */
+      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again.";
+      if (x.st === 503 && PANE && PANE.chat && PANE.chat.id === id) openItem("chat", id); else draw();
+    }, function(err){
+      THINKING = null;
+      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Try again in a moment."
+        : "The server could not be reached. Nothing was lost — try again.";
+      draw();
+    });
+  }
+  var AD_TAG = { platform:"p", you:"y", file:"f", assumed:"a" };
+  function adTag(src){ var w = ((PANE.advisoryWords || {}).tags || {})[src] || src; return '<span class="adtag ' + (AD_TAG[src] || "f") + '">' + E(w) + '</span>'; }
+  function adSideHtml(){
+    var s = PANE.advisory, todo = PANE.advisoryTodo || [], done = PANE.advisoryDone || 0, n = todo.length;
+    var c = PANE.advisoryCount || { round:1, rounds:2, asked:0, of:5, total:0 };
+    var h = '<aside class="copsw-side"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
+      '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + (n ? Math.round(done * 100 / n) : 0) + '%"></i></div></div>' +
+      '<div class="copsw-tg"><ul>' + todo.map(function(t){
+        return '<li class="copsw-li ' + t.state + '" data-cop-ad-todo="' + E(t.key) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
+          '<span class="copsw-lb"><span class="copsw-tt" title="' + E(t.status) + '"><span>' + E(t.title) + '</span></span><span class="copsw-ts">' + E(t.status) + '</span></span>' +
+          '<span class="copsw-pill ' + t.state + '">' + (t.state === "done" ? "Done" : "To do") + '</span></li>';
+      }).join("") + '</ul></div></div>';
+    var pips = ""; for (var k = 0; k < c.of; k++) pips += '<i class="' + (k < c.asked ? "u" : "") + '"></i>';
+    h += '<div class="copsw-box adbudget" data-cop-ad-budget><div class="copsw-bh"><b>Round ' + c.round + ' of ' + c.rounds + '</b> <span class="copsw-n">' + c.asked + ' of ' + c.of + ' asked</span></div>' +
+      '<div class="adpips" aria-hidden="true">' + pips + '</div>' +
+      '<p class="adwhy">' + (s.brief ? "The questions are done." : c.stopped ? "You asked it to proceed with what it has." :
+        c.owed ? "The questions are used up; the brief comes next." : "At most " + c.of + " questions a round and " + c.rounds + " rounds, then the brief.") + '</p></div>';
+    if (s.assumed && s.assumed.length) h += '<div class="copsw-box"><div class="copsw-bh"><b>Assumed so far</b></div><ul class="adlist">' +
+      s.assumed.map(function(a){ return '<li>' + adTag("assumed") + ' ' + E(a) + '</li>'; }).join("") + '</ul></div>';
+    var files = PANE.advisoryFiles || [];
+    if ((s.seen && s.seen.length) || files.length) h += '<div class="copsw-box"><div class="copsw-bh"><b>What it can see</b></div><ul class="adlist">' +
+      (s.seen || []).map(function(a){ return '<li>' + adTag("platform") + ' ' + E(a) + '</li>'; }).join("") +
+      files.map(function(f){ return '<li>' + adTag("file") + ' ' + E(f) + '</li>'; }).join("") + '</ul></div>';
+    return h + '</aside>';
+  }
+  function adAnswerHtml(t){
+    var W = PANE.advisoryWords || {}, cw = W.clash || {};
+    if (t.how === "assumed") return cpMsg("me", E(W.assume || "Assume for me"));
+    if (t.how === "platform") return cpMsg("me", E(cw.platform || "Use the platform figure") + " — " + E(t.answer));
+    if (t.how === "file") return cpMsg("me", E(cw.file || "Use the file") + " — " + E(t.answer));
+    return t.how ? cpMsg("me", E(t.answer)) : "";
+  }
+  function adBriefHtml(b){
+    var L = "ABCD";
+    return '<div class="adbrief" data-cop-ad-brief><h3>' + E(b.title) + '</h3>' +
+      '<div><h4>Situation</h4><p>' + E(b.situation) + '</p></div>' +
+      (b.known.length ? '<div><h4>What we know</h4><ul>' + b.known.map(function(f){ return '<li>' + adTag(f.source) + ' ' + E(f.text) + '</li>'; }).join("") + '</ul></div>' : '') +
+      '<div><h4>Options</h4><div class="adopts">' + b.options.map(function(o, k){
+        return '<div class="adopt' + (o.recommended ? " rec" : "") + '"><div class="adoh"><span>' + L.charAt(k) + '. ' + E(o.title) + '</span>' +
+          (o.recommended ? '<span class="adrec">Recommended</span>' : '') + '</div>' + (o.detail ? '<p>' + E(o.detail) + '</p>' : '') + '</div>';
+      }).join("") + '</div></div>' +
+      (b.why ? '<div><h4>Why</h4><p>' + E(b.why) + '</p></div>' : '') +
+      (b.next.length ? '<div><h4>Next steps</h4><ol>' + b.next.map(function(x){ return '<li>' + E(x) + '</li>'; }).join("") + '</ol></div>' : '') + '</div>';
+  }
+  function advHtml(){
+    var s = PANE.advisory, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id;
+    var W = PANE.advisoryWords || {}, cw = W.clash || {};
+    var head = '<div class="copvline"><b>' + E(PANE.chat.title || adTitle()) + '</b> · ' + (s.saved ? "saved" : s.brief ? "brief written" : "in progress") + '</div>';
+    var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
+    var main = cpMsg("ai", "Bring me a decision you are weighing about " + E(placeWord()) + ". I will ask a few questions — one at a time — then write a Decision Brief with options and one recommendation.");
+    if (s.ask) main += cpMsg("me", E(s.ask));
+    var last = s.turns.length - 1;
+    s.turns.forEach(function(t, k){
+      var inRound = s.turns.slice(0, k + 1).filter(function(x){ return x.round === t.round; }).length;
+      var q = '<div class="adq">Round ' + t.round + ' · Question ' + inRound + ' of ' + ((PANE.advisoryCount || {}).of || 5) + '</div>';
+      if (k === last && s.lead && !s.brief) q += '<p>' + E(s.lead) + '</p>';
+      q += '<p>' + E(t.q) + '</p>';
+      if (t.clash) q += '<div class="adclash"><b>Two sources disagree on ' + E(t.clash.what) + '</b><div class="adsrc">' +
+        adTag("platform") + '<span>' + E(t.clash.platform) + '</span>' + adTag("file") + '<span>' + E(t.clash.file) + '</span></div></div>';
+      main += cpMsg("ai", q) + adAnswerHtml(t);
+    });
+    var p = s.turns.length && !s.turns[last].how ? s.turns[last] : null;
+    if (s.brief) {
+      if (s.lead) main += cpMsg("ai", E(s.lead));
+      main += adBriefHtml(s.brief);
+      if (s.reply) main += cpMsg("ai", E(s.reply));
+    }
+    if (ed && !busyHere) {
+      if (!s.ask) {
+        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="3" placeholder="What would you like advice on?" aria-label="Your question for the Copilot">' + E(ADTXT[id] || "") + '</textarea>' +
+          '<button type="button" class="copbtn solid" data-cop-ad-send>Ask</button></div>';
+      } else if (!s.brief) {
+        if (p) {
+          main += '<div class="copopts" data-cop-ad-choices>' +
+            (p.clash ? '<button type="button" class="copopt" data-cop-ad-reply="platform">' + E(cw.platform || "Use the platform figure") + '</button>' +
+                       '<button type="button" class="copopt" data-cop-ad-reply="file">' + E(cw.file || "Use the file") + '</button>' : '') +
+            '<button type="button" class="copopt" data-cop-ad-reply="assume">' + E(W.assume || "Assume for me") + '</button>' +
+            '<button type="button" class="copopt" data-cop-ad-reply="proceed">' + E(W.proceed || "Proceed with what you have") + '</button></div>' +
+            '<div class="copcp-ask"><textarea class="fld" data-cop-ad-text rows="2" placeholder="' + (p.clash ? "Or give the number yourself" : "Your answer") + '" aria-label="Your answer">' + E(ADTXT[id] || "") + '</textarea>' +
+            '<button type="button" class="copbtn" data-cop-ad-send>Send</button></div>';
+        } else {
+          /* Nothing waiting (the model did not answer, or proceed was pressed
+             and the brief failed): the way on is to ask again (§61). */
+          main += '<div class="copopts"><button type="button" class="copopt rec" data-cop-ad-next>' + ((PANE.advisoryCount || {}).owed ? "Write the brief" : "Continue") + '</button></div>';
+        }
+      } else {
+        main += '<div class="copcp-ask"><textarea class="fld" data-cop-ad-change rows="2" placeholder="Ask for a change — another option, a different recommendation, a step to add" aria-label="Ask the Copilot to change the brief">' + E(ADASK[id] || "") + '</textarea>' +
+          '<button type="button" class="copbtn" data-cop-ad-revise>Ask for changes</button></div>' +
+          '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ad-finish>Save to Advisory deliverables</button></div>';
+      }
+    }
+    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + " in Advisory deliverables. It stays in the Copilot and does not go into the plan.");
+    return head + '<div class="copsw adv"><div class="copsw-main">' + main + work + '</div>' + adSideHtml() + '</div>';
+  }
+  function adClick(ev){
+    if (!advOn()) return false;
+    var b, s = PANE.advisory, id = PANE.chat.id;
+    if (!canEdit() || s.saved) return false;
+    if ((b = hit(ev, "[data-cop-ad-send]"))) {
+      var w = String(ADTXT[id] || "").trim();
+      if (!w) { var bx = document.querySelector("[data-cop-ad-text]"); if (bx) bx.focus(); return true; }
+      var pend = s.turns.length && !s.turns[s.turns.length - 1].how ? s.turns[s.turns.length - 1] : null;
+      ADTXT[id] = "";
+      adAsk({ act:"advisoryTurn", reply: pend && pend.clash ? "own" : "say", words: w });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-ad-reply]"))) { adAsk({ act:"advisoryTurn", reply: b.getAttribute("data-cop-ad-reply") }); return true; }
+    if ((b = hit(ev, "[data-cop-ad-next]"))) { adAsk({ act:"advisoryTurn" }); return true; }
+    if ((b = hit(ev, "[data-cop-ad-revise]"))) {
+      var q = String(ADASK[id] || "").trim();
+      if (!q) { var bx2 = document.querySelector("[data-cop-ad-change]"); if (bx2) bx2.focus(); return true; }
+      ADASK[id] = "";
+      adAsk({ act:"advisoryRevise", ask: q });
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-ad-finish]"))) {
+      if (THINKING) return true;
+      act({ act:"advisoryFinish", id:id }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) adView(j);
+        adProgress(id);
+        LISTS[key()] = null; loadList(true);
+        draw();
+      });
+      return true;
+    }
+    return false;
+  }
   /* ── DIRECTIONS AND CAPABILITIES (spec 064 §4–§5, §494, from the signed-off
      design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html,
      panels C, D and E) ──────────────────────────────────────────────────
@@ -58737,6 +58906,8 @@ var COPILOT = (function(){
     var sa = hit(ev, "[data-cop-sw-ans]");
     if (sa && swotOn()) { var sp = sa.getAttribute("data-cop-sw-ans").split("|"); var aa = PANE.swot.ans[sp[0]] = (PANE.swot.ans[sp[0]] || []).slice(); aa[+sp[1]] = sa.value; }
     var sq = hit(ev, "[data-cop-sw-paste]"); if (sq) SWPASTE = sq.value;
+    var at = hit(ev, "[data-cop-ad-text]"); if (at && advOn()) ADTXT[PANE.chat.id] = at.value;
+    var ac = hit(ev, "[data-cop-ad-change]"); if (ac && advOn()) ADASK[PANE.chat.id] = ac.value;
     var ck = hit(ev, "[data-cop-cp-ask]"); if (ck && competeOn()) CPASKTXT[PANE.chat.id] = ck.value;
     var cc = hit(ev, "[data-cop-cp-cell]"); if (cc && competeOn()) cpCell(cc);
     var da = hit(ev, "[data-cop-dv-ask]"); if (da && dirsOn()) DVASK[PANE.chat.id] = da.value;
@@ -58868,6 +59039,7 @@ var COPILOT = (function(){
     var b;
     if (flowClick(ev)) return;
     if (cpClick(ev)) return;
+    if (adClick(ev)) return;
     if (dvClick(ev)) return;
     if (exClick(ev)) return;
     if (swClick(ev)) return;
@@ -58891,6 +59063,17 @@ var COPILOT = (function(){
       }
       if (section() === "directions" || section() === "capabilities") { dvNew(section()); return; }
       if (section() === "execution") { exNew(); return; }
+      if (section() === "advisory") {
+        act({ act:"newAdvisory", place: place(), title: adTitle() }, function(j){
+          var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+          PANE = { id: j.chat.id, chat: j.chat, messages: [] };
+          adView(j);
+          OPEN[key()] = { kind:"chat", id: j.chat.id };
+          if (!RAILKEPT && !railShut()) setRail(true);
+          draw(); var t = document.querySelector("[data-cop-ad-text]"); if (t) t.focus();
+        });
+        return;
+      }
       if (section() === "compete") {
         act({ act:"newCompete", place: place(), title: cpTitle() }, function(j){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);

@@ -62676,3 +62676,17 @@ Islam signed off panels F and G of `design-mockups/copilot-directions-flow/2026-
 **Recorded, not done**: the chat asks again once the period has ended (§6.1) only by offering the choice anew on a new chat; nothing yet reminds anybody.
 
 **§492–§495 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §487.1 and §491 brought in first: the three record files combined (no line of either side lost; main's *Last Updated* demoted to *Earlier*), the built file and `smp-app/public/` rebuilt from the merged sources rather than merged, `sw.js` rebuilt from main's copy at `v6.06-execution-copilot` (one `const SHELL`, `node --check` clean), and the duplicate-declaration scan reading only §281.1's six. Re-run on the merged tree: authoriser 946/0, differ 140/0, copilot 292/0, shell 324/0, modules 233/0, state 92/0, door 146/0, `tsc` clean, `qa.py` ERRORS none, and single-company, plan-cycle-page, how-we-compete, structure, planning-period, years, contingency, capability-pillar-edit and plan-level all green. No forced sign-out is owed: no save rule moved for an old tab (the new authoriser keys are ones an old tab never writes).
+
+## §496 — Advisory, in the Copilot (spec 064)
+
+Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_advisory.html`): *"ok for both"* — the question count sits in the right column, and *Proceed with what you have* is offered from the first question.
+
+**A question, a few questions, then one brief.** The person writes what they want advice on; the Copilot asks ONE short question at a time, up to five a round and two rounds; then it writes a Decision Brief — situation, what we know (every fact tagged Platform, You, File or Assumed), two to four options with **exactly one recommended**, why, and next steps. *I don't know — assume for me* answers a question with a stated assumption; *Proceed with what you have* stops the questions at any point. When the platform's figures and a file disagree on a number, the Copilot does not choose: it asks which to use (the platform's, the file's, or the person's own).
+
+**The count is the server's** (`lib/copilot-advisory.ts`): the pips, the round and the rule that an eleventh question is refused all come from one function, so the screen cannot disagree with the rule (§53.5). A question still waiting on an answer is never asked again. A brief with no recommended option is not a brief and is refused in words; several recommended keep the first. The page never sends the state, only what the person did (§42).
+
+**Saved as an Advisory deliverable that stays in the Copilot** (`copilot-only`): advice is not a plan, so nothing is written into the plan. Versioned by the brief's title. A saved chat takes no further questions; the next question is a new chat. No migration — the section and the deliverable kind already existed.
+
+**Found while building**: a clash is itself the question, and the model may not word one — the platform words it (*"Which Store count should I use?"*) rather than refusing a good answer.
+
+**Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**

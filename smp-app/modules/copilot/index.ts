@@ -44,6 +44,7 @@ import { SWOT_ACTS, SWOT_ASKS, swotAct, swotAsk, swotView, swotProgress, sources
 import { COMPETE_ACTS, COMPETE_ASKS, competeAct, competeAsk, competeView, competeProgress } from "./compete.ts";
 import { DIRS_ACTS, DIRS_ASKS, dirsAct, dirsAsk, dirsView, dirsProgress } from "./directions.ts";
 import { EXEC_ACTS, EXEC_ASKS, execAct, execAsk, execView, execProgress } from "./execution.ts";
+import { ADVISORY_ACTS, ADVISORY_ASKS, advisoryAct, advisoryAsk, advisoryView, advisoryProgress } from "./advisory.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
@@ -110,7 +111,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
             swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id))
               : section === "compete" ? await competeProgress(c, chats.map((x: any) => x.id))
               : section === "directions" || section === "capabilities" ? await dirsProgress(c, chats.map((x: any) => x.id))
-              : section === "execution" ? await execProgress(c, chats.map((x: any) => x.id)) : {} }; }));
+              : section === "execution" ? await execProgress(c, chats.map((x: any) => x.id))
+              : section === "advisory" ? await advisoryProgress(c, chats.map((x: any) => x.id)) : {} }; }));
     }
     if (first === "chat") {
       const id = q("id");
@@ -128,7 +130,8 @@ export async function serve(a: ServeArgs): Promise<Response> {
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
           ...(chat.section === "compete" ? await competeView(c, chat) : {}),
           ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
-          ...(chat.section === "execution" ? await execView(c, chat) : {}) };
+          ...(chat.section === "execution" ? await execView(c, chat) : {}),
+          ...(chat.section === "advisory" ? await advisoryView(c, chat) : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -203,6 +206,14 @@ export async function serve(a: ServeArgs): Promise<Response> {
     }
     if (DIRS_ACTS.includes(String(body.act))) {
       const r = await withTenant(a.tenantId, (c) => dirsAct(c, body, who));
+      return json(r.status, r.body);
+    }
+    if (ADVISORY_ASKS.includes(String(body.act))) {
+      const r = await advisoryAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (ADVISORY_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => advisoryAct(c, body, who));
       return json(r.status, r.body);
     }
     if (SWOT_ACTS.includes(String(body.act))) {

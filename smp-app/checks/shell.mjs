@@ -1796,6 +1796,54 @@ await section("3m · the Execution chat: the period once, each item drafted, the
   }
 });
 
+await section("3n · the Advisory chat: one question at a time, counted, proceed, the brief, the save (§496)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup
+     (design-mockups/copilot-advisory/2026-10-06_advisory.html). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  const setAns = (a) => { for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k]; Object.assign(MODEL_ANSWER, a); };
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'advisory' s from copilot_chats where section = 'advisory' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/advisory");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-ad-text]", { timeout: 15000 });
+    check(!!(await page.$("[data-cop-ad-budget]")), "a new Advisory chat shows the question count in the right column");
+    setAns({ kind: "question", lead: "Good question.", question: "How many stores do you run today?" });
+    await page.fill("[data-cop-ad-text]", "Should we open stores in Upper Egypt?");
+    await page.click("[data-cop-ad-send]");
+    await page.waitForSelector(".adq", { timeout: 15000 });
+    let r = await row();
+    check(!!r && r.s.ask === "Should we open stores in Upper Egypt?" && r.s.turns.length === 1, "the question is stored and ONE question comes back", JSON.stringify(r && r.s));
+    const qline = await page.$eval(".adq", (e) => e.textContent);
+    check(/Question 1 of 5/.test(qline), "…numbered against the budget", qline);
+    const pips = await page.$$eval("[data-cop-ad-budget] .adpips i.u", (a) => a.length);
+    check(pips === 1, "one pip is spent", pips);
+    check(!!(await page.$('[data-cop-ad-reply="proceed"]')), "“Proceed with what you have” is offered from the first question");
+    setAns({ kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "assumed", text: "Rents flat" }],
+      options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }], why: "Lower risk", next: ["Pick sites"] } });
+    await page.click('[data-cop-ad-reply="proceed"]');
+    await page.waitForSelector("[data-cop-ad-brief]", { timeout: 15000 });
+    const recs = await page.$$eval("[data-cop-ad-brief] .adrec", (a) => a.length);
+    check(recs === 1, "the brief shows exactly one recommended option", recs);
+    const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
+    check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
+    await page.click("[data-cop-ad-finish]");
+    await page.waitForTimeout(1500);
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Upper Egypt stores" && dv.kind === "copilot-only" && dv.n === 1, "Save writes the brief as an Advisory deliverable, v1, kept in the Copilot", JSON.stringify(dv));
+    check(!(await page.$("[data-cop-ad-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    setAns(keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3g · turning a module on from inside the platform shows it at once (§453)", async () => {
   /* Islam: "I turned on the module but nothing is appearing in the
      navigation". The document carries which modules the client has, and

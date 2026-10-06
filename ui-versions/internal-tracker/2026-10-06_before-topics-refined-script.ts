@@ -69,7 +69,6 @@ export const APP_JS = `(function () {
       ar = document.querySelector(".addrow"), s = document.querySelector(".srch");
     return { add: add ? add.value : "", note: nt ? nt.value : "", srch: s ? s.value : "",
       due: ar ? ar.getAttribute("data-due") : null, owner: ar ? ar.getAttribute("data-owner") : null,
-      topic: ar ? ar.getAttribute("data-topic") : null, topicName: ar ? ar.getAttribute("data-topicname") : null,
       picked: !!(ar && ar.hasAttribute("data-picked")), noteOpen: !!(nt && !nt.hidden),
       focus: a && a.id === "add" ? "add" : (a && a.id === "addnote") ? "addnote" : (a && a.classList && a.classList.contains("srch")) ? "srch" : null };
   }
@@ -85,19 +84,12 @@ export const APP_JS = `(function () {
       if (k.noteOpen) drawNote(true);
       if (ar && k.picked) { if (k.due != null) setAddDue(ar, k.due); if (k.owner) setAddOwner(ar, k.owner); }
     }
-    if (ar && k && !k.clear && (k.topic || k.topicName)) setAddTopic(ar, k.topic || "", k.topicName || "");
-    if (ar && k && k.keepTopic && (k.keepTopic.id || k.keepTopic.name)) setAddTopic(ar, k.keepTopic.id, k.keepTopic.name);
-    /* the sections opened to show their done rows, and the rows just ticked,
-       stay as they were across the swap */
-    document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
-    fresh.forEach(function (id) { var r = document.querySelector('.row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
     if (s && k && k.srch) s.value = k.srch;
     if (k && k.focus === "add" && add) add.focus();
     else if (k && k.focus === "addnote" && nt) nt.focus();
     else if (k && k.focus === "srch" && s) s.focus();
     typing();
   }
-  var shown = new Set(), fresh = new Set();
   var chain = Promise.resolve();
   function request(method, url, body, k, then) {
     say("");
@@ -194,22 +186,6 @@ export const APP_JS = `(function () {
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
     return WD[d.getUTCDay()] + " " + d.getUTCDate() + " " + MO[d.getUTCMonth()];
   }
-  /* THE ADD LINE'S TOPIC (§492): an open topic picked from the list, a new
-     one named in the box under it (made on Enter, with the action), or none. */
-  function setAddTopic(ar, id, name) {
-    if (id) { ar.setAttribute("data-topic", id); ar.removeAttribute("data-topicname"); }
-    else ar.removeAttribute("data-topic");
-    if (!id && name) ar.setAttribute("data-topicname", name); else if (!name) ar.removeAttribute("data-topicname");
-    var p = ar.querySelector(".tpk"); if (!p) return;
-    var word = name;
-    if (id) { var b = p.querySelector('[data-act=pick-topic][data-topic="' + id + '"]'); if (b) word = b.textContent; }
-    p.querySelectorAll("[data-act=pick-topic]").forEach(function (b) {
-      var on = (b.getAttribute("data-topic") || "") === (id || "") && !!(id || !name);
-      b.classList.toggle("on", on); b.setAttribute("aria-selected", String(on));
-    });
-    var tw = p.querySelector(".tw"); if (tw) tw.textContent = word || "Topic";
-    p.classList.toggle("set", !!word);
-  }
   function submitAdd() {
     var add = document.getElementById("add"), nt = document.getElementById("addnote"), ar = document.querySelector(".addrow");
     if (!add || !ar) return;
@@ -217,10 +193,7 @@ export const APP_JS = `(function () {
     if (!t) { add.focus(); return; }
     add.disabled = true; if (nt) nt.disabled = true;
     var due = ar.getAttribute("data-due") || null, owner = ar.getAttribute("data-owner") || "";
-    var tid = ar.getAttribute("data-topic") || "", tname = ar.getAttribute("data-topicname") || "";
-    var payload = { act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner };
-    if (tid) payload.topicId = tid; else if (tname) payload.topicName = tname;
-    post(payload, { clear: true, focus: "add", keepTopic: { id: tid, name: tname } },
+    post({ act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner }, { clear: true, focus: "add" },
       function (j) { if (!j) { add.disabled = false; if (nt) nt.disabled = false; add.focus(); } /*%BRK%*/ });
   }
   document.addEventListener("keydown", function (e) {
@@ -245,17 +218,6 @@ export const APP_JS = `(function () {
     e.preventDefault();
     submitAdd();
   });
-  document.addEventListener("keydown", function (e) {
-    var t = e.target;
-    if (!t || !t.classList || !t.classList.contains("tnew")) return;
-    if (e.key === "Enter") {
-      e.preventDefault();
-      var ar = t.closest(".addrow"), v = t.value.replace(/\\s+/g, " ").trim();
-      if (ar && v) setAddTopic(ar, "", v);
-      closePops(null);
-      var add = document.getElementById("add"); if (add) add.focus();
-    } else if (e.key === "Escape") { t.value = ""; }
-  });
   document.addEventListener("input", function (e) { if (e.target && (e.target.id === "add" || e.target.id === "addnote")) typing(); });
   document.addEventListener("focusout", function (e) {
     if (!e.target || e.target.id !== "addnote" || e.target.value) return;
@@ -272,16 +234,13 @@ export const APP_JS = `(function () {
      date, the settings behind the dots — closed by a press elsewhere or
      Escape. */
   function closePops(except) {
-    document.querySelectorAll(".who.pick.on, .when.pick.on, .tpk.on").forEach(function (w) {
+    document.querySelectorAll(".who.pick.on, .when.pick.on").forEach(function (w) {
       if (w === except) return;
       w.classList.remove("on"); w.setAttribute("aria-expanded", "false");
-      var t = w.querySelector(".team, .weeks, .topics"); if (t) t.hidden = true;
+      var t = w.querySelector(".team, .weeks"); if (t) t.hidden = true;
     });
-    document.querySelectorAll(".dots > button.on, .tdots > button.on").forEach(function (d) {
-      if (d === except) return;
-      d.classList.remove("on"); d.setAttribute("aria-expanded", "false");
-      var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
-    });
+    var d = document.querySelector(".dots > button.on");
+    if (d && d !== except) { d.classList.remove("on"); d.setAttribute("aria-expanded", "false"); var m = d.parentNode.querySelector(".setmenu"); if (m) m.hidden = true; }
   }
   function togglePop(w, sel) {
     var on = !w.classList.contains("on");
@@ -296,7 +255,7 @@ export const APP_JS = `(function () {
     var on = !b.classList.contains("on");
     closePops(b);
     b.classList.toggle("on", on); b.setAttribute("aria-expanded", String(on));
-    var m = b.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = !on;
+    var m = b.parentNode.querySelector(".setmenu"); if (m) m.hidden = !on;
   }
 
   /* THE DATE BOX, in place of the day (or of the week's word, from "a day of
@@ -329,12 +288,11 @@ export const APP_JS = `(function () {
 
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-act]");
-    if (!b || !e.target.closest(".who.pick, .when.pick, .dots, .tpk, .tdots")) closePops(null);
+    if (!b || !e.target.closest(".who.pick, .when.pick, .dots")) closePops(null);
     if (!b) return;
     var act = b.getAttribute("data-act"), id = rowOf(b), ar = inAdd(b);
     if (act === "tick") {
       var done = b.getAttribute("aria-checked") === "true";
-      if (!done) fresh.add(id); else fresh.delete(id);
       post({ act: "status", id: id, status: done ? "not_started" : "done" });
     } else if (act === "due") {
       if (b.querySelector(".weeks")) toggleWeeks(b);
@@ -372,48 +330,6 @@ export const APP_JS = `(function () {
       if (act === "set-group") { B.setAttribute("data-group", v); remember("smp.tracker.group", v); }
       else { B.setAttribute("data-dates", v); remember("smp.tracker.dates", v); }
       refetch();
-    } else if (act === "tpk") {
-      if (e.target.closest(".topics")) return;
-      togglePop(b, ".topics");
-    } else if (act === "pick-topic") {
-      var tp = b.getAttribute("data-topic") || "";
-      closePops(null);
-      if (ar) setAddTopic(ar, tp, tp ? b.textContent : "");
-      var add2 = document.getElementById("add"); if (add2) add2.focus();
-    } else if (act === "show-done") {
-      var sec = b.closest(".sec"), key = sec ? sec.getAttribute("data-key") : null;
-      if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
-    } else if (act === "add-to-topic") {
-      var ar2 = document.querySelector(".addrow");
-      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = document.getElementById("add"); if (add3) { add3.focus(); add3.scrollIntoView({ block: "center" }); } }
-    } else if (act === "topic-menu") {
-      toggleSettings(b);
-    } else if (act === "topic-rename") {
-      var tid = b.getAttribute("data-topic"), sh = b.closest(".sh"), h3 = sh ? sh.querySelector("h3") : null;
-      closePops(null);
-      if (!h3 || h3.querySelector("input")) return;
-      var was = h3.textContent, inp = document.createElement("input");
-      inp.value = was; inp.maxLength = 120; inp.setAttribute("aria-label", "Rename the topic");
-      h3.textContent = ""; h3.appendChild(inp); inp.focus(); inp.select();
-      var settled = false, back = function () { if (settled) return; settled = true; h3.textContent = was; };
-      inp.addEventListener("keydown", function (ev) {
-        if (ev.key === "Escape") { ev.preventDefault(); back(); }
-        else if (ev.key === "Enter") { ev.preventDefault(); inp.blur(); }
-      });
-      inp.addEventListener("blur", function () {
-        if (settled) return;
-        var v = inp.value.replace(/\\s+/g, " ").trim();
-        if (!v || v === was) { back(); return; }
-        settled = true; h3.textContent = v;
-        post({ act: "topic-rename", topicId: tid, name: v });
-      });
-    } else if (act === "topic-close" || act === "topic-reopen" || act === "topic-delete") {
-      closePops(null);
-      post({ act: act, topicId: b.getAttribute("data-topic") });
-    } else if (act === "topic-delete-ask") {
-      b.hidden = true; var s3 = b.parentNode.querySelector(".sure"); if (s3) s3.hidden = false;
-    } else if (act === "topic-delete-no") {
-      var s4 = b.closest(".sure"); if (s4) { s4.hidden = true; var d4 = s4.parentNode.querySelector("[data-act=topic-delete-ask]"); if (d4) d4.hidden = false; }
     } else if (act === "add-note") {
       if (noteIsOpen()) foldNote(); else openNote();
     } else if (act === "more") {
@@ -432,10 +348,10 @@ export const APP_JS = `(function () {
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { closePops(null); return; }
-    var w = e.target.closest && e.target.closest(".who.pick, .when.pick, .tpk");
+    var w = e.target.closest && e.target.closest(".who.pick, .when.pick");
     if (w && e.target === w && (e.key === "Enter" || e.key === " ")) {
       e.preventDefault();
-      if (w.classList.contains("who")) toggleTeam(w); else if (w.classList.contains("tpk")) togglePop(w, ".topics"); else toggleWeeks(w);
+      if (w.classList.contains("who")) toggleTeam(w); else toggleWeeks(w);
     }
   });
 
@@ -443,8 +359,7 @@ export const APP_JS = `(function () {
     var c = e.target.closest("[data-act]");
     if (!c) return;
     var act = c.getAttribute("data-act"), id = rowOf(c);
-    if (act === "status") { if (c.value === "done") fresh.add(id); post({ act: "status", id: id, status: c.value }); }
-    else if (act === "topic") post({ act: "topic", id: id, topicId: c.value || null });
+    if (act === "status") post({ act: "status", id: id, status: c.value });
   });
 
   /* RENAME IN PLACE: a double-click on the name turns it into a box; Enter

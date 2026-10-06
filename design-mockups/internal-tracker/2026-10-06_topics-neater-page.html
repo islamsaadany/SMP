@@ -9,7 +9,7 @@
 :root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
   --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;padding-inline:16px}
-.doc{max-width:1340px;margin:0 auto;padding-block:24px 60px}
+.doc{max-width:1640px;margin:0 auto;padding-block:24px 60px}
 .doc>h1{font-size:22px;font-weight:600;margin:0 0 18px}
 .fr{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;margin:0 0 34px;align-items:start}
 .say{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--ink-2)}
@@ -118,121 +118,81 @@ svg{display:block}
 .n .sadd b{color:var(--gold);font-weight:600}
 .n .fold{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line-2);font-size:13px;color:var(--ink-3)}
 @media (max-width:760px){.n .r,.n .colh{grid-template-columns:20px minmax(0,1fr) 22px}.n .r .w,.n .r .p,.n .r .s,.n .colh span:nth-child(n+3):not(:last-child){display:none}.n .picks .chip:not(.on){display:none}.n .stats div{min-width:0;padding:7px 10px}}
+
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin:0 0 14px}
+.pair .lbl{font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px;display:flex;gap:8px;align-items:center}
+.pair .lbl.b{color:var(--ink-3)}.pair .lbl.a{color:var(--gold)}
+.pair .pg{padding:16px 16px 20px}
+@media (max-width:1180px){.pair{grid-template-columns:1fr}}
+.nb{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#fff;font:700 10.5px/1 var(--font);flex:none;vertical-align:2px;margin:0 4px}
+:root[data-theme="dark"] .nb{color:#12151C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nb{color:#12151C}}
+.chg{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;margin:0 0 36px}
+.chg th{text-align:left;font:600 10.5px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:9px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.chg td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+.chg td:first-child{width:36px}.chg td:nth-child(2){width:150px;color:var(--ink);font-weight:600}
+.chg tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.n .r,.n .colh{grid-template-columns:20px minmax(0,1fr) 78px 56px 100px 18px;gap:10px}
 </style>
-
-<div class="doc">
-<h1>Internal Tracker: a neater page, with topics</h1>
-
-<!-- TODAY -->
-<p class="cap">Today &middot; as built, grouped by Owner, with topic tags added</p>
-<div class="fr">
-<div class="stage"><div class="pg o">
-  <span class="back">&lsaquo; Back to Raya Trade</span>
-  <h2>Internal Tracker <small>Raya Trade &middot; W2 Oct</small></h2>
-  <nav class="cats"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><span class="dt">&middot;&middot;&middot;</span></nav>
-  <div class="strip"><div class="tile"><b>9</b><span>Open</span></div><div class="tile late"><b>2</b><span>Late</span></div><div class="tile"><b>5</b><span>Due this week</span></div><div class="tile"><b>1</b><span>Done this week</span></div></div>
-  <div class="tools"><span class="srch">Search actions</span><span class="go">Search</span><span class="cnt">6 actions on this week</span></div>
-  <div class="list">
-    <div class="grp">Noran Essam <span class="cnt">2</span></div>
-    <div class="row"><span class="tick"></span><div>Collect units' revenue assumptions for 2027<span class="tpc">Budget</span></div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="arr">⌄</span></div>
-    <div class="row"><span class="tick"></span><div>Cascade messages for the B2C company<span class="tpc">Strategy communication</span></div><span class="when">This week</span><span class="who">Noran</span><span class="st">Not started</span><span class="arr">⌄</span></div>
-    <div class="grp">Islam <span class="cnt">1</span></div>
-    <div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance<span class="tpc">Budget</span></div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
-    <div class="addrow"><span>+</span><span>Type an action and press Enter</span></div>
-  </div>
-  <div class="hint">Enter adds it under you, due this week &middot; type the action and its week, owner and note appear on the line</div>
-</div></div>
-<div class="say"><h3>What makes it busy</h3><ul>
-<li>Four big number cards take a whole band before any action.</li>
-<li>Views, search, the count and the settings dots sit on three different lines.</li>
-<li>Every label is in the same small uppercase type, so nothing stands out.</li>
-<li>Groups are a grey word between rows, so where one topic ends is hard to see.</li>
-<li>The add line sits at the very bottom, after every row.</li>
-</ul></div>
-</div>
-
-<!-- PROPOSED: grouped by topic -->
-<p class="cap">Proposed &middot; grouped by Topic</p>
-<div class="fr">
-<div class="stage"><div class="pg n">
-  <span class="back"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Raya Trade</span>
-  <div class="hd">
-    <h2>Internal Tracker<small>This week &middot; W2 Oct, 4 – 8 Oct</small></h2>
-    <div class="stats"><div><b>9</b><span>Open</span></div><div class="late"><b>2</b><span>Late</span></div><div><b>5</b><span>Due this week</span></div><div><b>1</b><span>Done this week</span></div></div>
-  </div>
-  <div class="bar">
-    <span class="seg"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a></span>
-    <span class="srch"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search actions</span>
-    <span class="grpby">Group by <b>Topic</b> <svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-    <span class="ico" title="Dates as weeks or exact dates"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></span>
-  </div>
-  <div class="add"><span class="plus">+</span><span class="ph">Add an action and press Enter</span><span></span></div>
-
-  <div class="colh"><span></span><span>Action</span><span>Due</span><span>Owner</span><span>Status</span><span></span></div>
-
-  <div class="sec">
-    <div class="sh"><h3>Budget</h3><span class="meta">3 open &middot; <span class="l">1 late</span></span><span class="prog"><i style="width:25%"></i></span><span class="pct">1 of 4</span><span class="dots">&middot;&middot;&middot;</span></div>
-    <div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar">⌄</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance</span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Agree the capex template with the CFO</span><span class="w">W3 Oct</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-    <div class="sadd"><b>+</b> Add to Budget</div>
-  </div>
-
-  <div class="sec">
-    <div class="sh"><h3>Strategy communication</h3><span class="meta">2 open</span><span class="prog"><i style="width:33%"></i></span><span class="pct">1 of 3</span><span class="dots">&middot;&middot;&middot;</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Town hall deck for the strategy refresh</span><span class="w">Next week</span><span class="p">Essam</span><span class="s prog">In progress</span><span class="ar">⌄</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company</span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-    <div class="fold"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>1 done</div>
-    <div class="sadd"><b>+</b> Add to Strategy communication</div>
-  </div>
-
-  <div class="sec">
-    <div class="sh notopic"><h3>No topic</h3><span class="meta">1 open</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Book the room for the Q3 review</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-  </div>
-</div></div>
-<div class="say"><h3>What changes</h3><ul>
-<li><b>One header line.</b> The title and week on the left; the four numbers become one slim bar on the right instead of four big cards.</li>
-<li><b>One toolbar.</b> The views as one switch, the search, and the grouping said in words (<b>Group by Topic</b>). The dots keep only Weeks or Exact dates.</li>
-<li><b>The add line moves to the top</b>, under the toolbar, so you add without scrolling.</li>
-<li><b>Each topic is its own white box</b> with its name, its counts, and a small bar for how much is done.</li>
-<li><b>Column names once</b> above the boxes, so every row lines up the same.</li>
-<li><b>Late is a thin red edge</b> on the row, plus the red date.</li>
-<li><b>Status is a small dot and a word</b>, not a wide bordered pill.</li>
-<li><b>Done actions fold</b> under "1 done" at the bottom of their topic.</li>
-<li><b>"+ Add to Budget"</b> at the foot of a topic adds an action already in that topic.</li>
-</ul></div>
-</div>
-
-<!-- PROPOSED: grouped by owner, adding with a topic -->
-<p class="cap">Proposed &middot; grouped by Owner, adding an action with a topic</p>
-<div class="fr">
-<div class="stage"><div class="pg n">
-  <div class="bar">
-    <span class="seg"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a></span>
-    <span class="srch"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search actions</span>
-    <span class="grpby">Group by <b>Owner</b> <svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-    <span class="ico"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></span>
-  </div>
-  <div class="add"><span class="plus">+</span><span class="ty">Confirm the payroll forecast with HR<i></i></span>
-    <span class="picks"><span class="chip on">Budget</span><span class="chip">This week</span><span class="chip">Islam</span><span class="chip"><small>Note</small></span></span></div>
-
-  <div class="colh"><span></span><span>Action</span><span>Due</span><span>Owner</span><span>Status</span><span></span></div>
-  <div class="sec">
-    <div class="sh"><h3>Noran Essam</h3><span class="meta">2 open &middot; <span class="l">1 late</span></span></div>
-    <div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027<span class="tg">Budget</span></span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar">⌄</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company<span class="tg">Strategy communication</span></span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-  </div>
-  <div class="sec">
-    <div class="sh"><h3>Islam</h3><span class="meta">1 open</span></div>
-    <div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance<span class="tg">Budget</span></span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar">⌄</span></div>
-    <div class="r dn"><span class="tk"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="t">Send the one-page summary to unit heads<span class="tg">Strategy communication</span></span><span class="w">Done 2 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar">⌄</span></div>
-  </div>
-</div></div>
-<div class="say"><h3>What changes</h3><ul>
-<li>Once you type, the add line shows its picks as small buttons on the right: <b>Topic</b>, week, owner and an optional note. Here the topic was picked (Budget) and is lit.</li>
-<li>When not grouped by topic, each row shows its topic as a soft grey tag after the name.</li>
-<li>The same boxes, toolbar and columns are used for every grouping, so the page always looks the same.</li>
-</ul></div>
-</div>
+<div class="doc"><h1>Internal Tracker: before and after</h1>
+<p class="cap">Every change, numbered as on the drawings</p><div class="tw"><table class="chg"><tr><th>#</th><th>What</th><th>Before</th><th>After</th></tr><tr><td><span class="nb">1</span></td><td>The numbers</td><td>Four big cards, a full band of the page</td><td>One slim bar of four numbers, beside the title</td></tr><tr><td><span class="nb">2</span></td><td>Views, search, settings</td><td>Three lines: tabs, then cards, then search with a Search button and a count</td><td>One line: the views as a switch, search, Group by in words, the dots</td></tr><tr><td><span class="nb">3</span></td><td>Adding an action</td><td>Last line of the list, after every row, with a grey hint under it</td><td>First thing under the toolbar; no hint line</td></tr><tr><td><span class="nb">4</span></td><td>Groups</td><td>A grey word between rows</td><td>Each group is its own white box with its name and counts</td></tr><tr><td><span class="nb">5</span></td><td>Column names</td><td>None</td><td>Action, Due, Owner, Status shown once above the boxes</td></tr><tr><td><span class="nb">6</span></td><td>Late</td><td>Red date only</td><td>Red date and a thin red edge on the row's left</td></tr><tr><td><span class="nb">7</span></td><td>Status</td><td>A wide bordered pill</td><td>A small dot and the word (pressing it still changes it)</td></tr><tr><td><span class="nb">8</span></td><td>Done actions</td><td>Stay in the list, struck through</td><td>Folded under “1 done” at the bottom of their group; one press shows them</td></tr><tr><td><span class="nb">9</span></td><td>Topic box (new)</td><td>—</td><td>When grouped by topic: a done bar, the three dots menu, and “+ Add to Budget” at the foot</td></tr><tr><td><span class="nb">10</span></td><td>Picks on the add line</td><td>Small mono text pieces, topic as a dashed tag</td><td>Small buttons on the right: Topic, week, owner, Note; the chosen one is lit</td></tr></table></div>
+<p class="cap">1 &middot; The whole page, This week, grouped by Owner — same actions both sides</p><div class="pair"><div><p class="lbl b">Before &middot; today</p><div class="stage tw"><div class="pg o"><span class="back">&lsaquo; Back to Raya Trade</span>
+<h2>Internal Tracker <small>Raya Trade &middot; W2 Oct</small></h2>
+<nav class="cats"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><span class="dt">&middot;&middot;&middot;</span></nav>
+<div class="strip"><div class="tile"><b>9</b><span>Open</span></div><div class="tile late"><b>2</b><span>Late</span></div><div class="tile"><b>5</b><span>Due this week</span></div><div class="tile"><b>1</b><span>Done this week</span></div></div>
+<div class="tools"><span class="srch">Search actions</span><span class="go">Search</span><span class="cnt">6 actions on this week</span></div><div class="list">
+<div class="grp">Noran Essam <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick"></span><div>Cascade messages for the B2C company</div><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="grp">Islam <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance</div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick" style="background:var(--good);border-color:var(--good)"></span><div style="color:var(--ink-3);text-decoration:line-through">Send the one-page summary to unit heads</div><span class="when">Done 2 Oct</span><span class="who">Islam</span><span class="st" style="border-color:var(--good);background:var(--good-bg);color:var(--good)">Done</span><span class="arr">⌄</span></div>
+<div class="grp">Omar <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Book the room for the Q3 review</div><span class="when">This week</span><span class="who">Omar</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow"><span>+</span><span>Type an action and press Enter</span></div></div>
+<div class="hint">Enter adds it under you, due this week &middot; type the action and its week, owner and note appear on the line</div></div></div></div><div><p class="lbl a">After &middot; proposed</p><div class="stage tw"><div class="pg n"><span class="back"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Raya Trade</span>
+<div class="hd"><h2>Internal Tracker<small>This week &middot; W2 Oct, 4 – 8 Oct</small></h2>
+<div style="display:flex;align-items:center"><span class="nb">1</span><div class="stats"><div><b>9</b><span>Open</span></div><div class="late"><b>2</b><span>Late</span></div><div><b>5</b><span>Due this week</span></div><div><b>1</b><span>Done this week</span></div></div></div></div>
+<div class="bar"><span class="nb">2</span><span class="seg"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a></span><span class="srch"><svg width="15" height="15" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search actions</span><span class="grpby">Group by <b>Owner</b> <svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="ico"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></span></div>
+<div class="add"><span class="plus">+</span><span class="ph">Add an action and press Enter</span><span class="nb">3</span></div>
+<div class="colh"><span></span><span>Action <span class="nb">5</span></span><span>Due</span><span>Owner</span><span>Status</span><span></span></div>
+<div class="sec"><div class="sh"><h3>Noran Essam</h3><span class="meta">2 open &middot; <span class="l">1 late</span></span><span class="nb">4</span></div>
+<div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar">⌄</span></div>
+<div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company</span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s">Not started</span><span class="ar">⌄</span></div></div>
+<div class="sec"><div class="sh"><h3>Islam</h3><span class="meta">1 open</span></div>
+<div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance</span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar">⌄</span></div>
+<div class="fold"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>1 done <span class="nb">8</span></div></div>
+<div class="sec"><div class="sh"><h3>Omar</h3><span class="meta">1 open</span></div>
+<div class="r"><span class="tk"></span><span class="t">Book the room for the Q3 review</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar">⌄</span></div></div>
+<p style="font-size:12.5px;color:var(--ink-3);margin:6px 2px 0">Marks <span class="nb">6</span> late edge and <span class="nb">7</span> status are on the rows above.</p></div></div></div></div>
+<p class="cap">2 &middot; Grouped by Topic</p><div class="pair"><div><p class="lbl b">Before &middot; today</p><div class="stage tw"><div class="pg o"><div class="tools"><span class="srch">Search actions</span><span class="go">Search</span><span class="cnt">6 actions on this week</span></div><div class="list">
+<div class="grp">Budget <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance</div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="grp">Strategy communication <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Cascade messages for the B2C company</div><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick" style="background:var(--good);border-color:var(--good)"></span><div style="color:var(--ink-3);text-decoration:line-through">Send the one-page summary to unit heads</div><span class="when">Done 2 Oct</span><span class="who">Islam</span><span class="st" style="border-color:var(--good);background:var(--good-bg);color:var(--good)">Done</span><span class="arr">⌄</span></div>
+<div class="grp">No topic <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Book the room for the Q3 review</div><span class="when">This week</span><span class="who">Omar</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow"><span>+</span><span>Type an action and press Enter</span></div></div></div></div></div><div><p class="lbl a">After &middot; proposed</p><div class="stage tw"><div class="pg n"><div class="colh"><span></span><span>Action</span><span>Due</span><span>Owner</span><span>Status</span><span></span></div>
+<div class="sec"><div class="sh"><h3>Budget</h3><span class="meta">2 open &middot; <span class="l">1 late</span></span><span class="prog"><i style="width:4%"></i></span><span class="pct">0 of 2</span><span class="dots">&middot;&middot;&middot;</span></div>
+<div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar">⌄</span></div>
+<div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance</span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar">⌄</span></div>
+<div class="sadd"><b>+</b> Add to Budget <span class="nb">9</span></div></div>
+<div class="sec"><div class="sh"><h3>Strategy communication</h3><span class="meta">1 open</span><span class="prog"><i style="width:50%"></i></span><span class="pct">1 of 2</span><span class="dots">&middot;&middot;&middot;</span></div>
+<div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company</span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s">Not started</span><span class="ar">⌄</span></div>
+<div class="fold"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>1 done</div>
+<div class="sadd"><b>+</b> Add to Strategy communication</div></div>
+<div class="sec"><div class="sh notopic"><h3>No topic</h3><span class="meta">1 open</span></div>
+<div class="r"><span class="tk"></span><span class="t">Book the room for the Q3 review</span><span class="w">This week</span><span class="p">Omar</span><span class="s">Not started</span><span class="ar">⌄</span></div></div></div></div></div></div>
+<p class="cap">3 &middot; Adding an action with a topic</p><div class="pair"><div><p class="lbl b">Before &middot; today</p><div class="stage tw"><div class="pg o"><div class="list">
+<div class="grp">Islam <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance<span class="tpc">Budget</span></div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow" style="grid-template-columns:22px 1fr auto auto auto"><span>+</span><span style="color:var(--ink)">Confirm the payroll forecast with HR</span><span class="tpc" style="border-style:dashed">Budget ▾</span><span class="when">This week</span><span class="who">Islam</span></div></div>
+<div class="hint">Topic, week and owner appear on the add line at the bottom of the list</div></div></div></div><div><p class="lbl a">After &middot; proposed</p><div class="stage tw"><div class="pg n"><div class="add"><span class="plus">+</span><span class="ty">Confirm the payroll forecast with HR<i></i></span><span class="picks"><span class="chip on">Budget</span><span class="chip">This week</span><span class="chip">Islam</span><span class="chip"><small>Note</small></span><span class="nb">10</span></span></div>
+<div class="colh"><span></span><span>Action</span><span>Due</span><span>Owner</span><span>Status</span><span></span></div>
+<div class="sec"><div class="sh"><h3>Islam</h3><span class="meta">1 open</span></div>
+<div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance<span class="tg">Budget</span></span><span class="w">This week</span><span class="p">Islam</span><span class="s">Not started</span><span class="ar">⌄</span></div></div></div></div></div></div>
+<p style="font-size:13px;color:var(--ink-3)">Unchanged: what each control does, the order of the columns, the week words, the colours, and that every change saves at once with no reload.</p>
 </div>

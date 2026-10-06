@@ -48,6 +48,7 @@ import { mayDeleteSource } from "../lib/copilot-sources.ts";
 import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
 import { methodFor } from "../lib/copilot-settings.ts";
 import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
+import { periodQuarters as exQs, periodWords as exWords, validPeriod as exValid, periodChoices as exChoices, withPeriod as exWith, cleanItem as exItem, newExec, todoOf as exTodo, finishBlocker as exBlock } from "../lib/copilot-execution.ts";
 import { scoreOf as dvScore, finishBlocker as dvBlock, newDirs, modelCaps as dvCaps, modelOptions as dvOpts, todoOf as dvTodo } from "../lib/copilot-directions.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
@@ -180,6 +181,22 @@ check("each section's guidance carries the house rules; the roads only where the
   const c = dvCaps([{ title: "Supply chain", kind: "gap", serves: ["win families", "Made up"], ownedBy: "commercial" }, { title: "X", kind: "weird", serves: [], ownedBy: "" }], fns, ["Win families"], [], true);
   check("...a Capability serves only Directions on the table, spelt as they are, and a kind not on the list is none",
     c[0].serves.join() === "Win families" && c[0].kind === "gap" && c[1].kind === "" && c[0].keep === true, JSON.stringify(c));
+}
+/* §495: Execution — the period, its quarters, and what blocks the save. */
+{
+  check("§495 a period's quarters are the ones its months touch, and no period means all four", exQs({ y: 2026, m1: 7, m2: 12 }).join() === "3,4" && exQs({ y: 2026, m1: 2, m2: 4 }).join() === "1,2" && exQs(null).join() === "1,2,3,4");
+  check("...said as months and quarters, the full year as Full year", exWords({ y: 2026, m1: 7, m2: 12 }) === "Jul\u2013Dec 2026 (Q3\u2013Q4)" && exWords({ y: 2027, m1: 1, m2: 12 }) === "Full year 2027 (Q1\u2013Q4)", exWords({ y: 2026, m1: 7, m2: 12 }));
+  check("...a period is months in ONE year, first before last", exValid({ y: 2026, m1: 9, m2: 3 }) === null && exValid({ y: 2026, m1: 0, m2: 5 }) === null && exValid({ y: 2026, m1: 3, m2: 9 })?.m2 === 9);
+  const ch = exChoices(new Date(2026, 9, 6));
+  check("...in October the ready answers are next year whole, and Oct–Dec", ch.full.y === 2027 && ch.full.m1 === 1 && ch.rest.y === 2026 && ch.rest.m1 === 10 && ch.rest.m2 === 12, JSON.stringify(ch));
+  const it = exItem({ title: "Win families", planId: "mobile-P1", measures: [{ name: "Share", target: "30%", compile: "Bogus" }], tactics: [{ name: "Launch", owner: "Commercial", quarters: [1, 3, 4, 9] }] }, [3, 4]);
+  check("...a tactic keeps only quarters inside the period, and a compile rule not on the list is none", it.tactics[0].quarters.join() === "3,4" && it.measures[0].compile === "", JSON.stringify(it));
+  const s0 = newExec([exItem({ title: "Win families", planId: "mobile-P1", tactics: [{ name: "T", quarters: [1, 2, 3] }] }, [1, 2, 3, 4])]);
+  check("...nothing is saved before the period is said", /how long the plan is/.test(exBlock(s0)));
+  const s1 = exWith(s0, { y: 2026, m1: 7, m2: 12 });
+  check("...setting a shorter period takes every tactic's quarters back inside it", s1.items[0].tactics[0].quarters.join() === "3", JSON.stringify(s1.items[0].tactics));
+  check("...an item with no measure still blocks, by name", /Win families/.test(exBlock(s1)));
+  check("...the to-do is the period, one row per item, then Save", exTodo(s1).map((t) => t.key).join() === "period,item:mobile-P1,save" && exTodo(s1)[0].state === "done");
 }
 /* §460: the conversation fixes, A B C, each asked of the rule itself. */
 {
@@ -965,6 +982,45 @@ try {
     check("...and saves as Capabilities — Mobile", cfin.st === 200 && cfin.j.saved?.title === "Capabilities \u2014 Mobile");
     const notDv = await call("POST", "api", { act: "dirSave", id: ch.id, dirs: {} }, NORAN);
     check("a chat that is not Directions is refused", notDv.st === 400 && /not a Directions/.test(notDv.j.why));
+    NEXT = null;
+    section("§9c · the Execution chat: the period, one item at a time, saved");
+    const xh = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution 2026", items: [{ kind: "direction", planId: "mobile-P1", title: "Win families" }] }, HEND);
+    check("a client's own person cannot start one", xh.st === 403, xh.st + "");
+    const xn = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution 2026",
+      items: [{ kind: "direction", planId: "mobile-P1", title: "Win families", ownedBy: "Commercial" }, { kind: "capability", planId: "cap:cap1", title: "Supply chain" }, { title: "" }] }, NORAN);
+    const xid = xn.j.chat?.id;
+    check("the office starts one: the plan's items, the period asked first, a to-do of period + items + save",
+      xn.st === 200 && xn.j.chat?.section === "execution" && xn.j.exec?.items.length === 2 && xn.j.exec?.period === null && xn.j.execTodo?.length === 4 && /how long the plan is/.test(xn.j.execBlocker),
+      String(JSON.stringify(xn.j)).slice(0, 200));
+    const xe = await call("POST", "api", { act: "execDraft", id: xid, placeWord: "Mobile" }, NORAN);
+    check("nothing is drafted before the period is said", xe.st === 400 && /how long the plan is/.test(xe.j.why), JSON.stringify(xe.j));
+    const xbad = await call("POST", "api", { act: "execPeriod", id: xid, period: { y: 2026, m1: 11, m2: 3 } }, NORAN);
+    check("a period that runs backwards is refused in words", xbad.st === 400 && /ONE year/.test(xbad.j.why));
+    const xp = await call("POST", "api", { act: "execPeriod", id: xid, period: { y: 2026, m1: 7, m2: 12 } }, NORAN);
+    check("picked months set the period, and only Q3 and Q4 are offered", xp.st === 200 && xp.j.exec?.period?.m1 === 7 && xp.j.execWords?.quarters.join() === "3,4", JSON.stringify(xp.j.execWords));
+    NEXT = { answer: { reply: "Drafted.", measures: [{ name: "Family share", target: "30%", compile: "Latest" }], tactics: [{ name: "Family bundles", owner: "Commercial", quarters: [1, 3, 4] }] } };
+    const xd = await call("POST", "api", { act: "execDraft", id: xid, placeWord: "Mobile", context: "SWOT: strong stores" }, NORAN);
+    const xi = xd.j.exec?.items[0];
+    check("the model drafts the item under the cursor; a quarter outside the period is dropped",
+      xd.st === 200 && xi?.measures.length === 1 && xi?.tactics[0]?.quarters.join() === "3,4" && xi?.drafted === true, String(JSON.stringify(xi)).slice(0, 200));
+    check("...and the model was told the period's quarters only", /Quarters a tactic may run in: Q3, Q4/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    const xf0 = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
+    check("saving is refused while an item has no measure — named, asked of the stored chat", xf0.st === 400 && /Supply chain/.test(xf0.j.why), JSON.stringify(xf0.j));
+    const items2 = xd.j.exec.items.map((x, k) => k === 1 ? { ...x, title: "Renamed", measures: [{ name: "Lead time", target: "5 days", compile: "Average" }], tactics: [{ name: "One warehouse", owner: "Supply", quarters: [2, 4] }] } : x);
+    const xs = await call("POST", "api", { act: "execSave", id: xid, exec: { items: items2, cursor: 1, saved: { deliverableId: "x", n: 9, title: "fake" } } }, NORAN);
+    check("the page writes what is under an item, never which items there are, and cannot say it is saved",
+      xs.st === 200 && xs.j.exec?.items[1].title === "Supply chain" && xs.j.exec?.items[1].tactics[0].quarters.join() === "4" && xs.j.exec?.saved === null && xs.j.execBlocker === "",
+      String(JSON.stringify(xs.j.exec)).slice(0, 300));
+    const xhf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, HEND);
+    check("a client's own person cannot save it", xhf.st === 403);
+    const xf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
+    check("saving makes version 1 of Execution — Mobile", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Execution \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
+    const xv = xf.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [xf.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the period and both items", xv.length === 1 && xv[0].body.period?.m1 === 7 && xv[0].body.items.length === 2 && /PLAN PERIOD: Jul\u2013Dec 2026/.test(xv[0].body.text), String(JSON.stringify(xv)).slice(0, 300));
+    const xafter = await call("POST", "api", { act: "execPeriod", id: xid, choice: "full" }, NORAN);
+    check("a saved chat refuses further changes", xafter.st === 400 && /Start a new chat/.test(xafter.j.why));
+    const notEx = await call("POST", "api", { act: "execSave", id: ch.id, exec: {} }, NORAN);
+    check("a chat that is not Execution is refused", notEx.st === 400 && /not an Execution/.test(notEx.j.why));
     NEXT = null;
     }
 

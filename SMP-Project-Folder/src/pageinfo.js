@@ -636,7 +636,7 @@ var PAGE_INFO = {
   },
 
   c_cycle: {
-    title: "Reporting cycle",
+    title: "Planning & reporting cycle",
     body: [
       ["What a cycle is",
        "A window the SMO opens over a span \u2014 a quarter, a half, a month. Opening it turns the plan " +

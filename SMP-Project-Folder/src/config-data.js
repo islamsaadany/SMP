@@ -454,6 +454,40 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
+/* §495: THE PLAN PERIOD HAS ITS OWN PEN on Setup › Planning & reporting
+   cycle, because it is the tenant's and outlives every cycle (§308) — so it
+   is no longer opened by the CYCLE's pen. Same shape as CYCLEEDIT: a mode,
+   nothing held back, the pickers write straight to GROUP. */
+var PLANEDIT = null;
+/* §495: HOW MANY TACTICS TICK A QUARTER THE PLAN PERIOD DOES NOT COVER.
+   Flagged, never deleted (spec 064 §7): shortening the period must not throw
+   away work somebody planned. A tactic's quarter is read in the plan's own
+   starting year; a quarter counts as covered when any of its months is. */
+function tacticsOutsidePlan(){
+  if (!planSet()) return 0;
+  var a = planFrom(), b = planTo(), y = Math.floor(a / 12), n = 0;
+  activeKeys().forEach(function(k){
+    var u = UNITS[k]; if (!u || !Array.isArray(u.items)) return;
+    u.items.forEach(function(it){ (it && it.tactics || []).forEach(function(t){
+      var out = false;
+      [1,2,3,4].forEach(function(q){
+        if (!t || !(+t["q" + q])) return;
+        var s0 = y * 12 + (q - 1) * 3, s1 = s0 + 2;
+        if (s1 < a || s0 > b) out = true;
+      });
+      if (out) n++;
+    }); });
+  });
+  return n;
+}
+/* §495: DOES THE OPEN CYCLE RUN PAST THE PLAN PERIOD. Asked of the months the
+   cycle covers, through the same readers every score uses; nothing is said
+   where either end cannot be read. */
+function cyclePastPlan(){
+  if (!planSet()) return false;
+  var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
+  return (to != null && to > planTo()) || (fr != null && fr < planFrom());
+}
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every

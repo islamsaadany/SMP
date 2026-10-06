@@ -35,7 +35,7 @@ import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
   FORMATS, FORMAT_WORD, todayIn, weekOf, weekLabel, readableDay, isLate, carriedWeeks, lateWord, inView, summary, mayChange,
   thursdayOf, weekWord, sameWeek, weekOptions,
-  officeRows, namesOf, shortNames, listActions, eventsOf, listTopics, type Topic,
+  officeRows, namesOf, shortNames, listActions, eventsOf,
 } from "../../lib/tracker.ts";
 
 const esc = (s: unknown) =>
@@ -282,7 +282,7 @@ export type PageArgs = {
 };
 
 type Q = Parameters<typeof officeRows>[0];
-export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<string, string>; actions: Action[]; events: Event[]; open: string | null; topics: Topic[] };
+export type Loaded = { office: Person[]; names: Map<string, string>; short: Map<string, string>; actions: Action[]; events: Event[]; open: string | null };
 
 /* ONE READ FOR THE PAGE AND FOR A PRESS. An opened row that is no longer on
    the list (deleted, or another client's id on a pasted link) is read as
@@ -295,7 +295,7 @@ export async function load(c: Q, openId: string | null): Promise<Loaded> {
   for (const a of actions) if (!named.has(a.ownerKey)) named.set(a.ownerKey, names.get(a.ownerKey) || a.ownerKey);
   const short = shortNames(Array.from(named, ([key, name]) => ({ key, name })));
   const open = openId && actions.some((a) => a.id === openId) ? openId : null;
-  return { office, names, short, actions, events: open ? await eventsOf(c, open) : [], open, topics: await listTopics(c) };
+  return { office, names, short, actions, events: open ? await eventsOf(c, open) : [], open };
 }
 
 const statusPill = (a: Action, live: boolean): string => {
@@ -421,7 +421,7 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
   /* as weeks, a due-date grouping is by the WEEK — every day of one week
      under one heading, keyed by its Thursday so the order is still by day */
   const dueKey = (a: Action) => !a.due ? "none" : dates === "weeks" ? thursdayOf(a.due) : a.due;
-  const keyOf = (a: Action) => group === "owner" ? a.ownerKey : group === "status" ? a.status : group === "due" ? dueKey(a) : group === "topic" ? (a.topicId || "none") : "all";
+  const keyOf = (a: Action) => group === "owner" ? a.ownerKey : group === "status" ? a.status : group === "due" ? dueKey(a) : "all";
   for (const a of shown) { const k = keyOf(a); if (!by.has(k)) by.set(k, []); by.get(k)!.push(a); }
   let keys = Array.from(by.keys());
   if (group === "owner") {
@@ -429,15 +429,11 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
     keys.sort((x, y) => (order.get(x) ?? 999) - (order.get(y) ?? 999) || (L.names.get(x) || x).localeCompare(L.names.get(y) || y));
   } else if (group === "status") {
     keys.sort((x, y) => (STATUSES as readonly string[]).indexOf(x) - (STATUSES as readonly string[]).indexOf(y));
-  } else if (group === "topic") {
-    const order = new Map<string, number>(L.topics.map((t, i) => [t.id, i]));
-    keys.sort((x, y) => (order.get(x) ?? 999) - (order.get(y) ?? 999));
   } else if (group === "due") {
     keys.sort((x, y) => (x === "none" ? 1 : 0) - (y === "none" ? 1 : 0) || x.localeCompare(y));
   }
   const label = (k: string) => group === "owner" ? (L.names.get(k) || k)
     : group === "status" ? STATUS_WORD[k as keyof typeof STATUS_WORD]
-    : group === "topic" ? (k === "none" ? "No topic" : (L.topics.find((t) => t.id === k)?.name || k))
     : group === "due" ? (k === "none" ? "No date" : dates === "weeks" ? weekWord(k, today) + " · " + weekOptions(k, 1)[0].days : readableDay(k, today))
     : null;
   return keys.map((k) => ({ key: k, label: label(k), rows: by.get(k)! }));
@@ -468,7 +464,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
        ONE BREAK PER DECISION: card-count is the tail, card-jumps is the
        floor — a break that did both would redden the other's assertions too
        and neither would be isolated (§276). */
-    '<div class="tile"><b>' + sum.dueWeek + "</b><span>Due" + (() => {
+    '<div class="tile"><b>' + sum.dueWeek + "</b><span>Due this week" + (() => {
       if (brk() !== "card-count") return "";
       const w = weekOf(today);
       const n = all.filter((a) => a.status === "not_started" && !!a.due && a.due >= w.from && a.due <= w.to).length;
@@ -564,7 +560,9 @@ export async function trackerDocument(p: PageArgs): Promise<string> {
     '<span class="col"><span class="lab">Dates as</span>' +
     FORMATS.map((f) => '<button type="button" role="menuitemradio" data-act="set-dates" data-value="' + f + '"' + (f === p.ask.dates ? ' class="on" aria-checked="true"' : ' aria-checked="false"') + ">" + esc(FORMAT_WORD[f]) + "</button>").join("") + "</span>" +
     "</span></span></nav>";
-  const title = '<h2 class="pt">' + esc(VIEW_WORD[view]) +
+  /* the way back to the client's platform, above the title (§356.14) */
+  const back = '<a class="back" href="' + esc(clientHref(p.slug, null, "")) + '"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' + esc(p.tenantName) + "</a>";
+  const title = back + '<h2 class="pt">' + esc(VIEW_WORD[view]) +
     (view === "week" ? " <small>" + esc(weekLabel(w, today)) + "</small>" : "") + "</h2>";
 
   if (!L) {

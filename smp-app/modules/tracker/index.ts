@@ -32,6 +32,7 @@ import { APP_JS } from "./script.ts";
 import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
+  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -146,15 +147,48 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     if (b.due === undefined) due = thursdayOf(todayIn());
     else if (b.due === null || b.due === "") due = null;
     else { due = calendarDay(b.due); if (!due) return refused(400, "That is not a date this list can read."); }
-    const row = await addAction(c, { title, ownerKey, by, due, description: String(b.description || "") });
+    /* A topic may arrive as one already on the list (its id) or as a name
+       typed on the add line, which is made — or found, whatever its case —
+       here, in the same transaction as the action (§492). */
+    let topicId: string | null = null;
+    if (b.topicId) {
+      const t = await oneTopic(c, String(b.topicId));
+      if (!t) return refused(400, "That topic is not on this client's list any more.");
+      topicId = t.id;
+    } else if (oneLine(b.topicName)) topicId = (await addTopic(c, String(b.topicName), by)).id;
+    const row = await addAction(c, { title, ownerKey, by, due, description: String(b.description || ""), topicId });
     return out(200, { ok: true, id: row.id });
+  }
+
+  /* TOPICS ARE THE OFFICE'S, NOT AN OWNER'S (§492, Islam's third answer):
+     anybody past the gate above may make one, rename it, close it or delete
+     it. The check's break hands the list to the Super user alone, which must
+     turn checks/tracker.mjs red (§94.5). */
+  if (kind.startsWith("topic-")) {
+    if (brk() === "topic-super-only" && who.seat !== "super") return refused(403, "Only the Super user can change topics.");
+    if (kind === "topic-new") {
+      if (!oneLine(b.name)) return refused(400, "A topic needs a name.");
+      const t = await addTopic(c, String(b.name), by);
+      return out(200, { ok: true, topicId: t.id });
+    }
+    const t = await oneTopic(c, String(b.topicId || ""));
+    if (!t) return refused(404, "That topic is not on this client's list any more.");
+    if (kind === "topic-rename") {
+      const r = await renameTopic(c, t.id, String(b.name || ""));
+      if (r === "empty") return refused(400, "A topic needs a name.");
+      if (r === "taken") return refused(400, "Another topic already has that name.");
+    } else if (kind === "topic-close") await setTopicClosed(c, t.id, true);
+    else if (kind === "topic-reopen") await setTopicClosed(c, t.id, false);
+    else if (kind === "topic-delete") await deleteTopic(c, t.id);
+    else return refused(400, "Not something this list does.");
+    return out(200, { ok: true, topicId: t.id });
   }
 
   const id = String(b.id || "");
   if (!id) return refused(400, "Which action?");
   const cur = await oneAction(c, id);
   if (!cur) return refused(404, "That action is not on this client's list any more.");
-  if (!["status", "due", "notes", "rename", "owner", "delete"].includes(kind)) return refused(400, "Not something this list does.");
+  if (!["status", "due", "notes", "rename", "owner", "topic", "delete"].includes(kind)) return refused(400, "Not something this list does.");
   if (!mayChange(cur, who)) return refused(403, ONLY);
 
   if (kind === "status") {
@@ -173,6 +207,17 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const ownerKey = String(b.ownerKey || "");
     if (!ownerKey || !(await isOfficeRow(c, ownerKey))) return refused(400, "An action is owned by somebody on the office's seats.");
     await setFields(c, id, { ownerKey });
+  } else if (kind === "topic") {
+    /* One topic or none (§492): an id already on the list, a name to make or
+       find, or nothing to take it off. A closed topic is not offered, but one
+       chosen on a stale tab is accepted — closing does not forbid it. */
+    let topicId: string | null = null;
+    if (b.topicId) {
+      const t = await oneTopic(c, String(b.topicId));
+      if (!t) return refused(400, "That topic is not on this client's list any more.");
+      topicId = t.id;
+    } else if (oneLine(b.topicName)) topicId = (await addTopic(c, String(b.topicName), by)).id;
+    await setFields(c, id, { topicId });
   } else if (kind === "delete") {
     await deleteAction(c, id);
   }

@@ -577,7 +577,7 @@ try {
     }).join(',')`);
     check("every card is held open at the taller size rather than hugging its own line",
       (await tileSlack()).split(",").length === 4 && (await tileSlack()).split(",").every((n) => Number(n) > 0), await tileSlack());
-    check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due this week",
+    check("...and the due card says the week and no count of its own", (await pg.locator(".strip .tile:nth-child(3) span").innerText()).toLowerCase() === "due",
       await pg.locator(".strip .tile:nth-child(3) span").innerText());
     check("the views row carries no Group by select any more, and a three-dots button", (await pg.locator(".gby").count()) === 0 && (await pg.locator("[data-act=settings]").count()) === 1);
     check("the menu is hidden until the dots are pressed", !(await pg.locator(".setmenu").isVisible()));
@@ -587,9 +587,7 @@ try {
       (await pg.locator(".setmenu .col").count()) === 2);
     await pg.locator("h2.pt").click();
     check("...and a press elsewhere closes it", !(await pg.locator(".setmenu").isVisible()));
-    const backHref = await pg.locator("a.back").getAttribute("href");
-    check("the way back sits above the title, naming the client, and goes to the client's platform", backHref === "/x" && (await pg.locator("a.back").innerText()).trim() === "Raya Trade" &&
-      (await pg.evaluate("document.querySelector('a.back').getBoundingClientRect().bottom <= document.querySelector('h2.pt').getBoundingClientRect().top")), backHref);
+    check("no back link: the top bar is the way back (§492)", (await pg.locator("a.back").count()) === 0);
     /* ENTER ADDS, AND THE LINE IS READ BACK OUT OF POSTGRES (§96) — due
        THIS WEEK'S THURSDAY by default (§356.14), the row reading the week in
        WORDS (§356.15) with nothing bold on it. */

@@ -8153,6 +8153,12 @@ html[data-stale] #panel { cursor:progress; }
 .topcapbody { padding:14px 20px 20px; }
 .topcapbody table { width:100%; }
 .topcapbody table td.num, .topcapbody table th.num { width:1%; white-space:nowrap; }
+/* §501: the 1% above also reaches a pillars capability's Key measures, whose
+   Target cell is `td.num` — so the box inside shrank to a sliver and a typed
+   target could not be read (Islam, El Abd). The column stays compact, signed
+   off that way ("units stay as is"): the box gets a width of its own, enough
+   for 1,250,000, and the rest of the row goes to the measure's name. */
+.topcapbody table:not([data-topcapprojects]) td.num input.fld { width:110px; min-width:110px; flex:0 0 110px; }
 tr.topcapprow { cursor:pointer; }
 tr.topcapprow.on > td { background:var(--surface-2); }
 tr.topcapopen > td { padding:0 !important; white-space:normal; }

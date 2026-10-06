@@ -3,6 +3,7 @@ import { doorPool } from "../../../../lib/auth.ts";
 import { resolveTenant, NO_SUCH_TENANT } from "../../../../lib/door.ts";
 import { requestUser, SLUG } from "../../../../lib/session.ts";
 import { readAnswer, writeAnswer, NoPerson, type Resolved } from "../../../../lib/state-api.ts";
+import { failRef } from "../../../../lib/fail-ref.ts";
 
 export const dynamic = "force-dynamic";
 type P = { params: Promise<{ slug: string }> };
@@ -28,8 +29,8 @@ async function resolved(req: Request, slug: string): Promise<{ ok: true; r: Reso
 }
 function failed(e: unknown): Response {
   if (e instanceof NoPerson) return json(404, { ok: false, error: e.message });
-  console.error("api/state:", e instanceof Error ? e.stack || e.message : e);
-  return json(500, { ok: false, error: "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening." });
+  const f = failRef("api/state", e);
+  return json(500, { ok: false, error: "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening.", reason: f.reason, ref: f.ref });
 }
 
 export async function GET(req: Request, { params }: P) {

@@ -62777,3 +62777,54 @@ direction-seats, top-plan, plan-edit-line) and `qa.py` green. Screen only;
 nothing stored moves, nothing migrated, no server rule. SHELL v6.08.
 
 **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main took §497–§499 (Internal Tracker) while this was built, so this section was renumbered §497 → §500 before the merge; the record files were combined, the built file and the served copies regenerated, SHELL v6.08 past main's v6.07.
+
+## §501 — a capability's Target box can be read, and a failed save says enough to trace
+
+Islam, on El Abd, Company › Strategy › Capabilities with the pen open: *"Target
+field is very small, no. are recorded but not visible / and on saving we got
+this message ths shouldn't happen by any means!!!"*, then *"you need to write
+an actual error here so we can get back to you to fix it properly"*, and of the
+first mockup *"the proposed is too big"*; the second was signed off (*"ok build
+both, units stay as is"*).
+
+**THE BOX.** §482's `.topcapbody table td.num { width:1% }` was written for the
+capability projects table's count columns and, as a bare selector, also reached
+a pillars capability's Key measures, whose Target cell is `td.num` — so the
+cell shrank to its content and the `width:100%` box inside it to a sliver. The
+1% stays (a compact column is what he chose), and the box gets a width of its
+own, **110px** — enough for 1,250,000 — scoped away from the projects table.
+The unit plan's Target (about 320px) is untouched at his word. Screen only.
+
+**THE ERROR.** The bar said "The server could not take your change just now"
+with `HTTP 500` on a hover, and `sync.js` never read the response body, so the
+server's own sentence and anything that could find the failure again were lost
+— a failure on a client's tenant could not be traced. Now:
+- the server's `failed()` (both state routes) gives every failure a reference
+  (`SMP-` + six characters), writes it to the runtime log beside the full
+  stack, and returns it with a **reason made of names only** — the database's
+  error code put into words, the table, the column, the constraint
+  (`lib/fail-ref.ts`). Never the database's own message, which can carry the
+  values being written (§43). `state-io.ts`'s statement runner marks the table
+  it was writing, because a type error names a type and not a table (§316.2);
+- the browser reads that body (and a 400's own sentence), puts the whole
+  account — time, page, status, reference, reason, the server's sentence — on
+  the hover of "Not saved.", into the console as an error **once per distinct
+  failure** (not once per five-second retry), and onto the clipboard from a
+  new link at the end of the bar, **Copy error for the Strategy Office**;
+- the sentence on the page stays the user's, with no status in it (§258.3).
+
+The link is wired once on the document, because the bar is rewritten on every
+retry (§24); the copy falls back to `execCommand` where the clipboard API is
+not offered (§93.6).
+
+**Verified.** `checks/save-said.py` §2b (8 new assertions, over HTTP with a
+stub) — red 2 with the reason read and the link removed, from the sources;
+`lib/fail-ref.ts` asked directly with an error carrying a value in its message
+— the value does not reach the reason. Screenshot of the built capability
+matches the signed-off mockup (cell 169px, box 110px). `single-company`,
+`refusal-keeps-work`, `table-fit`, `top-plan`, `capability-pillar-edit`,
+`pillar-breakdown`, `built-in-step` green, `tsc` clean cold. SHELL v6.09.
+Nothing stored moves, nothing migrated, no save rule moves — no sign-out owed.
+
+**Not done**: the El Abd save failure itself is not yet found — this is what
+will name it the next time it happens.

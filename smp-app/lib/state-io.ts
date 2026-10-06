@@ -24,6 +24,7 @@
    NOT addressable is a row without a key (§191: two rows sharing `undefined`
    are not one row), and that is refused before any write. */
 import type { PoolClient } from "pg";
+import { tableOf } from "./fail-ref.ts";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const G = require("./graph-io.cjs");
@@ -149,6 +150,8 @@ export async function writeChanges(c: PoolClient, stored: any, incoming: any): P
   const run = async (sql: string, params: unknown[]) => {
     try { return (await c.query(sql, params)).rowCount || 0; }
     catch (e: any) {
+      /* the table for the browser's reference line (§501) — a name, never a value */
+      if (!e.table) e.smpTable = tableOf(sql);
       e.message = e.message + " — while running: " + sql.slice(0, 160) +
         " with " + JSON.stringify(params).slice(0, 300);
       throw e;

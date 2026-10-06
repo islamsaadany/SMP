@@ -63063,11 +63063,44 @@ var SYNC = (function () {
       : "The server could not take your change just now.";
     /* The trailing space is load-bearing: the two spans are inline and ran
        together as "just now.Keep" without it — §171's own bar had "500.Your". */
+    /* §501: THE DETAILS TRAVEL WITH THE BAR. Islam: *"you need to write an
+       actual error here so we can get back to you."* One block of text — the
+       time, what failed, the server's reason and its log reference — goes on
+       the hover, into the console as an error, and onto the clipboard from the
+       link at the end, so the person can paste it to the office and the
+       office can find the failure in the server's log by its reference. The
+       reason is names only (lib/fail-ref.ts); the database's own words never
+       reach the page (§43). */
+    FAILTEXT = "SMP save failed \u00b7 " + new Date().toISOString() +
+      " \u00b7 " + location.pathname + "\n" + (detail || "");
+    /* once per distinct failure, not once per five-second retry */
+    if ((detail || "") !== FAILSHOWN) { FAILSHOWN = detail || ""; console.error(FAILTEXT); }
     notSaved("<span><strong title=\"" + esc(detail || "") + "\">Not saved.</strong> " + first + " </span>" +
       "<span>Keep this tab open \u2014 it tries again by itself every few seconds, and " +
       "this bar clears the moment your change goes through. If it stays for more " +
-      "than a minute, tell the Strategy Office.</span>");
+      "than a minute, tell the Strategy Office. </span>" +
+      "<button type=\"button\" class=\"refused-undo\" data-copyerr>Copy error for the Strategy Office</button>");
   }
+  var FAILTEXT = "", FAILSHOWN = "";
+  /* One listener, on the document, armed once: the bar's HTML is rewritten on
+     every retry, so a handler on the button would be lost each time (§24). */
+  document.addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-copyerr]");
+    if (!b) return;
+    var text = FAILTEXT;
+    var done = function () { b.textContent = "Copied \u2014 paste it to the Strategy Office"; };
+    var fallback = function () {
+      /* navigator.clipboard needs a secure context; this is the path that
+         runs from file:// and on older browsers (§93.6). */
+      var ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) { b.textContent = "Copy failed \u2014 hover \u201cNot saved.\u201d to read it"; }
+      document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  });
 
   /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
      Islam, on a strategy custodian: *"they lost all data they inputed."*
@@ -63345,6 +63378,7 @@ var SYNC = (function () {
         refusedWhy = null; refusedRows = null; refusedUndoable = false;
         refusedJudged = null;
         showRefusal(null);
+        FAILSHOWN = "";
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
@@ -63365,8 +63399,16 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        showFailed("server", "The server answered HTTP " + r.status + ".");
-        console.warn("SMP: save failed (HTTP " + r.status + ")");
+        /* the server's own sentence, reason and reference, when it sent any
+           (§501) — a body that will not parse still leaves the status */
+        var head = "HTTP " + r.status;
+        return r.json().then(function (j) { return j || {}; }, function () { return {}; }).then(function (j) {
+          var lines = [head + (j.ref ? " \u00b7 reference " + j.ref : "")];
+          if (j.reason) lines.push("Reason: " + j.reason);
+          if (j.table) lines.push("Table: " + j.table);
+          if (j.error) lines.push("Server said: " + j.error);
+          showFailed("server", lines.join("\n"));
+        });
       }
     }).catch(function (e) {
       saving = false;
@@ -63375,7 +63417,6 @@ var SYNC = (function () {
          errand, so a different sentence. */
       showFailed("network", "The platform could not reach the server (" +
                  (e && e.message ? e.message : "no answer") + ").");
-      console.warn("SMP: save failed (" + (e && e.message) + ")");
     });
   }
 

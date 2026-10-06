@@ -393,7 +393,7 @@ def main():
         # opens now. REWRITTEN, never loosened (§218) — it still asserts the
         # office is offered Setup, by the page's own name.
         ck("the office's pages open Setup, on Reporting cycle",
-           "Reporting cycle" in pg.inner_text(".wpages")
+           "Planning & reporting cycle" in pg.inner_text(".wpages")
            and "Overview" not in pg.inner_text(".wpages"), pg.inner_text(".wpages"))
         # A door into Setup: the no-custodian row goes to the People register.
         pg.locator(".wacts .wact", has_text="no custodian").locator("button").click()
@@ -634,7 +634,7 @@ def main():
         ck("...with no Client setup block", d["setup"] == 0, d)
         ck("...and no Your modules list", d["mods"] == 0, d)
         ck("...and its first page is the Reporting cycle (§359)",
-           bool(d["pages"]) and d["pages"][0].startswith("Setup — Reporting cycle"), d["pages"])
+           bool(d["pages"]) and d["pages"][0].startswith("Setup — Planning & reporting cycle"), d["pages"])
         ctx.close()
 
         browser.close()

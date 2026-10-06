@@ -62612,6 +62612,85 @@ in a pillar approach is typical to a direction"*.
 
 **Merged to `main` 2026-10-05 on Islam's word** (*"merge to main"*), with main's §487.1 brought in first; the built file rebuilt from the merged sources (byte-identical), the served copies regenerated, `sw.js` SHELL `v6.01-capability-as-direction` against main's `v6.00`. Screen only — no `api/`, `lib/` or `db/` file of this round changed, so no forced sign-out is owed.
 
+## §492 — How we compete, in the plan (spec 064 stage 1a, 2026-10-05)
+
+Islam signed off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`) and said *"start the build"*. Stage 1a is the plan half: the section, its switch, its table and its slide. The Copilot's scoring and value-proposition chat are stage 1b.
+
+**A Structure component, off until ticked.** `SMPRules.COMPETE` is a component like the SWOT, but `compOn` treats it as `FN_DESC` is treated: an unsaid level reads it OFF, so no existing client moves. `compOffered` allows the top level and business units only (`COMPETE_LEVELS`) — a function or capability is answered false before anything stored is read. The switch is a section on the Structure step's top and units cards (`data-stcompete`), through the same `compToggle` every other section uses; off says *"Not shown on this layer. Nothing entered is lost."* (§44: off hides, never forgets).
+
+**The record rides the subject's `extra`, no migration** (§8 of the spec asked for this to be said when built): `UNITS[k].compete` (units.extra) or `GROUP.compete` (org.extra), shaped `{discipline, values:[{title, how:[…], measure:[…]}]}`. `competeWritable` mints it, `competeTidy` deletes an emptied record (§50.6). Discipline keys and names live once in `SMPRules.DISCIPLINES` (btc · bts · bp), so the Copilot stage reads the same list.
+
+**Same pen as the SWOT.** The section sits after `swot` with `ac:"u_anal"` (the top: `g_found`), and `SEC_PENS.compete` names the analysis page, so one Edit opens both and nobody's rights move. **The server classifies it with the SWOT**: on a unit `collectUnit` adds `unitAnalysis` ("how the unit competes"); on the group it joins `gExtra` and the top view. Both compare with `sameCanon` because jsonb reorders keys (§145, §249.3). `test-authorize.js` §492: the office writes, a unit owner is refused, a reorder of keys is no change, and the group's is not swept to setup or unknown — 941/0.
+
+**The table is the slide's shape**: discipline across the top on the tenant's `--panel`, then Value / How / Measure rows on the accent, one column per value; How and Measure are bullets, typed one per line, with a leading `-`, `•` or `*` stripped. **One deck slide**, anchored `compete`, after the SWOT, drawn only when the section is on and holds something (§253: an empty table is not a slide).
+
+**Proved**: `checks/how-we-compete.py` all good — the rule at both ends, the Structure switch pressed, the section's place, every pen control pressed and the stored graph read back, the slide, and off hiding and keeping. Falsified from the sources (§276): the section's `when` forced true → 2 red; the slide call removed → 2 red. `checks/structure.py` held a count of sections per card that this moves (§214.3) — rewritten, never loosened (§218): the three-section count excludes How we compete, and a new assertion says it is on the top and units cards and no other. Neighbours green (structure-sections, plan-switch, slide-move, deck-blank-slides, client-setup, top-plan, fn-sw-default, function-sw, hide-slide, deck-strip); 140/0 differ, 69/0 platform rules.
+
+**Recorded, not done**: the top level's section has been proved as a rule and on the server but not walked visually; the plan download (.pptx of the plan) does not carry the table; the workbook has no sheet for it — an upload leaves it untouched.
+
+## §493 — How we compete, in the Copilot (spec 064 stage 1b, 2026-10-05)
+
+Islam: *"proceed with all until you need someting from me"*, on the signed-off spec 064 and its mockup. Stage 1b is the Copilot half of §492: a How we compete chat that scores the three value disciplines, recommends one, suggests the values, builds the table and saves it.
+
+**Two sections join the Copilot at once** — How we compete and Capabilities (for when capabilities are their own layer) — because a section is a CHECK on two tables, so a new one is a widened constraint and never only a word in the code (§172). Migration 024, idempotent, and `schema.sql` carries the same list. `SECTIONS` is seven, in the plan's order.
+
+**The arithmetic is one function, `resultOf`, and the page never adds a score** (§94.8): 0, 1 or 2 per factor per discipline, each side out of 20 shown as a per-cent; a gap over 25 points between the top two is Clear, 10 or more Leaning, otherwise Unclear; a tie breaks Best Total Cost, then Best Total Solution, then Best Product. The market decides the recommendation; the internal side is the check, and the two are said to agree or not.
+
+**The server keeps the chat honest** (§42), the SWOT chat's own shape: every write is judged against the STORED chat, `sanitizeCompete` refuses a phase that runs ahead of the work and ignores a `saved` sent by the page, values are refused before a discipline is chosen, a refine before there is a table, and Save before the STORED chat holds a table. The model is asked with no transaction open (§289); an incomplete set of scores is refused rather than half-stored. **Saving is a deliverable**, "How we compete — <place>", and a second chat for the same place adds a version to it rather than a second deliverable; the page then writes the table into the plan's How we compete record through `competeWritable`, after the press and never in a fetch's tail (§35). If the layer has the section switched off the save says so rather than pretending it is shown.
+
+**The screen**: the score table opens on three market factors with *+ N more*; every score is a pill that cycles 0→1→2 and is marked as changed by hand; the internal factors are behind one press; the recommendation offers *Yes, …*, the other two, and *Let me change scores*; five value cards are ticked into the table; every table cell is editable; a refine box asks for a change and the Copilot's alternatives are offered as buttons; *Save to How we compete* ends it.
+
+**Proved**: `checks/copilot.mjs` 236/0 with the pure rules and a server section against a stand-in model (red under `compete-tie-last` 2, `compete-trust-saved` 9, `compete-finish-any` 5); `checks/shell.mjs` §3k 14/0, pressed in a browser and read back from the database and from the plan, red 1 from the source with the plan write removed. The full shell run's two My work reds are §475's recorded Cairo-midnight fixture artefact, in a section this does not touch.
+
+**Recorded, not done**: Directions and Capabilities (stage 2) and Execution with the Planning & reporting cycle page (stage 3).
+
+## §494 — Directions and Capabilities, in the Copilot (spec 064 stage 2)
+
+Islam: *"proceed with all until you need someting from me"*, on the signed-off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`). Stage 2 is the Directions chat: start from the plan's own directions or fresh, score the candidates, tick the ones to keep, choose the capabilities, and save them into the plan.
+
+**The rules are one file, `lib/copilot-directions.ts`, and the page never adds a score** (§94.8): `scoreOf` is urgency × importance × ease, each 1–4, out of 64; `tickBest` ticks the top four; a plan row keeps its `planId` and its mark "plan" so saving updates the direction it came from rather than minting a second one.
+
+**The server keeps the chat honest** (§42), §493's shape: the state lives in `copilot_chats.extra.directions`, every write is judged against the STORED chat, `saved` belongs to the product and is ignored when the page sends it, and Finish is refused until the stored chat holds a ticked direction. The model is asked with no transaction open (§289).
+
+**Where capabilities are chosen follows the structure**: where `SMPRules.capAtTop(GROUP)` is true they are a step inside the Directions chat; otherwise they are the separate Capabilities section §493 opened. One question, asked in one place (`dvCapsHere`).
+
+**The save writes the plan in the browser, after the press** (`dvWritePlan`, §35): a direction is updated by its `planId` or created with `addPillar`; a capability is created with `addCapability` carrying `capKind` and `serves` (the pillar ids it supports). The authoriser learned both fields — `CAP_KNOWN` and a capPlan classification "what a capability is" — so a change to them is the plan's and not an unknown (§42's fall-through would otherwise make it the Super user's alone).
+
+**Proved**: `checks/copilot.mjs` 269/0, red under `dir-score-sum` 3, `dir-trust-saved` 6, `dir-finish-any` 10 (two probes made to degrade rather than die, §215); `scripts/test-authorize.js` 946/0, red 3/3 two ways; `checks/shell.mjs` §3l pressed in a browser — plan or fresh, scored, ticked, capabilities, and the save read back from the plan — red 2 with the plan-row lookup broken. The full shell run's two My work reds are §475's recorded fixture artefact. `tsc` clean; the shipped file is `build.py`'s output; `sw.js` SHELL `v6.04-directions-copilot`.
+
+**Recorded, not done**: owners are not written by the save (a direction's owner stays the plan's to set); stage 3 — the Execution chat and Setup › Planning & reporting cycle.
+
+
+## §495 — Execution in the Copilot, and Setup › Planning & reporting cycle (spec 064 stage 3)
+
+Islam signed off panels F and G of `design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html` and spec 064 §6–§7, then *"proceed with the rest"*.
+
+**The Execution chat** (`lib/copilot-execution.ts` the rules, `modules/copilot/execution.ts` the acts `newExecution` · `execPeriod` · `execDraft` · `execSave` · `execFinish`). It asks the plan period ONCE — full year, this quarter to year end, or picked months — capped at one calendar year (twelve months at most, never across a year end, because the planning period §308 is one year). Then one item per Direction and Capability, drafted by the model and editable by hand; the to-do column lists the period and each item, nothing else (§1 of the spec). **A quarter outside the period is cut on the server** — on the model's answer, on every hand edit, and again when the period changes (`withPeriod`), so the chat can never hold a tactic the period does not cover. Every write is judged against the stored chat (`sanitizeExec`: the page can change measures, tactics and the cursor, never which items there are, §42).
+
+**Save to plan** makes the deliverable *Execution — <place>* (versioned like every other) and the browser writes the plan: the period becomes `GROUP.planFrom` / `planTo` (§308's own fields, so proration follows it), a Direction gains its measures and its tactics with q1–q4 set from the chat, and a Capability's measures become key objectives (`mintRowId`, from the maximum) and its tactics become projects dated from the first to the last quarter. A row of the same name is updated, never duplicated. No server rule moves: every one of those writes is a change the authoriser already classifies (946/0).
+
+**Setup › Planning & reporting cycle**, replacing Reporting cycle. The plan period is the first block with its OWN Edit (`PLANEDIT`), taken out of the cycle's pen, because it outlives every cycle inside it; a month timeline shows the period, and a cycle that ends after it is drawn in the alarm ink with a *runs past the plan period* badge (`cyclePastPlan`). Tactics whose quarters fall outside a shortened period are **counted and named, never deleted** (`tacticsOutsidePlan`). Nothing else on the cycle pen moves; the rename reaches the rail, the knowledge base and the welcome screen.
+
+**Proved**: `checks/copilot.mjs` 292/0, red under `exec-any-quarter` 3 and `exec-finish-any` 4; `checks/shell.mjs` §3m drives the real chat in a browser and reads the plan back (12/0) — red 1 with the browser's quarter write made to ignore the period, printing `1111 want 0001`; `checks/plan-cycle-page.py` new, red 2 (panel after the cycle head; past-the-period flag stubbed off). Four neighbours REWRITTEN, never loosened (§218): `planning-period` (the period's controls moved to their own pen), `years` (the revision's year chips with them), `contingency` (the cycle pen is `[data-editcycle]` now, the first Edit on the page being the plan's), and the Setup rail's page name in `attention-rows` and `welcome`. Also: a todo status read *1 measures* — plural fixed.
+
+**Recorded, not done**: the chat asks again once the period has ended (§6.1) only by offering the choice anew on a new chat; nothing yet reminds anybody.
+
+**§492–§495 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §487.1 and §491 brought in first: the three record files combined (no line of either side lost; main's *Last Updated* demoted to *Earlier*), the built file and `smp-app/public/` rebuilt from the merged sources rather than merged, `sw.js` rebuilt from main's copy at `v6.06-execution-copilot` (one `const SHELL`, `node --check` clean), and the duplicate-declaration scan reading only §281.1's six. Re-run on the merged tree: authoriser 946/0, differ 140/0, copilot 292/0, shell 324/0, modules 233/0, state 92/0, door 146/0, `tsc` clean, `qa.py` ERRORS none, and single-company, plan-cycle-page, how-we-compete, structure, planning-period, years, contingency, capability-pillar-edit and plan-level all green. No forced sign-out is owed: no save rule moved for an old tab (the new authoriser keys are ones an old tab never writes).
+
+## §496 — Advisory, in the Copilot (spec 064)
+
+Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_advisory.html`): *"ok for both"* — the question count sits in the right column, and *Proceed with what you have* is offered from the first question.
+
+**A question, a few questions, then one brief.** The person writes what they want advice on; the Copilot asks ONE short question at a time, up to five a round and two rounds; then it writes a Decision Brief — situation, what we know (every fact tagged Platform, You, File or Assumed), two to four options with **exactly one recommended**, why, and next steps. *I don't know — assume for me* answers a question with a stated assumption; *Proceed with what you have* stops the questions at any point. When the platform's figures and a file disagree on a number, the Copilot does not choose: it asks which to use (the platform's, the file's, or the person's own).
+
+**The count is the server's** (`lib/copilot-advisory.ts`): the pips, the round and the rule that an eleventh question is refused all come from one function, so the screen cannot disagree with the rule (§53.5). A question still waiting on an answer is never asked again. A brief with no recommended option is not a brief and is refused in words; several recommended keep the first. The page never sends the state, only what the person did (§42).
+
+**Saved as an Advisory deliverable that stays in the Copilot** (`copilot-only`): advice is not a plan, so nothing is written into the plan. Versioned by the brief's title. A saved chat takes no further questions; the next question is a new chat. No migration — the section and the deliverable kind already existed.
+
+**Found while building**: a clash is itself the question, and the model may not word one — the platform words it (*"Which Store count should I use?"*) rather than refusing a good answer.
+
+**Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**
+
 ## §497 — Internal Tracker: topics, and the refined ledger page (spec 054, 2026-10-06)
 
 Islam: *"sometimes we have a general topic that is already continuing with us on

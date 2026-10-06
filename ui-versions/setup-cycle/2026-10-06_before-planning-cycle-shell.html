@@ -828,7 +828,7 @@
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -5063,15 +5063,6 @@
        button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
        `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
        handlers are DELETED rather than left unreachable (§24). */
-    /* §495: THE PLAN PERIOD'S OWN PEN, the cycle pen's shape (§273.4): the
-       pickers write as they are picked, so this only opens and closes. */
-    var ep = document.querySelector("[data-editplan]");
-    if (ep) ep.addEventListener("click", function(){
-      var a = document.activeElement;
-      if (PLANEDIT && a && a.blur) a.blur();
-      PLANEDIT = PLANEDIT ? null : true;
-      paint();
-    });
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
       if (REVIEW.state !== "open") return reopenDialog();
@@ -8970,13 +8961,7 @@
           var pu = unitLikeWritable(a[1]);
           addPillar(pu);
           /* §488: on the company's Capabilities pane, open what was just made. */
-          /* §491: a capability's one plan row takes the capability's name, so
-             reporting and the deck name it as the capability. */
-          if (pu && pu.capKey && pu.items.length) {
-            var nw = pu.items[pu.items.length - 1], cc = capById(pu.capKey);
-            if (cc && !nw.name) nw.name = cc.name;
-            TOPCAPPROJ[pu.capKey] = nw.id;
-          }
+          if (pu && pu.capKey && pu.items.length) TOPCAPPROJ[pu.capKey] = pu.items[pu.items.length - 1].id;
         }
         /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */

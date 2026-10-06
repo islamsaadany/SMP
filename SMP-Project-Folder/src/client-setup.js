@@ -1741,6 +1741,19 @@ var CLIENTSETUP = (function () {
       });
     }
     secs.appendChild(s2);
+
+    /* Spec 064 §3.1 — How we compete, between the SWOT and the plan, on the
+       layers that face a market (SMPRules.compOffered). Its on/off IS the
+       `compete` component: off until ticked, and off hides and keeps. */
+    if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
+      var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
+      var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
+      hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
+      sc.appendChild(hc);
+      if (!cOn) sc.appendChild(el("p", "sthid", "Not shown on this layer. Nothing entered is lost."));
+      secs.appendChild(sc);
+    }
     /* §465: the top card stops here — its plan is the Directions card. */
     if (noPlan) { box.appendChild(secs); structTail(box, L, k); return; }
 

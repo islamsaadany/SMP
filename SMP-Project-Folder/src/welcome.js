@@ -580,7 +580,7 @@ var WELCOME = (function(){
     if (office) {
       /* Reporting cycle since §359: the Overview this once opened is gone,
          and its rows are the list ABOVE this one. */
-      pageLink("Setup — Reporting cycle", "", function(){ goSetup("cycle"); });
+      pageLink("Setup — Planning & reporting cycle", "", function(){ goSetup("cycle"); });
       pageLink("The group — Performance", "", function(){ goGroup(); });
     } else {
       var home = targets[0] || null;

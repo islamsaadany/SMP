@@ -3326,6 +3326,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
+  compete: { unit: "analysis",                        ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -3335,7 +3336,7 @@ var SEC_PENS = {
 /* §488: the company's Capabilities section takes the plan's own pen, so one
    Edit opens the chosen capability for editing in place — the same fields its
    own Plan page draws (Islam: "there is no edit here in the capability"). */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], compete: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
@@ -5578,6 +5579,60 @@ function renderFnSW(t){
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
   return swotBoxes({ ukey:"fn:" + fk, swot:sw }, SMPRules.swotQuads(GROUP, "fn:" + fk), "capfoundation", "k_found");
+}
+/* ── HOW WE COMPETE (spec 064 §3.1, §3.4) ─────────────────────────────
+   A section after the SWOT, drawn while the layer's Structure has it on.
+   The table is Islam's own slide: the discipline across the top, then a
+   Value / How / Measure row, one column per value. It shares the SWOT's
+   page and grant (`analysis`, `u_anal`), so one Edit opens both and nobody's
+   rights move. In edit mode every cell is a box: a How or a Measure is one
+   line per bullet. */
+function renderUnitCompete(u){
+  var t = u.ukey, page = "analysis", ac = "u_anal";
+  var c = competeOf(t), ed = authoring(page, ac);
+  var vals = c.values;
+  var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };
+  var setLines = function(i, key){
+    return function(v){
+      var w = competeWritable(t); if (!w || !w.values[i]) return;
+      w.values[i][key] = String(v || "").split(/\n/).map(function(x){ return x.replace(/^\s*[-\u2022*]\s*/, "").trim(); }).filter(Boolean);
+    };
+  };
+  var disc = ed
+    ? selectOr(page, c.discipline || "", [{ v:"", label:"Not chosen" }].concat(SMPRules.DISCIPLINES.map(function(d){ return { v:d[0], label:d[1] }; })), "cmpdisc", function(v){
+        var w = competeWritable(t); if (!w) return;
+        if (v) w.discipline = v; else delete w.discipline;
+        competeTidy(t);
+      })
+    : (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : '<span class="cmpnone">Not chosen</span>');
+  if (!ed && !c.discipline && !vals.length)
+    return '<div class="cmp" data-compete="' + esc(t) + '"><p class="cmpnone">Nothing written yet.</p></div>';
+  var head = '<tr><th class="cmprow">Discipline</th><th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' + disc + '</th></tr>';
+  var row = function(label, cell){
+    return '<tr><th class="cmprow">' + label + '</th>' +
+      (vals.length ? vals.map(cell).join("") : '<td class="cmpnone">' + (ed ? "Add a value to start." : "&mdash;") + '</td>') + '</tr>';
+  };
+  var bullets = function(a){
+    var l = lines(a);
+    return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;';
+  };
+  var body =
+    row("Value", function(v, i){
+      return '<td class="cmpval">' + (ed
+        ? inputOr(page, v.title || "", "", function(x){ var w = competeWritable(t); if (w && w.values[i]) w.values[i].title = String(x || "").trim(); }) +
+          '<button class="xbtn" data-cmprm="' + esc(t) + '|' + i + '" title="Remove this value" aria-label="Remove this value">&times;</button>'
+        : esc(v.title || "")) + '</td>';
+    }) +
+    row("How", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.how).join("\n"), "cmpbox", setLines(i, "how")) : bullets(v.how)) + '</td>';
+    }) +
+    row("Measure", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.measure).join("\n"), "cmpbox", setLines(i, "measure")) : bullets(v.measure)) + '</td>';
+    });
+  return '<div class="cmp" data-compete="' + esc(t) + '"><div class="tblscroll"><table class="cmptab"><thead>' + head +
+    '</thead><tbody>' + body + '</tbody></table></div>' +
+    (ed ? '<div class="addrow"><button class="editbtn" data-cmpadd="' + esc(t) + '">+ Add a value</button></div>' : '') +
+    '</div>';
 }
 function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file

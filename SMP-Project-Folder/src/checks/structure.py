@@ -226,9 +226,14 @@ with sync_playwright() as p:
     ck("…while the top level's SWOT and plan switches stay live",
        safe(pg, "()=>['top|swot','top|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); return w&&!w.classList.contains('dummy')&&[...w.querySelectorAll('button')].every(x=>!x.disabled)})") is True)
     # §465: the top card keeps two sections; its plan is the Directions card.
+    # §492: How we compete is its own section on the top and units cards only, so
+    # it is asserted where it lives and left out of the three-section count (§218).
     ck("each layer draws three sections, the top two (its plan is the Directions card, §465)",
-       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')") == "2,3,3,3,3",
-       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec').length).join(',')"))
+       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')") == "2,3,3,3,3",
+       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')"))
+    ck("…and How we compete is a section on the top and units cards and no other",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).sort().join(',')") == "bu,top",
+       safe(pg, "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).join(',')"))
     # §428: the fifth card is the capabilities', and its plan names two ways, never three.
     ck("the capabilities card names pillars and projects only",
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects",
@@ -266,7 +271,7 @@ with sync_playwright() as p:
     ck("…names the directions on the card and the measures and tactics inside the way",
        safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"dir\"]'); return !!c && ['one','many'].every(f=>c.querySelector('[data-stlw=\"top|pillar|'+f+'\"]')) && ['measure','tactic'].every(p=>c.querySelector('[data-stway=\"top|pillars\"] [data-stlw=\"top|'+p+'|one\"]')) && !c.querySelector('[data-stway=\"top|pillars\"] [data-stlw=\"top|pillar|one\"]')}") is True)
     ck("…and the top card has no plan section of its own",
-       safe(pg, "()=>{var t=document.querySelectorAll('.stcard')[0]; return !t.querySelector('[data-stway]') && t.querySelectorAll('.stsecs > .stsec').length===2}") is True)
+       safe(pg, "()=>{var t=document.querySelectorAll('.stcard')[0]; return !t.querySelector('[data-stway]') && t.querySelectorAll('.stsecs > .stsec:not([data-stcompete])').length===2}") is True)
     ck("…pressing it Off", press(pg, '[data-stsec="top|plan"] button:nth-child(2)'))
     ck("…hides it and keeps the pillars carried", safe(pg, "()=>!SMPRules.planOn(GROUP,'group') && GROUP.structure.top.on.indexOf('pillar')>=0") is True)
     safe(pg, "()=>{GROUP.structure=JSON.parse(%s)}" % json.dumps(snap))

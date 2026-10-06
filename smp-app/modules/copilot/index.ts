@@ -41,6 +41,10 @@ import { shellHeaders } from "../../lib/shell.ts";
 import { listDocument, instructionsDocument, templatesDocument, refusedCopilot, barOf, type Names, type Flash, type ListAsk } from "./page.ts";
 import { doorPool, getSession, readCookie } from "../../lib/auth.ts";
 import { SWOT_ACTS, SWOT_ASKS, swotAct, swotAsk, swotView, swotProgress, sourcesGet, sourceFile } from "./swot.ts";
+import { COMPETE_ACTS, COMPETE_ASKS, competeAct, competeAsk, competeView, competeProgress } from "./compete.ts";
+import { DIRS_ACTS, DIRS_ASKS, dirsAct, dirsAsk, dirsView, dirsProgress } from "./directions.ts";
+import { EXEC_ACTS, EXEC_ASKS, execAct, execAsk, execView, execProgress } from "./execution.ts";
+import { ADVISORY_ACTS, ADVISORY_ASKS, advisoryAct, advisoryAsk, advisoryView, advisoryProgress } from "./advisory.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
 const json = (status: number, body: unknown) =>
@@ -104,7 +108,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
           return { ok: true, chats, archived: await chatsOn(c, place, section, true),
             mayDelete: who.seat === "super" && grant === "edit", mayEdit: grant === "edit", deliverables: await deliverablesOn(c, place, section),
             /* The rail's "N of M done" under a SWOT chat (§490). */
-            swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id)) : {} }; }));
+            swotProgress: section === "analysis" ? await swotProgress(c, chats.map((x: any) => x.id))
+              : section === "compete" ? await competeProgress(c, chats.map((x: any) => x.id))
+              : section === "directions" || section === "capabilities" ? await dirsProgress(c, chats.map((x: any) => x.id))
+              : section === "execution" ? await execProgress(c, chats.map((x: any) => x.id))
+              : section === "advisory" ? await advisoryProgress(c, chats.map((x: any) => x.id)) : {} }; }));
     }
     if (first === "chat") {
       const id = q("id");
@@ -119,7 +127,11 @@ export async function serve(a: ServeArgs): Promise<Response> {
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
           ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}),
-          ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}) };
+          ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
+          ...(chat.section === "compete" ? await competeView(c, chat) : {}),
+          ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
+          ...(chat.section === "execution" ? await execView(c, chat) : {}),
+          ...(chat.section === "advisory" ? await advisoryView(c, chat) : {}) };
       });
       return got ? json(200, got) : no(404, "That chat is not here any more.");
     }
@@ -170,6 +182,38 @@ export async function serve(a: ServeArgs): Promise<Response> {
     }
     if (SWOT_ASKS.includes(String(body.act))) {
       const r = await swotAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (COMPETE_ASKS.includes(String(body.act))) {
+      const r = await competeAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (COMPETE_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => competeAct(c, body, who));
+      return json(r.status, r.body);
+    }
+    if (EXEC_ASKS.includes(String(body.act))) {
+      const r = await execAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (EXEC_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => execAct(c, body, who));
+      return json(r.status, r.body);
+    }
+    if (DIRS_ASKS.includes(String(body.act))) {
+      const r = await dirsAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (DIRS_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => dirsAct(c, body, who));
+      return json(r.status, r.body);
+    }
+    if (ADVISORY_ASKS.includes(String(body.act))) {
+      const r = await advisoryAsk(a.tenantId, body, who);
+      return json(r.status, r.body);
+    }
+    if (ADVISORY_ACTS.includes(String(body.act))) {
+      const r = await withTenant(a.tenantId, (c) => advisoryAct(c, body, who));
       return json(r.status, r.body);
     }
     if (SWOT_ACTS.includes(String(body.act))) {

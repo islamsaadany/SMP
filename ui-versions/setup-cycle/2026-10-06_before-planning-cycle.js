@@ -6971,50 +6971,6 @@ function cyclePick(label, value, setter, opts){
    this one is picked for §177's reason as well: with no box there is nothing
    to mistype, and a period the arithmetic cannot read would silently go back
    to being a calendar year. */
-/* ── §495: THE PLAN PERIOD COMES FIRST ──────────────────────────────
-   Spec 064 §7, from the signed-off mockup (G): the page is Planning &
-   reporting cycle, the plan period is its first block with an Edit of its
-   own, and the reporting cycle sits under it. The facts are VALUES — the
-   pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
-   open, so one control writes the period (§53.5). The timeline is the plan's
-   calendar year(s), the plan shaded and the open cycle outlined. */
-function planPeriodPanel(can){
-  var set = planSet(), a = planFrom(), b = planTo();
-  var qw = function(m0, m1){ var q0 = Math.floor((m0 % 12) / 3) + 1, q1 = Math.floor((m1 % 12) / 3) + 1;
-    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "\u2013Q" + q1) : ""; };
-  var facts = set
-    ? '<div><small>From</small><b>' + esc(SMPRules.monthLabel(a)) + '</b></div>' +
-      '<div><small>To</small><b>' + esc(SMPRules.monthLabel(b)) + '</b></div>' +
-      '<div><small>Length</small><b>' + planLength() + ' months' + (qw(a, b) ? ' \u00b7 ' + qw(a, b) : '') + '</b></div>'
-    : '<div><small>Plan period</small><b>Not set</b><span class="why" style="margin:0">the calendar year is used</span></div>';
-  var tl = "";
-  if (set) {
-    var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
-    var lo = Math.min(a, cf != null ? cf : a), hi = Math.max(b, ct != null ? ct : b);
-    var y0 = Math.floor(lo / 12), y1 = Math.floor(hi / 12);
-    if (y1 - y0 > 2) y1 = y0 + 2;
-    var cells = "";
-    for (var m = y0 * 12; m < (y1 + 1) * 12; m++) {
-      var inP = m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct;
-      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && !inP ? ' past' : '') +
-        '" title="' + esc(SMPRules.monthLabel(m)) + '">' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
-    }
-    var yrs = ""; for (var yy = y0; yy <= y1; yy++) yrs += '<span>' + yy + '</span>';
-    tl = '<div class="pptl" data-plan-timeline><div class="pptl-y">' + yrs + '</div><div class="pptl-ms">' + cells + '</div>' +
-      '<div class="pptl-key"><span class="k inp"></span>Plan period' + (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') + '</div></div>';
-  }
-  var nOut = tacticsOutsidePlan();
-  return '<div class="planblk" data-plan-block>' +
-    '<div class="planblk-h"><span>Plan period</span>' +
-      (can ? '<button class="editbtn' + (PLANEDIT ? ' penon' : '') + '" data-editplan="1">' + (PLANEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
-    '</div>' +
-    '<div class="planblk-facts">' + facts + '</div>' + tl +
-    (nOut ? '<div class="planblk-flag" data-plan-outside><b>' + nOut + ' tactic' + (nOut === 1 ? ' ticks a quarter' : 's tick a quarter') +
-      ' outside the plan period.</b> They are kept as they are; change the period or the quarters on the plan.</div>' : '') +
-    (PLANEDIT && can ? '<div class="planblk-pen">' + planPeriodBlock() + '</div>' : '') +
-  '</div>';
-}
-
 function planPeriodBlock(){
   return '<div class="cyc2-r planper">' +
     '<div class="nc-h">The planning period</div>' +
@@ -7412,10 +7368,6 @@ function renderCycle(){
       (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
         esc(reviewDayWord()) + '</b></span>' : '') +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
-      /* §495: A CYCLE RUNNING PAST THE PLAN PERIOD IS SAID ON ITS OWN STRIP,
-         in the attention voice — nothing is wrong yet, but a figure measured
-         after the plan ended is measured against a whole target (§308). */
-      (cyclePastPlan() ? '<span class="badge b-late" data-cyc-past>Runs past the plan period</span>' : '') +
       /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
          Islam: "keep the close cycle inside the edit. as it's a critical
          button to click, the pen should hold everything editable so it's kept
@@ -7515,7 +7467,7 @@ function renderCycle(){
        in. The cost was measured before he chose — pressing Edit moves the page
        below by 156px here against 12px for the in-place shape. */
     (CYCLEEDIT && open
-      ? '<div class="cfg newcycle"><div class="cyc2">' +
+      ? '<div class="cfg newcycle">' + planPeriodBlock() + '<div class="cyc2">' +
           '<div class="cyc2-f">' +
             '<div class="nc-h">This cycle</div>' +
             '<div class="nc-grid nc-1line">' +
@@ -7601,11 +7553,11 @@ function renderCycle(){
         : '') + '</td></tr>';
   }).join("");
 
-  return cfgHead("Planning & reporting cycle",
+  return cfgHead("Reporting cycle",
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + planPeriodPanel(can) + head + contTakenSection() +
+      null, false) + head + contTakenSection() +
     (claims.length
       ? section("", "Claim requests", null,
           '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +

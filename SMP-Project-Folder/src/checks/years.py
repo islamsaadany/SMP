@@ -155,9 +155,12 @@ with sync_playwright() as p:
 
     print("\n6 · the yearly revision")
     safe(pg, "()=>{ current='setup'; currentSub='cycle'; paint(); }"); pg.wait_for_timeout(300)
-    if not pg.query_selector(".newcycle"): click(pg, "[data-editcycle]", 500)
-    ch = safe(pg, "()=>[...document.querySelectorAll('.planyears .yrchip')].map(c=>c.textContent)")
-    ok("the cycle pen names the three years, this one marked now",
+    # §495: the years live with the plan period, which has its own pen now
+    # (spec 064 §7) rather than sitting inside the cycle's — rewritten, the
+    # same three claims asked of the pen they moved into (§218).
+    if not pg.query_selector(".planblk-pen"): click(pg, "[data-editplan]", 500)
+    ch = safe(pg, "()=>[...document.querySelectorAll('.planblk-pen .planyears .yrchip')].map(c=>c.textContent)")
+    ok("the plan period's pen names the three years, this one marked now",
        ch and len(ch) == 3 and ch[0].startswith("Year 1.") and ch[0].endswith("now"), ch)
     a0 = safe(pg, "()=>ARCHIVES.length")
     click(pg, "[data-yearrev]", 400)

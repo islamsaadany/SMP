@@ -78,7 +78,7 @@ with sync_playwright() as p:
     ck("no def renders with a function that no longer exists",
        ev(pg, "()=>typeof renderOverview === 'undefined'", False))
     open_setup(pg, "smo")
-    ck("the SMO's gear lands on Reporting cycle", lit(pg) == "Reporting cycle", lit(pg))
+    ck("the SMO's gear lands on Reporting cycle", lit(pg) == "Planning & reporting cycle", lit(pg))
     # THE FIRST `primary` IN THE LIST IS WHAT THE GEAR PICKS (menuHTML): the
     # register carries its own `primary` for the other half of the old split,
     # so "the only one" would be a claim about a different mechanism (§113.8).
@@ -93,7 +93,7 @@ with sync_playwright() as p:
     ev(pg, "()=>{ currentSub='overview'; paint(); }")
     pg.wait_for_timeout(400)
     ck("an address still naming the Overview lands on Reporting cycle",
-       lit(pg) == "Reporting cycle" and ev(pg, "()=>currentSub") == "cycle",
+       lit(pg) == "Planning & reporting cycle" and ev(pg, "()=>currentSub") == "cycle",
        (lit(pg), ev(pg, "()=>currentSub")))
     ck("…and the pane is not blank",
        (ev(pg, "()=>document.getElementById('panel').textContent.trim().length", 0) or 0) > 40)
@@ -110,7 +110,7 @@ with sync_playwright() as p:
     if other:
         open_setup(pg, other)
         ck("a non-office viewer's gear lands on Reporting cycle too (%s)" % other,
-           lit(pg) == "Reporting cycle", lit(pg))
+           lit(pg) == "Planning & reporting cycle", lit(pg))
     else:
         ck("a non-office viewer with any Setup page exists in the demo", False, "none found")
 

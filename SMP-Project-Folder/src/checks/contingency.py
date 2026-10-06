@@ -310,11 +310,14 @@ with sync_playwright() as pw:
     head("3 · the pen's three fields write, and clear")
     js(pg, "()=>{ current='setup'; currentSub='cycle'; paint(); }")
     pg.wait_for_timeout(400)
+    # §495: the page carries TWO pens now — the plan period's first, then the
+    # cycle's — so "the first button reading Edit" opened the wrong one. The
+    # cycle's pen is pressed by its own name (§51.11: address the control,
+    # not its word).
     opened = False
-    for btn in pg.query_selector_all(".setuppane button"):
-        if (btn.inner_text() or "").strip().lower().startswith("edit"):
-            btn.click(); pg.wait_for_timeout(400); opened = True
-            break
+    cpen = pg.query_selector("[data-editcycle]")
+    if cpen:
+        cpen.click(); pg.wait_for_timeout(400); opened = True
     ck("the cycle pen opens", opened)
     # §308: THE REVIEW BLOCK, NAMED. The planning period is a `.cyc2-r` too
     # and it is drawn FIRST, so a bare `.cyc2-r` is satisfied by a build that

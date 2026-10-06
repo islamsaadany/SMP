@@ -33,6 +33,7 @@ import pg from "pg";
 import { devTenant, DEV_PASSWORD } from "../scripts/dev-tenant.mjs";
 import { MODULE_DEF } from "../lib/modules.ts";
 import { QUESTIONS } from "../lib/copilot-swot.ts";
+import { MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
 import { categoriesPresent, insertItem, setState, draftOf, CATEGORIES } from "../lib/library.ts";
 
 const URL_ = process.env.DATABASE_URL_UNPOOLED || "postgres://postgres:postgres@localhost:5432/smp_dev";
@@ -1548,6 +1549,297 @@ await section("3j · the SWOT chat: methods, the to-do list, sources, both analy
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
     await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables; delete from copilot_sources")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3k · the How we compete chat: scores, the discipline, values, the table, the save (§493)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup
+     (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
+     One stand-in answer holds every key the three asks need. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  const mk = (fs, f) => Object.fromEntries(fs.map((x) => [x.id, f()]));
+  const val = (t) => ({ title: t, how: ["One " + t.toLowerCase(), "Clear prices"], measure: [t + " under 2%"] });
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    market: mk(CP_M, () => ({ btc: 2, bts: 1, bp: 0 })), internal: mk(CP_I, () => ({ btc: 2, bts: 0, bp: 1 })),
+    values: ["Hassle-free", "Lowest price", "Wide reach", "Fast service", "Easy finance"].map(val),
+    reply: "Done — the first value is renamed.", alternatives: ["Effortless", "No fuss"],
+  });
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'compete' s from copilot_chats where section = 'compete' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/compete");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-cp-sc], [data-cop-cp-score]", { timeout: 15000 });
+    if (!(await page.$("[data-cop-cp-sc]")) && (await page.$("[data-cop-cp-score]"))) { await page.click("[data-cop-cp-score]"); await page.waitForSelector("[data-cop-cp-sc]", { timeout: 15000 }); }
+    let r = await row();
+    check(!!r && r.s && r.s.phase === "discipline", "a new chat scores itself and moves on to the discipline", JSON.stringify(r && r.s && r.s.phase));
+    const rec = await page.evaluate(() => (document.querySelector('[data-cop-cp-choose].rec') || {}).getAttribute ? document.querySelector('[data-cop-cp-choose].rec').getAttribute("data-cop-cp-choose") : null);
+    check(rec === "btc", "the page recommends the discipline the scores lead with", rec);
+    const few = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
+    check(few === 9, "the market table opens on three factors, a pill per discipline", few);
+    await page.click(".copcp-more [data-cop-cp-more]"); await page.waitForTimeout(300);
+    const all = await page.$$eval("[data-cop-cp-sc]", (a) => a.length);
+    check(all === CP_M.length * 3, "…and + more shows every market factor", all);
+    const k0 = "market:" + CP_M[0].id + ":bp";
+    await page.click('[data-cop-cp-sc="' + k0 + '"]');
+    await page.waitForTimeout(700);
+    r = await row();
+    check(r.s.market[CP_M[0].id].bp === 1 && (r.s.edited || []).includes(k0), "pressing a pill changes that score and marks it edited, stored", JSON.stringify(r.s.market[CP_M[0].id]));
+    check(await page.evaluate((k) => { const b = document.querySelector('[data-cop-cp-sc="' + k + '"]'); return !!b && b.classList.contains("ed"); }, k0), "…and the pill shows it was changed by hand");
+    await page.click('[data-cop-cp-choose="btc"]');
+    await page.waitForSelector("[data-cop-cp-pick]", { timeout: 15000 });
+    check((await page.$$eval("[data-cop-cp-pick]", (a) => a.length)) === 5, "choosing the discipline brings five value cards");
+    await page.click('[data-cop-cp-pick="0"]'); await page.waitForTimeout(400);
+    await page.click('[data-cop-cp-pick="2"]'); await page.waitForTimeout(400);
+    await page.click("[data-cop-cp-use]");
+    await page.waitForSelector("table.cmptab, [data-cop-cp-cell]", { timeout: 15000 });
+    r = await row();
+    check(r.s.table && r.s.table.discipline === "btc" && r.s.table.values.map((v) => v.title).join() === "Hassle-free,Wide reach", "the two ticked values become the table, stored", JSON.stringify(r.s.table && r.s.table.values.map((v) => v.title)));
+    const cells = await page.$$eval("[data-cop-cp-cell]", (a) => a.length);
+    check(cells === 6, "every cell of the table is editable before saving", cells);
+    await page.fill("[data-cop-cp-ask]", "Rename the first value");
+    await page.click("[data-cop-cp-refine]");
+    await page.waitForSelector("[data-cop-cp-alt]", { timeout: 15000 });
+    const alts = await page.$$eval("[data-cop-cp-alt]", (a) => a.map((x) => x.textContent));
+    check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
+    await page.click("[data-cop-cp-finish]");
+    await page.waitForTimeout(1500);
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'How we compete%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "How we compete — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
+    const plan = await page.evaluate(() => { try { const w = UNITS.mobile.compete; return w ? [w.discipline, w.values.length] : null; } catch (e) { return String(e); } });
+    check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and the table is written into the plan's How we compete", JSON.stringify(plan));
+    check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3l · the Directions chat: plan or fresh, scored, ticked, capabilities, the save writes the plan (§494)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup. One stand-in
+     answer holds both keys, `options` for the Directions ask and
+     `capabilities` for the Capabilities one. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    reply: "From the SWOT.",
+    options: [
+      { title: "Upper Egypt", urgency: 4, importance: 4, ease: 4, ownedBy: "" },
+      { title: "Own label", urgency: 1, importance: 1, ease: 1, ownedBy: "" },
+    ],
+    capabilities: [{ title: "Data-led stock", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "" }],
+  });
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'directions' s from copilot_chats where section = 'directions' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/directions");
+    const before = await page.evaluate(() => { try { return UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name })); } catch (e) { return null; } });
+    check(Array.isArray(before) && before.length > 0, "Mobile's plan already holds Directions to start from", JSON.stringify(before));
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-dv-start]", { timeout: 15000 });
+    let r = await row();
+    check(!!r && r.s && r.s.start === "" && !(r.s.options || []).length, "a new Directions chat asks plan-or-fresh first and suggests nothing", JSON.stringify(r && r.s && r.s.start));
+    await page.click('[data-cop-dv-start="plan"]');
+    await page.waitForSelector("[data-cop-dv-sc]", { timeout: 15000 });
+    await page.waitForTimeout(400);
+    r = await row();
+    const plans = (r.s.options || []).filter((o) => o.mark === "plan");
+    check(plans.length === before.length && plans.every((o) => before.some((b) => b.id === o.planId)), "starting from the plan puts its Directions on the table, keyed to their pillars", JSON.stringify(plans.map((o) => o.planId)));
+    check((r.s.options || []).some((o) => o.title === "Upper Egypt"), "…and the Copilot's own are added beside them");
+    const marks = await page.$$eval(".copdv-mk.plan", (a) => a.length);
+    check(marks === before.length, "a row from the plan says so on the page", marks);
+    const i = r.s.options.findIndex((o) => o.title === "Upper Egypt");
+    const sc0 = await page.evaluate((i) => document.querySelectorAll("td.copdv-score")[i].textContent, i);
+    check(sc0 === "64", "a Direction's score is drawn, Urgency × Importance × Ease", sc0);
+    await page.click('[data-cop-dv-sc="' + i + '|ease"]'); await page.waitForTimeout(700);
+    r = await row();
+    check(r.s.options[i].ease === 1, "pressing a score turns it and stores it", JSON.stringify(r.s.options[i]));
+    const iOwn = r.s.options.findIndex((o) => o.title === "Own label");
+    if (!r.s.options[iOwn].go) { await page.click('[data-cop-dv-go="' + iOwn + '"]'); await page.waitForTimeout(700); }
+    r = await row();
+    check(r.s.options[iOwn].go === true, "ticking a Direction marks it to go ahead, stored");
+    /* One row from the plan goes ahead too, or "updates THAT pillar" below
+       is asserted over nothing (§113.8). */
+    const iPlan = r.s.options.findIndex((o) => o.mark === "plan");
+    if (iPlan > -1 && !r.s.options[iPlan].go) { await page.click('[data-cop-dv-go="' + iPlan + '"]'); await page.waitForTimeout(700); }
+    r = await row();
+    const goN = r.s.options.filter((o) => o.go).length;
+    await page.click("[data-cop-dv-go-all]");
+    await page.waitForTimeout(1500);
+    r = await row();
+    check(r.s.chose === true, "Go ahead stores the choice", JSON.stringify(r.s.chose));
+    const withCaps = !!r.s.withCaps;
+    if (withCaps) {
+      await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
+      r = await row();
+      check((r.s.caps || []).length === 1 && r.s.caps[0].serves.join() === "Upper Egypt", "Capabilities follow the chosen Directions, each serving one of them", JSON.stringify(r.s.caps));
+    }
+    await page.click("[data-cop-dv-finish]");
+    await page.waitForTimeout(2000);
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Directions%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Directions — Mobile" && dv.n === 1, "Save writes Directions — Mobile v1", JSON.stringify(dv));
+    const after = await page.evaluate(() => UNITS.mobile.items.filter((p) => p && p.name).map((p) => ({ id: p.id, name: p.name, u: p.urgency })));
+    const kept = r.s.options.filter((o) => o.go && o.planId);
+    check(kept.length > 0 && kept.every((o) => after.some((p) => p.id === o.planId && p.name === o.title && p.u === o.urgency)), "a chosen Direction from the plan updates THAT pillar, by its key", JSON.stringify(after));
+    check(after.some((p) => p.name === "Own label") && after.length === before.length + r.s.options.filter((o) => o.go && !o.planId).length, "…and each new one is a new pillar, no more", after.length + " from " + before.length);
+    if (withCaps) {
+      const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; return c ? [c.capKind, (c.serves || []).length] : null; });
+      check(JSON.stringify(cap) === JSON.stringify(["enabler", 1]), "a kept Capability is written with its kind and the Direction it serves", JSON.stringify(cap));
+    }
+    check(!(await page.$("[data-cop-dv-finish]")), "a saved chat offers no Save again");
+    check(goN > 0, "something went ahead", goN);
+    if (!withCaps) {
+      /* Capabilities are their own layer here, so they are their own section
+         (spec §4.5) and read the Directions just saved. */
+      const tabs = await page.$$eval("[data-sub2]", (a) => a.map((x) => x.getAttribute("data-sub2")));
+      check(tabs.includes("capabilities"), "with capabilities as their own layer, the Copilot carries a Capabilities section", JSON.stringify(tabs));
+      await open("/raya-trade/strategy/mobile/copilot/capabilities");
+      await page.locator("[data-cop-newchat]:visible").first().click();
+      await page.waitForSelector("[data-cop-dv-caps], [data-cop-dv-keep]", { timeout: 15000 });
+      if (await page.$("[data-cop-dv-caps]")) await page.click("[data-cop-dv-caps]");
+      await page.waitForSelector("[data-cop-dv-keep]", { timeout: 15000 });
+      const cr = (await asTenant(tenantId, (c) => c.query("select extra->'directions' s from copilot_chats where section = 'capabilities' order by created_at desc limit 1"))).rows[0];
+      check(!!cr && cr.s.caps.length === 1 && cr.s.caps[0].serves.join() === "Upper Egypt", "a Capabilities chat suggests from the saved Directions", JSON.stringify(cr && cr.s.caps));
+      await page.click("[data-cop-dv-finish]");
+      await page.waitForTimeout(2000);
+      const cap = await page.evaluate(() => { const c = GROUP.capabilities.filter((x) => x.name === "Data-led stock")[0]; const up = UNITS.mobile.items.filter((p) => p.name === "Upper Egypt")[0]; return c ? [c.capKind, (c.serves || []).length === 1 && !!up && c.serves[0] === up.id] : null; });
+      check(JSON.stringify(cap) === JSON.stringify(["enabler", true]), "…and Save writes the Capability with its kind and the Direction it serves, by key", JSON.stringify(cap));
+    }
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3m · the Execution chat: the period once, each item drafted, the save writes the plan (§495)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off panels F and G. The
+     stand-in answers every draft with one measure and one tactic that asks
+     for Q1 AND Q4: the period chosen is "this quarter to year end", so only
+     the quarters inside it may reach the plan — asserted on the PLAN, not on
+     the screen. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    reply: "Drafted from the Direction.",
+    measures: [{ name: "Ex share", target: "30%", compile: "Latest" }],
+    tactics: [{ name: "Ex launch", owner: "Commercial", quarters: [1, 4] }],
+  });
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select extra->'execution' s from copilot_chats where section = 'execution' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/execution");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
+    let r = await row();
+    check(!!r && r.s && !r.s.period && (r.s.items || []).length > 0, "a new Execution chat asks the period first, with the plan's items listed", JSON.stringify(r && r.s && { p: r.s.period, n: (r.s.items || []).length }));
+    check(!(await page.$("[data-cop-ex-draft]")), "…and offers no drafting before the period is chosen");
+    await page.click('[data-cop-ex-period="rest"]');
+    await page.waitForSelector("[data-cop-ex-draft], [data-cop-ex-go]", { timeout: 15000 });
+    r = await row();
+    const per = r.s.period;
+    check(!!per && per.m2 === 12, "the period is stored, running to the year's end", JSON.stringify(per));
+    const qs = [1, 2, 3, 4].filter((q) => (q - 1) * 3 + 1 <= per.m2 && q * 3 >= per.m1);
+    for (let n = 0; n < 40; n++) {
+      if (await page.$("[data-cop-ex-draft]")) { await page.click("[data-cop-ex-draft]"); await page.waitForTimeout(1500); continue; }
+      if (await page.$('[data-cop-ex-go="1"]')) { await page.click('[data-cop-ex-go="1"]'); await page.waitForTimeout(700); continue; }
+      break;
+    }
+    r = await row();
+    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
+    const fin = await page.$("[data-cop-ex-finish]");
+    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true", "Save to plan is offered once everything is drafted");
+    if (fin) { await fin.click(); await page.waitForTimeout(2200); }
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
+    const plan = await page.evaluate((ids) => {
+      const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
+      (UNITS.mobile.items || []).forEach((p) => { if (!ids.includes(p.id)) return;
+        const m = (p.measures || []).filter((x) => x.name === "Ex share")[0];
+        const t = (p.tactics || []).filter((x) => x.name === "Ex launch")[0];
+        out.dirs.push({ m: m ? m.target : null, q: t ? [t.q1, t.q2, t.q3, t.q4].map((x) => +x || 0).join("") : null }); });
+      (GROUP.capabilities || []).forEach((c) => { if (!ids.includes(String(c.id))) return;
+        const ko = (c.keyObjectives || []).filter((x) => x.name === "Ex share")[0];
+        const pj = (c.projects || []).filter((x) => x.name === "Ex launch")[0];
+        out.caps.push({ ko: ko ? ko.target : null, pj: pj ? [pj.start, pj.end] : null }); });
+      return out;
+    }, r.s.items.map((x) => x.planId));
+    const want = await page.evaluate((p) => [SMPRules.monthLabel(p.y * 12 + p.m1 - 1), SMPRules.monthLabel(p.y * 12 + p.m2 - 1)], per);
+    check(plan.from === want[0] && plan.to === want[1], "the period becomes the plan period", JSON.stringify([plan.from, plan.to]));
+    const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");
+    check(plan.dirs.length > 0 && plan.dirs.every((d) => d.m === "30%" && d.q === qWant), "each Direction gains its measure, and its tactic runs only in the period's quarters", JSON.stringify(plan.dirs) + " want " + qWant);
+    check(plan.caps.every((c) => c.ko === "30%" && c.pj && c.pj[1] === "Dec " + String(per.y).slice(2)), "each Capability gains a key objective and a dated project inside the period", JSON.stringify(plan.caps));
+    check(!(await page.$("[data-cop-ex-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
+await section("3n · the Advisory chat: one question at a time, counted, proceed, the brief, the save (§496)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off mockup
+     (design-mockups/copilot-advisory/2026-10-06_advisory.html). */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  const setAns = (a) => { for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k]; Object.assign(MODEL_ANSWER, a); };
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select id, extra->'advisory' s from copilot_chats where section = 'advisory' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/advisory");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-ad-text]", { timeout: 15000 });
+    check(!!(await page.$("[data-cop-ad-budget]")), "a new Advisory chat shows the question count in the right column");
+    setAns({ kind: "question", lead: "Good question.", question: "How many stores do you run today?" });
+    await page.fill("[data-cop-ad-text]", "Should we open stores in Upper Egypt?");
+    await page.click("[data-cop-ad-send]");
+    await page.waitForSelector(".adq", { timeout: 15000 });
+    let r = await row();
+    check(!!r && r.s.ask === "Should we open stores in Upper Egypt?" && r.s.turns.length === 1, "the question is stored and ONE question comes back", JSON.stringify(r && r.s));
+    const qline = await page.$eval(".adq", (e) => e.textContent);
+    check(/Question 1 of 5/.test(qline), "…numbered against the budget", qline);
+    const pips = await page.$$eval("[data-cop-ad-budget] .adpips i.u", (a) => a.length);
+    check(pips === 1, "one pip is spent", pips);
+    check(!!(await page.$('[data-cop-ad-reply="proceed"]')), "“Proceed with what you have” is offered from the first question");
+    setAns({ kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "assumed", text: "Rents flat" }],
+      options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }], why: "Lower risk", next: ["Pick sites"] } });
+    await page.click('[data-cop-ad-reply="proceed"]');
+    await page.waitForSelector("[data-cop-ad-brief]", { timeout: 15000 });
+    const recs = await page.$$eval("[data-cop-ad-brief] .adrec", (a) => a.length);
+    check(recs === 1, "the brief shows exactly one recommended option", recs);
+    const tags = await page.$$eval("[data-cop-ad-brief] .adtag", (a) => a.map((x) => x.textContent));
+    check(tags.join() === "Platform,Assumed", "every fact says where it came from", JSON.stringify(tags));
+    await page.click("[data-cop-ad-finish]");
+    await page.waitForTimeout(1500);
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, d.kind, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.section = 'advisory' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Upper Egypt stores" && dv.kind === "copilot-only" && dv.n === 1, "Save writes the brief as an Advisory deliverable, v1, kept in the Copilot", JSON.stringify(dv));
+    check(!(await page.$("[data-cop-ad-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    setAns(keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
   }
 });

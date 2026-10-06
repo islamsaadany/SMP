@@ -136,26 +136,33 @@ def run(pg):
     ok("...and does not claim the number is the plan's",
        isinstance(s0, str) and "of the plan" not in s0, s0)
 
-    # ── 1 · the block is first in the pen ────────────────────────────
-    print("\n── 1 · the block, first in the pen ──")
-    btn = pg.query_selector("[data-editcycle]")
+    # ── 1 · the plan period is the page's FIRST block, with its own pen ─
+    # REWRITTEN, never loosened (§218, §495): since spec 064 §7 the planning
+    # period is not a block inside the cycle's pen — it is the first block on
+    # the page, with its own Edit, and the cycle sits under it. What survives
+    # from the old assertion is the ORDER: the period comes first.
+    print("\n── 1 · the plan period block, first on the page, with its own pen ──")
+    btn = pg.query_selector("[data-editplan]")
     if btn:
         btn.click(); pg.wait_for_timeout(420)
     shape = js(pg, """()=>{
-      const pen = document.querySelector('.newcycle');
-      if (!pen) return {none:true};
-      const blocks = [...pen.children].map(c => (c.querySelector('.nc-h')||{}).textContent || '');
-      const per = pen.querySelector('.planper');
-      return { blocks: blocks,
-               firstIsPeriod: !!per && pen.firstElementChild === per,
+      const blk = document.querySelector('[data-plan-block]');
+      if (!blk) return {none:true};
+      const head = document.querySelector('.cyc2, [data-cyc-head], .fstrip');
+      const pen = blk.querySelector('.planblk-pen');
+      const per = pen && pen.querySelector('.planper');
+      const cyc = document.querySelector('.newcycle');
+      return { blockFirst: !head || !!(blk.compareDocumentPosition(head) & Node.DOCUMENT_POSITION_FOLLOWING),
+               penOpen: !!pen, inPen: !!per,
+               notInCycle: !cyc || !cyc.querySelector('.planper'),
                picks: per ? per.querySelectorAll('.monthbtn').length : 0,
                labels: per ? [...per.querySelectorAll('label span')].map(e=>e.textContent) : [],
                status: per ? (per.querySelector('.nc-unit')||{}).textContent : null };
     }""")
-    ok("the pen opens", shape.get("none") is not True, shape)
-    ok("the planning period is the FIRST block in it", shape.get("firstIsPeriod") is True, shape)
-    ok("...and the cycle's own block is still there under it",
-       any("This cycle" in (b or "") for b in (shape.get("blocks") or [])), shape.get("blocks"))
+    ok("the plan period block is drawn", shape.get("none") is not True, shape)
+    ok("it comes BEFORE the reporting cycle", shape.get("blockFirst") is True, shape)
+    ok("its own Edit opens a pen holding the period", shape.get("penOpen") and shape.get("inPen"), shape)
+    ok("...and the period is no longer inside the cycle's pen", shape.get("notInCycle") is True, shape)
     ok("it holds two month pickers", shape.get("picks") == 2, shape)
     ok("named for the two ends of a period",
        [l for l in (shape.get("labels") or []) if l in ("Plan starts", "and ends")]

@@ -9301,3 +9301,6 @@ to main.
 
 ### §499 — The Internal Tracker keeps Forefront's own colours (2026-10-06)
 Islam asked that the Tracker not follow the client's colour at all. Its top band and the browser's tab colour are now always Forefront's navy and gold, as in the approved mockup, whatever colour the client chose. The check gives a client a tan colour and confirms the Tracker stays navy. On the branch, not merged. Merged to `main` 2026-10-06.
+
+### §501 — The topic has its own column, right before the week (2026-10-06)
+On the Internal Tracker each action's topic now sits in its own column immediately before the week, as a small rounded tag, and lines up down the list. An action with no topic shows "+ Add a topic" there instead. Pressing the tag opens the topic list on the spot: pick one, pick "No topic", or type a new one and press Enter. A double-click on an action now only renames it. Built from the mockup Islam approved ("proceed"). On the branch, not merged.

@@ -52,7 +52,6 @@ function brkCss(): string {
   const b = brk();
   if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
   if (b === "details-always") return ".addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:visible}";
-  if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §501 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
   return "";
 }
@@ -152,25 +151,13 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
    hand left it, and an opened row always shows. */
 .sec:not(.showdone) .row.done:not(.fresh):not(.on){display:none}
 /* the row: tick · name · when · owner · status · the arrow */
-.row{display:grid;grid-template-columns:20px minmax(0,1fr) 132px 84px 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
 .row .t{min-width:0;font-size:15px;line-height:1.35}
 .row .t[data-rename]{cursor:text}
 .row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
-.tn2.editing{align-items:center}
-/* THE TOPIC'S OWN COLUMN (§501), beside the week: a quiet rounded tag with a
-   gold dot, or "+ Add a topic" on a row that has none — outlined when the row
-   is under the pointer, so the empty column says what it is for without
-   shouting on every row. The press opens the add line's own topic list. */
-.tcwrap{position:relative;justify-self:end;max-width:132px;min-width:0;cursor:pointer;border-radius:999px;outline:none}
-.tc{display:inline-flex;align-items:center;gap:6px;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border:1px solid transparent;border-radius:999px;padding:5px 10px}
-.tc .tw{overflow:hidden;text-overflow:ellipsis}
-.tc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
-.tcwrap:hover .tc,.tcwrap.on .tc,.tcwrap:focus-visible .tc{border-color:var(--line)}
-.tc.add{background:transparent;color:var(--ink-3);border:1px dashed transparent}
-.tc.add::before{display:none}
-.row:hover .tc.add,.tcwrap.on .tc.add,.tcwrap:focus-visible .tc.add{border-color:var(--line);color:var(--ink)}
-.tcwrap.ro{cursor:default}.tcwrap.ro .tc{border-color:transparent}
-.tcwrap .topics{top:30px;right:0}
+.tn2.editing{align-items:center}.tn2.editing .tg{display:none}
+.tn2 select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:5px 8px;font:400 13px/1.3 var(--font);max-width:220px}
+.tg{font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
 .row.done .t{color:var(--ink-3)}
 .tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
@@ -275,7 +262,7 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
 @media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
   .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
-  .row{grid-template-columns:20px minmax(0,1fr) auto auto 26px;grid-template-areas:"tick t t st more" ". when tcol who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .tcol{grid-area:tcol;justify-self:start}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
+  .row{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t st more" ". when who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
   .team,.weeks,.topics{right:auto;left:0}}
 `;
 
@@ -428,36 +415,17 @@ const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx
 function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group): string {
   const live = brk() === "who-everyone" ? true : mayChange(a, who);
   const late = a.status !== "done" && !!a.due && isLate(a.due, today);
+  const t = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
+  const tag = t && group !== "topic" ? '<span class="tg">' + esc(t.name) + "</span>" : "";
   return '<div class="row' + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
-    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</div></div>" +
-    topicCell(a, L, live, group) +
+    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" data-topic="' + esc(a.topicId || "") + '"' + (t ? ' data-tname="' + esc(t.name) + '"' : "") + ' title="Double-click to rename or set its topic"' : "") + ">" + esc(a.title) + "</div>" + tag + "</div>" +
     whenCell(a, today, dates, live) +
     whoCell(a, L, live) +
     statusPill(a, live) +
     '<button class="more' + (opened ? " on" : "") + '" type="button" data-act="more" aria-expanded="' + opened + '" aria-label="' + (opened ? "Close" : "Notes and history") + '" title="' + (opened ? "Close" : "Notes and history") + '">' + ARROW + "</button>" +
     "</div>";
-}
-
-/* THE TOPIC CELL (§501): its own column, immediately before the week. Grouped
-   by topic the heading already says it (§87), so the cell stays empty; a row
-   nobody may change shows its topic and offers nothing; otherwise the tag (or
-   "+ Add a topic") opens the same list the add line offers — the open topics,
-   the closed one this row still carries, No topic, and New topic…. */
-function topicCell(a: Action, L: Loaded, live: boolean, group: Group): string {
-  const t = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
-  if (group === "topic") return '<span class="tcol"></span>';
-  if (!t && brk() === "no-add-topic") return '<span class="tcol"></span>';                /* §501 put back: an empty row offers nothing */
-  if (!live) return t ? '<span class="tcol tcwrap ro"><span class="tc"><span class="tw">' + esc(t.name) + "</span></span></span>" : '<span class="tcol"></span>';
-  const opts = L.topics.filter((x) => !x.closed || x.id === a.topicId);
-  const on = (id: string) => (id === (a.topicId || "") ? ' class="on" aria-selected="true"' : ' aria-selected="false"');
-  return '<span class="tcol tcwrap tpk" role="button" tabindex="0" data-act="tpk" aria-haspopup="listbox" aria-expanded="false" title="' + (t ? "Change the topic" : "Add a topic") + '">' +
-    '<span class="tc' + (t ? "" : " add") + '"><span class="tw">' + (t ? esc(t.name) : "+ Add a topic") + "</span></span>" +
-    '<span class="topics" role="listbox" aria-label="Topic" hidden>' +
-    opts.map((x) => '<button type="button" role="option" data-act="pick-topic" data-topic="' + esc(x.id) + '"' + on(x.id) + ">" + esc(x.name) + (x.closed ? " (closed)" : "") + "</button>").join("") +
-    '<button type="button" role="option" data-act="pick-topic" data-topic=""' + on("") + ">No topic</button>" +
-    '<input class="tnew" placeholder="New topic…" aria-label="New topic" maxlength="120"></span></span>';
 }
 
 /* The opened row: its topic, the notes, Delete behind a question, and the

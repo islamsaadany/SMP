@@ -107,7 +107,7 @@
                    only an admin adds to it — which is a gate on the ACT, asked
                    on the server, never a gate on the tab. */
                 ["frameworks", "Frameworks", true],
-                /* THE COPILOT'S SETTINGS LIVE HERE (§497): they are the same
+                /* THE COPILOT'S SETTINGS LIVE HERE (§501): they are the same
                    for every client, so reaching them from inside one client's
                    platform said they were that client's. Ungated for the
                    frameworks' reason: every consultant reads the method, and
@@ -2768,7 +2768,7 @@
     return drawFrameworks();
   }
 
-  /* ════ The Copilot's settings (§497, spec 064) ═══════════════════════
+  /* ════ The Copilot's settings (§501, spec 064) ═══════════════════════
      The method the Copilot is told for each section, and the templates a
      client downloads — the same for every client, so they are kept here,
      beside the frameworks library, rather than inside one client's

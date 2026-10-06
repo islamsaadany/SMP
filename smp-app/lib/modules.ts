@@ -348,7 +348,7 @@ export function clientHref(slug: string, module: ModuleKey | null, rest: string)
    differently (§53.5).
 
    A module that lives INSIDE another (`inside`, the Copilot) is NOT listed
-   (§497, reversing §456's listing at Islam's word): turning it on shows its
+   (§501, reversing §456's listing at Islam's word): turning it on shows its
    tab inside Strategy and nothing more; its settings are the same for every
    client and live on Forefront's console (/platform#copilot), and the page of
    every chat on a client is reached from the tab's own rail. Which PEOPLE see
@@ -419,7 +419,7 @@ export function moduleRows(have: ModuleKey[], facts: CardFacts): ModuleRow[] {
      Islam photographed. Must turn checks/modules.mjs red before its green
      run is believed (§94.5). Never set on a deployment. */
   const brk = typeof process !== "undefined" ? process.env.SMP_BREAK || "" : "";
-  /* An `inside` module draws no row on the card (§497): it is switched on
+  /* An `inside` module draws no row on the card (§501): it is switched on
      from Settings and lives in Strategy's tab. */
   return have.filter(shownOutside).map((k) => {
     const d = MODULE_DEF[k].mark;

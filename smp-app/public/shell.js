@@ -57928,7 +57928,7 @@ var COPILOT = (function(){
     return '<button type="button" class="copfoldb" data-cop-fold="' + k + '" aria-expanded="' + !f + '" aria-label="' + (f ? "Show " : "Hide ") + E(label) + '" title="' + (f ? "Show " : "Hide ") + E(label) + '">' +
       '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 6l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
   }
-  /* EVERY CHAT ON THIS CLIENT IS ONE PRESS FROM HERE (§497): the list page
+  /* EVERY CHAT ON THIS CLIENT IS ONE PRESS FROM HERE (§501): the list page
      left the module menu with the settings, so its door is the rail it
      lists. Drawn only where there is a client address to go to. */
   function allChatsLink(){

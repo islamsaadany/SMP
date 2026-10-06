@@ -6,7 +6,7 @@
    chose for the same reason (modules/insights/page.ts):
 
      /<client>/copilot                       every chat (or deliverable) on the client
-     (its settings moved to Forefront's console in §497 — /platform#copilot)
+     (its settings moved to Forefront's console in §501 — /platform#copilot)
 
    THE PAGE FINDS, THE TAB WORKS. A row is a link into its place's Copilot
    tab inside Strategy, ending in `#cop=chat-<id>` so the tab opens that chat

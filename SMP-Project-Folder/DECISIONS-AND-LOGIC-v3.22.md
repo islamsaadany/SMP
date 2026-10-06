@@ -62691,7 +62691,7 @@ Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_adv
 
 **Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**
 
-## §497 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
+## §501 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
 
 Islam: *"When I enable Copilot on the platform, the module appears on the outside of the platform. When someone clicks on it, it opens the settings, which I don't think is relevant."* Then, of the mockup (`design-mockups/copilot-placement/2026-10-06_copilot-placement.html`): *"go ahead"*, *"proceed"*.
 

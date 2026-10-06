@@ -1,4 +1,4 @@
-/* The Copilot's settings, on Forefront's console (§497, spec 064).
+/* The Copilot's settings, on Forefront's console (§501, spec 064).
  *
  * WHY THEY MOVED HERE: they are the same for every client (§456), so reaching
  * them from inside one client's platform said something untrue — that they

@@ -590,9 +590,9 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
   });
 }
 
-/* ── THE PAGE (§456, §497) ─────────────────────────────────────────────
+/* ── THE PAGE (§456, §501) ─────────────────────────────────────────────
    The list of every chat and deliverable on this client, reached from the
-   Copilot tab's own rail. The settings were here until §497 moved them to
+   Copilot tab's own rail. The settings were here until §501 moved them to
    the console; their old addresses redirect there. */
 async function pages(a: ServeArgs): Promise<Response> {
   const u = new URL(a.req.url);
@@ -612,7 +612,7 @@ async function pages(a: ServeArgs): Promise<Response> {
       } catch (e) { console.error("copilot: list " + a.slug + ":", (e as Error).message); }
       return html(200, listDocument(a.slug, a.tenantName, a.have, bar, names, ask, chats, delivs, !!a.consultant));
     }
-    /* THE SETTINGS LIVE ON THE CONSOLE NOW (§497): they are the same for
+    /* THE SETTINGS LIVE ON THE CONSOLE NOW (§501): they are the same for
        every client, so an address under one client was saying something
        untrue. An old bookmark is a door, so it lands where they went (§61). */
     return Response.redirect(new URL("/platform#copilot", a.req.url), 302);

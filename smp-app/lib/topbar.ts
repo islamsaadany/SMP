@@ -84,7 +84,7 @@ export function topBarHtml(t: TopBar): string {
       '<span class="tborg">' + esc(t.tenantName) + "</span>" + right + "</div></header>";
   }
   const mods = moduleMenu(t.have);
-  /* A module that lives inside another (the Copilot, §497) is not in this
+  /* A module that lives inside another (the Copilot, §501) is not in this
      menu, so its own page wears and marks the module it lives in — the trail
      reads Strategy, which is where it is reached from. */
   const here: ModuleKey = MODULE_DEF[t.module].inside || t.module;

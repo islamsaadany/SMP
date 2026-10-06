@@ -7,7 +7,7 @@ import { templateFile } from "../../../lib/copilot-settings.ts";
 export const dynamic = "force-dynamic";
 const json = (code: number, body: unknown) => NextResponse.json(body, { status: code, headers: { "Cache-Control": "no-store" } });
 
-/* /api/copilot — the Copilot's settings on Forefront's console (§497). The
+/* /api/copilot — the Copilot's settings on Forefront's console (§501). The
    frameworks library's door, word for word: a session, and a password that is
    no longer temporary. A template download is a GET (?file=<key>), because a
    download is a link and a link is a GET. */

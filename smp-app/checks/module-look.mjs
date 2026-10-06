@@ -362,7 +362,7 @@ try {
     { mod: "notes", what: "Meeting Notes — the list", url: "/x/notes", must: "Q3 review preparation" },
     { mod: "notes", what: "Meeting Notes — one note, with its minutes", url: "/x/notes?note=" + noteId, must: "circulate" },
     { mod: "copilot", what: "the Copilot — chats and deliverables", url: "/x/copilot", must: "End in Mind" },
-    /* The Copilot's settings left this list at §497: they moved to the
+    /* The Copilot's settings left this list at §501: they moved to the
        console's own Copilot tab (they are the same for every client), and
        the old address now redirects there, so there is no module page left
        here to sweep. The console tab is measured by checks/shell.mjs §3e. */

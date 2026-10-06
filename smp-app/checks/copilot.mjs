@@ -433,10 +433,10 @@ try {
   check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
-  /* ══ §3c · the Copilot's own settings, on the console (§456, §497) ══
+  /* ══ §3c · the Copilot's own settings, on the console (§456, §501) ══
      The same for every client; read by every consultant, changed by a
      Forefront super user only (the account's admin flag, never a client's
-     seat). Since §497 they are reached from Forefront's console rather than
+     seat). Since §501 they are reached from Forefront's console rather than
      from inside a client, so this drives the console's own endpoint
      (lib/copilot-settings-api.ts) — the same function the route calls. */
   section("§3c · Copilot settings: every consultant reads, only a Forefront super user changes");
@@ -489,7 +489,7 @@ try {
       old.st === 302 && /\/platform#copilot$/.test(old.to || ""), old.st + " " + old.to);
     const oldT = await page("GET", "settings/templates/t3", null, NORAN);
     check("...and so does an old template link", oldT.st === 302 && /\/platform#copilot$/.test(oldT.to || ""), oldT.st + "");
-    check("the Copilot is not offered in the client's module menu — it lives inside Strategy (§497)",
+    check("the Copilot is not offered in the client's module menu — it lives inside Strategy (§501)",
       !moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && moduleMenu(["strategy", "copilot"]).some((m) => m.key === "strategy"));
     check("...nor as a row on the client's console card", !moduleRows(["strategy", "copilot"], {}).some((r) => r.key === "copilot"));
     check("the door still refuses a client's person the Copilot", decideOpen("none", "copilot", {}, null) === false);

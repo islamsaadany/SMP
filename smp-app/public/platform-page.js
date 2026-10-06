@@ -2686,7 +2686,9 @@
         var cell = el("span", "cell" + (j.canEdit ? "" : " locked"));
         a.states.forEach(function (st) {
           if (st === "none" && a.states.length > 2) return;   /* nothing lit IS none (§37) */
-          var b = el("button", null, st === "yes" ? "Yes" : st.charAt(0).toUpperCase() + st.slice(1));
+          /* the word is the shared rules' (§487.1), sent with the table, so the
+             record's sentence and this button cannot read differently */
+          var b = el("button", null, (j.words && j.words[st]) || st.charAt(0).toUpperCase() + st.slice(1));
           b.type = "button";
           b.title = a.note;
           if (now === st) b.className = "on" + (st === "edit" || st === "open" || st === "yes" ? " hi" : "");

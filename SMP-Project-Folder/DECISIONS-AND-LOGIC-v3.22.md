@@ -62662,3 +62662,8 @@ fixed amber on whatever colour the client chose.
 - The Tracker's masthead and the Copilot's filled controls read `--bar-*` tokens.
   `checks/tracker.mjs` §1b asserts 4.5:1 for every ink on six bars including white,
   black and mid-grey; `SMP_BREAK=bar-fixed-inks` puts the fixed inks back and goes red.
+
+
+## §499 — The Internal Tracker wears Forefront's colours, never the client's
+
+Islam, of §498's masthead following the client's band: *"for the top banner I don't want it to follow the clients colors let's keep it with forefront colors like the mockup you made"*, then *"not hte banner only the whole module"*. The Tracker is the office's own weekly list (§356) — Forefront's page about a client, not the client's page — and the signed-off ledger mockup drew it navy and gold. Measured: the only client colour the module read was the masthead and the browser's `theme-color`, both through `barFor`; the shared top bar (§444) is white everywhere already. Both now take `BAR_DEFAULT` (#16325C). `barVars()` stays the one reader of how words sit on a band (§53.5) and is simply handed Forefront's navy; the Copilot's controls still follow the client (not asked about). `checks/tracker.mjs` gives the client a tan band, asserts it STORED first (§113.8), and asserts the masthead and theme colour stay navy, then puts the row back (§94.2): 247/0, and `SMP_BREAK=client-bar` (the old read put back) reddens exactly those two. Screen only; nothing stored, nothing migrated. On the branch, not merged.

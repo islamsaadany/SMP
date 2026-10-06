@@ -9287,3 +9287,7 @@ The SETTINGS word in the corner of each client card on the console is now the
 platform's two-sliders Settings mark; the word shows on hover. On an archived
 client, Bring back stays a word. Built from the mockup Islam approved and merged
 to main.
+
+
+### §499 — The Internal Tracker keeps Forefront's own colours (2026-10-06)
+Islam asked that the Tracker not follow the client's colour at all. Its top band and the browser's tab colour are now always Forefront's navy and gold, as in the approved mockup, whatever colour the client chose. The check gives a client a tan colour and confirms the Tracker stays navy. On the branch, not merged.

@@ -29,7 +29,7 @@
    control the server refuses is never drawn. */
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
-import { BAR_DEFAULT, barFor, barVars } from "../../lib/branding.ts";
+import { barFor, barVars } from "../../lib/branding.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
@@ -272,15 +272,6 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
    a press asks the server for the same list it is looking at. */
 const topOf = (p: PageArgs): TopBar => ({ slug: p.slug, tenantName: p.tenantName, module: "tracker", have: p.have, consultant: !!p.consultant });
 
-/* §499 — THE TRACKER WEARS FOREFRONT'S COLOURS, NEVER THE CLIENT'S. Islam:
-   "not the banner only the whole module". It is the office's own weekly list
-   (§356), so it is Forefront's page about a client rather than the client's
-   page, and the signed-off ledger mockup drew it navy and gold. §498's
-   barVars stays the one reader of how words sit on a band; it is simply
-   handed Forefront's navy here and nothing the client set. The break puts
-   the client's colour back so the check can prove it is not read. */
-async function trackerBar(tenantId: string): Promise<string> { return brk() === "client-bar" ? barFor(tenantId) : BAR_DEFAULT; }
-
 type BodyAttrs = { api: string; list: string; view: string; q: string; group: string; dates: string };
 function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, attrs: BodyAttrs | null, body: string): string {
   const a = attrs
@@ -301,7 +292,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
 
 /* Not the office: said in words, with the way back (§61). */
 export async function refusedDocument(slug: string, tenantId: string, tenantName: string, have: ModuleKey[], consultant = false): Promise<string> {
-  const bar = await trackerBar(tenantId);
+  const bar = await barFor(tenantId);
   return skeleton(slug, tenantName, { slug, tenantName, module: "tracker", have, consultant }, bar, null,
     '<main class="pg"><div class="none"><b>The Internal Tracker is the office\'s.</b>' +
     'It is where Forefront keeps its own weekly actions about ' + esc(tenantName) + '. ' +
@@ -651,7 +642,7 @@ export async function listFragment(p: PageArgs): Promise<ListOut> {
 
 export async function trackerDocument(p: PageArgs): Promise<string> {
   const today = p.today || todayIn();
-  const bar = await trackerBar(p.tenantId);
+  const bar = await barFor(p.tenantId);
   const q = String(p.ask.q || "").trim().slice(0, 120);
   const view: View = p.ask.view;
   const attrs: BodyAttrs = { api: clientHref(p.slug, "tracker", "api"), list: clientHref(p.slug, "tracker", "list"), view, q, group: p.ask.group, dates: p.ask.dates };

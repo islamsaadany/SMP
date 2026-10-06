@@ -581,6 +581,25 @@ try {
       await pg.reload(); await settle();
     }
     if (process.env.SMP_SHOT) await pg.screenshot({ path: process.env.SMP_SHOT, fullPage: true });
+    /* §499 — THE WHOLE MODULE IS FOREFRONT'S, NEVER THE CLIENT'S. The client
+       is given a tan band and the page asked again: the masthead and the
+       browser's theme colour must still be Forefront's navy. BOTH ENDS
+       (§94.2): the tan is asserted stored first, or "still navy" is true of a
+       client that never had a colour (§113.8). Put back afterwards. */
+    if (!process.env.SMP_SHOT_BAR) {
+      const had = await owner("SELECT extra FROM org WHERE tenant_id=$1", [A]);
+      if (had.length) await owner("UPDATE org SET extra = jsonb_set(coalesce(extra,'{}'::jsonb), '{branding}', jsonb_build_object('bar','#C8A27A')) WHERE tenant_id=$1", [A]);
+      else await owner("INSERT INTO org (tenant_id, org_name, extra) VALUES ($1, 'Raya Trade', jsonb_build_object('branding', jsonb_build_object('bar','#C8A27A')))", [A]);
+      const stored = await owner("SELECT extra->'branding'->>'bar' AS b FROM org WHERE tenant_id=$1", [A]);
+      check("the client really has a tan band stored", stored[0] && stored[0].b === "#C8A27A", JSON.stringify(stored));
+      await pg.reload(); await settle();
+      const look = await pg.evaluate("({mast:getComputedStyle(document.querySelector('.mast')).backgroundColor, theme:(document.querySelector('meta[name=theme-color]')||{}).content})");
+      check("the masthead keeps Forefront's navy over a client's tan band (§499)", look.mast === "rgb(22, 50, 92)", JSON.stringify(look));
+      check("and so does the browser's theme colour", String(look.theme).toUpperCase() === "#16325C", JSON.stringify(look));
+      if (had.length) await owner("UPDATE org SET extra = $2::jsonb WHERE tenant_id=$1", [A, JSON.stringify(had[0].extra)]);
+      else await owner("DELETE FROM org WHERE tenant_id=$1", [A]);
+      await pg.reload(); await settle();
+    }
     await pg.evaluate("window.__stay = 1");
     check("the mark is really planted, or 'it stayed' proves nothing", await stayed());
     /* THE TWO SETTINGS BEHIND THE DOTS (§356.14): Group by has left the

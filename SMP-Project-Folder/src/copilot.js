@@ -264,7 +264,7 @@ var COPILOT = (function(){
     if (!PANE || PANE.id !== o.id) return say + '<div class="copnone">Opening…</div>';
     if (PANE.failed) return say + '<div class="copnone"><b>This could not be opened just now.</b> ' + E(PANE.why || "Nothing has been lost.") +
       ' <button type="button" class="linkbu" data-cop-reopen>Try again</button></div>';
-    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : competeOn() ? competeHtml() : dirsOn() ? dirsHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
+    return say + (o.kind === "chat" ? (swotOn() ? swotHtml() : competeOn() ? competeHtml() : dirsOn() ? dirsHtml() : execOn() ? execHtml() : flowView() ? flowHtml() : chatHtml()) : delivHtml());
   }
   function placeWord(){
     var t = place();
@@ -2111,6 +2111,207 @@ var COPILOT = (function(){
      when Structure keeps them in the company plan, in a section of their own
      when they are a layer. One answer, asked of the shared rule. */
   function dvCapsHere(){ try { return !!SMPRules.capAtTop(GROUP); } catch (e) { return true; } }
+
+  /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
+     The period first, then each Direction and Capability in turn: its
+     measures with a target for the period, and its tactics with an owner and
+     the quarters they run in — only the period's quarters are offered. The
+     shape of the Directions chat's code (§494): every press saved through one
+     act, the model asked by one, the plan written after the save press. */
+  var EXPEND = null, EXASK = {}, EXPICK = {};
+  function execOn(){ return !!(PANE && PANE.chat && PANE.exec); }
+  function exView(j){ ["exec","execTodo","execDone","execBlocker","execWords"].forEach(function(k){ if (j && k in j) PANE[k] = j[k]; }); }
+  function exCopy(){ return JSON.parse(JSON.stringify(PANE.exec)); }
+  function exProgress(id){ var l = list(); if (l && l.swotProgress && PANE && PANE.execTodo) l.swotProgress[id] = { done: PANE.execDone, of: PANE.execTodo.length }; }
+  /* The plan's Directions and the capabilities this place holds, as the
+     items the chat walks. */
+  function exItems(){
+    var out = dvExisting().map(function(d){
+      var h = dvHolder(), p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null;
+      return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
+    });
+    if (place() === "group" && dvCapsHere() && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
+      GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: c.fn ? dvFnName(c.fn) : "" }); });
+    return out;
+  }
+  function exSave(patch){
+    if (!execOn()) return;
+    if (busy) { EXPEND = patch; return; }
+    var id = PANE.chat.id;
+    act({ act:"execSave", id:id, exec:patch }, function(j){
+      if (PANE && PANE.chat && PANE.chat.id === id) exView(j);
+      exProgress(id);
+      if (EXPEND) { var p = EXPEND; EXPEND = null; exSave(p); return; }
+      draw();
+    });
+  }
+  function exAsk(ask){
+    if (!execOn() || THINKING) return;
+    var id = PANE.chat.id;
+    THINKING = id; SAY = ""; THINK_AT = Date.now();
+    if (!WORK_TIMER) WORK_TIMER = setInterval(workTick, 500);
+    draw();
+    post({ act:"execDraft", id:id, exec: exCopy(), ask: ask || "", placeWord: placeWord(), context: swContext() }, WAIT_MS).then(function(x){
+      THINKING = null;
+      if (x.st === 200 && x.j && x.j.ok) { if (PANE && PANE.chat && PANE.chat.id === id) { exView(x.j); exProgress(id); } draw(); return; }
+      SAY = (x.j && x.j.why) || "That did not work. Nothing was lost — try again."; draw();
+    }, function(err){
+      THINKING = null;
+      SAY = err && err.timedOut ? "This is taking too long, so the page stopped waiting. Try again in a moment." : "The server could not be reached. Nothing was lost — try again.";
+      draw();
+    });
+  }
+  function exSideHtml(){ var keep = [PANE.dirsTodo, PANE.dirsDone]; PANE.dirsTodo = PANE.execTodo; PANE.dirsDone = PANE.execDone;
+    var h = dvSideHtml(); PANE.dirsTodo = keep[0]; PANE.dirsDone = keep[1]; return h; }
+  var EX_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function exPeriodAsk(ed){
+    var w = PANE.execWords || {}, ch = w.choices || {}, pk = EXPICK[PANE.chat.id];
+    var h = cpMsg("ai", "How long is this plan?");
+    if (!ed) return h;
+    h += '<div class="copopts"><button type="button" class="copopt" data-cop-ex-period="full">' + E(ch.fullWord || "Full year") + '</button>' +
+      '<button type="button" class="copopt" data-cop-ex-period="rest">This quarter to year end — ' + E(ch.restWord || "") + '</button>' +
+      '<button type="button" class="copopt" data-cop-ex-pick>Pick months</button></div>';
+    if (pk) {
+      var mo = function(attr, v){ return '<select class="fld copdv-own" ' + attr + '>' + EX_MONTHS.map(function(m, i){ return '<option value="' + (i + 1) + '"' + (i + 1 === v ? ' selected' : '') + '>' + m + '</option>'; }).join("") + '</select>'; };
+      h += '<div class="copcp-ask copex-pick">From ' + mo('data-cop-ex-m1 aria-label="From month"', pk.m1) + ' to ' + mo('data-cop-ex-m2 aria-label="To month"', pk.m2) +
+        ' <input class="fld copex-y" data-cop-ex-y value="' + E(String(pk.y)) + '" inputmode="numeric" aria-label="Year">' +
+        '<button type="button" class="copbtn" data-cop-ex-pickgo>Use these months</button></div>';
+    }
+    return h;
+  }
+  function exItemHtml(it, k, ed){
+    var w = PANE.execWords || {}, qs = w.quarters || [1,2,3,4], comp = w.compiles || ["Sum","Count","Latest","Average"];
+    var mrow = function(m, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|name" value="' + E(m.name) + '" aria-label="Measure">' : E(m.name)) + '</td>' +
+      '<td>' + (ed ? '<input class="fld" data-cop-ex-m="' + i + '|target" value="' + E(m.target) + '" aria-label="Target for the period">' : E(m.target || "—")) + '</td>' +
+      '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
+      (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
+    var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
+      '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      '<td class="copex-qs">' + [1,2,3,4].map(function(q){ var inP = qs.indexOf(q) >= 0, on = t.quarters.indexOf(q) >= 0;
+        return '<button type="button" class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '"' + (ed && inP ? ' data-cop-ex-q="' + i + '|' + q + '"' : ' disabled') + ' aria-pressed="' + on + '" title="' + (inP ? "Q" + q : "Q" + q + " is outside the plan period") + '">Q' + q + '</button>'; }).join("") + '</td>' +
+      (ed ? '<td><button type="button" class="xbtn" data-cop-ex-tx="' + i + '" aria-label="Remove this tactic">&times;</button></td>' : '') + '</tr>'; };
+    return '<div class="copex-item" data-cop-ex-item="' + k + '"><div class="copvline"><b>' + E(it.title) + '</b> — ' + (it.kind === "capability" ? "Capability" : "Direction") + ' ' + (k + 1) + ' of ' + PANE.exec.items.length + (it.ownedBy ? ', owned by ' + E(it.ownedBy) : '') + '</div>' +
+      '<table class="copdv-t"><thead><tr><th>Measure</th><th>Target (period)</th><th>Compile</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.measures.map(mrow).join("") + '</tbody></table>' +
+      (ed ? '<button type="button" class="linkbu" data-cop-ex-addm>+ Add a measure</button>' : '') +
+      '<table class="copdv-t"><thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.tactics.map(trow).join("") + '</tbody></table>' +
+      (ed ? '<button type="button" class="linkbu" data-cop-ex-addt>+ Add a tactic</button>' : '') + '</div>';
+  }
+  function execHtml(){
+    var s = PANE.exec, ed = canEdit() && !s.saved, id = PANE.chat.id, busyHere = THINKING === id, w = PANE.execWords || {};
+    var head = '<div class="copvline"><b>' + E(PANE.chat.title || "Execution") + '</b> · ' + (s.saved ? "saved" : "in progress") + '</div>';
+    var work = busyHere ? '<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>' : '';
+    var main = '';
+    if (!s.items.length) main = cpMsg("product", "This place's plan has no Directions or Capabilities yet. Choose them first, in the Directions section.");
+    else if (!s.period) main = exPeriodAsk(ed);
+    else {
+      main = '<div class="copex-period" data-cop-ex-strip>This plan covers <b>' + E(w.period) + '</b>' + (ed ? ' · <button type="button" class="linkbu" data-cop-ex-change>Change</button>' : '') + '</div>' +
+        (EXPICK[id] ? exPeriodAsk(ed) : '');
+      var it = s.items[s.cursor];
+      if (s.reply) main += cpMsg("ai", E(s.reply));
+      main += exItemHtml(it, s.cursor, ed);
+      if (ed && !busyHere) main += '<div class="copopts">' + (it.drafted ? '' : '<button type="button" class="copopt rec" data-cop-ex-draft>Draft measures and tactics</button>') +
+        (s.cursor > 0 ? '<button type="button" class="copopt" data-cop-ex-go="-1">Back</button>' : '') +
+        (s.cursor < s.items.length - 1 ? '<button type="button" class="copopt" data-cop-ex-go="1">Next</button>' : '') + '</div>' +
+        '<div class="copcp-ask"><textarea class="fld" data-cop-ex-ask rows="2" placeholder="Ask for a change to these measures or tactics" aria-label="Ask the Copilot">' + E(EXASK[id] || "") + '</textarea>' +
+        '<button type="button" class="copbtn" data-cop-ex-send>Send</button></div>';
+      if (ed) { var why = PANE.execBlocker || "";
+        main += '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-ex-finish' + (why ? ' aria-disabled="true" title="' + E(why) + '"' : '') + '>Save to plan</button></div>'; }
+    }
+    if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan.");
+    return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + exSideHtml() + '</div>';
+  }
+  /* The plan is written after the save press (§35): the plan period onto
+     the company, each Direction's measures and tactics onto its pillar, and a
+     Capability's measures as its key objectives and its tactics as projects
+     running from the first to the last month of their quarters. A row is
+     matched by name and updated rather than added twice. */
+  function exWritePlan(s){
+    if (!s.period || typeof GROUP === "undefined") return { ok:false };
+    var R = typeof SMPRules !== "undefined" ? SMPRules : null, p = s.period;
+    if (R && R.monthLabel) { GROUP[R.PLAN_FROM || "planFrom"] = R.monthLabel(p.y * 12 + p.m1 - 1); GROUP[R.PLAN_TO || "planTo"] = R.monthLabel(p.y * 12 + p.m2 - 1); }
+    var h = dvHolder(), wrote = 0, yy = String(p.y).slice(2);
+    var find = function(list, name){ return list.filter(function(x){ return x && String(x.name || "").trim().toLowerCase() === name.toLowerCase(); })[0]; };
+    s.items.forEach(function(it){
+      if (it.kind === "direction") {
+        var pl = h && Array.isArray(h.items) ? h.items.filter(function(x){ return x && x.id === it.planId; })[0] : null;
+        if (!pl) return;
+        it.measures.forEach(function(m){ var r = find(pl.measures || [], m.name) || addMeasure(pl); if (!r) return; r.name = m.name; r.target = m.target; if (m.compile) r.compile = m.compile; });
+        it.tactics.forEach(function(t){ var r = find(pl.tactics || [], t.name) || addTactic(pl); if (!r) return; r.name = t.name; r.owner = t.owner;
+          [1,2,3,4].forEach(function(q){ r["q" + q] = t.quarters.indexOf(q) >= 0 ? 1 : 0; }); });
+        wrote++;
+      } else {
+        var c = Array.isArray(GROUP.capabilities) ? GROUP.capabilities.filter(function(x){ return x && String(x.id) === it.planId; })[0] : null;
+        if (!c) return;
+        it.measures.forEach(function(m){ var r = find(c.keyObjectives || [], m.name);
+          if (!r) { r = { id: mintRowId(c.keyObjectives, c.id + "-KO"), name:"", dir:"≥", target:"", compile:"Latest", weight:null, actual:"", progress:null }; c.keyObjectives.push(r); }
+          r.name = m.name; r.target = m.target; if (m.compile) r.compile = m.compile; });
+        it.tactics.forEach(function(t){ var r = find(c.projects || [], t.name) || addProject(c); if (!r) return; r.name = t.name; r.owner = t.owner;
+          if (t.quarters.length) { var a = (Math.min.apply(null, t.quarters) - 1) * 3, b = Math.max.apply(null, t.quarters) * 3 - 1;
+            r.start = EX_MONTHS[a] + " " + yy; r.end = EX_MONTHS[b] + " " + yy; } });
+        wrote++;
+      }
+    });
+    return { ok:true, n:wrote };
+  }
+  function exItemPatch(f){ var g = exCopy(); f(g.items[g.cursor], g); PANE.exec = g; exSave(g); return true; }
+  function exClick(ev){
+    if (!execOn()) return false;
+    var b, s = PANE.exec, id = PANE.chat.id;
+    if (!canEdit() || s.saved) return false;
+    if ((b = hit(ev, "[data-cop-ex-period]"))) { EXPICK[id] = null; act({ act:"execPeriod", id:id, choice: b.getAttribute("data-cop-ex-period") }, function(j){ exView(j); exProgress(id); draw(); }); return true; }
+    if ((b = hit(ev, "[data-cop-ex-pick]")) || (b = hit(ev, "[data-cop-ex-change]"))) {
+      var p = s.period || (PANE.execWords && PANE.execWords.choices && PANE.execWords.choices.full) || { y: new Date().getFullYear(), m1: 1, m2: 12 };
+      EXPICK[id] = EXPICK[id] ? null : { y: p.y, m1: p.m1, m2: p.m2 }; draw(); return true;
+    }
+    if ((b = hit(ev, "[data-cop-ex-pickgo]"))) { var pk = EXPICK[id];
+      act({ act:"execPeriod", id:id, period: pk }, function(j){ EXPICK[id] = null; exView(j); exProgress(id); draw(); }); return true; }
+    if ((b = hit(ev, "[data-cop-ex-draft]"))) { exAsk(""); return true; }
+    if ((b = hit(ev, "[data-cop-ex-send]"))) { var q = String(EXASK[id] || "").trim(); if (!q) return true; EXASK[id] = ""; exAsk(q); return true; }
+    if ((b = hit(ev, "[data-cop-ex-go]"))) { var g = exCopy(); g.cursor = Math.max(0, Math.min(g.items.length - 1, g.cursor + (+b.getAttribute("data-cop-ex-go")))); g.reply = ""; PANE.exec = g; exSave(g); return true; }
+    if ((b = hit(ev, "[data-cop-ex-addm]"))) return exItemPatch(function(it){ it.measures.push({ name:"New measure", target:"", compile:"" }); });
+    if ((b = hit(ev, "[data-cop-ex-addt]"))) return exItemPatch(function(it){ it.tactics.push({ name:"New tactic", owner:"", quarters:[] }); });
+    if ((b = hit(ev, "[data-cop-ex-mx]"))) { var mi = +b.getAttribute("data-cop-ex-mx"); return exItemPatch(function(it){ it.measures.splice(mi, 1); }); }
+    if ((b = hit(ev, "[data-cop-ex-tx]"))) { var ti = +b.getAttribute("data-cop-ex-tx"); return exItemPatch(function(it){ it.tactics.splice(ti, 1); }); }
+    if ((b = hit(ev, "[data-cop-ex-q]"))) { var qp = b.getAttribute("data-cop-ex-q").split("|");
+      return exItemPatch(function(it){ var t = it.tactics[+qp[0]], q2 = +qp[1], at = t.quarters.indexOf(q2); if (at >= 0) t.quarters.splice(at, 1); else t.quarters.push(q2); t.quarters.sort(); }); }
+    if ((b = hit(ev, "[data-cop-ex-finish]"))) {
+      if (THINKING) return true;
+      if (PANE.execBlocker) { SAY = PANE.execBlocker; draw(); return true; }
+      act({ act:"execFinish", id:id, placeWord: placeWord() }, function(j){
+        if (PANE && PANE.chat && PANE.chat.id === id) exView(j);
+        exProgress(id);
+        var r = exWritePlan(PANE.exec);
+        SAY = r.ok ? "" : "Saved as a deliverable. The plan could not be written from here.";
+        LISTS[key()] = null; loadList(true);
+        if (r.ok && typeof paint === "function") paint(); else draw();
+      });
+      return true;
+    }
+    return false;
+  }
+  /* A typed field writes when the cursor leaves it (§35): the `change` of a
+     measure's or a tactic's box, and the months picked. */
+  function exChange(ev){
+    if (!execOn() || !canEdit() || PANE.exec.saved) return false;
+    var el = ev.target, id = PANE.chat.id, a;
+    if ((a = el.getAttribute && el.getAttribute("data-cop-ex-m"))) { var p = a.split("|"); return exItemPatch(function(it){ it.measures[+p[0]][p[1]] = el.value; }); }
+    if ((a = el.getAttribute && el.getAttribute("data-cop-ex-t"))) { var p2 = a.split("|"); return exItemPatch(function(it){ it.tactics[+p2[0]][p2[1]] = el.value; }); }
+    var pk = EXPICK[id]; if (!pk) return false;
+    if (el.hasAttribute && el.hasAttribute("data-cop-ex-m1")) { pk.m1 = +el.value; return true; }
+    if (el.hasAttribute && el.hasAttribute("data-cop-ex-m2")) { pk.m2 = +el.value; return true; }
+    if (el.hasAttribute && el.hasAttribute("data-cop-ex-y")) { pk.y = +el.value; return true; }
+    return false;
+  }
+  function exNew(){
+    act({ act:"newExecution", place: place(), title: "Execution — " + placeWord(), items: exItems() }, function(j){
+      var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
+      PANE = { id: j.chat.id, chat: j.chat, messages: [] };
+      exView(j);
+      OPEN[key()] = { kind:"chat", id: j.chat.id };
+      if (!RAILKEPT && !railShut()) setRail(true);
+      draw();
+    });
+  }
   function openItem(kind, id){
     OPEN[key()] = { kind: kind, id: id }; EDIT = null;
     /* A chat opening folds the chats rail to its strip (§490.2) — unless
@@ -2150,6 +2351,7 @@ var COPILOT = (function(){
     var ck = hit(ev, "[data-cop-cp-ask]"); if (ck && competeOn()) CPASKTXT[PANE.chat.id] = ck.value;
     var cc = hit(ev, "[data-cop-cp-cell]"); if (cc && competeOn()) cpCell(cc);
     var da = hit(ev, "[data-cop-dv-ask]"); if (da && dirsOn()) DVASK[PANE.chat.id] = da.value;
+    var ea = hit(ev, "[data-cop-ex-ask]"); if (ea && execOn()) EXASK[PANE.chat.id] = ea.value;
     var dn = hit(ev, "[data-cop-dv-owntitle]"); if (dn && dirsOn()) DVOWN[PANE.chat.id] = dn.value;
     var fe = hit(ev, "[data-cop-sw-fe]");
     if (fe && SWEDIT) { var fp = fe.getAttribute("data-cop-sw-fe").split("|"); var ff = SWEDIT.data.items[+fp[0]].factors[+fp[1]]; if (ff) ff[fp[2]] = fe.value; }
@@ -2157,6 +2359,7 @@ var COPILOT = (function(){
   /* An answer changed in its box is kept when the box is left, like every
      other field in the platform (§35) — not only when Draft is pressed. */
   document.addEventListener("change", function(ev){
+    if (exChange(ev)) return;
     var sa = hit(ev, "[data-cop-sw-ans]");
     if (sa && swotOn() && canEdit() && !THINKING) { swSave(swCopy()); return; }
     var cc = hit(ev, "[data-cop-cp-cell]");
@@ -2277,6 +2480,7 @@ var COPILOT = (function(){
     if (flowClick(ev)) return;
     if (cpClick(ev)) return;
     if (dvClick(ev)) return;
+    if (exClick(ev)) return;
     if (swClick(ev)) return;
     if ((b = hit(ev, "[data-cop-railtog]"))) { var sh = !railShut(); RAILKEPT = !sh; setRail(sh); return; }
     if ((b = hit(ev, "[data-cop-retry]"))) { loadList(true); return; }
@@ -2297,6 +2501,7 @@ var COPILOT = (function(){
         return;
       }
       if (section() === "directions" || section() === "capabilities") { dvNew(section()); return; }
+      if (section() === "execution") { exNew(); return; }
       if (section() === "compete") {
         act({ act:"newCompete", place: place(), title: cpTitle() }, function(j){
           var l = list(); if (l && l.chats) l.chats.unshift(j.chat);

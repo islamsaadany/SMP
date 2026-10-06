@@ -55,9 +55,12 @@ export function isView(s: unknown): s is View { return typeof s === "string" && 
    the order the rows already have. Remembered on the BROWSER (a cookie the
    page reads), never stored on the client, so two of the office read one
    list two ways. */
-export const GROUPS = ["owner", "status", "due", "none"] as const;
+/* TOPIC JOINS THEM (§497): Islam, "we can group by them" — a topic is how a
+   piece of work that runs over many weeks is held together, so the list can
+   be read one topic at a time with the actions belonging to none last. */
+export const GROUPS = ["owner", "topic", "status", "due", "none"] as const;
 export type Group = (typeof GROUPS)[number];
-export const GROUP_WORD: Record<Group, string> = { owner: "Owner", status: "Status", due: "Due date", none: "None" };
+export const GROUP_WORD: Record<Group, string> = { owner: "Owner", topic: "Topic", status: "Status", due: "Due date", none: "None" };
 export function isGroup(s: unknown): s is Group { return typeof s === "string" && (GROUPS as readonly string[]).includes(s); }
 export const GROUP_COOKIE = "smp.tracker.group";
 
@@ -210,6 +213,7 @@ export function weekLabel(w: Week, today?: string): string {
 export type Action = {
   id: string; title: string; description: string;
   ownerKey: string;
+  topicId: string | null;
   due: string | null; firstDue: string | null;
   status: Status; doneDay: string | null;
   createdBy: string; createdAt: string; updatedAt: string;
@@ -220,6 +224,7 @@ export function shape(r: Record<string, any>): Action {
   return {
     id: str(r.id), title: str(r.title), description: str(r.description),
     ownerKey: str(r.owner_key),
+    topicId: r.topic_id ? str(r.topic_id) : null,
     due: r.due ? str(r.due) : null, firstDue: r.first_due ? str(r.first_due) : null,
     status: isStatus(r.status) ? r.status : "not_started",
     doneDay: r.done_day ? str(r.done_day) : null,
@@ -303,7 +308,7 @@ export async function isOfficeRow(c: Q, key: string): Promise<boolean> {
 }
 
 const COLS =
-  "id, title, description, owner_key, due::text AS due, first_due::text AS first_due, status, " +
+  "id, title, description, owner_key, topic_id, due::text AS due, first_due::text AS first_due, status, " +
   "to_char(done_at AT TIME ZONE 'Africa/Cairo', 'YYYY-MM-DD') AS done_day, created_by, created_at, updated_at";
 
 /* Open first, soonest first, no date last; done at the end, latest first. */
@@ -328,20 +333,20 @@ export async function eventsOf(c: Q, id: string): Promise<Event[]> {
 /* THE ADD LINE TAKES EVERYTHING (Islam, 2026-09-16): the date, the owner
    and a note arrive with the title. A date given at birth is the first due
    date too (spec 054 §5). */
-export async function addAction(c: Q, a: { title: string; ownerKey: string; by: string; due?: string | null; description?: string }): Promise<Action> {
+export async function addAction(c: Q, a: { title: string; ownerKey: string; by: string; due?: string | null; description?: string; topicId?: string | null }): Promise<Action> {
   const title = oneLine(a.title).slice(0, TITLE_MAX);
   if (!title) throw new Error("an action needs a title");
   const due = a.due || null;
   const r = await c.query(
-    "INSERT INTO tracker_actions (title, owner_key, created_by, due, first_due, description) VALUES ($1, $2, $3, $4, $4, $5) RETURNING " + COLS,
-    [title, a.ownerKey, a.by, due, trimmed(a.description || "").slice(0, NOTES_MAX)]);
+    "INSERT INTO tracker_actions (title, owner_key, created_by, due, first_due, description, topic_id) VALUES ($1, $2, $3, $4, $4, $5, $6) RETURNING " + COLS,
+    [title, a.ownerKey, a.by, due, trimmed(a.description || "").slice(0, NOTES_MAX), a.topicId || null]);
   const row = shape(r.rows[0]);
   await c.query("INSERT INTO tracker_events (action_id, kind, to_status, by_key) VALUES ($1, 'created', $2, $3)",
     [row.id, row.status, a.by]);
   return row;
 }
 
-export type Patch = { title?: string; description?: string; due?: string | null; ownerKey?: string };
+export type Patch = { title?: string; description?: string; due?: string | null; ownerKey?: string; topicId?: string | null };
 /* THE FIRST DUE DATE IS WRITTEN ONCE (spec 054 §5): set the day the action
    first gets a date and never moved by a reschedule, so the carried count
    cannot be reset by giving an action a new date every Sunday. */
@@ -356,6 +361,7 @@ export async function setFields(c: Q, id: string, p: Patch): Promise<Action | nu
     else if (p.due) { args.push(p.due); sets.push("first_due = COALESCE(first_due, $" + args.length + ")"); }
   }
   if (p.ownerKey !== undefined) put("owner_key", p.ownerKey);
+  if (p.topicId !== undefined) put("topic_id", p.topicId || null);
   if (!sets.length) return oneAction(c, id);
   sets.push("updated_at = now()");
   args.push(id);
@@ -385,4 +391,67 @@ export async function setStatus(c: Q, id: string, status: Status, by: string): P
 export async function deleteAction(c: Q, id: string): Promise<boolean> {
   const r = await c.query("DELETE FROM tracker_actions WHERE id = $1", [id]);
   return (r.rowCount || 0) > 0;
+}
+
+/* ══ topics (§497) ════════════════════════════════════════════════════
+   Islam's three answers, each a line here: an action belongs to ONE topic
+   (a column on the action, not a list); a closed topic is still drawn while
+   it holds open actions (topicShown); and anybody in the office may create,
+   rename, close or delete one — no owner, because a topic is the office's
+   shared word for a piece of work, not somebody's action. */
+export const TOPIC_MAX = 60;
+export type Topic = { id: string; name: string; closed: boolean; createdBy: string };
+function shapeTopic(r: Record<string, any>): Topic {
+  return { id: str(r.id), name: str(r.name), closed: !!r.closed_at, createdBy: str(r.created_by) };
+}
+/* Open topics first, then by name — the order the picker and the grouped
+   list read them in, so one list is never ordered two ways. */
+export async function listTopics(c: Q): Promise<Topic[]> {
+  const r = await c.query("SELECT id, name, closed_at, created_by FROM tracker_topics ORDER BY (closed_at IS NOT NULL), lower(name)");
+  return r.rows.map(shapeTopic);
+}
+export async function oneTopic(c: Q, id: string): Promise<Topic | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const r = await c.query("SELECT id, name, closed_at, created_by FROM tracker_topics WHERE id = $1", [id]);
+  return r.rows[0] ? shapeTopic(r.rows[0]) : null;
+}
+/* A name already on the list — whatever its case — is THAT topic, handed
+   back rather than refused: somebody typing "budget" means Budget. A closed
+   one asked for again is reopened, because asking for it is using it. */
+export async function addTopic(c: Q, name: string, by: string): Promise<Topic> {
+  const n = oneLine(name).slice(0, TOPIC_MAX);
+  if (!n) throw new Error("a topic needs a name");
+  const had = await c.query("SELECT id, name, closed_at, created_by FROM tracker_topics WHERE lower(name) = lower($1)", [n]);
+  if (had.rows[0]) {
+    if (had.rows[0].closed_at) await c.query("UPDATE tracker_topics SET closed_at = NULL WHERE id = $1", [had.rows[0].id]);
+    return { ...shapeTopic(had.rows[0]), closed: false };
+  }
+  const r = await c.query("INSERT INTO tracker_topics (name, created_by) VALUES ($1, $2) RETURNING id, name, closed_at, created_by", [n, by]);
+  return shapeTopic(r.rows[0]);
+}
+/* Renaming onto another topic's name is refused, never merged quietly —
+   merging two topics is a decision, and it would move actions nobody chose. */
+export async function renameTopic(c: Q, id: string, name: string): Promise<"ok" | "empty" | "taken"> {
+  const n = oneLine(name).slice(0, TOPIC_MAX);
+  if (!n) return "empty";
+  const clash = await c.query("SELECT 1 FROM tracker_topics WHERE lower(name) = lower($1) AND id <> $2", [n, id]);
+  if (clash.rows.length) return "taken";
+  await c.query("UPDATE tracker_topics SET name = $2 WHERE id = $1", [id, n]);
+  return "ok";
+}
+export async function setTopicClosed(c: Q, id: string, closed: boolean): Promise<void> {
+  await c.query("UPDATE tracker_topics SET closed_at = " + (closed ? "COALESCE(closed_at, now())" : "NULL") + " WHERE id = $1", [id]);
+}
+/* Deleting a topic takes it off its actions FIRST and keeps the actions —
+   they are the work; the topic was only a heading over it. */
+export async function deleteTopic(c: Q, id: string): Promise<void> {
+  await c.query("UPDATE tracker_actions SET topic_id = NULL, updated_at = now() WHERE topic_id = $1", [id]);
+  await c.query("DELETE FROM tracker_topics WHERE id = $1", [id]);
+}
+/* A CLOSED TOPIC STAYS WHILE IT HOLDS OPEN WORK (Islam's second answer):
+   closing it says no more is coming, not that what is there is finished. It
+   leaves the picker (nothing new goes under it) and leaves the grouped list
+   once its last open action is done. */
+export function topicShown(t: Topic, all: Action[]): boolean {
+  return !t.closed || all.some((a) => a.topicId === t.id && a.status !== "done");
 }

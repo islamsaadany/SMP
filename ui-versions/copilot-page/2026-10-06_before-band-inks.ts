@@ -6,7 +6,8 @@
    chose for the same reason (modules/insights/page.ts):
 
      /<client>/copilot                       every chat (or deliverable) on the client
-     (its settings moved to Forefront's console in §501 — /platform#copilot)
+     /<client>/copilot/settings              AI instructions, per section
+     /<client>/copilot/settings/templates    the five blank templates
 
    THE PAGE FINDS, THE TAB WORKS. A row is a link into its place's Copilot
    tab inside Strategy, ending in `#cop=chat-<id>` so the tab opens that chat
@@ -21,8 +22,9 @@
    where in one row rather than drawing a page that would be a second copy. */
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss } from "../../lib/topbar.ts";
-import { barFor, barVars } from "../../lib/branding.ts";
+import { barFor } from "../../lib/branding.ts";
 import { SECTIONS, SECTION_WORD, type Chat, type Deliverable } from "../../lib/copilot.ts";
+import { SECTION_ORDER, type Part, type Template } from "../../lib/copilot-settings.ts";
 
 const esc = (s: unknown) =>
   String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -30,7 +32,7 @@ const esc = (s: unknown) =>
 
 const CSS = `
 *{box-sizing:border-box}
-:root{%BARVARS%;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EFF2F6;--gold:#9C5D08;--good-tx:#1E6B41;--bad-tx:#A23123;--note:#FFF7E3}
+:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#414A58;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EFF2F6;--gold:#9C5D08;--good-tx:#1E6B41;--bad-tx:#A23123;--note:#FFF7E3}
 @media (prefers-color-scheme:dark){:root{--ink:#E7EBF2;--ink-2:#B4BCC8;--ink-3:#8F9AAD;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222833;--gold:#F5A623;--good-tx:#6FCF97;--bad-tx:#F19A8E;--note:#2E2A1C}}
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 .crumbs{color:var(--ink-3);font-size:13px}.crumbs a{color:inherit}
@@ -40,12 +42,12 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .chip{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--ink-2);background:var(--surface)}
 .btn{border:1px solid var(--line);border-radius:7px;padding:6px 13px;font:600 13px/1.4 inherit;background:var(--surface);color:var(--ink);text-decoration:none;cursor:pointer;display:inline-block}
 .btn:hover,.btn:focus-visible{border-color:var(--gold);outline:none}
-.btn.solid{background:var(--bar);color:var(--bar-ink);border-color:var(--bar)}
+.btn.solid{background:var(--bar);color:#fff;border-color:var(--bar)}
 .btn.quiet{border-color:transparent;background:transparent;color:var(--ink-3);padding-inline:6px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;flex-wrap:wrap;background:var(--surface)}
 .seg a{padding:6px 13px;font-size:13.5px;border-right:1px solid var(--line);color:var(--ink-2);text-decoration:none}
 .seg a:last-child{border-right:0}
-.seg a[aria-current="true"]{background:var(--bar);color:var(--bar-ink)}
+.seg a[aria-current="true"]{background:var(--bar);color:#fff}
 .seg a:hover:not([aria-current]),.seg a:focus-visible{background:var(--surface-2);outline:none}
 .filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filters form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:1 1 420px;min-width:0}
@@ -54,7 +56,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 syste
 .cnt{font:600 10.5px/1 ui-monospace,SFMono-Regular,monospace;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-left:auto}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 table{border-collapse:collapse;width:100%;min-width:640px}
-th{background:var(--bar);color:var(--bar-ink);text-align:left;font:600 11.5px/1.3 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
+th{background:var(--bar);color:#fff;text-align:left;font:600 11.5px/1.3 system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;white-space:nowrap}
 td{padding:8px 12px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis;font-size:14px}
 tr:last-child td{border-bottom:0}
 tbody tr:nth-child(even) td{background:var(--surface-2)}
@@ -111,7 +113,7 @@ function frame(slug: string, tenantName: string, have: ModuleKey[], bar: string,
     "<title>" + esc(tenantName) + " &mdash; " + esc(title) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BARVARS%", barVars(bar))) + "</style>\n</head>\n<body>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + "</style>\n</head>\n<body>\n" +
     topBarHtml({ slug, tenantName, module: "copilot", have, consultant, viewer: null }) + "\n" +
     '<main class="pg">\n' + (crumbs ? '<div class="crumbs">' + crumbs + "</div>\n" : "") + body + "\n</main>\n</body>\n</html>\n";
 }
@@ -211,9 +213,120 @@ export function listDocument(
   }
 
   const body = '<div class="head"><h2>' + esc(MODULE_DEF.copilot.label) + "</h2>" +
-    (consultant ? '<a class="btn" href="/platform#copilot">Copilot settings &rsaquo;</a>' : "") + "</div>" +
+    '<a class="btn" href="' + esc(clientHref(slug, "copilot", "settings")) + '">Settings</a></div>' +
     '<div class="filters">' + seg + form + count + "</div>" + table;
   return frame(slug, tenantName, have, bar, "", "Copilot", body, consultant);
+}
+
+/* ── THE SETTINGS RAIL ─────────────────────────────────────────────────
+   Two pages under "The AI". No Roles & access entry: who may use the
+   Copilot is a column on Strategy's own table (Islam: "stay"), so the foot
+   says where rather than drawing a second copy of it. */
+function rail(slug: string, page: "instructions" | "templates"): string {
+  const it = (p: "instructions" | "templates", label: string, rest: string) =>
+    '<a class="it" href="' + esc(clientHref(slug, "copilot", rest)) + '"' + (page === p ? ' aria-current="true"' : "") + ">" + label + "</a>";
+  return '<nav class="rail" aria-label="Copilot settings"><div class="rh">Copilot &middot; Setup</div><div class="g">The AI</div>' +
+    it("instructions", "AI instructions", "settings") + it("templates", "Templates", "settings/templates") +
+    '<div class="foot"><span>Who may use the Copilot is set on Strategy&rsquo;s Roles &amp; access.</span>' +
+    '<a href="' + esc(clientHref(slug, "strategy", "setup/access")) + '">Roles &amp; access &rsaquo;</a>' +
+    '<a href="' + esc(clientHref(slug, null, "setup")) + '">Client settings &rsaquo;</a></div></nav>';
+}
+
+/* A SMALL, SAFE MARKDOWN READER for the method's own text — headings, lists,
+   bold and paragraphs, which is all the tidied text uses. Everything is
+   escaped first and only then given its few tags, so nothing typed into a
+   part can become markup (§235). */
+export function mdToHtml(src: string): string {
+  const out: string[] = [];
+  let list = false, para: string[] = [];
+  const inline = (s: string) => esc(s).replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
+  const flush = () => { if (para.length) { out.push("<p>" + inline(para.join(" ")) + "</p>"); para = []; } };
+  const endList = () => { if (list) { out.push("</ul>"); list = false; } };
+  for (const raw of String(src || "").split("\n")) {
+    const l = raw.replace(/\s+$/, "");
+    const h = /^(#{1,6})\s+(.*)$/.exec(l);
+    const li = /^\s*[-*]\s+(.*)$/.exec(l);
+    if (!l.trim()) { flush(); endList(); continue; }
+    if (h) { flush(); endList(); const n = Math.min(6, Math.max(3, h[1].length)); out.push("<h" + n + ">" + inline(h[2]) + "</h" + n + ">"); continue; }
+    if (li) { flush(); if (!list) { out.push("<ul>"); list = true; } out.push("<li>" + inline(li[1]) + "</li>"); continue; }
+    endList(); para.push(l.trim());
+  }
+  flush(); endList();
+  return out.join("");
+}
+
+function headingsOf(text: string): string {
+  const hs = String(text).split("\n").map((l) => /^#{3,4}\s+(.*)$/.exec(l)).filter(Boolean).map((m) => (m as RegExpExecArray)[1]);
+  return hs.slice(0, 6).join(" · ") + (hs.length > 6 ? " · …" : "");
+}
+
+export type Flash = { ok: boolean; text: string } | null;
+const flashHtml = (f: Flash) => f ? '<p class="flash' + (f.ok ? "" : " bad") + '" role="status">' + esc(f.text) + "</p>" : "";
+
+export function instructionsDocument(
+  slug: string, tenantName: string, have: ModuleKey[], bar: string, parts: Part[], section: string,
+  admin: boolean, editing: string, flash: Flash, consultant = false,
+): string {
+  const sec = (SECTION_ORDER as readonly string[]).includes(section) ? section : "foundation";
+  const segs = '<nav class="seg" aria-label="Section">' + SECTION_ORDER.map((s) =>
+    '<a href="' + esc(clientHref(slug, "copilot", "settings") + "?section=" + s) + '"' + (s === sec ? ' aria-current="true"' : "") + ">" +
+    esc(SECTION_WORD[s as keyof typeof SECTION_WORD]) + "</a>").join("") + "</nav>";
+  const action = clientHref(slug, "copilot", "settings") + "?section=" + sec;
+  const mine = parts.filter((p) => p.section === sec);
+  const blocks = mine.map((p) => {
+    const isEditing = admin && editing === p.key;
+    const tools = admin
+      ? '<div class="edit">' + (isEditing
+        ? '<form method="post" action="' + esc(action) + '"><input type="hidden" name="act" value="save"><input type="hidden" name="key" value="' + esc(p.key) + '">' +
+          '<textarea name="text" aria-label="' + esc(p.title) + '">' + esc(p.text) + "</textarea>" +
+          '<div class="row"><button class="btn solid" type="submit">Save</button><a class="btn quiet" href="' + esc(action) + '">Cancel</a></div></form>'
+        : '<div class="row"><a class="btn" href="' + esc(action + "&edit=" + p.key + "#" + p.key) + '">Edit</a>' +
+          (p.edited ? '<form method="post" action="' + esc(action) + '" style="margin:0"><input type="hidden" name="act" value="reset"><input type="hidden" name="key" value="' + esc(p.key) + '">' +
+            '<button class="btn quiet" type="submit">Put back the shipped text</button></form>' : "") + "</div>") + "</div>"
+      : "";
+    return '<details class="part" id="' + esc(p.key) + '"' + (isEditing || mine.length === 1 ? " open" : "") + "><summary><b>" + p.n + "</b>" +
+      '<span class="t">' + esc(p.title) + "</span>" + (p.edited ? '<span class="edited">Edited</span>' : "") +
+      '<span class="m">' + esc(headingsOf(p.text)) + "</span></summary>" +
+      '<div class="md">' + mdToHtml(p.text) + "</div>" + tools + "</details>";
+  }).join("");
+  const body = '<div class="split">' + rail(slug, "instructions") + '<div class="pane">' +
+    '<div class="head"><h2>AI instructions</h2><span class="chip">Same for all clients</span>' +
+    (admin ? "" : '<span class="chip">Read only</span>') + "</div>" + flashHtml(flash) + segs + blocks +
+    '<p class="why">What the Copilot is told for this section, read on every message. ' +
+    (admin ? "An edit here changes it for every client." : "Only a Forefront super user can change it.") + "</p></div></div>";
+  return frame(slug, tenantName, have, bar,
+    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot settings", body, consultant);
+}
+
+function sizeOf(n: number): string {
+  return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+}
+
+export function templatesDocument(
+  slug: string, tenantName: string, have: ModuleKey[], bar: string, ts: Template[], admin: boolean, flash: Flash, consultant = false,
+): string {
+  const action = clientHref(slug, "copilot", "settings/templates");
+  const rows = ts.map((t, i) =>
+    "<tr><td>" + (i + 1) + "</td><td>" + esc(t.name) + (t.edited ? ' <span class="edited">Replaced</span>' : "") + "</td>" +
+    "<td>" + esc(SECTION_WORD[t.section as keyof typeof SECTION_WORD] || t.section) + "</td><td>" + esc(t.use) + "</td>" +
+    '<td class="q">' + esc(sizeOf(t.size)) + "</td>" +
+    '<td><a class="btn" href="' + esc(action + "/" + t.key) + '">Download</a></td>' +
+    (admin ? '<td><form class="up" method="post" enctype="multipart/form-data" action="' + esc(action) + '">' +
+      '<input type="hidden" name="key" value="' + esc(t.key) + '"><input type="hidden" name="act" value="replace">' +
+      '<input type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" aria-label="Replace ' + esc(t.name) + '" required>' +
+      '<button class="btn" type="submit">Replace</button></form>' +
+      (t.edited ? '<form method="post" enctype="multipart/form-data" action="' + esc(action) + '" style="margin-top:4px"><input type="hidden" name="key" value="' + esc(t.key) + '"><input type="hidden" name="act" value="reset">' +
+        '<button class="btn quiet" type="submit">Put back the shipped file</button></form>' : "") + "</td>" : "") +
+    "</tr>").join("");
+  const body = '<div class="split">' + rail(slug, "templates") + '<div class="pane">' +
+    '<div class="head"><h2>Templates</h2><span class="chip">Same for all clients</span>' + (admin ? "" : '<span class="chip">Read only</span>') + "</div>" +
+    flashHtml(flash) +
+    '<div class="tw"><table><thead><tr><th>#</th><th>Template</th><th>Section</th><th>Used for</th><th>Size</th><th></th>' + (admin ? "<th>Replace</th>" : "") + "</tr></thead><tbody>" +
+    rows + "</tbody></table></div>" +
+    '<p class="why">A filled template attached in a Copilot chat is read as that section&rsquo;s input.' +
+    (admin ? " A replaced file is what every client downloads." : "") + "</p></div></div>";
+  return frame(slug, tenantName, have, bar,
+    '<a href="' + esc(clientHref(slug, "copilot", "")) + '">Copilot</a> &rsaquo; <b>Settings</b>', "Copilot templates", body, consultant);
 }
 
 export async function barOf(tenantId: string): Promise<string> { return barFor(tenantId); }

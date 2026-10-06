@@ -52,7 +52,7 @@ function brkCss(): string {
   const b = brk();
   if (b === "card-jumps") return ".tile{min-height:0}";                                         /* §356.16 put back */
   if (b === "details-always") return ".addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:visible}";
-  if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §501 put back: the week sized by its words */
+  if (b === "week-auto") return ".row{grid-template-columns:20px minmax(0,1fr) 132px auto 64px 128px 26px}"; /* §503 put back: the week sized by its words */
   if (b === "wide-names") return ".team{min-width:140px}.team button{padding:7px 9px;font-size:14px;gap:9px}";
   return "";
 }
@@ -157,7 +157,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .row .t[data-rename]{cursor:text}
 .row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
 .tn2.editing{align-items:center}
-/* THE TOPIC'S OWN COLUMN (§501), beside the week: a quiet rounded tag with a
+/* THE TOPIC'S OWN COLUMN (§503), beside the week: a quiet rounded tag with a
    gold dot, or "+ Add a topic" on a row that has none — outlined when the row
    is under the pointer, so the empty column says what it is for without
    shouting on every row. The press opens the add line's own topic list. */
@@ -440,7 +440,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
     "</div>";
 }
 
-/* THE TOPIC CELL (§501): its own column, immediately before the week. Grouped
+/* THE TOPIC CELL (§503): its own column, immediately before the week. Grouped
    by topic the heading already says it (§87), so the cell stays empty; a row
    nobody may change shows its topic and offers nothing; otherwise the tag (or
    "+ Add a topic") opens the same list the add line offers — the open topics,
@@ -448,7 +448,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
 function topicCell(a: Action, L: Loaded, live: boolean, group: Group): string {
   const t = a.topicId ? L.topics.find((x) => x.id === a.topicId) : null;
   if (group === "topic") return '<span class="tcol"></span>';
-  if (!t && brk() === "no-add-topic") return '<span class="tcol"></span>';                /* §501 put back: an empty row offers nothing */
+  if (!t && brk() === "no-add-topic") return '<span class="tcol"></span>';                /* §503 put back: an empty row offers nothing */
   if (!live) return t ? '<span class="tcol tcwrap ro"><span class="tc"><span class="tw">' + esc(t.name) + "</span></span></span>" : '<span class="tcol"></span>';
   const opts = L.topics.filter((x) => !x.closed || x.id === a.topicId);
   const on = (id: string) => (id === (a.topicId || "") ? ' class="on" aria-selected="true"' : ' aria-selected="false"');

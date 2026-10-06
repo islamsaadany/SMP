@@ -62749,7 +62749,7 @@ Islam, of §498's masthead following the client's band: *"for the top banner I d
 
 **§497–§499 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main had moved to §496 under the branch; it was merged in first, the three record files combined with both sides kept, and nothing in the frozen product had changed on the branch, so nothing was rebuilt and `sw.js` was not bumped. Migration 025 (topics) runs after main's 024; both applied in order on the check database. Re-run on the merged tree: tracker 247/0, copilot 311/0 (main's own figure, once 024 was applied to the local database), modules 233/0, notes 170/0, shell 334/0 against a fresh build, `generated-in-step` and `built-in-step` clear. No forced sign-out is owed: no `api/`, `lib/` or `db/` file of the frozen product moved, and nothing about how a save is judged changed.
 
-## §501 — The topic has its own column, immediately before the week (spec 054, 2026-10-06)
+## §503 — The topic has its own column, immediately before the week (spec 054, 2026-10-06)
 
 Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and when there is no topic, there should be a "Add a topic" button somehow. It should look cleaner and neater."* Drawn first (`design-mockups/internal-tracker/2026-10-06_topic-beside-timeline.html`, published as an artifact) and approved with *"proceed"*.
 

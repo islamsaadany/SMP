@@ -877,7 +877,7 @@ try {
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
-    /* THE TOPIC HAS ITS OWN COLUMN (§501), immediately before the week: a
+    /* THE TOPIC HAS ITS OWN COLUMN (§503), immediately before the week: a
        row with none says "+ Add a topic", the press opens the same list the
        add line offers, and a pick or a new name is written at once — read
        back from Postgres, never off the row (§96). The double-click only

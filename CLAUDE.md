@@ -10954,7 +10954,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-06 — **§501: the Internal Tracker's topic has its own column, right before the week.** Islam: *"The topic needs to be closer to the timeline … an "Add a topic" button"*. A rounded tag in a fixed column (the week is 84px so the tags line up), "+ Add a topic" where there is none, the press opening the topic list (pick, No topic, or a new one by Enter), a double-click renaming only. `checks/tracker.mjs` 251/0, red under `no-add-topic` and `week-auto`. On the branch, not merged.*
+*Last Updated: 2026-10-06 — **§503: the Internal Tracker's topic has its own column, right before the week.** Islam: *"The topic needs to be closer to the timeline … an "Add a topic" button"*. A rounded tag in a fixed column (the week is 84px so the tags line up), "+ Add a topic" where there is none, the press opening the topic list (pick, No topic, or a new one by Enter), a double-click renaming only. `checks/tracker.mjs` 251/0, red under `no-add-topic` and `week-auto`. On the branch, not merged.*
 
 *Earlier: 2026-10-06 — **§499: the Internal Tracker wears Forefront's colours, never the client's.** Islam: *"not hte banner only the whole module"*. The masthead and the browser's theme colour take `BAR_DEFAULT` (navy) whatever the client's band; `barVars()` is handed Forefront's navy. `checks/tracker.mjs` 247/0, red 2 under `client-bar`. **Merged to `main` 2026-10-06 on Islam's word** with §497/§498, after main's §492–§496 were brought in (record files combined; no frozen source changed, so no rebuild and no shell bump); on the merged tree tracker 247/0, copilot 311/0, modules 233/0, notes 170/0, shell 334/0.*
 

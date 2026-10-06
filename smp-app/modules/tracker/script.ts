@@ -252,7 +252,7 @@ export const APP_JS = `(function () {
       e.preventDefault();
       var ar = t.closest(".addrow"), v = t.value.replace(/\\s+/g, " ").trim();
       if (!ar) {
-        /* A row's own list (§501): the new topic is made and set on that
+        /* A row's own list (§503): the new topic is made and set on that
            row in one press, the server finding it if the name exists. */
         var rid = rowOf(t);
         closePops(null);
@@ -387,7 +387,7 @@ export const APP_JS = `(function () {
       var tp = b.getAttribute("data-topic") || "";
       closePops(null);
       if (ar) { setAddTopic(ar, tp, tp ? b.textContent : ""); var add2 = document.getElementById("add"); if (add2) add2.focus(); }
-      /* A row's topic column (§501): set it there and then, unless the pick
+      /* A row's topic column (§503): set it there and then, unless the pick
          is the topic the row already carries. */
       else if (id && !b.classList.contains("on")) post({ act: "topic", id: id, topicId: tp || null });
     } else if (act === "show-done") {
@@ -467,7 +467,7 @@ export const APP_JS = `(function () {
     var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
     var inp = document.createElement("input");
     inp.className = "ttl"; inp.value = was; inp.maxLength = 200; inp.setAttribute("aria-label", "Rename the action");
-    /* The topic is not set here any more (§501): it has its own column, one
+    /* The topic is not set here any more (§503): it has its own column, one
        press away, so the double-click only renames. */
     t.textContent = ""; t.appendChild(inp);
     if (tn) tn.classList.add("editing");

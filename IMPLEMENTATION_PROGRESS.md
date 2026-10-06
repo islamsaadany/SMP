@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-06 — The Copilot lives inside Strategy, its settings on the console (§501, spec 064), on the branch, not merged.** Turning the Copilot on now only shows its tab inside Strategy: the console card and the client's module menu no longer list it. Its settings — the AI instructions and the templates, which are the same for every client — moved to a new *Copilot* tab on the console, readable by every consultant and editable only by a Forefront super user. Old settings addresses send you there. Strategy's chats rail gains *All chats on this client ›*.
+**2026-10-06 — The Copilot lives inside Strategy, its settings on the console (§501, spec 064), merged to `main` 2026-10-06 on Islam's word.** Turning the Copilot on now only shows its tab inside Strategy: the console card and the client's module menu no longer list it. Its settings — the AI instructions and the templates, which are the same for every client — moved to a new *Copilot* tab on the console, readable by every consultant and editable only by a Forefront super user. Old settings addresses send you there. Strategy's chats rail gains *All chats on this client ›*.
 
 **2026-10-06 — A company capability is edited like a direction (§500), merged to `main` 2026-10-06 on Islam's word.** With Edit on, Company › Strategy › Capabilities now has a name box in the capability's header, a Remove button beside it, and "+ Add a Capability" under the list — the same three controls a direction has. Before, the name was plain text and there was no way to add one there.
 

@@ -62495,3 +62495,17 @@ Islam: *"proceed with all until you need someting from me"*, on the signed-off s
 
 **Recorded, not done**: owners are not written by the save (a direction's owner stays the plan's to set); stage 3 — the Execution chat and Setup › Planning & reporting cycle.
 
+
+## §495 — Execution in the Copilot, and Setup › Planning & reporting cycle (spec 064 stage 3)
+
+Islam signed off panels F and G of `design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html` and spec 064 §6–§7, then *"proceed with the rest"*.
+
+**The Execution chat** (`lib/copilot-execution.ts` the rules, `modules/copilot/execution.ts` the acts `newExecution` · `execPeriod` · `execDraft` · `execSave` · `execFinish`). It asks the plan period ONCE — full year, this quarter to year end, or picked months — capped at one calendar year (twelve months at most, never across a year end, because the planning period §308 is one year). Then one item per Direction and Capability, drafted by the model and editable by hand; the to-do column lists the period and each item, nothing else (§1 of the spec). **A quarter outside the period is cut on the server** — on the model's answer, on every hand edit, and again when the period changes (`withPeriod`), so the chat can never hold a tactic the period does not cover. Every write is judged against the stored chat (`sanitizeExec`: the page can change measures, tactics and the cursor, never which items there are, §42).
+
+**Save to plan** makes the deliverable *Execution — <place>* (versioned like every other) and the browser writes the plan: the period becomes `GROUP.planFrom` / `planTo` (§308's own fields, so proration follows it), a Direction gains its measures and its tactics with q1–q4 set from the chat, and a Capability's measures become key objectives (`mintRowId`, from the maximum) and its tactics become projects dated from the first to the last quarter. A row of the same name is updated, never duplicated. No server rule moves: every one of those writes is a change the authoriser already classifies (946/0).
+
+**Setup › Planning & reporting cycle**, replacing Reporting cycle. The plan period is the first block with its OWN Edit (`PLANEDIT`), taken out of the cycle's pen, because it outlives every cycle inside it; a month timeline shows the period, and a cycle that ends after it is drawn in the alarm ink with a *runs past the plan period* badge (`cyclePastPlan`). Tactics whose quarters fall outside a shortened period are **counted and named, never deleted** (`tacticsOutsidePlan`). Nothing else on the cycle pen moves; the rename reaches the rail, the knowledge base and the welcome screen.
+
+**Proved**: `checks/copilot.mjs` 292/0, red under `exec-any-quarter` 3 and `exec-finish-any` 4; `checks/shell.mjs` §3m drives the real chat in a browser and reads the plan back (12/0) — red 1 with the browser's quarter write made to ignore the period, printing `1111 want 0001`; `checks/plan-cycle-page.py` new, red 2 (panel after the cycle head; past-the-period flag stubbed off). Four neighbours REWRITTEN, never loosened (§218): `planning-period` (the period's controls moved to their own pen), `years` (the revision's year chips with them), `contingency` (the cycle pen is `[data-editcycle]` now, the first Edit on the page being the plan's), and the Setup rail's page name in `attention-rows` and `welcome`. Also: a todo status read *1 measures* — plural fixed.
+
+**Recorded, not done**: the chat asks again once the period has ended (§6.1) only by offering the choice anew on a new chat; nothing yet reminds anybody.

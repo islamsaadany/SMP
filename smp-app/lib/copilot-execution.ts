@@ -125,10 +125,14 @@ export function withPeriod(s: Exec, p: Period): Exec {
 /* ── THE TO-DO LIST, WORKED OUT ────────────────────────────────────── */
 export type Todo = { key: string; title: string; status: string; state: "done" | "open" };
 const itemDone = (it: Item) => it.measures.length > 0 && it.tactics.length > 0;
+/* "1 measure", "2 tactics" — a word the platform writes itself, never a
+   tenant label, so inflecting it is safe (§107.8 is about labels). */
+const nOf = (n: number, w: string) => n + " " + w + (n === 1 ? "" : "s");
+
 export function todoOf(s: Exec): Todo[] {
   const out: Todo[] = [{ key: "period", title: "Plan period", state: s.period ? "done" : "open", status: s.period ? periodWords(s.period) : "How long is this plan?" }];
   for (const it of s.items) out.push({ key: "item:" + it.planId, title: it.title, state: itemDone(it) ? "done" : "open",
-    status: it.measures.length || it.tactics.length ? it.measures.length + " measures · " + it.tactics.length + " tactics" : "Not drafted yet" });
+    status: it.measures.length || it.tactics.length ? nOf(it.measures.length, "measure") + " · " + nOf(it.tactics.length, "tactic") : "Not drafted yet" });
   out.push({ key: "save", title: "Save", state: s.saved ? "done" : "open", status: s.saved ? "Saved as " + s.saved.title + " v" + s.saved.n : "Into the plan" });
   return out;
 }

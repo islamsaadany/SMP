@@ -1725,6 +1725,77 @@ await section("3l · the Directions chat: plan or fresh, scored, ticked, capabil
   }
 });
 
+await section("3m · the Execution chat: the period once, each item drafted, the save writes the plan (§495)", async () => {
+  /* PRESSED AND READ BACK (§96), from the signed-off panels F and G. The
+     stand-in answers every draft with one measure and one tactic that asks
+     for Q1 AND Q4: the period chosen is "this quarter to year end", so only
+     the quarters inside it may reach the plan — asserted on the PLAN, not on
+     the screen. */
+  const was = (await owner.query("select modules from tenants where id = $1", [tenantId])).rows[0].modules;
+  const keep = { ...MODEL_ANSWER };
+  for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+  Object.assign(MODEL_ANSWER, {
+    reply: "Drafted from the Direction.",
+    measures: [{ name: "Ex share", target: "30%", compile: "Latest" }],
+    tactics: [{ name: "Ex launch", owner: "Commercial", quarters: [1, 4] }],
+  });
+  const row = async () => (await asTenant(tenantId, (c) => c.query("select extra->'execution' s from copilot_chats where section = 'execution' order by created_at desc limit 1"))).rows[0] || null;
+  try {
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await fresh(); await signIn("office@forefront.example");
+    await open("/raya-trade/strategy/mobile/copilot/execution");
+    await page.click(".copnew[data-cop-newchat]");
+    await page.waitForSelector("[data-cop-ex-period]", { timeout: 15000 });
+    let r = await row();
+    check(!!r && r.s && !r.s.period && (r.s.items || []).length > 0, "a new Execution chat asks the period first, with the plan's items listed", JSON.stringify(r && r.s && { p: r.s.period, n: (r.s.items || []).length }));
+    check(!(await page.$("[data-cop-ex-draft]")), "…and offers no drafting before the period is chosen");
+    await page.click('[data-cop-ex-period="rest"]');
+    await page.waitForSelector("[data-cop-ex-draft], [data-cop-ex-go]", { timeout: 15000 });
+    r = await row();
+    const per = r.s.period;
+    check(!!per && per.m2 === 12, "the period is stored, running to the year's end", JSON.stringify(per));
+    const qs = [1, 2, 3, 4].filter((q) => (q - 1) * 3 + 1 <= per.m2 && q * 3 >= per.m1);
+    for (let n = 0; n < 40; n++) {
+      if (await page.$("[data-cop-ex-draft]")) { await page.click("[data-cop-ex-draft]"); await page.waitForTimeout(1500); continue; }
+      if (await page.$('[data-cop-ex-go="1"]')) { await page.click('[data-cop-ex-go="1"]'); await page.waitForTimeout(700); continue; }
+      break;
+    }
+    r = await row();
+    check(r.s.items.every((x) => x.drafted), "every Direction and Capability is drafted, one at a time", JSON.stringify(r.s.items.map((x) => x.drafted)));
+    check(r.s.items.every((x) => x.tactics.every((t) => t.quarters.every((q) => qs.includes(q)))), "a quarter outside the period never reaches the chat", JSON.stringify(r.s.items.map((x) => x.tactics.map((t) => t.quarters))));
+    const fin = await page.$("[data-cop-ex-finish]");
+    check(!!fin && (await fin.getAttribute("aria-disabled")) !== "true", "Save to plan is offered once everything is drafted");
+    if (fin) { await fin.click(); await page.waitForTimeout(2200); }
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Execution%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Execution — Mobile" && dv.n === 1, "Save writes Execution — Mobile v1", JSON.stringify(dv));
+    const plan = await page.evaluate((ids) => {
+      const out = { from: GROUP[SMPRules.PLAN_FROM], to: GROUP[SMPRules.PLAN_TO], dirs: [], caps: [] };
+      (UNITS.mobile.items || []).forEach((p) => { if (!ids.includes(p.id)) return;
+        const m = (p.measures || []).filter((x) => x.name === "Ex share")[0];
+        const t = (p.tactics || []).filter((x) => x.name === "Ex launch")[0];
+        out.dirs.push({ m: m ? m.target : null, q: t ? [t.q1, t.q2, t.q3, t.q4].map((x) => +x || 0).join("") : null }); });
+      (GROUP.capabilities || []).forEach((c) => { if (!ids.includes(String(c.id))) return;
+        const ko = (c.keyObjectives || []).filter((x) => x.name === "Ex share")[0];
+        const pj = (c.projects || []).filter((x) => x.name === "Ex launch")[0];
+        out.caps.push({ ko: ko ? ko.target : null, pj: pj ? [pj.start, pj.end] : null }); });
+      return out;
+    }, r.s.items.map((x) => x.planId));
+    const want = await page.evaluate((p) => [SMPRules.monthLabel(p.y * 12 + p.m1 - 1), SMPRules.monthLabel(p.y * 12 + p.m2 - 1)], per);
+    check(plan.from === want[0] && plan.to === want[1], "the period becomes the plan period", JSON.stringify([plan.from, plan.to]));
+    const qWant = [1, 2, 3, 4].map((q) => (qs.includes(q) ? 1 : 0)).join("");
+    check(plan.dirs.length > 0 && plan.dirs.every((d) => d.m === "30%" && d.q === qWant), "each Direction gains its measure, and its tactic runs only in the period's quarters", JSON.stringify(plan.dirs) + " want " + qWant);
+    check(plan.caps.every((c) => c.ko === "30%" && c.pj && c.pj[1] === "Dec " + String(per.y).slice(2)), "each Capability gains a key objective and a dated project inside the period", JSON.stringify(plan.caps));
+    check(!(await page.$("[data-cop-ex-finish]")), "a saved chat offers no Save again");
+    check(!errs.length, "no page errors through the whole flow", errs.join(" | "));
+  } finally {
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    Object.assign(MODEL_ANSWER, keep);
+    await asTenant(tenantId, (c) => c.query("delete from copilot_chats; delete from copilot_deliverables")).catch(() => {});
+    await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});
+  }
+});
+
 await section("3g · turning a module on from inside the platform shows it at once (§453)", async () => {
   /* Islam: "I turned on the module but nothing is appearing in the
      navigation". The document carries which modules the client has, and

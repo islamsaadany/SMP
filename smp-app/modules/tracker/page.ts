@@ -151,7 +151,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
    hand left it, and an opened row always shows. */
 .sec:not(.showdone) .row.done:not(.fresh):not(.on){display:none}
 /* the row: tick · name · when · owner · status · the arrow */
-.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto 64px 104px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
 .row .t{min-width:0;font-size:15px;line-height:1.35}
 .row .t[data-rename]{cursor:text}
 .row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
@@ -197,9 +197,9 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
 /* THE STATUS IS A WORD (§492): one box whether it can be pressed or not —
    the same font, height and width for a select and a span — with a dash
    before it in the colour of what it says. */
-.st{display:inline-flex;align-items:center;gap:7px;height:26px;width:104px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:0;border:0;border-radius:6px;color:var(--ink-3);background:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
+.st{display:inline-flex;align-items:center;gap:7px;height:26px;width:128px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:0;border:0;border-radius:6px;color:var(--ink-3);background:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
 span.st::before{content:"";width:12px;height:2px;background:currentColor;flex:none}
-select.st{cursor:pointer;padding:0 16px 0 19px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%235E6E85'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 0 center,right 3px center}
+select.st{cursor:pointer;padding:0 14px 0 19px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%235E6E85'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 0 center,right 3px center}
 select.st:hover,select.st:focus-visible{background-color:var(--surface-2);outline:none}
 .st.prog{color:var(--gold)}
 select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%239C5D08'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%239C5D08'/%3E%3C/svg%3E")}

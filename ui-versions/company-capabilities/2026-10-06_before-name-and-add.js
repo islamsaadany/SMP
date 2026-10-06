@@ -1764,9 +1764,7 @@ function topCapBody(c, ed){
 }
 function renderTopCaps(){
   var caps = capsReachable();
-  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>' +
-    (projEditing() && mayEditPlan() ? '<div class="railadd"><button class="linkbu" data-topcapadd="">+ Add a ' +
-      esc(L1("capability")) + '</button></div>' : ''));
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
   var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
   var rail = '<div class="rail" data-topcaprail="1">' + railHead(L("capability", "bu"), caps.length) +
     caps.map(function(c){
@@ -1791,31 +1789,8 @@ function renderTopCaps(){
   };
   var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
               '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
-  /* §497: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
-     open on this pane: *"I'm not able to edit the name nor add a capability …
-     the capability view should be the same like the directions same
-     functionality same work."* §482/§488 drew the band read-only in both modes
-     and gave the rail no Add, where a direction's pane (unitPlanBody's edhead,
-     §194/§232) carries a name box and Remove and its rail carries "+ Add".
-     So editing draws that same head — the code, the name box (writing the
-     capability's name, and its one plan row's while that still wears the old
-     name, §491), the two seats, and Remove through §325's own dialog — and the
-     rail gets the direction rail's own add line (§69.13, §53.5). */
-  var head = ed
-    ? '<div class="ptitle edhead"><div class="pthead"><h3><span class="ptcode">' + esc(topCapCode(sel)) + '</span>' +
-        textOr("plan", sel.name, "ptname", function(v){
-          v = String(v || "").trim(); if (!v) return;
-          (sel.items || []).forEach(function(it){ if (!it.name || it.name === sel.name) it.name = v; });
-          sel.name = v;
-        }) + '</h3></div>' +
-        '<span class="pband-r">' + seats + '</span>' +
-        '<button class="rmplan" data-caprm="' + esc(sel.id) + '">Remove this ' + esc(L1("capability")) + '</button></div>'
-    : pillarBand(topCapCode(sel), sel.name, seats, L1("capability"));
-  var add = ed && mayEditPlan()
-    ? '<div class="railadd"><button class="linkbu" data-topcapadd="' + esc(sel.id) + '">+ Add a ' + esc(L1("capability")) + '</button></div>'
-    : '';
-  rail = rail.replace(/<\/div>$/, add + '</div>');
-  var pane = head + '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
+  var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
+    '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
   return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 

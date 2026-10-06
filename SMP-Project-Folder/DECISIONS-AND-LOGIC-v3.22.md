@@ -62690,3 +62690,30 @@ Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_adv
 **Found while building**: a clash is itself the question, and the model may not word one — the platform words it (*"Which Store count should I use?"*) rather than refusing a good answer.
 
 **Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**
+
+## §497 — the company's capability is edited like a direction
+
+Islam, with the pen open on Company › Strategy › Capabilities: *"I'm not able
+to edit the name nor add a capability!! … the capability view should be the
+same like the directions same functionality same work."* **He was right, and it
+was an omission rather than a breakage**: §482 drew the capability's band with
+`pillarBand()` in BOTH modes, and §488 added the pen without giving that band
+an editing form or the rail an Add — while a direction's pane, in edit mode,
+draws `unitPlanBody`'s pinned `edhead` (code, name box, Remove, §194/§232) and
+its rail draws "+ Add a Direction" (§69.13). Measured on the build before: no
+name box, no Add, no Remove.
+
+**The same controls, not new ones** (§53.5): editing draws the direction's own
+`edhead` — the code, a `textOr` name box writing the capability's name (and its
+one plan row's while that still wears the old name, §491, so reporting and the
+deck follow), the two seats, and **Remove this Capability** through §325's own
+dialog (`data-caprm`) — and the rail gets the direction rail's own `.railadd`.
+**A new capability plans the way the one beside it plans**, and a pillars one
+gets its single plan row at once (§491's rule), so it opens exactly as an added
+direction does: empty Key measures and Tactics. Read mode is untouched.
+`checks/single-company.py` §497: six assertions, the name read back from the
+DATA (§96), **10 red** on the build before; the §491 "no nested head" assertion
+REWRITTEN, never loosened (§218) — exactly one `edhead`, and it is the
+capability's. Neighbours (capability-remove, -pillar-edit, -seats, -entry,
+direction-seats, top-plan, plan-edit-line) and `qa.py` green. Screen only;
+nothing stored moves, nothing migrated, no server rule. SHELL v6.08.

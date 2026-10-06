@@ -4553,6 +4553,29 @@
     document.querySelectorAll("[data-topcap]").forEach(function(b){
       b.addEventListener("click", function(){ TOPCAP = b.dataset.topcap; paint(); });
     });
+    /* §497: "+ Add a Capability" on the company's Capabilities rail, the
+       direction rail's own add (§69.13). The new one plans the way the one it
+       was added beside plans, and a pillars one gets its single plan row at
+       once (§491), so it opens exactly as an added direction does: empty
+       Key measures and Tactics, ready to fill. Re-asks the pen (§48.2). */
+    document.querySelectorAll("[data-topcapadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var beside = capById(b.dataset.topcapadd);
+        var made = addCapability();
+        if (beside && capPlansInPillars(beside)) {
+          made.format = "pillars";
+          var mu = unitLikeWritable("cap:" + made.id);
+          if (mu) { addPillar(mu); var nw = mu.items[mu.items.length - 1]; if (nw && !nw.name) nw.name = made.name; }
+        }
+        TOPCAP = made.id;
+        paint();
+        setTimeout(function(){
+          var f = document.querySelector("[data-topcaps] .ptitle.edhead .ptname");
+          if (f) { f.focus(); if (f.select) f.select(); }
+        }, 0);
+      });
+    });
     document.querySelectorAll("[data-topcapproj]").forEach(function(r){
       var go = function(e){
         /* §488: the grip is a role=button span, and a press on it is a drag. */

@@ -144,7 +144,26 @@ with sync_playwright() as p:
         press(pg, '.secpen'); pg.wait_for_timeout(250)
         ck("…pressed, it reads Done editing", safe(pg, "()=>document.querySelector('.secpen').textContent") == "Done editing")
         ck("…the seats become pickers",
-           safe(pg, "()=>document.querySelectorAll('[data-topcaps] .pband [data-pick-open]').length") == 2)
+           safe(pg, "()=>document.querySelectorAll('[data-topcaps] .ptitle.edhead [data-pick-open]').length") == 2)
+        # §497: Islam — "I'm not able to edit the name nor add a capability …
+        # the capability view should be the same like the directions". Editing
+        # draws a direction's own head (name box, Remove) and its rail's Add.
+        ck("§497 editing draws the name as a box, like a direction's",
+           safe(pg, "()=>!!document.querySelector('[data-topcaps] .ptitle.edhead textarea.ptname[data-fld]')") is True)
+        nm0 = safe(pg, "()=>capsReachable()[0].name")
+        safe(pg, "()=>{var f=document.querySelector('[data-topcaps] .ptitle.edhead .ptname'); f.value='Renamed cap'; f.dispatchEvent(new Event('change',{bubbles:true}))}")
+        pg.wait_for_timeout(250)
+        ck("…typing a name writes the capability's name", safe(pg, "()=>capsReachable()[0].name") == "Renamed cap")
+        pg.evaluate("(n)=>{capsReachable()[0].name=n; paint()}", nm0); pg.wait_for_timeout(200)
+        ck("…the head carries Remove this capability",
+           safe(pg, "()=>!!document.querySelector('[data-topcaps] .ptitle.edhead [data-caprm]')") is True)
+        ck("…and the rail carries + Add, like the directions rail",
+           safe(pg, "()=>!!document.querySelector('[data-topcaps] .rail .railadd [data-topcapadd]')") is True)
+        c0 = safe(pg, "()=>GROUP.capabilities.length")
+        press(pg, '[data-topcaps] [data-topcapadd]'); pg.wait_for_timeout(300)
+        ck("…pressed, a capability is added and opened",
+           safe(pg, "()=>GROUP.capabilities.length===%d+1 && TOPCAP===GROUP.capabilities[GROUP.capabilities.length-1].id && !!document.querySelector('[data-topcaps] .ritem.on')" % (c0 or 0)) is True)
+        safe(pg, "()=>{GROUP.capabilities.pop(); TOPCAP=null; paint()}"); pg.wait_for_timeout(200)
         cid = safe(pg, "()=>{var c=capsReachable()[0]; c.format=undefined; delete c.format; return c.id}")
         safe(pg, "()=>paint()"); pg.wait_for_timeout(200)
         n0 = safe(pg, "()=>capsReachable()[0].projects.length")
@@ -185,8 +204,8 @@ with sync_playwright() as p:
            safe(pg, "()=>{var c=capsReachable()[0]; return c.items.length===1 && c.items[0].name===c.name}") is True)
         ck("…its key measures and tactics are drawn straight in the pane",
            safe(pg, "()=>{var p=document.querySelector('[data-topcaps] .pane'); return !!p.querySelector('[data-rowadd^=\"measure|\"]') && !!p.querySelector('[data-rowadd^=\"tactic|\"]')}") is True)
-        ck("…with no pinned plan head nested under the capability's band",
-           safe(pg, "()=>!document.querySelector('[data-topcaps] .ptitle.edhead, [data-topcaps] [data-topcappillars]')") is True)
+        ck("…with no pinned plan head nested under the capability's own",
+           safe(pg, "()=>document.querySelectorAll('[data-topcaps] .ptitle.edhead').length===1 && !document.querySelector('[data-topcaps] .topcapbody .ptitle, [data-topcaps] [data-topcappillars]')") is True)
         nm = safe(pg, "()=>capsReachable()[0].items[0].measures.length")
         press(pg, '[data-topcaps] [data-rowadd^="measure|"]'); pg.wait_for_timeout(300)
         ck("…and adding a measure writes the capability's plan",

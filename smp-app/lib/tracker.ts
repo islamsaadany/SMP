@@ -55,7 +55,7 @@ export function isView(s: unknown): s is View { return typeof s === "string" && 
    the order the rows already have. Remembered on the BROWSER (a cookie the
    page reads), never stored on the client, so two of the office read one
    list two ways. */
-/* TOPIC JOINS THEM (§492): Islam, "we can group by them" — a topic is how a
+/* TOPIC JOINS THEM (§497): Islam, "we can group by them" — a topic is how a
    piece of work that runs over many weeks is held together, so the list can
    be read one topic at a time with the actions belonging to none last. */
 export const GROUPS = ["owner", "topic", "status", "due", "none"] as const;
@@ -393,7 +393,7 @@ export async function deleteAction(c: Q, id: string): Promise<boolean> {
   return (r.rowCount || 0) > 0;
 }
 
-/* ══ topics (§492) ════════════════════════════════════════════════════
+/* ══ topics (§497) ════════════════════════════════════════════════════
    Islam's three answers, each a line here: an action belongs to ONE topic
    (a column on the action, not a list); a closed topic is still drawn while
    it holds open actions (topicShown); and anybody in the office may create,

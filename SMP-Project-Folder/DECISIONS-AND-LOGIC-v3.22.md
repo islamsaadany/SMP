@@ -62611,3 +62611,54 @@ in a pillar approach is typical to a direction"*.
   is numbered §491 and was merged with main's Copilot work before commit.
 
 **Merged to `main` 2026-10-05 on Islam's word** (*"merge to main"*), with main's §487.1 brought in first; the built file rebuilt from the merged sources (byte-identical), the served copies regenerated, `sw.js` SHELL `v6.01-capability-as-direction` against main's `v6.00`. Screen only — no `api/`, `lib/` or `db/` file of this round changed, so no forced sign-out is owed.
+
+## §497 — Internal Tracker: topics, and the refined ledger page (spec 054, 2026-10-06)
+
+Islam: *"sometimes we have a general topic that is already continuing with us on
+the tasks over the weeks like the Budget or strategy Communication etc. and we can
+group by them"*, then, of the mockups, *"yes to all three, but I need a better
+deisng for the page to be more neat"*, *"remove the back button, already the
+navigation from the top bar is doing the job"*, *"change due this week to Due"*.
+Built to the signed-off `design-mockups/internal-tracker/2026-10-06_topics-refined.html`.
+
+- **A topic is the client's, one per action, and the office's to manage** (his three
+  answers): `tracker_topics` plus `tracker_actions.topic_id` (migration 025 —
+  renumbered from 024, which main took for the Copilot), fenced like every tenant
+  table. Anybody past the office gate may make, rename, close, reopen or delete one;
+  deleting one leaves its actions un-topicked, never deleted. A closed topic keeps
+  its actions and is not offered for new ones.
+- **Group by gains Topic** (Owner · Topic · Status · Due date · None); a topic's
+  heading carries how much of it is done, a thin bar, its own menu and *+ Add to
+  <topic>*. A heading never stands over nothing.
+- **The page is the ledger**: the client's band holds this week's line, the title
+  and four counts (*Open · Late · Due · Done this week*), the views and the settings;
+  the next action is written at the top under a gold rule; numbered section heads.
+  **No back link** — the top bar's trail is the way back.
+- **The status pill is 128px** (*"the status is cut"*): *NOT STARTED* and *IN
+  PROGRESS* with the caret fit, measured by screenshot. The add line draws no pill —
+  a new line is Not started.
+- **A double-click opens the name box AND a topic list beside it** (*"when I double
+  click the task it doesn't show me the option to ad a topic"*): one Enter saves
+  both, Escape takes both back, leaving both boxes commits.
+- `checks/tracker.mjs` **244/0**; fifteen assertions held the old page and were
+  REWRITTEN, never loosened (§218) — the headings read off `.grp h3`, the empty
+  client's sentence, the new column, the add line's absent pill, the page's own
+  font. A new pair drives a topic as the SMO team AND refuses a client's person,
+  because `topic-super-only` went GREEN until it did (§54.5). Red sixteen ways.
+
+## §498 — Words on the client's band are worked out from the band (2026-10-06)
+
+Islam: *"we need to manage the colors contrast rules"* — a client with a tan bar
+made the Tracker's masthead words unreadable, because the module wrote white and a
+fixed amber on whatever colour the client chose.
+
+- **One rule, the frozen product's own** (`inkFor`/`readableOn`, config-data.js),
+  carried into `lib/branding.ts` as `barInks()`/`barVars()`: the ink is white or
+  near-black by the bar's luminance, and the quiet words, the gold accent and the
+  late red are each walked toward the INK's side until they read 4.5:1 on that bar.
+  Navy is unchanged (white, the house gold); tan gets near-black and a deep brown.
+- **The direction is the ink's, not the bar's** — the first draft chose it from the
+  bar's own luminance and failed tan, pink and mid-grey (2.4, 2.0, 3.9:1).
+- The Tracker's masthead and the Copilot's filled controls read `--bar-*` tokens.
+  `checks/tracker.mjs` §1b asserts 4.5:1 for every ink on six bars including white,
+  black and mid-grey; `SMP_BREAK=bar-fixed-inks` puts the fixed inks back and goes red.

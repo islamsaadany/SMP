@@ -149,7 +149,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     else { due = calendarDay(b.due); if (!due) return refused(400, "That is not a date this list can read."); }
     /* A topic may arrive as one already on the list (its id) or as a name
        typed on the add line, which is made — or found, whatever its case —
-       here, in the same transaction as the action (§492). */
+       here, in the same transaction as the action (§497). */
     let topicId: string | null = null;
     if (b.topicId) {
       const t = await oneTopic(c, String(b.topicId));
@@ -160,7 +160,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, id: row.id });
   }
 
-  /* TOPICS ARE THE OFFICE'S, NOT AN OWNER'S (§492, Islam's third answer):
+  /* TOPICS ARE THE OFFICE'S, NOT AN OWNER'S (§497, Islam's third answer):
      anybody past the gate above may make one, rename it, close it or delete
      it. The check's break hands the list to the Super user alone, which must
      turn checks/tracker.mjs red (§94.5). */
@@ -208,7 +208,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     if (!ownerKey || !(await isOfficeRow(c, ownerKey))) return refused(400, "An action is owned by somebody on the office's seats.");
     await setFields(c, id, { ownerKey });
   } else if (kind === "topic") {
-    /* One topic or none (§492): an id already on the list, a name to make or
+    /* One topic or none (§497): an id already on the list, a name to make or
        find, or nothing to take it off. A closed topic is not offered, but one
        chosen on a stale tab is accepted — closing does not forbid it. */
     let topicId: string | null = null;

@@ -29,7 +29,7 @@
    control the server refuses is never drawn. */
 import { topBarHtml, TOPBAR_CSS, TOPBAR_SCRIPT_TAG, themedCss, type TopBar } from "../../lib/topbar.ts";
 import { withTenant } from "../../lib/tenant.ts";
-import { barFor } from "../../lib/branding.ts";
+import { barFor, barVars } from "../../lib/branding.ts";
 import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
@@ -58,10 +58,10 @@ function brkCss(): string {
 
 const CSS = `
 *{box-sizing:border-box}
-/* THE LEDGER (§492), from design-mockups/internal-tracker/2026-10-06_topics-refined.html,
+/* THE LEDGER (§497), from design-mockups/internal-tracker/2026-10-06_topics-refined.html,
    its "Refined" column, with Islam's two changes: no way back above the
    title (the top bar is the way back) and the third count reads "Due". */
-:root{--bar:%BAR%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+:root{%BARVARS%;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
   --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
   --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 /* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
@@ -74,30 +74,30 @@ const CSS = `
 body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
 .pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
 /* the masthead: the week, the name, the four counts, the views */
-.mast{background:var(--bar);color:#fff;border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 #E8A33A}
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
 .mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#E8A33A;margin:0 0 7px}
-h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--bar-ink)}
 .strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
 /* ONE HEIGHT, WHATEVER THE WORDS SAY (§356.16): the floor holds the counts
    still when a status changes; the label never takes a second line. */
 .tile{text-align:right;min-height:48px}
-.tile b{display:block;font:600 22px/1 var(--font);color:#fff}
-.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:#AFC0DA;margin-top:3px;white-space:nowrap}
-.tile.late b{color:#FF9B8F}
+.tile b{display:block;font:600 22px/1 var(--font);color:var(--bar-ink)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.tile.late b{color:var(--bar-late)}
 .cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
-.cats a{font:600 13.5px/1 var(--font);color:#C6D2E5;padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none}
-.cats a[aria-current="true"]{color:#fff;border-bottom-color:#E8A33A}
-.cats a:hover,.cats a:focus-visible{color:#fff;outline:none}
+.cats a{font:600 13.5px/1 var(--font);color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none}
+.cats a[aria-current="true"]{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.cats a:hover,.cats a:focus-visible{color:var(--bar-ink);outline:none}
 .cats .sp{flex:1}
 /* the settings — how the list is grouped, and dates as weeks or days —
-   behind "Group by" on the far right of the views row (§356.14, §492) */
+   behind "Group by" on the far right of the views row (§356.14, §497) */
 .dots{position:relative;align-self:center;margin-bottom:9px}
-.dots>button{display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:#C6D2E5;padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer}
-.dots>button b{color:#fff;font-weight:600}
+.dots>button{display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:var(--bar-quiet);padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer}
+.dots>button b{color:var(--bar-ink);font-weight:600}
 .dots>button svg{width:12px;height:12px}
 .dots>button svg.d3{width:16px;height:16px;margin-left:4px}
-.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:rgba(255,255,255,.1);color:#fff;outline:none}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--bar-hover);color:var(--bar-ink);outline:none}
 .setmenu,.tmenu{position:absolute;top:32px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px;text-align:left}
 .setmenu .col{display:grid;align-content:start;min-width:0}
 .setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
@@ -146,7 +146,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
 .foot button{background:none;border:0;padding:0;font:500 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
 .foot button b{color:var(--gold);font-weight:600}
 .foot button:hover,.foot button:focus-visible{color:var(--ink);outline:none}
-/* DONE FOLDS UNDER ITS SECTION (§492): a section shows what is still to do,
+/* DONE FOLDS UNDER ITS SECTION (§497): a section shows what is still to do,
    and "N done ›" opens the rest. A row ticked a moment ago stays where the
    hand left it, and an opened row always shows. */
 .sec:not(.showdone) .row.done:not(.fresh):not(.on){display:none}
@@ -155,6 +155,8 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
 .row .t{min-width:0;font-size:15px;line-height:1.35}
 .row .t[data-rename]{cursor:text}
 .row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
+.tn2.editing{align-items:center}.tn2.editing .tg{display:none}
+.tn2 select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:5px 8px;font:400 13px/1.3 var(--font);max-width:220px}
 .tg{font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
 .row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
 .row.done .t{color:var(--ink-3)}
@@ -194,7 +196,7 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:#fff}
 .team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
 .topics{min-width:190px}
 .topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
-/* THE STATUS IS A WORD (§492): one box whether it can be pressed or not —
+/* THE STATUS IS A WORD (§497): one box whether it can be pressed or not —
    the same font, height and width for a select and a span — with a dash
    before it in the colour of what it says. */
 .st{display:inline-flex;align-items:center;gap:7px;height:26px;width:128px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:0;border:0;border-radius:6px;color:var(--ink-3);background:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
@@ -280,7 +282,7 @@ function skeleton(slug: string, tenantName: string, top: TopBar, bar: string, at
     "<title>" + esc(tenantName) + " &mdash; " + esc(MODULE_DEF.tracker.label) + "</title>\n" +
     '<link rel="icon" type="image/svg+xml" href="/favicon.svg">\n' +
     '<meta name="theme-color" content="' + esc(bar) + '">\n' +
-    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BAR%", bar)) + brkCss() + "</style>\n</head>\n" +
+    TOPBAR_SCRIPT_TAG + "<style>" + TOPBAR_CSS + themedCss(CSS.replace("%BARVARS%", barVars(bar))) + brkCss() + "</style>\n</head>\n" +
     "<body" + a + ">\n" +
     topBarHtml(top) + "\n" +
     body +
@@ -398,7 +400,7 @@ const LENS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" 
 const CARET = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
 
-/* THE ROW (§492): tick · the name, with its topic beside it unless the list
+/* THE ROW (§497): tick · the name, with its topic beside it unless the list
    is grouped by topic (the heading says it then, §87) · when · owner · the
    status as a word · the arrow. A late row's tick is ringed in the alarm. */
 function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group): string {
@@ -409,7 +411,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
   return '<div class="row' + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
-    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</div>" + tag + "</div>" +
+    '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" data-topic="' + esc(a.topicId || "") + '"' + (t ? ' data-tname="' + esc(t.name) + '"' : "") + ' title="Double-click to rename or set its topic"' : "") + ">" + esc(a.title) + "</div>" + tag + "</div>" +
     whenCell(a, today, dates, live) +
     whoCell(a, L, live) +
     statusPill(a, live) +
@@ -420,7 +422,7 @@ function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opene
 /* The opened row: its topic, the notes, Delete behind a question, and the
    history in a box that scrolls. The topic is a plain choice here, the open
    topics and the one the row already holds (a closed topic stays on the row
-   that carries it, §492). */
+   that carries it, §497). */
 function openPanel(a: Action, L: Loaded, who: Who, today: string): string {
   const live = mayChange(a, who);
   const name = (k: string) => L.names.get(k) || k;
@@ -486,7 +488,7 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
 
 export type ListOut = { body: string; count: string; open: string | null };
 
-/* THE MASTHEAD (§492): the week, the name, the four counts and the views on
+/* THE MASTHEAD (§497): the week, the name, the four counts and the views on
    the client's own colour. It is part of what a press redraws, so the counts
    follow a tick without a reload. */
 function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number; late: number; dueWeek: number; doneWeek: number } | null): string {
@@ -507,7 +509,7 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
       return n ? " &middot; " + n + " not started" : "";
     })() + "</span></div>" +
     '<div class="tile"><b>' + sum.doneWeek + "</b><span>Done this week</span></div></div>";
-  /* the two settings behind "Group by" on the far right (§356.14, §492):
+  /* the two settings behind "Group by" on the far right (§356.14, §497):
      each choice names its value, the one in force marked; the script writes
      a cookie and reads the list again */
   const settings = '<span class="dots"><button type="button" data-act="settings" aria-haspopup="menu" aria-expanded="false" title="Settings">' +
@@ -527,7 +529,7 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
 }
 
 /* A TOPIC'S OWN MENU, on its heading: rename, close or reopen, delete behind
-   a question. Anybody in the office (§492, Islam's third answer). */
+   a question. Anybody in the office (§497, Islam's third answer). */
 function topicMenu(t: Topic): string {
   return '<span class="tdots"><button type="button" data-act="topic-menu" data-topic="' + esc(t.id) + '" aria-haspopup="menu" aria-expanded="false" aria-label="Topic options" title="Topic options">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
@@ -560,7 +562,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
   const dates = p.ask.dates;
   const group = p.ask.group;
 
-  /* THE SECTIONS (§492): a numbered heading, its open and late counts, its
+  /* THE SECTIONS (§497): a numbered heading, its open and late counts, its
      rows with the done ones folded under "N done ›", and — for a topic — how
      much of it is done, a thin bar, its menu and "+ Add to <topic>". A topic
      with no rows in this view is not drawn: a heading never stands over
@@ -590,7 +592,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     return '<div class="sec" data-key="' + esc(g.key) + '">' + head + rows + (foot ? '<div class="foot">' + foot + "</div>" : "") + "</div>";
   }).join("");
 
-  /* THE NEXT ACTION is written at the top, under a gold rule (§492). It takes
+  /* THE NEXT ACTION is written at the top, under a gold rule (§497). It takes
      everything — the topic, the week (this week's Thursday until another is
      picked), the owner (you), and a note behind the arrow (§356.15) — and the
      details arrive with the first letter (§356.16). Nothing is posted until

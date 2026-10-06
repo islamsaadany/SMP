@@ -934,7 +934,7 @@ CREATE INDEX library_items_shelf ON library_items (tenant_id, kind, state, repor
 -- an action, and one row per status change. Both are tenant-owned, so the
 -- loop below fences them on a fresh database and migration 012 fences them on
 -- one already up (the same two paths library_items took, and the same reason).
--- A topic an action belongs to (§492): Budget, Strategy communication — a row
+-- A topic an action belongs to (§497): Budget, Strategy communication — a row
 -- of its own so a rename reaches every action under it, one name per client
 -- whatever the case. Closed is a stamp, not a delete: a closed topic is still
 -- drawn while it holds open actions.
@@ -975,7 +975,7 @@ CREATE TABLE tracker_actions (
   -- Room for what is deliberately not built (spec 054 §7): a late override,
   -- a reason, a link to a plan item — drawn by nothing.
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
-  -- One topic or none (§492). No ON DELETE: lib/tracker.ts takes a topic off
+  -- One topic or none (§497). No ON DELETE: lib/tracker.ts takes a topic off
   -- its actions before it deletes it.
   topic_id uuid,
   PRIMARY KEY (tenant_id, id),

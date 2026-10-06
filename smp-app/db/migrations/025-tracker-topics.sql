@@ -1,4 +1,4 @@
-/* The Internal Tracker's topics (spec 054, §492)
+/* The Internal Tracker's topics (spec 054, §497)
 
    Islam: "sometimes we have a general topic that is already continuing with
    us on the tasks over the weeks like the Budget or strategy Communication

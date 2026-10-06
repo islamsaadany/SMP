@@ -194,7 +194,7 @@ export const APP_JS = `(function () {
     var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
     return WD[d.getUTCDay()] + " " + d.getUTCDate() + " " + MO[d.getUTCMonth()];
   }
-  /* THE ADD LINE'S TOPIC (§492): an open topic picked from the list, a new
+  /* THE ADD LINE'S TOPIC (§497): an open topic picked from the list, a new
      one named in the box under it (made on Enter, with the action), or none. */
   function setAddTopic(ar, id, name) {
     if (id) { ar.setAttribute("data-topic", id); ar.removeAttribute("data-topicname"); }
@@ -454,23 +454,59 @@ export const APP_JS = `(function () {
   document.addEventListener("dblclick", function (e) {
     var t = e.target.closest(".t[data-rename]");
     if (!t || t.querySelector("input")) return;
-    var id = rowOf(t), was = t.textContent;
+    var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
+    var wasTopic = t.getAttribute("data-topic") || "";
     var inp = document.createElement("input");
     inp.className = "ttl"; inp.value = was; inp.maxLength = 200; inp.setAttribute("aria-label", "Rename the action");
-    t.textContent = ""; t.appendChild(inp); inp.focus(); inp.select();
+    /* THE TOPIC IS SET HERE TOO (§497): the same choice the opened row
+       offers, built from the add line's own list of open topics, plus the
+       one this row already carries if it has since been closed. */
+    var sel = document.createElement("select");
+    sel.className = "tsel"; sel.setAttribute("aria-label", "Topic");
+    var none = document.createElement("option"); none.value = ""; none.textContent = "No topic"; sel.appendChild(none);
+    var seen = false;
+    document.querySelectorAll(".addrow [data-act=pick-topic][data-topic]").forEach(function (b) {
+      var v = b.getAttribute("data-topic"); if (!v) return;
+      var o = document.createElement("option"); o.value = v; o.textContent = b.textContent; sel.appendChild(o);
+      if (v === wasTopic) seen = true;
+    });
+    if (wasTopic && !seen) { var o2 = document.createElement("option"); o2.value = wasTopic; o2.textContent = (t.getAttribute("data-tname") || "This topic") + " (closed)"; sel.appendChild(o2); }
+    sel.value = wasTopic;
+    t.textContent = ""; t.appendChild(inp);
+    if (tn) { tn.classList.add("editing"); tn.appendChild(sel); }
+    inp.focus(); inp.select();
     var settled = false;
-    var back = function () { if (settled) return; settled = true; t.textContent = was; };
-    inp.addEventListener("keydown", function (ev) {
-      if (ev.key === "Escape") { ev.preventDefault(); back(); }
-      else if (ev.key === "Enter") { ev.preventDefault(); inp.blur(); }
-    });
-    inp.addEventListener("blur", function () {
-      if (settled) return;
+    var finish = function (keep) {
+      if (settled) return; settled = true;
+      if (tn) tn.classList.remove("editing");
+      if (sel.parentNode) sel.parentNode.removeChild(sel);
       var v = inp.value.replace(/\\s+/g, " ").trim();
-      if (!v || v === was) { back(); return; }
-      settled = true; t.textContent = v;
-      post({ act: "rename", id: id, title: v });
-    });
+      var tv = sel.value;
+      if (!keep || !v) v = was;
+      t.textContent = v;
+      if (!keep) return;
+      if (v !== was) post({ act: "rename", id: id, title: v });
+      if (tv !== wasTopic) post({ act: "topic", id: id, topicId: tv || null });
+    };
+    var onKey = function (ev) {
+      if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); finish(false); }
+      else if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
+    };
+    inp.addEventListener("keydown", onKey);
+    sel.addEventListener("keydown", function (ev) { if (ev.key === "Escape" || (ev.key === "Enter")) onKey(ev); });
+    /* Settled once the cursor leaves both boxes — moving from the name to
+       the topic is not leaving. */
+    var out = function (ev) {
+      var to = ev.relatedTarget;
+      if (to && (to === inp || to === sel)) return;
+      setTimeout(function () {
+        var f = document.activeElement;
+        if (f === inp || f === sel) return;
+        finish(true);
+      }, 0);
+    };
+    inp.addEventListener("blur", out); sel.addEventListener("blur", out);
+    sel.addEventListener("change", function () { inp.focus(); });
   });
 
   /* Saved when you leave the box (§35), and only when it changed. */

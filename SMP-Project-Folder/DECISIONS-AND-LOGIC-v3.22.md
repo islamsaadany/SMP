@@ -62778,6 +62778,21 @@ nothing stored moves, nothing migrated, no server rule. SHELL v6.08.
 
 **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main took §497–§499 (Internal Tracker) while this was built, so this section was renumbered §497 → §500 before the merge; the record files were combined, the built file and the served copies regenerated, SHELL v6.08 past main's v6.07.
 
+## §501 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
+
+Islam: *"When I enable Copilot on the platform, the module appears on the outside of the platform. When someone clicks on it, it opens the settings, which I don't think is relevant."* Then, of the mockup (`design-mockups/copilot-placement/2026-10-06_copilot-placement.html`): *"go ahead"*, *"proceed"*.
+
+**WHAT TURNING IT ON DOES IS ONE THING**: it draws the Copilot tab inside Strategy. The console card no longer draws a Copilot row and the client's module menu and switcher no longer list Copilot or Copilot settings — `shownOutside()` in `lib/modules.ts` filters any module marked `inside` out of `moduleMenu` and `moduleRows`, and the top bar marks the host (Strategy) as current on the Copilot's own list page (`lib/topbar.ts`), so an inside module is never named as a place of its own.
+
+**THE SETTINGS ARE THE SAME FOR EVERY CLIENT, SO THEY LIVE WHERE EVERY CLIENT IS**: a console tab, *Copilot*, after Frameworks and before History — title *Copilot settings*, tag *Same for every client*, an AI instructions | Templates switch, the section switch, each part with Edit, and the templates table (download, replace, put back). Served by `/api/copilot` (`lib/copilot-settings-api.ts`): every consultant reads, only a Forefront super user (`isAdmin`) edits, a client login is refused — the rule asked on the server, never only by hiding a button (§42). The store is unchanged (`copilot_assets`, §456).
+
+**OLD ADDRESSES ARE DOORS** (§61): `/<client>/copilot/settings…` redirects to `/platform#copilot` rather than drawing a page that no longer exists. **AND THE WAY TO ALL CHATS STAYS**: Strategy's Copilot chats rail carries *All chats on this client ›* to the list page, which is still reachable from inside, never from the menu. Roles & access keeps its Copilot column (§454).
+
+**CHECKS**: `copilot.mjs` 315/0 (red under `copilot-settings-any` 3 and `copilot-settings-client` 1); `modules.mjs` 234/0 with an inside module asserted absent from the switcher and the card and its host present; `shell.mjs` §3f rewritten (the redirect, the console tab, the All chats link, no menu entry) 258/0; the five console checks green on both copies. **RECORDED, NOT DONE**: `check:modules:red`'s `any-module` break no longer reddens because every module in `MODULE_DEF` is now built — measured identical with this change stashed, so it is the break's subject that has gone (§214.3), not this change.
+
+
+**§501.1 — Merged to `main` 2026-10-06 on Islam's word** (*"proceed"*). Main took §497–§500 (the Internal Tracker's topics and colours, and the company capability edited like a direction) while this was built, so it was renumbered §497 → §501 BEFORE the merge, in all three spellings (the merge base held none, so every one was this branch's own — §264.3). The three record files were COMBINED, never picked (§318.7); the built file and `smp-app/public/` were REBUILT from the merged sources (§91, §329). **And §94.12 recurred**: both sides independently wrote shell `smp-shell-v6.08-…`, so the merged name goes past both, `v6.09-copilot-placement`, checked against every name the history has held. One red on the merged tree was my own litter rather than the product: `checks/shell.mjs`'s console-card assertion reads the FIRST card, and two fixture tenants left by a killed copilot run (`RHI` sorting first) answered instead — deleted, 338/0 (§442.15's road). Verified on the merged tree: copilot 315/0, modules 234/0, shell 338/0, tracker 247/0, door 146/0, `typecheck` clean, `built-in-step` and `generated-in-step` clear, `qa.py` ERRORS none, platform-cards 30/0, console-boot 13/0. No forced sign-out is owed: no rule about how a save is judged moved.
+
 ## §502 — a capability's Target box can be read, and a failed save says enough to trace
 
 Islam, on El Abd, Company › Strategy › Capabilities with the pen open: *"Target

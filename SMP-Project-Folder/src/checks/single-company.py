@@ -145,10 +145,10 @@ with sync_playwright() as p:
         ck("…pressed, it reads Done editing", safe(pg, "()=>document.querySelector('.secpen').textContent") == "Done editing")
         ck("…the seats become pickers",
            safe(pg, "()=>document.querySelectorAll('[data-topcaps] .ptitle.edhead [data-pick-open]').length") == 2)
-        # §497: Islam — "I'm not able to edit the name nor add a capability …
+        # §500: Islam — "I'm not able to edit the name nor add a capability …
         # the capability view should be the same like the directions". Editing
         # draws a direction's own head (name box, Remove) and its rail's Add.
-        ck("§497 editing draws the name as a box, like a direction's",
+        ck("§500 editing draws the name as a box, like a direction's",
            safe(pg, "()=>!!document.querySelector('[data-topcaps] .ptitle.edhead textarea.ptname[data-fld]')") is True)
         nm0 = safe(pg, "()=>capsReachable()[0].name")
         safe(pg, "()=>{var f=document.querySelector('[data-topcaps] .ptitle.edhead .ptname'); f.value='Renamed cap'; f.dispatchEvent(new Event('change',{bubbles:true}))}")

@@ -1791,7 +1791,7 @@ function renderTopCaps(){
   };
   var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
               '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
-  /* §497: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
+  /* §500: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
      open on this pane: *"I'm not able to edit the name nor add a capability …
      the capability view should be the same like the directions same
      functionality same work."* §482/§488 drew the band read-only in both modes

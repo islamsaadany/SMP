@@ -4,7 +4,7 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
-**2026-10-06 — A company capability is edited like a direction (§497), on the branch, not merged.** With Edit on, Company › Strategy › Capabilities now has a name box in the capability's header, a Remove button beside it, and "+ Add a Capability" under the list — the same three controls a direction has. Before, the name was plain text and there was no way to add one there.
+**2026-10-06 — A company capability is edited like a direction (§500), on the branch, not merged.** With Edit on, Company › Strategy › Capabilities now has a name box in the capability's header, a Remove button beside it, and "+ Add a Capability" under the list — the same three controls a direction has. Before, the name was plain text and there was no way to add one there.
 
 **2026-10-06 — Advisory in the Copilot (§496, spec 064), merged to `main` 2026-10-06 on Islam's word, a clean fast-forward.** A person asks for advice; the Copilot asks one short question at a time (five a round, two rounds, counted in the right column), offers *assume for me* and *proceed with what you have* from the first question, asks which figure to use when the platform and a file disagree, and then writes a Decision Brief with exactly one recommended option and every fact tagged with where it came from. Saved as an Advisory deliverable that stays in the Copilot; nothing is written into the plan.
 

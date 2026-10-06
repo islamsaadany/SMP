@@ -62333,3 +62333,13 @@ closing a main, Open/Close all, search flat) — and red 4 with rows made never
 to hide. The real page could not be driven in this container (no seeded
 `ffprocess` workspace), which is stated rather than glossed. Snapshot:
 `ui-versions/ffp-processes-list/2026-10-05_before-fold.tsx`.
+
+## §491 — AI in the Processes workspace: a better draft, drafting into an empty process, and an end-to-end check before export (2026-10-06)
+
+**Islam:** *"Build the option to use AI to build a process in the process workspace and also to check and evaluate the process end to end at the end before the exporting page."* His answers: both draft options; **warning only**; the check **runs only when pressed**; **everything fresh** (nothing shared with the existing screens' stored results). He approved the mockup `design-mockups/processes-ai/2026-10-05_build-and-check.html` (roles not in the org chart are kept and shown amber; the check is not saved; the draft covers the Process Map and RACI only).
+
+- **Draft:** the "Generate from best practice" box gains a notes field (*how it works today*, followed over generic practice) and a *use the roles in our org chart* tick (default on). The workspace's active roles are offered to the model; in the preview a role is green when it is in the org chart and amber when not, and an amber one is created as a new role when the draft is used (`materializeDraft`, case-insensitive match).
+- **Draft into an empty process:** a process with no steps shows *Draft it with AI* on its map page. `fillEmptyProcessFromTemplate` refuses inside its transaction if the process has any step or activity, so a draft can never mix into work somebody did. One writer (`materializeDraft`) lays a draft out for both paths (§53.5).
+- **Check before export:** *Check these N end to end* beside *Preview report* on the export page. `checkPackWithAI` (VIEWER access, max 12 processes) reads each process through the same `loadProcessReviewContext` the single-process AI Review now uses, plus facts worked out across the pack (hand-offs to processes not in the pack; the same activity with different Accountable roles). Findings are grouped *Across these processes* then per process with links to map, RACI and authority; clean processes say so. **Nothing is stored**, any change to ticks or order clears the result, and Preview is never blocked.
+- `loadProcessReviewContext` was extracted verbatim from `reviewProcessWithAI`; the AI Review's behaviour is unchanged.
+- **Not run here:** no Gemini key and no seeded workspace, so the model calls and a browser run were not exercised; `npm run typecheck` (cold) is clean.

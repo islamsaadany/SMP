@@ -6,7 +6,6 @@ import { buildStepAuthoritySummary } from "@/ffp/lib/domain/step-authority-summa
 import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { AddStepForm, BulkAddStepsForm } from "./step-form";
 import { MapView } from "./map-view";
-import { GenerateTemplateForm } from "../../template-form";
 import { ProcessStepper } from "../process-stepper";
 import { ProcessDocumentation } from "./process-documentation";
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
@@ -157,12 +156,6 @@ export default async function ProcessMapPage(
       />
 
       </div>
-
-      {process.steps.length === 0 && (
-        <div className="mx-auto mt-5 w-full max-w-4xl">
-          <GenerateTemplateForm workspaceId={workspaceId} intoProcess={{ id: processId, name: process.name }} />
-        </div>
-      )}
 
       <div className="mt-5" />
 

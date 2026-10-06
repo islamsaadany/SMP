@@ -9275,3 +9275,6 @@ The SETTINGS word in the corner of each client card on the console is now the
 platform's two-sliders Settings mark; the word shows on hover. On an archived
 client, Bring back stays a word. Built from the mockup Islam approved and merged
 to main.
+
+## 2026-10-06 — AI in the Processes workspace (§491)
+Built on the branch, not merged. In plain words: the AI draft box now takes your notes and can use the roles from the org chart (roles it invents show amber); an empty process offers "Draft it with AI" on its map page; and the export page has an optional "Check these N end to end" button that reads the ticked processes together and lists what to fix, saving nothing and never blocking the preview. Not tested against the real model (no key here); types check clean. Still waiting on Islam: the Helicopter-view process picker choice, and his word on any merge.

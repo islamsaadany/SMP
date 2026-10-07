@@ -62856,3 +62856,19 @@ Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and w
 - On a phone the topic drops to the second line beside the week.
 
 `checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §501–§502 brought in first; renumbered §501 → §503 before the merge.
+
+## §504 — A direction's owner and custodian are a row on Roles & access
+
+Islam, of Amr Hassan, named Owner of one of the company's directions: *"we dont have a direction owner in the roles & access and I made him a custodian but nothing appearing for him"* — then, of two answers put to him, *"A, view on group is fine, build it."*
+
+**Reproduced before anything was proposed.** §447/§469 gave a direction (a top-layer pillar, with the business units switched off) an Owner and a Custodian, and let both report their own direction through `ownsTopPillar` — a rule, deliberately not a row. What it never did was give them a place: being named on a direction derived **no role**, so somebody holding nothing else reached no destination and the page read *"No pages granted"* over the one thing they had been named on. Measured with two people holding nothing, one named Owner and one Custodian: `roles []`, `current null`, *No pages granted* for both.
+
+**The role is derived, never granted (§33, §147.7).** `dirowner` ("Direction owner") is minted in `personRoles()` at the group whenever `ownsTopPillar(w, p)` is true — the SAME rule that lets them report, so the role and the reporting right cannot disagree about who is named (§42, §53.5) — and it is false whenever the business units are on, because then the top layer's pillars are not directions anybody reports. Either seat derives it.
+
+**View on the group, none everywhere else** (his word). The own-unit and own-function columns can never be theirs (the role is held at the group alone), so they are drawn as not applicable (§174). What lets them type their own figures is still `ownsTopPillar`, unchanged — this row decides what they may OPEN and never what they may report. It joins `OWN_LINES_ONLY`, so it is never granted by hand on the register and never speaks for the company (no Submit, no note, no slides), and `boundedReach` reaches a pillar naming them in either seat.
+
+**Nobody's access moves on any other tenant**: `scripts/test-access-unmoved.js` against the stored baseline reads UNMOVED (the worked example plans on its business units, so nobody there is a direction owner). No migration, nothing stored.
+
+**Verified.** `scripts/test-authorize.js` §504, 953/0, both ends (named → role and group view, not named → nothing, units on → no role); red 3 with the derivation removed. `checks/direction-owner-role.py` all good, **5 red** against the build before, printing the reported state. `direction-seats`, `single-company`, `access-header`, `viewer-line`, `built-in-step` green; the four served copies regenerated and `rules.cjs` re-carried.
+
+**Recorded, not done.** `scripts/test-my-reporting.js` §0 is 1 red on `main` before this change too (six sources it now names as needing a browser), reproduced with this work stashed.

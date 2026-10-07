@@ -90,6 +90,25 @@
       note:"Named as a project's Owner on a supporting function, or on a business unit that plans in projects. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
+    /* ── A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW TOO (§504) ────────
+       Islam, of Amr Hassan, named Owner of one of the company's directions:
+       *"we dont have a direction owner in the roles & access and I made him
+       a custodian but nothing appearing for him"* — then, of two answers,
+       *"A, view on group is fine, build it."*
+
+       §447/§469 gave a direction (a top-layer pillar, with the business units
+       off) an Owner and a Custodian and let both report their own direction
+       through `ownsTopPillar` — a RULE, deliberately not a row. What it never
+       did was give them a place: being named on a direction derived no role,
+       so somebody holding nothing else reached no destination at all and the
+       page read "No pages granted" over the one thing they had been named on.
+       Derived exactly as the Pillar owner is (§147.7): being named IS the role,
+       from either seat, nothing granted by hand. It ships at VIEW on the group
+       and NONE everywhere else — what lets them type their own figures is still
+       `ownsTopPillar`, unchanged, so this row decides what they may OPEN and
+       never what they may report. */
+    { key:"dirowner", name:"Direction owner", scope:"group",
+      note:"Named as a company direction's Owner or Custodian, when the company plans its directions itself. Reports that direction by rule; this row decides what else they may open." },
     /* ── AND THE ROW UNDER THE PILLAR WAS HERE, AND IS GONE (§384 → §387) ──
        §384 added a **Tactic owner** row on Islam's ask — *"I believe we need
        to add measures & tactics owners as roles so I can set their
@@ -281,6 +300,11 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    /* §504: view on the group, Islam's word, and nothing else — the own
+       columns can never be theirs (the role is held at the group, never at a
+       unit or a function), so they are drawn as not applicable. */
+    dirowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"none", a_fn_own_strat:"none", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* §384's `towner` row sat here and is gone (§387) — the defaults go with
        the role, because a stored map is merged over these (§30.2) and a key
        nothing reads is a column somebody sets for nothing. A tenant that has
@@ -603,6 +627,12 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
+    /* §504: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
+       one rule that lets them report (`ownsTopPillar`), so the role and the
+       reporting right cannot disagree about who is named (§42, §53.5) — and
+       it is false whenever the business units are on, because then the top
+       layer's pillars are not directions anybody reports. */
+    if (ownsTopPillar(w, p)) once("dirowner", "group");
     /* §384 DERIVED A `towner` HERE AND §387 TOOK IT OUT — the whole role went
        with the Roles & access row (see ROLES above). A tactic's owner is
        `namedInUnit` by the floor below, exactly as they were before §384, and
@@ -3533,7 +3563,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      §55 recorded this list for. */
   /* §384 added the tactic's owner here and §387 took the role out entirely —
      the switch decides who enters a line now, not a row on this table. */
-  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner"];
+  /* §504: the Direction owner joins them — a bounded role that never submits,
+     never writes the company's note, and is never granted by hand. */
+  var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner", "dirowner"];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
@@ -3682,6 +3714,11 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
+    /* §504: a direction's owner reaches the rows of a pillar naming them in
+       either seat — and only ever on the top layer, where they hold the role. */
+    if (roleKey === "dirowner")
+      return (!!ctx.pillarOwner && namedOn({ owner: ctx.pillarOwner }, person)) ||
+             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
     /* ── §384's `towner` BRANCH SAT HERE, AND THE CONTRADICTION WITH IT ──
        That section gave a tactic's Owner a role and a branch; §382's switch
        gave the same person a page. Both shipped, and the merge that brought
@@ -35477,6 +35514,11 @@ function renderAccess(){
     if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
       return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
         " holds no " + L1("unitword") + ".";
+    }
+    /* §504: a direction owner is held at the group alone, never at a unit or
+       a function, so neither own pair can ever be theirs. */
+    if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
+      return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
     }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no " + L1("fnword") + ".";

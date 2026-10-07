@@ -53,7 +53,6 @@
 <a class="skip" href="#panel">Skip to the page</a>
 
 <div class="banner refused" id="refused" hidden></div>
-<div class="banner safety" id="unsaved" role="status" hidden></div>
 
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
@@ -230,7 +229,6 @@
 <script src="TOUR"></script>
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
-<script src="UNSAVED"></script>
 <script src="LIBRARY"></script>
 <script src="COPILOT"></script>
 <script src="SAFETY"></script>
@@ -871,13 +869,6 @@
       { k:"history",  ac:"c_history", grp:"cycle", mod:"strategy", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
         when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
         render:function(){ return TRAIL.renderPage(); } },
-      /* UNSAVED CHANGES (§504): changed lines a failed save could not land,
-         sent here from the person's own computer. The office's by rule, like
-         History beside it — the gate is inOffice(), so its access key is
-         History's, the same "always" area, rather than a new matrix cell. */
-      { k:"unsaved",  ac:"c_history", grp:"cycle", mod:"strategy", label:"Unsaved changes", glyph:"↑", find:"unsaved changes failed save sent to the office lost work recover apply discard server error",
-        when: function(){ return inOffice() && UNSAVED.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
-        render:function(){ return UNSAVED.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page

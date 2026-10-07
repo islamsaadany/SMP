@@ -521,7 +521,75 @@
            ((changes.rows || []).length);
   }
 
+  /* ── ONE CHANGE LIST AS LINES (§504) ──
+     A failed save is kept on the person's computer and, if they choose, sent
+     to the Strategy Office — and what the office acts on is ONE LINE, never a
+     whole plan, so two people's failed saves never become two versions to
+     reconcile. A line is the smallest piece of a change list that still
+     applies on its own through applyChanges: one part path, or one field of
+     one row. `addr` names WHAT the line changes (never who sent it), which is
+     how two people sending the same line are recognised as the same line. */
+  function splitLines(changes) {
+    var out = [];
+    if (!changes || typeof changes !== "object") return out;
+    var set = isMap(changes.set) ? changes.set : {};
+    Object.keys(set).forEach(function (p) {
+      var ch = { set: {} }; ch.set[p] = set[p];
+      out.push({ addr: "p:" + p, change: ch, mine: { has: true, value: set[p] } });
+    });
+    (Array.isArray(changes.del) ? changes.del : []).forEach(function (p) {
+      out.push({ addr: "p:" + p, change: { del: [p] }, mine: { has: false } });
+    });
+    (Array.isArray(changes.rows) ? changes.rows : []).forEach(function (e) {
+      if (!isMap(e)) return;
+      var head = "r:" + e.at + "|" + (e.path || []).join("/") + "|" + (e.id == null ? "" : e.id) + "|";
+      var es = isMap(e.set) ? e.set : {};
+      Object.keys(es).forEach(function (f) {
+        var s1 = {}; s1[f] = es[f];
+        out.push({ addr: head + f, change: { rows: [{ at: e.at, path: e.path || [], id: e.id, set: s1, del: [] }] },
+                   mine: { has: true, value: es[f] } });
+      });
+      (Array.isArray(e.del) ? e.del : []).forEach(function (f) {
+        out.push({ addr: head + f, change: { rows: [{ at: e.at, path: e.path || [], id: e.id, set: {}, del: [f] }] },
+                   mine: { has: false } });
+      });
+    });
+    return out;
+  }
+
+  /* What a line's place holds in a graph, read leniently: anything that is
+     not there answers { has:false } rather than throwing, because the graph a
+     line is read against may have moved on since the line was written. */
+  function valueAt(state, line) {
+    var none = { has: false };
+    if (!state || !line || !line.change) return none;
+    var ch = line.change;
+    var p = ch.set ? Object.keys(ch.set)[0] : (ch.del && ch.del[0]);
+    if (p != null) {
+      var parts = String(p).split("."), h = state;
+      for (var i = 0; i < parts.length; i++) {
+        if (!isMap(h) || !Object.prototype.hasOwnProperty.call(h, parts[i])) return none;
+        h = h[parts[i]];
+      }
+      return { has: true, value: h };
+    }
+    var e = ch.rows && ch.rows[0];
+    if (!e) return none;
+    var f = Object.keys(e.set || {})[0] || (e.del || [])[0];
+    var seg = String(e.at).split("."), host = null;
+    if (seg.length === 2) host = isMap(state[seg[0]]) ? state[seg[0]][seg[1]] : null;
+    else host = state[seg[0]];
+    var path = e.path || [], holder = host;
+    for (var q = 0; q < path.length; q += 2) {
+      if (!isMap(holder)) return none;
+      holder = byId(holder[path[q]])[String(q + 1 < path.length ? path[q + 1] : e.id)] || null;
+    }
+    if (!isMap(holder) || !Object.prototype.hasOwnProperty.call(holder, f)) return none;
+    return { has: true, value: holder[f] };
+  }
+
   return { graphChanges: graphChanges, applyChanges: applyChanges,
            countChanges: countChanges, BY_KEY: BY_KEY, sameValue: same,
-           REVIEW_PER_TARGET: REVIEW_PER_TARGET };
+           REVIEW_PER_TARGET: REVIEW_PER_TARGET,
+           splitLines: splitLines, valueAt: valueAt };
 });

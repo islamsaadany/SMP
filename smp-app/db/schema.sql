@@ -735,6 +735,31 @@ CREATE INDEX change_log_target ON change_log (tenant_id, target, at DESC);
 CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
 CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
 
+/* §504: a line of a save that failed, sent to the Strategy Office from the
+   person's own computer (migration 026). */
+CREATE TABLE unsaved_lines (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  report uuid NOT NULL,
+  person_key text NOT NULL,
+  person_name text,
+  role text NOT NULL DEFAULT '',
+  view_as text,
+  sent_at timestamptz NOT NULL DEFAULT now(),
+  addr text NOT NULL,
+  change jsonb NOT NULL,
+  base jsonb,
+  mine jsonb,
+  error text,
+  status text NOT NULL DEFAULT 'open',
+  done_by text,
+  done_at timestamptz,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT unsaved_status CHECK (status IN ('open', 'applied', 'discarded', 'landed'))
+);
+CREATE INDEX unsaved_lines_open ON unsaved_lines (tenant_id, status, addr);
+CREATE INDEX unsaved_lines_report ON unsaved_lines (tenant_id, report);
+
 CREATE TABLE chat_threads (
   tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   person_key text NOT NULL,

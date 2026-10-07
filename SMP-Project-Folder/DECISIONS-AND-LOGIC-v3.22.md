@@ -62857,7 +62857,7 @@ Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and w
 
 `checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §501–§502 brought in first; renumbered §501 → §503 before the merge.
 
-## §504 — A direction's owner and custodian are a row on Roles & access
+## §505 — A direction's owner and custodian are a row on Roles & access
 
 Islam, of Amr Hassan, named Owner of one of the company's directions: *"we dont have a direction owner in the roles & access and I made him a custodian but nothing appearing for him"* — then, of two answers put to him, *"A, view on group is fine, build it."*
 
@@ -62869,6 +62869,6 @@ Islam, of Amr Hassan, named Owner of one of the company's directions: *"we dont 
 
 **Nobody's access moves on any other tenant**: `scripts/test-access-unmoved.js` against the stored baseline reads UNMOVED (the worked example plans on its business units, so nobody there is a direction owner). No migration, nothing stored.
 
-**Verified.** `scripts/test-authorize.js` §504, 953/0, both ends (named → role and group view, not named → nothing, units on → no role); red 3 with the derivation removed. `checks/direction-owner-role.py` all good, **5 red** against the build before, printing the reported state. `direction-seats`, `single-company`, `access-header`, `viewer-line`, `built-in-step` green; the four served copies regenerated and `rules.cjs` re-carried.
+**Verified.** `scripts/test-authorize.js` §505, 953/0, both ends (named → role and group view, not named → nothing, units on → no role); red 3 with the derivation removed. `checks/direction-owner-role.py` all good, **5 red** against the build before, printing the reported state. `direction-seats`, `single-company`, `access-header`, `viewer-line`, `built-in-step` green; the four served copies regenerated and `rules.cjs` re-carried.
 
 **Recorded, not done.** `scripts/test-my-reporting.js` §0 is 1 red on `main` before this change too (six sources it now names as needing a browser), reproduced with this work stashed.

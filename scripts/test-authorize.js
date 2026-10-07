@@ -5433,12 +5433,12 @@ console.log("\n§492 · how we compete");
         gk.length && gk.indexOf("unknown") < 0 && gk.indexOf("setup") < 0, gk.join(",") || "(nothing — INVISIBLE)");
 })();
 
-/* ── §504: A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW ─────────────────────
+/* ── §505: A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW ─────────────────────
    Being named on a direction derives `dirowner` at the group — from either
    seat — and nothing else; with the units ON it derives nothing (the top
    layer's pillars are not directions then). The row opens the group at view
    and no unit or function, and it is never granted by hand. BOTH ENDS. */
-console.log("\n§504 · the direction owner row");
+console.log("\n§505 · the direction owner row");
 (function () {
   const B = clone(SEED);
   B.people = B.people.concat([
@@ -5450,17 +5450,17 @@ console.log("\n§504 · the direction owner row");
     owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian", measures: [], tactics: [] }];
   const w = R.worldOf(B);
   const roles = function (k) { return R.personRoles(w, personOf(B, k)).map(function (r) { return r.role + "@" + r.at; }).join(","); };
-  check("§504: a direction's owner holds the Direction owner role at the group", roles("t504_own") === "dirowner@group", roles("t504_own"));
-  check("§504: …and so does its custodian", roles("t504_cus") === "dirowner@group", roles("t504_cus"));
-  check("§504: somebody named on no direction holds nothing", roles("t504_none") === "", roles("t504_none"));
-  check("§504: the owner may open the group", R.grantIn(w, personOf(B, "t504_own"), "a_group", "group") === "view",
+  check("§505: a direction's owner holds the Direction owner role at the group", roles("t504_own") === "dirowner@group", roles("t504_own"));
+  check("§505: …and so does its custodian", roles("t504_cus") === "dirowner@group", roles("t504_cus"));
+  check("§505: somebody named on no direction holds nothing", roles("t504_none") === "", roles("t504_none"));
+  check("§505: the owner may open the group", R.grantIn(w, personOf(B, "t504_own"), "a_group", "group") === "view",
         R.grantIn(w, personOf(B, "t504_own"), "a_group", "group"));
-  check("§504: …and no business unit", R.grantIn(w, personOf(B, "t504_own"), "unit", "mobile") === "none",
+  check("§505: …and no business unit", R.grantIn(w, personOf(B, "t504_own"), "unit", "mobile") === "none",
         R.grantIn(w, personOf(B, "t504_own"), "unit", "mobile"));
-  check("§504: the role is bounded — it never speaks for the company", R.isOwnLinesRole("dirowner"), "not own-lines");
+  check("§505: the role is bounded — it never speaks for the company", R.isOwnLinesRole("dirowner"), "not own-lines");
   const on = clone(B); on.group[R.STRUCTURE] = { bu: { exists: true } };
   const r2 = R.personRoles(R.worldOf(on), personOf(on, "t504_own")).map(function (r) { return r.role; });
-  check("§504: with the business units on, the same naming derives no Direction owner", r2.indexOf("dirowner") < 0, r2.join(","));
+  check("§505: with the business units on, the same naming derives no Direction owner", r2.indexOf("dirowner") < 0, r2.join(","));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

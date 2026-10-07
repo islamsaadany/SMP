@@ -365,7 +365,7 @@ function renderAccess(){
       return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
         " holds no " + L1("unitword") + ".";
     }
-    /* §504: a direction owner is held at the group alone, never at a unit or
+    /* §505: a direction owner is held at the group alone, never at a unit or
        a function, so neither own pair can ever be theirs. */
     if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
       return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";

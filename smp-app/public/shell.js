@@ -90,7 +90,7 @@
       note:"Named as a project's Owner on a supporting function, or on a business unit that plans in projects. With Reporting opened on this row, they report that project — whole, and only it." },
     { key:"plowner", name:"Pillar owner", scope:"unitfn",
       note:"Named as a pillar's Owner, on a unit or a pillars function. With Reporting opened on this row, they report that pillar — whole, and only it." },
-    /* ── A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW TOO (§504) ────────
+    /* ── A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW TOO (§505) ────────
        Islam, of Amr Hassan, named Owner of one of the company's directions:
        *"we dont have a direction owner in the roles & access and I made him
        a custodian but nothing appearing for him"* — then, of two answers,
@@ -300,7 +300,7 @@
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    /* §504: view on the group, Islam's word, and nothing else — the own
+    /* §505: view on the group, Islam's word, and nothing else — the own
        columns can never be theirs (the role is held at the group, never at a
        unit or a function), so they are drawn as not applicable. */
     dirowner:  { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
@@ -627,7 +627,7 @@
       if (String(f.format) === "pillars" && (f.items || []).some(owns))
         once("plowner", "fn:" + k);
     });
-    /* §504: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
+    /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
        one rule that lets them report (`ownsTopPillar`), so the role and the
        reporting right cannot disagree about who is named (§42, §53.5) — and
        it is false whenever the business units are on, because then the top
@@ -3563,7 +3563,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      §55 recorded this list for. */
   /* §384 added the tactic's owner here and §387 took the role out entirely —
      the switch decides who enters a line now, not a row on this table. */
-  /* §504: the Direction owner joins them — a bounded role that never submits,
+  /* §505: the Direction owner joins them — a bounded role that never submits,
      never writes the company's note, and is never granted by hand. */
   var OWN_LINES_ONLY = ["contrib", NO_ROLE, "powner", "plowner", "dirowner"];
 
@@ -3714,7 +3714,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "plowner")
       return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
              namedOn({ owner: ctx.pillarOwner }, person);
-    /* §504: a direction's owner reaches the rows of a pillar naming them in
+    /* §505: a direction's owner reaches the rows of a pillar naming them in
        either seat — and only ever on the top layer, where they hold the role. */
     if (roleKey === "dirowner")
       return (!!ctx.pillarOwner && namedOn({ owner: ctx.pillarOwner }, person)) ||
@@ -35515,7 +35515,7 @@ function renderAccess(){
       return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
         " holds no " + L1("unitword") + ".";
     }
-    /* §504: a direction owner is held at the group alone, never at a unit or
+    /* §505: a direction owner is held at the group alone, never at a unit or
        a function, so neither own pair can ever be theirs. */
     if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
       return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";

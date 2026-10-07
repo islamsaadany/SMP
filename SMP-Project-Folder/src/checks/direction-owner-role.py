@@ -1,4 +1,4 @@
-"""A direction's owner and custodian are a row on Roles & access (§504).
+"""A direction's owner and custodian are a row on Roles & access (§505).
 
 Islam, of Amr Hassan, named Owner of one of the company's directions: *"we
 dont have a direction owner in the roles & access and I made him a custodian

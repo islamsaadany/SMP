@@ -57476,7 +57476,14 @@ var COPILOT = (function(){
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   function cardsHtml(f){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
-    var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
+    /* §507 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
+       Islam: "I have no option to edit any section once I finish and Done
+       appears until I finalize all parts and reach the consistency check."
+       Only the plan road could press a card, and never during the check;
+       now any part opens while the parts are being worked or checked —
+       never before the road is chosen, and never once the Foundation is
+       saved, because the server refuses a save to a saved flow. */
+    var pick = ed && PICK_PHASES.indexOf(f.phase) >= 0;
     return '<div class="copcards">' + S.map(function(el, i){
       if (!on(i)) return "";
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
@@ -57600,6 +57607,32 @@ var COPILOT = (function(){
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
   }
+  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§507): a drafted part
+     opens on its draft, a part with every question answered opens on the
+     review, and a part half answered opens on its next unanswered question
+     — never back at question one, which would make returning to a part you
+     were in the middle of cost the answers already given. */
+  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check"];
+  function openPart(g, i){
+    var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
+    g.e = i; g.done[i] = false; NUDGE = null;
+    if (String(g.drafts[i] || "").trim()) { g.phase = "draft"; g.qi = 0; return; }
+    while (k < n && String(a[k] || "").trim()) k++;
+    if (n && k >= n) { g.phase = "review"; g.qi = 0; } else { g.phase = "ask"; g.qi = Math.min(k, Math.max(n - 1, 0)); }
+  }
+  /* WHICH PART A TYPED LINE NAMES (§507), by the part's own words — one
+     part, or nobody: a line naming two is not guessed at. */
+  var PART_WORDS = { who: ["who we are"], asp: ["winning aspiration", "aspiration"], eim: ["end in mind"],
+    pur: ["purpose", "mission"], obj: ["key objectives", "objectives", "objective", "guiding objectives"], val: ["core values", "values"] };
+  function namedPart(text){
+    var t = " " + String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ") + " ", hits = [];
+    steps().forEach(function(el, i){
+      if (!on(i)) return;
+      var words = (PART_WORDS[el.key] || []).concat([String(el.name).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()]);
+      if (words.some(function(w){ return w && t.indexOf(" " + w + " ") >= 0; })) hits.push(i);
+    });
+    return hits.length === 1 ? hits[0] : -1;
+  }
   function nextUndone(f, from){
     var n = steps().length;
     for (var i = from + 1; i < n; i++) if (on(i) && !f.done[i]) return i;
@@ -57711,7 +57744,20 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    SAY = f.phase === "loaded" ? "Press the part you want to change on the left, then say what to change." : "Noted. Use the buttons above to carry on."; draw();
+    /* §507 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
+       IT WITH THE CHANGE APPLIED: the refine is asked of that part, and the
+       answer comes back as its draft to save, which runs the check again.
+       A part with nothing written yet opens on its questions instead. */
+    if (f.phase === "loaded" || f.phase === "check") {
+      var pi = namedPart(text);
+      if (pi >= 0) {
+        var gp = flowCopy(); DRAFT[id] = "";
+        if (String(gp.drafts[pi] || "").trim()) { gp.e = pi; flowAsk({ act:"flowRefine", el:pi, how:text.trim(), flow:gp }); return; }
+        openPart(gp, pi); flowSave(gp, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return;
+      }
+      SAY = "Press the part you want to change on the left, or name it, then say what to change."; draw(); return;
+    }
+    SAY = "Noted. Use the buttons above to carry on."; draw();
   }
   function flowClick(ev){
     var b, f = PANE && PANE.flow;
@@ -57746,8 +57792,7 @@ var COPILOT = (function(){
     }
     if ((b = hit(ev, "button[data-cop-card]"))) {
       var gc = flowCopy(), ci = Number(b.getAttribute("data-cop-card"));
-      gc.e = ci; gc.qi = 0; gc.done[ci] = false; NUDGE = null;
-      gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
+      openPart(gc, ci);
       flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
     if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
@@ -57766,12 +57811,12 @@ var COPILOT = (function(){
       if (g3.start === "plan") { g3.phase = "loaded"; flowSave(g3); return true; }
       var nx = nextUndone(g3, g3.e);
       if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
-      g3.e = nx; g3.qi = 0; g3.phase = g3.drafts[nx] ? "draft" : "ask";
+      openPart(g3, nx);
       flowSave(g3); return true;
     }
     if ((b = hit(ev, "[data-cop-goback]"))) {
       var g4 = flowCopy(), x = Number(b.getAttribute("data-cop-goback"));
-      g4.done[x] = false; g4.e = x; g4.phase = "draft"; flowSave(g4); return true;
+      openPart(g4, x); flowSave(g4); return true;
     }
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;

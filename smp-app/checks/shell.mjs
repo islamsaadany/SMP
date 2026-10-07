@@ -1374,6 +1374,30 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.drafts[0] === "We connect Egypt.", "Save and continue agrees the part and moves to the next", JSON.stringify({ done: F.done, e: F.e, phase: F.phase }));
     await shot("7-next");
 
+    /* §507 — A DONE PART STILL OPENS, ON THE FRESH ROAD TOO, and saving it
+       puts you back where you were. One question of the next part is
+       answered first, so "where you were" is question 2 and not question 1:
+       a build that reset to the start passes a check made on question 1. */
+    await page.fill("[data-cop-text]", "A full answer about where Mobile wins by 2028.");
+    await page.click("[data-cop-send]");
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).qi !== 1; i++) await page.waitForTimeout(250);
+    check(F.e === 1 && F.qi === 1, "…the next part's first question answered", JSON.stringify({ e: F.e, qi: F.qi }));
+    /* Every press here DEGRADES (§215): on a build without the fix the card
+       is not a button, and a bare page.click waits thirty seconds and takes
+       the rest of the section with it — a run that dies rather than reports. */
+    const textOf = async (sel) => ((await page.$(sel)) ? (await page.textContent(sel)) || "" : "");
+    const pressIf = async (sel) => { if (!(await page.$(sel))) return false; await page.click(sel); return true; };
+    check(!!(await page.$('button[data-cop-card="0"]')), "a Done part's card is a button on the fresh road too (§507)");
+    if (await pressIf('button[data-cop-card="0"]')) for (let i = 0; i < 20 && (F = await flowRow(cid)).e !== 0; i++) await page.waitForTimeout(250);
+    await page.waitForSelector(".copfdraft", { timeout: 10000 }).catch(() => {});
+    check(F.e === 0 && F.phase === "draft" && F.done[0] === false && /We connect Egypt\./.test(await textOf(".copfdraft")),
+      "pressing it opens its draft to change, before the check", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0] }));
+    check(/Save and continue to Winning Aspiration/.test(await textOf("[data-cop-fsave]")), "…and its Save names the part you were on");
+    await pressIf("[data-cop-fsave]");
+    for (let i = 0; i < 20 && ((F = await flowRow(cid)).e !== 1 || F.phase !== "ask"); i++) await page.waitForTimeout(250);
+    check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.qi === 1,
+      "saving it puts you back on question 2 of the part you were on", JSON.stringify({ done0: F.done[0], e: F.e, phase: F.phase, qi: F.qi }));
+
     /* The other four, agreed through the server so the check can be pressed. */
     F.drafts = F.drafts.map((d, i) => d || "Part " + (i + 1) + " for {Y}"); F.done = F.done.map(() => true); F.phase = "check";
     await page.evaluate(async ({ cid, F }) => { await fetch("/raya-trade/copilot/api", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -1389,6 +1413,29 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent), fin: document.querySelector("[data-cop-ffinish]").textContent }));
     check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && /Core Values/.test(ck.back[0]) && /Save as Foundation — Mobile v1/.test(ck.fin),
       "the check lists what agrees and what does not, offers Go back to that part, and Save as Foundation — Mobile v1", JSON.stringify(ck));
+
+    /* §507 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
+       opens it with the change applied; a line naming none asks nothing and
+       says how. Saving the changed part runs the check again. */
+    check((await page.$$("button[data-cop-card]")).length === 6, "every card is pressable during the check (§507)");
+    const seenC = MODEL_SEEN.length;
+    await page.fill("[data-cop-text]", "Make it shorter please");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => /or name it, then say what to change/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
+    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-ffinish]") }));
+    check(MODEL_SEEN.length === seenC && /Press the part you want to change on the left, or name it/.test(nn.say) && nn.fin,
+      "a line naming no part asks nothing, says how, and leaves the check where it was", JSON.stringify(nn));
+    Object.assign(MODEL_ANSWER, { text: "Integrity, speed and care." });
+    await page.fill("[data-cop-text]", "Make the core values shorter");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => /Integrity, speed and care\./.test((document.querySelector(".copfdraft") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "draft"; i++) await page.waitForTimeout(250);
+    check(MODEL_SEEN.length === seenC + 1 && /core values shorter/.test(JSON.stringify(MODEL_SEEN[seenC])) && F.e === 5 && F.phase === "draft" && F.done[5] === false,
+      "a line naming Core Values opens that part with the change applied", JSON.stringify({ seen: MODEL_SEEN.length - seenC, e: F.e, phase: F.phase }));
+    check(/Save and check the whole foundation/.test(await textOf("[data-cop-fsave]")), "…and its Save goes back to the check");
+    await pressIf("[data-cop-fsave]");
+    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 });
+    check(MODEL_SEEN.length === seenC + 2, "saving it runs the check again", MODEL_SEEN.length - seenC);
     await page.click("[data-cop-ffinish]");
     await page.waitForFunction(() => /Saved as Foundation — Mobile v1/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
     await shot("9-saved");

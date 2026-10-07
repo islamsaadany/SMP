@@ -464,5 +464,8 @@ var TRAIL = (function(){
   return { renderPage: renderPage, onPaint: onPaint, openFor: openFor, load: load,
            /* for the checks */
            filters: function(){ return F; }, rows: function(){ return rows; }, flatten: flatten,
-           locate: locate, noRestore: noRestore, servable: servable };
+           locate: locate, noRestore: noRestore, servable: servable,
+           /* §504: the Unsaved changes page speaks the same words for a field,
+              a person and a time — read, never copied (§53.5) */
+           fieldWord: fieldWord, whoWord: whoWord, whenWord: whenWord };
 })();

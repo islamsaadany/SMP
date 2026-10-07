@@ -5447,9 +5447,77 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
            ((changes.rows || []).length);
   }
 
+  /* ── ONE CHANGE LIST AS LINES (§504) ──
+     A failed save is kept on the person's computer and, if they choose, sent
+     to the Strategy Office — and what the office acts on is ONE LINE, never a
+     whole plan, so two people's failed saves never become two versions to
+     reconcile. A line is the smallest piece of a change list that still
+     applies on its own through applyChanges: one part path, or one field of
+     one row. `addr` names WHAT the line changes (never who sent it), which is
+     how two people sending the same line are recognised as the same line. */
+  function splitLines(changes) {
+    var out = [];
+    if (!changes || typeof changes !== "object") return out;
+    var set = isMap(changes.set) ? changes.set : {};
+    Object.keys(set).forEach(function (p) {
+      var ch = { set: {} }; ch.set[p] = set[p];
+      out.push({ addr: "p:" + p, change: ch, mine: { has: true, value: set[p] } });
+    });
+    (Array.isArray(changes.del) ? changes.del : []).forEach(function (p) {
+      out.push({ addr: "p:" + p, change: { del: [p] }, mine: { has: false } });
+    });
+    (Array.isArray(changes.rows) ? changes.rows : []).forEach(function (e) {
+      if (!isMap(e)) return;
+      var head = "r:" + e.at + "|" + (e.path || []).join("/") + "|" + (e.id == null ? "" : e.id) + "|";
+      var es = isMap(e.set) ? e.set : {};
+      Object.keys(es).forEach(function (f) {
+        var s1 = {}; s1[f] = es[f];
+        out.push({ addr: head + f, change: { rows: [{ at: e.at, path: e.path || [], id: e.id, set: s1, del: [] }] },
+                   mine: { has: true, value: es[f] } });
+      });
+      (Array.isArray(e.del) ? e.del : []).forEach(function (f) {
+        out.push({ addr: head + f, change: { rows: [{ at: e.at, path: e.path || [], id: e.id, set: {}, del: [f] }] },
+                   mine: { has: false } });
+      });
+    });
+    return out;
+  }
+
+  /* What a line's place holds in a graph, read leniently: anything that is
+     not there answers { has:false } rather than throwing, because the graph a
+     line is read against may have moved on since the line was written. */
+  function valueAt(state, line) {
+    var none = { has: false };
+    if (!state || !line || !line.change) return none;
+    var ch = line.change;
+    var p = ch.set ? Object.keys(ch.set)[0] : (ch.del && ch.del[0]);
+    if (p != null) {
+      var parts = String(p).split("."), h = state;
+      for (var i = 0; i < parts.length; i++) {
+        if (!isMap(h) || !Object.prototype.hasOwnProperty.call(h, parts[i])) return none;
+        h = h[parts[i]];
+      }
+      return { has: true, value: h };
+    }
+    var e = ch.rows && ch.rows[0];
+    if (!e) return none;
+    var f = Object.keys(e.set || {})[0] || (e.del || [])[0];
+    var seg = String(e.at).split("."), host = null;
+    if (seg.length === 2) host = isMap(state[seg[0]]) ? state[seg[0]][seg[1]] : null;
+    else host = state[seg[0]];
+    var path = e.path || [], holder = host;
+    for (var q = 0; q < path.length; q += 2) {
+      if (!isMap(holder)) return none;
+      holder = byId(holder[path[q]])[String(q + 1 < path.length ? path[q + 1] : e.id)] || null;
+    }
+    if (!isMap(holder) || !Object.prototype.hasOwnProperty.call(holder, f)) return none;
+    return { has: true, value: holder[f] };
+  }
+
   return { graphChanges: graphChanges, applyChanges: applyChanges,
            countChanges: countChanges, BY_KEY: BY_KEY, sameValue: same,
-           REVIEW_PER_TARGET: REVIEW_PER_TARGET };
+           REVIEW_PER_TARGET: REVIEW_PER_TARGET,
+           splitLines: splitLines, valueAt: valueAt };
 });
 
 /* ── ../../lib/audience.js ── */
@@ -56184,7 +56252,176 @@ var TRAIL = (function(){
   return { renderPage: renderPage, onPaint: onPaint, openFor: openFor, load: load,
            /* for the checks */
            filters: function(){ return F; }, rows: function(){ return rows; }, flatten: flatten,
-           locate: locate, noRestore: noRestore, servable: servable };
+           locate: locate, noRestore: noRestore, servable: servable,
+           /* §504: the Unsaved changes page speaks the same words for a field,
+              a person and a time — read, never copied (§53.5) */
+           fieldWord: fieldWord, whoWord: whoWord, whenWord: whenWord };
+})();
+
+/* ── unsaved.js ── */
+/* ══ UNSAVED (§504) ═══════════════════════════════════════════════════════
+   Islam: a save that fails (the server or the network, never a refusal) is
+   kept on the person's computer and resent by itself (sync.js); "Send to the
+   Strategy Office" puts its changed lines on ONE list here, Setup › Unsaved
+   changes, for the office to work through.
+
+   ONE ROW PER LINE, AND ONE GROUP PER PLACE: two people who sent the same
+   line are one decision — "Two people sent this", Use X / Use Y / Discard —
+   because applying one answer closes the other on the server (lib/unsaved.ts).
+
+   APPLY RUNS AS THE SENDER, on the server, never with the office's rights:
+   a line the sender could not have saved is refused and stays on the list.
+   A line that has landed by itself leaves the list on the next read.
+
+   Built on TRAIL's pattern (§262): the page draws a frame, asks, and writes
+   the answer into its own node; NEVER paint() from a fetch (§35, §71.2);
+   every control is delegated on the document once (§29.5). Not drawn over
+   file:// — there is no server to send to. */
+var UNSAVED = (function(){
+  var lines = [], loading = false, error = null, busy = {}, said = {};
+
+  function servable(){ return location.protocol !== "file:"; }
+  function E(s){ return typeof esc === "function" ? esc(s) : String(s == null ? "" : s); }
+  function api(){ return typeof SYNC !== "undefined" && SYNC.withClient ? SYNC.withClient("/api/state") : "/api/state"; }
+
+  /* ── WORDS ─────────────────────────────────────────────────────────── */
+  function placeOf(at){
+    var a = String(at || ""), m;
+    if (a === "group" || a.indexOf("group") === 0) return "The group";
+    if ((m = /^units\.([^.]+)/.exec(a))) return word(m[1]);
+    if ((m = /^functions\.([^.]+)/.exec(a))) return word("fn:" + m[1]);
+    return "Setup";
+  }
+  function word(t){ try { if (typeof placeLabel === "function") return placeLabel(t) || t; } catch (e) {} return String(t).replace(/^fn:/, ""); }
+  function field(f){ return typeof TRAIL !== "undefined" && TRAIL.fieldWord ? TRAIL.fieldWord(f) : String(f || ""); }
+  /* the row's own name, read from the graph this tab holds — a name only,
+     so a row the plan no longer has simply goes unnamed */
+  function rowName(id){
+    if (!id) return "";
+    var hit = "";
+    (function walk(o, d){
+      if (hit || !o || typeof o !== "object" || d > 9) return;
+      if (Array.isArray(o)) { for (var i = 0; i < o.length && !hit; i++) walk(o[i], d + 1); return; }
+      if (o.id === id && typeof o.name === "string") { hit = o.name; return; }
+      for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) walk(o[k], d + 1);
+    })(typeof SYNC !== "undefined" && SYNC.graph ? SYNC.graph() : null, 0);
+    return hit;
+  }
+  function label(l){
+    var a = String(l.addr || "");
+    if (a.indexOf("p:") === 0) {
+      var p = a.slice(2), parts = p.split(".");
+      return { place: placeOf(p), what: field(parts[parts.length - 1]) };
+    }
+    var r = a.slice(2).split("|");   /* r:<at>|<path>|<id>|<field> */
+    var nm = rowName(r[2]);
+    return { place: placeOf(r[0]), what: (nm ? nm + " · " : "") + field(r[3]) };
+  }
+  function show(v){
+    if (!v || !v.has) return '<span class="hist-none">empty</span>';
+    var x = v.value;
+    if (x == null || x === "") return '<span class="hist-none">empty</span>';
+    var s = typeof x === "object" ? JSON.stringify(x) : String(x);
+    if (s.length > 140) s = s.slice(0, 137) + "…";
+    return E(s);
+  }
+  function who(l){
+    var e = { person_key: l.by, person_name: l.byName };
+    try { if (typeof TRAIL !== "undefined" && TRAIL.whoWord) return TRAIL.whoWord(e); } catch (er) {}
+    return l.byName || l.by;
+  }
+  function when(at){
+    try { if (typeof TRAIL !== "undefined" && TRAIL.whenWord) return TRAIL.whenWord(at); } catch (e) {}
+    return String(at || "").slice(0, 16).replace("T", " ");
+  }
+
+  /* ── THE PAGE ──────────────────────────────────────────────────────── */
+  function groups(){
+    var by = {}, order = [];
+    lines.forEach(function(l){ if (!by[l.addr]) { by[l.addr] = []; order.push(l.addr); } by[l.addr].push(l); });
+    return order.map(function(a){ return by[a]; });
+  }
+  function rowHtml(l, two){
+    var lb = label(l), b = busy[l.id];
+    var act = two
+      ? '<button type="button" class="hist-rst" data-uns-apply="' + E(l.id) + '"' + (b ? ' disabled' : '') + '>Use ' + E(who(l)) + '</button>'
+      : '<button type="button" class="hist-rst" data-uns-apply="' + E(l.id) + '"' + (b ? ' disabled' : '') + '>Apply</button> ' +
+        '<button type="button" class="hist-rst" data-uns-discard="' + E(l.id) + '"' + (b ? ' disabled' : '') + '>Discard</button>';
+    var note = said[l.id] ? '<div class="hist-err">' + E(said[l.id]) + '</div>' : '';
+    return '<tr data-uns-row="' + E(l.id) + '">' +
+      '<td><b>' + E(lb.place) + '</b><div class="hist-none">' + E(lb.what) + '</div></td>' +
+      '<td class="hist-fromto">' + show(l.now) + '</td>' +
+      '<td class="hist-fromto">' + show(l.mine) + '</td>' +
+      '<td><span title="' + E(l.error || "") + '">' + E(who(l)) + '</span><div class="hist-t">' + E(when(l.at)) + '</div></td>' +
+      '<td class="hist-act">' + act + note + '</td></tr>';
+  }
+  function bodyHtml(){
+    if (error) return '<p class="hist-empty hist-err">The list could not be read — ' + E(error) + '. Nothing has been lost. <button type="button" class="linkbtn" data-uns-retry>Try again</button></p>';
+    if (loading && !lines.length) return '<p class="hist-empty">Reading…</p>';
+    if (!lines.length) return '<p class="hist-empty">Nothing is waiting. Changes people sent when a save failed appear here until they land.</p>';
+    var gs = groups(), body = "";
+    gs.forEach(function(g){
+      if (g.length > 1) {
+        body += '<tr class="grp"><td colspan="5">Two people sent this · ' +
+          '<button type="button" class="hist-rst" data-uns-discard-all="' + E(g.map(function(x){ return x.id; }).join(",")) + '">Discard</button></td></tr>';
+      }
+      g.forEach(function(l){ body += rowHtml(l, g.length > 1); });
+    });
+    return '<p class="hist-count">' + lines.length + (lines.length === 1 ? ' change' : ' changes') + ' waiting</p>' +
+      '<table class="hist uns"><thead><tr><th>Line</th><th>On the platform now</th><th>Sent</th><th>From</th><th></th></tr></thead><tbody>' +
+      body + '</tbody></table>';
+  }
+  function draw(){
+    var el = document.querySelector("[data-uns-page]");
+    if (el) el.innerHTML = bodyHtml();
+  }
+  function load(){
+    if (!servable()) return;
+    loading = true; error = null; draw();
+    fetch(api() + (api().indexOf("?") === -1 ? "?" : "&") + "unsaved=1", { cache:"no-store" })
+      .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }); })
+      .then(function(x){
+        loading = false;
+        if (x.st !== 200 || !x.j || !x.j.ok) { error = (x.j && x.j.error) || ("HTTP " + x.st); lines = []; draw(); return; }
+        lines = x.j.lines || []; draw();
+      })
+      .catch(function(e){ loading = false; error = (e && e.message) || "could not reach the server"; lines = []; draw(); });
+  }
+  function renderPage(){
+    var head = typeof cfgHead === "function" ? cfgHead("Unsaved changes", [], null, false, null, null, "") : '<h2>Unsaved changes</h2>';
+    setTimeout(load, 0);
+    return head + '<div class="hist-page" data-uns-page>' + bodyHtml() + '</div>';
+  }
+  function act(kind, id, done){
+    busy[id] = true; delete said[id]; draw();
+    fetch(api(), { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ unsaved: kind, id: id }) })
+      .then(function(r){ return r.json().then(function(j){ return { st:r.status, j:j }; }, function(){ return { st:r.status, j:null }; }); })
+      .then(function(x){
+        delete busy[id];
+        if (x.st !== 200 || !x.j || !x.j.ok) said[id] = (x.j && x.j.error) || ("Not done — HTTP " + x.st);
+        if (done) done(x.st === 200 && x.j && x.j.ok);
+      })
+      .catch(function(){ delete busy[id]; said[id] = "Not done — the server did not answer."; if (done) done(false); });
+  }
+
+  document.addEventListener("click", function(ev){
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-uns-apply],[data-uns-discard],[data-uns-discard-all],[data-uns-retry]");
+    if (!b) return;
+    if (b.hasAttribute("data-uns-retry")) { load(); return; }
+    if (b.hasAttribute("data-uns-apply")) {
+      act("apply", b.getAttribute("data-uns-apply"), function(ok){
+        if (ok && typeof SYNC !== "undefined" && SYNC.refresh) { try { SYNC.refresh(); } catch (e) {} }
+        load();
+      });
+      return;
+    }
+    if (b.hasAttribute("data-uns-discard")) { act("discard", b.getAttribute("data-uns-discard"), load); return; }
+    var ids = b.getAttribute("data-uns-discard-all").split(","), left = ids.length;
+    ids.forEach(function(id){ act("discard", id, function(){ if (--left === 0) load(); }); });
+  });
+
+  return { renderPage: renderPage, load: load, servable: servable,
+           /* for the checks */ lines: function(){ return lines; }, label: label };
 })();
 
 /* ── insights.js ── */
@@ -63082,31 +63319,211 @@ var SYNC = (function () {
       " \u00b7 " + location.pathname + "\n" + (detail || "");
     /* once per distinct failure, not once per five-second retry */
     if ((detail || "") !== FAILSHOWN) { FAILSHOWN = detail || ""; console.error(FAILTEXT); }
-    notSaved("<span><strong title=\"" + esc(detail || "") + "\">Not saved.</strong> " + first + " </span>" +
-      "<span>Keep this tab open \u2014 it tries again by itself every few seconds, and " +
-      "this bar clears the moment your change goes through. If it stays for more " +
-      "than a minute, tell the Strategy Office. </span>" +
-      "<button type=\"button\" class=\"refused-undo\" data-copyerr>Copy error for the Strategy Office</button>");
+    keepFailed(kind);
   }
   var FAILTEXT = "", FAILSHOWN = "";
-  /* One listener, on the document, armed once: the bar's HTML is rewritten on
-     every retry, so a handler on the button would be lost each time (§24). */
+
+  /* ── A FAILED SAVE IS KEPT ON THIS COMPUTER (§504) ───────────────
+     Islam: *"Can't we have a way to avoid the data unsaved error something
+     like the data is saved locally until we get back and fix things?"* A
+     save that FAILS (the server or the network — never a refusal, which is a
+     decision rather than an accident) is written to this browser's storage
+     as LINES (lib/graph-diff splitLines), so closing the tab while the server
+     is down loses nothing: the next time this person opens the platform on
+     this computer the lines are sent again by themselves.
+
+     ONE QUIET BUTTON, AND NO DOWNLOAD (his choice, replacing §502's copy
+     button): "Send to the Strategy Office" posts the same lines and the error
+     to the office's list (Setup › Unsaved changes, lib/unsaved.ts), which the
+     office applies AS THE SENDER. It is optional, because the lines resend
+     themselves either way.
+
+     KEYED BY CLIENT AND OWNED BY A PERSON: a record is replayed only for the
+     person who made it, and is wiped at sign-out, so the next person at this
+     computer is never handed somebody else's changes. Every storage call is
+     guarded — a browser that refuses storage still gets the old promise
+     (keep this tab open), never a false one. */
+  var KEEP_PREFIX = "smp.unsaved.";
+  var KEEPVIEW = "", KEEPSIG = "", KEEPOK = true;
+  function keepKey() { return KEEP_PREFIX + (clientSlug() || "-"); }
+  function keepRead() {
+    try {
+      var k = JSON.parse(localStorage.getItem(keepKey()) || "null");
+      return k && k.who && Array.isArray(k.lines) ? k : null;
+    } catch (e) { return null; }
+  }
+  function keepWrite(k) {
+    try { localStorage.setItem(keepKey(), JSON.stringify(k)); return true; } catch (e) { return false; }
+  }
+  function keepClear() { try { localStorage.removeItem(keepKey()); } catch (e) {} }
+  function keepWipe() {
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(KEEP_PREFIX) === 0) localStorage.removeItem(k);
+      }
+    } catch (e) {}
+  }
+  /* What is on screen and not on the server, line by line, each with what the
+     server held when it was typed — so a replay can tell "nobody touched it"
+     from "somebody else changed it meanwhile". */
+  function keepLines() {
+    if (typeof SMPDiff === "undefined" || !SMPDiff.splitLines || !lastSaved) return [];
+    try {
+      var base = JSON.parse(lastSaved), cur = JSON.parse(serialize());
+      return SMPDiff.splitLines(SMPDiff.graphChanges(base, cur)).map(function (l) {
+        l.base = SMPDiff.valueAt(base, l); return l;
+      });
+    } catch (e) { return []; }
+  }
+  function keepSig(lines) { try { return JSON.stringify((lines || []).map(function (l) { return [l.addr, l.mine]; })); } catch (e) { return ""; } }
+  function keepFailed(kind) {
+    var who = person && person.key;
+    var lines = keepLines();
+    var old = keepRead();
+    if (old && old.who !== who) old = null;
+    KEEPOK = false;
+    if (who && lines.length) {
+      KEEPOK = keepWrite({ who: who, viewAs: actingAs() || null, at: Date.now(), kind: kind,
+        error: FAILTEXT, lines: lines, reports: (old && old.reports) || [],
+        clash: (old && old.clash) || [] });
+    }
+    var sig = keepSig(lines);
+    if (sig !== KEEPSIG) { KEEPSIG = sig; if (KEEPVIEW !== "down") KEEPVIEW = ""; }
+    renderUnsaved();
+  }
+  var SHIELD = "<svg class=\"safety-ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" " +
+    "stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" +
+    "<path d=\"M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z\"/><path d=\"M9 12l2 2 4-4\"/></svg>";
+  /* The bar in its three states (the approved mockup): kept, sent, and the
+     platform down. Never a paint() — the page under it may hold a half-typed
+     sentence (§35). */
+  function renderUnsaved(html) {
+    var el = document.getElementById("unsaved");
+    if (!el) return;
+    if (html === null) { el.hidden = true; el.innerHTML = ""; el.className = "banner safety"; return; }
+    el.className = "banner safety";
+    if (html) { el.innerHTML = html; el.hidden = false; return; }
+    var title, sub, btn = "";
+    if (!KEEPOK) {
+      title = "Not saved yet.";
+      sub = "The server didn't answer. Keep this tab open \u2014 it tries again by itself every few seconds.";
+    } else if (KEEPVIEW === "sent") {
+      title = "Your changes are safe, and the office has a copy.";
+      sub = "They still save by themselves as soon as the server answers.";
+    } else if (KEEPVIEW === "down") {
+      title = "Your changes are safe on this computer.";
+      sub = "The platform is down right now. They save by themselves when it's back, even if you close this page.";
+    } else {
+      title = "Your changes are safe on this computer.";
+      sub = "The server didn't answer, so we'll save them the moment it does. Nothing to do.";
+      btn = "<span class=\"safety-acts\"><button type=\"button\" class=\"safety-btn ghost\" data-unsaved-send>" +
+            "Send to the Strategy Office</button></span>";
+    }
+    el.innerHTML = SHIELD + "<span class=\"safety-msg\"><strong title=\"" + esc(FAILSHOWN || "") + "\">" + title +
+      "</strong> <span>" + sub + "</span></span>" + btn;
+    el.hidden = false;
+  }
+  function sendUnsaved(b) {
+    var k = keepRead();
+    if (!k || !k.lines.length) return;
+    if (b) { b.disabled = true; b.textContent = "Sending\u2026"; }
+    var sig = KEEPSIG;
+    fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unsaved: "send", client: clientSlug(), viewAs: k.viewAs || undefined,
+        error: k.error || FAILTEXT, lines: k.lines.map(function (l) { return { addr: l.addr, change: l.change, base: l.base }; }) })
+    }).then(function (r) { return r.ok ? r.json() : null; }, function () { return null; })
+      .then(function (j) {
+        if (j && j.ok && j.report) {
+          var cur = keepRead();
+          if (cur) { cur.reports = (cur.reports || []).concat([j.report]); keepWrite(cur); }
+          if (sig === KEEPSIG) KEEPVIEW = "sent";
+        } else KEEPVIEW = "down";
+        if (lastSaved !== serialize()) renderUnsaved();
+      });
+  }
   document.addEventListener("click", function (ev) {
-    var b = ev.target && ev.target.closest && ev.target.closest("[data-copyerr]");
-    if (!b) return;
-    var text = FAILTEXT;
-    var done = function () { b.textContent = "Copied \u2014 paste it to the Strategy Office"; };
-    var fallback = function () {
-      /* navigator.clipboard needs a secure context; this is the path that
-         runs from file:// and on older browsers (§93.6). */
-      var ta = document.createElement("textarea");
-      ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
-      document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); done(); } catch (e) { b.textContent = "Copy failed \u2014 hover \u201cNot saved.\u201d to read it"; }
-      document.body.removeChild(ta);
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-unsaved-send]");
+    if (b) sendUnsaved(b);
+  });
+  /* The save landed: everything kept is on the server now. The office is told
+     each report it was sent saved itself, and the record goes — unless a
+     clash is still waiting on this person, which is theirs to answer. */
+  function keepLanded() {
+    KEEPVIEW = ""; KEEPSIG = ""; KEEPOK = true;
+    var k = keepRead();
+    if (k && k.who === (person && person.key) && (k.clash || []).length) {
+      k.lines = []; keepWrite(k); return;
+    }
+    if (k && k.who === (person && person.key)) {
+      (k.reports || []).forEach(function (rep) {
+        fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ unsaved: "landed", report: rep, client: clientSlug() }) }).catch(function () {});
+      });
+      keepClear();
+    }
+    var el = document.getElementById("unsaved");
+    if (el && !el.classList.contains("done") && !el.hasAttribute("data-clash")) renderUnsaved(null);
+    if (KEEPREPLAY) { var n = KEEPREPLAY; KEEPREPLAY = 0; keepDone(n); }
+  }
+  var KEEPREPLAY = 0;
+  function keepDone(n) {
+    renderUnsaved(SHIELD + "<span class=\"safety-msg\"><strong>Your " + (n === 1 ? "earlier change is" : n + " earlier changes are") +
+      " saved.</strong> <span>They were kept on this computer and went through as soon as the server answered.</span></span>");
+    var el = document.getElementById("unsaved");
+    if (el) el.classList.add("done");
+    setTimeout(function () { var e = document.getElementById("unsaved"); if (e && e.classList.contains("done")) renderUnsaved(null); }, 8000);
+  }
+  /* ON OPENING THE PLATFORM AGAIN: what was kept is laid back over the
+     server's copy, line by line. A line the server already holds landed; a
+     line whose place still holds what it held when it was typed is applied;
+     a line whose place somebody ELSE changed meanwhile is a clash, and the
+     person decides — never the platform silently. */
+  function keepReplay() {
+    var k = keepRead();
+    if (!k || !person || k.who !== person.key || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return;
+    var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
+    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = function (a, b) {
+      return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
     };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
-    else fallback();
+    k.lines.forEach(function (l) {
+      var now = SMPDiff.valueAt(cur, l);
+      if (same(now, l.mine)) return;
+      if (!l.base || same(now, l.base)) {
+        var r = SMPDiff.applyChanges(cur, l.change);
+        if (r && r.ok) { cur = r.state; applied++; } else clash.push(l);
+      } else clash.push(l);
+    });
+    k.lines = []; k.clash = clash;
+    if (clash.length || (k.reports || []).length) keepWrite(k); else keepClear();
+    if (applied) { hydrate(cur); KEEPREPLAY = applied; }
+    else if (!clash.length) { keepLanded(); if (kept) keepDone(kept); }
+    if (clash.length) keepClashBar();
+  }
+  function keepClashBar() {
+    var k = keepRead(); var n = k && k.clash ? k.clash.length : 0;
+    if (!n) return;
+    renderUnsaved(SHIELD + "<span class=\"safety-msg\"><strong>" + (n === 1 ? "One change you kept" : n + " changes you kept") +
+      " clash with an edit somebody made meanwhile.</strong> <span>Keep yours, or keep what is on the platform now.</span></span>" +
+      "<span class=\"safety-acts\"><button type=\"button\" class=\"safety-btn\" data-unsaved-clash=\"mine\">Keep mine</button>" +
+      "<button type=\"button\" class=\"safety-btn ghost\" data-unsaved-clash=\"theirs\">Keep theirs</button></span>");
+    var el = document.getElementById("unsaved"); if (el) el.setAttribute("data-clash", "");
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-unsaved-clash]");
+    if (!b) return;
+    var k = keepRead(); if (!k) return;
+    var el = document.getElementById("unsaved"); if (el) el.removeAttribute("data-clash");
+    var mine = b.getAttribute("data-unsaved-clash") === "mine";
+    var clash = k.clash || []; k.clash = []; keepWrite(k);
+    renderUnsaved(null);
+    if (mine && clash.length) {
+      var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
+      clash.forEach(function (l) { var r = SMPDiff.applyChanges(cur, l.change); if (r && r.ok) cur = r.state; });
+      hydrate(cur); KEEPREPLAY = clash.length;
+      if (typeof repaint === "function" && repaint) repaint();
+      save();
+    } else keepLanded();
   });
 
   /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
@@ -63278,6 +63695,7 @@ var SYNC = (function () {
       if (!confirm("Discard everything changed since the last successful save, " +
                    "and load the stored version again?\n\nAnything you have typed " +
                    "that was not saved will be lost.")) return;
+      keepClear();
       location.reload();
     });
   }
@@ -63362,7 +63780,7 @@ var SYNC = (function () {
          tried normally. */
       /* Signed out, or signed in on a password that still has to be changed:
          the door, not a banner. */
-      if (r.status === 401) { location.replace(doorUrl()); return; }
+      if (r.status === 401) { keepFailed("server"); location.replace(doorUrl()); return; }
       if (r.status === 403) {
         refusedBody = now; refusedAs = actingAs();
         say("refused");
@@ -63387,6 +63805,7 @@ var SYNC = (function () {
         showRefusal(null);
         FAILSHOWN = "";
         lastSaved = now;
+        keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
            they can be given no password and the password column has nothing
@@ -63564,6 +63983,7 @@ var SYNC = (function () {
     out.textContent = "Sign out";
     out.addEventListener("click", function () {
       cacheWipe();
+      keepWipe();
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
@@ -64212,6 +64632,10 @@ var SYNC = (function () {
              as a change nobody made (the server refuses it, 400, and the retry
              every 5s keeps the page busy for ever). */
           lastSaved = serialize();
+          /* §504: anything kept on this computer from a save that failed is
+             laid back over the server's copy, AFTER the baseline, so the
+             autosave sees it as this person's change and sends it. */
+          keepReplay();
           land(function () {
             if (person) chromeOnce(); else paint();
             if (stale) { stale = false; markStale(false); }
@@ -64924,6 +65348,13 @@ var SYNC = (function () {
       { k:"history",  ac:"c_history", grp:"cycle", mod:"strategy", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
         when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
         render:function(){ return TRAIL.renderPage(); } },
+      /* UNSAVED CHANGES (§504): changed lines a failed save could not land,
+         sent here from the person's own computer. The office's by rule, like
+         History beside it — the gate is inOffice(), so its access key is
+         History's, the same "always" area, rather than a new matrix cell. */
+      { k:"unsaved",  ac:"c_history", grp:"cycle", mod:"strategy", label:"Unsaved changes", glyph:"↑", find:"unsaved changes failed save sent to the office lost work recover apply discard server error",
+        when: function(){ return inOffice() && UNSAVED.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
+        render:function(){ return UNSAVED.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page

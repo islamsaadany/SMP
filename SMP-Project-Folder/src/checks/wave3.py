@@ -152,10 +152,20 @@ with sync_playwright() as p:
     ratio = [c for c in cards if "execution" in c["head"].lower()]
     ck("the execution card is found", bool(ratio), [c["head"][:40] for c in cards])
     if ratio:
+        # §507.2 (spec 066 P3) took the verdict out of this sentence: the
+        # headline is the weighted average of the units' own execution
+        # figures now, so "X% delivered against Y% planned" would be two
+        # numbers that no longer divide to the figure above them. REWRITTEN,
+        # never loosened (§218): the words under a ratio still must not
+        # disagree with it — they say what the number IS, name the units it
+        # is made of as the product counts them, and carry no pair of
+        # percentages at all.
         c = ratio[0]
-        v, sub = c["val"], c["sub"].lower()
-        want = ("ahead of plan" if v > 100 else "behind plan" if v < 100 else "exactly on plan")
-        ck("its verdict agrees with its own number", want in sub, (v, c["sub"]))
+        sub = c["sub"].lower()
+        n = pg.evaluate("() => scoringUnitKeys().length")
+        ck("its sentence says what the number is made of", "weighted" in sub and str(n) in c["sub"], (n, c["sub"]))
+        ck("and carries no delivered-against-planned pair that could disagree with it",
+           "planned" not in sub and "%" not in c["sub"], c["sub"])
     ck("the delta sits with its number, not in the heading",
        any(c["deltaInBig"] for c in cards) and not any(c["deltaInHead"] for c in cards),
        [(c["deltaInBig"], c["deltaInHead"]) for c in cards])

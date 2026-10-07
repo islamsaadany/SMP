@@ -69,9 +69,15 @@ with sync_playwright() as p:
     for ck_ in ("distribution", "b2c"):
         r = js(pg, """(function(c){ var k=companyUnitKeys(c);
           return [companyObjectives(c), weightedOver(k, unitObjectives),
-                  companyRatio(c), ratioOf(weightedOver(k, unitExec), weightedOver(k, unitPlan))]; })('%s')""" % ck_, [0,1,0,1])
+                  companyRatio(c), weightedOver(k, unitRatio)]; })('%s')""" % ck_, [0,1,0,1])
         ck(ck_ + ": performance agrees with the §68 formula", r[0] == r[1], r)
-        ck(ck_ + ": execution agrees with the §68 formula", r[2] == r[3], r)
+        # §507.2 (spec 066 P3) REWROTE the units-only execution rule: it was
+        # delivered over planned (ratioOf of two weighted averages) and it is
+        # the weighted average of the units' own execution figures now — the
+        # group's rule over a smaller list. Rewritten to that rule, never
+        # loosened (§218): it still asserts a company of units alone agrees
+        # with ONE formula, and the formula is the decided one.
+        ck(ck_ + ": execution agrees with the §507.2 formula", r[2] == r[3], r)
 
     print("\n§2  mixed: one weight set, one blank")
     js(pg, "FUNCTIONS.finance.company='distribution'; FUNCTIONS.finance.coWeight=20;"

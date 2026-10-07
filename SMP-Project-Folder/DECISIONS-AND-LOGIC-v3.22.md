@@ -62889,7 +62889,7 @@ Islam, of Amr Hassan, named Owner of one of the company's directions: *"we dont 
 
 **Recorded, not done.** `scripts/test-my-reporting.js` §0 is 1 red on `main` before this change too (six sources it now names as needing a browser), reproduced with this work stashed.
 
-## §506 — One kind of thing: the simplification, agreed in direction (spec 066, 2026-10-07)
+## §507 — One kind of thing: the simplification, agreed in direction (spec 066, 2026-10-07)
 
 Islam: *"the platform got very complex … every change requires me a new addition like adding a direction owner or a capability or planning in pillars only or projects in the roles and access or trying to see the BUs swot despite planning on the company level in addition to how performance is calculated and how presentations are set. please review the platform thoroughly and let's think of a simplification for all these interconnected areas."*
 
@@ -62905,7 +62905,7 @@ Islam: *"the platform got very complex … every change requires me a new additi
 
 **Nothing built.** Spec only; no source, check or data touched.
 
-## §506.1 — Stage 1 started: the capability question decided, and every headline measured before any rule moves (spec 066, 2026-10-07)
+## §507.1 — Stage 1 started: the capability question decided, and every headline measured before any rule moves (spec 066, 2026-10-07)
 
 Islam: **"ok for your recommendation, start stage 1"**.
 

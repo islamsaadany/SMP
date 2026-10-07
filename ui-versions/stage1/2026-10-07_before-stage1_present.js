@@ -413,11 +413,7 @@ function deckSlides(u){
 
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
-  /* §507.2 P5: a function whose objectives are switched off (§437) has no
-     objectives reading on its page — the pillars card leads there — so the
-     projector does not draw one either. fnKoCounted() answers true for
-     everything that is not a function, so a unit's slide is unchanged. */
-  var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
+  var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
     '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
@@ -1099,12 +1095,7 @@ function deckSlidesFn(subject){
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
-    /* §507.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
-       plans in projects is drawn here through its own holder, and the page has
-       always scored that holder's objectives as the UNIT's (holderKOScore);
-       the deck asked capKOScore and could print a different number for the
-       same objectives on a projector (§53.5). */
-    var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
+    var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
@@ -1124,16 +1115,14 @@ function deckSlidesFn(subject){
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
-        (holderHasKOs(c)
+        (SMPRules.shown(c.keyObjectives).length
           ? '<div><span class="dlab">' + L("keyobj") + '</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
         '<div><span class="dlab">' + L1("project") + ' performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    /* §507.2 P5: holderHasKOs() is the page's own test, so a function's
-       objectives switched off (§437) draw no slide here either. */
-    if (holderHasKOs(c)) {
+    if (SMPRules.shown(c.keyObjectives).length) {
       var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
@@ -1177,7 +1166,6 @@ function deckSlidesFn(subject){
         '<th class="num">Progress</th><th>Note</th></tr></thead>' +
         '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
         '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
-          (tal.due < tal.total ? ' &middot; ' + tal.due + ' due so far' : '') +
           (tal.pending ? ' &middot; ' + tal.pending + ' said In progress with no per-cent' : '') +
           '. Actions are counted, never scored into the objectives.</p></section>');
       return;

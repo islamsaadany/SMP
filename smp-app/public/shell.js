@@ -10760,6 +10760,16 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
+/* §507.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
+   `progress` (§239: reward stays a year-end judgement), except for a yes/no
+   measure, which stores none — its answer IS its figure, 100 or 0 from the
+   one scorer (§257), and nothing said stays null. Without this a Done measure
+   read "Not reported" on the board while its own page scored it. One reader
+   for the strip, the tally and the group board, or the three disagree. */
+function focusFigure(m){
+  if (!m) return null;
+  return SMPRules.isYesNo(m.target) ? measureScore(m) : m.progress;
+}
 function focusStanding(progress){
   if (progress == null) return { key:"none",  label:"Not reported" };
   if (progress >= CYCLE.rewardAt) return { key:"over", label:"Earning" };
@@ -10873,8 +10883,9 @@ function focusTallyOf(items){
   var vals = [];
   items.forEach(function(x){
     t.total++;
-    t[focusStanding(x.m.progress).key]++;
-    if (x.m.progress != null) vals.push(x.m.progress);
+    var fv = focusFigure(x.m);
+    t[focusStanding(fv).key]++;
+    if (fv != null) vals.push(fv);
   });
   t.mean = avg(vals);
   return t;
@@ -11171,15 +11182,26 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
+/* ── ONE WEIGHT RULE (§507.2, spec 066 P1) ──────────────────────────────
+   This averaged its own way: a blank weight counted as ONE, beside rows
+   weighted 60 and 40, so a function or a capability with one weight left
+   blank was scored by a rule no unit uses — and the same objectives entered on
+   a unit read a different number (§243's rule: a blank is the average of the
+   weights that were set). It is `koScore()` now, the unit's own reader, which
+   also leaves a hidden row out (§233) where this kept it. Nothing moves where
+   every weight is set or none is, which is every row in the worked example. */
 function capKOScore(c){
   /* §437: a function's own objectives, switched off, score nothing. */
   if (c && c.own && !fnKoCounted(c.id)) return null;
-  /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
-  if (!list.length) return null;
-  var tw = 0, sum = 0;
-  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
-  return tw ? Math.round(sum / tw) : null;
+  return koScore((c && c.keyObjectives) || []);
+}
+/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§507.2, P4): it has some
+   that are shown, and they are switched on. Asked by the card that leads and
+   by the division's reading, so the two cannot answer differently (§53.5). */
+function holderHasKOs(c){
+  if (!c) return false;
+  if (c.own && !fnKoCounted(c.id)) return false;
+  return SMPRules.shown(c.keyObjectives || []).length > 0;
 }
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
@@ -11300,8 +11322,22 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
+/* ── ONE EXECUTION (§507.2, spec 066 P2) ──────────────────────────────────
+   A milestone counts once its date has come, exactly as a tactic does
+   (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
+   with the ones not yet due reading nought, so a function's execution was low
+   by construction in the first half and climbed on the calendar rather than on
+   the work — measured on the worked example at June, Finance 49% with every
+   milestone already due completed. The stated cost, agreed: a milestone done
+   early earns nothing until its date arrives, which is what a tactic does.
+   With nothing due yet the figure is NULL, never nought (§35, §276).
+
+   The counts beside it stay whole — "5 of 12 milestones" is still all twelve —
+   and `due` says how many of them the figure is made of, so the card can say
+   why a percentage and a count read differently. `pending` keeps its meaning:
+   a row In progress with no per-cent, due or not (§104.10). */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
@@ -11310,12 +11346,15 @@ function capExec(c){
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
+      if (statusPending(x)) pending++;
+      if (!dueThisCycle(x.finish)) return;
+      due++;
       if (statusPending(x)) return;
       scored++; sum += msReads(x) || 0;
     });
   });
-  return { done: done, wip: wip, todo: todo, total: total,
-           pending: total - scored,
+  return { done: done, wip: wip, todo: todo, total: total, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 /* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§342) ───────────────────
@@ -11334,16 +11373,21 @@ function capExec(c){
    outstanding so the card can say why the figure rose (§106). */
 function fnActionsTally(fk){
   var list = SMPRules.shown(fnActions(fk));
-  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   list.forEach(function(a){
     if (a.status === "done") done++;
     else if (a.status === "wip") wip++;
     else todo++;
+    if (statusPending(a)) pending++;
+    /* §507.2 (P2): an action counts once its date has come, as a milestone
+       does — one meaning of Execution wherever the word is printed. */
+    if (!dueThisCycle(a.due)) return;
+    due++;
     if (statusPending(a)) return;
     scored++; sum += msReads(a) || 0;
   });
-  return { done: done, wip: wip, todo: todo, total: list.length,
-           pending: list.length - scored,
+  return { done: done, wip: wip, todo: todo, total: list.length, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 function fnObjScore(fk){
@@ -17924,7 +17968,16 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
+/* ONE ROLL-UP (§507.2, spec 066 P3). The group's execution was delivered over
+   planned, each averaged across the units FIRST and then divided — so a unit
+   with a large plan pulled the denominator and the headline could sit beside
+   ten unit cards whose own figures do not average to it. It is the weighted
+   average of the figures the units' own cards print now, through the same
+   weightedOver() the objectives headline already uses, so the group says
+   what its units say. groupExec()/groupPlan() stay: they are still the two
+   halves a unit card and the weighting table explain, and nothing else here
+   reads them as a ratio any more. */
+function groupRatio(){ return weightedOver(scoringUnitKeys(), unitRatio); }
 
 /* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
    performance page that includes the overall performance of the company and
@@ -17984,18 +18037,23 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
+  /* ONE HEADLINE (§507.2, spec 066 P4): a function's headline is its
+     objectives when its plan HAS objectives (shown and switched on) — reading
+     "not yet" until they are reported — and its pillars' or projects' figure
+     when it has none. Before, a pillars function with none read "—" (§437
+     covered only "switched off"), and a projects function whose objectives
+     were not yet reported quietly read its projects instead: two formats, two
+     answers to one question (§53.5). */
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
-    /* §437: with its objectives off the headline is its pillars' own figure. */
     if (!u) return { perf:null, exec:null };
-    var uo = unitObjectives(u);
-    return { perf: uo != null || fnKoCounted(u.ukey) ? uo : unitPillars(u), exec: unitRatio(u) };
+    var has = fnKoCounted("fn:" + fk) && SMPRules.shown(u.keyObjectives || []).length > 0;
+    return { perf: has ? unitObjectives(u) : unitPillars(u), exec: unitRatio(u) };
   }
   if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
   var h = fnHolders(fk)[0];
   if (!h) return { perf:null, exec:null };
-  var ko = capKOScore(h);
-  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
+  return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
 /* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
    The functions take their share first: a weight the office set is used as
@@ -18051,9 +18109,12 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
+/* §507.2 (P3): a division of units alone is the weighted average of its
+   units' own execution figures — the group's rule, over a smaller list. With
+   functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){
   return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : ratioOf(companyExec(ck), companyPlan(ck));
+                                  : weightedOver(companyUnitKeys(ck), unitRatio);
 }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
@@ -25050,14 +25111,21 @@ function plus(id, label){
    differently. The empty case keeps its own words: reading "0% delivered
    against 0% planned" under "Not yet measurable" is three false precisions in
    a row. */
-function deliveryLine(ex, pl, whose){
-  if (ex == null || pl == null || !pl)
+/* \u00a7507.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
+   Islam's word. The headline stopped being delivered over planned and became
+   the weighted average of the units' own execution figures, so a sentence
+   whose two numbers divide to something other than the figure above it would
+   be the card arguing with itself (\u00a7104.8). What replaces it says what the
+   number IS, the way the performance card beside it already does (\u00a7156); the
+   two halves are still one press away in "How this is calculated". The empty
+   case keeps its own words. */
+function execLine(val, whose, n){
+  if (val == null)
     return "No " + L1("tactic") + " " + (whose || "anywhere in the group") +
            " has a plan against it yet, so there is nothing to deliver against.";
-  var r = Math.round(ex / pl * 100);
-  var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
-  return "<b>" + ex + "%</b> of the work delivered against <b>" + pl +
-         "%</b> planned \u2014 <b>" + verdict + "</b>.";
+  return (whose ? "The <b>" + n + "</b> " + L("unitword") + " " + whose
+                : "All <b>" + n + "</b> " + L("unitword")) +
+         ", each on its own execution, weighted by size.";
 }
 
 function drillCard(title, val, opts){
@@ -27147,7 +27215,8 @@ function renderCompanyPerformance(coKey){
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
     '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
-    'to performance. The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
+    'to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. ' +
+    'The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
   var head = '<div class="scores">' +
@@ -27160,7 +27229,7 @@ function renderCompanyPerformance(coKey){
       modalSub: "Weighted across the units in this company"
     }) +
     drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), r, {
-      sub: deliveryLine(ex, pl, "in these units"),
+      sub: execLine(r, "in " + esc(co.name), keys.length),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
     }) +
@@ -27321,7 +27390,7 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
@@ -27362,7 +27431,11 @@ function renderGroupPerformance(){
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
-      (ko == null
+      /* §507.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
+         asked of the plan — a capability whose objectives nobody has reported
+         yet still has them, and its figure reads "not yet" rather than this
+         sentence claiming they do not exist. */
+      (!holderHasKOs(c)
         ? '<p class="sub">No ' + L("keyobj") + ' of its own. This ' + L1("capability") + ' is judged by its ' + L("project") + '.</p>'
         : miniTable(["#",L1("keyobj"),"Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
@@ -27375,7 +27448,7 @@ function renderGroupPerformance(){
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
-          '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
+          '<p class="sub">Weighted across <b>' + SMPRules.shown(c.keyObjectives).length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#",L1("project"),L("deliverable"),L("outcome"),"Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
@@ -27554,7 +27627,7 @@ function whereNext(keys){
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
-          sub: deliveryLine(groupExec(), groupPlan()),
+          sub: execLine(groupRatio(), "", scoringUnitKeys().length),
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
@@ -27871,7 +27944,7 @@ function focusStrip(u){
       '<span class="fstrip-meta">reward begins at ' + CYCLE.rewardAt + '%</span>' +
     '</summary>';
   var rows = items.map(function(x){
-    var st = focusStanding(x.m.progress);
+    var st = focusStanding(focusFigure(x.m));
     return '<tr><td>' + esc(x.m.name) + '</td>' +
       '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
       '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -27881,7 +27954,7 @@ function focusStrip(u){
          on the band while being short of the reward line, and colouring both
          in one row makes the strip argue with itself. The badge carries the
          meaning this table is about. */
-      '<td class="num final">' + pct(x.m.progress) + '</td>' +
+      '<td class="num final">' + pct(focusFigure(x.m)) + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
@@ -27906,6 +27979,13 @@ function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
   var pOn = planOn(u);
+  /* §507.2 P4: whether the objectives lead. Everything but a pillars
+     function does; a pillars function does only when its objectives are
+     counted (§437) and it has some to show — fnMemberScores()'s own test,
+     asked of the same view. A plan switched off keeps the objectives card,
+     or the page would draw no card at all. */
+  var koLeads = !/^fn:/.test(u.ukey || "") || !pOn ||
+                (fnKoCounted(u.ukey) && SMPRules.shown(u.keyObjectives || []).length > 0);
   /* §264: the same two questions the pillar card had. The membership comes from
      `scorableKOs()` — koScore()'s own list — so the Highest can never name an
      objective the headline above it left out, and the figure is the SCORE the
@@ -28036,6 +28116,12 @@ function renderUnitPerformance(u){
   return perfActs(presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
+      /* §507.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
+         BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
+         so the page leads with the same number or the two disagree about one
+         function. A unit, and a function whose objectives count, are
+         unchanged. */
+      (!koLeads ? '' : (
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
@@ -28045,14 +28131,14 @@ function renderUnitPerformance(u){
           '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
           '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
-            pct(koLo) + '</b></div></div></div>' +
+            pct(koLo) + '</b></div></div></div>')) +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
       /* §422: a plan switched off scores nothing, so its two cards go and
          the objectives stand alone. */
       (!pOn ? '' : (
-      '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
+      '<div class="card tight' + (koLeads ? '' : ' primary') + '"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
@@ -31129,7 +31215,7 @@ function renderFocusBoard(){
   var body = live.map(function(sub, ui){
     var u = UNITS[sub.key], items = focusIn(sub.key);
     return items.map(function(x, i){
-      var st = focusStanding(x.m.progress);
+      var st = focusStanding(focusFigure(x.m));
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
@@ -31143,7 +31229,7 @@ function renderFocusBoard(){
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
         '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="num">' + esc(x.m.actual) + '</td>' +
-        '<td class="num final">' + pct(x.m.progress) + '</td>' +
+        '<td class="num final">' + pct(focusFigure(x.m)) + '</td>' +
         '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
     }).join("");
   }).join("");
@@ -32416,19 +32502,29 @@ function overrunNote(p){
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
   var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
+  /* ONE HEADLINE (§507.2, spec 066 P4): the objectives lead whenever the plan
+     HAS objectives (shown and switched on) — reading "not yet" until they are
+     reported — never only once one has been. Before, a capability whose
+     objectives nobody had reported yet drew its projects card as primary,
+     and the division above it read that same number as its headline (§53.5:
+     the card and the roll-up ask fnMemberScores' own question now). The
+     counts are the SHOWN rows, because those are the rows the score is made
+     of (§233, §264). */
+  var kos = SMPRules.shown(c.keyObjectives || []);
+  var lead = ko != null || holderHasKOs(c);
   var cards = [];
-  if (ko != null) {
+  if (lead) {
     cards.push('<div class="card tight primary-card">' +
       '<div class="score-h"><h4>' + L("keyobj") + ' <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
-      '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
-        '<div><em>Weighted</em><b>' + c.keyObjectives.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
-        '<div><em>Reported</em><b>' + c.keyObjectives.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
-          ' / ' + c.keyObjectives.length + '</b></div></div></div>');
+      '<div class="minirow"><div><em>Objectives</em><b>' + kos.length + '</b></div>' +
+        '<div><em>Weighted</em><b>' + kos.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
+        '<div><em>Reported</em><b>' + kos.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
+          ' / ' + kos.length + '</b></div></div></div>');
   }
-  cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
-    '<div class="score-h"><h4>' + L1("project") + ' performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
+  cards.push('<div class="card tight' + (lead ? "" : " primary-card") + '">' +
+    '<div class="score-h"><h4>' + L1("project") + ' performance' + (lead ? '' : ' <span class="rank">primary</span>') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>' + L("deliverable") + '</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
@@ -32445,7 +32541,11 @@ function capScoreCards(c){
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
+      /* §507.2 (P2): the figure is built on the milestones whose date has
+         come, as a tactic's is — so the line says how many that is when it is
+         not all of them, or a 100% over "3 of 12" reads as a mistake. */
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
+        (ce.due < ce.total ? ' &middot; ' + ce.due + ' due so far' : '') +
         (ce.pending ? ' &middot; <span class="missing">' + ce.pending +
           ' not counted yet</span>' : '') + '</span></div>' +
     '<div class="minirow"><div><em>Completed</em><b>' + ce.done + '</b></div>' +
@@ -33145,6 +33245,7 @@ function fnObjCards(fk){
         '<span class="pill ' + band(ac.pct) + '">' + bandWord(ac.pct) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ac.pct) + '">' + pctBig(ac.pct) + '</span>' +
         '<span class="ofplan">' + ac.done + ' of ' + ac.total + ' done' +
+          (ac.due < ac.total ? ' &middot; ' + ac.due + ' due so far' : '') +
           (ac.pending ? ' &middot; <span class="missing">' + ac.pending +
             ' not counted yet</span>' : '') + '</span></div>' +
       '<div class="minirow"><div><em>' + L("action") + '</em><b>' + ac.total + '</b></div>' +
@@ -46123,7 +46224,11 @@ function deckSlides(u){
 
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
-  var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
+  /* §507.2 P5: a function whose objectives are switched off (§437) has no
+     objectives reading on its page — the pillars card leads there — so the
+     projector does not draw one either. fnKoCounted() answers true for
+     everything that is not a function, so a unit's slide is unchanged. */
+  var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
     '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
@@ -46805,7 +46910,12 @@ function deckSlidesFn(subject){
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
-    var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+    /* §507.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
+       plans in projects is drawn here through its own holder, and the page has
+       always scored that holder's objectives as the UNIT's (holderKOScore);
+       the deck asked capKOScore and could print a different number for the
+       same objectives on a projector (§53.5). */
+    var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
@@ -46825,14 +46935,16 @@ function deckSlidesFn(subject){
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
-        (SMPRules.shown(c.keyObjectives).length
+        (holderHasKOs(c)
           ? '<div><span class="dlab">' + L("keyobj") + '</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
         '<div><span class="dlab">' + L1("project") + ' performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    if (SMPRules.shown(c.keyObjectives).length) {
+    /* §507.2 P5: holderHasKOs() is the page's own test, so a function's
+       objectives switched off (§437) draw no slide here either. */
+    if (holderHasKOs(c)) {
       var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
@@ -46876,6 +46988,7 @@ function deckSlidesFn(subject){
         '<th class="num">Progress</th><th>Note</th></tr></thead>' +
         '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
         '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
+          (tal.due < tal.total ? ' &middot; ' + tal.due + ' due so far' : '') +
           (tal.pending ? ' &middot; ' + tal.pending + ' said In progress with no per-cent' : '') +
           '. Actions are counted, never scored into the objectives.</p></section>');
       return;

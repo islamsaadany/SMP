@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-07
 
-**Status**: Draft — direction agreed by Islam 2026-10-07; one question open (§7.1)
+**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; stage 1 started
 
 **Input**: Islam, 2026-10-07:
 
@@ -207,7 +207,9 @@ for every kind of thing):
 
 ## 7. Open questions
 
-### 7.1 A capability that today has its own page — OPEN, Islam's
+### 7.1 A capability that today has its own page — DECIDED 2026-10-07
+
+Islam: **"ok for your recommendation"** (the recommendation below, as written).
 
 Today a capability can also be held by a supporting function as its own page,
 with its own owner and custodian, planning in projects (Raya Trade's *Product
@@ -229,6 +231,9 @@ and custodian become the pillar's owner and custodian.
 - One weighting rule (answer 2).
 - Nothing hides anything else (answer 3).
 - Pillar = direction or capability; one list or split (answer 4).
+- A capability with its own page becomes an internal pillar of the function
+  that holds it; a pillar's work is tactics or projects, chosen per pillar
+  (§7.1, "ok for your recommendation").
 
 ---
 

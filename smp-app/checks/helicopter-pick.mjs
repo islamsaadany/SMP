@@ -1,4 +1,4 @@
-/* HELICOPTER PICKER (§493) — pure rules, no browser. --red makes each break in a copy. */
+/* HELICOPTER PICKER (§511) — pure rules, no browser. --red makes each break in a copy. */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";

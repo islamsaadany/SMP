@@ -53,6 +53,7 @@
 <a class="skip" href="#panel">Skip to the page</a>
 
 <div class="banner refused" id="refused" hidden></div>
+<div class="banner safety" id="unsaved" role="status" hidden></div>
 
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
@@ -229,6 +230,7 @@
 <script src="TOUR"></script>
 <script src="WELCOME"></script>
 <script src="HISTORY"></script>
+<script src="UNSAVED"></script>
 <script src="LIBRARY"></script>
 <script src="COPILOT"></script>
 <script src="SAFETY"></script>
@@ -312,7 +314,7 @@
      like a unit's; the other is the place the Foundation tab held before
      §428. Exactly one is drawn: the tab leads, and is called Strategy, only
      once the top layer's own SWOT or Plan is switched on. */
-  function topExtrasOn(){ return compOn("group", "swot") || topPlanOn() || topCapsOn(); }
+  function topExtrasOn(){ return compOn("group", "swot") || compOn("group", SMPRules.COMPETE) || topPlanOn() || topCapsOn(); }
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
@@ -330,6 +332,9 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot"); } },
+                  { k:"compete", ac:"g_found", label:"How we compete",
+                    render: function(){ return renderUnitCompete(topAsUnit()); },
+                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -553,6 +558,9 @@
                     when: function(t){ return SMPRules.foundOn(GROUP, t) && ["brief","aspiration","keyobj"].some(function(c){ return compOn(t, c); }); } },
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
+                  /* spec 064 §3.1: How we compete, after the SWOT. */
+                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                    when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
@@ -822,7 +830,7 @@
          rows themselves stay (`attentionRows()`, config-render.js): the
          landing, the rail's pills (§108.15) and the home mark (§197.2) all
          read them. What went is one page that said the same thing twice. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle", mod:"strategy",  label:"Planning & reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -863,6 +871,13 @@
       { k:"history",  ac:"c_history", grp:"cycle", mod:"strategy", label:"History", glyph:"↺", find:"history changes who changed what log audit trail restore put back recover undo lost data",
         when: function(){ return inOffice() && TRAIL.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
         render:function(){ return TRAIL.renderPage(); } },
+      /* UNSAVED CHANGES (§504): changed lines a failed save could not land,
+         sent here from the person's own computer. The office's by rule, like
+         History beside it — the gate is inOffice(), so its access key is
+         History's, the same "always" area, rather than a new matrix cell. */
+      { k:"unsaved",  ac:"c_history", grp:"cycle", mod:"strategy", label:"Unsaved changes", glyph:"↑", find:"unsaved changes failed save sent to the office lost work recover apply discard server error",
+        when: function(){ return inOffice() && UNSAVED.servable() && typeof SYNC !== "undefined" && SYNC.isLive(); },
+        render:function(){ return UNSAVED.renderPage(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
@@ -4547,6 +4562,29 @@
     document.querySelectorAll("[data-topcap]").forEach(function(b){
       b.addEventListener("click", function(){ TOPCAP = b.dataset.topcap; paint(); });
     });
+    /* §500: "+ Add a Capability" on the company's Capabilities rail, the
+       direction rail's own add (§69.13). The new one plans the way the one it
+       was added beside plans, and a pillars one gets its single plan row at
+       once (§491), so it opens exactly as an added direction does: empty
+       Key measures and Tactics, ready to fill. Re-asks the pen (§48.2). */
+    document.querySelectorAll("[data-topcapadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var beside = capById(b.dataset.topcapadd);
+        var made = addCapability();
+        if (beside && capPlansInPillars(beside)) {
+          made.format = "pillars";
+          var mu = unitLikeWritable("cap:" + made.id);
+          if (mu) { addPillar(mu); var nw = mu.items[mu.items.length - 1]; if (nw && !nw.name) nw.name = made.name; }
+        }
+        TOPCAP = made.id;
+        paint();
+        setTimeout(function(){
+          var f = document.querySelector("[data-topcaps] .ptitle.edhead .ptname");
+          if (f) { f.focus(); if (f.select) f.select(); }
+        }, 0);
+      });
+    });
     document.querySelectorAll("[data-topcapproj]").forEach(function(r){
       var go = function(e){
         /* §488: the grip is a role=button span, and a press on it is a drag. */
@@ -5057,6 +5095,15 @@
        button only opens and closes the pen. `cycleDraft()`, `cycleEditDirty()`,
        `ceHoldPaint()`, the two `data-ce-*` handlers and the four `input`
        handlers are DELETED rather than left unreachable (§24). */
+    /* §495: THE PLAN PERIOD'S OWN PEN, the cycle pen's shape (§273.4): the
+       pickers write as they are picked, so this only opens and closes. */
+    var ep = document.querySelector("[data-editplan]");
+    if (ep) ep.addEventListener("click", function(){
+      var a = document.activeElement;
+      if (PLANEDIT && a && a.blur) a.blur();
+      PLANEDIT = PLANEDIT ? null : true;
+      paint();
+    });
     var ec = document.querySelector("[data-editcycle]");
     if (ec) ec.addEventListener("click", function(){
       if (REVIEW.state !== "open") return reopenDialog();
@@ -6703,7 +6750,14 @@
        fault exactly: an editor that looks identical and discards every
        keystroke. */
     window.wirePersonFields = function(root){
-    fieldWire("pname",  function(p, v){ if (v) p.name = v; }, root);
+    /* A person on the register keeps their name when the box is emptied —
+       nobody may be nobody. The DRAFT is the exception (§506): clearing the
+       Add form's box left the old name standing behind an empty box, so Add
+       went ahead with a name the form was not showing, past a star saying a
+       name is needed. On the draft the box and the value are one thing. */
+    fieldWire("pname",  function(p, v){
+      if (v) p.name = v; else if (p === NEWDRAFT) p.name = "";
+    }, root);
     /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
        matches the guess, rather than storing the guess — otherwise correcting
        the full name later would leave a stale short one standing beside it. */
@@ -8955,7 +9009,13 @@
           var pu = unitLikeWritable(a[1]);
           addPillar(pu);
           /* §488: on the company's Capabilities pane, open what was just made. */
-          if (pu && pu.capKey && pu.items.length) TOPCAPPROJ[pu.capKey] = pu.items[pu.items.length - 1].id;
+          /* §491: a capability's one plan row takes the capability's name, so
+             reporting and the deck name it as the capability. */
+          if (pu && pu.capKey && pu.items.length) {
+            var nw = pu.items[pu.items.length - 1], cc = capById(pu.capKey);
+            if (cc && !nw.name) nw.name = cc.name;
+            TOPCAPPROJ[pu.capKey] = nw.id;
+          }
         }
         /* §342: an action hangs off the FUNCTION, so its address is the
            function key and not a project id. */
@@ -9247,6 +9307,31 @@
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q])) return;
         sw[q].push("");
+        fieldSaved(); paint();
+      });
+    });
+    /* spec 064 §3.4: How we compete's columns. Add asks the SWOT's own
+       rule (the section shares its grant); remove asks in the platform's
+       words when the column holds anything. */
+    document.querySelectorAll("[data-cmpadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var t = b.dataset.cmpadd;
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w) return;
+        w.values.push({ title:"", how:[], measure:[] });
+        fieldSaved(); paint();
+      });
+    });
+    document.querySelectorAll("[data-cmprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = b.dataset.cmprm.split("|"), t = a[0], i = +a[1];
+        if (!mayAuthor("u_anal", t)) return;
+        var w = competeWritable(t); if (!w || !w.values[i]) return;
+        var v = w.values[i];
+        if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
+            !confirm("Remove this value? This cannot be undone here.")) return;
+        w.values.splice(i, 1);
+        competeTidy(t);
         fieldSaved(); paint();
       });
     });
@@ -10508,10 +10593,27 @@
        So the field is closed here rather than trusted to have closed itself. */
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var nm = String(NEWDRAFT.name || "").trim();
-    if (!nm) {
+    /* ── WHAT IS NEEDED IS ASKED BEFORE WHO THEY MIGHT BE (§506) ─────────
+       Every needed field is checked at once and every empty one is ringed, so
+       a form missing two things says so in one press rather than one at a
+       time. This used to set `NEWPERSON.err` and repaint — and nothing ever
+       drew `err`, so an empty name was refused in SILENCE: the press did
+       nothing visible at all (§32, §171). The refusal is drawn now, under the
+       box it is about, by personFieldsHtml() reading `missing`.
+
+       The form stays open with everything typed still in it — the draft holds
+       it, and the repaint draws the draft — and the cursor goes to the first
+       empty box, without scrolling to get there (§110.7). */
+    NEWPERSON.missing = PERSON_NEEDED.filter(function(n){
+      return !String(NEWDRAFT[n.field] || "").trim();
+    }).map(function(n){ return n.label; });
+    if (NEWPERSON.missing.length) {
       NEWPERSON.hit = null; NEWPERSON.warn = null;
-      NEWPERSON.err = "A name is the one thing needed.";
       personDialogPaint();
+      var first = PERSON_NEEDED.filter(function(n){
+        return NEWPERSON.missing.indexOf(n.label) >= 0;
+      })[0];
+      focusNoScroll(document.querySelector('#modal-b [data-p' + first.field + ']'));
       return;
     }
     /* TWO ARGUMENTS, NOT AN OBJECT (§87). `personByIdentity(id, email)` climbs

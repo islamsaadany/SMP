@@ -4,6 +4,8 @@
      GET  /api/<slug>/state                → { ok, person, state }   the graph
      GET  …?since=<iso>&target=<t>[&sync]  → { ok, changed:[{by,at}] } §258's peek
      GET  …?log=1[&target&person&kind&from&to&limit] → { ok, office, log } §262
+     GET  …?unsaved=1                        → { ok, lines }  §504, the office's
+     POST { unsaved: send|landed|apply|discard, … } → lib/unsaved.ts (§504)
      POST /api/<slug>/state { changes, viewAs? } → lib/save.ts (§210/§215/§240/§184/§185)
 
    The tenant is the door's answer (lib/door.ts) and nothing else; every read
@@ -17,6 +19,7 @@ import type { Tenant, Membership } from "./door.ts";
 import { withTenant } from "./tenant.ts";
 import { readState } from "./state-io.ts";
 import { save, type SaveBody, type SaveResult } from "./save.ts";
+import { unsavedRead, unsavedWrite } from "./unsaved.ts";
 
 const R = createRequire(import.meta.url)("./rules.cjs");
 
@@ -169,6 +172,8 @@ function within(q: URLSearchParams, name: string): string | null {
 export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answer> {
   const person = await personFor(r);
   const brk = process.env.SMP_BREAK || "";
+  /* ── UNSAVED CHANGES (§504): the office's list of lines that never landed ── */
+  if (q.get("unsaved")) return unsavedRead(r.tenant.id, { key: person.key, name: person.name, role: person.role });
   /* ── HISTORY (§262): a filtered read of the log, never the whole ── */
   if (q.get("log")) {
     const office = brk === "log-for-all" ? true : R.isOfficeRole(person.role);
@@ -220,6 +225,8 @@ export async function readAnswer(r: Resolved, q: URLSearchParams): Promise<Answe
 
 export async function writeAnswer(r: Resolved, body: SaveBody): Promise<Answer> {
   const person = await personFor(r);
+  if (body && typeof (body as any).unsaved === "string")
+    return unsavedWrite(r.tenant.id, { key: person.key, name: person.name, role: person.role }, body);
   const out: SaveResult = await save(r.tenant.id, { key: person.key, name: person.name, role: person.role, email: person.email }, body);
   return { code: out.code, body: out.body as Record<string, unknown> };
 }

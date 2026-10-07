@@ -1,0 +1,426 @@
+<title>Copilot Directions Flow</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--good:#1F6B45;--goodbg:#E6F2EB;--warn:#8A5A12;--warnbg:#FBF1DE;--bad:#A3322A;--badbg:#FBECEA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--goodbg:#173326;--warn:#E5B45C;--warnbg:#2E2717;--bad:#F08A80;--badbg:#341C1A;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--goodbg:#173326;--warn:#E5B45C;--warnbg:#2E2717;--bad:#F08A80;--badbg:#341C1A;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:24px 64px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1{font-size:26px;margin:0}
+.lede{color:var(--ink-2);max-width:70ch;margin:6px 0 0}
+h2.step{font-size:19px;margin:0 0 4px;text-wrap:balance}
+h2.step span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.k{color:var(--ink-3);font-size:13.5px;margin:0 0 12px;max-width:80ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-quiet);display:flex;gap:18px;padding:10px 16px;font-size:13.5px;flex-wrap:wrap}
+.bar b{color:var(--panel-ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.secs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap}
+.sec{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}
+.sec.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.body{display:grid;grid-template-columns:200px minmax(0,1fr) 300px}
+@media (max-width:1020px){.body{grid-template-columns:1fr}.rail{display:none}}
+.rail{border-right:1px solid var(--line);padding:12px;font-size:13px;background:var(--surface-2)}
+.rh{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700;margin:4px 0 6px}
+.ri{padding:5px 8px;border-radius:5px;color:var(--ink-2)}
+.ri.on{background:var(--surface);color:var(--ink);font-weight:600}
+.cop{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.m{max-width:62ch;padding:10px 13px;border-radius:10px;font-size:14.5px}
+.m.ai{background:var(--surface-2)}
+.m.me{background:var(--panel);color:var(--panel-ink);align-self:flex-end}
+.m p{margin:0 0 6px}.m p:last-child{margin:0}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 13px;font-size:13.5px;color:var(--ink)}
+.choice.picked{border-color:var(--gold);background:var(--warnbg);font-weight:600}
+.comp{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:14px}
+.side{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:12px;min-width:0;background:var(--ground)}
+@media (max-width:1020px){.side{border-left:0;border-top:1px solid var(--line)}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.bh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:700;font-size:13.5px;margin-bottom:6px}
+.bh small{font-weight:400;color:var(--ink-3)}
+.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.todo li{display:flex;gap:8px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink-3);flex:none}
+.dot.done{background:var(--good);border-color:var(--good)}
+.dot.now{border-color:var(--gold);background:var(--goldfill)}
+.todo li.now{font-weight:600}
+.todo li.done{color:var(--ink-3)}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-size:13px;background:var(--surface);color:var(--ink);font-weight:600}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tw{overflow-x:auto}
+table.mg{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.mg th{background:var(--panel);color:var(--panel-ink);text-align:left;font-weight:600;padding:6px 8px;white-space:nowrap}
+table.mg td{border-bottom:1px solid var(--line);padding:5px 8px;vertical-align:top}
+table.mg td.n,table.mg th.n{text-align:center}
+table.mg tr.sub td{background:var(--surface-2);font-weight:700}
+table.mg tr.res td{font-weight:700}
+.tk{display:inline-flex;width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);vertical-align:middle;align-items:center;justify-content:center}
+.tk.on{background:var(--good);border-color:var(--good)}
+.tk.on::after{content:"";width:5px;height:9px;border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.sc{display:inline-block;min-width:26px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--surface)}
+.sc.ed{border-color:var(--gold);background:var(--warnbg)}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px}
+.pill.ext{background:var(--surface-2);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+.pill.int{background:var(--goodbg);color:var(--good)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.clear{background:var(--goodbg);color:var(--good)}
+.meter{height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--goldfill)}
+.bars{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.bars div.l{display:flex;justify-content:space-between}
+.note{border-left:3px solid var(--goldfill);background:var(--surface-2);padding:8px 12px;font-size:13.5px;color:var(--ink-2);border-radius:0 6px 6px 0;max-width:80ch}
+.period{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;background:var(--warnbg);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13.5px}
+.period a{color:var(--gold);font-weight:700;text-decoration:underline}
+.q{display:inline-flex;gap:3px}
+.q span{width:22px;height:20px;border-radius:4px;border:1px solid var(--line);font-size:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.q span.on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.q span.off{background:var(--surface-2);opacity:.45;text-decoration:line-through}
+.vpt{display:grid;grid-template-columns:118px repeat(3,minmax(170px,1fr));gap:8px;min-width:660px}
+.vpt>div{border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vpt .lab{background:var(--goldfill);color:#171B22;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;text-align:center}
+.vpt .lab.d{background:var(--panel);color:var(--panel-ink)}
+.vpt .dh{grid-column:2/-1;background:var(--panel);color:var(--panel-ink);font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.vpt .vh{background:var(--line);color:var(--ink);font-weight:700;font-size:15px;text-align:center;display:flex;align-items:center;justify-content:center}
+.vpt .c{background:var(--surface-2);color:var(--ink-2)}
+.vpt .c.wip{outline:2px dashed var(--goldfill);outline-offset:-2px}
+.vpt ul{margin:0;padding-left:16px}.vpt li{margin:2px 0}
+.vpwrap{overflow-x:auto;padding:12px}
+.vel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vel h4{margin:0 0 6px;font-size:14.5px}.vel .lb{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+.vel ul{margin:2px 0 0;padding-left:18px}
+.vels{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.vel{position:relative}.vel .tk{position:absolute;top:10px;right:10px}.vel h4{padding-right:26px}
+.vel.on{border-color:var(--goldfill);box-shadow:inset 0 0 0 1px var(--goldfill)}
+.pill.you{background:var(--goodbg);color:var(--good)}
+.cellhint{font-size:12.5px;color:var(--ink-3);margin:-2px 0 0}
+.vp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.vp .box h4{margin:0 0 4px;font-size:14px}
+.vp .box p{margin:0;font-size:13px;color:var(--ink-2)}
+.vp .box p b{color:var(--ink)}
+/* setup page */
+.setup{display:grid;grid-template-columns:200px minmax(0,1fr)}
+@media (max-width:760px){.setup{grid-template-columns:1fr}.setup .rail{display:none}}
+.pane{padding:16px 20px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.ptitle{font-size:20px;font-weight:700;margin:0}
+.block{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.blockh{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);color:var(--panel-ink);padding:8px 12px;font-weight:700;font-size:14px}
+.blockh .btn{background:transparent;color:var(--panel-ink);border-color:var(--panel-quiet)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:12px}
+.facts div small{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.facts div b{font-size:15px}
+.timeline{padding:0 12px 12px}
+.track{position:relative;height:34px;background:var(--surface-2);border-radius:6px;font-size:11px;color:var(--ink-3)}
+.track .yr{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr)}
+.track .yr span{border-left:1px solid var(--line);padding:2px 3px}
+.track .plan{position:absolute;top:18px;height:12px;left:50%;width:50%;background:var(--goldfill);border-radius:3px}
+.track .cyc{position:absolute;top:18px;height:12px;border-radius:3px;border:2px solid var(--panel);background:transparent}
+.flag{color:var(--warn);font-weight:700}
+.open{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.open .m{flex:1 1 280px}
+</style>
+<style>
+.kind{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;letter-spacing:.02em}
+.kind.gap{background:var(--warnbg);color:var(--warn)}
+.kind.tr{background:var(--goodbg);color:var(--good)}
+.kind.en{background:var(--surface-2);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+.sel{display:inline-block;border:1px solid var(--line);border-radius:5px;padding:1px 8px;background:var(--surface);font-size:12.5px;white-space:nowrap}
+.sel::after{content:" \25BE";color:var(--ink-3)}
+.stc{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;padding:12px}
+.chip{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:13.5px}
+.chip.new{border-color:var(--gold);background:var(--warnbg)}
+.sw{display:inline-flex;border:1px solid var(--line);border-radius:5px;overflow:hidden;font-size:12px;flex:none}
+.sw span{padding:1px 8px;color:var(--ink-3)}.sw span.on{background:var(--panel);color:var(--panel-ink)}
+.disc{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:12px}
+.disc .big{font-size:20px;font-weight:700}
+</style>
+<div class="wrap">
+<header>
+  <h1>Strategy Copilot &middot; How we compete, Directions, Execution</h1>
+  <p class="lede">Round 3: the value proposition is agreed one value at a time and kept as your slide&rsquo;s table; capabilities get their own Copilot section when they are their own layer. Redrawn after your answers. How we compete is a section of its own, between the SWOT and the Plan, switched on from Structure. The Directions chat ends when Directions and Capabilities are chosen. Measures and tactics are planned in Execution. The side column holds only the to-do. Drawn for El Abd's words. Nothing is built.</p>
+</header>
+
+<!-- A. Structure -->
+<section>
+  <h2 class="step"><span>Setup &middot; Client set-up &rsaquo; Structure</span>The new section is switched on per layer</h2>
+  <p class="k">One more row on each layer's card, between SWOT and Plan. Off hides the section and the Copilot step, and keeps whatever was saved.</p>
+  <div class="frame">
+    <div class="bar"><span>Setup</span><b>Client set-up &rsaquo; Structure</b></div>
+    <div class="pane" style="padding:16px">
+      <div class="block">
+        <div class="blockh"><span>Company</span></div>
+        <div class="stc">
+          <div class="chip"><span>Foundation</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+          <div class="chip"><span>SWOT</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+          <div class="chip new"><span><b>How we compete</b></span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+          <div class="chip"><span>Plan</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+        </div>
+      </div>
+      <div class="block">
+        <div class="blockh"><span>Business units</span></div>
+        <div class="stc">
+          <div class="chip"><span>Foundation</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+          <div class="chip"><span>SWOT</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+          <div class="chip new"><span><b>How we compete</b></span><span class="sw"><span>On</span><span class="on">Off</span></span></div>
+          <div class="chip"><span>Plan</span><span class="sw"><span class="on">On</span><span>Off</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- B. How we compete chat -->
+<section>
+  <h2 class="step"><span>Copilot &middot; How we compete</span>Its own Copilot section, next to Analysis and Directions</h2>
+  <p class="k">Ten market and ten internal factors, each scored 0, 1 or 2 for each discipline. The market result decides. Ties break Best Total Cost, then Best Total Solution, then Best Product. The result is shown in the chat, not in the side column.</p>
+  <div class="frame">
+    <div class="bar"><span>Group</span><b>El Abd Company</b><span>Strategy</span><span>Performance</span><span>Copilot</span></div>
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec on">How we compete</span><span class="sec">Directions</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">How we compete 2026</div><div class="rh" style="margin-top:12px">Deliverables</div><div class="ri">SWOT &mdash; company v2</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>I scored each factor from your SWOT. Change any score you disagree with.</p></div>
+        <div class="tw"><table class="mg">
+          <thead><tr><th>Market factor</th><th class="n">Best Total Cost</th><th class="n">Best Total Solution</th><th class="n">Best Product</th></tr></thead>
+          <tbody>
+            <tr><td>Customers choose mainly on price</td><td class="n"><span class="sc">2</span></td><td class="n"><span class="sc">0</span></td><td class="n"><span class="sc">0</span></td></tr>
+            <tr><td>Buyers want installation and service bundled</td><td class="n"><span class="sc">1</span></td><td class="n"><span class="sc ed">2</span></td><td class="n"><span class="sc">0</span></td></tr>
+            <tr><td>Products are hard to tell apart</td><td class="n"><span class="sc">2</span></td><td class="n"><span class="sc">1</span></td><td class="n"><span class="sc">0</span></td></tr>
+            <tr><td colspan="4" style="color:var(--ink-3)">+ 7 more market factors</td></tr>
+            <tr class="sub"><td>Market total (of 20)</td><td class="n">15 &middot; 75%</td><td class="n">9 &middot; 45%</td><td class="n">6 &middot; 30%</td></tr>
+            <tr class="sub"><td>Internal total (of 20) &mdash; 10 factors, folded</td><td class="n">13 &middot; 65%</td><td class="n">10 &middot; 50%</td><td class="n">5 &middot; 25%</td></tr>
+          </tbody></table></div>
+        <div class="m ai"><p><b>Best Total Cost</b> leads the market by 30 points <span class="pill clear">Clear</span>. Your internal scores point the same way. Go with it?</p></div>
+        <div class="choices"><span class="choice picked">Yes, Best Total Cost</span><span class="choice">Let me change scores</span></div>
+        <div class="m ai"><p>Now the value proposition. Here are <b>5 possible values</b> for Best Total Cost, each with how we deliver it and how we measure it. Tick the ones closest to you &mdash; usually 3 or 4.</p></div>
+        <div class="vels"><div class="vel on"><span class="tk on"></span><h4>Lowest price in the region</h4><div class="lb">How</div><ul><li>Central buying across all branches</li><li>Fewer brands per shelf, bigger volumes</li><li>Price checks against the top 3 every week</li></ul><div class="lb">Measure</div><ul><li>Price index &le; 97 vs top 3</li></ul></div><div class="vel on"><span class="tk on"></span><h4>Always in stock</h4><div class="lb">How</div><ul><li>One central warehouse</li><li>Daily replenishment to every branch</li><li>Fast movers reordered automatically</li></ul><div class="lb">Measure</div><ul><li>On-shelf availability 96%</li></ul></div><div class="vel on"><span class="tk on"></span><h4>Easy, fast visit</h4><div class="lb">How</div><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li><li>Click-and-collect at the entrance</li></ul><div class="lb">Measure</div><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div><div class="vel"><span class="tk"></span><h4>Value packs for families</h4><div class="lb">How</div><ul><li>Bulk packs on staples</li><li>Monthly family basket offer</li><li>Own-label in every category</li></ul><div class="lb">Measure</div><ul><li>Share of baskets with a pack 30%</li></ul></div><div class="vel"><span class="tk"></span><h4>A store near you</h4><div class="lb">How</div><ul><li>Small-format stores in new districts</li><li>Same prices in every format</li></ul><div class="lb">Measure</div><ul><li>Households within 2 km 60%</li></ul></div></div>
+        <div class="choices"><span class="choice picked">Use the 3 I ticked</span><span class="choice">Suggest other values</span></div>
+        <div class="m me"><p>Give me another title for &ldquo;Easy, fast visit&rdquo;, and drop click-and-collect, we&rsquo;re not there yet.</p></div>
+        <div class="m ai"><p>Click-and-collect is out. Three other titles:</p></div>
+        <div class="choices"><span class="choice">In and out in minutes</span><span class="choice">No time wasted</span><span class="choice">Keep &ldquo;Easy, fast visit&rdquo;</span></div>
+        <div class="m me"><p>Keep the title. Add a second measure for &ldquo;Always in stock&rdquo;.</p></div>
+        <div class="m ai"><p>Added <b>Out-of-stock lines &lt; 2%</b>. Here is the full table. Click any cell to edit it yourself, or keep chatting, then save.</p></div>
+        <div class="tw vpwrap"><div class="vpt">
+<div class="lab d">Discipline</div><div class="dh">Best Total Cost</div>
+<div class="lab">Value</div>
+<div class="vh">Lowest price in the region</div>
+<div class="vh">Always in stock</div>
+<div class="vh">Easy, fast visit</div>
+<div class="lab">How</div>
+<div class="c"><ul><li>Central buying across all branches</li><li>Fewer brands per shelf, bigger volumes</li><li>Price checks against the top 3 every week</li></ul></div>
+<div class="c"><ul><li>One central warehouse</li><li>Daily replenishment to every branch</li><li>Fast movers reordered automatically</li></ul></div>
+<div class="c"><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li></ul></div>
+<div class="lab">Measure</div>
+<div class="c"><ul><li>Price index &le; 97 vs top 3 competitors</li></ul></div>
+<div class="c"><ul><li>On-shelf availability 96%</li><li>Out-of-stock lines &lt; 2%</li></ul></div>
+<div class="c"><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div>
+</div></div>
+        <p class="cellhint">Every cell is editable here before saving.</p>
+        <div class="row"><span class="btn">Keep chatting</span><span class="btn pri">Save to How we compete</span></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>4/5</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Score the disciplines</li><li class="done"><i class="dot done"></i>Choose the discipline</li><li class="done"><i class="dot done"></i>Pick the values</li><li class="now"><i class="dot now"></i>Refine and check the table</li><li><i class="dot"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- C. Strategy tab section -->
+<section>
+  <h2 class="step"><span>Strategy tab</span>Where it is kept: a section between SWOT and Plan</h2>
+  <p class="k">The Copilot saves here, as it saves the SWOT. The value proposition is drawn as your own slide is: one column per value, with How and Measure as short bullet points. Editable with the pen like the other sections, and the same table goes on the deck.</p>
+  <div class="frame">
+    <div class="bar"><span>Group</span><b>El Abd Company</b><span>Performance</span><span>Strategy</span><span>Copilot</span></div>
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">SWOT</span><span class="sec on">How we compete</span><span class="sec">Plan</span></div>
+    <div class="pane">
+      <div class="block">
+        <div class="blockh"><span>Value discipline</span></div>
+        <div class="disc"><span class="big">Best Total Cost</span><span class="pill clear">Clear &middot; 30 points ahead</span>
+          <span style="color:var(--ink-3);font-size:13.5px">Market: BTC 75% &middot; BTS 45% &middot; BP 30% &nbsp;|&nbsp; Internal: BTC 65% &middot; BTS 50% &middot; BP 25%</span></div>
+      </div>
+      <div class="block">
+        <div class="blockh"><span>Value proposition</span></div>
+        <div class="tw vpwrap"><div class="vpt">
+<div class="lab d">Discipline</div><div class="dh">Best Total Cost</div>
+<div class="lab">Value</div>
+<div class="vh">Lowest price in the region</div>
+<div class="vh">Always in stock</div>
+<div class="vh">Easy, fast visit</div>
+<div class="lab">How</div>
+<div class="c"><ul><li>Central buying across all branches</li><li>Fewer brands per shelf, bigger volumes</li><li>Price checks against the top 3 every week</li></ul></div>
+<div class="c"><ul><li>One central warehouse</li><li>Daily replenishment to every branch</li><li>Fast movers reordered automatically</li></ul></div>
+<div class="c"><ul><li>Self-checkout in large stores</li><li>Same layout in every branch</li></ul></div>
+<div class="lab">Measure</div>
+<div class="c"><ul><li>Price index &le; 97 vs top 3 competitors</li></ul></div>
+<div class="c"><ul><li>On-shelf availability 96%</li><li>Out-of-stock lines &lt; 2%</li></ul></div>
+<div class="c"><ul><li>Average queue time &lt; 4 min</li><li>CSAT 85%</li></ul></div>
+</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- D. Directions chat -->
+<section>
+  <h2 class="step"><span>Copilot &middot; Directions</span>Options, score, choose &mdash; then Capabilities</h2>
+  <p class="k">Starts from the existing Directions if there are any. Only outside-facing options are scored: Urgency &times; Importance &times; Ease, 1&ndash;4 each, out of 64. The Copilot scores first; you change any score and tick what goes ahead. At company level each Direction is owned by a function.</p>
+  <div class="frame">
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec on">Directions</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">Directions 2026</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>The plan already has <b>4 Directions</b>. Start from them, or start fresh?</p></div>
+        <div class="choices"><span class="choice picked">Start from the existing ones</span><span class="choice">Start fresh</span></div>
+        <div class="m ai"><p>From the SWOT and Best Total Cost, here are 5 possible Directions.</p></div>
+        <div class="m me"><p>Suggest a couple more, and add one of mine: small neighbourhood stores.</p></div>
+        <div class="m ai"><p>Added yours and 2 more, all scored. The 4 ticked are the ones I'd take &mdash; change any score or tick.</p></div>
+        <div class="tw"><table class="mg">
+          <thead><tr><th>Possible Direction</th><th class="n">Urgency</th><th class="n">Importance</th><th class="n">Ease</th><th class="n">Score</th><th>Owned by</th><th class="n">Go ahead</th></tr></thead>
+          <tbody>
+            <tr><td>Win the price-sensitive family shopper</td><td class="n"><span class="sc">4</span></td><td class="n"><span class="sc">4</span></td><td class="n"><span class="sc">3</span></td><td class="n"><b>48</b></td><td><span class="sel">Commercial</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Expand into Upper Egypt cities</td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">4</span></td><td class="n"><span class="sc ed">3</span></td><td class="n"><b>36</b></td><td><span class="sel">Business Development</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Grow own-label share</td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">3</span></td><td class="n"><b>27</b></td><td><span class="sel">Category</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Launch home delivery</td><td class="n"><span class="sc">2</span></td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">2</span></td><td class="n">12</td><td style="color:var(--ink-3)">&mdash;</td><td class="n"><span class="tk"></span></td></tr>
+            <tr><td>Small neighbourhood stores <span class="pill you">Yours</span></td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">4</span></td><td class="n"><span class="sc">3</span></td><td class="n"><b>36</b></td><td><span class="sel">Business Development</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Loyalty card for families <span class="pill ext">New</span></td><td class="n"><span class="sc">2</span></td><td class="n"><span class="sc">3</span></td><td class="n"><span class="sc">3</span></td><td class="n">18</td><td style="color:var(--ink-3)">&mdash;</td><td class="n"><span class="tk"></span></td></tr>
+            <tr><td>B2B supply to restaurants</td><td class="n"><span class="sc">1</span></td><td class="n"><span class="sc">2</span></td><td class="n"><span class="sc">2</span></td><td class="n">4</td><td style="color:var(--ink-3)">&mdash;</td><td class="n"><span class="tk"></span></td></tr>
+          </tbody></table></div>
+        <div class="choices"><span class="choice picked">Go ahead with the 4 ticked</span><span class="choice">Suggest more</span><span class="choice">+ Add my own</span></div>
+        <div class="m ai"><p>4 Directions chosen. Next, the Capabilities we need to deliver them.</p></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>2/4</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Options</li><li class="done"><i class="dot done"></i>Choose Directions</li><li class="now"><i class="dot now"></i>Choose Capabilities</li><li><i class="dot"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- E. Capabilities -->
+<section>
+  <h2 class="step"><span>Copilot &middot; Directions, continued</span>Choose Capabilities &mdash; when capabilities are part of the plan</h2>
+  <p class="k">When Structure keeps capabilities inside the company plan (not as their own layer), they are chosen here, in the Directions chat. The Copilot suggests 3&ndash;5, worked out from the chosen Directions and the SWOT. Not scored. Each has a kind and says what it serves. Tick, edit the wording, or add your own.</p>
+  <div class="frame">
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">Directions 2026</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>To deliver the 4 Directions, I suggest these Capabilities.</p></div>
+        <div class="m me"><p>Add one for training store staff.</p></div>
+        <div class="m ai"><p>Added as a Gap-closing capability serving the neighbourhood stores and the price promise. Tick, edit or ask for more.</p></div>
+        <div class="tw"><table class="mg">
+          <thead><tr><th>Capability</th><th>Kind</th><th>Serves</th><th>Owned by</th><th class="n">Keep</th></tr></thead>
+          <tbody>
+            <tr><td>Low-cost supply chain</td><td><span class="kind gap">Gap-closing</span></td><td><span class="pill ext">Family shopper</span> <span class="pill ext">Upper Egypt</span></td><td><span class="sel">Supply Chain</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Own-label sourcing and quality</td><td><span class="kind gap">Gap-closing</span></td><td><span class="pill ext">Own-label share</span> <span class="pill warn">W: weak supplier base</span></td><td><span class="sel">Category</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Data-led pricing</td><td><span class="kind tr">Transformation</span></td><td><span class="pill ext">Family shopper</span></td><td><span class="sel">Commercial</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>One retail system across stores</td><td><span class="kind en">Enabler</span></td><td><span class="pill ext">Upper Egypt</span></td><td><span class="sel">IT</span></td><td class="n"><span class="tk"></span></td></tr>
+            <tr><td>Store staff training <span class="pill you">Yours</span></td><td><span class="kind gap">Gap-closing</span></td><td><span class="pill ext">Neighbourhood stores</span></td><td><span class="sel">HR</span></td><td class="n"><span class="tk on"></span></td></tr>
+          </tbody></table></div>
+        <div class="choices"><span class="choice">Suggest more</span><span class="choice">+ Add my own</span></div>
+        <div class="note"><b>Gap-closing</b>: something we must build because a weakness or a Direction needs it. <b>Transformation</b>: a change we choose to make for its own sake. <b>Enabler</b>: a supporting foundation such as data or systems.</div>
+        <div class="row"><span class="btn pri">Save 4 Directions and 4 Capabilities to the plan</span></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>3/4</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Options</li><li class="done"><i class="dot done"></i>Choose Directions</li><li class="done"><i class="dot done"></i>Choose Capabilities</li><li class="now"><i class="dot now"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- E2. Capabilities as their own Copilot section -->
+<section>
+  <h2 class="step"><span>Copilot &middot; Capabilities</span>When capabilities are their own layer, they get their own Copilot section</h2>
+  <p class="k">If Structure sets capabilities as a layer of their own, the Directions chat stops at Save Directions, and a <b>Capabilities</b> section appears between Directions and Execution. It starts from the saved Directions and the SWOT. Same table, same three kinds, same owner per row.</p>
+  <div class="frame">
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec on">Capabilities</span><span class="sec">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">Capabilities 2026</div><div class="rh" style="margin-top:12px">Deliverables</div><div class="ri">Directions 2026 v1</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>I read your <b>4 saved Directions</b> and the SWOT. These are the Capabilities I'd build to deliver them.</p></div>
+        <div class="tw"><table class="mg">
+          <thead><tr><th>Capability</th><th>Kind</th><th>Serves</th><th>Owned by</th><th class="n">Keep</th></tr></thead>
+          <tbody>
+            <tr><td>Low-cost supply chain</td><td><span class="kind gap">Gap-closing</span></td><td><span class="pill ext">Family shopper</span> <span class="pill ext">Upper Egypt</span></td><td><span class="sel">Supply Chain</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>Data-led pricing</td><td><span class="kind tr">Transformation</span></td><td><span class="pill ext">Family shopper</span></td><td><span class="sel">Commercial</span></td><td class="n"><span class="tk on"></span></td></tr>
+            <tr><td>One retail system across stores</td><td><span class="kind en">Enabler</span></td><td><span class="pill ext">Upper Egypt</span></td><td><span class="sel">IT</span></td><td class="n"><span class="tk on"></span></td></tr>
+          </tbody></table></div>
+        <div class="choices"><span class="choice">Suggest more</span><span class="choice">+ Add my own</span></div>
+        <div class="row"><span class="btn pri">Save 3 Capabilities</span></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>1/3</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Suggest Capabilities</li><li class="now"><i class="dot now"></i>Choose and set owners</li><li><i class="dot"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+  <p class="k" style="margin-top:10px">In this case the Directions to-do ends <i>Options &middot; Choose Directions &middot; Save</i>, and Execution lists the Directions and the Capabilities from both saves.</p>
+</section>
+
+<!-- F. Execution -->
+<section>
+  <h2 class="step"><span>Copilot &middot; Execution</span>Plan period, then measures and tactics for each</h2>
+  <p class="k">Asked once and stored on Setup &rsaquo; Planning &amp; reporting cycle. After that every Execution chat shows the period with a Change link. Each chosen Direction and Capability gets its measures with targets and its tactics, in quarters inside the period.</p>
+  <div class="frame">
+    <div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec on">Execution</span><span class="sec">Advisory</span></div>
+    <div class="body">
+      <aside class="rail"><div class="rh">Chats</div><div class="ri on">Execution 2026</div></aside>
+      <div class="cop">
+        <div class="m ai"><p>How long is this plan?</p>
+          <div class="choices" style="margin-top:8px"><span class="choice">Full year 2027</span><span class="choice picked">This quarter to year end &mdash; Jul&ndash;Dec 2026</span><span class="choice">Pick months</span></div></div>
+        <div class="period"><span>This plan covers <b>Jul&ndash;Dec 2026</b> (Q3&ndash;Q4)</span><a>Change</a></div>
+        <div class="m ai"><p><b>Expand into Upper Egypt cities</b> &mdash; Direction 2 of 3, owned by Business Development. Here is a draft; edit anything.</p></div>
+        <div class="box">
+          <div class="tw"><table class="mg">
+            <thead><tr><th>Measure</th><th>Target (Jul&ndash;Dec)</th><th>Compile</th></tr></thead>
+            <tbody><tr><td>New stores opened</td><td>4 #</td><td>Count</td></tr><tr><td>Sales from new stores</td><td>60M EGP</td><td>Sum</td></tr></tbody></table></div>
+          <div class="tw" style="margin-top:10px"><table class="mg">
+            <thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th></tr></thead>
+            <tbody>
+              <tr><td>Sign leases in Assiut and Sohag</td><td>Real Estate</td><td><span class="q"><span class="off">Q1</span><span class="off">Q2</span><span class="on">Q3</span><span>Q4</span></span></td></tr>
+              <tr><td>Open 4 stores</td><td>Operations</td><td><span class="q"><span class="off">Q1</span><span class="off">Q2</span><span>Q3</span><span class="on">Q4</span></span></td></tr>
+            </tbody></table></div>
+        </div>
+        <div class="row"><span class="btn pri">Save to plan</span><span class="btn">Next</span></div>
+      </div>
+      <aside class="side">
+        <div class="box"><div class="bh">To do <small>3/8</small></div>
+          <ul class="todo"><li class="done"><i class="dot done"></i>Plan period</li><li class="done"><i class="dot done"></i>Family shopper</li><li class="now"><i class="dot now"></i>Upper Egypt</li><li><i class="dot"></i>Own-label share</li><li><i class="dot"></i>Low-cost supply chain</li><li><i class="dot"></i>Own-label sourcing</li><li><i class="dot"></i>Data-led pricing</li><li><i class="dot"></i>Save</li></ul></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- G. Setup page -->
+<section>
+  <h2 class="step"><span>Setup</span>Planning &amp; reporting cycle &mdash; replaces Reporting cycle</h2>
+  <p class="k">The plan period comes first. The reporting cycles sit inside it. A cycle running past the period is flagged. Changing the period changes what is due on targets; tactics in quarters outside a shortened period are flagged, never deleted.</p>
+  <div class="frame">
+    <div class="bar"><span>Setup</span><b>Planning &amp; reporting cycle</b></div>
+    <div class="setup">
+      <aside class="rail"><div class="rh">Running the cycle</div><div class="ri on">Planning &amp; reporting cycle</div><div class="ri">Platform Inbox</div><div class="ri">History</div></aside>
+      <div class="pane">
+        <div class="block">
+          <div class="blockh"><span>Plan period</span><span class="btn">Edit</span></div>
+          <div class="facts"><div><small>From</small><b>Jul 2026</b></div><div><small>To</small><b>Dec 2026</b></div><div><small>Length</small><b>6 months &middot; Q3&ndash;Q4</b></div><div><small>Set by</small><b>Copilot chat &middot; 4 Oct</b></div></div>
+          <div class="timeline"><div class="track"><div class="yr"><span>J</span><span>F</span><span>M</span><span>A</span><span>M</span><span>J</span><span>J</span><span>A</span><span>S</span><span>O</span><span>N</span><span>D</span></div><div class="plan"></div></div></div>
+        </div>
+        <div class="block">
+          <div class="blockh"><span>Reporting cycles in this plan</span><span class="btn">Open a new cycle</span></div>
+          <div class="tw" style="padding:12px"><table class="mg">
+            <thead><tr><th>Cycle</th><th>Covers</th><th>Reports due</th><th>State</th></tr></thead>
+            <tbody>
+              <tr><td>Q3 2026</td><td>Jul&ndash;Sep 2026</td><td>10 Oct 2026</td><td><span class="pill clear">Open</span></td></tr>
+              <tr><td>Q4 2026</td><td>Oct 2026&ndash;Jan 2027</td><td>&mdash;</td><td><span class="pill warn">Runs past the plan period</span></td></tr>
+            </tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="step"><span>Not in this round</span>Left out on purpose</h2>
+  <p class="k">The Projects way of planning, and the 3&times;3 grid.</p>
+</section>
+</div>

@@ -365,6 +365,11 @@ function renderAccess(){
       return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
         " holds no " + L1("unitword") + ".";
     }
+    /* §505: a direction owner is held at the group alone, never at a unit or
+       a function, so neither own pair can ever be theirs. */
+    if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
+      return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
+    }
     if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no " + L1("fnword") + ".";
     }
@@ -2378,11 +2383,20 @@ function renderPeople(){
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
-    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">');
+    /* The star is drawn for the eye and hidden from a screen reader, so the
+       box says it itself (§506) — and says it was refused, once it was. */
+    var needA = function(label){
+      if (!add) return "";
+      return ' aria-required="true"' +
+        ((NEWPERSON.missing || []).indexOf(label) >= 0 ? ' aria-invalid="true"' : '');
+    };
+    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key +
+        '"' + needA("Full name") + '>');
     F("Emp. ID", '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
         '" placeholder="Emp. ID">');
     F("Email", '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
+        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email"' +
+        needA("Email") + '>');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
     /* THE REASON IS ON THE HOVER (§122). It was a two-line paragraph, the
@@ -2496,15 +2510,31 @@ function renderPeople(){
        row for anything to be outstanding about, and attentionOf() would be
        asked about a draft (§116's NEWDRAFT). */
     var by = add ? {} : attnFor(p), drawn = {};
+    /* ── THE STAR, AND THE REFUSAL UNDER THE BOX IT IS ABOUT (§506) ──────
+       Add form only (PERSON_NEEDED's note). The ring is the attention ring's
+       own shape in the alarm colour — out of flow, so a refused field still
+       shares its grid row (§190) — because this is not "outstanding", it is
+       "this will not go in" (§168). The sentence sits under the box rather
+       than above the form, §190's rule: a band saying what is wrong above nine
+       boxes leaves somebody to guess which. */
+    var need = {}, miss = {};
+    if (add) {
+      PERSON_NEEDED.forEach(function(n){ need[n.label] = n; });
+      (NEWPERSON.missing || []).forEach(function(l){ miss[l] = 1; });
+    }
     var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
       var mine = by[f.label] || [];
       if (mine.length) drawn[f.label] = 1;
+      var req = need[f.label], refused = !!(req && miss[f.label]);
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
-        (mine.length ? ' attn' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
+        (mine.length ? ' attn' : '') + (refused ? ' reqmiss' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) +
+          (req ? '<span class="reqmark" aria-hidden="true">*</span>' : '') + '</div>' +
+        f.html + f.note +
+        (refused ? '<div class="reqsay">' + esc(req.say) + '</div>' : '') +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -3161,8 +3191,16 @@ function renderPeople(){
   }
   function personDialogFoot(){
     if (!PDLG) return "";
+    /* "Only a name is needed" stopped being true at §506, and a footer that
+       says otherwise beside a refusal for a missing email is the form arguing
+       with itself (§104.8). The star is the KEY to the marks above it, so it is
+       READ here, where the marks on the boxes are hidden from a screen reader
+       (their `aria-required` says it): hidden in the key too, the line would
+       read "needed to add them" about nothing. A real space, not a margin, or
+       the sentence copies and reads as "*needed". */
     if (PDLG.mode === "add")
-      return '<span class="why" style="margin:0">Only a name is needed. Everything ' +
+      return '<span class="why" style="margin:0"><span class="reqmark reqkey">*' +
+        '</span> needed to add them. Everything ' +
         'else can wait.</span><span class="pdrt">' +
         '<button class="linkbu" data-pdlg-close="1">Cancel</button>' +
         '<button class="linkbu tk-save" data-pdlg-add="1">Add them</button></span>';
@@ -6971,6 +7009,50 @@ function cyclePick(label, value, setter, opts){
    this one is picked for §177's reason as well: with no box there is nothing
    to mistype, and a period the arithmetic cannot read would silently go back
    to being a calendar year. */
+/* ── §495: THE PLAN PERIOD COMES FIRST ──────────────────────────────
+   Spec 064 §7, from the signed-off mockup (G): the page is Planning &
+   reporting cycle, the plan period is its first block with an Edit of its
+   own, and the reporting cycle sits under it. The facts are VALUES — the
+   pickers are §308's own `planPeriodBlock()`, drawn only while this pen is
+   open, so one control writes the period (§53.5). The timeline is the plan's
+   calendar year(s), the plan shaded and the open cycle outlined. */
+function planPeriodPanel(can){
+  var set = planSet(), a = planFrom(), b = planTo();
+  var qw = function(m0, m1){ var q0 = Math.floor((m0 % 12) / 3) + 1, q1 = Math.floor((m1 % 12) / 3) + 1;
+    return Math.floor(m0 / 12) === Math.floor(m1 / 12) ? (q0 === q1 ? "Q" + q0 : "Q" + q0 + "\u2013Q" + q1) : ""; };
+  var facts = set
+    ? '<div><small>From</small><b>' + esc(SMPRules.monthLabel(a)) + '</b></div>' +
+      '<div><small>To</small><b>' + esc(SMPRules.monthLabel(b)) + '</b></div>' +
+      '<div><small>Length</small><b>' + planLength() + ' months' + (qw(a, b) ? ' \u00b7 ' + qw(a, b) : '') + '</b></div>'
+    : '<div><small>Plan period</small><b>Not set</b><span class="why" style="margin:0">the calendar year is used</span></div>';
+  var tl = "";
+  if (set) {
+    var cf = monthsOf(REVIEW.from), ct = reviewAsOf();
+    var lo = Math.min(a, cf != null ? cf : a), hi = Math.max(b, ct != null ? ct : b);
+    var y0 = Math.floor(lo / 12), y1 = Math.floor(hi / 12);
+    if (y1 - y0 > 2) y1 = y0 + 2;
+    var cells = "";
+    for (var m = y0 * 12; m < (y1 + 1) * 12; m++) {
+      var inP = m >= a && m <= b, inC = cf != null && ct != null && m >= cf && m <= ct;
+      cells += '<span class="pptl-m' + (inP ? ' inp' : '') + (inC ? ' inc' : '') + (inC && !inP ? ' past' : '') +
+        '" title="' + esc(SMPRules.monthLabel(m)) + '">' + "JFMAMJJASOND".charAt(m % 12) + '</span>';
+    }
+    var yrs = ""; for (var yy = y0; yy <= y1; yy++) yrs += '<span>' + yy + '</span>';
+    tl = '<div class="pptl" data-plan-timeline><div class="pptl-y">' + yrs + '</div><div class="pptl-ms">' + cells + '</div>' +
+      '<div class="pptl-key"><span class="k inp"></span>Plan period' + (cf != null && ct != null ? '<span class="k inc"></span>This cycle' : '') + '</div></div>';
+  }
+  var nOut = tacticsOutsidePlan();
+  return '<div class="planblk" data-plan-block>' +
+    '<div class="planblk-h"><span>Plan period</span>' +
+      (can ? '<button class="editbtn' + (PLANEDIT ? ' penon' : '') + '" data-editplan="1">' + (PLANEDIT ? 'Done editing' : 'Edit') + '</button>' : '') +
+    '</div>' +
+    '<div class="planblk-facts">' + facts + '</div>' + tl +
+    (nOut ? '<div class="planblk-flag" data-plan-outside><b>' + nOut + ' tactic' + (nOut === 1 ? ' ticks a quarter' : 's tick a quarter') +
+      ' outside the plan period.</b> They are kept as they are; change the period or the quarters on the plan.</div>' : '') +
+    (PLANEDIT && can ? '<div class="planblk-pen">' + planPeriodBlock() + '</div>' : '') +
+  '</div>';
+}
+
 function planPeriodBlock(){
   return '<div class="cyc2-r planper">' +
     '<div class="nc-h">The planning period</div>' +
@@ -7368,6 +7450,10 @@ function renderCycle(){
       (reviewDayWord() ? '<span class="fstrip-meta">presents <b>' +
         esc(reviewDayWord()) + '</b></span>' : '') +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
+      /* §495: A CYCLE RUNNING PAST THE PLAN PERIOD IS SAID ON ITS OWN STRIP,
+         in the attention voice — nothing is wrong yet, but a figure measured
+         after the plan ended is measured against a whole target (§308). */
+      (cyclePastPlan() ? '<span class="badge b-late" data-cyc-past>Runs past the plan period</span>' : '') +
       /* ── ONE DOOR, AND CLOSE IS BEHIND IT (§273) ───────────────────
          Islam: "keep the close cycle inside the edit. as it's a critical
          button to click, the pen should hold everything editable so it's kept
@@ -7467,7 +7553,7 @@ function renderCycle(){
        in. The cost was measured before he chose — pressing Edit moves the page
        below by 156px here against 12px for the in-place shape. */
     (CYCLEEDIT && open
-      ? '<div class="cfg newcycle">' + planPeriodBlock() + '<div class="cyc2">' +
+      ? '<div class="cfg newcycle"><div class="cyc2">' +
           '<div class="cyc2-f">' +
             '<div class="nc-h">This cycle</div>' +
             '<div class="nc-grid nc-1line">' +
@@ -7553,11 +7639,11 @@ function renderCycle(){
         : '') + '</td></tr>';
   }).join("");
 
-  return cfgHead("Reporting cycle",
+  return cfgHead("Planning & reporting cycle",
       ['<span class="pill kind">' + esc(REVIEW.cadence) + '</span>'].concat(
         claims.length ? ['<span class="pill attn">' + claims.length + ' claim request' +
           (claims.length === 1 ? "" : "s") + '</span>'] : []),
-      null, false) + head + contTakenSection() +
+      null, false) + planPeriodPanel(can) + head + contTakenSection() +
     (claims.length
       ? section("", "Claim requests", null,
           '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +

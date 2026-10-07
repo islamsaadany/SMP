@@ -103,7 +103,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 pass
             return
         if POST["status"] != 200:
-            self._s(POST["status"], b'{"ok":false,"error":"boom"}', "application/json")
+            body = {"ok": False, "error": "boom"}
+            if POST.get("ref"):
+                body.update(ref=POST["ref"], reason=POST["reason"])
+            self._s(POST["status"], json.dumps(body).encode(), "application/json")
             return
         self._s(200, b'{"ok":true}', "application/json")
 
@@ -117,9 +120,23 @@ FILE_URL = "file://" + str(ROOT / "SMP-Project-Folder/src/strategy-management-pl
 
 
 def banner(pg):
+    """What the page is saying about saving: a refusal on #refused, or (§504)
+       a failed save kept on this computer on #unsaved."""
     return pg.evaluate("""() => {
-      const e = document.getElementById('refused');
+      const t = [];
+      for (const id of ['refused', 'unsaved']) {
+        const e = document.getElementById(id);
+        if (e && !e.hidden) t.push(e.textContent.replace(/\\s+/g,' ').trim());
+      }
+      return t.join(' | '); }""")
+
+
+def unsaved_bar(pg):
+    return pg.evaluate("""() => { const e = document.getElementById('unsaved');
       return (e && !e.hidden) ? e.textContent.replace(/\\s+/g,' ').trim() : ""; }""")
+
+
+HOVER = "()=>{const s=document.querySelector('#unsaved strong');return s?s.title:''}"
 
 
 def change(pg, mark):
@@ -132,11 +149,14 @@ def change(pg, mark):
 
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport={"width": 1440, "height": 900})
+    cx = b.new_context(viewport={"width": 1440, "height": 900})
+    cx.grant_permissions(["clipboard-read", "clipboard-write"], origin="http://127.0.0.1:%d" % PORT)
+    pg = cx.new_page()
     pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');"
                        "sessionStorage.setItem('smp.welcome.done','1');}catch(e){}")
-    errs = []
+    errs, cons = [], []
     pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.on("console", lambda m: m.type == "error" and cons.append(m.text))
     pg.goto(URL, wait_until="networkidle")
     pg.wait_for_timeout(1800)
     ck("the platform hydrated", pg.evaluate("()=>SYNC.isLive()") is True)
@@ -146,18 +166,42 @@ with sync_playwright() as p:
     change(pg, "quiet-1")
     ck("nothing on the page when the save lands", banner(pg) == "", banner(pg))
 
-    # ── 2 · A SERVER ERROR ───────────────────────────────────────────────
+    # ── 2 · A SERVER ERROR (§504: kept, never "Not saved") ───────────────
+    #    REWRITTEN, NOT LOOSENED (§218): §171 asserted a red "Not saved" bar and
+    #    §258.3 the advice to keep the tab open. §504 keeps the change on this
+    #    computer, so the honest sentence is that it is SAFE — in amber, on the
+    #    bar of its own — and the status still rides the hover for the operator.
     print("\n2 · the server answers 500")
     POST["status"] = 500
     change(pg, "boom-1")
-    said = banner(pg)
-    ck("the page says it did not save", "Not saved" in said, said or "(nothing)")
-    # THE SENTENCE IS THE USER'S (§258.3): no status in it, the useful advice
-    # in it — and the status still there for the operator, on the hover.
+    said = unsaved_bar(pg)
+    ck("the page says the change is safe on this computer", "safe on this computer" in said, said or "(nothing)")
     ck("...in plain words, with no status in the sentence", "500" not in said and "HTTP" not in said, said)
-    ck("...telling them to keep the tab open", "keep this tab open" in said.lower(), said)
-    ck("...with the status on the hover for whoever can act on it",
-       "500" in (pg.evaluate("()=>{const s=document.querySelector('#refused strong');return s?s.title:''}") or ""))
+    ck("...and it is not a refusal", pg.evaluate("()=>{const e=document.getElementById('refused');return !e||e.hidden}") is True)
+    ck("...with the status on the hover for whoever can act on it", "500" in (pg.evaluate(HOVER) or ""))
+
+    # ── 2b · THE DETAILS TRAVEL WITH IT (§502, reshaped by §504) ─────────
+    #    The reference and the reason still reach the hover and the console;
+    #    §504 replaced the copy button with one ghost button that sends the
+    #    kept lines to the office. Both ends: the copy button is GONE and the
+    #    send button is THERE, or a bar with no control passes the absence.
+    print("\n2b · the details travel with the bar")
+    POST["ref"], POST["reason"] = "SMP-TEST42", "a value is not in the shape this field takes · table measures · code 22P02"
+    change(pg, "boom-2")
+    hover = pg.evaluate(HOVER) or ""
+    ck("the hover carries the reference and the reason", "SMP-TEST42" in hover and "table measures" in hover, hover)
+    ck("...and the server's own sentence", "boom" in hover, hover)
+    said = unsaved_bar(pg)
+    ck("the sentence on the page still carries no status", "HTTP" not in said and "SMP-TEST42" not in said, said)
+    ck("the console carries it as an error", any("SMP-TEST42" in c for c in cons), cons)
+    n1 = sum(1 for c in cons if "SMP-TEST42" in c)
+    pg.wait_for_timeout(5600)   # one retry, same failure
+    ck("...once per failure, not once per retry", sum(1 for c in cons if "SMP-TEST42" in c) == n1, cons)
+    ck("the copy button is gone", pg.query_selector("[data-copyerr]") is None)
+    sb = pg.query_selector("#unsaved [data-unsaved-send]")
+    ck("...and the bar offers to send the changes to the office",
+       sb is not None and "Strategy Office" in (sb.inner_text() if sb else ""))
+    POST["ref"] = None
 
     # ── 3 · IT CLEARS WHEN A SAVE LANDS ──────────────────────────────────
     # A WARNING THAT OUTLIVES ITS CAUSE IS WORSE THAN NONE (§35).
@@ -166,15 +210,19 @@ with sync_playwright() as p:
     change(pg, "quiet-2")
     ck("the banner goes when a save succeeds", banner(pg) == "", banner(pg))
 
-    # ── 4 · NO SERVER AT ALL IS A DIFFERENT ERRAND ───────────────────────
+    # ── 4 · NO SERVER AT ALL (§504: kept the same way) ──────────────────
+    #    A dropped connection is an accident like a 500, so it is kept the
+    #    same way; the hover says which it was, never the sentence.
     print("\n4 · the server cannot be reached")
     POST["status"] = "drop"
     change(pg, "gone-1")
     pg.wait_for_timeout(1500)
-    said = banner(pg)
-    ck("the page says it did not save", "Not saved" in said, said or "(nothing)")
-    ck("...and it is not reported as a server answer",
-       "reach" in said.lower() and "connection" in said.lower() and "HTTP" not in said, said)
+    said = unsaved_bar(pg)
+    ck("the page says the change is safe on this computer", "safe on this computer" in said, said or "(nothing)")
+    ck("...and it is not reported as a server answer", "HTTP" not in said and "500" not in (pg.evaluate(HOVER) or ""), said)
+    POST["status"] = 200
+    change(pg, "back-1")
+    ck("...and it goes when the server answers again", banner(pg) == "", banner(pg))
 
     # ── 5 · A REFUSAL IS UNCHANGED (§32) ─────────────────────────────────
     print("\n5 · a refusal keeps its own shape")

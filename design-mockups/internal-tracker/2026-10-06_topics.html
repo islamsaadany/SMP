@@ -1,0 +1,208 @@
+<title>Tracker Topics</title>
+<style>
+/* Layout: four frames of the real tracker page, each with a plain-words note beside it.
+   Every class and value below the frame line is the tracker's own stylesheet (modules/tracker/page.ts);
+   only .tpc, .tpick, .gmenu and the frame furniture are new. */
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--warn:#8A6410;--warn-bg:#FBF2DC;--bad:#B23025;--bad-bg:#FBEDEB;--new:#FFF4DE;
+  --font:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;--new:#2E2715;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;
+  --good:#63BE96;--good-bg:#1B2C26;--warn:#D7B04A;--warn-bg:#2A2515;--bad:#E8776B;--bad-bg:#33211F;--new:#2E2715;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;padding-inline:16px}
+
+/* ---- mockup furniture ---- */
+.doc{max-width:1340px;margin:0 auto;padding-block:24px 60px}
+.doc>h1{font-size:22px;font-weight:600;margin:0 0 4px;text-wrap:balance}
+.doc>p.lede{margin:0 0 22px;color:var(--ink-2);max-width:70ch}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;margin:0 0 34px;align-items:start}
+.fr>.say{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--ink-2)}
+.fr>.say h3{margin:0 0 8px;font-size:15px;color:var(--ink);font-weight:600}
+.fr>.say ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.fr>.say b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.stage{border:1px solid var(--line);border-radius:12px;background:var(--ground);overflow:hidden}
+.stage .pg{padding:16px 20px 22px}
+@media (max-width:980px){.fr{grid-template-columns:1fr}}
+
+/* ---- the tracker's own rules ---- */
+.pg{max-width:1000px;margin:0 auto}
+h2.pt{margin:0 0 14px;font-size:21px;font-weight:600}
+h2.pt small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
+.cats{display:flex;gap:3px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:15px;align-items:flex-end}
+.cats a{color:var(--ink-3);text-decoration:none;font:600 13.5px/1 var(--font);padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.cats a[aria-current="true"]{color:var(--ink);border-bottom-color:var(--gold)}
+.dots{margin-left:auto;margin-bottom:6px;position:relative}
+.dots>button{width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink-3);display:grid;place-items:center;padding:0}
+.dots>button.on{background:var(--surface-2);color:var(--ink)}
+.dots svg{width:16px;height:16px}
+.setmenu{position:absolute;top:30px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px}
+.setmenu .col{display:grid;align-content:start}
+.setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
+.setmenu .lab{display:block;font:600 10.5px/1.7 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
+.setmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);text-align:left;white-space:nowrap}
+.setmenu button.on{font-weight:600}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
+.setmenu button.nw{background:var(--new)}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:12px}
+.grp{display:flex;align-items:center;gap:9px;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2);position:relative}
+.cnt{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.grp .late{color:var(--bad)}
+.row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row.done .t{color:var(--ink-3);text-decoration:line-through}
+.tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--surface);padding:0}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+.when{font:400 12.5px/1.4 var(--mono);color:var(--ink-3);white-space:nowrap;text-align:right}
+.when.late{color:var(--bad);font-weight:600}
+.when .wk{font:500 12.5px/1.4 var(--font);color:var(--ink-2)}
+.who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;min-width:52px;text-align:right}
+.st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);letter-spacing:.02em;padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.st.prog{border-color:var(--gold);color:var(--gold)}
+.st.done{border-color:var(--good);background-color:var(--good-bg);color:var(--good)}
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;padding:0;justify-self:end}
+.more svg{width:16px;height:16px}
+.addrow{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:9px 2px;border-bottom:1px dashed var(--line);background:var(--surface)}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--ink-3);font:600 15px/1 var(--font)}
+.addrow .typed{font-size:15px;line-height:1.35}
+.addrow .typed i{display:inline-block;width:1px;height:17px;background:var(--ink);vertical-align:-3px;margin-left:1px}
+.addhint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
+.who.pick,.when.pick{border-radius:6px;padding:3px 7px;margin:-3px -7px}
+
+/* ---- new: the topic ---- */
+/* the tag after the action's name: quiet, the page's own mono key, never a colour */
+.t .tpc{display:inline-block;margin-left:8px;font:600 10px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:0 5px;vertical-align:2px;white-space:nowrap}
+/* on the add line: the same tag, pressable, at the end of the name */
+.tn{min-width:0;display:flex;align-items:center;gap:8px;position:relative}
+.tn .typed{flex:1 1 auto;min-width:0}
+.tpc.pick{position:relative;flex:none;font:600 10px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);border:1px dashed var(--ink-3);border-radius:5px;padding:2px 6px;background:var(--surface)}
+.tpc.pick.on{background:var(--surface-2);border-style:solid;color:var(--ink)}
+/* the topic list: the team list's own shape */
+.tpick{position:absolute;top:28px;right:0;z-index:6;width:250px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left}
+.tpick .lab{display:block;font:600 10px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);padding:5px 9px 4px;border-bottom:1px solid var(--line);margin-bottom:3px}
+.tpick button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.4 var(--font);color:var(--ink);text-align:left}
+.tpick button small{margin-left:auto;font:400 11.5px/1.3 var(--mono);color:var(--ink-3)}
+.tpick button.hit{background:var(--ground)}
+.tpick .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
+.tpick .wf button{color:var(--ink-3);font-size:13px}
+.tpick .wf button.mk{color:var(--gold);font-weight:600}
+/* a topic heading's own three dots: rename, close */
+.gdots{width:22px;height:20px;border:0;border-radius:6px;background:none;color:var(--ink-3);display:grid;place-items:center;padding:0}
+.gdots.on{background:var(--surface-2);color:var(--ink)}
+.gdots svg{width:14px;height:14px}
+.gmenu{position:absolute;top:36px;left:120px;z-index:6;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;display:grid;min-width:190px}
+.gmenu button{background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);text-align:left}
+.gmenu button small{display:block;font-size:11.5px;color:var(--ink-3)}
+.gmenu button.dz{color:var(--ink-3)}
+.closedtag{font:600 10px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.gap{height:180px}
+@media (max-width:720px){.row,.addrow{grid-template-columns:22px 1fr auto 26px}.row .when,.row .who,.addrow .when,.addrow .who,.addrow .st{display:none}.setmenu,.tpick{right:auto;left:0}.gmenu{left:0}}
+</style>
+
+<div class="doc">
+<h1>Internal Tracker: topics</h1>
+<p class="lede">Four views of the same Raya Trade list. Everything you see is the tracker as it is today, except the topic tags, the topic list, the Topic grouping and the topic heading's menu.</p>
+
+<!-- 1. Grouped by Topic -->
+<p class="cap">1 &middot; Grouped by Topic</p>
+<div class="fr">
+<div class="stage"><main class="pg">
+  <h2 class="pt">This week <small>W2 Oct &middot; 4 – 8 Oct</small></h2>
+  <nav class="cats"><a>This week</a><a aria-current="true">All</a><a>Mine</a><a>Undated</a>
+    <span class="dots"><button><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button></span></nav>
+  <div class="list">
+    <div class="grp">Budget <span class="cnt">3 open &middot; <span class="late">1 late</span></span>
+      <button class="gdots" aria-label="Topic options"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></div>
+    <div class="row"><span class="tick"></span><div class="t">Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Draft the budget calendar with Finance</div><span class="when"><span class="wk">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Agree the capex template with the CFO</div><span class="when"><span class="wk">W3 Oct</span></span><span class="who">Omar</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+
+    <div class="grp">Strategy communication <span class="cnt">2 open</span>
+      <button class="gdots" aria-label="Topic options"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button></div>
+    <div class="row"><span class="tick"></span><div class="t">Town hall deck for the strategy refresh</div><span class="when"><span class="wk">Next week</span></span><span class="who">Essam</span><span class="st prog">In progress</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row done"><span class="tick"><svg viewBox="0 0 12 12"><path d="M2 6.5 5 9.5 10 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><div class="t">Send the one-page summary to unit heads</div><span class="when">Done 2 Oct</span><span class="who">Islam</span><span class="st done">Done</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Cascade messages for the B2C company</div><span class="when"><span class="wk">W4 Oct</span></span><span class="who">Noran</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+
+    <div class="grp">No topic <span class="cnt">1 open</span></div>
+    <div class="row"><span class="tick"></span><div class="t">Book the room for the Q3 review</div><span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+</main></div>
+<div class="say"><h3>What you see</h3><ul>
+<li>Each topic is a heading with its counts: <b>open</b> and, in red, <b>late</b>. Done actions stay under their topic, as they do today.</li>
+<li>The topic with the nearest due action comes first. <b>No topic</b> is always last.</li>
+<li>No tag on the rows here, because the heading already says it.</li>
+<li>The three dots on a heading open the topic's own menu (view 4).</li>
+</ul></div>
+</div>
+
+<!-- 2. The setting -->
+<p class="cap">2 &middot; Group by gains Topic</p>
+<div class="fr">
+<div class="stage"><main class="pg">
+  <nav class="cats"><a aria-current="true">This week</a><a>All</a><a>Mine</a><a>Undated</a>
+    <span class="dots"><button class="on"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="13" cy="8" r="1.5" fill="currentColor"/></svg></button>
+    <span class="setmenu"><span class="col"><span class="lab">Group by</span><button>Owner</button><button class="on nw">Topic</button><button>Status</button><button>Due date</button><button>None</button></span>
+    <span class="col"><span class="lab">Dates as</span><button class="on">Weeks</button><button>Exact dates</button></span></span></span></nav>
+  <div class="gap"></div>
+</main></div>
+<div class="say"><h3>What changes</h3><ul>
+<li><b>Topic</b> is one more choice under the same three dots, second after Owner. The highlighted line is the only new one.</li>
+<li>Owner stays the default when the page opens. Your choice is remembered, as now.</li>
+</ul></div>
+</div>
+
+<!-- 3. Add line + rows grouped by owner -->
+<p class="cap">3 &middot; Adding an action, and rows when grouped by Owner</p>
+<div class="fr">
+<div class="stage"><main class="pg">
+  <div class="list">
+    <div class="grp">Noran Essam <span class="cnt">2</span></div>
+    <div class="row"><span class="tick"></span><div class="t">Collect units' revenue assumptions for 2027<span class="tpc">Budget</span></div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Cascade messages for the B2C company<span class="tpc">Strategy communication</span></div><span class="when"><span class="wk">W4 Oct</span></span><span class="who">Noran</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="grp">Omar <span class="cnt">1</span></div>
+    <div class="row"><span class="tick"></span><div class="t">Book the room for the Q3 review</div><span class="when"><span class="wk">This week</span></span><span class="who">Omar</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="addrow"><span class="plus">+</span>
+      <div class="tn"><span class="typed">Confirm the payroll forecast with HR<i></i></span>
+        <span class="tpc pick on">Bud ▾
+          <span class="tpick" role="listbox"><span class="lab">Topic</span>
+            <button class="hit">Budget <small>3 open</small></button>
+            <span class="wf"><button class="mk">+ New topic "Bud"</button><button>No topic</button></span>
+          </span></span></div>
+      <span class="when pick"><span class="wk">This week</span></span><span class="who pick">Islam</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+  <div class="addhint">Enter adds it under you, due this week &middot; the topic, week, owner and note appear on the line once you type</div>
+  <div class="gap" style="height:40px"></div>
+</main></div>
+<div class="say"><h3>What changes</h3><ul>
+<li>On the add line a <b>Topic</b> tag appears with the week and the owner, once you start typing. You type a few letters and the list narrows; the last topic you used is offered first.</li>
+<li>If nothing matches, <b>+ New topic "…"</b> creates it there and then.</li>
+<li>On a row, the topic is a quiet tag after the action's name. Pressing it opens the same list to move the action to another topic.</li>
+<li>No tag means no topic. Nothing is required.</li>
+</ul></div>
+</div>
+
+<!-- 4. Topic menu, closed topic -->
+<p class="cap">4 &middot; A topic's own menu, and a closed topic</p>
+<div class="fr">
+<div class="stage"><main class="pg">
+  <div class="list">
+    <div class="grp">Budget <span class="cnt">3 open &middot; <span class="late">1 late</span></span>
+      <button class="gdots on" aria-label="Topic options"><svg viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></button>
+      <span class="gmenu"><button>Rename</button><button>Close topic<small>Its actions keep it; it leaves the list of choices</small></button><button class="dz">Delete<small>Only when no action uses it</small></button></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="row"><span class="tick"></span><div class="t">Draft the budget calendar with Finance</div><span class="when"><span class="wk">This week</span></span><span class="who">Islam</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="grp">Annual plan 2026 <span class="closedtag">Closed</span> <span class="cnt">1 open</span></div>
+    <div class="row"><span class="tick"></span><div class="t">File the signed plan with the board secretary</div><span class="when late">Late 3 w</span><span class="who">Omar</span><span class="st">Not started</span><span class="more"><svg viewBox="0 0 16 16"><path d="M4 6.5 8 10.5 12 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+</main></div>
+<div class="say"><h3>What changes</h3><ul>
+<li><b>Rename</b> changes the name everywhere at once.</li>
+<li><b>Close topic</b> when the theme is over. It stops being offered on the add line, but its actions keep it.</li>
+<li>A closed topic still shows, marked <b>Closed</b>, while it has open actions, so nothing gets lost. Once they are all done it disappears from the grouping.</li>
+<li><b>Delete</b> only works on a topic nobody uses; otherwise you close it.</li>
+</ul></div>
+</div>
+</div>

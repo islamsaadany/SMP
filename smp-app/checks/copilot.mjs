@@ -1,7 +1,7 @@
 /* ── THE STRATEGY COPILOT, STAGES 1 AND 2 (spec 064) ─────────────────────────────
    The shelf with no AI yet, checked against a real Postgres:
 
-     · §1 the pure rules — the five sections, the shape of a place word, who
+     · §1 the pure rules — the seven sections, the shape of a place word, who
        may delete a chat (both ends, §94.2), and the stamp's own rule;
      · §2 every statement run as `smp_app` with the tenant set — a chat keeps
        what is typed and answers with the product's line, versions only go
@@ -19,6 +19,9 @@
        platform's line, the Word file's words, the PDF as itself; then the
        answer kept, assumptions recorded once and sent back, the paste offer,
        a failure and no key each saying so and keeping what was typed;
+     · §7 (§490) the SWOT chat and the sources shelf — who may delete a
+       source at both ends, a saved state the page cannot claim, an analysis
+       refused until the to-do list is done and a save until there is a draft;
      · §4 the catalogue — every table RLS-forced with the policy IDENTICAL to
        `tracker_actions`', and none on PLATFORM_TABLES.
 
@@ -41,10 +44,16 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES } from "../lib/copilot-files.ts";
 import { isPasted, shapeAnswer, corpusOf, askCopilot } from "../lib/copilot-ask.ts";
 import { guidanceFor } from "../lib/copilot-guidance.ts";
-import { methodFor } from "../lib/copilot-settings.ts";
+import { mayDeleteSource } from "../lib/copilot-sources.ts";
+import { newSwot, sanitizeSwot, todoOf, doneCount, QUESTIONS as SWQ } from "../lib/copilot-swot.ts";
+import { methodFor, templateFile } from "../lib/copilot-settings.ts";
+import { copilotSettingsAction } from "../lib/copilot-settings-api.ts";
+import { resultOf as cpResult, MARKET as CP_M, INTERNAL as CP_I } from "../lib/copilot-compete.ts";
+import { periodQuarters as exQs, periodWords as exWords, validPeriod as exValid, periodChoices as exChoices, withPeriod as exWith, cleanItem as exItem, newExec, todoOf as exTodo, finishBlocker as exBlock } from "../lib/copilot-execution.ts";
+import { scoreOf as dvScore, finishBlocker as dvBlock, newDirs, modelCaps as dvCaps, modelOptions as dvOpts, todoOf as dvTodo } from "../lib/copilot-directions.ts";
 import { DEFAULT_PARTS } from "../lib/copilot-defaults.generated.ts";
 import { doorPool } from "../lib/auth.ts";
-import { moduleMenu } from "../lib/modules.ts";
+import { moduleMenu, moduleRows } from "../lib/modules.ts";
 import { decideOpen } from "../lib/access.ts";
 
 /* The key decides whether the model is asked at all; this check sets it per
@@ -62,7 +71,7 @@ const probe = async (what, fn) => { try { return await fn(); } catch (e) { check
 
 /* ══ §1 · the rules ══════════════════════════════════════════════════ */
 section("§1 · the sections, the place word, and who may delete");
-check("five sections, in the record's order", SECTIONS.join(",") === "foundation,analysis,directions,execution,advisory");
+check("seven sections, in the record's order (§493: How we compete after the analysis, Capabilities before Execution)", SECTIONS.join(",") === "foundation,analysis,compete,directions,capabilities,execution,advisory");
 check("a near miss is not a section", !isSection("Foundation") && !isSection("plan") && isSection("advisory"));
 check("a place is the product's own word — group, a unit, fn:, co:, cap:",
   ["group", "mobile", "fn:finance", "co:distribution", "cap:cap6"].every(isPlace));
@@ -140,6 +149,56 @@ check("each section's guidance carries the house rules; the roads only where the
   /Copilot settings › Templates \(Porter's Five Forces/.test(guidanceFor("analysis", "", ["Porter's Five Forces"])) &&
   /FOREFRONT'S METHOD FOR THIS SECTION[\s\S]*Rule one/.test(guidanceFor("analysis", "## SWOT\n\nRule one", [])) &&
   !/WAYS TO START/.test(guidanceFor("directions")));
+/* §493: How we compete — the one scoring function (§94.8). */
+{
+  const all = (fs, sc) => Object.fromEntries(fs.map((f) => [f.id, sc]));
+  const r = cpResult("market", all(CP_M, { btc: 2, bts: 1, bp: 0 }));
+  check("§493 a side totals out of 20 and reads as a per-cent", r.complete && r.total.btc === 20 && r.pct.btc === 100 && r.pct.bts === 50 && r.pct.bp === 0, JSON.stringify(r));
+  check("...a gap over 25 points is Clear", r.leader === "btc" && r.second === "bts" && r.gap === 50 && r.clarity === "clear");
+  const tie = cpResult("market", all(CP_M, { btc: 1, bts: 1, bp: 1 }));
+  check("...a tie breaks btc, then bts, then bp, and reads Unclear", tie.leader === "btc" && tie.second === "bts" && tie.clarity === "unclear", JSON.stringify(tie));
+  const tie2 = cpResult("market", all(CP_M, { btc: 0, bts: 2, bp: 2 }));
+  check("...bts before bp when they tie at the top", tie2.leader === "bts" && tie2.second === "bp", tie2.leader + "," + tie2.second);
+  const part = cpResult("internal", { operations: { btc: 2, bts: 0, bp: 0 } });
+  check("...one factor scored is not complete", part.complete === false);
+  const lean = Object.fromEntries(CP_I.map((f, k) => [f.id, k < 2 ? { btc: 2, bts: 0, bp: 0 } : { btc: 1, bts: 1, bp: 0 }]));
+  const lr = cpResult("internal", lean);
+  check("...a 20-point gap is Leaning", lr.gap === 20 && lr.clarity === "leaning", JSON.stringify(lr.pct));
+}
+
+/* §494: Directions — the one score, the blockers, the model's rows cut to shape. */
+{
+  check("§494 a Direction's score is Urgency × Importance × Ease, out of 64", dvScore({ urgency: 4, importance: 4, ease: 3 }) === 48 && dvScore({ urgency: 1, importance: 2, ease: 2 }) === 4);
+  check("...a row missing a score has no score, never a nought (§35)", dvScore({ urgency: 4, importance: 0, ease: 3 }) === null);
+  const d = newDirs("directions", true, 0);
+  check("...nothing chosen blocks the save", /Tick the Directions/.test(dvBlock(d)));
+  check("...Directions chosen with Capabilities owed still block", /Keep at least one Capability/.test(dvBlock({ ...d, chose: true, options: [{ title: "A", urgency: 1, importance: 1, ease: 1, ownedBy: "", go: true, mark: "", planId: "" }] })));
+  check("...a plan holding Directions asks plan-or-fresh first; an empty one starts fresh", newDirs("directions", false, 4).start === "" && newDirs("directions", false, 0).start === "fresh");
+  check("...the to-do has Choose Capabilities only when capabilities are chosen here", dvTodo(newDirs("directions", true, 0)).some((t) => t.key === "caps") && !dvTodo(newDirs("directions", false, 0)).some((t) => t.key === "caps"));
+  const fns = [{ key: "commercial", name: "Commercial" }];
+  const o = dvOpts([{ title: "Win families", urgency: 9, importance: 3, ease: 3, ownedBy: "nobody" }, { title: "Mine", urgency: 3, importance: 3, ease: 3, ownedBy: "commercial" }], fns, ["mine"]);
+  check("...a score out of range is dropped, an owner not on the list is dropped, the client's own row is marked theirs",
+    o[0].urgency === 0 && o[0].ownedBy === "" && o[0].mark === "new" && o[1].mark === "yours" && o[1].ownedBy === "commercial", JSON.stringify(o));
+  const c = dvCaps([{ title: "Supply chain", kind: "gap", serves: ["win families", "Made up"], ownedBy: "commercial" }, { title: "X", kind: "weird", serves: [], ownedBy: "" }], fns, ["Win families"], [], true);
+  check("...a Capability serves only Directions on the table, spelt as they are, and a kind not on the list is none",
+    c[0].serves.join() === "Win families" && c[0].kind === "gap" && c[1].kind === "" && c[0].keep === true, JSON.stringify(c));
+}
+/* §495: Execution — the period, its quarters, and what blocks the save. */
+{
+  check("§495 a period's quarters are the ones its months touch, and no period means all four", exQs({ y: 2026, m1: 7, m2: 12 }).join() === "3,4" && exQs({ y: 2026, m1: 2, m2: 4 }).join() === "1,2" && exQs(null).join() === "1,2,3,4");
+  check("...said as months and quarters, the full year as Full year", exWords({ y: 2026, m1: 7, m2: 12 }) === "Jul\u2013Dec 2026 (Q3\u2013Q4)" && exWords({ y: 2027, m1: 1, m2: 12 }) === "Full year 2027 (Q1\u2013Q4)", exWords({ y: 2026, m1: 7, m2: 12 }));
+  check("...a period is months in ONE year, first before last", exValid({ y: 2026, m1: 9, m2: 3 }) === null && exValid({ y: 2026, m1: 0, m2: 5 }) === null && exValid({ y: 2026, m1: 3, m2: 9 })?.m2 === 9);
+  const ch = exChoices(new Date(2026, 9, 6));
+  check("...in October the ready answers are next year whole, and Oct–Dec", ch.full.y === 2027 && ch.full.m1 === 1 && ch.rest.y === 2026 && ch.rest.m1 === 10 && ch.rest.m2 === 12, JSON.stringify(ch));
+  const it = exItem({ title: "Win families", planId: "mobile-P1", measures: [{ name: "Share", target: "30%", compile: "Bogus" }], tactics: [{ name: "Launch", owner: "Commercial", quarters: [1, 3, 4, 9] }] }, [3, 4]);
+  check("...a tactic keeps only quarters inside the period, and a compile rule not on the list is none", it.tactics[0].quarters.join() === "3,4" && it.measures[0].compile === "", JSON.stringify(it));
+  const s0 = newExec([exItem({ title: "Win families", planId: "mobile-P1", tactics: [{ name: "T", quarters: [1, 2, 3] }] }, [1, 2, 3, 4])]);
+  check("...nothing is saved before the period is said", /how long the plan is/.test(exBlock(s0)));
+  const s1 = exWith(s0, { y: 2026, m1: 7, m2: 12 });
+  check("...setting a shorter period takes every tactic's quarters back inside it", s1.items[0].tactics[0].quarters.join() === "3", JSON.stringify(s1.items[0].tactics));
+  check("...an item with no measure still blocks, by name", /Win families/.test(exBlock(s1)));
+  check("...the to-do is the period, one row per item, then Save", exTodo(s1).map((t) => t.key).join() === "period,item:mobile-P1,save" && exTodo(s1)[0].state === "done");
+}
 /* §460: the conversation fixes, A B C, each asked of the rule itself. */
 {
   const M = "## Situational Analysis - SWOT\n\nPhase one: Strengths from the Internal analysis.";
@@ -374,54 +433,66 @@ try {
   check("with the row removed the team is back at edit (the shipped answer)", back.st === 200 && back.j.mayEdit === true);
 
   /* ══ §5 · the AI, read off the wire ═════════════════════════════ */
-  /* ══ §3c · the Copilot's own settings (§456) ═══════════════════════
-     The same for every client; read by the office, changed by a Forefront
-     super user only (the account's admin flag, never the client's seat). */
-  section("§3c · Copilot settings: the office reads, only a Forefront super user changes");
+  /* ══ §3c · the Copilot's own settings, on the console (§456, §501) ══
+     The same for every client; read by every consultant, changed by a
+     Forefront super user only (the account's admin flag, never a client's
+     seat). Since §501 they are reached from Forefront's console rather than
+     from inside a client, so this drives the console's own endpoint
+     (lib/copilot-settings-api.ts) — the same function the route calls. */
+  section("§3c · Copilot settings: every consultant reads, only a Forefront super user changes");
   const KEY = "part2";
+  const CONSULT = { id: null, email: "c@ff", name: "C", kind: "office", isAdmin: false, mustChange: false };
+  const ADMIN = { ...CONSULT, isAdmin: true };
+  const CLIENTP = { ...CONSULT, kind: "client" };
+  const act = (me, body) => copilotSettingsAction(doorPool(), me, body, null);
   await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]);
   try {
-    const ins = await page("GET", "settings", null, NORAN, "?section=analysis");
-    check("the AI instructions page draws the analysis parts for the office, read only",
-      ins.st === 200 && /SWOT/.test(ins.text) && /Same for all clients/.test(ins.text) && /Read only/.test(ins.text) && !/edit=part/.test(ins.text), ins.st + "");
-    const insAdm = await page("GET", "settings", null, NORAN, "?section=analysis", true);
-    check("...and offers Edit to a Forefront super user, and only to one", /edit=part2/.test(insAdm.text) && !/Read only/.test(insAdm.text));
-    const fd = (o) => { const f = new FormData(); for (const [k, v] of Object.entries(o)) f.append(k, v); return f; };
-    const nope = await page("POST", "settings", fd({ act: "save", key: KEY, text: "Hijacked" }), NORAN, "?section=analysis");
+    const rd = await act(CONSULT, { action: "read" });
+    check("a consultant reads every part and all five templates, told they may not change them",
+      rd.code === 200 && rd.body.canEdit === false && (rd.body.parts || []).some((p) => p.section === "analysis" && /SWOT/.test(p.text)) &&
+      (rd.body.templates || []).length === 5 && (rd.body.sections || []).length === 5, JSON.stringify({ c: rd.code, e: rd.body.canEdit }));
+    const rdA = await act(ADMIN, { action: "read" });
+    check("...and a Forefront super user is told they may", rdA.code === 200 && rdA.body.canEdit === true);
+    const nope = await act(CONSULT, { action: "save", key: KEY, text: "Hijacked" });
     const rowNope = await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY]);
-    check("a POST from somebody who is not a Forefront super user changes nothing and says why",
-      nope.st === 400 && /Only a Forefront super user/.test(nope.text) && rowNope.rowCount === 0, nope.st + " " + rowNope.rowCount);
-    const yes = await page("POST", "settings", fd({ act: "save", key: KEY, text: "## General\n\nOur own SWOT rule." }), NORAN, "?section=analysis", true);
+    check("a save from somebody who is not a Forefront super user changes nothing and says why",
+      nope.code === 403 && /Only a Forefront super user/.test(nope.body.error) && rowNope.rowCount === 0, nope.code + " " + rowNope.rowCount);
+    const yes = await act(ADMIN, { action: "save", key: KEY, text: "## General\n\nOur own SWOT rule." });
     const rowYes = await doorPool().query("SELECT text FROM copilot_assets WHERE key = $1", [KEY]);
-    check("an admin's save is stored and answers 303 to the page, so a refresh does not resend it",
-      yes.st === 303 && /done=saved/.test(yes.to) && rowYes.rowCount === 1 && /Our own SWOT rule/.test(rowYes.rows[0].text), yes.st + " " + yes.to);
+    check("an admin's save is stored and answers with the whole state again",
+      yes.code === 200 && yes.body.changed === true && rowYes.rowCount === 1 && /Our own SWOT rule/.test(rowYes.rows[0].text) &&
+      (yes.body.parts || []).some((p) => p.key === KEY && p.edited), yes.code + "");
     check("...and the next question is told it (methodFor reads the stored row)", /Our own SWOT rule/.test(await methodFor(doorPool(), "analysis")));
-    const empty = await page("POST", "settings", fd({ act: "save", key: KEY, text: "   " }), NORAN, "?section=analysis", true);
-    check("an empty part is refused in words, the stored text kept", empty.st === 400 && /cannot be empty/.test(empty.text) &&
+    const empty = await act(ADMIN, { action: "save", key: KEY, text: "   " });
+    check("an empty part is refused in words, the stored text kept", empty.code === 400 && /cannot be empty/.test(empty.body.error) &&
       (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 1);
+    const reset = await act(ADMIN, { action: "reset", key: KEY });
+    check("putting the shipped text back DELETES the row — the default is an absence (§50.6)",
+      reset.code === 200 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 0, reset.code + "");
     const shipped = DEFAULT_PARTS.find((x) => x.key === KEY).text;
-    const back = await page("POST", "settings", fd({ act: "save", key: KEY, text: shipped }), NORAN, "?section=analysis", true);
-    check("saving the shipped text DELETES the row — the default is an absence (§50.6)",
-      back.st === 303 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = $1", [KEY])).rowCount === 0, back.st + "");
-    const tp = await page("GET", "settings/templates", null, NORAN);
-    check("the templates page lists all five, each downloadable, read only for the office",
-      tp.st === 200 && (tp.text.match(/settings\/templates\/t[1-5]"/g) || []).length === 5 && /Read only/.test(tp.text), tp.st + "");
-    const dl = await page("GET", "settings/templates/t3", null, NORAN);
-    check("a template downloads as the shipped Excel file", dl.st === 200 && dl.bytes && dl.bytes[0] === 0x50 && dl.bytes[1] === 0x4b && /Porters/.test(decodeURIComponent(dl.disp)), dl.st + " " + dl.disp);
-    const notX = fd({ act: "replace", key: "t3" }); notX.append("file", new Blob([Buffer.from("not excel")]), "porter.xlsx");
-    const rep = await page("POST", "settings/templates", notX, NORAN, "", true);
-    check("a file that only CALLS itself .xlsx is refused by its shape", rep.st === 400 && /not an Excel file/.test(rep.text) &&
-      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 0, rep.st + "");
-    const realX = fd({ act: "replace", key: "t3" }); realX.append("file", new Blob([XLSX]), "Porter v2.xlsx");
-    const rep2 = await page("POST", "settings/templates", realX, NORAN, "", true);
-    const dl2 = await page("GET", "settings/templates/t3", null, NORAN);
-    check("an admin's replacement is what every client downloads next", rep2.st === 303 && dl2.bytes && dl2.bytes.equals(XLSX) && /Porter v2/.test(decodeURIComponent(dl2.disp)), rep2.st + " " + dl2.disp);
-    const repNo = await page("POST", "settings/templates", fd({ act: "reset", key: "t3" }), NORAN);
-    check("...and somebody else cannot put it back either", repNo.st === 400 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 1);
-    const hendSet = await page("GET", "settings", null, HEND);
-    check("a client's own person is refused the settings too", hendSet.st === 403, hendSet.st + "");
-    check("the switcher offers the Copilot to the office, and the door refuses a client's person",
-      moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && decideOpen("none", "copilot", {}, null) === false);
+    check("...and the part reads the shipped text again", (reset.body.parts || []).some((p) => p.key === KEY && p.text === shipped && !p.edited));
+    const before = await templateFile(doorPool(), "t3");
+    check("a template is the shipped Excel file until replaced", before && before.bytes[0] === 0x50 && before.bytes[1] === 0x4b && /Porters/.test(before.name), before && before.name);
+    const notX = await act(ADMIN, { action: "replace", key: "t3", name: "porter.xlsx", data: Buffer.from("not excel").toString("base64") });
+    check("a file that only CALLS itself .xlsx is refused by its shape", notX.code === 400 && /not an Excel file/.test(notX.body.error) &&
+      (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 0, notX.code + "");
+    const rep2 = await act(ADMIN, { action: "replace", key: "t3", name: "Porter v2.xlsx", data: XLSX.toString("base64") });
+    const after = await templateFile(doorPool(), "t3");
+    check("an admin's replacement is what every client downloads next", rep2.code === 200 && after.bytes.equals(XLSX) && /Porter v2/.test(after.name) &&
+      (rep2.body.templates || []).some((t) => t.key === "t3" && t.edited), rep2.code + " " + after.name);
+    const repNo = await act(CONSULT, { action: "reset", key: "t3" });
+    check("...and somebody else cannot put it back either", repNo.code === 403 && (await doorPool().query("SELECT 1 FROM copilot_assets WHERE key = 't3'")).rowCount === 1);
+    const cl = await act(CLIENTP, { action: "read" });
+    check("a client's own login is refused even the reading, in words", cl.code === 403 && /not something this account opens/.test(cl.body.error), cl.code + "");
+    const old = await page("GET", "settings", null, NORAN, "?section=analysis");
+    check("an old settings address inside a client sends you to the console's Copilot tab",
+      old.st === 302 && /\/platform#copilot$/.test(old.to || ""), old.st + " " + old.to);
+    const oldT = await page("GET", "settings/templates/t3", null, NORAN);
+    check("...and so does an old template link", oldT.st === 302 && /\/platform#copilot$/.test(oldT.to || ""), oldT.st + "");
+    check("the Copilot is not offered in the client's module menu — it lives inside Strategy (§501)",
+      !moduleMenu(["strategy", "copilot"]).some((m) => m.key === "copilot") && moduleMenu(["strategy", "copilot"]).some((m) => m.key === "strategy"));
+    check("...nor as a row on the client's console card", !moduleRows(["strategy", "copilot"], {}).some((r) => r.key === "copilot"));
+    check("the door still refuses a client's person the Copilot", decideOpen("none", "copilot", {}, null) === false);
   } finally {
     await doorPool().query("DELETE FROM copilot_assets WHERE key = ANY($1)", [[KEY, "t3"]]).catch(() => {});
   }
@@ -779,6 +850,263 @@ try {
     NEXT = null;
     }
 
+    /* ══ §8 · the How-we-compete chat (§493) ═══════════════════════════
+       Scored, chosen, valued, refined and saved through the stand-in; every
+       gate asked of the STORED chat (§42), both ends (§94.2). */
+    {
+    section("§8 · the How-we-compete chat: scored, chosen, valued, refined, saved");
+    const mk = (fs, f) => Object.fromEntries(fs.map((x, k) => [x.id, f(k)]));
+    const SC = { market: mk(CP_M, () => ({ btc: 2, bts: 1, bp: 0 })), internal: mk(CP_I, () => ({ btc: 1, bts: 2, bp: 0 })) };
+    const VALS = [1, 2, 3, 4, 5].map((n) => ({ title: "Value " + n, how: ["How " + n], measure: ["Measure " + n] }));
+    const hn = await call("POST", "api", { act: "newCompete", place: "mobile" }, HEND);
+    check("a client's own person cannot start one", hn.st === 403, hn.st + "");
+    const nc = await call("POST", "api", { act: "newCompete", place: "mobile" }, NORAN);
+    check("the office starts a How we compete chat, on the score step, with the twenty factors",
+      nc.st === 200 && nc.j.chat?.section === "compete" && nc.j.compete?.phase === "score" && nc.j.competeFactors?.market.length === 10 && nc.j.competeFactors?.internal.length === 10 && nc.j.competeTodo.length === 5,
+      JSON.stringify(nc.j).slice(0, 200));
+    const cid = nc.j.chat?.id;
+    const early = await call("POST", "api", { act: "competeValues", id: cid, placeWord: "Mobile" }, NORAN);
+    check("values are refused before a discipline is chosen", early.st === 400 && /Choose the discipline/.test(early.j.why), JSON.stringify(early.j));
+    const noTab = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, NORAN);
+    check("saving is refused while there is no table — asked of the stored chat", noTab.st === 400 && /check the table/.test(noTab.j.why), JSON.stringify(noTab.j));
+    NEXT = { answer: { market: { [CP_M[0].id]: { btc: 2, bts: 1, bp: 0 } }, internal: SC.internal } };
+    const half = await call("POST", "api", { act: "competeScore", id: cid, placeWord: "Mobile" }, NORAN);
+    check("scores that come back incomplete are refused, never half-kept", half.st === 503, half.st + "");
+    NEXT = { answer: SC };
+    const sc = await call("POST", "api", { act: "competeScore", id: cid, placeWord: "Mobile", context: "SWOT: strong stores" }, NORAN);
+    check("scored through the model, the chat moves to choosing and recommends what the market rewards",
+      sc.st === 200 && sc.j.compete?.phase === "discipline" && sc.j.competeResult?.recommended === "btc" && sc.j.competeResult?.market.pct.btc === 100 &&
+      sc.j.competeResult?.internal.leader === "bts" && sc.j.competeResult?.aligned === false, JSON.stringify(sc.j.competeResult || sc.j).slice(0, 200));
+    check("...and the model was asked for every factor", /operations/.test(JSON.stringify(seen[seen.length - 1] || "")) && /switching_costs/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    let C = sc.j.compete;
+    const fake = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...(C||{}), phase: "saved", saved: { deliverableId: "x", n: 7, title: "fake" } } }, NORAN);
+    check("the page cannot say it is saved — `saved` is the product's", fake.st === 200 && fake.j.compete?.saved === null && fake.j.compete?.phase !== "saved", JSON.stringify(fake.j.compete && fake.j.compete?.saved));
+    const ahead = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...(C||{}), phase: "table" } }, NORAN);
+    check("the phase never runs ahead of the work", ahead.j.compete?.phase === "discipline", ahead.j.compete?.phase);
+    const ed = JSON.parse(JSON.stringify(C || {market:{}})); (ed.market = ed.market || {})[CP_M[1].id] = { btc: 0, bts: 2, bp: 2 }; ed.edited = ["market:" + CP_M[1].id + ":btc"];
+    const es = await call("POST", "api", { act: "competeSave", id: cid, compete: ed }, NORAN);
+    check("a changed score is kept, marked edited, and the result follows", es.j.compete?.edited.length === 1 && es.j.competeResult?.market.pct.btc === 90, JSON.stringify(es.j.competeResult && es.j.competeResult?.market.pct));
+    NEXT = { answer: { values: VALS } };
+    const vv = await call("POST", "api", { act: "competeValues", id: cid, placeWord: "Mobile", compete: { ...es.j.compete, chosen: "bts", phase: "values" } }, NORAN);
+    check("choosing a discipline and asking gives five values to tick", vv.st === 200 && vv.j.compete?.chosen === "bts" && vv.j.compete?.suggested.length === 5 && vv.j.compete?.phase === "values",
+      JSON.stringify(vv.j.compete || vv.j).slice(0, 200));
+    const tb = await call("POST", "api", { act: "competeSave", id: cid, compete: { ...vv.j.compete, picked: [0, 2, 9], table: { discipline: "bts", values: [VALS[0], VALS[2]] }, phase: "table" } }, NORAN);
+    check("ticking two makes the table, and a tick past the list is dropped", tb.j.compete?.picked.join() === "0,2" && tb.j.compete?.table.values.length === 2 && tb.j.compete?.phase === "table", JSON.stringify(tb.j.compete?.picked));
+    const noAsk = await call("POST", "api", { act: "competeRefine", id: cid, placeWord: "Mobile" }, NORAN);
+    check("a refine with nothing asked is refused in words", noAsk.st === 400 && /Say what to change/.test(noAsk.j.why));
+    NEXT = { answer: { reply: "Sharper titles.", values: [{ ...VALS[0], title: "Hassle-free" }, VALS[2]], alternatives: ["Easy to buy", "One visit"] } };
+    const rf = await call("POST", "api", { act: "competeRefine", id: cid, placeWord: "Mobile", ask: "Make the first title warmer" }, NORAN);
+    check("refining changes the table in place and offers alternatives", rf.st === 200 && rf.j.compete?.table.values[0].title === "Hassle-free" && rf.j.compete?.alts.length === 2 && rf.j.compete?.reply === "Sharper titles.",
+      JSON.stringify(rf.j.compete || rf.j).slice(0, 200));
+    const hf = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, HEND);
+    check("a client's own person cannot save it", hf.st === 403);
+    const fn = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, NORAN);
+    check("saving makes version 1 of How we compete — Mobile", fn.st === 200 && fn.j.saved && fn.j.saved.n === 1 && fn.j.saved.title === "How we compete \u2014 Mobile" && fn.j.compete?.phase === "saved",
+      JSON.stringify(fn.j).slice(0, 200));
+    const vrow = fn.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fn.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the table and the scores", vrow.length === 1 && vrow[0].body.compete.discipline === "bts" && vrow[0].body.compete.values.length === 2 && !!vrow[0].body.scores.market,
+      JSON.stringify(vrow).slice(0, 200));
+    const after = await call("POST", "api", { act: "competeSave", id: cid, compete: tb.j.compete }, NORAN);
+    check("a saved chat refuses further changes", after.st === 400 && /Start a new How we compete chat/.test(after.j.why));
+    const nc2 = await call("POST", "api", { act: "newCompete", place: "mobile" }, OMAR);
+    NEXT = { answer: SC }; await call("POST", "api", { act: "competeScore", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
+    const g2 = await call("GET", "chat", null, OMAR, "?id=" + nc2.j.chat?.id);
+    await call("POST", "api", { act: "competeSave", id: nc2.j.chat?.id, compete: { ...g2.j.compete, chosen: "btc", table: { discipline: "btc", values: [VALS[1]] }, phase: "table" } }, OMAR);
+    const fn2 = await call("POST", "api", { act: "competeFinish", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
+    check("a second chat saves as version 2 of the SAME deliverable", fn2.j.saved && fn2.j.saved.n === 2 && fn.j.saved && fn2.j.saved.deliverableId === fn.j.saved.deliverableId, JSON.stringify(fn2.j.saved));
+    const notCp = await call("POST", "api", { act: "competeSave", id: ch.id, compete: {} }, NORAN);
+    check("a chat that is not How we compete is refused", notCp.st === 400 && /not a How we compete chat/.test(notCp.j.why));
+    NEXT = null;
+    }
+
+    /* ══ §9 · the Directions and Capabilities chats (§494) ════════════ */
+    {
+    section("§9 · the Directions chat: plan or fresh, scored, chosen, capabilities, saved");
+    const FNS = [{ key: "commercial", name: "Commercial" }, { key: "it", name: "IT" }];
+    const hn = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "directions", withCaps: true, hadPlan: 2, title: "Directions 2026" }, HEND);
+    check("a client's own person cannot start one", hn.st === 403, hn.st + "");
+    const nd = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "directions", withCaps: true, hadPlan: 2, title: "Directions 2026" }, NORAN);
+    check("the office starts a Directions chat that asks plan-or-fresh first", nd.st === 200 && nd.j.chat?.section === "directions" && nd.j.dirs?.start === "" && nd.j.dirs?.withCaps === true && nd.j.dirsTodo?.length === 4,
+      String(JSON.stringify(nd.j)).slice(0, 200));
+    const did = nd.j.chat?.id;
+    const tooSoon = await call("POST", "api", { act: "dirSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("nothing is suggested before plan-or-fresh is answered", tooSoon.st === 400 && /Start from the plan/.test(tooSoon.j.why), JSON.stringify(tooSoon.j));
+    const st = await call("POST", "api", { act: "dirStart", id: did, start: "plan", existing: [{ id: "mobile-P1", title: "Grow accessories" }, { id: "mobile-P2", title: "Win families" }] }, NORAN);
+    check("starting from the plan puts its Directions on the table, marked and keyed to their pillars", st.st === 200 && st.j.dirs?.options.length === 2 && st.j.dirs.options.every((o) => o.mark === "plan" && o.planId) && st.j.dirs?.start === "plan",
+      String(JSON.stringify(st.j.dirs)).slice(0, 200));
+    const again = await call("POST", "api", { act: "dirStart", id: did, start: "fresh" }, NORAN);
+    check("...and it cannot start twice", again.st === 400 && /already started/.test(again.j.why));
+    NEXT = { answer: { reply: "From the SWOT.", options: [
+      { title: "Win families", urgency: 4, importance: 4, ease: 3, ownedBy: "commercial" }, { title: "Grow accessories", urgency: 2, importance: 2, ease: 2, ownedBy: "" },
+      { title: "Upper Egypt", urgency: 3, importance: 4, ease: 3, ownedBy: "nobody" }, { title: "Own label", urgency: 3, importance: 3, ease: 3, ownedBy: "it" },
+      { title: "Delivery", urgency: 2, importance: 3, ease: 2, ownedBy: "" }, { title: "B2B", urgency: 1, importance: 2, ease: 2, ownedBy: "" } ] } };
+    const sg = await call("POST", "api", { act: "dirSuggest", id: did, placeWord: "Mobile", fns: FNS, context: "SWOT: strong stores" }, NORAN);
+    const so = sg.j.dirs?.options || [];
+    check("suggested and scored: the plan's rows keep their key and mark, new rows follow, the four best are ticked",
+      sg.st === 200 && so.length === 6 && so[0].planId === "mobile-P1" && so[0].urgency === 2 && so[1].mark === "plan" && so[1].ownedBy === "commercial" &&
+      so.filter((o) => o.go).length === 4 && !so.find((o) => o.title === "B2B").go && sg.j.dirsScores?.[1] === 48,
+      String(JSON.stringify(so)).slice(0, 300));
+    check("...an owner the model named that is not a function is dropped", so.find((o) => o.title === "Upper Egypt")?.ownedBy === "");
+    check("...and the model was told the plan's own rows and the functions", /THE PLAN'S EXISTING DIRECTIONS[\s\S]*Grow accessories/.test(JSON.stringify(seen[seen.length - 1] || "")) && /commercial: Commercial/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    NEXT = { answer: { reply: "Added yours.", options: [{ title: "Small stores", urgency: 3, importance: 4, ease: 3, ownedBy: "commercial" }, { title: "Win families", urgency: 1, importance: 1, ease: 1, ownedBy: "" }] } };
+    const mo = await call("POST", "api", { act: "dirMore", id: did, placeWord: "Mobile", fns: FNS, own: ["Small stores"] }, NORAN);
+    check("adding your own: scored, marked yours, and a row already on the table is not added twice",
+      mo.st === 200 && mo.j.dirs?.options.length === 7 && mo.j.dirs.options[6].mark === "yours" && mo.j.dirs.options.filter((o) => o.title === "Win families").length === 1,
+      JSON.stringify(mo.j.dirs?.options.map((o) => o.title + ":" + o.mark)));
+    const capEarly = await call("POST", "api", { act: "capSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("Capabilities are refused before the Directions are chosen", capEarly.st === 400 && /Choose the Directions/.test(capEarly.j.why));
+    const finEarly = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("saving is refused while nothing is chosen — asked of the stored chat", finEarly.st === 400 && /Tick the Directions/.test(finEarly.j.why), JSON.stringify(finEarly.j));
+    const fake = await call("POST", "api", { act: "dirSave", id: did, dirs: { saved: { deliverableId: "x", n: 9, title: "fake" } } }, NORAN);
+    check("the page cannot say it is saved — `saved` is the product's", fake.st === 200 && fake.j.dirs?.saved === null);
+    const none = await call("POST", "api", { act: "dirSave", id: did, dirs: { options: mo.j.dirs.options.map((o) => ({ ...o, go: false })), chose: true } }, NORAN);
+    check("'chosen' with nothing ticked does not stick", none.j.dirs?.chose === false);
+    const ch2 = await call("POST", "api", { act: "dirSave", id: did, dirs: { options: mo.j.dirs.options, chose: true } }, NORAN);
+    check("choosing the ticked ones moves the to-do on, and Capabilities are now owed", ch2.j.dirs?.chose === true && /Keep at least one Capability/.test(ch2.j.dirsBlocker), ch2.j.dirsBlocker);
+    const chosen = (ch2.j?.dirs?.options || []).filter((o) => o.go).map((o) => o.title);
+    NEXT = { answer: { reply: "To deliver them.", capabilities: [
+      { title: "Low-cost supply chain", kind: "gap", serves: [chosen[0], "Not a direction"], ownedBy: "commercial" },
+      { title: "Data-led pricing", kind: "transformation", serves: [chosen[1]], ownedBy: "it" } ] } };
+    const cs = await call("POST", "api", { act: "capSuggest", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("Capabilities suggested from the chosen Directions, kept, serving only Directions on the table",
+      cs.st === 200 && cs.j.dirs?.caps.length === 2 && cs.j.dirs.caps.every((x) => x.keep) && cs.j.dirs.caps[0].serves.join() === chosen[0] && cs.j.dirs.caps[0].kind === "gap" && cs.j.dirsBlocker === "",
+      String(JSON.stringify(cs.j.dirs?.caps)).slice(0, 300));
+    check("...and the model was asked with the chosen Directions", chosen.every((t) => JSON.stringify(seen[seen.length - 1] || "").includes(t)));
+    const hf = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, HEND);
+    check("a client's own person cannot save it", hf.st === 403);
+    const fin = await call("POST", "api", { act: "dirFinish", id: did, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("saving makes version 1 of Directions — Mobile", fin.st === 200 && fin.j.saved?.n === 1 && fin.j.saved?.title === "Directions \u2014 Mobile" && fin.j.dirsDone === 4, String(JSON.stringify(fin.j)).slice(0, 200));
+    const vrow = fin.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fin.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the chosen Directions and kept Capabilities, owners by name",
+      vrow.length === 1 && vrow[0].body.directions.length === chosen.length && vrow[0].body.capabilities.length === 2 && /Commercial/.test(vrow[0].body.text) && /48\/64/.test(vrow[0].body.text),
+      String(JSON.stringify(vrow)).slice(0, 300));
+    const after = await call("POST", "api", { act: "dirSave", id: did, dirs: { chose: false } }, NORAN);
+    check("a saved chat refuses further changes", after.st === 400 && /Start a new chat/.test(after.j.why));
+
+    section("§9b · the Capabilities chat, when capabilities are their own layer");
+    const nc = await call("POST", "api", { act: "newDirections", place: "mobile", mode: "capabilities", title: "Capabilities 2026" }, NORAN);
+    check("a Capabilities chat starts with nothing to choose first", nc.st === 200 && nc.j.chat?.section === "capabilities" && nc.j.dirs?.start === "fresh" && nc.j.dirs?.withCaps === false && nc.j.dirsTodo?.length === 3);
+    const cfin0 = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("...nothing kept, nothing saved", cfin0.st === 400 && /Keep at least one Capability/.test(cfin0.j.why));
+    NEXT = { answer: { reply: "From the saved Directions.", capabilities: [{ title: "One retail system", kind: "enabler", serves: ["Upper Egypt"], ownedBy: "it" }] } };
+    const cc = await call("POST", "api", { act: "capSuggest", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS, dirTitles: ["Upper Egypt"] }, NORAN);
+    check("...suggested from the saved Directions the page sends", cc.st === 200 && cc.j.dirs?.caps[0]?.serves.join() === "Upper Egypt" && cc.j.dirs.caps[0].kind === "enabler");
+    const cfin = await call("POST", "api", { act: "dirFinish", id: nc.j.chat?.id, placeWord: "Mobile", fns: FNS }, NORAN);
+    check("...and saves as Capabilities — Mobile", cfin.st === 200 && cfin.j.saved?.title === "Capabilities \u2014 Mobile");
+    const notDv = await call("POST", "api", { act: "dirSave", id: ch.id, dirs: {} }, NORAN);
+    check("a chat that is not Directions is refused", notDv.st === 400 && /not a Directions/.test(notDv.j.why));
+    NEXT = null;
+    section("§9c · the Execution chat: the period, one item at a time, saved");
+    const xh = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution 2026", items: [{ kind: "direction", planId: "mobile-P1", title: "Win families" }] }, HEND);
+    check("a client's own person cannot start one", xh.st === 403, xh.st + "");
+    const xn = await call("POST", "api", { act: "newExecution", place: "mobile", title: "Execution 2026",
+      items: [{ kind: "direction", planId: "mobile-P1", title: "Win families", ownedBy: "Commercial" }, { kind: "capability", planId: "cap:cap1", title: "Supply chain" }, { title: "" }] }, NORAN);
+    const xid = xn.j.chat?.id;
+    check("the office starts one: the plan's items, the period asked first, a to-do of period + items + save",
+      xn.st === 200 && xn.j.chat?.section === "execution" && xn.j.exec?.items.length === 2 && xn.j.exec?.period === null && xn.j.execTodo?.length === 4 && /how long the plan is/.test(xn.j.execBlocker),
+      String(JSON.stringify(xn.j)).slice(0, 200));
+    const xe = await call("POST", "api", { act: "execDraft", id: xid, placeWord: "Mobile" }, NORAN);
+    check("nothing is drafted before the period is said", xe.st === 400 && /how long the plan is/.test(xe.j.why), JSON.stringify(xe.j));
+    const xbad = await call("POST", "api", { act: "execPeriod", id: xid, period: { y: 2026, m1: 11, m2: 3 } }, NORAN);
+    check("a period that runs backwards is refused in words", xbad.st === 400 && /ONE year/.test(xbad.j.why));
+    const xp = await call("POST", "api", { act: "execPeriod", id: xid, period: { y: 2026, m1: 7, m2: 12 } }, NORAN);
+    check("picked months set the period, and only Q3 and Q4 are offered", xp.st === 200 && xp.j.exec?.period?.m1 === 7 && xp.j.execWords?.quarters.join() === "3,4", JSON.stringify(xp.j.execWords));
+    NEXT = { answer: { reply: "Drafted.", measures: [{ name: "Family share", target: "30%", compile: "Latest" }], tactics: [{ name: "Family bundles", owner: "Commercial", quarters: [1, 3, 4] }] } };
+    const xd = await call("POST", "api", { act: "execDraft", id: xid, placeWord: "Mobile", context: "SWOT: strong stores" }, NORAN);
+    const xi = xd.j.exec?.items[0];
+    check("the model drafts the item under the cursor; a quarter outside the period is dropped",
+      xd.st === 200 && xi?.measures.length === 1 && xi?.tactics[0]?.quarters.join() === "3,4" && xi?.drafted === true, String(JSON.stringify(xi)).slice(0, 200));
+    check("...and the model was told the period's quarters only", /Quarters a tactic may run in: Q3, Q4/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    const xf0 = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
+    check("saving is refused while an item has no measure — named, asked of the stored chat", xf0.st === 400 && /Supply chain/.test(xf0.j.why), JSON.stringify(xf0.j));
+    const items2 = xd.j.exec.items.map((x, k) => k === 1 ? { ...x, title: "Renamed", measures: [{ name: "Lead time", target: "5 days", compile: "Average" }], tactics: [{ name: "One warehouse", owner: "Supply", quarters: [2, 4] }] } : x);
+    const xs = await call("POST", "api", { act: "execSave", id: xid, exec: { items: items2, cursor: 1, saved: { deliverableId: "x", n: 9, title: "fake" } } }, NORAN);
+    check("the page writes what is under an item, never which items there are, and cannot say it is saved",
+      xs.st === 200 && xs.j.exec?.items[1].title === "Supply chain" && xs.j.exec?.items[1].tactics[0].quarters.join() === "4" && xs.j.exec?.saved === null && xs.j.execBlocker === "",
+      String(JSON.stringify(xs.j.exec)).slice(0, 300));
+    const xhf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, HEND);
+    check("a client's own person cannot save it", xhf.st === 403);
+    const xf = await call("POST", "api", { act: "execFinish", id: xid, placeWord: "Mobile" }, NORAN);
+    check("saving makes version 1 of Execution — Mobile", xf.st === 200 && xf.j.saved?.n === 1 && xf.j.saved?.title === "Execution \u2014 Mobile" && xf.j.execDone === 4, String(JSON.stringify(xf.j)).slice(0, 200));
+    const xv = xf.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [xf.j.saved.deliverableId]))).rows : [];
+    check("...the version holds the period and both items", xv.length === 1 && xv[0].body.period?.m1 === 7 && xv[0].body.items.length === 2 && /PLAN PERIOD: Jul\u2013Dec 2026/.test(xv[0].body.text), String(JSON.stringify(xv)).slice(0, 300));
+    const xafter = await call("POST", "api", { act: "execPeriod", id: xid, choice: "full" }, NORAN);
+    check("a saved chat refuses further changes", xafter.st === 400 && /Start a new chat/.test(xafter.j.why));
+    const notEx = await call("POST", "api", { act: "execSave", id: ch.id, exec: {} }, NORAN);
+    check("a chat that is not Execution is refused", notEx.st === 400 && /not an Execution/.test(notEx.j.why));
+    NEXT = null;
+    }
+
+    {
+    section("§9d · the Advisory chat: asked one at a time, counted, a brief with one recommendation, saved");
+    const ah = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, HEND);
+    check("a client's own person cannot start one", ah.st === 403, ah.st + "");
+    const an = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, NORAN);
+    const aid = an.j.chat?.id;
+    check("the office starts one: nothing asked, a to-do of ask + questions + brief + save, round 1 of 2",
+      an.st === 200 && an.j.chat?.section === "advisory" && an.j.advisory?.ask === "" && an.j.advisoryTodo?.length === 4 && an.j.advisoryCount?.round === 1 && an.j.advisoryCount?.rounds === 2 && an.j.advisoryCount?.of === 5,
+      String(JSON.stringify(an.j)).slice(0, 200));
+    const a0 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "" }, NORAN);
+    check("an empty first ask is refused in words", a0.st === 400 && /advice on/.test(a0.j.why), JSON.stringify(a0.j));
+    NEXT = { answer: { kind: "question", lead: "Good question.", question: "How many stores do you run today?", seen: ["Revenue 300M EGP"] } };
+    const a1 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "Should we open stores in Upper Egypt?", context: "PLAN: mobile", placeWord: "Mobile" }, NORAN);
+    check("the first ask is kept and ONE question comes back, counted 1 of 5",
+      a1.st === 200 && a1.j.advisory?.ask === "Should we open stores in Upper Egypt?" && a1.j.advisory?.turns.length === 1 && a1.j.advisoryCount?.asked === 1 && a1.j.advisory?.seen[0] === "Revenue 300M EGP",
+      String(JSON.stringify(a1.j.advisory)).slice(0, 200));
+    check("...and the model was given the platform's text and told how many it has asked", /PLAN: mobile/.test(JSON.stringify(seen[seen.length - 1] || "")) && /asked 0 of 5 questions in round 1/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    const b1 = seen.length;
+    const a1b = await call("POST", "api", { act: "advisoryTurn", id: aid }, NORAN);
+    check("a question still waiting is not asked again", a1b.st === 200 && seen.length === b1 && a1b.j.advisory?.turns.length === 1);
+    NEXT = { answer: { kind: "clash", lead: "Two sources disagree.", clash: { what: "Store count", platform: "42", file: "45" } } };
+    const a2 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "assume", context: "" }, NORAN);
+    check("'assume for me' answers the waiting question, and a clash comes back naming both figures",
+      a2.st === 200 && a2.j.advisory?.turns[0].how === "assumed" && a2.j.advisory?.turns[1].clash?.platform === "42" && a2.j.advisory?.turns[1].clash?.file === "45",
+      a2.st + " " + String(JSON.stringify(a2.j)).slice(0, 400));
+    NEXT = { answer: { kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "you", text: "Rents are rising" }],
+      options: [{ title: "Open 5", detail: "Phased", recommended: false }, { title: "Open 2", detail: "Pilot", recommended: false }], why: "Lower risk", next: ["Pick sites"] } } };
+    const a3 = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "proceed", context: "" }, NORAN);
+    check("a brief with NO recommended option is not a brief — refused in words, nothing written",
+      a3.st === 503 && !(a3.j.advisory?.brief), JSON.stringify(a3.j).slice(0, 200));
+    NEXT = { answer: { kind: "brief", lead: "Here is the brief.", assumed: ["Rents flat"], brief: { title: "Upper Egypt stores", situation: "Growth is flat in Cairo.",
+      known: [{ source: "platform", text: "42 stores" }, { source: "bogus", text: "Rents are rising" }],
+      options: [{ title: "Open 5", detail: "Phased", recommended: true }, { title: "Open 2", detail: "Pilot", recommended: true }, { title: "Wait", detail: "Hold", recommended: false }], why: "Lower risk", next: ["Pick sites"] } } };
+    const a4 = await call("POST", "api", { act: "advisoryTurn", id: aid, context: "" }, NORAN);
+    const bf = a4.j.advisory?.brief;
+    check("proceed writes the brief: exactly ONE recommended (the first), an unknown source read as assumed, the assumption kept",
+      a4.st === 200 && bf && bf.options.filter((o) => o.recommended).length === 1 && bf.options[0].recommended && bf.known[1].source === "assumed" && a4.j.advisory?.assumed.includes("Rents flat") && a4.j.advisoryCount?.stopped === true,
+      String(JSON.stringify(a4.j.advisory)).slice(0, 300));
+    const aRe0 = await call("POST", "api", { act: "advisoryRevise", id: aid, ask: "" }, NORAN);
+    check("a change with no words is refused", aRe0.st === 400 && /what to change/.test(aRe0.j.why));
+    NEXT = { answer: { reply: "Made it a pilot first.", brief: { ...bf, title: "Upper Egypt stores", options: [{ title: "Open 2", detail: "Pilot", recommended: true }, { title: "Open 5", detail: "Phased", recommended: false }] } } };
+    const aRe = await call("POST", "api", { act: "advisoryRevise", id: aid, ask: "Lead with the pilot" }, NORAN);
+    check("asking for changes rewrites the brief and says what changed", aRe.st === 200 && aRe.j.advisory?.brief.options[0].title === "Open 2" && aRe.j.advisory?.reply === "Made it a pilot first.", JSON.stringify(aRe.j).slice(0, 200));
+    const afh = await call("POST", "api", { act: "advisoryFinish", id: aid }, HEND);
+    check("a client's own person cannot save it", afh.st === 403);
+    const af = await call("POST", "api", { act: "advisoryFinish", id: aid }, NORAN);
+    check("saving makes version 1 of the brief, as an Advisory deliverable", af.st === 200 && af.j.saved?.n === 1 && af.j.saved?.title === "Upper Egypt stores" && af.j.advisoryDone === 4, String(JSON.stringify(af.j)).slice(0, 200));
+    const ad = af.j.saved ? (await asTenant(A, (c) => c.query("SELECT d.kind, d.type, d.section, v.body FROM copilot_deliverables d JOIN copilot_versions v ON v.deliverable_id = d.id WHERE d.id = $1", [af.j.saved.deliverableId]))).rows : [];
+    check("...it stays in the Copilot (never promoted to the plan) and holds the brief's text", ad.length === 1 && ad[0].kind === "copilot-only" && ad[0].type === "advisory" && ad[0].section === "advisory" && /Open 2 \(recommended\)/.test(ad[0].body.text), String(JSON.stringify(ad)).slice(0, 300));
+    const aafter = await call("POST", "api", { act: "advisoryTurn", id: aid, reply: "say", words: "One more?" }, NORAN);
+    const aafter2 = await call("POST", "api", { act: "advisoryFinish", id: aid }, NORAN);
+    check("a saved chat refuses more questions and a second save", aafter.st === 400 && /saved/.test(aafter.j.why) && aafter2.st === 400 && /saved/.test(aafter2.j.why));
+    const notAd = await call("POST", "api", { act: "advisoryFinish", id: ch.id }, NORAN);
+    check("a chat that is not Advisory is refused", notAd.st === 400 && /not an Advisory/.test(notAd.j.why));
+
+    /* The budget: ten questions, then the model may not ask an eleventh. */
+    const bn = await call("POST", "api", { act: "newAdvisory", place: "mobile", title: "Advisory — Mobile" }, NORAN);
+    const bid = bn.j.chat?.id;
+    NEXT = { answer: { kind: "question", lead: "Next.", question: "And?" } };
+    let bl = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Which market first?", context: "" }, NORAN);
+    for (let k = 0; k < 9; k++) bl = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Answer " + k, context: "" }, NORAN);
+    check("ten questions are asked across two rounds of five", bl.st === 200 && bl.j.advisory?.turns.length === 10 && bl.j.advisory?.turns[5].round === 2 && bl.j.advisoryCount?.round === 2,
+      String(JSON.stringify(bl.j.advisoryCount)));
+    const bq = await call("POST", "api", { act: "advisoryTurn", id: bid, reply: "say", words: "Answer 9", context: "" }, NORAN);
+    check("with the budget spent an eleventh question is refused — the count is the server's", bq.st === 503 && /brief was owed/.test(bq.j.why), JSON.stringify(bq.j).slice(0, 200));
+    check("...and the model was told to write the brief", /questions are used up/.test(JSON.stringify(seen[seen.length - 1] || "")));
+    NEXT = null;
+    }
+
     NEXT = { status: 500 };
     const b2 = seen.length;
     const n0 = (await asTenant(A, (c) => messagesOf(c, ch.id))).length;
@@ -799,11 +1127,75 @@ try {
     await new Promise((r) => stand.close(r));
   }
 
+  /* ══ §7 · the SWOT chat and the sources shelf (§490) ═════════════════
+     Every gate asked of the STORED row, never of the page (§42), and each
+     at both ends (§94.2): who may delete a source, a saved SWOT the page
+     cannot claim, an analysis refused until the to-do list is done, and a
+     save refused until there is a draft. None of it needs the model. */
+  section("§7 · the SWOT chat and the sources shelf");
+  check("whoever added a source may delete it", mayDeleteSource({ by: "noran" }, NORAN));
+  check("...and the Super user may", mayDeleteSource({ by: "noran" }, ISLAM));
+  check("...and nobody else may — another of the office, or nobody signed in",
+    !mayDeleteSource({ by: "noran" }, OMAR) && !mayDeleteSource({ by: "noran" }, { personKey: null, seat: null }));
+  const sw_fresh = newSwot(null);
+  check("a fresh SWOT opens on the methods with nothing saved", sw_fresh.phase === "methods" && sw_fresh.saved === null);
+  const sw_claimed = sanitizeSwot({ phase: "saved", saved: { deliverableId: "x", n: 9, title: "Faked" } }, sw_fresh);
+  check("the page cannot claim a SWOT is saved — `saved` is the product's", sw_claimed.saved === null && sw_claimed.phase !== "saved", JSON.stringify(sw_claimed.saved));
+  const sw_ticked = sanitizeSwot({ methods: { internal: ["guided", "research"], micro: ["report"], macro: [] } }, sw_fresh);
+  check("a method an area does not offer is dropped (Internal has no deep research)",
+    sw_ticked.methods.internal.join() === "guided" && sw_ticked.methods.micro.join() === "report", JSON.stringify(sw_ticked.methods));
+  const sw_td = todoOf(sw_ticked);
+  check("the to-do list counts what is ticked plus the analyses and the draft, nothing done yet",
+    sw_td.length === 4 && doneCount(sw_td) === 0, sw_td.map((x) => x.title + ":" + x.state).join(" | "));
+
+  const sw_ns = await call("POST", "api", { act: "newSwot", place: "mobile" }, NORAN);
+  const sw_sid = sw_ns.j && sw_ns.j.chat && sw_ns.j.chat.id;
+  check("the office starts a SWOT chat", sw_ns.st === 200 && !!sw_sid, sw_ns.st + " " + JSON.stringify(sw_ns.j).slice(0, 160));
+  check("...a client's own person cannot", (await call("POST", "api", { act: "newSwot", place: "mobile" }, HEND)).st === 403);
+  const sw_sv = await call("POST", "api", { act: "swotSave", id: sw_sid, placeWord: "Mobile",
+    swot: { methods: { internal: ["guided"], micro: ["report"], macro: [] }, ans: { internal: SWQ.internal.map(() => "") } } }, NORAN);
+  check("ticks are kept and the list says 0 of 4", sw_sv.st === 200 && sw_sv.j.swotDone === 0 && sw_sv.j.swotTodo.length === 4, JSON.stringify(sw_sv.j && sw_sv.j.swotTodo));
+  /* §490.2 — "Help me understand" is the old library, chosen by the client's industry. */
+  const sw_q = sw_sv.j && sw_sv.j.swotQuestions || {};
+  const sw_mi = (sw_q.micro || []).find((q) => q.key === "rivalry"), sw_ma = (sw_q.macro || []).find((q) => q.key === "economic");
+  check("a micro and a macro question carry the old library's help (simpler terms, things to think about, an example)",
+    !!(sw_mi && sw_mi.more && sw_mi.more.simplerTerms && sw_mi.more.thinkAbout.length && sw_mi.more.exampleResponse) &&
+    !!(sw_ma && sw_ma.more && sw_ma.more.simplerTerms), JSON.stringify(sw_mi && sw_mi.more).slice(0, 160));
+  check("...and an internal question keeps its own short line and no library entry",
+    (sw_q.internal || []).length > 0 && (sw_q.internal || []).every((q) => !q.more), "");
+  const { helpFor: sw_help } = await import("../lib/copilot-swot-help.ts");
+  check("the library picks the client's industry and falls back to Other",
+    sw_help("rivalry", "Retail & E-commerce").industry === "Retail" && sw_help("rivalry", "Something unknown").industry === "Other" &&
+    sw_help("nope", "Retail & E-commerce") === null, JSON.stringify([sw_help("rivalry","Retail & E-commerce")?.industry, sw_help("rivalry","x")?.industry]));
+  const sw_early = await call("POST", "api", { act: "swotAnalysis", id: sw_sid, area: "micro", placeWord: "Mobile" }, NORAN);
+  check("an analysis is refused, in words, until the lines of the list are done", sw_early.st === 400 && /to-do list/.test(sw_early.j && sw_early.j.why), sw_early.st + " " + JSON.stringify(sw_early.j));
+  const sw_fin0 = await call("POST", "api", { act: "swotFinish", id: sw_sid, placeWord: "Mobile" }, NORAN);
+  check("saving is refused until there is a draft and the analyses are agreed", sw_fin0.st === 400 && /Draft the SWOT/.test(sw_fin0.j && sw_fin0.j.why), sw_fin0.st + " " + JSON.stringify(sw_fin0.j));
+  const sw_nsaved = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title LIKE 'SWOT%'"))).rows[0].n;
+  check("...and nothing was written", sw_nsaved === 0, sw_nsaved + "");
+
+  const sw_add = await call("POST", "api", { act: "addSource", place: "mobile", kind: "report", name: "market.txt", text: "Competitors cut prices.",
+    chatId: sw_sid, area: "micro", method: "report", placeWord: "Mobile" }, NORAN);
+  const sw_srcId = sw_add.j && sw_add.j.source && sw_add.j.source.id;
+  check("a pasted ready report is kept on the client's shelf and ticks its line", sw_add.st === 200 && !!sw_srcId && sw_add.j.swotDone === 1, sw_add.st + " " + JSON.stringify(sw_add.j).slice(0, 200));
+  const sw_shelf = await call("GET", "sources", null, OMAR, "?place=mobile");
+  const sw_row = sw_shelf.j && sw_shelf.j.sources.find((x) => x.id === sw_srcId);
+  check("another of the office sees it on the shelf, with no delete offered", !!sw_row && sw_row.mayDelete === false, JSON.stringify(sw_row));
+  check("...and its delete is refused on the server too", (await call("POST", "api", { act: "deleteSource", sourceId: sw_srcId }, OMAR)).st === 403);
+  const sw_shelfI = await call("GET", "sources", null, ISLAM, "?place=mobile");
+  check("the Super user is offered the delete", !!sw_shelfI.j.sources.find((x) => x.id === sw_srcId && x.mayDelete));
+  check("a source added for this unit shows on another unit's shelf only when retagged to all units",
+    !(await call("GET", "sources", null, NORAN, "?place=retail")).j.sources.some((x) => x.id === sw_srcId) &&
+    (await call("POST", "api", { act: "retagSource", sourceId: sw_srcId, place: "all" }, NORAN)).st === 200 &&
+    (await call("GET", "sources", null, NORAN, "?place=retail")).j.sources.some((x) => x.id === sw_srcId));
+  check("whoever added it deletes it", (await call("POST", "api", { act: "deleteSource", sourceId: sw_srcId }, NORAN)).st === 200 &&
+    !(await call("GET", "sources", null, NORAN, "?place=mobile")).j.sources.some((x) => x.id === sw_srcId));
+
   /* ══ §4 · the catalogue ═══════════════════════════════════════ */
   section("§4 · every table is the tenant's, fenced like the tracker's");
-  const T = ["copilot_chats", "copilot_messages", "copilot_deliverables", "copilot_versions", "copilot_files"];
+  const T = ["copilot_chats", "copilot_messages", "copilot_deliverables", "copilot_versions", "copilot_files", "copilot_sources"];
   const rls = await owner("SELECT relname, relrowsecurity, relforcerowsecurity FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = $1 AND relname = ANY($2)", [SCHEMA, T]);
-  check("all five tables exist, RLS on and FORCED", rls.length === 5 && rls.every((x) => x.relrowsecurity && x.relforcerowsecurity), JSON.stringify(rls));
+  check("all six tables exist, RLS on and FORCED", rls.length === 6 && rls.every((x) => x.relrowsecurity && x.relforcerowsecurity), JSON.stringify(rls));
   const pol = await owner("SELECT tablename, qual, with_check FROM pg_policies WHERE schemaname = $1 AND tablename = ANY($2)", [SCHEMA, T.concat(["tracker_actions"])]);
   const ref = pol.find((p) => p.tablename === "tracker_actions");
   check("each carries the policy IDENTICAL to tracker_actions' (§94.8)",

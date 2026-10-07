@@ -133,6 +133,13 @@ def banner(pg):
       return (e && !e.hidden) ? e.textContent.replace(/\\s+/g,' ').trim() : ""; }""")
 
 
+def unsaved(pg):
+    """§504: a failed save is kept on this computer and said on its own amber bar."""
+    return pg.evaluate("""() => {
+      const e = document.getElementById('unsaved');
+      return (e && !e.hidden) ? e.textContent.replace(/\\s+/g,' ').trim() : ""; }""")
+
+
 def refused(pg):
     return pg.evaluate("""() => {
       const e = document.getElementById('refused');
@@ -276,7 +283,8 @@ with sync_playwright() as p:
     press(pg, "#safety [data-safety-keep]")
     pg.wait_for_timeout(2500)
     ck("no reload happened", SEEN["loads"] == loads0, SEEN["loads"] - loads0)
-    ck("the failure is said in its own banner (§171)", "Not saved" in refused(pg), refused(pg) or "(nothing)")
+    # §504 (rewritten, not loosened, §218): the failure is kept and said on its own bar
+    ck("the failure is said in its own banner (§171, §504)", "safe on this computer" in unsaved(pg), unsaved(pg) or "(nothing)")
     ck("the caution keeps its control live",
        pg.evaluate("()=>{const k=document.querySelector('#safety [data-safety-keep]');"
                    "return !!k && !k.disabled;}"))
@@ -336,7 +344,7 @@ with sync_playwright() as p:
     press(pg, "#safety [data-safety-reload]")
     pg.wait_for_timeout(2000)
     ck("a save that fails does NOT reload", SEEN["loads"] == loads0, SEEN["loads"] - loads0)
-    ck("...the failure is said (§171)", "Not saved" in refused(pg), refused(pg) or "(nothing)")
+    ck("...the failure is said (§171, §504)", "safe on this computer" in unsaved(pg), unsaved(pg) or "(nothing)")
     ck("...and Reload is live again", pg.evaluate("()=>{const b=document.querySelector('#safety [data-safety-reload]');return !!b && !b.disabled && b.textContent==='Reload';}"))
     SEEN["post_status"] = 200
 

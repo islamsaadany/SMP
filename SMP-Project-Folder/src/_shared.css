@@ -395,6 +395,12 @@
   .banner.safety.done .safety-btn.ghost { background:transparent; color:inherit;
                                           border-color:currentColor; }
   @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
+  /* §504: the kept-changes bar keeps its button beside the message rather
+     than across the window from it (the approved mockup: "make the send to
+     strategy office closer to the message"). */
+  #unsaved .safety-msg { flex:0 1 auto; }
+  #unsaved .safety-acts { margin-left:20px; }
+  @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
   /* ── HISTORY (§262) ─────────────────────────────────────────────────
@@ -426,6 +432,9 @@
   i.hist-q { display:inline-block; width:9px; height:9px; border:1px solid var(--ink-3); border-radius:2px; margin-right:2px; vertical-align:-1px; }
   i.hist-q.on { background:var(--gold-deep); border-color:var(--gold-deep); }
   table.hist td.hist-act { text-align:right; }
+  /* §504: two people sent the same line — one decision, so one band over both */
+  table.hist.uns tr.grp td { background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  table.hist.uns td.hist-act .hist-err { font-size:var(--fs-micro); margin-top:4px; text-align:right; }
   .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
   .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
   .hist-rst:disabled { opacity:.45; cursor:default; }

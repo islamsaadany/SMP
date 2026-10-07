@@ -368,9 +368,32 @@ var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
-var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+/* `missing` (§506) is the labels of the needed fields an Add press found empty
+   — the form's own words, so the field that draws them can ring itself without
+   a second list of which fields those are. Empty until somebody presses Add:
+   a ring before anybody has tried is a form scolding somebody for not having
+   finished yet. */
+var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
+/* ── WHAT ADDING SOMEBODY NEEDS (§506) ────────────────────────────────
+   Islam: "please mark the essential fields with an astrict" — and of what
+   counts as essential, Full name + Email, with the form refusing to add
+   somebody without an address: they sign in with their email (§69) and are
+   written to there, so a row with none is a person who cannot open the
+   platform or be told anything. Named ONCE, read by the form that draws the
+   star and the press that refuses (§53.5), so the star cannot promise a rule
+   the button does not keep. `field` is what the draft holds, `label` is the
+   form's own word for the box (personFields), `say` is the refusal under it.
+
+   THE ADD FORM ONLY. Editing somebody already on the register is not held to
+   this: a row that arrived from a file with no address is still a row, and
+   refusing to let anybody correct its job title until somebody finds an email
+   would make the dialog a wall rather than a form. */
+var PERSON_NEEDED = [
+  { field:"name",  label:"Full name", say:"A full name is needed to add them." },
+  { field:"email", label:"Email",     say:"An email is needed — it is what they sign in with." }
+];
 function newPersonReset(){
-  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
 }
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because
@@ -454,6 +477,40 @@ var NEWCYCLE = null;
    because the two panels answer different questions — NEWCYCLE really is a
    draft, of a cycle that does not exist yet and so has nothing to write to. */
 var CYCLEEDIT = null;
+/* §495: THE PLAN PERIOD HAS ITS OWN PEN on Setup › Planning & reporting
+   cycle, because it is the tenant's and outlives every cycle (§308) — so it
+   is no longer opened by the CYCLE's pen. Same shape as CYCLEEDIT: a mode,
+   nothing held back, the pickers write straight to GROUP. */
+var PLANEDIT = null;
+/* §495: HOW MANY TACTICS TICK A QUARTER THE PLAN PERIOD DOES NOT COVER.
+   Flagged, never deleted (spec 064 §7): shortening the period must not throw
+   away work somebody planned. A tactic's quarter is read in the plan's own
+   starting year; a quarter counts as covered when any of its months is. */
+function tacticsOutsidePlan(){
+  if (!planSet()) return 0;
+  var a = planFrom(), b = planTo(), y = Math.floor(a / 12), n = 0;
+  activeKeys().forEach(function(k){
+    var u = UNITS[k]; if (!u || !Array.isArray(u.items)) return;
+    u.items.forEach(function(it){ (it && it.tactics || []).forEach(function(t){
+      var out = false;
+      [1,2,3,4].forEach(function(q){
+        if (!t || !(+t["q" + q])) return;
+        var s0 = y * 12 + (q - 1) * 3, s1 = s0 + 2;
+        if (s1 < a || s0 > b) out = true;
+      });
+      if (out) n++;
+    }); });
+  });
+  return n;
+}
+/* §495: DOES THE OPEN CYCLE RUN PAST THE PLAN PERIOD. Asked of the months the
+   cycle covers, through the same readers every score uses; nothing is said
+   where either end cannot be read. */
+function cyclePastPlan(){
+  if (!planSet()) return false;
+  var to = reviewAsOf(), fr = monthsOf(REVIEW.from);
+  return (to != null && to > planTo()) || (fr != null && fr < planFrom());
+}
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 /* Send a message's two header dropdowns (§95). One at a time, like every
@@ -8538,6 +8595,42 @@ function swotWritable(target){
   }
   var u = unitLikeWritable(t);
   return u && u.swot ? u.swot : null;
+}
+/* ── HOW WE COMPETE (spec 064 §3) ────────────────────────────────────
+   `compete` rides the subject itself — a unit's on UNITS[k] (units.extra),
+   the top layer's on GROUP (org.extra) — so there is no migration. Shape:
+   { discipline: "btc"|"bts"|"bp", values: [{ title, how:[…], measure:[…] }] }.
+   The reader hands out a shared frozen empty and never creates the field
+   (§50.6); the writer mints it. */
+var COMPETE_NONE = Object.freeze({ values: Object.freeze([]) });
+function competeHolder(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("co:") === 0) return null;
+  return UNITS[t] || null;
+}
+function competeOf(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c || typeof c !== "object") return COMPETE_NONE;
+  return { discipline: c.discipline, values: Array.isArray(c.values) ? c.values : [] };
+}
+function competeWritable(target){
+  var h = competeHolder(target);
+  if (!h) return null;
+  if (!h.compete || typeof h.compete !== "object") h.compete = { values: [] };
+  if (!Array.isArray(h.compete.values)) h.compete.values = [];
+  h.compete.values.forEach(function(v){
+    if (!Array.isArray(v.how)) v.how = [];
+    if (!Array.isArray(v.measure)) v.measure = [];
+  });
+  return h.compete;
+}
+/* An emptied record goes back to an absence (§50.6). */
+function competeTidy(target){
+  var h = competeHolder(target), c = h && h.compete;
+  if (!c) return;
+  if (!c.discipline) delete c.discipline;
+  if (!c.discipline && !(c.values || []).length) delete h.compete;
 }
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){

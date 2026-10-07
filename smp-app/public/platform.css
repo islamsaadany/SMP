@@ -398,6 +398,12 @@
   .banner.safety.done .safety-btn.ghost { background:transparent; color:inherit;
                                           border-color:currentColor; }
   @media (max-width:680px){ .banner.safety { flex-wrap:wrap; } .banner.safety .safety-acts { width:100%; } }
+  /* §504: the kept-changes bar keeps its button beside the message rather
+     than across the window from it (the approved mockup: "make the send to
+     strategy office closer to the message"). */
+  #unsaved .safety-msg { flex:0 1 auto; }
+  #unsaved .safety-acts { margin-left:20px; }
+  @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
   /* ── HISTORY (§262) ─────────────────────────────────────────────────
@@ -429,6 +435,9 @@
   i.hist-q { display:inline-block; width:9px; height:9px; border:1px solid var(--ink-3); border-radius:2px; margin-right:2px; vertical-align:-1px; }
   i.hist-q.on { background:var(--gold-deep); border-color:var(--gold-deep); }
   table.hist td.hist-act { text-align:right; }
+  /* §504: two people sent the same line — one decision, so one band over both */
+  table.hist.uns tr.grp td { background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  table.hist.uns td.hist-act .hist-err { font-size:var(--fs-micro); margin-top:4px; text-align:right; }
   .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
   .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
   .hist-rst:disabled { opacity:.45; cursor:default; }
@@ -5057,6 +5066,20 @@ html[data-client-settings] .viewer { display:none; }
   /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
      has nothing above it to ring (§190). */
   .pdlg .attnloose { gap:0; }
+  /* ── A NEEDED FIELD, AND ONE THAT WAS REFUSED (§506) ──────────────────
+     The attention ring's own shape (out of flow, so the grid is untouched —
+     the note above says why that matters) in the ALARM colour: outstanding is
+     amber, "this will not go in" is red (§168). Words wear `--bad-tx`, never
+     `--bad`, which as type measures under 4.5:1 in dark (§38.5). The star is
+     scoped to nothing: it is drawn in the label and in the footer's key. */
+  .reqmark { color:var(--bad-tx); margin-left:3px; font-weight:700; }
+  .reqmark.reqkey { margin:0; }
+  .pdlg .pdf.reqmiss { border-radius:var(--r-sm);
+    outline:2px solid var(--bad-tx); outline-offset:4px;
+    box-shadow:0 0 0 4px var(--bad-bg); background:var(--bad-bg); }
+  .pdlg .pdf.reqmiss > .pdfl { color:var(--bad-tx); }
+  .pdlg .reqsay { font-size:12px; font-weight:600; line-height:1.45;
+    color:var(--bad-tx); white-space:normal; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }
@@ -5129,6 +5152,46 @@ html[data-client-settings] .viewer { display:none; }
   /* §480: a reporting line with nobody named over it says so in the warning
      ink, never the quiet grey — "None yet" is outstanding, not a description. */
   .cfg td.why.nobody { color:var(--attn-tx); }
+
+  /* ══ THE PLAN PERIOD LEADS THE PAGE (spec 064 §7, mockup G) ═══════════
+     Setup › Planning & reporting cycle opens on the plan period as a block
+     of its own, with its own Edit, ABOVE the reporting cycle, because the
+     cycle sits inside the period rather than beside it. The pen is its own
+     class and never `.newcycle`, which is the NAME checks find the cycle's
+     pen by (§65.9). Colours are the palette's tokens only (§25), so the
+     header wears the tenant's bar like every other table head (§41.10). */
+  .planblk { border:1px solid var(--line); border-radius:8px; overflow:hidden;
+             background:var(--surface); margin:0 0 16px; }
+  .planblk-h { display:flex; justify-content:space-between; align-items:center; gap:8px;
+               background:var(--panel); color:var(--panel-ink); padding:8px 12px;
+               font-weight:700; font-size:14px; }
+  .planblk-h .editbtn:not(.penon) { background:transparent; color:var(--panel-ink);
+                                    border-color:var(--panel-quiet); }
+  .planblk-facts { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+                   gap:12px; padding:12px; }
+  .planblk-facts small { display:block; font-size:11px; letter-spacing:.07em;
+                         text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .planblk-facts b { font-size:15px; color:var(--ink); }
+  .pptl { padding:0 12px 12px; }
+  .pptl-y { display:flex; font:700 11px/1.4 var(--sans); color:var(--ink-3); }
+  .pptl-y span { flex:1 1 0; padding:0 0 3px 2px; }
+  .pptl-ms { display:flex; border-radius:6px; overflow:hidden; background:var(--surface-2); }
+  .pptl-m { flex:1 1 0; min-width:0; text-align:center; font:600 10.5px/24px var(--sans);
+            color:var(--ink-3); border-left:1px solid var(--line); }
+  .pptl-m:first-child { border-left:0; }
+  .pptl-m.inp { background:color-mix(in srgb, var(--gold) 32%, var(--surface)); color:var(--ink); }
+  .pptl-m.inc { box-shadow:inset 0 0 0 2px var(--panel); }
+  .pptl-m.past { background:var(--warn-bg); color:var(--warn-tx); }
+  .pptl-key { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:6px;
+              font-size:12px; color:var(--ink-2); }
+  .pptl-key .k { width:14px; height:10px; border-radius:2px; margin-left:8px; }
+  .pptl-key .k:first-child { margin-left:0; }
+  .pptl-key .k.inp { background:color-mix(in srgb, var(--gold) 32%, var(--surface)); }
+  .pptl-key .k.inc { box-shadow:inset 0 0 0 2px var(--panel); }
+  .planblk-flag { margin:0 12px 12px; padding:7px 12px; border-radius:6px;
+                  background:var(--warn-bg); color:var(--warn-tx); font-size:13px; }
+  .planblk-pen { border-top:1px solid var(--line); padding:12px 18px 14px; }
+  .planblk-pen > .cyc2-r.planper:first-child { border-top:0; margin-top:0; padding-top:0; }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -8113,6 +8176,12 @@ html[data-stale] #panel { cursor:progress; }
 .topcapbody { padding:14px 20px 20px; }
 .topcapbody table { width:100%; }
 .topcapbody table td.num, .topcapbody table th.num { width:1%; white-space:nowrap; }
+/* §502: the 1% above also reaches a pillars capability's Key measures, whose
+   Target cell is `td.num` — so the box inside shrank to a sliver and a typed
+   target could not be read (Islam, El Abd). The column stays compact, signed
+   off that way ("units stay as is"): the box gets a width of its own, enough
+   for 1,250,000, and the rest of the row goes to the measure's name. */
+.topcapbody table:not([data-topcapprojects]) td.num input.fld { width:110px; min-width:110px; flex:0 0 110px; }
 tr.topcapprow { cursor:pointer; }
 tr.topcapprow.on > td { background:var(--surface-2); }
 tr.topcapopen > td { padding:0 !important; white-space:normal; }
@@ -8120,6 +8189,34 @@ tr.topcapopen > td { padding:0 !important; white-space:normal; }
 /* §488: the add line under the table, and a grip beside the row's number. */
 .topcapadd { padding:10px 2px 0; }
 .topcapprow .grip { vertical-align:middle; margin-right:4px; }
+
+/* ── HOW WE COMPETE (spec 064 §3.4) ──────────────────────────────────
+   Islam's own slide: the discipline across the top in the tenant's bar
+   colour, then Value / How / Measure rows, one column per value. Spaced
+   cells rather than ruled ones, the signed-off mockup's shape. Every colour
+   is a token: --panel/--panel-ink is the tenant's brand, the row labels are
+   the accent as a FILL with --on-accent as its ink (§38.4: the accent
+   fails as type, never as a fill with its own ink). */
+.cmp { margin-top: 4px; }
+.cmp .tblscroll { overflow-x: auto; }
+table.cmptab { border-collapse: separate; border-spacing: 8px; width: calc(100% + 16px); min-width: 660px; margin: -8px; background: transparent; }
+table.cmptab th, table.cmptab td { border: 0; border-radius: 10px; padding: 10px 12px; vertical-align: top; font-size: 13.5px; white-space: normal; max-width: none; }
+table.cmptab tr > *:first-child { width: 118px; }
+table.cmptab thead th.cmprow, table.cmptab th.cmprow { background: var(--gold); color: var(--on-accent); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; font-size: 12px; text-align: center; vertical-align: middle; }
+table.cmptab thead th.cmprow { background: var(--panel); color: var(--panel-ink); }
+table.cmptab thead th.cmpd { background: var(--panel); color: var(--panel-ink); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; text-align: center; vertical-align: middle; }
+table.cmptab thead th.cmpd select.fld { width: auto; min-width: 200px; text-transform: none; letter-spacing: 0; }
+table.cmptab td { background: var(--surface-2); color: var(--ink-2); }
+table.cmptab td.cmpval { background: var(--line); color: var(--ink); font-weight: 700; font-size: 15px; text-align: center; vertical-align: middle; }
+table.cmptab td.cmpval .fld { font-weight: 700; text-align: center; }
+table.cmptab tbody tr:nth-child(even) > td, table.cmptab tbody tr:hover > td { background: var(--surface-2); }
+table.cmptab tbody tr:nth-child(even) > td.cmpval, table.cmptab tbody tr:hover > td.cmpval { background: var(--line); }
+.cmpul { margin: 0; padding-left: 16px; }
+.cmpul li + li { margin-top: 4px; }
+.cmpnone { color: var(--ink-3); }
+table.cmptab td.cmpnone { text-align: center; vertical-align: middle; }
+textarea.fld.cmpbox { min-height: 84px; width: 100%; }
+.cmp .addrow { margin-top: 10px; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -9351,6 +9448,11 @@ tr.topcapopen > td { padding:0 !important; white-space:normal; }
 .dovs .side .row{display:flex;justify-content:space-between;gap:18px;padding:11px 0;border-bottom:1px solid var(--line);font-size:19px;color:var(--ink)}
 .dovs .side .row b{font-family:var(--mono);font-weight:600;white-space:nowrap}
 .dovs .side .row i{font-style:normal;color:var(--ink-3);font-size:17px;white-space:nowrap}
+  /* §492: How we compete on a slide — the page's table at projector size. */
+  .d-compete table.cmptab { min-width:0; margin:0; width:100%; }
+  .d-compete table.cmptab th, .d-compete table.cmptab td { font-size:17px; padding:14px 16px; }
+  .d-compete table.cmptab td.cmpval { font-size:20px; }
+  .d-compete table.cmptab th.cmprow, .d-compete table.cmptab th.cmpd { font-size:14px; }
 
 /* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
@@ -11207,3 +11309,260 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 :root[data-cop-page] .chrome .tabs-in { padding-left:12px; padding-right:12px; }
 :root[data-cop-page] #secrow .tabs-in { padding-top:3px; padding-bottom:3px; }
 :root[data-cop-page] .coppane { gap:10px; }
+
+/* ── THE SWOT FLOW (§490, from design-mockups/copilot-swot-flow/2026-10-04_v2.html)
+   Platform tokens only (§25). The to-do column is 340px (Islam: "more
+   compact horizontally") and drops under the work below 1020px. ── */
+.copsw { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:16px; align-items:start; margin-top:10px; }
+@media (max-width:1020px){ .copsw { grid-template-columns:minmax(0,1fr); } }
+.copsw-main { min-width:0; display:flex; flex-direction:column; gap:12px; }
+.copsw-side { display:flex; flex-direction:column; gap:12px; min-width:0; }
+/* §490.1 COMPACT COLUMNS (design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html,
+   signed off with one addition): in a SWOT chat the chats rail is 200px and the
+   to-do 270px, and the work and the to-do each scroll in their own box, so
+   reading the end of the list no longer scrolls the work away. The to-do's
+   header (title, count, meter) stays frozen while its list scrolls (Islam:
+   "keep the header freezed"). Scoped to the SWOT chat (`:has(.copsw)`); other
+   chats keep their rail. Below 1020px nothing changes. */
+.copsw-todoh { background:var(--surface); }
+@media (min-width:1021px){
+  .coppane:has(.copsw):not(.copshut) { grid-template-columns:200px minmax(0,1fr); }
+  .coppane:has(.copsw) .copnew { padding:4px 7px; white-space:nowrap; }
+  .copmain:has(.copsw) { overflow:hidden; }
+  .copmain:has(.copsw) .copsw { flex:1 1 auto; min-height:0; grid-template-columns:minmax(0,1fr) 270px; align-items:stretch; }
+  .copsw-main, .copsw-side { overflow-y:auto; min-height:0; padding-right:4px; }
+  .copsw-todoh { position:sticky; top:0; z-index:1; margin:-12px -14px 0; padding:12px 14px 2px;
+                 border-radius:var(--r-sm, 6px) var(--r-sm, 6px) 0 0; }
+}
+.copsw-box, .copsw-card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:12px 14px; }
+.copsw-card h3 { margin:0 0 6px; font:700 var(--fs-body, 14px)/1.3 var(--sans); color:var(--ink); }
+.copsw-card p { margin:0 0 8px; color:var(--ink-2); font-size:var(--fs-small, 12.5px); }
+.copsw-bh { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.copsw-bh b { color:var(--ink); }
+.copsw-bh .linkbu { margin-left:auto; }
+.copsw-n { font-size:var(--fs-micro, 11px); color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.copsw-meter { height:6px; background:var(--surface-2); border-radius:3px; overflow:hidden; margin-bottom:10px; }
+.copsw-meter i { display:block; height:100%; background:var(--gold); }
+.copsw-tg + .copsw-tg { margin-top:8px; }
+.copsw-th { font:700 var(--fs-micro, 11px)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:4px; }
+.copsw-tg ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+.copsw-li { display:grid; grid-template-columns:16px minmax(0,1fr) auto; align-items:center; gap:6px; padding:3px 4px; border-radius:4px; }
+.copsw-li.on { background:var(--surface-2); }
+.copsw-dot { width:9px; height:9px; border-radius:50%; border:2px solid var(--line); justify-self:center; }
+.copsw-li.done .copsw-dot { background:var(--good); border-color:var(--good); }
+.copsw-li.wait .copsw-dot { border-color:var(--gold); }
+.copsw-lb { min-width:0; display:flex; flex-direction:column; text-align:left; background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer; }
+span.copsw-lb { cursor:default; }
+.copsw-tt { font-size:var(--fs-small, 12.5px); color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copsw-ts { font-size:var(--fs-micro, 11px); color:var(--ink-3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copsw-pill { font:600 10.5px/1.5 var(--sans); padding:0 6px; border-radius:9px; border:1px solid var(--line); color:var(--ink-3); white-space:nowrap; }
+.copsw-pill.done { color:var(--good-tx); border-color:var(--good); }
+.copsw-pill.wait { color:var(--attn-tx, var(--gold-deep)); border-color:var(--gold); }
+.copsw-cov { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.copsw-ci { display:flex; flex-direction:column; padding:6px 8px; background:var(--surface-2); border-radius:4px; }
+.copsw-ci b { font-size:var(--fs-small, 12.5px); color:var(--ink); }
+.copsw-ci span { font-size:var(--fs-micro, 11px); color:var(--ink-2); }
+.copsw-ci.none span { color:var(--ink-3); }
+.copsw-gridwrap { overflow-x:auto; margin-bottom:10px; }
+.copsw-grid { border-collapse:collapse; min-width:0; width:100%; }
+.copsw-grid th, .copsw-grid td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:center; font-size:var(--fs-small, 12.5px); }
+.copsw-grid th[scope=row] { text-align:left; color:var(--ink); }
+.copsw-grid td.na { color:var(--ink-3); }
+.copsw-tick { width:24px; height:24px; border:1px solid var(--line); border-radius:4px; background:var(--surface); color:var(--surface); font:700 13px/1 var(--sans); cursor:pointer; }
+.copsw-tick.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink, var(--surface)); }
+.copsw-tick:disabled { cursor:default; }
+.copsw-lh { font:700 var(--fs-micro, 11px)/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); }
+.copsw-q { display:flex; flex-direction:column; gap:8px; }
+.copsw-qn { font-size:var(--fs-micro, 11px); color:var(--ink-3); }
+.copsw-qt { font-weight:600; color:var(--ink); }
+.copsw-help { font-size:var(--fs-small, 12.5px); color:var(--ink-2); background:var(--surface-2); border-radius:4px; padding:8px 10px; }
+.copsw-ans { width:100%; box-sizing:border-box; }
+.copsw-used, .copsw-ev { display:block; font-size:var(--fs-micro, 11px); color:var(--ink-3); margin-top:2px; }
+.copsw-sp { flex:1 1 auto; }
+.copsw-links { list-style:none; margin:0 0 8px; padding:0; display:flex; flex-direction:column; gap:4px; }
+.copsw-add, .copsw-pick { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:8px; }
+.copsw-add textarea { flex:1 1 100%; }
+.copsw-where { font-size:var(--fs-small, 12.5px); color:var(--ink-2); display:flex; gap:6px; align-items:center; }
+.copsw-forces { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-bottom:8px; }
+.copsw-force { border:1px solid var(--line); border-radius:4px; padding:8px 10px; min-width:0; }
+.copsw-force h4 { margin:0 0 4px; font-size:var(--fs-small, 12.5px); color:var(--ink); }
+.copsw-force ul, .copsw-l ol { margin:0; padding-left:16px; display:flex; flex-direction:column; gap:4px; }
+.copsw-force li, .copsw-l li { font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copsw-force li b, .copsw-l li b { display:block; color:var(--ink); }
+.copsw-force li .fld { width:100%; box-sizing:border-box; margin-bottom:3px; }
+.copsw-next { padding:10px 12px; background:var(--surface-2); border-radius:var(--r-sm, 6px); font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copsw-next b { color:var(--ink); }
+.copsw-swot { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:760px){ .copsw-swot { grid-template-columns:1fr; } }
+.copsw-l { border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:10px 12px; background:var(--surface); min-width:0; }
+.copsw-l h3 { margin:0 0 6px; font:700 var(--fs-body, 14px)/1.3 var(--sans); color:var(--ink); }
+.copsw-check ul { margin:0; padding-left:16px; font-size:var(--fs-small, 12.5px); }
+.copsw-check ul.ok li { color:var(--good-tx); }
+.copsw-check ul.bad li { color:var(--bad-tx); }
+.copsw-end { margin-top:4px; }
+/* ── the rail folds (§490) ── */
+.copfoldb { flex:none; width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border:0; background:none; color:var(--ink-3); cursor:pointer; border-radius:4px; }
+.copfoldb:hover, .copfoldb:focus-visible { color:var(--ink); background:var(--surface-2); outline:none; }
+.copfoldb svg { width:14px; height:14px; transition:transform .12s; }
+.copfoldb[aria-expanded="false"] svg { transform:rotate(-90deg); }
+.coprail.copfolded > .coplist, .coprail.copfolded > .coprft { display:none; }
+.coprail.copfolded, .coprail.copchats.copfolded { flex:none; }
+/* the source ROW is its own class: `.copsrc` is the small Pasted / Assumed
+   pill above, and a row wearing it was drawn as a rounded pill (§65.9) */
+.copsrcrow { display:flex; align-items:flex-start; gap:8px; }
+.copsrcrow .copitem { flex:1 1 auto; min-width:0; text-decoration:none; color:inherit; }
+.copsrcacts { display:flex; align-items:center; gap:10px; flex:none; padding-top:4px; }
+
+/* ── §490.2 ONE RAIL WIDTH, A COMPACT TO-DO, A FOUNDATION TO-DO, TIGHT EQUAL
+   SPACE (design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html and
+   2026-10-04_spacing-and-fold.html, both signed off). The chats rail is 200px
+   in every phase (it no longer jumps between chats), every gap around the
+   panels is 8px, the to-do matches the rail at 200px, and the columns reach
+   the foot of the page. Later in the file on purpose: it settles the earlier
+   rules. Below 821px nothing here applies but the help panel's shape. ── */
+@media (min-width:821px){
+  :root[data-cop-page] { --pane-foot:8px; }
+  :root[data-cop-page] .view { padding-top:8px; }
+  :root[data-cop-page] .wrap { padding-left:8px; padding-right:8px; }
+  :root[data-cop-page] .coppane { grid-template-columns:200px minmax(0,1fr); gap:8px; padding:0; }
+  :root[data-cop-page] .coppane.copshut { grid-template-columns:24px minmax(0,1fr); }
+  .coppane .copnew { padding:4px 7px; white-space:nowrap; }
+  .coppane .copmain { padding:8px; }
+  .copflow { gap:8px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) 200px; }
+  .copflow.nocards { grid-template-columns:minmax(0,1fr) 200px; }
+  .copftodo { display:flex; flex-direction:column; gap:8px; min-width:0; min-height:0; overflow-y:auto; align-self:stretch; }
+  .copftodo > .copsw-box { flex:1 1 auto; }
+  .copsw { margin-top:4px; gap:8px; }
+  .copmain:has(.copsw) .copsw { grid-template-columns:minmax(0,1fr) 200px; }
+  .copsw-side { gap:8px; }
+  .copsw-box { padding:8px 10px; }
+  .copsw-todoh { margin:-8px -10px 0; padding:8px 10px 2px; }
+  .copsw-main > .copsw-q { flex:1 1 auto; }
+  .copsw-q .copsw-ans { flex:1 1 auto; min-height:120px; resize:vertical; }
+  .copsw-side > .copsw-box:first-child { flex:1 1 auto; }
+}
+@media (max-width:980px){ .copftodo { display:none; } .copflow, .copflow.nocards { grid-template-columns:minmax(0,1fr); } }
+@media (min-width:821px) and (max-width:1020px){ .copmain:has(.copsw) .copsw { grid-template-columns:minmax(0,1fr); } }
+.copsw-meter { height:4px; margin-bottom:6px; }
+.copsw-tg + .copsw-tg { margin-top:4px; }
+.copsw-th { margin-bottom:1px; }
+.copsw-li { padding:2px 4px; gap:5px; align-items:flex-start; }
+.copsw-li .copsw-dot { margin-top:4px; }
+.copsw-ts { display:none; }
+.copsw-tt { display:flex; gap:6px; align-items:baseline; white-space:normal; flex-wrap:wrap; overflow:visible; line-height:1.3; }
+.copsw-tt i { font-style:normal; font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+.copsw-pill { font-size:10px; padding:0 5px; }
+.copsw-bh { flex-wrap:nowrap; align-items:baseline; gap:6px; }
+.copsw-bh .linkbu { margin-left:auto; font-size:11.5px; white-space:nowrap; }
+.copswhelp { display:flex; flex-direction:column; gap:6px; }
+.copswhelp h4 { margin:0; font:700 11px/1.3 var(--sans); text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); }
+.copswhelp ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:2px; }
+.copswhelp p { margin:0; }
+.copswhelp .ex { font-style:italic; color:var(--ink-2); }
+.copswhelp .src { font-size:11px; color:var(--ink-3); }
+/* §490.2 — with the panels reaching the foot of the page, a plain chat's box
+   reaches the corner the office chat button floats over (18px in, 50px
+   round), and that button sat ON Send. The box ends where the panel's 8px
+   ends (the old -16px matched the old 16px padding), and only where the box
+   is flush with that corner it keeps clear of the button. */
+@media (min-width:821px) {
+  :root[data-cop-page] .copcompose { margin-bottom:-8px; }
+  :root[data-cop-page] .copmain:not(:has(.copflow)):not(:has(.copsw)) .copcompose { padding-right:64px; }
+}
+/* ── §493 HOW WE COMPETE IN THE COPILOT (spec 064 §3.2–§3.5, from
+   design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html).
+   It wears the SWOT flow's frame (.copsw): the results live in the
+   conversation and the side column holds the to-do alone. Platform tokens
+   only (§25). A score is a pill you press; one the person changed wears the
+   accent's border so their hand is visible against the Copilot's. ── */
+.copcp-wrap { overflow-x:auto; }
+.copcp-tab { border-collapse:collapse; width:100%; min-width:0; }
+.copcp-tab th, .copcp-tab td { padding:6px 8px; border-bottom:1px solid var(--line); font-size:var(--fs-small, 12.5px); text-align:center; white-space:normal; max-width:none; }
+.copcp-tab thead th { background:var(--surface-2); color:var(--ink-2); font:700 var(--fs-micro, 11px)/1.3 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+.copcp-tab thead th:first-child, .copcp-tab th[scope=row] { text-align:left; }
+.copcp-tab th[scope=row] { color:var(--ink); font-weight:600; }
+.copcp-sc { display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:24px; padding:0 6px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); font:600 12.5px/1 var(--sans); font-variant-numeric:tabular-nums; box-sizing:border-box; }
+button.copcp-sc { cursor:pointer; }
+button.copcp-sc:hover, button.copcp-sc:focus-visible { border-color:var(--ink-3); outline:none; }
+.copcp-sc.ed { border-color:var(--gold); background:var(--attn-bg, var(--surface-2)); }
+.copcp-more td { text-align:left; }
+.copcp-tot th, .copcp-tot td { font-weight:700; color:var(--ink); border-bottom:0; font-variant-numeric:tabular-nums; }
+.copcp-tot td.lead { background:var(--good-bg, var(--surface-2)); color:var(--good-tx); }
+.copcp-cl { font:600 10.5px/1.5 var(--sans); padding:0 6px; border-radius:9px; border:1px solid var(--line); white-space:nowrap; }
+.copcp-cl.clear { color:var(--good-tx); border-color:var(--good); }
+.copcp-cl.leaning { color:var(--attn-tx, var(--gold-deep)); border-color:var(--gold); }
+.copcp-cl.unclear { color:var(--bad-tx); border-color:var(--bad); }
+.copcp-cards { display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:8px; }
+.copcp-card { position:relative; border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:10px 12px 10px 42px; background:var(--surface); min-width:0; }
+.copcp-card.on { border-color:var(--panel); box-shadow:inset 3px 0 0 var(--panel); }
+.copcp-card .copsw-tick { position:absolute; left:10px; top:10px; }
+.copcp-card h4 { margin:2px 0 6px; font:700 var(--fs-body, 14px)/1.3 var(--sans); color:var(--ink); }
+.copcp-card ul { margin:0 0 6px; padding-left:16px; display:flex; flex-direction:column; gap:2px; }
+.copcp-card li { font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.copcp-table table.cmptab { min-width:0; }
+.copcp-table textarea.cmpbox { min-height:64px; }
+.copcp-ask { display:flex; gap:8px; align-items:flex-end; }
+.copcp-ask textarea { flex:1 1 auto; min-width:0; }
+
+/* §494: the Directions Copilot (spec 064 §4–5). The compete table's own shape
+   (§53.5); only what is new to a Directions row is styled here. */
+.copdv-tab tr.on th[scope=row] { box-shadow:inset 3px 0 0 var(--panel); }
+.copdv-tab td.copdv-score { font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+.copdv-mk { display:inline-block; margin-left:6px; padding:0 6px; border-radius:9px; border:1px solid var(--line); font:600 10.5px/1.5 var(--sans); color:var(--ink-2); vertical-align:1px; white-space:nowrap; }
+.copdv-mk.plan { color:var(--ink-2); }
+.copdv-mk.yours { color:var(--attn-tx, var(--gold-deep)); border-color:var(--gold); }
+.copdv-mk.new { color:var(--good-tx); border-color:var(--good); }
+select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; font-size:var(--fs-small, 12.5px); }
+.copdv-serves { text-align:left !important; }
+.copdv-chip { display:inline-block; margin:1px 4px 1px 0; padding:0 7px; border-radius:9px; background:var(--surface-2); color:var(--ink-2); font-size:11.5px; line-height:1.6; }
+/* §495 the Execution chat, from the signed-off mockup
+   (design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html, F):
+   the plan period as one strip with its Change, each item's two tables in the
+   Copilot's own table style, and four quarter buttons where a quarter outside
+   the period is greyed and struck through rather than hidden. */
+.copex-period { display:flex; justify-content:space-between; gap:8px; align-items:center; flex-wrap:wrap; background:var(--attn-bg); border:1px solid var(--line); border-radius:8px; padding:7px 12px; font-size:13.5px; color:var(--ink); margin:6px 0 10px; }
+.copex-item { display:flex; flex-direction:column; gap:8px; margin:8px 0; }
+.copex-t td:first-child { text-align:left; }
+.copex-t td { vertical-align:middle; }
+.copex-qs { white-space:nowrap; }
+.copex-q { width:26px; height:24px; margin:0 1px; padding:0; border-radius:4px; border:1px solid var(--field-line, var(--line)); background:var(--surface); color:var(--ink-3); font:600 11px/1 var(--sans); cursor:pointer; }
+.copex-q.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+.copex-q.off { background:var(--surface-2); opacity:.45; text-decoration:line-through; cursor:default; }
+.copex-q:disabled:not(.off) { cursor:default; }
+.copex-pick { flex-wrap:wrap; align-items:center; font-size:13px; }
+.copex-y { width:72px; }
+
+/* ── ADVISORY (§496, from design-mockups/copilot-advisory/2026-10-06_advisory.html)
+   Platform tokens only (§25). The SWOT chat's columns (.copsw) carry it; what
+   is its own is the question count over each question, the clash card, the
+   source tags, the question budget in the right column, and the brief. ── */
+.adv .adq { font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gold-deep); margin-bottom:3px; }
+.adv .copbody p { margin:0 0 6px; } .adv .copbody p:last-child { margin-bottom:0; }
+.adclash { border:1px solid var(--line); border-left:3px solid var(--attn); background:var(--attn-bg); border-radius:0 var(--r-sm, 6px) var(--r-sm, 6px) 0; padding:9px 12px; margin-top:6px; color:var(--ink); }
+.adsrc { display:grid; grid-template-columns:auto 1fr; gap:4px 10px; margin-top:6px; align-items:baseline; }
+.adtag { display:inline-block; font-size:var(--fs-micro, 11px); font-weight:700; border-radius:4px; padding:0 6px; letter-spacing:.03em; line-height:1.6; white-space:nowrap; }
+.adtag.p { background:var(--panel); color:var(--panel-ink); }
+.adtag.y { background:var(--good-bg); color:var(--good-tx); }
+.adtag.f { background:var(--surface-2); color:var(--ink-2); box-shadow:inset 0 0 0 1px var(--line); }
+.adtag.a { background:var(--attn-bg); color:var(--attn-tx); }
+.adbudget .adpips { display:flex; gap:4px; }
+.adpips i { width:22px; height:8px; border-radius:3px; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line); }
+.adpips i.u { background:var(--gold); box-shadow:none; }
+.adwhy { margin:8px 0 0; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.adlist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small, 12.5px); color:var(--ink-2); }
+.adbrief { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md, 10px); padding:14px 16px; max-width:76ch; display:flex; flex-direction:column; gap:12px; color:var(--ink); }
+.adbrief h3 { margin:0; font-size:18px; text-wrap:balance; }
+.adbrief h4 { margin:0 0 4px; font-size:var(--fs-micro, 11px); letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); }
+.adbrief p { margin:0; }
+.adbrief ul, .adbrief ol { margin:0; padding-left:18px; } .adbrief li { margin:3px 0; }
+.adbrief ul { list-style:none; padding-left:0; }
+.adopts { display:flex; flex-direction:column; gap:6px; }
+.adopt { border:1px solid var(--line); border-radius:var(--r-sm, 6px); padding:8px 11px; }
+.adopt.rec { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
+.adoh { display:flex; justify-content:space-between; gap:8px; font-weight:700; align-items:baseline; }
+.adopt p { color:var(--ink-2); margin-top:2px; }
+.adrec { flex:none; font-size:var(--fs-micro, 11px); font-weight:700; border-radius:var(--r-pill, 999px); padding:1px 8px; background:var(--gold); color:var(--on-accent); }
+
+/* §501: the door to every chat on this client, above the chats rail. */
+.copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
+.copall:hover { color:var(--ink); text-decoration:underline; }

@@ -5,11 +5,12 @@
    else, so his detailed instructions replace the text below without anybody
    touching the chat, the tables or the screen.
 
-   What is here today is deliberately short: the house rules the decision
-   record already settled (v0.4 §3), and one paragraph per section saying
-   what that section produces and which roads fit it (plan §7.5). It is a
-   placeholder for the methodology, and it says so to nobody but the reader
-   of this file. */
+   That has happened: since §456 Forefront's method for each section is read
+   from Copilot settings (the shipped text in copilot-defaults.generated.ts, generated from
+   assets/copilot/instructions-source.md, with edits in `copilot_assets`), and since §460 it leads every
+   question. This file holds the voice, the starting point and the house
+   rules that wrap it — not the method itself. (§490: this comment used to
+   call the guidance a placeholder, which stopped being true at §456.) */
 import type { Section } from "./copilot.ts";
 
 /* HOW THE COPILOT TALKS (§460, rethought at §471). Islam, 2026-10-02: "we
@@ -64,8 +65,16 @@ export const GUIDE: Record<Section, Guide> = {
     produces: "Analysis: a SWOT, a macro or market scan, an internal analysis.",
     roads: ["Guided questions", "Upload notes", "Template", "Import", "Deep-research prompt"],
   },
+  compete: {
+    produces: "How the place competes: the value discipline it leads with, and the value proposition table (values, how, measure).",
+    roads: [],
+  },
   directions: {
     produces: "Strategic directions (pillars) with their key measures, resting on the analysis.",
+    roads: [],
+  },
+  capabilities: {
+    produces: "Core capabilities that serve the chosen directions, each with its kind and the function that owns it.",
     roads: [],
   },
   execution: {

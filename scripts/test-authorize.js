@@ -4882,6 +4882,37 @@ console.log("\n44 · revenue drivers (spec 063)");
         k2.indexOf("setup") > -1 && k2.indexOf("unknown") < 0, k2.join(","));
 })();
 
+/* ── §494: WHAT A CAPABILITY IS — its kind and the Directions it serves ──
+   The Copilot's Directions chat writes both onto a capability. They are the
+   plan, so the office's, classified as "what a capability is" and never
+   swept into unknown — both ends asserted (§94.2). */
+(function () {
+  const raw = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  const base = clone(raw);
+  const holder = base.group.capabilities[0].fn;
+  let team = base.people.find(function (p) { return p.role === "smoteam"; });
+  if (!team) { team = base.people.find(function (p) { return p.key !== "smo" && p.role !== "super"; }); team.role = "smoteam"; }
+  const head = base.functions[holder].head;
+  function run(who, mutate) {
+    const inc = clone(base); mutate(inc.group.capabilities[0]);
+    return A.authorize(base, inc, personOf(base, who));
+  }
+  const kind = function (c) { c.capKind = "enabler"; };
+  const serves = function (c) { c.serves = ["mobile-P1"]; };
+  let v = run(team.key, kind);
+  check("§494: the SMO team sets what kind a capability is", v.ok, v.refusals.join(" / "));
+  v = run(team.key, serves);
+  check("§494: ...and which Directions it serves", v.ok, v.refusals.join(" / "));
+  v = run(head, kind);
+  check("§494 REFUSED: the holding head may not set its kind (the office's)", !v.ok, "was ALLOWED");
+  v = run(head, serves);
+  check("§494 REFUSED: ...nor what it serves", !v.ok, "was ALLOWED");
+  const inc = clone(base); kind(inc.group.capabilities[0]); serves(inc.group.capabilities[0]);
+  const ks = (A.collect(base, inc, R.worldOf(base)) || []).map(function (c) { return c.kind; });
+  check("§494: both are a plan change, never unknown",
+        ks.indexOf("capPlan") > -1 && ks.indexOf("unknown") < 0, ks.join(",") || "(nothing)");
+})();
+
 /* ── 46 · the client's structure, and a company's own Foundation (§404) ──
    The structure is SETUP (the office's); a company's Foundation is the
    group's own strategy drawn over the company's record, so it is judged as
@@ -5372,6 +5403,64 @@ console.log("\n§481 · a direction's picture slides");
   check("§481 REFUSED: submitting a direction on its own", !v.ok, "was ALLOWED");
   v = as("t471_own", slide("group"));
   check("§481 REFUSED: the owner on the company's own slides", !v.ok, "was ALLOWED");
+})();
+
+/* ── §492: HOW WE COMPETE ────────────────────────────────────────────────
+   On a unit it is the unit's analysis (the SWOT's own kind, the office's
+   Strategy half); on the group it is the group's own strategy. Classified
+   AND swept (§259.2): never "unknown", and a reordered copy is no change. */
+console.log("\n§492 · how we compete");
+(function () {
+  const rec = { discipline: "btc", values: [{ title: "Hassle-free", how: ["One visit"], measure: ["NPS 45+"] }] };
+  const put = function (inc) { inc.units.mobile.compete = clone(rec); };
+  allows("smo", put, "§492: the office writes a unit's How we compete");
+  refuses("own_mob", put, "§492 REFUSED: the unit's own owner may not (the Strategy half is the office's)");
+  const inc = clone(SEED); put(inc);
+  const kinds = (A.collect(SEED, inc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+  check("§492: a unit's How we compete is classified as its analysis",
+        kinds.length && kinds.every(function (k) { return k === "unitAnalysis"; }), kinds.join(",") || "(nothing — INVISIBLE)");
+  const stored = clone(SEED); stored.units.mobile.compete = clone(rec);
+  const re = clone(SEED); re.units.mobile.compete = { values: [{ measure: ["NPS 45+"], how: ["One visit"], title: "Hassle-free" }], discipline: "btc" };
+  const same = (A.collect(stored, re, R.worldOf(stored)) || []);
+  check("§492: the same record with its keys reordered is no change (§145)", same.length === 0,
+        same.map(function (c) { return c.kind; }).join(","));
+  const gput = function (inc) { inc.group.compete = clone(rec); };
+  allows("smo", gput, "§492: the office writes the top layer's How we compete");
+  refuses("own_mob", gput, "§492 REFUSED: a unit owner may not write the top layer's");
+  const ginc = clone(SEED); gput(ginc);
+  const gk = (A.collect(SEED, ginc, R.worldOf(SEED)) || []).map(function (c) { return c.kind; });
+  check("§492: the top layer's How we compete is never unknown or setup",
+        gk.length && gk.indexOf("unknown") < 0 && gk.indexOf("setup") < 0, gk.join(",") || "(nothing — INVISIBLE)");
+})();
+
+/* ── §505: A DIRECTION'S OWNER AND CUSTODIAN ARE A ROW ─────────────────────
+   Being named on a direction derives `dirowner` at the group — from either
+   seat — and nothing else; with the units ON it derives nothing (the top
+   layer's pillars are not directions then). The row opens the group at view
+   and no unit or function, and it is never granted by hand. BOTH ENDS. */
+console.log("\n§505 · the direction owner row");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t504_own", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t504_cus", name: "Testcase Direction Custodian", unit: "group" },
+    { key: "t504_none", name: "Testcase Nobody Named", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+    owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian", measures: [], tactics: [] }];
+  const w = R.worldOf(B);
+  const roles = function (k) { return R.personRoles(w, personOf(B, k)).map(function (r) { return r.role + "@" + r.at; }).join(","); };
+  check("§505: a direction's owner holds the Direction owner role at the group", roles("t504_own") === "dirowner@group", roles("t504_own"));
+  check("§505: …and so does its custodian", roles("t504_cus") === "dirowner@group", roles("t504_cus"));
+  check("§505: somebody named on no direction holds nothing", roles("t504_none") === "", roles("t504_none"));
+  check("§505: the owner may open the group", R.grantIn(w, personOf(B, "t504_own"), "a_group", "group") === "view",
+        R.grantIn(w, personOf(B, "t504_own"), "a_group", "group"));
+  check("§505: …and no business unit", R.grantIn(w, personOf(B, "t504_own"), "unit", "mobile") === "none",
+        R.grantIn(w, personOf(B, "t504_own"), "unit", "mobile"));
+  check("§505: the role is bounded — it never speaks for the company", R.isOwnLinesRole("dirowner"), "not own-lines");
+  const on = clone(B); on.group[R.STRUCTURE] = { bu: { exists: true } };
+  const r2 = R.personRoles(R.worldOf(on), personOf(on, "t504_own")).map(function (r) { return r.role; });
+  check("§505: with the business units on, the same naming derives no Direction owner", r2.indexOf("dirowner") < 0, r2.join(","));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

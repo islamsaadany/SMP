@@ -735,6 +735,31 @@ CREATE INDEX change_log_target ON change_log (tenant_id, target, at DESC);
 CREATE INDEX change_log_person ON change_log (tenant_id, person_key, at DESC);
 CREATE INDEX change_log_email ON change_log (tenant_id, email, at DESC);
 
+/* §504: a line of a save that failed, sent to the Strategy Office from the
+   person's own computer (migration 026). */
+CREATE TABLE unsaved_lines (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  report uuid NOT NULL,
+  person_key text NOT NULL,
+  person_name text,
+  role text NOT NULL DEFAULT '',
+  view_as text,
+  sent_at timestamptz NOT NULL DEFAULT now(),
+  addr text NOT NULL,
+  change jsonb NOT NULL,
+  base jsonb,
+  mine jsonb,
+  error text,
+  status text NOT NULL DEFAULT 'open',
+  done_by text,
+  done_at timestamptz,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT unsaved_status CHECK (status IN ('open', 'applied', 'discarded', 'landed'))
+);
+CREATE INDEX unsaved_lines_open ON unsaved_lines (tenant_id, status, addr);
+CREATE INDEX unsaved_lines_report ON unsaved_lines (tenant_id, report);
+
 CREATE TABLE chat_threads (
   tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   person_key text NOT NULL,
@@ -934,6 +959,22 @@ CREATE INDEX library_items_shelf ON library_items (tenant_id, kind, state, repor
 -- an action, and one row per status change. Both are tenant-owned, so the
 -- loop below fences them on a fresh database and migration 012 fences them on
 -- one already up (the same two paths library_items took, and the same reason).
+-- A topic an action belongs to (§497): Budget, Strategy communication — a row
+-- of its own so a rename reaches every action under it, one name per client
+-- whatever the case. Closed is a stamp, not a delete: a closed topic is still
+-- drawn while it holds open actions.
+CREATE TABLE tracker_topics (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  closed_at timestamptz,
+  created_by text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT tracker_topic_name CHECK (btrim(name) <> '')
+);
+CREATE UNIQUE INDEX tracker_topics_name ON tracker_topics (tenant_id, lower(name));
+
 CREATE TABLE tracker_actions (
   tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -959,11 +1000,16 @@ CREATE TABLE tracker_actions (
   -- Room for what is deliberately not built (spec 054 §7): a late override,
   -- a reason, a link to a plan item — drawn by nothing.
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  -- One topic or none (§497). No ON DELETE: lib/tracker.ts takes a topic off
+  -- its actions before it deletes it.
+  topic_id uuid,
   PRIMARY KEY (tenant_id, id),
+  CONSTRAINT tracker_actions_topic FOREIGN KEY (tenant_id, topic_id) REFERENCES tracker_topics (tenant_id, id),
   CONSTRAINT tracker_status CHECK (status IN ('not_started','in_progress','done')),
   CONSTRAINT tracker_title CHECK (btrim(title) <> '')
 );
 CREATE INDEX tracker_actions_week ON tracker_actions (tenant_id, status, due);
+CREATE INDEX tracker_actions_topic_ix ON tracker_actions (tenant_id, topic_id);
 
 -- One row per status change, plus one on creation. Appended, never edited:
 -- a log a save could rewrite is not a log (§42).
@@ -1355,7 +1401,7 @@ CREATE TABLE copilot_chats (
   last_at timestamptz NOT NULL DEFAULT now(),
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
-  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_chat_section CHECK (section IN ('foundation','analysis','compete','directions','capabilities','execution','advisory')),
   CONSTRAINT copilot_chat_title CHECK (btrim(title) <> '')
 );
 CREATE INDEX copilot_chats_shelf ON copilot_chats (tenant_id, place, section, last_at DESC);
@@ -1393,7 +1439,7 @@ CREATE TABLE copilot_deliverables (
   created_at timestamptz NOT NULL DEFAULT now(),
   extra jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (tenant_id, id),
-  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','directions','execution','advisory')),
+  CONSTRAINT copilot_deliverable_section CHECK (section IN ('foundation','analysis','compete','directions','capabilities','execution','advisory')),
   CONSTRAINT copilot_deliverable_kind CHECK (kind IN ('promotable','copilot-only')),
   CONSTRAINT copilot_deliverable_title CHECK (btrim(title) <> '')
 );
@@ -1444,6 +1490,30 @@ CREATE TABLE copilot_files (
   CONSTRAINT copilot_file_size CHECK (size > 0 AND size <= 3145728)
 );
 CREATE INDEX copilot_files_chat ON copilot_files (tenant_id, chat_id);
+
+-- A source the Copilot reads (§490): belongs to the CLIENT, not to a chat, so
+-- one brought in for one unit's SWOT can be picked again for another's.
+-- place is the unit it is about, or 'all'. bytes is NULL for a text source.
+CREATE TABLE copilot_sources (
+  tenant_id uuid NOT NULL DEFAULT NULLIF(current_setting('app.tenant_id', true), '')::uuid REFERENCES tenants (id) ON DELETE CASCADE,
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  place text NOT NULL,
+  kind text NOT NULL,
+  name text NOT NULL,
+  file_kind text,
+  size integer NOT NULL DEFAULT 0,
+  bytes bytea,
+  text text NOT NULL DEFAULT '',
+  by_key text NOT NULL DEFAULT '',
+  at timestamptz NOT NULL DEFAULT now(),
+  extra jsonb NOT NULL DEFAULT '{}'::jsonb,
+  PRIMARY KEY (tenant_id, id),
+  CONSTRAINT copilot_source_kind CHECK (kind IN ('guided','template','report','research')),
+  CONSTRAINT copilot_source_file_kind CHECK (file_kind IS NULL OR file_kind IN ('pdf','docx','xlsx')),
+  CONSTRAINT copilot_source_size CHECK (size >= 0 AND size <= 3145728),
+  CONSTRAINT copilot_source_name CHECK (btrim(name) <> '')
+);
+CREATE INDEX copilot_sources_shelf ON copilot_sources (tenant_id, place, at DESC);
 
 -- An office login may be placed on a register that does not exist yet
 -- (§313.32), so the membership's pointer at the person is checked at COMMIT.

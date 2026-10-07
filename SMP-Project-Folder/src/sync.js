@@ -440,11 +440,224 @@ var SYNC = (function () {
       : "The server could not take your change just now.";
     /* The trailing space is load-bearing: the two spans are inline and ran
        together as "just now.Keep" without it — §171's own bar had "500.Your". */
-    notSaved("<span><strong title=\"" + esc(detail || "") + "\">Not saved.</strong> " + first + " </span>" +
-      "<span>Keep this tab open \u2014 it tries again by itself every few seconds, and " +
-      "this bar clears the moment your change goes through. If it stays for more " +
-      "than a minute, tell the Strategy Office.</span>");
+    /* §502: THE DETAILS TRAVEL WITH THE BAR. Islam: *"you need to write an
+       actual error here so we can get back to you."* One block of text — the
+       time, what failed, the server's reason and its log reference — goes on
+       the hover, into the console as an error, and onto the clipboard from the
+       link at the end, so the person can paste it to the office and the
+       office can find the failure in the server's log by its reference. The
+       reason is names only (lib/fail-ref.ts); the database's own words never
+       reach the page (§43). */
+    FAILTEXT = "SMP save failed \u00b7 " + new Date().toISOString() +
+      " \u00b7 " + location.pathname + "\n" + (detail || "");
+    /* once per distinct failure, not once per five-second retry */
+    if ((detail || "") !== FAILSHOWN) { FAILSHOWN = detail || ""; console.error(FAILTEXT); }
+    keepFailed(kind);
   }
+  var FAILTEXT = "", FAILSHOWN = "";
+
+  /* ── A FAILED SAVE IS KEPT ON THIS COMPUTER (§504) ───────────────
+     Islam: *"Can't we have a way to avoid the data unsaved error something
+     like the data is saved locally until we get back and fix things?"* A
+     save that FAILS (the server or the network — never a refusal, which is a
+     decision rather than an accident) is written to this browser's storage
+     as LINES (lib/graph-diff splitLines), so closing the tab while the server
+     is down loses nothing: the next time this person opens the platform on
+     this computer the lines are sent again by themselves.
+
+     ONE QUIET BUTTON, AND NO DOWNLOAD (his choice, replacing §502's copy
+     button): "Send to the Strategy Office" posts the same lines and the error
+     to the office's list (Setup › Unsaved changes, lib/unsaved.ts), which the
+     office applies AS THE SENDER. It is optional, because the lines resend
+     themselves either way.
+
+     KEYED BY CLIENT AND OWNED BY A PERSON: a record is replayed only for the
+     person who made it, and is wiped at sign-out, so the next person at this
+     computer is never handed somebody else's changes. Every storage call is
+     guarded — a browser that refuses storage still gets the old promise
+     (keep this tab open), never a false one. */
+  var KEEP_PREFIX = "smp.unsaved.";
+  var KEEPVIEW = "", KEEPSIG = "", KEEPOK = true;
+  function keepKey() { return KEEP_PREFIX + (clientSlug() || "-"); }
+  function keepRead() {
+    try {
+      var k = JSON.parse(localStorage.getItem(keepKey()) || "null");
+      return k && k.who && Array.isArray(k.lines) ? k : null;
+    } catch (e) { return null; }
+  }
+  function keepWrite(k) {
+    try { localStorage.setItem(keepKey(), JSON.stringify(k)); return true; } catch (e) { return false; }
+  }
+  function keepClear() { try { localStorage.removeItem(keepKey()); } catch (e) {} }
+  function keepWipe() {
+    try {
+      for (var i = localStorage.length - 1; i >= 0; i--) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(KEEP_PREFIX) === 0) localStorage.removeItem(k);
+      }
+    } catch (e) {}
+  }
+  /* What is on screen and not on the server, line by line, each with what the
+     server held when it was typed — so a replay can tell "nobody touched it"
+     from "somebody else changed it meanwhile". */
+  function keepLines() {
+    if (typeof SMPDiff === "undefined" || !SMPDiff.splitLines || !lastSaved) return [];
+    try {
+      var base = JSON.parse(lastSaved), cur = JSON.parse(serialize());
+      return SMPDiff.splitLines(SMPDiff.graphChanges(base, cur)).map(function (l) {
+        l.base = SMPDiff.valueAt(base, l); return l;
+      });
+    } catch (e) { return []; }
+  }
+  function keepSig(lines) { try { return JSON.stringify((lines || []).map(function (l) { return [l.addr, l.mine]; })); } catch (e) { return ""; } }
+  function keepFailed(kind) {
+    var who = person && person.key;
+    var lines = keepLines();
+    var old = keepRead();
+    if (old && old.who !== who) old = null;
+    KEEPOK = false;
+    if (who && lines.length) {
+      KEEPOK = keepWrite({ who: who, viewAs: actingAs() || null, at: Date.now(), kind: kind,
+        error: FAILTEXT, lines: lines, reports: (old && old.reports) || [],
+        clash: (old && old.clash) || [] });
+    }
+    var sig = keepSig(lines);
+    if (sig !== KEEPSIG) { KEEPSIG = sig; if (KEEPVIEW !== "down") KEEPVIEW = ""; }
+    renderUnsaved();
+  }
+  var SHIELD = "<svg class=\"safety-ic\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" " +
+    "stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">" +
+    "<path d=\"M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z\"/><path d=\"M9 12l2 2 4-4\"/></svg>";
+  /* The bar in its three states (the approved mockup): kept, sent, and the
+     platform down. Never a paint() — the page under it may hold a half-typed
+     sentence (§35). */
+  function renderUnsaved(html) {
+    var el = document.getElementById("unsaved");
+    if (!el) return;
+    if (html === null) { el.hidden = true; el.innerHTML = ""; el.className = "banner safety"; return; }
+    el.className = "banner safety";
+    if (html) { el.innerHTML = html; el.hidden = false; return; }
+    var title, sub, btn = "";
+    if (!KEEPOK) {
+      title = "Not saved yet.";
+      sub = "The server didn't answer. Keep this tab open \u2014 it tries again by itself every few seconds.";
+    } else if (KEEPVIEW === "sent") {
+      title = "Your changes are safe, and the office has a copy.";
+      sub = "They still save by themselves as soon as the server answers.";
+    } else if (KEEPVIEW === "down") {
+      title = "Your changes are safe on this computer.";
+      sub = "The platform is down right now. They save by themselves when it's back, even if you close this page.";
+    } else {
+      title = "Your changes are safe on this computer.";
+      sub = "The server didn't answer, so we'll save them the moment it does. Nothing to do.";
+      btn = "<span class=\"safety-acts\"><button type=\"button\" class=\"safety-btn ghost\" data-unsaved-send>" +
+            "Send to the Strategy Office</button></span>";
+    }
+    el.innerHTML = SHIELD + "<span class=\"safety-msg\"><strong title=\"" + esc(FAILSHOWN || "") + "\">" + title +
+      "</strong> <span>" + sub + "</span></span>" + btn;
+    el.hidden = false;
+  }
+  function sendUnsaved(b) {
+    var k = keepRead();
+    if (!k || !k.lines.length) return;
+    if (b) { b.disabled = true; b.textContent = "Sending\u2026"; }
+    var sig = KEEPSIG;
+    fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unsaved: "send", client: clientSlug(), viewAs: k.viewAs || undefined,
+        error: k.error || FAILTEXT, lines: k.lines.map(function (l) { return { addr: l.addr, change: l.change, base: l.base }; }) })
+    }).then(function (r) { return r.ok ? r.json() : null; }, function () { return null; })
+      .then(function (j) {
+        if (j && j.ok && j.report) {
+          var cur = keepRead();
+          if (cur) { cur.reports = (cur.reports || []).concat([j.report]); keepWrite(cur); }
+          if (sig === KEEPSIG) KEEPVIEW = "sent";
+        } else KEEPVIEW = "down";
+        if (lastSaved !== serialize()) renderUnsaved();
+      });
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-unsaved-send]");
+    if (b) sendUnsaved(b);
+  });
+  /* The save landed: everything kept is on the server now. The office is told
+     each report it was sent saved itself, and the record goes — unless a
+     clash is still waiting on this person, which is theirs to answer. */
+  function keepLanded() {
+    KEEPVIEW = ""; KEEPSIG = ""; KEEPOK = true;
+    var k = keepRead();
+    if (k && k.who === (person && person.key) && (k.clash || []).length) {
+      k.lines = []; keepWrite(k); return;
+    }
+    if (k && k.who === (person && person.key)) {
+      (k.reports || []).forEach(function (rep) {
+        fetch("/api/state", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ unsaved: "landed", report: rep, client: clientSlug() }) }).catch(function () {});
+      });
+      keepClear();
+    }
+    var el = document.getElementById("unsaved");
+    if (el && !el.classList.contains("done") && !el.hasAttribute("data-clash")) renderUnsaved(null);
+    if (KEEPREPLAY) { var n = KEEPREPLAY; KEEPREPLAY = 0; keepDone(n); }
+  }
+  var KEEPREPLAY = 0;
+  function keepDone(n) {
+    renderUnsaved(SHIELD + "<span class=\"safety-msg\"><strong>Your " + (n === 1 ? "earlier change is" : n + " earlier changes are") +
+      " saved.</strong> <span>They were kept on this computer and went through as soon as the server answered.</span></span>");
+    var el = document.getElementById("unsaved");
+    if (el) el.classList.add("done");
+    setTimeout(function () { var e = document.getElementById("unsaved"); if (e && e.classList.contains("done")) renderUnsaved(null); }, 8000);
+  }
+  /* ON OPENING THE PLATFORM AGAIN: what was kept is laid back over the
+     server's copy, line by line. A line the server already holds landed; a
+     line whose place still holds what it held when it was typed is applied;
+     a line whose place somebody ELSE changed meanwhile is a clash, and the
+     person decides — never the platform silently. */
+  function keepReplay() {
+    var k = keepRead();
+    if (!k || !person || k.who !== person.key || typeof SMPDiff === "undefined" || !SMPDiff.applyChanges) return;
+    var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
+    var kept = k.lines.length, applied = 0, clash = (k.clash || []).slice(), same = function (a, b) {
+      return !!(a && b) && a.has === b.has && (!a.has || SMPDiff.sameValue(a.value, b.value));
+    };
+    k.lines.forEach(function (l) {
+      var now = SMPDiff.valueAt(cur, l);
+      if (same(now, l.mine)) return;
+      if (!l.base || same(now, l.base)) {
+        var r = SMPDiff.applyChanges(cur, l.change);
+        if (r && r.ok) { cur = r.state; applied++; } else clash.push(l);
+      } else clash.push(l);
+    });
+    k.lines = []; k.clash = clash;
+    if (clash.length || (k.reports || []).length) keepWrite(k); else keepClear();
+    if (applied) { hydrate(cur); KEEPREPLAY = applied; }
+    else if (!clash.length) { keepLanded(); if (kept) keepDone(kept); }
+    if (clash.length) keepClashBar();
+  }
+  function keepClashBar() {
+    var k = keepRead(); var n = k && k.clash ? k.clash.length : 0;
+    if (!n) return;
+    renderUnsaved(SHIELD + "<span class=\"safety-msg\"><strong>" + (n === 1 ? "One change you kept" : n + " changes you kept") +
+      " clash with an edit somebody made meanwhile.</strong> <span>Keep yours, or keep what is on the platform now.</span></span>" +
+      "<span class=\"safety-acts\"><button type=\"button\" class=\"safety-btn\" data-unsaved-clash=\"mine\">Keep mine</button>" +
+      "<button type=\"button\" class=\"safety-btn ghost\" data-unsaved-clash=\"theirs\">Keep theirs</button></span>");
+    var el = document.getElementById("unsaved"); if (el) el.setAttribute("data-clash", "");
+  }
+  document.addEventListener("click", function (ev) {
+    var b = ev.target && ev.target.closest && ev.target.closest("[data-unsaved-clash]");
+    if (!b) return;
+    var k = keepRead(); if (!k) return;
+    var el = document.getElementById("unsaved"); if (el) el.removeAttribute("data-clash");
+    var mine = b.getAttribute("data-unsaved-clash") === "mine";
+    var clash = k.clash || []; k.clash = []; keepWrite(k);
+    renderUnsaved(null);
+    if (mine && clash.length) {
+      var cur; try { cur = JSON.parse(serialize()); } catch (e) { return; }
+      clash.forEach(function (l) { var r = SMPDiff.applyChanges(cur, l.change); if (r && r.ok) cur = r.state; });
+      hydrate(cur); KEEPREPLAY = clash.length;
+      if (typeof repaint === "function" && repaint) repaint();
+      save();
+    } else keepLanded();
+  });
 
   /* ── PUTTING BACK ONLY WHAT WAS REFUSED (§184) ───────────────────
      Islam, on a strategy custodian: *"they lost all data they inputed."*
@@ -615,6 +828,7 @@ var SYNC = (function () {
       if (!confirm("Discard everything changed since the last successful save, " +
                    "and load the stored version again?\n\nAnything you have typed " +
                    "that was not saved will be lost.")) return;
+      keepClear();
       location.reload();
     });
   }
@@ -699,7 +913,7 @@ var SYNC = (function () {
          tried normally. */
       /* Signed out, or signed in on a password that still has to be changed:
          the door, not a banner. */
-      if (r.status === 401) { location.replace(doorUrl()); return; }
+      if (r.status === 401) { keepFailed("server"); location.replace(doorUrl()); return; }
       if (r.status === 403) {
         refusedBody = now; refusedAs = actingAs();
         say("refused");
@@ -722,7 +936,9 @@ var SYNC = (function () {
         refusedWhy = null; refusedRows = null; refusedUndoable = false;
         refusedJudged = null;
         showRefusal(null);
+        FAILSHOWN = "";
         lastSaved = now;
+        keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
            they can be given no password and the password column has nothing
@@ -742,8 +958,16 @@ var SYNC = (function () {
       }
       else {
         say("failed");
-        showFailed("server", "The server answered HTTP " + r.status + ".");
-        console.warn("SMP: save failed (HTTP " + r.status + ")");
+        /* the server's own sentence, reason and reference, when it sent any
+           (§502) — a body that will not parse still leaves the status */
+        var head = "HTTP " + r.status;
+        return r.json().then(function (j) { return j || {}; }, function () { return {}; }).then(function (j) {
+          var lines = [head + (j.ref ? " \u00b7 reference " + j.ref : "")];
+          if (j.reason) lines.push("Reason: " + j.reason);
+          if (j.table) lines.push("Table: " + j.table);
+          if (j.error) lines.push("Server said: " + j.error);
+          showFailed("server", lines.join("\n"));
+        });
       }
     }).catch(function (e) {
       saving = false;
@@ -752,7 +976,6 @@ var SYNC = (function () {
          errand, so a different sentence. */
       showFailed("network", "The platform could not reach the server (" +
                  (e && e.message ? e.message : "no answer") + ").");
-      console.warn("SMP: save failed (" + (e && e.message) + ")");
     });
   }
 
@@ -893,6 +1116,7 @@ var SYNC = (function () {
     out.textContent = "Sign out";
     out.addEventListener("click", function () {
       cacheWipe();
+      keepWipe();
       fetch("/api/auth", { method: "POST",
         headers: { "Content-Type": "application/json" },
         body: '{"action":"logout"}'
@@ -1541,6 +1765,10 @@ var SYNC = (function () {
              as a change nobody made (the server refuses it, 400, and the retry
              every 5s keeps the page busy for ever). */
           lastSaved = serialize();
+          /* §504: anything kept on this computer from a save that failed is
+             laid back over the server's copy, AFTER the baseline, so the
+             autosave sees it as this person's change and sends it. */
+          keepReplay();
           land(function () {
             if (person) chromeOnce(); else paint();
             if (stale) { stale = false; markStale(false); }

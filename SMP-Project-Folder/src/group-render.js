@@ -1730,19 +1730,24 @@ function topCapBody(c, ed){
   var tbody = function(kind, extra){
     return ed ? '<tbody class="sortable" data-item="tr.topcapprow" data-kind="' + kind + '"' + extra + '>' : '<tbody>';
   };
+  /* §491: A CAPABILITY PLANNED IN PILLARS IS SHAPED LIKE A DIRECTION. Islam,
+     of §488.1's table of directions inside a capability: *"a capability
+     planning in a pillar approach is typical to a direction"*, showing the
+     Directions pane as the picture. So the capability holds its key measures
+     and tactics itself — drawn by the Directions pane's own body
+     (unitPlanBody, bare) under the capability's band, never a list of
+     directions inside it. Stored exactly as before: the capability's one
+     pillar row carries them, so reporting, scoring and the deck are unmoved. */
   if (capPlansInPillars(c)) {
     var u = ed ? capWritable(c.id) : capAsUnit(tgt);
     var items = ed ? u.items : itemsNow(u);
-    if (!items.length) return '<p class="sub">No ' + L("pillar", "bu").toLowerCase() + ' yet.</p>' + addLine("pillar", L1("pillar"));
-    return '<div class="tblscroll"><table data-topcappillars="1"><thead><tr><th class="num">#</th><th>' + L1("pillar") +
-      '</th><th>Owner</th><th class="num">Measures</th><th class="num">Tactics</th></tr></thead>' +
-      tbody("pillars", ' data-u="' + esc(tgt) + '"') +
-      items.map(function(it, i){
-        return row(it.id, i, '<td class="num mono">' + grip(it.name || "") + esc(pillarCode(u, u.items.indexOf(it))) +
-          '</td><td><b>' + esc(it.name || "") + '</b></td><td>' + miss(it.owner) +
-          '</td><td class="num">' + (it.measures || []).length + '</td><td class="num">' + (it.tactics || []).length + '</td>',
-          5, function(){ return unitPlanBody(it, u, false); });
-      }).join("") + '</tbody></table></div>' + addLine("pillar", L1("pillar"));
+    if (!items.length) return ed
+      ? '<div class="topcapadd"><button class="linkbu" data-rowadd="pillar|' + esc(tgt) +
+          '">+ Start this ' + esc(L1("capability").toLowerCase()) + '\'s plan</button></div>'
+      : '<p class="sub">Nothing planned yet.</p>';
+    return unitPlanBody(items[0], u, true, true) + (items.length > 1
+      ? '<p class="sub">This ' + esc(L1("capability").toLowerCase()) + ' holds ' + items.length +
+        ' plans from before; the first is shown.</p>' : '');
   }
   var ps = c.projects || [];
   if (!ps.length) return '<p class="sub">No ' + L("project", "bu").toLowerCase() + ' yet.</p>' + addLine("project", L1("project"));
@@ -1759,7 +1764,9 @@ function topCapBody(c, ed){
 }
 function renderTopCaps(){
   var caps = capsReachable();
-  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>');
+  if (!caps.length) return section("", "", null, '<p class="sub">No ' + L("capability", "bu").toLowerCase() + ' yet.</p>' +
+    (projEditing() && mayEditPlan() ? '<div class="railadd"><button class="linkbu" data-topcapadd="">+ Add a ' +
+      esc(L1("capability")) + '</button></div>' : ''));
   var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
   var rail = '<div class="rail" data-topcaprail="1">' + railHead(L("capability", "bu"), caps.length) +
     caps.map(function(c){
@@ -1769,7 +1776,10 @@ function renderTopCaps(){
       return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
         railName(topCapCode(c), c.name) +
         (g ? '<span class="rgap">' + g + ' Missing</span>' : '') +
-        railSub(n ? plural(n, pil ? L1("pillar").toLowerCase() : "project") : "No " + (pil ? L("pillar", "bu").toLowerCase() : "projects") + " yet", "") +
+        /* §491: a pillars capability IS its plan, so its line is not a count
+           of directions inside it — a direction's own rail says none. */
+        (pil ? (n ? "" : railSub("Nothing planned yet", ""))
+             : railSub(n ? plural(n, "project") : "No projects yet", "")) +
         '</button>';
     }).join("") + '</div>';
   /* §488: WITH THE PEN ON, THE PANE KEEPS ITS TABLE (topCapBody's own note)
@@ -1781,8 +1791,31 @@ function renderTopCaps(){
   };
   var seats = '<span class="topcapseat"><b>Owner</b> ' + seat("capowner", sel.head) + '</span>' +
               '<span class="topcapseat"><b>Custodian</b> ' + seat("custodian", sel.custodian) + '</span>';
-  var pane = pillarBand(topCapCode(sel), sel.name, seats, L1("capability")) +
-    '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
+  /* §500: THE SAME HEAD AND THE SAME ADD AS A DIRECTION. Islam, with the pen
+     open on this pane: *"I'm not able to edit the name nor add a capability …
+     the capability view should be the same like the directions same
+     functionality same work."* §482/§488 drew the band read-only in both modes
+     and gave the rail no Add, where a direction's pane (unitPlanBody's edhead,
+     §194/§232) carries a name box and Remove and its rail carries "+ Add".
+     So editing draws that same head — the code, the name box (writing the
+     capability's name, and its one plan row's while that still wears the old
+     name, §491), the two seats, and Remove through §325's own dialog — and the
+     rail gets the direction rail's own add line (§69.13, §53.5). */
+  var head = ed
+    ? '<div class="ptitle edhead"><div class="pthead"><h3><span class="ptcode">' + esc(topCapCode(sel)) + '</span>' +
+        textOr("plan", sel.name, "ptname", function(v){
+          v = String(v || "").trim(); if (!v) return;
+          (sel.items || []).forEach(function(it){ if (!it.name || it.name === sel.name) it.name = v; });
+          sel.name = v;
+        }) + '</h3></div>' +
+        '<span class="pband-r">' + seats + '</span>' +
+        '<button class="rmplan" data-caprm="' + esc(sel.id) + '">Remove this ' + esc(L1("capability")) + '</button></div>'
+    : pillarBand(topCapCode(sel), sel.name, seats, L1("capability"));
+  var add = ed && mayEditPlan()
+    ? '<div class="railadd"><button class="linkbu" data-topcapadd="' + esc(sel.id) + '">+ Add a ' + esc(L1("capability")) + '</button></div>'
+    : '';
+  rail = rail.replace(/<\/div>$/, add + '</div>');
+  var pane = head + '<div class="topcapbody">' + topCapBody(sel, ed) + '</div>';
   return '<div class="split" data-topcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
@@ -3318,6 +3351,7 @@ function paneActs(page, acKey){
 var SEC_PENS = {
   found:   { unit: "foundation", fn: "capfoundation", ac: "u_found" },
   swot:    { unit: "analysis",   fn: "capfoundation", ac: "u_anal"  },
+  compete: { unit: "analysis",                        ac: "u_anal"  },
   drivers: { unit: "plan",                            ac: "u_plan"  },
   plan:    { unit: "plan",       fn: "plan",          ac: "u_plan"  },
   proj:    { unit: "plan",       fn: "plan",          ac: "u_plan"  }
@@ -3327,7 +3361,7 @@ var SEC_PENS = {
 /* §488: the company's Capabilities section takes the plan's own pen, so one
    Edit opens the chosen capability for editing in place — the same fields its
    own Plan page draws (Islam: "there is no edit here in the capability"). */
-var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
+var SEC_PENS_TOP = { found: ["foundation", "g_found"], swot: ["analysis", "u_anal"], compete: ["analysis", "u_anal"], plan: ["plan", "u_plan"], caps: ["plan", "u_plan"] };
 function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
@@ -5570,6 +5604,60 @@ function renderFnSW(t){
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
   return swotBoxes({ ukey:"fn:" + fk, swot:sw }, SMPRules.swotQuads(GROUP, "fn:" + fk), "capfoundation", "k_found");
+}
+/* ── HOW WE COMPETE (spec 064 §3.1, §3.4) ─────────────────────────────
+   A section after the SWOT, drawn while the layer's Structure has it on.
+   The table is Islam's own slide: the discipline across the top, then a
+   Value / How / Measure row, one column per value. It shares the SWOT's
+   page and grant (`analysis`, `u_anal`), so one Edit opens both and nobody's
+   rights move. In edit mode every cell is a box: a How or a Measure is one
+   line per bullet. */
+function renderUnitCompete(u){
+  var t = u.ukey, page = "analysis", ac = "u_anal";
+  var c = competeOf(t), ed = authoring(page, ac);
+  var vals = c.values;
+  var lines = function(a){ return (a || []).map(function(x){ return String(x || "").trim(); }).filter(Boolean); };
+  var setLines = function(i, key){
+    return function(v){
+      var w = competeWritable(t); if (!w || !w.values[i]) return;
+      w.values[i][key] = String(v || "").split(/\n/).map(function(x){ return x.replace(/^\s*[-\u2022*]\s*/, "").trim(); }).filter(Boolean);
+    };
+  };
+  var disc = ed
+    ? selectOr(page, c.discipline || "", [{ v:"", label:"Not chosen" }].concat(SMPRules.DISCIPLINES.map(function(d){ return { v:d[0], label:d[1] }; })), "cmpdisc", function(v){
+        var w = competeWritable(t); if (!w) return;
+        if (v) w.discipline = v; else delete w.discipline;
+        competeTidy(t);
+      })
+    : (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : '<span class="cmpnone">Not chosen</span>');
+  if (!ed && !c.discipline && !vals.length)
+    return '<div class="cmp" data-compete="' + esc(t) + '"><p class="cmpnone">Nothing written yet.</p></div>';
+  var head = '<tr><th class="cmprow">Discipline</th><th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' + disc + '</th></tr>';
+  var row = function(label, cell){
+    return '<tr><th class="cmprow">' + label + '</th>' +
+      (vals.length ? vals.map(cell).join("") : '<td class="cmpnone">' + (ed ? "Add a value to start." : "&mdash;") + '</td>') + '</tr>';
+  };
+  var bullets = function(a){
+    var l = lines(a);
+    return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;';
+  };
+  var body =
+    row("Value", function(v, i){
+      return '<td class="cmpval">' + (ed
+        ? inputOr(page, v.title || "", "", function(x){ var w = competeWritable(t); if (w && w.values[i]) w.values[i].title = String(x || "").trim(); }) +
+          '<button class="xbtn" data-cmprm="' + esc(t) + '|' + i + '" title="Remove this value" aria-label="Remove this value">&times;</button>'
+        : esc(v.title || "")) + '</td>';
+    }) +
+    row("How", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.how).join("\n"), "cmpbox", setLines(i, "how")) : bullets(v.how)) + '</td>';
+    }) +
+    row("Measure", function(v, i){
+      return '<td>' + (ed ? fieldOr(page, lines(v.measure).join("\n"), "cmpbox", setLines(i, "measure")) : bullets(v.measure)) + '</td>';
+    });
+  return '<div class="cmp" data-compete="' + esc(t) + '"><div class="tblscroll"><table class="cmptab"><thead>' + head +
+    '</thead><tbody>' + body + '</tbody></table></div>' +
+    (ed ? '<div class="addrow"><button class="editbtn" data-cmpadd="' + esc(t) + '">+ Add a value</button></div>' : '') +
+    '</div>';
 }
 function swotBoxes(u, quads, page, ac){
   /* THE FIRST LINE CAN BE WRITTEN (§129's audit). The pen edited what a file
@@ -9079,7 +9167,7 @@ if (typeof document !== "undefined") document.addEventListener("toggle", functio
   }
 }, true);
 
-function unitPlanBody(it, u, railed){
+function unitPlanBody(it, u, railed, bare){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
   var code = pillarCode(u, u.items.indexOf(it));
@@ -9407,7 +9495,11 @@ function unitPlanBody(it, u, railed){
      one answer, and the two are different questions). The column takes
      `flex:1` so the growing box (§189) fills the line instead of taking a
      slice of it. */
-  var head = showHead
+  /* §491: `bare` is a capability planned in pillars on the company's
+     Capabilities pane — the capability's band IS the head, and its owner and
+     custodian are on it, so neither the pillar's head nor its front matter is
+     drawn a second time. */
+  var head = bare ? "" : showHead
     ? '<div class="ptitle' + (ed ? ' edhead' : '') + '"><div class="pthead"><h3>' +
         '<span class="ptcode">' + code + '</span>' +
         (ed ? textOr("plan", it.name, "ptname", function(v){ it.name = v; })
@@ -9486,7 +9578,7 @@ function unitPlanBody(it, u, railed){
        wide (§109, §130.1): a pillar's kind and its owner are two facts about
        the pillar itself, and a second block for the second fact is a component
        nobody needed. */
-    (ed
+    (ed && !bare
       ? '<div class="pfront one"><div class="pfcol">' +
           '<div class="pfrow"><em>Owner</em><div class="pfval">' +
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +

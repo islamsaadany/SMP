@@ -1,0 +1,253 @@
+<title>Tracker Topic Column</title>
+<style>
+*{box-sizing:border-box}
+/* THE LEDGER (§497), from design-mockups/internal-tracker/2026-10-06_topics-refined.html,
+   its "Refined" column, with Islam's two changes: no way back above the
+   title (the top bar is the way back) and the third count reads "Due". */
+:root{--bar:#16325C;--bar-ink:#FFFFFF;--bar-quiet:#B9C4D6;--bar-accent:#E8B04A;--bar-late:#FFB4A8;--bar-hover:rgba(255,255,255,.1);--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F7F8FA;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+/* THE FONT FAMILY IS NAMED, NEVER "inherit" INSIDE THE SHORTHAND (§356.14):
+   a shorthand ending in a CSS-wide keyword is not CSS a browser will read,
+   so every such line was silently dropped. */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8E99AC;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased}
+.pg{max-width:1000px;margin:0 auto;padding:20px 20px 48px}
+/* the masthead: the week, the name, the four counts, the views */
+.mast{background:var(--bar);color:var(--bar-ink);border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;box-shadow:inset 0 -3px 0 var(--bar-accent)}
+.mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.wkof{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--bar-accent);margin:0 0 7px}
+h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--bar-ink)}
+.strip{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+/* ONE HEIGHT, WHATEVER THE WORDS SAY (§356.16): the floor holds the counts
+   still when a status changes; the label never takes a second line. */
+.tile{text-align:right;min-height:48px}
+.tile b{display:block;font:600 22px/1 var(--font);color:var(--bar-ink)}
+.tile span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--bar-quiet);margin-top:3px;white-space:nowrap}
+.tile.late b{color:var(--bar-late)}
+.cats{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end;flex-wrap:wrap}
+.cats a{font:600 13.5px/1 var(--font);color:var(--bar-quiet);padding:10px 12px 12px;border-bottom:3px solid transparent;text-decoration:none}
+.cats a[aria-current="true"]{color:var(--bar-ink);border-bottom-color:var(--bar-accent)}
+.cats a:hover,.cats a:focus-visible{color:var(--bar-ink);outline:none}
+.cats .sp{flex:1}
+/* the settings — how the list is grouped, and dates as weeks or days —
+   behind "Group by" on the far right of the views row (§356.14, §497) */
+.dots{position:relative;align-self:center;margin-bottom:9px}
+.dots>button{display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:var(--bar-quiet);padding:6px 8px;border-radius:7px;background:none;border:0;cursor:pointer}
+.dots>button b{color:var(--bar-ink);font-weight:600}
+.dots>button svg{width:12px;height:12px}
+.dots>button svg.d3{width:16px;height:16px;margin-left:4px}
+.dots>button:hover,.dots>button.on,.dots>button:focus-visible{background:var(--bar-hover);color:var(--bar-ink);outline:none}
+.setmenu,.tmenu{position:absolute;top:32px;right:0;z-index:9;display:flex;gap:4px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:6px;text-align:left}
+.setmenu .col{display:grid;align-content:start;min-width:0}
+.setmenu .col+.col{border-left:1px solid var(--line);padding-left:4px}
+.setmenu .lab{display:block;font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:3px 9px 2px}
+.setmenu button,.tmenu button{display:flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.setmenu button:hover,.setmenu button:focus-visible,.tmenu button:hover,.tmenu button:focus-visible{background:var(--ground);outline:none}
+.setmenu button.on{font-weight:600}
+.setmenu button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto;flex:none}
+.tmenu{display:grid;min-width:150px}
+.tmenu button.danger{color:var(--bad)}
+.tmenu .sure{display:grid;gap:4px;padding:4px 9px;font-size:13px;color:var(--ink-2);max-width:220px;white-space:normal}
+/* the tools: write the next action, or search */
+.tools{display:flex;gap:18px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
+.write{flex:1 1 380px;min-width:0;border-bottom:1.5px solid var(--gold)}
+.find{display:flex;align-items:center;gap:8px;flex:0 1 240px;min-width:0;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--ink-3)}
+.find svg{width:14px;height:14px;flex:none}
+.srch{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 14px/1.5 var(--font);padding:2px 0;outline:none}
+.srch::placeholder{color:var(--ink-3)}
+.go{border:0;background:none;color:var(--ink-3);font:600 12.5px/1 var(--font);cursor:pointer;padding:4px 2px}
+.cnt{font:500 12.5px/1 var(--font);color:var(--ink-3);white-space:nowrap}
+.find .cnt{display:none}
+.counted{font:500 12.5px/1 var(--font);color:var(--ink-3);margin:-14px 0 18px;text-align:right}
+.list{display:flex;flex-direction:column}
+.none{padding:30px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
+.none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
+/* a section: a numbered head, its counts, its rows, and what it folds */
+.sec{margin:0 0 26px}
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.sh h3{margin:0;font:600 17px/1.2 var(--font);min-width:0}
+.sh h3 input{font:600 17px/1.2 var(--font);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:1px 6px;background:var(--surface);outline:none}
+.sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+.sh .meta .bad{color:var(--bad);font-weight:600}
+.sh .end{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12.5px/1 var(--font);color:var(--ink-3)}
+.sh .tdots{position:relative}
+.sh .tdots>button{background:none;border:0;border-radius:6px;color:var(--ink-3);padding:3px 5px;cursor:pointer;display:grid;place-items:center}
+.sh .tdots>button:hover,.sh .tdots>button.on,.sh .tdots>button:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.sh .tdots svg{width:16px;height:16px}
+.sh .tmenu{top:26px}
+.sh.quiet{border-bottom-color:var(--line)}
+.sh.quiet h3{color:var(--ink-2);font-weight:500;font-style:italic}
+.sh .shut{font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 7px}
+.meter{height:2px;background:var(--line-2);position:relative;top:-2px;margin-bottom:-2px}
+.meter i{display:block;height:100%;background:var(--good)}
+.foot{display:flex;gap:16px;padding:9px 0 0 32px;font:500 13px/1.4 var(--font);color:var(--ink-3)}
+.foot button{background:none;border:0;padding:0;font:500 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer}
+.foot button b{color:var(--gold);font-weight:600}
+.foot button:hover,.foot button:focus-visible{color:var(--ink);outline:none}
+/* DONE FOLDS UNDER ITS SECTION (§497): a section shows what is still to do,
+   and "N done ›" opens the rest. A row ticked a moment ago stays where the
+   hand left it, and an opened row always shows. */
+.sec:not(.showdone) .row.done:not(.fresh):not(.on){display:none}
+/* the row: tick · name · when · owner · status · the arrow */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row .t{min-width:0;font-size:15px;line-height:1.35}
+.row .t[data-rename]{cursor:text}
+.row .tn2{min-width:0;display:flex;align-items:baseline;flex-wrap:wrap;column-gap:8px}
+.tn2.editing{align-items:center}.tn2.editing .tg{display:none}
+.tn2 select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:5px 8px;font:400 13px/1.3 var(--font);max-width:220px}
+.tg{font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.row input.ttl{width:100%;min-width:0;border:1px solid var(--gold);border-radius:6px;background:var(--surface);color:var(--ink);padding:3px 7px;margin:-4px -8px;font:400 15px/1.35 var(--font);outline:none}
+.row.done .t{color:var(--ink-3)}
+.tick{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;display:grid;place-items:center;color:var(--surface);background:var(--surface);cursor:pointer;padding:0}
+.tick:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row.late .tick{border-color:var(--bad)}
+.row.done .tick{background:var(--good);border-color:var(--good)}
+.tick svg{width:11px;height:11px}
+.tick[disabled]{cursor:default;opacity:.55}
+.when{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;text-align:left;background:none;border:0;padding:0;position:relative}
+.when.late{color:var(--bad);font-weight:600}
+.when.pick{cursor:pointer;border-radius:6px;padding:3px 6px;margin:-3px -6px}
+.when.pick:hover,.when.pick.on,.when.pick:focus-visible{background:var(--surface-2);outline:none}
+.when .wk{display:inline-block;font:500 13px/1.4 var(--font);color:inherit}
+/* the week picker: a small table — the week, the days — this week bold
+   (§356.15); No date and a day of your own at the foot */
+.weeks{position:absolute;top:26px;right:0;z-index:5;width:232px;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left;font-variant-numeric:tabular-nums}
+.weeks .wh{display:grid;grid-template-columns:86px 1fr;padding:5px 9px 4px;font:600 10px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);margin-bottom:3px}
+.weeks button{display:grid;grid-template-columns:86px 1fr;width:100%;align-items:baseline;background:none;border:0;border-radius:7px;padding:6px 9px;font:400 13.5px/1.3 var(--font);color:var(--ink);cursor:pointer;text-align:left}
+.weeks button b{font-weight:400;font-variant-numeric:tabular-nums}
+.weeks button.now b{font-weight:700}
+.weeks button small{font:400 12px/1.3 var(--font);color:var(--ink-3);white-space:nowrap}
+.weeks button:hover,.weeks button:focus-visible{background:var(--ground);outline:none}
+.weeks button.on{background:var(--surface-2)}
+.weeks .wf{display:grid;border-top:1px solid var(--line);margin-top:3px;padding-top:3px}
+.weeks .wf button{grid-template-columns:1fr;color:var(--ink-3);font-size:13px}
+.row input.dt,.addrow input.dt{font:400 13px/1.4 var(--font);color:var(--ink);border:1px solid var(--gold);border-radius:6px;padding:2px 5px;background:var(--surface)}
+/* the owner is a first name, drawn as the fact; a press opens the team */
+.who{font:500 13px/1.4 var(--font);color:var(--ink-2);white-space:nowrap;text-align:left;background:none;border:0;padding:0;position:relative}
+.who.pick{cursor:pointer;border-radius:6px;padding:3px 6px;margin:-3px -6px}
+.who.pick:hover,.who.pick.on,.who.pick:focus-visible{background:var(--surface-2);outline:none}
+/* COMPACT (§356.16): the box is its widest name */
+.team,.topics{position:absolute;top:26px;right:0;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 26px rgba(20,28,43,.16);padding:4px;text-align:left}
+.team button,.topics button{display:flex;width:100%;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:5px 9px;font:400 13.5px/1.4 var(--font);color:var(--ink);cursor:pointer;text-align:left;white-space:nowrap}
+.team button:hover,.team button:focus-visible,.topics button:hover,.topics button:focus-visible{background:var(--ground);outline:none}
+.team button.on,.topics button.on{font-weight:600}
+.team button.on::after,.topics button.on::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:auto}
+.topics{min-width:190px}
+.topics .tnew{display:block;width:100%;border:0;border-top:1px solid var(--line);margin-top:3px;padding:7px 9px 5px;background:transparent;color:var(--ink);font:400 13.5px/1.4 var(--font);outline:none}
+/* THE STATUS IS A WORD (§497): one box whether it can be pressed or not —
+   the same font, height and width for a select and a span — with a dash
+   before it in the colour of what it says. */
+.st{display:inline-flex;align-items:center;gap:7px;height:26px;width:128px;font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;padding:0;border:0;border-radius:6px;color:var(--ink-3);background:transparent;white-space:nowrap;text-align:left;appearance:none;-webkit-appearance:none;margin:0}
+span.st::before{content:"";width:12px;height:2px;background:currentColor;flex:none}
+select.st{cursor:pointer;padding:0 14px 0 19px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%235E6E85'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%235E6E85'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 0 center,right 3px center}
+select.st:hover,select.st:focus-visible{background-color:var(--surface-2);outline:none}
+.st.prog{color:var(--gold)}
+select.st.prog{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%239C5D08'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%239C5D08'/%3E%3C/svg%3E")}
+.st.done{color:var(--good)}
+select.st.done{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='2'%3E%3Crect width='12' height='2' fill='%231B6E4E'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0h8L4 5z' fill='%231B6E4E'/%3E%3C/svg%3E")}
+select.st option{text-transform:none;letter-spacing:0;color:var(--ink);background:var(--surface)}
+/* the arrow that expands a row for its notes and history, and folds it */
+.more{width:26px;height:26px;border-radius:7px;border:0;background:none;color:var(--ink-3);display:grid;place-items:center;cursor:pointer;padding:0;justify-self:end}
+.more:hover,.more.on,.more:focus-visible{background:var(--surface-2);color:var(--ink);outline:none}
+.more svg{width:14px;height:14px;transition:transform .15s}
+.more.on svg{transform:rotate(180deg)}
+@media (prefers-reduced-motion:reduce){.more svg{transition:none}}
+/* THE NEXT ACTION is written at the top, under a gold rule: the pen, the box,
+   and — once a first letter lands — its topic, week, owner and note */
+.addrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto auto 0 26px;gap:12px;align-items:center;padding:6px 0}
+.addrow .plus{width:18px;height:18px;display:grid;place-items:center;color:var(--gold)}
+.addrow .plus svg{width:15px;height:15px}
+.addrow input.new{border:0;background:transparent;color:var(--ink);font:400 15px/1.35 var(--font);padding:2px 0;width:100%;min-width:0;outline:none}
+.addrow input::placeholder{color:var(--ink-3)}
+.addrow .tn{min-width:0;display:grid;gap:2px}
+.addrow input.nt{border:0;background:transparent;color:var(--ink-2);font:400 13px/1.4 var(--font);padding:0;width:100%;min-width:0;outline:none}
+.addrow .tpk{font:600 13px/1.4 var(--font);color:var(--ink-3);white-space:nowrap;background:none;border:0;padding:3px 6px;margin:-3px -6px;border-radius:6px;cursor:pointer;position:relative}
+.addrow .tpk .tw{text-decoration:underline dotted;text-underline-offset:3px}
+.addrow .tpk.set{color:var(--gold)}
+.addrow .tpk.set .tw{text-decoration:underline solid 1.5px}
+.addrow .tpk:hover,.addrow .tpk.on,.addrow .tpk:focus-visible{background:var(--surface-2);outline:none}
+.addrow .when .wk,.addrow .who .wn{text-decoration:underline dotted;text-underline-offset:3px}
+.addrow .st{width:0;overflow:hidden;padding:0;gap:0}
+/* THE DETAILS ARRIVE WITH THE FIRST LETTER (§356.16): their space is kept,
+   so the box does not narrow under the hand when a letter lands */
+.addrow .tpk,.addrow .when,.addrow .who,.addrow .st,.addrow .more{visibility:hidden}
+.addrow.typing .tpk,.addrow.typing .when,.addrow.typing .who,.addrow.typing .st,.addrow.typing .more{visibility:visible}
+.addhint{font:400 12.5px/1.5 var(--font);color:var(--ink-3);padding:6px 0 0 32px}
+/* the opened row: its topic, its notes, its history */
+.open{grid-column:1/-1;display:grid;grid-template-columns:1.4fr 1fr;gap:18px;padding:12px 4px 10px 32px;border-bottom:1px solid var(--line-2);background:var(--surface)}
+.open .lab{font:600 10.5px/1.7 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:10px 0 4px}
+.open .lab:first-child{margin-top:0}
+.open textarea{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:8px 11px;font:400 14px/1.5 var(--font);width:100%;min-height:72px;resize:vertical}
+.open select.tsel{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:6px 9px;font:400 14px/1.4 var(--font);max-width:100%}
+.open .hint{font-size:12.5px;color:var(--ink-3);margin-top:4px}
+.open .ro{font-size:14px;color:var(--ink-2)}
+.hist{list-style:none;margin:0;padding:0 8px 0 0;font-size:11.5px;line-height:1.45;max-height:118px;overflow-y:auto;scrollbar-width:thin;scrollbar-gutter:stable;color:var(--ink-2)}
+.hist li{display:grid;grid-template-columns:auto 1fr;gap:8px;padding:4px 0;border-bottom:1px solid var(--line-2)}
+.hist li:last-child{border-bottom:0}
+.hist time{font:400 10.5px/1.6 var(--font);color:var(--ink-3);white-space:nowrap}
+.hist b{font-weight:600;color:var(--ink)}
+.open .acts{display:flex;gap:14px;padding-top:10px;font-size:13px;align-items:center}
+.open .acts button{background:none;border:0;padding:0;font:400 13px/1.4 var(--font);color:var(--ink-3);cursor:pointer;text-decoration:underline}
+.open .acts button.danger{color:var(--bad)}
+.open .acts .sure{display:flex;gap:10px;align-items:center;color:var(--ink-2)}
+/* An author display beats the browser's own [hidden] rule (§356.8). */
+[hidden]{display:none!important}
+.open .acts .sure .go,.tmenu .sure .go{border:1px solid var(--line);border-radius:7px;padding:5px 10px;text-decoration:none;color:var(--ink)}
+.open .acts .sure .go.danger,.tmenu .sure .go.danger{color:var(--bad);border-color:var(--bad)}
+.row.on{background:var(--surface);border-bottom-color:transparent}
+.said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
+.said:empty{display:none}
+.unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+@media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
+  .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
+  .row{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t st more" ". when who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
+  .team,.weeks,.topics{right:auto;left:0}}
+
+.mini{max-width:none;padding:14px 18px 18px;background:var(--ground)}
+/* PROPOSED: the topic has its own column, immediately left of the week */
+.row.nrow{grid-template-columns:20px minmax(0,1fr) 132px 84px 64px 128px 26px}
+.tc{justify-self:end;max-width:132px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;
+  font:500 12.5px/1 var(--font);color:var(--ink-2);background:var(--surface-2);border:1px solid transparent;border-radius:999px;padding:5px 10px;cursor:pointer}
+.tc::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
+.tc:hover{border-color:var(--line)}
+.tc.add{background:transparent;color:var(--ink-3);border:1px dashed transparent;font-weight:500}
+.tc.add::before{display:none}
+.tc.add.hov,.tc.add:hover,.tc.add.on{border-color:var(--line);color:var(--ink)}
+.row.nrow:hover .tc.add{border-color:var(--line)}
+.tcwrap{position:relative;justify-self:end}
+.tcwrap .topics{top:30px;right:0;display:block}
+.tcwrap .topics button{display:flex}
+
+.doc{max-width:1500px;margin:0 auto;padding:24px 16px 60px}
+.doc>h1{font:600 22px/1.2 var(--font);margin:0 0 6px}
+.doc>p.lede{color:var(--ink-2);margin:0 0 22px;max-width:75ch}
+.cap{font:600 11px/1.6 var(--font);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 8px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;max-width:1000px}
+.pair>div{min-width:0}.stage{border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+.lbl{font:600 12px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.lbl.b{color:var(--ink-3)}.lbl.a{color:var(--gold)}
+.notes{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:0 0 6px;font-size:14px;color:var(--ink-2)}
+.notes li{margin:3px 0}
+.stage.pk{overflow:visible}.stage.pk .mini{padding-bottom:150px}
+</style>
+<div class="doc"><h1>Internal Tracker: the topic on the row</h1>
+<p class="lede">Same five actions in both versions, drawn with the tracker&rsquo;s own styles.</p>
+<ul class="notes">
+<li><b>Where it sits:</b> the topic gets its own column right before the week, so every topic lines up in one place instead of trailing after the action&rsquo;s name.</li>
+<li><b>How it looks:</b> a small rounded tag in normal letters with a gold dot, not gold capitals.</li>
+<li><b>No topic:</b> the row shows a quiet &ldquo;+ Add a topic&rdquo;. It gets a light outline when you point at the row (shown on the third row). Pressing it opens the same topic list the add line already uses, including &ldquo;New topic&hellip;&rdquo;.</li>
+<li><b>A topic that is set:</b> press the tag to change it or take it off. A double-click on the name now only renames the action.</li>
+<li><b>Grouped by topic:</b> the column stays empty, because the group heading already names the topic. This is how it works today too.</li>
+<li><b>Cost:</b> the action name loses about 130px of width, so a long name wraps a little sooner.</li>
+</ul>
+<p class="cap">1 &middot; A list grouped by owner</p>
+<div class="pair"><div><p class="lbl b">Today</p><div class="stage"><div class="pg mini"><div class="sec"><div class="sh"><span class="ix">01</span><h3>Islam</h3><span class="meta">5 open &middot; <span class="bad">1 late</span></span></div><div class="row late"><button class="tick" type="button"></button><div class="tn2"><div class="t">Collect units' revenue assumptions for 2027</div><span class="tg">Budget 2027</span></div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row"><button class="tick" type="button"></button><div class="tn2"><div class="t">Confirm the payroll forecast with HR, including the new grades and the allowances review</div><span class="tg">Budget 2027</span></div><span class="when">This week</span><span class="who">Islam</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row"><button class="tick" type="button"></button><div class="tn2"><div class="t">Book the room for the Q3 review</div></div><span class="when">This week</span><span class="who">Omar</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row"><button class="tick" type="button"></button><div class="tn2"><div class="t">Cascade messages for the B2C company</div><span class="tg">Comms</span></div><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row"><button class="tick" type="button"></button><div class="tn2"><div class="t">Chase Mobile on the missing pillar owners</div></div><span class="when">Next week</span><span class="who">Essam</span><span class="st prog">In progress</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div></div></div>
+<div><p class="lbl a">Proposed</p><div class="stage"><div class="pg mini"><div class="sec"><div class="sh"><span class="ix">01</span><h3>Islam</h3><span class="meta">5 open &middot; <span class="bad">1 late</span></span></div><div class="row nrow late"><button class="tick" type="button"></button><div class="t">Collect units' revenue assumptions for 2027</div><button class="tc" type="button" title="Change its topic">Budget 2027</button><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Confirm the payroll forecast with HR, including the new grades and the allowances review</div><button class="tc" type="button" title="Change its topic">Budget 2027</button><span class="when">This week</span><span class="who">Islam</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Book the room for the Q3 review</div><button class="tc add hov" type="button" title="Add a topic">+ Add a topic</button><span class="when">This week</span><span class="who">Omar</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Cascade messages for the B2C company</div><button class="tc" type="button" title="Change its topic">Comms</button><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Chase Mobile on the missing pillar owners</div><button class="tc add" type="button" title="Add a topic">+ Add a topic</button><span class="when">Next week</span><span class="who">Essam</span><span class="st prog">In progress</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div></div></div></div>
+<p class="cap">2 &middot; Pressing &ldquo;+ Add a topic&rdquo;</p>
+<div class="pair"><div><p class="lbl a">Proposed</p><div class="stage pk"><div class="pg mini"><div class="sec"><div class="sh"><span class="ix">01</span><h3>Islam</h3><span class="meta">5 open</span></div><div class="row nrow late"><button class="tick" type="button"></button><div class="t">Collect units' revenue assumptions for 2027</div><button class="tc" type="button" title="Change its topic">Budget 2027</button><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Book the room for the Q3 review</div><span class="tcwrap"><button class="tc add on" type="button">+ Add a topic</button><span class="topics"><button>Budget 2027</button><button>Comms</button><button>Q3 review</button><input class="tnew" placeholder="New topic…"></span></span><span class="when">This week</span><span class="who">Omar</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="row nrow"><button class="tick" type="button"></button><div class="t">Cascade messages for the B2C company</div><button class="tc" type="button" title="Change its topic">Comms</button><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st ">Not started</span><button class="more" type="button"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div></div></div></div></div><div></div></div>
+</div>

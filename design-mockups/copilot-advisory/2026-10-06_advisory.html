@@ -1,0 +1,177 @@
+<title>Copilot Advisory</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#636C79;--gold:#8A6720;--goldfill:#C9A24D;--panel:#16325C;--panel-ink:#FFFFFF;--panel-quiet:#B9C6DA;--good:#1F6B45;--goodbg:#E6F2EB;--warn:#8A5A12;--warnbg:#FBF1DE;--bad:#A3322A;--badbg:#FBECEA;--sans:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--goodbg:#173326;--warn:#E5B45C;--warnbg:#2E2717;--bad:#F08A80;--badbg:#341C1A;color-scheme:dark}}
+:root[data-theme="dark"]{--ground:#14161A;--surface:#1C1F25;--surface-2:#23272E;--line:#333A45;--ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#949DAA;--gold:#D9B665;--goldfill:#D9B665;--panel:#0E2A4F;--panel-ink:#EAF0FA;--panel-quiet:#9FB0C8;--good:#6FCF97;--goodbg:#173326;--warn:#E5B45C;--warnbg:#2E2717;--bad:#F08A80;--badbg:#341C1A;color-scheme:dark}
+body{background:var(--ground);color:var(--ink);font:15px/1.5 var(--sans);padding-inline:16px;padding-block:24px 64px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+h1{font-size:26px;margin:0}
+.lede{color:var(--ink-2);max-width:70ch;margin:6px 0 0}
+h2.step{font-size:19px;margin:0 0 4px;text-wrap:balance}
+h2.step span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.k{color:var(--ink-3);font-size:13.5px;margin:0 0 12px;max-width:80ch}
+.frame{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bar{background:var(--panel);color:var(--panel-quiet);display:flex;gap:18px;padding:10px 16px;font-size:13.5px;flex-wrap:wrap}
+.bar b{color:var(--panel-ink);border-bottom:2px solid var(--goldfill);padding-bottom:2px}
+.secs{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap}
+.sec{font-size:12.5px;padding:3px 10px;border-radius:5px;color:var(--ink-2)}
+.sec.on{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.body{display:grid;grid-template-columns:200px minmax(0,1fr) 300px}
+@media (max-width:1020px){.body{grid-template-columns:1fr}.rail{display:none}}
+.rail{border-right:1px solid var(--line);padding:12px;font-size:13px;background:var(--surface-2)}
+.rh{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:700;margin:4px 0 6px}
+.ri{padding:5px 8px;border-radius:5px;color:var(--ink-2)}
+.ri.on{background:var(--surface);color:var(--ink);font-weight:600}
+.cop{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.m{max-width:62ch;padding:10px 13px;border-radius:10px;font-size:14.5px}
+.m.ai{background:var(--surface-2)}
+.m.me{background:var(--panel);color:var(--panel-ink);align-self:flex-end}
+.m p{margin:0 0 6px}.m p:last-child{margin:0}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 13px;font-size:13.5px;color:var(--ink)}
+.choice.picked{border-color:var(--gold);background:var(--warnbg);font-weight:600}
+.comp{margin-top:auto;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink-3);font-size:14px}
+.side{border-left:1px solid var(--line);padding:12px;display:flex;flex-direction:column;gap:12px;min-width:0;background:var(--ground)}
+@media (max-width:1020px){.side{border-left:0;border-top:1px solid var(--line)}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.bh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:700;font-size:13.5px;margin-bottom:6px}
+.bh small{font-weight:400;color:var(--ink-3)}
+.todo{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.todo li{display:flex;gap:8px;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--ink-3);flex:none}
+.dot.done{background:var(--good);border-color:var(--good)}
+.dot.now{border-color:var(--gold);background:var(--goldfill)}
+.todo li.now{font-weight:600}
+.todo li.done{color:var(--ink-3)}
+.btn{display:inline-block;border:1px solid var(--line);border-radius:6px;padding:5px 12px;font-size:13px;background:var(--surface);color:var(--ink);font-weight:600}
+.btn.pri{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tw{overflow-x:auto}
+table.mg{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+table.mg th{background:var(--panel);color:var(--panel-ink);text-align:left;font-weight:600;padding:6px 8px;white-space:nowrap}
+table.mg td{border-bottom:1px solid var(--line);padding:5px 8px;vertical-align:top}
+table.mg td.n,table.mg th.n{text-align:center}
+table.mg tr.sub td{background:var(--surface-2);font-weight:700}
+table.mg tr.res td{font-weight:700}
+.tk{display:inline-flex;width:18px;height:18px;border-radius:4px;border:1.5px solid var(--line);vertical-align:middle;align-items:center;justify-content:center}
+.tk.on{background:var(--good);border-color:var(--good)}
+.tk.on::after{content:"";width:5px;height:9px;border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.sc{display:inline-block;min-width:26px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--surface)}
+.sc.ed{border-color:var(--gold);background:var(--warnbg)}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px}
+.pill.ext{background:var(--surface-2);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+.pill.int{background:var(--goodbg);color:var(--good)}
+.pill.warn{background:var(--warnbg);color:var(--warn)}
+.pill.clear{background:var(--goodbg);color:var(--good)}
+.meter{height:7px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--goldfill)}
+.bars{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.bars div.l{display:flex;justify-content:space-between}
+.note{border-left:3px solid var(--goldfill);background:var(--surface-2);padding:8px 12px;font-size:13.5px;color:var(--ink-2);border-radius:0 6px 6px 0;max-width:80ch}
+.period{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;background:var(--warnbg);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13.5px}
+.period a{color:var(--gold);font-weight:700;text-decoration:underline}
+.q{display:inline-flex;gap:3px}
+.q span{width:22px;height:20px;border-radius:4px;border:1px solid var(--line);font-size:11px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.q span.on{background:var(--panel);color:var(--panel-ink);border-color:var(--panel)}
+.q span.off{background:var(--surface-2);opacity:.45;text-decoration:line-through}
+.vpt{display:grid;grid-template-columns:118px repeat(3,minmax(170px,1fr));gap:8px;min-width:660px}
+.vpt>div{border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vpt .lab{background:var(--goldfill);color:#171B22;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:center;text-align:center}
+.vpt .lab.d{background:var(--panel);color:var(--panel-ink)}
+.vpt .dh{grid-column:2/-1;background:var(--panel);color:var(--panel-ink);font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:center}
+.vpt .vh{background:var(--line);color:var(--ink);font-weight:700;font-size:15px;text-align:center;display:flex;align-items:center;justify-content:center}
+.vpt .c{background:var(--surface-2);color:var(--ink-2)}
+.vpt .c.wip{outline:2px dashed var(--goldfill);outline-offset:-2px}
+.vpt ul{margin:0;padding-left:16px}.vpt li{margin:2px 0}
+.vpwrap{overflow-x:auto;padding:12px}
+.vel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.vel h4{margin:0 0 6px;font-size:14.5px}.vel .lb{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+.vel ul{margin:2px 0 0;padding-left:18px}
+.vels{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.vel{position:relative}.vel .tk{position:absolute;top:10px;right:10px}.vel h4{padding-right:26px}
+.vel.on{border-color:var(--goldfill);box-shadow:inset 0 0 0 1px var(--goldfill)}
+.pill.you{background:var(--goodbg);color:var(--good)}
+.cellhint{font-size:12.5px;color:var(--ink-3);margin:-2px 0 0}
+.vp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.vp .box h4{margin:0 0 4px;font-size:14px}
+.vp .box p{margin:0;font-size:13px;color:var(--ink-2)}
+.vp .box p b{color:var(--ink)}
+/* setup page */
+.setup{display:grid;grid-template-columns:200px minmax(0,1fr)}
+@media (max-width:760px){.setup{grid-template-columns:1fr}.setup .rail{display:none}}
+.pane{padding:16px 20px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.ptitle{font-size:20px;font-weight:700;margin:0}
+.block{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.blockh{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--panel);color:var(--panel-ink);padding:8px 12px;font-weight:700;font-size:14px}
+.blockh .btn{background:transparent;color:var(--panel-ink);border-color:var(--panel-quiet)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:12px}
+.facts div small{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.facts div b{font-size:15px}
+.timeline{padding:0 12px 12px}
+.track{position:relative;height:34px;background:var(--surface-2);border-radius:6px;font-size:11px;color:var(--ink-3)}
+.track .yr{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr)}
+.track .yr span{border-left:1px solid var(--line);padding:2px 3px}
+.track .plan{position:absolute;top:18px;height:12px;left:50%;width:50%;background:var(--goldfill);border-radius:3px}
+.track .cyc{position:absolute;top:18px;height:12px;border-radius:3px;border:2px solid var(--panel);background:transparent}
+.flag{color:var(--warn);font-weight:700}
+.open{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.open .m{flex:1 1 280px}
+
+.budget{display:flex;flex-direction:column;gap:6px}
+.pips{display:flex;gap:4px}
+.pips i{width:22px;height:8px;border-radius:3px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.pips i.u{background:var(--goldfill);box-shadow:none}
+.rnd{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-3)}
+.rnd b{color:var(--ink)}
+.qcount{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.clash{border:1px solid var(--line);border-left:3px solid var(--warn);background:var(--warnbg);border-radius:0 8px 8px 0;padding:10px 13px;max-width:62ch;font-size:14px}
+.clash .src{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:6px 0 8px;font-size:13.5px}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;letter-spacing:.03em}
+.tag.p{background:var(--panel);color:var(--panel-ink)}
+.tag.y{background:var(--goodbg);color:var(--good)}
+.tag.f{background:var(--surface-2);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line)}
+.tag.a{background:var(--warnbg);color:var(--warn)}
+.asm{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--ink-2)}
+.brief{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;max-width:76ch;display:flex;flex-direction:column;gap:12px}
+.brief h3{margin:0;font-size:18px;text-wrap:balance}
+.brief h4{margin:0 0 4px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.brief p{margin:0;font-size:14px}
+.brief ul,.brief ol{margin:0;padding-left:18px;font-size:14px}.brief li{margin:3px 0}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{border:1px solid var(--line);border-radius:8px;padding:8px 11px;font-size:14px}
+.opt.rec{border-color:var(--goldfill);box-shadow:inset 0 0 0 1px var(--goldfill)}
+.opt .oh{display:flex;justify-content:space-between;gap:8px;font-weight:700;align-items:baseline}
+.opt .oh .pill{flex:none}
+.opt p{color:var(--ink-2);font-size:13.5px;margin-top:2px}
+.ask{font-size:13px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:10px 12px;max-width:90ch}
+.ask ol{margin:4px 0 0;padding-left:20px}.ask li{margin:4px 0}
+.tip{border-bottom:1px dotted var(--ink-3);cursor:help}
+</style>
+<div class="wrap">
+<div><h1>Copilot · Advisory</h1><p class="lede">Mobile › Copilot › Advisory. A chat that asks one question at a time within a set count, puts any clash between sources to you as a choice, and ends with a Decision Brief you can save.</p></div>
+<section><h2 class="step"><span>1 · Asking</span>One question a turn, the count on the right</h2><p class="k">Each question says its number. Two replies are always offered. When the platform, a file or your answers disagree, it stops and asks which wins — it never picks quietly.</p><div class="frame"><div class="bar"><span>Strategy</span><span>Performance</span><span>Reporting</span><b>Copilot</b></div>
+<div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec on">Advisory</span></div><div class="body"><div class="rail"><div class="rh">Chats</div><div class="ri on">Accessory revenue keeps missing</div><div class="ri">Board paper: price increase</div><div class="rh" style="margin-top:14px">Deliverables</div><div class="ri">Q2 review prep — brief</div></div><div class="cop"><div class="m me">Why does accessory revenue keep missing? I need something for the Q2 review.</div>
+<div class="m ai"><div class="qcount">Question 3 of 5</div><p>Your file shows accessories at 3.8M in June. The platform has 4.2M reported for June. Before I go on:</p></div>
+<div class="clash"><b>Two sources disagree on June accessory revenue</b><div class="src"><span class="tag p">Platform</span><span>4.2M — reported by Retail custodian, 3 Jul</span><span class="tag f">File</span><span>3.8M — Q2 sales review.xlsx, sheet “Accessories”</span></div><div class="row"><span class="choice">Use the platform figure</span><span class="choice">Use the file</span><span class="choice">Neither — I'll give the number</span></div></div>
+<div class="choices"><span class="choice">I don't know — assume for me</span><span class="choice">Proceed with what you have</span></div><div class="comp">Reply…</div></div><div class="side"><div class="box budget"><div class="bh">Questions <small>one at a time</small></div><div class="rnd"><span>Round <b>1</b> of 2</span><span><b>3</b> of 5 asked</span></div><div class="pips"><i class="u"></i><i class="u"></i><i class="u"></i><i class=""></i><i class=""></i></div></div><div class="box"><div class="bh">Assumed so far <small>2</small></div><ul class="asm"><li><span class="tag a">Assumed</span> Price list unchanged since January</li><li><span class="tag a">Assumed</span> Store count flat at 214</li></ul></div><div class="box"><div class="bh">What it can see</div><ul class="asm"><li><span class="tag p">Platform</span> Accessory revenue: 96M of 150M due by June (64%)</li><li><span class="tag p">Platform</span> Attach rate tactic: Q2, not started</li><li><span class="tag f">File</span> Q2 sales review.xlsx</li></ul></div></div></div></div></section>
+<section><h2 class="step"><span>2 · The brief</span>When you say proceed, or after 5 questions × 2 rounds, it answers</h2><p class="k">Every fact is tagged with where it came from. Exactly one option is marked recommended.</p><div class="frame"><div class="bar"><span>Strategy</span><span>Performance</span><span>Reporting</span><b>Copilot</b></div>
+<div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec on">Advisory</span></div><div class="body"><div class="rail"><div class="rh">Chats</div><div class="ri on">Accessory revenue keeps missing</div><div class="ri">Board paper: price increase</div><div class="rh" style="margin-top:14px">Deliverables</div><div class="ri">Q2 review prep — brief</div></div><div class="cop"><div class="m me">Proceed with what you have</div>
+<div class="m ai"><p>Fine, I'll stop asking. I'm writing the brief on what you told me, what the platform shows, and two assumptions — each marked below.</p></div>
+<div class="brief"><h3>Accessory revenue: why it keeps missing, and what to do before Q3</h3>
+<div><h4>Situation</h4><p>Mobile has delivered 96M of the 150M accessory revenue due by June (64%). It missed in Q1 too. The attach-rate tactic planned for Q2 has not started.</p></div>
+<div><h4>What we know</h4><ul><li><span class="tag p">Platform</span> 96M of 150M due by June; Q1 also below plan</li><li><span class="tag y">You</span> Stores stopped bundling accessories at the till in March</li><li><span class="tag f">File</span> June figure is 3.8M (chosen over the platform's 4.2M)</li><li><span class="tag a">Assumed</span> Price list unchanged since January</li></ul></div>
+<div><h4>Options</h4><div class="opts">
+<div class="opt rec"><div class="oh"><span>A. Restart till bundling in all stores from August</span><span class="pill clear">Recommended</span></div><p>Cheapest, fastest; recovers the March drop. Needs the store managers' sign-off.</p></div>
+<div class="opt"><div class="oh"><span>B. Start the attach-rate tactic now, one quarter late</span></div><p>Addresses the cause in the plan; results not before Q4.</p></div>
+<div class="opt"><div class="oh"><span>C. Lower the year target to 250M</span></div><p>Honest about the gap; needs the office's agreement and changes the plan.</p></div></div></div>
+<div><h4>Why A</h4><p>The drop starts the month bundling stopped, and the other stores' figures did not move. It is the one cause that can be reversed within the quarter.</p></div>
+<div><h4>Next steps</h4><ol><li>Retail custodian confirms bundling stopped in March (by 15 Jul)</li><li>Store managers' sign-off on restarting (by 31 Jul)</li><li>Review accessory revenue at the August check-in</li></ol></div>
+<div class="row"><span class="btn pri">Save to Advisory deliverables</span><span class="btn">Ask for changes</span></div></div><div class="comp">Reply…</div></div><div class="side"><div class="box budget"><div class="bh">Questions <small>stopped early</small></div><div class="rnd"><span>Round <b>2</b> of 2</span><span><b>2</b> of 5 asked</span></div><div class="pips"><i class="u"></i><i class="u"></i><i></i><i></i><i></i></div></div><div class="box"><div class="bh">Assumed so far <small>2</small></div><ul class="asm"><li><span class="tag a">Assumed</span> Price list unchanged since January</li><li><span class="tag a">Assumed</span> Store count flat at 214</li></ul></div><div class="box"><div class="bh">What it can see</div><ul class="asm"><li><span class="tag p">Platform</span> Accessory revenue: 96M of 150M due by June (64%)</li><li><span class="tag p">Platform</span> Attach rate tactic: Q2, not started</li><li><span class="tag f">File</span> Q2 sales review.xlsx</li></ul></div></div></div></div></section>
+<section><h2 class="step"><span>3 · Saved</span>A Copilot-only deliverable</h2><p class="k">Saved as the next version under Advisory deliverables. It never goes into the plan.</p><div class="frame"><div class="bar"><span>Strategy</span><span>Performance</span><span>Reporting</span><b>Copilot</b></div>
+<div class="secs"><span class="sec">Foundation</span><span class="sec">Analysis</span><span class="sec">How we compete</span><span class="sec">Directions</span><span class="sec">Capabilities</span><span class="sec">Execution</span><span class="sec on">Advisory</span></div><div class="body"><div class="rail"><div class="rh">Chats</div><div class="ri">Accessory revenue keeps missing</div><div class="ri">Board paper: price increase</div><div class="rh" style="margin-top:14px">Deliverables</div><div class="ri on">Accessory revenue — brief <span class="pill ext">v1</span></div><div class="ri">Q2 review prep — brief</div></div><div class="cop"><div class="brief"><div class="row" style="justify-content:space-between"><span class="pill ext">Copilot-only · v1 · saved 6 Oct by Islam</span><span class="row"><span class="btn">Edit</span><span class="btn">Versions</span></span></div><h3>Accessory revenue: why it keeps missing, and what to do before Q3</h3><div><h4>Situation</h4><p>Mobile has delivered 96M of the 150M accessory revenue due by June (64%)…</p></div><p style="color:var(--ink-3);font-size:13px">(the rest of the brief, as saved)</p></div></div><div class="side"><div class="box"><div class="bh">From chat</div><p style="margin:0;font-size:13.5px">Accessory revenue keeps missing</p></div></div></div></div></section>
+<section><h2 class="step"><span>To decide</span>Two questions for you</h2><div class="ask"><ol>
+<li><b>Where the count sits.</b> Drawn here in the right column with the assumptions and what it can see, like the other Copilot sections. The alternative is a small “3 of 5” line above the reply box with no right column — more room for the conversation, less at a glance.</li>
+<li><b>Is “Proceed with what you have” allowed in round 1?</b> Drawn as always offered, so you can stop it early. The alternative is offering it only from round 2.</li>
+</ol></div></section>
+</div>

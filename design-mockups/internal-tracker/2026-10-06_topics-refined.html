@@ -1,0 +1,173 @@
+<title>Tracker Ledger Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,500&display=swap">
+<style>
+*{box-sizing:border-box}
+:root{--bar:#16325C;--ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;padding-inline:16px}
+.doc{max-width:1640px;margin:0 auto;padding-block:24px 60px}
+.doc>h1{font-size:22px;font-weight:600;margin:0 0 18px}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;margin:0 0 34px;align-items:start}
+.say{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--ink-2)}
+.say h3{margin:0 0 8px;font-size:15px;color:var(--ink)}
+.say ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.say b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.stage{border:1px solid var(--line);border-radius:12px;background:var(--ground);overflow:hidden;min-width:0}
+.pg{max-width:1000px;margin:0 auto;padding:18px 20px 24px}
+@media (max-width:980px){.fr{grid-template-columns:1fr}}
+svg{display:block}
+
+/* ================= TODAY (the page as built) ================= */
+.o .back{display:inline-block;color:var(--ink-3);font:600 12.5px/1 var(--font);margin:0 0 10px}
+.o h2{margin:0 0 14px;font-size:21px;font-weight:600}
+.o h2 small{font-weight:400;color:var(--ink-3);font-size:14px;margin-left:8px}
+.o .cats{display:flex;gap:3px;border-bottom:1px solid var(--line);margin-bottom:15px;align-items:flex-end}
+.o .cats a{color:var(--ink-3);font:600 13.5px/1 var(--font);padding:9px 11px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.o .cats a.on{color:var(--ink);border-bottom-color:var(--gold)}
+.o .cats .dt{margin-left:auto;margin-bottom:6px;width:28px;height:24px;border:1px solid var(--line);border-radius:7px;background:var(--surface);display:grid;place-items:center;color:var(--ink-3)}
+.o .strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 16px}
+.o .tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 13px;min-height:80px}
+.o .tile b{display:block;font-size:22px;font-weight:600;line-height:1.1}
+.o .tile span{display:block;font:600 10.5px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-top:4px}
+.o .tile.late b{color:var(--bad)}
+.o .tools{display:flex;gap:8px;align-items:center}
+.o .srch{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:8px 11px;color:var(--ink-3);font-size:14px}
+.o .go{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 13px;font:600 13px/1.5 var(--font)}
+.o .cnt{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
+.o .list{border-top:1px solid var(--line);margin-top:12px}
+.o .grp{display:flex;gap:9px;align-items:center;padding:14px 2px 6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.o .row{display:grid;grid-template-columns:22px 1fr auto auto auto 26px;gap:12px;align-items:center;padding:11px 2px;border-bottom:1px solid var(--line)}
+.o .tick{width:18px;height:18px;border:1.5px solid var(--line);border-radius:5px;background:var(--surface)}
+.o .when{font:400 12.5px/1.4 var(--mono);color:var(--ink-2)}
+.o .when.late{color:var(--bad);font-weight:600}
+.o .who{font:600 12.5px/1.4 var(--font);color:var(--ink-2);min-width:52px;text-align:right}
+.o .st{display:inline-grid;place-items:center;height:26px;width:118px;font:600 11px/1 var(--font);border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface)}
+.o .st.prog{border-color:var(--gold);color:var(--gold)}
+.o .arr{color:var(--ink-3)}
+.o .tpc{margin-left:8px;font:600 10px/1.5 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.o .addrow{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:10px 2px;border-bottom:1px dashed var(--line);background:var(--surface);color:var(--ink-3)}
+.o .hint{font:400 12px/1.5 var(--mono);color:var(--ink-3);padding:6px 2px 0 34px}
+
+
+/* ================= REFINED — "the week's ledger" ================= */
+.l{--rule:var(--line-2);font-family:var(--font)}
+.l .mast{background:var(--bar);color:#fff;border-radius:12px;padding:16px 20px 0;margin:0 0 18px;position:relative;overflow:hidden}
+.l .mast::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:linear-gradient(90deg,#E8A33A,#C9821A)}
+.l .crumb{display:flex;align-items:center;gap:6px;font:600 12px/1 var(--font);color:#AFC0DA;letter-spacing:.02em}
+.l .crumb b{color:#fff;font-weight:600}
+.l .mrow{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:12px 0 0}
+.l .mt h2{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em}
+.l .mt p{margin:5px 0 0;font:400 13.5px/1.4 var(--font);color:#C6D2E5}
+.l .wk{font:600 11px/1 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#E8A33A}
+.l .tally{display:flex;gap:22px;font-variant-numeric:tabular-nums}
+.l .tally div{text-align:right}
+.l .tally b{display:block;font:600 22px/1 var(--font);color:#fff}
+.l .tally span{display:block;font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:#AFC0DA;margin-top:3px}
+.l .tally .bad b{color:#FF9B8F}
+.l .tabs{display:flex;gap:2px;margin:14px 0 0;align-items:flex-end}
+.l .tabs a{font:600 13.5px/1 var(--font);color:#C6D2E5;padding:10px 12px 12px;border-bottom:3px solid transparent;margin-bottom:0}
+.l .tabs a.on{color:#fff;border-bottom-color:#E8A33A}
+.l .tabs .sp{flex:1}
+.l .tabs .grpby{align-self:center;margin-bottom:9px;display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font);color:#C6D2E5;padding:6px 8px;border-radius:7px}
+.l .tabs .grpby b{color:#fff;font-weight:600}
+.l .tabs .ic{align-self:center;margin-bottom:9px;color:#C6D2E5;padding:5px 6px;border-radius:7px}
+/* the search sits under the band, with the add line beside it: both are about writing */
+.l .tools{display:flex;gap:10px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
+.l .find{display:flex;align-items:center;gap:8px;flex:0 1 240px;min-width:0;border-bottom:1.5px solid var(--line);padding:6px 2px;color:var(--ink-3);font-size:14px}
+.l .write{flex:1 1 320px;min-width:0;display:flex;align-items:center;gap:10px;border-bottom:1.5px solid var(--gold);padding:6px 2px;font-size:15px;color:var(--ink-3)}
+.l .write .pen{color:var(--gold)}
+.l .write .ty{color:var(--ink);flex:1;min-width:0}
+.l .write .ty i{display:inline-block;width:1.5px;height:17px;background:var(--gold);vertical-align:-3px;margin-left:1px}
+.l .write .opt{display:flex;gap:14px;font:500 13px/1 var(--font);color:var(--ink-3);white-space:nowrap}
+.l .write .opt u{text-decoration:none;border-bottom:1px dotted var(--ink-3);padding-bottom:1px}
+.l .write .opt u.set{color:var(--gold);border-bottom:1.5px solid var(--gold);font-weight:600}
+/* a group is a ledger section: index number, name, counts, a hairline of progress under it */
+.l .sec{margin:0 0 26px}
+.l .sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.l .sh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.l .sh h3{margin:0;font:600 17px/1.2 var(--font);letter-spacing:-.005em}
+.l .sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+.l .sh .meta .bad{color:var(--bad);font-weight:600}
+.l .sh .end{margin-left:auto;display:flex;align-items:center;gap:12px;font:500 12.5px/1 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.l .sh .dots{color:var(--ink-3)}
+.l .meter{height:2px;background:var(--rule);position:relative;top:-2px;margin-bottom:-2px}
+.l .meter i{display:block;height:100%;background:var(--good)}
+.l .sh.quiet{border-bottom-color:var(--line)}.l .sh.quiet h3{color:var(--ink-2);font-weight:500;font-style:italic}
+/* rows: same columns as today, ruled like a ledger */
+.l .r{display:grid;grid-template-columns:20px minmax(0,1fr) 74px 58px 104px 16px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--rule)}
+.l .tk{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface)}
+.l .r.lt .tk{border-color:var(--bad)}
+.l .r .t{font:400 15px/1.35 var(--font)}
+.l .r .tg{margin-left:8px;font:600 10.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.l .r .w{font:500 13px/1 var(--font);color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.l .r .w.late{color:var(--bad);font-weight:600}
+.l .r .p{font:500 13px/1 var(--font);color:var(--ink-2)}
+.l .s{font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;display:flex;align-items:center;gap:7px}
+.l .s::before{content:"";width:12px;height:2px;background:currentColor;border-radius:1px}
+.l .s.prog{color:var(--gold)}
+.l .s.done{color:var(--good)}
+.l .ar{color:var(--ink-3)}
+.l .r.dn .t{color:var(--ink-3)}
+.l .r.dn .tk{background:var(--good);border-color:var(--good)}
+.l .more{display:flex;gap:16px;padding:9px 0 0 32px;font:500 13px/1.4 var(--font);color:var(--ink-3)}
+.l .more b{color:var(--gold);font-weight:600}
+@media (max-width:760px){.l .r{grid-template-columns:20px minmax(0,1fr) 16px}.l .r .w,.l .r .p,.l .r .s{display:none}.l .tally{gap:14px}.l .write .opt u:not(.set){display:none}}
+
+.doc>p.lede{max-width:70ch;color:var(--ink-2);margin:-8px 0 22px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin:0 0 30px}
+.pair .lbl{font:600 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px}
+.pair .lbl.b{color:var(--ink-3)}.pair .lbl.a{color:var(--gold)}
+.pair .pg{padding:16px 16px 20px}
+@media (max-width:1180px){.pair{grid-template-columns:1fr}}
+.chg{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);font-size:14px;margin:0 0 34px}
+.chg th{text-align:left;font:600 10.5px/1.4 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:9px 12px;border-bottom:2px solid var(--ink)}
+.chg td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+.chg td:first-child{width:150px;color:var(--ink);font-weight:600}
+.tw{overflow-x:auto}
+</style>
+<div class="doc"><h1>Internal Tracker: today and refined</h1>
+<div class="tw"><table class="chg"><tr><th>Part</th><th>Today</th><th>Refined</th></tr><tr><td>The top</td><td>White title, then a row of tabs, then four big number cards</td><td>One navy band in the client's colour: the week, the title, the four numbers in a line, the views, and Group by</td></tr><tr><td>Writing and finding</td><td>Search box with a Search button and a count; the add line at the very bottom with a grey hint under it</td><td>One line under the band: write the next action on the left, search on the right; the topic, week and owner appear as words once you type</td></tr><tr><td>Groups</td><td>A grey word between rows</td><td>A numbered heading with a dark rule under it, like a ledger section; topics also show how many are done</td></tr><tr><td>Rows</td><td>Bordered status pills</td><td>Same columns, ruled lines; status as a short small-caps word in its colour; a late action's tick is outlined red</td></tr><tr><td>Done actions</td><td>Stay in the list, struck through</td><td>Folded into “1 done” under their group</td></tr></table></div>
+<p class="cap">1 &middot; This week, grouped by owner</p><div class="pair"><div><p class="lbl b">Today</p><div class="stage tw"><div class="pg o"><span class="back">&lsaquo; Back to Raya Trade</span>
+<h2>Internal Tracker <small>Raya Trade &middot; W2 Oct</small></h2>
+<nav class="cats"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><span class="dt">&middot;&middot;&middot;</span></nav>
+<div class="strip"><div class="tile"><b>9</b><span>Open</span></div><div class="tile late"><b>2</b><span>Late</span></div><div class="tile"><b>5</b><span>Due this week</span></div><div class="tile"><b>1</b><span>Done this week</span></div></div>
+<div class="tools"><span class="srch">Search actions</span><span class="go">Search</span><span class="cnt">6 actions on this week</span></div><div class="list">
+<div class="grp">Noran Essam <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick"></span><div>Cascade messages for the B2C company</div><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="grp">Islam <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance</div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick" style="background:var(--good);border-color:var(--good)"></span><div style="color:var(--ink-3);text-decoration:line-through">Send the one-page summary to unit heads</div><span class="when">Done 2 Oct</span><span class="who">Islam</span><span class="st" style="border-color:var(--good);background:var(--good-bg);color:var(--good)">Done</span><span class="arr">⌄</span></div>
+<div class="grp">Omar <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Book the room for the Q3 review</div><span class="when">This week</span><span class="who">Omar</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow"><span>+</span><span>Type an action and press Enter</span></div></div>
+<div class="hint">Enter adds it under you, due this week &middot; type the action and its week, owner and note appear on the line</div></div></div></div><div><p class="lbl a">Refined</p><div class="stage tw"><div class="pg l"><div class="mast"><div class="crumb"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><b>Raya Trade</b></div>
+<div class="mrow"><div class="mt"><div class="wk">W2 Oct &middot; 4 – 8 Oct</div><h2>Internal Tracker</h2></div>
+<div class="tally"><div><b>9</b><span>Open</span></div><div class="bad"><b>2</b><span>Late</span></div><div><b>5</b><span>Due this week</span></div><div><b>1</b><span>Done</span></div></div></div>
+<nav class="tabs"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><span class="sp"></span><span class="grpby">Group by <b>Owner</b><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="ic"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span></nav></div><div class="tools"><span class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span>Write the next action and press Enter</span></span><span class="find"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search</span></div><div class="sec"><div class="sh"><span class="ix">01</span><h3>Noran Essam</h3><span class="meta">2 open &middot; <span class="bad">1 late</span></span><span class="end"></span></div><div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company</span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div></div><div class="sec"><div class="sh"><span class="ix">02</span><h3>Islam</h3><span class="meta">1 open</span><span class="end"></span></div><div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance</span><span class="w">This week</span><span class="p">Islam</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class=more>1 done &rsaquo;</div></div><div class="sec"><div class="sh"><span class="ix">03</span><h3>Omar</h3><span class="meta">1 open</span><span class="end"></span></div><div class="r"><span class="tk"></span><span class="t">Book the room for the Q3 review</span><span class="w">This week</span><span class="p">Omar</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div></div></div></div></div></div>
+<p class="cap">2 &middot; Grouped by topic</p><div class="pair"><div><p class="lbl b">Today</p><div class="stage tw"><div class="pg o"><div class="tools"><span class="srch">Search actions</span><span class="go">Search</span><span class="cnt">6 actions on this week</span></div><div class="list">
+<div class="grp">Budget <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Collect units' revenue assumptions for 2027</div><span class="when late">Late 1 w</span><span class="who">Noran</span><span class="st prog">In progress</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance</div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="grp">Strategy communication <span class="cnt">2</span></div>
+<div class="row"><span class="tick"></span><div>Cascade messages for the B2C company</div><span class="when">W4 Oct</span><span class="who">Noran</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="row"><span class="tick" style="background:var(--good);border-color:var(--good)"></span><div style="color:var(--ink-3);text-decoration:line-through">Send the one-page summary to unit heads</div><span class="when">Done 2 Oct</span><span class="who">Islam</span><span class="st" style="border-color:var(--good);background:var(--good-bg);color:var(--good)">Done</span><span class="arr">⌄</span></div>
+<div class="grp">No topic <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Book the room for the Q3 review</div><span class="when">This week</span><span class="who">Omar</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow"><span>+</span><span>Type an action and press Enter</span></div></div></div></div></div><div><p class="lbl a">Refined</p><div class="stage tw"><div class="pg l"><div class="mast"><div class="crumb"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><b>Raya Trade</b></div>
+<div class="mrow"><div class="mt"><div class="wk">W2 Oct &middot; 4 – 8 Oct</div><h2>Internal Tracker</h2></div>
+<div class="tally"><div><b>9</b><span>Open</span></div><div class="bad"><b>2</b><span>Late</span></div><div><b>5</b><span>Due this week</span></div><div><b>1</b><span>Done</span></div></div></div>
+<nav class="tabs"><a class="on">This week</a><a>All</a><a>Mine</a><a>Undated</a><span class="sp"></span><span class="grpby">Group by <b>Topic</b><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="ic"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span></nav></div><div class="tools"><span class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span>Write the next action and press Enter</span></span><span class="find"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search</span></div><div class="sec"><div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">2 open &middot; <span class="bad">1 late</span></span><span class="end">0 of 2 done<span class="dots"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span></span></div><div class="meter"><i style="width:0%"></i></div><div class="r lt"><span class="tk"></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="w late">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance</span><span class="w">This week</span><span class="p">Islam</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class=more><b>+</b> Add to Budget</div></div><div class="sec"><div class="sh"><span class="ix">02</span><h3>Strategy communication</h3><span class="meta">1 open</span><span class="end">1 of 2 done<span class="dots"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg></span></span></div><div class="meter"><i style="width:50%"></i></div><div class="r"><span class="tk"></span><span class="t">Cascade messages for the B2C company</span><span class="w">W4 Oct</span><span class="p">Noran</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div><div class=more>1 done &rsaquo; &nbsp; <b>+</b> Add to Strategy communication</div></div><div class="sec"><div class="sh quiet"><span class="ix">&mdash;</span><h3>No topic</h3><span class="meta">1 open</span><span class="end"></span></div><div class="r"><span class="tk"></span><span class="t">Book the room for the Q3 review</span><span class="w">This week</span><span class="p">Omar</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div></div></div></div></div></div>
+<p class="cap">3 &middot; Writing an action with a topic</p><div class="pair"><div><p class="lbl b">Today</p><div class="stage tw"><div class="pg o"><div class="list">
+<div class="grp">Islam <span class="cnt">1</span></div>
+<div class="row"><span class="tick"></span><div>Draft the budget calendar with Finance<span class="tpc">Budget</span></div><span class="when">This week</span><span class="who">Islam</span><span class="st">Not started</span><span class="arr">⌄</span></div>
+<div class="addrow" style="grid-template-columns:22px 1fr auto auto auto"><span>+</span><span style="color:var(--ink)">Confirm the payroll forecast with HR</span><span class="tpc" style="border-style:dashed">Budget ▾</span><span class="when">This week</span><span class="who">Islam</span></div></div>
+<div class="hint">Topic, week and owner appear on the add line at the bottom of the list</div></div></div></div><div><p class="lbl a">Refined</p><div class="stage tw"><div class="pg l"><div class="tools"><span class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Confirm the payroll forecast with HR<i></i></span><span class="opt"><u class="set">Budget</u><u>This week</u><u>Islam</u><u>+ note</u></span></span><span class="find"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Search</span></div><div class="sec"><div class="sh"><span class="ix">02</span><h3>Islam</h3><span class="meta">1 open</span><span class="end"></span></div><div class="r"><span class="tk"></span><span class="t">Draft the budget calendar with Finance<span class=tg>Budget</span></span><span class="w">This week</span><span class="p">Islam</span><span class="s ">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div></div></div></div></div></div>
+<p style="font-size:13px;color:var(--ink-3)">Unchanged: what every control does, the columns and their order, the week words, and that every change saves at once with no reload.</p></div>

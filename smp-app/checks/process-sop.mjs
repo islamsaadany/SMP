@@ -1,4 +1,4 @@
-/* ── THE SOP COMPILE (§492) ───────────────────────────────────────────────
+/* ── THE SOP COMPILE (§510) ───────────────────────────────────────────────
  *
  * No database and no browser: compileSop is pure. Both ends every time
  * (§94.2) — a blank is Missing AND a filled cell is not; a step that

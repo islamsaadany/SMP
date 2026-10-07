@@ -62224,6 +62224,141 @@ drift of its own, and sweeping sixty-four blocks inside a merge commit is a fix
 reaching far beyond the fault (rule 1b), so only this round's own block was
 corrected and the rest is named here for its own pass.
 
+## §487.1 — The four acts the console record was still silent about (2026-10-04)
+
+**Islam, of the recommendation handed over with the last merge:** *"let's do it
+(my fear is would that slow down the platform? because if this will imapct the
+performance we need to rethink)"*, and *"what chceks?"*
+
+### The fear was answered with measurements, before anything was built
+
+Rule 3a, and it matters that these are measurements rather than reassurance:
+
+- **Nothing a client's own people touch writes a record.** Not a page load, not
+  the plan, not reporting, not a save. Every one of the acts recorded arrives at
+  Forefront's own `platformAction` — the console — which is pressed a few dozen
+  times a year by a handful of consultants.
+- **One act costs one extra INSERT**, on a connection the request is already
+  holding, after the act itself has already written.
+- **A record that cannot be written never costs the act** (§231.3): `logAct`'s
+  INSERT sits inside a try that logs and does not re-throw.
+- **The read does not slow as the record grows**: `LIMIT 200` against an indexed
+  `at DESC`.
+- **A row is a few hundred characters**, so a thousand acts a year is under a
+  megabyte.
+
+**AND WHERE THE ANSWER WOULD CHANGE IS NAMED RATHER THAN LEFT OUT.** Recording
+something a client's own people do *inside* the platform is thousands of writes
+a day rather than dozens a year, and that is a different decision to bring back
+to him rather than something to decide here.
+
+### What ships, and why it was not in §487
+
+§487 recorded eleven acts and **named these four in its own code as
+unanswered** — *proceed* had not reached them, and widening a record to cover
+permission changes is not a thing to ride in on a defect fix (rule 1b). So they
+are the twelfth to fifteenth acts now:
+
+| act | sentence |
+| --- | --- |
+| `consultant.admin` | *Gave N the platform admin flag* / *Took the platform admin flag off N* |
+| `consultant.renamed` | *Renamed N to M* |
+| `consultant.address` | *Changed N's address from a to b* |
+| `access.set` | *Set Demo to View (was Edit)* |
+
+### Three of the four ride handlers that write whatever arrives
+
+This is the finding rather than a detail. `saveConsultant` and `saveAccess` both
+re-write the value on every press, identical or not — so recording **the press**
+would fill the record with rows for presses nobody made anything with, and **a
+record people learn to scroll past has stopped being one** (§280.1's lesson,
+pointed at a log rather than at a check).
+
+`moved(a, b)` compares before it writes, and **the line claimed as the fix is
+proved to be one** (§276, §298.2): `SMP_BREAK=record-always` reddens **10**
+assertions and prints the defect verbatim — `Set Demo to Edit (was Edit)`.
+
+### The old value is read through the rule, never re-derived
+
+An absent access row means *nobody has answered yet* and never *denied*
+(§30.2), so `was` is `FF.grantIn(world, areaKey)` rather than
+`stored ?? default` — a column the tenant has never saved is recorded as the
+shipped default, which is what the table in front of them says.
+
+### And the word for a setting is decided once (§53.5)
+
+The console capitalised the state key for its own button, and the sentence
+would have spelt it again. **A stored sentence outlives the screen that wrote
+it**, so a drift there is a record disagreeing with the table it is about.
+`STATE_NAMES` / `stateName()` live in `lib/platform-rules.js` (and its
+byte-identical `.cjs` twin, §323) and are **handed to the page with the
+`access` answer**, because that page loads no rules of its own — grepped, not
+assumed. One source, one line changed on each side, and the payload is not
+reshaped.
+
+**AND THE FIRST MAP REWORDED A BUTTON ON THAT TABLE.** It spelt `none` as
+*Nothing* where the page drew *None* — **a round
+about a record quietly restyling the page the record is about**, which is rule
+1b's own fault committed by the section quoting §53.5. Caught before it shipped,
+and the right word was never a choice: it is **the word already on screen**.
+**One button and not three, and that had to be measured rather than counted off
+the data**: this section first said three, because four areas hold the word
+— and the page skips `none` wherever an area offers more than two states, so
+*Add a client* is the only column that ever draws one.
+What is asserted now is that not one button moves (§94.2), measured against the
+OLD EXPRESSION rather than a list typed into the check, so the two cannot drift
+the next time a state is added — proved able to fail, printing
+`reworded: ["none"]`.
+
+### Two smaller decisions
+
+- **The address act records BOTH addresses** (§87): an address *is* the identity
+  here, so the row that loses it has to name what it was.
+- **It is recorded BEFORE the per-client register sweep**, or a failure halfway
+  through leaves the change made and unrecorded.
+- **The History page needed no edit at all** — it draws `a.detail` verbatim.
+  That is §487's *the sentence is written at the act and stored* paying for
+  itself the first time the acts grew.
+
+### Verified
+
+`checks/console-record.mjs` **58 → 73 assertions, all good**. §7b drives all
+four acts through `platformAction` and reads the rows back **from Postgres**
+(§96), **both ends every time** (§94.2 — the press that changes nothing must
+record nothing), the words asserted through the module that decides them rather
+than typed (§94.8), and **every value it moves is put back**, so the sections
+after it are not measuring state this one changed.
+
+Red both ways: `no-record` **30**, `record-always` **10**.
+
+Beside it: modules 233/0, shell 252/0, state 92/0, insights 137/0, memory 14/0,
+platform rules **69/0** with §323's two-copies assertion green and the two
+files `diff`'d byte-identical, and the five frozen console checks green
+**against both copies of the page** (§53.5).
+
+**The frozen product is untouched and measured** — `built-in-step.py` all good,
+the shipped file byte-identical — so **no `sw.js` SHELL bump is owed** (§91's
+trigger is the built file's bytes changing, and they did not). The **served**
+worker's release stamp did move (`ab2d2649` → `8d8ca684`), which is §397
+working as designed, since `public/platform-page.js` is a file a tab holds; it
+is the witness the next merge reads off the live site. `generated-in-step`'s one
+FAIL is §349.4's guard refusing an uncommitted tree and saying which errand
+that is, with every comparison line ok.
+
+### Recorded, not done
+
+- `client-setup-outside.py` and `client-archive.py` do not honour `SMP_PAGE`, so
+  §369.4's repair reached three of five files. Both are green against the root
+  copy, which is the source, and the generated copy is proved in step by
+  `generated-in-step.mjs`.
+- `checks/door-landing.mjs` is **1 red on `main` itself** — `[2,0]`, because
+  §461 removed the group-mark upload and the check was never told. Established
+  as not this work's (§303) and **Islam's to settle**, since putting the control
+  back and rewriting the assertion are two different answers (§218).
+- `smp-app/.env.local` is tracked in git, which `CLAUDE.md`'s own pre-commit
+  rule forbids by name. Nothing is exposed today (a password-less local
+  address); the habit is what is wrong. Flagged, not changed (rule 1b).
+
 ---
 
 ## §488 — The company's capabilities can be edited in place
@@ -62270,7 +62405,509 @@ loosened (§218): no rail in the pane, add line under the table, the new row
 unfolded and editable, grips, a keyboard move read back from the data, Remove —
 red 6 with the first build's pane put back.
 
-## §489 — A process export starts empty, with a box to select all (2026-10-05)
+
+## §489 — two checks main was red on, both stale, both rewritten (never loosened)
+
+Islam: *"do 1"* — clear the two failures recorded at §479 as main's own.
+**Neither was a product fault**; each asserted a literal that a later,
+deliberate decision had moved (§214.3), and each is rewritten to the property
+that survives the decision (§218).
+
+**`setup-shape.mjs` §1 — `desc` is answered by the part defaults.** The words
+step asks for a function's Description (§436), and the check required every
+key it asks to be a key in `LABELS`. `labelWord` falls back through
+`SMPRules.PART_DEFAULTS`, which holds `desc` since §418 — so the word was
+never unanswered. The check now accepts a key held by either, and asserts
+`PART_DEFAULTS` is there with `desc` in it, or a build that dropped the
+fallback would pass by both lists being empty (§113.8).
+
+**`setup-shape.mjs` — the new client's top level.** It asserted the top carried
+a written structure; §427/§428.2 deliberately left the top UNSAID on a new
+client (`STRUCT_NEW_CLIENT` holds `mid` and `bu` only). Rewritten as an
+AGREEMENT (§94.8): every component reads the same on a new client's top as on a
+top with nothing stored, and that top still carries its Brief — the control,
+or "they agree" passes on a build where both read nothing. 49/0; red under all
+six breaks.
+
+**`door-landing.mjs` — Branding inside the flow.** It counted the group's own
+mark upload, which §461 removed (one mark per client, set on the client's
+door). Rewritten at both ends: the colours and the client's door mark are
+inside the set-up flow, and the separate group-mark upload is ABSENT. 146/0.
+
+No product file changes; nothing stored, nothing migrated, no `sw.js` bump.
+
+## §490 — The SWOT Copilot flow (spec 064, 2026-10-04)
+
+Islam, of the signed-off mockup `design-mockups/copilot-swot-flow/2026-10-04_v2.html`:
+*"proceed"*, then *"continue"*. Numbered §482 when it
+was built; renumbered §490 at the 2026-10-05 merge, because main had taken
+§480&ndash;§488 for its own work meanwhile (the company's directions, the
+console record). This branch's own §480 (two stale checks) became §489 in the
+same pass. Both renumbers ran before the merge and touched only this work's
+own lines (§264.3).
+
+**THE FLOW.** A SWOT chat starts from the subject's existing SWOT or fresh,
+then a methods grid — rows Internal · Micro · Macro, columns Guided questions ·
+Template · Ready reports · Deep research, with no Deep research on Internal
+(the inside of a business is not on the web). The ticks become a to-do list
+(*"N of M done"*) in a right column, beside one box per letter showing what has
+been gathered. Guided questions are asked word for word from the original
+method. Micro and Macro each get an analysis page that is agreed on its own,
+then the SWOT is drafted at 5–7 items per letter, and saving writes the titles
+into the plan's SWOT. The original names two macro factors *Environmental* and
+*Political*, and the flow keeps those words.
+
+**SOURCES ARE THE CLIENT'S, NOT THE CHAT'S** (*"per client is better"*): a
+report, a filled template, a deep-research answer or a set of guided answers
+is a row in `copilot_sources` (migration 023, RLS-forced like every tenant
+table), tagged to one unit or to *all*, so a report brought in for Mobile can
+be picked again for Retail or next year. **Only whoever added a source, or the
+Super user, may delete it** — asked of the stored row on the server
+(`mayDeleteSource`), never of what the page drew (§42).
+
+**DEEP RESEARCH IS A PROMPT OUT AND AN ANSWER IN**: the platform cannot browse,
+so it hands over a `.txt` prompt to run elsewhere, and the answer comes back as
+an upload or a paste and becomes a source. The download's name carries a long
+dash, which a plain `filename=` header cannot carry; it goes as
+`filename*=UTF-8''` like the platform's other downloads.
+
+**THE GATES READ THE STORED FLOW** (`modules/copilot/swot.ts`): the analysis
+step is refused until the to-do list is done, the SWOT cannot be saved before
+it is drafted, and the page cannot claim a SWOT is already saved
+(`sanitizeSwot`). Every rail section folds; Deliverables and Sources open
+folded.
+
+**TWO FAULTS FOUND BY LOOKING AT THE BUILT PAGE**: a letter's count rendered as
+a bare digit beside its heading, so *Opportunities* read *"Opportunities s"* —
+it reads *"5 items"* now; and the source row reused the `.copsrc` pill class,
+so it is `copsrcrow` (§65.9).
+
+**A CHECK WAS FLAKY AND IT WAS THE CHECK**: §472's working-word assertion looked
+at 2.2s for a word that turns at 2s on a 0.5s tick, so it raced the tick and
+failed one run in two. It looks at 2.9s inside a 4s answer now. And §453's
+deliverable press had to open the Deliverables rail first, since it opens
+folded.
+
+**VERIFIED**: `checks/copilot.mjs` 207/0 with a new §7 at both ends of every
+rule, red under four new breaks (`source-any-delete`, `swot-trust-saved`,
+`swot-any-gather`, `swot-finish-any`); `checks/shell.mjs` §3j 20/0 driven in a
+browser and the whole file re-run; `built-in-step` and `generated-in-step`
+clear; typecheck clean. **RECORDED, NOT DONE**: main has moved ahead of this
+branch; nothing is merged.
+
+### §490.1 — Compact columns, and a to-do header that stays put (2026-10-04)
+Islam asked for the SWOT chat to be compacted: a narrower chats column on the
+left, a narrower to-do column on the right, and the work and the to-do list
+scrolling separately. Drawn first (`design-mockups/copilot-swot-flow/2026-10-04_compact-columns.html`,
+published as an artifact) and signed off with one addition: *"for the to do
+list scrolling you need to keep the header freezed"*.
+- **In a SWOT chat** the chats rail is 200px (from about 250) and the to-do 270px
+  (from 340); the work in the middle takes the space back. Scoped with
+  `:has(.copsw)`, so the other Copilot chats keep their rail — the mockup was of
+  the SWOT chat and nothing else was asked.
+- **The work and the to-do each scroll in their own box**; scrolling to the end of
+  the list no longer scrolls the work away.
+- **The to-do's header — title, count and progress bar — is frozen** at the top of
+  its column while the list scrolls under it. The header and the bar are one
+  wrapper (`.copsw-todoh`), so a single sticky element carries both; it paints the
+  card's own surface and covers the card's top padding, so the list cannot show
+  through above it.
+- **"+ New chat" keeps one line** at 200px by tightening its padding (the mockup
+  named the wrap as the cost and the build answered it); a long chat's date line
+  may still wrap.
+- **Below 1021px nothing changes** — the to-do drops under the work as before.
+- Checked in `smp-app/checks/shell.mjs` §3i at a short window (or there is nothing
+  for the to-do to scroll, §94.2): the two widths, the button on one line, the
+  to-do scrolling in its own box, the work beside it not moving, and the header
+  still at the top of the column AND the thing a click lands on (`elementFromPoint`,
+  never a computed `position`, §94.8).
+
+### §490.2 — One rail width, a compact to-do, the old help library, a Foundation to-do, tight equal space (2026-10-04)
+Islam, of the SWOT and Foundation chats: the left panel changing size between
+phases, a to-do that was too tall, *"help me understand is not working, the
+copilot had a big library of answers for this for each question"*, a to-do for
+the Foundation too, and the space above and below the panels. Drawn in two
+mockups (`design-mockups/copilot-swot-flow/2026-10-04_rail-todo-help.html` and
+`2026-10-04_spacing-and-fold.html`, both published as artifacts) and signed off
+with *"proceed"*, after his own answers: *"fetch the old library dont' write a
+new one"*, *"let's keep all the surrounding space tight and equal"*, the to-do
+the same width as the chats panel, the chats panel folding when a chat starts,
+and the columns reaching the bottom of the page.
+- **The chats rail is 200px in every phase**, not only in a SWOT chat (§490.1's
+  `:has(.copsw)` scope goes); its folded strip stays 24px.
+- **A chat that starts or opens folds the rail to its strip**, so the work gets
+  the room. Pressed open again it stays open for the rest of the visit (`RAILKEPT`,
+  per page load) — the fold is the platform's suggestion, never an override of
+  somebody who asked for the list back.
+- **The to-do is compact**: each line's count sits beside its title (`0/16`), the
+  status sentence moves onto the hover, titles wrap rather than clip, and the
+  header reads `done/n`. *Change methods* stays on the title line.
+- **"Help me understand" is the old Copilot's library, carried verbatim**
+  (`smp-app/lib/copilot-swot-help.ts` — `strategy_copilot/lib/data/
+  expanded-explanations.ts` unchanged below its marker): In simpler terms, Think
+  about, an Example answer, and which industry it was written for. The entry is
+  chosen by the client's own industry (`tenants.industry`, the GICS-style name the
+  set-up flow stores, mapped to the library's sixteen), falling back to *Other*,
+  and the line says when it fell back. **Only what is added is the mapping**: the
+  SWOT's five competition and six market questions to the library's keys. The
+  sixteen internal questions have no library entry and keep their own short line.
+  The server attaches it to the question (`more`), so the page never carries a
+  second copy of the library (§53.5).
+- **A Foundation chat has a to-do**, a 200px third column beside the chat with the
+  cards still open: *Start* (starting point, plan years), *The parts* (each part
+  with answered/asked and Agreed · Answering · To do), *Then* (consistency check,
+  save). Its count is worked out from the flow's own state, never stored. Below
+  980px it is not drawn and the flow is one column, as before.
+- **Every gap round the panels is 8px** — the page's side gutter, the space under
+  the section row, between the rail and the work, inside the work, and to the
+  foot of the page — and **the columns reach the bottom**: the question card, the
+  answer box and the to-do grow to fill.
+- **Found by the check, not the drawing**: with the work reaching the foot of the
+  page, a plain chat's Send sat **under the office chat button** that floats over
+  the bottom-right corner, and a press there opened the corner instead. The box
+  now ends at the panel's 8px (the old `-16px` margin matched the old 16px
+  padding) and, only where it is flush with that corner (a plain chat — the flows
+  put a to-do there), keeps 64px clear of the button. Asserted as a hit test on
+  Send (§94.8).
+- **Recorded, not changed**: the same button still sits over the foot of the to-do
+  column in a SWOT or Foundation chat (flagged at §490.1); in those columns it
+  covers the last line, not a control that has no other way in.
+- Checks: `check:copilot` 210/0 (the help attached to a micro and a macro question
+  and not to an internal one, the industry pick and its fallback); `shell.mjs`
+  280/0 — the rail folding when a chat opens and coming back at 200px, Send
+  pressable, the SWOT to-do and rail both 200px, the count read as `0/5`. Three
+  §490.1 assertions REWRITTEN to the new numbers, never loosened (§218), and the
+  years assertion made to wait for its save rather than racing it (one red in
+  three runs). An earlier `check:copilot` red was two runs sharing one database,
+  not the product; alone it is green.
+
+
+## §491 — A capability planned in pillars is shaped like one direction (2026-10-05)
+
+Islam, of the company's Strategy › Capabilities pane with a capability planned in
+pillars: *"why is it asking me to add a direction? and the view is damaged"*, then,
+showing the Directions pane, *"that's how it should be"* and *"a capability planning
+in a pillar approach is typical to a direction"*.
+
+- **The model was wrong, not the styling.** §482/§488 drew a pillars capability as a
+  CONTAINER of pillars, so the add row used the client's word for a pillar and asked
+  for a Direction inside a capability. A capability planned in pillars IS one
+  direction-shaped plan: its key measures, breakdown and tactics sit straight under
+  the capability's own band (code, name, Owner, Custodian).
+- **The damage was a nested pinned head.** `unitPlanBody()` draws a sticky
+  `.ptitle.edhead` and a pillar Owner block; nested under the capability band in edit
+  mode they pinned over the rows and clipped the OWNER row. `unitPlanBody` gains a
+  `bare` argument: no head and no pillar owner, because the capability's band IS the
+  head and carries the seats.
+- **Nothing stored moves.** The capability still holds one pillar row in `items`, so
+  reporting, scoring and the deck read it as before. An empty capability offers
+  *Start this capability's plan*, which mints one pillar named as the capability
+  (shell's `[data-rowadd]` pillar branch). A capability holding more than one from
+  before shows the first and says how many there are. The rail shows no direction
+  count for it. Capabilities planned in projects are unchanged.
+- `checks/single-company.py` §491: 7 assertions, **4 red** on the build before, from
+  the sources (§276). `qa.py` ERRORS none; capability-entry, capability-pillar-edit,
+  pillar-rail, plan-edit-head green. Main took §489/§490 while this was built, so it
+  is numbered §491 and was merged with main's Copilot work before commit.
+
+**Merged to `main` 2026-10-05 on Islam's word** (*"merge to main"*), with main's §487.1 brought in first; the built file rebuilt from the merged sources (byte-identical), the served copies regenerated, `sw.js` SHELL `v6.01-capability-as-direction` against main's `v6.00`. Screen only — no `api/`, `lib/` or `db/` file of this round changed, so no forced sign-out is owed.
+
+## §492 — How we compete, in the plan (spec 064 stage 1a, 2026-10-05)
+
+Islam signed off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`) and said *"start the build"*. Stage 1a is the plan half: the section, its switch, its table and its slide. The Copilot's scoring and value-proposition chat are stage 1b.
+
+**A Structure component, off until ticked.** `SMPRules.COMPETE` is a component like the SWOT, but `compOn` treats it as `FN_DESC` is treated: an unsaid level reads it OFF, so no existing client moves. `compOffered` allows the top level and business units only (`COMPETE_LEVELS`) — a function or capability is answered false before anything stored is read. The switch is a section on the Structure step's top and units cards (`data-stcompete`), through the same `compToggle` every other section uses; off says *"Not shown on this layer. Nothing entered is lost."* (§44: off hides, never forgets).
+
+**The record rides the subject's `extra`, no migration** (§8 of the spec asked for this to be said when built): `UNITS[k].compete` (units.extra) or `GROUP.compete` (org.extra), shaped `{discipline, values:[{title, how:[…], measure:[…]}]}`. `competeWritable` mints it, `competeTidy` deletes an emptied record (§50.6). Discipline keys and names live once in `SMPRules.DISCIPLINES` (btc · bts · bp), so the Copilot stage reads the same list.
+
+**Same pen as the SWOT.** The section sits after `swot` with `ac:"u_anal"` (the top: `g_found`), and `SEC_PENS.compete` names the analysis page, so one Edit opens both and nobody's rights move. **The server classifies it with the SWOT**: on a unit `collectUnit` adds `unitAnalysis` ("how the unit competes"); on the group it joins `gExtra` and the top view. Both compare with `sameCanon` because jsonb reorders keys (§145, §249.3). `test-authorize.js` §492: the office writes, a unit owner is refused, a reorder of keys is no change, and the group's is not swept to setup or unknown — 941/0.
+
+**The table is the slide's shape**: discipline across the top on the tenant's `--panel`, then Value / How / Measure rows on the accent, one column per value; How and Measure are bullets, typed one per line, with a leading `-`, `•` or `*` stripped. **One deck slide**, anchored `compete`, after the SWOT, drawn only when the section is on and holds something (§253: an empty table is not a slide).
+
+**Proved**: `checks/how-we-compete.py` all good — the rule at both ends, the Structure switch pressed, the section's place, every pen control pressed and the stored graph read back, the slide, and off hiding and keeping. Falsified from the sources (§276): the section's `when` forced true → 2 red; the slide call removed → 2 red. `checks/structure.py` held a count of sections per card that this moves (§214.3) — rewritten, never loosened (§218): the three-section count excludes How we compete, and a new assertion says it is on the top and units cards and no other. Neighbours green (structure-sections, plan-switch, slide-move, deck-blank-slides, client-setup, top-plan, fn-sw-default, function-sw, hide-slide, deck-strip); 140/0 differ, 69/0 platform rules.
+
+**Recorded, not done**: the top level's section has been proved as a rule and on the server but not walked visually; the plan download (.pptx of the plan) does not carry the table; the workbook has no sheet for it — an upload leaves it untouched.
+
+## §493 — How we compete, in the Copilot (spec 064 stage 1b, 2026-10-05)
+
+Islam: *"proceed with all until you need someting from me"*, on the signed-off spec 064 and its mockup. Stage 1b is the Copilot half of §492: a How we compete chat that scores the three value disciplines, recommends one, suggests the values, builds the table and saves it.
+
+**Two sections join the Copilot at once** — How we compete and Capabilities (for when capabilities are their own layer) — because a section is a CHECK on two tables, so a new one is a widened constraint and never only a word in the code (§172). Migration 024, idempotent, and `schema.sql` carries the same list. `SECTIONS` is seven, in the plan's order.
+
+**The arithmetic is one function, `resultOf`, and the page never adds a score** (§94.8): 0, 1 or 2 per factor per discipline, each side out of 20 shown as a per-cent; a gap over 25 points between the top two is Clear, 10 or more Leaning, otherwise Unclear; a tie breaks Best Total Cost, then Best Total Solution, then Best Product. The market decides the recommendation; the internal side is the check, and the two are said to agree or not.
+
+**The server keeps the chat honest** (§42), the SWOT chat's own shape: every write is judged against the STORED chat, `sanitizeCompete` refuses a phase that runs ahead of the work and ignores a `saved` sent by the page, values are refused before a discipline is chosen, a refine before there is a table, and Save before the STORED chat holds a table. The model is asked with no transaction open (§289); an incomplete set of scores is refused rather than half-stored. **Saving is a deliverable**, "How we compete — <place>", and a second chat for the same place adds a version to it rather than a second deliverable; the page then writes the table into the plan's How we compete record through `competeWritable`, after the press and never in a fetch's tail (§35). If the layer has the section switched off the save says so rather than pretending it is shown.
+
+**The screen**: the score table opens on three market factors with *+ N more*; every score is a pill that cycles 0→1→2 and is marked as changed by hand; the internal factors are behind one press; the recommendation offers *Yes, …*, the other two, and *Let me change scores*; five value cards are ticked into the table; every table cell is editable; a refine box asks for a change and the Copilot's alternatives are offered as buttons; *Save to How we compete* ends it.
+
+**Proved**: `checks/copilot.mjs` 236/0 with the pure rules and a server section against a stand-in model (red under `compete-tie-last` 2, `compete-trust-saved` 9, `compete-finish-any` 5); `checks/shell.mjs` §3k 14/0, pressed in a browser and read back from the database and from the plan, red 1 from the source with the plan write removed. The full shell run's two My work reds are §475's recorded Cairo-midnight fixture artefact, in a section this does not touch.
+
+**Recorded, not done**: Directions and Capabilities (stage 2) and Execution with the Planning & reporting cycle page (stage 3).
+
+## §494 — Directions and Capabilities, in the Copilot (spec 064 stage 2)
+
+Islam: *"proceed with all until you need someting from me"*, on the signed-off spec 064 and its mockup (`design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html`). Stage 2 is the Directions chat: start from the plan's own directions or fresh, score the candidates, tick the ones to keep, choose the capabilities, and save them into the plan.
+
+**The rules are one file, `lib/copilot-directions.ts`, and the page never adds a score** (§94.8): `scoreOf` is urgency × importance × ease, each 1–4, out of 64; `tickBest` ticks the top four; a plan row keeps its `planId` and its mark "plan" so saving updates the direction it came from rather than minting a second one.
+
+**The server keeps the chat honest** (§42), §493's shape: the state lives in `copilot_chats.extra.directions`, every write is judged against the STORED chat, `saved` belongs to the product and is ignored when the page sends it, and Finish is refused until the stored chat holds a ticked direction. The model is asked with no transaction open (§289).
+
+**Where capabilities are chosen follows the structure**: where `SMPRules.capAtTop(GROUP)` is true they are a step inside the Directions chat; otherwise they are the separate Capabilities section §493 opened. One question, asked in one place (`dvCapsHere`).
+
+**The save writes the plan in the browser, after the press** (`dvWritePlan`, §35): a direction is updated by its `planId` or created with `addPillar`; a capability is created with `addCapability` carrying `capKind` and `serves` (the pillar ids it supports). The authoriser learned both fields — `CAP_KNOWN` and a capPlan classification "what a capability is" — so a change to them is the plan's and not an unknown (§42's fall-through would otherwise make it the Super user's alone).
+
+**Proved**: `checks/copilot.mjs` 269/0, red under `dir-score-sum` 3, `dir-trust-saved` 6, `dir-finish-any` 10 (two probes made to degrade rather than die, §215); `scripts/test-authorize.js` 946/0, red 3/3 two ways; `checks/shell.mjs` §3l pressed in a browser — plan or fresh, scored, ticked, capabilities, and the save read back from the plan — red 2 with the plan-row lookup broken. The full shell run's two My work reds are §475's recorded fixture artefact. `tsc` clean; the shipped file is `build.py`'s output; `sw.js` SHELL `v6.04-directions-copilot`.
+
+**Recorded, not done**: owners are not written by the save (a direction's owner stays the plan's to set); stage 3 — the Execution chat and Setup › Planning & reporting cycle.
+
+
+## §495 — Execution in the Copilot, and Setup › Planning & reporting cycle (spec 064 stage 3)
+
+Islam signed off panels F and G of `design-mockups/copilot-directions-flow/2026-10-05_directions-flow-v2.html` and spec 064 §6–§7, then *"proceed with the rest"*.
+
+**The Execution chat** (`lib/copilot-execution.ts` the rules, `modules/copilot/execution.ts` the acts `newExecution` · `execPeriod` · `execDraft` · `execSave` · `execFinish`). It asks the plan period ONCE — full year, this quarter to year end, or picked months — capped at one calendar year (twelve months at most, never across a year end, because the planning period §308 is one year). Then one item per Direction and Capability, drafted by the model and editable by hand; the to-do column lists the period and each item, nothing else (§1 of the spec). **A quarter outside the period is cut on the server** — on the model's answer, on every hand edit, and again when the period changes (`withPeriod`), so the chat can never hold a tactic the period does not cover. Every write is judged against the stored chat (`sanitizeExec`: the page can change measures, tactics and the cursor, never which items there are, §42).
+
+**Save to plan** makes the deliverable *Execution — <place>* (versioned like every other) and the browser writes the plan: the period becomes `GROUP.planFrom` / `planTo` (§308's own fields, so proration follows it), a Direction gains its measures and its tactics with q1–q4 set from the chat, and a Capability's measures become key objectives (`mintRowId`, from the maximum) and its tactics become projects dated from the first to the last quarter. A row of the same name is updated, never duplicated. No server rule moves: every one of those writes is a change the authoriser already classifies (946/0).
+
+**Setup › Planning & reporting cycle**, replacing Reporting cycle. The plan period is the first block with its OWN Edit (`PLANEDIT`), taken out of the cycle's pen, because it outlives every cycle inside it; a month timeline shows the period, and a cycle that ends after it is drawn in the alarm ink with a *runs past the plan period* badge (`cyclePastPlan`). Tactics whose quarters fall outside a shortened period are **counted and named, never deleted** (`tacticsOutsidePlan`). Nothing else on the cycle pen moves; the rename reaches the rail, the knowledge base and the welcome screen.
+
+**Proved**: `checks/copilot.mjs` 292/0, red under `exec-any-quarter` 3 and `exec-finish-any` 4; `checks/shell.mjs` §3m drives the real chat in a browser and reads the plan back (12/0) — red 1 with the browser's quarter write made to ignore the period, printing `1111 want 0001`; `checks/plan-cycle-page.py` new, red 2 (panel after the cycle head; past-the-period flag stubbed off). Four neighbours REWRITTEN, never loosened (§218): `planning-period` (the period's controls moved to their own pen), `years` (the revision's year chips with them), `contingency` (the cycle pen is `[data-editcycle]` now, the first Edit on the page being the plan's), and the Setup rail's page name in `attention-rows` and `welcome`. Also: a todo status read *1 measures* — plural fixed.
+
+**Recorded, not done**: the chat asks again once the period has ended (§6.1) only by offering the choice anew on a new chat; nothing yet reminds anybody.
+
+**§492–§495 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §487.1 and §491 brought in first: the three record files combined (no line of either side lost; main's *Last Updated* demoted to *Earlier*), the built file and `smp-app/public/` rebuilt from the merged sources rather than merged, `sw.js` rebuilt from main's copy at `v6.06-execution-copilot` (one `const SHELL`, `node --check` clean), and the duplicate-declaration scan reading only §281.1's six. Re-run on the merged tree: authoriser 946/0, differ 140/0, copilot 292/0, shell 324/0, modules 233/0, state 92/0, door 146/0, `tsc` clean, `qa.py` ERRORS none, and single-company, plan-cycle-page, how-we-compete, structure, planning-period, years, contingency, capability-pillar-edit and plan-level all green. No forced sign-out is owed: no save rule moved for an old tab (the new authoriser keys are ones an old tab never writes).
+
+## §496 — Advisory, in the Copilot (spec 064)
+
+Islam, of the signed-off mockup (`design-mockups/copilot-advisory/2026-10-06_advisory.html`): *"ok for both"* — the question count sits in the right column, and *Proceed with what you have* is offered from the first question.
+
+**A question, a few questions, then one brief.** The person writes what they want advice on; the Copilot asks ONE short question at a time, up to five a round and two rounds; then it writes a Decision Brief — situation, what we know (every fact tagged Platform, You, File or Assumed), two to four options with **exactly one recommended**, why, and next steps. *I don't know — assume for me* answers a question with a stated assumption; *Proceed with what you have* stops the questions at any point. When the platform's figures and a file disagree on a number, the Copilot does not choose: it asks which to use (the platform's, the file's, or the person's own).
+
+**The count is the server's** (`lib/copilot-advisory.ts`): the pips, the round and the rule that an eleventh question is refused all come from one function, so the screen cannot disagree with the rule (§53.5). A question still waiting on an answer is never asked again. A brief with no recommended option is not a brief and is refused in words; several recommended keep the first. The page never sends the state, only what the person did (§42).
+
+**Saved as an Advisory deliverable that stays in the Copilot** (`copilot-only`): advice is not a plan, so nothing is written into the plan. Versioned by the brief's title. A saved chat takes no further questions; the next question is a new chat. No migration — the section and the deliverable kind already existed.
+
+**Found while building**: a clash is itself the question, and the model may not word one — the platform words it (*"Which Store count should I use?"*) rather than refusing a good answer.
+
+**Verified**: `check:copilot` 311/0, red under `no-budget` (2), `brief-any-rec` (2) and `advisory-promotable` (1); `check:shell` §3n presses the flow end to end. Typecheck clean; `sw.js` at `v6.07-advisory-copilot`. **On the branch, not merged.**
+
+## §497 — Internal Tracker: topics, and the refined ledger page (spec 054, 2026-10-06)
+
+Islam: *"sometimes we have a general topic that is already continuing with us on
+the tasks over the weeks like the Budget or strategy Communication etc. and we can
+group by them"*, then, of the mockups, *"yes to all three, but I need a better
+deisng for the page to be more neat"*, *"remove the back button, already the
+navigation from the top bar is doing the job"*, *"change due this week to Due"*.
+Built to the signed-off `design-mockups/internal-tracker/2026-10-06_topics-refined.html`.
+
+- **A topic is the client's, one per action, and the office's to manage** (his three
+  answers): `tracker_topics` plus `tracker_actions.topic_id` (migration 025 —
+  renumbered from 024, which main took for the Copilot), fenced like every tenant
+  table. Anybody past the office gate may make, rename, close, reopen or delete one;
+  deleting one leaves its actions un-topicked, never deleted. A closed topic keeps
+  its actions and is not offered for new ones.
+- **Group by gains Topic** (Owner · Topic · Status · Due date · None); a topic's
+  heading carries how much of it is done, a thin bar, its own menu and *+ Add to
+  <topic>*. A heading never stands over nothing.
+- **The page is the ledger**: the client's band holds this week's line, the title
+  and four counts (*Open · Late · Due · Done this week*), the views and the settings;
+  the next action is written at the top under a gold rule; numbered section heads.
+  **No back link** — the top bar's trail is the way back.
+- **The status pill is 128px** (*"the status is cut"*): *NOT STARTED* and *IN
+  PROGRESS* with the caret fit, measured by screenshot. The add line draws no pill —
+  a new line is Not started.
+- **A double-click opens the name box AND a topic list beside it** (*"when I double
+  click the task it doesn't show me the option to ad a topic"*): one Enter saves
+  both, Escape takes both back, leaving both boxes commits.
+- `checks/tracker.mjs` **244/0**; fifteen assertions held the old page and were
+  REWRITTEN, never loosened (§218) — the headings read off `.grp h3`, the empty
+  client's sentence, the new column, the add line's absent pill, the page's own
+  font. A new pair drives a topic as the SMO team AND refuses a client's person,
+  because `topic-super-only` went GREEN until it did (§54.5). Red sixteen ways.
+
+## §498 — Words on the client's band are worked out from the band (2026-10-06)
+
+Islam: *"we need to manage the colors contrast rules"* — a client with a tan bar
+made the Tracker's masthead words unreadable, because the module wrote white and a
+fixed amber on whatever colour the client chose.
+
+- **One rule, the frozen product's own** (`inkFor`/`readableOn`, config-data.js),
+  carried into `lib/branding.ts` as `barInks()`/`barVars()`: the ink is white or
+  near-black by the bar's luminance, and the quiet words, the gold accent and the
+  late red are each walked toward the INK's side until they read 4.5:1 on that bar.
+  Navy is unchanged (white, the house gold); tan gets near-black and a deep brown.
+- **The direction is the ink's, not the bar's** — the first draft chose it from the
+  bar's own luminance and failed tan, pink and mid-grey (2.4, 2.0, 3.9:1).
+- The Tracker's masthead and the Copilot's filled controls read `--bar-*` tokens.
+  `checks/tracker.mjs` §1b asserts 4.5:1 for every ink on six bars including white,
+  black and mid-grey; `SMP_BREAK=bar-fixed-inks` puts the fixed inks back and goes red.
+
+
+## §499 — The Internal Tracker wears Forefront's colours, never the client's
+
+Islam, of §498's masthead following the client's band: *"for the top banner I don't want it to follow the clients colors let's keep it with forefront colors like the mockup you made"*, then *"not hte banner only the whole module"*. The Tracker is the office's own weekly list (§356) — Forefront's page about a client, not the client's page — and the signed-off ledger mockup drew it navy and gold. Measured: the only client colour the module read was the masthead and the browser's `theme-color`, both through `barFor`; the shared top bar (§444) is white everywhere already. Both now take `BAR_DEFAULT` (#16325C). `barVars()` stays the one reader of how words sit on a band (§53.5) and is simply handed Forefront's navy; the Copilot's controls still follow the client (not asked about). `checks/tracker.mjs` gives the client a tan band, asserts it STORED first (§113.8), and asserts the masthead and theme colour stay navy, then puts the row back (§94.2): 247/0, and `SMP_BREAK=client-bar` (the old read put back) reddens exactly those two. Screen only; nothing stored, nothing migrated. On the branch, not merged.
+
+**§497–§499 merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main had moved to §496 under the branch; it was merged in first, the three record files combined with both sides kept, and nothing in the frozen product had changed on the branch, so nothing was rebuilt and `sw.js` was not bumped. Migration 025 (topics) runs after main's 024; both applied in order on the check database. Re-run on the merged tree: tracker 247/0, copilot 311/0 (main's own figure, once 024 was applied to the local database), modules 233/0, notes 170/0, shell 334/0 against a fresh build, `generated-in-step` and `built-in-step` clear. No forced sign-out is owed: no `api/`, `lib/` or `db/` file of the frozen product moved, and nothing about how a save is judged changed.
+
+## §500 — the company's capability is edited like a direction
+
+Islam, with the pen open on Company › Strategy › Capabilities: *"I'm not able
+to edit the name nor add a capability!! … the capability view should be the
+same like the directions same functionality same work."* **He was right, and it
+was an omission rather than a breakage**: §482 drew the capability's band with
+`pillarBand()` in BOTH modes, and §488 added the pen without giving that band
+an editing form or the rail an Add — while a direction's pane, in edit mode,
+draws `unitPlanBody`'s pinned `edhead` (code, name box, Remove, §194/§232) and
+its rail draws "+ Add a Direction" (§69.13). Measured on the build before: no
+name box, no Add, no Remove.
+
+**The same controls, not new ones** (§53.5): editing draws the direction's own
+`edhead` — the code, a `textOr` name box writing the capability's name (and its
+one plan row's while that still wears the old name, §491, so reporting and the
+deck follow), the two seats, and **Remove this Capability** through §325's own
+dialog (`data-caprm`) — and the rail gets the direction rail's own `.railadd`.
+**A new capability plans the way the one beside it plans**, and a pillars one
+gets its single plan row at once (§491's rule), so it opens exactly as an added
+direction does: empty Key measures and Tactics. Read mode is untouched.
+`checks/single-company.py` §500: six assertions, the name read back from the
+DATA (§96), **10 red** on the build before; the §491 "no nested head" assertion
+REWRITTEN, never loosened (§218) — exactly one `edhead`, and it is the
+capability's. Neighbours (capability-remove, -pillar-edit, -seats, -entry,
+direction-seats, top-plan, plan-edit-line) and `qa.py` green. Screen only;
+nothing stored moves, nothing migrated, no server rule. SHELL v6.08.
+
+**Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*). Main took §497–§499 (Internal Tracker) while this was built, so this section was renumbered §497 → §500 before the merge; the record files were combined, the built file and the served copies regenerated, SHELL v6.08 past main's v6.07.
+
+## §501 — The Copilot lives inside Strategy, and its settings live on the console (spec 064)
+
+Islam: *"When I enable Copilot on the platform, the module appears on the outside of the platform. When someone clicks on it, it opens the settings, which I don't think is relevant."* Then, of the mockup (`design-mockups/copilot-placement/2026-10-06_copilot-placement.html`): *"go ahead"*, *"proceed"*.
+
+**WHAT TURNING IT ON DOES IS ONE THING**: it draws the Copilot tab inside Strategy. The console card no longer draws a Copilot row and the client's module menu and switcher no longer list Copilot or Copilot settings — `shownOutside()` in `lib/modules.ts` filters any module marked `inside` out of `moduleMenu` and `moduleRows`, and the top bar marks the host (Strategy) as current on the Copilot's own list page (`lib/topbar.ts`), so an inside module is never named as a place of its own.
+
+**THE SETTINGS ARE THE SAME FOR EVERY CLIENT, SO THEY LIVE WHERE EVERY CLIENT IS**: a console tab, *Copilot*, after Frameworks and before History — title *Copilot settings*, tag *Same for every client*, an AI instructions | Templates switch, the section switch, each part with Edit, and the templates table (download, replace, put back). Served by `/api/copilot` (`lib/copilot-settings-api.ts`): every consultant reads, only a Forefront super user (`isAdmin`) edits, a client login is refused — the rule asked on the server, never only by hiding a button (§42). The store is unchanged (`copilot_assets`, §456).
+
+**OLD ADDRESSES ARE DOORS** (§61): `/<client>/copilot/settings…` redirects to `/platform#copilot` rather than drawing a page that no longer exists. **AND THE WAY TO ALL CHATS STAYS**: Strategy's Copilot chats rail carries *All chats on this client ›* to the list page, which is still reachable from inside, never from the menu. Roles & access keeps its Copilot column (§454).
+
+**CHECKS**: `copilot.mjs` 315/0 (red under `copilot-settings-any` 3 and `copilot-settings-client` 1); `modules.mjs` 234/0 with an inside module asserted absent from the switcher and the card and its host present; `shell.mjs` §3f rewritten (the redirect, the console tab, the All chats link, no menu entry) 258/0; the five console checks green on both copies. **RECORDED, NOT DONE**: `check:modules:red`'s `any-module` break no longer reddens because every module in `MODULE_DEF` is now built — measured identical with this change stashed, so it is the break's subject that has gone (§214.3), not this change.
+
+
+**§501.1 — Merged to `main` 2026-10-06 on Islam's word** (*"proceed"*). Main took §497–§500 (the Internal Tracker's topics and colours, and the company capability edited like a direction) while this was built, so it was renumbered §497 → §501 BEFORE the merge, in all three spellings (the merge base held none, so every one was this branch's own — §264.3). The three record files were COMBINED, never picked (§318.7); the built file and `smp-app/public/` were REBUILT from the merged sources (§91, §329). **And §94.12 recurred**: both sides independently wrote shell `smp-shell-v6.08-…`, so the merged name goes past both, `v6.09-copilot-placement`, checked against every name the history has held. One red on the merged tree was my own litter rather than the product: `checks/shell.mjs`'s console-card assertion reads the FIRST card, and two fixture tenants left by a killed copilot run (`RHI` sorting first) answered instead — deleted, 338/0 (§442.15's road). Verified on the merged tree: copilot 315/0, modules 234/0, shell 338/0, tracker 247/0, door 146/0, `typecheck` clean, `built-in-step` and `generated-in-step` clear, `qa.py` ERRORS none, platform-cards 30/0, console-boot 13/0. No forced sign-out is owed: no rule about how a save is judged moved.
+
+## §502 — a capability's Target box can be read, and a failed save says enough to trace
+
+Islam, on El Abd, Company › Strategy › Capabilities with the pen open: *"Target
+field is very small, no. are recorded but not visible / and on saving we got
+this message ths shouldn't happen by any means!!!"*, then *"you need to write
+an actual error here so we can get back to you to fix it properly"*, and of the
+first mockup *"the proposed is too big"*; the second was signed off (*"ok build
+both, units stay as is"*).
+
+**THE BOX.** §482's `.topcapbody table td.num { width:1% }` was written for the
+capability projects table's count columns and, as a bare selector, also reached
+a pillars capability's Key measures, whose Target cell is `td.num` — so the
+cell shrank to its content and the `width:100%` box inside it to a sliver. The
+1% stays (a compact column is what he chose), and the box gets a width of its
+own, **110px** — enough for 1,250,000 — scoped away from the projects table.
+The unit plan's Target (about 320px) is untouched at his word. Screen only.
+
+**THE ERROR.** The bar said "The server could not take your change just now"
+with `HTTP 500` on a hover, and `sync.js` never read the response body, so the
+server's own sentence and anything that could find the failure again were lost
+— a failure on a client's tenant could not be traced. Now:
+- the server's `failed()` (both state routes) gives every failure a reference
+  (`SMP-` + six characters), writes it to the runtime log beside the full
+  stack, and returns it with a **reason made of names only** — the database's
+  error code put into words, the table, the column, the constraint
+  (`lib/fail-ref.ts`). Never the database's own message, which can carry the
+  values being written (§43). `state-io.ts`'s statement runner marks the table
+  it was writing, because a type error names a type and not a table (§316.2);
+- the browser reads that body (and a 400's own sentence), puts the whole
+  account — time, page, status, reference, reason, the server's sentence — on
+  the hover of "Not saved.", into the console as an error **once per distinct
+  failure** (not once per five-second retry), and onto the clipboard from a
+  new link at the end of the bar, **Copy error for the Strategy Office**;
+- the sentence on the page stays the user's, with no status in it (§258.3).
+
+The link is wired once on the document, because the bar is rewritten on every
+retry (§24); the copy falls back to `execCommand` where the clipboard API is
+not offered (§93.6).
+
+**Verified.** `checks/save-said.py` §2b (8 new assertions, over HTTP with a
+stub) — red 2 with the reason read and the link removed, from the sources;
+`lib/fail-ref.ts` asked directly with an error carrying a value in its message
+— the value does not reach the reason. Screenshot of the built capability
+matches the signed-off mockup (cell 169px, box 110px). `single-company`,
+`refusal-keeps-work`, `table-fit`, `top-plan`, `capability-pillar-edit`,
+`pillar-breakdown`, `built-in-step` green, `tsc` clean cold. SHELL v6.09.
+Nothing stored moves, nothing migrated, no save rule moves — no sign-out owed.
+
+**Not done**: the El Abd save failure itself is not yet found — this is what
+will name it the next time it happens.
+
+## §503 — The topic has its own column, immediately before the week (spec 054, 2026-10-06)
+
+Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and when there is no topic, there should be a "Add a topic" button somehow. It should look cleaner and neater."* Drawn first (`design-mockups/internal-tracker/2026-10-06_topic-beside-timeline.html`, published as an artifact) and approved with *"proceed"*.
+
+- **The topic leaves the name's line and takes a column of its own**, between the action and the week. It is a quiet rounded tag (a gold dot and the name, 132px max, ellipsis with the full name on the hover). The week column is FIXED at 84px, because with `auto` the topic column's right edge followed each row's week words and the tags did not line up down the list — seen in a screenshot, asserted as one right edge for every row, and falsified (`week-auto`, the old sizing put back, printing three different edges).
+- **No topic is "+ Add a topic"** in the same cell, quiet until the row is hovered or focused, so an empty list of actions is not a column of buttons shouting.
+- **The press is the topic list itself** — the `.tpk` popup the add line already uses (§53.5): open topics plus the row's own closed one, *No topic*, and *New topic…* which posts `topicName` so the server makes or finds it and sets it in one act. Nothing new on the server: the `topic` act already took `topicId` or `topicName`.
+- **A double-click only renames.** §497 put a topic select inside the rename; with the topic on the row that is two ways to one act, so the select is gone (§24) and the check asserts no `.tn2 select`.
+- **Grouped by topic, the cell is empty** (the group heading already says it, §87); a read-only row shows the tag without a press, or nothing.
+- On a phone the topic drops to the second line beside the week.
+
+`checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §501–§502 brought in first; renumbered §501 → §503 before the merge.
+
+## §504 — A failed save is kept on this computer, and can be sent to the office (2026-10-07)
+
+Islam: *"Can't we have a way to avoid the data unsaved error something like the data is saved locally until we get back and fix things or even have an sql script as a backup for the smo to update the unsaved data?"* — then, of the first wording, *"too long and confusing"*, with the worry that *"if everyone saves something due to a server error we will have a lot of versions"*; then *"not saved yet with red view is a bit tricky"*, *"make it amber and calmer"*, *"the send to strategy office closer to the message"*, and *"ok approved, build it"*. Built from the mockup he signed off (`design-mockups/unsaved-changes/`).
+
+**A FAILURE IS NOT A REFUSAL, AND ONLY A FAILURE IS KEPT.** A server error or a dropped connection is an accident; a refusal is a decision (§32, §184) and keeps its own bar, its own words and Discard. So `sync.js`'s failure path writes what is on screen and not on the server to this browser's storage — **as LINES, not a graph** (`SMPDiff.splitLines` in `lib/graph-diff.js`, one line per field, each carrying the value the server held when it was typed) — keyed by client and owned by the person, wiped at sign-out, so the next person at that computer is never handed somebody else's changes. The lines are resent by themselves the next time this person opens the platform, and a green *"Your N earlier changes are saved"* says so.
+
+**ONE CALM AMBER BAR, ONE GHOST BUTTON, NO DOWNLOAD, NO COPY BUTTON** — replacing §502's *Copy error*. Kept: *"Your changes are safe on this computer. The server didn't answer, so we'll save them the moment it does. Nothing to do."* with *Send to the Strategy Office* right after the message. Sent: *"…and the office has a copy."* Down (the send itself failed): *"The platform is down right now. They save by themselves when it's back, even if you close this page."* — which offers no second send, because a button that cannot work is worse than none (§61). The status, reference and reason stay on the hover (§502). A browser that refuses storage gets the old honest promise — *Not saved yet … keep this tab open* — never a false one.
+
+**THE "MANY VERSIONS" WORRY IS ANSWERED BY LINES, NOT BY SNAPSHOTS.** The office's list (**Setup › Unsaved changes**, office only, `lib/unsaved.ts`, table `unsaved_lines`, migration 026) groups by the address of the field, so two people's answers to one line arrive as ONE row — *"Two people sent this"*, with *Use X · Use Y · Discard* — and applying one closes the other. **A line leaves the list when it is applied, discarded, or lands by itself** (read on every open; marked `landed`, never deleted).
+
+**APPLY RUNS AS THE SENDER, NEVER AS THE OFFICE.** The office pressing Apply must not launder a change the sender could never have made, so the line goes through the authoriser as the person who typed it — and a line they could not have saved is refused even when the office presses the button, and stays on the list (§42). **Residual risk, stated:** the sender's seat is read at send time, so a person whose rights were narrowed between sending and applying is judged by their earlier seat.
+
+**A REPLAY THAT FINDS SOMEBODY ELSE CHANGED THE LINE ASKS.** Because each line carries its base, *nobody touched it* and *somebody changed it meanwhile* are told apart; a clash is never applied silently — an amber bar offers *Keep mine / Keep theirs*.
+
+**CHECKS.** `checks/unsaved-keep.py` (new, all good, red three ways from the SOURCES: nothing kept 13 red, a clash applied silently 6 red, the office page for anybody 1 red — the last only after its assertion was rewritten to ask `reachable()`, because the rail is not drawn away from Setup and the first version passed on the broken build, §113.8). `smp-app/checks/unsaved-lines.mjs` 26/0 against Postgres, red under `--break=apply-as-office`. **Two neighbours REWRITTEN, never loosened** (§218): `save-said.py` asserted the red *Not saved* bar and §502's copy button, both deliberately gone — it now asserts the amber bar, the hover, the console line, the copy button ABSENT and the send button PRESENT (8 red on the build before); `safety-banners.py`'s two *"the failure is said"* assertions read the new bar. `setup-rail.py`'s one red (*Planning & reporting cycle* clipped) reproduces on the build before this and is not this work's (§303). `qa.py` ERRORS none; built-in-step all good; state 92/0, door 146/0, shell 338/0, authoriser 946/0, differ 140/0, typecheck clean. Numbered §504 because main took §503 for the tracker's topic column while this was built (§264.3).
+
+## §505 — A direction's owner and custodian are a row on Roles & access
+
+Islam, of Amr Hassan, named Owner of one of the company's directions: *"we dont have a direction owner in the roles & access and I made him a custodian but nothing appearing for him"* — then, of two answers put to him, *"A, view on group is fine, build it."*
+
+**Reproduced before anything was proposed.** §447/§469 gave a direction (a top-layer pillar, with the business units switched off) an Owner and a Custodian, and let both report their own direction through `ownsTopPillar` — a rule, deliberately not a row. What it never did was give them a place: being named on a direction derived **no role**, so somebody holding nothing else reached no destination and the page read *"No pages granted"* over the one thing they had been named on. Measured with two people holding nothing, one named Owner and one Custodian: `roles []`, `current null`, *No pages granted* for both.
+
+**The role is derived, never granted (§33, §147.7).** `dirowner` ("Direction owner") is minted in `personRoles()` at the group whenever `ownsTopPillar(w, p)` is true — the SAME rule that lets them report, so the role and the reporting right cannot disagree about who is named (§42, §53.5) — and it is false whenever the business units are on, because then the top layer's pillars are not directions anybody reports. Either seat derives it.
+
+**View on the group, none everywhere else** (his word). The own-unit and own-function columns can never be theirs (the role is held at the group alone), so they are drawn as not applicable (§174). What lets them type their own figures is still `ownsTopPillar`, unchanged — this row decides what they may OPEN and never what they may report. It joins `OWN_LINES_ONLY`, so it is never granted by hand on the register and never speaks for the company (no Submit, no note, no slides), and `boundedReach` reaches a pillar naming them in either seat.
+
+**Nobody's access moves on any other tenant**: `scripts/test-access-unmoved.js` against the stored baseline reads UNMOVED (the worked example plans on its business units, so nobody there is a direction owner). No migration, nothing stored.
+
+**Verified.** `scripts/test-authorize.js` §505, 953/0, both ends (named → role and group view, not named → nothing, units on → no role); red 3 with the derivation removed. `checks/direction-owner-role.py` all good, **5 red** against the build before, printing the reported state. `direction-seats`, `single-company`, `access-header`, `viewer-line`, `built-in-step` green; the four served copies regenerated and `rules.cjs` re-carried.
+
+**Recorded, not done.** `scripts/test-my-reporting.js` §0 is 1 red on `main` before this change too (six sources it now names as needing a browser), reproduced with this work stashed.
+
+## §506 — The Add someone form says what it needs (2026-10-07)
+
+Islam: *"for the client register adding users. please mark the essential fields with an astrict"* — then, of three answers put to him, **Full name + Email**, both starred and the form refusing to add somebody without an address, with the cost stated before he chose (*nobody can be added until you have their address*); then, of the mockup drawn out of the real dialog (`design-mockups/register-required-fields/`), *"ok build it"*.
+
+**THE OLD REFUSAL WAS SILENT, WHICH IS WHY THIS IS A FIX AS WELL AS A FEATURE.** The form already refused a press with no name — and set `NEWPERSON.err`, which nothing ever drew. So pressing *Add them* on an empty form did nothing and said nothing (§32, §171), under a footer promising *"Only a name is needed"*. The footer is replaced (*\* needed to add them. Everything else can wait.*) because a footer saying otherwise beside a refusal for a missing email is the form arguing with itself (§104.8).
+
+**ONE LIST, READ BY THE FORM AND THE PRESS** (`PERSON_NEEDED` in `config-data.js`, §53.5): which boxes carry a star, which are ringed, and the sentence under each are all read from it, so a third needed field is one line. **The ring is the attention ring's own shape in the alarm colour** (`--bad-tx` on `--bad-bg`), drawn OUT OF FLOW — an outline and a shadow, never a border — so a refused Email still shares its grid row (§190); the sentence sits UNDER the box it is about (§190's rule), in Islam's words: *"A full name is needed to add them."* / *"An email is needed — it is what they sign in with."* The form stays open with everything typed, the cursor goes to the first empty box, and each refused box says so to a screen reader (`aria-required` at rest, `aria-invalid` once refused). **The stars on the boxes are hidden from a screen reader** (their `aria-required` says it) **and the star in the footer is READ**, with a real space after it, or the key line reads *"needed to add them"* about nothing.
+
+**THE ADD FORM ONLY, AND THAT IS A DECISION** (the mockup's own note): somebody already on the register who arrived from a file with no address is still a row, and refusing to let anybody correct their job title until somebody finds an email would make *Edit details* a wall rather than a form. Asserted at both ends — the edit form draws no star, claims nothing required and rings nothing.
+
+**AND A QUIRK FOUND ON THE WAY**: the Full name box's writer ignored an EMPTY value, so typing a name, clearing it and pressing Add added the person under the name that had been cleared. For the Add form's draft an emptied box now empties the draft, which is what makes the refusal true; a person already on the register still keeps their name when the box is emptied, as before.
+
+**CHECKS.** `checks/required-fields.py` (new, 40 assertions, all good) over HTTP with a stub, proved able to fail four ways from the SOURCES with an unbroken copy built byte-identical beside them (§276): the email not needed **17 red**, the refusal silent **3 red**, the emptied-name quirk put back **8 red**, the star on the edit form too **1 red**. **Two neighbours REWRITTEN, never loosened** (§218, §214.3): `people-dialog.py` §6 asserted *"a name is the one thing needed"* and now asserts the refusal at each step and the rings it draws — it had only ever counted rows, so the silence was invisible to it; `no-jump.py`'s add fixture now carries an email, or *"nothing jumped"* would be measured on a press that did nothing (§113.8). **Neighbours green**: `people-dialog`, `identity-merge`, `table-standard`, `register-header`, `attention-dismiss`, `duplicates`, `role-picker`, `seat-grant`, `forefront-team`. **Two reds are NOT this work's, each reproduced identically on a build of the commit before it** (§303): `no-jump`'s *adding a person* JUMPED, and `team-page`'s three address-clipping failures at 1100/1000. Full `qa.py` over `file://` **33 viewers, 243 destinations, ERRORS none**, summed from the run's own lines (§332); `built-in-step` all good; the served copies regenerated; `sw.js` SHELL `v6.13-required-fields`. **Screen only** — no `api/`, `lib/` or `db/` file touched, nothing stored, nothing migrated, no rule about who may save what moved.
+
+**Recorded, not done.** Two other ways a person reaches the register are not held to the email rule and were not asked about (rule 1b): the unit role picker's *+ Add* (it creates somebody by name to give them a role), and the people workbook upload, where a row with no address is still added, as it was. And `no-jump.py` reports the register jumping back to the top after a person is added — reproduced identically on a build of the commit before this one (§303), so it is not this work's.
+
+**MERGED TO `main` 2026-10-07 on Islam's word** (*"merge to main"*). `main` had not moved since this branch left it, measured rather than assumed (§4's fetch-and-look), so the tree pushed is the tree verified. §506 was free on `main` in all three spellings (§336.1), so no renumber was owed (§264.3). `sw.js` SHELL `v6.13-required-fields` against main's `v6.12`, a name the history had never held, confirmed again immediately before the push (§94.16). The branch tip was already pushed, so this record commit is what `main` holds and the branch does not (§91), and the branch is brought up only once production has served it. **No forced sign-out is owed** (spec 029): read off the diff, no `api/`, `lib/` or `db/` file is in it.
+
+## §507 — A process export starts empty, with a box to select all (2026-10-05)
 
 Islam, of Processes › Export: *"the default should be all non selected with an
 option to select all."* Every row's box arrived ticked (`defaultChecked`), so
@@ -62300,7 +62937,7 @@ Prisma client, both missing from a fresh install and neither caused by this
 change. Not driven inside the running app: the Processes pages need a seeded
 `ffprocess` workspace, which this container does not have.
 
-## §490 — The Processes list folds: a plus opens a main process's subs (2026-10-05)
+## §508 — The Processes list folds: a plus opens a main process's subs (2026-10-05)
 
 Islam, of the Processes list: *"can we make a plus next to each main to open
 and drop all subs, instead of having big list?"* — then, of the mockup
@@ -62334,7 +62971,7 @@ to hide. The real page could not be driven in this container (no seeded
 `ffprocess` workspace), which is stated rather than glossed. Snapshot:
 `ui-versions/ffp-processes-list/2026-10-05_before-fold.tsx`.
 
-## §491 — AI in the Processes workspace: a better draft, drafting into an empty process, and an end-to-end check before export (2026-10-06)
+## §509 — AI in the Processes workspace: a better draft, drafting into an empty process, and an end-to-end check before export (2026-10-06)
 
 **Islam:** *"Build the option to use AI to build a process in the process workspace and also to check and evaluate the process end to end at the end before the exporting page."* His answers: both draft options; **warning only**; the check **runs only when pressed**; **everything fresh** (nothing shared with the existing screens' stored results). He approved the mockup `design-mockups/processes-ai/2026-10-05_build-and-check.html` (roles not in the org chart are kept and shown amber; the check is not saved; the draft covers the Process Map and RACI only).
 
@@ -62344,7 +62981,7 @@ to hide. The real page could not be driven in this container (no seeded
 - `loadProcessReviewContext` was extracted verbatim from `reviewProcessWithAI`; the AI Review's behaviour is unchanged.
 - **Not run here:** no Gemini key and no seeded workspace, so the model calls and a browser run were not exercised; `npm run typecheck` (cold) is clean.
 
-## §492 — SOPs for each process (Processes workspace)
+## §510 — SOPs for each process (Processes workspace)
 
 Islam: *"i want to add SOPs for each process … collecting all steps and operational aspects to be part of the report."* Settled in chat: **its own export** (not inside the Export Report), **document control carried**, audience Forefront, **A + B in the first round**; owner and approver are free-text names and the revision history is a hand-kept list (nothing recorded automatically). Mockup `design-mockups/processes-sop/2026-10-06_sop.html` approved.
 
@@ -62355,6 +62992,6 @@ Islam: *"i want to add SOPs for each process … collecting all steps and operat
 - **Check:** `npm run check:sop` 17/0; `check:sop:red` six breaks from a copy of the source, each red. Typecheck cold clean. Not run here: a browser/seeded-workspace pass.
 - **Not built (option C):** AI-drafted step detail.
 
-## §493 — The Helicopter view chooses which processes it draws
+## §511 — The Helicopter view chooses which processes it draws
 
 Islam picked option A (a "Processes" dropdown with a searchable tick list beside the Milestones | Cards switch), applied to both views, the rest left to judgement. **Hides from the picture only — nothing is deleted or archived.** Starts with everything shown; the choice is remembered per browser as the HIDDEN ids (so a process added later shows by default), wrapped in try/catch. Ticking a main ticks its subs, its box reads indeterminate when only some are on; Select all / none; label "All (N)" / "N of M"; search by code or name; empty selection says so in words. A shown process that branches from a hidden one reads "↰ from ADM105, hidden" instead of a dashed line; links to hidden processes drop from the cards. The PNG exports what is drawn. Rules live in `ffp/lib/domain/helicopter-pick.ts` (pure); `check:pick` 12/0, `check:pick:red` all five breaks red. Snapshot: `ui-versions/ffp-helicopter-picker/`. Screen only; no schema, no server rule. Recorded, not done: the dropdown has not been looked at on a real workspace in a browser; cards do not name a hidden link target.

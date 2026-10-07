@@ -251,15 +251,7 @@ export const APP_JS = `(function () {
     if (e.key === "Enter") {
       e.preventDefault();
       var ar = t.closest(".addrow"), v = t.value.replace(/\\s+/g, " ").trim();
-      if (!ar) {
-        /* A row's own list (§503): the new topic is made and set on that
-           row in one press, the server finding it if the name exists. */
-        var rid = rowOf(t);
-        closePops(null);
-        if (v && rid) post({ act: "topic", id: rid, topicName: v });
-        return;
-      }
-      if (v) setAddTopic(ar, "", v);
+      if (ar && v) setAddTopic(ar, "", v);
       closePops(null);
       var add = document.getElementById("add"); if (add) add.focus();
     } else if (e.key === "Escape") { t.value = ""; }
@@ -386,10 +378,8 @@ export const APP_JS = `(function () {
     } else if (act === "pick-topic") {
       var tp = b.getAttribute("data-topic") || "";
       closePops(null);
-      if (ar) { setAddTopic(ar, tp, tp ? b.textContent : ""); var add2 = document.getElementById("add"); if (add2) add2.focus(); }
-      /* A row's topic column (§503): set it there and then, unless the pick
-         is the topic the row already carries. */
-      else if (id && !b.classList.contains("on")) post({ act: "topic", id: id, topicId: tp || null });
+      if (ar) setAddTopic(ar, tp, tp ? b.textContent : "");
+      var add2 = document.getElementById("add"); if (add2) add2.focus();
     } else if (act === "show-done") {
       var sec = b.closest(".sec"), key = sec ? sec.getAttribute("data-key") : null;
       if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
@@ -465,27 +455,58 @@ export const APP_JS = `(function () {
     var t = e.target.closest(".t[data-rename]");
     if (!t || t.querySelector("input")) return;
     var tn = t.closest(".tn2"), id = rowOf(t), was = t.textContent;
+    var wasTopic = t.getAttribute("data-topic") || "";
     var inp = document.createElement("input");
     inp.className = "ttl"; inp.value = was; inp.maxLength = 200; inp.setAttribute("aria-label", "Rename the action");
-    /* The topic is not set here any more (§503): it has its own column, one
-       press away, so the double-click only renames. */
+    /* THE TOPIC IS SET HERE TOO (§497): the same choice the opened row
+       offers, built from the add line's own list of open topics, plus the
+       one this row already carries if it has since been closed. */
+    var sel = document.createElement("select");
+    sel.className = "tsel"; sel.setAttribute("aria-label", "Topic");
+    var none = document.createElement("option"); none.value = ""; none.textContent = "No topic"; sel.appendChild(none);
+    var seen = false;
+    document.querySelectorAll(".addrow [data-act=pick-topic][data-topic]").forEach(function (b) {
+      var v = b.getAttribute("data-topic"); if (!v) return;
+      var o = document.createElement("option"); o.value = v; o.textContent = b.textContent; sel.appendChild(o);
+      if (v === wasTopic) seen = true;
+    });
+    if (wasTopic && !seen) { var o2 = document.createElement("option"); o2.value = wasTopic; o2.textContent = (t.getAttribute("data-tname") || "This topic") + " (closed)"; sel.appendChild(o2); }
+    sel.value = wasTopic;
     t.textContent = ""; t.appendChild(inp);
-    if (tn) tn.classList.add("editing");
+    if (tn) { tn.classList.add("editing"); tn.appendChild(sel); }
     inp.focus(); inp.select();
     var settled = false;
     var finish = function (keep) {
       if (settled) return; settled = true;
       if (tn) tn.classList.remove("editing");
+      if (sel.parentNode) sel.parentNode.removeChild(sel);
       var v = inp.value.replace(/\\s+/g, " ").trim();
+      var tv = sel.value;
       if (!keep || !v) v = was;
       t.textContent = v;
-      if (keep && v !== was) post({ act: "rename", id: id, title: v });
+      if (!keep) return;
+      if (v !== was) post({ act: "rename", id: id, title: v });
+      if (tv !== wasTopic) post({ act: "topic", id: id, topicId: tv || null });
     };
-    inp.addEventListener("keydown", function (ev) {
+    var onKey = function (ev) {
       if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); finish(false); }
       else if (ev.key === "Enter") { ev.preventDefault(); finish(true); }
-    });
-    inp.addEventListener("blur", function () { finish(true); });
+    };
+    inp.addEventListener("keydown", onKey);
+    sel.addEventListener("keydown", function (ev) { if (ev.key === "Escape" || (ev.key === "Enter")) onKey(ev); });
+    /* Settled once the cursor leaves both boxes — moving from the name to
+       the topic is not leaving. */
+    var out = function (ev) {
+      var to = ev.relatedTarget;
+      if (to && (to === inp || to === sel)) return;
+      setTimeout(function () {
+        var f = document.activeElement;
+        if (f === inp || f === sel) return;
+        finish(true);
+      }, 0);
+    };
+    inp.addEventListener("blur", out); sel.addEventListener("blur", out);
+    sel.addEventListener("change", function () { inp.focus(); });
   });
 
   /* Saved when you leave the box (§35), and only when it changed. */

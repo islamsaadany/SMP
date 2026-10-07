@@ -61,7 +61,7 @@ import { barInks, barVars, contrastOf } from "../lib/branding.ts";
 import {
   STATUSES, STATUS_WORD, VIEWS, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
-  officeRows, listActions, oneAction, addAction, addTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
+  officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
 } from "../lib/tracker.ts";
 
 let ok = 0;
@@ -877,21 +877,43 @@ try {
     await pg.locator(row + "input.ttl").press("Escape");
     check("Escape puts the name back and writes nothing", (await pg.locator(row + ".t").innerText()) === "Book the big room for Thursday" &&
       (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday");
-    /* THE TOPIC IS SET FROM THE DOUBLE-CLICK TOO (§497): a topic list
-       stands beside the name box, set to the row's own; leaving both boxes
-       saves it, and Escape writes nothing. Both ends (§94.2). */
-    await pg.locator(row + ".t").dblclick();
-    check("a double-click also offers the topic, beside the name box, set to the row's own (none)", (await pg.locator(row + ".tn2 select.tsel").count()) === 1 &&
-      (await pg.locator(row + ".tn2 select.tsel").inputValue()) === "" && (await pg.locator(row + '.tn2 select.tsel option[value="' + roomTopic.id + '"]').count()) === 1);
+    /* THE TOPIC HAS ITS OWN COLUMN (§503), immediately before the week: a
+       row with none says "+ Add a topic", the press opens the same list the
+       add line offers, and a pick or a new name is written at once — read
+       back from Postgres, never off the row (§96). The double-click only
+       renames now. Both ends (§94.2): set, then taken off again. */
+    const tcBox = (await pg.locator(row + ".tcwrap").count()) ? await pg.locator(row + ".tcwrap").boundingBox() : null, whenBox = await pg.locator(row + ".when").boundingBox(), nameBox = await pg.locator(row + ".tn2").boundingBox();
+    check("a row with no topic says \"+ Add a topic\" in its own column, between the name and the week",
+      (await pg.locator(row + ".tcwrap .tc.add").count()) === 1 && (await pg.locator(row + ".tcwrap .tw").innerText()) === "+ Add a topic" &&
+      !!tcBox && !!whenBox && !!nameBox && tcBox.x + tcBox.width <= whenBox.x + 1 && tcBox.x >= nameBox.x + nameBox.width - 1 && whenBox.x - (tcBox.x + tcBox.width) <= 24,
+      JSON.stringify({ tcBox, whenBox }));
+    const rights = await pg.locator(".row .tcwrap").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().right)));
+    check("...and the column lines up down the list, whatever the week beside it says", rights.length > 1 && new Set(rights).size === 1, JSON.stringify(rights));
     if (process.env.SMP_SHOT2) await pg.screenshot({ path: process.env.SMP_SHOT2 });
-    await pg.locator(row + ".tn2 select.tsel").selectOption(roomTopic.id);
-    await pg.locator("h2.pt").click(); await settle();
-    check("...and leaving the boxes puts the action under that topic, the name unchanged, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
-      (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tg").innerText()).toLowerCase() === "facilities" && await stayed());
     await pg.locator(row + ".t").dblclick();
-    await pg.locator(row + ".tn2 select.tsel").selectOption("");
+    check("the double-click only renames — no topic choice stands beside the name box", (await pg.locator(row + "input.ttl").count()) === 1 && (await pg.locator(row + ".tn2 select").count()) === 0);
     await pg.locator(row + "input.ttl").press("Escape");
-    check("...Escape takes the topic change back too, and writes nothing", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id && (await pg.locator(row + ".tn2 select.tsel").count()) === 0);
+    /* Degrades rather than dying (§215): on a build with no topic cell the
+       presses below would each wait thirty seconds for nothing. */
+    if ((await pg.locator(row + ".tcwrap").count()) !== 1) check("pressing \"+ Add a topic\" — but there is no topic cell on the row to press", false);
+    else {
+    await pg.locator(row + ".tcwrap").click();
+    check("pressing it opens the topic list, the open topics and No topic", await pg.locator(row + ".tcwrap .topics").isVisible() &&
+      (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').count()) === 1 && (await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').count()) === 1);
+    await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic="' + roomTopic.id + '"]').click(); await settle();
+    check("...and a pick puts the action under that topic, the name unchanged, the tag reading it, without a reload", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === roomTopic.id &&
+      (await asTenant(A, (c) => oneAction(c, born.id))).title === "Book the big room for Thursday" && (await pg.locator(row + ".tcwrap .tc:not(.add) .tw").innerText()) === "Facilities" && await stayed());
+    await pg.locator(row + ".tcwrap").click();
+    await pg.locator(row + '.tcwrap [data-act=pick-topic][data-topic=""]').click(); await settle();
+    check("...and No topic takes it off again, back to \"+ Add a topic\"", (await asTenant(A, (c) => oneAction(c, born.id))).topicId === null && (await pg.locator(row + ".tcwrap .tc.add").count()) === 1);
+    await pg.locator(row + ".tcwrap").click();
+    await pg.locator(row + ".tcwrap .tnew").fill("Venue hunt");
+    await pg.locator(row + ".tcwrap .tnew").press("Enter"); await settle();
+    const madeTopic = (await asTenant(A, (c) => listTopics(c))).find((x) => x.name === "Venue hunt");
+    check("...and New topic… makes the topic and sets it on that row in one press", !!madeTopic && (await asTenant(A, (c) => oneAction(c, born.id))).topicId === madeTopic.id &&
+      (await pg.locator(row + ".tcwrap .tw").innerText()) === "Venue hunt");
+    if (madeTopic) { await asTenant(A, (c) => setFields(c, born.id, { topicId: null })); await asTenant(A, (c) => deleteTopic(c, madeTopic.id)); }
+    }
     await asTenant(A, (c) => setFields(c, born.id, { topicId: null }));
     /* THE ARROW opens the row in place for its notes and history, on the
        address, and folds it again; no Title box; the history is small type

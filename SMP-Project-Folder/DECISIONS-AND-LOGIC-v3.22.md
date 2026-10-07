@@ -62844,6 +62844,19 @@ Nothing stored moves, nothing migrated, no save rule moves — no sign-out owed.
 **Not done**: the El Abd save failure itself is not yet found — this is what
 will name it the next time it happens.
 
+## §503 — The topic has its own column, immediately before the week (spec 054, 2026-10-06)
+
+Islam, of §497's tracker: *"The topic needs to be closer to the timeline, and when there is no topic, there should be a "Add a topic" button somehow. It should look cleaner and neater."* Drawn first (`design-mockups/internal-tracker/2026-10-06_topic-beside-timeline.html`, published as an artifact) and approved with *"proceed"*.
+
+- **The topic leaves the name's line and takes a column of its own**, between the action and the week. It is a quiet rounded tag (a gold dot and the name, 132px max, ellipsis with the full name on the hover). The week column is FIXED at 84px, because with `auto` the topic column's right edge followed each row's week words and the tags did not line up down the list — seen in a screenshot, asserted as one right edge for every row, and falsified (`week-auto`, the old sizing put back, printing three different edges).
+- **No topic is "+ Add a topic"** in the same cell, quiet until the row is hovered or focused, so an empty list of actions is not a column of buttons shouting.
+- **The press is the topic list itself** — the `.tpk` popup the add line already uses (§53.5): open topics plus the row's own closed one, *No topic*, and *New topic…* which posts `topicName` so the server makes or finds it and sets it in one act. Nothing new on the server: the `topic` act already took `topicId` or `topicName`.
+- **A double-click only renames.** §497 put a topic select inside the rename; with the topic on the row that is two ways to one act, so the select is gone (§24) and the check asserts no `.tn2 select`.
+- **Grouped by topic, the cell is empty** (the group heading already says it, §87); a read-only row shows the tag without a press, or nothing.
+- On a phone the topic drops to the second line beside the week.
+
+`checks/tracker.mjs` 251/0, with the new assertions reading the pick back from Postgres and asserting the page did not reload; red under every break including the two new ones (`no-add-topic` 3 red, `week-auto` 1 red). Screen only: no schema, no rule, nothing stored moves; the frozen product is untouched, so no `sw.js` bump. **Merged to `main` 2026-10-06 on Islam's word** (*"merge to main"*), with main's §501–§502 brought in first; renumbered §501 → §503 before the merge.
+
 ## §504 — A failed save is kept on this computer, and can be sent to the office (2026-10-07)
 
 Islam: *"Can't we have a way to avoid the data unsaved error something like the data is saved locally until we get back and fix things or even have an sql script as a backup for the smo to update the unsaved data?"* — then, of the first wording, *"too long and confusing"*, with the worry that *"if everyone saves something due to a server error we will have a lot of versions"*; then *"not saved yet with red view is a bit tricky"*, *"make it amber and calmer"*, *"the send to strategy office closer to the message"*, and *"ok approved, build it"*. Built from the mockup he signed off (`design-mockups/unsaved-changes/`).

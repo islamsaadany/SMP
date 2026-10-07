@@ -60,6 +60,13 @@ with sync_playwright() as p:
                  const i=document.querySelector('#modal-b [data-pname]');
                  i.value='Test Person Added';
                  i.dispatchEvent(new Event('change',{bubbles:true}));
+                 /* An email is needed to add anybody since §506, so the
+                    fixture carries one — or the dialog refuses, stays open,
+                    and "nothing jumped" is measured on a press that did
+                    nothing (§113.8). */
+                 const e=document.querySelector('#modal-b [data-pemail]');
+                 e.value='test.person.added@example.com';
+                 e.dispatchEvent(new Event('change',{bubbles:true}));
                  document.querySelector('[data-pdlg-add]').click(); }""")
     n1 = pg.evaluate("PEOPLE.length")
     if n1 != n0 + 1:

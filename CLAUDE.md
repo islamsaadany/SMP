@@ -9516,6 +9516,15 @@ python3 checks/attention-dismiss.py # every attention item can be ANSWERED, on t
                                 # the ring measured as PAINT not as a class, one press
                                 # clearing the queue AND the count AND the button, and
                                 # moving a dismissed seat bringing it straight back (§190)
+python3 checks/required-fields.py # the Add someone form says what it needs (§506):
+                                # the star on Full name and Email and nowhere else,
+                                # drawn and read; an empty press REFUSED and SAID under
+                                # the box it is about, the ring painted out of flow, the
+                                # cursor on the first empty box, what was typed kept; a
+                                # cleared name refused rather than added under the old
+                                # one; both palettes; and the EDIT form asserted to draw
+                                # no star (§94.2). Over HTTP with a stub; SMP_BUILT points
+                                # it at another build. Red 17/3/8/1 from the sources
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP) —
                                 # §8 covers dismissing a declaration (§180): outstanding
@@ -10954,7 +10963,9 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-10-07 — **§505: a direction's owner and custodian are a row on Roles & access.** Islam: *"we dont have a direction owner in the roles & access … nothing appearing for him"*, then *"A, view on group is fine, build it."* Being named Owner or Custodian on a company direction (units off) derives `dirowner` at the group from the same `ownsTopPillar` that lets them report, shipping View on the group and none elsewhere, own columns dashed, bounded (OWN_LINES_ONLY). Before: "No pages granted"; after: the company page. `test-authorize.js` 953/0 red 3, `checks/direction-owner-role.py` red 5 on the build before, access baseline UNMOVED. On the branch, not merged.*
+*Last Updated: 2026-10-07 — **§506: the Add someone form says what it needs.** Islam: *"please mark the essential fields with an astrict"*, then **Full name + Email**, then *"ok build it"* from the mockup. One list (`PERSON_NEEDED`, `config-data.js`) draws the red star on both boxes, rings an empty one in the alarm colour OUT OF FLOW with the reason under it, and holds the press; the old refusal set `NEWPERSON.err` and drew it nowhere, so an empty press did nothing in silence. Add form only — the edit form draws no star. The Full name box's writer ignored an empty value, so a cleared name was added under the old one; fixed for the Add draft only. `checks/required-fields.py` red 17/3/8/1 from the sources; `people-dialog.py` §6 and `no-jump.py`'s fixture rewritten, never loosened. The role picker's *+ Add* and the people upload are not held to the email rule (recorded). `sw.js` shell `v6.13-required-fields`. On the branch, not merged.*
+
+*Earlier: 2026-10-07 — **§505: a direction's owner and custodian are a row on Roles & access.** Islam: *"we dont have a direction owner in the roles & access … nothing appearing for him"*, then *"A, view on group is fine, build it."* Being named Owner or Custodian on a company direction (units off) derives `dirowner` at the group from the same `ownsTopPillar` that lets them report, shipping View on the group and none elsewhere, own columns dashed, bounded (OWN_LINES_ONLY). Before: "No pages granted"; after: the company page. `test-authorize.js` 953/0 red 3, `checks/direction-owner-role.py` red 5 on the build before, access baseline UNMOVED. Merged to `main` 2026-10-07.*
 
 *Earlier: 2026-10-07 — **§504: a failed save is kept on this computer, and can be sent to the office.** A server or network failure (never a refusal) writes the unsaved change to this browser as LINES (`SMPDiff.splitLines`, each with its base value), keyed by client and owned by the person, wiped at sign-out, replayed by itself on the next open with a green *saved* bar and an amber *Keep mine / Keep theirs* on a clash. One calm amber bar (`#unsaved`) with one ghost button, *Send to the Strategy Office* — §502's copy button is gone. The office's **Setup › Unsaved changes** (`unsaved.js`, `smp-app/lib/unsaved.ts`, migration 026) groups by field address, applies **as the sender** (a line the sender could not save is refused even on the office's press), and drops a line once applied, discarded or landed. Residual: the sender's seat is read at send time. `checks/unsaved-keep.py` red 13/6/1 from the sources; `save-said.py` and `safety-banners.py` rewritten, never loosened; `unsaved-lines.mjs` 26/0. Merged to `main` 2026-10-07 with main's §503 brought in first; `sw.js` shell `v6.11-unsaved-kept`. Numbered §504 because main took §503.*
 

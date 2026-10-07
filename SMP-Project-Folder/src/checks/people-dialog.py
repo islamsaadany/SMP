@@ -538,17 +538,33 @@ with sync_playwright() as p:
        # §372: the roles control is the cell's ticking list, and `personFields`
        # still draws none on the ADD form — a person with no key has no roles.
        pg.evaluate("!document.querySelector('#modal-b [data-proleset]')"))
-    # A NAME IS THE ONE THING NEEDED (§87.3) — and pressing with none must SAY
-    # so rather than doing nothing.
+    # A FULL NAME AND AN EMAIL ARE WHAT IS NEEDED (§506, REWRITTEN from §87.3's
+    # "a name is the one thing needed", never loosened — §218). The comment
+    # here always said a refusal must SAY so, and the assertion only ever
+    # counted rows; the refusal was in fact SILENT (`NEWPERSON.err` drawn
+    # nowhere). It asserts the saying now, at each step — what the press
+    # refused, and that it named exactly the boxes still empty.
+    rings = """()=>[].slice.call(document.querySelectorAll('#modal-b .pdf.reqmiss .pdfl'))
+       .map(e=>e.firstChild.textContent.trim())"""
     pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")
     pg.wait_for_timeout(500)
-    ck("with no name it refuses", pg.evaluate("PEOPLE.length") == n0)
+    ck("with nothing it refuses", pg.evaluate("PEOPLE.length") == n0)
+    ck("...and SAYS so, under both needed boxes",
+       pg.evaluate(rings) == ["Full name", "Email"], pg.evaluate(rings))
     pg.evaluate("""()=>{const i=document.querySelector('#modal-b [data-pname]');
        i.value='Nadia Fouad'; i.dispatchEvent(new Event('change',{bubbles:true}));}""")
     pg.wait_for_timeout(200)
     pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")
+    pg.wait_for_timeout(500)
+    ck("with a name and no email it still refuses", pg.evaluate("PEOPLE.length") == n0)
+    ck("...ringing the email and no longer the name", pg.evaluate(rings) == ["Email"],
+       pg.evaluate(rings))
+    pg.evaluate("""()=>{const i=document.querySelector('#modal-b [data-pemail]');
+       i.value='nadia.fouad@example.com'; i.dispatchEvent(new Event('change',{bubbles:true}));}""")
+    pg.wait_for_timeout(200)
+    pg.evaluate("()=>document.querySelector('[data-pdlg-add]').click()")
     pg.wait_for_timeout(700)
-    ck("with one it adds them", pg.evaluate("PEOPLE.length") == n0 + 1)
+    ck("with both it adds them", pg.evaluate("PEOPLE.length") == n0 + 1)
     ck("...under the name that was typed",
        pg.evaluate("!!PEOPLE.filter(function(p){return p.name==='Nadia Fouad';})[0]"))
     ck("...and the dialog closed", pg.evaluate("!PDLG"))

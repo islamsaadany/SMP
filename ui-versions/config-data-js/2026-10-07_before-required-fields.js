@@ -368,32 +368,9 @@ var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
-/* `missing` (§506) is the labels of the needed fields an Add press found empty
-   — the form's own words, so the field that draws them can ring itself without
-   a second list of which fields those are. Empty until somebody presses Add:
-   a ring before anybody has tried is a form scolding somebody for not having
-   finished yet. */
-var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
-/* ── WHAT ADDING SOMEBODY NEEDS (§506) ────────────────────────────────
-   Islam: "please mark the essential fields with an astrict" — and of what
-   counts as essential, Full name + Email, with the form refusing to add
-   somebody without an address: they sign in with their email (§69) and are
-   written to there, so a row with none is a person who cannot open the
-   platform or be told anything. Named ONCE, read by the form that draws the
-   star and the press that refuses (§53.5), so the star cannot promise a rule
-   the button does not keep. `field` is what the draft holds, `label` is the
-   form's own word for the box (personFields), `say` is the refusal under it.
-
-   THE ADD FORM ONLY. Editing somebody already on the register is not held to
-   this: a row that arrived from a file with no address is still a row, and
-   refusing to let anybody correct its job title until somebody finds an email
-   would make the dialog a wall rather than a form. */
-var PERSON_NEEDED = [
-  { field:"name",  label:"Full name", say:"A full name is needed to add them." },
-  { field:"email", label:"Email",     say:"An email is needed — it is what they sign in with." }
-];
+var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
-  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
+  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 }
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because

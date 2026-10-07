@@ -7323,9 +7323,32 @@ var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
-var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+/* `missing` (§506) is the labels of the needed fields an Add press found empty
+   — the form's own words, so the field that draws them can ring itself without
+   a second list of which fields those are. Empty until somebody presses Add:
+   a ring before anybody has tried is a form scolding somebody for not having
+   finished yet. */
+var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
+/* ── WHAT ADDING SOMEBODY NEEDS (§506) ────────────────────────────────
+   Islam: "please mark the essential fields with an astrict" — and of what
+   counts as essential, Full name + Email, with the form refusing to add
+   somebody without an address: they sign in with their email (§69) and are
+   written to there, so a row with none is a person who cannot open the
+   platform or be told anything. Named ONCE, read by the form that draws the
+   star and the press that refuses (§53.5), so the star cannot promise a rule
+   the button does not keep. `field` is what the draft holds, `label` is the
+   form's own word for the box (personFields), `say` is the refusal under it.
+
+   THE ADD FORM ONLY. Editing somebody already on the register is not held to
+   this: a row that arrived from a file with no address is still a row, and
+   refusing to let anybody correct its job title until somebody finds an email
+   would make the dialog a wall rather than a form. */
+var PERSON_NEEDED = [
+  { field:"name",  label:"Full name", say:"A full name is needed to add them." },
+  { field:"email", label:"Email",     say:"An email is needed — it is what they sign in with." }
+];
 function newPersonReset(){
-  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
 }
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because
@@ -37601,11 +37624,20 @@ function renderPeople(){
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
-    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">');
+    /* The star is drawn for the eye and hidden from a screen reader, so the
+       box says it itself (§506) — and says it was refused, once it was. */
+    var needA = function(label){
+      if (!add) return "";
+      return ' aria-required="true"' +
+        ((NEWPERSON.missing || []).indexOf(label) >= 0 ? ' aria-invalid="true"' : '');
+    };
+    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key +
+        '"' + needA("Full name") + '>');
     F("Emp. ID", '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
         '" placeholder="Emp. ID">');
     F("Email", '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
+        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email"' +
+        needA("Email") + '>');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
     /* THE REASON IS ON THE HOVER (§122). It was a two-line paragraph, the
@@ -37719,15 +37751,31 @@ function renderPeople(){
        row for anything to be outstanding about, and attentionOf() would be
        asked about a draft (§116's NEWDRAFT). */
     var by = add ? {} : attnFor(p), drawn = {};
+    /* ── THE STAR, AND THE REFUSAL UNDER THE BOX IT IS ABOUT (§506) ──────
+       Add form only (PERSON_NEEDED's note). The ring is the attention ring's
+       own shape in the alarm colour — out of flow, so a refused field still
+       shares its grid row (§190) — because this is not "outstanding", it is
+       "this will not go in" (§168). The sentence sits under the box rather
+       than above the form, §190's rule: a band saying what is wrong above nine
+       boxes leaves somebody to guess which. */
+    var need = {}, miss = {};
+    if (add) {
+      PERSON_NEEDED.forEach(function(n){ need[n.label] = n; });
+      (NEWPERSON.missing || []).forEach(function(l){ miss[l] = 1; });
+    }
     var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
       var mine = by[f.label] || [];
       if (mine.length) drawn[f.label] = 1;
+      var req = need[f.label], refused = !!(req && miss[f.label]);
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
-        (mine.length ? ' attn' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
+        (mine.length ? ' attn' : '') + (refused ? ' reqmiss' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) +
+          (req ? '<span class="reqmark" aria-hidden="true">*</span>' : '') + '</div>' +
+        f.html + f.note +
+        (refused ? '<div class="reqsay">' + esc(req.say) + '</div>' : '') +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -38384,8 +38432,16 @@ function renderPeople(){
   }
   function personDialogFoot(){
     if (!PDLG) return "";
+    /* "Only a name is needed" stopped being true at §506, and a footer that
+       says otherwise beside a refusal for a missing email is the form arguing
+       with itself (§104.8). The star is the KEY to the marks above it, so it is
+       READ here, where the marks on the boxes are hidden from a screen reader
+       (their `aria-required` says it): hidden in the key too, the line would
+       read "needed to add them" about nothing. A real space, not a margin, or
+       the sentence copies and reads as "*needed". */
     if (PDLG.mode === "add")
-      return '<span class="why" style="margin:0">Only a name is needed. Everything ' +
+      return '<span class="why" style="margin:0"><span class="reqmark reqkey">*' +
+        '</span> needed to add them. Everything ' +
         'else can wait.</span><span class="pdrt">' +
         '<button class="linkbu" data-pdlg-close="1">Cancel</button>' +
         '<button class="linkbu tk-save" data-pdlg-add="1">Add them</button></span>';
@@ -71269,7 +71325,14 @@ var SYNC = (function () {
        fault exactly: an editor that looks identical and discards every
        keystroke. */
     window.wirePersonFields = function(root){
-    fieldWire("pname",  function(p, v){ if (v) p.name = v; }, root);
+    /* A person on the register keeps their name when the box is emptied —
+       nobody may be nobody. The DRAFT is the exception (§506): clearing the
+       Add form's box left the old name standing behind an empty box, so Add
+       went ahead with a name the form was not showing, past a star saying a
+       name is needed. On the draft the box and the value are one thing. */
+    fieldWire("pname",  function(p, v){
+      if (v) p.name = v; else if (p === NEWDRAFT) p.name = "";
+    }, root);
     /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
        matches the guess, rather than storing the guess — otherwise correcting
        the full name later would leave a stale short one standing beside it. */
@@ -75105,10 +75168,27 @@ var SYNC = (function () {
        So the field is closed here rather than trusted to have closed itself. */
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var nm = String(NEWDRAFT.name || "").trim();
-    if (!nm) {
+    /* ── WHAT IS NEEDED IS ASKED BEFORE WHO THEY MIGHT BE (§506) ─────────
+       Every needed field is checked at once and every empty one is ringed, so
+       a form missing two things says so in one press rather than one at a
+       time. This used to set `NEWPERSON.err` and repaint — and nothing ever
+       drew `err`, so an empty name was refused in SILENCE: the press did
+       nothing visible at all (§32, §171). The refusal is drawn now, under the
+       box it is about, by personFieldsHtml() reading `missing`.
+
+       The form stays open with everything typed still in it — the draft holds
+       it, and the repaint draws the draft — and the cursor goes to the first
+       empty box, without scrolling to get there (§110.7). */
+    NEWPERSON.missing = PERSON_NEEDED.filter(function(n){
+      return !String(NEWDRAFT[n.field] || "").trim();
+    }).map(function(n){ return n.label; });
+    if (NEWPERSON.missing.length) {
       NEWPERSON.hit = null; NEWPERSON.warn = null;
-      NEWPERSON.err = "A name is the one thing needed.";
       personDialogPaint();
+      var first = PERSON_NEEDED.filter(function(n){
+        return NEWPERSON.missing.indexOf(n.label) >= 0;
+      })[0];
+      focusNoScroll(document.querySelector('#modal-b [data-p' + first.field + ']'));
       return;
     }
     /* TWO ARGUMENTS, NOT AN OBJECT (§87). `personByIdentity(id, email)` climbs

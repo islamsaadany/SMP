@@ -6750,14 +6750,7 @@
        fault exactly: an editor that looks identical and discards every
        keystroke. */
     window.wirePersonFields = function(root){
-    /* A person on the register keeps their name when the box is emptied —
-       nobody may be nobody. The DRAFT is the exception (§506): clearing the
-       Add form's box left the old name standing behind an empty box, so Add
-       went ahead with a name the form was not showing, past a star saying a
-       name is needed. On the draft the box and the value are one thing. */
-    fieldWire("pname",  function(p, v){
-      if (v) p.name = v; else if (p === NEWDRAFT) p.name = "";
-    }, root);
+    fieldWire("pname",  function(p, v){ if (v) p.name = v; }, root);
     /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
        matches the guess, rather than storing the guess — otherwise correcting
        the full name later would leave a stale short one standing beside it. */
@@ -10593,27 +10586,10 @@
        So the field is closed here rather than trusted to have closed itself. */
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     var nm = String(NEWDRAFT.name || "").trim();
-    /* ── WHAT IS NEEDED IS ASKED BEFORE WHO THEY MIGHT BE (§506) ─────────
-       Every needed field is checked at once and every empty one is ringed, so
-       a form missing two things says so in one press rather than one at a
-       time. This used to set `NEWPERSON.err` and repaint — and nothing ever
-       drew `err`, so an empty name was refused in SILENCE: the press did
-       nothing visible at all (§32, §171). The refusal is drawn now, under the
-       box it is about, by personFieldsHtml() reading `missing`.
-
-       The form stays open with everything typed still in it — the draft holds
-       it, and the repaint draws the draft — and the cursor goes to the first
-       empty box, without scrolling to get there (§110.7). */
-    NEWPERSON.missing = PERSON_NEEDED.filter(function(n){
-      return !String(NEWDRAFT[n.field] || "").trim();
-    }).map(function(n){ return n.label; });
-    if (NEWPERSON.missing.length) {
+    if (!nm) {
       NEWPERSON.hit = null; NEWPERSON.warn = null;
+      NEWPERSON.err = "A name is the one thing needed.";
       personDialogPaint();
-      var first = PERSON_NEEDED.filter(function(n){
-        return NEWPERSON.missing.indexOf(n.label) >= 0;
-      })[0];
-      focusNoScroll(document.querySelector('#modal-b [data-p' + first.field + ']'));
       return;
     }
     /* TWO ARGUMENTS, NOT AN OBJECT (§87). `personByIdentity(id, email)` climbs

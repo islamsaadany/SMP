@@ -368,32 +368,9 @@ var SEATASK = null;
 /* The People render publishes the dialog's builders here (§116) — see the note
    beside the assignment for why they cannot simply be module-level functions. */
 var PEOPLEDLG = null;
-/* `missing` (§506) is the labels of the needed fields an Add press found empty
-   — the form's own words, so the field that draws them can ring itself without
-   a second list of which fields those are. Empty until somebody presses Add:
-   a ring before anybody has tried is a form scolding somebody for not having
-   finished yet. */
-var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
-/* ── WHAT ADDING SOMEBODY NEEDS (§506) ────────────────────────────────
-   Islam: "please mark the essential fields with an astrict" — and of what
-   counts as essential, Full name + Email, with the form refusing to add
-   somebody without an address: they sign in with their email (§69) and are
-   written to there, so a row with none is a person who cannot open the
-   platform or be told anything. Named ONCE, read by the form that draws the
-   star and the press that refuses (§53.5), so the star cannot promise a rule
-   the button does not keep. `field` is what the draft holds, `label` is the
-   form's own word for the box (personFields), `say` is the refusal under it.
-
-   THE ADD FORM ONLY. Editing somebody already on the register is not held to
-   this: a row that arrived from a file with no address is still a row, and
-   refusing to let anybody correct its job title until somebody finds an email
-   would make the dialog a wall rather than a form. */
-var PERSON_NEEDED = [
-  { field:"name",  label:"Full name", say:"A full name is needed to add them." },
-  { field:"email", label:"Email",     say:"An email is needed — it is what they sign in with." }
-];
+var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
-  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null, missing:[] };
+  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 }
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because
@@ -3828,16 +3805,6 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
-/* §507.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
-   `progress` (§239: reward stays a year-end judgement), except for a yes/no
-   measure, which stores none — its answer IS its figure, 100 or 0 from the
-   one scorer (§257), and nothing said stays null. Without this a Done measure
-   read "Not reported" on the board while its own page scored it. One reader
-   for the strip, the tally and the group board, or the three disagree. */
-function focusFigure(m){
-  if (!m) return null;
-  return SMPRules.isYesNo(m.target) ? measureScore(m) : m.progress;
-}
 function focusStanding(progress){
   if (progress == null) return { key:"none",  label:"Not reported" };
   if (progress >= CYCLE.rewardAt) return { key:"over", label:"Earning" };
@@ -3951,9 +3918,8 @@ function focusTallyOf(items){
   var vals = [];
   items.forEach(function(x){
     t.total++;
-    var fv = focusFigure(x.m);
-    t[focusStanding(fv).key]++;
-    if (fv != null) vals.push(fv);
+    t[focusStanding(x.m.progress).key]++;
+    if (x.m.progress != null) vals.push(x.m.progress);
   });
   t.mean = avg(vals);
   return t;
@@ -4250,26 +4216,15 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
-/* ── ONE WEIGHT RULE (§507.2, spec 066 P1) ──────────────────────────────
-   This averaged its own way: a blank weight counted as ONE, beside rows
-   weighted 60 and 40, so a function or a capability with one weight left
-   blank was scored by a rule no unit uses — and the same objectives entered on
-   a unit read a different number (§243's rule: a blank is the average of the
-   weights that were set). It is `koScore()` now, the unit's own reader, which
-   also leaves a hidden row out (§233) where this kept it. Nothing moves where
-   every weight is set or none is, which is every row in the worked example. */
 function capKOScore(c){
   /* §437: a function's own objectives, switched off, score nothing. */
   if (c && c.own && !fnKoCounted(c.id)) return null;
-  return koScore((c && c.keyObjectives) || []);
-}
-/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§507.2, P4): it has some
-   that are shown, and they are switched on. Asked by the card that leads and
-   by the division's reading, so the two cannot answer differently (§53.5). */
-function holderHasKOs(c){
-  if (!c) return false;
-  if (c.own && !fnKoCounted(c.id)) return false;
-  return SMPRules.shown(c.keyObjectives || []).length > 0;
+  /* Pending confirmation leaves the average (§145), as everywhere. */
+  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
+  if (!list.length) return null;
+  var tw = 0, sum = 0;
+  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
+  return tw ? Math.round(sum / tw) : null;
 }
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
@@ -4390,22 +4345,8 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
-/* ── ONE EXECUTION (§507.2, spec 066 P2) ──────────────────────────────────
-   A milestone counts once its date has come, exactly as a tactic does
-   (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
-   with the ones not yet due reading nought, so a function's execution was low
-   by construction in the first half and climbed on the calendar rather than on
-   the work — measured on the worked example at June, Finance 49% with every
-   milestone already due completed. The stated cost, agreed: a milestone done
-   early earns nothing until its date arrives, which is what a tactic does.
-   With nothing due yet the figure is NULL, never nought (§35, §276).
-
-   The counts beside it stay whole — "5 of 12 milestones" is still all twelve —
-   and `due` says how many of them the figure is made of, so the card can say
-   why a percentage and a count read differently. `pending` keeps its meaning:
-   a row In progress with no per-cent, due or not (§104.10). */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
@@ -4414,15 +4355,12 @@ function capExec(c){
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
-      if (statusPending(x)) pending++;
-      if (!dueThisCycle(x.finish)) return;
-      due++;
       if (statusPending(x)) return;
       scored++; sum += msReads(x) || 0;
     });
   });
-  return { done: done, wip: wip, todo: todo, total: total, due: due,
-           pending: pending,
+  return { done: done, wip: wip, todo: todo, total: total,
+           pending: total - scored,
            pct: scored ? Math.round(sum / scored) : null };
 }
 /* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§342) ───────────────────
@@ -4441,21 +4379,16 @@ function capExec(c){
    outstanding so the card can say why the figure rose (§106). */
 function fnActionsTally(fk){
   var list = SMPRules.shown(fnActions(fk));
-  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
+  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0;
   list.forEach(function(a){
     if (a.status === "done") done++;
     else if (a.status === "wip") wip++;
     else todo++;
-    if (statusPending(a)) pending++;
-    /* §507.2 (P2): an action counts once its date has come, as a milestone
-       does — one meaning of Execution wherever the word is printed. */
-    if (!dueThisCycle(a.due)) return;
-    due++;
     if (statusPending(a)) return;
     scored++; sum += msReads(a) || 0;
   });
-  return { done: done, wip: wip, todo: todo, total: list.length, due: due,
-           pending: pending,
+  return { done: done, wip: wip, todo: todo, total: list.length,
+           pending: list.length - scored,
            pct: scored ? Math.round(sum / scored) : null };
 }
 function fnObjScore(fk){
@@ -11036,16 +10969,7 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-/* ONE ROLL-UP (§507.2, spec 066 P3). The group's execution was delivered over
-   planned, each averaged across the units FIRST and then divided — so a unit
-   with a large plan pulled the denominator and the headline could sit beside
-   ten unit cards whose own figures do not average to it. It is the weighted
-   average of the figures the units' own cards print now, through the same
-   weightedOver() the objectives headline already uses, so the group says
-   what its units say. groupExec()/groupPlan() stay: they are still the two
-   halves a unit card and the weighting table explain, and nothing else here
-   reads them as a ratio any more. */
-function groupRatio(){ return weightedOver(scoringUnitKeys(), unitRatio); }
+function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
 
 /* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
    performance page that includes the overall performance of the company and
@@ -11105,23 +11029,18 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
-  /* ONE HEADLINE (§507.2, spec 066 P4): a function's headline is its
-     objectives when its plan HAS objectives (shown and switched on) — reading
-     "not yet" until they are reported — and its pillars' or projects' figure
-     when it has none. Before, a pillars function with none read "—" (§437
-     covered only "switched off"), and a projects function whose objectives
-     were not yet reported quietly read its projects instead: two formats, two
-     answers to one question (§53.5). */
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
+    /* §437: with its objectives off the headline is its pillars' own figure. */
     if (!u) return { perf:null, exec:null };
-    var has = fnKoCounted("fn:" + fk) && SMPRules.shown(u.keyObjectives || []).length > 0;
-    return { perf: has ? unitObjectives(u) : unitPillars(u), exec: unitRatio(u) };
+    var uo = unitObjectives(u);
+    return { perf: uo != null || fnKoCounted(u.ukey) ? uo : unitPillars(u), exec: unitRatio(u) };
   }
   if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
   var h = fnHolders(fk)[0];
   if (!h) return { perf:null, exec:null };
-  return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
+  var ko = capKOScore(h);
+  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
 }
 /* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
    The functions take their share first: a weight the office set is used as
@@ -11177,12 +11096,9 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-/* §507.2 (P3): a division of units alone is the weighted average of its
-   units' own execution figures — the group's rule, over a smaller list. With
-   functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){
   return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : weightedOver(companyUnitKeys(ck), unitRatio);
+                                  : ratioOf(companyExec(ck), companyPlan(ck));
 }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately

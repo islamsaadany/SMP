@@ -2942,20 +2942,6 @@
   /* A KIND NO FIELD ANSWERS still gets its ring and its dismiss — it simply
      has nothing above it to ring (§190). */
   .pdlg .attnloose { gap:0; }
-  /* ── A NEEDED FIELD, AND ONE THAT WAS REFUSED (§506) ──────────────────
-     The attention ring's own shape (out of flow, so the grid is untouched —
-     the note above says why that matters) in the ALARM colour: outstanding is
-     amber, "this will not go in" is red (§168). Words wear `--bad-tx`, never
-     `--bad`, which as type measures under 4.5:1 in dark (§38.5). The star is
-     scoped to nothing: it is drawn in the label and in the footer's key. */
-  .reqmark { color:var(--bad-tx); margin-left:3px; font-weight:700; }
-  .reqmark.reqkey { margin:0; }
-  .pdlg .pdf.reqmiss { border-radius:var(--r-sm);
-    outline:2px solid var(--bad-tx); outline-offset:4px;
-    box-shadow:0 0 0 4px var(--bad-bg); background:var(--bad-bg); }
-  .pdlg .pdf.reqmiss > .pdfl { color:var(--bad-tx); }
-  .pdlg .reqsay { font-size:12px; font-weight:600; line-height:1.45;
-    color:var(--bad-tx); white-space:normal; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;
     padding-top:13px; flex-wrap:wrap; }

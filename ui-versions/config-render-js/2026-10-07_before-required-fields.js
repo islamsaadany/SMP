@@ -2383,20 +2383,11 @@ function renderPeople(){
     F("Group", "who", false);
     F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
         '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
-    /* The star is drawn for the eye and hidden from a screen reader, so the
-       box says it itself (§506) — and says it was refused, once it was. */
-    var needA = function(label){
-      if (!add) return "";
-      return ' aria-required="true"' +
-        ((NEWPERSON.missing || []).indexOf(label) >= 0 ? ' aria-invalid="true"' : '');
-    };
-    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key +
-        '"' + needA("Full name") + '>');
+    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">');
     F("Emp. ID", '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
         '" placeholder="Emp. ID">');
     F("Email", '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email"' +
-        needA("Email") + '>');
+        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
     F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
         '" placeholder="Mobile">');
     /* THE REASON IS ON THE HOVER (§122). It was a two-line paragraph, the
@@ -2510,31 +2501,15 @@ function renderPeople(){
        row for anything to be outstanding about, and attentionOf() would be
        asked about a draft (§116's NEWDRAFT). */
     var by = add ? {} : attnFor(p), drawn = {};
-    /* ── THE STAR, AND THE REFUSAL UNDER THE BOX IT IS ABOUT (§506) ──────
-       Add form only (PERSON_NEEDED's note). The ring is the attention ring's
-       own shape in the alarm colour — out of flow, so a refused field still
-       shares its grid row (§190) — because this is not "outstanding", it is
-       "this will not go in" (§168). The sentence sits under the box rather
-       than above the form, §190's rule: a band saying what is wrong above nine
-       boxes leaves somebody to guess which. */
-    var need = {}, miss = {};
-    if (add) {
-      PERSON_NEEDED.forEach(function(n){ need[n.label] = n; });
-      (NEWPERSON.missing || []).forEach(function(l){ miss[l] = 1; });
-    }
     var body = personFields(p, add).map(function(f){
       if (f.label === "Group")
         return '<div class="pdsect">' + (f.html === "who"
           ? "Who they are" : "Where they sit, and what they may do") + '</div>';
       var mine = by[f.label] || [];
       if (mine.length) drawn[f.label] = 1;
-      var req = need[f.label], refused = !!(req && miss[f.label]);
       return '<div class="pdf' + (f.wide ? ' wide' : '') +
-        (mine.length ? ' attn' : '') + (refused ? ' reqmiss' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) +
-          (req ? '<span class="reqmark" aria-hidden="true">*</span>' : '') + '</div>' +
-        f.html + f.note +
-        (refused ? '<div class="reqsay">' + esc(req.say) + '</div>' : '') +
+        (mine.length ? ' attn' : '') + '">' +
+        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + f.note +
         (mine.length ? attnBlock(p, mine) : '') + '</div>';
     }).join("");
     /* What no field can answer, and anything whose field this person's form
@@ -3191,16 +3166,8 @@ function renderPeople(){
   }
   function personDialogFoot(){
     if (!PDLG) return "";
-    /* "Only a name is needed" stopped being true at §506, and a footer that
-       says otherwise beside a refusal for a missing email is the form arguing
-       with itself (§104.8). The star is the KEY to the marks above it, so it is
-       READ here, where the marks on the boxes are hidden from a screen reader
-       (their `aria-required` says it): hidden in the key too, the line would
-       read "needed to add them" about nothing. A real space, not a margin, or
-       the sentence copies and reads as "*needed". */
     if (PDLG.mode === "add")
-      return '<span class="why" style="margin:0"><span class="reqmark reqkey">*' +
-        '</span> needed to add them. Everything ' +
+      return '<span class="why" style="margin:0">Only a name is needed. Everything ' +
         'else can wait.</span><span class="pdrt">' +
         '<button class="linkbu" data-pdlg-close="1">Cancel</button>' +
         '<button class="linkbu tk-save" data-pdlg-add="1">Add them</button></span>';

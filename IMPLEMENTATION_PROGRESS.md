@@ -9278,3 +9278,7 @@ to main.
 
 ## 2026-10-06 — AI in the Processes workspace (§491)
 Built on the branch, not merged. In plain words: the AI draft box now takes your notes and can use the roles from the org chart (roles it invents show amber); an empty process offers "Draft it with AI" on its map page; and the export page has an optional "Check these N end to end" button that reads the ticked processes together and lists what to fix, saving nothing and never blocking the preview. Not tested against the real model (no key here); types check clean. Still waiting on Islam: the Helicopter-view process picker choice, and his word on any merge.
+
+## 2026-10-07 — SOPs for each process (§492)
+
+Built on the branch, not merged. Each process can now be exported as a Standard Operating Procedure — its own document beside the report, made from the same data so the two agree. It carries document control (version, owner, effective date, approved by, and a revision list you keep by hand), purpose and scope, who is involved, a numbered procedure (who, how, inputs, expected output, approval or time limit, hand-over), controls and KPIs. Anything not said shows as a red "Missing". Steps gain three optional boxes: inputs and tools, expected output, common errors. Open it from the export page with the new "SOP →" button. Checked: the compile check passes (17) and fails six ways when broken. Waiting on Islam: a browser look on a real workspace; the helicopter-view process picker choice; AI-drafted step detail (not started).

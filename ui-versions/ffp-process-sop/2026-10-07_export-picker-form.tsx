@@ -201,19 +201,6 @@ export function ExportPickerForm({
       </button>
 
       <button
-        type="submit"
-        formAction={`/${workspaceId}/processes/reports/sop`}
-        aria-disabled={picked.size === 0}
-        title={picked.size === 0 ? "Tick at least one process to preview the SOP" : undefined}
-        onClick={(e) => {
-          if (picked.size === 0) e.preventDefault();
-        }}
-        className="mt-4 ms-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-40"
-      >
-        SOP →
-      </button>
-
-      <button
         type="button"
         onClick={runCheck}
         disabled={checking || picked.size === 0}

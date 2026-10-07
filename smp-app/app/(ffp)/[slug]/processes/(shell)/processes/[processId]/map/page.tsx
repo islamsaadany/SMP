@@ -9,6 +9,8 @@ import { MapView } from "./map-view";
 import { GenerateTemplateForm } from "../../template-form";
 import { ProcessStepper } from "../process-stepper";
 import { ProcessDocumentation } from "./process-documentation";
+import { SopDocumentControl } from "./sop-document-control";
+import type { Revision } from "@/ffp/lib/domain/sop";
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
 
 export default async function ProcessMapPage(
@@ -154,6 +156,16 @@ export default async function ProcessMapPage(
         inScope={process.inScope}
         outOfScope={process.outOfScope}
         externalEntities={externalEntities}
+      />
+
+      <SopDocumentControl
+        workspaceId={workspaceId}
+        processId={processId}
+        sopVersion={process.sopVersion}
+        sopOwner={process.sopOwner}
+        sopEffectiveDate={process.sopEffectiveDate}
+        sopApprovedBy={process.sopApprovedBy}
+        revisions={process.sopRevisions as unknown as Revision[]}
       />
 
       </div>

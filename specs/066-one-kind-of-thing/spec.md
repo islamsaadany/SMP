@@ -1,10 +1,10 @@
 # Feature Specification: One kind of thing — the simplification
 
-**Feature Branch**: `claude/blissful-tesla-c5amlg` (spec only; no code yet)
+**Feature Branch**: `claude/blissful-tesla-c5amlg` (stage 1 built; stages 2–5 not started)
 
 **Created**: 2026-10-07
 
-**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; stage 1 started
+**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; **stage 1 built on the branch 2026-10-07 (§507.2), not merged** — the six rules of §4 below, with the client copies waived at Islam's word (*"No need for client data proceed"*)
 
 **Input**: Islam, 2026-10-07:
 
@@ -254,6 +254,22 @@ starts (rule 1b); visual changes are mocked up first (rule 1c).
 clients currently see disagreeing numbers. Stage 3 is the only one that moves
 data, so it waits until 1 and 2 have removed most of the special cases it would
 otherwise have to carry.
+
+### 8.1 Stage 1, as built (§507.2, 2026-10-07)
+
+| Rule | What changed | Where |
+|---|---|---|
+| P1 one weight rule | A capability's and a function's objectives use `koScore` (§243): a blank weight is the average of the set ones; hidden rows left out | `capKOScore` |
+| P2 one Execution | Milestones and actions count once their date has come; nothing due is no figure; the card says *N due so far* | `capExec`, `fnActionsTally` |
+| P3 one roll-up | Group and units-only division execution = weighted average of the units' own execution; the *Delivered X% against Y% planned* line replaced | `groupRatio`, `companyRatio`, `execLine` |
+| P4 one headline | A function's headline is its objectives when its plan has them (shown, switched on), else its pillars or projects — on the page and in the division roll-up alike | `holderHasKOs`, `fnMemberScores`, `koLeads`, `capScoreCards` |
+| P5 deck = page | The deck shows objectives only where the page does | `present.js` |
+| P6 Focus yes/no | A yes/no focus measure reads its answer | `focusFigure` |
+
+Proof: `scripts/test-stage1-rules.js` (38/0, every row score compared with
+f1f5d29, red eleven ways from the sources); `scripts/stage1-readings.js` now
+reports 0 moves against the built sources and 16 against f1f5d29. The client
+copies were waived (Islam: *"No need for client data proceed"*).
 
 ---
 

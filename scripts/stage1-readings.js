@@ -1,4 +1,12 @@
 /* ── STAGE 1: EVERY HEADLINE NUMBER, TODAY AND UNDER ONE SET OF RULES ──
+   §507.2: THE SIX RULES ARE NOW BUILT INTO THE PRODUCT, so against the
+   current sources this reports "0 number(s) move" — which is the point of
+   running it now: the built rules and the overrides below are asked the same
+   questions and give the same answers on the worked example (Finance's
+   execution 84, HR's 90, Merchandising's headline 93, exactly §507.1's
+   "after"). Run from a checkout of the commit before §507.2 it still prints
+   the sixteen moves.
+
    Spec 066 §8, stage 1: "Before/after headline numbers for every client,
    shown to Islam BEFORE anything ships." This prints them. It changes no
    product code: the proposed rules are installed as overrides INSIDE a vm that

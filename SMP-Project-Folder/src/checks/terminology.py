@@ -51,7 +51,9 @@ def js(pg, expr, default=None):
 ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "values",
          "measure", "tactic", "unitword", "division", "fnword", "project",
          # §404: the structure step names the top level, and two components gained a word
-         "topword", "brief", "swot"]
+         "topword", "brief", "swot",
+         # §508: the End in Mind gained a word of its own, last in the order
+         "endinmind"]
 
 def setup_labels(pg):
     js(pg, "current='setup'; currentSub='labels'; paint()"); pg.wait_for_timeout(250)

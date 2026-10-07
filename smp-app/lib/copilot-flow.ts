@@ -242,6 +242,17 @@ export const REFINES: Record<string, string> = {
   simple: "Simplify it: plainer words, shorter sentences. Keep every fact.",
 };
 
+/* WHAT A PART IS, WHERE THE ANSWERS ALONE DO NOT SAY IT (§508). Islam:
+   "In the End in Mind section I don't know why it takes both Purpose &
+   Winning aspiration content." The agreed parts travel with every draft
+   (flowCorpus), so a part with no rule of its own borrows its neighbours'
+   words; the End in Mind is the part that sat between two of them. The
+   definition is the one agreed with him in chat. */
+export const PART_RULES: Record<string, string> = {
+  eim: "The End in Mind is the lasting mark the organisation works towards, long after this plan ends: what it becomes if everything goes right for decades. It has no finish date and no figures. Don't repeat the Purpose (why it exists) or the Winning Aspiration (what it wins by the end of the plan). One or two sentences.",
+};
+const partRule = (key: string) => (PART_RULES[key] ? "\n\nWHAT THIS PART IS: " + PART_RULES[key] : "");
+
 export function flowInstruction(method: string): string {
   return "You are Forefront Consulting's strategy consultant, writing one part of an organisation's Foundation from what the client told you." +
     "\nRULES: Use only what the answers and the plan say — never invent a figure, a name or a fact. Write in the organisation's own voice, plainly, with no marketing fluff." +
@@ -262,11 +273,11 @@ export function flowCorpus(f: Flow, placeWord: string, context: string, upTo?: n
 export function draftQuestion(f: Flow, i: number): string {
   const el = FLOW_ELEMENTS[i];
   const qa = el.questions.map((q, k) => "Q: " + withYear(q, f.y1) + "\nA: " + (f.ans[i][k].trim() || "(not answered)")).join("\n\n");
-  return "Draft the " + el.name.toUpperCase() + " part of the Foundation from these answers." + (el.key === "obj" ? " Write each objective on its own numbered line." : el.key === "val" ? " Write each value on its own line, its name then a dash and what it means." : "") + "\n\n" + qa;
+  return "Draft the " + el.name.toUpperCase() + " part of the Foundation from these answers." + (el.key === "obj" ? " Write each objective on its own numbered line." : el.key === "val" ? " Write each value on its own line, its name then a dash and what it means." : "") + partRule(el.key) + "\n\n" + qa;
 }
 export function refineQuestion(f: Flow, i: number, how: string): string {
   const el = FLOW_ELEMENTS[i];
-  return "Rewrite this " + el.name.toUpperCase() + " draft. " + (REFINES[how] || ("The person asked: " + how)) + "\n\nTHE DRAFT:\n" + f.drafts[i];
+  return "Rewrite this " + el.name.toUpperCase() + " draft. " + (REFINES[how] || ("The person asked: " + how)) + partRule(el.key) + "\n\nTHE DRAFT:\n" + f.drafts[i];
 }
 export function checkQuestion(f: Flow): string {
   return "Check these parts of one Foundation against each other. Say in `agree` where two parts support each other, and in `issues` where they do not (a gap, a contradiction, an objective that measures nothing the other parts promise), naming the part to change in `element`. At most three of each. Short sentences.\n\n" +

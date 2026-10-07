@@ -813,6 +813,23 @@ try {
     const earlyFin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
     check("...and so does saving it", earlyFin.st === 400 && /Every part needs/.test(earlyFin.j.why));
     F = r1.j.flow;
+    /* §508 — END IN MIND IS TOLD WHAT IT IS, and the other parts are not:
+       it was repeating the Purpose and the Winning Aspiration, because the
+       agreed parts ride every prompt and nothing said this one is neither.
+       Both ends (§94.2), asked of the request that LEFT (§100.3). */
+    check("...and Who We Are's draft carries no part instruction (§508)", !/WHAT THIS PART IS/.test(sysF + qText), (sysF + qText).slice(0, 120));
+    const E1 = JSON.parse(JSON.stringify(F)); E1.ans[2][0] = "Every Egyptian connected for good."; E1.e = 2; E1.phase = "review";
+    NEXT = { answer: { text: "A connected Egypt, for generations." } };
+    const beforeE = seen.length;
+    const dE = await call("POST", "api", { act: "flowDraft", id: fid, el: 2, flow: E1, placeWord: "Mobile" }, NORAN);
+    const wE = seen[seen.length - 1];
+    const tE = wE && wE.body ? JSON.stringify(wE.body.contents) + (wE.body.systemInstruction ? wE.body.systemInstruction.parts.map((p) => p.text).join("") : "") : "";
+    check("End in Mind's draft is told what the part is — lasting, no finish date, not the Purpose or the Aspiration (§508)",
+      dE.st === 200 && seen.length === beforeE + 1 && /WHAT THIS PART IS: The End in Mind is the lasting mark/.test(tE) && /Don't repeat the Purpose/.test(tE), tE.slice(0, 200));
+    NEXT = { answer: { text: "A connected Egypt." } };
+    const rE = await call("POST", "api", { act: "flowRefine", id: fid, el: 2, how: "concise", placeWord: "Mobile" }, NORAN);
+    const wR = seen[seen.length - 1];
+    check("...and so is its refine (§508)", rE.st === 200 && /WHAT THIS PART IS: The End in Mind/.test(wR && wR.body ? JSON.stringify(wR.body.contents) : ""), rE.st + "");
     F.drafts = F.drafts.map((d, i) => d || (i === 3 ? "" : "Part " + (i + 1) + " draft for {Y}")); F.done = F.done.map((_, i) => i !== 3); F.phase = "check";
     await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
     /* §479: nothing is optional — a part the Structure carries is owed, and

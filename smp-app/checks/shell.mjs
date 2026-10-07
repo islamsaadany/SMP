@@ -1241,6 +1241,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(await page.evaluate(() => !document.querySelector("[data-cop-pane]").classList.contains("copshut") && getComputedStyle(document.querySelector(".coprails")).display !== "none"),
       "…and the strip's button brings it back");
 
+    const textOf = async (sel) => ((await page.$(sel)) ? (await page.textContent(sel)) || "" : "");
+    const pressIf = async (sel) => { if (!(await page.$(sel))) return false; await page.hover(sel.replace(/\[data-cop-(?:ai|pen)=("\d+")\]/, "[data-cop-card=$1]")).catch(() => {}); await page.click(sel); return true; };
     /* §478: a new Foundation chat on a place with a Foundation asks first. */
     /* §479: the cards follow Client set-up › Structure. The dev tenant never
        saved its units' Structure, so Purpose and Core Values are OFF — four
@@ -1269,7 +1271,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "six cards in order, Who We Are and Winning Aspiration full width", JSON.stringify(q0.cards) + " " + q0.wide);
     await shot("0b-start");
     await page.click('[data-cop-start="plan"]');
-    await page.waitForSelector(".copcard.pick", { timeout: 10000 });
+    await page.waitForSelector(".copcard.acts, .copcard.pick", { timeout: 10000 });
     const pl = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard")).map((c) => ({ st: (c.querySelector(".copst") || {}).textContent, p: c.textContent })));
     let P = await flowRow(pid);
     check(P && P.start === "plan" && P.phase === "loaded" && P.from[0] && /From the plan/.test(pl[0].st) && /From the plan/.test(pl[1].st),
@@ -1282,7 +1284,56 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "× closes the cards and the chat takes the width, with Show cards to bring them back");
     await page.click('[data-cop-cards="show"]');
     check(!!(await page.$(".copleft .copcard")), "…Show cards brings them back");
-    await page.click('[data-cop-card="1"]');
+    /* §508 — A CARD WITH TEXT CARRIES A PEN AND EDIT WITH AI AND IS NOT
+       ITSELF A BUTTON; A CARD WITH NOTHING WRITTEN STAYS ONE PRESS. The
+       icons are measured as PAINT: hidden until the card is hovered, then
+       drawn — or a build drawing them at rest passes, and so does one that
+       never draws them (§94.8). */
+    const ic = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard")).map((c) => ({ i: c.dataset.copCard, tag: c.tagName,
+      txt: c.classList.contains("acts"), pen: !!c.querySelector("[data-cop-pen]"), ai: !!c.querySelector("[data-cop-ai]") })));
+    check(ic.filter((c) => c.txt).length >= 2 && ic.filter((c) => c.txt).every((c) => c.tag === "DIV" && c.pen && c.ai),
+      "every card with text carries the pen and Edit with AI, and is not a button (§508)", JSON.stringify(ic));
+    check(ic.filter((c) => !c.txt).every((c) => c.tag === "BUTTON" && !c.pen && !c.ai),
+      "a card with nothing written has no icons and stays one press (§508)", JSON.stringify(ic.filter((c) => !c.txt)));
+    const op = (sel) => page.evaluate((q) => { const e = document.querySelector(q); return e ? Number(getComputedStyle(e).opacity) : -1; }, sel);
+    await page.mouse.move(2, 2); await page.evaluate(() => document.activeElement && document.activeElement.blur && document.activeElement.blur()); await page.waitForTimeout(250);
+    const vis = (sel) => page.evaluate((q) => { const e = document.querySelector(q); return e ? getComputedStyle(e).visibility : "none"; }, sel);
+    const rest = await op('[data-cop-card="1"] .copcact'), stRest = await vis('[data-cop-card="1"] .copst');
+    await page.hover('[data-cop-card="1"]'); await page.waitForTimeout(250);
+    const lit = await op('[data-cop-card="1"] .copcact'), stLit = await vis('[data-cop-card="1"] .copst');
+    check(rest === 0 && lit === 1, "the icons appear on hovering the card, and not before", JSON.stringify({ rest, lit }));
+    /* The status word is wider than the two icons, so while they are up it
+       steps aside rather than showing two letters beside them — both ends. */
+    check(stRest === "visible" && stLit === "hidden", "the card's status steps aside while its icons are up, and is there at rest", JSON.stringify({ stRest, stLit }));
+    await shot("0c2-hover");
+
+    /* THE PEN: the card becomes a text box holding the words; Esc leaves
+       it as it was; Ctrl+Enter saves the words, marks the part Done and
+       drops From the plan. Read back from the database (§96). */
+    const P0 = (await flowRow(pid)).drafts[0];
+    await page.hover('[data-cop-card="0"]'); await page.click('[data-cop-pen="0"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 });
+    const pe = await page.evaluate(() => ({ val: document.querySelector("[data-cop-pentext]").value, focus: document.activeElement === document.querySelector("[data-cop-pentext]"),
+      others: document.querySelectorAll("[data-cop-ai], [data-cop-pen], button.copcard").length, save: !!document.querySelector("[data-cop-pensave]") }));
+    check(pe.val.trim() === P0.trim() && pe.focus && pe.others === 0 && pe.save,
+      "the pen turns the card into a text box holding its words, with the cursor in it and every other card waiting", JSON.stringify(pe).slice(0, 300));
+    await shot("0c3-pen");
+    await page.fill("[data-cop-pentext]", "Something else entirely");
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(300);
+    P = await flowRow(pid);
+    check(!(await page.$("[data-cop-pentext]")) && P.drafts[0] === P0 && P.from[0] === true, "Esc leaves the part as it was", JSON.stringify({ d: P.drafts[0].slice(0, 60), from: P.from[0] }));
+    await page.hover('[data-cop-card="0"]'); await page.click('[data-cop-pen="0"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 });
+    await page.fill("[data-cop-pentext]", "We sell phones across Egypt, written by hand.");
+    await page.keyboard.press("Control+Enter");
+    for (let i = 0; i < 20 && (P = await flowRow(pid)).drafts[0] !== "We sell phones across Egypt, written by hand."; i++) await page.waitForTimeout(250);
+    const st0 = await textOf('[data-cop-card="0"] .copst');
+    check(P.drafts[0] === "We sell phones across Egypt, written by hand." && P.done[0] === true && P.from[0] === false && /Done/.test(st0) && !(await page.$("[data-cop-pentext]")),
+      "Ctrl+Enter saves the words, the part reads Done and no longer From the plan", JSON.stringify({ d: P.drafts[0], done: P.done[0], from: P.from[0], st0 }));
+
+    /* EDIT WITH AI is what pressing the card did (§507): the part in the chat. */
+    await page.hover('[data-cop-card="1"]'); await page.click('[data-cop-ai="1"]');
     await page.waitForFunction(() => /Let's work on/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
     for (let i = 0; i < 20 && (P = await flowRow(pid)).e !== 1; i++) await page.waitForTimeout(250);
     check(P.e === 1 && (P.phase === "draft" || P.phase === "ask"), "pressing a card works on that part", JSON.stringify({ e: P.e, phase: P.phase }));
@@ -1385,14 +1436,20 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     /* Every press here DEGRADES (§215): on a build without the fix the card
        is not a button, and a bare page.click waits thirty seconds and takes
        the rest of the section with it — a run that dies rather than reports. */
-    const textOf = async (sel) => ((await page.$(sel)) ? (await page.textContent(sel)) || "" : "");
-    const pressIf = async (sel) => { if (!(await page.$(sel))) return false; await page.click(sel); return true; };
-    check(!!(await page.$('button[data-cop-card="0"]')), "a Done part's card is a button on the fresh road too (§507)");
-    if (await pressIf('button[data-cop-card="0"]')) for (let i = 0; i < 20 && (F = await flowRow(cid)).e !== 0; i++) await page.waitForTimeout(250);
+    /* §508: an empty card ahead stays one press, the card being worked has
+       no icons, and the Done card carries them. */
+    const fr = await page.evaluate(() => ({ now: !!document.querySelector('.copcard.now [data-cop-ai], button.copcard.now'),
+      empty: !!document.querySelector('button.copcard.pick[data-cop-card="2"]') && !document.querySelector('[data-cop-ai="2"]'),
+      done: !!document.querySelector('[data-cop-ai="0"]') && !!document.querySelector('[data-cop-pen="0"]') && !document.querySelector('button[data-cop-card="0"]') }));
+    check(!fr.now && fr.empty && fr.done, "on the fresh road the Done card carries the icons, an empty one stays a button, the one in the chat has neither (§508)", JSON.stringify(fr));
+    if (await pressIf('[data-cop-ai="0"]')) for (let i = 0; i < 20 && (F = await flowRow(cid)).e !== 0; i++) await page.waitForTimeout(250);
     await page.waitForSelector(".copfdraft", { timeout: 10000 }).catch(() => {});
     check(F.e === 0 && F.phase === "draft" && F.done[0] === false && /We connect Egypt\./.test(await textOf(".copfdraft")),
       "pressing it opens its draft to change, before the check", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0] }));
     check(/Save and continue to Winning Aspiration/.test(await textOf("[data-cop-fsave]")), "…and its Save names the part you were on");
+    /* §508 — the part left half answered says so: In progress, N of M. */
+    const half = { st: await textOf('[data-cop-card="1"] .copst'), p: await textOf('[data-cop-card="1"] p') };
+    check(/In progress/.test(half.st) && /^1 of \d+ answered\.$/.test(half.p.trim()), "a part left half answered reads In progress, 1 of N answered (§508)", JSON.stringify(half));
     await pressIf("[data-cop-fsave]");
     for (let i = 0; i < 20 && ((F = await flowRow(cid)).e !== 1 || F.phase !== "ask"); i++) await page.waitForTimeout(250);
     check(F.done[0] === true && F.e === 1 && F.phase === "ask" && F.qi === 1,
@@ -1417,13 +1474,25 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     /* §507 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
        opens it with the change applied; a line naming none asks nothing and
        says how. Saving the changed part runs the check again. */
-    check((await page.$$("button[data-cop-card]")).length === 6, "every card is pressable during the check (§507)");
+    const ckc = await page.evaluate(() => ({ ai: document.querySelectorAll("[data-cop-ai]").length, pen: document.querySelectorAll("[data-cop-pen]").length, btn: document.querySelectorAll("button[data-cop-card]").length }));
+    check(ckc.ai === 6 && ckc.pen === 6 && ckc.btn === 0, "every card carries the pen and Edit with AI during the check (§507, §508)", JSON.stringify(ckc));
+    /* A PEN SAVE DURING THE CHECK runs the check again. */
+    const seenP = MODEL_SEEN.length;
+    await page.hover('[data-cop-card="0"]'); await page.click('[data-cop-pen="0"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 });
+    await page.fill("[data-cop-pentext]", "We connect Egypt. Every town, every store.");
+    await page.click("[data-cop-pensave]");
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).drafts[0] !== "We connect Egypt. Every town, every store."; i++) await page.waitForTimeout(250);
+    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    for (let i = 0; i < 20 && MODEL_SEEN.length === seenP; i++) await page.waitForTimeout(250);
+    check(F.drafts[0] === "We connect Egypt. Every town, every store." && F.done[0] === true && F.phase === "check" && MODEL_SEEN.length === seenP + 1,
+      "a part saved from its card during the check is stored, and the check runs again", JSON.stringify({ d: F.drafts[0], phase: F.phase, seen: MODEL_SEEN.length - seenP }));
     const seenC = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Make it shorter please");
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => /or name it, then say what to change/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
     const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-ffinish]") }));
-    check(MODEL_SEEN.length === seenC && /Press the part you want to change on the left, or name it/.test(nn.say) && nn.fin,
+    check(MODEL_SEEN.length === seenC && /Edit the part from its card on the left, or name it/.test(nn.say) && nn.fin,
       "a line naming no part asks nothing, says how, and leaves the check where it was", JSON.stringify(nn));
     Object.assign(MODEL_ANSWER, { text: "Integrity, speed and care." });
     await page.fill("[data-cop-text]", "Make the core values shorter");

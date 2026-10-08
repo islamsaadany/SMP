@@ -21,12 +21,15 @@ and every DOM check passed on it (§93.4, §110).
 
 Run: SMP_CHROME=... python3 qa-run.py checks/owner-picker.py
 """
-import pathlib
+import os, pathlib
 from playwright.sync_api import sync_playwright
 
-URL = "file://" + str(pathlib.Path(
+# SMP_BUILT points it at another build, which is how it is falsified from the
+# SOURCES (§276, §334.13 — a check that ignores it measures this build while
+# the run claims to measure the broken one).
+URL = "file://" + str(pathlib.Path(os.environ.get("SMP_BUILT") or pathlib.Path(
     pathlib.Path(__file__).resolve().parent.parent,
-    "strategy-management-platform.html").resolve())
+    "strategy-management-platform.html")).resolve())
 
 fails = []
 errs = []
@@ -129,11 +132,24 @@ with sync_playwright() as p:
               owners:tbl.querySelectorAll('select.ownersel').length,
               collabs:tbl.querySelectorAll('select.collabsel').length,
               typed:tbl.querySelectorAll('td:nth-child(3) input').length,
-              pillar:document.querySelectorAll('.pane .pfront.one select.ownersel').length};}""")
+              /* SINCE SPEC 066 STAGE 2 the pillar's front matter carries TWO
+                 register pickers, its Owner and its Custodian (§508), so the
+                 two are counted by the ROW they sit on, never as one count of
+                 every picker in the block: a build that dropped the Custodian
+                 and drew the Owner twice satisfies "two pickers" perfectly. */
+              pillar:[...document.querySelectorAll('.pane .pfront.one .pfrow')]
+                .filter(r=>/^owner$/i.test((r.querySelector('em')||{}).textContent||''))
+                .reduce((a,r)=>a+r.querySelectorAll('select.ownersel').length,0),
+              cust:[...document.querySelectorAll('.pane .pfront.one .pfrow')]
+                .filter(r=>/^custodian$/i.test((r.querySelector('em')||{}).textContent||''))
+                .reduce((a,r)=>a+r.querySelectorAll('select.ownersel').length,0),
+              all:document.querySelectorAll('.pane .pfront.one select.ownersel').length};}""")
     ck("every tactic's owner is a list", n["owners"] == n["tactics"] and n["owners"] > 0, n)
     ck("every tactic's collaborators is a list", n["collabs"] == n["tactics"], n)
     ck("no typed owner box is left behind", n["typed"] == 0, n)
     ck("the pillar's own owner is a list, and there is one", n["pillar"] == 1, n)
+    ck("its custodian is a list too, and there is one (§508)", n["cust"] == 1, n)
+    ck("and the block holds no other register picker", n["all"] == 2, n)
 
     # ── 3 · the list says where each name comes from ────────────────────
     print("\n3 · the list")
@@ -257,7 +273,15 @@ with sync_playwright() as p:
     # ── 6 · the pillar's owner, and it is not said twice ────────────────
     print("\n6 · the pillar's owner")
     try:
-        psel = ".pane .pfront.one select.ownersel"
+        # The OWNER row's picker, never "the block's first select": the
+        # Custodian sits beside it since §508, and a selector reaching both
+        # presses whichever the document happens to draw first. CSS cannot
+        # match a row by its words, so the row is addressed by position AND
+        # its key is asserted to read Owner before anything is pressed.
+        prow = ".pane .pfront.one .pfcol > .pfrow:first-child"
+        psel = prow + " select.ownersel"
+        ck("the first row of the pillar's front matter is its Owner",
+           (pg.evaluate("(s)=>{const e=document.querySelector(s+' > em');return e?e.textContent.trim():null;}", prow) or "").lower() == "owner")
         was = pg.evaluate("()=>UNITS.mobile.items[0].owner")
         press(pg, btn_for(pg, psel), "the pillar owner picker")
     # A DEPARTMENT NOBODY SITS IN, deliberately: the place now joins what

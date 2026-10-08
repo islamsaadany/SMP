@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { checkPackWithAI, type PackCheckReport } from "@/ffp/lib/actions/pack-check";
 import { saveReportArrangement } from "@/ffp/lib/actions/report-arrangement";
 import {
   resolveArrangement,
@@ -49,12 +48,6 @@ export function ExportPickerForm({
   // to take out. Held as state (not defaultChecked) so the header box can
   // tick or clear every row and show a mixed mark between the two.
   const [picked, setPicked] = useState<ReadonlySet<string>>(() => new Set());
-  // The end-to-end check runs only when pressed and is never stored: a result
-  // is about the pack as it stood, so any change to the ticks or the order
-  // clears it rather than leave an answer about a different pack on screen.
-  const [check, setCheck] = useState<PackCheckReport | null>(null);
-  const [checkError, setCheckError] = useState<string | null>(null);
-  const [checking, startChecking] = useTransition();
   const allPicked = ordered.length > 0 && picked.size === ordered.length;
   const somePicked = picked.size > 0 && !allPicked;
 
@@ -63,7 +56,6 @@ export function ExportPickerForm({
     if (on) next.add(id);
     else next.delete(id);
     setPicked(next);
-    setCheck(null);
   }
 
   function move(index: number, direction: -1 | 1) {
@@ -73,25 +65,6 @@ export function ExportPickerForm({
     next[index] = next[to]!;
     next[to] = ordered[index]!;
     setOrdered(next);
-    setCheck(null);
-  }
-
-  function runCheck() {
-    setCheckError(null);
-    setCheck(null);
-    const processIds = ordered.filter((p) => picked.has(p.id)).map((p) => p.id);
-    startChecking(async () => {
-      const result = await checkPackWithAI({ workspaceId, processIds });
-      if (!result.ok) {
-        setCheckError(
-          result.error === "AI_UNAVAILABLE" || result.error === "VALIDATION_ERROR"
-            ? (result.message ?? "The check could not run")
-            : result.error
-        );
-        return;
-      }
-      setCheck(result.data);
-    });
   }
 
   return (
@@ -115,10 +88,7 @@ export function ExportPickerForm({
                     if (el) el.indeterminate = somePicked;
                   }}
                   onChange={(e) =>
-                    {
-                    setPicked(e.target.checked ? new Set(ordered.map((p) => p.id)) : new Set());
-                    setCheck(null);
-                  }
+                    setPicked(e.target.checked ? new Set(ordered.map((p) => p.id)) : new Set())
                   }
                   disabled={ordered.length === 0}
                   aria-label="Select all processes"
@@ -199,34 +169,6 @@ export function ExportPickerForm({
       >
         Preview report →
       </button>
-
-      <button
-        type="submit"
-        formAction={`/${workspaceId}/processes/reports/sop`}
-        aria-disabled={picked.size === 0}
-        title={picked.size === 0 ? "Tick at least one process to preview the SOP" : undefined}
-        onClick={(e) => {
-          if (picked.size === 0) e.preventDefault();
-        }}
-        className="mt-4 ms-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50 aria-disabled:cursor-not-allowed aria-disabled:opacity-40"
-      >
-        SOP →
-      </button>
-
-      <button
-        type="button"
-        onClick={runCheck}
-        disabled={checking || picked.size === 0}
-        title={picked.size === 0 ? "Tick at least one process to check" : undefined}
-        className="mt-4 ms-2 rounded-lg border border-indigo-300 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {checking ? "Checking…" : `✨ Check ${picked.size > 0 ? `these ${picked.size}` : "these"} end to end`}
-      </button>
-      <p className="mt-1 text-xs text-slate-500">
-        Optional, and a warning only — the report opens either way. Nothing is saved.
-      </p>
-      {checkError && <p className="mt-2 text-xs text-red-600">{checkError}</p>}
-      {check && <PackCheckResult workspaceId={workspaceId} report={check} />}
       </form>
     </>
   );
@@ -548,70 +490,6 @@ function Panel({ title, subtitle, children }: { title: string; subtitle: string;
       <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
       <p className="mt-0.5 mb-2 text-xs text-slate-600">{subtitle}</p>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">{children}</div>
-    </section>
-  );
-}
-
-const SEVERITY_STYLES: Record<string, string> = {
-  high: "bg-red-50 text-red-700",
-  medium: "bg-amber-50 text-amber-800",
-  low: "bg-slate-100 text-slate-600",
-};
-
-/** What the end-to-end check found: across-the-pack points first, then each process. */
-function PackCheckResult({ workspaceId, report }: { workspaceId: string; report: PackCheckReport }) {
-  const across = report.findings.filter((f) => f.processId === null);
-  const count = (sev: string) => report.findings.filter((f) => f.severity === sev).length;
-  const base = `/${workspaceId}/processes/processes`;
-
-  const card = (f: PackCheckReport["findings"][number], i: number) => (
-    <li key={i} className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="flex items-center gap-2">
-        <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${SEVERITY_STYLES[f.severity]}`}>
-          {f.severity}
-        </span>
-        <span className="text-sm font-semibold text-slate-900">{f.title}</span>
-      </div>
-      <p className="mt-1 text-xs text-slate-700">{f.description}</p>
-      <p className="mt-1 text-xs text-slate-500">→ {f.recommendation}</p>
-    </li>
-  );
-
-  return (
-    <section aria-live="polite" className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50/40 p-4">
-      <p className="text-xs font-semibold text-slate-700">
-        {count("high")} high · {count("medium")} medium · {count("low")} low
-      </p>
-      <p className="mt-1 text-sm text-slate-800">{report.summary}</p>
-
-      {across.length > 0 && (
-        <div className="mt-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Across these processes</p>
-          <ul className="mt-1.5 flex flex-col gap-2">{across.map(card)}</ul>
-        </div>
-      )}
-
-      {report.processes.map((p) => {
-        const mine = report.findings.filter((f) => f.processId === p.id);
-        return (
-          <div key={p.id} className="mt-3">
-            <p className="text-xs font-semibold text-slate-700">
-              <span className="font-mono">{p.code}</span> {p.name}{" "}
-              <span className="font-normal text-slate-500">
-                ·{" "}
-                <a className="hover:text-slate-900" href={`${base}/${p.id}/map`}>map</a>{" · "}
-                <a className="hover:text-slate-900" href={`${base}/${p.id}/raci`}>RACI</a>{" · "}
-                <a className="hover:text-slate-900" href={`${base}/${p.id}/authority`}>authority</a>
-              </span>
-            </p>
-            {mine.length === 0 ? (
-              <p className="mt-1 text-xs text-emerald-700">Fine — nothing to flag.</p>
-            ) : (
-              <ul className="mt-1.5 flex flex-col gap-2">{mine.map(card)}</ul>
-            )}
-          </div>
-        );
-      })}
     </section>
   );
 }

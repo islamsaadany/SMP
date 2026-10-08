@@ -62907,6 +62907,95 @@ Islam: *"for the client register adding users. please mark the essential fields 
 
 **MERGED TO `main` 2026-10-07 on Islam's word** (*"merge to main"*). `main` had not moved since this branch left it, measured rather than assumed (§4's fetch-and-look), so the tree pushed is the tree verified. §506 was free on `main` in all three spellings (§336.1), so no renumber was owed (§264.3). `sw.js` SHELL `v6.13-required-fields` against main's `v6.12`, a name the history had never held, confirmed again immediately before the push (§94.16). The branch tip was already pushed, so this record commit is what `main` holds and the branch does not (§91), and the branch is brought up only once production has served it. **No forced sign-out is owed** (spec 029): read off the diff, no `api/`, `lib/` or `db/` file is in it.
 
+## §507 — A process export starts empty, with a box to select all (2026-10-05)
+
+Islam, of Processes › Export: *"the default should be all non selected with an
+option to select all."* Every row's box arrived ticked (`defaultChecked`), so
+each export started as a list of what to take OUT, while a pack is picked FOR
+an audience. Now every row starts unticked, the header gets the select-all box
+(the empty space over the row boxes, which held only a screen-reader label),
+ticking it ticks every row and pressing it again clears them, and between the
+two it shows the half-filled mark. Islam agreed both placements before it was
+built: the box in the header, and **Preview held until something is ticked**.
+`aria-disabled` rather than `disabled`, with the reason on a hover and the
+click refused by the handler (§221, §163), so the reason can still be read.
+
+Selection is STATE now, keyed by process id rather than by row position (§48),
+so a tick travels with its row when the arrows move it, and the GET form still
+posts `ids` in on-screen order, which is the report's order. Nothing is stored
+and nothing moves on the server: the arrangement panels above are untouched,
+and so is the report page.
+
+Proved by bundling this one form with the real React and the real arrangement
+module (the server action, the router and the edit flag stubbed), rendering it
+in Chromium and pressing every control, with what the form submits read off the
+request: 11/0. **Red 4** with the old "everything ticked" start put back.
+One of the harness's own failures was the harness: Playwright treats
+`aria-disabled` as disabled (§222), so the refused press has to be forced.
+Typecheck clean once the container had Next's generated route types and the
+Prisma client, both missing from a fresh install and neither caused by this
+change. Not driven inside the running app: the Processes pages need a seeded
+`ffprocess` workspace, which this container does not have.
+
+## §508 — The Processes list folds: a plus opens a main process's subs (2026-10-05)
+
+Islam, of the Processes list: *"can we make a plus next to each main to open
+and drop all subs, instead of having big list?"* — then, of the mockup
+(`design-mockups/processes-list-fold/2026-10-05_plus-to-open-subs.html`,
+published as an artifact), *"yes great. do it on the branch"*, taking its
+three stated defaults as drawn.
+
+- **Main processes only, closed on arrival.** A plus beside a process with
+  sub-processes opens them underneath, shaded and indented by depth; it turns
+  into a minus. A process with none keeps the plus's space so codes line up.
+- **One level at a time**: a sub-process with subs of its own gets its own
+  plus. Closing a main hides everything under it.
+- **Open all · Close all** above the table, drawn only when something folds.
+- **Search stays flat and is never folded** — a closed plus must never hide a
+  match, and a match's parent may not itself match.
+- *"sub-process of X"* is now said only where the parent is NOT the row the
+  sub is folded under: a search result, or one whose parent is deleted.
+  Under its own parent it would say the same thing twice.
+
+**The rows stay server-rendered** — their cells hold the edit, clone and delete
+forms — and only the `<tr>` is a client component (`process-fold.tsx`), so a
+row hides without the page rebuilding what is inside it. Which rows sit under
+which is `fold-chains.ts`, pure, read off `orderProcessTree`'s own order, so
+the page and its check ask one function. The open state is screen-only and not
+stored; nothing on the server moves.
+
+Proved in Chromium against the real components and the real tree helper (nine
+assertions: closed start, counts on the plus's label, one level, nesting,
+closing a main, Open/Close all, search flat) — and red 4 with rows made never
+to hide. The real page could not be driven in this container (no seeded
+`ffprocess` workspace), which is stated rather than glossed. Snapshot:
+`ui-versions/ffp-processes-list/2026-10-05_before-fold.tsx`.
+
+## §509 — AI in the Processes workspace: a better draft, drafting into an empty process, and an end-to-end check before export (2026-10-06)
+
+**Islam:** *"Build the option to use AI to build a process in the process workspace and also to check and evaluate the process end to end at the end before the exporting page."* His answers: both draft options; **warning only**; the check **runs only when pressed**; **everything fresh** (nothing shared with the existing screens' stored results). He approved the mockup `design-mockups/processes-ai/2026-10-05_build-and-check.html` (roles not in the org chart are kept and shown amber; the check is not saved; the draft covers the Process Map and RACI only).
+
+- **Draft:** the "Generate from best practice" box gains a notes field (*how it works today*, followed over generic practice) and a *use the roles in our org chart* tick (default on). The workspace's active roles are offered to the model; in the preview a role is green when it is in the org chart and amber when not, and an amber one is created as a new role when the draft is used (`materializeDraft`, case-insensitive match).
+- **Draft into an empty process:** a process with no steps shows *Draft it with AI* on its map page. `fillEmptyProcessFromTemplate` refuses inside its transaction if the process has any step or activity, so a draft can never mix into work somebody did. One writer (`materializeDraft`) lays a draft out for both paths (§53.5).
+- **Check before export:** *Check these N end to end* beside *Preview report* on the export page. `checkPackWithAI` (VIEWER access, max 12 processes) reads each process through the same `loadProcessReviewContext` the single-process AI Review now uses, plus facts worked out across the pack (hand-offs to processes not in the pack; the same activity with different Accountable roles). Findings are grouped *Across these processes* then per process with links to map, RACI and authority; clean processes say so. **Nothing is stored**, any change to ticks or order clears the result, and Preview is never blocked.
+- `loadProcessReviewContext` was extracted verbatim from `reviewProcessWithAI`; the AI Review's behaviour is unchanged.
+- **Not run here:** no Gemini key and no seeded workspace, so the model calls and a browser run were not exercised; `npm run typecheck` (cold) is clean.
+
+## §510 — SOPs for each process (Processes workspace)
+
+Islam: *"i want to add SOPs for each process … collecting all steps and operational aspects to be part of the report."* Settled in chat: **its own export** (not inside the Export Report), **document control carried**, audience Forefront, **A + B in the first round**; owner and approver are free-text names and the revision history is a hand-kept list (nothing recorded automatically). Mockup `design-mockups/processes-sop/2026-10-06_sop.html` approved.
+
+- **A — compiled, not retyped.** `compileSop` (`ffp/lib/domain/sop.ts`, pure) reads the SAME `loadReportData` output the report reads, so the SOP and the report cannot disagree: purpose and scope, who is involved, a numbered procedure (who, how, approval/time limit, hand-over from connections and cross-process links), controls, KPIs, revisions. Approval is matched to a step by the activity's label on the Authority rows (first unused row), since those rows carry no step id.
+- **B — three new step fields:** inputs/tools/systems, expected output, common errors (`sopInputs/sopOutput/sopErrors`). "How" is the existing `detailedAction`; "common errors" is kept apart from `exceptionHandling` (the risk). Per process: version, owner, effective date, approved by, revisions (JSON). Migration `20261007120000_process_sop`, additive, nothing backfilled.
+- **Missing, never invented:** blank control fields, purpose, and who/how/inputs/output on task and decision steps are red "Missing" and counted; start/end steps and "errors" owe nothing.
+- **Where:** document control edited on the process's map page (`SopDocumentControl`, editors only); step fields in the step row; the export page gains an "SOP →" button on the same ticked list; the document is `/<ws>/processes/reports/sop`, printable.
+- **Check:** `npm run check:sop` 17/0; `check:sop:red` six breaks from a copy of the source, each red. Typecheck cold clean. Not run here: a browser/seeded-workspace pass.
+- **Not built (option C):** AI-drafted step detail.
+
+## §511 — The Helicopter view chooses which processes it draws
+
+Islam picked option A (a "Processes" dropdown with a searchable tick list beside the Milestones | Cards switch), applied to both views, the rest left to judgement. **Hides from the picture only — nothing is deleted or archived.** Starts with everything shown; the choice is remembered per browser as the HIDDEN ids (so a process added later shows by default), wrapped in try/catch. Ticking a main ticks its subs, its box reads indeterminate when only some are on; Select all / none; label "All (N)" / "N of M"; search by code or name; empty selection says so in words. A shown process that branches from a hidden one reads "↰ from ADM105, hidden" instead of a dashed line; links to hidden processes drop from the cards. The PNG exports what is drawn. Rules live in `ffp/lib/domain/helicopter-pick.ts` (pure); `check:pick` 12/0, `check:pick:red` all five breaks red. Snapshot: `ui-versions/ffp-helicopter-picker/`. Screen only; no schema, no server rule. Recorded, not done: the dropdown has not been looked at on a real workspace in a browser; cards do not name a hidden link target.
+
 ## §512 — A part of the Foundation opens at every step (2026-10-07)
 
 Islam, of the Copilot's guided Foundation flow (§473): *"I have no option to edit any section once I finish and "Done" appears until I finalize all parts and reach the consistency check"*, and *"in the consistency check, it also doesn't give me the option to edit; it only lets me write what I want in the bottom-right box, but there's no option to edit any section myself."* Two proposals put to him in plain words and taken: *"1&2 ok"*.
@@ -62951,3 +63040,4 @@ Islam, answering the three things §513 handed over: *"1. yes the names should f
 
 **Recorded, not done.** The knowledge base and the workbook headings still spell the method's words. A client whose Terminology names two parts the same word gets two cards with one name.
 
+**§514.1 — MERGED TO `main` 2026-10-08 on Islam's word** (*"merge to main"*). `main` had moved ten commits under this branch — another session's Processes SOP work, recorded there as §507–§511 — so this branch's three sections were **renumbered BEFORE the merge** (§264.3: a renumber is provably scoped to the branch's own lines only while they are the only ones there): §509 → §514, §508 → §513, §507 → §512, descending so no pass eats the next, in the one spelling present (0 of the entity and 0 of the `\u00a7` escape, measured, §336.1), every count declared beforehand (30 / 50 / 32 occurrences) and **0 changed lines carrying anything but a citation**. The built file and the four generated copies were REBUILT from the renumbered sources rather than edited (§91, §329); the built file moved by exactly one §238 CSP hash, as that section designed. **Main touched no frozen source, no `sw.js` and nothing under `smp-app/public/`** (measured: 0 files), so the three overlaps were the two record files — **COMBINED, never picked** (§318.7), every non-blank line of each side asserted present in the result, main's §507–§511 before this branch's §512–§514 in the decisions document and ours first in the progress file — and `smp-app/package.json`, which auto-merged carrying both sides' check scripts and parses. The merged tree was READ before it was believed (§313.37): the two non-trivial names this branch's diff removes are both still declared, and `node --check sw.js` is clean with **one** `const SHELL`. **Re-run on the MERGED tree, never on either side** (§365): `check:shell` **364/0** (§3i 59/0), `check:copilot` **323/0**, main's own `check:sop` **17/0** and `check:pick` **12/0**, `typecheck` clean COLD (§3), `built-in-step.py` all good, `generated-in-step` all clear, `terminology.py` 26/0, `structure.py` all good, `next build` green. **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): `smp-app/lib/copilot-flow.ts` and `smp-app/modules/copilot/index.ts` change how the Copilot's flow is sanitised and saved, and not one file under `api/`, `lib/authorize`, `lib/save` or `db/` moves, so no save that worked before is refused now. `sw.js` SHELL is `v6.16-client-words` against main's `v6.13-required-fields`, a name the history has never held, confirmed again immediately before the push (§94.16). The branch tip was already pushed, so **this merge commit is the commit `main` holds and the branch does not** (§91, §357.4's road); the branch is fast-forwarded only after the live read.

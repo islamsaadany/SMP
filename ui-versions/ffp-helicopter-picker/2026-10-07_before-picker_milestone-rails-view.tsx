@@ -26,13 +26,10 @@ export function MilestoneRailsView({
   workspaceId,
   workspaceName,
   processes,
-  hiddenOrigins = {},
 }: {
   workspaceId: string;
   workspaceName: string;
   processes: RailProcess[];
-  /** processId → code of a hidden process it branches from. */
-  hiddenOrigins?: Record<string, string>;
 }) {
   const layout = useMemo(() => buildMilestoneRails(processes), [processes]);
   const boardRef = useRef<HTMLDivElement>(null);
@@ -94,7 +91,7 @@ export function MilestoneRailsView({
           ))}
 
           {layout.rails.map((rail) => (
-            <RailRow key={rail.processId} rail={rail} workspaceId={workspaceId} hiddenOrigin={hiddenOrigins[rail.processId] ?? null} />
+            <RailRow key={rail.processId} rail={rail} workspaceId={workspaceId} />
           ))}
         </div>
       </div>
@@ -102,7 +99,7 @@ export function MilestoneRailsView({
   );
 }
 
-function RailRow({ rail, workspaceId, hiddenOrigin }: { rail: Rail; workspaceId: string; hiddenOrigin: string | null }) {
+function RailRow({ rail, workspaceId }: { rail: Rail; workspaceId: string }) {
   return (
     <div className="absolute" style={{ left: rail.offsetX, top: rail.y, width: rail.width, height: rail.height }}>
       <div className="flex items-baseline gap-2">
@@ -116,11 +113,6 @@ function RailRow({ rail, workspaceId, hiddenOrigin }: { rail: Rail; workspaceId:
         <span className="flex-none rounded-full bg-slate-100 px-1.5 py-px text-[9px] font-semibold text-slate-600">
           {rail.stepCount} {rail.stepCount === 1 ? "step" : "steps"}
         </span>
-        {!rail.branchFrom && hiddenOrigin && (
-          <span className="flex-none truncate rounded-md bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold text-slate-600">
-            ↰ from {hiddenOrigin}, hidden
-          </span>
-        )}
         {rail.branchFrom && (
           <span className="flex-none truncate rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800">
             ↰ from {rail.branchFrom.code} · step {rail.branchFrom.stepNumber}

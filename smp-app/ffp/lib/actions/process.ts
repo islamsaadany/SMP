@@ -470,6 +470,52 @@ export async function updateProcessKpis(
   return ok({ id: updated.id });
 }
 
+const revisionSchema = z.object({
+  version: z.string().trim().min(1).max(40),
+  date: z.string().trim().max(40),
+  by: z.string().trim().max(120),
+  change: z.string().trim().max(500),
+});
+
+const updateProcessSopSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  sopVersion: z.string().trim().max(40),
+  sopOwner: z.string().trim().max(120),
+  sopEffectiveDate: z.string().trim().max(40),
+  sopApprovedBy: z.string().trim().max(120),
+  sopRevisions: z.array(revisionSchema).max(100),
+});
+
+/** Saves the SOP's document control and its hand-kept revision list. Free text on purpose: nothing is recorded automatically. */
+export async function updateProcessSop(
+  input: z.infer<typeof updateProcessSopSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = updateProcessSopSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+
+  const process = await loadProcessInWorkspace(parsed.data.workspaceId, parsed.data.processId);
+  if (!process) return notFound();
+
+  const updated = await prisma.process.update({
+    where: { id: parsed.data.processId },
+    data: {
+      sopVersion: parsed.data.sopVersion || null,
+      sopOwner: parsed.data.sopOwner || null,
+      sopEffectiveDate: parsed.data.sopEffectiveDate || null,
+      sopApprovedBy: parsed.data.sopApprovedBy || null,
+      sopRevisions: parsed.data.sopRevisions,
+    },
+  });
+
+  revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${parsed.data.processId}/map`);
+  revalidatePath(`/${parsed.data.workspaceId}/processes/reports/sop`);
+  return ok({ id: updated.id });
+}
+
 const archiveProcessSchema = z.object({
   workspaceId: z.string().min(1),
   processId: z.string().min(1),
@@ -782,6 +828,10 @@ const updateStepSchema = z.object({
   swimlaneRoleId: z.string().min(1).optional().or(z.literal("")),
   detailedAction: z.array(z.string().trim().min(1).max(500)).max(50).optional(),
   exceptionHandling: z.string().trim().max(2000).optional().or(z.literal("")),
+  // SOP detail — undefined leaves the stored value alone.
+  sopInputs: z.string().trim().max(2000).optional().or(z.literal("")),
+  sopOutput: z.string().trim().max(2000).optional().or(z.literal("")),
+  sopErrors: z.string().trim().max(2000).optional().or(z.literal("")),
   // Undefined leaves existing links untouched; a step created before this
   // field existed, or edited by a caller that doesn't send it, shouldn't
   // silently lose whatever it was already linked to.
@@ -840,6 +890,9 @@ export async function updateProcessStep(
       ...(parsed.data.exceptionHandling !== undefined
         ? { exceptionHandling: parsed.data.exceptionHandling || null }
         : {}),
+      ...(parsed.data.sopInputs !== undefined ? { sopInputs: parsed.data.sopInputs || null } : {}),
+      ...(parsed.data.sopOutput !== undefined ? { sopOutput: parsed.data.sopOutput || null } : {}),
+      ...(parsed.data.sopErrors !== undefined ? { sopErrors: parsed.data.sopErrors || null } : {}),
       ...(parsed.data.joinRequiresAll !== undefined ? { joinRequiresAll: parsed.data.joinRequiresAll } : {}),
     },
   });

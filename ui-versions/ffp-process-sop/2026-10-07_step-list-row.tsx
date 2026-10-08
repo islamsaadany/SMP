@@ -46,9 +46,6 @@ type StepT = {
   gaps: StepGap[];
   detailedAction: string[];
   exceptionHandling: string | null;
-  sopInputs: string | null;
-  sopOutput: string | null;
-  sopErrors: string | null;
   links: { id: string; targetProcessId: string; targetProcess: { code: string; name: string } }[];
 };
 type ConnectionT = { id: string; fromStepId: string; toStepId: string; label: string | null };
@@ -107,9 +104,6 @@ export function StepListRow({
   );
   const [detailedAction, setDetailedAction] = useState(step.detailedAction.join("\n"));
   const [exceptionHandling, setExceptionHandling] = useState(step.exceptionHandling ?? "");
-  const [sopInputs, setSopInputs] = useState(step.sopInputs ?? "");
-  const [sopOutput, setSopOutput] = useState(step.sopOutput ?? "");
-  const [sopErrors, setSopErrors] = useState(step.sopErrors ?? "");
   const [linkedProcessIds, setLinkedProcessIds] = useState<string[]>(step.links.map((l) => l.targetProcessId));
 
   function toggleMilestone() {
@@ -154,9 +148,6 @@ export function StepListRow({
     );
     setDetailedAction(step.detailedAction.join("\n"));
     setExceptionHandling(step.exceptionHandling ?? "");
-    setSopInputs(step.sopInputs ?? "");
-    setSopOutput(step.sopOutput ?? "");
-    setSopErrors(step.sopErrors ?? "");
     setLinkedProcessIds(step.links.map((l) => l.targetProcessId));
     setError(null);
     setEditing(true);
@@ -178,9 +169,6 @@ export function StepListRow({
           .map((line) => line.trim())
           .filter(Boolean),
         exceptionHandling,
-        sopInputs,
-        sopOutput,
-        sopErrors,
         linkedProcessIds,
         joinRequiresAll,
       });
@@ -345,35 +333,6 @@ export function StepListRow({
             />
           </Field>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="Inputs, tools and systems (SOP)">
-            <textarea
-              value={sopInputs}
-              onChange={(e) => setSopInputs(e.target.value)}
-              rows={2}
-              placeholder="What it takes in, and the tool or system used"
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
-            />
-          </Field>
-          <Field label="Expected output (SOP)">
-            <textarea
-              value={sopOutput}
-              onChange={(e) => setSopOutput(e.target.value)}
-              rows={2}
-              placeholder="What this step produces"
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
-            />
-          </Field>
-          <Field label="Common errors and exceptions (SOP)">
-            <textarea
-              value={sopErrors}
-              onChange={(e) => setSopErrors(e.target.value)}
-              rows={2}
-              placeholder="Mistakes people commonly make here"
-              className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
-            />
-          </Field>
-        </div>
         {otherProcesses.length > 0 && (
           <div className="flex flex-col gap-1">
             <span className="text-xs font-medium text-slate-600">Link to other process(es)</span>
@@ -476,7 +435,7 @@ export function StepListRow({
               ⚠ {step.gaps.map((gap) => STEP_GAP_LABELS[gap]).join(" · ")}
             </span>
           )}
-          {(step.detailedAction.length > 0 || step.exceptionHandling || step.sopInputs || step.sopOutput || step.sopErrors) && (
+          {(step.detailedAction.length > 0 || step.exceptionHandling) && (
             <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
               📄 Documented
             </span>

@@ -29,7 +29,9 @@ what is stored, never about numbers typed into this file (§94.8).
       differs at all. §508.2 WIDENED THE FIRST ONE TO EVERY ROW BUT THE OFFICE
       (Islam: "no one get the setup but the super use and the smo team"), so
       the dash is asserted on EVERY non-office row drawn, and a Setup grant
-      stored for every non-office role must still read none.
+      stored for every non-office role must still read none. §508.3 GAVE THE
+      REPORTING CYCLE THE SAME RULE (Islam: "same for the reporting cycle",
+      then "close it fully"), so it is asserted the same way, both ends.
 
   1b · THE COLUMN HEADINGS ARE ISLAM'S WORDS (§508.2): "Group / Company",
       "Their own" over Plan and Reporting, "Other units & functions". Asserted
@@ -209,6 +211,16 @@ with sync_playwright() as p:
                  or "Only the Super user and the SMO team open Setup" not in ds[0]["title"]]
         ok("Setup is never offered to any row but the office — a dash, with the reason on it (§508.2)",
            not bad_s, {r: setup[r] for r in bad_s})
+        # §508.3: the Reporting cycle, the same shape as Setup.
+        cyc = {r: pick(r, "cycle") for r in nonoff}
+        bad_c = [r for r, ds in cyc.items()
+                 if len(ds) != 1 or ds[0]["st"] != "dash"
+                 or "Only the Super user and the SMO team open the Reporting cycle" not in ds[0]["title"]]
+        ok("the Reporting cycle is never offered to any row but the office — a dash, with the reason on it (§508.3)",
+           not bad_c, {r: cyc[r] for r in bad_c})
+        officec = pick("super", "cycle") + pick("smoteam", "cycle")
+        ok("while the office's Reporting cycle cell is a live one (§94.2)",
+           len(officec) == 2 and all(d["st"] != "dash" and d["target"] for d in officec), officec)
         office = pick("super", "setup") + pick("smoteam", "setup")
         ok("while the office's Setup cell is a live one (§94.2)",
            len(office) == 2 and all(d["st"] != "dash" and d["target"] for d in office), office)
@@ -235,6 +247,20 @@ with sync_playwright() as p:
        len(hg) >= 10 and not leak, leak)
     ok("while the office, given the same, reads it", hoff and all(hg.get(rk) == "edit" for rk in hoff),
        {rk: hg.get(rk) for rk in hoff})
+    # §508.3: the same for the Reporting cycle.
+    heldc = js(pg, r"""()=>{ var k = JSON.stringify(ACCESS);
+      var all = ROLES.map(r=>r.key).concat([SMPRules.NO_ROLE]);
+      all.forEach(rk=>{ (ACCESS[rk]=ACCESS[rk]||{}).a_cycle='edit'; });
+      var g = {}; all.forEach(rk=>{ g[rk] = grantFor(rk,'a_cycle'); });
+      var o = JSON.parse(k); Object.keys(ACCESS).forEach(x=>delete ACCESS[x]); Object.assign(ACCESS,o);
+      return {g:g, off: all.filter(rk=>SMPRules.isOfficeRole(rk))}; }""")
+    hgc = heldc.get("g", {}) if isinstance(heldc, dict) else {}
+    hoffc = heldc.get("off", []) if isinstance(heldc, dict) else []
+    leakc = [rk for rk, v in hgc.items() if rk not in hoffc and v != "none"]
+    ok("a stored Reporting cycle grant on any non-office role still reads none (%d roles)" % (len(hgc) - len(hoffc)),
+       len(hgc) >= 10 and not leakc, leakc)
+    ok("while the office, given the same, reads it", hoffc and all(hgc.get(rk) == "edit" for rk in hoffc),
+       {rk: hgc.get(rk) for rk in hoffc})
 
     print("\n2b · a client with no second layer has no second-layer row")
     nomid = js(pg, r"""()=>{
@@ -433,6 +459,17 @@ with sync_playwright() as p:
           if (v === undefined) { if (ACCESS[rk]) delete ACCESS[rk][ak]; }
           else (ACCESS[rk]=ACCESS[rk]||{})[ak]=v; }); }""")
     js(pg, "()=>document.documentElement.removeAttribute('data-theme')")
+
+    # §508.3: with Setup (§508.2) and now the Reporting cycle both the
+    # office's alone, a CEO has no Setup page left to open — so the gear is
+    # not drawn for them at all. Both ends (§94.2): a build that took the
+    # gear away from EVERYBODY would satisfy the CEO half perfectly.
+    print("\n7 · with Setup and the cycle both shut, a CEO has no gear (§508.3)")
+    for who, want in (("smo", True), ("ceo", False), ("co_b2c", False)):
+        g = js(pg, r"""(who)=>{ switchViewer(who); paint();
+          return !!document.querySelector('[data-md="setup"]'); }""", who)
+        ok("%s: the gear is %s" % (who, "drawn" if want else "NOT drawn"), g is want, g)
+    js(pg, "()=>{ switchViewer('smo'); paint(); }")
 
     ok("no page errors", not errs, errs[:3])
     b.close()

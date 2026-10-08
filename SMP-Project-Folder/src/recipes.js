@@ -263,7 +263,7 @@ var RECIPES = [
        "thresholds for your organisation.|The colour and the status word always " +
        "come from the same scale, so they can never disagree." },
   { id: "focus-measure", q: "What is a focus measure?",
-    a: "A focus measure is a measure the CEO has identified as particularly " +
+    a: "A focus measure is a measure the Strategy Office has marked as particularly " +
        "important for the year. It doesn't change how the score is calculated; it " +
        "simply highlights the measures that should receive additional attention." },
   { id: "reward-line", q: "What is the reward line?",

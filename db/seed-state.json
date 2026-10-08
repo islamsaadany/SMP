@@ -6176,7 +6176,7 @@
    "a_fn_own": "view",
    "a_fn_own_strat": "view",
    "a_fn_other": "view",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "cceo": {
@@ -6187,7 +6187,7 @@
    "a_fn_own": "view",
    "a_fn_own_strat": "view",
    "a_fn_other": "view",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "owner": {

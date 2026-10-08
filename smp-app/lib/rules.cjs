@@ -256,9 +256,9 @@
                  a_fn_own:"edit", a_fn_own_strat:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
     /* Sees the whole organisation and manages none of it. */
     gceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"none", a_setup:"none" },
     cceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"none", a_setup:"none" },
     /* ── SETUP IS THE SMO'S, AND SO IS THE CYCLE'S MACHINERY (§51.18) ──
        Islam: "no one should have access to the settings except for the SMO."
 
@@ -268,11 +268,15 @@
        closing this takes nothing away from the people entering figures: it
        closes the office's own machinery to everyone but the office.
 
-       THE GROUP CEO KEEPS IT, deliberately. §37 made marking focus measures a
-       RULE rather than a cell — "focus measures are marked by the CEO and the
-       SMO" — and a CEO who cannot open the page cannot obey a rule addressed
-       to them. Same for the company CEO, who reads the cycle and marks
-       nothing.
+       THE GROUP CEO KEPT IT UNTIL §508.3, and that is reversed rather than
+       overwritten (Principle II). §37 made marking focus measures a RULE —
+       "focus measures are marked by the CEO and the SMO" — and a CEO who
+       cannot open the page cannot obey a rule addressed to them, so the CEO
+       read this column. Islam then closed it to everyone but the office,
+       knowing it took focus marking with it ("close it fully"), so the rule
+       moved with the column: marking is the Super user's now, and neither
+       CEO reads the cycle's pages. neverOffered() says so whatever a tenant
+       once stored.
 
        What a unit head, a custodian or a function head is left with behind the
        gear is only what is theirs by rule: the knowledge base, the figures
@@ -710,8 +714,17 @@
      Every shipped default for these rows was already none, so the worked
      example moves nothing; what changes is that a tenant which had opened
      Setup to one of them loses it, and the table can no longer offer it. */
+  /* §508.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
+     anyone but the smo and the super user it's not an option and same for
+     the reporting cycle". The two CEO rows were the only ones still reading
+     it, and closing it takes the Focus measures page with it — the one place
+     the group CEO marked what carries reward. Put to him with that cost
+     stated, and his answer was "close it fully": focus marking is the Super
+     user's now (mayMarkFocus and the server's focus case both say so). The
+     list names AREAS, never roles, for the same reason as above. */
+  var OFFICE_ONLY_AREAS = ["a_setup", "a_cycle"];
   function neverOffered(roleKey, areaKey) {
-    return areaKey === "a_setup" && !isOfficeRole(roleKey);
+    return OFFICE_ONLY_AREAS.indexOf(areaKey) > -1 && !isOfficeRole(roleKey);
   }
 
   function grantFor(w, roleKey, areaKey) {
@@ -902,7 +915,7 @@
     { key:"other", label:"Other units & functions", areas:["a_unit_other", "a_fn_other"],
       note:"Every unit, function or capability the person is NOT attached to." },
     { key:"cycle", label:"Reporting cycle", areas:["a_cycle"],
-      note:"Open, chase and close · Import · Archived plans · Focus measures." },
+      note:"Open, chase and close · Import · Archived plans · Focus measures. Only the office — the Super user and the SMO team — is ever offered it." },
     { key:"setup", label:"Setup", areas:["a_setup"],
       note:"Every Setup page except Roles & access, which is the Super user's. Only the office — the Super user and the SMO team — is ever offered it." }
   ];

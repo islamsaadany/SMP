@@ -1846,10 +1846,14 @@ function authorize(stored, incoming, person) {
         return;
 
       /* A rule, not a setting (§37): what carries reward is the office's
-         decision. And a locked cycle has stopped taking marks. */
+         decision. And a locked cycle has stopped taking marks.
+         §508.3: the group CEO no longer marks them — the Reporting cycle
+         column, which holds the Focus measures page, is the office's alone
+         now, and Islam closed it knowing it took this with it. The screen's
+         mayMarkFocus() says the same, so a crafted save is refused too. */
       case "focus":
-        if (roleKeys.indexOf("gceo") === -1 && roleKeys.indexOf("super") === -1)
-          no("Focus measures are marked by the CEO and the SMO.");
+        if (roleKeys.indexOf("super") === -1)
+          no("Focus measures are marked by the Super user.");
         else if (locked && !office)
           no("This cycle is locked, so its focus measures can no longer be changed.");
         return;

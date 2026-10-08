@@ -113,7 +113,7 @@ var PAGE_INFO = {
     title: "Focus",
     body: [
       ["What a focus measure is",
-       "A measure the CEO has marked as one of the few that carry reward this cycle. It can be a " +
+       "A measure the Super user has marked as one of the few that carry reward this cycle. It can be a " +
        "unit's own Key Objective or a key measure under any direction or capability."],
       ["One rule, not a target per measure",
        "Where reward begins is a property of the scheme, set once for the cycle on Setup and read " +
@@ -229,7 +229,7 @@ var PAGE_INFO = {
       ["Two things are rules, not settings, so they are not in the table",
        "The <b>knowledge base</b> is the office's &mdash; the Super user and the SMO team &mdash; " +
        "because it explains how the platform itself is run. And <b>focus measures</b> &mdash; " +
-       "what carries reward &mdash; are marked by the group CEO and the SMO. Each of these is a " +
+       "what carries reward &mdash; are marked by the Super user. Each of these is a " +
        "rule rather than a cell, so neither moves when the table does."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +

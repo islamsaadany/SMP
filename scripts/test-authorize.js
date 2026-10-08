@@ -263,8 +263,20 @@ allows(headKey, function (s) { s.review.note[UNIT] = "Why we are behind."; },
   "a unit head writes their own report note");
 if (custKey) allows(custKey, function (s) { s.units[UNIT].items[0].measures[0].actual = 7; },
   "the strategy custodian reports the same figure");
-allows("ceo", function (s) { s.cycle.focus = Object.assign({}, s.cycle.focus, { zzz: true }); },
-  "the group CEO marks a focus measure");
+/* §508.3 REVERSES THIS ONE, REWRITTEN RATHER THAN DELETED (§218): the group
+   CEO marked focus measures until Islam closed the Reporting cycle column to
+   everyone but the office ("close it fully"), knowing it took this with it.
+   So the Super user marks them, and the CEO is refused — both ends (§94.2). */
+allows("smo", function (s) { s.cycle.focus = Object.assign({}, s.cycle.focus, { zzz: true }); },
+  "§508.3: the Super user marks a focus measure");
+refuses("ceo", function (s) { s.cycle.focus = Object.assign({}, s.cycle.focus, { zzz: true }); },
+  "§508.3: the group CEO no longer marks a focus measure");
+(function () {
+  const inc = clone(SEED); inc.cycle.focus = Object.assign({}, inc.cycle.focus, { zzz: true });
+  const v = A.authorize(SEED, inc, personOf(SEED, "ceo"));
+  check("§508.3: …and the refusal names who does (§16.7)",
+        v.refusals.some(function (r) { return /Super user/.test(r); }), v.refusals.join(" / "));
+})();
 
 console.log("\n4 · the SMO");
 allows("smo", function (s) { s.units[UNIT].items[0].measures[0].target = 999; }, "corrects a plan");
@@ -1310,16 +1322,18 @@ refuses("ceo", function (s) { s.group.focusOff = true; },
 refuses(headKey, function (s) { s.group.focusOff = true; },
   "a unit head may NOT switch focus measures off");
 
-/* AND THE MARKS ARE STILL THE CEO'S, or the pair above proves only that
-   something was locked down, not that the right thing was. */
+/* AND THE MARKS ARE STILL THE OFFICE'S, or the pair above proves only that
+   something was locked down, not that the right thing was. §508.3: that was
+   the CEO until the Reporting cycle column closed to everyone but the
+   office; it is the Super user now. */
 (function () {
   const anyId = Object.keys(SEED.cycle.focus || {})[0] ||
                 (SEED.units[UNIT].keyObjectives[0] || {}).id;
   check("the seed has a markable id to test with", !!anyId,
         "no id — this assertion would be measuring nothing");
   if (!anyId) return;
-  allows("ceo", function (s) { s.cycle.focus[anyId] = !s.cycle.focus[anyId]; },
-    "the CEO may still mark a focus measure");
+  allows("smo", function (s) { s.cycle.focus[anyId] = !s.cycle.focus[anyId]; },
+    "the Super user may still mark a focus measure");
 })();
 
 /* THE SWITCH CLASSIFIES AS setup, NOT focus. Every assertion above would pass
@@ -5623,8 +5637,10 @@ console.log("\n§508.1 · two CEO rows, and Setup never offered to them");
   check("§508.1: …and so does a division head",
         R.grantAtPage(stored, personOf(SEED, "co_dist"), "c_labels", "group") === "none",
         R.grantAtPage(stored, personOf(SEED, "co_dist"), "c_labels", "group"));
+  /* §508.3 took a_cycle out of this list, REWRITTEN rather than loosened
+     (§218): the Reporting cycle is the office's alone now, asserted below. */
   check("§508.1: the rule touches no other area of a CEO",
-        ["a_group", "a_unit_own", "a_unit_own_strat", "a_unit_other", "a_fn_own", "a_fn_own_strat", "a_fn_other", "a_cycle"]
+        ["a_group", "a_unit_own", "a_unit_own_strat", "a_unit_other", "a_fn_own", "a_fn_own_strat", "a_fn_other"]
           .every(function (a) { return !R.neverOffered("gceo", a) && !R.neverOffered("cceo", a); }));
   check("§508.1: the office's two seats still open Setup",
         !R.neverOffered("super", "a_setup") && !R.neverOffered("smoteam", "a_setup") &&
@@ -5652,8 +5668,39 @@ console.log("\n§508.1 · two CEO rows, and Setup never offered to them");
         nonOffice.filter(function (k) { return R.grantFor(openW, k, "a_setup") !== "none"; }).join(","));
   check("§508.2: …while the office's two seats still open it, from that same world (§94.2)",
         R.grantFor(openW, "super", "a_setup") === "edit" && R.grantFor(openW, "smoteam", "a_setup") === "edit");
-  check("§508.2: the rule touches no other area of any role",
-        allRoles.every(function (k) { return R.AREAS.every(function (a) { return a.key === "a_setup" || !R.neverOffered(k, a.key); }); }));
+  /* §508.3: the two office-only areas are Setup and the Reporting cycle, and
+     nothing else — asserted for every role the table draws. */
+  const OFFICE_ONLY = ["a_setup", "a_cycle"];
+  check("§508.2/§508.3: the rule touches no other area of any role",
+        allRoles.every(function (k) { return R.AREAS.every(function (a) { return OFFICE_ONLY.indexOf(a.key) > -1 || !R.neverOffered(k, a.key); }); }));
+
+  /* §508.3: THE REPORTING CYCLE, the same shape as Setup. Islam: "setup should
+     be a dash for anyone but the smo and the super user it's not an option
+     and same for the reporting cycle". Every non-office role a tenant once
+     gave the cycle edit still holds none; the office still opens it from that
+     same world (§94.2). */
+  const openC = clone(SEED);
+  nonOffice.forEach(function (k) { openC.access[k] = Object.assign({}, openC.access[k], { a_cycle: "edit" }); });
+  const openCW = R.worldOf(openC);
+  check("§508.3: the Reporting cycle is never offered to any role but the office",
+        nonOffice.every(function (k) { return R.neverOffered(k, "a_cycle"); }),
+        nonOffice.filter(function (k) { return !R.neverOffered(k, "a_cycle"); }).join(","));
+  check("§508.3: …and every one of them a tenant once gave it edit still holds none",
+        nonOffice.every(function (k) { return R.grantFor(openCW, k, "a_cycle") === "none"; }),
+        nonOffice.filter(function (k) { return R.grantFor(openCW, k, "a_cycle") !== "none"; }).join(","));
+  check("§508.3: …while the office's two seats still open it, from that same world",
+        R.grantFor(openCW, "super", "a_cycle") === "edit" && R.grantFor(openCW, "smoteam", "a_cycle") === "edit");
+  check("§508.3: neither CEO ships the cycle any more",
+        R.ACCESS_DEFAULTS.gceo.a_cycle === "none" && R.ACCESS_DEFAULTS.cceo.a_cycle === "none",
+        JSON.stringify([R.ACCESS_DEFAULTS.gceo.a_cycle, R.ACCESS_DEFAULTS.cceo.a_cycle]));
+  ["c_cycle", "c_import", "c_focus"].forEach(function (pg) {
+    check("§508.3: a top CEO given the cycle cannot open " + pg,
+          R.grantAtPage(openCW, personOf(SEED, "ceo"), pg, "group") === "none",
+          R.grantAtPage(openCW, personOf(SEED, "ceo"), pg, "group"));
+    check("§508.3: …while the SMO opens " + pg,
+          R.grantAtPage(openCW, personOf(SEED, "smo"), pg, "group") !== "none",
+          R.grantAtPage(openCW, personOf(SEED, "smo"), pg, "group"));
+  });
   check("§508.2: a unit owner given Setup edit cannot open a Setup page",
         R.grantAtPage(openW, personOf(SEED, "mobhead"), "c_labels", "group") === "none",
         R.grantAtPage(openW, personOf(SEED, "mobhead"), "c_labels", "group"));

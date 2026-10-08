@@ -6732,11 +6732,14 @@ function passwordReach(){
   });
 }
 
-/* What carries reward is the office's decision, not a page permission. The
-   group CEO marks it and the SMO can too; nobody else, at any grant. */
+/* What carries reward is the office's decision, not a page permission.
+   §508.3: the Super user marks it and nobody else, at any grant — the group
+   CEO used to, and Islam closed the Reporting cycle column (where this page
+   lives) to everyone but the office knowing it took this with it. The server's
+   focus case says the same. */
 function mayMarkFocus(){
   var rs = personRoleKeys(viewer());
-  return (rs.indexOf("gceo") > -1 || rs.indexOf("super") > -1) && !CYCLE.locked;
+  return rs.indexOf("super") > -1 && !CYCLE.locked;
 }
 
 /* ── Key Objective weights ────────────────────────────────────────────────

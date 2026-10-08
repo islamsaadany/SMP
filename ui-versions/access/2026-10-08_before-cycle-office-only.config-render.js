@@ -384,12 +384,8 @@ function accessNA(roleKey, areaKey){
      (Islam: "never offered"), so the cell is a dash with the reason on it.
      §508.2 widened the rule to every row but the office, and this reason
      moved with it untouched, because it was always the office's sentence. */
-  /* §508.3: the Reporting cycle joined it, with its own sentence, because the
-     cell says which column it is closing. */
   if (SMPRules.neverOffered(roleKey, areaKey)) {
-    return areaKey === "a_cycle"
-      ? "Only the Super user and the SMO team open the Reporting cycle."
-      : "Only the Super user and the SMO team open Setup.";
+    return "Only the Super user and the SMO team open Setup.";
   }
   if (SMPRules.ownsEveryPlace(roleKey) &&
       (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
@@ -5495,7 +5491,7 @@ function focusNav(){
 }
 
 function renderFocusSetup(){
-  /* Marking is the Super user's — a rule, not a cell (§37, §508.3).
+  /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
   var editable = mayMarkFocus();
   var bands = focusBands(FSET.unit);

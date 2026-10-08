@@ -14,7 +14,7 @@ reaches nothing. Then Roles & access: since §508 the table draws eight rows
 over the stored roles, and a direction owner is one of the three under PART
 OWNER — so what is asserted is that the Part owner row says so, that its The
 top cell carries the direction owner's pair at the group's View, and that no
-This box cell carries it (its own-unit and own-function pairs are not
+"Their own" cell carries it (its own-unit and own-function pairs are not
 applicable). REWRITTEN at §508, never loosened (§218): it asked for a row
 named Direction owner, which the merged table no longer draws. SMP_BUILT
 points it at another build (§276).
@@ -82,7 +82,7 @@ with sync_playwright() as p:
         ck("its The top cell carries the direction owner's pair", "dirowner:a_group" in (top.get("pairs") or []), top)
         ck("the direction owner reads the group's View", acc.get("stored") == "view", acc.get("stored"))
         here = [c for c in acc["cells"][1:3]]
-        ck("no This box cell carries the direction owner (not applicable there)",
+        ck("no Their own cell carries the direction owner (not applicable there)",
            here and all(not any(x.startswith("dirowner:") for x in c["pairs"]) for c in here), here)
     ck("no page errors", not errs, errs)
     b.close()

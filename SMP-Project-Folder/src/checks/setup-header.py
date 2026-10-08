@@ -261,7 +261,7 @@ with sync_playwright() as p:
                                     "e=>e.map(x=>x.textContent.trim().toLowerCase())")
     titles = pg.eval_on_selector_all(".acgrid thead th",
                                      "e=>e.map(x=>(x.getAttribute('title')||'').toLowerCase())")
-    # §508 MERGED THE TABLE: its group heading is the pair "This box" over Plan
+    # §508 MERGED THE TABLE: its group heading is the pair "Their own" (§508.2; "This box" at §508) over Plan
     # and Reporting, and the long name of each column is its note from the
     # shared rule. REWRITTEN, never loosened (§218): still both halves — the
     # words on screen AND the meaning on the hover — but asserted as an

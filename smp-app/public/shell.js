@@ -703,10 +703,17 @@
      view would grant Setup from behind a dash nobody can press to take it
      back (§61). Asked by grantFor, so the screen and the server read it from
      one place (§42). */
-  var NEVER_OFFERED = { gceo: ["a_setup"], cceo: ["a_setup"] };
+  /* §508.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
+     offered Setup: "close setup for all of them even the ceo no one get the
+     setup but the super use and the smo team". So the rule is said the way
+     he said it — Setup is the office's — rather than as a list of the rows
+     it is not, which would be one more place to forget the day a role is
+     added (§104.7). isOfficeRole is the one definition of the office (§89).
+     Every shipped default for these rows was already none, so the worked
+     example moves nothing; what changes is that a tenant which had opened
+     Setup to one of them loses it, and the table can no longer offer it. */
   function neverOffered(roleKey, areaKey) {
-    var a = NEVER_OFFERED[roleKey];
-    return !!(a && a.indexOf(areaKey) > -1);
+    return areaKey === "a_setup" && !isOfficeRole(roleKey);
   }
 
   function grantFor(w, roleKey, areaKey) {
@@ -882,20 +889,24 @@
      and every area exactly once — asserted, or a role added later would
      simply not appear on the table and nobody could set it. */
   var ACCESS_COLS = [
-    { key:"top", label:"The top", areas:["a_group"],
+    /* §508.2: the column words are Islam's, given as they are — "for the
+       group make it Group / Company", "Their own", "Other units & functions" —
+       and literal, because they name a KIND of place rather than this
+       client's word for one (the rows do that, §508.1). */
+    { key:"top", label:"Group / Company", areas:["a_group"],
       note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
-    { key:"plan", label:"This box — Plan", pair:"This box", col:"Plan",
+    { key:"plan", label:"Their own — Plan", pair:"Their own", col:"Plan",
       areas:["a_unit_own_strat", "a_fn_own_strat"],
-      note:"The box the person is attached to — a business unit, a function or a capability. Its strategy: Foundation, SWOT, the plan." },
-    { key:"rep", label:"This box — Reporting", pair:"This box", col:"Reporting",
+      note:"The place the person is attached to — a business unit, a function or a capability. Its strategy: Foundation, SWOT, the plan." },
+    { key:"rep", label:"Their own — Reporting", pair:"Their own", col:"Reporting",
       areas:["a_unit_own", "a_fn_own"],
-      note:"The same box. Its Performance and its Reporting." },
-    { key:"other", label:"Other boxes", areas:["a_unit_other", "a_fn_other"],
-      note:"Every box the person is NOT attached to." },
+      note:"The same place. Its Performance and its Reporting." },
+    { key:"other", label:"Other units & functions", areas:["a_unit_other", "a_fn_other"],
+      note:"Every unit, function or capability the person is NOT attached to." },
     { key:"cycle", label:"Reporting cycle", areas:["a_cycle"],
       note:"Open, chase and close · Import · Archived plans · Focus measures." },
     { key:"setup", label:"Setup", areas:["a_setup"],
-      note:"Every Setup page except Roles & access, which is the Super user's." }
+      note:"Every Setup page except Roles & access, which is the Super user's. Only the office — the Super user and the SMO team — is ever offered it." }
   ];
   var ACCESS_ROWS = [
     { key:"super", name:"Super user", of:["super"],
@@ -915,11 +926,11 @@
     { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
       note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
     { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
-      note:"Owns a box: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+      note:"Owns a place: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
     { key:"custodian", name:"Custodian", of:["custodian"],
-      note:"Keeps a box's plan and figures." },
+      note:"Keeps a place's plan and figures." },
     { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
-      note:"Owns one part inside a box: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+      note:"Owns one part inside a place: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
     { key:"contrib", name:"Contributor", of:["contrib"],
       note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
     { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
@@ -35837,13 +35848,15 @@ function accessNA(roleKey, areaKey){
      count them as owning anything, and this did not mark their other
      columns either, so four cells did nothing and nobody could see it. */
   /* §508.1: a rule, never a cell — Setup is not offered to either CEO
-     (Islam: "never offered"), so the cell is a dash with the reason on it. */
+     (Islam: "never offered"), so the cell is a dash with the reason on it.
+     §508.2 widened the rule to every row but the office, and this reason
+     moved with it untouched, because it was always the office's sentence. */
   if (SMPRules.neverOffered(roleKey, areaKey)) {
     return "Only the Super user and the SMO team open Setup.";
   }
   if (SMPRules.ownsEveryPlace(roleKey) &&
       (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
-    return "Every box is theirs, so there is no “other”.";
+    return "Every unit and function is theirs, so there is no “other”.";
   }
   /* The split halves collapse exactly as their whole did (§117): no unit
      means neither half of the unit pair can come up. */

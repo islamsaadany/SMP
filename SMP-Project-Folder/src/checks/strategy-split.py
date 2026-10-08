@@ -146,7 +146,7 @@ with sync_playwright() as p:
     # test is that the header AGREES with lib/rules.js, never what the two of
     # them happen to say (§53.5, §94.8), so the next rename keeps it green.
     # §508 MERGED THE TABLE: the own unit and the own function are ONE box
-    # column ("This box") with Plan and Reporting under it, where there were
+    # column ("Their own" since §508.2, "This box" at §508) with Plan and Reporting under it, where there were
     # two pairs with Strategy and Reporting under each. Asked of the shared
     # list the cells are walked from (SMPRules.ACCESS_COLS), never typed here,
     # or the next rename turns this red for a header that still agrees with

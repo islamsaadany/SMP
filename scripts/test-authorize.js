@@ -5630,9 +5630,33 @@ console.log("\n§508.1 · two CEO rows, and Setup never offered to them");
         !R.neverOffered("super", "a_setup") && !R.neverOffered("smoteam", "a_setup") &&
         R.grantAtPage(stored, personOf(SEED, "smo"), "c_labels", "group") === "edit",
         R.grantAtPage(stored, personOf(SEED, "smo"), "c_labels", "group"));
-  check("§508.1: …and an Owner row a tenant opened keeps what it was given (the rule is the CEOs' only)",
-        !R.neverOffered("owner", "a_setup") && R.grantFor(stored, "owner", "a_setup") === "edit",
-        R.grantFor ? R.grantFor(stored, "owner", "a_setup") : "grantFor not exported");
+  /* §508.2 REVERSES THIS ONE, REWRITTEN RATHER THAN DELETED (§218). It
+     asserted that an Owner row a tenant opened kept its Setup grant, because
+     the rule was the CEOs' only; Islam: "no one get the setup but the super
+     use and the smo team". So it asks the same stored world the other way,
+     of EVERY role the table draws — read off ACCESS_ROWS, never a list typed
+     here, or a role added tomorrow escapes the rule unasked (§94.8). */
+  const allRoles = [];
+  R.ACCESS_ROWS.forEach(function (r) { r.of.forEach(function (k) { allRoles.push(k); }); });
+  const nonOffice = allRoles.filter(function (k) { return !R.isOfficeRole(k); });
+  const openAll = clone(SEED);
+  nonOffice.forEach(function (k) { openAll.access[k] = Object.assign({}, openAll.access[k], { a_setup: "edit" }); });
+  const openW = R.worldOf(openAll);
+  check("§508.2: the table draws more than the office's two rows (the next assertion is not vacuous)",
+        nonOffice.length >= 8 && allRoles.length === nonOffice.length + 2, nonOffice.join(","));
+  check("§508.2: Setup is never offered to any role but the office",
+        nonOffice.every(function (k) { return R.neverOffered(k, "a_setup"); }),
+        nonOffice.filter(function (k) { return !R.neverOffered(k, "a_setup"); }).join(","));
+  check("§508.2: …and every one of them a tenant once gave Setup edit still holds none",
+        nonOffice.every(function (k) { return R.grantFor(openW, k, "a_setup") === "none"; }),
+        nonOffice.filter(function (k) { return R.grantFor(openW, k, "a_setup") !== "none"; }).join(","));
+  check("§508.2: …while the office's two seats still open it, from that same world (§94.2)",
+        R.grantFor(openW, "super", "a_setup") === "edit" && R.grantFor(openW, "smoteam", "a_setup") === "edit");
+  check("§508.2: the rule touches no other area of any role",
+        allRoles.every(function (k) { return R.AREAS.every(function (a) { return a.key === "a_setup" || !R.neverOffered(k, a.key); }); }));
+  check("§508.2: a unit owner given Setup edit cannot open a Setup page",
+        R.grantAtPage(openW, personOf(SEED, "mobhead"), "c_labels", "group") === "none",
+        R.grantAtPage(openW, personOf(SEED, "mobhead"), "c_labels", "group"));
 
   /* ON THE SERVER, against a stored world that says edit: the CEO's save is
      refused, the office's is not (§42 — one rule, both sides). */
@@ -5644,6 +5668,14 @@ console.log("\n§508.1 · two CEO rows, and Setup never offered to them");
         "was ALLOWED — " + JSON.stringify(vc.changes.map(function (c) { return c.kind + ":" + c.what; })));
   const vs = A.authorize(base, inc, personOf(base, "smo"));
   check("§508.1: …and accepts the same change from the SMO", vs.ok, (vs.refusals || []).join(" / "));
+  /* §508.2: the same on the server for a row that was offered Setup until
+     today — a unit owner with edit stored is refused, as the CEO is. */
+  const base2 = clone(SEED);
+  base2.access.owner = Object.assign({}, base2.access.owner, { a_setup: "edit" });
+  const inc2 = clone(base2); inc2.labels[0].bu = "changed";
+  const vo = A.authorize(base2, inc2, personOf(base2, "mobhead"));
+  check("§508.2: the server refuses a unit owner's Setup change even with edit stored", !vo.ok,
+        "was ALLOWED — " + JSON.stringify(vo.changes.map(function (c) { return c.kind + ":" + c.what; })));
 })();
 
 /* ── §508.1: A PART OWNER MAY READ THEIR OWN UNIT ─────────────────────────

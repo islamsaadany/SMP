@@ -26,7 +26,15 @@ what is stored, never about numbers typed into this file (§94.8).
       §508.1 decisions, at both ends (§94.2): Setup is a dash with its reason
       on both CEO rows while the office keeps a live one; the Part owner's
       Plan and Reporting light "may read"; and on the shipped defaults no cell
-      differs at all.
+      differs at all. §508.2 WIDENED THE FIRST ONE TO EVERY ROW BUT THE OFFICE
+      (Islam: "no one get the setup but the super use and the smo team"), so
+      the dash is asserted on EVERY non-office row drawn, and a Setup grant
+      stored for every non-office role must still read none.
+
+  1b · THE COLUMN HEADINGS ARE ISLAM'S WORDS (§508.2): "Group / Company",
+      "Their own" over Plan and Reporting, "Other units & functions". Asserted
+      as those words AND as agreement with the shared list, because a build
+      that kept the old words agrees with itself perfectly (§113.8).
 
   2b · A CLIENT WITH NO SECOND LAYER HAS NO SECOND-LAYER ROW. The state is
       made (the structure's own switch) and put back; the rows drop to the
@@ -149,6 +157,13 @@ with sync_playwright() as p:
            got["heads"])
         ok("the paired columns share one name written once above them",
            all(got["heads"].count(n) == 1 for n in set(shape["pairs"])), got["heads"])
+        # §508.2: the words are Islam's, given literally — so they are asserted
+        # literally here as well as by agreement above.
+        isl = ["Group / Company", "Their own", "Plan", "Reporting", "Other units & functions",
+               "Reporting cycle", "Setup"]
+        ok("the head reads in Islam's words (§508.2)",
+           all(w in got["heads"] for w in isl) and not any("box" in h.lower() for h in got["heads"]),
+           got["heads"])
     # MADE (§255): the demo's words are the defaults, so a build that typed
     # "Group CEO" passes everything above. Two words no default spells.
     named = js(pg, r"""()=>{
@@ -179,12 +194,21 @@ with sync_playwright() as p:
         ok("the table holds a dash, a lit cell and a none (the fixture can tell them apart)",
            {"dash", "none"} <= kinds and bool(kinds & {"view", "edit", "fill"}), sorted(kinds))
         sup = [d["st"] for e, d in zip(exp, flat) if e["row"] in ("super", "smoteam") and e["col"] == "other"]
-        ok("the office's Other boxes is a dash, not a refusal", sup == ["dash", "dash"], sup)
+        ok("the office's Other units & functions is a dash, not a refusal", sup == ["dash", "dash"], sup)
         pick = lambda row, col: [d for e, d in zip(exp, flat) if e["row"] == row and e["col"] == col]
-        ceo = pick("gceo", "setup") + pick("cceo", "setup")
-        ok("Setup is never offered to either CEO — a dash, with the reason on it (§508.1)",
-           len(ceo) == 2 and all(d["st"] == "dash" and "Only the Super user and the SMO team open Setup" in d["title"]
-                                 for d in ceo), ceo)
+        # §508.2: every row that holds no office role — asked of the rule's own
+        # definition of the office, never a list typed here (§89, §94.8).
+        offrows = js(pg, r"""()=>SMPRules.ACCESS_ROWS.filter(r=>r.of.some(k=>SMPRules.isOfficeRole(k))).map(r=>r.key)""")
+        drawn = sorted(set(e["row"] for e in exp))
+        nonoff = [r for r in drawn if isinstance(offrows, list) and r not in offrows]
+        setup = {r: pick(r, "setup") for r in nonoff}
+        ok("the fixture holds both CEOs and the owner among the non-office rows",
+           {"gceo", "cceo", "owner"} <= set(nonoff) and len(nonoff) >= 6, nonoff)
+        bad_s = [r for r, ds in setup.items()
+                 if len(ds) != 1 or ds[0]["st"] != "dash"
+                 or "Only the Super user and the SMO team open Setup" not in ds[0]["title"]]
+        ok("Setup is never offered to any row but the office — a dash, with the reason on it (§508.2)",
+           not bad_s, {r: setup[r] for r in bad_s})
         office = pick("super", "setup") + pick("smoteam", "setup")
         ok("while the office's Setup cell is a live one (§94.2)",
            len(office) == 2 and all(d["st"] != "dash" and d["target"] for d in office), office)
@@ -195,14 +219,22 @@ with sync_playwright() as p:
            not got.get("differ") and "mixed" not in kinds, {"differ": got.get("differ"), "kinds": sorted(kinds)})
     else:
         ok("every cell agrees", False, exp)
-    # And a stored Setup grant does not reach either CEO (§61, §42): the rule
-    # answers none whatever the map once held.
+    # And a stored Setup grant does not reach any non-office role (§61, §42,
+    # §508.2): the rule answers none whatever the map once held — while the
+    # office, given the same, still reads it (§94.2).
     held = js(pg, r"""()=>{ var k = JSON.stringify(ACCESS);
-      ['gceo','cceo'].forEach(rk=>{ (ACCESS[rk]=ACCESS[rk]||{}).a_setup='edit'; });
-      var g = ['gceo','cceo'].map(rk=>grantFor(rk,'a_setup'));
+      var all = ROLES.map(r=>r.key).concat([SMPRules.NO_ROLE]);
+      all.forEach(rk=>{ (ACCESS[rk]=ACCESS[rk]||{}).a_setup='edit'; });
+      var g = {}; all.forEach(rk=>{ g[rk] = grantFor(rk,'a_setup'); });
       var o = JSON.parse(k); Object.keys(ACCESS).forEach(x=>delete ACCESS[x]); Object.assign(ACCESS,o);
-      return g; }""")
-    ok("a stored Setup grant on either CEO still reads none", held == ["none", "none"], held)
+      return {g:g, off: all.filter(rk=>SMPRules.isOfficeRole(rk))}; }""")
+    hg = held.get("g", {}) if isinstance(held, dict) else {}
+    hoff = held.get("off", []) if isinstance(held, dict) else []
+    leak = [rk for rk, v in hg.items() if rk not in hoff and v != "none"]
+    ok("a stored Setup grant on any non-office role still reads none (%d roles)" % (len(hg) - len(hoff)),
+       len(hg) >= 10 and not leak, leak)
+    ok("while the office, given the same, reads it", hoff and all(hg.get(rk) == "edit" for rk in hoff),
+       {rk: hg.get(rk) for rk in hoff})
 
     print("\n2b · a client with no second layer has no second-layer row")
     nomid = js(pg, r"""()=>{
@@ -261,7 +293,8 @@ with sync_playwright() as p:
       return {border:cs.borderTopStyle, w:parseFloat(cs.borderTopWidth)}; }""")
     ok("the tray is ringed", isinstance(tray, dict) and tray.get("border") == "solid" and tray.get("w", 0) >= 1, tray)
     ok("the line above the table names it",
-       got and got.get("differ") and "Owner" in got["differ"] and "different answers" in got["differ"],
+       got and got.get("differ") and "Owner · Their own: Reporting" in got["differ"]
+       and "different answers" in got["differ"],
        got and got.get("differ"))
 
     print("\n4 · a press writes every pair under the cell, and nothing else")
@@ -286,8 +319,14 @@ with sync_playwright() as p:
     # be gone altogether here; what must hold is that it stops naming THIS
     # cell. "Owner · " is case-sensitive on purpose: "Part owner · …" does not
     # contain it.
-    ok("the line above the table stops naming the cell once its pairs agree",
-       isinstance(got, dict) and "cells" in got and "Owner · This box: Reporting" not in (got.get("differ") or ""),
+    # The cell's name is built from the rule's own pair and column (§94.8), so
+    # it follows the headings whatever they are called.
+    cname = js(pg, r"""()=>{ var c=SMPRules.ACCESS_COLS.filter(x=>x.key==='rep')[0];
+      return 'Owner · ' + (c.col ? c.pair + ': ' + c.col : c.label); }""")
+    ok("the cell's name is built from the rule's own headings",
+       isinstance(cname, str) and cname == "Owner · Their own: Reporting", cname)
+    ok("and stops naming it once its pairs agree",
+       isinstance(got, dict) and "cells" in got and isinstance(cname, str) and cname not in (got.get("differ") or ""),
        got and got.get("differ"))
     res2 = js(pg, r"""(t)=>{
       var b=[...document.querySelectorAll('.acgrid .stbtn')].find(x=>(x.dataset.acm||'')===t+'|none');

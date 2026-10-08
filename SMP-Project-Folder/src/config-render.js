@@ -381,13 +381,15 @@ function accessNA(roleKey, areaKey){
      count them as owning anything, and this did not mark their other
      columns either, so four cells did nothing and nobody could see it. */
   /* §508.1: a rule, never a cell — Setup is not offered to either CEO
-     (Islam: "never offered"), so the cell is a dash with the reason on it. */
+     (Islam: "never offered"), so the cell is a dash with the reason on it.
+     §508.2 widened the rule to every row but the office, and this reason
+     moved with it untouched, because it was always the office's sentence. */
   if (SMPRules.neverOffered(roleKey, areaKey)) {
     return "Only the Super user and the SMO team open Setup.";
   }
   if (SMPRules.ownsEveryPlace(roleKey) &&
       (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
-    return "Every box is theirs, so there is no “other”.";
+    return "Every unit and function is theirs, so there is no “other”.";
   }
   /* The split halves collapse exactly as their whole did (§117): no unit
      means neither half of the unit pair can come up. */

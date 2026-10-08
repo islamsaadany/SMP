@@ -312,7 +312,7 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 .copcard li { overflow-wrap:anywhere; }
 .copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
-/* §508 — a card with text carries a pen and "Edit with AI", shown when the
+/* §513 — a card with text carries a pen and "Edit with AI", shown when the
    card is hovered or anything in it has the keyboard; on a touch screen,
    where nothing hovers, they sit on a line of their own so the status the
    card states is never covered. */

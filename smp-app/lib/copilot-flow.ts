@@ -172,8 +172,8 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   f.done = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.done) && j.done[i]) && !!f.drafts[i].trim());
   f.skip = Array.isArray(j.skip) ? cleanSkip(j.skip) : base.skip;
   f.from = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.from) && j.from[i]) && !!f.drafts[i].trim());
-  /* §509 — THE CHECK'S RESULTS ARE ABOUT THE DRAFTS THEY WERE RUN ON. A
-     draft changed since (a pen save during the check, §508) left them
+  /* §514 — THE CHECK'S RESULTS ARE ABOUT THE DRAFTS THEY WERE RUN ON. A
+     draft changed since (a pen save during the check, §513) left them
      standing for the OLD words, drawn as though they were about the new
      ones with the Save button under them — so they are dropped the moment
      any draft differs, and the screen says the check has not run. */
@@ -249,7 +249,7 @@ export const REFINES: Record<string, string> = {
   simple: "Simplify it: plainer words, shorter sentences. Keep every fact.",
 };
 
-/* WHAT A PART IS, WHERE THE ANSWERS ALONE DO NOT SAY IT (§508). Islam:
+/* WHAT A PART IS, WHERE THE ANSWERS ALONE DO NOT SAY IT (§513). Islam:
    "In the End in Mind section I don't know why it takes both Purpose &
    Winning aspiration content." The agreed parts travel with every draft
    (flowCorpus), so a part with no rule of its own borrows its neighbours'
@@ -292,7 +292,7 @@ export function checkQuestion(f: Flow): string {
 }
 
 /* ── THE FOUNDATION AS ONE TEXT, AND SAVING IT ──────────────────────── */
-/* §509 — THE SAVED TEXT'S HEADINGS ARE THE CLIENT'S WORDS. The page sends
+/* §514 — THE SAVED TEXT'S HEADINGS ARE THE CLIENT'S WORDS. The page sends
    each part's name as Terminology spells it for this place (one or many, as
    the Foundation page reads that row); a key the page did not send, or a
    value that is not a line, keeps the method's own name. The AI is never

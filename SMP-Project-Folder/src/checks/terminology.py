@@ -52,7 +52,7 @@ ORDER = ["theme", "pillar", "capability", "keyobj", "aspiration", "purpose", "va
          "measure", "tactic", "unitword", "division", "fnword", "project",
          # §404: the structure step names the top level, and two components gained a word
          "topword", "brief", "swot",
-         # §508: the End in Mind gained a word of its own, last in the order
+         # §513: the End in Mind gained a word of its own, last in the order
          "endinmind"]
 
 def setup_labels(pg):

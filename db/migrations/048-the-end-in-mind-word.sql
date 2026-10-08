@@ -1,4 +1,4 @@
-/* THE END IN MIND'S OWN WORD (§508)
+/* THE END IN MIND'S OWN WORD (§513)
 
    Islam: "it needs a simple prompt as well and a naming in the foundation
    terminologies." The label registry had no row for it, so a client could

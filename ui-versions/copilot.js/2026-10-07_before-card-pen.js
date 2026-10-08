@@ -727,7 +727,7 @@ var COPILOT = (function(){
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
   function cardsHtml(f){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
-    /* §507 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
+    /* §512 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
        Islam: "I have no option to edit any section once I finish and Done
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
@@ -858,7 +858,7 @@ var COPILOT = (function(){
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
   }
-  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§507): a drafted part
+  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
      opens on its draft, a part with every question answered opens on the
      review, and a part half answered opens on its next unanswered question
      — never back at question one, which would make returning to a part you
@@ -871,7 +871,7 @@ var COPILOT = (function(){
     while (k < n && String(a[k] || "").trim()) k++;
     if (n && k >= n) { g.phase = "review"; g.qi = 0; } else { g.phase = "ask"; g.qi = Math.min(k, Math.max(n - 1, 0)); }
   }
-  /* WHICH PART A TYPED LINE NAMES (§507), by the part's own words — one
+  /* WHICH PART A TYPED LINE NAMES (§512), by the part's own words — one
      part, or nobody: a line naming two is not guessed at. */
   var PART_WORDS = { who: ["who we are"], asp: ["winning aspiration", "aspiration"], eim: ["end in mind"],
     pur: ["purpose", "mission"], obj: ["key objectives", "objectives", "objective", "guiding objectives"], val: ["core values", "values"] };
@@ -995,7 +995,7 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    /* §507 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
+    /* §512 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
        IT WITH THE CHANGE APPLIED: the refine is asked of that part, and the
        answer comes back as its draft to save, which runs the check again.
        A part with nothing written yet opens on its questions instead. */

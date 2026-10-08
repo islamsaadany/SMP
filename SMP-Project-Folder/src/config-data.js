@@ -65,7 +65,7 @@ var LABELS = {
       note:"A short description of who this part of the business is" },
     { key:"swot",        internal:"SWOT",                group:"SWOT",                bu:"SWOT",
       note:"Strengths, weaknesses, opportunities and threats" },
-    /* §508: the End in Mind's own word, last because migration 048 (027 on
+    /* §513: the End in Mind's own word, last because migration 048 (027 on
        the new stack) writes it last for every tenant already deployed. */
     { key:"endinmind",   internal:"End in Mind",         group:"End in Mind",         bu:"End in Mind",
       note:"The lasting mark the organisation works towards, long after this plan ends" }

@@ -288,7 +288,7 @@ var COPILOT = (function(){
     try { if (typeof labelWord === "function") return labelWord(k, many ? "bu" : "group"); } catch (e) {}
     return k;
   }
-  /* §509 — A PART'S NAME IS THE CLIENT'S WORD (Islam: "yes the names should
+  /* §514 — A PART'S NAME IS THE CLIENT'S WORD (Islam: "yes the names should
      follow the terminology"). The Copilot's six parts are Terminology's own
      rows, so wherever a PERSON reads a part's name — a card, the to-do, a
      chat line, a button, the saved text's headings — it is the word the
@@ -732,7 +732,7 @@ var COPILOT = (function(){
   }
   function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
   function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
-  /* §509 — ONE COUNT OF ANSWERS, read by the card, the to-do and the bar
+  /* §514 — ONE COUNT OF ANSWERS, read by the card, the to-do and the bar
      (Islam: "we need to fix the panel and the card"). The card said
      "Answering 1/4" — the question's POSITION — beside a panel saying
      "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
@@ -747,7 +747,7 @@ var COPILOT = (function(){
       (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
   }
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
-  /* §508 — A PART'S TEXT IS EDITED ON ITS CARD (Islam: "edit the cards on
+  /* §513 — A PART'S TEXT IS EDITED ON ITS CARD (Islam: "edit the cards on
      the left … a pen to edit or edit with AI to take it back to the chat",
      the original Copilot's own pattern, signed off from
      design-mockups/copilot-foundation-flow/2026-10-07_edit-cards-hover.html).
@@ -759,7 +759,7 @@ var COPILOT = (function(){
   function penHere(){ return !!(CARDPEN && PANE && PANE.chat && CARDPEN.id === PANE.chat.id); }
   function cardsHtml(f){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
-    /* §507 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
+    /* §512 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
        Islam: "I have no option to edit any section once I finish and Done
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
@@ -778,7 +778,7 @@ var COPILOT = (function(){
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
       else if (txt) { st = "In progress"; }
-      /* §508 — A PART HALF ANSWERED IS IN PROGRESS, NOT EMPTY. It said
+      /* §513 — A PART HALF ANSWERED IS IN PROGRESS, NOT EMPTY. It said
          "Empty · Not started" with three answers given, which is the one
          card a person comes back to and the one that told them nothing. */
       else if (a) { st = "In progress"; }
@@ -904,7 +904,7 @@ var COPILOT = (function(){
             return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
           '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
     }
-    /* §509 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
+    /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
        A pen save during the check left the OLD results standing, "Go back
        to" and the Save button under them, nothing saying they were about
        the text before the edit, and no way to run it again. The server now
@@ -920,7 +920,7 @@ var COPILOT = (function(){
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
   }
-  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§507): a drafted part
+  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
      opens on its draft, a part with every question answered opens on the
      review, and a part half answered opens on its next unanswered question
      — never back at question one, which would make returning to a part you
@@ -929,12 +929,12 @@ var COPILOT = (function(){
   function openPart(g, i){
     var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
     g.e = i; g.done[i] = false; NUDGE = null;
-    if (CARDPEN && CARDPEN.i === i) CARDPEN = null;   /* §508: the part is in the chat now */
+    if (CARDPEN && CARDPEN.i === i) CARDPEN = null;   /* §513: the part is in the chat now */
     if (String(g.drafts[i] || "").trim()) { g.phase = "draft"; g.qi = 0; return; }
     while (k < n && String(a[k] || "").trim()) k++;
     if (n && k >= n) { g.phase = "review"; g.qi = 0; } else { g.phase = "ask"; g.qi = Math.min(k, Math.max(n - 1, 0)); }
   }
-  /* WHICH PART A TYPED LINE NAMES (§507), by the part's own words — one
+  /* WHICH PART A TYPED LINE NAMES (§512), by the part's own words — one
      part, or nobody: a line naming two is not guessed at. */
   var PART_WORDS = { who: ["who we are"], asp: ["winning aspiration", "aspiration"], eim: ["end in mind"],
     pur: ["purpose", "mission"], obj: ["key objectives", "objectives", "objective", "guiding objectives"], val: ["core values", "values"] };
@@ -1058,7 +1058,7 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    /* §507 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
+    /* §512 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
        IT WITH THE CHANGE APPLIED: the refine is asked of that part, and the
        answer comes back as its draft to save, which runs the check again.
        A part with nothing written yet opens on its questions instead. */
@@ -1073,7 +1073,7 @@ var COPILOT = (function(){
     }
     SAY = "Noted. Use the buttons above to carry on."; draw();
   }
-  /* SAVING A CARD'S OWN WORDS (§508). The text is the part's, agreed as it
+  /* SAVING A CARD'S OWN WORDS (§513). The text is the part's, agreed as it
      stands — so a part that was still a draft reads Done once saved, and a
      part from the plan stops saying so only when its words change. It is
      saved FIRST and the consistency check, if that is where the flow stood,
@@ -1124,8 +1124,8 @@ var COPILOT = (function(){
       if (b.getAttribute("data-cop-cards") === "hide") CARDSHUT[PANE.chat.id] = true; else delete CARDSHUT[PANE.chat.id];
       draw(); return true;
     }
-    /* §508 — THE PEN MAKES THE CARD A TEXT BOX; EDIT WITH AI TAKES THE PART
-       BACK TO THE CHAT, which is what pressing the card did before (§507). */
+    /* §513 — THE PEN MAKES THE CARD A TEXT BOX; EDIT WITH AI TAKES THE PART
+       BACK TO THE CHAT, which is what pressing the card did before (§512). */
     if ((b = hit(ev, "[data-cop-pen]"))) {
       var pi2 = Number(b.getAttribute("data-cop-pen")), pt0 = withY(String(f.drafts[pi2] || ""), f);
       CARDPEN = { id: PANE.chat.id, i: pi2, text: pt0, orig: pt0 };
@@ -1222,7 +1222,7 @@ var COPILOT = (function(){
   }
   function draw(){
     keepDraft();
-    /* A redraw while a card is a text box (§508) puts the cursor back where
+    /* A redraw while a card is a text box (§513) puts the cursor back where
        it was; the text itself is CARDPEN's. */
     var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();

@@ -847,6 +847,14 @@ try {
     check("the check comes back as agreements and issues, each issue naming a real part or none",
       ck.st === 200 && ck.j.flow.phase === "check" && ck.j.flow.check.agree.length === 1 &&
       ck.j.flow.check.issues[0].el === "val" && ck.j.flow.check.issues[1].el === "", JSON.stringify(ck.j.flow && ck.j.flow.check));
+    /* §509 — the check's results are about the drafts they were run on. */
+    const keepCk = await call("POST", "api", { act: "flowSave", id: fid, flow: ck.j.flow }, NORAN);
+    check("a save that changes no draft keeps the check's results", keepCk.st === 200 && keepCk.j.flow.check && keepCk.j.flow.check.agree.length === 1, JSON.stringify(keepCk.j.flow && keepCk.j.flow.check));
+    const F3 = JSON.parse(JSON.stringify(ck.j.flow)); F3.drafts[1] = "An aspiration written again after the check.";
+    const dropCk = await call("POST", "api", { act: "flowSave", id: fid, flow: F3 }, NORAN);
+    check("a save that changes a draft drops them, and the phase stays check (§509)", dropCk.st === 200 && dropCk.j.flow.check === null && dropCk.j.flow.phase === "check" && dropCk.j.flow.drafts[1] === F3.drafts[1], JSON.stringify(dropCk.j.flow && { check: dropCk.j.flow.check, phase: dropCk.j.flow.phase }));
+    const ck2 = await call("POST", "api", { act: "flowCheck", id: fid, placeWord: "Mobile" }, NORAN);
+    check("…and running the check again brings them back", ck2.st === 200 && ck2.j.flow.check && ck2.j.flow.check.agree.length === 1, JSON.stringify(ck2.j.flow && ck2.j.flow.check));
     const fin = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
     check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
     const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
@@ -858,10 +866,20 @@ try {
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);
     const g2 = await call("GET", "chat", null, NORAN, "?id=" + nf2.j.chat.id + "&placeWord=Mobile");
     check("a second run says before the press that it will be version 2", g2.j.nextVersion === 2, g2.j.nextVersion + "");
-    const fin2 = await call("POST", "api", { act: "flowFinish", id: nf2.j.chat.id, placeWord: "Mobile" }, NORAN);
+    /* §509 — the saved text wears the CLIENT's words for the parts, sent by
+       the browser; each is one line, capped, an unknown key ignored, a part
+       with no word falling back to the method's. Strings only: a number
+       would survive oneLine and prove nothing. */
+    const fin2 = await call("POST", "api", { act: "flowFinish", id: nf2.j.chat.id, placeWord: "Mobile", partWords: { who: "Who we are", asp: "  Ambition\n  for\tMobile ", obj: "K".repeat(200), nope: "Ignored" } }, NORAN);
     const nd = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title = 'Foundation — Mobile'"))).rows[0].n;
     check("...and becomes version 2 of the SAME deliverable, never a second one", fin2.j.saved && fin2.j.saved.n === 2 && fin2.j.saved.deliverableId === fin.j.saved.deliverableId && nd === 1,
       JSON.stringify(fin2.j.saved) + " · " + nd);
+    const v2 = (await asTenant(A, (c) => c.query("SELECT v.body->>'text' t, v.body->'foundation' f FROM copilot_versions v WHERE v.deliverable_id = $1 AND v.n = 2", [fin.j.saved.deliverableId]))).rows[0] || { t: "", f: [] };
+    check("the saved text names the parts in the client's words, one line each, capped, unknown keys ignored, the method's word where none was sent (§509)",
+      /\nAMBITION FOR MOBILE\n/.test(v2.t) && !/WINNING ASPIRATION/.test(v2.t) && /WHO WE ARE\n/.test(v2.t) && /\nEND IN MIND\n/.test(v2.t) && /\nCORE VALUES\n/.test(v2.t) && /\nK{120}\n/.test(v2.t) && !/K{121}/.test(v2.t) && !/Ignored/.test(v2.t),
+      JSON.stringify(v2.t).slice(0, 300));
+    check("…and the stored parts carry those names too", Array.isArray(v2.f) && v2.f.length === 5 && v2.f[0].key === "who" && v2.f[0].name === "Who we are" && v2.f[1].key === "asp" && v2.f[1].name === "Ambition for Mobile" && v2.f[2].name === "End in Mind" && v2.f[4].key === "val" && v2.f[4].name === "Core Values",
+      JSON.stringify(v2.f && v2.f.map((x) => [x.key, x.name])));
     const hendSave = await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, HEND);
     check("a client's own person cannot write a flow", hendSave.st === 403);
     NEXT = null;

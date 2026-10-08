@@ -172,7 +172,14 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   f.done = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.done) && j.done[i]) && !!f.drafts[i].trim());
   f.skip = Array.isArray(j.skip) ? cleanSkip(j.skip) : base.skip;
   f.from = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.from) && j.from[i]) && !!f.drafts[i].trim());
-  f.check = base.check; f.saved = base.saved;
+  /* §509 — THE CHECK'S RESULTS ARE ABOUT THE DRAFTS THEY WERE RUN ON. A
+     draft changed since (a pen save during the check, §508) left them
+     standing for the OLD words, drawn as though they were about the new
+     ones with the Save button under them — so they are dropped the moment
+     any draft differs, and the screen says the check has not run. */
+  const sameDrafts = f.drafts.every((d, i) => d === base.drafts[i]);
+  f.check = sameDrafts || process.env.SMP_BREAK === "keep-stale-check" ? base.check : null;
+  f.saved = base.saved;
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
   const yearsOk = f.y0 != null && f.y1 != null && f.y1 >= f.y0;
   if (f.phase === "start" && f.start) f.phase = f.start === "plan" ? "loaded" : "path";
@@ -285,9 +292,23 @@ export function checkQuestion(f: Flow): string {
 }
 
 /* ── THE FOUNDATION AS ONE TEXT, AND SAVING IT ──────────────────────── */
-export function foundationText(f: Flow, placeWord: string): string {
+/* §509 — THE SAVED TEXT'S HEADINGS ARE THE CLIENT'S WORDS. The page sends
+   each part's name as Terminology spells it for this place (one or many, as
+   the Foundation page reads that row); a key the page did not send, or a
+   value that is not a line, keeps the method's own name. The AI is never
+   handed these — its questions name the parts in the method's words. */
+export type PartWords = Partial<Record<string, string>>;
+export function cleanPartWords(raw: unknown): PartWords {
+  const j: any = raw && typeof raw === "object" ? raw : {};
+  const out: PartWords = {};
+  FLOW_ELEMENTS.forEach((el) => { const w = oneLine(j[el.key]).slice(0, 120); if (w) out[el.key] = w; });
+  return out;
+}
+export const partWord = (el: { key: string; name: string }, words?: PartWords): string =>
+  (process.env.SMP_BREAK !== "ignore-part-words" && words && words[el.key]) || el.name;
+export function foundationText(f: Flow, placeWord: string, words?: PartWords): string {
   const out = ["Foundation — " + placeWord, f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "", ""];
-  FLOW_ELEMENTS.forEach((el, i) => { if (live(f, i) && f.drafts[i].trim()) out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
+  FLOW_ELEMENTS.forEach((el, i) => { if (live(f, i) && f.drafts[i].trim()) out.push(partWord(el, words).toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
   return out.join("\n").trim();
 }
 export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
@@ -295,9 +316,9 @@ export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneL
 /* EACH RUN IS A NEW VERSION OF ONE DELIVERABLE: the title is what the rail
    shows, so a deliverable already called "Foundation — Mobile" in this place
    and section gains a version; otherwise it is made at v1. */
-export async function saveFoundation(c: Q, chat: { id: string; place: string; section: Section; title: string }, f: Flow, placeWord: string, by: string): Promise<{ deliverableId: string; n: number; title: string; isNew: boolean }> {
+export async function saveFoundation(c: Q, chat: { id: string; place: string; section: Section; title: string }, f: Flow, placeWord: string, by: string, words?: PartWords): Promise<{ deliverableId: string; n: number; title: string; isNew: boolean }> {
   const title = foundationTitle(placeWord);
-  const body = { text: foundationText(f, placeWord), foundation: FLOW_ELEMENTS.filter((_, i) => live(f, i)).map((el) => ({ key: el.key, name: el.name, text: f.drafts[FLOW_ELEMENTS.indexOf(el)] })), years: [f.y0, f.y1] };
+  const body = { text: foundationText(f, placeWord, words), foundation: FLOW_ELEMENTS.filter((_, i) => live(f, i)).map((el) => ({ key: el.key, name: partWord(el, words), text: f.drafts[FLOW_ELEMENTS.indexOf(el)] })), years: [f.y0, f.y1] };
   const note = "Built in “" + chat.title + "”";
   const hit = await c.query(
     "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",

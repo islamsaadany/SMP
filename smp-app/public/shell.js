@@ -57041,6 +57041,23 @@ var COPILOT = (function(){
     try { if (typeof labelWord === "function") return labelWord(k, many ? "bu" : "group"); } catch (e) {}
     return k;
   }
+  /* §509 — A PART'S NAME IS THE CLIENT'S WORD (Islam: "yes the names should
+     follow the terminology"). The Copilot's six parts are Terminology's own
+     rows, so wherever a PERSON reads a part's name — a card, the to-do, a
+     chat line, a button, the saved text's headings — it is the word the
+     client chose, in the form the Foundation page reads it (one or many,
+     per row). The AI goes on being asked in the method's own words, which
+     is what its instructions are written against. A label the list cannot
+     answer keeps the method's name rather than a bare key. */
+  var PART_LABEL = { who: ["brief", true], asp: ["aspiration", false], eim: ["endinmind", false],
+    pur: ["purpose", false], obj: ["keyobj", true], val: ["values", true] };
+  function partName(el){
+    var m = el && PART_LABEL[el.key];
+    if (!m) return el ? String(el.name || "") : "";
+    var w = ""; try { w = lw(m[0], m[1]); } catch (e) { w = ""; }
+    return w && w !== m[0] ? String(w) : String(el.name || "");
+  }
+  function partWords(){ var o = {}; steps().forEach(function(el){ o[el.key] = partName(el); }); return o; }
   function contextOf(){
     var line = [placeWord()], detail = [];
     var u = null;
@@ -57468,6 +57485,11 @@ var COPILOT = (function(){
   }
   function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
   function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
+  /* §509 — ONE COUNT OF ANSWERS, read by the card, the to-do and the bar
+     (Islam: "we need to fix the panel and the card"). The card said
+     "Answering 1/4" — the question's POSITION — beside a panel saying
+     "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
+  function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -57502,9 +57524,9 @@ var COPILOT = (function(){
     return '<div class="copcards">' + S.map(function(el, i){
       if (!on(i)) return "";
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
-      var n = el.questions.length, a = (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length;
+      var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + n; cls += " now"; }
+      if (now && f.phase === "ask") { st = "Answering"; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
@@ -57515,13 +57537,13 @@ var COPILOT = (function(){
       else if (a) { st = "In progress"; }
       else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
-        : '<p>' + (now ? E(n + " questions") : a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+        : '<p>' + (now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
       var wide = el.key === "who" || el.key === "asp";
-      var head = '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
+      var head = '<h3><span>' + E(partName(el)) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
       var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
       if (pen && pen.i === i)
         return '<div class="' + c + ' editing" data-cop-card="' + i + '">' + head +
-          '<textarea class="copfedit" data-cop-pentext aria-label="' + E(el.name) + '">' + E(pen.text) + '</textarea>' +
+          '<textarea class="copfedit" data-cop-pentext aria-label="' + E(partName(el)) + '">' + E(pen.text) + '</textarea>' +
           '<div class="copeact"><span class="copkh">Esc to cancel · Ctrl+Enter to save</span>' +
           '<button type="button" class="copbtn quiet" data-cop-pencancel>Cancel</button>' +
           '<button type="button" class="copbtn solid" data-cop-pensave' + (!pen.text.trim() || THINKING === PANE.chat.id ? ' disabled' : '') + '>Save</button></div></div>';
@@ -57532,10 +57554,10 @@ var COPILOT = (function(){
          half-typed. */
       if (pick && !pen && txt && !now)
         return '<div class="' + c + ' acts" data-cop-card="' + i + '">' + head + body +
-          '<span class="copcact"><button type="button" data-cop-pen="' + i + '" title="Edit the text" aria-label="Edit the text of ' + E(el.name) + '">' + PENMARK + '</button>' +
-          '<button type="button" data-cop-ai="' + i + '" title="Edit with AI" aria-label="Edit ' + E(el.name) + ' with AI">' + AIMARK + '</button></span></div>';
+          '<span class="copcact"><button type="button" data-cop-pen="' + i + '" title="Edit the text" aria-label="Edit the text of ' + E(partName(el)) + '">' + PENMARK + '</button>' +
+          '<button type="button" data-cop-ai="' + i + '" title="Edit with AI" aria-label="Edit ' + E(partName(el)) + ' with AI">' + AIMARK + '</button></span></div>';
       return pick && !pen && !now
-        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '" aria-label="Work on ' + E(el.name) + '">' + head + body + '</button>'
+        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '" aria-label="Work on ' + E(partName(el)) + '">' + head + body + '</button>'
         : '<div class="' + c + '" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') + '>' + head + body + '</div>';
     }).join("") + '</div>';
   }
@@ -57544,14 +57566,14 @@ var COPILOT = (function(){
     if (f.phase === "year" || f.phase === "path" || f.phase === "start" || f.phase === "loaded") t = "Copilot · Foundation";
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
-      t = "Copilot · " + el.name;
+      t = "Copilot · " + partName(el);
       p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
     }
-    var total = 0, answered = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
+    var total = 0, ans = 0;
+    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; ans += answered(f, i); });
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
+      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + ans + '"><i style="width:' + (total ? Math.round(ans / total * 100) : 0) + '%"></i></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -57587,18 +57609,18 @@ var COPILOT = (function(){
           '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
       if (f.phase === "year") return out.join("");
       out.push(meMsg(yearsWord(f)));
-      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
+      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(partName(S[0])) + "</b> (" + S[0].questions.length + " short questions)."));
     }
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
       if (!on(i)) return;
       var current = !all && i === f.e;
       if (!current) {
-        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
+        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(partName(el)) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
         return;
       }
       if (f.phase === "loaded") return;
-      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + "."));
+      if (plan) out.push(aiMsg("Let's work on <b>" + E(partName(el)) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
@@ -57609,20 +57631,20 @@ var COPILOT = (function(){
             '<button type="button" class="copbtn quiet" data-cop-nudge-go>Continue anyway</button></div></div>');
         }
       } else if (f.phase === "review") {
-        out.push(aiMsg("Here is what you told me about " + E(el.name) + ". Change anything before I draft it." +
+        out.push(aiMsg("Here is what you told me about " + E(partName(el)) + ". Change anything before I draft it." +
           '<div class="coprv">' + el.questions.map(function(q, k){
             return '<label>' + E(withY(q, f)) + '<textarea class="copfed" rows="2" data-cop-fans="' + k + '"' + (ed ? '' : ' readonly') + '>' + E(f.ans[i][k]) + '</textarea></label>';
           }).join("") + '</div>' +
-          (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(el.name) + '</button></div>' : ''), true));
+          (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(partName(el)) + '</button></div>' : ''), true));
       } else if (f.phase === "draft") {
         var nx = nextUndone(f, i);
-        out.push(aiMsg('<span class="copeh">Draft · ' + E(el.name) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
+        out.push(aiMsg('<span class="copeh">Draft · ' + E(partName(el)) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
           (ed ? 'Refine it, or type what to change in the box below.' +
             '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
             '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
             '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
             '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
+              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(partName(S[nx]))) + '</button></div>' : ''), true));
       }
     });
     if (all && f.check) {
@@ -57632,8 +57654,18 @@ var COPILOT = (function(){
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
         (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(S[byKey[x.el]].name) + '</button>'; }).join("") +
+            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
           '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
+    }
+    /* §509 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
+       A pen save during the check left the OLD results standing, "Go back
+       to" and the Save button under them, nothing saying they were about
+       the text before the edit, and no way to run it again. The server now
+       drops the results the moment a draft changes (copilot-flow.ts); this
+       is what stands in their place, with the one way to get them back. */
+    if (f.phase === "check" && !f.check && !busyHere) {
+      out.push(aiMsg("The check has not run on the text as it stands now." +
+        (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
       out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
@@ -57663,7 +57695,7 @@ var COPILOT = (function(){
     var t = " " + String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ") + " ", hits = [];
     steps().forEach(function(el, i){
       if (!on(i)) return;
-      var words = (PART_WORDS[el.key] || []).concat([String(el.name).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()]);
+      var words = (PART_WORDS[el.key] || []).concat([el.name, partName(el)].map(function(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }));
       if (words.some(function(w){ return w && t.indexOf(" " + w + " ") >= 0; })) hits.push(i);
     });
     return hits.length === 1 ? hits[0] : -1;
@@ -57706,9 +57738,9 @@ var COPILOT = (function(){
     var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
-      var a = (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length, q = el.questions.length;
+      var a = answered(f, i), q = el.questions.length;
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(el.name, f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
     }).join("");
     var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
               li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
@@ -57888,7 +57920,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;
       var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow() }, function(j){
+      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow(), partWords:partWords() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
         loadList(true); draw(); });
       return true;

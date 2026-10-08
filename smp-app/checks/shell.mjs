@@ -1219,11 +1219,23 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
   const keep = { ...MODEL_ANSWER };
   const flowRow = async (id) => (await asTenant(tenantId, (c) => c.query("select extra->'flow' f from copilot_chats where id = $1", [id]))).rows[0].f;
   let ST0 = undefined;
+  let LB0 = undefined;
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await fresh(); await signIn("office@forefront.example");
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     await page.evaluate(() => { try { localStorage.removeItem("smp.copilot.rail"); } catch (e) {} });
+    /* §509 — THE PART NAMES ARE THE CLIENT'S WORDS: two Terminology rows are
+       renamed for the length of the section (state MADE, §113.8) and every
+       name below is read back through the page's own labelWord — read at
+       each use, never captured once, because GROUP.structure is replaced
+       and reverted along the way and labelWord consults it. */
+    LB0 = await page.evaluate(() => JSON.parse(JSON.stringify(LABELS.entries)));
+    await page.evaluate(() => { LABELS.entries.forEach((e) => { if (e.key === "aspiration") { e.group = "Ambition"; e.bu = "Ambition"; } if (e.key === "values") { e.group = "Our Values"; e.bu = "Our Values"; } }); paint();
+      return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); });
+    const readW = () => page.evaluate(() => ({ who: labelWord("brief", "bu"), asp: labelWord("aspiration", "group"), eim: labelWord("endinmind", "group"), pur: labelWord("purpose", "group"), obj: labelWord("keyobj", "bu"), val: labelWord("values", "bu") }));
+    const W0 = await readW();
+    check(W0.asp === "Ambition" && W0.val === "Our Values" && !!(W0.who && W0.eim && W0.pur && W0.obj), "two terms renamed for the section, read back through the page's own labelWord (§509)", JSON.stringify(W0));
 
     /* The rail hides to a strip and comes back; the choice outlives a reload. */
     check(!(await page.$(".copguided")) && !(await page.$("[data-cop-newflow]")), "the Guided Foundation button is gone — a Foundation chat is the start (§478)");
@@ -1252,9 +1264,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector("[data-cop-start]", { timeout: 10000 });
     await page.waitForFunction(() => document.querySelectorAll(".copcard").length > 0, null, { timeout: 5000 }).catch(() => {});
     const off4 = await page.evaluate(() => Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()));
-    check(off4.join("|") === "Who We Are|Winning Aspiration|End in Mind|Key Objectives",
-      "with Purpose and Core Values off in Structure, the chat has no card for either (§479)", JSON.stringify(off4));
+    check(off4.join("|") === [W0.who, W0.asp, W0.eim, W0.obj].join("|"),
+      "with Purpose and Core Values off in Structure, the chat has no card for either, in the client's words (§479, §509)", JSON.stringify(off4) + " vs " + JSON.stringify(W0));
     await page.evaluate(() => { GROUP.structure = { bu: { on: ["brief", "purpose", "aspiration", "keyobj", "pillar", "swot", "values"] } }; paint(); });
+    const W = await readW();
     const was4 = await page.evaluate(() => (document.querySelector(".copitem[aria-current]") || {}).dataset.copChat);
     await page.click(".copnew[data-cop-newchat]");
     /* the first chat's own Start buttons are still on screen, so wait for the
@@ -1267,8 +1280,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       cards: Array.from(document.querySelectorAll(".copcard h3")).map((h) => h.childNodes[0].textContent.trim()), wide: document.querySelectorAll(".copcard.wide").length, roads: document.querySelectorAll("[data-cop-path]").length }));
     check(/already has a Foundation/.test(q0.q) && q0.b.join("|") === "Start from it|Start fresh" && q0.roads === 0,
       "a place that has a Foundation is asked: start from it, or start fresh — before any road", JSON.stringify(q0).slice(0, 300));
-    check(q0.cards.join("|") === "Who We Are|Winning Aspiration|End in Mind|Purpose|Key Objectives|Core Values" && q0.wide === 2,
-      "six cards in order, Who We Are and Winning Aspiration full width", JSON.stringify(q0.cards) + " " + q0.wide);
+    check(q0.cards.join("|") === [W.who, W.asp, W.eim, W.pur, W.obj, W.val].join("|") && q0.wide === 2,
+      "six cards in order in the client's words — Ambition where the method says Winning Aspiration — the first two full width (§509)", JSON.stringify(q0.cards) + " " + q0.wide + " vs " + JSON.stringify(W));
     await shot("0b-start");
     await page.click('[data-cop-start="plan"]');
     await page.waitForSelector(".copcard.acts, .copcard.pick", { timeout: 10000 });
@@ -1375,9 +1388,15 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start === "fresh", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 
     /* The guided road: a question, its examples, a short answer held. */
-    const q1 = await page.evaluate(() => ({ ex: document.querySelectorAll(".copexs p").length, prog: (document.querySelector(".copprog") || {}).textContent,
-      now: (document.querySelector(".copcard.now .copst") || {}).textContent }));
-    check(q1.ex === 3 && /Question 1 of/.test(q1.prog) && /Answering 1\//.test(q1.now), "the first question comes with three examples, and its card says Answering", JSON.stringify(q1));
+    /* §509 — ONE COUNT OF ANSWERS: the card's body, the to-do's a/q and the
+       bar must say the same number; the pill says Answering and no number. */
+    const readQ = () => page.evaluate(() => ({ ex: document.querySelectorAll(".copexs p").length, prog: (document.querySelector(".copprog") || {}).textContent,
+      now: ((document.querySelector(".copcard.now .copst") || {}).textContent || "").trim(), body: ((document.querySelector(".copcard.now p") || {}).textContent || "").trim(),
+      panel: ((document.querySelector(".copftodo li.copsw-li.on i") || {}).textContent || "").trim(), bar: (document.querySelector(".coptrack") || { getAttribute: () => null }).getAttribute("aria-valuenow") }));
+    const agree = (q) => { const c = /^(\d+) of (\d+) answered\.$/.exec(q.body), p = /^(\d+)\/(\d+)$/.exec(q.panel); return !!(c && p && c[1] === p[1] && c[2] === p[2]); };
+    const q1 = await readQ();
+    check(q1.ex === 3 && /Question 1 of/.test(q1.prog) && q1.now === "Answering" && /^0 of \d+ answered\.$/.test(q1.body) && agree(q1) && q1.bar === "0",
+      "the first question comes with three examples, its card says Answering, and the card, the to-do and the bar agree on 0 answered (§509)", JSON.stringify(q1));
     await shot("3-ask");
     await page.fill("[data-cop-text]", "Telecom");
     await page.click("[data-cop-send]");
@@ -1390,6 +1409,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForFunction(() => /Question 2 of/.test((document.querySelector(".copprog") || {}).textContent || ""), null, { timeout: 10000 });
     for (let i = 0; i < 20 && !(F = await flowRow(cid)).ans[0][0]; i++) await page.waitForTimeout(250);
     check(F.ans[0][0] === "We sell phones and connectivity across Egypt through 300 stores." && F.qi === 1, "the answer is stored and the next question asked", JSON.stringify(F.ans[0]));
+    const q2 = await readQ();
+    check(/^1 of \d+ answered\.$/.test(q2.body) && agree(q2) && q2.bar === "1", "…and after the first answer the card, the to-do and the bar all say 1 (§509, both ends)", JSON.stringify(q2));
     /* The rest of the part's questions, answered. */
     for (let k = 1; k < 20; k++) {
       if (!(await page.$(".copexs"))) break;
@@ -1413,7 +1434,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(MODEL_SEEN.length === seen0 + 1 && /plans and connectivity/.test(JSON.stringify(MODEL_SEEN[seen0])), "Draft asks the model once, with the answers as they stand");
     const dr = await page.evaluate(() => ({ t: document.querySelector(".copfdraft").textContent, card: document.querySelector('[data-cop-card="0"] p').textContent,
       refines: document.querySelectorAll("[data-cop-refine]").length, save: (document.querySelector("[data-cop-fsave]") || {}).textContent }));
-    check(/connect every Egyptian/.test(dr.t) && /connect every Egyptian/.test(dr.card) && dr.refines === 3 && /Save and continue to Winning Aspiration/.test(dr.save),
+    check(/connect every Egyptian/.test(dr.t) && /connect every Egyptian/.test(dr.card) && dr.refines === 3 && dr.save.indexOf("Save and continue to " + W.asp) >= 0,
       "the draft shows in the chat and on its card, with three refines and Save and continue to the next part", JSON.stringify(dr));
     Object.assign(MODEL_ANSWER, { text: "We connect Egypt." });
     await page.click('[data-cop-refine="concise"]');
@@ -1446,7 +1467,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector(".copfdraft", { timeout: 10000 }).catch(() => {});
     check(F.e === 0 && F.phase === "draft" && F.done[0] === false && /We connect Egypt\./.test(await textOf(".copfdraft")),
       "pressing it opens its draft to change, before the check", JSON.stringify({ e: F.e, phase: F.phase, done0: F.done[0] }));
-    check(/Save and continue to Winning Aspiration/.test(await textOf("[data-cop-fsave]")), "…and its Save names the part you were on");
+    check((await textOf("[data-cop-fsave]")).indexOf("Save and continue to " + W.asp) >= 0, "…and its Save names the part you were on, in the client's word (§509)");
     /* §508 — the part left half answered says so: In progress, N of M. */
     const half = { st: await textOf('[data-cop-card="1"] .copst'), p: await textOf('[data-cop-card="1"] p') };
     check(/In progress/.test(half.st) && /^1 of \d+ answered\.$/.test(half.p.trim()), "a part left half answered reads In progress, 1 of N answered (§508)", JSON.stringify(half));
@@ -1465,10 +1486,11 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     await page.click('[data-cop-chat="' + cid + '"]');
     await page.waitForSelector("[data-cop-ffinish]", { timeout: 10000 });
+    const Wc = await readW();
     await shot("8-check");
     const ck = await page.evaluate(() => ({ ok: document.querySelectorAll(".copchk.ok li").length, iss: document.querySelectorAll(".copchk.issue li").length,
       back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent), fin: document.querySelector("[data-cop-ffinish]").textContent }));
-    check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && /Core Values/.test(ck.back[0]) && /Save as Foundation — Mobile v1/.test(ck.fin),
+    check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0 && /Save as Foundation — Mobile v1/.test(ck.fin),
       "the check lists what agrees and what does not, offers Go back to that part, and Save as Foundation — Mobile v1", JSON.stringify(ck));
 
     /* §507 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
@@ -1487,6 +1509,49 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     for (let i = 0; i < 20 && MODEL_SEEN.length === seenP; i++) await page.waitForTimeout(250);
     check(F.drafts[0] === "We connect Egypt. Every town, every store." && F.done[0] === true && F.phase === "check" && MODEL_SEEN.length === seenP + 1,
       "a part saved from its card during the check is stored, and the check runs again", JSON.stringify({ d: F.drafts[0], phase: F.phase, seen: MODEL_SEEN.length - seenP }));
+    /* §509 — A CHECK THAT DID NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE:
+       the model answers nothing, so the re-run after a pen save fails; the
+       server has already dropped the old results, the page says so and
+       offers Run the check, and no Save is drawn. */
+    const seenS = MODEL_SEEN.length, keepS = { ...MODEL_ANSWER };
+    for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
+    await page.hover('[data-cop-card="0"]'); await pressIf('[data-cop-pen="0"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 }).catch(() => {});
+    await page.fill("[data-cop-pentext]", "We connect Egypt. Every town, every store, every day.").catch(() => {});
+    await pressIf("[data-cop-pensave]");
+    for (let i = 0; i < 40 && MODEL_SEEN.length === seenS; i++) await page.waitForTimeout(250);
+    await page.waitForFunction(() => /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).drafts[0] !== "We connect Egypt. Every town, every store, every day."; i++) await page.waitForTimeout(250);
+    check(F.phase === "check" && F.check === null && F.drafts[0] === "We connect Egypt. Every town, every store, every day." && MODEL_SEEN.length === seenS + 1,
+      "a draft changed during the check drops the check's results on the server (§509)", JSON.stringify({ phase: F.phase, check: F.check, d: F.drafts[0], seen: MODEL_SEEN.length - seenS }));
+    const st = await page.evaluate(() => ({ line: /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
+      fin: !!document.querySelector("[data-cop-ffinish]"), chk: document.querySelectorAll(".copchk").length }));
+    check(st.line && st.run && !st.fin && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, and draws no results and no Save", JSON.stringify(st));
+    /* The 503 the browser logs here is the refusal this block ASKS for (the
+       model answered nothing); it is asserted present and taken off the
+       page-error list, so the section's own closing "no page errors" still
+       sees everything else. */
+    const i503 = errs.findIndex((e) => /503/.test(e));
+    check(i503 >= 0, "…and the refused re-run is the one 503 this block asked the model for", errs.join(" | "));
+    if (i503 >= 0) errs.splice(i503, 1);
+    await shot("8b-stale");
+    Object.assign(MODEL_ANSWER, keepS);
+    await pressIf("[data-cop-fcheck]");
+    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    for (let i = 0; i < 20 && !((F = await flowRow(cid)).check); i++) await page.waitForTimeout(250);
+    check(MODEL_SEEN.length === seenS + 2 && !!(F.check && F.check.agree.length === 1) && (await page.evaluate(() => document.querySelectorAll(".copchk.ok li").length)) === 1,
+      "Run the check asks the model again and the results come back", JSON.stringify({ seen: MODEL_SEEN.length - seenS, check: F.check }));
+    /* §509 — A LINE NAMING THE PART BY THE CLIENT'S WORD opens it. */
+    const seenW = MODEL_SEEN.length;
+    Object.assign(MODEL_ANSWER, { text: "Integrity and speed." });
+    await page.fill("[data-cop-text]", "Make our values shorter");
+    await page.click("[data-cop-send]");
+    await page.waitForFunction(() => /Integrity and speed\./.test((document.querySelector(".copfdraft") || {}).textContent || ""), null, { timeout: 15000 }).catch(() => {});
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "draft"; i++) await page.waitForTimeout(250);
+    check(MODEL_SEEN.length === seenW + 1 && F.e === 5 && F.phase === "draft", "a line naming the part by the CLIENT's word (Our Values) opens it (§509)", JSON.stringify({ e: F.e, phase: F.phase, seen: MODEL_SEEN.length - seenW }));
+    await pressIf("[data-cop-fsave]");
+    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    for (let i = 0; i < 20 && !((F = await flowRow(cid)).check); i++) await page.waitForTimeout(250);
     const seenC = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Make it shorter please");
     await page.click("[data-cop-send]");
@@ -1515,6 +1580,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(errs.length === 0, "no page errors", errs.join(" | "));
   } finally {
     if (ST0 !== undefined) await page.evaluate((st) => { if (st) GROUP.structure = st; else delete GROUP.structure; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, ST0).catch(() => {});
+    if (LB0 !== undefined) await page.evaluate((lb) => { LABELS.entries = lb; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, LB0).catch(() => {});
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});

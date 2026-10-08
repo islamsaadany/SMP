@@ -616,15 +616,26 @@
        nothing on its hidden pillars, so their owners derive nothing there.
        The unit's own Reporting cell for this row ships at none, so nobody's
        access moves until the office opens it. */
+    /* SPEC 066 STAGE 2: A PILLAR NAMES A CUSTODIAN AS WELL AS AN OWNER, and
+       both sit on the same row of Roles & access — Part owner — because a
+       pillar's custodian reaches exactly what its owner reaches: that one
+       pillar's rows, never the unit. It is §505's own answer for a company's
+       direction (owner and custodian both derive `dirowner`), carried to every
+       pillar, and deliberately NOT the unit's `custodian` role: that role
+       speaks for the whole unit and submits its report, which a pillar's
+       custodian does not. */
+    var holdsPillar = function (row) {
+      return owns(row) || (!!row && !!row.custodian && namedOn({ owner: row.custodian }, p));
+    };
     w.unitKeys.forEach(function (k) {
       var u = (w.units || {})[k] || {}, fm = String(u.format || "pillars");
       if (fm === "projects") { if ((u.projects || []).some(owns)) once("powner", k); return; }
       if (fm !== "pillars") return;
-      if ((u.items || []).some(owns)) once("plowner", k);
+      if ((u.items || []).some(holdsPillar)) once("plowner", k);
     });
     w.functionKeys.forEach(function (k) {
       var f = w.functions[k] || {};
-      if (String(f.format) === "pillars" && (f.items || []).some(owns))
+      if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
@@ -826,6 +837,61 @@
                       : person.company ? "co:" + person.company : person.unit);
     return at ? [{ role: NO_ROLE, at: at }] : [];
   }
+
+  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§508) ──
+     Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
+     — 117 cells, of which the unit and the function halves gave the same
+     answer for every person on every tenant measured. What is DRAWN is now
+     8 rows and 6 columns; what is STORED is untouched. Each drawn cell is a
+     VIEW over the (role, area) pairs under it, and pressing it writes every
+     pair whose answer differs — so `grantFor`, `grantIn` and everything the
+     server asks read exactly what they read before, and nobody's access can
+     move by the table changing shape (asserted by
+     scripts/test-access-unmoved.js).
+
+     WHY A VIEW AND NOT A MIGRATION. Merging the storage would have to pick
+     an answer wherever a client set two of the old cells differently, and
+     picking is the one thing Islam ruled out: such a cell is drawn as
+     DIFFERING, says which pairs disagree, and the office presses it to make
+     them one. Nothing is merged by guessing.
+
+     A row's `of` and a column's `areas` must between them cover every role
+     and every area exactly once — asserted, or a role added later would
+     simply not appear on the table and nobody could set it. */
+  var ACCESS_COLS = [
+    { key:"top", label:"The top", areas:["a_group"],
+      note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
+    { key:"plan", label:"This box — Plan", pair:"This box", col:"Plan",
+      areas:["a_unit_own_strat", "a_fn_own_strat"],
+      note:"The box the person is attached to — a business unit, a function or a capability. Its strategy: Foundation, SWOT, the plan." },
+    { key:"rep", label:"This box — Reporting", pair:"This box", col:"Reporting",
+      areas:["a_unit_own", "a_fn_own"],
+      note:"The same box. Its Performance and its Reporting." },
+    { key:"other", label:"Other boxes", areas:["a_unit_other", "a_fn_other"],
+      note:"Every box the person is NOT attached to." },
+    { key:"cycle", label:"Reporting cycle", areas:["a_cycle"],
+      note:"Open, chase and close · Import · Archived plans · Focus measures." },
+    { key:"setup", label:"Setup", areas:["a_setup"],
+      note:"Every Setup page except Roles & access, which is the Super user's." }
+  ];
+  var ACCESS_ROWS = [
+    { key:"super", name:"Super user", of:["super"],
+      note:"A seat. Granted on the register." },
+    { key:"smoteam", name:"SMO team", of:["smoteam"],
+      note:"A seat. Granted on the register." },
+    { key:"ceo", name:"CEO", of:["gceo", "cceo"],
+      note:"Group CEO, and a division (company) CEO. A division CEO's two switches — see the other divisions, see the group — stay on the division." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
+      note:"Owns a box: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"custodian", name:"Custodian", of:["custodian"],
+      note:"Keeps a box's plan and figures." },
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
+      note:"Owns one part inside a box: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    { key:"contrib", name:"Contributor", of:["contrib"],
+      note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
+    { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
+      note:"Not a role — what somebody on the register who holds no role may open." }
+  ];
 
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
@@ -3688,6 +3754,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        row          the row itself; namedOn() reads owner + collaborators
        pillarOwner  the Owner of the pillar the row sits under (unit side —
                     also what §55's measure rule has always leaned on)
+       pillarCust   that pillar's Custodian (spec 066 stage 2; §505 for a
+                    company's direction) — the second seat on the same pillar
        project      the project the row sits inside (function side)
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
@@ -3712,8 +3780,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "powner")
       return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
     if (roleKey === "plowner")
-      return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
-             namedOn({ owner: ctx.pillarOwner }, person);
+      return (ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
+              namedOn({ owner: ctx.pillarOwner }, person)) ||
+             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
     /* §505: a direction's owner reaches the rows of a pillar naming them in
        either seat — and only ever on the top layer, where they hold the role. */
     if (roleKey === "dirowner")
@@ -3806,12 +3875,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `owner` is read from the STORED container by both callers (§42) — the
      screen to draw the control, the server to accept the save — so a project
      whose Owner the incoming save has just rewritten is never what decides
-     whether that save was allowed. */
-  function mayMarkDone(w, person, area, target, owner) {
+     whether that save was allowed.
+
+     `custodian` (spec 066 stage 2): a pillar's second seat saves it as its
+     owner does — §469's answer for a company's direction, one layer down. A
+     project has no custodian seat, so its callers pass nothing and nothing
+     changes for it. */
+  function mayMarkDone(w, person, area, target, owner, custodian) {
     var via = editingRoles(w, person, area, target);
     if (!via.length) return false;
     if (via.some(function (r) { return OWN_LINES_ONLY.indexOf(r) === -1; })) return true;
-    return namedOn({ owner: owner }, person);
+    return namedOn({ owner: owner }, person) ||
+           (!!custodian && namedOn({ owner: custodian }, person));
   }
   /* Is this role one of the two that speak only for themselves? Asked by the
      employee file and the People page, which must never GRANT either. */
@@ -4825,6 +4900,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     capHolderTarget: capHolderTarget, promotePlan: promotePlan,
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
+    ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
@@ -12119,7 +12195,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+      pillarOwner: x.pown, pillarCust: x.pcust });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -12955,11 +13031,11 @@ function areaOfTarget(target){
   var t = String(target || "");
   return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
 }
-function mayMarkDoneOn(target, owner){
+function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
-  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner);
+  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner, cust);
 }
 /* Does this viewer report here through bounded roles ALONE — the person the
    control exists for. Anybody unbounded has Submit, which says more than a
@@ -14905,7 +14981,7 @@ function gapMap(target, all, fillable){
     (u.items || []).forEach(function(p, i){
       /* §416: a direction not running this year owes nothing yet. */
       if (!runsNow(p)) return;
-      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, pillarCust: p.custodian, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){
@@ -31811,7 +31887,7 @@ function renderReport(u){
                             reportParked(u.ukey), submitWhyShort(u.ukey),
     !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
       var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
+      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
                done:t.done, total:t.total };
     }), L("pillar","bu")));
   var bar = "";
@@ -31975,10 +32051,11 @@ function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
    settled — and never `boundedReach()`, whose contributor branch reaches a
    project through its stakeholders: being named on somebody else's project
    does not make it the one you came to open. */
-function railMine(target, list, ownerOf) {
+function railMine(target, list, ownerOf, custOf) {
   if (!list.length || !boundedHere(target)) return null;
   for (var i = 0; i < list.length; i++)
-    if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
+    if (mayMarkDoneOn(target, ownerOf(list[i]), custOf ? custOf(list[i]) : null))
+      return list[i];
   return null;
 }
 function railPick(c){
@@ -33766,7 +33843,8 @@ function unitRailPick(u){
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
-  var mine = railMine(u.ukey, list, function(p){ return p.owner; });
+  var mine = railMine(u.ukey, list, function(p){ return p.owner; },
+                     function(p){ return p.custodian; });
   var pick = mine || list[0];
   railShow(k, pillarRailId(pick));
   return pick;
@@ -33933,7 +34011,7 @@ function doneCtl(target, id, owner, code, cust){
   var seated = String(target) === "group"
     ? !SMPRules.mayReportTop(world(), viewer()) &&
       SMPRules.ownsTopPillar(world(), viewer(), owner || "", cust || "")
-    : boundedHere(target) && mayMarkDoneOn(target, owner);
+    : boundedHere(target) && mayMarkDoneOn(target, owner, cust);
   /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
@@ -33986,11 +34064,11 @@ function doneCtl(target, id, owner, code, cust){
    one, a count where they own several, and the plain fact where they own none
    but still report rows that name them.
 
-   `list` is `[{id, code, owner, done, total}]`, built by each caller from the
+   `list` is `[{id, code, owner, cust?, done, total}]`, built by each caller from the
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner); });
+  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
   var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
   var tip = 'You report your own rows. The ' + submits +
             ' custodian submits the report.';
@@ -34212,7 +34290,7 @@ function unitPlanBody(it, u, railed, bare){
      the rows of the pillar whose Owner names them; a contributor reaches the
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
-  var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  var pctx = function(row){ return { pillarOwner: it.owner, pillarCust: it.custodian, row: row }; };
   /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
      nothing here — `row` is the real object — so reading `ctx.row.owner`
      would have worked today and stopped working the day a key measure gains
@@ -34589,15 +34667,17 @@ function unitPlanBody(it, u, railed, bare){
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
           '</div></div>' +
           /* §469: a company direction also has a CUSTODIAN, picked from the
-             register the way the owner is. The top layer's alone, because the
-             rule that lets the seat report (`ownsTopPillar`) reads only the
-             company's directions. An emptied seat DELETES its key (§50.6):
-             nobody minted it, so its absence is the default. */
-          (u.ukey === "group"
-            ? '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
-                ownerSel("plan", it.custodian, function(v){
-                  if (v) it.custodian = v; else delete it.custodian; }) +
-              '</div></div>' : '') +
+             register the way the owner is — AND SINCE SPEC 066 STAGE 2 EVERY
+             PILLAR DOES (Islam signed off "the Custodian seat on every
+             pillar"). The seat reaches what the owner reaches, through the
+             Part owner row on Roles & access (`personRoles` derives `plowner`
+             from either seat, `boundedReach` reads `pillarCust`), never the
+             whole unit. An emptied seat DELETES its key (§50.6): nobody minted
+             it, so its absence is the default. */
+          '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
+            ownerSel("plan", it.custodian, function(v){
+              if (v) it.custodian = v; else delete it.custodian; }) +
+          '</div></div>' +
           '<div class="pfrow"><em>Kind</em><div class="pfval">' +
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +
@@ -35517,8 +35597,22 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
      writes through (`data-mac`, whose handler deletes the key on the default,
      §50.6). Absent, the cell is Strategy's exactly as it was. */
+  /* §508: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
+     `role|area` the press names (the merged table hands every pair under the
+     cell, written through `data-acm`), and `opt.mixed` says those pairs do
+     not agree — so nothing is lit, the tray is marked, and any press sets
+     them all to one answer. `opt.title` is the cell's own hover, which is
+     where a mixed cell names the pairs and what each holds. */
   opt = opt || {};
-  var v = opt.value != null ? opt.value : grantFor(roleKey, areaKey);
+  var v = opt.mixed ? null : opt.value != null ? opt.value : grantFor(roleKey, areaKey);
+  /* Every press in Strategy's own table goes through ONE writer now (§508,
+     `data-acm`, "role:area,…|state"); a module's cell names its own
+     (`data-mac`, "role|area|state|shipped"). A caller naming neither gets
+     the merged writer for its one pair, so no cell can draw a press that
+     nothing listens to — the old single-cell `data-ac` writer is gone (§24). */
+  var attr = opt.attr || "data-acm";
+  var tgt = opt.target || (attr === "data-acm" ? roleKey + ':' + areaKey : roleKey + '|' + areaKey);
+  var tdOpen = '<td class="ac"' + (opt.title ? ' title="' + esc(opt.title) + '"' : '') + '>';
   /* A cell that cannot come up is drawn as a dash rather than as "none". The
      group CEO owns every unit, so "other business units" is an empty set for
      them: saying "none" there would read as a denial of something, when there
@@ -35528,7 +35622,8 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       '">&mdash;</span></td>';
   }
   if (!editable) {
-    return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
+    if (opt.mixed) return tdOpen + '<span class="st st-mixed">differs</span></td>';
+    return tdOpen + '<span class="st st-' + v + '">' + v + '</span></td>';
   }
   /* TWO buttons, not three. Islam: "no need for the none box that's the
      default no need to grow the matrix" — and he is right that none is not a
@@ -35557,16 +35652,16 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
        of JS: a one-word modifier will eventually collide with a one-word
        component, and the collision is silent because both rules are valid. */
     return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" ' +
-      (opt.attr || "data-ac") + '="' + roleKey + '|' + areaKey + '|' + (on ? "none" : o) +
+      attr + '="' + tgt + '|' + (on ? "none" : o) +
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
-      (on ? "Turn off — leaves no access" : WORD[o]) +
+      (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
       ICON[o] + '</button>';
   }).join("");
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
      which is the one thing it must never be mistaken for. */
-  return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
+  return tdOpen + '<span class="stset' + (opt.mixed ? " mixed" : v === "none" ? " off" : "") + '">' +
     opts + '</span></td>';
 }
 
@@ -35591,10 +35686,16 @@ function matrixRows(){
    than the thing its caller meant, silently and rendering perfectly. A
    third matrix added inside renderPeople() would have got the wrong one. */
 function matrixRoleCell(r){
+  /* §508: a merged row counts everybody holding ANY of the roles under it,
+     once each — a person who is both a BU owner and a function head is one
+     Owner, not two. */
+  var of = r.of || [r.key];
   var n = r.floor
     ? PEOPLE.filter(function(p){
         return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
-    : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+    : PEOPLE.filter(function(p){
+        var ks = personRoleKeys(p);
+        return of.some(function(k){ return ks.indexOf(k) > -1; }); }).length;
   /* Two lines, never more. The role's description is a sentence, and a
      sentence in a 19% column wraps to eight lines and makes every row of a
      49-cell table a hundred pixels tall — the exact fault this page was
@@ -35677,6 +35778,111 @@ function copilotArea(){
   if (!raw) return null;
   try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
 }
+/* WHETHER AN AREA CAN COME UP AT ALL FOR A ROLE (§37, §117, §174).
+   Lifted out of renderAccess (§508) so the merged table's cell and a check
+   can ask it: a drawn cell is the pairs under it that CAN come up, and a
+   pair that cannot is left out of what the cell reads and what its press
+   writes. Only the own/other pair ever collapses, and only upwards:
+   somebody who owns everything has no "other", and somebody who owns no
+   unit has no "own". Returning a REASON rather than a boolean, because the
+   cell shows it on hover. */
+function accessNA(roleKey, areaKey){
+  /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
+     carried its own copy of "super or gceo", and the copy is why the SMO
+     team's row was wrong in both directions at once: `roleOwns()` did not
+     count them as owning anything, and this did not mark their other
+     columns either, so four cells did nothing and nobody could see it. */
+  if (SMPRules.ownsEveryPlace(roleKey) &&
+      (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
+    return "Every box is theirs, so there is no “other”.";
+  }
+  /* The split halves collapse exactly as their whole did (§117): no unit
+     means neither half of the unit pair can come up. */
+  if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+    return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
+      " holds no " + L1("unitword") + ".";
+  }
+  /* §505: a direction owner is held at the group alone, never at a unit or
+     a function, so neither own pair can ever be theirs. */
+  if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
+    return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
+  }
+  if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    return "A company CEO holds no " + L1("fnword") + ".";
+  }
+  /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
+     Islam: *"a project owner has options to edit or fill in a business
+     unit. Business units have no project owners, they have only pillar
+     owners."* Correct, and it is the derivation that says so rather than a
+     convention: `personRoles()` mints `powner` only from
+     `capabilities[].projects`, and a capability belongs to a FUNCTION
+     (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
+     unit can never be the one this person holds.
+
+     The OTHER columns stay, which is the same reading `fnhead` has had
+     since §117: a project owner holds no unit, so every unit is "other" to
+     them, and that column is how a tenant would let them read one.
+
+     The defaults were already `none` here, so nothing anybody has is
+     changing — what goes is being OFFERED a choice with nothing behind it.
+     An option that cannot do anything is worse than an absent one: it reads
+     as a decision somebody forgot to make. */
+  /* §405 REVERSES THIS ONE: a business unit may now plan in projects, and
+     `personRoles()` mints `powner` at the unit for one that does, so the
+     own-unit columns can be theirs — offered exactly as the own-function
+     ones are, and shipped at none so nobody's access moves. */
+  /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
+     and `roleWheres()` offers only units, so "own supporting function" can
+     never be theirs either — `fnhead`'s exclusion above with the sides
+     swapped, missed when that one was written. */
+  if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    return "A " + L1("unitword") + " owner holds no " + L1("fnword") + ".";
+  }
+  /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
+     ("same for pillar owner in the function") and the derivation disagrees:
+     `personRoles()` mints `plowner` from a unit's `items` AND from a
+     function whose `format` is "pillars" (§59) — a supporting function that
+     plans in pillars has pillars, and its pillar owners are derived by the
+     same line as a unit's. Removing that cell would close a real
+     configuration this tenant already has. Left, and said out loud rather
+     than quietly obeyed. */
+  return null;
+}
+
+/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§508) ──────────────
+   Spec 066 stage 2. The rows and columns are SMPRules.ACCESS_ROWS and
+   ACCESS_COLS, named once in the shared module; a cell is every
+   (role, area) pair under it that can come up, and it reads as one answer
+   only when they all agree. When they do not, it says so — nothing is lit,
+   the tray is marked, the hover names each pair and what it holds — and a
+   press sets them all to the state pressed. Islam's rule: nothing is merged
+   by guessing. */
+var ACC_WORD = { none: "no access", view: "may read",
+                 fill: "may fill what’s empty", edit: "may read and change" };
+function accessRoleName(k){
+  if (k === SMPRules.NO_ROLE) return "Everyone else";
+  var r = ROLES.filter(function(x){ return x.key === k; })[0];
+  return r ? r.name : k;
+}
+function accessAreaLabel(k){
+  var a = AREAS.filter(function(x){ return x.key === k; })[0];
+  return a ? a.label : k;
+}
+function accessMerged(row, col){
+  var pairs = [], why = null, vals = [];
+  row.of.forEach(function(rk){
+    col.areas.forEach(function(ak){
+      var na = accessNA(rk, ak);
+      if (na) { why = why || na; return; }
+      var v = grantFor(rk, ak);
+      pairs.push({ role: rk, area: ak, v: v });
+      if (vals.indexOf(v) < 0) vals.push(v);
+    });
+  });
+  return { pairs: pairs, why: why,
+           value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
+}
+
 function renderAccess(){
   /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
      A grant cannot express this: the SMO team holds `a_setup` at edit, which
@@ -35686,107 +35892,33 @@ function renderAccess(){
      everyone may do is part of running the office, and §37's rules are shown
      to everyone who can open the page. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-
-  /* Whether an area can come up at all for a role. Only the own/other pair
-     ever collapses, and only upwards: somebody who owns everything has no
-     "other", and somebody who owns no unit has no "own". Returning a REASON
-     rather than a boolean, because the cell shows it on hover. */
-  function notApplicable(roleKey, areaKey){
-    /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
-       carried its own copy of "super or gceo", and the copy is why the SMO
-       team's row was wrong in both directions at once: `roleOwns()` did not
-       count them as owning anything, and this did not mark their other
-       columns either, so four cells did nothing and nobody could see it. */
-    if (SMPRules.ownsEveryPlace(roleKey) &&
-        (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
-      return "Every unit and function is theirs, so there is no “other”.";
-    }
-    /* The split halves collapse exactly as their whole did (§117): no unit
-       means neither half of the unit pair can come up. */
-    if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
-        " holds no " + L1("unitword") + ".";
-    }
-    /* §505: a direction owner is held at the group alone, never at a unit or
-       a function, so neither own pair can ever be theirs. */
-    if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
-      return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
-    }
-    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A company CEO holds no " + L1("fnword") + ".";
-    }
-    /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
-       Islam: *"a project owner has options to edit or fill in a business
-       unit. Business units have no project owners, they have only pillar
-       owners."* Correct, and it is the derivation that says so rather than a
-       convention: `personRoles()` mints `powner` only from
-       `capabilities[].projects`, and a capability belongs to a FUNCTION
-       (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
-       unit can never be the one this person holds.
-
-       The OTHER columns stay, which is the same reading `fnhead` has had
-       since §117: a project owner holds no unit, so every unit is "other" to
-       them, and that column is how a tenant would let them read one.
-
-       The defaults were already `none` here, so nothing anybody has is
-       changing — what goes is being OFFERED a choice with nothing behind it.
-       An option that cannot do anything is worse than an absent one: it reads
-       as a decision somebody forgot to make. */
-    /* §405 REVERSES THIS ONE: a business unit may now plan in projects, and
-       `personRoles()` mints `powner` at the unit for one that does, so the
-       own-unit columns can be theirs — offered exactly as the own-function
-       ones are, and shipped at none so nobody's access moves. */
-    /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
-       and `roleWheres()` offers only units, so "own supporting function" can
-       never be theirs either — `fnhead`'s exclusion above with the sides
-       swapped, missed when that one was written. */
-    if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A " + L1("unitword") + " owner holds no " + L1("fnword") + ".";
-    }
-    /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
-       ("same for pillar owner in the function") and the derivation disagrees:
-       `personRoles()` mints `plowner` from a unit's `items` AND from a
-       function whose `format` is "pillars" (§59) — a supporting function that
-       plans in pillars has pillars, and its pillar owners are derived by the
-       same line as a unit's. Removing that cell would close a real
-       configuration this tenant already has. Left, and said out loud rather
-       than quietly obeyed. */
-    return null;
-  }
+  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS;
 
   /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
      (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists — "Open, chase and
-     close · Import · Archived plans · Focus measures" — and seven of them
-     stacked under seven labels made the HEAD of a 49-cell table taller than
-     its body. The same answer the role column already reached in §37: the
-     sentence is on hover, and the column keeps its name. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117) ──────
-     The own pair split into Strategy | Reporting halves, and the pair's name
-     is written ONCE above them rather than twice into them. Built off the
-     `pair`/`col` fields the AREAS entries carry — the header is derived from
-     the same list the cells walk, so a column cannot appear in one and not
-     the other. Entries without a pair span both rows. Consecutive same-pair
-     entries group; the AREAS order is the column order, as it always was. */
+     make it appear on hovering"). The notes are lists, and stacked under the
+     labels they made the HEAD of the table taller than its body. */
+  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §508) ──
+     Plan and Reporting are two answers about the same box, so the box's name
+     is written ONCE above them. Built off the `pair`/`col` fields the columns
+     carry — the header is derived from the same list the cells walk, so a
+     column cannot appear in one and not the other. */
   var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
   var hi = 0;
-  while (hi < AREAS.length) {
-    var ha = AREAS[hi];
-    if (!ha.pair) {
-      /* THE SHORT WORD IN THE COLUMN, THE FULL ONE ON THE HOVER (§174), so
-         nothing is lost by abbreviating — the heading says "Other Func." and
-         hovering it says which functions and what is in the column. */
+  while (hi < COLS.length) {
+    var hc = COLS[hi];
+    if (!hc.pair) {
       headTop += '<th class="ac" rowspan="2" title="' +
-        esc(ha.label + " — " + ha.note) + '">' + esc(ha.short || ha.label) + '</th>';
+        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
       hi++;
       continue;
     }
     var span = 0;
-    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(ha.pair) +
-      '">' + esc(ha.short || ha.pair) + '</th>';
+    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
+    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
+      '">' + esc(hc.pair) + '</th>';
     for (var hj = 0; hj < span; hj++) {
-      var hb = AREAS[hi + hj];
+      var hb = COLS[hi + hj];
       headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
         '">' + esc(hb.col) + '</th>';
     }
@@ -35801,43 +35933,66 @@ function renderAccess(){
      the module cell's own writer (§359.5: the default is an ABSENCE, edit);
      every other row is a dash by RULE — "office only for now" — because the
      api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). */
+     that changes nothing is decoration (§42). Both office rows are a single
+     role each on the merged table (§508), so the cell names that role. */
   var COPA = copilotArea();
   if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, the × could never take it
-     off, and it was drawn as a chip beside Business unit owner claiming
-     somebody held something they did not. What it decided is still a real
-     question — what somebody on the register with NO role may open — so it is
-     still a row here, labelled as the state it is.
-
-     It has to stay editable. A client who wants people with no role to see
-     nothing sets this row to none and can see that they have; a floor nobody
-     can reach is a rule hiding as a default. */
-  var MATRIX_ROWS = matrixRows();
-
-  var body = MATRIX_ROWS.map(function(r){
+     Employee stopped being one: nobody grants it, and it was drawn as a chip
+     claiming somebody held something they did not. What it decided is still
+     a real question — what somebody on the register with NO role may open —
+     so it is still a row here, labelled as the state it is, and editable: a
+     client who wants people with no role to see nothing sets it to none and
+     can see that they have. */
+  var differ = [];
+  var body = ROWS.map(function(r){
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      AREAS.map(function(a){
-        return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
+      COLS.map(function(c){
+        var m = accessMerged(r, c);
+        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
+        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
+        var opt = { attr: "data-acm", target: target, value: m.value };
+        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
+        if (m.mixed) {
+          differ.push(r.name + " · " + (c.col ? c.pair + ": " + c.col : c.label));
+          opt.mixed = true;
+          opt.title = "These differ underneath: " + m.pairs.map(function(p){
+            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
+              " — " + ACC_WORD[p.v];
+          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
+        }
+        return stateCell(r.of[0], c.areas[0], editable, null, opt);
       }).join("") +
-      (COPA ? (SMPRules.isOfficeRole(r.key)
-        ? stateCell(r.key, COPA.key, editable, null, {
-            value: moduleGrantFor(r.key, COPA), states: ["view", "edit"],
+      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
+        ? stateCell(r.of[0], COPA.key, editable, null, {
+            value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
             attr: "data-mac", shipped: COPA.shipped || "none" })
-        : stateCell(r.key, COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+        : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
+
+  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§508). Its
+     hover says which pairs and what each holds; this line says that there is
+     something to decide at all, because a cell with nothing lit is easy to
+     read as "no access" from across the room. A status, not a description
+     (1b-ii), and drawn only while there is one. */
+  var differLine = differ.length
+    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
+      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
+      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
+    : '';
 
   return section("", "Roles & access",
       null,
+      differLine +
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Strategy halves only)</span>' +
+        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
+        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
       '</div>');
 }
@@ -69376,14 +69531,24 @@ var SYNC = (function () {
        information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
-       so the grid is judged by using it rather than by reading it. */
-    document.querySelectorAll("[data-ac]").forEach(function(b){
+       so the grid is judged by using it rather than by reading it.
+       ONE DRAWN CELL, SEVERAL STORED ONES (§508). The merged table's press
+       carries every (role, area) pair under the cell and the one state to
+       give them all. Only a pair whose answer DIFFERS is written: a pair
+       already on that state keeps its absence (§50.6), so a tenant's stored
+       map grows by exactly the answers somebody changed, and an untouched
+       pair goes on following the shipped default. */
+    document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = b.dataset.ac.split("|");
-        /* The row may not exist yet: a migrated tenant starts with an empty
-           map and every answer coming from the shipped default. Writing a cell
-           is the moment that role gets a row of its own. */
-        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        var p = b.dataset.acm.split("|"), st = p[1];
+        p[0].split(",").forEach(function(pair){
+          var ra = pair.split(":");
+          if (grantFor(ra[0], ra[1]) === st) return;
+          /* The row may not exist yet: a migrated tenant starts with an empty
+             map and every answer coming from the shipped default. Writing a
+             cell is the moment that role gets a row of its own. */
+          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        });
         paint();
       });
     });

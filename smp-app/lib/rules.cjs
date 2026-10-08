@@ -614,15 +614,26 @@
        nothing on its hidden pillars, so their owners derive nothing there.
        The unit's own Reporting cell for this row ships at none, so nobody's
        access moves until the office opens it. */
+    /* SPEC 066 STAGE 2: A PILLAR NAMES A CUSTODIAN AS WELL AS AN OWNER, and
+       both sit on the same row of Roles & access — Part owner — because a
+       pillar's custodian reaches exactly what its owner reaches: that one
+       pillar's rows, never the unit. It is §505's own answer for a company's
+       direction (owner and custodian both derive `dirowner`), carried to every
+       pillar, and deliberately NOT the unit's `custodian` role: that role
+       speaks for the whole unit and submits its report, which a pillar's
+       custodian does not. */
+    var holdsPillar = function (row) {
+      return owns(row) || (!!row && !!row.custodian && namedOn({ owner: row.custodian }, p));
+    };
     w.unitKeys.forEach(function (k) {
       var u = (w.units || {})[k] || {}, fm = String(u.format || "pillars");
       if (fm === "projects") { if ((u.projects || []).some(owns)) once("powner", k); return; }
       if (fm !== "pillars") return;
-      if ((u.items || []).some(owns)) once("plowner", k);
+      if ((u.items || []).some(holdsPillar)) once("plowner", k);
     });
     w.functionKeys.forEach(function (k) {
       var f = w.functions[k] || {};
-      if (String(f.format) === "pillars" && (f.items || []).some(owns))
+      if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
@@ -824,6 +835,61 @@
                       : person.company ? "co:" + person.company : person.unit);
     return at ? [{ role: NO_ROLE, at: at }] : [];
   }
+
+  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§508) ──
+     Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
+     — 117 cells, of which the unit and the function halves gave the same
+     answer for every person on every tenant measured. What is DRAWN is now
+     8 rows and 6 columns; what is STORED is untouched. Each drawn cell is a
+     VIEW over the (role, area) pairs under it, and pressing it writes every
+     pair whose answer differs — so `grantFor`, `grantIn` and everything the
+     server asks read exactly what they read before, and nobody's access can
+     move by the table changing shape (asserted by
+     scripts/test-access-unmoved.js).
+
+     WHY A VIEW AND NOT A MIGRATION. Merging the storage would have to pick
+     an answer wherever a client set two of the old cells differently, and
+     picking is the one thing Islam ruled out: such a cell is drawn as
+     DIFFERING, says which pairs disagree, and the office presses it to make
+     them one. Nothing is merged by guessing.
+
+     A row's `of` and a column's `areas` must between them cover every role
+     and every area exactly once — asserted, or a role added later would
+     simply not appear on the table and nobody could set it. */
+  var ACCESS_COLS = [
+    { key:"top", label:"The top", areas:["a_group"],
+      note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
+    { key:"plan", label:"This box — Plan", pair:"This box", col:"Plan",
+      areas:["a_unit_own_strat", "a_fn_own_strat"],
+      note:"The box the person is attached to — a business unit, a function or a capability. Its strategy: Foundation, SWOT, the plan." },
+    { key:"rep", label:"This box — Reporting", pair:"This box", col:"Reporting",
+      areas:["a_unit_own", "a_fn_own"],
+      note:"The same box. Its Performance and its Reporting." },
+    { key:"other", label:"Other boxes", areas:["a_unit_other", "a_fn_other"],
+      note:"Every box the person is NOT attached to." },
+    { key:"cycle", label:"Reporting cycle", areas:["a_cycle"],
+      note:"Open, chase and close · Import · Archived plans · Focus measures." },
+    { key:"setup", label:"Setup", areas:["a_setup"],
+      note:"Every Setup page except Roles & access, which is the Super user's." }
+  ];
+  var ACCESS_ROWS = [
+    { key:"super", name:"Super user", of:["super"],
+      note:"A seat. Granted on the register." },
+    { key:"smoteam", name:"SMO team", of:["smoteam"],
+      note:"A seat. Granted on the register." },
+    { key:"ceo", name:"CEO", of:["gceo", "cceo"],
+      note:"Group CEO, and a division (company) CEO. A division CEO's two switches — see the other divisions, see the group — stay on the division." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
+      note:"Owns a box: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"custodian", name:"Custodian", of:["custodian"],
+      note:"Keeps a box's plan and figures." },
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
+      note:"Owns one part inside a box: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    { key:"contrib", name:"Contributor", of:["contrib"],
+      note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
+    { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
+      note:"Not a role — what somebody on the register who holds no role may open." }
+  ];
 
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
@@ -3686,6 +3752,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        row          the row itself; namedOn() reads owner + collaborators
        pillarOwner  the Owner of the pillar the row sits under (unit side —
                     also what §55's measure rule has always leaned on)
+       pillarCust   that pillar's Custodian (spec 066 stage 2; §505 for a
+                    company's direction) — the second seat on the same pillar
        project      the project the row sits inside (function side)
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
@@ -3710,8 +3778,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "powner")
       return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
     if (roleKey === "plowner")
-      return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
-             namedOn({ owner: ctx.pillarOwner }, person);
+      return (ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
+              namedOn({ owner: ctx.pillarOwner }, person)) ||
+             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
     /* §505: a direction's owner reaches the rows of a pillar naming them in
        either seat — and only ever on the top layer, where they hold the role. */
     if (roleKey === "dirowner")
@@ -3804,12 +3873,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `owner` is read from the STORED container by both callers (§42) — the
      screen to draw the control, the server to accept the save — so a project
      whose Owner the incoming save has just rewritten is never what decides
-     whether that save was allowed. */
-  function mayMarkDone(w, person, area, target, owner) {
+     whether that save was allowed.
+
+     `custodian` (spec 066 stage 2): a pillar's second seat saves it as its
+     owner does — §469's answer for a company's direction, one layer down. A
+     project has no custodian seat, so its callers pass nothing and nothing
+     changes for it. */
+  function mayMarkDone(w, person, area, target, owner, custodian) {
     var via = editingRoles(w, person, area, target);
     if (!via.length) return false;
     if (via.some(function (r) { return OWN_LINES_ONLY.indexOf(r) === -1; })) return true;
-    return namedOn({ owner: owner }, person);
+    return namedOn({ owner: owner }, person) ||
+           (!!custodian && namedOn({ owner: custodian }, person));
   }
   /* Is this role one of the two that speak only for themselves? Asked by the
      employee file and the People page, which must never GRANT either. */
@@ -4823,6 +4898,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     capHolderTarget: capHolderTarget, promotePlan: promotePlan,
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
+    ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,

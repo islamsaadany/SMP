@@ -261,11 +261,22 @@ with sync_playwright() as p:
                                     "e=>e.map(x=>x.textContent.trim().toLowerCase())")
     titles = pg.eval_on_selector_all(".acgrid thead th",
                                      "e=>e.map(x=>(x.getAttribute('title')||'').toLowerCase())")
+    # §508 MERGED THE TABLE: its group heading is the pair "This box" over Plan
+    # and Reporting, and the long name of each column is its note from the
+    # shared rule. REWRITTEN, never loosened (§218): still both halves — the
+    # words on screen AND the meaning on the hover — but asserted as an
+    # AGREEMENT with SMPRules.ACCESS_COLS rather than as literals (§94.8), so a
+    # column renamed in the rule moves this check with it and a column the
+    # head forgot goes red.
+    cols = pg.evaluate("""()=>SMPRules.ACCESS_COLS.map(c=>({
+        pair:(c.pair||'').toLowerCase(), col:(c.col||c.label).toLowerCase(),
+        note:c.note.toLowerCase()}))""")
+    want_heads = sorted(set([c["pair"] for c in cols if c["pair"]] + [c["col"] for c in cols]))
     ck("the group headings are on the page",
-       any("own bu" in h for h in heads) and any("own func" in h for h in heads), heads)
+       bool(cols) and all(w in heads for w in want_heads),
+       {"want": want_heads, "got": heads})
     ck("...and each still says in full what it is",
-       any("own business unit" in t for t in titles)
-       and any("own supporting function" in t for t in titles), titles)
+       bool(cols) and all(any(c["note"] in t for t in titles) for c in cols), titles)
     pg.set_viewport_size({"width": 1560, "height": 900})
 
     # ── 5 · FOCUS MEASURES (§135.5) ──────────────────────────────────
@@ -295,7 +306,8 @@ with sync_playwright() as p:
     ck("the sides offered are the sides with something behind them",
        st["sides"] == want and len(want) > 1, (st["sides"], want))
     ck("and it is a real table with a real head",
-       st["thead"] and st["thead"][0].lower() == "measure" and st["bands"] > 0, st)
+       st["thead"] and st["bands"] > 0 and
+       st["thead"][0] == pg.evaluate("()=>L1('measure')"), st)
     hits = pg.evaluate(HITS, ".setuphead [data-focusswitch], [data-fsetside], [data-fsetgo]")
     ck("every one of those can be pressed (%d)" % len(hits),
        all(h["ok"] for h in hits), [h for h in hits if not h["ok"]])

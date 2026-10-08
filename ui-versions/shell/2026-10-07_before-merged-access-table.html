@@ -4688,24 +4688,14 @@
        information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
-       so the grid is judged by using it rather than by reading it.
-       ONE DRAWN CELL, SEVERAL STORED ONES (§508). The merged table's press
-       carries every (role, area) pair under the cell and the one state to
-       give them all. Only a pair whose answer DIFFERS is written: a pair
-       already on that state keeps its absence (§50.6), so a tenant's stored
-       map grows by exactly the answers somebody changed, and an untouched
-       pair goes on following the shipped default. */
-    document.querySelectorAll("[data-acm]").forEach(function(b){
+       so the grid is judged by using it rather than by reading it. */
+    document.querySelectorAll("[data-ac]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = b.dataset.acm.split("|"), st = p[1];
-        p[0].split(",").forEach(function(pair){
-          var ra = pair.split(":");
-          if (grantFor(ra[0], ra[1]) === st) return;
-          /* The row may not exist yet: a migrated tenant starts with an empty
-             map and every answer coming from the shipped default. Writing a
-             cell is the moment that role gets a row of its own. */
-          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
-        });
+        var p = b.dataset.ac.split("|");
+        /* The row may not exist yet: a migrated tenant starts with an empty
+           map and every answer coming from the shipped default. Writing a cell
+           is the moment that role gets a row of its own. */
+        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
         paint();
       });
     });

@@ -15,6 +15,11 @@ same function the server calls. Where the two disagree, the server wins and the
 product is broken.
 """
 from playwright.sync_api import sync_playwright
+# §508: the matrix's presses are `data-acm` (one drawn cell over every pair
+# under it). Asking for the old `data-ac` would read nought on EVERY build and
+# pass the "offers nothing" half for the wrong reason (§113.8); both are asked
+# so a writer reintroduced under either name is counted.
+PRESS = ".setuppane [data-acm], .setuppane [data-ac]"
 
 import os as _os
 # THE BUILD, BY ITS OWN PATH (§334.13). This read
@@ -140,8 +145,8 @@ with sync_playwright() as p:
     ck("Roles & access opens for them",
        pg.query_selector(".setuppane table") is not None)
     ck("...and offers nothing to change on it",
-       pg.eval_on_selector_all(".setuppane [data-ac]", "e=>e.length") == 0,
-       pg.eval_on_selector_all(".setuppane [data-ac]", "e=>e.length"))
+       pg.eval_on_selector_all(PRESS, "e=>e.length") == 0,
+       pg.eval_on_selector_all(PRESS, "e=>e.length"))
 
     setup(pg, "people")
     ck("the register opens for them",
@@ -174,7 +179,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(600)
     setup(pg, "access")
     ck("the Super user still edits the matrix",
-       pg.eval_on_selector_all(".setuppane [data-ac]", "e=>e.length") > 0)
+       pg.eval_on_selector_all(PRESS, "e=>e.length") > 0)
     setup(pg, "people")
     pg.click('.kebab[data-pmenu="%s"]' % cl)
     pg.wait_for_timeout(300)

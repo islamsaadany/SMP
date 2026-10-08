@@ -1005,7 +1005,7 @@ function gapPassUnit(target, su, iu, add) {
     if (!im[id]) return;
     /* §177: the pillar's OWN owner, off the stored pillar, so a pillar owner
        fills the rows of the pillar that names them and nobody else's. */
-    const pctx = function (row) { return { pillarOwner: sm[id].owner, row: row }; };
+    const pctx = function (row) { return { pillarOwner: sm[id].owner, pillarCust: sm[id].custodian, row: row }; };
     gapRows("measure", sm[id].measures, im[id].measures, target, add, "a key measure", pctx);
     /* §384 wrapped pctx here to carry the tactic's own Owner for its role;
        §387 removed the role, so a tactic is filled through the pillar's ctx
@@ -2129,7 +2129,7 @@ function authorize(stored, incoming, person) {
           no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
           return;
         }
-        if (!R.mayMarkDone(w, person, isFn ? "fn" : "unit", t, c.owner))
+        if (!R.mayMarkDone(w, person, isFn ? "fn" : "unit", t, c.owner, c.custodian))
           no("Marking " + (c.name ? "“" + c.name + "”" : "a project") +
              " finished is its owner's.");
         return;

@@ -126,7 +126,7 @@ with sync_playwright() as p:
           "smo %(smo)s · head %(head)s · custodian %(cust)s · floor %(floor)s" % who)
 
     # ── 1 · THE TABLE DRAWS THE SPLIT ────────────────────────────────
-    print("\n1 · the matrix draws two halves under each own column")
+    print("\n1 · the matrix draws the box as two halves")
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
@@ -145,15 +145,27 @@ with sync_playwright() as p:
     # that changed). It asks the shared rule for the words now — what is under
     # test is that the header AGREES with lib/rules.js, never what the two of
     # them happen to say (§53.5, §94.8), so the next rename keeps it green.
-    want = pg.evaluate(
-        "() => [\"a_unit_own_strat\", \"a_fn_own_strat\"].map(function(k){"
-        "  var a = SMPRules.AREAS.filter(function(x){ return x.key === k; })[0] || {};"
-        "  return String(a.short || a.pair || a.label || \"\").trim(); })")
-    ck("the two pair names span their halves, in the rule's own words",
-       shape["pairs"] == want, "header %s, rule %s" % (shape["pairs"], want))
-    ck("Strategy | Reporting under each",
-       shape["halves"] == ["Strategy", "Reporting", "Strategy", "Reporting"], shape["halves"])
-    ck("a body row holds the role and nine answers", shape["cols"] == 10, shape["cols"])
+    # §508 MERGED THE TABLE: the own unit and the own function are ONE box
+    # column ("This box") with Plan and Reporting under it, where there were
+    # two pairs with Strategy and Reporting under each. Asked of the shared
+    # list the cells are walked from (SMPRules.ACCESS_COLS), never typed here,
+    # or the next rename turns this red for a header that still agrees with
+    # the rule (§214.3, §218) — and the split itself is still asserted: a
+    # build that drew one column for the box passes nothing below.
+    want = pg.evaluate("""() => {
+      const C = SMPRules.ACCESS_COLS;
+      const pairs = [];
+      C.forEach(c => { if (c.pair && pairs.indexOf(c.pair) < 0) pairs.push(c.pair); });
+      return { pairs, halves: C.filter(c => c.pair).map(c => c.col), cols: C.length + 1 };
+    }""")
+    ck("the box's name spans its two halves, in the rule's own words",
+       shape["pairs"] == want["pairs"] and len(want["pairs"]) == 1,
+       "header %s, rule %s" % (shape["pairs"], want["pairs"]))
+    ck("Plan | Reporting under it",
+       shape["halves"] == want["halves"] and want["halves"] == ["Plan", "Reporting"],
+       "header %s, rule %s" % (shape["halves"], want["halves"]))
+    ck("a body row holds the role and one answer per column",
+       shape["cols"] == want["cols"], "%s against %s" % (shape["cols"], want["cols"]))
 
     # ── 2 · OPENING A STRATEGY CELL OPENS THE PENS, CLOSING IT CLOSES THEM ──
     print("\n2 · the strategy cell is a real door, pressed both ways")
@@ -190,7 +202,10 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
-    cell = pg.query_selector('[data-ac="custodian|a_unit_own_strat|edit"]')
+    # §508: the merged table's press names every pair under the cell (the
+    # custodian's Plan cell is its unit AND its function half), so the cell is
+    # found by the pair it holds. Same press, same claim (§218).
+    cell = pg.query_selector('[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|edit"]')
     ck("the strategy cell offers the pen (Islam: the SMO can open it)", cell is not None)
     if cell:
         cell.click(); pg.wait_for_timeout(350)
@@ -211,8 +226,9 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
-    pg.click('[data-ac="custodian|a_unit_own_strat|none"]'); pg.wait_for_timeout(300)
-    pg.click('[data-ac="custodian|a_unit_own_strat|view"]'); pg.wait_for_timeout(300)
+    # The merged cell has no separate None button (an empty cell IS none), so
+    # closing it back to the shipped default is one press of View.
+    pg.click('[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|view"]'); pg.wait_for_timeout(300)
     closed = asks(pg, who)
     ck("closed again: the rule refuses once more", closed["rule"] is False, closed)
     be(pg, who["cust"], who["unit"], "strategy", "plan")

@@ -6846,7 +6846,7 @@ function renderReport(u){
                             reportParked(u.ukey), submitWhyShort(u.ukey),
     !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
       var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
+      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
                done:t.done, total:t.total };
     }), L("pillar","bu")));
   var bar = "";
@@ -7010,10 +7010,11 @@ function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
    settled — and never `boundedReach()`, whose contributor branch reaches a
    project through its stakeholders: being named on somebody else's project
    does not make it the one you came to open. */
-function railMine(target, list, ownerOf) {
+function railMine(target, list, ownerOf, custOf) {
   if (!list.length || !boundedHere(target)) return null;
   for (var i = 0; i < list.length; i++)
-    if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
+    if (mayMarkDoneOn(target, ownerOf(list[i]), custOf ? custOf(list[i]) : null))
+      return list[i];
   return null;
 }
 function railPick(c){
@@ -8801,7 +8802,8 @@ function unitRailPick(u){
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
-  var mine = railMine(u.ukey, list, function(p){ return p.owner; });
+  var mine = railMine(u.ukey, list, function(p){ return p.owner; },
+                     function(p){ return p.custodian; });
   var pick = mine || list[0];
   railShow(k, pillarRailId(pick));
   return pick;
@@ -8968,7 +8970,7 @@ function doneCtl(target, id, owner, code, cust){
   var seated = String(target) === "group"
     ? !SMPRules.mayReportTop(world(), viewer()) &&
       SMPRules.ownsTopPillar(world(), viewer(), owner || "", cust || "")
-    : boundedHere(target) && mayMarkDoneOn(target, owner);
+    : boundedHere(target) && mayMarkDoneOn(target, owner, cust);
   /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
@@ -9021,11 +9023,11 @@ function doneCtl(target, id, owner, code, cust){
    one, a count where they own several, and the plain fact where they own none
    but still report rows that name them.
 
-   `list` is `[{id, code, owner, done, total}]`, built by each caller from the
+   `list` is `[{id, code, owner, cust?, done, total}]`, built by each caller from the
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner); });
+  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
   var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
   var tip = 'You report your own rows. The ' + submits +
             ' custodian submits the report.';
@@ -9247,7 +9249,7 @@ function unitPlanBody(it, u, railed, bare){
      the rows of the pillar whose Owner names them; a contributor reaches the
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
-  var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  var pctx = function(row){ return { pillarOwner: it.owner, pillarCust: it.custodian, row: row }; };
   /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
      nothing here — `row` is the real object — so reading `ctx.row.owner`
      would have worked today and stopped working the day a key measure gains
@@ -9624,15 +9626,17 @@ function unitPlanBody(it, u, railed, bare){
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
           '</div></div>' +
           /* §469: a company direction also has a CUSTODIAN, picked from the
-             register the way the owner is. The top layer's alone, because the
-             rule that lets the seat report (`ownsTopPillar`) reads only the
-             company's directions. An emptied seat DELETES its key (§50.6):
-             nobody minted it, so its absence is the default. */
-          (u.ukey === "group"
-            ? '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
-                ownerSel("plan", it.custodian, function(v){
-                  if (v) it.custodian = v; else delete it.custodian; }) +
-              '</div></div>' : '') +
+             register the way the owner is — AND SINCE SPEC 066 STAGE 2 EVERY
+             PILLAR DOES (Islam signed off "the Custodian seat on every
+             pillar"). The seat reaches what the owner reaches, through the
+             Part owner row on Roles & access (`personRoles` derives `plowner`
+             from either seat, `boundedReach` reads `pillarCust`), never the
+             whole unit. An emptied seat DELETES its key (§50.6): nobody minted
+             it, so its absence is the default. */
+          '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
+            ownerSel("plan", it.custodian, function(v){
+              if (v) it.custodian = v; else delete it.custodian; }) +
+          '</div></div>' +
           '<div class="pfrow"><em>Kind</em><div class="pfval">' +
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +

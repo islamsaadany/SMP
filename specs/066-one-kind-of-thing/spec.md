@@ -151,8 +151,17 @@ for every kind of thing):
   reporting cycle / setup): **6 rows × 5 columns = 30 cells**, where today is 117.
   Where somebody is attached decides the scope, exactly as "own" already works
   (§37: *own is not a setting*).
+  *Superseded at stage 2 (§508, signed off from the mockup):* **8 rows × 6
+  columns = 48 cells.** Rows: Super user · SMO team · CEO · Owner · Custodian ·
+  Part owner · Contributor · Everyone else. Columns: The top · This box — Plan ·
+  This box — Reporting · Other boxes · Reporting cycle · Setup. Plan and
+  Reporting stay apart because a person can hold one without the other (§117);
+  the top keeps its own column; the **Part owner** row holds whoever owns or
+  keeps one part inside a box (a project, a pillar, a direction).
 - The rules that live outside the table today (44) are reviewed one by one in
   stage 2; each either becomes a cell or stays a named rule with a reason.
+  *Stage 2 kept all 44 as named rules* — each is a decision about one act
+  (who may close a cycle, who marks a project done), not a grant a client tunes.
 
 ---
 
@@ -245,7 +254,7 @@ starts (rule 1b); visual changes are mocked up first (rule 1c).
 | # | Stage | Moves data? | What must NOT change | Proof |
 |---|---|---|---|---|
 | 1 | **Performance** — one formula, one weight rule, one meaning of execution | No | Row scores (`measureScore`) | Before/after headline numbers for every client, shown to Islam **before** anything ships |
-| 2 | **Roles** — Owner / Custodian / Contributor on any box, pillar or row; the 30-cell table | No | What every person can open and do | The T0 access baseline (`scripts/test-access-unmoved.js`) reads UNMOVED |
+| 2 | **Roles** — Owner / Custodian / Contributor on any box, pillar or row; the 48-cell table (§3) | No | What every person can open and do | The T0 access baseline (`scripts/test-access-unmoved.js`) reads UNMOVED |
 | 3 | **The tree** — every plan holder becomes a box; pillars carry their kind | **Yes** | Every figure, id, code and snapshot | A migration rehearsed on a copy of each client first; round trip a fixed point |
 | 4 | **Setup** — draw the tree; per-level and per-box switches | No | What each client currently sees, until changed | Each client opens identically after the switch-over |
 | 5 | **Presentations** — one template | No | The slides a review already relies on, unless agreed | Deck-by-deck comparison per client |
@@ -270,6 +279,27 @@ Proof: `scripts/test-stage1-rules.js` (38/0, every row score compared with
 f1f5d29, red eleven ways from the sources); `scripts/stage1-readings.js` now
 reports 0 moves against the built sources and 16 against f1f5d29. The client
 copies were waived (Islam: *"No need for client data proceed"*).
+
+### 8.2 Stage 2, as built (§508, 2026-10-07)
+
+| Part | What changed | Where |
+|---|---|---|
+| The table | 8 rows × 6 columns drawn over the old 13 × 9 stored cells; a drawn cell reads one answer only when every stored pair under it agrees | `SMPRules.ACCESS_ROWS` / `ACCESS_COLS`, `renderAccess` |
+| A cell that differs | Lights nothing, ringed amber, the hover names each pair and what it holds, a line above the table names it; a press sets every pair to the state pressed | `accessCell`, `[data-acm]` |
+| Storage | Untouched — no key renamed, nothing migrated | `grantFor`, `grantIn` unchanged |
+| A pillar's custodian | A pillar may name a Custodian beside its Owner; they derive the Part owner role (`plowner`) and reach exactly that pillar's rows | `holdsPillar` in `personRoles`, `boundedReach`, `mayMarkDone` |
+| The module table | The Copilot's own access table is left as it was (one column, not a box) | `.macgrid` |
+
+Proof: `scripts/test-access-unmoved.js` reads **UNMOVED** against the specs/058
+baseline and against the build before stage 2 (10,228 grants); the authoriser
+suite **984/0**, its new §508 sections proved able to fail three ways (6 / 2 / 1
+red); `checks/access-merged.py` all good, proved able to fail three ways
+(10 / 3 / 5 red).
+
+**Shipped defaults that differ:** the Part owner row's Plan and Reporting cells
+(a project owner was shipped at *none* on a business unit and *view* on a
+function, a pillar owner at *view* on both). They draw as *differs* until the
+office presses one answer.
 
 ---
 

@@ -5463,5 +5463,125 @@ console.log("\n§505 · the direction owner row");
   check("§505: with the business units on, the same naming derives no Direction owner", r2.indexOf("dirowner") < 0, r2.join(","));
 })();
 
+/* ── §508: A PILLAR CAN NAME A CUSTODIAN ───────────────────────────────────
+   Islam signed off "a Custodian seat on every pillar" with the merged access
+   table. Named a pillar's Custodian derives the same PILLAR OWNER role a
+   pillar's Owner derives (the Part owner row on the merged table) — and it
+   reaches THAT pillar only, which is the half that has to be asserted: a
+   derivation that worked and a reach that read `owner` alone would let the
+   custodian hold the role and report nothing, or (worse, the other way) a
+   reach widened past the pillar would hand them the unit. BOTH ENDS, on a
+   unit AND a pillars function, and the done mark (rowDone) beside reporting. */
+console.log("\n§508 · a pillar's custodian");
+(function () {
+  const UK = Object.keys(SEED.units)[0];
+  const B = clone(SEED);
+  B.access.plowner = Object.assign({}, B.access.plowner, { a_unit_own: "edit", a_fn_own: "edit" });
+  B.people.push({ key: "t508_cus", name: "Pillar Custodian 508", active: true });
+  B.people.push({ key: "t508_none", name: "Named Nowhere 508", active: true });
+  B.units[UK].items[0].custodian = "Pillar Custodian 508";
+  const w = R.worldOf(B);
+  const roles = function (st, k) { return JSON.stringify(R.personRoles(R.worldOf(st), personOf(st, k))); };
+  check("§508: a pillar's Custodian derives PILLAR OWNER on that unit",
+        roles(B, "t508_cus") === JSON.stringify([{ role: "plowner", at: UK }]), roles(B, "t508_cus"));
+  check("§508: …and somebody named on no pillar holds nothing",
+        roles(B, "t508_none") === "[]", roles(B, "t508_none"));
+  const noCus = clone(B); delete noCus.units[UK].items[0].custodian;
+  check("§508: take the custodian off the pillar and the role goes with it",
+        roles(noCus, "t508_cus") === "[]", roles(noCus, "t508_cus"));
+  check("§508: the role stays bounded — never the whole unit",
+        R.onlyOwnLines(w, personOf(B, "t508_cus"), "unit", UK) === true);
+
+  const same = function (a, b) { return JSON.stringify(a) === JSON.stringify(b); };
+  const run = function (stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return { v: A.authorize(stored, inc, personOf(stored, who)), moved: !same(stored, inc) };
+  };
+  const ok = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, r.v.ok, r.v.refusals.join(" / "));
+  };
+  const not = function (name, r) {
+    check(name + " — the fixture actually changed something", r.moved);
+    check(name, !r.v.ok, "was ALLOWED — " +
+      JSON.stringify(r.v.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  };
+  ok("§508: the pillar's custodian reports a measure of THEIR pillar",
+     run(B, "t508_cus", function (s) { const m = s.units[UK].items[0].measures[0]; m.actual = "7"; m.note = "up"; }));
+  not("§508: …and NOT a measure of the pillar beside it",
+      run(B, "t508_cus", function (s) {
+        const q = s.units[UK].items[1];
+        const m = (q.measures || [])[0] || (q.tactics || [])[0];
+        if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+  not("§508: …and never submits the unit",
+      run(B, "t508_cus", function (s) {
+        s.review.submitted = Object.assign({}, s.review.submitted); s.review.submitted[UK] = true; }));
+  const PILL = B.units[UK].items[0].id, OTHER = B.units[UK].items[1].id;
+  const mark = function (id) { return function (s) {
+    s.review = Object.assign({}, s.review); s.review.done = Object.assign({}, s.review.done);
+    s.review.done[id] = { by: "t508_cus", at: "2026-10-07" }; }; };
+  ok("§508: the pillar's custodian marks their own pillar finished", run(B, "t508_cus", mark(PILL)));
+  not("§508: …and not the pillar beside it", run(B, "t508_cus", mark(OTHER)));
+  not("§508: with the Part owner row left at its default, naming reaches nothing",
+      run((function () { const s2 = clone(B); delete s2.access.plowner; return s2; })(),
+          "t508_cus", function (s) { s.units[UK].items[0].measures[0].actual = "7"; }));
+
+  /* THE OTHER SIDE OF THE SWITCH (§53.5): a pillars function's pillar. */
+  const MR = Object.keys(SEED.functions).filter(function (k) {
+    return SEED.functions[k].format === "pillars" && (SEED.functions[k].items || []).length > 1; })[0];
+  check("§508: the seed holds a pillars function with two pillars to test on", !!MR, String(MR));
+  if (MR) {
+    const F = clone(B);
+    F.functions[MR].items[0].custodian = "Pillar Custodian 508";
+    check("§508: a pillars function's pillar custodian derives PILLAR OWNER there too",
+          R.personRoles(R.worldOf(F), personOf(F, "t508_cus")).some(function (r) { return r.role === "plowner" && r.at === "fn:" + MR; }),
+          roles(F, "t508_cus"));
+    ok("§508: …and reports a measure of that pillar",
+       run(F, "t508_cus", function (s) { const m = s.functions[MR].items[0].measures[0]; m.actual = "5"; m.note = "up"; }));
+    not("§508: …and not the function's pillar beside it",
+        run(F, "t508_cus", function (s) {
+          const q = s.functions[MR].items[1];
+          const m = (q.measures || [])[0] || (q.tactics || [])[0];
+          if (m.actual !== undefined) m.actual = "9"; else m.status = "Done"; }));
+  }
+})();
+
+/* ── §508: THE MERGED TABLE COVERS EVERY ROLE AND EVERY AREA ONCE ──────────
+   The 8 × 6 table is a VIEW over unchanged storage, and that is only safe if
+   every stored role sits under exactly one row and every stored area under
+   at most one column — a role in two rows would be drawn twice with two
+   answers, a role in none would have NO control left on the page (§61), and
+   a role grantable on the old table that the new one forgot would be access
+   nobody can change. Asserted against ROLES/AREAS themselves, never a list
+   typed here (§94.8), so a role added tomorrow reddens this until it is
+   placed. The Copilot's area (a module area, its own table) and Roles &
+   access's own Super-user-only rule are the stated exceptions. */
+console.log("\n§508 · the merged table covers every role and area");
+(function () {
+  const rows = R.ACCESS_ROWS, cols = R.ACCESS_COLS;
+  check("§508: eight rows", rows.length === 8, rows.length);
+  check("§508: six columns", cols.length === 6, cols.length);
+  check("§508: 48 cells", rows.length * cols.length === 48);
+  const seenR = {};
+  rows.forEach(function (r) { r.of.forEach(function (k) { seenR[k] = (seenR[k] || 0) + 1; }); });
+  const roleKeys = Object.keys(R.ACCESS_DEFAULTS);
+  const missR = roleKeys.filter(function (k) { return !seenR[k]; });
+  const twiceR = Object.keys(seenR).filter(function (k) { return seenR[k] > 1; });
+  const ghostR = Object.keys(seenR).filter(function (k) { return roleKeys.indexOf(k) < 0; });
+  check("§508: every stored role sits under a row", !missR.length, missR.join(","));
+  check("§508: …under ONE row only", !twiceR.length, twiceR.join(","));
+  check("§508: …and no row names a role the platform does not hold", !ghostR.length, ghostR.join(","));
+  const seenA = {};
+  cols.forEach(function (c) { c.areas.forEach(function (a) { seenA[a] = (seenA[a] || 0) + 1; }); });
+  const areaKeys = {};
+  roleKeys.forEach(function (k) { Object.keys(R.ACCESS_DEFAULTS[k] || {}).forEach(function (a) { areaKeys[a] = 1; }); });
+  const missA = Object.keys(areaKeys).filter(function (a) { return !seenA[a] && a !== "a_copilot"; });
+  const twiceA = Object.keys(seenA).filter(function (a) { return seenA[a] > 1; });
+  check("§508: every stored area sits under a column (the Copilot's own table aside)", !missA.length, missA.join(","));
+  check("§508: …under ONE column only", !twiceA.length, twiceA.join(","));
+  check("§508: the floor row is the one marked floor", rows.filter(function (r) { return r.floor; }).map(function (r) { return r.key; }).join(",") === R.NO_ROLE,
+        rows.filter(function (r) { return r.floor; }).map(function (r) { return r.key; }).join(","));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

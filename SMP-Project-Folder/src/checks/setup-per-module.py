@@ -311,7 +311,9 @@ with sync_playwright() as p:
     pg.click('.setuprail [data-setupgo="access"]')
     pg.wait_for_timeout(400)
     before = ev(pg, "()=>JSON.stringify(ACCESS)")
-    wrote = ev(pg, """()=>{const b=document.querySelector(".acgrid button[data-ac]:not(.on)");
+    # §508: Strategy's table presses through `data-acm` (one drawn cell over
+    # every pair under it); the old single-cell `data-ac` writer is gone.
+    wrote = ev(pg, """()=>{const b=document.querySelector(".acgrid button[data-acm]:not(.on)");
                          if(!b) return 'no control'; b.click(); return 'pressed';}""")
     pg.wait_for_timeout(300)
     after = ev(pg, "()=>JSON.stringify(ACCESS)")

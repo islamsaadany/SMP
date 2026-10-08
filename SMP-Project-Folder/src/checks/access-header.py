@@ -206,19 +206,21 @@ with sync_playwright() as p:
         out[role.key] = { places: ws.length, reaches: Object.keys(hit) };
       });
       return out; }""")
+    # §508 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS, and a drawn cell is
+    # every (role, area) pair under it that can come up — which is exactly
+    # what its press carries in `data-acm`. So "is this column offered to
+    # this role" is read off the PAIRS the presses name, keyed by the ROLE'S
+    # KEY rather than a row's name (a row now holds several roles). REWRITTEN,
+    # never loosened (§218): the question is the one §174 asked, per role and
+    # per area, and every role starts with an empty map so a role the table
+    # offers nothing at all reads as offering nothing rather than being
+    # skipped (§54.5).
     offered = pg.evaluate("""()=>{
-      const keys = SMPRules.AREAS.map(a => a.key);
       const out = {};
-      document.querySelectorAll('.acgrid tbody tr').forEach(tr => {
-        const row = {};
-        [...tr.querySelectorAll('td.ac')].forEach((td, i) => {
-          /* `td.ac` IS ALREADY ONLY THE AREA CELLS — the role's name is a
-             `td.rolecell` and is not in this list — so the first of them is
-             AREAS[0], not AREAS[1]. The off-by-one reported every role as
-             offering columns it does not and withholding ones it does. */
-          row[keys[i]] = !!td.querySelector('[data-ac]'); });
-        out[tr.getAttribute('data-role') || tr.querySelector('.rolecell b').textContent.trim()] = row;
-      });
+      (SMPRules.ROLES || []).forEach(r => { out[r.key] = {}; });
+      document.querySelectorAll('.acgrid .stbtn[data-acm]').forEach(b => {
+        b.dataset.acm.split('|')[0].split(',').forEach(pr => {
+          const ra = pr.split(':'); (out[ra[0]] = out[ra[0]] || {})[ra[1]] = true; }); });
       return out; }""")
     names = pg.evaluate("()=>{const o={}; (SMPRules.ROLES||[]).forEach(r=>o[r.key]=r.name); return o;}")
     SPLIT = ["a_unit_own_strat", "a_unit_own", "a_unit_other",
@@ -226,7 +228,7 @@ with sync_playwright() as p:
     unmeasured = []
     for key, info in reach.items():
         name = names.get(key, key)
-        row = offered.get(name)
+        row = offered.get(key)
         if row is None:
             continue
         # NOT SKIPPED IN SILENCE (§54.5). A role nobody on this register holds
@@ -258,13 +260,13 @@ with sync_playwright() as p:
     # owner used to be unable to hold anything on a unit, so the own-unit
     # columns were dashed; since a unit may plan in projects they are offered.
     ck("a project owner IS offered the OWN business unit columns (§405)",
-       offered["Project owner"]["a_unit_own"]
-       and offered["Project owner"]["a_unit_own_strat"])
+       offered["powner"].get("a_unit_own")
+       and offered["powner"].get("a_unit_own_strat"))
     ck("a BU owner is offered no OWN supporting function column",
-       not offered["BU owner"]["a_fn_own"]
-       and not offered["BU owner"]["a_fn_own_strat"])
+       not offered["owner"].get("a_fn_own")
+       and not offered["owner"].get("a_fn_own_strat"))
     ck("a pillar owner KEEPS the own-function columns",
-       offered["Pillar owner"]["a_fn_own"] and offered["Pillar owner"]["a_fn_own_strat"])
+       offered["plowner"].get("a_fn_own") and offered["plowner"].get("a_fn_own_strat"))
     ck("...because a pillars function really does derive them",
        any(str(a).startswith("fn:") for a in
            pg.evaluate("""()=>{const w=world(); const s={};

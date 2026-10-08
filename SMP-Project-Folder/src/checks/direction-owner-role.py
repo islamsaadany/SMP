@@ -10,9 +10,14 @@ read "No pages granted". It MAKES its state (§255) — two people on the
 register holding nothing, the business units switched off, one direction
 naming one as Owner and the other as Custodian — and asserts BOTH ENDS
 (§94.2): each lands on the company, and somebody named on nothing still
-reaches nothing. Then the Roles & access row: drawn, View on the group, and
-the own-unit and own-function columns dashed. SMP_BUILT points it at another
-build (§276).
+reaches nothing. Then Roles & access: since §508 the table draws eight rows
+over the stored roles, and a direction owner is one of the three under PART
+OWNER — so what is asserted is that the Part owner row says so, that its The
+top cell carries the direction owner's pair at the group's View, and that no
+This box cell carries it (its own-unit and own-function pairs are not
+applicable). REWRITTEN at §508, never loosened (§218): it asked for a row
+named Direction owner, which the merged table no longer draws. SMP_BUILT
+points it at another build (§276).
 """
 import os
 from playwright.sync_api import sync_playwright
@@ -61,13 +66,24 @@ with sync_playwright() as p:
     # The row on Roles & access, seen as the office.
     acc = safe(pg, """()=>{ switchViewer(PEOPLE.find(p=>p.role==='super').key);
       current='setup'; currentSub='access'; paint();
-      var row = [...document.querySelectorAll('#panel tr')].find(tr=>/Direction owner/.test(tr.textContent));
+      var row = [...document.querySelectorAll('#panel .acgrid tr')].find(tr=>{
+        var b = tr.querySelector('.rolecell b'); return b && b.textContent.trim()==='Part owner'; });
       if (!row) return null;
-      return {cells: [...row.querySelectorAll('td')].map(td=>({t:td.textContent.trim(), dash: !!td.querySelector('.na,[data-na]') || /^\\u2014$/.test(td.textContent.trim())}))}; }""")
-    ck("Roles & access draws a Direction owner row", bool(acc), acc)
+      var note = (row.querySelector('.rolecell')||{}).title || '';
+      var cells = [...row.querySelectorAll('td.ac')].map(td=>{
+        var acm = [...td.querySelectorAll('[data-acm]')].map(x=>x.getAttribute('data-acm').split('|')[0]);
+        return {pairs: acm.length ? acm[0].split(',') : [], dash: !acm.length};
+      });
+      return {note: note, cells: cells, stored: ACCESS.dirowner && ACCESS.dirowner.a_group}; }""")
+    ck("Roles & access draws the Part owner row", bool(acc), acc)
     if acc:
-        ck("the row is the group's View and some columns are not applicable",
-           any(c["dash"] for c in acc["cells"]), acc["cells"])
+        ck("its hover names a direction among what it covers", "direction" in (acc.get("note") or ""), acc.get("note"))
+        top = acc["cells"][0] if acc["cells"] else {}
+        ck("its The top cell carries the direction owner's pair", "dirowner:a_group" in (top.get("pairs") or []), top)
+        ck("the direction owner reads the group's View", acc.get("stored") == "view", acc.get("stored"))
+        here = [c for c in acc["cells"][1:3]]
+        ck("no This box cell carries the direction owner (not applicable there)",
+           here and all(not any(x.startswith("dirowner:") for x in c["pairs"]) for c in here), here)
     ck("no page errors", not errs, errs)
     b.close()
 

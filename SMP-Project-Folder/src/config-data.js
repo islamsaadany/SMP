@@ -5164,7 +5164,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+      pillarOwner: x.pown, pillarCust: x.pcust });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -6000,11 +6000,11 @@ function areaOfTarget(target){
   var t = String(target || "");
   return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
 }
-function mayMarkDoneOn(target, owner){
+function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
-  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner);
+  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner, cust);
 }
 /* Does this viewer report here through bounded roles ALONE — the person the
    control exists for. Anybody unbounded has Submit, which says more than a
@@ -7950,7 +7950,7 @@ function gapMap(target, all, fillable){
     (u.items || []).forEach(function(p, i){
       /* §416: a direction not running this year owes nothing yet. */
       if (!runsNow(p)) return;
-      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, pillarCust: p.custodian, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){

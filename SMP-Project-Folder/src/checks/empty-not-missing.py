@@ -211,7 +211,8 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
-    pg.click('[data-ac="custodian|a_unit_own_strat|fill"]'); pg.wait_for_timeout(350)
+    # §508: the merged cell is found by the pair its press carries.
+    pg.click('[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|fill"]'); pg.wait_for_timeout(350)
     be(pg, who["cust"], who["unit"], "strategy", "plan")
 
     fil = pg.evaluate("""() => ({

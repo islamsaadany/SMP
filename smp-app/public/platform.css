@@ -2241,6 +2241,18 @@ html[data-client-settings] .viewer { display:none; }
   .stbtn.on.st-view { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
   .stbtn.on.st-edit { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
   .stbtn.on.st-fill { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
+  /* §508: A CELL THAT STANDS FOR MORE THAN ONE STORED ANSWER, WHEN THOSE
+     ANSWERS DIFFER. Nothing is lit, because no one state is true of all of
+     them, and the tray is ringed in the attention ground rather than dashed —
+     dashed is "no access", which is a chosen answer, and this is not an
+     answer at all until somebody presses one (§168: outstanding is not
+     broken). The hover names each one underneath. */
+  .stset.mixed { border:1px solid var(--attn); background:var(--attn-bg); border-radius:6px; padding:1px; }
+  .st-mixed { color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
+  /* Sits OUTSIDE .cfg (above the grid), so it is not scoped to it. */
+  p.acdiffer { margin:0 0 10px; padding:7px 12px; border-left:3px solid var(--attn);
+                background:var(--attn-bg); color:var(--attn-tx); border-radius:4px;
+                font-size:var(--fs-note); }
 
   .chart-legend i.st { margin-right:2px; }
 

@@ -84,18 +84,33 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
+    # §508 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS: a cell's press carries
+    # every (role, area) pair under it in `data-acm`, so a cell is found by
+    # the PAIR it holds rather than by one role|area|state string. REWRITTEN,
+    # never loosened (§218): the same three claims, the Reporting absence
+    # paired with that cell's own edit so it cannot pass over a cell that is
+    # not drawn at all (§113.8).
+    PLAN_FILL = '[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|fill"]'
     ck("the Strategy cell offers Fill gaps",
-       pg.query_selector('[data-ac="custodian|a_unit_own_strat|fill"]') is not None)
+       pg.query_selector(PLAN_FILL) is not None)
     ck("...the function half too",
-       pg.query_selector('[data-ac="fnhead|a_fn_own_strat|fill"]') is not None)
+       pg.query_selector('[data-acm*="fnhead:a_fn_own_strat"][data-acm$="|fill"]') is not None)
+    # The STATES the cell offers, read off its buttons' own names — never off
+    # the press, because the LIT button's press says "|none" (a toggle), so
+    # asking for "|edit" on a cell already at edit finds nothing and reports
+    # a correct build broken (§100.3). Both ends: the two it should offer are
+    # there, and fill is not.
+    rep_states = pg.evaluate("""() => [...document.querySelectorAll(
+        '[data-acm^="custodian:a_unit_own,"]')].map(b =>
+        (b.getAttribute("aria-label") || "").replace(/^turn off /, "")).sort()""")
     ck("...and the Reporting half does NOT (§42: a toggle that grants nothing)",
-       pg.query_selector('[data-ac="custodian|a_unit_own|fill"]') is None)
+       rep_states == ["edit", "view"], rep_states)
     ck("the legend explains it",
        pg.evaluate("() => document.body.textContent.includes('may fill what’s empty')"))
 
-    pg.click('[data-ac="custodian|a_unit_own_strat|fill"]'); pg.wait_for_timeout(350)
+    pg.click(PLAN_FILL); pg.wait_for_timeout(350)
     lit = pg.evaluate("""() =>
-      !!document.querySelector('.stbtn.on.st-fill[data-ac^="custodian|a_unit_own_strat"]')""")
+      !!document.querySelector('.stbtn.on.st-fill[data-acm^="custodian:a_unit_own_strat,"]')""")
     ck("pressing it lights the amber state", lit)
     rule = pg.evaluate("""(w) =>
       SMPRules.mayFillPage(world(), personBy(w.cust), "u_plan", w.unit)""", who)

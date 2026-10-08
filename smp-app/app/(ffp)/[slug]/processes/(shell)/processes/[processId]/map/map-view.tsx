@@ -24,6 +24,9 @@ type StepT = {
   gaps: StepGap[];
   detailedAction: string[];
   exceptionHandling: string | null;
+  sopInputs: string | null;
+  sopOutput: string | null;
+  sopErrors: string | null;
   links: { id: string; targetProcessId: string; targetProcess: { code: string; name: string } }[];
   slaDays?: number | null;
   threshold?: number | null;

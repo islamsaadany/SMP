@@ -327,6 +327,14 @@ model Process {
   /// { metric, target, frequency }[] — operational KPIs/SLAs for this process.
   kpis             Json     @default("[]")
 
+  /// SOP document control — all hand-kept free text, nothing recorded
+  /// automatically. sopRevisions is { version, date, by, change }[].
+  sopVersion       String?
+  sopOwner         String?
+  sopEffectiveDate String?
+  sopApprovedBy    String?
+  sopRevisions     Json     @default("[]")
+
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])
@@ -471,6 +479,14 @@ model ProcessStep {
   /// cosmetic gain. The old label promised a handling *procedure*, which is
   /// not what anyone was writing in it.
   exceptionHandling String?
+
+  /// SOP detail (optional). "How" is detailedAction above, never a second copy.
+  /// What the step takes in and the tools or systems used, what it produces,
+  /// and the mistakes people commonly make — kept apart from exceptionHandling,
+  /// which is the *risk* if the step is missed.
+  sopInputs String?
+  sopOutput String?
+  sopErrors String?
 
   process      Process @relation(fields: [processId], references: [id], onDelete: Cascade)
   assignedRole Role?   @relation("StepAssignedRole", fields: [assignedRoleId], references: [id])

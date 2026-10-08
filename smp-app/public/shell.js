@@ -305,7 +305,7 @@
        now hold one at a unit, and that pair shipped at none while the
        own-function pair shipped at view — which is the only reason the merged
        table drew Part owner's Plan and Reporting as "differs". Now the two
-       halves say one thing; migration 048 (and smp-app 027) moves a tenant's
+       halves say one thing; migration 049 (and smp-app 028) moves a tenant's
        stored none to view only where it still holds the old none. */
     powner:    { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
@@ -7153,7 +7153,11 @@ var LABELS = {
     { key:"brief",       internal:"Brief",               group:"Who we are",          bu:"Who we are",
       note:"A short description of who this part of the business is" },
     { key:"swot",        internal:"SWOT",                group:"SWOT",                bu:"SWOT",
-      note:"Strengths, weaknesses, opportunities and threats" }
+      note:"Strengths, weaknesses, opportunities and threats" },
+    /* §513: the End in Mind's own word, last because migration 048 (027 on
+       the new stack) writes it last for every tenant already deployed. */
+    { key:"endinmind",   internal:"End in Mind",         group:"End in Mind",         bu:"End in Mind",
+      note:"The lasting mark the organisation works towards, long after this plan ends" }
   ]
 };
 /* What the platform would say, kept BEFORE hydration replaces the list with
@@ -27890,7 +27894,7 @@ function templeTables(){
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
-      '<div class="trow"><label>End in mind</label>' +
+      '<div class="trow"><label>' + L1("endinmind") + '</label>' +
         fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>' +
       '<div class="trow"><label>Horizon</label>' +
         inputOr("temple", GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</div>' +
@@ -30545,7 +30549,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
     (endInMind || editing
-      ? '<div class="endin"><span class="boxlab">End in mind</span>' +
+      ? '<div class="endin"><span class="boxlab">' + L1("endinmind") + '</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
     /* ── WHILE THE PEN IS OPEN THE TABLE IS NOT IN HERE (§96.6) ────
@@ -46353,7 +46357,7 @@ function unitAimSlides(u){
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
-        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
+        ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
     (aimRows
       ? '<div class="aimbottom">' +
@@ -47043,7 +47047,7 @@ function companyFoundationSlides(){
   return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
-      (end ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
+      (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
       '</div>' : '') +
     (rows ? '<div class="aimbottom"><span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
@@ -57392,6 +57396,23 @@ var COPILOT = (function(){
     try { if (typeof labelWord === "function") return labelWord(k, many ? "bu" : "group"); } catch (e) {}
     return k;
   }
+  /* §514 — A PART'S NAME IS THE CLIENT'S WORD (Islam: "yes the names should
+     follow the terminology"). The Copilot's six parts are Terminology's own
+     rows, so wherever a PERSON reads a part's name — a card, the to-do, a
+     chat line, a button, the saved text's headings — it is the word the
+     client chose, in the form the Foundation page reads it (one or many,
+     per row). The AI goes on being asked in the method's own words, which
+     is what its instructions are written against. A label the list cannot
+     answer keeps the method's name rather than a bare key. */
+  var PART_LABEL = { who: ["brief", true], asp: ["aspiration", false], eim: ["endinmind", false],
+    pur: ["purpose", false], obj: ["keyobj", true], val: ["values", true] };
+  function partName(el){
+    var m = el && PART_LABEL[el.key];
+    if (!m) return el ? String(el.name || "") : "";
+    var w = ""; try { w = lw(m[0], m[1]); } catch (e) { w = ""; }
+    return w && w !== m[0] ? String(w) : String(el.name || "");
+  }
+  function partWords(){ var o = {}; steps().forEach(function(el){ o[el.key] = partName(el); }); return o; }
   function contextOf(){
     var line = [placeWord()], detail = [];
     var u = null;
@@ -57714,7 +57735,7 @@ var COPILOT = (function(){
     if (flowView()) {
       var ph = PANE.flow.phase;
       return ph === "ask" ? "Type your answer…" : ph === "draft" ? "Say what to change in this draft…"
-        : ph === "loaded" ? "Pick a part on the left to work on it…" : "Use the buttons above to carry on…";
+        : ph === "loaded" ? "Edit a part from its card, or name it and say what to change…" : "Use the buttons above to carry on…";
     }
     return pend ? "Say what this file is for…" : "Ask about " + placeWord() + "’s " + sectionWord().toLowerCase() + "…";
   }
@@ -57819,6 +57840,11 @@ var COPILOT = (function(){
   }
   function on(i){ var el = steps()[i]; return !!el && skipNow().indexOf(el.key) < 0; }
   function agreedAll(f){ return steps().every(function(el, i){ return !on(i) || (f.done[i] && !!String(f.drafts[i] || "").trim()); }); }
+  /* §514 — ONE COUNT OF ANSWERS, read by the card, the to-do and the bar
+     (Islam: "we need to fix the panel and the card"). The card said
+     "Answering 1/4" — the question's POSITION — beside a panel saying
+     "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
+  function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -57829,28 +57855,65 @@ var COPILOT = (function(){
       (lines.length > cut ? '<li class="copmore">…' + (lines.length - cut) + ' more lines</li>' : '') + '</ul>';
   }
   var CARDSHUT = {};             /* chat id → the cards closed with × (this visit only) */
+  /* §513 — A PART'S TEXT IS EDITED ON ITS CARD (Islam: "edit the cards on
+     the left … a pen to edit or edit with AI to take it back to the chat",
+     the original Copilot's own pattern, signed off from
+     design-mockups/copilot-foundation-flow/2026-10-07_edit-cards-hover.html).
+     {id, i, text} while one card is a text box; the text is held here so a
+     redraw puts back what is half-typed rather than the stored draft. */
+  var CARDPEN = null;
+  var PENMARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 5.2l3.6 3.6M16.7 3.7a2.5 2.5 0 113.6 3.6L6.5 21H3v-3.6z"/></svg>';
+  var AIMARK = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 3.5l1.6 4.4 4.4 1.6-4.4 1.6L10 15.5l-1.6-4.4L4 9.5l4.4-1.6z"/><path d="M17.5 13.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></svg>';
+  function penHere(){ return !!(CARDPEN && PANE && PANE.chat && CARDPEN.id === PANE.chat.id); }
   function cardsHtml(f){
     var S = steps(), plan = f.start === "plan", ed = canEdit() && !PANE.chat.archived && THINKING !== PANE.chat.id;
-    var pick = plan && ed && f.phase !== "check" && f.phase !== "saved";
+    /* §512 — A PART IS OPENED FROM ITS CARD AT EVERY STEP, ON BOTH ROADS.
+       Islam: "I have no option to edit any section once I finish and Done
+       appears until I finalize all parts and reach the consistency check."
+       Only the plan road could press a card, and never during the check;
+       now any part opens while the parts are being worked or checked —
+       never before the road is chosen, and never once the Foundation is
+       saved, because the server refuses a save to a saved flow. */
+    var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
+    var pick = ed && phaseOk, pen = penHere() && phaseOk ? CARDPEN : null;
     return '<div class="copcards">' + S.map(function(el, i){
       if (!on(i)) return "";
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
+      var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering " + (f.qi + 1) + "/" + el.questions.length; cls += " now"; }
+      if (now && f.phase === "ask") { st = "Answering"; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
       else if (txt) { st = "In progress"; }
+      /* §513 — A PART HALF ANSWERED IS IN PROGRESS, NOT EMPTY. It said
+         "Empty · Not started" with three answers given, which is the one
+         card a person comes back to and the one that told them nothing. */
+      else if (a) { st = "In progress"; }
       else { empty = true; st = "Empty"; }
       var body = txt && (!now || f.phase === "draft") ? cardBody(withY(txt, f))
-        : '<p>' + (now ? E(el.questions.length + " questions") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
+        : '<p>' + (now || a ? E(a + " of " + n + " answered.") : plan || f.done[i] ? "Nothing saved yet." : "Not started.") + '</p>';
       var wide = el.key === "who" || el.key === "asp";
-      var head = '<h3><span>' + E(el.name) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
+      var head = '<h3><span>' + E(partName(el)) + '</span><span class="' + cls + '">' + E(st) + '</span></h3>';
       var c = 'copcard' + (wide ? " wide" : "") + (now ? " now" : "") + (empty && !now ? " empty" : "");
-      return pick
-        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') +
-            ' aria-label="Work on ' + E(el.name) + '">' + head + body + '</button>'
-        : '<div class="' + c + '" data-cop-card="' + i + '">' + head + body + '</div>';
+      if (pen && pen.i === i)
+        return '<div class="' + c + ' editing" data-cop-card="' + i + '">' + head +
+          '<textarea class="copfedit" data-cop-pentext aria-label="' + E(partName(el)) + '">' + E(pen.text) + '</textarea>' +
+          '<div class="copeact"><span class="copkh">Esc to cancel · Ctrl+Enter to save</span>' +
+          '<button type="button" class="copbtn quiet" data-cop-pencancel>Cancel</button>' +
+          '<button type="button" class="copbtn solid" data-cop-pensave' + (!pen.text.trim() || THINKING === PANE.chat.id ? ' disabled' : '') + '>Save</button></div></div>';
+      /* A card with text carries its two ways in and stops being a button;
+         a card with nothing written stays one press into the chat; the part
+         already in the chat carries neither. While one card is a text box
+         the others wait, so a press elsewhere cannot throw away what is
+         half-typed. */
+      if (pick && !pen && txt && !now)
+        return '<div class="' + c + ' acts" data-cop-card="' + i + '">' + head + body +
+          '<span class="copcact"><button type="button" data-cop-pen="' + i + '" title="Edit the text" aria-label="Edit the text of ' + E(partName(el)) + '">' + PENMARK + '</button>' +
+          '<button type="button" data-cop-ai="' + i + '" title="Edit with AI" aria-label="Edit ' + E(partName(el)) + ' with AI">' + AIMARK + '</button></span></div>';
+      return pick && !pen && !now
+        ? '<button type="button" class="' + c + ' pick" data-cop-card="' + i + '" aria-label="Work on ' + E(partName(el)) + '">' + head + body + '</button>'
+        : '<div class="' + c + '" data-cop-card="' + i + '"' + (now ? ' aria-current="true"' : '') + '>' + head + body + '</div>';
     }).join("") + '</div>';
   }
   function flowHead(f){
@@ -57858,14 +57921,14 @@ var COPILOT = (function(){
     if (f.phase === "year" || f.phase === "path" || f.phase === "start" || f.phase === "loaded") t = "Copilot · Foundation";
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
-      t = "Copilot · " + el.name;
+      t = "Copilot · " + partName(el);
       p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
     }
-    var total = 0, answered = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; f.ans[i].forEach(function(a){ if (String(a).trim()) answered++; }); });
+    var total = 0, ans = 0;
+    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; ans += answered(f, i); });
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + answered + '"><i style="width:' + (total ? Math.round(answered / total * 100) : 0) + '%"></i></div>';
+      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + ans + '"><i style="width:' + (total ? Math.round(ans / total * 100) : 0) + '%"></i></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -57882,7 +57945,7 @@ var COPILOT = (function(){
       if (f.phase === "start") return out.join("");
     } else out.push(aiMsg("Hi — let's build " + E(placeWord()) + "’s Foundation. I'll ask a few short questions per part, show you what you said, draft it, and you refine and save each part."));
     if (plan) {
-      out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Pick a part to work on, or tell me what you want to change."));
+      out.push(aiMsg("I've loaded what " + E(placeWord()) + "’s Foundation says today into the cards. Edit a part from its card — the pen to write it yourself, or Edit with AI — or tell me what you want to change."));
       if (f.phase === "loaded" && ed && agreedAll(f))
         out.push(aiMsg("When the parts read as you want them, check them together and save the Foundation." +
           '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck' + (busyHere ? ' disabled' : '') + '>Check the whole Foundation</button></div>'));
@@ -57901,18 +57964,18 @@ var COPILOT = (function(){
           '<button type="button" class="copbtn solid" data-cop-setyears>Set the years</button></div>' : '')));
       if (f.phase === "year") return out.join("");
       out.push(meMsg(yearsWord(f)));
-      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(S[0].name) + "</b> (" + S[0].questions.length + " short questions)."));
+      out.push(aiMsg("Good. We'll build the parts in order, starting with <b>" + E(partName(S[0])) + "</b> (" + S[0].questions.length + " short questions)."));
     }
     var all = f.phase === "check" || f.phase === "saved";
     S.forEach(function(el, i){
       if (!on(i)) return;
       var current = !all && i === f.e;
       if (!current) {
-        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(el.name) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
+        if (f.done[i] && !f.from[i]) out.push(aiMsg(E(partName(el)) + (String(f.drafts[i] || "").trim() ? " agreed" : " left empty") + " for " + E(fname()) + "."));
         return;
       }
       if (f.phase === "loaded") return;
-      if (plan) out.push(aiMsg("Let's work on <b>" + E(el.name) + "</b>" + "."));
+      if (plan) out.push(aiMsg("Let's work on <b>" + E(partName(el)) + "</b>" + "."));
       if (f.phase === "ask") {
         for (var k = 0; k < f.qi; k++) { out.push(aiMsg(E(withY(el.questions[k], f)))); out.push(meMsg(f.ans[i][k] || "(skipped)")); }
         out.push(aiMsg(E(withY(el.questions[f.qi], f))) + examplesHtml(el.examples[f.qi], f));
@@ -57923,20 +57986,20 @@ var COPILOT = (function(){
             '<button type="button" class="copbtn quiet" data-cop-nudge-go>Continue anyway</button></div></div>');
         }
       } else if (f.phase === "review") {
-        out.push(aiMsg("Here is what you told me about " + E(el.name) + ". Change anything before I draft it." +
+        out.push(aiMsg("Here is what you told me about " + E(partName(el)) + ". Change anything before I draft it." +
           '<div class="coprv">' + el.questions.map(function(q, k){
             return '<label>' + E(withY(q, f)) + '<textarea class="copfed" rows="2" data-cop-fans="' + k + '"' + (ed ? '' : ' readonly') + '>' + E(f.ans[i][k]) + '</textarea></label>';
           }).join("") + '</div>' +
-          (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(el.name) + '</button></div>' : ''), true));
+          (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fdraft' + (busyHere ? ' disabled' : '') + '>Draft ' + E(partName(el)) + '</button></div>' : ''), true));
       } else if (f.phase === "draft") {
         var nx = nextUndone(f, i);
-        out.push(aiMsg('<span class="copeh">Draft · ' + E(el.name) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
+        out.push(aiMsg('<span class="copeh">Draft · ' + E(partName(el)) + '</span><div class="copfdraft">' + E(withY(f.drafts[i], f)) + '</div>' +
           (ed ? 'Refine it, or type what to change in the box below.' +
             '<div class="copbtns"><button type="button" class="copbtn" data-cop-refine="concise"' + (busyHere ? ' disabled' : '') + '>Make concise</button>' +
             '<button type="button" class="copbtn" data-cop-refine="professional"' + (busyHere ? ' disabled' : '') + '>More professional</button>' +
             '<button type="button" class="copbtn" data-cop-refine="simple"' + (busyHere ? ' disabled' : '') + '>Simplify</button></div>' +
             '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fsave' + (busyHere ? ' disabled' : '') + '>' +
-              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(S[nx].name)) + '</button></div>' : ''), true));
+              (plan ? "Save this part" : nx < 0 ? "Save and check the whole foundation" : "Save and continue to " + E(partName(S[nx]))) + '</button></div>' : ''), true));
       }
     });
     if (all && f.check) {
@@ -57946,14 +58009,51 @@ var COPILOT = (function(){
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
         (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(S[byKey[x.el]].name) + '</button>'; }).join("") +
+            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
           '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
+    }
+    /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
+       A pen save during the check left the OLD results standing, "Go back
+       to" and the Save button under them, nothing saying they were about
+       the text before the edit, and no way to run it again. The server now
+       drops the results the moment a draft changes (copilot-flow.ts); this
+       is what stands in their place, with the one way to get them back. */
+    if (f.phase === "check" && !f.check && !busyHere) {
+      out.push(aiMsg("The check has not run on the text as it stands now." +
+        (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
       out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
+  }
+  /* OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT (§512): a drafted part
+     opens on its draft, a part with every question answered opens on the
+     review, and a part half answered opens on its next unanswered question
+     — never back at question one, which would make returning to a part you
+     were in the middle of cost the answers already given. */
+  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check"];
+  function openPart(g, i){
+    var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
+    g.e = i; g.done[i] = false; NUDGE = null;
+    if (CARDPEN && CARDPEN.i === i) CARDPEN = null;   /* §513: the part is in the chat now */
+    if (String(g.drafts[i] || "").trim()) { g.phase = "draft"; g.qi = 0; return; }
+    while (k < n && String(a[k] || "").trim()) k++;
+    if (n && k >= n) { g.phase = "review"; g.qi = 0; } else { g.phase = "ask"; g.qi = Math.min(k, Math.max(n - 1, 0)); }
+  }
+  /* WHICH PART A TYPED LINE NAMES (§512), by the part's own words — one
+     part, or nobody: a line naming two is not guessed at. */
+  var PART_WORDS = { who: ["who we are"], asp: ["winning aspiration", "aspiration"], eim: ["end in mind"],
+    pur: ["purpose", "mission"], obj: ["key objectives", "objectives", "objective", "guiding objectives"], val: ["core values", "values"] };
+  function namedPart(text){
+    var t = " " + String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ") + " ", hits = [];
+    steps().forEach(function(el, i){
+      if (!on(i)) return;
+      var words = (PART_WORDS[el.key] || []).concat([el.name, partName(el)].map(function(s){ return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }));
+      if (words.some(function(w){ return w && t.indexOf(" " + w + " ") >= 0; })) hits.push(i);
+    });
+    return hits.length === 1 ? hits[0] : -1;
   }
   function nextUndone(f, from){
     var n = steps().length;
@@ -57993,9 +58093,9 @@ var COPILOT = (function(){
     var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
-      var a = (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length, q = el.questions.length;
+      var a = answered(f, i), q = el.questions.length;
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(el.name, f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
     }).join("");
     var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
               li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
@@ -58066,7 +58166,40 @@ var COPILOT = (function(){
       return;
     }
     if (f.phase === "draft") { DRAFT[id] = ""; flowAsk({ act:"flowRefine", el:f.e, how:text.trim(), flow:flowCopy() }); return; }
-    SAY = f.phase === "loaded" ? "Press the part you want to change on the left, then say what to change." : "Noted. Use the buttons above to carry on."; draw();
+    /* §512 — FROM THE CARDS OR THE CHECK, A LINE THAT NAMES ONE PART OPENS
+       IT WITH THE CHANGE APPLIED: the refine is asked of that part, and the
+       answer comes back as its draft to save, which runs the check again.
+       A part with nothing written yet opens on its questions instead. */
+    if (f.phase === "loaded" || f.phase === "check") {
+      var pi = namedPart(text);
+      if (pi >= 0) {
+        var gp = flowCopy(); DRAFT[id] = "";
+        if (String(gp.drafts[pi] || "").trim()) { gp.e = pi; flowAsk({ act:"flowRefine", el:pi, how:text.trim(), flow:gp }); return; }
+        openPart(gp, pi); flowSave(gp, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return;
+      }
+      SAY = "Edit the part from its card on the left, or name it, then say what to change."; draw(); return;
+    }
+    SAY = "Noted. Use the buttons above to carry on."; draw();
+  }
+  /* SAVING A CARD'S OWN WORDS (§513). The text is the part's, agreed as it
+     stands — so a part that was still a draft reads Done once saved, and a
+     part from the plan stops saying so only when its words change. It is
+     saved FIRST and the consistency check, if that is where the flow stood,
+     runs again after, so an AI that does not answer costs nothing typed. */
+  function penSave(){
+    if (!penHere() || THINKING) return;
+    var text = CARDPEN.text.replace(/^\s+|\s+$/g, ""), i = CARDPEN.i, f = PANE.flow;
+    if (!text) return;
+    if (text === CARDPEN.orig.replace(/^\s+|\s+$/g, "") && f.done[i]) { CARDPEN = null; draw(); return; }
+    var g = flowCopy(), was = g.phase, same = text === CARDPEN.orig.replace(/^\s+|\s+$/g, "");
+    /* Unchanged words keep the draft as stored, so the end-year mark in it
+       is not written in as a number by a press that changed nothing. */
+    if (!same) g.from[i] = false;
+    g.drafts[i] = same ? f.drafts[i] : text; g.done[i] = true;
+    CARDPEN = null;
+    flowSave(g, function(){
+      if (was === "check" && PANE && PANE.flow && PANE.flow.phase === "check") flowAsk({ act:"flowCheck", flow:flowCopy() });
+    });
   }
   function flowClick(ev){
     var b, f = PANE && PANE.flow;
@@ -58099,10 +58232,21 @@ var COPILOT = (function(){
       if (b.getAttribute("data-cop-cards") === "hide") CARDSHUT[PANE.chat.id] = true; else delete CARDSHUT[PANE.chat.id];
       draw(); return true;
     }
-    if ((b = hit(ev, "button[data-cop-card]"))) {
-      var gc = flowCopy(), ci = Number(b.getAttribute("data-cop-card"));
-      gc.e = ci; gc.qi = 0; gc.done[ci] = false; NUDGE = null;
-      gc.phase = String(gc.drafts[ci] || "").trim() ? "draft" : "ask";
+    /* §513 — THE PEN MAKES THE CARD A TEXT BOX; EDIT WITH AI TAKES THE PART
+       BACK TO THE CHAT, which is what pressing the card did before (§512). */
+    if ((b = hit(ev, "[data-cop-pen]"))) {
+      var pi2 = Number(b.getAttribute("data-cop-pen")), pt0 = withY(String(f.drafts[pi2] || ""), f);
+      CARDPEN = { id: PANE.chat.id, i: pi2, text: pt0, orig: pt0 };
+      draw();
+      var pta = document.querySelector("[data-cop-pentext]");
+      if (pta) { pta.focus(); pta.setSelectionRange(pta.value.length, pta.value.length); }
+      return true;
+    }
+    if ((b = hit(ev, "[data-cop-pencancel]"))) { CARDPEN = null; draw(); return true; }
+    if ((b = hit(ev, "[data-cop-pensave]"))) { if (!b.disabled) penSave(); return true; }
+    if ((b = hit(ev, "button[data-cop-card], [data-cop-ai]"))) {
+      var gc = flowCopy(), ci = Number(b.getAttribute("data-cop-card") || b.getAttribute("data-cop-ai"));
+      openPart(gc, ci);
       flowSave(gc, function(){ var t = document.querySelector("[data-cop-text]"); if (t) t.focus(); }); return true;
     }
     if ((b = hit(ev, "[data-cop-fcheck]"))) { if (!b.disabled) flowAsk({ act:"flowCheck", flow:flowCopy() }); return true; }
@@ -58121,17 +58265,17 @@ var COPILOT = (function(){
       if (g3.start === "plan") { g3.phase = "loaded"; flowSave(g3); return true; }
       var nx = nextUndone(g3, g3.e);
       if (nx < 0) { flowAsk({ act:"flowCheck", flow:g3 }); return true; }
-      g3.e = nx; g3.qi = 0; g3.phase = g3.drafts[nx] ? "draft" : "ask";
+      openPart(g3, nx);
       flowSave(g3); return true;
     }
     if ((b = hit(ev, "[data-cop-goback]"))) {
       var g4 = flowCopy(), x = Number(b.getAttribute("data-cop-goback"));
-      g4.done[x] = false; g4.e = x; g4.phase = "draft"; flowSave(g4); return true;
+      openPart(g4, x); flowSave(g4); return true;
     }
     if ((b = hit(ev, "[data-cop-ffinish]"))) {
       if (b.disabled) return true;
       var cid = PANE.chat.id;
-      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow() }, function(j){
+      act({ act:"flowFinish", id:cid, placeWord:placeWord(), skip:skipNow(), partWords:partWords() }, function(j){
         if (PANE && PANE.chat && PANE.chat.id === cid) { PANE.flow = j.flow; PANE.nextVersion = (j.saved && j.saved.n + 1) || PANE.nextVersion; }
         loadList(true); draw(); });
       return true;
@@ -58186,8 +58330,12 @@ var COPILOT = (function(){
   }
   function draw(){
     keepDraft();
+    /* A redraw while a card is a text box (§513) puts the cursor back where
+       it was; the text itself is CARDPEN's. */
+    var ae = document.activeElement, penAt = ae && ae.matches && ae.matches("[data-cop-pentext]") ? [ae.selectionStart, ae.selectionEnd] : null;
     var rl = document.querySelector("[data-cop-rails]"); if (rl) rl.innerHTML = railsInner();
     var m = document.querySelector("[data-cop-main]"); if (m) m.innerHTML = mainHtml();
+    if (penAt) { var pb = document.querySelector("[data-cop-pentext]"); if (pb) { pb.focus(); try { pb.setSelectionRange(penAt[0], penAt[1]); } catch (e) {} } }
     var msgs = document.querySelector("[data-cop-msgs]"); if (msgs) msgs.scrollTop = msgs.scrollHeight;
     fitPane(); fitBox();
     var r = document.querySelector("[data-cop-rename-box]"); if (r && document.activeElement !== r) { r.focus(); r.select(); }
@@ -59624,6 +59772,8 @@ var COPILOT = (function(){
     var t = hit(ev, "[data-cop-text]"); if (t && PANE && PANE.chat) { DRAFT[PANE.chat.id] = t.value; fitBox(); }
     var e = hit(ev, "[data-cop-edit-text]"); if (e && EDIT) EDIT.text = e.value;
     var fa = hit(ev, "[data-cop-fans]"); if (fa && flowOn()) PANE.flow.ans[PANE.flow.e][+fa.getAttribute("data-cop-fans")] = fa.value;
+    var pe = hit(ev, "[data-cop-pentext]");
+    if (pe && penHere()) { CARDPEN.text = pe.value; var ps = document.querySelector("[data-cop-pensave]"); if (ps) ps.disabled = !pe.value.trim() || !!THINKING; }
     var n = hit(ev, "[data-cop-edit-note]"); if (n && EDIT) EDIT.note = n.value;
     var sa = hit(ev, "[data-cop-sw-ans]");
     if (sa && swotOn()) { var sp = sa.getAttribute("data-cop-sw-ans").split("|"); var aa = PANE.swot.ans[sp[0]] = (PANE.swot.ans[sp[0]] || []).slice(); aa[+sp[1]] = sa.value; }
@@ -59670,6 +59820,10 @@ var COPILOT = (function(){
   });
   document.addEventListener("keydown", function(ev){
     if (ev.key === "Enter" && !ev.shiftKey && hit(ev, "[data-cop-text]")) { ev.preventDefault(); send(); }
+    if (hit(ev, "[data-cop-pentext]")) {
+      if (ev.key === "Escape") { ev.preventDefault(); CARDPEN = null; draw(); return; }
+      if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); penSave(); return; }
+    }
     if (ev.key === "Enter" && hit(ev, "[data-cop-rename-box]")) { ev.preventDefault(); rename(); }
     if (ev.key === "Escape" && hit(ev, "[data-cop-rename-box]")) { RENAME = null; draw(); }
     if (ev.key === "Escape" && (MENU || ASKDEL)) { MENU = null; ASKDEL = null; draw(); }

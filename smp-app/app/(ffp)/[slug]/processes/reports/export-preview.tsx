@@ -90,6 +90,11 @@ export type ExportProcessData = {
   processPurpose: string | null;
   inScope: string[];
   outOfScope: string[];
+  sopVersion: string | null;
+  sopOwner: string | null;
+  sopEffectiveDate: string | null;
+  sopApprovedBy: string | null;
+  sopRevisions: { version: string; date: string; by: string; change: string }[];
   externalEntities: { name: string; description: string }[];
   kpis: { metric: string; target: string; frequency: string }[];
   steps: {
@@ -100,6 +105,9 @@ export type ExportProcessData = {
     positionY: number;
     detailedAction: string[];
     exceptionHandling: string | null;
+    sopInputs: string | null;
+    sopOutput: string | null;
+    sopErrors: string | null;
     assignedRole: { id: string; name: string } | null;
     swimlaneRole: { id: string; name: string } | null;
     /** Whether this step needs every one of its predecessors, not just one (spec 015). */

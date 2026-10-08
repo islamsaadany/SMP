@@ -2788,7 +2788,7 @@ function templeTables(){
     '<div class="tcard">' +
       '<div class="trow"><label>Statement</label>' +
         fieldOr("temple", GROUP.aspiration, "big-field", function(v){ GROUP.aspiration = v; }) + '</div>' +
-      '<div class="trow"><label>End in mind</label>' +
+      '<div class="trow"><label>' + L1("endinmind") + '</label>' +
         fieldOr("temple", GROUP.endInMind, "big-field", function(v){ GROUP.endInMind = v; }) + '</div>' +
       '<div class="trow"><label>Horizon</label>' +
         inputOr("temple", GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</div>' +
@@ -5443,7 +5443,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
     (endInMind || editing
-      ? '<div class="endin"><span class="boxlab">End in mind</span>' +
+      ? '<div class="endin"><span class="boxlab">' + L1("endinmind") + '</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
     /* ── WHILE THE PEN IS OPEN THE TABLE IS NOT IN HERE (§96.6) ────

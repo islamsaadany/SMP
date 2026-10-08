@@ -244,7 +244,7 @@ function unitAimSlides(u){
       '<div class="aimtop"><div><span class="dlab">' + L1("aspiration") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
-        ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
+        ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') + '</div>') +
     (aimRows
       ? '<div class="aimbottom">' +
@@ -934,7 +934,7 @@ function companyFoundationSlides(){
   return ['<section class="dslide"' + anch("aim", "After the Foundation") + '><h2>Foundation</h2>' +
     ((asp || end) ? '<div class="aimtop">' +
       (asp ? '<div><span class="dlab">' + L1("aspiration") + '</span><p class="asp2">' + esc(asp) + '</p></div>' : '') +
-      (end ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
+      (end ? '<div><span class="dlab">' + L1("endinmind") + '</span><p class="asp3">' + esc(end) + '</p></div>' : '') +
       '</div>' : '') +
     (rows ? '<div class="aimbottom"><span class="dlab">' + L("keyobj","bu") + horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +

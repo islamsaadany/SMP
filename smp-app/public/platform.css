@@ -11220,7 +11220,7 @@ body.presenting #buildband { display:none; }
 .copcards { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
 @media (max-width:520px){ .copcards { grid-template-columns:1fr; } }
 .copcard { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface);
-           display:flex; flex-direction:column; gap:4px; min-width:0; }
+           display:flex; flex-direction:column; gap:4px; min-width:0; position:relative; }
 .copcard.wide { grid-column:1 / -1; }
 .copcard.now { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
 .copcard h3 { margin:0; font-size:14px; display:flex; justify-content:space-between; gap:8px; color:var(--ink); }
@@ -11241,6 +11241,30 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 .copcard li { overflow-wrap:anywhere; }
 .copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
+/* §513 — a card with text carries a pen and "Edit with AI", shown when the
+   card is hovered or anything in it has the keyboard; on a touch screen,
+   where nothing hovers, they sit on a line of their own so the status the
+   card states is never covered. */
+.copcard.acts:hover { border-color:var(--gold); }
+.copcact { position:absolute; top:6px; right:6px; display:flex; gap:4px; padding-left:10px; background:var(--surface);
+           opacity:0; transition:opacity .12s; }
+.copcard.acts:hover .copcact, .copcard.acts:focus-within .copcact { opacity:1; }
+/* The status word ("From the plan") is wider than the two icons, so while
+   they are up it steps aside rather than showing two letters beside them;
+   visibility, never display, so the heading keeps its height. */
+@media (hover:hover){ .copcard.acts:hover .copst, .copcard.acts:focus-within .copst { visibility:hidden; } }
+@media (hover:none){ .copcact { position:static; opacity:1; justify-content:flex-end; padding:0; background:none; } }
+.copcact button { width:26px; height:26px; display:grid; place-items:center; border:1px solid var(--line); border-radius:6px;
+                  background:var(--surface); color:var(--ink-2); cursor:pointer; padding:0; }
+.copcact button:hover, .copcact button:focus-visible { color:var(--ink); border-color:var(--gold); outline:none; }
+.copcact svg { width:15px; height:15px; display:block; }
+.copcard.editing { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+textarea.copfedit { display:block; width:100%; box-sizing:border-box; font:13px/1.45 var(--sans); color:var(--ink); background:var(--surface);
+                    border:1px solid var(--field-line, var(--line)); border-radius:6px; padding:7px 9px; margin:6px 0 0;
+                    resize:vertical; field-sizing:content; min-height:5em; }
+textarea.copfedit:focus { outline:2px solid var(--focus, var(--gold)); outline-offset:0; }
+.copeact { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.copeact .copkh { margin-right:auto; font-size:11.5px; color:var(--ink-3); }
 .copchoice { display:inline-block; border:1px solid var(--line); border-radius:6px; padding:4px 10px; margin:2px 4px 0 0;
              font:600 var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-3); background:var(--surface); }
 .copchoice.picked { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }

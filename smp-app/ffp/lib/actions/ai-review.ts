@@ -4,15 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/ffp/lib/db/client";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
-import { validateRaciMatrix } from "@/ffp/lib/domain/raci-validation";
-import {
-  additionalApprovals,
-  buildAuthorityTableRows,
-  validateAuthorityTable,
-  DIRECTION_LABELS,
-  requiresApproval,
-} from "@/ffp/lib/domain/authority-table";
-import { findStructuralGaps, buildProcessReviewPrompt } from "@/ffp/lib/domain/process-review";
+import { buildProcessReviewPrompt } from "@/ffp/lib/domain/process-review";
 import {
   normalizeFindingTitle,
   partitionNewFindings,
@@ -23,7 +15,7 @@ import {
 import { runProcessReview } from "@/ffp/lib/ai/process-review";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
 import type { ReviewFindingCategory, ReviewFindingArea, ReviewFindingSeverity } from "@/ffp/generated/prisma/client";
-import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
+import { loadProcessReviewContext } from "@/ffp/lib/data/process-review-context";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
 
@@ -63,101 +55,11 @@ export async function reviewProcessWithAI(
   ]);
   if (!workspace || !process || process.workspaceId !== workspaceId) return notFound();
 
-  const [steps, connections, activities, matrixStatus, roles, people, authorityAssignments, existingFindings] =
-    await Promise.all([
-      prisma.processStep.findMany({
-        where: { processId },
-        include: { assignedRole: true, swimlaneRole: true, links: { include: { targetProcess: true } } },
-        orderBy: { createdAt: "asc" },
-      }),
-      prisma.stepConnection.findMany({ where: { processId } }),
-      prisma.activity.findMany({
-        where: { processId },
-        include: { raciAssignments: { include: { role: true } } },
-        orderBy: { order: "asc" },
-      }),
-      prisma.raciMatrixStatus.findUnique({ where: { processId } }),
-      prisma.role.findMany({ where: { workspaceId } }),
-      prisma.person.findMany({ where: { workspaceId } }),
-      prisma.authorityAssignment.findMany({ where: { processId }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
-      prisma.reviewFinding.findMany({ where: { processId }, include: { integratedStep: true } }),
-    ]);
-
-  const stepLabelById = new Map(steps.map((s) => [s.id, s.label]));
-
-  const raciActivities = activities.map((a) => ({
-    activityId: a.id,
-    name: a.name,
-    assignments: a.raciAssignments.map((ra) => ({ roleId: ra.roleId, code: ra.code })),
-  }));
-  const raciIssues = validateRaciMatrix(raciActivities);
-
-  const roleNameById = new Map(roles.map((r) => [r.id, r.name]));
-  const personNameById = new Map(people.map((p) => [p.id, p.name]));
-  const authorityRows = buildAuthorityTableRows(
-    steps.map((s) => ({ id: s.id, type: s.type, label: s.label })),
-    activities.map((a) => ({ id: a.id, name: a.name, relatedStepId: a.relatedStepId, order: a.order })),
-    authorityAssignments.map(toAuthorityAssignmentData)
-  );
-  const authorityIssues = validateAuthorityTable(authorityRows);
-  const authorityRowsForPrompt = authorityRows.map((r) => ({
-    rowId: r.id,
-    label: r.label,
-    skipped: r.skipped,
-    slaDays: r.slaDays,
-    threshold: r.threshold,
-    directionLabel: DIRECTION_LABELS[r.direction].label,
-    requiresApproval: requiresApproval(r.direction),
-    approverLabel: r.approverRoleId
-      ? (roleNameById.get(r.approverRoleId) ?? null)
-      : r.approverPersonId
-        ? (personNameById.get(r.approverPersonId) ?? null)
-        : null,
-    extraApprovals: additionalApprovals(r.rules).map((rule) => ({
-      amount: rule.amount,
-      label: rule.whoRoleId ? (roleNameById.get(rule.whoRoleId) ?? null) : null,
-    })),
-    escalationLabel: r.escalationRoleId ? (roleNameById.get(r.escalationRoleId) ?? null) : null,
-  }));
-
-  const structuralGaps = findStructuralGaps(
-    steps.map((s) => ({ id: s.id, type: s.type, label: s.label })),
-    connections.map((c) => ({ fromStepId: c.fromStepId, toStepId: c.toStepId }))
-  );
-
-  const promptText = buildProcessReviewPrompt({
-    workspaceName: workspace.name,
-    workspaceIndustry: workspace.industry,
-    processCode: process.code,
-    processName: process.name,
-    processDescription: process.description,
-    steps: steps.map((s) => ({
-      type: s.type,
-      label: s.label,
-      assignedRoleName: s.assignedRole?.name ?? null,
-      swimlaneRoleName: s.swimlaneRole?.name ?? null,
-      linkedProcessCodes: s.links.map((l) => l.targetProcess.code),
-    })),
-    connections: connections.map((c) => ({
-      fromLabel: stepLabelById.get(c.fromStepId) ?? c.fromStepId,
-      toLabel: stepLabelById.get(c.toStepId) ?? c.toStepId,
-      connectionLabel: c.label,
-    })),
-    raci: {
-      matrixStatus: matrixStatus?.status ?? "DRAFT",
-      activities: activities.map((a) => ({
-        id: a.id,
-        name: a.name,
-        assignments: a.raciAssignments.map((ra) => ({ roleName: ra.role.name, code: ra.code })),
-      })),
-      issues: raciIssues,
-    },
-    authority: {
-      rows: authorityRowsForPrompt,
-      issues: authorityIssues,
-    },
-    structuralGaps,
-  });
+  const [promptContext, existingFindings] = await Promise.all([
+    loadProcessReviewContext(workspace, process),
+    prisma.reviewFinding.findMany({ where: { processId }, include: { integratedStep: true } }),
+  ]);
+  const promptText = buildProcessReviewPrompt(promptContext);
 
   const outcome = await runProcessReview(withAnswerLanguage(promptText, await getActionLocale()));
   if (!outcome.ok) {

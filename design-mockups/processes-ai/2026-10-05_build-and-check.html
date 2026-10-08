@@ -1,0 +1,234 @@
+<title>Processes AI Build and Check</title>
+<style>
+/* Layout: a stack of three framed screens, each the real page area in the Processes module's slate look, with the new parts marked. */
+:root{
+  --bg:#f1f5f9; --card:#ffffff; --line:#e2e8f0; --head:#f8fafc; --ink:#0f172a; --ink2:#475569; --ink3:#64748b;
+  --ai:#4338ca; --ai-bg:#eef2ff; --ai-bd:#a5b4fc; --btn:#0f172a; --btn-ink:#ffffff;
+  --hi:#b91c1c; --hi-bg:#fef2f2; --md:#b45309; --md-bg:#fffbeb; --lo:#475569; --lo-bg:#f1f5f9;
+  --ok:#047857; --ok-bg:#ecfdf5; --new:#16325C; --new-ink:#ffffff; --note:#fffbeb; --note-bd:#fde68a;
+  --sans: "Source Sans 3", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --head:#0f1828; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8;
+  --ai:#c7cdff; --ai-bg:#1e2350; --ai-bd:#4c56a8; --btn:#e5e9f0; --btn-ink:#0b1220;
+  --hi:#fca5a5; --hi-bg:#3a1414; --md:#fcd34d; --md-bg:#2a2210; --lo:#a7b1c2; --lo-bg:#1a2539;
+  --ok:#6ee7b7; --ok-bg:#0f2a22; --new:#9fb8e6; --new-ink:#0b1220; --note:#2a2210; --note-bd:#5c4a1c; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --head:#0f1828; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8;
+  --ai:#c7cdff; --ai-bg:#1e2350; --ai-bd:#4c56a8; --btn:#e5e9f0; --btn-ink:#0b1220;
+  --hi:#fca5a5; --hi-bg:#3a1414; --md:#fcd34d; --md-bg:#2a2210; --lo:#a7b1c2; --lo-bg:#1a2539;
+  --ok:#6ee7b7; --ok-bg:#0f2a22; --new:#9fb8e6; --new-ink:#0b1220; --note:#2a2210; --note-bd:#5c4a1c; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans)}
+main{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:24px 64px;display:grid;gap:28px}
+h1{font-size:22px;margin:0;text-wrap:balance}
+.lede{color:var(--ink2);margin:4px 0 0;max-width:68ch}
+.screen{display:grid;gap:8px}
+.screen>h2{font-size:15px;margin:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--new);color:var(--new-ink)}
+.where{color:var(--ink3);font-size:13px;font-weight:400}
+.frame{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.ptitle{font-size:19px;font-weight:600;margin:0}
+.psub{color:var(--ink3);font-size:13px;margin:2px 0 14px}
+.btn{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:7px 14px;cursor:pointer;border:1px solid transparent}
+.btn.dark{background:var(--btn);color:var(--btn-ink)}
+.btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line)}
+.btn.ai{background:var(--ai-bg);color:var(--ai);border:1px dashed var(--ai-bd)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+.aibox{border:1px dashed var(--ai-bd);background:color-mix(in srgb,var(--ai-bg) 45%,var(--card));border-radius:12px;padding:16px;display:grid;gap:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--ink2);flex:1;min-width:200px}
+input[type=text],textarea{font:inherit;font-size:13.5px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+textarea{min-height:92px;resize:vertical}
+.newmark{outline:2px solid var(--new);outline-offset:3px;border-radius:8px;position:relative}
+.newmark::after{content:"new";position:absolute;top:-10px;right:8px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--new);color:var(--new-ink);padding:1px 6px;border-radius:999px}
+.check{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink2)}
+.draft{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:720px){.draft{grid-template-columns:1fr}}
+.dh{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin:0 0 6px}
+ol.steps{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+ol.steps li{display:flex;gap:8px;align-items:center;font-size:13px}
+.st{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:var(--lo-bg);color:var(--lo);min-width:62px;text-align:center}
+.st.d{background:var(--ai-bg);color:var(--ai)} .st.e{background:var(--ok-bg);color:var(--ok)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--head);text-align:left;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3);padding:7px 10px;border-bottom:1px solid var(--line)}
+td{padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.role{display:inline-flex;gap:4px;align-items:center;font-size:12px;padding:1px 7px;border-radius:999px;background:var(--ok-bg);color:var(--ok);white-space:nowrap}
+.role.out{background:var(--md-bg);color:var(--md)}
+.legend{font-size:12px;color:var(--ink3);display:flex;gap:12px;flex-wrap:wrap}
+.code{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink2)}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:28px 16px;text-align:center;color:var(--ink3);display:grid;gap:10px;justify-items:center}
+.stepper{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.stepper span{font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink3)}
+.stepper span.on{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.pick td:first-child,.pick th:first-child{width:36px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.muted{color:var(--ink3);font-size:12.5px}
+.result{margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rhead{background:var(--head);padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.counts{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px}
+.pill.hi{background:var(--hi-bg);color:var(--hi)} .pill.md{background:var(--md-bg);color:var(--md)} .pill.lo{background:var(--lo-bg);color:var(--lo)}
+.summary{padding:12px 14px;color:var(--ink2);border-bottom:1px solid var(--line);max-width:80ch}
+.grp{padding:10px 14px 4px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3)}
+.find{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:10px 14px;border-top:1px solid var(--line)}
+.find .pill{align-self:start}
+.find b{font-weight:600}
+.find p{margin:2px 0 0;color:var(--ink2);font-size:13px}
+.find .fix{color:var(--ink);font-size:13px}
+.find a{color:var(--ai);font-weight:600;font-size:12.5px;text-decoration:none}
+.notes{border:1px solid var(--note-bd);background:var(--note);border-radius:12px;padding:14px 16px}
+.notes h3{margin:0 0 6px;font-size:14px}
+.notes ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid var(--ai-bd);border-top-color:var(--ai);border-radius:50%;animation:r 0.8s linear infinite;vertical-align:-2px}
+@keyframes r{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+
+<main>
+<header>
+  <h1>Processes: build with AI, and check before export</h1>
+  <p class="lede">Three screens. The parts outlined in navy and marked <b>new</b> are what changes; everything else is the page as it is today. The buttons work, so you can press through each one.</p>
+</header>
+
+<!-- 1 -->
+<section class="screen">
+  <h2><span class="tag">1</span> Draft a new process <span class="where">· Processes list, the existing "Generate from best practice" button</span></h2>
+  <div class="frame">
+    <p class="ptitle">Processes</p>
+    <p class="psub">RHI · 14 processes</p>
+    <div class="aibox">
+      <div class="row">
+        <label class="f" for="pname">Process to draft<input id="pname" type="text" value="Supplier invoice approval"></label>
+      </div>
+      <label class="f newmark" for="pnotes" style="min-width:0">How it works today (optional — describe it or paste notes)
+        <textarea id="pnotes">Invoices arrive by email to the AP clerk. Anything over 50,000 EGP needs the Finance Manager's sign-off, over 500,000 the CFO. Purchasing confirms the goods were received before we pay. Payments run every Thursday.</textarea>
+      </label>
+      <label class="check newmark" for="useorg" style="padding:4px 6px"><input id="useorg" type="checkbox" checked> Use the roles in our org chart</label>
+      <div class="row"><button class="btn ai" id="gen1">✨ Draft it</button><button class="btn ghost">Cancel</button><span class="muted" id="gen1s"></span></div>
+
+      <div id="draft1">
+        <div class="draft">
+          <div>
+            <p class="dh">Process map — 8 steps</p>
+            <ol class="steps">
+              <li><span class="st e">START</span>Invoice received by email</li>
+              <li><span class="st">TASK</span>Log invoice and match to purchase order</li>
+              <li><span class="st">TASK</span>Confirm goods received</li>
+              <li><span class="st d">DECISION</span>Amount over 50,000 EGP?</li>
+              <li><span class="st">TASK</span>Finance Manager approves</li>
+              <li><span class="st d">DECISION</span>Amount over 500,000 EGP?</li>
+              <li><span class="st">TASK</span>CFO approves</li>
+              <li><span class="st e">END</span>Paid in Thursday payment run</li>
+            </ol>
+          </div>
+          <div>
+            <p class="dh">RACI — who does what</p>
+            <div class="tblwrap"><table>
+              <thead><tr><th>Activity</th><th>Accountable</th><th>Responsible</th></tr></thead>
+              <tbody>
+                <tr><td>Log and match invoice</td><td><span class="role">AP Accountant</span></td><td><span class="role">AP Accountant</span></td></tr>
+                <tr><td>Confirm receipt</td><td><span class="role">Procurement Manager</span></td><td><span class="role out">Warehouse Clerk</span></td></tr>
+                <tr><td>Approve payment</td><td><span class="role">Finance Manager</span></td><td><span class="role">Finance Manager</span></td></tr>
+                <tr><td>Approve over 500,000</td><td><span class="role">CFO</span></td><td><span class="role">CFO</span></td></tr>
+                <tr><td>Release payment</td><td><span class="role">Treasury Lead</span></td><td><span class="role">AP Accountant</span></td></tr>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+        <p class="legend newmark" style="padding:4px 6px;margin:12px 0 0"><span><span class="role">green</span> a role in your org chart</span><span><span class="role out">amber</span> not in your org chart — kept, so you can rename it or add it</span></p>
+        <div class="row" style="margin-top:12px"><button class="btn dark">Use draft →</button><button class="btn ghost">Discard</button><span class="muted">Creates the process and opens its Process Map. Nothing is saved until you press Use draft.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="screen">
+  <h2><span class="tag">2</span> Draft a process you already created <span class="where">· a process's Process Map page, only while it has no steps</span></h2>
+  <div class="frame">
+    <p class="muted" style="margin:0">FIN107 · Supplier onboarding</p>
+    <p class="ptitle">Process Map</p>
+    <div class="stepper" style="margin-top:10px"><span>Process</span><span class="on">Process Map</span><span>RACI Matrix</span><span>Authority Matrix</span><span>AI Review</span></div>
+    <div class="empty">
+      <div>No steps yet.</div>
+      <div class="row" style="justify-content:center"><button class="btn ghost">+ Add the first step</button><button class="btn ai newmark" id="gen2">✨ Draft it with AI</button></div>
+      <div class="muted" style="max-width:56ch">Opens the same box as screen 1, with the process name already filled in. The draft goes into this process — it never replaces steps you have written, so the button is only offered while the map is empty.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="screen">
+  <h2><span class="tag">3</span> Check end to end before export <span class="where">· Export Report page, between ticking processes and Preview report</span></h2>
+  <div class="frame">
+    <p class="ptitle">Export Report</p>
+    <p class="psub">Pick which processes to include.</p>
+    <div class="tblwrap"><table class="pick">
+      <thead><tr><th><input type="checkbox" aria-label="Select all" checked></th><th>Code</th><th>Process</th></tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox" checked aria-label="ADM105"></td><td class="code">ADM105</td><td>Admin - End2End</td></tr>
+        <tr><td><input type="checkbox" checked aria-label="ADM103"></td><td class="code">ADM103</td><td>Admin - Operations</td></tr>
+        <tr><td><input type="checkbox" checked aria-label="FIN100"></td><td class="code">FIN100</td><td>Supplier invoice approval</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="actions">
+      <button class="btn ai newmark" id="chk">✨ Check these 3 end to end</button>
+      <button class="btn dark">Preview report →</button>
+      <span class="muted" id="chks">Optional. Runs only when you press it, and looks at everything fresh.</span>
+    </div>
+
+    <div class="result newmark" id="res">
+      <div class="rhead">
+        <b>Checked 3 processes just now</b>
+        <span class="counts"><span class="pill hi">2 high</span><span class="pill md">3 medium</span><span class="pill lo">1 low</span></span>
+      </div>
+      <div class="summary">The three processes hang together, but the admin flow loses track of who owns asset requests after approval, and the invoice process sends large payments to a role the admin side never hands over to. Fix the two high items before sending this pack to the client.</div>
+
+      <div class="grp">Across these processes</div>
+      <div class="find"><span class="pill hi">High</span><div><b>ADM105 hands over to a process that is not in this pack</b><p>Step "Raise purchase request" branches to FIN102 Purchase to pay, which you have not ticked. The report will show a link to nothing.</p><p class="fix">Fix: tick FIN102, or remove the branch.</p></div></div>
+      <div class="find"><span class="pill md">Medium</span><div><b>"Approve payment" has two different owners</b><p>Accountable is Finance Manager in FIN100 and Admin Manager in ADM103.</p><p class="fix">Fix: agree one owner and use it in both.</p></div></div>
+
+      <div class="grp">ADM105 · Admin - End2End</div>
+      <div class="find"><span class="pill hi">High</span><div><b>A decision with only one way out</b><p>"Request within budget?" has no step for the No answer, so the process stops there.</p><p class="fix">Fix: add what happens when it is over budget. <a href="#">Open Process Map →</a></p></div></div>
+      <div class="find"><span class="pill md">Medium</span><div><b>Two steps have nobody in the RACI</b><p>"Archive request" and "Notify requester" appear on the map but not in the RACI matrix.</p><p class="fix">Fix: add them to the RACI. <a href="#">Open RACI →</a></p></div></div>
+
+      <div class="grp">FIN100 · Supplier invoice approval</div>
+      <div class="find"><span class="pill md">Medium</span><div><b>No limit set for the CFO in the Authority Matrix</b><p>The map sends invoices over 500,000 EGP to the CFO, but the Authority Matrix has no row for that amount.</p><p class="fix">Fix: add the limit. <a href="#">Open Authority Matrix →</a></p></div></div>
+      <div class="find"><span class="pill lo">Low</span><div><b>Same person logs and releases payment</b><p>AP Accountant is Responsible for both. Common in small teams, a control gap in larger ones.</p><p class="fix">Fix: consider moving release to Treasury.</p></div></div>
+
+      <div class="grp">ADM103 · Admin - Operations</div>
+      <div class="find"><span class="pill" style="background:var(--ok-bg);color:var(--ok)">Fine</span><div><b>Nothing to flag</b></div></div>
+
+      <div class="actions" style="padding:0 14px 14px"><button class="btn dark">Preview report →</button><span class="muted">A warning only — you can preview and export whatever it found.</span></div>
+    </div>
+  </div>
+</section>
+
+<aside class="notes">
+  <h3>Three things to confirm</h3>
+  <ol>
+    <li>A role the AI needs that is <b>not in your org chart</b> (amber above): keep it in the draft so you can rename it or add it later. I recommend this over leaving the step without an owner.</li>
+    <li>The export check <b>is not saved</b>: it shows for this export and is gone when you leave. A process's own AI Review keeps its findings as it does today. Agree?</li>
+    <li>The draft covers the <b>Process Map and RACI</b>, as today. The Authority Matrix stays yours to fill — limits are company decisions the AI should not guess.</li>
+  </ol>
+</aside>
+</main>
+
+<script>
+function fake(btn,status,target,label){
+  btn.addEventListener('click',function(){
+    var s=document.getElementById(status); var t=document.getElementById(target);
+    if(t) t.hidden=true;
+    s.innerHTML='<span class="spin"></span> '+label;
+    btn.disabled=true;
+    setTimeout(function(){ s.textContent=''; if(t) t.hidden=false; btn.disabled=false; },1100);
+  });
+}
+fake(document.getElementById('gen1'),'gen1s','draft1','Drafting…');
+fake(document.getElementById('chk'),'chks','res','Checking 3 processes…');
+document.getElementById('gen2').addEventListener('click',function(){document.getElementById('pname').focus();document.getElementById('pname').scrollIntoView({behavior:'smooth',block:'center'});});
+</script>

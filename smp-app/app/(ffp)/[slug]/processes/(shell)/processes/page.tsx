@@ -5,6 +5,8 @@ import { WorkspacePageHeader } from "../workspace-page-header";
 import { CreateProcessForm, CloneProcessButton, EditProcessButton, ArchiveProcessButton } from "./process-forms";
 import { GenerateTemplateForm } from "./template-form";
 import { ImportPanel } from "./import-panel";
+import { FoldProvider, FoldRow, FoldToggle, FoldAllControls } from "./process-fold";
+import { foldChains } from "./fold-chains";
 import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { hasSufficientAccess } from "@/ffp/lib/domain/access-control";
 import { orderProcessTree } from "@/ffp/lib/domain/process-hierarchy";
@@ -77,6 +79,10 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
     ? processes.map((process) => ({ process, depth: 0 }))
     : orderProcessTree(processes);
 
+  // Search results are flat and are never folded (process-fold.tsx).
+  const { ancestorsOf, directSubs } = foldChains(rows);
+  const folding = !q;
+
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-8">
       <WorkspacePageHeader
@@ -122,6 +128,8 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
         </p>
       )}
 
+      <FoldProvider enabled={folding} parentIds={[...directSubs.keys()]}>
+      <FoldAllControls any={directSubs.size > 0} />
       <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-start text-xs font-semibold uppercase text-slate-500">
@@ -138,21 +146,31 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
           </thead>
           <tbody>
             {rows.map(({ process: p, depth }) => (
-              <tr key={p.id} className="border-t border-slate-100">
-                <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-700">
-                  {/* Indented by how deep it actually sits, so a sub-process of
-                      a sub-process reads as one rather than as a sibling of
-                      its own parent. */}
-                  {depth > 0 ? (
-                    <span className="me-1 text-slate-300" style={{ paddingLeft: (depth - 1) * 12 }}>
-                      ↳
-                    </span>
-                  ) : null}
+              <FoldRow
+                key={p.id}
+                ancestors={ancestorsOf.get(p.id) ?? []}
+                className={depth > 0 ? "border-t border-slate-100 bg-slate-50" : "border-t border-slate-100"}
+              >
+                <td
+                  className="whitespace-nowrap px-4 py-2 font-mono text-xs font-semibold text-slate-700"
+                  // Indented by how deep it actually sits, so a sub-process of
+                  // a sub-process reads as one rather than as a sibling of its
+                  // own parent.
+                  style={depth > 0 ? { paddingLeft: 16 + depth * 30 } : undefined}
+                >
+                  <FoldToggle id={p.id} code={p.code} count={directSubs.get(p.id) ?? 0} />
                   {p.code}
                 </td>
                 <td className="px-4 py-2 font-medium text-slate-900">
                   {p.name}
-                  {p.parentProcessId && (
+                  {folding && (directSubs.get(p.id) ?? 0) > 0 && (
+                    <span className="ms-2 text-xs font-normal text-slate-500" data-fold-count>
+                      {directSubs.get(p.id) === 1 ? "1 sub-process" : `${directSubs.get(p.id)} sub-processes`}
+                    </span>
+                  )}
+                  {/* Said only where the parent is not the row it is folded
+                      under — a search result, or one whose parent is deleted. */}
+                  {p.parentProcessId && depth === 0 && (
                     <span className="ms-2 text-xs font-normal text-slate-500">
                       sub-process of {p.parentProcess?.code}
                       {/* The parent is loaded regardless of its own deletion, so
@@ -226,7 +244,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                     </Link>
                   </div>
                 </td>
-              </tr>
+              </FoldRow>
             ))}
             {rows.length === 0 && (
               <tr>
@@ -238,6 +256,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
           </tbody>
         </table>
       </div>
+      </FoldProvider>
 
       <div className="mt-4 flex flex-col gap-3">
         <CreateProcessForm

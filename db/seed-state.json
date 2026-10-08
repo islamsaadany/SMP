@@ -6402,6 +6402,13 @@
    "group": "SWOT",
    "bu": "SWOT",
    "note": "Strengths, weaknesses, opportunities and threats"
+  },
+  {
+   "key": "endinmind",
+   "internal": "End in Mind",
+   "group": "End in Mind",
+   "bu": "End in Mind",
+   "note": "The lasting mark the organisation works towards, long after this plan ends"
   }
  ],
  "bands": [

@@ -7,12 +7,23 @@ import { requireWorkspaceAccess } from "@/ffp/lib/auth/workspace";
 import { generateProcessCode, isCodeAvailable } from "@/ffp/lib/domain/process-hierarchy";
 import { laneY, nextStepX, FIRST_STEP_X } from "@/ffp/lib/domain/process-layout";
 import { runProcessTemplateGeneration, type ProcessTemplateResult } from "@/ffp/lib/ai/process-template";
+import { getActionLocale } from "@/ffp/lib/i18n/server";
+import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
 
 const generateSchema = z.object({
   workspaceId: z.string().min(1),
   processName: z.string().trim().min(1).max(120),
+  /** How the work runs today, in the consultant's own words (optional). */
+  notes: z.string().trim().max(4000).optional().or(z.literal("")),
+  /** Offer the workspace's org-chart roles to the model (default on). */
+  useOrgChart: z.boolean().default(true),
 });
+
+export type ProcessTemplateDraft = ProcessTemplateResult & {
+  /** Active org-chart role names, so the screen can mark a draft role as known or not. */
+  orgRoles: string[];
+};
 
 /**
  * Drafts a best-practice Process Map + RACI matrix using the workspace's
@@ -22,7 +33,7 @@ const generateSchema = z.object({
  */
 export async function generateProcessTemplateDraft(
   input: z.infer<typeof generateSchema>
-): Promise<ActionResult<ProcessTemplateResult>> {
+): Promise<ActionResult<ProcessTemplateDraft>> {
   const parsed = generateSchema.safeParse(input);
   if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
 
@@ -31,20 +42,39 @@ export async function generateProcessTemplateDraft(
 
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: parsed.data.workspaceId } });
 
+  const orgRoles = (
+    await prisma.role.findMany({
+      where: { workspaceId: parsed.data.workspaceId, archivedAt: null },
+      orderBy: { name: "asc" },
+      select: { name: true },
+    })
+  ).map((r) => r.name);
+
   const promptLines = [
     `Draft a process named or about: "${parsed.data.processName}".`,
     `Client: ${workspace.name}`,
     workspace.industry ? `Industry / sector: ${workspace.industry}` : "Industry / sector: not specified.",
     workspace.description ? `Background: ${workspace.description}` : "No further background provided.",
   ];
+  if (parsed.data.notes) {
+    promptLines.push(`How this works today (the consultant's notes — follow them over generic practice):\n${parsed.data.notes}`);
+  }
+  if (parsed.data.useOrgChart && orgRoles.length > 0) {
+    promptLines.push(
+      `Roles in this client's org chart: ${orgRoles.join("; ")}.\n` +
+        "Use these exact names for steps and RACI wherever one fits. Only invent a new role name when none of them can do the work."
+    );
+  }
 
-  const outcome = await runProcessTemplateGeneration(promptLines.join("\n"));
+  const outcome = await runProcessTemplateGeneration(
+    withAnswerLanguage(promptLines.join("\n"), await getActionLocale())
+  );
   if (!outcome.ok) {
     if (outcome.reason === "NOT_CONFIGURED") return aiUnavailable(outcome.message);
     return validationError(outcome.message);
   }
 
-  return ok(outcome.data);
+  return ok({ ...outcome.data, orgRoles });
 }
 
 const templateStepSchema = z.object({
@@ -73,6 +103,80 @@ const createFromTemplateSchema = z.object({
   steps: z.array(templateStepSchema).min(1).max(40),
   activities: z.array(templateActivitySchema).max(40).default([]),
 });
+
+type DraftTx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
+/**
+ * Writes a draft's steps (chained in order), RACI activities and assignments
+ * into a process, resolving Roles by name — an existing one in this workspace,
+ * or a new one. Shared by "create a process from a draft" and "fill an empty
+ * process from a draft" so the two cannot lay a draft out differently.
+ */
+async function materializeDraft(
+  tx: DraftTx,
+  args: {
+    workspaceId: string;
+    processId: string;
+    steps: z.infer<typeof templateStepSchema>[];
+    activities: z.infer<typeof templateActivitySchema>[];
+  }
+) {
+  const { workspaceId, processId, steps, activities } = args;
+  const roleIdByName = new Map<string, string>();
+  async function resolveRoleId(name: string): Promise<string> {
+    const key = name.trim();
+    const cached = roleIdByName.get(key.toLowerCase());
+    if (cached) return cached;
+    const existingRole = await tx.role.findFirst({
+      where: { workspaceId, name: { equals: key, mode: "insensitive" }, archivedAt: null },
+    });
+    const roleId = existingRole ? existingRole.id : (await tx.role.create({ data: { workspaceId, name: key } })).id;
+    roleIdByName.set(key.toLowerCase(), roleId);
+    return roleId;
+  }
+
+  const laneOrder: string[] = [];
+  const usedX: number[] = [];
+  let previousStepId: string | undefined;
+
+  for (const s of steps) {
+    const roleId = s.roleName ? await resolveRoleId(s.roleName) : undefined;
+    if (roleId && !laneOrder.includes(roleId)) laneOrder.push(roleId);
+    const positionX = usedX.length === 0 ? FIRST_STEP_X : nextStepX(usedX);
+    usedX.push(positionX);
+    const positionY = laneY(roleId ?? null, laneOrder);
+
+    const newStep = await tx.processStep.create({
+      data: {
+        processId,
+        type: s.type,
+        label: s.label,
+        assignedRoleId: roleId,
+        swimlaneRoleId: roleId,
+        positionX,
+        positionY,
+      },
+    });
+    if (previousStepId) {
+      await tx.stepConnection.create({
+        data: { processId, fromStepId: previousStepId, toStepId: newStep.id },
+      });
+    }
+    previousStepId = newStep.id;
+  }
+
+  for (const [i, a] of activities.entries()) {
+    const newActivity = await tx.activity.create({
+      data: { processId, name: a.name, order: i },
+    });
+    for (const asn of a.assignments) {
+      const roleId = await resolveRoleId(asn.roleName);
+      await tx.raciAssignment.create({
+        data: { activityId: newActivity.id, roleId, code: asn.code },
+      });
+    }
+  }
+}
 
 const MAX_CODE_GENERATION_ATTEMPTS = 5;
 
@@ -117,64 +221,10 @@ export async function createProcessFromTemplate(
 
     try {
       const process = await prisma.$transaction(async (tx) => {
-        const roleIdByName = new Map<string, string>();
-        async function resolveRoleId(name: string): Promise<string> {
-          const key = name.trim();
-          const cached = roleIdByName.get(key.toLowerCase());
-          if (cached) return cached;
-          const existingRole = await tx.role.findFirst({
-            where: { workspaceId, name: key, archivedAt: null },
-          });
-          const roleId = existingRole ? existingRole.id : (await tx.role.create({ data: { workspaceId, name: key } })).id;
-          roleIdByName.set(key.toLowerCase(), roleId);
-          return roleId;
-        }
-
         const newProcess = await tx.process.create({
           data: { workspaceId, code, name: parsed.data.processName, parentProcessId, categoryId },
         });
-
-        const laneOrder: string[] = [];
-        const usedX: number[] = [];
-        let previousStepId: string | undefined;
-
-        for (const s of steps) {
-          const roleId = s.roleName ? await resolveRoleId(s.roleName) : undefined;
-          if (roleId && !laneOrder.includes(roleId)) laneOrder.push(roleId);
-          const positionX = usedX.length === 0 ? FIRST_STEP_X : nextStepX(usedX);
-          usedX.push(positionX);
-          const positionY = laneY(roleId ?? null, laneOrder);
-
-          const newStep = await tx.processStep.create({
-            data: {
-              processId: newProcess.id,
-              type: s.type,
-              label: s.label,
-              assignedRoleId: roleId,
-              swimlaneRoleId: roleId,
-              positionX,
-              positionY,
-            },
-          });
-          if (previousStepId) {
-            await tx.stepConnection.create({
-              data: { processId: newProcess.id, fromStepId: previousStepId, toStepId: newStep.id },
-            });
-          }
-          previousStepId = newStep.id;
-        }
-
-        for (const [i, a] of activities.entries()) {
-          const newActivity = await tx.activity.create({
-            data: { processId: newProcess.id, name: a.name, order: i },
-          });
-          for (const asn of a.assignments) {
-            const roleId = await resolveRoleId(asn.roleName);
-            await tx.raciAssignment.create({
-              data: { activityId: newActivity.id, roleId, code: asn.code },
-            });
-          }
-        }
+        await materializeDraft(tx, { workspaceId, processId: newProcess.id, steps, activities });
 
         return newProcess;
       });
@@ -189,4 +239,46 @@ export async function createProcessFromTemplate(
   }
 
   return validationError("Could not generate a unique Process Code — please try again.");
+}
+
+const fillSchema = z.object({
+  workspaceId: z.string().min(1),
+  processId: z.string().min(1),
+  steps: z.array(templateStepSchema).min(1).max(40),
+  activities: z.array(templateActivitySchema).max(40).default([]),
+});
+
+/**
+ * Puts a draft into a process that already exists but has no steps yet.
+ * Refuses outright if the process has any step, so a draft can never
+ * overwrite or mix into work somebody already did.
+ */
+export async function fillEmptyProcessFromTemplate(
+  input: z.infer<typeof fillSchema>
+): Promise<ActionResult<{ id: string }>> {
+  const parsed = fillSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+
+  const { workspaceId, processId, steps, activities } = parsed.data;
+  const process = await prisma.process.findUnique({ where: { id: processId } });
+  if (!process || process.workspaceId !== workspaceId) return notFound();
+
+  const refused = await prisma.$transaction(async (tx) => {
+    // Checked inside the transaction so two presses cannot both pass it.
+    const [stepCount, activityCount] = await Promise.all([
+      tx.processStep.count({ where: { processId } }),
+      tx.activity.count({ where: { processId } }),
+    ]);
+    if (stepCount > 0 || activityCount > 0) return true;
+    await materializeDraft(tx, { workspaceId, processId, steps, activities });
+    return false;
+  });
+  if (refused) return validationError("This process already has steps, so a draft can't be added to it.");
+
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}/map`);
+  revalidatePath(`/${workspaceId}/processes/processes`);
+  return ok({ id: processId });
 }

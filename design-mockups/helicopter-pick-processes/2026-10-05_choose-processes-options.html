@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Helicopter Process Picker</title>
+<style>
+:root{
+  --bg:#f8fafc; --card:#fff; --line:#e2e8f0; --ink:#0f172a; --ink2:#475569; --ink3:#64748b; --navy:#1e293b;
+  --pill:#f1f5f9; --sel:#16325C; --selink:#fff; --hv:#f1f5f9; --note:#fffbeb; --note-bd:#fde68a; --rail:#cbd5e1;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8; --navy:#cbd5e1;
+  --pill:#1a2539; --sel:#9fb8e6; --selink:#0b1220; --hv:#1a2539; --note:#2a2210; --note-bd:#5c4a1c; --rail:#3a4a66;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1220; --card:#111a2b; --line:#24324a; --ink:#e5e9f0; --ink2:#a7b1c2; --ink3:#8a95a8; --navy:#cbd5e1;
+  --pill:#1a2539; --sel:#9fb8e6; --selink:#0b1220; --hv:#1a2539; --note:#2a2210; --note-bd:#5c4a1c; --rail:#3a4a66;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:20px;margin:0 0 4px} .lede{color:var(--ink3);margin:0 0 8px}
+section{margin-top:34px}
+h2{font-size:16px;margin:0 0 4px;display:flex;gap:8px;align-items:center}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--sel);color:var(--selink)}
+.why{color:var(--ink2);margin:0 0 12px;font-size:13px}
+.frame{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;overflow:hidden}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.seg{display:inline-flex;background:var(--pill);border-radius:10px;padding:3px}
+.seg span{padding:5px 12px;border-radius:8px;font-weight:600;font-size:13px;color:var(--ink3)}
+.seg span.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--hv)}
+.meta{font-size:12px;color:var(--ink3)}
+.spacer{flex:1}
+/* rails */
+.rails{border-top:1px solid var(--line)}
+.rail{padding:10px 4px 12px;border-bottom:1px solid var(--line)}
+.rail:last-child{border-bottom:0}
+.rh{display:flex;gap:10px;align-items:baseline}
+.rh code{font-weight:700;font-size:12.5px;color:var(--ink2)}
+.rh b{font-size:14px}
+.rh .n{font-size:11px;background:var(--pill);border-radius:999px;padding:1px 8px;color:var(--ink3)}
+.track{position:relative;height:22px;margin:8px 10px 0}
+.track::before{content:"";position:absolute;left:0;right:0;top:10px;height:2px;background:var(--rail)}
+.bead{position:absolute;top:4px;width:14px;height:14px;border:2.5px solid var(--navy);border-radius:50%;background:var(--card)}
+.empty{font-style:italic;font-size:12px;color:var(--ink3);margin:6px 10px 0}
+.none{padding:30px;text-align:center;color:var(--ink3);font-size:13px}
+/* option A dropdown */
+.dd{position:relative}
+.panel{position:absolute;z-index:5;top:calc(100% + 6px);left:0;width:340px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:10px}
+.panel[hidden]{display:none}
+.panel input[type=search]{width:100%;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit;font-size:13px}
+.links{display:flex;gap:10px;font-size:12px;margin:8px 2px}
+.links button{background:none;border:0;padding:0;color:var(--sel);font:inherit;font-weight:700;cursor:pointer}
+.list{max-height:260px;overflow:auto}
+.row{display:flex;gap:8px;align-items:center;padding:5px 4px;border-radius:6px;font-size:13px;cursor:pointer}
+.row:hover{background:var(--hv)}
+.row.sub{padding-left:26px}
+.row code{font-size:12px;color:var(--ink2);font-weight:700;min-width:54px}
+/* option B chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:999px;padding:4px 11px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--sel);color:var(--selink);border-color:var(--sel)}
+.chip small{font-weight:500;opacity:.8}
+/* option C side list */
+.split{display:grid;grid-template-columns:250px 1fr;gap:14px}
+@media (max-width:720px){.split{grid-template-columns:1fr}}
+.side{border:1px solid var(--line);border-radius:10px;padding:10px;align-self:start}
+.side h3{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3)}
+.notes{margin-top:34px;border:1px solid var(--note-bd);background:var(--note);border-radius:12px;padding:14px 16px}
+.notes h3{margin:0 0 6px;font-size:14px} .notes ol{margin:0;padding-left:20px} .notes li{margin:5px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Helicopter view: choose which processes to show</h1>
+<p class="lede">Three ways to do it. Each one works below: tick or press to see the rails change.</p>
+
+<section>
+<h2><span class="tag">A</span> A "Processes" dropdown with a tick list</h2>
+<p class="why">One button beside Milestones | Cards. It opens a searchable list with a box per process, subs under their main. Takes no room until you open it. Ticking a main ticks its subs.</p>
+<div class="frame" id="A">
+  <div class="top">
+    <div class="seg"><span class="on">▤ Milestones</span><span>▢ Cards</span></div>
+    <div class="dd"><button class="btn" data-open>Processes: <span data-label></span> ▾</button>
+      <div class="panel" hidden>
+        <input type="search" placeholder="Search processes…" data-find>
+        <div class="links"><button data-all>Select all</button><button data-none>Select none</button></div>
+        <div class="list" data-list></div>
+      </div>
+    </div>
+    <span class="spacer"></span><button class="btn">⬇ PNG</button>
+  </div>
+  <div class="rails" data-rails></div>
+</div>
+</section>
+
+<section>
+<h2><span class="tag">B</span> One chip per main process, always visible</h2>
+<p class="why">A row of chips above the rails, one per main process with its subs counted. Press to show or hide that main and all its subs. Fastest for a few groups; gets long with many, and you can't pick a single sub on its own.</p>
+<div class="frame" id="B">
+  <div class="top">
+    <div class="seg"><span class="on">▤ Milestones</span><span>▢ Cards</span></div>
+    <span class="meta" data-label></span><span class="spacer"></span><button class="btn">⬇ PNG</button>
+  </div>
+  <div class="chips" data-chips></div>
+  <div class="rails" data-rails></div>
+</div>
+</section>
+
+<section>
+<h2><span class="tag">C</span> A tick list down the left of the rails</h2>
+<p class="why">The full list stays open beside the picture, like a legend you can tick. Easiest to see what's in and out at a glance; costs the rails about a quarter of the width.</p>
+<div class="frame" id="C">
+  <div class="top">
+    <div class="seg"><span class="on">▤ Milestones</span><span>▢ Cards</span></div>
+    <span class="meta" data-label></span><span class="spacer"></span><button class="btn">⬇ PNG</button>
+  </div>
+  <div class="split">
+    <div class="side"><h3>Show</h3>
+      <div class="links"><button data-all>Select all</button><button data-none>Select none</button></div>
+      <div class="list" data-list></div></div>
+    <div class="rails" data-rails></div>
+  </div>
+</div>
+</section>
+
+<div class="notes">
+<h3>The same in all three, and what you decide</h3>
+<ol>
+<li><b>Start:</b> everything is shown, as today. Unticking hides a process from the picture only, nothing is deleted.</li>
+<li><b>Remembered?</b> I'd remember your choice on this browser, so coming back shows the same set. Or reset to everything each visit?</li>
+<li><b>Cards view too?</b> I'd apply the same choice to Cards as well as Milestones, and the PNG download exports only what's shown. Agree?</li>
+<li><b>Links to a hidden process:</b> a branch from a process you've hidden would show a small note ("from ADM105, hidden") instead of the dashed line. OK?</li>
+</ol>
+</div>
+</main>
+<script>
+const P=[
+ {c:"ADM105",n:"Admin - End2End",s:0,p:null},
+ {c:"ADM100",n:"Admin - transpiration - cars",s:6,p:"ADM105"},
+ {c:"ADM102",n:"Admin - Petty cash - garden, rent, printer, utilities , etc",s:0,p:"ADM105"},
+ {c:"ADM103",n:"Admin - Operations",s:0,p:"ADM105"},
+ {c:"ADM104",n:"Admin - Requests and Invoicing",s:13,p:"ADM105"},
+ {c:"ADM106",n:"Admin - Assets Management",s:0,p:null},
+ {c:"ETE100",n:"RHI End2End - high-level",s:14,p:null},
+ {c:"FIN100",n:"Finance - Payables",s:9,p:null},
+ {c:"FIN101",n:"Finance - Vendor payments",s:5,p:"FIN100"},
+];
+const mains=P.filter(x=>!x.p), subsOf=c=>P.filter(x=>x.p===c);
+function railsHtml(sel){
+  const shown=P.filter(x=>sel.has(x.c));
+  if(!shown.length) return '<div class="none">No processes chosen — tick at least one to see the picture.</div>';
+  return shown.map(x=>{
+    const beads=Math.min(x.s,5);
+    const t=beads?'<div class="track">'+Array.from({length:beads},(_,i)=>'<span class="bead" style="left:'+(i*(100/5))+'%"></span>').join('')+'</div>':'<div class="empty">No steps mapped yet</div>';
+    return '<div class="rail"><div class="rh"><code>'+x.c+'</code><b>'+x.n+'</b><span class="n">'+x.s+' steps</span></div>'+t+'</div>';
+  }).join('');
+}
+const label=sel=>sel.size===P.length?"All ("+P.length+")":sel.size+" of "+P.length;
+function listHtml(sel,q){
+  q=(q||"").toLowerCase();
+  return P.filter(x=>!q||(x.c+" "+x.n).toLowerCase().includes(q)).map(x=>
+    '<label class="row'+(x.p&&!q?' sub':'')+'"><input type="checkbox" data-c="'+x.c+'"'+(sel.has(x.c)?' checked':'')+'><code>'+x.c+'</code><span>'+x.n+'</span></label>').join('');
+}
+function tick(sel,c,on){[c,...subsOf(c).map(s=>s.c)].forEach(k=>on?sel.add(k):sel.delete(k));}
+function setupList(root){
+  const sel=new Set(P.map(x=>x.c)), $=s=>root.querySelector(s);
+  const draw=()=>{$('[data-rails]').innerHTML=railsHtml(sel);$('[data-label]').textContent=root.id==="A"?label(sel):"Showing "+label(sel);
+    $('[data-list]').innerHTML=listHtml(sel,$('[data-find]')?.value);
+    $('[data-list]').querySelectorAll('input').forEach(i=>{const kids=subsOf(i.dataset.c);
+      if(kids.length){const n=kids.filter(k=>sel.has(k.c)).length+(sel.has(i.dataset.c)?1:0);i.indeterminate=n>0&&n<kids.length+1;}});};
+  root.addEventListener('change',e=>{if(e.target.dataset.c){tick(sel,e.target.dataset.c,e.target.checked);draw();}});
+  root.addEventListener('input',e=>{if(e.target.matches('[data-find]'))draw();});
+  root.addEventListener('click',e=>{
+    if(e.target.closest('[data-all]')){P.forEach(x=>sel.add(x.c));draw();}
+    if(e.target.closest('[data-none]')){sel.clear();draw();}
+    if(e.target.closest('[data-open]')){const p=$('.panel');p.hidden=!p.hidden;}
+  });
+  document.addEventListener('pointerdown',e=>{const p=root.querySelector('.panel');if(p&&!p.hidden&&!e.target.closest('.dd'))p.hidden=true;});
+  draw();
+}
+setupList(document.getElementById('A'));setupList(document.getElementById('C'));
+(function(){const root=document.getElementById('B'),sel=new Set(P.map(x=>x.c));
+  const draw=()=>{root.querySelector('[data-chips]').innerHTML=mains.map(m=>{const k=subsOf(m.c).length;
+    return '<button class="chip'+(sel.has(m.c)?' on':'')+'" data-m="'+m.c+'">'+m.c+(k?' <small>+'+k+' subs</small>':'')+'</button>';}).join('')
+    +'<button class="chip" data-allb>All</button>';
+    root.querySelector('[data-rails]').innerHTML=railsHtml(sel);root.querySelector('[data-label]').textContent="Showing "+label(sel);};
+  root.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b){tick(sel,b.dataset.m,!sel.has(b.dataset.m));draw();}
+    if(e.target.closest('[data-allb]')){P.forEach(x=>sel.add(x.c));draw();}});
+  draw();})();
+</script>
+</body>
+</html>

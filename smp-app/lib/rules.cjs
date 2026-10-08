@@ -294,7 +294,14 @@
        would make the second condition the only one. The SMO opens the
        own-function cell for project owners, the own-unit (and, for a pillars
        function, own-function) cell for pillar owners. */
-    powner:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+    /* §508.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
+       ok"). §405 let a business unit plan in projects, so a project owner can
+       now hold one at a unit, and that pair shipped at none while the
+       own-function pair shipped at view — which is the only reason the merged
+       table drew Part owner's Plan and Reporting as "differs". Now the two
+       halves say one thing; migration 048 (and smp-app 027) moves a tenant's
+       stored none to view only where it still holds the old none. */
+    powner:    { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
@@ -686,7 +693,22 @@
     return personRoles(w, p).map(function (r) { return r.role; });
   }
 
+  /* ── SETUP IS NEVER OFFERED TO A CEO (§508.1) ─────────────────────
+     Islam: "nobody will see the setup even the ceo", and of the drawn choice
+     between a cell that starts shut and one never offered: "never offered".
+     So it is a RULE rather than a cell (§37's shape): the table draws a dash
+     there, and this answers none whatever a tenant once stored — or a stored
+     view would grant Setup from behind a dash nobody can press to take it
+     back (§61). Asked by grantFor, so the screen and the server read it from
+     one place (§42). */
+  var NEVER_OFFERED = { gceo: ["a_setup"], cceo: ["a_setup"] };
+  function neverOffered(roleKey, areaKey) {
+    var a = NEVER_OFFERED[roleKey];
+    return !!(a && a.indexOf(areaKey) > -1);
+  }
+
   function grantFor(w, roleKey, areaKey) {
+    if (neverOffered(roleKey, areaKey)) return "none";
     var row = w.access[roleKey];
     if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";
     return (ACCESS_DEFAULTS[roleKey] || {})[areaKey] || "none";
@@ -840,7 +862,8 @@
      Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
      — 117 cells, of which the unit and the function halves gave the same
      answer for every person on every tenant measured. What is DRAWN is now
-     8 rows and 6 columns; what is STORED is untouched. Each drawn cell is a
+     9 rows and 6 columns (8 on a client with no second layer, §508.1);
+     what is STORED is untouched. Each drawn cell is a
      VIEW over the (role, area) pairs under it, and pressing it writes every
      pair whose answer differs — so `grantFor`, `grantIn` and everything the
      server asks read exactly what they read before, and nobody's access can
@@ -877,8 +900,18 @@
       note:"A seat. Granted on the register." },
     { key:"smoteam", name:"SMO team", of:["smoteam"],
       note:"A seat. Granted on the register." },
-    { key:"ceo", name:"CEO", of:["gceo", "cceo"],
-      note:"Group CEO, and a division (company) CEO. A division CEO's two switches — see the other divisions, see the group — stay on the division." },
+    /* §508.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
+       and layer 2 head needs different rows". They were always stored apart
+       (gceo, cceo); only the table drew them as one. Each is named in the
+       client's own words — the word for the top plus " CEO", the word for the
+       second layer plus " head" (`word`/`suffix`, read by the page through
+       labelWord(), because a rule module holds no tenant vocabulary); `name`
+       is the shipped spelling and the fallback. `mid` marks the row that
+       exists only where the client HAS a second layer (midExists). */
+    { key:"gceo", name:"Group CEO", of:["gceo"], word:"topword", suffix:" CEO",
+      note:"Heads the whole client — the top layer." },
+    { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
+      note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
     { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
       note:"Owns a box: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
     { key:"custodian", name:"Custodian", of:["custodian"],
@@ -4899,6 +4932,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
+    neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,

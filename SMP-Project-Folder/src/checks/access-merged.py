@@ -2,19 +2,35 @@
 
 Islam signed off the mockup (2a23b8c): Setup › Roles & access becomes 8 rows by
 6 columns — 48 cells where there were 117 — and every pillar gains a Custodian
-seat beside its Owner. THE TABLE IS A VIEW, NEVER A NEW STORE: the stored map
+seat beside its Owner. §508.1 then split the CEO row in two (Islam: "the company
+ceo and layer 2 head needs different rows"), named in the client's own words,
+the second layer's row drawn only where the client HAS one; Setup is never
+offered to either; and the Part owner may read. So the demo — which has
+companies — draws 9 rows and 54 cells, and a client with no second layer 8 and
+48, both worked out here rather than typed. THE TABLE IS A VIEW, NEVER A NEW STORE: the stored map
 keeps its 13 roles and its areas, and a drawn cell is every (role, area) pair
 under it that can come up. So the claims here are about the VIEW agreeing with
 what is stored, never about numbers typed into this file (§94.8).
 
-  1 · THE SHAPE IS THE SHARED LIST'S. 8 rows and 6 columns, the names read off
-      SMPRules.ACCESS_ROWS / ACCESS_COLS rather than typed here, and every one
-      of the 48 cells drawn.
+  1 · THE SHAPE IS THE SHARED LIST'S. The rows SMPRules.ACCESS_ROWS draws for
+      this client (the second layer's only where midExists says it exists),
+      each named the way the client says it — the top's word + " CEO", the
+      second layer's + " head" — and every cell drawn. The names are MADE to
+      move (§255): set the two words to something no default spells, and the
+      rows must follow.
 
   2 · EVERY CELL AGREES WITH THE STORED PAIRS UNDER IT. Worked out in this
       file from the product's own grantFor() and accessNA(): a cell with no
       pair that can come up is a dash, one whose pairs agree lights exactly
-      that answer, one whose pairs differ lights NOTHING.
+      that answer, one whose pairs differ lights NOTHING. And three of the
+      §508.1 decisions, at both ends (§94.2): Setup is a dash with its reason
+      on both CEO rows while the office keeps a live one; the Part owner's
+      Plan and Reporting light "may read"; and on the shipped defaults no cell
+      differs at all.
+
+  2b · A CLIENT WITH NO SECOND LAYER HAS NO SECOND-LAYER ROW. The state is
+      made (the structure's own switch) and put back; the rows drop to the
+      ones without `mid`, and every other row is still drawn.
 
   3 · A CELL THAT DIFFERS SAYS SO, AT BOTH ENDS (§94.2). The tray is marked,
       the hover names every pair and what it holds, and the line above the
@@ -58,7 +74,8 @@ GO_ACCESS = """()=>{ var a=document.querySelector('[data-setupgo="access"]'); if
 # What the table SHOULD draw, worked out here from the product's own readers
 # (grantFor, accessNA) over the shared rows and columns — never typed.
 EXPECT = r"""()=>{
-  var R = SMPRules.ACCESS_ROWS, C = SMPRules.ACCESS_COLS, out = [];
+  var R = SMPRules.ACCESS_ROWS.filter(r=>!r.mid || SMPRules.midExists(GROUP, COMPANIES)),
+      C = SMPRules.ACCESS_COLS, out = [];
   R.forEach(function(r){ C.forEach(function(c){
     var vals = [], pairs = [];
     r.of.forEach(function(rk){ c.areas.forEach(function(ak){
@@ -70,6 +87,13 @@ EXPECT = r"""()=>{
   }); });
   return out; }"""
 
+# The rows this client should see, named the way it says them — worked out
+# from the shared list, the structure rule and labelWord, never typed.
+WANT_ROWS = r"""()=>SMPRules.ACCESS_ROWS
+  .filter(r=>!r.mid || SMPRules.midExists(GROUP, COMPANIES))
+  .map(r=>{ var w = r.word ? String(labelWord(r.word,'group')||'').trim() : '';
+    return {key:r.key, name: w ? w + r.suffix : r.name}; })"""
+
 READ = r"""()=>{
   var t = document.querySelector('.acgrid table'); if (!t) return null;
   var rows = [...t.querySelectorAll('tbody tr')];
@@ -80,7 +104,8 @@ READ = r"""()=>{
       var st = !set ? 'dash' : lit ? (lit.className.match(/st-(\w+)/)||[])[1]
              : set.classList.contains('mixed') ? 'mixed' : 'none';
       var b = td.querySelector('.stbtn');
-      return {st:st, title:td.getAttribute('title')||'',
+      // A dash carries its reason on the mark itself, a live cell on the td.
+      return {st:st, title:td.getAttribute('title')||((td.querySelector('.why')||{}).title)||'',
               target: b ? (b.dataset.acm||'').split('|')[0] : null}; })),
     differ: (document.querySelector('p.acdiffer')||{}).textContent || null }; }"""
 
@@ -100,29 +125,53 @@ with sync_playwright() as p:
     js(pg, GO_ACCESS); pg.wait_for_timeout(700)
 
     print("\n1 · the shape is the shared list's")
-    shape = js(pg, """()=>({rows:(SMPRules.ACCESS_ROWS||[]).map(r=>r.name),
+    shape = js(pg, """()=>({rows:(SMPRules.ACCESS_ROWS||[]).map(r=>r.key),
       cols:(SMPRules.ACCESS_COLS||[]).map(c=>c.col||c.label),
       pairs:(SMPRules.ACCESS_COLS||[]).filter(c=>c.pair).map(c=>c.pair)})""")
     got = js(pg, READ)
-    ok("the shared module names the rows and columns",
-       isinstance(shape, dict) and len(shape.get("rows", [])) == 8 and len(shape.get("cols", [])) == 6, shape)
+    want = js(pg, WANT_ROWS)
+    ok("the shared module names nine rows and six columns",
+       isinstance(shape, dict) and len(shape.get("rows", [])) == 9 and len(shape.get("cols", [])) == 6, shape)
+    ok("the CEO is two rows, the top's and the second layer's (§508.1)",
+       isinstance(shape, dict) and "gceo" in shape.get("rows", []) and "cceo" in shape.get("rows", [])
+       and "ceo" not in shape.get("rows", []), shape and shape.get("rows"))
+    ok("the demo has a second layer, so the Division head's row is drawn",
+       isinstance(want, list) and "cceo" in [w["key"] for w in want], want)
     ok("the page draws the table", isinstance(got, dict) and "cells" in got, got)
-    if isinstance(got, dict) and "cells" in got and isinstance(shape, dict) and "rows" in shape:
-        ok("its rows are the shared rows, in order", got["names"] == shape["rows"], got["names"])
+    if isinstance(got, dict) and "cells" in got and isinstance(want, list):
+        ok("its rows are the rows drawn for this client, in order, in its own words",
+           got["names"] == [w["name"] for w in want], {"page": got["names"], "want": [w["name"] for w in want]})
         flat = [c for row in got["cells"] for c in row]
-        ok("48 cells, six to a row", len(flat) == 48 and all(len(r) == 6 for r in got["cells"]),
+        ok("six cells to a row, for every row drawn",
+           len(flat) == 6 * len(want) and all(len(r) == 6 for r in got["cells"]),
            [len(r) for r in got["cells"]])
         ok("every column is named in the head", all(c in got["heads"] for c in shape["cols"]),
            got["heads"])
         ok("the paired columns share one name written once above them",
            all(got["heads"].count(n) == 1 for n in set(shape["pairs"])), got["heads"])
+    # MADE (§255): the demo's words are the defaults, so a build that typed
+    # "Group CEO" passes everything above. Two words no default spells.
+    named = js(pg, r"""()=>{
+      var keep = {};
+      ['topword','division'].forEach(k=>{ var e=LABELS.entries.filter(x=>x.key===k)[0];
+        keep[k] = e ? e.group : undefined; if (e) e.group = k==='topword' ? 'Holdco' : 'Sector'; });
+      window.__labels = keep; paint(); return Object.keys(keep).length; }""")
+    pg.wait_for_timeout(400)
+    got2 = js(pg, READ)
+    names2 = got2.get("names", []) if isinstance(got2, dict) else []
+    ok("the two CEO rows follow the client's own words",
+       named == 2 and "Holdco CEO" in names2 and "Sector head" in names2
+       and "Group CEO" not in names2 and "Division head" not in names2, names2)
+    js(pg, r"""()=>{ var k=window.__labels||{}; Object.keys(k).forEach(key=>{
+      var e=LABELS.entries.filter(x=>x.key===key)[0]; if (e) e.group = k[key]; }); paint(); }""")
+    pg.wait_for_timeout(400)
 
     print("\n2 · every cell agrees with the stored pairs under it")
     exp = js(pg, EXPECT)
     if isinstance(exp, list) and isinstance(got, dict) and "cells" in got:
         flat = [c for row in got["cells"] for c in row]
         bad = [(e["row"], e["col"], e["want"], d["st"]) for e, d in zip(exp, flat) if e["want"] != d["st"]]
-        ok("all 48 agree", not bad and len(flat) == len(exp), bad[:6])
+        ok("every cell agrees (%d)" % len(flat), not bad and len(flat) == len(exp), bad[:6])
         badt = [(e["row"], e["col"]) for e, d in zip(exp, flat)
                 if e["pairs"] and d["target"] is not None and sorted(d["target"].split(",")) != sorted(e["pairs"])]
         ok("and each press names exactly the pairs under its cell", not badt, badt[:4])
@@ -131,8 +180,50 @@ with sync_playwright() as p:
            {"dash", "none"} <= kinds and bool(kinds & {"view", "edit", "fill"}), sorted(kinds))
         sup = [d["st"] for e, d in zip(exp, flat) if e["row"] in ("super", "smoteam") and e["col"] == "other"]
         ok("the office's Other boxes is a dash, not a refusal", sup == ["dash", "dash"], sup)
+        pick = lambda row, col: [d for e, d in zip(exp, flat) if e["row"] == row and e["col"] == col]
+        ceo = pick("gceo", "setup") + pick("cceo", "setup")
+        ok("Setup is never offered to either CEO — a dash, with the reason on it (§508.1)",
+           len(ceo) == 2 and all(d["st"] == "dash" and "Only the Super user and the SMO team open Setup" in d["title"]
+                                 for d in ceo), ceo)
+        office = pick("super", "setup") + pick("smoteam", "setup")
+        ok("while the office's Setup cell is a live one (§94.2)",
+           len(office) == 2 and all(d["st"] != "dash" and d["target"] for d in office), office)
+        part = pick("part", "plan") + pick("part", "rep")
+        ok("the Part owner may read on Plan and on Reporting (§508.1)",
+           len(part) == 2 and all(d["st"] == "view" for d in part), part)
+        ok("on the shipped defaults no cell differs, so there is no line above the table",
+           not got.get("differ") and "mixed" not in kinds, {"differ": got.get("differ"), "kinds": sorted(kinds)})
     else:
-        ok("all 48 agree", False, exp)
+        ok("every cell agrees", False, exp)
+    # And a stored Setup grant does not reach either CEO (§61, §42): the rule
+    # answers none whatever the map once held.
+    held = js(pg, r"""()=>{ var k = JSON.stringify(ACCESS);
+      ['gceo','cceo'].forEach(rk=>{ (ACCESS[rk]=ACCESS[rk]||{}).a_setup='edit'; });
+      var g = ['gceo','cceo'].map(rk=>grantFor(rk,'a_setup'));
+      var o = JSON.parse(k); Object.keys(ACCESS).forEach(x=>delete ACCESS[x]); Object.assign(ACCESS,o);
+      return g; }""")
+    ok("a stored Setup grant on either CEO still reads none", held == ["none", "none"], held)
+
+    print("\n2b · a client with no second layer has no second-layer row")
+    nomid = js(pg, r"""()=>{
+      window.__struct = JSON.stringify(GROUP.structure === undefined ? null : GROUP.structure);
+      GROUP.structure = GROUP.structure || {}; GROUP.structure.mid = Object.assign({}, GROUP.structure.mid, {exists:false});
+      paint(); return SMPRules.midExists(GROUP, COMPANIES); }""")
+    pg.wait_for_timeout(400)
+    got3 = js(pg, READ); want3 = js(pg, WANT_ROWS)
+    ok("the state is made: no second layer", nomid is False, nomid)
+    ok("the Division head's row is not drawn",
+       isinstance(got3, dict) and isinstance(want3, list) and "cceo" not in [w["key"] for w in want3]
+       and got3.get("names") == [w["name"] for w in want3], got3 and got3.get("names"))
+    ok("every other row still is, six cells to each",
+       isinstance(got3, dict) and len(got3.get("names", [])) == 8
+       and all(len(r) == 6 for r in got3.get("cells", [])), got3 and [len(r) for r in got3.get("cells", [])])
+    js(pg, r"""()=>{ var s = JSON.parse(window.__struct||'null');
+      if (s === null) delete GROUP.structure; else GROUP.structure = s; paint(); }""")
+    pg.wait_for_timeout(400)
+    back = js(pg, READ)
+    ok("and put back, the row returns", isinstance(back, dict) and isinstance(want, list)
+       and back.get("names") == [w["name"] for w in want], back and back.get("names"))
 
     print("\n3 · a cell that differs says so — at both ends")
     # MAKE the state rather than relying on the shipped defaults (§255):
@@ -191,10 +282,10 @@ with sync_playwright() as p:
     ok("and nothing outside it moved",
        bool(under) and all(k in under for k in moved), [k for k in moved if k not in under])
     got = js(pg, READ)
-    # The shipped defaults leave the Part owner row differing (its project
-    # owner reads none in a unit and view in a function), so the line stays —
-    # what must change is that it stops naming THIS cell. "Owner · " is
-    # case-sensitive on purpose: "Part owner · …" does not contain it.
+    # §508.1 left the shipped defaults with no cell differing, so the line may
+    # be gone altogether here; what must hold is that it stops naming THIS
+    # cell. "Owner · " is case-sensitive on purpose: "Part owner · …" does not
+    # contain it.
     ok("the line above the table stops naming the cell once its pairs agree",
        isinstance(got, dict) and "cells" in got and "Owner · This box: Reporting" not in (got.get("differ") or ""),
        got and got.get("differ"))
@@ -225,8 +316,11 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     got = js(pg, READ)
     leg = js(pg, r"""()=>[...document.querySelectorAll('.st-mixed')].length""")
+    # §508.1 made the shipped defaults agree, so `made` may be nought here;
+    # the presence end of this pair is §3's line, which a made disagreement
+    # drew on this same page a moment ago (§94.2) — this is its absence.
     ok("with every cell agreeing, the line above the table is gone (§45.2)",
-       isinstance(agree, int) and agree > 0 and isinstance(got, dict) and "cells" in got
+       isinstance(agree, int) and agree >= 0 and isinstance(got, dict) and "cells" in got
        and not got.get("differ") and leg == 0, {"made": agree, "differ": got and got.get("differ"), "legend": leg})
     js(pg, r"""()=>{ if (window.__all){ var o=JSON.parse(window.__all);
       Object.keys(ACCESS).forEach(k=>delete ACCESS[k]); Object.assign(ACCESS,o); } paint(); }""")

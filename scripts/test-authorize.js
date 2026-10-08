@@ -5559,9 +5559,13 @@ console.log("\n§508 · a pillar's custodian");
 console.log("\n§508 · the merged table covers every role and area");
 (function () {
   const rows = R.ACCESS_ROWS, cols = R.ACCESS_COLS;
-  check("§508: eight rows", rows.length === 8, rows.length);
+  /* §508.1: NINE ROWS. The CEO row became two (Islam: "the company ceo and
+     layer 2 head needs different rows"), so the table is 9 × 6 = 54 on a
+     client that has a second layer and 8 × 6 where it has none — the page
+     drops the `mid` row, the rule keeps all nine. */
+  check("§508.1: nine rows", rows.length === 9, rows.length);
   check("§508: six columns", cols.length === 6, cols.length);
-  check("§508: 48 cells", rows.length * cols.length === 48);
+  check("§508.1: 54 cells", rows.length * cols.length === 54);
   const seenR = {};
   rows.forEach(function (r) { r.of.forEach(function (k) { seenR[k] = (seenR[k] || 0) + 1; }); });
   const roleKeys = Object.keys(R.ACCESS_DEFAULTS);
@@ -5581,6 +5585,81 @@ console.log("\n§508 · the merged table covers every role and area");
   check("§508: …under ONE column only", !twiceA.length, twiceA.join(","));
   check("§508: the floor row is the one marked floor", rows.filter(function (r) { return r.floor; }).map(function (r) { return r.key; }).join(",") === R.NO_ROLE,
         rows.filter(function (r) { return r.floor; }).map(function (r) { return r.key; }).join(","));
+})();
+
+/* ── §508.1: THE TWO CEO ROWS, AND SETUP NEVER OFFERED TO EITHER ──────────
+   Islam: "nobody will see the setup even the ceo", and of the drawn choice,
+   "never offered". A rule rather than a cell, so it must hold against a
+   tenant that STORED edit there — a dash on the page with a stored grant
+   behind it would be access nobody can see or take back (§61). Both ends
+   (§94.2): the rule must not reach the office's two seats, nor any other
+   row, or a build that refused Setup to everybody passes the first half. */
+console.log("\n§508.1 · two CEO rows, and Setup never offered to them");
+(function () {
+  const rows = R.ACCESS_ROWS;
+  const gRow = rows.filter(function (r) { return r.of.indexOf("gceo") > -1; });
+  const cRow = rows.filter(function (r) { return r.of.indexOf("cceo") > -1; });
+  check("§508.1: the top CEO has a row of its own", gRow.length === 1 && gRow[0].of.length === 1,
+        JSON.stringify(gRow.map(function (r) { return r.of; })));
+  check("§508.1: the second-layer head has a row of its own", cRow.length === 1 && cRow[0].of.length === 1,
+        JSON.stringify(cRow.map(function (r) { return r.of; })));
+  check("§508.1: …and they are two rows, not one", gRow[0] !== cRow[0]);
+  const mids = rows.filter(function (r) { return r.mid; }).map(function (r) { return r.key; });
+  check("§508.1: exactly one row exists only with a second layer, and it is the division head's",
+        mids.length === 1 && cRow[0].mid === true, mids.join(","));
+  check("§508.1: both CEO rows are named from the client's own word",
+        gRow[0].word === "topword" && cRow[0].word === "division" && !!gRow[0].suffix && !!cRow[0].suffix,
+        JSON.stringify([gRow[0].word, gRow[0].suffix, cRow[0].word, cRow[0].suffix]));
+
+  const W = function (access) { const s = clone(SEED); s.access = Object.assign({}, s.access, access); return R.worldOf(s); };
+  const stored = W({ gceo: Object.assign({}, SEED.access.gceo, { a_setup: "edit" }),
+                     cceo: Object.assign({}, SEED.access.cceo, { a_setup: "edit" }),
+                     owner: Object.assign({}, SEED.access.owner, { a_setup: "edit" }) });
+  check("§508.1: Setup is never offered to the top CEO", R.neverOffered("gceo", "a_setup") === true);
+  check("§508.1: …nor to the division head", R.neverOffered("cceo", "a_setup") === true);
+  check("§508.1: …and a top CEO a tenant once gave Setup edit still holds none",
+        R.grantAtPage(stored, personOf(SEED, "ceo"), "c_labels", "group") === "none",
+        R.grantAtPage(stored, personOf(SEED, "ceo"), "c_labels", "group"));
+  check("§508.1: …and so does a division head",
+        R.grantAtPage(stored, personOf(SEED, "co_dist"), "c_labels", "group") === "none",
+        R.grantAtPage(stored, personOf(SEED, "co_dist"), "c_labels", "group"));
+  check("§508.1: the rule touches no other area of a CEO",
+        ["a_group", "a_unit_own", "a_unit_own_strat", "a_unit_other", "a_fn_own", "a_fn_own_strat", "a_fn_other", "a_cycle"]
+          .every(function (a) { return !R.neverOffered("gceo", a) && !R.neverOffered("cceo", a); }));
+  check("§508.1: the office's two seats still open Setup",
+        !R.neverOffered("super", "a_setup") && !R.neverOffered("smoteam", "a_setup") &&
+        R.grantAtPage(stored, personOf(SEED, "smo"), "c_labels", "group") === "edit",
+        R.grantAtPage(stored, personOf(SEED, "smo"), "c_labels", "group"));
+  check("§508.1: …and an Owner row a tenant opened keeps what it was given (the rule is the CEOs' only)",
+        !R.neverOffered("owner", "a_setup") && R.grantFor(stored, "owner", "a_setup") === "edit",
+        R.grantFor ? R.grantFor(stored, "owner", "a_setup") : "grantFor not exported");
+
+  /* ON THE SERVER, against a stored world that says edit: the CEO's save is
+     refused, the office's is not (§42 — one rule, both sides). */
+  const base = clone(SEED);
+  base.access.gceo = Object.assign({}, base.access.gceo, { a_setup: "edit" });
+  const inc = clone(base); inc.labels[0].bu = "changed";
+  const vc = A.authorize(base, inc, personOf(base, "ceo"));
+  check("§508.1: the server refuses a top CEO's Setup change even with edit stored", !vc.ok,
+        "was ALLOWED — " + JSON.stringify(vc.changes.map(function (c) { return c.kind + ":" + c.what; })));
+  const vs = A.authorize(base, inc, personOf(base, "smo"));
+  check("§508.1: …and accepts the same change from the SMO", vs.ok, (vs.refusals || []).join(" / "));
+})();
+
+/* ── §508.1: A PART OWNER MAY READ THEIR OWN UNIT ─────────────────────────
+   Islam: "may read ok". The project owner's own-unit pair moves none → view
+   so the Part owner row's Plan and Reporting cells agree with the pillar
+   owner's; both halves asserted, and the rest of the row asserted unmoved. */
+console.log("\n§508.1 · a part owner may read");
+(function () {
+  const D = R.ACCESS_DEFAULTS;
+  ["a_unit_own_strat", "a_unit_own", "a_fn_own_strat", "a_fn_own"].forEach(function (a) {
+    check("§508.1: project owner ships " + a + " at view", D.powner[a] === "view", D.powner[a]);
+    check("§508.1: pillar owner ships " + a + " at view", D.plowner[a] === "view", D.plowner[a]);
+  });
+  check("§508.1: …and nothing else on the project owner's row moved",
+        D.powner.a_group === "view" && D.powner.a_unit_other === "none" && D.powner.a_fn_other === "none" &&
+        D.powner.a_cycle === "none" && D.powner.a_setup === "none", JSON.stringify(D.powner));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

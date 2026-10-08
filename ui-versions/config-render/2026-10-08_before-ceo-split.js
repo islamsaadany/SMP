@@ -263,16 +263,6 @@ function matrixRows(){
    paid for by exactly this family, a name resolving to something other
    than the thing its caller meant, silently and rendering perfectly. A
    third matrix added inside renderPeople() would have got the wrong one. */
-/* §508.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
-   `word`/`suffix` — the word for the top plus " CEO", the word for the second
-   layer plus " head" — because the rule module that lists them holds no
-   tenant vocabulary; every other row keeps the name it was given. One reader,
-   so the role cell and the "differs" line cannot name one row two ways. */
-function accessRowName(r){
-  if (!r.word) return r.name;
-  var w = String(labelWord(r.word, "group") || "").trim();
-  return w ? w + r.suffix : r.name;
-}
 function matrixRoleCell(r){
   /* §508: a merged row counts everybody holding ANY of the roles under it,
      once each — a person who is both a BU owner and a function head is one
@@ -288,7 +278,7 @@ function matrixRoleCell(r){
      sentence in a 19% column wraps to eight lines and makes every row of a
      49-cell table a hundred pixels tall — the exact fault this page was
      rebuilt to remove. It is on hover instead. */
-  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(accessRowName(r)) + '</b>' +
+  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
     '<span class="why">' +
     (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
     '</span></td>';
@@ -380,11 +370,6 @@ function accessNA(roleKey, areaKey){
      team's row was wrong in both directions at once: `roleOwns()` did not
      count them as owning anything, and this did not mark their other
      columns either, so four cells did nothing and nobody could see it. */
-  /* §508.1: a rule, never a cell — Setup is not offered to either CEO
-     (Islam: "never offered"), so the cell is a dash with the reason on it. */
-  if (SMPRules.neverOffered(roleKey, areaKey)) {
-    return "Only the Super user and the SMO team open Setup.";
-  }
   if (SMPRules.ownsEveryPlace(roleKey) &&
       (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
     return "Every box is theirs, so there is no “other”.";
@@ -485,12 +470,7 @@ function renderAccess(){
      everyone may do is part of running the office, and §37's rules are shown
      to everyone who can open the page. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §508.1: the second layer's row exists only where the client HAS a
-     second layer — Islam: "a client with no second layer has no second layer
-     row". Asked of midExists(), the one answer the set-up flow and the
-     Structure step already ask (§53.5). */
-  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
-    return !r.mid || midExists(); });
+  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS;
 
   /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
      (Islam, 2026-08-22: "remove all the descriptions from the headers and just
@@ -554,7 +534,7 @@ function renderAccess(){
         var opt = { attr: "data-acm", target: target, value: m.value };
         if (c.key === "plan") opt.states = ["view", "fill", "edit"];
         if (m.mixed) {
-          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
+          differ.push(r.name + " · " + (c.col ? c.pair + ": " + c.col : c.label));
           opt.mixed = true;
           opt.title = "These differ underneath: " + m.pairs.map(function(p){
             return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +

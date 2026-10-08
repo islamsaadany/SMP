@@ -97,8 +97,12 @@ with sync_playwright() as p:
        (lit(pg), ev(pg, "()=>currentSub")))
     ck("…and the pane is not blank",
        (ev(pg, "()=>document.getElementById('panel').textContent.trim().length", 0) or 0) > 40)
-    # A NON-OFFICE VIEWER who can open Setup at all lands on the same page —
-    # before §108.10 this was the fallback, now it is the rule for everybody.
+    # A NON-OFFICE VIEWER who can open Setup at all. Until §508.3 they landed on
+    # Reporting cycle too; §508.3 made that page the office's alone (Islam:
+    # "same for the reporting cycle"), so it is not in their rail and the gear
+    # lands on what IS — never on a page they cannot reach, never on a blank
+    # pane. REWRITTEN, not loosened (§218): both ends are asserted, the office
+    # on Reporting cycle above and the non-office viewer kept off it here.
     other = None
     for who in ev(pg, "()=>[...document.querySelectorAll('#asWho option')].map(o=>o.value)", [])[:40]:
         pg.select_option("#asWho", who)
@@ -109,8 +113,16 @@ with sync_playwright() as p:
             break
     if other:
         open_setup(pg, other)
-        ck("a non-office viewer's gear lands on Reporting cycle too (%s)" % other,
-           lit(pg) == "Planning & reporting cycle", lit(pg))
+        drawn = ev(pg, "()=>[...document.querySelectorAll('.setuprail .ritem .rilab')]"
+                       ".map(e=>e.textContent.trim())", []) or []
+        ck("a non-office viewer's rail does not offer Reporting cycle (%s)" % other,
+           "Planning & reporting cycle" not in drawn
+           and ev(pg, "()=>document.querySelectorAll('.setuprail [data-setupgo=\"cycle\"]').length", -1) == 0,
+           drawn)
+        ck("…and their gear lands on a page their rail does draw",
+           bool(lit(pg)) and lit(pg) in drawn, (lit(pg), drawn))
+        ck("…and that pane is not blank",
+           (ev(pg, "()=>document.getElementById('panel').textContent.trim().length", 0) or 0) > 40)
     else:
         ck("a non-office viewer with any Setup page exists in the demo", False, "none found")
 

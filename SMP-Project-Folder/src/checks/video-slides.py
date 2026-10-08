@@ -23,11 +23,14 @@ file most has to be able to see.
 
 Run: python3 qa-run.py checks/video-slides.py
 """
-import json, pathlib, re, sys
+import json, os, pathlib, re, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
-FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
+# SMP_BUILT points it at another build, or a §303 baseline run measures this
+# one (§334.13). An empty value is unset (§340.2).
+FILE = pathlib.Path(os.environ.get("SMP_BUILT") or
+                    ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").resolve()
 VERCEL = ROOT / "vercel.json"
 RULES = ROOT / "lib/rules.js"
 CHROME = "/opt/pw-browsers/chromium"
@@ -527,22 +530,31 @@ with sync_playwright() as pw:
     if other:
         ev(pg, "(k) => { VIEWER = k; paint(); }", other)
         pg.wait_for_timeout(400)
-        # ASSERTED ON THE PANE, not on the tab row: `c_import` is "view" for the
-        # WHOLE register, so a unit head reaches this page — they simply lose
-        # two of its three sections (Import a plan wants edit, Video storage
-        # wants the office), and one section draws no tab row at all. That is
-        # also what makes the gate load-bearing rather than belt-and-braces:
-        # without it every unit head would see every unit's clips and sizes.
+        # ASSERTED ON THE PANE, not on the tab row. Until §508.3 a CEO reached
+        # this page through the Reporting cycle column and lost only Video
+        # storage here; §508.3 made that column the office's alone (Islam:
+        # "same for the reporting cycle"), so NOBODY outside the office reaches
+        # Import & storage at all now — the page, its archives and its clips.
+        # REWRITTEN, not loosened (§218): the claim that survives is that they
+        # are shown none of it and are not left on a blank screen, with the
+        # office's own end asserted just above (it still gets Video storage)
+        # and its archives asserted below (§94.2, §113.8).
         pane_them = pg.eval_on_selector(".setuppane", "e => e.innerText") if \
                     pg.query_selector(".setuppane") else ""
         check("...and somebody outside the office does not get Video storage",
               "Video storage" not in pane_them, pane_them[:160])
-        # Both ends (§113.8): "it is gone" is true of a build that lost the
-        # page, so what they DO keep is asserted in the same breath.
-        check("...while the archives they may see are untouched",
-              "rchive" in pane_them, pane_them[:160])
-        ev(pg, "() => { VIEWER = PEOPLE.filter(p => p.role === 'super')[0].key; paint(); }")
+        check("...nor the archived plans, since §508.3 the page is the office's",
+              "Archived plans" not in pane_them
+              and not ev(pg, "() => reachable(setupDefs(), 'group', null).some(d => d.k === 'import')"),
+              pane_them[:160])
+        check("...and they are not left on a blank screen",
+              len((ev(pg, "() => (document.getElementById('panel')||{}).textContent || ''") or "").strip()) > 40)
+        ev(pg, "() => { VIEWER = PEOPLE.filter(p => p.role === 'super')[0].key; current='setup'; currentSub='import'; paint(); }")
         pg.wait_for_timeout(300)
+        office_pane = pg.eval_on_selector(".setuppane", "e => e.innerText") if \
+                      pg.query_selector(".setuppane") else ""
+        check("...while the office still has the archives on this page",
+              "rchive" in office_pane, office_pane[:160])
     else:
         print("  (no non-office person on this register to check the other end)")
 

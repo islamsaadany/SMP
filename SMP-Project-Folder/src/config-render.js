@@ -6334,7 +6334,8 @@ function impCycleLabel(){
 function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
-    var v = a.kind === "unit" ? a.key : "cap:" + a.key;
+    /* §517: a Foundation archive is keyed by its place already. */
+    var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -6688,6 +6689,10 @@ function renderArchives(){
     var held = a.kind === "figures"
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
+      : a.kind === "foundation"
+      /* §517: the six parts of a Foundation, replaced from the Copilot. */
+      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
+        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
       : a.kind === "unit"
       ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
          plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
@@ -6697,7 +6702,9 @@ function renderArchives(){
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
        restore itself. */
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+    var live = a.kind === "figures" ? true
+             : a.kind === "foundation" ? !!foundationRecord(a.key)
+             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'

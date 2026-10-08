@@ -859,22 +859,49 @@ try {
     check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
     const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
     check("...Purpose switched off does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
-    const again = await call("POST", "api", { act: "flowSave", id: fid, flow: F }, NORAN);
-    check("a saved flow is done — it cannot be changed or saved twice", again.st === 400 && (await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN)).st === 400);
+    /* §517 — a saved flow stays OPEN: the cards are still editable and the
+       next change starts v2. What is refused is saving the SAME drafts
+       twice (break `save-same-twice`). REWRITTEN from "a saved flow is
+       done", never loosened (§218): both ends (§94.2). */
+    const again = await call("POST", "api", { act: "flowSave", id: fid, flow: fin.j.flow }, NORAN);
+    const twice = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
+    check("a saved flow can still be written to, and saving it again unchanged is refused by name (§517)",
+      again.st === 200 && again.j.flow.saved && again.j.flow.saved.n === 1 && twice.st === 400 && /Nothing has changed since v1/.test(twice.j.why), again.st + " · " + twice.st + " · " + (twice.j && twice.j.why));
+    const FC = JSON.parse(JSON.stringify(fin.j.flow)); FC.drafts[1] = "Aspiration, second thoughts, for {Y}.";
+    const svC = await call("POST", "api", { act: "flowSave", id: fid, flow: FC }, NORAN);
+    const finC = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
+    check("...and a changed draft saves as v2 of the SAME deliverable", svC.st === 200 && finC.st === 200 && finC.j.saved.n === 2 && finC.j.saved.deliverableId === fin.j.saved.deliverableId, svC.st + " · " + JSON.stringify(finC.j.saved));
+    /* §517 — Apply to plan: the server records which version went and hands
+       back the parts with the end year written in; the stored parts keep
+       their raw {Y}. Both ends: a missing deliverable, and one that is not a
+       Foundation (break `apply-any-type`). */
+    const apNone = await call("POST", "api", { act: "applyFoundation", id: "00000000-0000-4000-8000-000000000000" }, NORAN);
+    const freeId = (await asTenant(A, (c) => c.query("SELECT id FROM copilot_deliverables WHERE type <> 'foundation' ORDER BY created_at LIMIT 1"))).rows[0].id;
+    const apFree = await call("POST", "api", { act: "applyFoundation", id: freeId }, NORAN);
+    check("Apply refuses a deliverable that is not here, and one that is not a Foundation (§517)", apNone.st === 404 && apFree.st === 400 && /Only a saved Foundation/.test(apFree.j.why), apNone.st + " · " + apFree.st + " · " + JSON.stringify(apFree.j));
+    const ap = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, NORAN);
+    const apRow = (await asTenant(A, (c) => c.query("SELECT extra->'applied' a FROM copilot_deliverables WHERE id = $1", [fin.j.saved.deliverableId]))).rows[0];
+    const apDel = await call("GET", "deliverable", null, NORAN, "?id=" + fin.j.saved.deliverableId);
+    check("Apply records the LATEST version on the deliverable and the page reads it back", ap.st === 200 && ap.j.n === 2 && apRow && apRow.a && apRow.a.n === 2 && apRow.a.by === NORAN.personKey && apDel.j.deliverable && apDel.j.deliverable.applied && apDel.j.deliverable.applied.n === 2, JSON.stringify(apRow && apRow.a) + " · " + JSON.stringify(apDel.j.deliverable && apDel.j.deliverable.applied));
+    const apAsp = (ap.j.foundation || []).find((x) => x.key === "asp");
+    check("...and hands back the parts with the end year written in, the stored copy keeping its {Y}",
+      Array.isArray(ap.j.foundation) && ap.j.foundation.length === 5 && apAsp && apAsp.text === "Aspiration, second thoughts, for 2028." && !ap.j.foundation.some((x) => /\{Y\}/.test(x.text)) && ap.j.years[1] === 2028, JSON.stringify(ap.j.foundation).slice(0, 200));
+    const apHend = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, HEND);
+    check("a client's own person cannot apply one", apHend.st === 403, apHend.st + "");
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
     const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);
     const g2 = await call("GET", "chat", null, NORAN, "?id=" + nf2.j.chat.id + "&placeWord=Mobile");
-    check("a second run says before the press that it will be version 2", g2.j.nextVersion === 2, g2.j.nextVersion + "");
+    check("a second run says before the press that it will be version 3 — v2 was the changed draft (§517)", g2.j.nextVersion === 3, g2.j.nextVersion + "");
     /* §514 — the saved text wears the CLIENT's words for the parts, sent by
        the browser; each is one line, capped, an unknown key ignored, a part
        with no word falling back to the method's. Strings only: a number
        would survive oneLine and prove nothing. */
     const fin2 = await call("POST", "api", { act: "flowFinish", id: nf2.j.chat.id, placeWord: "Mobile", partWords: { who: "Who we are", asp: "  Ambition\n  for\tMobile ", obj: "K".repeat(200), nope: "Ignored" } }, NORAN);
     const nd = (await asTenant(A, (c) => c.query("SELECT count(*)::int n FROM copilot_deliverables WHERE title = 'Foundation — Mobile'"))).rows[0].n;
-    check("...and becomes version 2 of the SAME deliverable, never a second one", fin2.j.saved && fin2.j.saved.n === 2 && fin2.j.saved.deliverableId === fin.j.saved.deliverableId && nd === 1,
+    check("...and becomes version 3 of the SAME deliverable, never a second one", fin2.j.saved && fin2.j.saved.n === 3 && fin2.j.saved.deliverableId === fin.j.saved.deliverableId && nd === 1,
       JSON.stringify(fin2.j.saved) + " · " + nd);
-    const v2 = (await asTenant(A, (c) => c.query("SELECT v.body->>'text' t, v.body->'foundation' f FROM copilot_versions v WHERE v.deliverable_id = $1 AND v.n = 2", [fin.j.saved.deliverableId]))).rows[0] || { t: "", f: [] };
+    const v2 = (await asTenant(A, (c) => c.query("SELECT v.body->>'text' t, v.body->'foundation' f FROM copilot_versions v WHERE v.deliverable_id = $1 AND v.n = 3", [fin.j.saved.deliverableId]))).rows[0] || { t: "", f: [] };
     check("the saved text names the parts in the client's words, one line each, capped, unknown keys ignored, the method's word where none was sent (§514)",
       /\nAMBITION FOR MOBILE\n/.test(v2.t) && !/WINNING ASPIRATION/.test(v2.t) && /WHO WE ARE\n/.test(v2.t) && /\nEND IN MIND\n/.test(v2.t) && /\nCORE VALUES\n/.test(v2.t) && /\nK{120}\n/.test(v2.t) && !/K{121}/.test(v2.t) && !/Ignored/.test(v2.t),
       JSON.stringify(v2.t).slice(0, 300));

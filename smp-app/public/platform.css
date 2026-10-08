@@ -11590,3 +11590,20 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 /* §501: the door to every chat on this client, above the chats rail. */
 .copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
 .copall:hover { color:var(--ink); text-decoration:underline; }
+
+/* §517: the bar at the foot of the cards — Save, the optional check and
+   Apply to plan — and the saved Foundation shown as its six cards on the
+   deliverable page. Existing tokens only (§25). */
+.copsavebar { position:sticky; bottom:0; margin-top:auto; display:flex; flex-direction:column; gap:6px; padding:10px 0 2px; background:var(--surface); border-top:1px solid var(--line); }
+.copsavebar .copbtns { margin-top:0; }
+.copsvst { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copsvst.ok { color:var(--good-tx); }
+.copsvst.warn { color:var(--attn-tx, var(--gold-deep)); }
+.copsw-pill.opt { color:var(--ink-3); border-style:dashed; }
+.copfcards { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:10px 0 12px; }
+.copfcard { border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface); padding:10px 12px; min-width:0; }
+.copfcard h5 { margin:0 0 6px; font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copfcard p, .copfcard ul { margin:0; font-size:var(--fs-note, 13.5px); line-height:1.5; color:var(--ink); }
+.copfcard ul { padding-left:18px; }
+.copplanrow { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); margin-bottom:12px; }
+@media (max-width:760px){ .copfcards { grid-template-columns:minmax(0, 1fr); } }

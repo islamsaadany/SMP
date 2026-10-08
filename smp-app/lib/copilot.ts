@@ -308,13 +308,19 @@ export const KINDS = ["promotable", "copilot-only"] as const;
 export type Kind = (typeof KINDS)[number];
 export function isKind(s: unknown): s is Kind { return typeof s === "string" && (KINDS as readonly string[]).includes(s); }
 
+/* §517 — `applied` is which version of a Foundation last went into the
+   plan (`extra.applied`, written by the applyFoundation act), null where
+   none has. Carried on every read so the rail and the deliverable page
+   cannot disagree about it. */
+export type Applied = { n: number; at: string; by: string } | null;
 export type Deliverable = { id: string; place: string; section: Section; type: string; kind: Kind; title: string;
-  approach: string; by: string; at: string; latest: number; latestBy: string; latestAt: string };
+  approach: string; by: string; at: string; latest: number; latestBy: string; latestAt: string; applied: Applied };
+const appliedOf = (v: any): Applied => (v && typeof v === "object" && Number(v.n) > 0 ? { n: Number(v.n), at: str(v.at), by: str(v.by) } : null);
 const delivOf = (r: any): Deliverable => ({ id: str(r.id), place: str(r.place), section: r.section, type: str(r.type),
   kind: r.kind, title: str(r.title), approach: str(r.approach), by: str(r.created_by), at: iso(r.created_at),
-  latest: Number(r.latest) || 0, latestBy: str(r.latest_by), latestAt: iso(r.latest_at) });
+  latest: Number(r.latest) || 0, latestBy: str(r.latest_by), latestAt: iso(r.latest_at), applied: appliedOf(r.applied) });
 const DELIV_SELECT =
-  "SELECT d.id, d.place, d.section, d.type, d.kind, d.title, d.approach, d.created_by, d.created_at, " +
+  "SELECT d.id, d.place, d.section, d.type, d.kind, d.title, d.approach, d.created_by, d.created_at, d.extra->'applied' AS applied, " +
   "v.n AS latest, v.by_key AS latest_by, v.at AS latest_at FROM copilot_deliverables d " +
   "LEFT JOIN LATERAL (SELECT n, by_key, at FROM copilot_versions x WHERE x.deliverable_id = d.id ORDER BY n DESC LIMIT 1) v ON true ";
 

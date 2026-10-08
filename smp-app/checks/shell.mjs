@@ -1220,6 +1220,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
   const flowRow = async (id) => (await asTenant(tenantId, (c) => c.query("select extra->'flow' f from copilot_chats where id = $1", [id]))).rows[0].f;
   let ST0 = undefined;
   let LB0 = undefined;
+  let FD0 = undefined;
   try {
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(["strategy", "copilot"]), tenantId]);
     await fresh(); await signIn("office@forefront.example");
@@ -1485,13 +1486,24 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       body: JSON.stringify({ act: "flowCheck", id: cid, placeWord: "Mobile" }) }); }, { cid });
     await open("/raya-trade/strategy/mobile/copilot/foundation");
     await page.click('[data-cop-chat="' + cid + '"]');
-    await page.waitForSelector("[data-cop-ffinish]", { timeout: 10000 });
+    await page.waitForSelector(".copchk", { timeout: 10000 });
     const Wc = await readW();
+    /* §517 — the plan this will be applied to, and the archive, snapshotted
+       so the finally can put both back (§94.2). */
+    FD0 = await page.evaluate(() => JSON.stringify({ f: foundationSnapshot(UNITS.mobile), a: ARCHIVES }));
     await shot("8-check");
     const ck = await page.evaluate(() => ({ ok: document.querySelectorAll(".copchk.ok li").length, iss: document.querySelectorAll(".copchk.issue li").length,
-      back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent), fin: document.querySelector("[data-cop-ffinish]").textContent }));
-    check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0 && /Save as Foundation — Mobile v1/.test(ck.fin),
-      "the check lists what agrees and what does not, offers Go back to that part, and Save as Foundation — Mobile v1", JSON.stringify(ck));
+      back: Array.from(document.querySelectorAll("[data-cop-goback]")).map((b) => b.textContent),
+      fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent, finOn: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"),
+      inMsgs: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), run: !!document.querySelector("[data-cop-savebar] [data-cop-fcheck]"),
+      apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { off: a.disabled, title: a.title } : null; })() }));
+    check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0,
+      "the check lists what agrees and what does not, and offers Go back to that part", JSON.stringify(ck));
+    /* §517 — SAVING IS A BAR UNDER THE CARDS, never a button in the chat:
+       Save as Foundation — Mobile v1 live, Run the check beside it, and
+       Apply to plan dimmed with its reason until a version is saved. */
+    check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.off && /Save the Foundation first/.test(ck.apply.title),
+      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan dimmed until something is saved (§517)", JSON.stringify(ck));
 
     /* §512 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
        opens it with the change applied; a line naming none asks nothing and
@@ -1505,7 +1517,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.fill("[data-cop-pentext]", "We connect Egypt. Every town, every store.");
     await page.click("[data-cop-pensave]");
     for (let i = 0; i < 20 && (F = await flowRow(cid)).drafts[0] !== "We connect Egypt. Every town, every store."; i++) await page.waitForTimeout(250);
-    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector(".copchk", { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && MODEL_SEEN.length === seenP; i++) await page.waitForTimeout(250);
     check(F.drafts[0] === "We connect Egypt. Every town, every store." && F.done[0] === true && F.phase === "check" && MODEL_SEEN.length === seenP + 1,
       "a part saved from its card during the check is stored, and the check runs again", JSON.stringify({ d: F.drafts[0], phase: F.phase, seen: MODEL_SEEN.length - seenP }));
@@ -1525,8 +1537,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F.phase === "check" && F.check === null && F.drafts[0] === "We connect Egypt. Every town, every store, every day." && MODEL_SEEN.length === seenS + 1,
       "a draft changed during the check drops the check's results on the server (§514)", JSON.stringify({ phase: F.phase, check: F.check, d: F.drafts[0], seen: MODEL_SEEN.length - seenS }));
     const st = await page.evaluate(() => ({ line: /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
-      fin: !!document.querySelector("[data-cop-ffinish]"), chk: document.querySelectorAll(".copchk").length }));
-    check(st.line && st.run && !st.fin && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, and draws no results and no Save", JSON.stringify(st));
+      fin: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), bar: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"), chk: document.querySelectorAll(".copchk").length }));
+    check(st.line && st.run && !st.fin && st.bar && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, draws no results — and the bar's Save stays live, because the check is not the door (§517)", JSON.stringify(st));
     /* The 503 the browser logs here is the refusal this block ASKS for (the
        model answered nothing); it is asserted present and taken off the
        page-error list, so the section's own closing "no page errors" still
@@ -1537,7 +1549,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await shot("8b-stale");
     Object.assign(MODEL_ANSWER, keepS);
     await pressIf("[data-cop-fcheck]");
-    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector(".copchk", { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && !((F = await flowRow(cid)).check); i++) await page.waitForTimeout(250);
     check(MODEL_SEEN.length === seenS + 2 && !!(F.check && F.check.agree.length === 1) && (await page.evaluate(() => document.querySelectorAll(".copchk.ok li").length)) === 1,
       "Run the check asks the model again and the results come back", JSON.stringify({ seen: MODEL_SEEN.length - seenS, check: F.check }));
@@ -1550,13 +1562,13 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     for (let i = 0; i < 20 && (F = await flowRow(cid)).phase !== "draft"; i++) await page.waitForTimeout(250);
     check(MODEL_SEEN.length === seenW + 1 && F.e === 5 && F.phase === "draft", "a line naming the part by the CLIENT's word (Our Values) opens it (§514)", JSON.stringify({ e: F.e, phase: F.phase, seen: MODEL_SEEN.length - seenW }));
     await pressIf("[data-cop-fsave]");
-    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 }).catch(() => {});
+    await page.waitForSelector(".copchk", { timeout: 15000 }).catch(() => {});
     for (let i = 0; i < 20 && !((F = await flowRow(cid)).check); i++) await page.waitForTimeout(250);
     const seenC = MODEL_SEEN.length;
     await page.fill("[data-cop-text]", "Make it shorter please");
     await page.click("[data-cop-send]");
     await page.waitForFunction(() => /or name it, then say what to change/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 5000 }).catch(() => {});
-    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-ffinish]") }));
+    const nn = await page.evaluate(() => ({ say: (document.querySelector(".copsay") || {}).textContent || "", fin: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])") }));
     check(MODEL_SEEN.length === seenC && /Edit the part from its card on the left, or name it/.test(nn.say) && nn.fin,
       "a line naming no part asks nothing, says how, and leaves the check where it was", JSON.stringify(nn));
     Object.assign(MODEL_ANSWER, { text: "Integrity, speed and care." });
@@ -1568,19 +1580,78 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "a line naming Core Values opens that part with the change applied", JSON.stringify({ seen: MODEL_SEEN.length - seenC, e: F.e, phase: F.phase }));
     check(/Save and check the whole foundation/.test(await textOf("[data-cop-fsave]")), "…and its Save goes back to the check");
     await pressIf("[data-cop-fsave]");
-    await page.waitForSelector("[data-cop-ffinish]", { timeout: 15000 });
+    await page.waitForSelector(".copchk", { timeout: 15000 });
     check(MODEL_SEEN.length === seenC + 2, "saving it runs the check again", MODEL_SEEN.length - seenC);
-    await page.click("[data-cop-ffinish]");
+    await page.click("[data-cop-savebar] [data-cop-ffinish]");
     await page.waitForFunction(() => /Saved as Foundation — Mobile v1/.test(document.querySelector("[data-cop-msgs]").textContent), null, { timeout: 10000 });
     await shot("9-saved");
     const sv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n, v.body->>'text' t from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title = 'Foundation — Mobile'"))).rows;
     check(sv.length === 1 && sv[0].n === 1 && /We connect Egypt\./.test(sv[0].t) && /for 2028/.test(sv[0].t), "the Foundation is saved as version 1, the end year written in", JSON.stringify(sv).slice(0, 200));
     check(await page.waitForFunction(() => Array.from(document.querySelectorAll("[data-cop-deliv]")).some((b) => /Foundation — Mobile/.test(b.textContent)), null, { timeout: 5000 }).then(() => true, () => false),
       "…and it is on the rail under Deliverables");
+    /* §517 — AFTER THE SAVE the bar says so, Save is dimmed (nothing has
+       changed since v1) and Apply to plan is live. */
+    const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
+      finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]:not([disabled])"),
+      todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
+    check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§517)", JSON.stringify(sb));
+    /* APPLY TO PLAN asks first, in the platform's own dialog, then REPLACES
+       the unit's Foundation and ARCHIVES what stood (§49.2) — read off the
+       graph and the archive, never the chat. The old Foundation is MADE
+       first, or "it was archived" is true of a build that archives nothing
+       (§113.8). */
+    const old0 = await page.evaluate(() => { UNITS.mobile.aspiration = "The aspiration that stood before the Copilot."; paint(); return ARCHIVES.length; });
+    await page.click("[data-cop-savebar] [data-cop-fapply]");
+    await page.waitForSelector("#modal-b [data-cop-apply-yes]", { timeout: 5000 });
+    const ask = await page.evaluate(() => ({ t: ((document.querySelector("#modal-t") || {}).textContent || "") + " " + ((document.querySelector("#modal-b") || {}).textContent || ""), planText: UNITS.mobile.aspiration }));
+    check(/Apply to the plan\?/.test(ask.t) && /Foundation — Mobile/.test(ask.t) && /last saved version/.test(ask.t) && /archived/.test(ask.t) && ask.planText === "The aspiration that stood before the Copilot.",
+      "Apply asks first in the platform's own dialog, naming the version and that the old Foundation is archived — and the plan is untouched until Yes", JSON.stringify(ask).slice(0, 300));
+    await page.click("#modal-b [data-cop-apply-yes]");
+    await page.waitForFunction(() => /is on the plan now/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    const ap = await page.evaluate((old0) => ({ say: (document.querySelector(".copsay") || {}).textContent || "", asp: UNITS.mobile.aspiration, eim: UNITS.mobile.endInMind,
+      who: (UNITS.mobile.clauses || []).map((c) => c[1]).join(" | "), ko: (UNITS.mobile.keyObjectives || []).map((k) => k.name).join(" | "), vals: (UNITS.mobile.values || []).map((v) => v.name).join(" | "),
+      arch: ARCHIVES.length - old0, a0: ARCHIVES[0] ? { kind: ARCHIVES[0].kind, key: ARCHIVES[0].key, asp: ARCHIVES[0].plan && ARCHIVES[0].plan.aspiration } : null,
+      applied: window.PANE && PANE.deliverable ? PANE.deliverable.applied : undefined }), old0);
+    check(/Foundation — Mobile v1 is on the plan now/.test(ap.say) && /Integrity, speed and care\./.test(ap.vals) && /for 2028/.test(ap.eim) && /We connect Egypt/.test(ap.who) && !/\{Y\}/.test(ap.asp + ap.eim + ap.ko) && ap.ko.length > 0,
+      "Yes writes the six parts onto Mobile's Foundation, the end year written in, and says so (§517)", JSON.stringify(ap).slice(0, 400));
+    check(ap.arch === 1 && ap.a0 && ap.a0.kind === "foundation" && ap.a0.key === "mobile" && ap.a0.asp === "The aspiration that stood before the Copilot.",
+      "…and what stood before is archived, as a Foundation archive holding the old words", JSON.stringify(ap.a0));
+    /* …read back from the DATABASE after the save lands, not off the screen. */
+    for (let i = 0; i < 40; i++) { const r = (await asTenant(tenantId, (c) => c.query("select aspiration from units where key = 'mobile'"))).rows[0]; if (r && !/stood before/.test(r.aspiration || "")) break; await page.waitForTimeout(250); }
+    const dbF = (await asTenant(tenantId, (c) => c.query("select u.aspiration, (select count(*)::int from plan_archives) n from units u where u.key = 'mobile'"))).rows[0];
+    check(dbF && !/stood before/.test(dbF.aspiration || "") && dbF.n >= 1, "…and the save carries the new Foundation and the archive to the database", JSON.stringify(dbF));
+    await shot("9b-applied");
+    /* THE DELIVERABLE PAGE shows the parts as cards under the client's own
+       words, says it is on the plan as v1, and offers Apply and Edit as v2. */
+    /* §490.2: a running chat folds the rails to their strip, so they are shown again the way a person would, then the Deliverables fold opened */
+    if (await page.$('[data-cop-railtog][aria-expanded="false"]')) await page.click('[data-cop-railtog][aria-expanded="false"]');
+    if (await page.$('[data-cop-fold="delivs"][aria-expanded="false"]')) await page.click('[data-cop-fold="delivs"]');
+    await page.waitForSelector("[data-cop-deliv]", { timeout: 8000 });
+    await page.click("[data-cop-deliv]");
+    await page.waitForSelector(".copplanrow", { timeout: 10000 });
+    const dp = await page.evaluate(() => ({ cards: document.querySelectorAll(".copfcard").length, heads: Array.from(document.querySelectorAll(".copfcard h5")).map((h) => h.textContent),
+      row: (document.querySelector(".copplanrow") || {}).textContent || "", apply: !!document.querySelector(".copplanrow [data-cop-fapply]"),
+      edit: Array.from(document.querySelectorAll("button")).map((b) => b.textContent).filter((t) => /Edit as v2/.test(t)).length }));
+    check(dp.cards === 6 && dp.heads.indexOf(Wc.val) >= 0 && /On the plan as v1/.test(dp.row) && dp.apply && dp.edit === 1,
+      "the deliverable page draws the six parts as cards in the client's words, says On the plan as v1 with Apply beside it, and offers Edit as v2 (§517)", JSON.stringify(dp).slice(0, 300));
+    /* A CARD CHANGED AFTER THE SAVE starts v2 on the rail and moves nothing
+       on the plan. */
+    await page.click('[data-cop-chat="' + cid + '"]');
+    await page.waitForSelector("[data-cop-savebar]", { timeout: 10000 });
+    await page.hover('[data-cop-card="1"]'); await pressIf('[data-cop-pen="1"]');
+    await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 }).catch(() => {});
+    await page.fill("[data-cop-pentext]", "A second aspiration, for {Y}.").catch(() => {});
+    await pressIf("[data-cop-pensave]");
+    for (let i = 0; i < 20 && (F = await flowRow(cid)).drafts[1] !== "A second aspiration, for {Y}."; i++) await page.waitForTimeout(250);
+    await page.waitForFunction(() => /v2 in progress/.test((document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
+    const v2 = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "", fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent || "", asp: UNITS.mobile.aspiration }));
+    check(F.saved && F.saved.n === 1 && F.drafts[1] === "A second aspiration, for {Y}." && /v2 in progress/.test(v2.st) && /v2/.test(v2.fin) && !/second aspiration/.test(v2.asp),
+      "a card changed after the save starts v2 on the bar and the plan keeps v1 until Apply (§517)", JSON.stringify(v2));
     check(errs.length === 0, "no page errors", errs.join(" | "));
   } finally {
     if (ST0 !== undefined) await page.evaluate((st) => { if (st) GROUP.structure = st; else delete GROUP.structure; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, ST0).catch(() => {});
     if (LB0 !== undefined) await page.evaluate((lb) => { LABELS.entries = lb; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, LB0).catch(() => {});
+    if (FD0 !== undefined) await page.evaluate((fd) => { const o = JSON.parse(fd); Object.assign(UNITS.mobile, o.f); ARCHIVES.length = 0; o.a.forEach((x) => ARCHIVES.push(x)); paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, FD0).catch(() => {});
     for (const k of Object.keys(MODEL_ANSWER)) delete MODEL_ANSWER[k];
     Object.assign(MODEL_ANSWER, keep);
     await owner.query("update tenants set modules = $1 where id = $2", [JSON.stringify(was), tenantId]).catch(() => {});

@@ -685,6 +685,15 @@ var COPILOT = (function(){
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
+  /* §517 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
+     cards stay editable after a save (Islam: "let the card be editable to
+     begin a new version"), so what decides whether Save is live is whether
+     any counted part differs from what vN holds, never the phase. */
+  function savedNow(f){
+    if (!f.saved || !Array.isArray(f.saved.drafts)) return false;
+    return steps().every(function(_, i){ return !on(i) || String(f.drafts[i] || "").trim() === String(f.saved.drafts[i] || "").trim(); });
+  }
+  function countedParts(f){ return steps().filter(function(_, i){ return on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -764,8 +773,9 @@ var COPILOT = (function(){
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
        now any part opens while the parts are being worked or checked —
-       never before the road is chosen, and never once the Foundation is
-       saved, because the server refuses a save to a saved flow. */
+       never before the road is chosen. Since §517 a SAVED Foundation opens
+       too: a change after a save starts the next version on the rail, and
+       the plan moves only when Apply to plan is pressed. */
     var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
     var pick = ed && phaseOk, pen = penHere() && phaseOk ? CARDPEN : null;
     return '<div class="copcards">' + S.map(function(el, i){
@@ -900,9 +910,11 @@ var COPILOT = (function(){
       out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
-          '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
+        /* §517 — the check is an extra move, never the door to saving
+           (Islam: "a check is an extra move"), so Save is on the bar under
+           the cards and only "Go back to" stays here, when there is one. */
+        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
+            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") + '</div>' : ''), true));
     }
     /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
        A pen save during the check left the OLD results standing, "Go back
@@ -915,7 +927,7 @@ var COPILOT = (function(){
         (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
+      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> under the cards to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
@@ -925,7 +937,7 @@ var COPILOT = (function(){
      review, and a part half answered opens on its next unanswered question
      — never back at question one, which would make returning to a part you
      were in the middle of cost the answers already given. */
-  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check"];
+  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check", "saved"];
   function openPart(g, i){
     var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
     g.e = i; g.done[i] = false; NUDGE = null;
@@ -955,12 +967,13 @@ var COPILOT = (function(){
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
-    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
+    var vn = f.saved ? f.saved.n : (PANE.nextVersion || 1), sNow = savedNow(f);
+    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> · ' + (sNow ? "saved" : "in progress") +
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
       (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
-        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + '</div>') +
+        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
@@ -970,12 +983,40 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
+  /* §517 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
+     it is APPLIED. Islam: "where do I press save for the foundation? in the
+     chat?" — the save was a button inside the check's own message, so it
+     could only be reached by running the check; now the check is an extra
+     move and the save stands at the foot of the cards (mockup
+     design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html).
+     Save is live the moment every counted part is agreed and differs from
+     the last version; Apply is dimmed until a version exists, because it
+     always writes the last SAVED version and never the cards' unsaved words
+     (Islam: "the plan only changes when we apply to plan"). The mockup
+     spells Apply as "Move"; the word is Islam's later one. */
+  function savebarHtml(f){
+    var S = steps(), ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
+    var early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded" && !f.start;
+    if (!ed || early) return '';
+    var total = countedParts(f), agreed = S.filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
+    var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
+    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + '</span>'
+      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + '</span>'
+      : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
+      : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
+    var saveN = f.saved && !sNow ? vn + 1 : vn;
+    return '<div class="copsavebar" data-cop-savebar>' + st + '<div class="copbtns">' +
+      '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the six parts together">Run the check</button>' +
+      '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
+      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      '</div></div>';
+  }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
      carries, worked out from the flow as it stands — nothing is stored for it.
      Start, each part with its answers counted, then the check and the save. */
   function ftodoHtml(f){
     var S = steps(), li = function(name, state, cnt, part){
-      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : "To do";
+      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : state === "opt" ? "Optional" : "To do";
       return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
         '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
         '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
@@ -989,10 +1030,11 @@ var COPILOT = (function(){
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
       return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
     }).join("");
-    var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
-              li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
-    var n = 2 + 2 + S.filter(function(_, i){ return on(i); }).length;
-    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (f.phase === "saved" ? 2 : 0);
+    /* §517 — the check is optional and not counted; the save is. */
+    var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
+              li("Save as Foundation", savedNow(f) ? "done" : agreedAll(f) ? "now" : "todo")];
+    var n = 2 + 1 + S.filter(function(_, i){ return on(i); }).length;
+    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (savedNow(f) ? 1 : 0);
     return '<aside class="copftodo"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + Math.round(done * 100 / n) + '%"></i></div></div>' +
       '<div class="copsw-tg"><div class="copsw-th">Start</div><ul>' + g1.join("") + '</ul></div>' +
@@ -1174,6 +1216,42 @@ var COPILOT = (function(){
     }
     return false;
   }
+  /* §517 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
+     the place's own Foundation page, replacing what the plan holds — and
+     what it replaces is ARCHIVED first (Islam: "anything old is not deleted
+     it's archived"), restorable from Import & storage › Archived plans. It
+     is asked for through the platform's own dialog, never a browser
+     confirm() (§95); the server stamps which version went in, the browser
+     writes the plan through the same writers the Foundation page uses
+     (applyFoundationParts, config-data.js) and the autosave carries it. */
+  function applyAsk(did, title){
+    if (!did || typeof openModalHtml !== "function") { SAY = "Save the Foundation first."; draw(); return; }
+    openModalHtml("Apply to the plan?", "",
+      '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
+      '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — its six parts go onto the Foundation page.</span></div>' +
+      '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
+      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="danger" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
+    var mb = document.getElementById("modal-b"); if (!mb) return;
+    mb.addEventListener("click", function(ev){
+      var y;
+      if (hit(ev, "[data-cop-apply-no]")) { closeModal(); return; }
+      if ((y = hit(ev, "[data-cop-apply-yes]"))) { closeModal(); applyGo(y.getAttribute("data-cop-apply-yes"), title); }
+    });
+  }
+  function applyGo(did, title){
+    var tgt = place();
+    act({ act:"applyFoundation", id:did }, function(j){
+      var wrote = false;
+      if (typeof applyFoundationParts === "function" && typeof archiveFoundation === "function") {
+        archiveFoundation(tgt, "replaced from the Copilot — " + title + " v" + j.n);
+        wrote = !!applyFoundationParts(tgt, j.foundation || []);
+      }
+      if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = j.applied;
+      SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+      if (wrote && typeof paint === "function") paint(); else draw();
+      loadList(true);
+    });
+  }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
   var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
@@ -1195,6 +1273,20 @@ var COPILOT = (function(){
         '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
         '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
+    /* §517 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
+       client's own words, with whether it is on the plan and the same
+       Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
+       plain-text edit of the whole version; a card is edited from the chat. */
+    var fp = cur && cur.body && Array.isArray(cur.body.foundation) ? cur.body.foundation : [];
+    if (d.type === "foundation" && fp.length && !editing) {
+      var words = partWords();
+      body = '<div class="copfcards">' + fp.map(function(x){
+        return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
+        '<div class="copplanrow" data-cop-planrow>' + (d.applied
+          ? '<span class="copsvst ok">On the plan as v' + E(d.applied.n) + (d.applied.n < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
+          : '<span class="copsvst warn">Not on the plan yet</span>') +
+        (canEdit() ? '<button type="button" class="copbtn solid" data-cop-fapply="' + E(d.id) + '" data-cop-fapply-title="' + E(d.title) + '">Apply to plan</button>' : '') + '</div>';
+    }
     var hist = vs.map(function(v, i){
       return '<li class="copver' + (i === 0 ? " latest" : "") + '"><span class="copvn">v' + v.n + '</span>' +
         '<span class="copvnote">' + E(v.note || (v.restoredFrom ? "Restored from v" + v.restoredFrom : "")) + '</span>' +
@@ -1205,7 +1297,7 @@ var COPILOT = (function(){
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
+        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit' + (d.type === "foundation" && cur ? ' as v' + (cur.n + 1) : '') + '</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
       body +
       '<h4 class="copvh">Versions</h4><ol class="copvers">' + hist + '</ol>' +
@@ -2816,6 +2908,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname()); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
          button"). It opens on "start from what is there, or fresh?" where

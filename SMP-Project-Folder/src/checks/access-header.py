@@ -206,7 +206,7 @@ with sync_playwright() as p:
         out[role.key] = { places: ws.length, reaches: Object.keys(hit) };
       });
       return out; }""")
-    # §508 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS, and a drawn cell is
+    # §516 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS, and a drawn cell is
     # every (role, area) pair under it that can come up — which is exactly
     # what its press carries in `data-acm`. So "is this column offered to
     # this role" is read off the PAIRS the presses name, keyed by the ROLE'S

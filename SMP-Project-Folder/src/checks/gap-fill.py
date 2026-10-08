@@ -84,7 +84,7 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
-    # §508 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS: a cell's press carries
+    # §516 MERGED THE TABLE INTO 8 ROWS BY 6 COLUMNS: a cell's press carries
     # every (role, area) pair under it in `data-acm`, so a cell is found by
     # the PAIR it holds rather than by one role|area|state string. REWRITTEN,
     # never loosened (§218): the same three claims, the Reporting absence

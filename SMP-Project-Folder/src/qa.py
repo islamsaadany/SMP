@@ -635,7 +635,7 @@ with sync_playwright() as p:
           const blank = blankCard.querySelector(".big").textContent.trim();
           u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
             (p.measures || []).forEach((m, j) => { m.progress = keep[i][j].p; m.actual = keep[i][j].a; }); });
-          /* §507.2 P4: a pillars function whose objectives are not counted,
+          /* §515.2 P4: a pillars function whose objectives are not counted,
              or which holds none, leads with its pillars — the page asks the
              same two questions, so the check asks them too rather than
              counting a fixed three (§218: rewritten, never loosened). */

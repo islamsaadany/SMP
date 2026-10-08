@@ -145,8 +145,8 @@ with sync_playwright() as p:
     # that changed). It asks the shared rule for the words now — what is under
     # test is that the header AGREES with lib/rules.js, never what the two of
     # them happen to say (§53.5, §94.8), so the next rename keeps it green.
-    # §508 MERGED THE TABLE: the own unit and the own function are ONE box
-    # column ("Their own" since §508.2, "This box" at §508) with Plan and Reporting under it, where there were
+    # §516 MERGED THE TABLE: the own unit and the own function are ONE box
+    # column ("Their own" since §516.2, "This box" at §516) with Plan and Reporting under it, where there were
     # two pairs with Strategy and Reporting under each. Asked of the shared
     # list the cells are walked from (SMPRules.ACCESS_COLS), never typed here,
     # or the next rename turns this red for a header that still agrees with
@@ -202,7 +202,7 @@ with sync_playwright() as p:
     be(pg, who["smo"])
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(250)
     pg.click('.setuprail [data-setupgo="access"]'); pg.wait_for_timeout(350)
-    # §508: the merged table's press names every pair under the cell (the
+    # §516: the merged table's press names every pair under the cell (the
     # custodian's Plan cell is its unit AND its function half), so the cell is
     # found by the pair it holds. Same press, same claim (§218).
     cell = pg.query_selector('[data-acm^="custodian:a_unit_own_strat,"][data-acm$="|edit"]')

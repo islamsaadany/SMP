@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-07
 
-**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; **stage 1 built on the branch 2026-10-07 (§507.2), not merged** — the six rules of §4 below, with the client copies waived at Islam's word (*"No need for client data proceed"*)
+**Status**: Direction agreed by Islam 2026-10-07; §7.1 decided the same day; **stage 1 built on the branch 2026-10-07 (§515.2), not merged** — the six rules of §4 below, with the client copies waived at Islam's word (*"No need for client data proceed"*)
 
 **Input**: Islam, 2026-10-07:
 
@@ -151,7 +151,7 @@ for every kind of thing):
   reporting cycle / setup): **6 rows × 5 columns = 30 cells**, where today is 117.
   Where somebody is attached decides the scope, exactly as "own" already works
   (§37: *own is not a setting*).
-  *Superseded at stage 2 (§508, signed off from the mockup):* **8 rows × 6
+  *Superseded at stage 2 (§516, signed off from the mockup):* **8 rows × 6
   columns = 48 cells.** Rows: Super user · SMO team · CEO · Owner · Custodian ·
   Part owner · Contributor · Everyone else. Columns: The top · This box — Plan ·
   This box — Reporting · Other boxes · Reporting cycle · Setup. Plan and
@@ -264,7 +264,7 @@ clients currently see disagreeing numbers. Stage 3 is the only one that moves
 data, so it waits until 1 and 2 have removed most of the special cases it would
 otherwise have to carry.
 
-### 8.1 Stage 1, as built (§507.2, 2026-10-07)
+### 8.1 Stage 1, as built (§515.2, 2026-10-07)
 
 | Rule | What changed | Where |
 |---|---|---|
@@ -280,7 +280,7 @@ f1f5d29, red eleven ways from the sources); `scripts/stage1-readings.js` now
 reports 0 moves against the built sources and 16 against f1f5d29. The client
 copies were waived (Islam: *"No need for client data proceed"*).
 
-### 8.2 Stage 2, as built (§508, 2026-10-07)
+### 8.2 Stage 2, as built (§516, 2026-10-07)
 
 | Part | What changed | Where |
 |---|---|---|
@@ -292,7 +292,7 @@ copies were waived (Islam: *"No need for client data proceed"*).
 
 Proof: `scripts/test-access-unmoved.js` reads **UNMOVED** against the specs/058
 baseline and against the build before stage 2 (10,228 grants); the authoriser
-suite **984/0**, its new §508 sections proved able to fail three ways (6 / 2 / 1
+suite **984/0**, its new §516 sections proved able to fail three ways (6 / 2 / 1
 red); `checks/access-merged.py` all good, proved able to fail three ways
 (10 / 3 / 5 red).
 

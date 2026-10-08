@@ -1,4 +1,4 @@
-/* ── STAGE 1'S SIX RULES, ASKED OF THE PLATFORM'S OWN CODE (§507.2) ──────
+/* ── STAGE 1'S SIX RULES, ASKED OF THE PLATFORM'S OWN CODE (§515.2) ──────
    Spec 066 stage 1 changes how rows are COMBINED and never how a row is
    SCORED. This check asks each of the six rules of the platform's own sources,
    run in a vm exactly as scripts/stage1-readings.js runs them, over states it

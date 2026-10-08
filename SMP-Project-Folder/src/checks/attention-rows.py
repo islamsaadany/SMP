@@ -97,8 +97,8 @@ with sync_playwright() as p:
        (lit(pg), ev(pg, "()=>currentSub")))
     ck("…and the pane is not blank",
        (ev(pg, "()=>document.getElementById('panel').textContent.trim().length", 0) or 0) > 40)
-    # A NON-OFFICE VIEWER who can open Setup at all. Until §508.3 they landed on
-    # Reporting cycle too; §508.3 made that page the office's alone (Islam:
+    # A NON-OFFICE VIEWER who can open Setup at all. Until §516.3 they landed on
+    # Reporting cycle too; §516.3 made that page the office's alone (Islam:
     # "same for the reporting cycle"), so it is not in their rail and the gear
     # lands on what IS — never on a page they cannot reach, never on a blank
     # pane. REWRITTEN, not loosened (§218): both ends are asserted, the office

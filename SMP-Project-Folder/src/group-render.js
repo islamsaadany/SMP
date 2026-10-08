@@ -169,7 +169,7 @@ function plus(id, label){
    differently. The empty case keeps its own words: reading "0% delivered
    against 0% planned" under "Not yet measurable" is three false precisions in
    a row. */
-/* \u00a7507.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
+/* \u00a7515.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
    Islam's word. The headline stopped being delivered over planned and became
    the weighted average of the units' own execution figures, so a sentence
    whose two numbers divide to something other than the figure above it would
@@ -2489,7 +2489,7 @@ function renderGroupPerformance(){
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
-      /* §507.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
+      /* §515.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
          asked of the plan — a capability whose objectives nobody has reported
          yet still has them, and its figure reads "not yet" rather than this
          sentence claiming they do not exist. */
@@ -3037,7 +3037,7 @@ function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
   var pOn = planOn(u);
-  /* §507.2 P4: whether the objectives lead. Everything but a pillars
+  /* §515.2 P4: whether the objectives lead. Everything but a pillars
      function does; a pillars function does only when its objectives are
      counted (§437) and it has some to show — fnMemberScores()'s own test,
      asked of the same view. A plan switched off keeps the objectives card,
@@ -3174,7 +3174,7 @@ function renderUnitPerformance(u){
   return perfActs(presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
-      /* §507.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
+      /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
          BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
          so the page leads with the same number or the two disagree about one
          function. A unit, and a function whose objectives count, are
@@ -7561,7 +7561,7 @@ function overrunNote(p){
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
   var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
-  /* ONE HEADLINE (§507.2, spec 066 P4): the objectives lead whenever the plan
+  /* ONE HEADLINE (§515.2, spec 066 P4): the objectives lead whenever the plan
      HAS objectives (shown and switched on) — reading "not yet" until they are
      reported — never only once one has been. Before, a capability whose
      objectives nobody had reported yet drew its projects card as primary,
@@ -7600,7 +7600,7 @@ function capScoreCards(c){
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
-      /* §507.2 (P2): the figure is built on the milestones whose date has
+      /* §515.2 (P2): the figure is built on the milestones whose date has
          come, as a tactic's is — so the line says how many that is when it is
          not all of them, or a 100% over "3 of 12" reads as a mistake. */
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +

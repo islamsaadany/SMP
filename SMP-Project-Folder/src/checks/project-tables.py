@@ -189,7 +189,7 @@ with sync_playwright() as p:
         (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
           keep.push([m, m.pct, m.status]);
           m.pct = null; if (m.status === "wip") m.status = "todo"; }));
-        // §507.2 (spec 066 P2): the figure is made of the milestones whose
+        // §515.2 (spec 066 P2): the figure is made of the milestones whose
         // date has COME, as a tactic's is, so the count it is compared with
         // counts those same rows — rewritten to the decided rule, never
         // loosened (§218); every other milestone is still in the tally.

@@ -413,7 +413,7 @@ function deckSlides(u){
 
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
-  /* §507.2 P5: a function whose objectives are switched off (§437) has no
+  /* §515.2 P5: a function whose objectives are switched off (§437) has no
      objectives reading on its page — the pillars card leads there — so the
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
@@ -1099,7 +1099,7 @@ function deckSlidesFn(subject){
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
-    /* §507.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
+    /* §515.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
        plans in projects is drawn here through its own holder, and the page has
        always scored that holder's objectives as the UNIT's (holderKOScore);
        the deck asked capKOScore and could print a different number for the
@@ -1131,7 +1131,7 @@ function deckSlidesFn(subject){
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    /* §507.2 P5: holderHasKOs() is the page's own test, so a function's
+    /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
        objectives switched off (§437) draw no slide here either. */
     if (holderHasKOs(c)) {
       var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){

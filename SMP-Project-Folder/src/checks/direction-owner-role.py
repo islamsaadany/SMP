@@ -10,12 +10,12 @@ read "No pages granted". It MAKES its state (§255) — two people on the
 register holding nothing, the business units switched off, one direction
 naming one as Owner and the other as Custodian — and asserts BOTH ENDS
 (§94.2): each lands on the company, and somebody named on nothing still
-reaches nothing. Then Roles & access: since §508 the table draws eight rows
+reaches nothing. Then Roles & access: since §516 the table draws eight rows
 over the stored roles, and a direction owner is one of the three under PART
 OWNER — so what is asserted is that the Part owner row says so, that its The
 top cell carries the direction owner's pair at the group's View, and that no
 "Their own" cell carries it (its own-unit and own-function pairs are not
-applicable). REWRITTEN at §508, never loosened (§218): it asked for a row
+applicable). REWRITTEN at §516, never loosened (§218): it asked for a row
 named Direction owner, which the merged table no longer draws. SMP_BUILT
 points it at another build (§276).
 """

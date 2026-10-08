@@ -268,7 +268,7 @@
        closing this takes nothing away from the people entering figures: it
        closes the office's own machinery to everyone but the office.
 
-       THE GROUP CEO KEPT IT UNTIL §508.3, and that is reversed rather than
+       THE GROUP CEO KEPT IT UNTIL §516.3, and that is reversed rather than
        overwritten (Principle II). §37 made marking focus measures a RULE —
        "focus measures are marked by the CEO and the SMO" — and a CEO who
        cannot open the page cannot obey a rule addressed to them, so the CEO
@@ -298,7 +298,7 @@
        would make the second condition the only one. The SMO opens the
        own-function cell for project owners, the own-unit (and, for a pillars
        function, own-function) cell for pillar owners. */
-    /* §508.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
+    /* §516.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
        ok"). §405 let a business unit plan in projects, so a project owner can
        now hold one at a unit, and that pair shipped at none while the
        own-function pair shipped at view — which is the only reason the merged
@@ -697,7 +697,7 @@
     return personRoles(w, p).map(function (r) { return r.role; });
   }
 
-  /* ── SETUP IS NEVER OFFERED TO A CEO (§508.1) ─────────────────────
+  /* ── SETUP IS NEVER OFFERED TO A CEO (§516.1) ─────────────────────
      Islam: "nobody will see the setup even the ceo", and of the drawn choice
      between a cell that starts shut and one never offered: "never offered".
      So it is a RULE rather than a cell (§37's shape): the table draws a dash
@@ -705,7 +705,7 @@
      view would grant Setup from behind a dash nobody can press to take it
      back (§61). Asked by grantFor, so the screen and the server read it from
      one place (§42). */
-  /* §508.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
+  /* §516.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
      offered Setup: "close setup for all of them even the ceo no one get the
      setup but the super use and the smo team". So the rule is said the way
      he said it — Setup is the office's — rather than as a list of the rows
@@ -714,7 +714,7 @@
      Every shipped default for these rows was already none, so the worked
      example moves nothing; what changes is that a tenant which had opened
      Setup to one of them loses it, and the table can no longer offer it. */
-  /* §508.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
+  /* §516.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
      anyone but the smo and the super user it's not an option and same for
      the reporting cycle". The two CEO rows were the only ones still reading
      it, and closing it takes the Focus measures page with it — the one place
@@ -878,11 +878,11 @@
     return at ? [{ role: NO_ROLE, at: at }] : [];
   }
 
-  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§508) ──
+  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§516) ──
      Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
      — 117 cells, of which the unit and the function halves gave the same
      answer for every person on every tenant measured. What is DRAWN is now
-     9 rows and 6 columns (8 on a client with no second layer, §508.1);
+     9 rows and 6 columns (8 on a client with no second layer, §516.1);
      what is STORED is untouched. Each drawn cell is a
      VIEW over the (role, area) pairs under it, and pressing it writes every
      pair whose answer differs — so `grantFor`, `grantIn` and everything the
@@ -900,10 +900,10 @@
      and every area exactly once — asserted, or a role added later would
      simply not appear on the table and nobody could set it. */
   var ACCESS_COLS = [
-    /* §508.2: the column words are Islam's, given as they are — "for the
+    /* §516.2: the column words are Islam's, given as they are — "for the
        group make it Group / Company", "Their own", "Other units & functions" —
        and literal, because they name a KIND of place rather than this
-       client's word for one (the rows do that, §508.1). */
+       client's word for one (the rows do that, §516.1). */
     { key:"top", label:"Group / Company", areas:["a_group"],
       note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
     { key:"plan", label:"Their own — Plan", pair:"Their own", col:"Plan",
@@ -924,7 +924,7 @@
       note:"A seat. Granted on the register." },
     { key:"smoteam", name:"SMO team", of:["smoteam"],
       note:"A seat. Granted on the register." },
-    /* §508.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
+    /* §516.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
        and layer 2 head needs different rows". They were always stored apart
        (gceo, cceo); only the table drew them as one. Each is named in the
        client's own words — the word for the top plus " CEO", the word for the

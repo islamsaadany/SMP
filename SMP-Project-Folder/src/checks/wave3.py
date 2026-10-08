@@ -152,7 +152,7 @@ with sync_playwright() as p:
     ratio = [c for c in cards if "execution" in c["head"].lower()]
     ck("the execution card is found", bool(ratio), [c["head"][:40] for c in cards])
     if ratio:
-        # §507.2 (spec 066 P3) took the verdict out of this sentence: the
+        # §515.2 (spec 066 P3) took the verdict out of this sentence: the
         # headline is the weighted average of the units' own execution
         # figures now, so "X% delivered against Y% planned" would be two
         # numbers that no longer divide to the figure above them. REWRITTEN,

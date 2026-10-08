@@ -175,7 +175,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
      writes through (`data-mac`, whose handler deletes the key on the default,
      §50.6). Absent, the cell is Strategy's exactly as it was. */
-  /* §508: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
+  /* §516: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
      `role|area` the press names (the merged table hands every pair under the
      cell, written through `data-acm`), and `opt.mixed` says those pairs do
      not agree — so nothing is lit, the tray is marked, and any press sets
@@ -183,7 +183,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      where a mixed cell names the pairs and what each holds. */
   opt = opt || {};
   var v = opt.mixed ? null : opt.value != null ? opt.value : grantFor(roleKey, areaKey);
-  /* Every press in Strategy's own table goes through ONE writer now (§508,
+  /* Every press in Strategy's own table goes through ONE writer now (§516,
      `data-acm`, "role:area,…|state"); a module's cell names its own
      (`data-mac`, "role|area|state|shipped"). A caller naming neither gets
      the merged writer for its one pair, so no cell can draw a press that
@@ -263,7 +263,7 @@ function matrixRows(){
    paid for by exactly this family, a name resolving to something other
    than the thing its caller meant, silently and rendering perfectly. A
    third matrix added inside renderPeople() would have got the wrong one. */
-/* §508.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
+/* §516.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
    `word`/`suffix` — the word for the top plus " CEO", the word for the second
    layer plus " head" — because the rule module that lists them holds no
    tenant vocabulary; every other row keeps the name it was given. One reader,
@@ -274,7 +274,7 @@ function accessRowName(r){
   return w ? w + r.suffix : r.name;
 }
 function matrixRoleCell(r){
-  /* §508: a merged row counts everybody holding ANY of the roles under it,
+  /* §516: a merged row counts everybody holding ANY of the roles under it,
      once each — a person who is both a BU owner and a function head is one
      Owner, not two. */
   var of = r.of || [r.key];
@@ -367,7 +367,7 @@ function copilotArea(){
   try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
 }
 /* WHETHER AN AREA CAN COME UP AT ALL FOR A ROLE (§37, §117, §174).
-   Lifted out of renderAccess (§508) so the merged table's cell and a check
+   Lifted out of renderAccess (§516) so the merged table's cell and a check
    can ask it: a drawn cell is the pairs under it that CAN come up, and a
    pair that cannot is left out of what the cell reads and what its press
    writes. Only the own/other pair ever collapses, and only upwards:
@@ -380,9 +380,9 @@ function accessNA(roleKey, areaKey){
      team's row was wrong in both directions at once: `roleOwns()` did not
      count them as owning anything, and this did not mark their other
      columns either, so four cells did nothing and nobody could see it. */
-  /* §508.1: a rule, never a cell — Setup is not offered to either CEO
+  /* §516.1: a rule, never a cell — Setup is not offered to either CEO
      (Islam: "never offered"), so the cell is a dash with the reason on it.
-     §508.2 widened the rule to every row but the office, and this reason
+     §516.2 widened the rule to every row but the office, and this reason
      moved with it untouched, because it was always the office's sentence. */
   if (SMPRules.neverOffered(roleKey, areaKey)) {
     return "Only the Super user and the SMO team open Setup.";
@@ -444,7 +444,7 @@ function accessNA(roleKey, areaKey){
   return null;
 }
 
-/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§508) ──────────────
+/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§516) ──────────────
    Spec 066 stage 2. The rows and columns are SMPRules.ACCESS_ROWS and
    ACCESS_COLS, named once in the shared module; a cell is every
    (role, area) pair under it that can come up, and it reads as one answer
@@ -487,7 +487,7 @@ function renderAccess(){
      everyone may do is part of running the office, and §37's rules are shown
      to everyone who can open the page. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §508.1: the second layer's row exists only where the client HAS a
+  /* §516.1: the second layer's row exists only where the client HAS a
      second layer — Islam: "a client with no second layer has no second layer
      row". Asked of midExists(), the one answer the set-up flow and the
      Structure step already ask (§53.5). */
@@ -498,7 +498,7 @@ function renderAccess(){
      (Islam, 2026-08-22: "remove all the descriptions from the headers and just
      make it appear on hovering"). The notes are lists, and stacked under the
      labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §508) ──
+  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
      Plan and Reporting are two answers about the same box, so the box's name
      is written ONCE above them. Built off the `pair`/`col` fields the columns
      carry — the header is derived from the same list the cells walk, so a
@@ -534,7 +534,7 @@ function renderAccess(){
      every other row is a dash by RULE — "office only for now" — because the
      api refuses a client's own person whatever the map holds, and a toggle
      that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§508), so the cell names that role. */
+     role each on the merged table (§516), so the cell names that role. */
   var COPA = copilotArea();
   if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
@@ -572,7 +572,7 @@ function renderAccess(){
         : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
 
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§508). Its
+  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
      hover says which pairs and what each holds; this line says that there is
      something to decide at all, because a cell with nothing lit is easy to
      read as "no access" from across the room. A status, not a description

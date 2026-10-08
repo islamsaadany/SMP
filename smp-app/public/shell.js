@@ -270,7 +270,7 @@
        closing this takes nothing away from the people entering figures: it
        closes the office's own machinery to everyone but the office.
 
-       THE GROUP CEO KEPT IT UNTIL §508.3, and that is reversed rather than
+       THE GROUP CEO KEPT IT UNTIL §516.3, and that is reversed rather than
        overwritten (Principle II). §37 made marking focus measures a RULE —
        "focus measures are marked by the CEO and the SMO" — and a CEO who
        cannot open the page cannot obey a rule addressed to them, so the CEO
@@ -300,7 +300,7 @@
        would make the second condition the only one. The SMO opens the
        own-function cell for project owners, the own-unit (and, for a pillars
        function, own-function) cell for pillar owners. */
-    /* §508.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
+    /* §516.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
        ok"). §405 let a business unit plan in projects, so a project owner can
        now hold one at a unit, and that pair shipped at none while the
        own-function pair shipped at view — which is the only reason the merged
@@ -699,7 +699,7 @@
     return personRoles(w, p).map(function (r) { return r.role; });
   }
 
-  /* ── SETUP IS NEVER OFFERED TO A CEO (§508.1) ─────────────────────
+  /* ── SETUP IS NEVER OFFERED TO A CEO (§516.1) ─────────────────────
      Islam: "nobody will see the setup even the ceo", and of the drawn choice
      between a cell that starts shut and one never offered: "never offered".
      So it is a RULE rather than a cell (§37's shape): the table draws a dash
@@ -707,7 +707,7 @@
      view would grant Setup from behind a dash nobody can press to take it
      back (§61). Asked by grantFor, so the screen and the server read it from
      one place (§42). */
-  /* §508.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
+  /* §516.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
      offered Setup: "close setup for all of them even the ceo no one get the
      setup but the super use and the smo team". So the rule is said the way
      he said it — Setup is the office's — rather than as a list of the rows
@@ -716,7 +716,7 @@
      Every shipped default for these rows was already none, so the worked
      example moves nothing; what changes is that a tenant which had opened
      Setup to one of them loses it, and the table can no longer offer it. */
-  /* §508.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
+  /* §516.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
      anyone but the smo and the super user it's not an option and same for
      the reporting cycle". The two CEO rows were the only ones still reading
      it, and closing it takes the Focus measures page with it — the one place
@@ -880,11 +880,11 @@
     return at ? [{ role: NO_ROLE, at: at }] : [];
   }
 
-  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§508) ──
+  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§516) ──
      Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
      — 117 cells, of which the unit and the function halves gave the same
      answer for every person on every tenant measured. What is DRAWN is now
-     9 rows and 6 columns (8 on a client with no second layer, §508.1);
+     9 rows and 6 columns (8 on a client with no second layer, §516.1);
      what is STORED is untouched. Each drawn cell is a
      VIEW over the (role, area) pairs under it, and pressing it writes every
      pair whose answer differs — so `grantFor`, `grantIn` and everything the
@@ -902,10 +902,10 @@
      and every area exactly once — asserted, or a role added later would
      simply not appear on the table and nobody could set it. */
   var ACCESS_COLS = [
-    /* §508.2: the column words are Islam's, given as they are — "for the
+    /* §516.2: the column words are Islam's, given as they are — "for the
        group make it Group / Company", "Their own", "Other units & functions" —
        and literal, because they name a KIND of place rather than this
-       client's word for one (the rows do that, §508.1). */
+       client's word for one (the rows do that, §516.1). */
     { key:"top", label:"Group / Company", areas:["a_group"],
       note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
     { key:"plan", label:"Their own — Plan", pair:"Their own", col:"Plan",
@@ -926,7 +926,7 @@
       note:"A seat. Granted on the register." },
     { key:"smoteam", name:"SMO team", of:["smoteam"],
       note:"A seat. Granted on the register." },
-    /* §508.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
+    /* §516.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
        and layer 2 head needs different rows". They were always stored apart
        (gceo, cceo); only the table drew them as one. Each is named in the
        client's own words — the word for the top plus " CEO", the word for the
@@ -10917,7 +10917,7 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
-/* §507.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
+/* §515.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
    `progress` (§239: reward stays a year-end judgement), except for a yes/no
    measure, which stores none — its answer IS its figure, 100 or 0 from the
    one scorer (§257), and nothing said stays null. Without this a Done measure
@@ -11339,7 +11339,7 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
-/* ── ONE WEIGHT RULE (§507.2, spec 066 P1) ──────────────────────────────
+/* ── ONE WEIGHT RULE (§515.2, spec 066 P1) ──────────────────────────────
    This averaged its own way: a blank weight counted as ONE, beside rows
    weighted 60 and 40, so a function or a capability with one weight left
    blank was scored by a rule no unit uses — and the same objectives entered on
@@ -11352,7 +11352,7 @@ function capKOScore(c){
   if (c && c.own && !fnKoCounted(c.id)) return null;
   return koScore((c && c.keyObjectives) || []);
 }
-/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§507.2, P4): it has some
+/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§515.2, P4): it has some
    that are shown, and they are switched on. Asked by the card that leads and
    by the division's reading, so the two cannot answer differently (§53.5). */
 function holderHasKOs(c){
@@ -11479,7 +11479,7 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
-/* ── ONE EXECUTION (§507.2, spec 066 P2) ──────────────────────────────────
+/* ── ONE EXECUTION (§515.2, spec 066 P2) ──────────────────────────────────
    A milestone counts once its date has come, exactly as a tactic does
    (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
    with the ones not yet due reading nought, so a function's execution was low
@@ -11536,7 +11536,7 @@ function fnActionsTally(fk){
     else if (a.status === "wip") wip++;
     else todo++;
     if (statusPending(a)) pending++;
-    /* §507.2 (P2): an action counts once its date has come, as a milestone
+    /* §515.2 (P2): an action counts once its date has come, as a milestone
        does — one meaning of Execution wherever the word is printed. */
     if (!dueThisCycle(a.due)) return;
     due++;
@@ -13822,7 +13822,7 @@ function passwordReach(){
 }
 
 /* What carries reward is the office's decision, not a page permission.
-   §508.3: the Super user marks it and nobody else, at any grant — the group
+   §516.3: the Super user marks it and nobody else, at any grant — the group
    CEO used to, and Islam closed the Reporting cycle column (where this page
    lives) to everyone but the office knowing it took this with it. The server's
    focus case says the same. */
@@ -18128,7 +18128,7 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-/* ONE ROLL-UP (§507.2, spec 066 P3). The group's execution was delivered over
+/* ONE ROLL-UP (§515.2, spec 066 P3). The group's execution was delivered over
    planned, each averaged across the units FIRST and then divided — so a unit
    with a large plan pulled the denominator and the headline could sit beside
    ten unit cards whose own figures do not average to it. It is the weighted
@@ -18197,7 +18197,7 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
-  /* ONE HEADLINE (§507.2, spec 066 P4): a function's headline is its
+  /* ONE HEADLINE (§515.2, spec 066 P4): a function's headline is its
      objectives when its plan HAS objectives (shown and switched on) — reading
      "not yet" until they are reported — and its pillars' or projects' figure
      when it has none. Before, a pillars function with none read "—" (§437
@@ -18269,7 +18269,7 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-/* §507.2 (P3): a division of units alone is the weighted average of its
+/* §515.2 (P3): a division of units alone is the weighted average of its
    units' own execution figures — the group's rule, over a smaller list. With
    functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){
@@ -25271,7 +25271,7 @@ function plus(id, label){
    differently. The empty case keeps its own words: reading "0% delivered
    against 0% planned" under "Not yet measurable" is three false precisions in
    a row. */
-/* \u00a7507.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
+/* \u00a7515.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
    Islam's word. The headline stopped being delivered over planned and became
    the weighted average of the units' own execution figures, so a sentence
    whose two numbers divide to something other than the figure above it would
@@ -27591,7 +27591,7 @@ function renderGroupPerformance(){
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
-      /* §507.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
+      /* §515.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
          asked of the plan — a capability whose objectives nobody has reported
          yet still has them, and its figure reads "not yet" rather than this
          sentence claiming they do not exist. */
@@ -28139,7 +28139,7 @@ function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
   var pOn = planOn(u);
-  /* §507.2 P4: whether the objectives lead. Everything but a pillars
+  /* §515.2 P4: whether the objectives lead. Everything but a pillars
      function does; a pillars function does only when its objectives are
      counted (§437) and it has some to show — fnMemberScores()'s own test,
      asked of the same view. A plan switched off keeps the objectives card,
@@ -28276,7 +28276,7 @@ function renderUnitPerformance(u){
   return perfActs(presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
-      /* §507.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
+      /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
          BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
          so the page leads with the same number or the two disagree about one
          function. A unit, and a function whose objectives count, are
@@ -32663,7 +32663,7 @@ function overrunNote(p){
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
   var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
-  /* ONE HEADLINE (§507.2, spec 066 P4): the objectives lead whenever the plan
+  /* ONE HEADLINE (§515.2, spec 066 P4): the objectives lead whenever the plan
      HAS objectives (shown and switched on) — reading "not yet" until they are
      reported — never only once one has been. Before, a capability whose
      objectives nobody had reported yet drew its projects card as primary,
@@ -32702,7 +32702,7 @@ function capScoreCards(c){
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
-      /* §507.2 (P2): the figure is built on the milestones whose date has
+      /* §515.2 (P2): the figure is built on the milestones whose date has
          come, as a tactic's is — so the line says how many that is when it is
          not all of them, or a 100% over "3 of 12" reads as a mistake. */
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
@@ -35658,7 +35658,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
      writes through (`data-mac`, whose handler deletes the key on the default,
      §50.6). Absent, the cell is Strategy's exactly as it was. */
-  /* §508: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
+  /* §516: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
      `role|area` the press names (the merged table hands every pair under the
      cell, written through `data-acm`), and `opt.mixed` says those pairs do
      not agree — so nothing is lit, the tray is marked, and any press sets
@@ -35666,7 +35666,7 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      where a mixed cell names the pairs and what each holds. */
   opt = opt || {};
   var v = opt.mixed ? null : opt.value != null ? opt.value : grantFor(roleKey, areaKey);
-  /* Every press in Strategy's own table goes through ONE writer now (§508,
+  /* Every press in Strategy's own table goes through ONE writer now (§516,
      `data-acm`, "role:area,…|state"); a module's cell names its own
      (`data-mac`, "role|area|state|shipped"). A caller naming neither gets
      the merged writer for its one pair, so no cell can draw a press that
@@ -35746,7 +35746,7 @@ function matrixRows(){
    paid for by exactly this family, a name resolving to something other
    than the thing its caller meant, silently and rendering perfectly. A
    third matrix added inside renderPeople() would have got the wrong one. */
-/* §508.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
+/* §516.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
    `word`/`suffix` — the word for the top plus " CEO", the word for the second
    layer plus " head" — because the rule module that lists them holds no
    tenant vocabulary; every other row keeps the name it was given. One reader,
@@ -35757,7 +35757,7 @@ function accessRowName(r){
   return w ? w + r.suffix : r.name;
 }
 function matrixRoleCell(r){
-  /* §508: a merged row counts everybody holding ANY of the roles under it,
+  /* §516: a merged row counts everybody holding ANY of the roles under it,
      once each — a person who is both a BU owner and a function head is one
      Owner, not two. */
   var of = r.of || [r.key];
@@ -35850,7 +35850,7 @@ function copilotArea(){
   try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
 }
 /* WHETHER AN AREA CAN COME UP AT ALL FOR A ROLE (§37, §117, §174).
-   Lifted out of renderAccess (§508) so the merged table's cell and a check
+   Lifted out of renderAccess (§516) so the merged table's cell and a check
    can ask it: a drawn cell is the pairs under it that CAN come up, and a
    pair that cannot is left out of what the cell reads and what its press
    writes. Only the own/other pair ever collapses, and only upwards:
@@ -35863,11 +35863,11 @@ function accessNA(roleKey, areaKey){
      team's row was wrong in both directions at once: `roleOwns()` did not
      count them as owning anything, and this did not mark their other
      columns either, so four cells did nothing and nobody could see it. */
-  /* §508.1: a rule, never a cell — Setup is not offered to either CEO
+  /* §516.1: a rule, never a cell — Setup is not offered to either CEO
      (Islam: "never offered"), so the cell is a dash with the reason on it.
-     §508.2 widened the rule to every row but the office, and this reason
+     §516.2 widened the rule to every row but the office, and this reason
      moved with it untouched, because it was always the office's sentence. */
-  /* §508.3: the Reporting cycle joined it, with its own sentence, because the
+  /* §516.3: the Reporting cycle joined it, with its own sentence, because the
      cell says which column it is closing. */
   if (SMPRules.neverOffered(roleKey, areaKey)) {
     return areaKey === "a_cycle"
@@ -35931,7 +35931,7 @@ function accessNA(roleKey, areaKey){
   return null;
 }
 
-/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§508) ──────────────
+/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§516) ──────────────
    Spec 066 stage 2. The rows and columns are SMPRules.ACCESS_ROWS and
    ACCESS_COLS, named once in the shared module; a cell is every
    (role, area) pair under it that can come up, and it reads as one answer
@@ -35974,7 +35974,7 @@ function renderAccess(){
      everyone may do is part of running the office, and §37's rules are shown
      to everyone who can open the page. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-  /* §508.1: the second layer's row exists only where the client HAS a
+  /* §516.1: the second layer's row exists only where the client HAS a
      second layer — Islam: "a client with no second layer has no second layer
      row". Asked of midExists(), the one answer the set-up flow and the
      Structure step already ask (§53.5). */
@@ -35985,7 +35985,7 @@ function renderAccess(){
      (Islam, 2026-08-22: "remove all the descriptions from the headers and just
      make it appear on hovering"). The notes are lists, and stacked under the
      labels they made the HEAD of the table taller than its body. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §508) ──
+  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
      Plan and Reporting are two answers about the same box, so the box's name
      is written ONCE above them. Built off the `pair`/`col` fields the columns
      carry — the header is derived from the same list the cells walk, so a
@@ -36021,7 +36021,7 @@ function renderAccess(){
      every other row is a dash by RULE — "office only for now" — because the
      api refuses a client's own person whatever the map holds, and a toggle
      that changes nothing is decoration (§42). Both office rows are a single
-     role each on the merged table (§508), so the cell names that role. */
+     role each on the merged table (§516), so the cell names that role. */
   var COPA = copilotArea();
   if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
@@ -36059,7 +36059,7 @@ function renderAccess(){
         : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
 
-  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§508). Its
+  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
      hover says which pairs and what each holds; this line says that there is
      something to decide at all, because a cell with nothing lit is easy to
      read as "no access" from across the room. A status, not a description
@@ -40978,7 +40978,7 @@ function focusNav(){
 }
 
 function renderFocusSetup(){
-  /* Marking is the Super user's — a rule, not a cell (§37, §508.3).
+  /* Marking is the Super user's — a rule, not a cell (§37, §516.3).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
   var editable = mayMarkFocus();
   var bands = focusBands(FSET.unit);
@@ -46522,7 +46522,7 @@ function deckSlides(u){
 
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
-  /* §507.2 P5: a function whose objectives are switched off (§437) has no
+  /* §515.2 P5: a function whose objectives are switched off (§437) has no
      objectives reading on its page — the pillars card leads there — so the
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
@@ -47208,7 +47208,7 @@ function deckSlidesFn(subject){
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
-    /* §507.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
+    /* §515.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
        plans in projects is drawn here through its own holder, and the page has
        always scored that holder's objectives as the UNIT's (holderKOScore);
        the deck asked capKOScore and could print a different number for the
@@ -47240,7 +47240,7 @@ function deckSlidesFn(subject){
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    /* §507.2 P5: holderHasKOs() is the page's own test, so a function's
+    /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
        objectives switched off (§437) draw no slide here either. */
     if (holderHasKOs(c)) {
       var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
@@ -69619,7 +69619,7 @@ var SYNC = (function () {
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
        so the grid is judged by using it rather than by reading it.
-       ONE DRAWN CELL, SEVERAL STORED ONES (§508). The merged table's press
+       ONE DRAWN CELL, SEVERAL STORED ONES (§516). The merged table's press
        carries every (role, area) pair under the cell and the one state to
        give them all. Only a pair whose answer DIFFERS is written: a pair
        already on that state keeps its absence (§50.6), so a tenant's stored

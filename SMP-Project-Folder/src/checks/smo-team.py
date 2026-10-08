@@ -15,7 +15,7 @@ same function the server calls. Where the two disagree, the server wins and the
 product is broken.
 """
 from playwright.sync_api import sync_playwright
-# §508: the matrix's presses are `data-acm` (one drawn cell over every pair
+# §516: the matrix's presses are `data-acm` (one drawn cell over every pair
 # under it). Asking for the old `data-ac` would read nought on EVERY build and
 # pass the "offers nothing" half for the wrong reason (§113.8); both are asked
 # so a writer reintroduced under either name is counted.

@@ -530,9 +530,9 @@ with sync_playwright() as pw:
     if other:
         ev(pg, "(k) => { VIEWER = k; paint(); }", other)
         pg.wait_for_timeout(400)
-        # ASSERTED ON THE PANE, not on the tab row. Until §508.3 a CEO reached
+        # ASSERTED ON THE PANE, not on the tab row. Until §516.3 a CEO reached
         # this page through the Reporting cycle column and lost only Video
-        # storage here; §508.3 made that column the office's alone (Islam:
+        # storage here; §516.3 made that column the office's alone (Islam:
         # "same for the reporting cycle"), so NOBODY outside the office reaches
         # Import & storage at all now — the page, its archives and its clips.
         # REWRITTEN, not loosened (§218): the claim that survives is that they
@@ -543,7 +543,7 @@ with sync_playwright() as pw:
                     pg.query_selector(".setuppane") else ""
         check("...and somebody outside the office does not get Video storage",
               "Video storage" not in pane_them, pane_them[:160])
-        check("...nor the archived plans, since §508.3 the page is the office's",
+        check("...nor the archived plans, since §516.3 the page is the office's",
               "Archived plans" not in pane_them
               and not ev(pg, "() => reachable(setupDefs(), 'group', null).some(d => d.k === 'import')"),
               pane_them[:160])

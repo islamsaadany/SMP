@@ -1,8 +1,8 @@
-"""ONE ACCESS TABLE, AND A SEAT ON EVERY PILLAR (§508, spec 066 stage 2).
+"""ONE ACCESS TABLE, AND A SEAT ON EVERY PILLAR (§516, spec 066 stage 2).
 
 Islam signed off the mockup (2a23b8c): Setup › Roles & access becomes 8 rows by
 6 columns — 48 cells where there were 117 — and every pillar gains a Custodian
-seat beside its Owner. §508.1 then split the CEO row in two (Islam: "the company
+seat beside its Owner. §516.1 then split the CEO row in two (Islam: "the company
 ceo and layer 2 head needs different rows"), named in the client's own words,
 the second layer's row drawn only where the client HAS one; Setup is never
 offered to either; and the Part owner may read. So the demo — which has
@@ -23,17 +23,17 @@ what is stored, never about numbers typed into this file (§94.8).
       file from the product's own grantFor() and accessNA(): a cell with no
       pair that can come up is a dash, one whose pairs agree lights exactly
       that answer, one whose pairs differ lights NOTHING. And three of the
-      §508.1 decisions, at both ends (§94.2): Setup is a dash with its reason
+      §516.1 decisions, at both ends (§94.2): Setup is a dash with its reason
       on both CEO rows while the office keeps a live one; the Part owner's
       Plan and Reporting light "may read"; and on the shipped defaults no cell
-      differs at all. §508.2 WIDENED THE FIRST ONE TO EVERY ROW BUT THE OFFICE
+      differs at all. §516.2 WIDENED THE FIRST ONE TO EVERY ROW BUT THE OFFICE
       (Islam: "no one get the setup but the super use and the smo team"), so
       the dash is asserted on EVERY non-office row drawn, and a Setup grant
-      stored for every non-office role must still read none. §508.3 GAVE THE
+      stored for every non-office role must still read none. §516.3 GAVE THE
       REPORTING CYCLE THE SAME RULE (Islam: "same for the reporting cycle",
       then "close it fully"), so it is asserted the same way, both ends.
 
-  1b · THE COLUMN HEADINGS ARE ISLAM'S WORDS (§508.2): "Group / Company",
+  1b · THE COLUMN HEADINGS ARE ISLAM'S WORDS (§516.2): "Group / Company",
       "Their own" over Plan and Reporting, "Other units & functions". Asserted
       as those words AND as agreement with the shared list, because a build
       that kept the old words agrees with itself perfectly (§113.8).
@@ -142,7 +142,7 @@ with sync_playwright() as p:
     want = js(pg, WANT_ROWS)
     ok("the shared module names nine rows and six columns",
        isinstance(shape, dict) and len(shape.get("rows", [])) == 9 and len(shape.get("cols", [])) == 6, shape)
-    ok("the CEO is two rows, the top's and the second layer's (§508.1)",
+    ok("the CEO is two rows, the top's and the second layer's (§516.1)",
        isinstance(shape, dict) and "gceo" in shape.get("rows", []) and "cceo" in shape.get("rows", [])
        and "ceo" not in shape.get("rows", []), shape and shape.get("rows"))
     ok("the demo has a second layer, so the Division head's row is drawn",
@@ -159,11 +159,11 @@ with sync_playwright() as p:
            got["heads"])
         ok("the paired columns share one name written once above them",
            all(got["heads"].count(n) == 1 for n in set(shape["pairs"])), got["heads"])
-        # §508.2: the words are Islam's, given literally — so they are asserted
+        # §516.2: the words are Islam's, given literally — so they are asserted
         # literally here as well as by agreement above.
         isl = ["Group / Company", "Their own", "Plan", "Reporting", "Other units & functions",
                "Reporting cycle", "Setup"]
-        ok("the head reads in Islam's words (§508.2)",
+        ok("the head reads in Islam's words (§516.2)",
            all(w in got["heads"] for w in isl) and not any("box" in h.lower() for h in got["heads"]),
            got["heads"])
     # MADE (§255): the demo's words are the defaults, so a build that typed
@@ -198,7 +198,7 @@ with sync_playwright() as p:
         sup = [d["st"] for e, d in zip(exp, flat) if e["row"] in ("super", "smoteam") and e["col"] == "other"]
         ok("the office's Other units & functions is a dash, not a refusal", sup == ["dash", "dash"], sup)
         pick = lambda row, col: [d for e, d in zip(exp, flat) if e["row"] == row and e["col"] == col]
-        # §508.2: every row that holds no office role — asked of the rule's own
+        # §516.2: every row that holds no office role — asked of the rule's own
         # definition of the office, never a list typed here (§89, §94.8).
         offrows = js(pg, r"""()=>SMPRules.ACCESS_ROWS.filter(r=>r.of.some(k=>SMPRules.isOfficeRole(k))).map(r=>r.key)""")
         drawn = sorted(set(e["row"] for e in exp))
@@ -209,14 +209,14 @@ with sync_playwright() as p:
         bad_s = [r for r, ds in setup.items()
                  if len(ds) != 1 or ds[0]["st"] != "dash"
                  or "Only the Super user and the SMO team open Setup" not in ds[0]["title"]]
-        ok("Setup is never offered to any row but the office — a dash, with the reason on it (§508.2)",
+        ok("Setup is never offered to any row but the office — a dash, with the reason on it (§516.2)",
            not bad_s, {r: setup[r] for r in bad_s})
-        # §508.3: the Reporting cycle, the same shape as Setup.
+        # §516.3: the Reporting cycle, the same shape as Setup.
         cyc = {r: pick(r, "cycle") for r in nonoff}
         bad_c = [r for r, ds in cyc.items()
                  if len(ds) != 1 or ds[0]["st"] != "dash"
                  or "Only the Super user and the SMO team open the Reporting cycle" not in ds[0]["title"]]
-        ok("the Reporting cycle is never offered to any row but the office — a dash, with the reason on it (§508.3)",
+        ok("the Reporting cycle is never offered to any row but the office — a dash, with the reason on it (§516.3)",
            not bad_c, {r: cyc[r] for r in bad_c})
         officec = pick("super", "cycle") + pick("smoteam", "cycle")
         ok("while the office's Reporting cycle cell is a live one (§94.2)",
@@ -225,14 +225,14 @@ with sync_playwright() as p:
         ok("while the office's Setup cell is a live one (§94.2)",
            len(office) == 2 and all(d["st"] != "dash" and d["target"] for d in office), office)
         part = pick("part", "plan") + pick("part", "rep")
-        ok("the Part owner may read on Plan and on Reporting (§508.1)",
+        ok("the Part owner may read on Plan and on Reporting (§516.1)",
            len(part) == 2 and all(d["st"] == "view" for d in part), part)
         ok("on the shipped defaults no cell differs, so there is no line above the table",
            not got.get("differ") and "mixed" not in kinds, {"differ": got.get("differ"), "kinds": sorted(kinds)})
     else:
         ok("every cell agrees", False, exp)
     # And a stored Setup grant does not reach any non-office role (§61, §42,
-    # §508.2): the rule answers none whatever the map once held — while the
+    # §516.2): the rule answers none whatever the map once held — while the
     # office, given the same, still reads it (§94.2).
     held = js(pg, r"""()=>{ var k = JSON.stringify(ACCESS);
       var all = ROLES.map(r=>r.key).concat([SMPRules.NO_ROLE]);
@@ -247,7 +247,7 @@ with sync_playwright() as p:
        len(hg) >= 10 and not leak, leak)
     ok("while the office, given the same, reads it", hoff and all(hg.get(rk) == "edit" for rk in hoff),
        {rk: hg.get(rk) for rk in hoff})
-    # §508.3: the same for the Reporting cycle.
+    # §516.3: the same for the Reporting cycle.
     heldc = js(pg, r"""()=>{ var k = JSON.stringify(ACCESS);
       var all = ROLES.map(r=>r.key).concat([SMPRules.NO_ROLE]);
       all.forEach(rk=>{ (ACCESS[rk]=ACCESS[rk]||{}).a_cycle='edit'; });
@@ -341,7 +341,7 @@ with sync_playwright() as p:
     ok("and nothing outside it moved",
        bool(under) and all(k in under for k in moved), [k for k in moved if k not in under])
     got = js(pg, READ)
-    # §508.1 left the shipped defaults with no cell differing, so the line may
+    # §516.1 left the shipped defaults with no cell differing, so the line may
     # be gone altogether here; what must hold is that it stops naming THIS
     # cell. "Owner · " is case-sensitive on purpose: "Part owner · …" does not
     # contain it.
@@ -381,7 +381,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(400)
     got = js(pg, READ)
     leg = js(pg, r"""()=>[...document.querySelectorAll('.st-mixed')].length""")
-    # §508.1 made the shipped defaults agree, so `made` may be nought here;
+    # §516.1 made the shipped defaults agree, so `made` may be nought here;
     # the presence end of this pair is §3's line, which a made disagreement
     # drew on this same page a moment ago (§94.2) — this is its absence.
     ok("with every cell agreeing, the line above the table is gone (§45.2)",
@@ -460,11 +460,11 @@ with sync_playwright() as p:
           else (ACCESS[rk]=ACCESS[rk]||{})[ak]=v; }); }""")
     js(pg, "()=>document.documentElement.removeAttribute('data-theme')")
 
-    # §508.3: with Setup (§508.2) and now the Reporting cycle both the
+    # §516.3: with Setup (§516.2) and now the Reporting cycle both the
     # office's alone, a CEO has no Setup page left to open — so the gear is
     # not drawn for them at all. Both ends (§94.2): a build that took the
     # gear away from EVERYBODY would satisfy the CEO half perfectly.
-    print("\n7 · with Setup and the cycle both shut, a CEO has no gear (§508.3)")
+    print("\n7 · with Setup and the cycle both shut, a CEO has no gear (§516.3)")
     for who, want in (("smo", True), ("ceo", False), ("co_b2c", False)):
         g = js(pg, r"""(who)=>{ switchViewer(who); paint();
           return !!document.querySelector('[data-md="setup"]'); }""", who)

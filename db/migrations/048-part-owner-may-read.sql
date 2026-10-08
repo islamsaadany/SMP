@@ -1,4 +1,4 @@
-/* A PART OWNER MAY READ THEIR OWN UNIT (§508.1). Islam, of the merged Roles &
+/* A PART OWNER MAY READ THEIR OWN UNIT (§516.1). Islam, of the merged Roles &
    access table's one row that drew "differs" on the shipped defaults: "may
    read ok".
 

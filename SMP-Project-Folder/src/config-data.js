@@ -3828,7 +3828,7 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
-/* §507.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
+/* §515.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
    `progress` (§239: reward stays a year-end judgement), except for a yes/no
    measure, which stores none — its answer IS its figure, 100 or 0 from the
    one scorer (§257), and nothing said stays null. Without this a Done measure
@@ -4250,7 +4250,7 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
-/* ── ONE WEIGHT RULE (§507.2, spec 066 P1) ──────────────────────────────
+/* ── ONE WEIGHT RULE (§515.2, spec 066 P1) ──────────────────────────────
    This averaged its own way: a blank weight counted as ONE, beside rows
    weighted 60 and 40, so a function or a capability with one weight left
    blank was scored by a rule no unit uses — and the same objectives entered on
@@ -4263,7 +4263,7 @@ function capKOScore(c){
   if (c && c.own && !fnKoCounted(c.id)) return null;
   return koScore((c && c.keyObjectives) || []);
 }
-/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§507.2, P4): it has some
+/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§515.2, P4): it has some
    that are shown, and they are switched on. Asked by the card that leads and
    by the division's reading, so the two cannot answer differently (§53.5). */
 function holderHasKOs(c){
@@ -4390,7 +4390,7 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
-/* ── ONE EXECUTION (§507.2, spec 066 P2) ──────────────────────────────────
+/* ── ONE EXECUTION (§515.2, spec 066 P2) ──────────────────────────────────
    A milestone counts once its date has come, exactly as a tactic does
    (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
    with the ones not yet due reading nought, so a function's execution was low
@@ -4447,7 +4447,7 @@ function fnActionsTally(fk){
     else if (a.status === "wip") wip++;
     else todo++;
     if (statusPending(a)) pending++;
-    /* §507.2 (P2): an action counts once its date has come, as a milestone
+    /* §515.2 (P2): an action counts once its date has come, as a milestone
        does — one meaning of Execution wherever the word is printed. */
     if (!dueThisCycle(a.due)) return;
     due++;
@@ -6733,7 +6733,7 @@ function passwordReach(){
 }
 
 /* What carries reward is the office's decision, not a page permission.
-   §508.3: the Super user marks it and nobody else, at any grant — the group
+   §516.3: the Super user marks it and nobody else, at any grant — the group
    CEO used to, and Islam closed the Reporting cycle column (where this page
    lives) to everyone but the office knowing it took this with it. The server's
    focus case says the same. */
@@ -11039,7 +11039,7 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-/* ONE ROLL-UP (§507.2, spec 066 P3). The group's execution was delivered over
+/* ONE ROLL-UP (§515.2, spec 066 P3). The group's execution was delivered over
    planned, each averaged across the units FIRST and then divided — so a unit
    with a large plan pulled the denominator and the headline could sit beside
    ten unit cards whose own figures do not average to it. It is the weighted
@@ -11108,7 +11108,7 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
-  /* ONE HEADLINE (§507.2, spec 066 P4): a function's headline is its
+  /* ONE HEADLINE (§515.2, spec 066 P4): a function's headline is its
      objectives when its plan HAS objectives (shown and switched on) — reading
      "not yet" until they are reported — and its pillars' or projects' figure
      when it has none. Before, a pillars function with none read "—" (§437
@@ -11180,7 +11180,7 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-/* §507.2 (P3): a division of units alone is the weighted average of its
+/* §515.2 (P3): a division of units alone is the weighted average of its
    units' own execution figures — the group's rule, over a smaller list. With
    functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){

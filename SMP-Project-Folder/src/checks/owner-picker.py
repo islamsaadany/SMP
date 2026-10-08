@@ -133,7 +133,7 @@ with sync_playwright() as p:
               collabs:tbl.querySelectorAll('select.collabsel').length,
               typed:tbl.querySelectorAll('td:nth-child(3) input').length,
               /* SINCE SPEC 066 STAGE 2 the pillar's front matter carries TWO
-                 register pickers, its Owner and its Custodian (§508), so the
+                 register pickers, its Owner and its Custodian (§516), so the
                  two are counted by the ROW they sit on, never as one count of
                  every picker in the block: a build that dropped the Custodian
                  and drew the Owner twice satisfies "two pickers" perfectly. */
@@ -148,7 +148,7 @@ with sync_playwright() as p:
     ck("every tactic's collaborators is a list", n["collabs"] == n["tactics"], n)
     ck("no typed owner box is left behind", n["typed"] == 0, n)
     ck("the pillar's own owner is a list, and there is one", n["pillar"] == 1, n)
-    ck("its custodian is a list too, and there is one (§508)", n["cust"] == 1, n)
+    ck("its custodian is a list too, and there is one (§516)", n["cust"] == 1, n)
     ck("and the block holds no other register picker", n["all"] == 2, n)
 
     # ── 3 · the list says where each name comes from ────────────────────
@@ -274,7 +274,7 @@ with sync_playwright() as p:
     print("\n6 · the pillar's owner")
     try:
         # The OWNER row's picker, never "the block's first select": the
-        # Custodian sits beside it since §508, and a selector reaching both
+        # Custodian sits beside it since §516, and a selector reaching both
         # presses whichever the document happens to draw first. CSS cannot
         # match a row by its words, so the row is addressed by position AND
         # its key is asserted to read Owner before anything is pressed.

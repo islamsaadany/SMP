@@ -613,7 +613,7 @@ def main():
         ck("...and their welcome screen is otherwise intact", u["screen"], u)
         ctx.close()
 
-        # §508.3: the group CEO read the cycle until Islam closed the Reporting
+        # §516.3: the group CEO read the cycle until Islam closed the Reporting
         # cycle column to everyone but the office ("close it fully"). So the
         # CEO is now on the unit head's side of this gate — asserted as the
         # CEO, because a build that kept the CEO's old grant passes both
@@ -624,7 +624,7 @@ def main():
           grant: grant('c_cycle'),
           block: !!document.querySelector('.welcomeover .wcyc'),
           screen: !!document.querySelector('.welcomeover') })""")
-        ck("the group CEO may NOT open the cycle page (§508.3)", g["grant"] == "none", g)
+        ck("the group CEO may NOT open the cycle page (§516.3)", g["grant"] == "none", g)
         ck("...so the cycle summary is not drawn for them", g["screen"] and not g["block"], g)
         ctx.close()
 

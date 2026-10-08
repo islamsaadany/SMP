@@ -630,17 +630,28 @@ with sync_playwright() as p:
             (p.measures || []).forEach(m => { m.progress = null; m.actual = ""; }); });
           const bare = document.createElement("div");
           bare.innerHTML = renderUnitPerformance(u);
-          const blank = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")][1]
-            .querySelector(".big").textContent.trim();
+          const bareCards = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")];
+          const blankCard = bareCards.find(c => /pillar/i.test(c.querySelector("h4").textContent)) || bareCards[1];
+          const blank = blankCard.querySelector(".big").textContent.trim();
           u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
             (p.measures || []).forEach((m, j) => { m.progress = keep[i][j].p; m.actual = keep[i][j].a; }); });
-          return { cards:cards, computed:unitPillars(u), blank:blank };
+          /* §507.2 P4: a pillars function whose objectives are not counted,
+             or which holds none, leads with its pillars — the page asks the
+             same two questions, so the check asks them too rather than
+             counting a fixed three (§218: rewritten, never loosened). */
+          const koLeads = !/^fn:/.test(d) || !planOn(u) ||
+            (fnKoCounted(d) && SMPRules.shown(u.keyObjectives || []).length > 0);
+          return { cards:cards, computed:unitPillars(u), blank:blank, koLeads:koLeads };
         }""", dest)
-        if len(three["cards"]) != 3:
-            errs.append("SCORES (%s): %d headline cards, expected 3 (%r)"
-                        % (label, len(three["cards"]), three["cards"]))
+        want_n = 3 if three["koLeads"] else 2
+        if len(three["cards"]) != want_n:
+            errs.append("SCORES (%s): %d headline cards, expected %d (%r)"
+                        % (label, len(three["cards"]), want_n, three["cards"]))
             continue
-        mid = three["cards"][1]
+        if not three["koLeads"] and three["cards"][0]["h"].lower().find("objective") >= 0:
+            errs.append("SCORES (%s): objectives lead where they are not counted (%r)"
+                        % (label, three["cards"][0]))
+        mid = three["cards"][1] if three["koLeads"] else three["cards"][0]
         want = "\u2014" if three["computed"] is None else "%d%%" % three["computed"]
         if mid["big"].replace("\u2014", "\u2014") != want:
             errs.append("SCORES (%s): the middle card reads %r and unitPillars() "
@@ -654,7 +665,7 @@ with sync_playwright() as p:
                         % (label, three["blank"]))
         print("three numbers (%s): %s / %s / %s, middle agrees with unitPillars(), "
               "dash when nothing is scored"
-              % (label, three["cards"][0]["big"], mid["big"], three["cards"][2]["big"]))
+              % (label, three["cards"][0]["big"] if three["koLeads"] else "(none)", mid["big"], three["cards"][-1]["big"]))
 
     # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
     # The rule Islam set on 2026-08-23: any change to how something works or

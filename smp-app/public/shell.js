@@ -58105,18 +58105,33 @@ var COPILOT = (function(){
       if ((y = hit(ev, "[data-cop-apply-yes]"))) { closeModal(); applyGo(y.getAttribute("data-cop-apply-yes"), title); }
     });
   }
+  /* §517.1 — THE NOTE FOLLOWS THE FACT. The server hands over the parts
+     and records nothing; the plan is written here and saved through the
+     ordinary save (the authoriser judges it, §42), and only a save that
+     LANDED — "saved", or "clean" when the plan already held exactly this —
+     sends `foundationApplied`. A refused or failed save says so on the page
+     already (§171, §184) and leaves the deliverable "Not on the plan yet",
+     which is the truth (§124). */
   function applyGo(did, title){
     var tgt = place();
     act({ act:"applyFoundation", id:did }, function(j){
-      var wrote = false;
-      if (typeof applyFoundationParts === "function" && typeof archiveFoundation === "function") {
-        archiveFoundation(tgt, "replaced from the Copilot — " + title + " v" + j.n);
-        wrote = !!applyFoundationParts(tgt, j.foundation || []);
-      }
-      if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = j.applied;
-      SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+      if (typeof applyFoundationParts !== "function" || typeof archiveFoundation !== "function") {
+        SAY = "The plan could not be written from here. Nothing was changed."; draw(); return; }
+      archiveFoundation(tgt, "replaced from the Copilot — " + title + " v" + j.n);
+      var wrote = !!applyFoundationParts(tgt, j.foundation || []);
       if (wrote && typeof paint === "function") paint(); else draw();
-      loadList(true);
+      var saveNow = typeof SYNC !== "undefined" && SYNC.saveNow;
+      if (!saveNow) { SAY = "The plan could not be saved from here, so it is not marked as applied."; draw(); return; }
+      SYNC.saveNow(function(how){
+        if (how !== "saved" && how !== "clean") {
+          SAY = "The plan did not save, so " + title + " v" + j.n + " is not marked as on the plan. Try Apply to plan again once the save goes through.";
+          draw(); loadList(true); return; }
+        act({ act:"foundationApplied", id:did, n:j.n }, function(k){
+          if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = k.applied;
+          SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+          draw(); loadList(true);
+        });
+      });
     });
   }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left

@@ -385,14 +385,19 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, flow: f, saved: f.saved });
   }
 
-  /* §517 — APPLY TO PLAN. The browser writes the six parts into the
-     place's Foundation page (the old one archived first, §49.2) and the
-     server records WHICH version went, on the deliverable's own row
-     (`extra.applied`, no migration). Recorded FIRST, before the browser
-     writes: a record that cannot be made is the one refusal the page needs
-     to hear before it touches the plan. Always the LATEST version — the
-     cards' unsaved words never reach the plan (Islam: "the plan only
-     changes when we apply to plan"). */
+  /* §517 — APPLY TO PLAN, in two acts (§517.1). `applyFoundation` READS:
+     it hands the browser the LATEST version's six parts, with the end year
+     written in, and records nothing. The browser writes them onto the
+     place's Foundation page (the old one archived first, §49.2) through the
+     ordinary save, which the authoriser judges (§42) — and only once that
+     save has LANDED does it send `foundationApplied`, which writes the note
+     *version N is on the plan* on the deliverable's own row (`extra.applied`,
+     no migration). §517 wrote the note FIRST, so a save that was refused,
+     failed or never left the tab left the deliverable saying "On the plan
+     as vN" over a plan that did not hold it (§124: a status claiming more
+     than happened). The note now follows the fact. Always the LATEST
+     version — the cards' unsaved words never reach the plan (Islam: "the
+     plan only changes when we apply to plan"). */
   if (kind === "applyFoundation") {
     const d = await oneDeliverable(c, id);
     if (!d) return refused(404, "That deliverable is not here any more.");
@@ -401,13 +406,31 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const body: any = cur && cur.body && typeof cur.body === "object" ? cur.body : {};
     const parts = Array.isArray(body.foundation) ? body.foundation : [];
     if (!parts.length) return refused(400, "This version holds no Foundation parts to apply.");
-    const applied = { n: cur.n, at: new Date().toISOString(), by };
     const years = Array.isArray(body.years) ? body.years : [null, null];
-    await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify(applied)]);
+    /* The break puts §517's order back: the note written on the READ. */
+    if (brk() === "stamp-on-read")
+      await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify({ n: cur.n, at: new Date().toISOString(), by })]);
     /* The stored parts keep their raw {Y}; what goes onto the plan has the
        end year written in, exactly as the version's text does. */
     const filled = parts.map((p: any) => ({ key: String(p.key || ""), name: String(p.name || ""), text: withYear(String(p.text || ""), Number.isInteger(years[1]) ? years[1] : null) }));
-    return out(200, { ok: true, applied, n: cur.n, foundation: filled, years });
+    return out(200, { ok: true, n: cur.n, foundation: filled, years });
+  }
+  /* §517.1 — the note, sent by the browser only after the plan's own save
+     came back "saved" (or had nothing left to send). It names the version
+     the browser WROTE, so a v4 saved by somebody else in between does not
+     get the credit for a v3 that went onto the plan; a version this
+     Foundation does not hold, or one with no parts, is refused by name. */
+  if (kind === "foundationApplied") {
+    const d = await oneDeliverable(c, id);
+    if (!d) return refused(404, "That deliverable is not here any more.");
+    if (d.type !== "foundation") return refused(400, "Only a saved Foundation can be applied to the plan.");
+    const n = Number(b.n);
+    const v = (await versionsOf(c, id)).find((x: any) => x.n === n);
+    const vb: any = v && v.body && typeof v.body === "object" ? v.body : {};
+    if (!v || !Array.isArray(vb.foundation) || !vb.foundation.length) return refused(400, "That version of the Foundation is not here.");
+    const applied = { n, at: new Date().toISOString(), by };
+    await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify(applied)]);
+    return out(200, { ok: true, applied });
   }
 
   if (kind === "editVersion" || kind === "restore") {

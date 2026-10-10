@@ -63061,3 +63061,13 @@ Islam, using §514's flow: *"1. check shouldn't stop sovmething to be saved a ch
 **Built as §515 and renumbered §517 before the commit**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **On the branch, not merged** — a merge owes bringing main's §515–§516 in first, and `main` is Islam's word, on that merge.
 
 **Recorded, not done**: the server does not re-check that the person may write the Foundation before stamping `applied` — the browser's save is where the authoriser refuses, so a refused save leaves a stamp on the deliverable with nothing on the plan; the archive is written by the browser from what the plan held, never from a stored copy on the server; and the mockup still says *Move to the plan*.
+
+## §517.1 — "On the plan" follows the save, never the press (2026-10-10)
+
+Islam, of §517's recorded gap: *"yes fix it and update the mockup word too."* §517 wrote `extra.applied` inside `applyFoundation`, which runs BEFORE the browser archives the old Foundation, writes the six parts and saves. So a save the server refused, or one that failed on the network, left the deliverable saying *On the plan as vN* while the plan held the old Foundation — a status claiming more than happened (§124). It was never a way past the rules: the Copilot is office-only and so is authoring a Foundation (§94), and the save itself is still judged by the authoriser (§42). What was wrong was the note.
+
+**The note follows the fact.** `applyFoundation` now only reads the last saved version and returns its parts with the year written in; it records nothing. A second act, `foundationApplied {id, n}`, writes `extra.applied = {n, at, by}` and refuses a version that is not there or holds no parts. The browser calls it only after `SYNC.saveNow` answers `saved` or `clean`; on `refused`, `failed` or `offline` it says *the plan did not save, so vN is not marked as on the plan* and the deliverable keeps *Not on the plan yet*. Both acts are refused to anybody but the office, asserted.
+
+**Cost stated**: if the browser closes between the save landing and the note being written, the plan holds vN and the deliverable still reads *Not on the plan yet* — the safe direction, fixed by pressing Apply again.
+
+`check:copilot` 329/0; the new break `stamp-on-read` (the note written on the read again) reddens exactly the new assertion, `apply-any-type` still reddens its own. `check:shell` §3i green. The mockup `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` now says *Apply to plan* throughout its words, with one line saying the pictures were taken before the rename and still show *Move to the plan*. `sw.js` shell `v6.22-apply-after-save`.

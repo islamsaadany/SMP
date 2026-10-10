@@ -879,15 +879,24 @@ try {
     const freeId = (await asTenant(A, (c) => c.query("SELECT id FROM copilot_deliverables WHERE type <> 'foundation' ORDER BY created_at LIMIT 1"))).rows[0].id;
     const apFree = await call("POST", "api", { act: "applyFoundation", id: freeId }, NORAN);
     check("Apply refuses a deliverable that is not here, and one that is not a Foundation (§517)", apNone.st === 404 && apFree.st === 400 && /Only a saved Foundation/.test(apFree.j.why), apNone.st + " · " + apFree.st + " · " + JSON.stringify(apFree.j));
+    /* §517.1 — the READ records nothing: the note waits for the plan's own
+       save to land (break `stamp-on-read` puts §517's order back). Then the
+       note, sent for a version this Foundation holds, is what the page
+       reads back; a version it does not hold is refused by name. */
     const ap = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, NORAN);
+    const apRead = (await asTenant(A, (c) => c.query("SELECT extra->'applied' a FROM copilot_deliverables WHERE id = $1", [fin.j.saved.deliverableId]))).rows[0];
+    check("Apply's read hands back the LATEST version and records nothing yet — the plan has not saved (§517.1)", ap.st === 200 && ap.j.n === 2 && apRead && apRead.a == null && !("applied" in ap.j), JSON.stringify(apRead && apRead.a) + " · n " + (ap.j && ap.j.n));
+    const apBad = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 9 }, NORAN);
+    const apMk = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 2 }, NORAN);
     const apRow = (await asTenant(A, (c) => c.query("SELECT extra->'applied' a FROM copilot_deliverables WHERE id = $1", [fin.j.saved.deliverableId]))).rows[0];
     const apDel = await call("GET", "deliverable", null, NORAN, "?id=" + fin.j.saved.deliverableId);
-    check("Apply records the LATEST version on the deliverable and the page reads it back", ap.st === 200 && ap.j.n === 2 && apRow && apRow.a && apRow.a.n === 2 && apRow.a.by === NORAN.personKey && apDel.j.deliverable && apDel.j.deliverable.applied && apDel.j.deliverable.applied.n === 2, JSON.stringify(apRow && apRow.a) + " · " + JSON.stringify(apDel.j.deliverable && apDel.j.deliverable.applied));
+    check("...a version the Foundation does not hold is refused, and the note for v2 is what the page reads back (§517.1)", apBad.st === 400 && /not here/.test(apBad.j.why) && apMk.st === 200 && apRow && apRow.a && apRow.a.n === 2 && apRow.a.by === NORAN.personKey && apDel.j.deliverable && apDel.j.deliverable.applied && apDel.j.deliverable.applied.n === 2, apBad.st + " · " + JSON.stringify(apRow && apRow.a) + " · " + JSON.stringify(apDel.j.deliverable && apDel.j.deliverable.applied));
     const apAsp = (ap.j.foundation || []).find((x) => x.key === "asp");
     check("...and hands back the parts with the end year written in, the stored copy keeping its {Y}",
       Array.isArray(ap.j.foundation) && ap.j.foundation.length === 5 && apAsp && apAsp.text === "Aspiration, second thoughts, for 2028." && !ap.j.foundation.some((x) => /\{Y\}/.test(x.text)) && ap.j.years[1] === 2028, JSON.stringify(ap.j.foundation).slice(0, 200));
     const apHend = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, HEND);
-    check("a client's own person cannot apply one", apHend.st === 403, apHend.st + "");
+    const apHend2 = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 2 }, HEND);
+    check("a client's own person cannot apply one, nor mark one applied", apHend.st === 403 && apHend2.st === 403, apHend.st + " · " + apHend2.st);
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
     const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);

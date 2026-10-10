@@ -308,7 +308,7 @@ export const KINDS = ["promotable", "copilot-only"] as const;
 export type Kind = (typeof KINDS)[number];
 export function isKind(s: unknown): s is Kind { return typeof s === "string" && (KINDS as readonly string[]).includes(s); }
 
-/* §517 — `applied` is which version of a Foundation last went into the
+/* §518 — `applied` is which version of a Foundation last went into the
    plan (`extra.applied`, written by the applyFoundation act), null where
    none has. Carried on every read so the rail and the deliverable page
    cannot disagree about it. */
@@ -385,7 +385,7 @@ export async function newDeliverable(c: Q, a: { place: string; section: Section;
 /* AN EDIT ADDS A VERSION (decisions §3.6) — never an UPDATE of the last one. */
 export async function addVersion(c: Q, id: string, a: { body: unknown; note: string; by: string; chatId?: string | null; chatTitle?: string }): Promise<number> {
   const n = await nextN(c, id);
-  /* §518 — a version made in a chat names that chat, as v1 always has, so
+  /* §519 — a version made in a chat names that chat, as v1 always has, so
      a saved Foundation's Edit can open the chat its parts live in. */
   await c.query("INSERT INTO copilot_versions (deliverable_id, n, body, note, by_key, chat_id, chat_title) VALUES ($1, $2, $3, $4, $5, $6, $7)",
     [id, n, JSON.stringify(a.body ?? {}), a.note, a.by, a.chatId || null, a.chatTitle || ""]);

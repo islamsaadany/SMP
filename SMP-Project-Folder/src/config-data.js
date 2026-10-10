@@ -9754,7 +9754,7 @@ function archiveCapPlan(c, why){
   return a;
 }
 
-/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§517) ─────────────────────
+/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§518) ─────────────────────
    Islam, of the Copilot's Apply to plan: *"anything old is not deleted it's
    archived."* A plan archive (`kind:"unit"`) carries the Foundation beside
    the pillars and the SWOT, and restoring one puts ALL of it back — which is
@@ -9880,7 +9880,7 @@ function restoreArchive(id){
     if (restFk) fnWriteBack(restFk, u);
   }
   else if (a.kind === "foundation") {
-    /* §517: six parts, put back whole; what stands is archived first so the
+    /* §518: six parts, put back whole; what stands is archived first so the
        restore can itself be undone (the plan branches' own rule). */
     if (!foundationRecord(a.key)) return false;
     archiveFoundation(a.key, "replaced by restoring the " + a.at + " archive");

@@ -11262,7 +11262,7 @@ textarea.copfedit:focus { outline:2px solid var(--focus, var(--gold)); outline-o
 .copfhead { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
 .copfhead b { flex:1 1 auto; min-width:0; font-size:13.5px; color:var(--ink); overflow-wrap:anywhere; }
 .copprog { color:var(--ink-3); white-space:nowrap; }
-/* §518.1 — ONE COUNT, AND THE WORDS SIT BESIDE THE TRACK. The number and the
+/* §519.1 — ONE COUNT, AND THE WORDS SIT BESIDE THE TRACK. The number and the
    bar are one statement, so they are one row: the count takes its own width
    and the track what is left, which is also what stops a long count ("5 of 6
    parts agreed") pushing the bar onto a line of its own. */
@@ -11597,12 +11597,12 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
 .copall:hover { color:var(--ink); text-decoration:underline; }
 
-/* §517: the bar at the foot of the cards — Save, the optional check and
+/* §518: the bar at the foot of the cards — Save, the optional check and
    Apply to plan — and the saved Foundation shown as its six cards on the
    deliverable page. Existing tokens only (§25). */
 .copsavebar { position:sticky; bottom:0; margin-top:auto; display:flex; flex-direction:column; gap:6px; padding:10px 0 2px; background:var(--surface); border-top:1px solid var(--line); }
 .copsavebar .copbtns { margin-top:0; }
-/* §518 — with the cards closed the same bar stands at the head of the chat:
+/* §519 — with the cards closed the same bar stands at the head of the chat:
    in the flow there rather than pinned to a foot it does not own. */
 .copfchat > .copsavebar { position:static; margin:0 0 8px; padding:8px 0; border-top:0; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; }
 .copsvst { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
@@ -11615,7 +11615,7 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copfcard p, .copfcard ul { margin:0; font-size:var(--fs-note, 13.5px); line-height:1.5; color:var(--ink); }
 .copfcard ul { padding-left:18px; }
 .copplanrow { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); margin-bottom:12px; }
-/* §518.1 — APPLY IS THE DIALOG'S MAIN ACTION AND IS FILLED NAVY. The one
+/* §519.1 — APPLY IS THE DIALOG'S MAIN ACTION AND IS FILLED NAVY. The one
    filled main action in a confirmation already in this product is the master
    flow's Start (`.mflow .cbtns button.mfgo`, §266), and these are its three
    declarations rather than a fourth treatment. `config.css`'s recorded
@@ -11633,7 +11633,7 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
    the side where the ordering is in our favour). `mfgo` has no hover rule
    for the same reason and is what this follows. */
 .cbtns button.copgo { border-color:var(--panel); background:var(--panel); color:var(--panel-ink); }
-/* §518.1 — THE LINE THAT SAYS IT LANDED, with one way to go and look. The
+/* §519.1 — THE LINE THAT SAYS IT LANDED, with one way to go and look. The
    pair is `--good-bg` + `--good-tx`, which the save banner's own done state
    already wears together (`.banner.safety.done`), so no token is added and
    §38.4's trap — a colour that works as a fill failing as type — cannot bite.

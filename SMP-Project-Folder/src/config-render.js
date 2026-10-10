@@ -6334,7 +6334,7 @@ function impCycleLabel(){
 function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
-    /* §517: a Foundation archive is keyed by its place already. */
+    /* §518: a Foundation archive is keyed by its place already. */
     var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
@@ -6690,7 +6690,7 @@ function renderArchives(){
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
       : a.kind === "foundation"
-      /* §517: the six parts of a Foundation, replaced from the Copilot. */
+      /* §518: the six parts of a Foundation, replaced from the Copilot. */
       ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
         '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
       : a.kind === "unit"

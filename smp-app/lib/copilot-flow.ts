@@ -109,7 +109,7 @@ const N = FLOW_ELEMENTS.length;
    road from nothing), `loaded` the cards filled from the plan with nobody
    working on one yet, `ask` one question of element `e`, `review` its answers
    back in boxes, `draft` its draft, `check` the look across every part,
-   `saved` done — and since §517 a saved flow is still EDITABLE: the cards
+   `saved` done — and since §518 a saved flow is still EDITABLE: the cards
    stay open and the next change starts the next version, so `saved` means
    *these drafts are the ones version n holds* and nothing more. */
 export const PHASES = ["start", "path", "year", "loaded", "ask", "review", "draft", "check", "saved"] as const;
@@ -119,7 +119,7 @@ export type Flow = {
   phase: Phase; start: string; y0: number | null; y1: number | null; path: string; e: number; qi: number;
   ans: string[][]; drafts: string[]; done: boolean[]; from: boolean[]; skip: string[];
   check: { agree: string[]; issues: { el: string; text: string }[] } | null;
-  /* §517 — `drafts` is the SNAPSHOT version n was made from, so the page
+  /* §518 — `drafts` is the SNAPSHOT version n was made from, so the page
      can tell "v1 saved" from "v2 in progress" by comparing, and a second
      Save of unchanged drafts is refused rather than stored twice. */
   saved: { deliverableId: string; n: number; title: string; drafts: string[] } | null;
@@ -155,7 +155,7 @@ export function newFlow(hasPlan = false, skip: string[] = []): Flow {
 export function allAgreed(f: Flow): boolean {
   return FLOW_ELEMENTS.every((_, i) => !live(f, i) || (f.done[i] && !!f.drafts[i].trim()));
 }
-/* §517 — the drafts on the cards are exactly the ones the last version was
+/* §518 — the drafts on the cards are exactly the ones the last version was
    saved from. False with nothing saved; false the moment a draft differs,
    which is what makes "Save as vN+1" honest and "Apply" apply the SAVED one. */
 export function savedCurrent(f: Flow): boolean {
@@ -192,9 +192,9 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   f.check = sameDrafts || process.env.SMP_BREAK === "keep-stale-check" ? base.check : null;
   f.saved = base.saved;
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
-  /* §517 — the "saved" phase is a fact about the DRAFTS: a draft changed
+  /* §518 — the "saved" phase is a fact about the DRAFTS: a draft changed
      since version n was made means the page is on the next version, so the
-     phase falls back to the work (the cards stay editable, §517, reversing
+     phase falls back to the work (the cards stay editable, §518, reversing
      §473's "saved is done"). */
   if (f.phase === "saved" && !savedCurrent(f)) f.phase = allAgreed(f) ? "check" : "draft";
   const yearsOk = f.y0 != null && f.y1 != null && f.y1 >= f.y0;
@@ -228,7 +228,7 @@ export function storedFlow(raw: unknown): Flow | null {
     issues: (Array.isArray(j.check.issues) ? j.check.issues : []).map((x: any) => ({ el: str(x && x.el), text: oneLine(x && x.text).slice(0, 400) })).filter((x: any) => x.text).slice(0, 8),
   };
   if (j.saved && typeof j.saved === "object" && j.saved.deliverableId) {
-    /* A flow saved before §517 carries no snapshot: it is read as saved from
+    /* A flow saved before §518 carries no snapshot: it is read as saved from
        the drafts it holds now, never as changed since. */
     const snap = Array.isArray(j.saved.drafts) ? FLOW_ELEMENTS.map((_, i) => str(j.saved.drafts[i])) : f.drafts.slice();
     f.saved = { deliverableId: str(j.saved.deliverableId), n: Number(j.saved.n) || 0, title: oneLine(j.saved.title), drafts: snap };
@@ -353,7 +353,7 @@ export async function saveFoundation(c: Q, chat: { id: string; place: string; se
 
 /* The version the NEXT save would be, so the screen can say it before the
    press ("Save as Foundation — Mobile v3"). */
-/* §518 — WHICH VERSION IS ON THE PLAN, for the chat's save bar: the same
+/* §519 — WHICH VERSION IS ON THE PLAN, for the chat's save bar: the same
    `extra.applied` the deliverable page reads, so the two cannot disagree. */
 export async function appliedFoundation(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<{ n: number; at: string; by: string } | null> {
   const r = await c.query(

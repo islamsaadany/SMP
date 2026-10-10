@@ -63088,3 +63088,129 @@ Islam asked for a full UX review of the Foundation flow and agreed to seven find
 
 **Waiting on a mockup (rule 1c)**: 4 — four progress counters that disagree (and the top bar at 0% on the *start from it* road); 6 — Apply is drawn red though nothing is lost; 7 — no way from the chat to the Foundation page after Apply.
 
+
+## §518.1 — one count of progress, Apply is not a red button, and a way to see the result (2026-10-10)
+
+§518's last three findings, drawn first as rule 1c requires
+(`design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html`,
+published as an artifact) and signed off whole: *"ok for all, build them"*.
+
+**4 · ONE COUNT, AND THE OTHER THREE GO.** Measured on the *start from it* road
+before anything was proposed (rule 3a): the head read **`Questions 0 of 18`**
+over a **0%** track, six cards already reading **Agreed** each wearing a red
+**`0/n`** badge, and the save bar saying **`v2 in progress · 1 of 6 answered`** —
+four counters, three of them saying nought about a Foundation that is finished.
+**AND THE ZERO IS CORRECT ARITHMETIC, WHICH IS WHY IT HAD TO BE A DIFFERENT
+QUESTION RATHER THAN A FIXED SUM**: a part filled from the plan is agreed and was
+never asked anything, so a count of ANSWERS over that road is honestly nought
+and will stay nought however the Foundation is finished. So what is counted is
+**parts agreed** (`agreedCount(f)` — on, done, and holding a draft, never
+answers), the bar reads `N of M parts agreed`, the track is that ratio, and the
+save bar says **the same words from the same source** (§53.5) rather than a
+second number that can drift. **THE RED BADGES GO FROM THE TO-DO** for the same
+reason: `0/4` beside a row whose own pill says *Agreed* is a figure contradicting
+the word next to it (§87's twins, as a number).
+**AND THE QUESTION'S POSITION IS NOT LOST — IT MOVES ONTO THE CARD BEING
+ANSWERED** (`Question 2 of 4` in place of that card's status), because the count
+belongs to the part it is about and not to the page; **the page's own ask-phase
+word is DROPPED in the same edit**, or the position is said twice on one screen
+(§87) — asserted at both ends, and reddened on its own (`page-question-count`).
+**THIS REVERSES TWO THIRDS OF §514's RULE AND KEEPS ITS REASONING** (Principle
+II): that section's finding is that one `x of n` shape meaning two things is the
+fault, and it answered by making the shapes agree; this removes the third meaning
+instead, which is what the shapes were disagreeing about.
+
+**6 · NAVY, NOT RED — AND MEASURING IT SAID SOMETHING STRONGER THAN THE ASK.**
+The Apply dialog's main action was `btn danger`, and the mockup's note is *"Apply
+is not a red button"*. Read off the page it was not drawn as a **main action at
+all**: `.cbtns button.danger` sets a border and an ink colour and **no
+background**, so Apply measured `bg rgba(0,0,0,0) · fg rgb(140,51,39)` beside
+Cancel's `bg rgba(0,0,0,0) · fg rgb(65,74,88)` — **two outline buttons differing
+only in the colour of their words**, with the irreversible-looking one carrying
+no more weight than the way out. *So the fault was the ink AND the absence of a
+fill, and only the measurement separated them.* Red in this product is for an act
+with no way back — a delete, a closed cycle — and Apply **archives what stood
+before it does anything** (§517), so the way back is the archive. It takes the
+product's own precedent rather than a new rule: the one filled main action in a
+`.cbtns` row is §266's `mfgo`, navy through `--panel` with its derived
+`--panel-ink` (§38.4, never a literal — §25). **NO HOVER RULE WAS NEEDED AND THAT
+WAS CHECKED RATHER THAN ASSUMED**: `copilot.css` is concatenated LAST by
+`build.py`, so `.cbtns button.copgo` beats `.cbtns button:hover` at equal (0,2,1)
+specificity on source order — which is why `mfgo` has none either. **AND A SOLID
+RED FILL WAS ALREADY REFUSED ONCE** — `config.css` records white on dark `--bad`
+at 2.4:1 (§38.4) — so navy is not merely the quieter choice, it is the only
+filled answer this palette has.
+
+**7 · A WAY TO SEE WHAT APPLY DID.** One green line — *✓ vN is on <place>'s plan.
+Open the Foundation page ›* — drawn by ONE builder in two places: inside the save
+bar after Apply, and above the deliverable page's plan row. **THE ADDRESS IS
+DERIVED THE WAY THE ROUTER WRITES ONE** (`shell/route.js`'s own spelling) rather
+than composed by hand, which is what caught the exception: **a company's
+Foundation is a TAB of its own** (`/<slug>/strategy/co/<key>/foundation`) where a
+unit's, a function's and the group's are a SECTION of Strategy — and **a `cap:`
+target cannot be addressed at all**, so it gets the line with no link rather than
+a dead one (§61). **It is drawn from the SAVE's own outcome and never from the
+press** (§517.1): absent while a version is merely saved, present once the plan
+has taken it — asserted at both ends, or a build that drew it always passes every
+assertion about it being there. Both the line and its link measured on the green
+ground in the check rather than argued from a token (§38.4).
+
+**FOUR FAULTS IN MY OWN HARNESS, EVERY ONE AN OLD RULE IN A NEW PLACE.**
+**§518.1a — THE SECTION DIED RATHER THAN REPORTING** (§215) on a ten-second
+timeout, on a build that is right: a wait written when the question's position was
+on the PAGE still read `.copprog`, and fix 4 moved that word onto the card. I had
+rewritten the ASSERTION that reads it and left the WAIT that depends on it — so
+the fix is the rule rather than the line: when a control moves, grep **every**
+place that reaches for it rather than the assertion that failed first (§51.11,
+§214.3, in this file's own harness). Both reaches found and corrected; there are
+only two.
+**§518.1b — AND ONE NEW ASSERTION REPORTED A CORRECT BUILD BROKEN** (§100.3): it
+asked Cancel for `--surface`, and `.cbtns button` sets **no background at all**,
+so an outline button there computes **transparent** and never the surface colour.
+Rewritten to assert what such a button actually is — no fill, and different from
+the main action — which is also the claim that survives a later change to either.
+**§518.1c — AND THE SAVED COPY WAS THE *BEFORE* STATE**, caught before it was
+used: the scratchpad copy the falsification harness restores from was
+byte-identical to the mandatory `ui-versions/` snapshot, so a `restore()` would
+have wiped the whole round — §343.9's fault by a different road, *a saved copy
+that is not the state you want restored*. The harness restores from a copy taken
+of the FIXED sources, asserted byte-identical before the first break was written.
+
+**§518.1d — AND MY FALSIFICATION COUNTER READ 0 RED ON FIVE GENUINELY RED
+RUNS.** The harness counted `^  FAIL` and `shell.mjs` prints `FAIL` at **column
+0**, so every break reported *0 red* while the tail printed beside it said
+`5 ok, 3 failed`. §298.3 exactly — *the tail is the verdict and the count is
+not* — in the harness written to prove this round. Nothing had to be re-run,
+because the tail was printed next to each count from the first run and is what
+the numbers below are read from; the pattern is corrected and the tail is still
+printed, because a count is never the verdict.
+
+**Proved able to fail FIVE ways from the SOURCES** (§276), one break per decision,
+each **asserting it matched exactly once before writing** (§344.1) and each
+restored from the saved copy rather than with `git checkout` (§343.9):
+**bar-counts-answers 3 red · page-question-count 1 · todo-badges 1 ·
+apply-red 1 · no-done-line 3**, each reddening exactly its own assertions and no
+others, and each detail reproducing the reported shape verbatim —
+`count:"7 of 6 parts agreed"` (the answer count out of its own bounds),
+`prog:"Question 1"` beside `now:"Question 1 of 7"` (the position said twice,
+§87), `badges:["0/7","0/4","0/3","0/4","0/5","0/5","optional"]`, the two outline
+buttons measured above, and `null` for all three done-line assertions. The breaks edit the frozen source and regenerate `public/`,
+because `check:shell`'s existing ten are server-side `SMP_BREAK` names and a
+browser-side one cannot ride that mechanism — said plainly rather than implying a
+named `--break` exists for them.
+
+**VERIFIED**: `check:shell` §3i **79 ok, 0 failed**, red five ways as above with
+the restore asserted byte-identical to the saved copies; `check:copilot`
+**332/0**; `npm run typecheck` clean COLD (§3); `built-in-step.py` all good with
+the shipped file byte-identical to `build.py`'s output (§349); `qa.py` through
+`qa-run.py` **ERRORS none**, the tail read rather than the exit code (§320.6b);
+the four generators re-run and `generated-in-step` clear but for §349.4's own
+uncommitted-tree guard, which every comparison line passes and which clears on
+the commit. The built file's bytes changed, so **`sw.js` is bumped** to
+`smp-shell-v6.24-progress-apply-done` (§91) — a name proved held nowhere in the
+history and past `origin/main`'s `v6.21-direction-part` (§94.12, §94.16) — one
+live `const SHELL`, `node --check` clean (§146.2); it reaches the OFFLINE copy
+alone, the served worker holding `SHELL` nought times (§316.10, §329). Screen
+only, read off the diff: nothing stored moves, nothing is migrated, no rule about
+who may save what changes. **`main` untouched: the merge is Islam's word, on that
+merge.**

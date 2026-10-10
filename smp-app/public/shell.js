@@ -57551,6 +57551,39 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
+  /* §518.1 — A WAY TO SEE THE RESULT AFTER APPLY (Islam: "ok for all", of
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     Applying changed the bar's words and nothing else, so checking the one
+     thing Apply is for meant leaving the Copilot and finding Strategy ›
+     Foundation by hand. One green line with one link, shown where the state
+     is already read — the flow's save bar and the deliverable page (§517.1's
+     "keep in both") — and nothing is stored for it.
+     THE ADDRESS IS WORKED OUT THE WAY THE ROUTER WRITES ONE
+     (smp-app/shell/route.js `addressOf`): the module word, the destination's
+     own segment, its tab, then the section. A company's Foundation is a TAB
+     of its own (`foundation`) where a unit's, a function's and the group's
+     are a SECTION of Strategy (`found`) — read off shell.html rather than
+     guessed. A capability is a destination the router cannot spell, so there
+     the line is drawn with no link rather than a link that lands nowhere
+     (§61): a dead link is worse than no link. */
+  function foundHref(){
+    var t = place(), s = slug();
+    if (!s || !t || /^cap:/.test(t)) return "";
+    if (/^co:/.test(t)) return "/" + s + "/strategy/co/" + t.slice(3) + "/foundation";
+    return "/" + s + "/strategy/" + (/^fn:/.test(t) ? "fn/" + t.slice(3) : t) + "/strategy/found";
+  }
+  /* The page's own name is the client's word for it, as every part's name is
+     (§514) — asked of the one rule that answers it, never spelt here. */
+  function foundPageWord(){
+    try { if (typeof SMPRules !== "undefined" && SMPRules.foundTitle) { var w = SMPRules.foundTitle(GROUP, place()); if (w) return w; } } catch (e) {}
+    return "Foundation";
+  }
+  function fdoneHtml(n){
+    var h = foundHref();
+    return '<div class="copfdone" data-cop-fdone>' +
+      '<span>✓ v' + E(n) + ' is on ' + E(placeWord()) + '’s plan.</span>' +
+      (h ? ' <a href="' + E(h) + '">Open the ' + E(foundPageWord()) + ' page ›</a>' : '') + '</div>';
+  }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
   /* §517 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
      cards stay editable after a save (Islam: "let the card be editable to
@@ -57613,6 +57646,19 @@ var COPILOT = (function(){
      "Answering 1/4" — the question's POSITION — beside a panel saying
      "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
   function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
+  /* §518.1 — ONE COUNT OF PROGRESS, read by the top bar and the save bar
+     (Islam, of the UX review: "ok for all", from
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     The questions bar counted ANSWERS GIVEN out of questions asked, which on
+     the "start from what is there" road is 0 of 18 over six parts already
+     agreed — a 0% track on a Foundation that is five sixths done, because
+     nobody was asked anything. What the page is asking is *how much of the
+     Foundation is settled*, so the one number is parts agreed out of the
+     parts this place has, and it moves on either road. Named here once:
+     `agreedAll` is this same test asked of every part (§53.5). */
+  function agreedCount(f){
+    return steps().filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
+  }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -57650,7 +57696,11 @@ var COPILOT = (function(){
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering"; cls += " now"; }
+      /* §518.1 — WHERE THE QUESTION COUNT BELONGS IS THE CARD BEING
+         ANSWERED, never the page: the position through one part's questions
+         is a fact about that part, and on the head it sat beside a track
+         counting something else. */
+      if (now && f.phase === "ask") { st = "Question " + (f.qi + 1) + " of " + n; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
@@ -57691,13 +57741,16 @@ var COPILOT = (function(){
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + partName(el);
-      p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
+      /* The question's position is the card's (§518.1), so the head says
+         which part and which step of it, never how far through its
+         questions — said twice on one screen otherwise (§87). */
+      p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
     }
-    var total = 0, ans = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; ans += answered(f, i); });
+    var total = countedParts(f), agreed = agreedCount(f);
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + ans + '"><i style="width:' + (total ? Math.round(ans / total * 100) : 0) + '%"></i></div>';
+      '<div class="copfbar"><span class="copfcount" data-cop-progress>' + agreed + ' of ' + total + ' parts agreed</span>' +
+      '<div class="coptrack" role="progressbar" aria-label="Parts agreed" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + agreed + '"><i style="width:' + (total ? Math.round(agreed / total * 100) : 0) + '%"></i></div></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -57869,7 +57922,7 @@ var COPILOT = (function(){
     var S = steps(), ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
     var early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded" && !f.start;
     if (!ed || early) return '';
-    var total = countedParts(f), agreed = S.filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
+    var total = countedParts(f), agreed = agreedCount(f);
     var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
     /* §518 — whether the plan holds it, read off the same extra.applied the
        deliverable page reads (Islam: "keep in both"). */
@@ -57880,7 +57933,13 @@ var COPILOT = (function(){
       : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
       : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
     var saveN = f.saved && !sNow ? vn + 1 : vn;
-    return '<div class="copsavebar" data-cop-savebar>' + st + '<div class="copbtns">' +
+    /* §518.1 — the green line only where the words beside it would otherwise
+       be the only thing saying it landed: the version that is on the plan is
+       the one just saved. A LATER unsaved version is a different state and
+       the bar already names it ("v3 in progress · v2 is on the plan"), so a
+       done line there would read as a claim about work nobody has applied. */
+    var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
       '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
       '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
       '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
@@ -57901,9 +57960,13 @@ var COPILOT = (function(){
     var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
-      var a = answered(f, i), q = el.questions.length;
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+      /* §518.1 — NO SECOND COUNT HERE. A part agreed from the plan carries
+         no answers, so this read "0/4" beside a row whose own pill says
+         Agreed — a number disagreeing with the word next to it. How many
+         questions a part has answered is on its card while it is the part
+         being answered, and nowhere else. */
+      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", "", true);
     }).join("");
     /* §517 — the check is optional and not counted; the save is. */
     var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
@@ -58111,7 +58174,17 @@ var COPILOT = (function(){
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
       '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
       '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
-      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="danger" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
+      /* §518.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
+         colour of an act with no way back, and the row above this button
+         says in its own words that the Foundation the plan holds is archived
+         first and can be put back — so the colour said the opposite of the
+         sentence it sat under. It is the dialog's own main action, filled in
+         the client's navy exactly as the master flow's Start button is
+         (`.mflow .cbtns button.mfgo`, §266) rather than a new treatment —
+         and `--panel-ink` is the derived ink for that ground, so §38.4's
+         trap (white on a fill that is pale in dark) cannot bite. Red stays
+         for deleting and for closing a cycle. */
+      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="copgo" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
     var mb = document.getElementById("modal-b"); if (!mb) return;
     mb.addEventListener("click", function(ev){
       var y;
@@ -58185,6 +58258,10 @@ var COPILOT = (function(){
       var words = partWords();
       body = '<div class="copfcards">' + fp.map(function(x){
         return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
+        /* §518.1 — the same green line the flow's bar carries, on the same
+           test: the version shown is the version the plan holds. An older
+           one applied is said by the row below, which names both numbers. */
+        (d.applied && d.applied.n === cur.n ? fdoneHtml(d.applied.n) : '') +
         '<div class="copplanrow" data-cop-planrow>' + (d.applied
           ? '<span class="copsvst ok">On the plan as v' + E(d.applied.n) + (d.applied.n < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
           : '<span class="copsvst warn">Not on the plan yet</span>') +

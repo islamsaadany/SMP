@@ -927,7 +927,7 @@ var COPILOT = (function(){
         (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
+      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> under the cards to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
@@ -976,10 +976,6 @@ var COPILOT = (function(){
         '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
-        /* §518 — Save and Apply live in the card column, so closing the cards
-           with × used to take them away too. With the cards shut the same bar
-           stands at the head of the chat. */
-        (shut ? savebarHtml(f) : '') +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
         (!canEdit() ? VIEWONLY
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
@@ -1004,19 +1000,15 @@ var COPILOT = (function(){
     if (!ed || early) return '';
     var total = countedParts(f), agreed = S.filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
     var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
-    /* §518 — whether the plan holds it, read off the same extra.applied the
-       deliverable page reads (Islam: "keep in both"). */
-    var ap = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
-    var onPlan = ap ? (ap === vn && f.saved ? ' · on the plan' : ' · v' + ap + ' is on the plan') : '';
-    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + onPlan + '</span>'
-      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + onPlan + '</span>'
+    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + '</span>'
+      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + '</span>'
       : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
       : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
     var saveN = f.saved && !sNow ? vn + 1 : vn;
     return '<div class="copsavebar" data-cop-savebar>' + st + '<div class="copbtns">' +
-      '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
+      '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the six parts together">Run the check</button>' +
       '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
-      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
       '</div></div>';
   }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
@@ -1232,17 +1224,11 @@ var COPILOT = (function(){
      confirm() (§95); the server stamps which version went in, the browser
      writes the plan through the same writers the Foundation page uses
      (applyFoundationParts, config-data.js) and the autosave carries it. */
-  function applyAsk(did, title, o){
+  function applyAsk(did, title){
     if (!did || typeof openModalHtml !== "function") { SAY = "Save the Foundation first."; draw(); return; }
-    o = o || {};
-    /* §518 — the count is the parts this Foundation holds (Structure can
-       switch Purpose and Core Values off), and applying a version already on
-       the plan says so, since it files another copy of it in Archived plans. */
-    var partsWord = o.parts ? (o.parts === 1 ? "its one part goes" : "its " + o.parts + " parts go") : "its parts go";
-    var again = o.n && o.on === o.n ? '<div class="kv"><span class="k">Already applied</span><span>v' + E(o.n) + ' is on the plan already. Applying it again changes nothing on the plan and files another copy in Archived plans.</span></div>' : '';
     openModalHtml("Apply to the plan?", "",
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
-      '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
+      '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — its six parts go onto the Foundation page.</span></div>' +
       '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
       '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="danger" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
     var mb = document.getElementById("modal-b"); if (!mb) return;
@@ -1275,7 +1261,6 @@ var COPILOT = (function(){
           draw(); loadList(true); return; }
         act({ act:"foundationApplied", id:did, n:j.n }, function(k){
           if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = k.applied;
-          if (PANE && PANE.chat && PANE.flow && PANE.flow.saved && PANE.flow.saved.deliverableId === did) PANE.applied = k.applied;
           SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
           draw(); loadList(true);
         });
@@ -1308,12 +1293,6 @@ var COPILOT = (function(){
        Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
        plain-text edit of the whole version; a card is edited from the chat. */
     var fp = cur && cur.body && Array.isArray(cur.body.foundation) ? cur.body.foundation : [];
-    /* §518 — A FOUNDATION IS EDITED IN ITS CHAT. The plain-text box made a
-       version holding no parts, and Apply to plan then refused it; so Edit
-       opens the chat the latest version was built in, where the cards, the
-       pen and Edit with AI already work, and a change there starts vN+1. */
-    var fchat = "";
-    vs.forEach(function(v){ if (!fchat && v.chatId) fchat = v.chatId; });
     if (d.type === "foundation" && fp.length && !editing) {
       var words = partWords();
       body = '<div class="copfcards">' + fp.map(function(x){
@@ -1321,7 +1300,7 @@ var COPILOT = (function(){
         '<div class="copplanrow" data-cop-planrow>' + (d.applied
           ? '<span class="copsvst ok">On the plan as v' + E(d.applied.n) + (d.applied.n < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
           : '<span class="copsvst warn">Not on the plan yet</span>') +
-        (canEdit() ? '<button type="button" class="copbtn solid" data-cop-fapply="' + E(d.id) + '" data-cop-fapply-title="' + E(d.title) + '" data-cop-fapply-n="' + E(cur.n) + '" data-cop-fapply-on="' + E(d.applied ? d.applied.n : 0) + '" data-cop-fapply-parts="' + fp.length + '">Apply to plan</button>' : '') + '</div>';
+        (canEdit() ? '<button type="button" class="copbtn solid" data-cop-fapply="' + E(d.id) + '" data-cop-fapply-title="' + E(d.title) + '">Apply to plan</button>' : '') + '</div>';
     }
     var hist = vs.map(function(v, i){
       return '<li class="copver' + (i === 0 ? " latest" : "") + '"><span class="copvn">v' + v.n + '</span>' +
@@ -1333,9 +1312,7 @@ var COPILOT = (function(){
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : d.type === "foundation"
-          ? (fchat ? '<button type="button" class="copbtn quiet" data-cop-edit-chat="' + E(fchat) + '">Edit' + (cur ? ' as v' + (cur.n + 1) : '') + '</button>' : '')
-          : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
+        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit' + (d.type === "foundation" && cur ? ' as v' + (cur.n + 1) : '') + '</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
       body +
       '<h4 class="copvh">Versions</h4><ol class="copvers">' + hist + '</ol>' +
@@ -2946,8 +2923,7 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
-    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
-      { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname()); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
          button"). It opens on "start from what is there, or fresh?" where
@@ -3066,7 +3042,6 @@ var COPILOT = (function(){
       EDIT = { id: PANE.deliverable.id, text: cur && cur.body && typeof cur.body.text === "string" ? cur.body.text : "", note: "" };
       draw(); var e = document.querySelector("[data-cop-edit-text]"); if (e) e.focus(); return;
     }
-    if ((b = hit(ev, "[data-cop-edit-chat]"))) { openItem("chat", b.getAttribute("data-cop-edit-chat")); return; }
     if ((b = hit(ev, "[data-cop-edit-cancel]"))) { EDIT = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-edit-save]"))) {
       if (!EDIT) return;

@@ -1595,6 +1595,14 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]:not([disabled])"),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
     check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§517)", JSON.stringify(sb));
+    /* §518 — closing the cards with × used to take Save and Apply with them;
+       the bar now stands at the head of the chat, and Show cards puts it back. */
+    await page.click('[data-cop-cards="hide"]');
+    await page.waitForSelector(".copflow.nocards", { timeout: 5000 }).catch(() => {});
+    const sbShut = await page.evaluate(() => ({ inChat: !!document.querySelector(".copfchat > [data-cop-savebar]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]"), cards: !!document.querySelector(".copleft") }));
+    check(sbShut.inChat && sbShut.apply && !sbShut.cards, "with the cards closed, Save and Apply to plan stay on screen at the head of the chat (§518)", JSON.stringify(sbShut));
+    await page.click('[data-cop-cards="show"]');
+    await page.waitForSelector(".copleft [data-cop-savebar]", { timeout: 5000 }).catch(() => {});
     /* APPLY TO PLAN asks first, in the platform's own dialog, then REPLACES
        the unit's Foundation and ARCHIVES what stood (§49.2) — read off the
        graph and the archive, never the chat. The old Foundation is MADE
@@ -1603,9 +1611,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const old0 = await page.evaluate(() => { UNITS.mobile.aspiration = "The aspiration that stood before the Copilot."; paint(); return ARCHIVES.length; });
     await page.click("[data-cop-savebar] [data-cop-fapply]");
     await page.waitForSelector("#modal-b [data-cop-apply-yes]", { timeout: 5000 });
-    const ask = await page.evaluate(() => ({ t: ((document.querySelector("#modal-t") || {}).textContent || "") + " " + ((document.querySelector("#modal-b") || {}).textContent || ""), planText: UNITS.mobile.aspiration }));
+    const ask = await page.evaluate(() => ({ nParts: document.querySelectorAll("[data-cop-card]").length, t: ((document.querySelector("#modal-t") || {}).textContent || "") + " " + ((document.querySelector("#modal-b") || {}).textContent || ""), planText: UNITS.mobile.aspiration }));
     check(/Apply to the plan\?/.test(ask.t) && /Foundation — Mobile/.test(ask.t) && /last saved version/.test(ask.t) && /archived/.test(ask.t) && ask.planText === "The aspiration that stood before the Copilot.",
       "Apply asks first in the platform's own dialog, naming the version and that the old Foundation is archived — and the plan is untouched until Yes", JSON.stringify(ask).slice(0, 300));
+    check(new RegExp("its " + ask.nParts + " parts go").test(ask.t) && !/six parts/.test(ask.t), "…and counts the parts this Foundation actually has, never a fixed six (§518)", ask.nParts + " · " + ask.t.slice(0, 200));
     await page.click("#modal-b [data-cop-apply-yes]");
     await page.waitForFunction(() => /is on the plan now/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     const ap = await page.evaluate((old0) => ({ say: (document.querySelector(".copsay") || {}).textContent || "", asp: UNITS.mobile.aspiration, eim: UNITS.mobile.endInMind,
@@ -1636,8 +1645,15 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "the deliverable page draws the six parts as cards in the client's words, says On the plan as v1 with Apply beside it, and offers Edit as v2 (§517)", JSON.stringify(dp).slice(0, 300));
     /* A CARD CHANGED AFTER THE SAVE starts v2 on the rail and moves nothing
        on the plan. */
-    await page.click('[data-cop-chat="' + cid + '"]');
+    /* §518 — Edit as v2 opens the chat the Foundation came from (a text edit
+       would save a version with no parts, which Apply refuses), and that
+       chat's bar says the version is on the plan. */
+    const editTo = await page.evaluate(() => (document.querySelector("[data-cop-edit-chat]") || {}).getAttribute ? document.querySelector("[data-cop-edit-chat]").getAttribute("data-cop-edit-chat") : null);
+    check(editTo === cid && !(await page.$("[data-cop-edit]")), "Edit as v2 points at the chat the Foundation came from, and no text editor is offered for it (§518)", String(editTo));
+    await page.click("[data-cop-edit-chat]");
     await page.waitForSelector("[data-cop-savebar]", { timeout: 10000 });
+    const onp = await page.evaluate(() => (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "");
+    check(/Saved as Foundation — Mobile v1 · on the plan/.test(onp), "…and that chat's bar says v1 is on the plan (§518)", onp);
     await page.hover('[data-cop-card="1"]'); await pressIf('[data-cop-pen="1"]');
     await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 }).catch(() => {});
     await page.fill("[data-cop-pentext]", "A second aspiration, for {Y}.").catch(() => {});

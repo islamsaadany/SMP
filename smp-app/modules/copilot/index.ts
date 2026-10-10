@@ -34,7 +34,7 @@ import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../
 import {
   FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
-  saveFoundation, nextFoundationVersion, cleanPartWords,
+  saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
   withYear,
 } from "../../lib/copilot-flow.ts";
 import { methodFor, templateNamesFor } from "../../lib/copilot-settings.ts";
@@ -127,7 +127,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
         const pw = oneLine(q("placeWord")).slice(0, 120);
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
-          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}),
+          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place), applied: await appliedFoundation(c, chat, pw || chat.place) } : {}),
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
           ...(chat.section === "compete" ? await competeView(c, chat) : {}),
           ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
@@ -441,6 +441,11 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       if (text.length > MAX_MESSAGE) return refused(400, TOO_LONG);
       const cur = (await versionsOf(c, id))[0];
       if (cur && bodyOf(cur.body)?.text === text) return refused(400, "Nothing changed, so no new version was made.");
+      /* §518 — a Foundation is its parts, and a plain-text edit would make a
+         version holding none, which Apply to plan then refuses. Its parts
+         are changed in the chat that built it. */
+      if (d.type === "foundation" && brk() !== "text-edit-foundation")
+        return refused(400, "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan.");
       const n = await addVersion(c, id, { body: { text }, note: oneLine(b.note) || "Edited", by });
       return out(200, { ok: true, n });
     }

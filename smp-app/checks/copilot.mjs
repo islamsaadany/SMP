@@ -897,6 +897,18 @@ try {
     const apHend = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, HEND);
     const apHend2 = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 2 }, HEND);
     check("a client's own person cannot apply one, nor mark one applied", apHend.st === 403 && apHend2.st === 403, apHend.st + " · " + apHend2.st);
+    /* §518 — a Foundation is changed part by part in its chat, never as one
+       block of text, or the new version holds no parts and Apply refuses it
+       (break `text-edit-foundation`). Both ends: an ordinary deliverable's
+       text edit is still accepted (line ~398). Every version records the chat
+       it came from, so the page can send Edit back there; and the chat says
+       which version is on the plan, so its save bar can. */
+    const fEdit = await call("POST", "api", { act: "editVersion", id: fin.j.saved.deliverableId, text: "One block of text", note: "x" }, NORAN);
+    check("a Foundation's text cannot be edited as one block — it is changed in its chat (§518)", fEdit.st === 400 && /part by part/.test(fEdit.j.why || ""), fEdit.st + " · " + JSON.stringify(fEdit.j));
+    const vChats = (await asTenant(A, (c) => c.query("SELECT n, chat_id FROM copilot_versions WHERE deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
+    check("...every saved version records the chat it came from, not only the first (§518)", vChats.length === 2 && vChats.every((r) => r.chat_id === fid), JSON.stringify(vChats));
+    const gAp = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
+    check("...and the chat says which version is on the plan (§518)", gAp.j.applied && gAp.j.applied.n === 2, JSON.stringify(gAp.j.applied));
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
     const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);

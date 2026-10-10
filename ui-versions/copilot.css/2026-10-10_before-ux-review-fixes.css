@@ -679,9 +679,6 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
    deliverable page. Existing tokens only (§25). */
 .copsavebar { position:sticky; bottom:0; margin-top:auto; display:flex; flex-direction:column; gap:6px; padding:10px 0 2px; background:var(--surface); border-top:1px solid var(--line); }
 .copsavebar .copbtns { margin-top:0; }
-/* §518 — with the cards closed the same bar stands at the head of the chat:
-   in the flow there rather than pinned to a foot it does not own. */
-.copfchat > .copsavebar { position:static; margin:0 0 8px; padding:8px 0; border-top:0; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; }
 .copsvst { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
 .copsvst.ok { color:var(--good-tx); }
 .copsvst.warn { color:var(--attn-tx, var(--gold-deep)); }

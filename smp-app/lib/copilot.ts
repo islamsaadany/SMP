@@ -383,10 +383,12 @@ export async function newDeliverable(c: Q, a: { place: string; section: Section;
 }
 
 /* AN EDIT ADDS A VERSION (decisions §3.6) — never an UPDATE of the last one. */
-export async function addVersion(c: Q, id: string, a: { body: unknown; note: string; by: string }): Promise<number> {
+export async function addVersion(c: Q, id: string, a: { body: unknown; note: string; by: string; chatId?: string | null; chatTitle?: string }): Promise<number> {
   const n = await nextN(c, id);
-  await c.query("INSERT INTO copilot_versions (deliverable_id, n, body, note, by_key) VALUES ($1, $2, $3, $4, $5)",
-    [id, n, JSON.stringify(a.body ?? {}), a.note, a.by]);
+  /* §518 — a version made in a chat names that chat, as v1 always has, so
+     a saved Foundation's Edit can open the chat its parts live in. */
+  await c.query("INSERT INTO copilot_versions (deliverable_id, n, body, note, by_key, chat_id, chat_title) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    [id, n, JSON.stringify(a.body ?? {}), a.note, a.by, a.chatId || null, a.chatTitle || ""]);
   return n;
 }
 

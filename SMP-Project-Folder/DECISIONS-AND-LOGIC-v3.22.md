@@ -63071,3 +63071,20 @@ Islam, of §517's recorded gap: *"yes fix it and update the mockup word too."* �
 **Cost stated**: if the browser closes between the save landing and the note being written, the plan holds vN and the deliverable still reads *Not on the plan yet* — the safe direction, fixed by pressing Apply again.
 
 `check:copilot` 329/0; the new break `stamp-on-read` (the note written on the read again) reddens exactly the new assertion, `apply-any-type` still reddens its own. `check:shell` §3i green. The mockup `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` now says *Apply to plan* throughout its words, with one line saying the pictures were taken before the rename and still show *Move to the plan*. `sw.js` shell `v6.22-apply-after-save`.
+
+## §518 — four fixes from a UX review of the Foundation flow (2026-10-10)
+
+Islam asked for a full UX review of the Foundation flow and agreed to seven findings, with three of them (4, 6, 7) to be shown in a mockup first: *"ok for all but for 4 as well show me in the mockup"*. This section is the four built.
+
+**1. Edit as vN+1 on a Foundation opens its chat.** The deliverable page's Edit opened the generic text editor, and `editVersion` saved `body {text}` only — a version holding no `foundation` parts, which `applyFoundation` then refuses. A Foundation is made of parts, so it is changed where its parts are: the button carries `data-cop-edit-chat` and opens the chat the version came from. That needed the chat on every version, not only v1 — `addVersion` now takes `chatId`/`chatTitle` and `saveFoundation` passes them. Older versions saved before this carry none; the page takes the newest version that does. The server refuses a text edit of a `foundation` deliverable by name (break `text-edit-foundation`), so the shape cannot be broken from outside the screen either (§42). Both ends: an ordinary deliverable's text edit is still accepted.
+
+**2. Closing the cards kept Save and Apply.** The save bar lived only in the card column, so × took it away. With the cards shut the same bar (one builder, §53.5) stands at the head of the chat column, laid out as a row.
+
+**3. The chat says whether it is on the plan.** The chat GET returns `applied` (`appliedFoundation`, read off the deliverable's `extra.applied`), and the bar's status gains *· on the plan* or *· vN is on the plan*. Applying the version already on the plan adds an *Already applied* row to the dialog: it changes nothing on the plan and files another archive.
+
+**5. The real part count.** The dialog and the Apply hover said *six parts* whatever the Foundation held; Structure can switch parts off. They count the parts the version holds.
+
+`check:copilot` 332/0, red under `text-edit-foundation` (6 — the refusal, the chat on each version, and the version numbering the later assertions depend on). `check:shell` 376/0 with four new §3i assertions; with the old behaviour put back in the sources three fail and the section stops at the press the fourth needs (§215 noted, not hidden). `qa.py` ERRORS none; built-in-step all good; typecheck clean. `sw.js` shell `v6.23-foundation-ux`.
+
+**Waiting on a mockup (rule 1c)**: 4 — four progress counters that disagree (and the top bar at 0% on the *start from it* road); 6 — Apply is drawn red though nothing is lost; 7 — no way from the chat to the Foundation page after Apply.
+

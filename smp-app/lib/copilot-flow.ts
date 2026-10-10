@@ -344,7 +344,7 @@ export async function saveFoundation(c: Q, chat: { id: string; place: string; se
     [chat.place, chat.section, title]);
   if (hit.rows[0]) {
     const id = str(hit.rows[0].id);
-    return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by }), title, isNew: false };
+    return { deliverableId: id, n: await addVersion(c as any, id, { body, note, by, chatId: chat.id, chatTitle: chat.title }), title, isNew: false };
   }
   const id = await newDeliverable(c as any, { place: chat.place, section: chat.section, title, type: "foundation", kind: "promotable",
     approach: "Guided questions", body, note, by, chatId: chat.id, chatTitle: chat.title });
@@ -353,6 +353,15 @@ export async function saveFoundation(c: Q, chat: { id: string; place: string; se
 
 /* The version the NEXT save would be, so the screen can say it before the
    press ("Save as Foundation — Mobile v3"). */
+/* §518 — WHICH VERSION IS ON THE PLAN, for the chat's save bar: the same
+   `extra.applied` the deliverable page reads, so the two cannot disagree. */
+export async function appliedFoundation(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<{ n: number; at: string; by: string } | null> {
+  const r = await c.query(
+    "SELECT d.extra->'applied' AS a FROM copilot_deliverables d WHERE d.place = $1 AND d.section = $2 AND lower(d.title) = lower($3) ORDER BY d.created_at DESC LIMIT 1",
+    [chat.place, chat.section, foundationTitle(placeWord)]);
+  const a: any = r.rows[0]?.a;
+  return a && typeof a === "object" && Number(a.n) > 0 ? { n: Number(a.n), at: String(a.at || ""), by: String(a.by || "") } : null;
+}
 export async function nextFoundationVersion(c: Q, chat: { place: string; section: string }, placeWord: string): Promise<number> {
   const r = await c.query(
     "SELECT coalesce(max(v.n), 0) + 1 AS n FROM copilot_deliverables d LEFT JOIN copilot_versions v ON v.deliverable_id = d.id " +

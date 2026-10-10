@@ -170,7 +170,7 @@ export const doneCount = (t: Todo[]) => t.filter((x) => x.state === "done").leng
 /* ── WHAT THE MODEL READS AND RETURNS ────────────────────────────────── */
 export function dirsInstruction(method: string): string {
   return "You are Forefront Consulting's strategy consultant, choosing an organisation's strategic Directions and the Capabilities that deliver them." +
-    "\nRULES: Use the SWOT, How we compete, the Foundation and the plan as evidence; never invent a figure, a name or a fact. A Direction faces OUTSIDE — a market, a customer, a growth move — never an internal fix." +
+    "\nRULES: Use the SWOT, Competitive Discipline, the Foundation and the plan as evidence; never invent a figure, a name or a fact. A Direction faces OUTSIDE — a market, a customer, a growth move — never an internal fix." +
     " Score Urgency, Importance and Ease each 1 to 4 (4 = most urgent, most important, easiest). Own each one by a function from the list given, using its key, or leave ownedBy empty if none fits." +
     " Return JSON in the shape asked, with no preamble." +
     (method.trim() ? "\n\nFOREFRONT'S METHOD:\n" + method.trim() : "");

@@ -63220,3 +63220,55 @@ Islam, of El Abd (business units off, directions with named owners): *"when they
 **NOT CLAIMED**: why El Abd's owners *"can't report"*. The code lets a named Owner or Custodian report their own direction (§469); whether El Abd's owners are named by a name the register holds is a fact about their data, and it waits on Islam viewing as one of them. **Built on the branch, not merged.**
 
 **§517.1 — MERGED TO `main` 2026-10-10 on Islam's word** (*"merge to main"*). `main` had not moved since the branch was cut (`origin/main` an ancestor of the branch, measured), so the merge is a clean fast-forward and the tree pushed is the tree verified; §517 was free on `main`. `sw.js` confirmed against `origin/main` immediately before the push (§94.16): `v6.21-direction-part` against main's `v6.20-cycle-office`, one live `const SHELL`, `node --check` clean. The branch tip was already pushed, so `main` carries this record commit of its own (§91). **No forced sign-out is owed** (spec 029): the authoriser changed and only ADDS — a new group key nobody's tab has ever written, refused to everybody but the Super user — so no save that worked before is refused now. **§91.5's live read could not be made from this session**: the proxy refuses the production address (403 at CONNECT), so the deployment is unverified from here and said so rather than claimed. The witnesses for whoever reads it: `shell.js` **4,619,585 / `3dc70320` → 4,627,912 / `b44ea287`** and the served `sw.js` stamp **`d7a28757` → `c65f9364`** (§397 — so the reload banner is offered); `platform.css` is unchanged at 777,706 / `9f586d49` and is no witness this round (§113.8). The branch is held behind `main` until that read is made.
+
+## §518 — The section is called Competitive Discipline (2026-10-10)
+
+Islam, of §492's section: ***"CHANGE how we compete to Competitive Discipline"***. A
+rename of the WORDS a person reads and nothing else.
+
+**THE INSTRUCTIONS HE WROTE ALREADY CALLED IT THAT, WHICH IS HALF THE ARGUMENT FOR
+THE RENAME AND IS A MEASUREMENT RATHER THAN A GUESS**: `copilot-defaults.generated.ts`
+— the Copilot's own method text, Islam's words carried in verbatim (§456) — holds
+**Competitive Discipline** and the phrase *How we compete* **nought** times, under
+its own `- **Name:**` heading. So the model was being told one name and the screens
+were drawing another, and the drift was ours.
+
+**NINETEEN LINES, AND NOT ONE OF THEM IS A KEY** (§30.2): the stored field is still
+`compete`, the Structure switch is still `structure.<level>.compete.on`, the deck's
+anchor is still `data-anchor="compete"`, the access keys are still `g_found`/`u_anal`
+and the Copilot's section is still `compete` — so **nothing stored moves, nothing is
+migrated, and no deliverable already saved is renamed**: a *How we compete — Mobile*
+in a client's Deliverables rail keeps the title it was saved under, because the title
+is a stored value somebody's own press produced (§96.2) and rewriting it would be the
+platform editing the record. Said rather than discovered: a client who has used the
+Copilot here will read both names for a while, the old one only in the list of what
+they made.
+
+**EVERY SURFACE IN ONE EDIT, OR THE PRODUCT READS TWO WAYS** (§53.5): the section
+label on the top level and on a business unit (`shell.html`), the Structure step's
+chip (`client-setup.js`), the deck's own heading and its picture-placer's *After…*
+word (`present.js`), and the Copilot's six — the road card, the saved deliverable's
+title, the chat's own words. Server-side, the four `lib/copilot-*.ts` and
+`modules/copilot/compete.ts` strings a person reads back in an answer.
+
+**THE COMMENTS AND THE CHECK FILENAMES ARE LEFT**, deliberately and by rule: 1b-iii
+says plain words govern what is said to a person and never the record, which is
+written for whoever has to change this in six months and cites §492 by name — so
+`checks/how-we-compete.py` keeps its name and its docstring, and nineteen source
+comments keep theirs. What they do NOT keep is a stale expectation: that check and
+`structure.py` assert the section's own label, so both were read and found to address
+it by its KEY (`[data-sec="compete"]`) rather than by the word, which is why neither
+needed editing — the two that did are `smp-app/checks/copilot.mjs` and
+`shell.mjs`, which assert the Copilot's road card and its saved title by their words.
+
+**VERIFIED**: `qa.py` through `qa-run.py` **33 viewers, ERRORS none**;
+`how-we-compete.py`, `structure.py`, `structure-sections.py`, `plan-switch.py` and
+`deck-dividers.py` all good; `built-in-step.py` all good after the rebuild and
+`generated-in-step.mjs` all clear (§329); the built file grep'd for the old phrase
+outside a comment and holding **none**. **The three `smp-app` checks and `tsc` are
+UNRUN rather than passing** (§54.5): this container holds no `smp-app/node_modules`,
+so `check:copilot`, `check:shell` and the typecheck could not launch — narrowed by the
+diff, which in those files is **string literals only**, no logic and no types.
+`sw.js` bumped to `v6.22-competitive-discipline`, because the built file's bytes
+changed (§91). **On the branch, not merged** — the merge is Islam's word, on that
+merge.

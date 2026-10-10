@@ -148,7 +148,7 @@ export function finishBlocker(s: Exec): string {
 /* ── WHAT THE MODEL READS AND RETURNS ────────────────────────────────── */
 export function execInstruction(method: string): string {
   return "You are Forefront Consulting's strategy consultant, turning one strategic Direction or Capability into its execution plan." +
-    "\nRULES: Use the plan, the SWOT and How we compete as evidence; never invent a figure. A measure says how we will know it worked, with a target for the plan period;" +
+    "\nRULES: Use the plan, the SWOT and Competitive Discipline as evidence; never invent a figure. A measure says how we will know it worked, with a target for the plan period;" +
     " compile is one of Sum, Count, Latest, Average. A tactic is a piece of work with an owner (a role or a function, never an invented name) and the quarters it runs in," +
     " chosen ONLY from the quarters given. Return JSON in the shape asked, with no preamble." +
     (method.trim() ? "\n\nFOREFRONT'S METHOD:\n" + method.trim() : "");

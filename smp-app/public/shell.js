@@ -46528,8 +46528,8 @@ function competeSlides(u){
   var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
     return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
   var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
-  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
-    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+  return ['<section class="dslide d-compete"' + anch("compete", "After Competitive Discipline") + '>' +
+    '<h2>Competitive Discipline</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
     '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
     (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
     '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +
@@ -57252,7 +57252,7 @@ var COPILOT = (function(){
   var SECTIONS = [
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
-    { k:"compete",    label:"How we compete" },
+    { k:"compete",    label:"Competitive Discipline" },
     { k:"directions", label:"Directions" },
     { k:"capabilities", label:"Capabilities" },
     { k:"execution",  label:"Execution" },
@@ -58955,7 +58955,7 @@ var COPILOT = (function(){
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
-  function cpTitle(){ return "How we compete — " + placeWord(); }
+  function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
   function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
@@ -59095,8 +59095,8 @@ var COPILOT = (function(){
           '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
           '<button type="button" class="copbtn" data-cop-cp-refine' + (busyHere ? ' disabled' : '') + '>Send</button></div>' +
           '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
-          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to How we compete</button></div>';
-        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under How we compete.");
+          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
+        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under Competitive Discipline.");
       }
     }
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
@@ -59167,8 +59167,8 @@ var COPILOT = (function(){
         cpProgress(id);
         var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
         var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
-        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the How we compete page."
-          : on ? "" : "Saved. How we compete is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
+        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the Competitive Discipline page."
+          : on ? "" : "Saved. Competitive Discipline is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
         LISTS[key()] = null; loadList(true);
         if (wrote && typeof paint === "function") paint(); else draw();
       });
@@ -62695,7 +62695,7 @@ var CLIENTSETUP = (function () {
        `compete` component: off until ticked, and off hides and keeps. */
     if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
       var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
-      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "Competitive Discipline"));
       var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
       hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
       sc.appendChild(hc);
@@ -65523,7 +65523,7 @@ var SYNC = (function () {
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
-                  { k:"compete", ac:"g_found", label:"How we compete",
+                  { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
@@ -65752,7 +65752,7 @@ var SYNC = (function () {
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   /* spec 064 §3.1: How we compete, after the SWOT. */
-                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                  { k:"compete", ac:"u_anal", label:"Competitive Discipline", render:renderUnitCompete,
                     when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */

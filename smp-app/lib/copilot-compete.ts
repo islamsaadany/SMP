@@ -185,7 +185,7 @@ export function todoOf(s: Compete): Todo[] {
     { key: "discipline", title: "Choose the discipline", state: s.chosen ? "done" : "open", status: s.chosen ? DISC_WORD[s.chosen] : "Not chosen yet" },
     { key: "values", title: "Pick the values", state: s.table ? "done" : "open", status: s.table ? s.table.values.length + " values" : s.suggested.length ? s.picked.length + " ticked" : "Not suggested yet" },
     { key: "table", title: "Refine and check the table", state: s.saved ? "done" : "open", status: s.saved ? "Checked" : s.table ? "On the table now" : "After the values" },
-    { key: "save", title: "Save", state: s.saved ? "done" : "open", status: s.saved ? "Saved as " + s.saved.title + " v" + s.saved.n : "Into How we compete" },
+    { key: "save", title: "Save", state: s.saved ? "done" : "open", status: s.saved ? "Saved as " + s.saved.title + " v" + s.saved.n : "Into Competitive Discipline" },
   ];
 }
 export const doneCount = (t: Todo[]) => t.filter((x) => x.state === "done").length;
@@ -227,7 +227,7 @@ export function refineQuestion(t: Compete["table"], ask: string): string {
 }
 
 /* ── SAVING: THE TABLE AS A DELIVERABLE ──────────────────────────────── */
-export const competeTitle = (placeWord: string) => ("How we compete — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
+export const competeTitle = (placeWord: string) => ("Competitive Discipline — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
 export async function saveCompete(c: Q, chat: { id: string; place: string; section: Section; title: string }, s: Compete, placeWord: string, by: string) {
   const title = competeTitle(placeWord);
   const body = { text: tableText(s.table), compete: s.table, scores: { market: s.market, internal: s.internal } };

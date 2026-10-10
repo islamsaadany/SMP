@@ -332,7 +332,7 @@
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
                     when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
-                  { k:"compete", ac:"g_found", label:"Competitive Discipline",
+                  { k:"compete", ac:"g_found", label:"How we compete",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
@@ -561,7 +561,7 @@
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   /* spec 064 §3.1: How we compete, after the SWOT. */
-                  { k:"compete", ac:"u_anal", label:"Competitive Discipline", render:renderUnitCompete,
+                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
                     when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */

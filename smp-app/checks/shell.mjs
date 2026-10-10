@@ -1815,8 +1815,8 @@ await section("3k · the How we compete chat: scores, the discipline, values, th
     check(alts.join() === "Effortless,No fuss", "a refine shows the alternatives the Copilot offers", JSON.stringify(alts));
     await page.click("[data-cop-cp-finish]");
     await page.waitForTimeout(1500);
-    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'How we compete%' order by d.created_at desc limit 1"))).rows[0];
-    check(!!dv && dv.title === "How we compete — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
+    const dv = (await asTenant(tenantId, (c) => c.query("select d.title, v.n from copilot_deliverables d join copilot_versions v on v.deliverable_id = d.id where d.title like 'Competitive Discipline%' order by d.created_at desc limit 1"))).rows[0];
+    check(!!dv && dv.title === "Competitive Discipline — Mobile" && dv.n === 1, "Save writes How we compete — Mobile v1", JSON.stringify(dv));
     const plan = await page.evaluate(() => { try { const w = UNITS.mobile.compete; return w ? [w.discipline, w.values.length] : null; } catch (e) { return String(e); } });
     check(JSON.stringify(plan) === JSON.stringify(["btc", 5]), "…and the table is written into the plan's How we compete", JSON.stringify(plan));
     check(!(await page.$("[data-cop-cp-finish]")), "a saved chat offers no Save again");

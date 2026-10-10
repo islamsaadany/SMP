@@ -1747,7 +1747,7 @@ var CLIENTSETUP = (function () {
        `compete` component: off until ticked, and off hides and keeps. */
     if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
       var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
-      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "Competitive Discipline"));
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
       var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
       hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
       sc.appendChild(hc);

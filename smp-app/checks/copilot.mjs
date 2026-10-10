@@ -936,13 +936,13 @@ try {
     const hf = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, HEND);
     check("a client's own person cannot save it", hf.st === 403);
     const fn = await call("POST", "api", { act: "competeFinish", id: cid, placeWord: "Mobile" }, NORAN);
-    check("saving makes version 1 of How we compete — Mobile", fn.st === 200 && fn.j.saved && fn.j.saved.n === 1 && fn.j.saved.title === "How we compete \u2014 Mobile" && fn.j.compete?.phase === "saved",
+    check("saving makes version 1 of How we compete — Mobile", fn.st === 200 && fn.j.saved && fn.j.saved.n === 1 && fn.j.saved.title === "Competitive Discipline \u2014 Mobile" && fn.j.compete?.phase === "saved",
       JSON.stringify(fn.j).slice(0, 200));
     const vrow = fn.j.saved ? (await asTenant(A, (c) => c.query("SELECT body FROM copilot_versions WHERE deliverable_id = $1", [fn.j.saved.deliverableId]))).rows : [];
     check("...the version holds the table and the scores", vrow.length === 1 && vrow[0].body.compete.discipline === "bts" && vrow[0].body.compete.values.length === 2 && !!vrow[0].body.scores.market,
       JSON.stringify(vrow).slice(0, 200));
     const after = await call("POST", "api", { act: "competeSave", id: cid, compete: tb.j.compete }, NORAN);
-    check("a saved chat refuses further changes", after.st === 400 && /Start a new How we compete chat/.test(after.j.why));
+    check("a saved chat refuses further changes", after.st === 400 && /Start a new Competitive Discipline chat/.test(after.j.why));
     const nc2 = await call("POST", "api", { act: "newCompete", place: "mobile" }, OMAR);
     NEXT = { answer: SC }; await call("POST", "api", { act: "competeScore", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
     const g2 = await call("GET", "chat", null, OMAR, "?id=" + nc2.j.chat?.id);
@@ -950,7 +950,7 @@ try {
     const fn2 = await call("POST", "api", { act: "competeFinish", id: nc2.j.chat?.id, placeWord: "Mobile" }, OMAR);
     check("a second chat saves as version 2 of the SAME deliverable", fn2.j.saved && fn2.j.saved.n === 2 && fn.j.saved && fn2.j.saved.deliverableId === fn.j.saved.deliverableId, JSON.stringify(fn2.j.saved));
     const notCp = await call("POST", "api", { act: "competeSave", id: ch.id, compete: {} }, NORAN);
-    check("a chat that is not How we compete is refused", notCp.st === 400 && /not a How we compete chat/.test(notCp.j.why));
+    check("a chat that is not How we compete is refused", notCp.st === 400 && /not a Competitive Discipline chat/.test(notCp.j.why));
     NEXT = null;
     }
 

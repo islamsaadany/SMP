@@ -308,8 +308,8 @@ function competeSlides(u){
   var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
     return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
   var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
-  return ['<section class="dslide d-compete"' + anch("compete", "After Competitive Discipline") + '>' +
-    '<h2>Competitive Discipline</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
+    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
     '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
     (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
     '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +

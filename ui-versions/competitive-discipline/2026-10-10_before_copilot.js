@@ -37,7 +37,7 @@ var COPILOT = (function(){
   var SECTIONS = [
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
-    { k:"compete",    label:"Competitive Discipline" },
+    { k:"compete",    label:"How we compete" },
     { k:"directions", label:"Directions" },
     { k:"capabilities", label:"Capabilities" },
     { k:"execution",  label:"Execution" },
@@ -1740,7 +1740,7 @@ var COPILOT = (function(){
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
-  function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
+  function cpTitle(){ return "How we compete — " + placeWord(); }
   function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
@@ -1880,8 +1880,8 @@ var COPILOT = (function(){
           '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
           '<button type="button" class="copbtn" data-cop-cp-refine' + (busyHere ? ' disabled' : '') + '>Send</button></div>' +
           '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
-          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
-        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under Competitive Discipline.");
+          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to How we compete</button></div>';
+        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under How we compete.");
       }
     }
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
@@ -1952,8 +1952,8 @@ var COPILOT = (function(){
         cpProgress(id);
         var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
         var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
-        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the Competitive Discipline page."
-          : on ? "" : "Saved. Competitive Discipline is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
+        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the How we compete page."
+          : on ? "" : "Saved. How we compete is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
         LISTS[key()] = null; loadList(true);
         if (wrote && typeof paint === "function") paint(); else draw();
       });

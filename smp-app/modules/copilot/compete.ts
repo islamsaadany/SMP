@@ -21,8 +21,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const brk = () => process.env.SMP_BREAK || "";
 const MAX_CONTEXT = 24_000;
 const ARCHIVED = "This chat is archived. Restore it to keep talking.";
-const SAVED_ALREADY = "This is saved. Start a new How we compete chat to make the next version.";
-const NOT_COMPETE = "This is not a How we compete chat.";
+const SAVED_ALREADY = "This is saved. Start a new Competitive Discipline chat to make the next version.";
+const NOT_COMPETE = "This is not a Competitive Discipline chat.";
 
 /* What the chat GET adds: the state, the to-do list and the RESULTS worked
    out by the one scoring function — the page never adds a score up (§94.8). */
@@ -54,7 +54,7 @@ export async function competeAct(c: any, b: any, who: Who): Promise<Out> {
   if (kind === "newCompete") {
     const place = String(b.place || "");
     if (!isPlace(place)) return refused(400, "Which place?");
-    const chat = await newChat(c, { place, section: "compete", title: oneLine(b.title).slice(0, MAX_TITLE) || "How we compete", by });
+    const chat = await newChat(c, { place, section: "compete", title: oneLine(b.title).slice(0, MAX_TITLE) || "Competitive Discipline", by });
     const s = newCompete();
     await writeCompete(c, chat.id, s);
     return out(200, { ok: true, chat: { ...chat, compete: true }, ...(await competeView(c, chat)) });

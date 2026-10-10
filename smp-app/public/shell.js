@@ -258,9 +258,9 @@
                  a_fn_own:"edit", a_fn_own_strat:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
     /* Sees the whole organisation and manages none of it. */
     gceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"none", a_setup:"none" },
     cceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"none", a_setup:"none" },
     /* ── SETUP IS THE SMO'S, AND SO IS THE CYCLE'S MACHINERY (§51.18) ──
        Islam: "no one should have access to the settings except for the SMO."
 
@@ -270,11 +270,15 @@
        closing this takes nothing away from the people entering figures: it
        closes the office's own machinery to everyone but the office.
 
-       THE GROUP CEO KEEPS IT, deliberately. §37 made marking focus measures a
-       RULE rather than a cell — "focus measures are marked by the CEO and the
-       SMO" — and a CEO who cannot open the page cannot obey a rule addressed
-       to them. Same for the company CEO, who reads the cycle and marks
-       nothing.
+       THE GROUP CEO KEPT IT UNTIL §516.3, and that is reversed rather than
+       overwritten (Principle II). §37 made marking focus measures a RULE —
+       "focus measures are marked by the CEO and the SMO" — and a CEO who
+       cannot open the page cannot obey a rule addressed to them, so the CEO
+       read this column. Islam then closed it to everyone but the office,
+       knowing it took focus marking with it ("close it fully"), so the rule
+       moved with the column: marking is the Super user's now, and neither
+       CEO reads the cycle's pages. neverOffered() says so whatever a tenant
+       once stored.
 
        What a unit head, a custodian or a function head is left with behind the
        gear is only what is theirs by rule: the knowledge base, the figures
@@ -296,7 +300,14 @@
        would make the second condition the only one. The SMO opens the
        own-function cell for project owners, the own-unit (and, for a pillars
        function, own-function) cell for pillar owners. */
-    powner:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+    /* §516.1: MAY READ ON THE OWN-UNIT PAIR TOO, Islam's word ("may read
+       ok"). §405 let a business unit plan in projects, so a project owner can
+       now hold one at a unit, and that pair shipped at none while the
+       own-function pair shipped at view — which is the only reason the merged
+       table drew Part owner's Plan and Reporting as "differs". Now the two
+       halves say one thing; migration 049 (and smp-app 028) moves a tenant's
+       stored none to view only where it still holds the old none. */
+    powner:    { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     plowner:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
                  a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
@@ -522,7 +533,10 @@
                people: state.people,
                topItems: (state.group || {}).items,
                topProjects: (state.group || {}).topProjects,
-               group: state.group ? { structure: state.group.structure } : null });
+               /* §517: and the direction owners' scope, read by dirPartOnly().
+                  Here AND in W()'s `group` (§102.4) — W passes the object
+                  through whole, so this is the one list to edit. */
+               group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -616,15 +630,26 @@
        nothing on its hidden pillars, so their owners derive nothing there.
        The unit's own Reporting cell for this row ships at none, so nobody's
        access moves until the office opens it. */
+    /* SPEC 066 STAGE 2: A PILLAR NAMES A CUSTODIAN AS WELL AS AN OWNER, and
+       both sit on the same row of Roles & access — Part owner — because a
+       pillar's custodian reaches exactly what its owner reaches: that one
+       pillar's rows, never the unit. It is §505's own answer for a company's
+       direction (owner and custodian both derive `dirowner`), carried to every
+       pillar, and deliberately NOT the unit's `custodian` role: that role
+       speaks for the whole unit and submits its report, which a pillar's
+       custodian does not. */
+    var holdsPillar = function (row) {
+      return owns(row) || (!!row && !!row.custodian && namedOn({ owner: row.custodian }, p));
+    };
     w.unitKeys.forEach(function (k) {
       var u = (w.units || {})[k] || {}, fm = String(u.format || "pillars");
       if (fm === "projects") { if ((u.projects || []).some(owns)) once("powner", k); return; }
       if (fm !== "pillars") return;
-      if ((u.items || []).some(owns)) once("plowner", k);
+      if ((u.items || []).some(holdsPillar)) once("plowner", k);
     });
     w.functionKeys.forEach(function (k) {
       var f = w.functions[k] || {};
-      if (String(f.format) === "pillars" && (f.items || []).some(owns))
+      if (String(f.format) === "pillars" && (f.items || []).some(holdsPillar))
         once("plowner", "fn:" + k);
     });
     /* §505: A DIRECTION'S OWNER OR CUSTODIAN, held at the group. Asked of the
@@ -677,7 +702,38 @@
     return personRoles(w, p).map(function (r) { return r.role; });
   }
 
+  /* ── SETUP IS NEVER OFFERED TO A CEO (§516.1) ─────────────────────
+     Islam: "nobody will see the setup even the ceo", and of the drawn choice
+     between a cell that starts shut and one never offered: "never offered".
+     So it is a RULE rather than a cell (§37's shape): the table draws a dash
+     there, and this answers none whatever a tenant once stored — or a stored
+     view would grant Setup from behind a dash nobody can press to take it
+     back (§61). Asked by grantFor, so the screen and the server read it from
+     one place (§42). */
+  /* §516.2 WIDENS IT TO EVERY ROW BUT THE OFFICE. Islam, of the rows still
+     offered Setup: "close setup for all of them even the ceo no one get the
+     setup but the super use and the smo team". So the rule is said the way
+     he said it — Setup is the office's — rather than as a list of the rows
+     it is not, which would be one more place to forget the day a role is
+     added (§104.7). isOfficeRole is the one definition of the office (§89).
+     Every shipped default for these rows was already none, so the worked
+     example moves nothing; what changes is that a tenant which had opened
+     Setup to one of them loses it, and the table can no longer offer it. */
+  /* §516.3 ADDS THE REPORTING CYCLE. Islam: "setup should be a dash for
+     anyone but the smo and the super user it's not an option and same for
+     the reporting cycle". The two CEO rows were the only ones still reading
+     it, and closing it takes the Focus measures page with it — the one place
+     the group CEO marked what carries reward. Put to him with that cost
+     stated, and his answer was "close it fully": focus marking is the Super
+     user's now (mayMarkFocus and the server's focus case both say so). The
+     list names AREAS, never roles, for the same reason as above. */
+  var OFFICE_ONLY_AREAS = ["a_setup", "a_cycle"];
+  function neverOffered(roleKey, areaKey) {
+    return OFFICE_ONLY_AREAS.indexOf(areaKey) > -1 && !isOfficeRole(roleKey);
+  }
+
   function grantFor(w, roleKey, areaKey) {
+    if (neverOffered(roleKey, areaKey)) return "none";
     var row = w.access[roleKey];
     if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";
     return (ACCESS_DEFAULTS[roleKey] || {})[areaKey] || "none";
@@ -826,6 +882,76 @@
                       : person.company ? "co:" + person.company : person.unit);
     return at ? [{ role: NO_ROLE, at: at }] : [];
   }
+
+  /* ── THE TABLE SOMEBODY READS, OVER THE TABLE THE RULES READ (§516) ──
+     Spec 066 stage 2. Roles & access was 13 roles down and 9 areas across
+     — 117 cells, of which the unit and the function halves gave the same
+     answer for every person on every tenant measured. What is DRAWN is now
+     9 rows and 6 columns (8 on a client with no second layer, §516.1);
+     what is STORED is untouched. Each drawn cell is a
+     VIEW over the (role, area) pairs under it, and pressing it writes every
+     pair whose answer differs — so `grantFor`, `grantIn` and everything the
+     server asks read exactly what they read before, and nobody's access can
+     move by the table changing shape (asserted by
+     scripts/test-access-unmoved.js).
+
+     WHY A VIEW AND NOT A MIGRATION. Merging the storage would have to pick
+     an answer wherever a client set two of the old cells differently, and
+     picking is the one thing Islam ruled out: such a cell is drawn as
+     DIFFERING, says which pairs disagree, and the office presses it to make
+     them one. Nothing is merged by guessing.
+
+     A row's `of` and a column's `areas` must between them cover every role
+     and every area exactly once — asserted, or a role added later would
+     simply not appear on the table and nobody could set it. */
+  var ACCESS_COLS = [
+    /* §516.2: the column words are Islam's, given as they are — "for the
+       group make it Group / Company", "Their own", "Other units & functions" —
+       and literal, because they name a KIND of place rather than this
+       client's word for one (the rows do that, §516.1). */
+    { key:"top", label:"Group / Company", areas:["a_group"],
+      note:"The group's own pages, and a division's — Foundation, Performance, the Temple." },
+    { key:"plan", label:"Their own — Plan", pair:"Their own", col:"Plan",
+      areas:["a_unit_own_strat", "a_fn_own_strat"],
+      note:"The place the person is attached to — a business unit, a function or a capability. Its strategy: Foundation, SWOT, the plan." },
+    { key:"rep", label:"Their own — Reporting", pair:"Their own", col:"Reporting",
+      areas:["a_unit_own", "a_fn_own"],
+      note:"The same place. Its Performance and its Reporting." },
+    { key:"other", label:"Other units & functions", areas:["a_unit_other", "a_fn_other"],
+      note:"Every unit, function or capability the person is NOT attached to." },
+    { key:"cycle", label:"Reporting cycle", areas:["a_cycle"],
+      note:"Open, chase and close · Import · Archived plans · Focus measures. Only the office — the Super user and the SMO team — is ever offered it." },
+    { key:"setup", label:"Setup", areas:["a_setup"],
+      note:"Every Setup page except Roles & access, which is the Super user's. Only the office — the Super user and the SMO team — is ever offered it." }
+  ];
+  var ACCESS_ROWS = [
+    { key:"super", name:"Super user", of:["super"],
+      note:"A seat. Granted on the register." },
+    { key:"smoteam", name:"SMO team", of:["smoteam"],
+      note:"A seat. Granted on the register." },
+    /* §516.1: TWO ROWS, NOT ONE. Islam, of the merged table: "the company ceo
+       and layer 2 head needs different rows". They were always stored apart
+       (gceo, cceo); only the table drew them as one. Each is named in the
+       client's own words — the word for the top plus " CEO", the word for the
+       second layer plus " head" (`word`/`suffix`, read by the page through
+       labelWord(), because a rule module holds no tenant vocabulary); `name`
+       is the shipped spelling and the fallback. `mid` marks the row that
+       exists only where the client HAS a second layer (midExists). */
+    { key:"gceo", name:"Group CEO", of:["gceo"], word:"topword", suffix:" CEO",
+      note:"Heads the whole client — the top layer." },
+    { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
+      note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
+      note:"Owns a place: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"custodian", name:"Custodian", of:["custodian"],
+      note:"Keeps a place's plan and figures." },
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
+      note:"Owns one part inside a place: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    { key:"contrib", name:"Contributor", of:["contrib"],
+      note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
+    { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
+      note:"Not a role — what somebody on the register who holds no role may open." }
+  ];
 
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
@@ -3688,6 +3814,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        row          the row itself; namedOn() reads owner + collaborators
        pillarOwner  the Owner of the pillar the row sits under (unit side —
                     also what §55's measure rule has always leaned on)
+       pillarCust   that pillar's Custodian (spec 066 stage 2; §505 for a
+                    company's direction) — the second seat on the same pillar
        project      the project the row sits inside (function side)
 
      · a PROJECT OWNER reaches every row of a project whose Owner names them;
@@ -3712,8 +3840,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     if (roleKey === "powner")
       return !!ctx.project && namedOn({ owner: ctx.project.owner }, person);
     if (roleKey === "plowner")
-      return ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
-             namedOn({ owner: ctx.pillarOwner }, person);
+      return (ctx.pillarOwner != null && ctx.pillarOwner !== "" &&
+              namedOn({ owner: ctx.pillarOwner }, person)) ||
+             (!!ctx.pillarCust && namedOn({ owner: ctx.pillarCust }, person));
     /* §505: a direction's owner reaches the rows of a pillar naming them in
        either seat — and only ever on the top layer, where they hold the role. */
     if (roleKey === "dirowner")
@@ -3806,12 +3935,18 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `owner` is read from the STORED container by both callers (§42) — the
      screen to draw the control, the server to accept the save — so a project
      whose Owner the incoming save has just rewritten is never what decides
-     whether that save was allowed. */
-  function mayMarkDone(w, person, area, target, owner) {
+     whether that save was allowed.
+
+     `custodian` (spec 066 stage 2): a pillar's second seat saves it as its
+     owner does — §469's answer for a company's direction, one layer down. A
+     project has no custodian seat, so its callers pass nothing and nothing
+     changes for it. */
+  function mayMarkDone(w, person, area, target, owner, custodian) {
     var via = editingRoles(w, person, area, target);
     if (!via.length) return false;
     if (via.some(function (r) { return OWN_LINES_ONLY.indexOf(r) === -1; })) return true;
-    return namedOn({ owner: owner }, person);
+    return namedOn({ owner: owner }, person) ||
+           (!!custodian && namedOn({ owner: custodian }, person));
   }
   /* Is this role one of the two that speak only for themselves? Asked by the
      employee file and the People page, which must never GRANT either. */
@@ -4276,6 +4411,40 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return (w.topItems || []).some(function (p) {
       return p && (seat(p.owner) || seat(p.custodian));
     });
+  }
+  /* §517 — A DIRECTION'S OWNER SEES THEIR PART ONLY, IF THE OFFICE SAYS SO.
+     Islam, of El Abd: direction owners "see the full plan and can't report",
+     and the Roles & access table should hold "2 visibility buttons one for
+     the full plan and one only for their part". The choice is a GROUP key
+     stored as an ABSENCE (§50.6): absent is the full plan (what every client
+     has today), "part" narrows. It is not a grant state, because grants live
+     in tables with a CHECK on their values and this is a scope beside a
+     grant, not a fourth level of one.
+
+     IT NARROWS WHAT IS DRAWN, NEVER WHAT IS SENT (his "3. agreed"): the plan
+     still reaches the browser whole, so this is a reading convenience and not
+     a fence — the server's reach (`boundedReach`) is unchanged and already
+     keeps their reporting to their own direction.
+
+     ONLY WHERE THE DIRECTION IS ALL THAT BROUGHT THEM: somebody who also
+     reaches the group by another role (a unit owner, a CEO, the office) sees
+     the full plan whatever this says, because a narrowing must never take
+     away what another row of the table gives (§33's most-generous rule). */
+  var DIR_SCOPE = "dirScope";
+  function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
+  function dirPartOnly(w, person) {
+    if (!person || !w || !dirScopePart(w.group)) return false;
+    var rs = personRoles(w, person), holds = false;
+    for (var i = 0; i < rs.length; i++) {
+      if (rs[i].role === "dirowner") { holds = true; continue; }
+      if (!companyAllows(w, rs[i], "group")) continue;
+      if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
+    }
+    return holds;
+  }
+  /* Whether ONE direction is theirs — ownsTopPillar asked of that row. */
+  function ownsDirection(w, person, p) {
+    return !!p && ownsTopPillar(w, person, p.owner || "", p.custodian || "");
   }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
@@ -4825,6 +4994,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     capHolderTarget: capHolderTarget, promotePlan: promotePlan,
     OWNS_EVERY_PLACE: OWNS_EVERY_PLACE, ownsEveryPlace: ownsEveryPlace,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
+    ACCESS_COLS: ACCESS_COLS, ACCESS_ROWS: ACCESS_ROWS,
+    neverOffered: neverOffered,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     SEAT_ROLES: SEAT_ROLES, isSeatRole: isSeatRole,
     seatOutOfPlace: seatOutOfPlace,
@@ -4899,7 +5070,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, dirPartOnly: dirPartOnly, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -10787,6 +10958,16 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
+/* §515.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
+   `progress` (§239: reward stays a year-end judgement), except for a yes/no
+   measure, which stores none — its answer IS its figure, 100 or 0 from the
+   one scorer (§257), and nothing said stays null. Without this a Done measure
+   read "Not reported" on the board while its own page scored it. One reader
+   for the strip, the tally and the group board, or the three disagree. */
+function focusFigure(m){
+  if (!m) return null;
+  return SMPRules.isYesNo(m.target) ? measureScore(m) : m.progress;
+}
 function focusStanding(progress){
   if (progress == null) return { key:"none",  label:"Not reported" };
   if (progress >= CYCLE.rewardAt) return { key:"over", label:"Earning" };
@@ -10900,8 +11081,9 @@ function focusTallyOf(items){
   var vals = [];
   items.forEach(function(x){
     t.total++;
-    t[focusStanding(x.m.progress).key]++;
-    if (x.m.progress != null) vals.push(x.m.progress);
+    var fv = focusFigure(x.m);
+    t[focusStanding(fv).key]++;
+    if (fv != null) vals.push(fv);
   });
   t.mean = avg(vals);
   return t;
@@ -11198,15 +11380,26 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
+/* ── ONE WEIGHT RULE (§515.2, spec 066 P1) ──────────────────────────────
+   This averaged its own way: a blank weight counted as ONE, beside rows
+   weighted 60 and 40, so a function or a capability with one weight left
+   blank was scored by a rule no unit uses — and the same objectives entered on
+   a unit read a different number (§243's rule: a blank is the average of the
+   weights that were set). It is `koScore()` now, the unit's own reader, which
+   also leaves a hidden row out (§233) where this kept it. Nothing moves where
+   every weight is set or none is, which is every row in the worked example. */
 function capKOScore(c){
   /* §437: a function's own objectives, switched off, score nothing. */
   if (c && c.own && !fnKoCounted(c.id)) return null;
-  /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
-  if (!list.length) return null;
-  var tw = 0, sum = 0;
-  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
-  return tw ? Math.round(sum / tw) : null;
+  return koScore((c && c.keyObjectives) || []);
+}
+/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§515.2, P4): it has some
+   that are shown, and they are switched on. Asked by the card that leads and
+   by the division's reading, so the two cannot answer differently (§53.5). */
+function holderHasKOs(c){
+  if (!c) return false;
+  if (c.own && !fnKoCounted(c.id)) return false;
+  return SMPRules.shown(c.keyObjectives || []).length > 0;
 }
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
@@ -11327,8 +11520,22 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
+/* ── ONE EXECUTION (§515.2, spec 066 P2) ──────────────────────────────────
+   A milestone counts once its date has come, exactly as a tactic does
+   (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
+   with the ones not yet due reading nought, so a function's execution was low
+   by construction in the first half and climbed on the calendar rather than on
+   the work — measured on the worked example at June, Finance 49% with every
+   milestone already due completed. The stated cost, agreed: a milestone done
+   early earns nothing until its date arrives, which is what a tactic does.
+   With nothing due yet the figure is NULL, never nought (§35, §276).
+
+   The counts beside it stay whole — "5 of 12 milestones" is still all twelve —
+   and `due` says how many of them the figure is made of, so the card can say
+   why a percentage and a count read differently. `pending` keeps its meaning:
+   a row In progress with no per-cent, due or not (§104.10). */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
@@ -11337,12 +11544,15 @@ function capExec(c){
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
+      if (statusPending(x)) pending++;
+      if (!dueThisCycle(x.finish)) return;
+      due++;
       if (statusPending(x)) return;
       scored++; sum += msReads(x) || 0;
     });
   });
-  return { done: done, wip: wip, todo: todo, total: total,
-           pending: total - scored,
+  return { done: done, wip: wip, todo: todo, total: total, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 /* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§342) ───────────────────
@@ -11361,16 +11571,21 @@ function capExec(c){
    outstanding so the card can say why the figure rose (§106). */
 function fnActionsTally(fk){
   var list = SMPRules.shown(fnActions(fk));
-  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   list.forEach(function(a){
     if (a.status === "done") done++;
     else if (a.status === "wip") wip++;
     else todo++;
+    if (statusPending(a)) pending++;
+    /* §515.2 (P2): an action counts once its date has come, as a milestone
+       does — one meaning of Execution wherever the word is printed. */
+    if (!dueThisCycle(a.due)) return;
+    due++;
     if (statusPending(a)) return;
     scored++; sum += msReads(a) || 0;
   });
-  return { done: done, wip: wip, todo: todo, total: list.length,
-           pending: list.length - scored,
+  return { done: done, wip: wip, todo: todo, total: list.length, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 function fnObjScore(fk){
@@ -12079,7 +12294,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+      pillarOwner: x.pown, pillarCust: x.pcust });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -12915,11 +13130,11 @@ function areaOfTarget(target){
   var t = String(target || "");
   return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
 }
-function mayMarkDoneOn(target, owner){
+function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
-  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner);
+  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner, cust);
 }
 /* Does this viewer report here through bounded roles ALONE — the person the
    control exists for. Anybody unbounded has Submit, which says more than a
@@ -13647,11 +13862,14 @@ function passwordReach(){
   });
 }
 
-/* What carries reward is the office's decision, not a page permission. The
-   group CEO marks it and the SMO can too; nobody else, at any grant. */
+/* What carries reward is the office's decision, not a page permission.
+   §516.3: the Super user marks it and nobody else, at any grant — the group
+   CEO used to, and Islam closed the Reporting cycle column (where this page
+   lives) to everyone but the office knowing it took this with it. The server's
+   focus case says the same. */
 function mayMarkFocus(){
   var rs = personRoleKeys(viewer());
-  return (rs.indexOf("gceo") > -1 || rs.indexOf("super") > -1) && !CYCLE.locked;
+  return rs.indexOf("super") > -1 && !CYCLE.locked;
 }
 
 /* ── Key Objective weights ────────────────────────────────────────────────
@@ -14865,7 +15083,7 @@ function gapMap(target, all, fillable){
     (u.items || []).forEach(function(p, i){
       /* §416: a direction not running this year owes nothing yet. */
       if (!runsNow(p)) return;
-      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, pillarCust: p.custodian, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){
@@ -15445,6 +15663,22 @@ function topWritable(){
   if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
+}
+/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+   (§42) so the page and the server agree about who is narrowed; the filter
+   is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
+   code is its POSITION (pillarCode) and topWritable() hands out the real
+   array, so filtering the array would renumber every direction and write
+   into the wrong one. partFilter(u) is null when nothing is narrowed. */
+function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+function partFilter(u){
+  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  var w = world(), v = viewer();
+  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+}
+function partItems(u){
+  var f = partFilter(u), list = (u && u.items) || [];
+  return f ? list.filter(f) : list;
 }
 /* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§447) ─────────────────
    Islam, of El Abd: *"a one company with multiple directions … all the
@@ -18058,7 +18292,16 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
+/* ONE ROLL-UP (§515.2, spec 066 P3). The group's execution was delivered over
+   planned, each averaged across the units FIRST and then divided — so a unit
+   with a large plan pulled the denominator and the headline could sit beside
+   ten unit cards whose own figures do not average to it. It is the weighted
+   average of the figures the units' own cards print now, through the same
+   weightedOver() the objectives headline already uses, so the group says
+   what its units say. groupExec()/groupPlan() stay: they are still the two
+   halves a unit card and the weighting table explain, and nothing else here
+   reads them as a ratio any more. */
+function groupRatio(){ return weightedOver(scoringUnitKeys(), unitRatio); }
 
 /* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
    performance page that includes the overall performance of the company and
@@ -18118,18 +18361,23 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
+  /* ONE HEADLINE (§515.2, spec 066 P4): a function's headline is its
+     objectives when its plan HAS objectives (shown and switched on) — reading
+     "not yet" until they are reported — and its pillars' or projects' figure
+     when it has none. Before, a pillars function with none read "—" (§437
+     covered only "switched off"), and a projects function whose objectives
+     were not yet reported quietly read its projects instead: two formats, two
+     answers to one question (§53.5). */
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
-    /* §437: with its objectives off the headline is its pillars' own figure. */
     if (!u) return { perf:null, exec:null };
-    var uo = unitObjectives(u);
-    return { perf: uo != null || fnKoCounted(u.ukey) ? uo : unitPillars(u), exec: unitRatio(u) };
+    var has = fnKoCounted("fn:" + fk) && SMPRules.shown(u.keyObjectives || []).length > 0;
+    return { perf: has ? unitObjectives(u) : unitPillars(u), exec: unitRatio(u) };
   }
   if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
   var h = fnHolders(fk)[0];
   if (!h) return { perf:null, exec:null };
-  var ko = capKOScore(h);
-  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
+  return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
 /* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
    The functions take their share first: a weight the office set is used as
@@ -18185,9 +18433,12 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
+/* §515.2 (P3): a division of units alone is the weighted average of its
+   units' own execution figures — the group's rule, over a smaller list. With
+   functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){
   return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : ratioOf(companyExec(ck), companyPlan(ck));
+                                  : weightedOver(companyUnitKeys(ck), unitRatio);
 }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately
@@ -18553,7 +18804,7 @@ var PAGE_INFO = {
     title: "Focus",
     body: [
       ["What a focus measure is",
-       "A measure the CEO has marked as one of the few that carry reward this cycle. It can be a " +
+       "A measure the Super user has marked as one of the few that carry reward this cycle. It can be a " +
        "unit's own Key Objective or a key measure under any direction or capability."],
       ["One rule, not a target per measure",
        "Where reward begins is a property of the scheme, set once for the cycle on Setup and read " +
@@ -18669,7 +18920,7 @@ var PAGE_INFO = {
       ["Two things are rules, not settings, so they are not in the table",
        "The <b>knowledge base</b> is the office's &mdash; the Super user and the SMO team &mdash; " +
        "because it explains how the platform itself is run. And <b>focus measures</b> &mdash; " +
-       "what carries reward &mdash; are marked by the group CEO and the SMO. Each of these is a " +
+       "what carries reward &mdash; are marked by the Super user. Each of these is a " +
        "rule rather than a cell, so neither moves when the table does."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
@@ -19412,7 +19663,7 @@ var RECIPES = [
        "thresholds for your organisation.|The colour and the status word always " +
        "come from the same scale, so they can never disagree." },
   { id: "focus-measure", q: "What is a focus measure?",
-    a: "A focus measure is a measure the CEO has identified as particularly " +
+    a: "A focus measure is a measure the Strategy Office has marked as particularly " +
        "important for the year. It doesn't change how the score is calculated; it " +
        "simply highlights the measures that should receive additional attention." },
   { id: "reward-line", q: "What is the reward line?",
@@ -25184,14 +25435,21 @@ function plus(id, label){
    differently. The empty case keeps its own words: reading "0% delivered
    against 0% planned" under "Not yet measurable" is three false precisions in
    a row. */
-function deliveryLine(ex, pl, whose){
-  if (ex == null || pl == null || !pl)
+/* \u00a7515.2 (spec 066 P3): THE DELIVERED-AGAINST-PLANNED SENTENCE IS GONE, at
+   Islam's word. The headline stopped being delivered over planned and became
+   the weighted average of the units' own execution figures, so a sentence
+   whose two numbers divide to something other than the figure above it would
+   be the card arguing with itself (\u00a7104.8). What replaces it says what the
+   number IS, the way the performance card beside it already does (\u00a7156); the
+   two halves are still one press away in "How this is calculated". The empty
+   case keeps its own words. */
+function execLine(val, whose, n){
+  if (val == null)
     return "No " + L1("tactic") + " " + (whose || "anywhere in the group") +
            " has a plan against it yet, so there is nothing to deliver against.";
-  var r = Math.round(ex / pl * 100);
-  var verdict = r > 100 ? "ahead of plan" : r < 100 ? "behind plan" : "exactly on plan";
-  return "<b>" + ex + "%</b> of the work delivered against <b>" + pl +
-         "%</b> planned \u2014 <b>" + verdict + "</b>.";
+  return (whose ? "The <b>" + n + "</b> " + L("unitword") + " " + whose
+                : "All <b>" + n + "</b> " + L("unitword")) +
+         ", each on its own execution, weighted by size.";
 }
 
 function drillCard(title, val, opts){
@@ -27281,7 +27539,8 @@ function renderCompanyPerformance(coKey){
     '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
     '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
     '<p class="sub">' + L1("tactic") + ' completion under every ' + L1("pillar") + ' in these units, weighted identically ' +
-    'to performance. The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
+    'to performance; the company\u2019s figure is the weighted average of the <b>Of plan</b> column. ' +
+    'The planned line is derived from each ' + L1("tactic") + '\u2019s quarter span, never ' +
     'entered.</p>';
 
   var head = '<div class="scores">' +
@@ -27294,7 +27553,7 @@ function renderCompanyPerformance(coKey){
       modalSub: "Weighted across the units in this company"
     }) +
     drillCard(L("unitword","bu") + " &mdash; execution" + tip(TIP_EXEC()), r, {
-      sub: deliveryLine(ex, pl, "in these units"),
+      sub: execLine(r, "in " + esc(co.name), keys.length),
       drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
       modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
     }) +
@@ -27455,7 +27714,7 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + groupExec() + '%</b></td>' +
     '<td class="num"><b>' + groupPlan() + '%</b></td>' +
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
-    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
+    '<p class="sub">' + L1("tactic") + ' completion under every unit\'s ' + L("pillar") + ', weighted identically to performance. The group\'s figure is the weighted average of the <b>Of plan</b> column. The planned line is derived from each ' + L1("tactic") + '\'s quarter span, never entered.</p>';
 
   var units = unitCards(keys);
 
@@ -27496,7 +27755,11 @@ function renderGroupPerformance(){
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
     var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
-      (ko == null
+      /* §515.2 (P1, P4): "none of its own" is a fact about the PLAN, so it is
+         asked of the plan — a capability whose objectives nobody has reported
+         yet still has them, and its figure reads "not yet" rather than this
+         sentence claiming they do not exist. */
+      (!holderHasKOs(c)
         ? '<p class="sub">No ' + L("keyobj") + ' of its own. This ' + L1("capability") + ' is judged by its ' + L("project") + '.</p>'
         : miniTable(["#",L1("keyobj"),"Direction","Target","Actual","Progress"],
             c.keyObjectives.map(function(m, i){
@@ -27509,7 +27772,7 @@ function renderGroupPerformance(){
                 '<td class="num">' + figShown(m) + '</td>' +
                 '<td class="num final" style="color:' + bandInk(sc) + '">' + pct(sc) + '</td></tr>';
             }).join("")) +
-          '<p class="sub">Weighted across <b>' + c.keyObjectives.length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
+          '<p class="sub">Weighted across <b>' + SMPRules.shown(c.keyObjectives).length + '</b> objectives: <b>' + pct(ko) + '</b>.</p>') +
       miniTable(["#",L1("project"),L("deliverable"),L("outcome"),"Performance"],
         c.projects.map(function(p, i){
           return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(p.name) + '</td>' +
@@ -27688,7 +27951,7 @@ function whereNext(keys){
           /* The sentence has to survive the empty tenant too. Reading
              "Delivered 0% against 0% planned - variance +0" under a card that
              says "Not yet measurable" is three false precisions in a row. */
-          sub: deliveryLine(groupExec(), groupPlan()),
+          sub: execLine(groupRatio(), "", scoringUnitKeys().length),
           drill: execDrill, modalTitle: L("unitword","bu") + " \u2014 execution", modalSub: "Weighted compile of " + L1("tactic") + " delivery, as a share of plan"
         })) +
       '</div>' + (buExists() ? whereNext(UNIT_KEYS) : "")) });
@@ -27730,7 +27993,10 @@ function whereNext(keys){
      while the top layer plans in pillars (§466: a projects company is scored
      by its projects in the headline card). */
   if (topHasPlan() && planOn("group") && topWay() !== "projects") {
-    var dtu = topAsUnit(), ditems = itemsNow(dtu);
+    var dtu = topAsUnit(), dpf = partFilter(dtu), ditems = itemsNow(dtu);
+    /* §517: their own directions only — the code still read off the real
+       position below, so it is the one every other page shows. */
+    if (dpf) ditems = ditems.filter(dpf);
     var dirs = ditems.map(function(p, di){
       var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
       var code = pillarCode(dtu, dtu.items.indexOf(p));
@@ -27754,7 +28020,7 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
@@ -27766,6 +28032,13 @@ function whereNext(keys){
           '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
       TIP_CAP(), viewToggle("caps")) });
 
+  /* §517: a direction owner narrowed to their part reads their directions and
+     nothing else here — the company's headline, its themes and its
+     capabilities are the whole company's figures. */
+  if (dirPartOnly()) {
+    SECS = SECS.filter(function(x){ return x.dir; });
+    if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
+  }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   /* §428: the top layer's own review deck — its SWOT and its pillars — is
      presented from here once it has a plan, through the one menu every
@@ -28005,7 +28278,7 @@ function focusStrip(u){
       '<span class="fstrip-meta">reward begins at ' + CYCLE.rewardAt + '%</span>' +
     '</summary>';
   var rows = items.map(function(x){
-    var st = focusStanding(x.m.progress);
+    var st = focusStanding(focusFigure(x.m));
     return '<tr><td>' + esc(x.m.name) + '</td>' +
       '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
       '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
@@ -28015,7 +28288,7 @@ function focusStrip(u){
          on the band while being short of the reward line, and colouring both
          in one row makes the strip argue with itself. The badge carries the
          meaning this table is about. */
-      '<td class="num final">' + pct(x.m.progress) + '</td>' +
+      '<td class="num final">' + pct(focusFigure(x.m)) + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
@@ -28040,6 +28313,13 @@ function renderUnitPerformance(u){
   var ko = unitObjectives(u);
   var r  = unitRatio(u);
   var pOn = planOn(u);
+  /* §515.2 P4: whether the objectives lead. Everything but a pillars
+     function does; a pillars function does only when its objectives are
+     counted (§437) and it has some to show — fnMemberScores()'s own test,
+     asked of the same view. A plan switched off keeps the objectives card,
+     or the page would draw no card at all. */
+  var koLeads = !/^fn:/.test(u.ukey || "") || !pOn ||
+                (fnKoCounted(u.ukey) && SMPRules.shown(u.keyObjectives || []).length > 0);
   /* §264: the same two questions the pillar card had. The membership comes from
      `scorableKOs()` — koScore()'s own list — so the Highest can never name an
      objective the headline above it left out, and the figure is the SCORE the
@@ -28170,6 +28450,12 @@ function renderUnitPerformance(u){
   return perfActs(presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
+      /* §515.2 P4: A PILLARS FUNCTION WITH NO COUNTED OBJECTIVES IS JUDGED
+         BY ITS PILLARS — fnMemberScores() says so for the division roll-up,
+         so the page leads with the same number or the two disagree about one
+         function. A unit, and a function whose objectives count, are
+         unchanged. */
+      (!koLeads ? '' : (
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span>' +
@@ -28179,14 +28465,14 @@ function renderUnitPerformance(u){
           '<div><em>Highest</em><b style="color:' + bandInk(koHi) + '">' +
             pct(koHi) + '</b></div>' +
           '<div><em>Lowest</em><b style="color:' + bandInk(koLo) + '">' +
-            pct(koLo) + '</b></div></div></div>' +
+            pct(koLo) + '</b></div></div></div>')) +
       /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
          on, the pillars are how it means to get there, and execution is
          whether the work happened. Read left to right that is the argument. */
       /* §422: a plan switched off scores nothing, so its two cards go and
          the objectives stand alone. */
       (!pOn ? '' : (
-      '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
+      '<div class="card tight' + (koLeads ? '' : ' primary') + '"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
         '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:' + bandInk(pl) + '">' + pctBig(pl) + '</span>' +
           '<button class="drill" data-modal="' + plId + '">See the ' +
@@ -31263,7 +31549,7 @@ function renderFocusBoard(){
   var body = live.map(function(sub, ui){
     var u = UNITS[sub.key], items = focusIn(sub.key);
     return items.map(function(x, i){
-      var st = focusStanding(x.m.progress);
+      var st = focusStanding(focusFigure(x.m));
       totals[st.key]++; totals.total++;
       return '<tr class="' + (ui % 2 ? "alt " : "") + (i === 0 ? "unitstart" : "") + '">' +
         (i === 0 ? '<td class="unitcell" rowspan="' + items.length + '"><b>' + esc(sub.name) + '</b>' +
@@ -31277,7 +31563,7 @@ function renderFocusBoard(){
         '<td class="cc"><span class="why" style="margin:0">' + esc(x.src) + '</span></td>' +
         '<td class="num">' + (x.m.target ? esc(x.m.target) : '<span class="missing">Missing</span>') + '</td>' +
         '<td class="num">' + esc(x.m.actual) + '</td>' +
-        '<td class="num final">' + pct(x.m.progress) + '</td>' +
+        '<td class="num final">' + pct(focusFigure(x.m)) + '</td>' +
         '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
     }).join("");
   }).join("");
@@ -31775,7 +32061,7 @@ function renderReport(u){
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = u.items.filter(runsNow)[0];
+    var firstNow = partItems(u).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
   var pillars;
@@ -31792,7 +32078,9 @@ function renderReport(u){
        ordinary sub-line would have said nothing in the state people meet. */
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
+    var rpf = partFilter(u);          /* §517: skipped, never renumbered */
     var railRows = u.items.map(function(p, pi){
+      if (rpf && !rpf(p)) return "";
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -31817,11 +32105,11 @@ function renderReport(u){
                 : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
+    var rail = '<div class="rail">' + railHead(L("pillar","bu"), partItems(u).length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(u.items)
+    pillars = railWorthIt(partItems(u))
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -31836,7 +32124,7 @@ function renderReport(u){
                             reportParked(u.ukey), submitWhyShort(u.ukey),
     !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
       var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner,
+      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
                done:t.done, total:t.total };
     }), L("pillar","bu")));
   var bar = "";
@@ -31885,7 +32173,8 @@ function renderReport(u){
        objectives are the group's Foundation, not figures entered here.
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
-    (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    /* §517: and a direction owner narrowed to their part is not shown them. */
+    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -32000,10 +32289,11 @@ function railShow(k, id){ if (id != null) RAIL_SHOWN[k] = id; return id; }
    settled — and never `boundedReach()`, whose contributor branch reaches a
    project through its stakeholders: being named on somebody else's project
    does not make it the one you came to open. */
-function railMine(target, list, ownerOf) {
+function railMine(target, list, ownerOf, custOf) {
   if (!list.length || !boundedHere(target)) return null;
   for (var i = 0; i < list.length; i++)
-    if (mayMarkDoneOn(target, ownerOf(list[i]))) return list[i];
+    if (mayMarkDoneOn(target, ownerOf(list[i]), custOf ? custOf(list[i]) : null))
+      return list[i];
   return null;
 }
 function railPick(c){
@@ -32550,19 +32840,29 @@ function overrunNote(p){
    optional: where a capability has none the card is absent, not zero. */
 function capScoreCards(c){
   var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
+  /* ONE HEADLINE (§515.2, spec 066 P4): the objectives lead whenever the plan
+     HAS objectives (shown and switched on) — reading "not yet" until they are
+     reported — never only once one has been. Before, a capability whose
+     objectives nobody had reported yet drew its projects card as primary,
+     and the division above it read that same number as its headline (§53.5:
+     the card and the roll-up ask fnMemberScores' own question now). The
+     counts are the SHOWN rows, because those are the rows the score is made
+     of (§233, §264). */
+  var kos = SMPRules.shown(c.keyObjectives || []);
+  var lead = ko != null || holderHasKOs(c);
   var cards = [];
-  if (ko != null) {
+  if (lead) {
     cards.push('<div class="card tight primary-card">' +
       '<div class="score-h"><h4>' + L("keyobj") + ' <span class="rank">primary</span></h4>' +
         '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ko) + '">' + pctBig(ko) + '</span></div>' +
-      '<div class="minirow"><div><em>Objectives</em><b>' + c.keyObjectives.length + '</b></div>' +
-        '<div><em>Weighted</em><b>' + c.keyObjectives.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
-        '<div><em>Reported</em><b>' + c.keyObjectives.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
-          ' / ' + c.keyObjectives.length + '</b></div></div></div>');
+      '<div class="minirow"><div><em>Objectives</em><b>' + kos.length + '</b></div>' +
+        '<div><em>Weighted</em><b>' + kos.map(function(m){ return m.weight == null ? "\u2014" : m.weight; }).join(" / ") + '</b></div>' +
+        '<div><em>Reported</em><b>' + kos.filter(function(m){ return m.actual != null && m.actual !== ""; }).length +
+          ' / ' + kos.length + '</b></div></div></div>');
   }
-  cards.push('<div class="card tight' + (ko == null ? " primary-card" : "") + '">' +
-    '<div class="score-h"><h4>' + L1("project") + ' performance' + (ko == null ? ' <span class="rank">primary</span>' : '') + '</h4>' +
+  cards.push('<div class="card tight' + (lead ? "" : " primary-card") + '">' +
+    '<div class="score-h"><h4>' + L1("project") + ' performance' + (lead ? '' : ' <span class="rank">primary</span>') + '</h4>' +
       '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(perf) + '">' + pctBig(perf) + '</span></div>' +
     '<div class="minirow"><div><em>' + L("deliverable") + '</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
@@ -32579,7 +32879,11 @@ function capScoreCards(c){
     '<div class="score-h"><h4>Execution</h4>' +
       '<span class="pill ' + band(ce.pct) + '">' + bandWord(ce.pct) + '</span></div>' +
     '<div class="headline"><span class="big" style="color:' + bandInk(ce.pct) + '">' + pctBig(ce.pct) + '</span>' +
+      /* §515.2 (P2): the figure is built on the milestones whose date has
+         come, as a tactic's is — so the line says how many that is when it is
+         not all of them, or a 100% over "3 of 12" reads as a mistake. */
       '<span class="ofplan">' + ce.done + ' of ' + ce.total + ' milestones' +
+        (ce.due < ce.total ? ' &middot; ' + ce.due + ' due so far' : '') +
         (ce.pending ? ' &middot; <span class="missing">' + ce.pending +
           ' not counted yet</span>' : '') + '</span></div>' +
     '<div class="minirow"><div><em>Completed</em><b>' + ce.done + '</b></div>' +
@@ -33279,6 +33583,7 @@ function fnObjCards(fk){
         '<span class="pill ' + band(ac.pct) + '">' + bandWord(ac.pct) + '</span></div>' +
       '<div class="headline"><span class="big" style="color:' + bandInk(ac.pct) + '">' + pctBig(ac.pct) + '</span>' +
         '<span class="ofplan">' + ac.done + ' of ' + ac.total + ' done' +
+          (ac.due < ac.total ? ' &middot; ' + ac.due + ' due so far' : '') +
           (ac.pending ? ' &middot; <span class="missing">' + ac.pending +
             ' not counted yet</span>' : '') + '</span></div>' +
       '<div class="minirow"><div><em>' + L("action") + '</em><b>' + ac.total + '</b></div>' +
@@ -33770,13 +34075,14 @@ function unitRailKey(u){ return "unit:" + u.ukey; }
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
+  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
   /* §301.4 on the other side of the switch: a pillar owner's own pillar
      opens, exactly as a project owner's project does (§53.5). */
-  var mine = railMine(u.ukey, list, function(p){ return p.owner; });
+  var mine = railMine(u.ukey, list, function(p){ return p.owner; },
+                     function(p){ return p.custodian; });
   var pick = mine || list[0];
   railShow(k, pillarRailId(pick));
   return pick;
@@ -33790,7 +34096,12 @@ function unitRailFor(u, sel){
      part of how it is going — and Progress and Performance need nothing to
      follow it, because the order IS the array. */
   var on = arranging("unit", u.ukey);
+  /* §517: a direction owner narrowed to their part sees only their rows —
+     skipped here rather than filtered out of the list, so `i` stays the
+     pillar's real position and its code does not change. */
+  var pf = partFilter(u);
   var rows = list.map(function(it, i){
+    if (pf && !pf(it)) return "";
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
        plan arrived with — "01" for Mobile, because its pillars predate the
@@ -33855,7 +34166,7 @@ function unitRailFor(u, sel){
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), list.length) +
+    railHead(L("pillar","bu"), pf ? list.filter(pf).length : list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -33943,7 +34254,7 @@ function doneCtl(target, id, owner, code, cust){
   var seated = String(target) === "group"
     ? !SMPRules.mayReportTop(world(), viewer()) &&
       SMPRules.ownsTopPillar(world(), viewer(), owner || "", cust || "")
-    : boundedHere(target) && mayMarkDoneOn(target, owner);
+    : boundedHere(target) && mayMarkDoneOn(target, owner, cust);
   /* ── SEEING A STATE IS NOT SETTING IT (§309, §256's own pattern) ──────
      §301 drew this control for anybody `mayMarkDone` allows, which is every
      unbounded role as well — right while it was a SIGNAL, and wrong the
@@ -33996,11 +34307,11 @@ function doneCtl(target, id, owner, code, cust){
    one, a count where they own several, and the plain fact where they own none
    but still report rows that name them.
 
-   `list` is `[{id, code, owner, done, total}]`, built by each caller from the
+   `list` is `[{id, code, owner, cust?, done, total}]`, built by each caller from the
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner); });
+  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
   var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
   var tip = 'You report your own rows. The ' + submits +
             ' custodian submits the report.';
@@ -34222,7 +34533,7 @@ function unitPlanBody(it, u, railed, bare){
      the rows of the pillar whose Owner names them; a contributor reaches the
      rows that name them. Same shape §147.7 hands the authoriser, so the two
      sides answer with one voice. */
-  var pctx = function(row){ return { pillarOwner: it.owner, row: row }; };
+  var pctx = function(row){ return { pillarOwner: it.owner, pillarCust: it.custodian, row: row }; };
   /* §384: THE TACTIC'S OWN OWNER IS ITS OWN HANDLE. `pctx` synthesises
      nothing here — `row` is the real object — so reading `ctx.row.owner`
      would have worked today and stopped working the day a key measure gains
@@ -34599,15 +34910,17 @@ function unitPlanBody(it, u, railed, bare){
             ownerSel("plan", it.owner, function(v){ it.owner = v; }) +
           '</div></div>' +
           /* §469: a company direction also has a CUSTODIAN, picked from the
-             register the way the owner is. The top layer's alone, because the
-             rule that lets the seat report (`ownsTopPillar`) reads only the
-             company's directions. An emptied seat DELETES its key (§50.6):
-             nobody minted it, so its absence is the default. */
-          (u.ukey === "group"
-            ? '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
-                ownerSel("plan", it.custodian, function(v){
-                  if (v) it.custodian = v; else delete it.custodian; }) +
-              '</div></div>' : '') +
+             register the way the owner is — AND SINCE SPEC 066 STAGE 2 EVERY
+             PILLAR DOES (Islam signed off "the Custodian seat on every
+             pillar"). The seat reaches what the owner reaches, through the
+             Part owner row on Roles & access (`personRoles` derives `plowner`
+             from either seat, `boundedReach` reads `pillarCust`), never the
+             whole unit. An emptied seat DELETES its key (§50.6): nobody minted
+             it, so its absence is the default. */
+          '<div class="pfrow"><em>Custodian</em><div class="pfval">' +
+            ownerSel("plan", it.custodian, function(v){
+              if (v) it.custodian = v; else delete it.custodian; }) +
+          '</div></div>' +
           '<div class="pfrow"><em>Kind</em><div class="pfval">' +
             selectOr("plan", it.kind || "", kindChoices(), "kindsel",
                      function(v){ it.kind = v; }) +
@@ -35269,7 +35582,9 @@ function unitPerfRail(u){
   var sel = unitRailPick(u);
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
+  var pf = partFilter(u);            /* §517: skipped, never renumbered */
   var rows = u.items.map(function(it, i){
+    if (pf && !pf(it)) return "";
     /* §416: a direction that does not run this year is not scored, so its
        rail row reads a dash and says when it runs rather than a figure. */
     var now = runsNow(it);
@@ -35290,7 +35605,7 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), u.items.length) +
+    railHead(L("pillar","bu"), partItems(u).length) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -35299,9 +35614,11 @@ function unitPerfRail(u){
        items. A handle that renders is a feature that looks built (§51.11). The
        CONTAINER says what it holds now, so the two cannot disagree. */
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
-    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
-      pct(unitRatio(u)) + '</div></div>';
-  return railWorthIt(u.items)
+    /* §517: the footer is the whole company's reading, so a direction owner
+       narrowed to their part is not shown it. */
+    (pf ? '' : '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
+      pct(unitRatio(u)) + '</div>') + '</div>';
+  return railWorthIt(partItems(u))
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
     : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }
@@ -35506,6 +35823,18 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+/* §517: THE HALF EYE — "may read their part only". The eye with its right
+   half and its pupil's right half dashed: the same mark, seeing part of the
+   thing. Drawn beside the eye in the Part owner row's Group / Company cell
+   and in the legend, from this one string. */
+var ICON_HALFEYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M10 5C4.8 5 1.7 10 1.7 10S4.8 15 10 15" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linejoin="round"/>' +
+  '<path d="M10 5c5.2 0 8.3 5 8.3 5s-3.1 5-8.3 5" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-dasharray="1.6 1.9" stroke-linejoin="round"/>' +
+  '<path d="M10 7.7a2.3 2.3 0 0 0 0 4.6z" fill="currentColor"/>' +
+  '<path d="M10 7.7a2.3 2.3 0 0 1 0 4.6" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.3" stroke-dasharray="1.2 1.4"/></svg>';
 /* §145: the fill-the-gaps mark — a pen over a dashed line, writing into the
    blank. The same pen, lifted, with the line it writes on. */
 var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
@@ -35527,8 +35856,22 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
      ACCESS_DEFAULTS'), the states it admits, and the attribute the press
      writes through (`data-mac`, whose handler deletes the key on the default,
      §50.6). Absent, the cell is Strategy's exactly as it was. */
+  /* §516: A DRAWN CELL OVER SEVERAL STORED ONES. `opt.target` replaces the
+     `role|area` the press names (the merged table hands every pair under the
+     cell, written through `data-acm`), and `opt.mixed` says those pairs do
+     not agree — so nothing is lit, the tray is marked, and any press sets
+     them all to one answer. `opt.title` is the cell's own hover, which is
+     where a mixed cell names the pairs and what each holds. */
   opt = opt || {};
-  var v = opt.value != null ? opt.value : grantFor(roleKey, areaKey);
+  var v = opt.mixed ? null : opt.value != null ? opt.value : grantFor(roleKey, areaKey);
+  /* Every press in Strategy's own table goes through ONE writer now (§516,
+     `data-acm`, "role:area,…|state"); a module's cell names its own
+     (`data-mac`, "role|area|state|shipped"). A caller naming neither gets
+     the merged writer for its one pair, so no cell can draw a press that
+     nothing listens to — the old single-cell `data-ac` writer is gone (§24). */
+  var attr = opt.attr || "data-acm";
+  var tgt = opt.target || (attr === "data-acm" ? roleKey + ':' + areaKey : roleKey + '|' + areaKey);
+  var tdOpen = '<td class="ac"' + (opt.title ? ' title="' + esc(opt.title) + '"' : '') + '>';
   /* A cell that cannot come up is drawn as a dash rather than as "none". The
      group CEO owns every unit, so "other business units" is an empty set for
      them: saying "none" there would read as a denial of something, when there
@@ -35538,7 +35881,8 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       '">&mdash;</span></td>';
   }
   if (!editable) {
-    return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
+    if (opt.mixed) return tdOpen + '<span class="st st-mixed">differs</span></td>';
+    return tdOpen + '<span class="st st-' + v + '">' + v + '</span></td>';
   }
   /* TWO buttons, not three. Islam: "no need for the none box that's the
      default no need to grow the matrix" — and he is right that none is not a
@@ -35557,8 +35901,16 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
                fill: "May fill what’s empty — Missing values only, and they count straight away",
                edit: "May read and change" };
   var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
+  /* §517: THE HALF EYE is a fourth answer in ONE cell — the Part owner row's
+     Group / Company cell — and it is not a grant: the pairs keep reading
+     "view", and the half eye narrows what is DRAWN for a direction owner
+     (`GROUP.dirScope`, stored as an absence). While it is lit the eye shows
+     unlit, because the two are one choice to the person reading the table:
+     the whole plan, or their part. Pressing the eye or the pen turns it off
+     (`data-dirclear`), so the three stay one choice to the person pressing. */
+  var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
   var opts = states.map(function(o){
-    var on = o === v;
+    var on = o === v && !(halfOn && o === "view");
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
        `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
        so the lit eye was given 22px of padding inside a 24px box and its icon
@@ -35567,16 +35919,26 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
        of JS: a one-word modifier will eventually collide with a one-word
        component, and the collision is silent because both rules are valid. */
     return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" ' +
-      (opt.attr || "data-ac") + '="' + roleKey + '|' + areaKey + '|' + (on ? "none" : o) +
+      attr + '="' + tgt + '|' + (on ? "none" : o) +
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
-      (on ? "Turn off — leaves no access" : WORD[o]) +
-      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
+      (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
+      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '"' +
+      (halfOn ? ' data-dirclear="1"' : '') + '>' +
       ICON[o] + '</button>';
   }).join("");
+  /* Placed straight after the FIRST button, which is the eye (`states` always
+     opens with "view"), so the half eye sits beside the thing it narrows. */
+  if (half) opts = opts.replace(/^([\s\S]*?<\/button>)/, function(eye){
+    return eye + '<button type="button" class="stbtn' + (halfOn ? " on st-view" : "") + '" ' +
+      'data-dirscope="' + (halfOn ? "full" : "part") + '" title="' +
+      (halfOn ? "Show them the full plan again" : "May read their part only — a direction owner sees their own directions and the Foundation") +
+      '" aria-label="' + (halfOn ? "turn off their part only" : "their part only") +
+      '" aria-pressed="' + halfOn + '">' + ICON_HALFEYE + '</button>';
+  });
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
      which is the one thing it must never be mistaken for. */
-  return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
+  return tdOpen + '<span class="stset' + (opt.mixed ? " mixed" : v === "none" ? " off" : "") + '">' +
     opts + '</span></td>';
 }
 
@@ -35600,16 +35962,32 @@ function matrixRows(){
    paid for by exactly this family, a name resolving to something other
    than the thing its caller meant, silently and rendering perfectly. A
    third matrix added inside renderPeople() would have got the wrong one. */
+/* §516.1: A ROW NAMED IN THE CLIENT'S OWN WORDS. The two CEO rows carry
+   `word`/`suffix` — the word for the top plus " CEO", the word for the second
+   layer plus " head" — because the rule module that lists them holds no
+   tenant vocabulary; every other row keeps the name it was given. One reader,
+   so the role cell and the "differs" line cannot name one row two ways. */
+function accessRowName(r){
+  if (!r.word) return r.name;
+  var w = String(labelWord(r.word, "group") || "").trim();
+  return w ? w + r.suffix : r.name;
+}
 function matrixRoleCell(r){
+  /* §516: a merged row counts everybody holding ANY of the roles under it,
+     once each — a person who is both a BU owner and a function head is one
+     Owner, not two. */
+  var of = r.of || [r.key];
   var n = r.floor
     ? PEOPLE.filter(function(p){
         return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
-    : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+    : PEOPLE.filter(function(p){
+        var ks = personRoleKeys(p);
+        return of.some(function(k){ return ks.indexOf(k) > -1; }); }).length;
   /* Two lines, never more. The role's description is a sentence, and a
      sentence in a 19% column wraps to eight lines and makes every row of a
      49-cell table a hundred pixels tall — the exact fault this page was
      rebuilt to remove. It is on hover instead. */
-  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+  return '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(accessRowName(r)) + '</b>' +
     '<span class="why">' +
     (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
     '</span></td>';
@@ -35687,6 +36065,122 @@ function copilotArea(){
   if (!raw) return null;
   try { var a = JSON.parse(raw); return a && a.key ? a : null; } catch (e) { return null; }
 }
+/* WHETHER AN AREA CAN COME UP AT ALL FOR A ROLE (§37, §117, §174).
+   Lifted out of renderAccess (§516) so the merged table's cell and a check
+   can ask it: a drawn cell is the pairs under it that CAN come up, and a
+   pair that cannot is left out of what the cell reads and what its press
+   writes. Only the own/other pair ever collapses, and only upwards:
+   somebody who owns everything has no "other", and somebody who owns no
+   unit has no "own". Returning a REASON rather than a boolean, because the
+   cell shows it on hover. */
+function accessNA(roleKey, areaKey){
+  /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
+     carried its own copy of "super or gceo", and the copy is why the SMO
+     team's row was wrong in both directions at once: `roleOwns()` did not
+     count them as owning anything, and this did not mark their other
+     columns either, so four cells did nothing and nobody could see it. */
+  /* §516.1: a rule, never a cell — Setup is not offered to either CEO
+     (Islam: "never offered"), so the cell is a dash with the reason on it.
+     §516.2 widened the rule to every row but the office, and this reason
+     moved with it untouched, because it was always the office's sentence. */
+  /* §516.3: the Reporting cycle joined it, with its own sentence, because the
+     cell says which column it is closing. */
+  if (SMPRules.neverOffered(roleKey, areaKey)) {
+    return areaKey === "a_cycle"
+      ? "Only the Super user and the SMO team open the Reporting cycle."
+      : "Only the Super user and the SMO team open Setup.";
+  }
+  if (SMPRules.ownsEveryPlace(roleKey) &&
+      (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
+    return "Every unit and function is theirs, so there is no “other”.";
+  }
+  /* The split halves collapse exactly as their whole did (§117): no unit
+     means neither half of the unit pair can come up. */
+  if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+    return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
+      " holds no " + L1("unitword") + ".";
+  }
+  /* §505: a direction owner is held at the group alone, never at a unit or
+     a function, so neither own pair can ever be theirs. */
+  if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
+    return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
+  }
+  if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    return "A company CEO holds no " + L1("fnword") + ".";
+  }
+  /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
+     Islam: *"a project owner has options to edit or fill in a business
+     unit. Business units have no project owners, they have only pillar
+     owners."* Correct, and it is the derivation that says so rather than a
+     convention: `personRoles()` mints `powner` only from
+     `capabilities[].projects`, and a capability belongs to a FUNCTION
+     (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
+     unit can never be the one this person holds.
+
+     The OTHER columns stay, which is the same reading `fnhead` has had
+     since §117: a project owner holds no unit, so every unit is "other" to
+     them, and that column is how a tenant would let them read one.
+
+     The defaults were already `none` here, so nothing anybody has is
+     changing — what goes is being OFFERED a choice with nothing behind it.
+     An option that cannot do anything is worse than an absent one: it reads
+     as a decision somebody forgot to make. */
+  /* §405 REVERSES THIS ONE: a business unit may now plan in projects, and
+     `personRoles()` mints `powner` at the unit for one that does, so the
+     own-unit columns can be theirs — offered exactly as the own-function
+     ones are, and shipped at none so nobody's access moves. */
+  /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
+     and `roleWheres()` offers only units, so "own supporting function" can
+     never be theirs either — `fnhead`'s exclusion above with the sides
+     swapped, missed when that one was written. */
+  if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    return "A " + L1("unitword") + " owner holds no " + L1("fnword") + ".";
+  }
+  /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
+     ("same for pillar owner in the function") and the derivation disagrees:
+     `personRoles()` mints `plowner` from a unit's `items` AND from a
+     function whose `format` is "pillars" (§59) — a supporting function that
+     plans in pillars has pillars, and its pillar owners are derived by the
+     same line as a unit's. Removing that cell would close a real
+     configuration this tenant already has. Left, and said out loud rather
+     than quietly obeyed. */
+  return null;
+}
+
+/* ── ONE DRAWN CELL OVER THE STORED ONES UNDER IT (§516) ──────────────
+   Spec 066 stage 2. The rows and columns are SMPRules.ACCESS_ROWS and
+   ACCESS_COLS, named once in the shared module; a cell is every
+   (role, area) pair under it that can come up, and it reads as one answer
+   only when they all agree. When they do not, it says so — nothing is lit,
+   the tray is marked, the hover names each pair and what it holds — and a
+   press sets them all to the state pressed. Islam's rule: nothing is merged
+   by guessing. */
+var ACC_WORD = { none: "no access", view: "may read",
+                 fill: "may fill what’s empty", edit: "may read and change" };
+function accessRoleName(k){
+  if (k === SMPRules.NO_ROLE) return "Everyone else";
+  var r = ROLES.filter(function(x){ return x.key === k; })[0];
+  return r ? r.name : k;
+}
+function accessAreaLabel(k){
+  var a = AREAS.filter(function(x){ return x.key === k; })[0];
+  return a ? a.label : k;
+}
+function accessMerged(row, col){
+  var pairs = [], why = null, vals = [];
+  row.of.forEach(function(rk){
+    col.areas.forEach(function(ak){
+      var na = accessNA(rk, ak);
+      if (na) { why = why || na; return; }
+      var v = grantFor(rk, ak);
+      pairs.push({ role: rk, area: ak, v: v });
+      if (vals.indexOf(v) < 0) vals.push(v);
+    });
+  });
+  return { pairs: pairs, why: why,
+           value: vals.length === 1 ? vals[0] : null, mixed: vals.length > 1 };
+}
+
 function renderAccess(){
   /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
      A grant cannot express this: the SMO team holds `a_setup` at edit, which
@@ -35696,107 +36190,38 @@ function renderAccess(){
      everyone may do is part of running the office, and §37's rules are shown
      to everyone who can open the page. */
   var editable = grant("c_access") === "edit" && mayEditAccess();
-
-  /* Whether an area can come up at all for a role. Only the own/other pair
-     ever collapses, and only upwards: somebody who owns everything has no
-     "other", and somebody who owns no unit has no "own". Returning a REASON
-     rather than a boolean, because the cell shows it on hover. */
-  function notApplicable(roleKey, areaKey){
-    /* ASKED OF THE SHARED RULE, NOT OF A LIST REPEATED HERE (§175). This
-       carried its own copy of "super or gceo", and the copy is why the SMO
-       team's row was wrong in both directions at once: `roleOwns()` did not
-       count them as owning anything, and this did not mark their other
-       columns either, so four cells did nothing and nobody could see it. */
-    if (SMPRules.ownsEveryPlace(roleKey) &&
-        (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
-      return "Every unit and function is theirs, so there is no “other”.";
-    }
-    /* The split halves collapse exactly as their whole did (§117): no unit
-       means neither half of the unit pair can come up. */
-    if ((roleKey === "fnhead" || roleKey === "capowner") && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
-      return (roleKey === "fnhead" ? "A function head" : "A " + L1("capability") + " owner") +
-        " holds no " + L1("unitword") + ".";
-    }
-    /* §505: a direction owner is held at the group alone, never at a unit or
-       a function, so neither own pair can ever be theirs. */
-    if (roleKey === "dirowner" && /^a_(unit|fn)_own/.test(areaKey)) {
-      return "A direction owner holds no " + L1("unitword") + " and no " + L1("fnword") + ".";
-    }
-    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A company CEO holds no " + L1("fnword") + ".";
-    }
-    /* ── TWO MORE THAT COULD NEVER COME UP (§174) ─────────────────────
-       Islam: *"a project owner has options to edit or fill in a business
-       unit. Business units have no project owners, they have only pillar
-       owners."* Correct, and it is the derivation that says so rather than a
-       convention: `personRoles()` mints `powner` only from
-       `capabilities[].projects`, and a capability belongs to a FUNCTION
-       (`c.fn`) — so the role is only ever held at `fn:<key>` and a business
-       unit can never be the one this person holds.
-
-       The OTHER columns stay, which is the same reading `fnhead` has had
-       since §117: a project owner holds no unit, so every unit is "other" to
-       them, and that column is how a tenant would let them read one.
-
-       The defaults were already `none` here, so nothing anybody has is
-       changing — what goes is being OFFERED a choice with nothing behind it.
-       An option that cannot do anything is worse than an absent one: it reads
-       as a decision somebody forgot to make. */
-    /* §405 REVERSES THIS ONE: a business unit may now plan in projects, and
-       `personRoles()` mints `powner` at the unit for one that does, so the
-       own-unit columns can be theirs — offered exactly as the own-function
-       ones are, and shipped at none so nobody's access moves. */
-    /* AND THE MIRROR, WHICH THE SAME LOOK FOUND: a BU owner's scope is a unit
-       and `roleWheres()` offers only units, so "own supporting function" can
-       never be theirs either — `fnhead`'s exclusion above with the sides
-       swapped, missed when that one was written. */
-    if (roleKey === "owner" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
-      return "A " + L1("unitword") + " owner holds no " + L1("fnword") + ".";
-    }
-    /* DELIBERATELY NOT plowner × own function. Islam expected the mirror
-       ("same for pillar owner in the function") and the derivation disagrees:
-       `personRoles()` mints `plowner` from a unit's `items` AND from a
-       function whose `format` is "pillars" (§59) — a supporting function that
-       plans in pillars has pillars, and its pillar owners are derived by the
-       same line as a unit's. Removing that cell would close a real
-       configuration this tenant already has. Left, and said out loud rather
-       than quietly obeyed. */
-    return null;
-  }
+  /* §516.1: the second layer's row exists only where the client HAS a
+     second layer — Islam: "a client with no second layer has no second layer
+     row". Asked of midExists(), the one answer the set-up flow and the
+     Structure step already ask (§53.5). */
+  var COLS = SMPRules.ACCESS_COLS, ROWS = SMPRules.ACCESS_ROWS.filter(function(r){
+    return !r.mid || midExists(); });
 
   /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
      (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists — "Open, chase and
-     close · Import · Archived plans · Focus measures" — and seven of them
-     stacked under seven labels made the HEAD of a 49-cell table taller than
-     its body. The same answer the role column already reached in §37: the
-     sentence is on hover, and the column keeps its name. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117) ──────
-     The own pair split into Strategy | Reporting halves, and the pair's name
-     is written ONCE above them rather than twice into them. Built off the
-     `pair`/`col` fields the AREAS entries carry — the header is derived from
-     the same list the cells walk, so a column cannot appear in one and not
-     the other. Entries without a pair span both rows. Consecutive same-pair
-     entries group; the AREAS order is the column order, as it always was. */
+     make it appear on hovering"). The notes are lists, and stacked under the
+     labels they made the HEAD of the table taller than its body. */
+  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117, §516) ──
+     Plan and Reporting are two answers about the same box, so the box's name
+     is written ONCE above them. Built off the `pair`/`col` fields the columns
+     carry — the header is derived from the same list the cells walk, so a
+     column cannot appear in one and not the other. */
   var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
   var hi = 0;
-  while (hi < AREAS.length) {
-    var ha = AREAS[hi];
-    if (!ha.pair) {
-      /* THE SHORT WORD IN THE COLUMN, THE FULL ONE ON THE HOVER (§174), so
-         nothing is lost by abbreviating — the heading says "Other Func." and
-         hovering it says which functions and what is in the column. */
+  while (hi < COLS.length) {
+    var hc = COLS[hi];
+    if (!hc.pair) {
       headTop += '<th class="ac" rowspan="2" title="' +
-        esc(ha.label + " — " + ha.note) + '">' + esc(ha.short || ha.label) + '</th>';
+        esc(hc.label + " — " + hc.note) + '">' + esc(hc.label) + '</th>';
       hi++;
       continue;
     }
     var span = 0;
-    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(ha.pair) +
-      '">' + esc(ha.short || ha.pair) + '</th>';
+    while (hi + span < COLS.length && COLS[hi + span].pair === hc.pair) span++;
+    headTop += '<th class="ac acpair" colspan="' + span + '" title="' + esc(hc.pair) +
+      '">' + esc(hc.pair) + '</th>';
     for (var hj = 0; hj < span; hj++) {
-      var hb = AREAS[hi + hj];
+      var hb = COLS[hi + hj];
       headSub += '<th class="ac achalf" title="' + esc(hb.label + " — " + hb.note) +
         '">' + esc(hb.col) + '</th>';
     }
@@ -35811,43 +36236,68 @@ function renderAccess(){
      the module cell's own writer (§359.5: the default is an ABSENCE, edit);
      every other row is a dash by RULE — "office only for now" — because the
      api refuses a client's own person whatever the map holds, and a toggle
-     that changes nothing is decoration (§42). */
+     that changes nothing is decoration (§42). Both office rows are a single
+     role each on the merged table (§516), so the cell names that role. */
   var COPA = copilotArea();
   if (COPA) headTop += '<th class="ac" rowspan="2" title="' + esc(COPA.label + " \u2014 " + COPA.note) + '">' + esc(COPA.label) + '</th>';
   var head = headTop + "</tr>" + headSub + "</tr>";
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
-     Employee stopped being one: nobody grants it, the × could never take it
-     off, and it was drawn as a chip beside Business unit owner claiming
-     somebody held something they did not. What it decided is still a real
-     question — what somebody on the register with NO role may open — so it is
-     still a row here, labelled as the state it is.
-
-     It has to stay editable. A client who wants people with no role to see
-     nothing sets this row to none and can see that they have; a floor nobody
-     can reach is a rule hiding as a default. */
-  var MATRIX_ROWS = matrixRows();
-
-  var body = MATRIX_ROWS.map(function(r){
+     Employee stopped being one: nobody grants it, and it was drawn as a chip
+     claiming somebody held something they did not. What it decided is still
+     a real question — what somebody on the register with NO role may open —
+     so it is still a row here, labelled as the state it is, and editable: a
+     client who wants people with no role to see nothing sets it to none and
+     can see that they have. */
+  var differ = [];
+  var body = ROWS.map(function(r){
     return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' + matrixRoleCell(r) +
-      AREAS.map(function(a){
-        return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
+      COLS.map(function(c){
+        var m = accessMerged(r, c);
+        if (!m.pairs.length) return stateCell(r.of[0], c.areas[0], editable, m.why || "Cannot come up for this role.");
+        var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
+        var opt = { attr: "data-acm", target: target, value: m.value };
+        if (c.key === "plan") opt.states = ["view", "fill", "edit"];
+        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
+        if (m.mixed) {
+          differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
+          opt.mixed = true;
+          opt.title = "These differ underneath: " + m.pairs.map(function(p){
+            return accessRoleName(p.role) + " in " + accessAreaLabel(p.area).toLowerCase().replace(/^own /, "own ") +
+              " — " + ACC_WORD[p.v];
+          }).join("; ") + "." + (editable ? " Press a state to give them all that one." : "");
+        }
+        return stateCell(r.of[0], c.areas[0], editable, null, opt);
       }).join("") +
-      (COPA ? (SMPRules.isOfficeRole(r.key)
-        ? stateCell(r.key, COPA.key, editable, null, {
-            value: moduleGrantFor(r.key, COPA), states: ["view", "edit"],
+      (COPA ? (r.of.length === 1 && SMPRules.isOfficeRole(r.of[0])
+        ? stateCell(r.of[0], COPA.key, editable, null, {
+            value: moduleGrantFor(r.of[0], COPA), states: ["view", "edit"],
             attr: "data-mac", shipped: COPA.shipped || "none" })
-        : stateCell(r.key, COPA.key, editable, "Office only for now.")) : "") + '</tr>';
+        : stateCell(r.of[0], COPA.key, editable, "Office only for now.")) : "") + '</tr>';
   }).join("");
+
+  /* A CELL THAT DIFFERS UNDERNEATH IS NAMED ABOVE THE TABLE (§516). Its
+     hover says which pairs and what each holds; this line says that there is
+     something to decide at all, because a cell with nothing lit is easy to
+     read as "no access" from across the room. A status, not a description
+     (1b-ii), and drawn only while there is one. */
+  var differLine = differ.length
+    ? '<p class="acdiffer"><b>' + differ.length + (differ.length === 1 ? ' cell holds' : ' cells hold') +
+      ' different answers underneath</b> — ' + differ.map(esc).join(", ") +
+      '. Hover one to see which' + (editable ? ', press a state to make them one.' : '.') + '</p>'
+    : '';
 
   return section("", "Roles & access",
       null,
+      differLine +
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Strategy halves only)</span>' +
+        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
+        '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
+        (differ.length ? '<span><i class="st st-mixed">differs</i> answers differ underneath</span>' : '') +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
       '</div>');
 }
@@ -40746,7 +41196,7 @@ function focusNav(){
 }
 
 function renderFocusSetup(){
-  /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
+  /* Marking is the Super user's — a rule, not a cell (§37, §516.3).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
   var editable = mayMarkFocus();
   var bands = focusBands(FSET.unit);
@@ -46297,7 +46747,11 @@ function deckSlides(u){
 
      AND THE FOOTNOTE LOSES THE CLAUSE THAT NAMES THE MISSING NUMBER, or the
      slide explains a reading it is not showing. */
-  var pl = unitPillars(u), koShown = SMPRules.shown(u.keyObjectives).length;
+  /* §515.2 P5: a function whose objectives are switched off (§437) has no
+     objectives reading on its page — the pillars card leads there — so the
+     projector does not draw one either. fnKoCounted() answers true for
+     everything that is not a function, so a unit's slide is unchanged. */
+  var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
   var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
     '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
     '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
@@ -46979,7 +47433,12 @@ function deckSlidesFn(subject){
   if (isUnit) { S = S.concat(unitAimSlides(f)); S = S.concat(unitSwotSlides(f)); S = S.concat(competeSlides(f)); }
 
   caps.forEach(function(c){
-    var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+    /* §515.2 (spec 066 P5): THE DECK READS WHAT THE PAGE READS. A unit that
+       plans in projects is drawn here through its own holder, and the page has
+       always scored that holder's objectives as the UNIT's (holderKOScore);
+       the deck asked capKOScore and could print a different number for the
+       same objectives on a projector (§53.5). */
+    var ko = holderKOScore(c), perf = capPerf(c), ce = capExec(c);
 
     /* The capability's cover carries its definition and its readings — key
        objectives only where it has any (§15.1: absent, never zero). */
@@ -46999,14 +47458,16 @@ function deckSlidesFn(subject){
       '<h1 class="cover">' + esc(c.name) + '</h1>' +
       '<p class="coversub">' + esc(c.def) + '</p>' +
       '<div class="coverrule"></div><div class="leadstats">' +
-        (SMPRules.shown(c.keyObjectives).length
+        (holderHasKOs(c)
           ? '<div><span class="dlab">' + L("keyobj") + '</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
           : '') +
         '<div><span class="dlab">' + L1("project") + ' performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
         '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
       '</div></section>');
 
-    if (SMPRules.shown(c.keyObjectives).length) {
+    /* §515.2 P5: holderHasKOs() is the page's own test, so a function's
+       objectives switched off (§437) draw no slide here either. */
+    if (holderHasKOs(c)) {
       var kRows = SMPRules.shown(c.keyObjectives).map(function(m, i){
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(m.name) + '</td>' +
@@ -47050,6 +47511,7 @@ function deckSlidesFn(subject){
         '<th class="num">Progress</th><th>Note</th></tr></thead>' +
         '<tbody>' + (aRows || '<tr><td colspan="6">No actions yet.</td></tr>') + '</tbody></table>' +
         '<p class="headfoot">' + tal.done + ' of ' + tal.total + ' done' +
+          (tal.due < tal.total ? ' &middot; ' + tal.due + ' due so far' : '') +
           (tal.pending ? ' &middot; ' + tal.pending + ' said In progress with no per-cent' : '') +
           '. Actions are counted, never scored into the objectives.</p></section>');
       return;
@@ -65384,10 +65846,10 @@ var SYNC = (function () {
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
+                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
                   { k:"compete", ac:"g_found", label:"How we compete",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -65395,7 +65857,9 @@ var SYNC = (function () {
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    when: topCapsOn }];
+                    /* §517: and none of the three is shown to a direction
+                       owner the office narrowed to their part. */
+                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
       } };
   }
   var SUBS = {
@@ -65573,9 +66037,9 @@ var SYNC = (function () {
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn(); } },
+        when: function(){ return focusOn() && !dirPartOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group"); } },
+        when: function(){ return templeOn("group") && !dirPartOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
@@ -69741,14 +70205,42 @@ var SYNC = (function () {
        information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
-       so the grid is judged by using it rather than by reading it. */
-    document.querySelectorAll("[data-ac]").forEach(function(b){
+       so the grid is judged by using it rather than by reading it.
+       ONE DRAWN CELL, SEVERAL STORED ONES (§516). The merged table's press
+       carries every (role, area) pair under the cell and the one state to
+       give them all. Only a pair whose answer DIFFERS is written: a pair
+       already on that state keeps its absence (§50.6), so a tenant's stored
+       map grows by exactly the answers somebody changed, and an untouched
+       pair goes on following the shipped default. */
+    document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = b.dataset.ac.split("|");
-        /* The row may not exist yet: a migrated tenant starts with an empty
-           map and every answer coming from the shipped default. Writing a cell
-           is the moment that role gets a row of its own. */
-        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        var p = b.dataset.acm.split("|"), st = p[1];
+        p[0].split(",").forEach(function(pair){
+          var ra = pair.split(":");
+          if (grantFor(ra[0], ra[1]) === st) return;
+          /* The row may not exist yet: a migrated tenant starts with an empty
+             map and every answer coming from the shipped default. Writing a
+             cell is the moment that role gets a row of its own. */
+          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        });
+        /* §517: the eye or the pen pressed while the half eye is lit is the
+           same one choice made the other way — the full plan again. */
+        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        paint();
+      });
+    });
+    /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
+       their own directions and the Foundation; "full" DELETES the key, so a
+       tenant that never chose reads exactly as before (§50.6). It is a
+       narrowing of reading, so it needs reading: a Direction owner left at
+       none for Group / Company is given view in the same press, or the half
+       eye would light over a page they cannot open (§61). */
+    document.querySelectorAll("[data-dirscope]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.dataset.dirscope === "part") {
+          GROUP[SMPRules.DIR_SCOPE] = "part";
+          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+        } else delete GROUP[SMPRules.DIR_SCOPE];
         paint();
       });
     });

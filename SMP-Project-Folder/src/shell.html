@@ -331,10 +331,10 @@
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
+                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
                   { k:"compete", ac:"g_found", label:"How we compete",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -342,7 +342,9 @@
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    when: topCapsOn }];
+                    /* §517: and none of the three is shown to a direction
+                       owner the office narrowed to their part. */
+                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
       } };
   }
   var SUBS = {
@@ -520,9 +522,9 @@
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn(); } },
+        when: function(){ return focusOn() && !dirPartOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group"); } },
+        when: function(){ return templeOn("group") && !dirPartOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
@@ -4688,14 +4690,42 @@
        information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
-       so the grid is judged by using it rather than by reading it. */
-    document.querySelectorAll("[data-ac]").forEach(function(b){
+       so the grid is judged by using it rather than by reading it.
+       ONE DRAWN CELL, SEVERAL STORED ONES (§516). The merged table's press
+       carries every (role, area) pair under the cell and the one state to
+       give them all. Only a pair whose answer DIFFERS is written: a pair
+       already on that state keeps its absence (§50.6), so a tenant's stored
+       map grows by exactly the answers somebody changed, and an untouched
+       pair goes on following the shipped default. */
+    document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = b.dataset.ac.split("|");
-        /* The row may not exist yet: a migrated tenant starts with an empty
-           map and every answer coming from the shipped default. Writing a cell
-           is the moment that role gets a row of its own. */
-        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        var p = b.dataset.acm.split("|"), st = p[1];
+        p[0].split(",").forEach(function(pair){
+          var ra = pair.split(":");
+          if (grantFor(ra[0], ra[1]) === st) return;
+          /* The row may not exist yet: a migrated tenant starts with an empty
+             map and every answer coming from the shipped default. Writing a
+             cell is the moment that role gets a row of its own. */
+          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        });
+        /* §517: the eye or the pen pressed while the half eye is lit is the
+           same one choice made the other way — the full plan again. */
+        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        paint();
+      });
+    });
+    /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
+       their own directions and the Foundation; "full" DELETES the key, so a
+       tenant that never chose reads exactly as before (§50.6). It is a
+       narrowing of reading, so it needs reading: a Direction owner left at
+       none for Group / Company is given view in the same press, or the half
+       eye would light over a page they cannot open (§61). */
+    document.querySelectorAll("[data-dirscope]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.dataset.dirscope === "part") {
+          GROUP[SMPRules.DIR_SCOPE] = "part";
+          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+        } else delete GROUP[SMPRules.DIR_SCOPE];
         paint();
       });
     });

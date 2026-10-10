@@ -6176,7 +6176,7 @@
    "a_fn_own": "view",
    "a_fn_own_strat": "view",
    "a_fn_other": "view",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "cceo": {
@@ -6187,7 +6187,7 @@
    "a_fn_own": "view",
    "a_fn_own_strat": "view",
    "a_fn_other": "view",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "owner": {
@@ -6236,8 +6236,8 @@
   },
   "powner": {
    "a_group": "view",
-   "a_unit_own": "none",
-   "a_unit_own_strat": "none",
+   "a_unit_own": "view",
+   "a_unit_own_strat": "view",
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_own_strat": "view",

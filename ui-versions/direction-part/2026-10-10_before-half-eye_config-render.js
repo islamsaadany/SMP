@@ -154,18 +154,6 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-/* §517: THE HALF EYE — "may read their part only". The eye with its right
-   half and its pupil's right half dashed: the same mark, seeing part of the
-   thing. Drawn beside the eye in the Part owner row's Group / Company cell
-   and in the legend, from this one string. */
-var ICON_HALFEYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-  '<path d="M10 5C4.8 5 1.7 10 1.7 10S4.8 15 10 15" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.5" stroke-linejoin="round"/>' +
-  '<path d="M10 5c5.2 0 8.3 5 8.3 5s-3.1 5-8.3 5" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.5" stroke-dasharray="1.6 1.9" stroke-linejoin="round"/>' +
-  '<path d="M10 7.7a2.3 2.3 0 0 0 0 4.6z" fill="currentColor"/>' +
-  '<path d="M10 7.7a2.3 2.3 0 0 1 0 4.6" fill="none" stroke="currentColor" ' +
-    'stroke-width="1.3" stroke-dasharray="1.2 1.4"/></svg>';
 /* §145: the fill-the-gaps mark — a pen over a dashed line, writing into the
    blank. The same pen, lifted, with the line it writes on. */
 var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
@@ -232,16 +220,8 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
                fill: "May fill what’s empty — Missing values only, and they count straight away",
                edit: "May read and change" };
   var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
-  /* §517: THE HALF EYE is a fourth answer in ONE cell — the Part owner row's
-     Group / Company cell — and it is not a grant: the pairs keep reading
-     "view", and the half eye narrows what is DRAWN for a direction owner
-     (`GROUP.dirScope`, stored as an absence). While it is lit the eye shows
-     unlit, because the two are one choice to the person reading the table:
-     the whole plan, or their part. Pressing the eye or the pen turns it off
-     (`data-dirclear`), so the three stay one choice to the person pressing. */
-  var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
   var opts = states.map(function(o){
-    var on = o === v && !(halfOn && o === "view");
+    var on = o === v;
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
        `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
        so the lit eye was given 22px of padding inside a 24px box and its icon
@@ -253,19 +233,9 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       attr + '="' + tgt + '|' + (on ? "none" : o) +
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
-      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '"' +
-      (halfOn ? ' data-dirclear="1"' : '') + '>' +
+      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
       ICON[o] + '</button>';
   }).join("");
-  /* Placed straight after the FIRST button, which is the eye (`states` always
-     opens with "view"), so the half eye sits beside the thing it narrows. */
-  if (half) opts = opts.replace(/^([\s\S]*?<\/button>)/, function(eye){
-    return eye + '<button type="button" class="stbtn' + (halfOn ? " on st-view" : "") + '" ' +
-      'data-dirscope="' + (halfOn ? "full" : "part") + '" title="' +
-      (halfOn ? "Show them the full plan again" : "May read their part only — a direction owner sees their own directions and the Foundation") +
-      '" aria-label="' + (halfOn ? "turn off their part only" : "their part only") +
-      '" aria-pressed="' + halfOn + '">' + ICON_HALFEYE + '</button>';
-  });
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
      which is the one thing it must never be mistaken for. */
@@ -589,7 +559,6 @@ function renderAccess(){
         var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
         var opt = { attr: "data-acm", target: target, value: m.value };
         if (c.key === "plan") opt.states = ["view", "fill", "edit"];
-        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
         if (m.mixed) {
           differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
           opt.mixed = true;
@@ -624,7 +593,6 @@ function renderAccess(){
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
         '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +

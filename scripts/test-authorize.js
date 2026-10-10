@@ -5741,5 +5741,44 @@ console.log("\n§516.1 · a part owner may read");
         D.powner.a_cycle === "none" && D.powner.a_setup === "none", JSON.stringify(D.powner));
 })();
 
+/* ── §517: WHAT A DIRECTION OWNER SEES OF THE PLAN ───────────────────────
+   The half eye on Roles & access writes GROUP.dirScope. It decides what
+   people are shown, so it is the matrix's own owner's: the Super user may set
+   and clear it, the SMO team and anybody else may not. BOTH ENDS (§94.2). And
+   the rule itself: narrowed only for somebody whom a direction is all that
+   brings to the group — the office and a CEO see the full plan whatever it
+   says (§33). */
+console.log("\n§517 · the half eye");
+(function () {
+  const B = clone(SEED);
+  function as(who, mutate, base) { const b = base || B; const inc = clone(b); mutate(inc); return A.authorize(b, inc, personOf(b, who)); }
+  let v = as("smo", function (inc) { inc.group[R.DIR_SCOPE] = "part"; });
+  check("§517: the Super user sets their-part-only", v.ok, (v.refusals || []).join(" / "));
+  const P = clone(B); P.group[R.DIR_SCOPE] = "part";
+  v = as("smo", function (inc) { delete inc.group[R.DIR_SCOPE]; }, P);
+  check("§517: …and clears it", v.ok, (v.refusals || []).join(" / "));
+  /* The seed holds no SMO team member, so one is MADE (§255) — or the
+     assertion the rule exists for never runs. */
+  const T = clone(B); T.people = T.people.concat([{ key: "t517_team", name: "Testcase Office Member", unit: "group", role: "smoteam" }]);
+  v = as("t517_team", function (inc) { inc.group[R.DIR_SCOPE] = "part"; }, T);
+  check("§517 REFUSED: the SMO team setting it (the matrix is the Super user's)", !v.ok, "was ALLOWED");
+  const other = B.people.find(function (p) { return p.role === "owner" || p.role === "custodian"; }) ||
+                B.people.find(function (p) { return !R.isOfficeRole(p.role); });
+  v = as(other.key, function (inc) { inc.group[R.DIR_SCOPE] = "part"; });
+  check("§517 REFUSED: anybody else setting it", !v.ok, "was ALLOWED");
+  /* the rule */
+  P.people = P.people.concat([{ key: "t517_dir", name: "Testcase Part Reader", unit: "group" }]);
+  P.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  P.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", owner: "Testcase Part Reader", measures: [], tactics: [] },
+                   { id: "group-P2", code: "EA02", name: "Direction two", owner: "Somebody Else Entirely", measures: [], tactics: [] }];
+  const w = R.worldOf(P), me = personOf(P, "t517_dir");
+  check("§517: a direction's owner reads their part only", R.dirPartOnly(w, me) === true);
+  check("§517: …their own direction is theirs", R.ownsDirection(w, me, P.group.items[0]) === true);
+  check("§517: …another's is not", R.ownsDirection(w, me, P.group.items[1]) === false);
+  check("§517: the office still sees the full plan", R.dirPartOnly(w, personOf(P, "smo")) === false);
+  const F = clone(P); delete F.group[R.DIR_SCOPE];
+  check("§517: with the half eye off they see the full plan", R.dirPartOnly(R.worldOf(F), personOf(F, "t517_dir")) === false);
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

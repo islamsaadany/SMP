@@ -8538,22 +8538,6 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
-   (§42) so the page and the server agree about who is narrowed; the filter
-   is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
-   code is its POSITION (pillarCode) and topWritable() hands out the real
-   array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
-function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
-  var w = world(), v = viewer();
-  return function(p){ return SMPRules.ownsDirection(w, v, p); };
-}
-function partItems(u){
-  var f = partFilter(u), list = (u && u.items) || [];
-  return f ? list.filter(f) : list;
-}
 /* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§447) ─────────────────
    Islam, of El Abd: *"a one company with multiple directions … all the
    directions and the Foundation and the SWAT belongs to its page only

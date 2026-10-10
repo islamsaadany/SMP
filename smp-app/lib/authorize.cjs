@@ -121,6 +121,7 @@ const PLAN_TO         = R.PLAN_TO;
 const DRIVERS         = R.DRIVERS;
 const SEASONS         = R.SEASONS;
 const DRIVERS_ON      = R.DRIVERS_ON;
+const DIR_SCOPE       = R.DIR_SCOPE;
 const UNIT_FOUNDATION = ["aspiration", "endInMind", "clauses", "mission", "values"];
 /* `pend` is §145's pending-fill marks — known here so a mark the gap pass
    did not accept falls to the PLAN comparison (office-only) rather than to
@@ -614,6 +615,14 @@ function collect(stored, incoming, w) {
   if (!same(sg[DRIVERS_ON], ig[DRIVERS_ON]))
     add("seasons", null, "whether revenue drivers are used at all");
 
+  /* §517: WHETHER A DIRECTION'S OWNER SEES THE FULL PLAN OR THEIR PART is
+     a cell of Roles & access, so it is the Super user's like every other
+     cell (`access`, §89). The two edits go together (§259.2): classified
+     here AND named in gExtra below, or the change is swept unseen and
+     therefore allowed to everybody. */
+  if (!same(sg[DIR_SCOPE], ig[DIR_SCOPE]))
+    add("access", null, "what a direction owner sees of the plan");
+
   /* ── §428: THE TOP LAYER'S OWN PLAN AND SWOT ─────────────────────────
      Judged by exactly the rules a business unit's plan gets — the same
      `collectUnit()` pass over a unit-shaped view, against the `group`
@@ -638,7 +647,7 @@ function collect(stored, incoming, w) {
   const gExtra = GROUP_OWN.concat(["items", "swot", "compete", "capabilities", "branding", "sets", "claims",
                                    "naming", "focusOff", "lineOwners", "mainbus", "comms", "kb", "logo",
                                    MASTER_FLOW, PRESENT_MINS, LANDING_PICK, SETUP_DONE, STRUCTURE, "coFound", PLAN_FROM, PLAN_TO,
-                                   SEASONS, DRIVERS_ON, "planYear", "topProjects"]);
+                                   SEASONS, DRIVERS_ON, DIR_SCOPE, "planYear", "topProjects"]);
   /* NAMED, not "the group". A refusal that cannot be diagnosed is a bug
      report addressed to nobody — and the first thing this bucket caught was a
      field the browser invented and the database never held. */

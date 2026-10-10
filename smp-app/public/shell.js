@@ -533,7 +533,10 @@
                people: state.people,
                topItems: (state.group || {}).items,
                topProjects: (state.group || {}).topProjects,
-               group: state.group ? { structure: state.group.structure } : null });
+               /* §517: and the direction owners' scope, read by dirPartOnly().
+                  Here AND in W()'s `group` (§102.4) — W passes the object
+                  through whole, so this is the one list to edit. */
+               group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -4409,6 +4412,40 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
       return p && (seat(p.owner) || seat(p.custodian));
     });
   }
+  /* §517 — A DIRECTION'S OWNER SEES THEIR PART ONLY, IF THE OFFICE SAYS SO.
+     Islam, of El Abd: direction owners "see the full plan and can't report",
+     and the Roles & access table should hold "2 visibility buttons one for
+     the full plan and one only for their part". The choice is a GROUP key
+     stored as an ABSENCE (§50.6): absent is the full plan (what every client
+     has today), "part" narrows. It is not a grant state, because grants live
+     in tables with a CHECK on their values and this is a scope beside a
+     grant, not a fourth level of one.
+
+     IT NARROWS WHAT IS DRAWN, NEVER WHAT IS SENT (his "3. agreed"): the plan
+     still reaches the browser whole, so this is a reading convenience and not
+     a fence — the server's reach (`boundedReach`) is unchanged and already
+     keeps their reporting to their own direction.
+
+     ONLY WHERE THE DIRECTION IS ALL THAT BROUGHT THEM: somebody who also
+     reaches the group by another role (a unit owner, a CEO, the office) sees
+     the full plan whatever this says, because a narrowing must never take
+     away what another row of the table gives (§33's most-generous rule). */
+  var DIR_SCOPE = "dirScope";
+  function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
+  function dirPartOnly(w, person) {
+    if (!person || !w || !dirScopePart(w.group)) return false;
+    var rs = personRoles(w, person), holds = false;
+    for (var i = 0; i < rs.length; i++) {
+      if (rs[i].role === "dirowner") { holds = true; continue; }
+      if (!companyAllows(w, rs[i], "group")) continue;
+      if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
+    }
+    return holds;
+  }
+  /* Whether ONE direction is theirs — ownsTopPillar asked of that row. */
+  function ownsDirection(w, person, p) {
+    return !!p && ownsTopPillar(w, person, p.owner || "", p.custodian || "");
+  }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
      ABSENCE (§50.6) on `structure.top.plan.way`, so every client that never
@@ -5033,7 +5070,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, dirPartOnly: dirPartOnly, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -15626,6 +15663,22 @@ function topWritable(){
   if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
+}
+/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+   (§42) so the page and the server agree about who is narrowed; the filter
+   is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
+   code is its POSITION (pillarCode) and topWritable() hands out the real
+   array, so filtering the array would renumber every direction and write
+   into the wrong one. partFilter(u) is null when nothing is narrowed. */
+function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+function partFilter(u){
+  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  var w = world(), v = viewer();
+  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+}
+function partItems(u){
+  var f = partFilter(u), list = (u && u.items) || [];
+  return f ? list.filter(f) : list;
 }
 /* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§447) ─────────────────
    Islam, of El Abd: *"a one company with multiple directions … all the
@@ -27833,7 +27886,10 @@ function whereNext(keys){
      while the top layer plans in pillars (§466: a projects company is scored
      by its projects in the headline card). */
   if (topHasPlan() && planOn("group") && topWay() !== "projects") {
-    var dtu = topAsUnit(), ditems = itemsNow(dtu);
+    var dtu = topAsUnit(), dpf = partFilter(dtu), ditems = itemsNow(dtu);
+    /* §517: their own directions only — the code still read off the real
+       position below, so it is the one every other page shows. */
+    if (dpf) ditems = ditems.filter(dpf);
     var dirs = ditems.map(function(p, di){
       var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
       var code = pillarCode(dtu, dtu.items.indexOf(p));
@@ -27857,7 +27913,7 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
@@ -27869,6 +27925,13 @@ function whereNext(keys){
           '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
       TIP_CAP(), viewToggle("caps")) });
 
+  /* §517: a direction owner narrowed to their part reads their directions and
+     nothing else here — the company's headline, its themes and its
+     capabilities are the whole company's figures. */
+  if (dirPartOnly()) {
+    SECS = SECS.filter(function(x){ return x.dir; });
+    if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
+  }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   /* §428: the top layer's own review deck — its SWOT and its pillars — is
      presented from here once it has a plan, through the one menu every
@@ -31891,7 +31954,7 @@ function renderReport(u){
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = u.items.filter(runsNow)[0];
+    var firstNow = partItems(u).filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
   var pillars;
@@ -31908,7 +31971,9 @@ function renderReport(u){
        ordinary sub-line would have said nothing in the state people meet. */
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
+    var rpf = partFilter(u);          /* §517: skipped, never renumbered */
     var railRows = u.items.map(function(p, pi){
+      if (rpf && !rpf(p)) return "";
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -31933,11 +31998,11 @@ function renderReport(u){
                 : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
+    var rail = '<div class="rail">' + railHead(L("pillar","bu"), partItems(u).length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(u.items)
+    pillars = railWorthIt(partItems(u))
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -32001,7 +32066,8 @@ function renderReport(u){
        objectives are the group's Foundation, not figures entered here.
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
-    (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    /* §517: and a direction owner narrowed to their part is not shown them. */
+    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -33902,7 +33968,7 @@ function unitRailKey(u){ return "unit:" + u.ukey; }
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
+  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -33923,7 +33989,12 @@ function unitRailFor(u, sel){
      part of how it is going — and Progress and Performance need nothing to
      follow it, because the order IS the array. */
   var on = arranging("unit", u.ukey);
+  /* §517: a direction owner narrowed to their part sees only their rows —
+     skipped here rather than filtered out of the list, so `i` stays the
+     pillar's real position and its code does not change. */
+  var pf = partFilter(u);
   var rows = list.map(function(it, i){
+    if (pf && !pf(it)) return "";
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
        plan arrived with — "01" for Mobile, because its pillars predate the
@@ -33988,7 +34059,7 @@ function unitRailFor(u, sel){
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), list.length) +
+    railHead(L("pillar","bu"), pf ? list.filter(pf).length : list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -35404,7 +35475,9 @@ function unitPerfRail(u){
   var sel = unitRailPick(u);
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
+  var pf = partFilter(u);            /* §517: skipped, never renumbered */
   var rows = u.items.map(function(it, i){
+    if (pf && !pf(it)) return "";
     /* §416: a direction that does not run this year is not scored, so its
        rail row reads a dash and says when it runs rather than a figure. */
     var now = runsNow(it);
@@ -35425,7 +35498,7 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), u.items.length) +
+    railHead(L("pillar","bu"), partItems(u).length) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -35434,9 +35507,11 @@ function unitPerfRail(u){
        items. A handle that renders is a feature that looks built (§51.11). The
        CONTAINER says what it holds now, so the two cannot disagree. */
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
-    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
-      pct(unitRatio(u)) + '</div></div>';
-  return railWorthIt(u.items)
+    /* §517: the footer is the whole company's reading, so a direction owner
+       narrowed to their part is not shown it. */
+    (pf ? '' : '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
+      pct(unitRatio(u)) + '</div>') + '</div>';
+  return railWorthIt(partItems(u))
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
     : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }
@@ -35641,6 +35716,18 @@ var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
     'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+/* §517: THE HALF EYE — "may read their part only". The eye with its right
+   half and its pupil's right half dashed: the same mark, seeing part of the
+   thing. Drawn beside the eye in the Part owner row's Group / Company cell
+   and in the legend, from this one string. */
+var ICON_HALFEYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M10 5C4.8 5 1.7 10 1.7 10S4.8 15 10 15" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-linejoin="round"/>' +
+  '<path d="M10 5c5.2 0 8.3 5 8.3 5s-3.1 5-8.3 5" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.5" stroke-dasharray="1.6 1.9" stroke-linejoin="round"/>' +
+  '<path d="M10 7.7a2.3 2.3 0 0 0 0 4.6z" fill="currentColor"/>' +
+  '<path d="M10 7.7a2.3 2.3 0 0 1 0 4.6" fill="none" stroke="currentColor" ' +
+    'stroke-width="1.3" stroke-dasharray="1.2 1.4"/></svg>';
 /* §145: the fill-the-gaps mark — a pen over a dashed line, writing into the
    blank. The same pen, lifted, with the line it writes on. */
 var ICON_FILL = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
@@ -35707,8 +35794,16 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
                fill: "May fill what’s empty — Missing values only, and they count straight away",
                edit: "May read and change" };
   var ICON = { view: ICON_EYE, fill: ICON_FILL, edit: ICON_PEN };
+  /* §517: THE HALF EYE is a fourth answer in ONE cell — the Part owner row's
+     Group / Company cell — and it is not a grant: the pairs keep reading
+     "view", and the half eye narrows what is DRAWN for a direction owner
+     (`GROUP.dirScope`, stored as an absence). While it is lit the eye shows
+     unlit, because the two are one choice to the person reading the table:
+     the whole plan, or their part. Pressing the eye or the pen turns it off
+     (`data-dirclear`), so the three stay one choice to the person pressing. */
+  var half = opt.half || null, halfOn = !!(half && half.on && v !== "none");
   var opts = states.map(function(o){
-    var on = o === v;
+    var on = o === v && !(halfOn && o === "view");
     /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
        `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
        so the lit eye was given 22px of padding inside a 24px box and its icon
@@ -35720,9 +35815,19 @@ function stateCell(roleKey, areaKey, editable, disabled, opt){
       attr + '="' + tgt + '|' + (on ? "none" : o) +
       (opt.shipped ? '|' + opt.shipped : '') + '" title="' +
       (on ? "Turn off — leaves no access" : opt.mixed ? WORD[o] + " — all of them" : WORD[o]) +
-      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
+      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '"' +
+      (halfOn ? ' data-dirclear="1"' : '') + '>' +
       ICON[o] + '</button>';
   }).join("");
+  /* Placed straight after the FIRST button, which is the eye (`states` always
+     opens with "view"), so the half eye sits beside the thing it narrows. */
+  if (half) opts = opts.replace(/^([\s\S]*?<\/button>)/, function(eye){
+    return eye + '<button type="button" class="stbtn' + (halfOn ? " on st-view" : "") + '" ' +
+      'data-dirscope="' + (halfOn ? "full" : "part") + '" title="' +
+      (halfOn ? "Show them the full plan again" : "May read their part only — a direction owner sees their own directions and the Foundation") +
+      '" aria-label="' + (halfOn ? "turn off their part only" : "their part only") +
+      '" aria-pressed="' + halfOn + '">' + ICON_HALFEYE + '</button>';
+  });
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
      which is the one thing it must never be mistaken for. */
@@ -36046,6 +36151,7 @@ function renderAccess(){
         var target = m.pairs.map(function(p){ return p.role + ":" + p.area; }).join(",");
         var opt = { attr: "data-acm", target: target, value: m.value };
         if (c.key === "plan") opt.states = ["view", "fill", "edit"];
+        if (r.key === "part" && c.key === "top") opt.half = { on: SMPRules.dirScopePart(GROUP) };
         if (m.mixed) {
           differ.push(accessRowName(r) + " · " + (c.col ? c.pair + ": " + c.col : c.label));
           opt.mixed = true;
@@ -36080,6 +36186,7 @@ function renderAccess(){
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
         '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
+        '<span><i class="st st-view">' + ICON_HALFEYE + '</i> may read their part only (Part owner)</span>' +
         '<span><i class="st st-fill">' + ICON_FILL + '</i> may fill what&rsquo;s empty (Plan only)</span>' +
         '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
@@ -65415,10 +65522,10 @@ var SYNC = (function () {
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
+                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
                   { k:"compete", ac:"g_found", label:"How we compete",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
                     when: topPlanOn },
@@ -65426,7 +65533,9 @@ var SYNC = (function () {
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    when: topCapsOn }];
+                    /* §517: and none of the three is shown to a direction
+                       owner the office narrowed to their part. */
+                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
       } };
   }
   var SUBS = {
@@ -65604,9 +65713,9 @@ var SYNC = (function () {
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn(); } },
+        when: function(){ return focusOn() && !dirPartOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group"); } },
+        when: function(){ return templeOn("group") && !dirPartOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
@@ -69790,6 +69899,24 @@ var SYNC = (function () {
              cell is the moment that role gets a row of its own. */
           (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
         });
+        /* §517: the eye or the pen pressed while the half eye is lit is the
+           same one choice made the other way — the full plan again. */
+        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        paint();
+      });
+    });
+    /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
+       their own directions and the Foundation; "full" DELETES the key, so a
+       tenant that never chose reads exactly as before (§50.6). It is a
+       narrowing of reading, so it needs reading: a Direction owner left at
+       none for Group / Company is given view in the same press, or the half
+       eye would light over a page they cannot open (§61). */
+    document.querySelectorAll("[data-dirscope]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.dataset.dirscope === "part") {
+          GROUP[SMPRules.DIR_SCOPE] = "part";
+          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+        } else delete GROUP[SMPRules.DIR_SCOPE];
         paint();
       });
     });

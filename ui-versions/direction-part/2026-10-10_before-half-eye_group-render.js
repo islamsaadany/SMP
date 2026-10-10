@@ -2727,10 +2727,7 @@ function whereNext(keys){
      while the top layer plans in pillars (§466: a projects company is scored
      by its projects in the headline card). */
   if (topHasPlan() && planOn("group") && topWay() !== "projects") {
-    var dtu = topAsUnit(), dpf = partFilter(dtu), ditems = itemsNow(dtu);
-    /* §517: their own directions only — the code still read off the real
-       position below, so it is the one every other page shows. */
-    if (dpf) ditems = ditems.filter(dpf);
+    var dtu = topAsUnit(), ditems = itemsNow(dtu);
     var dirs = ditems.map(function(p, di){
       var pf = pillarPerf(p), ex = pillarExec(p), pl = pillarPlan(p);
       var code = pillarCode(dtu, dtu.items.indexOf(p));
@@ -2754,7 +2751,7 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    SECS.push({ t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
@@ -2766,13 +2763,6 @@ function whereNext(keys){
           '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
       TIP_CAP(), viewToggle("caps")) });
 
-  /* §517: a direction owner narrowed to their part reads their directions and
-     nothing else here — the company's headline, its themes and its
-     capabilities are the whole company's figures. */
-  if (dirPartOnly()) {
-    SECS = SECS.filter(function(x){ return x.dir; });
-    if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
-  }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   /* §428: the top layer's own review deck — its SWOT and its pillars — is
      presented from here once it has a plan, through the one menu every
@@ -6795,7 +6785,7 @@ function renderReport(u){
      page does not OPEN on one — unless somebody pressed it, in which case
      it says why there is nothing to enter (§35). */
   if (sel && !runsNow(sel) && RAIL[unitRailKey(u)] !== pillarRailId(sel)) {
-    var firstNow = partItems(u).filter(runsNow)[0];
+    var firstNow = u.items.filter(runsNow)[0];
     if (firstNow) { sel = firstNow; railShow(unitRailKey(u), pillarRailId(sel)); }
   }
   var pillars;
@@ -6812,9 +6802,7 @@ function renderReport(u){
        ordinary sub-line would have said nothing in the state people meet. */
     var owedAt = {};
     reportPlaces(u.ukey).forEach(function(e){ owedAt[e.key] = e; });
-    var rpf = partFilter(u);          /* §517: skipped, never renumbered */
     var railRows = u.items.map(function(p, pi){
-      if (rpf && !rpf(p)) return "";
       var t = pillarTally(p), code = pillarCode(u, pi);
       /* Keyed on the STORED code, exactly as the place is (§48) — the
          displayed one is a label and belongs nowhere in an address. */
@@ -6839,11 +6827,11 @@ function renderReport(u){
                 : !now ? esc(sub) : "") +
         '</button>';
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), partItems(u).length) + railRows +
+    var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(partItems(u))
+    pillars = railWorthIt(u.items)
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -6907,8 +6895,7 @@ function renderReport(u){
        objectives are the group's Foundation, not figures entered here.
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
-    /* §517: and a direction owner narrowed to their part is not shown them. */
-    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    (u.topLayer && !objs.length ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -8809,7 +8796,7 @@ function unitRailKey(u){ return "unit:" + u.ukey; }
    for a row with no id, which renumberUnit() and mintRowId() never leave. */
 function pillarRailId(p){ return (p && (p.id || p.code)) || ""; }
 function unitRailPick(u){
-  var k = unitRailKey(u), want = RAIL[k], list = partItems(u);
+  var k = unitRailKey(u), want = RAIL[k], list = u.items || [];
   if (!list.length) return null;
   for (var i = 0; i < list.length; i++)
     if (pillarRailId(list[i]) === want) { railShow(k, pillarRailId(list[i])); return list[i]; }
@@ -8830,12 +8817,7 @@ function unitRailFor(u, sel){
      part of how it is going — and Progress and Performance need nothing to
      follow it, because the order IS the array. */
   var on = arranging("unit", u.ukey);
-  /* §517: a direction owner narrowed to their part sees only their rows —
-     skipped here rather than filtered out of the list, so `i` stays the
-     pillar's real position and its code does not change. */
-  var pf = partFilter(u);
   var rows = list.map(function(it, i){
-    if (pf && !pf(it)) return "";
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
        plan arrived with — "01" for Mobile, because its pillars predate the
@@ -8900,7 +8882,7 @@ function unitRailFor(u, sel){
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), pf ? list.filter(pf).length : list.length) +
+    railHead(L("pillar","bu"), list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
       esc(u.ukey) + '">' + rows + '</div>' +
     /* ADD, in the rail that holds them (§69.13). The same place the projects
@@ -10316,9 +10298,7 @@ function unitPerfRail(u){
   var sel = unitRailPick(u);
   if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu") + ' yet.</div>';
   var on = arranging("unit", u.ukey);
-  var pf = partFilter(u);            /* §517: skipped, never renumbered */
   var rows = u.items.map(function(it, i){
-    if (pf && !pf(it)) return "";
     /* §416: a direction that does not run this year is not scored, so its
        rail row reads a dash and says when it runs rather than a figure. */
     var now = runsNow(it);
@@ -10339,7 +10319,7 @@ function unitPerfRail(u){
       '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), partItems(u).length) +
+    railHead(L("pillar","bu"), u.items.length) +
     /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
        were bound to NOTHING: the shell chose the item selector from `data-kind`
        and "pillars" meant the accordion's `.prow-wrap`, which does not exist
@@ -10348,11 +10328,9 @@ function unitPerfRail(u){
        items. A handle that renders is a feature that looks built (§51.11). The
        CONTAINER says what it holds now, so the two cannot disagree. */
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
-    /* §517: the footer is the whole company's reading, so a direction owner
-       narrowed to their part is not shown it. */
-    (pf ? '' : '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
-      pct(unitRatio(u)) + '</div>') + '</div>';
-  return railWorthIt(partItems(u))
+    '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + itemsNow(u).length + ' &middot; execution ' +
+      pct(unitRatio(u)) + '</div></div>';
+  return railWorthIt(u.items)
     ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
     : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }

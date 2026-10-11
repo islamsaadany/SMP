@@ -31761,16 +31761,19 @@ function repOutTarget(t, x){
       ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
 }
 
-/* §520.7: `opt.bodyOnly` returns the two SECTIONS alone — the key objectives
-   and the pillars — and sets no chrome, draws no bar, no summary and no
-   waiting note. It is how a capability planned in pillars is drawn INSIDE the
-   company's Reporting page (§520.6's section), through `capAsUnit(c.id)`: the
-   same builder a unit and a pillars function already report through, with
-   every gate below asking `u.ukey` = "cap:<id>" (§53.5, §59). A second body
-   for the same tables is how the Plan page came to know both shapes while
-   this page knew one. */
+/* §520.7, reshaped by §520.8: `opt.paneOnly` returns the key objectives and
+   the selected pillar's PANE alone — no chrome, no bar, no summary, no waiting
+   note, and no rail or section heading of its own, because the capability
+   already sits on a rail of capabilities one level up. It is how a capability
+   planned in pillars is drawn INSIDE the company's Reporting page
+   (`reportCapsSplit`), through `capAsUnit(c.id)`: the same builder a unit and
+   a pillars function already report through, with every gate below asking
+   `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
+   the Plan page came to know both shapes while this page knew one. */
 function renderReport(u, opt){
-  var bodyOnly = !!(opt && opt.bodyOnly);
+  /* §520.8: the PANE alone — a capability drawn inside the company's report
+     has its own rail there, so this hands back only what sits in the pane. */
+  var paneOnly = !!(opt && opt.paneOnly);
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
   var may = canReport(u.ukey);
@@ -31784,7 +31787,7 @@ function renderReport(u, opt){
 
   if (REVIEW.state !== "open") {
     /* §520.7: inside the company's page the closed note is already above. */
-    if (bodyOnly) return "";
+    if (paneOnly) return "";
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
       'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
   }
@@ -32065,7 +32068,10 @@ function renderReport(u, opt){
   }
   var pillars;
   if (!sel) {
-    pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
+    /* §520.8: a capability with nothing planned says so in the words its own
+       rail already uses (`topCapBody`), never "this unit has no directions". */
+    pillars = paneOnly ? '<div class="note">Nothing planned yet.</div>'
+      : '<div class="note">This unit has no ' + L("pillar","bu") +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -32108,7 +32114,16 @@ function renderReport(u, opt){
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(partItems(u))
+    /* §520.8: inside the company's capabilities split the capability's own
+       rail is the one on the left, and a pillars capability is ONE pillar
+       named as the capability (§491) — so the pane stands alone, and the
+       inner rail is drawn only where there is genuinely more than one
+       pillar to pick between. */
+    pillars = paneOnly
+      ? (partItems(u).length > 1
+          ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+          : pane)
+      : railWorthIt(partItems(u))
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -32119,11 +32134,13 @@ function renderReport(u, opt){
   /* §301: what a bounded reporter is told in place of "View only" — built
      from the SAME pillarTally() the rail rows read, so the chip and the rail
      can never disagree about how much is entered. */
-  /* §520.7: the body alone, for a capability drawn inside the company's
-     report — its objectives where it has any, and its pillars. */
-  if (bodyOnly) {
-    return (objs.length ? section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) : "") +
-      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars);
+  /* §520.8: the pane alone, for a capability drawn inside the company's
+     report — its objectives where it has any, then its pillar's tables. No
+     section heading and no rail of its own: the capabilities rail beside it
+     is the rail, and the heading over the split names every capability. */
+  if (paneOnly) {
+    return (objs.length ? '<h4 class="mini">' + L("keyobj","bu") + ' ' + tally(doneOf(objs), objs.length) + '</h4>' + objTable : "") +
+      pillars;
   }
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
                             reportParked(u.ukey), submitWhyShort(u.ukey),
@@ -32187,24 +32204,56 @@ function renderReport(u, opt){
       section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
     /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
        a section of the company's plan and never a destination (§520.1), so
-       this page is the only Reporting page its owner can reach; each one is
-       the capability's own report body, which asks `cap:<id>` for itself —
-       the owner types on theirs, a direction's owner reads it, the office
-       types on all. `capsHere()` is the one narrowing (§520.5). */
-    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP)
-      ? capsHere().map(function(c){
-          return section("", L1("capability") + " &mdash; " + esc(c.name), null,
-            /* §520.7: a capability planned in PILLARS reports its measures and
-               tactics the way a direction does — the unit report's own body
-               over `capAsUnit`, never the projects body, which looked for
-               projects, found none and said so over rows the bar was already
-               counting. */
-            '<div class="capbody">' + (capPlansInPillars(c)
-              ? renderReport(capAsUnit(c.id), { bodyOnly: true })
-              : capReportBody(c)) + '</div>');
-        }).join("")
+       this page is the only Reporting page its owner can reach. `capsHere()`
+       is the one narrowing (§520.5).
+       §520.8: ONE SECTION, SHAPED LIKE THE DIRECTIONS' — Islam, of §520.7's
+       stacked blocks: "the name of the capability is written at the top of
+       the page which is wrong and another line says directions key measures
+       and tactics which is wrong it should say Capabilities - key measures
+       and tactics". A rail of capabilities on the left (the Strategy tab's
+       own rail, `renderTopCaps`, so the two read alike) and the chosen one's
+       report in the pane: a pillars capability through `renderReport`'s pane
+       (§520.7's body without its heading or its one-row rail), a projects
+       capability through `capReportBody`. The owner types on theirs, a
+       direction's owner reads it, the office types on all — the pane asks
+       `cap:<id>` for itself exactly as before. */
+    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+      ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
+          reportCapsSplit(capsHere()))
       : "") +
     summary;
+}
+
+
+/* §520.8: the company report's capabilities rail and pane. The rail reads
+   the Strategy tab's own shape (`renderTopCaps`): the same `data-topcap`
+   press, the same code and name, with the REPORT's tally in place of the
+   plan's gap count — entries given of asked, off `reportedCount`, the one
+   reader the bar and the rail both ask — and the places still owing a figure
+   named in the rail's alarm, exactly as a direction's row says it. */
+function reportCapsSplit(caps){
+  var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
+  var rows = caps.map(function(c){
+    var pil = capPlansInPillars(c), cu = pil ? capAsUnit(c.id) : null;
+    var t = cu ? reportedCount(cu) : null;
+    var owes = cu ? reportPlaces(cu.ukey).some(function(e){ return e.count > 0; }) : false;
+    var sub = !cu ? "" : t.total === 0 ? 'Not asked this cycle'
+            : t.done >= t.total ? 'Complete'
+            : (t.total - t.done) + ' still to enter';
+    return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
+      railName(topCapCode(c), c.name) +
+      (cu ? '<span class="rnum"><span class="rtally' +
+              (t.total && t.done >= t.total && !owes ? ' full' : '') + '">' +
+              t.done + '/' + t.total + '</span></span>' : '') +
+      railSub(owes ? "" : sub, owes ? '<span class="missing">Still to enter</span>' : "") +
+      '</button>';
+  }).join("");
+  var rail = '<div class="rail" data-repcaprail="1">' + railHead(L("capability","bu"), caps.length) + rows +
+    '<div class="rfoot">Tally is entries given of asked</div></div>';
+  var pane = '<div class="capbody">' + (capPlansInPillars(sel)
+    ? renderReport(capAsUnit(sel.id), { paneOnly: true })
+    : capReportBody(sel)) + '</div>';
+  return '<div class="split" data-repcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
 

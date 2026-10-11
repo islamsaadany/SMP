@@ -40,8 +40,8 @@ def ck(name, ok, detail=""):
     global bad
     print(("  ok   " if ok else "  FAIL ") + name + ("" if ok else "  — " + str(detail)))
     if not ok: bad += 1
-def safe(pg, js, dflt=None):
-    try: return pg.evaluate(js)
+def safe(pg, js, dflt=None, arg=None):
+    try: return pg.evaluate(js) if arg is None else pg.evaluate(js, arg)
     except Exception: return dflt
 
 MAKE = """()=>{
@@ -302,7 +302,11 @@ with sync_playwright() as p:
       var boxes = [...p.querySelectorAll('.capbody input, .capbody select, .capbody textarea')];
       return {tabs: allowed(SUBS.group,'group').map(x=>x.k),
               heads: [...p.querySelectorAll('h2, .secttl')].map(e=>e.textContent.trim()),
-              caps: p.querySelectorAll('.capbody').length,
+              //  §520.8: the capabilities are a RAIL and one pane, so "both
+              //  drawn" is the rail's rows and never a count of panes (§113.8).
+              caps: p.querySelectorAll('[data-repcaprail] .ritem[data-topcap]').length,
+              railNames: [...p.querySelectorAll('[data-repcaprail] .ritem[data-topcap]')].map(b=>b.textContent),
+              pane: p.querySelectorAll('[data-repcaps] .capbody').length,
               capBoxes: boxes.length, capEnabled: boxes.filter(b=>!b.disabled).length,
               //  THE OBJECTIVE'S OWN BOX, BY ITS ID — a project's outcomes draw
               //  `data-crep` too, so an unscoped query went green on the very
@@ -314,9 +318,16 @@ with sync_playwright() as p:
     as_(pg, "t520")
     rp = safe(pg, REPORT, {}) or {}
     ck("§520.6: the company Reporting tab is offered to a capability's owner", "report" in (rp.get("tabs") or []), rp.get("tabs"))
-    capw = safe(pg, "()=>L1('capability')", "") or "\u0000"
-    ck("§520.6: …and it draws their capability's section, named as one",
-       any(h.startswith(capw) and mine in h for h in (rp.get("heads") or [])), rp.get("heads"))
+    #  §520.6 asserted a heading carrying the capability's NAME; §520.8 removed
+    #  that heading at Islam's word (a name at the top of the page is wrong), so
+    #  the claim is REWRITTEN, never loosened (§218): the section is headed in
+    #  the PLURAL capability word and the owner's capability is a row on the
+    #  rail — the two things a build that lost the section cannot satisfy.
+    capw = safe(pg, "()=>L('capability','bu')", "") or "\u0000"
+    ck("§520.6/§520.8: …and it draws the capabilities section, headed in the client's word",
+       any(h.startswith(capw) for h in (rp.get("heads") or [])), rp.get("heads"))
+    ck("§520.8: …with their own capability named on its rail",
+       any(mine in n for n in (rp.get("railNames") or [])), rp.get("railNames"))
     ck("§520.6: …with its boxes live", (rp.get("capBoxes") or 0) > 0 and rp.get("capEnabled") == rp.get("capBoxes"),
        {"boxes": rp.get("capBoxes"), "enabled": rp.get("capEnabled")})
     #  The capability's OWN row — the one gated by holderCodeOwner (§520.6),
@@ -363,8 +374,9 @@ with sync_playwright() as p:
     #  §520.6 BOTH ENDS: the office's Reporting page draws BOTH capabilities,
     #  the directions AND Submit — or a build that narrowed everybody passes.
     rs = safe(pg, REPORT, {}) or {}
-    ck("§520.6: …and the office's Reporting page draws both capabilities",
-       rs.get("caps") == 2 and "Second capability" in (rs.get("text") or ""), rs.get("caps"))
+    ck("§520.6: …and the office's Reporting page lists both capabilities on the rail",
+       rs.get("caps") == 2 and rs.get("pane") == 1 and "Second capability" in (rs.get("text") or ""),
+       {"rail": rs.get("caps"), "pane": rs.get("pane")})
     ck("§520.6: …the directions", (rs.get("dirBoxes") or 0) > 0, rs.get("dirBoxes"))
     ck("§520.6: …and Submit", rs.get("submit") is True and rs.get("speak") is True, {"submit": rs.get("submit"), "speak": rs.get("speak")})
     # ── 5c. §520.7: a capability planned in PILLARS reports its measures ──
@@ -376,8 +388,15 @@ with sync_playwright() as p:
     #  The state is MADE: the SECOND capability becomes the same owner's and
     #  plans in pillars, which is Ehab's shape exactly (two owned, one of
     #  them pillars). A pillars capability goes through `renderReport(
-    #  capAsUnit(c.id), {bodyOnly:true})`, the body a direction reports
+    #  capAsUnit(c.id), {paneOnly:true})`, the body a direction reports
     #  through (§53.5, §59), so its measures and tactics get the same boxes.
+    #  §520.8 (Islam, of the first build: "the name of the cpability is
+    #  wrtte n at teh top of the page which is wrong and another line sayd
+    #  directions key measures and tactics which is wrong"): the two sit on
+    #  ONE rail in the capability word, the selected one in ONE pane, no
+    #  "Capability — name" heading and no directions rail inside the pane —
+    #  so the second is reached by PRESSING its rail row, which is what a
+    #  person does, and the probe takes the capability to look at.
     ck("§520.7: a pillars-format capability is made for the same owner", safe(pg, """()=>{
       var c = GROUP.capabilities.find(x=>x.id==='capZZ'); if(!c) return false;
       c.head = 't520'; c.format = 'pillars';
@@ -385,21 +404,38 @@ with sync_playwright() as p:
         measures:[{id:'capZZ-P1-M1', name:'Cap measure', dir:'\u2265', target:'10%', compile:'Latest'}],
         tactics:[{id:'capZZ-P1-T1', name:'Cap tactic', owner:'', q1:1, q2:1, q3:1, q4:1}]}];
       return capPlansInPillars(c) === true}""") is True)
-    PILL = """()=>{current='group'; REPORTING='group'; currentSub='report'; paint();
+    PILL = """(id)=>{current='group'; REPORTING='group'; currentSub='report'; paint();
       var p = document.getElementById('panel');
+      var row = p.querySelector('[data-repcaprail] .ritem[data-topcap="' + id + '"]');
+      if (row && !row.classList.contains('on')) { row.click(); p = document.getElementById('panel'); }
       //  THE PILLARS CAPABILITY'S OWN BOXES, by their ids — a measure's figure
       //  and a tactic's — never an unscoped count, which the first
       //  capability's objective box already satisfies (§113.8).
       var m = p.querySelector('.capbody [data-rep="capZZ-P1-M1"]');
       var t = p.querySelector('.capbody [data-rep="capZZ-P1-T1"]');
-      return {caps: p.querySelectorAll('.capbody').length,
+      var sec = [...p.querySelectorAll('h2')].map(e=>e.textContent.trim()).filter(h=>/Key measures and Tactics/i.test(h));
+      return {caps: p.querySelectorAll('[data-repcaprail] .ritem[data-topcap]').length,
+              pane: p.querySelectorAll('[data-repcaps] .capbody').length,
+              on: [...p.querySelectorAll('[data-repcaprail] .ritem.on')].map(b=>b.dataset.topcap),
+              heads: sec,
+              capHeading: /Capability\s+\u2014/.test(p.textContent),
+              innerRail: p.querySelectorAll('[data-repcaps] .capbody .rhead').length,
               noProjects: /No Projects to report on/.test(p.textContent),
               measure: !!m, measureLive: !!(m && !m.disabled),
               tactic: !!t, tacticLive: !!(t && !t.disabled),
               words: /Cap measure/.test(p.textContent) && /Cap tactic/.test(p.textContent)}}"""
     as_(pg, "t520")
-    rpp = safe(pg, PILL, {}) or {}
-    ck("§520.7: the owner's Reporting page draws BOTH their capabilities", rpp.get("caps") == 2, rpp.get("caps"))
+    rpp = safe(pg, PILL, {}, "capZZ") or {}
+    ck("§520.7: the owner's Reporting page lists BOTH their capabilities on the rail", rpp.get("caps") == 2, rpp.get("caps"))
+    #  §520.8 BOTH ENDS (§94.2): one section headed in the CAPABILITY word
+    #  with no "Directions — …" twin, one pane, the pressed row lit and its
+    #  pane drawn with no "Capability — name" heading and no rail of
+    #  directions inside it.
+    ck("§520.8: one section, headed in the capability word",
+       len(rpp.get("heads") or []) == 1 and (rpp.get("heads") or [""])[0].startswith("Capabilities"), rpp.get("heads"))
+    ck("§520.8: …no capability's name as a heading over the block", rpp.get("capHeading") is False, rpp.get("capHeading"))
+    ck("§520.8: …one pane, the pressed capability lit", rpp.get("pane") == 1 and rpp.get("on") == ["capZZ"], {"pane": rpp.get("pane"), "on": rpp.get("on")})
+    ck("§520.8: …and no rail of directions inside it", rpp.get("innerRail") == 0, rpp.get("innerRail"))
     ck("§520.7: …and never says a pillars capability has no projects to report on",
        rpp.get("noProjects") is False, rpp.get("noProjects"))
     ck("§520.7: …its measure and its tactic are on the page", rpp.get("words") is True, rpp.get("words"))
@@ -415,10 +451,10 @@ with sync_playwright() as p:
     #  BOTH ENDS (§94.2): a direction owner is drawn no capability section at
     #  all, and the office is drawn the same two boxes.
     as_(pg, "t517")
-    rq2 = safe(pg, PILL, {}) or {}
+    rq2 = safe(pg, PILL, {}, "capZZ") or {}
     ck("§520.7: a direction owner is drawn no capability section", rq2.get("caps") == 0 and rq2.get("measure") is False, rq2)
     as_(pg, "smo")
-    rs2 = safe(pg, PILL, {}) or {}
+    rs2 = safe(pg, PILL, {}, "capZZ") or {}
     ck("§520.7: …and the office is drawn the pillars capability's boxes too",
        rs2.get("caps") == 2 and rs2.get("measureLive") is True and rs2.get("tacticLive") is True and rs2.get("noProjects") is False, rs2)
     ck("no page errors", not errs, errs[:3])

@@ -63877,3 +63877,87 @@ the Submit button, not the rows. Changing that word is its own decision.
 `v6.21`; `qa.py` through `qa-run.py` — see §520.7's tracker entry for the
 summed figure (§332). **On the branch, not merged** — the merge is Islam's
 word, on that merge.
+
+## §520.8 — The capabilities reporting section is one section, with a rail (2026-10-11)
+
+Islam, with a screenshot of the company Reporting tab viewed as Ehab, minutes
+after §520.7: *"ehab has 2 capabilities but in the rporting it's sjowing one
+only and the name of the cpability is wrtte n at teh top of the page which is
+wrong and another line sayd directions key measures and tactics which is wrong
+it shold say Capbilities - key measures and tactics"*.
+
+**THREE COMPLAINTS, ONE CAUSE.** §520.7 drew a capability planned in pillars
+through `renderReport(capAsUnit(id), {bodyOnly:true})`, and that option returns
+the UNIT page's whole body — its own pillar rail, its own *Directions — Key
+measures and Tactics* heading, its own chrome. So the first capability's pane
+filled the screen under a heading written for a unit, with the capability's
+name printed over it by the section wrapper, and the second capability sat off
+the bottom of the page, one more whole unit body down. Nothing was missing from
+the data; the page was two unit pages stacked, each wearing the wrong name.
+
+**THE ANSWER IS THE PRODUCT'S OWN RAIL-AND-PANE, NEVER A SECOND SHAPE**
+(§53.5): every unit's Reporting page lists its pillars on a rail and draws the
+pressed one in a pane, and that is exactly the shape two capabilities want.
+`reportCapsSplit(caps)` is the one builder: a `.split` whose rail
+(`data-repcaprail`) carries one row per capability — `railName(topCapCode(c),
+c.name)`, the tally from `reportedCount(capAsUnit(c.id))` as entered of asked,
+and *Still to enter* in the alarm ink while anything is owed — and whose pane
+draws the PRESSED capability's body: `renderReport(capAsUnit(id),
+{paneOnly:true})` for one planned in pillars, `capReportBody(c)` for one
+planned in projects. The press is `TOPCAP`, wired in `shell.html` beside the
+other rail presses. The section is headed in the client's own word —
+`L("capability","bu") + " — " + L("measure") + " and " + L("tactic")`, so it
+reads *Capabilities — Key measures and Tactics* on the worked example and
+whatever the client named them on theirs (§392) — and the capability's name is
+on its rail row and nowhere above the section.
+
+**`paneOnly` IS `bodyOnly` MADE HONEST**: it returns the key objectives table
+and the selected pillar's PANE alone — no bar, no summary, no waiting note, and
+no inner rail or inner heading unless the capability itself holds more than one
+pillar (then the inner rail is the right control and is kept). The non-paneOnly
+path is untouched and a unit's Reporting page is asserted **byte-identical** by
+hash of the rendered body, or a change to the shared renderer could reach every
+unit through a capability.
+
+**NO RULE MOVES**: the boxes drawn in the pane are the boxes §520.6's gate
+already opened — a capability's owner types on their own capability, the other
+rows stay read-only, the office types everywhere — and a direction's owner is
+still shown no capabilities section at all. Both ends asserted (§94.2).
+
+**§520.8a — THE §520.6 ASSERTION WAS STALE AND IS REWRITTEN, NEVER LOOSENED**
+(§218): it asked for the capability's name as a page heading, which is the very
+thing this round removes on Islam's word, so it went red on the correct build
+(§214.3). It asks now for the client's word leading the section heading and for
+the owner's capability named on the rail — two claims that can each fail and
+that survive the decision.
+
+**§520.8b — AND THE SCREENSHOT FIXTURE CALLED A CORRECT BUILD BROKEN**
+(§100.3): the shot of the built page timed out pressing a rail row because the
+Reporting tab was not offered at all — `canReport("group")` answered false, and
+measuring why found `topHasPlan` false and `ownsTopCapability` false, because
+the fixture had not made the single-company state the check makes
+(`GROUP.structure.bu.exists:false`, two top directions), so `buExists` was true
+and the top layer held no plan. The product was right; the fixture was not the
+state the feature exists for. Made the same state, and both capabilities shot.
+
+**VERIFIED**: `checks/direction-part.py` all good; red **2 / 1 / 9** on three
+breaks from the SOURCES (§276) — the section drawn through the old `bodyOnly`
+path, the rail removed, and the pane drawn for the first capability whatever is
+pressed — each break asserted to have matched once (§344.1), the tree restored
+from the saved copy and the rebuild byte-identical (§343.9); `test-authorize.js`
+**1057/0** unmoved; the access baseline **UNMOVED** against a baseline written
+from HEAD (§520.5c); `access-merged`, `capability-report-column` 16/0,
+`direction-owner-role`, `single-company`, `capability-first`, `hide-slide` 42/0
+all green; `built-in-step.py` all good; the four generators re-run and
+`generated-in-step` every comparison ok with §349.4's guard refusing the
+uncommitted tree; `sw.js` bumped to `v6.28-cap-rail-reporting`, held by no
+commit in the history, one live `const SHELL`, `node --check` clean, confirmed
+against `origin/main`'s `v6.21`; `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the destinations summed from the run's own lines
+(§332) and §520.7's figure to the digit — a round that adds a rail inside one
+section must move no destination. The built page was shot on both capabilities
+and published for Islam's look, with the record copy under
+`design-mockups/capability-reporting/2026-10-11_cap-rail-built.html` (rule 1c,
+shown after the build because the shape is the product's own and the question
+was the words, §1c's content-first rule). **On the branch, not merged** — the
+merge is Islam's word, on that merge.

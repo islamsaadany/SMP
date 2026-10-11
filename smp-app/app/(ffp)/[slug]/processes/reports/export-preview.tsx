@@ -282,6 +282,61 @@ export function ExportPreview({
     };
   }, [density, processes, arrangement]);
 
+  /* One continuous page. The PDF is shared mostly as a file read on screen, and
+     fixed A4 pages cut a block at every page end. In this mode the sheet is
+     printed as ONE page as wide as the preview and exactly as tall as its
+     content, so the PDF is the preview. The height is measured at the moment
+     of printing, on the paper held at its on-screen width so the text wraps as
+     previewed. Chrome refuses pages taller than 200in, so a longer document
+     falls back to ordinary pages rather than printing nothing. */
+  const [continuous, setContinuous] = useState(true);
+
+  useEffect(() => {
+    if (!continuous) return;
+    const MAX_MM = 200 * 25.4 - 20;
+    const styleId = "report-continuous-page";
+
+    const before = () => {
+      const paper = paperRef.current;
+      if (!paper) return;
+      const prevWidth = paper.style.width;
+      paper.style.width = "297mm";
+      paper.style.maxWidth = "none";
+      const heightMm = Math.ceil((paper.getBoundingClientRect().height * 25.4) / 96) + 3;
+      paper.dataset.prevWidth = prevWidth;
+      if (heightMm > MAX_MM) {
+        paper.style.width = prevWidth;
+        paper.style.maxWidth = "";
+        return;
+      }
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        @page { size: 297mm ${heightMm}mm; margin: 0; }
+        .report-paper { padding: 14mm !important; width: 297mm !important; }
+        .print-break-before { break-before: auto !important; }
+        .print-keep, tr, h1, h2, h3, h4 { break-inside: auto !important; }
+      `;
+      document.head.appendChild(style);
+    };
+    const after = () => {
+      document.getElementById(styleId)?.remove();
+      const paper = paperRef.current;
+      if (paper) {
+        paper.style.width = paper.dataset.prevWidth ?? "";
+        paper.style.maxWidth = "";
+      }
+    };
+
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => {
+      window.removeEventListener("beforeprint", before);
+      window.removeEventListener("afterprint", after);
+      after();
+    };
+  }, [continuous]);
+
   useEffect(() => {
     const scale = DENSITY_OPTIONS.find((option) => option.id === density)?.scale ?? 1;
     const root = document.documentElement;
@@ -481,6 +536,14 @@ export function ExportPreview({
             </div>
           </div>
         )}
+        <label className="flex items-center gap-[6px] text-[12px] font-semibold text-slate-500">
+          <input
+            type="checkbox"
+            checked={continuous}
+            onChange={(e) => setContinuous(e.target.checked)}
+          />
+          One continuous page
+        </label>
         <a
           href={pptxHref}
           className="rounded-[8px] border border-slate-300 bg-white px-[16px] py-[8px] text-[13px] font-semibold text-slate-700 hover:bg-slate-50"

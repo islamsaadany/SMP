@@ -1014,6 +1014,105 @@ reads as a clean run. *A check that cannot launch reports no failures.* Edit the
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE PLATFORM SAYS IT HAS SAVED (&sect;521, usability audit item 1):** Islam,
+  of the audit's first finding &mdash; *"let's start with the silent save, show
+  me the mockups"*. **THERE IS NO SAVE BUTTON ANYWHERE IN SMP AND THAT IS
+  DELIBERATE** (&sect;268, &sect;273.4: a field writes when the cursor leaves it
+  and the autosave carries it, so a Save button would promise the work was lost
+  until pressed) &mdash; **and nothing on the screen said so**, so the one thing
+  a person needs to know about the model is the one thing it never mentioned
+  (&sect;124). Four placements drawn and published as an Artifact (rule 1c);
+  Islam picked **D**, bottom left, carrying a premise &mdash; *"the normal user
+  can't see the top bar"* &mdash; which was **MEASURED AND IS FALSE**:
+  `header.top` is unconditional markup and `chromeFor()` hides only the
+  *Viewing as* dropdown, so the gap A would occupy is **106px BIGGER** for a
+  reporter at every width from 1600 to 1000. Said with the measurement rather
+  than an opinion (&sect;93.11), D's one real cost named (repetition in a long
+  report), the refinement proposed, and he took it: *"yes show me the staying
+  version with the time on hover"*, then **D, staying**.
+  **ONE ELEMENT FROM THE PLATFORM'S SINGLE SAVE EXIT, WHICH IS WHAT MADE IT
+  SMALL** &mdash; `sync.js`'s `say(state)` carries a comment saying it is the
+  ONE EXIT *"so a path added later cannot forget the parked callers"*
+  (&sect;104.7), with five states and only five (`offline` &middot; `clean`
+  &middot; `refused` &middot; `saved` &middot; `failed`; `"busy"` was retired at
+  &sect;183) &mdash; so there is no list of save sites to keep in step and a
+  sixth state tomorrow is one `case` rather than a sweep.
+  **IT SAYS NOTHING UNTIL THERE IS SOMETHING TO SAY** (&sect;35): `hidden` until
+  the first save of the session, and **it does not explain a failure**, because
+  &sect;171's banner, &sect;184's put-back and &sect;502's reference already do
+  and a second sentence beside them is two answers to one question (&sect;53.5)
+  &mdash; asserted as a PAIR, or a build that drew nothing at all satisfies the
+  silence half perfectly (&sect;94.2, &sect;113.8).
+  **BOTTOM LEFT BECAUSE BOTTOM RIGHT IS THE CHAT CORNER'S** (&sect;97's
+  `.chatdock`, measured rather than assumed) **and the one place they collide is
+  stated rather than dodged**: below 460px `chat.css` spans the dock across the
+  width, so the corner sits behind it there &mdash; the only cost is a `title`
+  hover and a phone has no hover, written into the CSS comment rather than
+  silently omitted. **z-index 35**, above page content and below every floating
+  control, read off the existing ladder. **NOT DRAWN IN FRONT OF A ROOM**
+  (`body.presenting`, &sect;265). **THE WIDTH FLOOR IS DERIVED, NEVER MEASURED**
+  (&sect;122.5): 9ch holds *Saving&hellip;* and *Saved* on one box so the pair
+  cannot jump, and the check asserts THAT PAIR rather than a pixel count
+  &mdash; *Not saved* is 1.7px wider and is not a jump on a working save.
+  **NO NEW TOKEN** (&sect;25, &sect;38.5): `--good`/`--good-tx` and
+  `--bad`/`--bad-tx`, the pairs &sect;94.8 already declares for exactly this
+  (a colour that works as a fill fails as type). **`role="status"` AND NOTHING
+  BESIDE IT** &mdash; it already implies `aria-live="polite"` and
+  `aria-atomic="true"`, and the atomic replacement is what keeps a burst quiet,
+  so the explicit `aria-live` drafted first was DROPPED after asking rather than
+  reasoning (&sect;298.2). **THE TIME IS ON THE HOVER** (1b-ii: a fact the
+  screen does not otherwise state belongs on a hover, and a clock on the line is
+  a figure that is wrong one minute later), from `savedAt`, written at the ONE
+  site that is a save &mdash; `lastSaved` is assigned at three and the other two
+  are a refresh and a boot landing.
+  **&sect;521.1 &mdash; AND THE ONE PRODUCT FAULT WAS &sect;170's DEBOUNCE
+  MEETING MY OWN FADE**: that section's debounce is LEADING-EDGE, so the first
+  change of a burst posts at once and the trailing timer still fires with
+  nothing to send, answering `clean` every time &mdash; and `clearTimeout(tipFade)`
+  sat ABOVE the `clean` early return, so the second save cancelled the fade a
+  beat after it was armed and never re-armed one: **`Saved` stayed on the screen
+  for ever**. Three check failures, one cause. `clean` leaves everything alone
+  now, the pending fade included. **And my first fix of it made the `offline`
+  branch unreachable** &mdash; `offline` has no word of its own, so the word test
+  fired first &mdash; caught by me rather than by a check, and `offline` is
+  handled first with its own clear (&sect;24).
+  **&sect;521.2 &mdash; AND A FALSIFICATION THAT COULD NOT FALSIFY WAS THE
+  FINDING** (&sect;54.5): `tip-fades-failure` made a failure fade like a success
+  and reported **ALL GOOD**. Chased rather than accepted, and the cause is in the
+  product: `sync.js` holds `setInterval(save, 5000)` **never captured in a
+  variable and therefore never cleared, for the life of the page** (&sect;160.4),
+  a failed save does not update `lastSaved` so each retry fails again and calls
+  `say()` again, and a refusal short-circuits into `say("refused")` the same way
+  &mdash; so **a six-second fade can never complete while a failure or a refusal
+  stands**, and `if (state === "saved")` provably does nothing today. Answered
+  three ways rather than left: the guard is KEPT with its own comment saying it
+  fixes nothing today, the break is REMOVED with the reason in its place, and
+  &sect;7 of the check asserts the **RETRY** &mdash; the post count before and
+  after the quiet window &mdash; beside what a person gets, because *"it is STILL
+  there"* was passing for the wrong reason (&sect;113.8).
+  **VERIFIED**: `checks/save-tip.py` **38/0** &mdash; `qa-run: own-server`,
+  twelve sections, both ends everywhere &mdash; proved able to fail **five ways
+  from the SOURCES** (&sect;276; &sect;238's hashed CSP silences an edited built
+  file), each break **1 red on its own assertion and no other**, with
+  `tip-always-pointer` printing `{'there': True, 'hit': 'sword', 'mine': True}`,
+  `tip-on-projector` printing `display: 'flex'` and `tip-no-width-floor`
+  printing `45.8 vs 31.2`; every break asserted to have MATCHED before it was
+  written (&sect;344.1), the tree restored from the saved copies rather than with
+  `git checkout` (&sect;343.9) and the rebuild asserted byte-identical. Beside
+  it: `save-said`, `safety-banners`, `report-saves`, `save-flush`,
+  `office-chat` and `deck-fullscreen` all green, `built-in-step.py` all good,
+  `generated-in-step` all comparison lines ok, and `qa.py` through `qa-run.py`
+  **33 viewers / ERRORS none**. **`save-fidelity` 1 FAILED is NOT this work's**,
+  established on a baseline worktree before anything here was blamed
+  (&sect;303). **Screen only**, read off the diff: nothing stored moves, nothing
+  is migrated, no rule about who may save what changes &mdash; so no forced
+  sign-out is owed (spec 029). The built file's bytes changed, so **`sw.js` is
+  bumped** (&sect;91). **RECORDED, NOT DONE** &mdash; the rest of Islam's own
+  queue, in his order: keyboard shortcuts for entry, the 26 `confirm()` / 11
+  `alert()` / 1 `prompt()` moved inside the platform, what a failed save tells
+  the client, and the six date spellings; and **the help page for a client's own
+  staff** (heuristic 10 &mdash; the Knowledge base is `when: inOffice()`), which
+  is NOT in his order and is named rather than dropped.
 - **A CLOCK ON THE REVIEW (§340):** Islam — *"in the presentation module I need
   to set as an SMO the time of each presentation so the timer appears for the
   presenter"*, then *"it needs to be per unit and it can be set in the master

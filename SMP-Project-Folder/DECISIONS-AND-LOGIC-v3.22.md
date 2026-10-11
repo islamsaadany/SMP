@@ -63220,3 +63220,141 @@ Islam, of El Abd (business units off, directions with named owners): *"when they
 **NOT CLAIMED**: why El Abd's owners *"can't report"*. The code lets a named Owner or Custodian report their own direction (§469); whether El Abd's owners are named by a name the register holds is a fact about their data, and it waits on Islam viewing as one of them. **Built on the branch, not merged.**
 
 **§517.1 — MERGED TO `main` 2026-10-10 on Islam's word** (*"merge to main"*). `main` had not moved since the branch was cut (`origin/main` an ancestor of the branch, measured), so the merge is a clean fast-forward and the tree pushed is the tree verified; §517 was free on `main`. `sw.js` confirmed against `origin/main` immediately before the push (§94.16): `v6.21-direction-part` against main's `v6.20-cycle-office`, one live `const SHELL`, `node --check` clean. The branch tip was already pushed, so `main` carries this record commit of its own (§91). **No forced sign-out is owed** (spec 029): the authoriser changed and only ADDS — a new group key nobody's tab has ever written, refused to everybody but the Super user — so no save that worked before is refused now. **§91.5's live read could not be made from this session**: the proxy refuses the production address (403 at CONNECT), so the deployment is unverified from here and said so rather than claimed. The witnesses for whoever reads it: `shell.js` **4,619,585 / `3dc70320` → 4,627,912 / `b44ea287`** and the served `sw.js` stamp **`d7a28757` → `c65f9364`** (§397 — so the reload banner is offered); `platform.css` is unchanged at 777,706 / `9f586d49` and is no witness this round (§113.8). The branch is held behind `main` until that read is made.
+
+
+## §521 — The platform says it has saved (usability audit, item 1; 2026-10-11)
+
+Islam, setting the queue after the usability audit: *"let's start with the silent
+save, show me the mockups and after we can tackle the shortcuts of entry then the
+browser popups that we need to adjust to be inside the platform and the failed
+save telling the lcient and then the dates."* This is the first of the five.
+
+**THE AUDIT'S OWN FINDING, AND IT IS A SILENCE RATHER THAN A FAULT**: this
+platform has no Save button anywhere by design (§268, §273.4) — every box
+writes when the cursor leaves it and the autosave carries it — and until today
+**nothing on the screen said so**. A person reporting a figure typed it, saw
+nothing happen, and had no way to tell a landed save from a lost one; the only
+thing the product ever said about a save was when one went WRONG (§171,
+§502, §504). *A product whose saves are invisible asks every reporter to
+trust it, and the one thing it tells them is bad news.*
+
+**FOUR PLACEMENTS DRAWN BEFORE ANYTHING WAS BUILT** (rule 1c): the top bar, the
+section line, the pillar head, and the bottom left corner. Islam picked **D**,
+the corner, and his pick carried a premise — *"the normal user can't see the
+top bar"* — **which is false, and the correction is a measurement rather than
+an opinion**: `header.top` is unconditional markup and `chromeFor()` hides only
+the *Viewing as* dropdown, so the gap treatment A would occupy is **106px BIGGER
+for a reporter** than for the office, at every width from 1600 to 1000. Said
+plainly with the number; he kept D on its own merits (*"I like option D while
+staying while work"*), so the choice is his and the premise is corrected rather
+than carried. **AND THE REFINEMENT IS HIS TOO**: the message STAYS while the
+work is going on, with the time of day on the hover — *"yes show me the staying
+version with the time on hover"* — drawn, published as an Artifact and signed
+off before a source moved.
+
+**IT IS ONE ELEMENT DRAWN FROM THE PLATFORM'S SINGLE SAVE EXIT, WHICH IS THE
+WHOLE REASON IT IS SMALL** (§104.7): `sync.js`'s `say(state)` has its own
+comment calling itself *"ONE EXIT, so a path added later cannot forget the
+parked callers"*, and it has five states and only five — `offline` · `clean`
+· `refused` · `saved` · `failed` (`"busy"` was retired at §183). So three
+words cover every save the product can make, a sixth state added tomorrow is
+drawn the day it is added, and **nothing anywhere else in the product needed a
+line**.
+
+**IT SAYS NOTHING UNTIL THERE IS SOMETHING TO SAY** (§35) and **it does not
+explain a failure**, because three surfaces already do and a fourth would be a
+second answer to one question (§53.5): the refusal banner with its put-back
+(§184), the failure bar with the status, the reference and the reason (§171,
+§502), and the unsaved-work bar (§504). *Not saved* is a signal that points at
+them; **asserted as a PAIR**, because a build whose corner tried to explain the
+server's refusal would satisfy every assertion about the corner alone.
+
+**BOTTOM LEFT BECAUSE BOTTOM RIGHT IS THE CHAT CORNER'S** (§97), measured
+rather than assumed — `.chatdock` is `right:18px; bottom:18px` — and the one
+width where the two meet is stated rather than silently dodged: below 460px
+`chat.css` makes the dock span the page, so the corner sits behind it there, and
+the only thing lost is a `title` hover, which a phone does not have. Recorded in
+the CSS comment instead of a media query nobody asked for. **z-index 35**: above
+page content, below every floating control (`.kmenu` 40, `.chatdock` 45, the
+pickers 60, the deck 61, the tour 70, the overlay 100). **NOT DRAWN IN FRONT OF
+A ROOM** (§265), through `body.presenting` — the deck's own class — and
+asserted at both ends.
+
+**THE WORD'S BOX HAS A FLOOR SO IT DOES NOT JUMP** as `Saving…` becomes
+`Saved`, **derived from the longest of the three words in its own font and never
+a pixel measured once** (§122.5): `min-width:9ch`. **NO NEW TOKEN** (§25,
+§38.5) — `--good`/`--good-tx` and `--bad`/`--bad-tx` already exist as the
+fill-and-type pair §38.4 requires, so the dot takes the fill and the word takes
+the ink. **`role="status"` AND NOTHING BESIDE IT**, which is `#unsaved`'s own
+shape (§53.5): that role already implies `aria-live="polite"` and
+`aria-atomic="true"`, and the atomic replacement is what keeps a burst of saves
+from reading out three times — **measured rather than reasoned about, and an
+explicit `aria-live` dropped once it was** (§298.2).
+
+**THE TIME IS ON THE HOVER AND NOT ON THE LINE** (1b-ii): a clock drawn on the
+line is a figure that is wrong one minute later, and `lastSaved` — *"the
+serialized graph the server last accepted"* — carried no timestamp at all. It
+is stamped at the ONE place a save lands (the ok branch) and never at the two
+other sites that assign `lastSaved` (a refresh, and the boot landing), because
+neither of those is a save.
+
+**§521.1 — ONE PRODUCT FAULT, AND IT IS THE PROMISE THE DRAWING MAKES.** The
+first build cleared the pending fade at the top of `saveTip`, above the `clean`
+early return — and §170's debounce is LEADING-EDGE, so the first change of a
+burst posts at once and the trailing 800ms timer still runs, which means a
+second save follows with nothing to send and **answers `clean` every time**. So
+the fade was armed and then cancelled a beat later by a state that has nothing
+to say, and never re-armed: **`Saved` stayed on the screen for ever**, which is
+exactly what treatment D promises not to do. Three check failures, one cause.
+`clean` now LEAVES EVERYTHING ALONE, the pending fade included. **Found by the
+check on its first run, not by reading** — and **my first fix made the
+`offline` branch unreachable**, because `offline` has no word of its own and the
+word test fired first (caught by me rather than by a check; `offline` is handled
+first now, with its own clear).
+
+**§521.2 — AND ONE FALSIFICATION COULD NOT FALSIFY, WHICH IS THE FINDING OF
+THE ROUND.** `tip-fades-failure` made a failure fade like a success and the check
+reported **ALL GOOD** — a green falsification run, indistinguishable from a
+guard that works (§54.5). Chasing it rather than accepting it found the real
+mechanism: **`sync.js`'s `setInterval(save, 5000)` is never captured in a
+variable, so it can never be cleared and runs for the life of the page**
+(§160.4) — a failed save does not update `lastSaved`, so every retry fails
+again and calls `say("failed")`, and a refusal short-circuits straight to
+`say("refused")`. **So a six-second fade can never complete while a failure or a
+refusal stands, and `if (state === "saved")` provably does nothing today.** The
+asymmetry Islam asked for holds either way, by a route nobody designed. Answered
+three ways rather than quietly: the guard is KEPT with its own comment saying it
+fixes nothing today and why (§298.2); the break is REMOVED from the list with
+the reason in its place, because a falsification that reports 0 red is worse than
+none; and **§7 of the check asserts the RETRY** — the post count before and
+after the quiet window — beside what a person gets, or the pair would be true
+for the wrong reason (§113.8). *I had assumed the guard; only asking the code
+found it.*
+
+**VERIFIED**: `checks/save-tip.py` **38/0**, twelve sections, **both ends
+everywhere** (§94.2) and proved able to fail **five ways from the SOURCES**
+(§276, because §238's hashed policy silences an edited built file) —
+`no-tip` **18 red**, printing the reported silence verbatim
+(`{'shown': False, 'op': 0, 'display': 'none'}`); `tip-clean-clears` **3 red**,
+§521.1's own three (`op:1 shown:True word:'Saved'`); `tip-always-pointer`,
+`tip-on-projector` and `tip-no-width-floor` **1 red each**, every one reddening
+its own assertions and no others. The tree was restored from the saved copies
+rather than with `git checkout` (§343.9) and the rebuild asserted
+byte-identical to the build the green run was measured against.
+`built-in-step.py` all good, `generated-in-step.mjs` all comparison lines ok
+(its one FAIL is §349.4's dirty-tree guard, which clears on commit), `sw.js`
+bumped to `v6.22-save-said` with one live `const SHELL` and `node --check`
+clean (§91, §146.2). **Screen only**: nothing stored moves, nothing is
+migrated, no rule about who may save what changes — read off the diff
+(spec 029), so no forced sign-out is owed.
+
+**NOT THIS WORK'S** (§303): `save-fidelity.py`'s one failure
+(*adding a measure lands on the server*) reproduces identically on a baseline
+worktree built from the commit before this — recorded, not fixed here.
+
+**RECORDED, NOT DONE**: the four items after this in Islam's own order — the
+keyboard shortcuts for entry, the browser pop-ups moved inside the platform,
+what a failed save tells the client, and the dates. And **the help page for a
+client's own staff is NOT in his order** and is named rather than dropped: the
+Knowledge base is `when: inOffice()` (§119.4), so heuristic 10 is unanswered
+for everybody outside the office.

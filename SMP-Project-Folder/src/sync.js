@@ -163,12 +163,108 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
+  /* WHEN the server last accepted one, for the hover (§521). `lastSaved`
+     carries no time of its own and never needed one: it is compared, not
+     read. Set at the ONE place a save is accepted, so a landing or a rebase
+     — which set the baseline from the server's copy rather than from a
+     change of this person's — cannot claim to be a save. */
+  var savedAt = null;
   var stale = false;       /* §431: the saved copy is on screen and the fresh one has not landed */
   var timer = null;
   var saving = false;
   /* When the last save actually LEFT, so the leading edge below can tell a
      first change from the fourth in a burst. */
   var lastFlush = 0;
+  /* ── IS IT SAVED? (§521) ──────────────────────────────────
+
+     Islam, of the usability audit's first finding: a platform with no Save
+     button tells the person typing nothing at all. Every box writes when the
+     cursor leaves it and the autosave carries it (§268, §273.4) — which is
+     right, and means the five outcomes of a save reached only the eight
+     callers that pass a callback.
+
+     DRAWN FROM `say()` AND FROM THE ONE `saving = true`, so a save path added
+     later reports without anybody remembering to add it to a list (§104.7).
+     `saving` is deliberately NOT routed through `say()`: that function has
+     exactly five states and §183 retired a sixth on purpose, so the word in
+     flight is set where the flight opens.
+
+     SAVED FADES AND A FAILURE DOES NOT, which is Islam's own asymmetry: a
+     save that landed has nothing left to say six seconds later, and one that
+     did not is the only thing on the screen saying so until the next save
+     settles it. `clean` LEAVES IT EXACTLY AS IT IS — the trailing half of
+     §170's debounce answers `clean` constantly, so re-arming the fade there
+     would hold a stale `Saved` up for ever and clearing it would take the
+     message away mid-sentence.
+
+     IT SAYS TWO WORDS AND EXPLAINS NOTHING. A refusal has §184's banner with
+     its put-back, a failure has §171's sentence with its reference and
+     §504's kept copy, and a stale tab has §258's. Four surfaces already
+     explain; a fifth that half-explained would be the drift §53.5 exists to
+     stop. */
+  var tipFade = null;
+  /* Long enough that a run of edits reads as ONE appearance rather than a
+     message per box left: §170 posts the first change of a burst at once, so
+     somebody filling a report settles several saves a minute. */
+  var TIP_QUIET = 6000;
+  function saveTip(state) {
+    var el = document.getElementById("savetip");
+    if (!el) return;
+    /* With no server there is nothing to say about saving, and before the
+       first save of a session there is nothing to say either (§35). This is
+       FIRST, and the word test below is not the place for it: `offline` has
+       no word of its own, so folding it in under the empty word would have
+       made this branch unreachable — a line nobody can reach that the next
+       reader takes for load-bearing (§24, §298.2). */
+    if (state === "offline") {
+      if (tipFade) { clearTimeout(tipFade); tipFade = null; }
+      el.hidden = true; el.classList.remove("show"); return;
+    }
+    var word = state === "saving" ? "Saving…"
+             : state === "saved"  ? "Saved"
+             : (state === "failed" || state === "refused") ? "Not saved"
+             : null;
+    /* `clean` LEAVES EVERYTHING ALONE, THE PENDING FADE INCLUDED — and the
+       first build of this cleared the fade timer ABOVE this line, which is
+       the one thing it may not do (§521.1). §170's debounce is leading-edge:
+       the first change of a burst posts at once and the trailing 800ms timer
+       still runs, so a second save follows with nothing to send and answers
+       `clean` — every single time. So the clear cancelled the fade a beat
+       after arming it and never re-armed one, and `Saved` stayed on the
+       screen for ever: exactly what this treatment promises not to do, and
+       the reason Islam chose it over the two that flash. Found by the check
+       on its first run, not by reading. */
+    if (!word) return;
+    if (tipFade) { clearTimeout(tipFade); tipFade = null; }
+    el.hidden = false;
+    el.setAttribute("data-state", state === "refused" ? "failed" : state);
+    el.innerHTML = '<span class="sdot"></span><span class="sword">' +
+                   word + "</span>";
+    /* The time is on the hover rather than on the line, because a clock on
+       the line is a figure that is wrong one minute later (1b-ii: a fact the
+       screen does not otherwise state belongs on a hover). */
+    if (state === "saved" && savedAt) el.title = "Last saved at " + savedAt;
+    else el.removeAttribute("title");
+    el.classList.add("show");
+    /* AND THIS GUARD PROVABLY FIXES NOTHING TODAY, WHICH IS WORTH SAYING
+       RATHER THAN LEAVING SOMEBODY TO WRITE A FALSIFICATION FOR IT
+       (§298.2). The asymmetry Islam asked for — `Saved` fades, `Not
+       saved` stays — holds whether or not this line is here, because a
+       save that did not land is RE-SENT every five seconds for the life of
+       the page (`setInterval(save, 5000)` below, never captured and never
+       cleared, §160.4) and each retry calls `say()` again, so a six-second
+       fade can never complete while a failure or a refusal stands. Measured
+       rather than reasoned about: with the guard removed the message is
+       still on screen seven seconds later and the check reports 0 red,
+       which is indistinguishable from a guard that works (§54.5). It is
+       kept as belt and braces for the day the retry stops — and
+       `checks/save-tip.py` §7 asserts the RETRY, which is what actually
+       holds the message there. */
+    if (state === "saved") {
+      tipFade = setTimeout(function () { el.classList.remove("show"); }, TIP_QUIET);
+    }
+  }
+
   /* Kept from boot() so a save can ask the screen to repaint itself. The
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
@@ -847,6 +943,7 @@ var SYNC = (function () {
        arrived while the flight was open — by re-running the save, because
        their change may not have been in it. */
     var say = function (state) {
+      saveTip(state);
       if (done) done(state);
       if (!queued.length || saving) return;
       var waiting = queued.splice(0, queued.length);
@@ -898,6 +995,7 @@ var SYNC = (function () {
       return say("refused");
     }
     saving = true;
+    saveTip("saving");
     lastFlush = Date.now();
     fetch("/api/state", {
       method: "POST",
@@ -938,6 +1036,7 @@ var SYNC = (function () {
         showRefusal(null);
         FAILSHOWN = "";
         lastSaved = now;
+        savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then

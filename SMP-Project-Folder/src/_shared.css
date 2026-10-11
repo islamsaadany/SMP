@@ -403,6 +403,48 @@
   @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
+  /* ── IS IT SAVED? (§521) ───────────────────────────────
+     One message, bottom left, in the shape Islam signed off. BOTTOM RIGHT IS
+     THE CHAT CORNER'S (§97), so this takes the other end.
+     THE Z-INDEX IS BELOW EVERY FLOATING CONTROL and above the page: .kmenu is
+     40, .chatdock 45, the pickers 60, the deck 61, the tour 70, a modal 100 —
+     so an open conversation, a menu or a dialog covers this rather than the
+     other way round, because those are what somebody is using and this is
+     only reading back what already happened.
+     THE SHOWN PILL TAKES THE POINTER, because the time is on its hover and a
+     hover needs one — which is the chat corner's own recorded cost at the
+     other end (§316.5), narrowed here to the seconds a save is in flight and
+     the six after it; FADED it takes none, or an invisible box would eat
+     clicks at that corner for ever.
+     Below 460px .chatdock spans the width and its own invisible box lies over
+     this one: the only thing that can cost is the hover, and a phone has no
+     hover.
+     NOT ON A PROJECTOR — §265's rule, and the one .chatdock already follows:
+     a message that comes and goes in front of a room costs the room more
+     attention than it saves the presenter. */
+  .savetip { position:fixed; left:18px; bottom:18px; z-index:35;
+             display:flex; align-items:center; gap:6px;
+             background:var(--surface); border:1px solid var(--line);
+             border-radius:6px; box-shadow:0 6px 20px rgba(10,20,40,.18);
+             padding:8px 13px; font-size:var(--fs-small); color:var(--ink-3);
+             white-space:nowrap; letter-spacing:.01em;
+             opacity:0; transition:opacity .22s ease; pointer-events:none; }
+  .savetip[hidden] { display:none; }
+  .savetip.show { opacity:1; pointer-events:auto; }
+  body.presenting .savetip { display:none; }
+  .savetip .sdot { width:7px; height:7px; border-radius:50%;
+                   background:var(--ink-3); flex:none; }
+  .savetip[data-state="saved"] { color:var(--good-tx); }
+  .savetip[data-state="saved"] .sdot { background:var(--good); }
+  .savetip[data-state="failed"] { color:var(--bad-tx); font-weight:600; }
+  .savetip[data-state="failed"] .sdot { background:var(--bad); }
+  /* THE BOX MUST NOT CHANGE WIDTH AS Saving… BECOMES Saved, or it re-animates
+     the one thing this treatment promises not to: a message that stays put
+     while somebody works. Derived from the longest of the three words
+     ("Not saved", 9 characters) in its own font, never a pixel measured once
+     (§122.5). */
+  .savetip .sword { display:inline-block; min-width:9ch; }
+
   /* ── HISTORY (§262) ─────────────────────────────────────────────────
      A setup table in the register's clothes (§88: one line per cell, the
      long value on the hover), the changed pair in the mono face so a number

@@ -55,6 +55,27 @@
 <div class="banner refused" id="refused" hidden></div>
 <div class="banner safety" id="unsaved" role="status" hidden></div>
 
+<!-- IS IT SAVED? (§521) The platform has never had a Save button (§268,
+     §273.4): every box writes when the cursor leaves it and the autosave
+     carries it. Which is right, and left the person doing the typing with
+     nothing at all to read - the five outcomes of a save were told only to
+     the eight callers that pass a callback. One message, drawn from sync.js's
+     own single exit so a save path added later reports without anybody
+     remembering to add it (§104.7). Bottom left, because bottom right is the
+     chat corner's (§97). Hidden until there is something to say - before the
+     first save of a session there is nothing (§35).
+     `role="status"` AND NOTHING BESIDE IT, which is #unsaved's own shape one
+     line up (§53.5): that role already means a polite, atomic live region, so
+     a second `aria-live="polite"` would be a line that changes nothing and the
+     next reader would take it for load-bearing (§298.2). It carries real
+     weight here rather than being a formality - #refused above it has no live
+     role at all, so until today a refused or failed save reached a screen
+     reader through nothing whatever. Atomic is also what keeps it quiet: each
+     word REPLACES the one before it, so a run of edits supersedes its own
+     pending announcements and what is spoken lands in the pauses, which is
+     when it is wanted. -->
+<div class="savetip" id="savetip" role="status" hidden></div>
+
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
      you are looking as, and the two buttons that leave. The org name, the unit

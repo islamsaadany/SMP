@@ -6932,7 +6932,23 @@ function renderReport(u){
        roll them up from and the office enters them here (`topReportKOs`). */
     /* §517: and a direction owner narrowed to their part is not shown them. */
     (u.topLayer && (!objs.length || partOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
-    section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
+    /* §520.6: a part owner narrowed to a part that is not a direction is not
+       told the company has no directions to report against (§45.2, §61) —
+       the section is theirs only where one of its rows is. */
+    (u.topLayer && partOnly() && !partItems(u).length ? "" :
+      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
+       a section of the company's plan and never a destination (§520.1), so
+       this page is the only Reporting page its owner can reach; each one is
+       the capability's own report body, which asks `cap:<id>` for itself —
+       the owner types on theirs, a direction's owner reads it, the office
+       types on all. `capsHere()` is the one narrowing (§520.5). */
+    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP)
+      ? capsHere().map(function(c){
+          return section("", L1("capability") + " &mdash; " + esc(c.name), null,
+            '<div class="capbody">' + capReportBody(c) + '</div>');
+        }).join("")
+      : "") +
     summary;
 }
 
@@ -8695,7 +8711,13 @@ function capReportBody(c){
      question, because a project owner speaks for their project and a
      capability's key objectives belong to no project. Each project asks for
      ITSELF, below, through the same pair the server enforces. */
-  var may = canReportFnWhole(c.fn);
+  /* §520.6: THE CAPABILITY'S OWN TARGET, never the holding function's. Asked
+     of `fn:<key>` this answered for the FUNCTION — true for its head, false for
+     the capability's own owner (§412) — so on the company's Reporting page
+     Ehab's rows drew read-only while a direction's owner typed on his. Through
+     `holderCodeOwner` so a function's own work keeps asking `fn:<key>` and a
+     capability asks `cap:<id>`, which is what the server judges (§334). */
+  var may = canReportFnWhole(holderCodeOwner(c));
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
@@ -8712,7 +8734,7 @@ function capReportBody(c){
   /* §279: the same mark the unit's rail carries, off the same map — this
      side's rail had exactly the unit's fault and no banner above it either. */
   var owedAt = {};
-  reportPlaces("fn:" + c.fn).forEach(function(e){ owedAt[e.key] = e; });
+  reportPlaces(holderTarget(holderCodeOwner(c))).forEach(function(e){ owedAt[e.key] = e; });
   var owesPr = function(p){
     var e = owedAt["pr:" + p.id];
     return e && e.count > 0 ? e : null;

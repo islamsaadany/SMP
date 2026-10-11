@@ -9447,3 +9447,44 @@ What to go and check, after a merge:
   exactly as before.
 
 Still open: your word to merge.
+
+## 2026-10-11 — A capability's owner reports their own capability (§520.6)
+
+On the branch, not merged. Built on your word: the capability owner is treated
+like the direction owner.
+
+With the business units off and the half eye on, a capability's owner now opens
+the company's **Reporting** tab, exactly as a direction's owner does, and enters
+figures on their own capability's rows and nowhere else. The Foundation they
+already had. Submitting is still the office's and the CEO's — neither kind of
+owner gets a Submit button.
+
+Why it was missing: the Reporting tab asked one rule for who may enter figures
+on the company, and that rule knew about a direction's owner and not about a
+capability's. One shared rule now answers for both, on the screen and on the
+server. And inside the page, the capability's own rows were being asked about
+the FUNCTION that holds the capability rather than the capability itself —
+right for a function head, wrong for somebody whose seat is on the capability
+alone — so they are asked about the capability now.
+
+Checked: Ehab gets the Reporting tab, boxes on Product Mindset's rows, no box
+on Amr's direction, no Submit; Amr gets boxes on his direction and none on
+Product Mindset; the office is untouched; the server accepts Ehab's own figure
+and refuses him the other capability and a submission. Nobody's access moved,
+measured person by person. Three deliberate breaks each turned the check red —
+and the third only after the check itself was corrected twice, because the
+example data's capability had no rows to measure and the probe was looking at
+the wrong box. The whole-platform walk: 33 viewers, 234 destinations, no errors — the same count as yesterday, as it should be when nothing on the example data gains a page.
+
+What to go and check, after a merge:
+
+- Open **Roles & access**, press the half eye in the Part owner row's *The top*
+  cell, then view as Ehab.
+- The company page should show **Foundation** and **Reporting**. On Reporting,
+  Product Mindset's rows take a figure; Amr's direction shows none; there is no
+  Submit button.
+- View as Amr Hassan: his direction's rows take a figure, Product Mindset shows
+  none, no Submit.
+- Press the eye again. Both read the whole company as before.
+
+Still open: your word to merge.

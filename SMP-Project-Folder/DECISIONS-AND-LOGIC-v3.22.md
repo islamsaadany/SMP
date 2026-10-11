@@ -63739,3 +63739,73 @@ option (b) — narrowing `capowner:a_fn_own` to `view` so the row agrees — is 
 line whenever he wants it and moves a grant, which is why it is not taken here.
 
 **On the branch, not merged** — the merge is Islam's word, on that merge.
+
+## §520.6 — A capability's owner reports their own capability (2026-10-11)
+
+Islam, of what §520.5 handed over: *"why ehab doesn't have the reporting part?
+like Amr in the retail he should see the foundation like the direction owner and
+see thereporting. Why are you confused. the capability owner is treated like hte
+direction owner why are you still confused?"* — then, of the plan put back in
+plain words, **"yes agreed noting the the capability owner sees the foundation
+as well just like the direction owner (build it)"**.
+
+**HE IS RIGHT AND THE RULE WAS ALREADY WRITTEN ONE ROLE OVER.** §469 lets a
+company direction's owner enter their own direction's figures on the company's
+Reporting tab and no more, and §520 made a capability's owner a part owner — the
+same narrowing, the same half eye — and stopped one tab short: the company
+Reporting tab asked `canReport("group")`, whose group branch admitted the office,
+the CEO and `ownsTopPillar` and had never heard of a capability. So Amr (a
+direction's owner) reached Reporting and Ehab (a capability's owner) did not,
+with both holding the same kind of seat on the same page. The Foundation half of
+his sentence was already true — §520.1 kept it for every part owner — and is
+asserted rather than re-built.
+
+**ONE RULE, SHARED** (§42): `SMPRules.ownsTopCapability(w, person)` is the twin
+of `ownsTopPillar`, written once in `lib/rules.js` and asked by the browser's
+`canReport` group branch and by the authoriser. The server needed no new
+classification — a capability's own rows already classify as that capability's
+reporting, and the owner was already allowed them — so the server-side section
+(`test-authorize.js` §520.6) asserts what was true and now has a screen in front
+of it: the owner's figure on their own capability accepted, a figure on the OTHER
+capability refused, a submission refused. **1057/0.**
+
+**THE PAGE ASKS THE CAPABILITY, NEVER THE FUNCTION THAT HOLDS IT.**
+`capReportBody(c)` gated the capability's own key-objective rows on
+`canReportFnWhole(c.fn)` — the holding FUNCTION's column — which is right for a
+function head and wrong for somebody whose seat is on the capability alone.
+Measured on the made state: for the capability's owner the function answers
+**false** and the capability answers **true** (`k_report` on `fn:…` is none, on
+`cap:…` is edit); for the direction's owner both are false; for the office both
+are true. So the body asks `holderCodeOwner(c)` — the capability's own target —
+for the rows and for `reportPlaces()`, which is what the rail's owed marks read.
+A project's rows were already asked per project and are untouched.
+
+**SUBMITTING STAYS THE OFFICE'S AND THE CEO'S.** `canSpeakFor("group")` is not
+widened, so REPORT_CHROME draws no Submit for either owner; what they get is a
+box on their own rows and nothing on the other's — Amr sees no box on Product
+Mindset, Ehab sees no box on Amr's direction — asserted at both ends (§94.2).
+
+**AND TWO OF THE CHECK'S OWN FAULTS WERE FOUND BY FALSIFYING** (§54.5,
+§113.8). The break that puts `c.fn` back came out GREEN twice before it came out
+red. First because the fixture's capability holds NO key objectives (§333 left
+the demo's one capability empty), so the only rows that line gates did not exist
+and the line was under no measurement at all — the fixture now makes one.
+Second because the probe asked for any `[data-crep]` box, and a project's
+outcomes draw `data-crep` too, so a page with the objective's box missing still
+answered yes — it asks for the objective's own id now. With both corrected the
+break is **1 FAILED**, on exactly that assertion.
+
+**VERIFIED**: `checks/direction-part.py` all good (64 assertions), red three ways
+from the SOURCES (§276) at **5 / 5 / 1** with each break asserted to have matched
+exactly once (§344.1), the tree restored from the saved copy and the rebuild
+asserted byte-identical (§343.9); `test-authorize.js` **1057/0**; the access
+baseline **UNMOVED** against `b9155143` (33 people × 36 pages × 21 targets);
+`rules.cjs` re-carried and in step; `built-in-step.py` all good; the four
+generators re-run with `generated-in-step` every comparison line ok (its one
+FAIL is §349.4's guard refusing an uncommitted tree); `sw.js` bumped to
+`v6.26-cap-owner-reporting` because the built file's bytes changed (§91), held
+by no commit in the history and confirmed against `origin/main`; the served
+worker byte-identical at 4192 bytes, because the generator drops the caching
+half (§316.10). The whole-platform sweep: `qa.py` through `qa-run.py` **33 viewers / 234 destinations / ERRORS none**, the destinations SUMMED from the run's own lines (§332) and §520.5's figure to the digit, which is what a round adding a tab for one made seat and no destination on the worked example must reproduce.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.

@@ -22,6 +22,9 @@ person MADE for the check whose only road to the company is that direction.
       section and the Foundation, and nothing else; the caps section is the
       one thing the half eye may NOT hide, because with the units off a
       capability is never a destination (§61). Both ends again.
+  5b · §520.6: and they REPORT — the company Reporting tab, their own
+      capability's rows live and nobody else's, no Submit; a direction owner
+      as the control; the office the lot. Both ends.
 
 SMP_BUILT points it at another build (§276). Every probe degrades (§215).
 """
@@ -186,6 +189,12 @@ with sync_playwright() as p:
       PEOPLE.push({key:'t520', name:'Testcase Capability Owner', unit:'group'});
       var c = (GROUP.capabilities||[])[0]; if(!c) return false;
       c.head = 't520';
+      //  §520.6: A KEY OBJECTIVE IS MADE, because the demo's capability holds
+      //  none (§333) and the capability's OWN rows are the only ones gated by
+      //  `canReportFnWhole(holderCodeOwner(c))` — a project's rows ask per
+      //  project. Without this row that line is under no measurement at all,
+      //  which is how its falsification first came back green (§54.5).
+      c.keyObjectives.push({id: c.id + '-KO1', name: 'Testcase objective', dir: '\u2265', target: '10%', weight: 1});
       GROUP.capabilities.push({id:'capZZ', name:'Second capability', fn:c.fn, def:'',
                                keyObjectives:[], projects:[], items:[]});
       GROUP[SMPRules.DIR_SCOPE] = 'part';
@@ -273,6 +282,68 @@ with sync_playwright() as p:
     tw2 = (safe(pg, OFFERED, {}) or {}).get("tabs") or []
     ck("§520: …and with the half eye off it comes back", "weighting" in tw2, tw2)
     safe(pg, "()=>{GROUP.structure.bu.exists = false; GROUP[SMPRules.DIR_SCOPE]='part'; paint(); return true}")
+    # ── 5b. §520.6: a capability's owner reports their own capability ──
+    #  Islam: "why ehab doesn't have the reporting part? like Amr in the retail
+    #  he should see the foundation like the direction owner and see the
+    #  reporting … the capability owner is treated like the direction owner".
+    #  `canReport("group")` admits `ownsTopCapability` now, so the company's
+    #  Reporting tab is offered to them, and the page draws THEIR capability's
+    #  rows (one section per reachable capability, `capsHere()` — the same
+    #  list the Strategy and Performance pages read, §53.5) and no direction's.
+    #  Submitting stays the office's and the CEO's (`canSpeakFor`).
+    REPORT = """()=>{current='group'; REPORTING='group'; currentSub='report'; paint();
+      var p = document.getElementById('panel');
+      //  THE REPORT CHROME (the count, the bar, Submit) is drawn on the tab
+      //  row and never inside the pane, so Submit is asked of the DOCUMENT —
+      //  the first draft asked the pane and reported the office's as absent.
+      var boxes = [...p.querySelectorAll('.capbody input, .capbody select, .capbody textarea')];
+      return {tabs: allowed(SUBS.group,'group').map(x=>x.k),
+              heads: [...p.querySelectorAll('h2, .secttl')].map(e=>e.textContent.trim()),
+              caps: p.querySelectorAll('.capbody').length,
+              capBoxes: boxes.length, capEnabled: boxes.filter(b=>!b.disabled).length,
+              //  THE OBJECTIVE'S OWN BOX, BY ITS ID — a project's outcomes draw
+              //  `data-crep` too, so an unscoped query went green on the very
+              //  break this exists for (§113.8, found by falsifying).
+              koBox: !!p.querySelector('.capbody [data-crep="' + GROUP.capabilities[0].id + '-KO1"]'),
+              dirBoxes: p.querySelectorAll('[data-rep], [data-note]').length,
+              submit: !!document.querySelector('[data-submit]'), speak: canSpeakFor('group'),
+              text: p.textContent}}"""
+    as_(pg, "t520")
+    rp = safe(pg, REPORT, {}) or {}
+    ck("§520.6: the company Reporting tab is offered to a capability's owner", "report" in (rp.get("tabs") or []), rp.get("tabs"))
+    capw = safe(pg, "()=>L1('capability')", "") or "\u0000"
+    ck("§520.6: …and it draws their capability's section, named as one",
+       any(h.startswith(capw) and mine in h for h in (rp.get("heads") or [])), rp.get("heads"))
+    ck("§520.6: …with its boxes live", (rp.get("capBoxes") or 0) > 0 and rp.get("capEnabled") == rp.get("capBoxes"),
+       {"boxes": rp.get("capBoxes"), "enabled": rp.get("capEnabled")})
+    #  The capability's OWN row — the one gated by holderCodeOwner (§520.6),
+    #  asked of `cap:<id>` and never of the holding function, which answers
+    #  no for this owner (measured: fn false, cap true).
+    ck("§520.6: …the capability's own key objective takes a figure from its owner", rp.get("koBox") is True, rp.get("koBox"))
+    ck("§520.6: …and ONLY theirs — one section, never the other capability",
+       rp.get("caps") == 1 and "Second capability" not in (rp.get("text") or ""), rp.get("caps"))
+    ck("§520.6: …and no direction's box", rp.get("dirBoxes") == 0, rp.get("dirBoxes"))
+    ck("§520.6: …and no Submit, because submitting speaks for the company",
+       rp.get("submit") is False and rp.get("speak") is False, {"submit": rp.get("submit"), "speak": rp.get("speak")})
+    ck("§520.6: the Foundation is still offered beside it",
+       "found" in ((safe(pg, OFFERED, {}) or {}).get("secs") or []))
+    #  THE DIRECTION OWNER IS THE CONTROL (§113.8): the same page, their own
+    #  direction's boxes and no capability section — or a build drawing every
+    #  capability for every part owner passes everything above.
+    as_(pg, "t517")
+    rq = safe(pg, REPORT, {}) or {}
+    ck("§520.6: a direction owner's Reporting page draws their direction", (rq.get("dirBoxes") or 0) > 0, rq.get("dirBoxes"))
+    ck("§520.6: …and no capability section", rq.get("caps") == 0, rq.get("caps"))
+    ck("§520.6: …and no Submit either", rq.get("submit") is False and rq.get("speak") is False)
+    #  BOTH ENDS (§94.2): with the half eye off nobody's REPORTING moves — a
+    #  capability's owner still reports on the company page (the right is the
+    #  rule's, not the half eye's), and the sweep below asserts the office.
+    safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; return true}")
+    as_(pg, "t520")
+    ro = safe(pg, REPORT, {}) or {}
+    ck("§520.6: with the half eye off the owner still reaches the company Reporting tab",
+       "report" in (ro.get("tabs") or []) and (ro.get("capBoxes") or 0) > 0, {"tabs": ro.get("tabs"), "boxes": ro.get("capBoxes")})
+    safe(pg, "()=>{GROUP[SMPRules.DIR_SCOPE]='part'; return true}")
     #  …and with it on the office is untouched.
     as_(pg, "smo")
     o3 = safe(pg, OFFERED, {}) or {}
@@ -286,6 +357,13 @@ with sync_playwright() as p:
     to = perfcaps(pg) or ""
     ck("§520.5: …and Performance draws both for the office",
        mine in to and "Second capability" in to, to[:200])
+    #  §520.6 BOTH ENDS: the office's Reporting page draws BOTH capabilities,
+    #  the directions AND Submit — or a build that narrowed everybody passes.
+    rs = safe(pg, REPORT, {}) or {}
+    ck("§520.6: …and the office's Reporting page draws both capabilities",
+       rs.get("caps") == 2 and "Second capability" in (rs.get("text") or ""), rs.get("caps"))
+    ck("§520.6: …the directions", (rs.get("dirBoxes") or 0) > 0, rs.get("dirBoxes"))
+    ck("§520.6: …and Submit", rs.get("submit") is True and rs.get("speak") is True, {"submit": rs.get("submit"), "speak": rs.get("speak")})
     ck("no page errors", not errs, errs[:3])
     b.close()
 print(("%d FAILED" % bad) if bad else "all good")

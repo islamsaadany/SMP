@@ -8538,15 +8538,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }

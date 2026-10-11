@@ -533,7 +533,7 @@
                people: state.people,
                topItems: (state.group || {}).items,
                topProjects: (state.group || {}).topProjects,
-               /* §517: and the direction owners' scope, read by dirPartOnly().
+               /* §517: and the direction owners' scope, read by partOnly().
                   Here AND in W()'s `group` (§102.4) — W passes the object
                   through whole, so this is the one list to edit. */
                group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
@@ -941,12 +941,19 @@
       note:"Heads the whole client — the top layer." },
     { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
       note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
-    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
-      note:"Owns a place: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead"],
+      note:"Owns a place: a business unit owner or a function head. On the function page and the register the word stays Function head." },
     { key:"custodian", name:"Custodian", of:["custodian"],
       note:"Keeps a place's plan and figures." },
-    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
-      note:"Owns one part inside a place: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    /* §520: AND A CAPABILITY'S OWNER IS A PART OWNER. Islam: "a capability
+       owner is a part owner and it's set to see only his capability like the
+       pillars owners". A capability sits INSIDE a function exactly as a
+       project and a pillar sit inside a place, so it was on the wrong row —
+       and being on the Owner row is why the half eye beside this row's Group
+       cell could not reach them. Drawing only: their stored pairs are
+       untouched, and the access baseline reads UNMOVED. */
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner", "capowner"],
+      note:"Owns one part inside a place: a project, a pillar, a direction or a capability — as its owner or its custodian. Reaches only that part." },
     { key:"contrib", name:"Contributor", of:["contrib"],
       note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
     { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
@@ -4430,13 +4437,33 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      reaches the group by another role (a unit owner, a CEO, the office) sees
      the full plan whatever this says, because a narrowing must never take
      away what another row of the table gives (§33's most-generous rule). */
+  /* §520 — AND IT IS EVERY PART OWNER, NOT THE DIRECTION'S ALONE. Islam, of a
+     capability owner who reached the whole group: "his access hsould match the
+     direction owner like Amr hassan only seeing his directions plus the
+     corporate foundation". A capability owner holds ONE part inside a
+     function, which is what a direction owner holds inside the company, so
+     this is the same rule pointed at a second role rather than a second
+     answer to it (§53.5) — one switch, one stored key, one half eye.
+
+     THE STORED KEY DOES NOT MOVE. `dirScope` is a key and not a label
+     (§30.2): renaming it would reset every client that has already pressed
+     the half eye, for a word nobody reads. The FUNCTION is renamed, because
+     what it answers is no longer about directions.
+
+     WHAT IT LEAVES A CAPABILITY OWNER FALLS OUT OF THE SAME FILTERS: the
+     group's lists are narrowed to the parts that are theirs, and a capability
+     owner owns no direction, so the company's plan has nothing of theirs in
+     it and what remains is the Foundation. Their own capability is a
+     destination of its own and is untouched — that is the half of "his
+     capability" the navigation already had right. */
+  var PART_ONLY_ROLES = ["dirowner", "capowner"];
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
-  function dirPartOnly(w, person) {
+  function partOnly(w, person) {
     if (!person || !w || !dirScopePart(w.group)) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
-      if (rs[i].role === "dirowner") { holds = true; continue; }
+      if (PART_ONLY_ROLES.indexOf(rs[i].role) > -1) { holds = true; continue; }
       if (!companyAllows(w, rs[i], "group")) continue;
       if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
     }
@@ -5070,7 +5097,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, dirPartOnly: dirPartOnly, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -15664,15 +15691,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }
@@ -27913,7 +27948,15 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
+       empties this list for a part owner who owns no direction — which
+       before §520 could not happen, since the only part owner was a
+       direction's — and the section was pushed regardless, so a
+       capability's owner read the word "Pillars" over an empty row while
+       the "Nothing to show yet." note below could never fire (§45.2).
+       Nobody else is reached: with no filter `ditems` is `itemsNow` and
+       `topHasPlan()` has already said there is a plan. */
+    if (ditems.length) SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
@@ -27928,7 +27971,7 @@ function whereNext(keys){
   /* §517: a direction owner narrowed to their part reads their directions and
      nothing else here — the company's headline, its themes and its
      capabilities are the whole company's figures. */
-  if (dirPartOnly()) {
+  if (partOnly()) {
     SECS = SECS.filter(function(x){ return x.dir; });
     if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
   }
@@ -32067,7 +32110,7 @@ function renderReport(u){
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
     /* §517: and a direction owner narrowed to their part is not shown them. */
-    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    (u.topLayer && (!objs.length || partOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
     section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
     summary;
 }
@@ -65567,20 +65610,36 @@ var SYNC = (function () {
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", "swot") && !partOnly(); } },
                   { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    /* §520: a part owner sees their own part and nothing
+                       else — so a capability's owner, who owns no direction,
+                       is not shown the directions rail at all rather than an
+                       empty one (§61). partMine() is the one question. */
+                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    /* §517: and none of the three is shown to a direction
-                       owner the office narrowed to their part. */
-                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
+                    /* §517 narrowed all three of these together, and §520
+                       measured that this one needs no help: `capsReachable()`
+                       is the MATRIX's own answer and is already narrowed per
+                       role — a capability's owner reaches their own and not
+                       the other, a direction owner reaches none, so for them
+                       `topCapsOn()` is false on its own.
+                       AND HIDING IT WAS THE ONE THING THE HALF EYE MAY NOT DO
+                       (§61): with the business units off a capability is
+                       always a section of this tab and never a destination
+                       (`capAtTop` returns true outright), so `!partOnly()`
+                       here left a capability's owner the Foundation and no
+                       way to their own part at all. The half eye narrows what
+                       is drawn of the COMPANY's plan; what somebody reaches is
+                       the matrix's to say, and this asks it (§53.5). */
+                    when: topCapsOn }];
       } };
   }
   var SUBS = {
@@ -65758,13 +65817,15 @@ var SYNC = (function () {
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn() && !dirPartOnly(); } },
+        when: function(){ return focusOn() && !partOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group") && !dirPartOnly(); } },
+        when: function(){ return templeOn("group") && !partOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
-        when: function(){ return buExists(); } },
+        /* §520: and it is neither the owner's own part nor the Foundation,
+           so it goes with the rest for a narrowed part owner. */
+        when: function(){ return buExists() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,

@@ -9363,3 +9363,44 @@ Built on the branch, not merged. Each process can now be exported as a Standard 
 ## 2026-10-10 — A direction owner sees their part only (§517)
 
 Merged to main 2026-10-10 on Islam's word. On Roles & access, the Part owner row's Group / Company cell now has a half eye beside the eye. The eye means a direction owner reads the whole company plan; the half eye means they read their own directions only. With the half eye on, they still see the Foundation, and their Plan, Reporting and Performance list only the directions they own; the SWOT, How we compete, Capabilities, Focus and the Temple are hidden from them. Nothing is deleted, and their reporting rights do not change. Only the Super user can set it. Still open: why El Abd's owners could not report — that needs a view-as one of them on the live client.
+
+## 2026-10-10 — The trail is quiet while you are viewing as somebody (§519)
+
+On the branch, not merged. While you are looking at the platform as somebody
+else, the trail along the top (Platform › client › module) is drawn quietly, so
+nobody reads it as that person's own access. Its menus still open — a held bar
+would be worse, because the control that takes you back out of the view is on
+that line. Nothing else about the bar changes, and for a client's own staff
+nothing changes at all. This line was missing from this file and is written in
+late; the round itself shipped on 2026-10-10.
+
+## 2026-10-11 — A capability owner sees their own capability only (§520)
+
+On the branch, not merged. Ehab owns the capability *Product Mindset* under
+Marketing and was seeing the whole company. He was on the wrong row of Roles &
+access: a capability owner sat with the Owners, who read everything, instead of
+with the Part owners, who read their own part. He is a part owner now, so the
+same half eye that narrows a direction owner narrows him, and his access reads
+the way you asked — the company's Foundation plus his own capability, and
+nothing else.
+
+With the half eye on, a capability owner opens the Foundation and the
+Capabilities section and sees their own capability on the list beside it and
+nobody else's. The SWOT, How we compete, the directions, the Temple, Focus and
+the weighting tab are hidden from them, exactly as for a direction owner.
+Nothing is deleted and their reporting rights do not change. With the half eye
+off nobody's access moves at all — measured, every person opening exactly what
+they opened before. Only the Super user can set it.
+
+One consequence worth knowing. On Roles & access the Part owner row's *Their
+own — Reporting* cell now reads **differs**, because a capability owner was
+shipped able to report in their own function where the other part owners were
+not. Nothing is broken by it: pressing one answer settles the row. It is left
+as it is until you say which answer it should carry — that is one line either
+way.
+
+Still open, and both need your word. First, the group's Performance page: a
+capability owner reads *Nothing to show yet* there today. Showing them their own
+capability's figures means narrowing that page, and measured against the example
+data that would take the capability figures away from 27 of the 33 people, so it
+is not done quietly. Second, the word to merge.

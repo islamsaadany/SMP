@@ -18,6 +18,10 @@ person MADE for the check whose only road to the company is that direction.
       Performance and NOT the other one; the Foundation kept; the SWOT gone.
   4 · BOTH ENDS: with it off the same person sees both directions, and with it
       on the office still sees both.
+  5 · §520: a capability's owner is a part owner too — their own capability's
+      section and the Foundation, and nothing else; the caps section is the
+      one thing the half eye may NOT hide, because with the units off a
+      capability is never a destination (§61). Both ends again.
 
 SMP_BUILT points it at another build (§276). Every probe degrades (§215).
 """
@@ -51,6 +55,14 @@ def go(pg, sub, sec=None):
 def as_(pg, key):
     safe(pg, "()=>{switchViewer('%s'); return true}" % key); pg.wait_for_timeout(400)
 RAIL = "()=>[...document.querySelectorAll('[data-urail]')].map(b=>b.dataset.urail)"
+#  §520: WHAT THE GROUP DESTINATION OFFERS, asked of the product rather than
+#  of the markup. `allowed()` is the one answer the shell's own tab row and
+#  section row are built from (§53.5), so this holds whether or not a button
+#  is drawn — and `capsReachable()` is the matrix's answer for the caps rail.
+OFFERED = """()=>{var d = SUBS.group.filter(x=>x.k==='strategy')[0];
+  return {secs: allowed(d.sections(),'group').map(s=>s.k),
+          tabs: allowed(SUBS.group,'group').map(x=>x.k),
+          caps: capsReachable().map(c=>c.id)}}"""
 def cell(pg):
     return safe(pg, """()=>{var tr=[...document.querySelectorAll('.acgrid tbody tr')].find(t=>/Part owner/.test(t.textContent));
       if(!tr) return null; var td=tr.querySelectorAll('td.ac')[0];
@@ -92,7 +104,7 @@ with sync_playwright() as p:
     # ── 3. What they see with it on ──────────────────────────────────
     safe(pg, "()=>{GROUP[SMPRules.DIR_SCOPE]='part'; return true}")
     as_(pg, "t517")
-    ck("the rule says they read their part only", safe(pg, "()=>dirPartOnly()") is True)
+    ck("the rule says they read their part only", safe(pg, "()=>partOnly()") is True)
     go(pg, "strategy", "plan")
     r = safe(pg, RAIL, []) or []
     ck("Plan lists their own direction", any("group-P1" in x for x in r), r)
@@ -100,13 +112,22 @@ with sync_playwright() as p:
     go(pg, "report")
     r = safe(pg, RAIL, []) or []
     ck("Reporting lists their own direction and not the other", any("group-P1" in x for x in r) and not any("group-P2" in x for x in r), r)
-    go(pg, "perf")
+    #  §520: "perf" IS NOT THE GROUP'S PERFORMANCE TAB AND NEVER WAS — the key
+    #  is `performance` (shell.html's own def), so `paint()` fell back to the
+    #  first tab with CURSEC preserved and this block has been re-measuring the
+    #  PLAN section it asserted two lines above. It passed for the wrong reason
+    #  (§113.8), which means §517's own Performance filter has never once been
+    #  measured (§54.5). REWRITTEN, never loosened (§218).
+    go(pg, "performance")
     txt = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
     ck("Performance shows their direction and not the other", "Direction one" in txt and "Direction two" not in txt, txt[:200])
-    secs = safe(pg, "()=>[...document.querySelectorAll('[data-sub2]')].map(b=>b.dataset.sub2)", []) or []
-    ck("the Foundation is kept", "foundation" in secs or any("found" in s for s in secs), secs)
-    ck("the SWOT is not offered", not any("swot" in s for s in secs), secs)
-
+    #  WHAT THE PRODUCT OFFERS, never the button row (§100.3): §211.2 draws no
+    #  section button at all where a tab has one section, so `[data-sub2]`
+    #  reports a rendered Foundation as absent. `allowed()` is the shell's own
+    #  answer and holds at one section too.
+    secs = (safe(pg, OFFERED, {}) or {}).get("secs") or []
+    ck("the Foundation is kept", "found" in secs, secs)
+    ck("the SWOT is not offered", "swot" not in secs, secs)
     # ── 4. Both ends ─────────────────────────────────────────────────
     safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; paint(); return true}")
     go(pg, "strategy", "plan")
@@ -118,6 +139,100 @@ with sync_playwright() as p:
     r = safe(pg, RAIL, []) or []
     ck("with it on the office still sees both", any("group-P1" in x for x in r) and any("group-P2" in x for x in r), r)
 
+    # ── 5. §520: a capability's owner is a part owner ──────────────
+    #  Islam: "a capability owner is a part owner and it's set to see only his
+    #  capability like the pillars owners but still he sees everything. his
+    #  access hsould match the direction owner like Amr hassan only seeing his
+    #  directions plus the corporate foundation". A capability sits INSIDE a
+    #  function, so it was on the wrong drawn row — and the half eye lives on
+    #  the PART OWNER row, which is why it could not reach them.
+    #  The state is MADE again (§255): the worked example's one capability
+    #  carries no head, so it derives no capowner — and a SECOND capability is
+    #  made beside it, or "they reach their own and not the other" is asserted
+    #  over a list that could only ever hold one (§113.8).
+    ck("the capability state is made", safe(pg, """()=>{
+      PEOPLE.push({key:'t520', name:'Testcase Capability Owner', unit:'group'});
+      var c = (GROUP.capabilities||[])[0]; if(!c) return false;
+      c.head = 't520';
+      GROUP.capabilities.push({id:'capZZ', name:'Second capability', fn:c.fn, def:'',
+                               keyObjectives:[], projects:[], items:[]});
+      GROUP[SMPRules.DIR_SCOPE] = 'part';
+      return true}""") is True)
+    as_(pg, "t520")
+    ck("§520: the rule reaches a capability's owner", safe(pg, "()=>partOnly()") is True)
+    ck("§520: …and they own no direction", safe(pg, "()=>partMine()") is False)
+    o = safe(pg, OFFERED, {}) or {}
+    secs, tabs, reach = o.get("secs") or [], o.get("tabs") or [], o.get("caps") or []
+    ck("§520: the corporate Foundation is offered", "found" in secs, secs)
+    #  …and RENDERED, not merely offered (§96): the word is read off the
+    #  product's own label rather than typed (§94.8).
+    go(pg, "strategy", "found")
+    fw = safe(pg, "()=>L('brief')", "") or "\u0000"
+    ck("§520: …and the Foundation is drawn",
+       fw in (safe(pg, "()=>document.getElementById('panel').textContent", "") or ""), fw)
+    for k, word in (("swot", "the SWOT"), ("compete", "Competitive Discipline"),
+                    ("plan", "the directions rail")):
+        ck("§520: %s is not offered" % word, k not in secs, secs)
+    for k, word in (("focus", "Focus"), ("temple", "the Temple")):
+        ck("§520: the %s tab is not offered" % word, k not in tabs, tabs)
+    #  §61: AND THE ONE THING THEY SHOULD SEE IS STILL REACHED. With the
+    #  business units off `capAtTop` is true outright, so a capability is
+    #  always a SECTION of this tab and never a destination — which is what
+    #  made `!partOnly()` on that section the one thing the half eye may not
+    #  do: it left them the Foundation and no way to their own part at all.
+    #  The narrowing is the MATRIX's (`capsReachable`), never the half eye's.
+    cid = safe(pg, "()=>(GROUP.capabilities||[])[0].id", "")
+    ck("§520: their own capability's section is offered", "caps" in secs, secs)
+    ck("§520: …listing theirs and not the other", reach == [cid], {"want": [cid], "got": reach})
+    #  AND GROUP PERFORMANCE SAYS SO RATHER THAN DRAWING A HEADING OVER
+    #  NOTHING (§45.2): §517's filter empties the directions list for a part
+    #  owner who owns none, which before §520 could not happen.
+    go(pg, "performance")
+    txt = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
+    ck("§520: Performance says there is nothing to show", "Nothing to show yet." in txt, txt[:200])
+    ck("§520: …and never the other direction", "Direction two" not in txt, txt[:200])
+    #  BOTH ENDS (§94.2): with the half eye off the same person is offered
+    #  the lot — or a build that simply deleted those sections passes above.
+    safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; paint(); return true}")
+    o2 = safe(pg, OFFERED, {}) or {}
+    secs2 = o2.get("secs") or []
+    ck("§520: with the half eye off the SWOT comes back", "swot" in secs2, secs2)
+    ck("§520: …and the directions rail", "plan" in secs2, secs2)
+    #  AND THE GROUP'S PERFORMANCE DRAWS ONE SECTION AT A TIME (`SECS[GSEC]`),
+    #  so the panel's text is not the page's contents: the first draft asserted
+    #  both directions in the panel with the half eye off and was reading the
+    #  HEADLINE section — the very section §517's filter exists to hide — so it
+    #  reported a correct build broken (§100.3). The section is pressed by its
+    #  own name (§94.8), which is also what says it is offered at all.
+    go(pg, "performance")
+    pressed = safe(pg, """()=>{var w = L('pillar','bu');
+      var b = [...document.querySelectorAll('[data-sec]')].find(x=>x.textContent.trim()===w);
+      if(!b) return false; b.click(); return true}""")
+    pg.wait_for_timeout(300)
+    txt2 = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
+    ck("§520: …and Performance offers the directions section again", pressed is True)
+    ck("§520: …drawing both directions",
+       "Direction one" in txt2 and "Direction two" in txt2, txt2[:200])
+    safe(pg, "()=>{GSEC = 0; return true}")
+    #  THE WEIGHTING TAB IS MEASURED IN THE SHAPE THAT HAS ONE (§113.8): the
+    #  fixture switches the business units OFF, and with them off `buExists()`
+    #  is false and that tab can never be offered — so asserting its absence
+    #  there could not fail on any build, and my own gate went unmeasured
+    #  (§54.5). Units back on for two assertions, then put back (§94.2).
+    safe(pg, "()=>{GROUP.structure.bu.exists = true; GROUP[SMPRules.DIR_SCOPE]='part'; paint(); return true}")
+    tw = (safe(pg, OFFERED, {}) or {}).get("tabs") or []
+    ck("§520: with the units on the Weighting tab is still not offered", "weighting" not in tw, tw)
+    safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; paint(); return true}")
+    tw2 = (safe(pg, OFFERED, {}) or {}).get("tabs") or []
+    ck("§520: …and with the half eye off it comes back", "weighting" in tw2, tw2)
+    safe(pg, "()=>{GROUP.structure.bu.exists = false; GROUP[SMPRules.DIR_SCOPE]='part'; paint(); return true}")
+    #  …and with it on the office is untouched.
+    as_(pg, "smo")
+    o3 = safe(pg, OFFERED, {}) or {}
+    secs3, reach3 = o3.get("secs") or [], o3.get("caps") or []
+    ck("§520: with it on the office still sees the SWOT and the plan",
+       "swot" in secs3 and "plan" in secs3, secs3)
+    ck("§520: …and both capabilities", len(reach3) == 2, reach3)
     ck("no page errors", not errs, errs[:3])
     b.close()
 print(("%d FAILED" % bad) if bad else "all good")

@@ -63439,3 +63439,173 @@ destination count is not on one.
 
 **On the branch, not merged** — the merge is
 Islam's word, on that merge.
+
+## §520 — A capability's owner is a part owner (2026-10-11)
+
+Islam, of Ehab, who owns the capability *Product Mindset* under the
+Marketing function:
+
+> "a capability owner is a part owner and it's set to see only his capability
+> like the pillars owners but still he sees everything. his access hsould match
+> the direction owner like Amr hassan only seeing his directions plus the
+> corporate foundation"
+
+**IT IS NOT A REGRESSION, AND ESTABLISHING THAT FIRST DECIDED THE SHAPE OF THE
+ANSWER.** `a_group:"view"` has been the Capability owner row's answer since the
+row was created at §412, copied verbatim from `fnhead` — read off the history
+rather than inferred. So nothing broke; a role was given a function head's
+reach when it holds one part inside a function, and §517's half eye, built a
+day earlier for exactly this complaint, could not reach it.
+
+**THE REASON IT COULD NOT IS THE WHOLE FIX: `capowner` WAS ON THE WRONG DRAWN
+ROW.** §517's half eye sits beside the eye in the **Part owner** row's Group /
+Company cell, and §516 draws eight rows over thirteen stored roles — so a role
+grouped under **Owner** is a role that control cannot see. A capability sits
+INSIDE a function exactly as a project and a pillar sit inside a place, which is
+Islam's own sentence restated, so the row it belongs on is the one it is moved
+to. **ONE SWITCH, ONE STORED KEY, ONE HALF EYE** (§53.5): this is §517's rule
+pointed at a second role rather than a second answer to it.
+
+**THE STORED KEY DOES NOT MOVE.** `dirScope` is a key and not a label (§30.2):
+renaming it would reset every client that has already pressed the half eye, for
+a word nobody reads. The FUNCTION is renamed `partOnly` — on both sides and in
+the carried copy — because what it answers is no longer about directions.
+
+**NO GRANT MOVES, AND THAT IS A MEASUREMENT RATHER THAN A CLAIM.** The access
+baseline reads **UNMOVED** (33 people × every page key × every target): §516's
+drawn cell is a VIEW over the stored pairs, so moving a role between drawn rows
+cannot move `grantAtPage`. What changes is what is DRAWN of the company's plan
+once the office presses the half eye, and reporting rights are untouched
+(§469).
+
+**WHAT IT LEAVES THEM FALLS OUT OF §517'S OWN FILTERS RATHER THAN A SECOND
+RULE**: the group's lists are narrowed to the parts that are theirs, a
+capability owner owns no direction, so the company's plan has nothing of theirs
+in it and what remains is the **Foundation** — which is the second half of
+Islam's sentence, arrived at by arithmetic rather than by a branch.
+
+### §520.1 — And hiding the capabilities section was the one thing the half eye may not do
+
+§517 narrowed the SWOT, Competitive Discipline, the plan and the capabilities
+section together with `!dirPartOnly()`, which was right for a direction owner
+and is wrong here — and the measurement is `capAtTop`:
+
+```js
+function capAtTop(group) { if (!buExists(group)) return true; … }
+```
+
+**With the business units off a capability is ALWAYS a section of the company's
+Strategy tab and never a destination of its own.** El Abd is that shape. So
+`!partOnly()` on that section left a capability's owner the Foundation and **no
+way to their own part at all** — §61 exactly, and the opposite of what was
+asked for.
+
+**AND IT NEEDS NO HELP, WHICH IS WHY THE GATE IS SIMPLY DROPPED**:
+`capsReachable()` filters by `grantAt("k_perf", "cap:" + c.id)`, which is the
+MATRIX's own answer and is already narrowed per role — a capability's owner
+reaches their own and not the other, a direction owner reaches none, so for a
+direction owner `topCapsOn()` is false on its own. *The half eye narrows what is
+drawn of the COMPANY's plan; what somebody REACHES is the matrix's to say, and
+this asks it* (§53.5).
+
+### §520.2 — A heading over nothing is not an empty state
+
+§517's filter empties the directions rail for a part owner who owns no
+direction — which **before §520 could not happen**, the only part owner being a
+direction's — and the section was pushed regardless, so a capability's owner
+read the word *Pillars* over an empty row while the *"Nothing to show yet."*
+note below it could never fire (§45.2). Guarded on `ditems.length`, and nobody
+else is reached: with no filter `ditems` is `itemsNow` and `topHasPlan()` has
+already said there is a plan.
+
+The plan SECTION goes the same way but through a different question —
+`partMine()`, which asks whether any direction on the company is theirs — so a
+capability owner is not shown an empty directions rail rather than being shown
+one (§61), while §517's own subject keeps the section their part is in. That
+widening is what the `plan` falsification reddens, and it reddens §517's OWN
+assertion, which is the proof it is load-bearing.
+
+### §520.3 — Proved able to fail five ways from the SOURCES
+
+§238's hashed CSP silences a script block whose bytes changed, so every break
+is made from the sources and rebuilt (§276), each asserted to have MATCHED
+exactly once before it was written (§344.1), the tree restored and the rebuild
+asserted **byte-identical** to the baseline afterwards (§343.9):
+
+| break | red | what it prints |
+|---|---|---|
+| `roles` — `PART_ONLY_ROLES` back to `["dirowner"]` | **7** | the rule not reaching a capability owner, then the SWOT, the directions rail, Focus, the Temple, Performance and Weighting all coming back — **the reported fault, "he sees everything", verbatim** |
+| `weighting` | 1 | `['strategy','performance','weighting']` |
+| `plan` — the `partMine()` widening removed | 1 | **§517's own assertion**, `Plan lists their own direction — []` |
+| `caps` — `!partOnly()` put back on the section | 1 | `['found']` — §520.1's fault verbatim, the Foundation and nothing else |
+| `dirsec` — the `ditems.length` guard removed | 1 | `Pillars`, the bare heading over nothing |
+
+### §520.4 — And it moved a cell on Roles & access, which is a finding rather than a repair
+
+`checks/access-merged.py` went **2 FAILED**, on §516.1's own two assertions:
+the Part owner row's **Their own: Reporting** cell now covers five stored pairs
+where it covered four, and `capowner:a_fn_own` ships at `edit` while the other
+four ship at `view` — so the drawn cell reads *mixed*, and the line above the
+table appears **on the shipped defaults**, where §516.1 recorded that no cell
+differs.
+
+**§516's drawn-cell model is working exactly as designed**, and the grant is
+unchanged: §412 copied `capowner` from `fnhead`, whose own-function Reporting
+has always been `edit`. Two readings were weighed and **the first was taken**:
+
+- **(a)** leave the defaults and rewrite the assertions — because §520 is a
+  drawing change and the measurement is **0 grants moved**.
+- **(b)** narrow `capowner:a_fn_own` to `view` so the row agrees — which would
+  MOVE a grant, taking reporting-and-changing away from a capability owner in
+  their own function: a permission change nobody asked for (rule 1b), against
+  §469.
+
+**REWRITTEN, NEVER LOOSENED** (§218), into three assertions each still able to
+fail: Plan asserted SEPARATELY as still agreeing at `view` with
+`capowner:a_fn_own_strat` present in its target — because that is §516.1's
+decision surviving whole, and the half that can still fail if a capability
+owner is ever opened on the plan; Reporting asserted as `mixed` **with the
+hover asserted to NAME** *"Capability owner in own supporting function"*
+(§94.8), so a build where some other pair had drifted cannot pass; and the line
+above the table asserted as an AGREEMENT with the cell, naming *"Part owner ·
+Their own: Reporting"*, so it cannot read one count while the table draws
+another.
+
+**AND PROVING THE REWRITE FALSIFIABLE FOUND THAT `roles` IS THE WRONG BREAK FOR
+THIS FILE** — it is correctly GREEN here, because narrowing `PART_ONLY_ROLES`
+says nothing about which drawn row a role sits in. The faithful inverse is
+§516.1's own state, `capowner` back on the Owner row and off the Part owner row:
+**3 red**, printing both targets with `capowner` absent, and nothing else in the
+file moves. *A rewrite is only a rewrite once the break that reaches it has been
+found; the break from the round's own harness is not automatically that break.*
+
+### §520.5 — Recorded, not done
+
+- **A capability owner's group Performance reads "Nothing to show yet."**
+  rather than their own capability's figures, because §517 keeps only the
+  directions sections there. Showing it would mean narrowing that section, and
+  its capabilities gauges read `GROUP.capabilities` (group-render.js:2484) and
+  **not** `capsReachable()` — so keeping it unnarrowed leaks every capability,
+  and narrowing it was measured across all 33 demo people: **27 of them read
+  `capsReachable()` = 0** against a tenant with one capability, so the
+  narrowing would REMOVE those figures from 27 viewers on the worked example.
+  A wide behaviour change nobody asked for (rule 1b) — Islam's to settle, with
+  that cost stated.
+- **The demo seed derives no `capowner` and no `dirowner`**, so every check
+  MAKES its state (§255) — and the access baseline sweeps **no `cap:` target at
+  all**, so a cell at a capability is asserted nowhere. `scripts/test-nav-row.js`
+  stubs the capability list to empty.
+- **§517's own group-Performance filter was unmeasured until this round**, and
+  the key names bit twice: the group's Strategy tab spells its Foundation
+  `found` and its Performance tab `performance` — not `foundation` and `perf`.
+  **And the group's Performance page draws ONE section at a time**
+  (`SECS[Math.min(GSEC, …)]`), so a panel-text assertion is not a page
+  assertion: the check presses the `[data-sec]` button and resets `GSEC`
+  afterwards (§94.2).
+- **Two neighbours are red and both are `main`'s**, reproduced detail for
+  detail on a worktree built from `origin/main` before anything here was blamed
+  (§303): `setup-rail`'s clipped *Planning & reporting cycle* label (§495's
+  rename, already recorded) and `no-jump`'s *adding a person, through the
+  dialog* trial — a different trial from the one §118.7 records.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.

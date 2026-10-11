@@ -5772,12 +5772,51 @@ console.log("\n§517 · the half eye");
   P.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", owner: "Testcase Part Reader", measures: [], tactics: [] },
                    { id: "group-P2", code: "EA02", name: "Direction two", owner: "Somebody Else Entirely", measures: [], tactics: [] }];
   const w = R.worldOf(P), me = personOf(P, "t517_dir");
-  check("§517: a direction's owner reads their part only", R.dirPartOnly(w, me) === true);
+  check("§517: a direction's owner reads their part only", R.partOnly(w, me) === true);
   check("§517: …their own direction is theirs", R.ownsDirection(w, me, P.group.items[0]) === true);
   check("§517: …another's is not", R.ownsDirection(w, me, P.group.items[1]) === false);
-  check("§517: the office still sees the full plan", R.dirPartOnly(w, personOf(P, "smo")) === false);
+  check("§517: the office still sees the full plan", R.partOnly(w, personOf(P, "smo")) === false);
   const F = clone(P); delete F.group[R.DIR_SCOPE];
-  check("§517: with the half eye off they see the full plan", R.dirPartOnly(R.worldOf(F), personOf(F, "t517_dir")) === false);
+  check("§517: with the half eye off they see the full plan", R.partOnly(R.worldOf(F), personOf(F, "t517_dir")) === false);
+})();
+
+/* ── §520: A CAPABILITY'S OWNER IS A PART OWNER ────────────────────
+   Islam: "a capability owner is a part owner and it's set to see only his
+   capability like the pillars owners ... his access hsould match the direction
+   owner". A capability sits INSIDE a function exactly as a project and a
+   pillar sit inside a place, so being on the Owner drawn row is why the half
+   eye beside the PART OWNER row's Group cell could not reach them.
+   BOTH ENDS (§94.2): the half eye off, and the office, must still read the
+   full plan — or a build that narrowed everybody passes every assertion
+   about the capability owner being narrowed. And the state is MADE (§255):
+   the seed's one capability carries no head, so it derives no capowner. */
+console.log("\n§520 · a capability's owner is a part owner");
+(function () {
+  const rowOf = function (k) { return R.ACCESS_ROWS.find(function (r) { return r.key === k; }); };
+  check("§520: capowner is on the Part owner row", rowOf("part").of.indexOf("capowner") > -1,
+        JSON.stringify(rowOf("part").of));
+  check("§520: …and no longer on the Owner row", rowOf("owner").of.indexOf("capowner") === -1,
+        JSON.stringify(rowOf("owner").of));
+  check("§520: the narrowed roles are the direction's and the capability's",
+        R.PART_ONLY_ROLES.join(",") === "dirowner,capowner", R.PART_ONLY_ROLES.join(","));
+
+  const P = clone(SEED);
+  P.people = P.people.concat([{ key: "t520_cap", name: "Testcase Capability Owner", unit: "group" }]);
+  const cap = P.group.capabilities[0];
+  cap.head = "t520_cap";
+  P.group[R.DIR_SCOPE] = "part";
+  /* a direction of somebody else's, so "they own no direction" is a
+     measurement rather than an empty list (§113.8). */
+  P.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", owner: "Somebody Else Entirely", measures: [], tactics: [] }];
+  const w = R.worldOf(P), me = personOf(P, "t520_cap");
+  const rs = R.personRoles(w, me).map(function (r) { return r.role; });
+  check("§520: being named the head derives capowner", rs.indexOf("capowner") > -1, rs.join(","));
+  check("§520: the half eye reaches them", R.partOnly(w, me) === true);
+  check("§520: …and they own no direction", R.ownsDirection(w, me, P.group.items[0]) === false);
+  check("§520: the office still sees the full plan", R.partOnly(w, personOf(P, "smo")) === false);
+  const F = clone(P); delete F.group[R.DIR_SCOPE];
+  check("§520: with the half eye off they see the full plan",
+        R.partOnly(R.worldOf(F), personOf(F, "t520_cap")) === false);
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

@@ -331,20 +331,36 @@
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", "swot") && !partOnly(); } },
                   { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    /* §520: a part owner sees their own part and nothing
+                       else — so a capability's owner, who owns no direction,
+                       is not shown the directions rail at all rather than an
+                       empty one (§61). partMine() is the one question. */
+                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    /* §517: and none of the three is shown to a direction
-                       owner the office narrowed to their part. */
-                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
+                    /* §517 narrowed all three of these together, and §520
+                       measured that this one needs no help: `capsReachable()`
+                       is the MATRIX's own answer and is already narrowed per
+                       role — a capability's owner reaches their own and not
+                       the other, a direction owner reaches none, so for them
+                       `topCapsOn()` is false on its own.
+                       AND HIDING IT WAS THE ONE THING THE HALF EYE MAY NOT DO
+                       (§61): with the business units off a capability is
+                       always a section of this tab and never a destination
+                       (`capAtTop` returns true outright), so `!partOnly()`
+                       here left a capability's owner the Foundation and no
+                       way to their own part at all. The half eye narrows what
+                       is drawn of the COMPANY's plan; what somebody reaches is
+                       the matrix's to say, and this asks it (§53.5). */
+                    when: topCapsOn }];
       } };
   }
   var SUBS = {
@@ -522,13 +538,15 @@
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn() && !dirPartOnly(); } },
+        when: function(){ return focusOn() && !partOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group") && !dirPartOnly(); } },
+        when: function(){ return templeOn("group") && !partOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
-        when: function(){ return buExists(); } },
+        /* §520: and it is neither the owner's own part nor the Foundation,
+           so it goes with the rest for a narrowed part owner. */
+        when: function(){ return buExists() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,

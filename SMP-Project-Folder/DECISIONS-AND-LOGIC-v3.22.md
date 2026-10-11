@@ -63393,3 +63393,132 @@ alone, the served worker holding `SHELL` nought times (§316.10, §329). Screen
 only, read off the diff: nothing stored moves, nothing is migrated, no rule about
 who may save what changes. **`main` untouched: the merge is Islam's word, on that
 merge.**
+
+## §520 — the sweep of the merged tree, and the proof that could not walk (2026-10-11)
+
+The verification pass §519.1 owed, run **on the merged tree and never on the
+branch** (§365: that is the only tree anybody will ever be served), with every
+verdict read from its own TAIL (§298.3) and every red carried to an
+`origin/main` baseline before anything here was blamed (§303). HEAD is the
+merge of main's §515–§517 into this branch's §518–§519.1; the baseline is
+`origin/main` at `b9dd9a4`, built from its own sources in a worktree.
+
+**222 FROZEN CHECKS WALKED. 16 ARE MOCKUP GENERATORS AND REFUSED THEMSELVES**,
+which is §334.14 working rather than failing — their tail is that refusal's own
+sentence, and reading it as a result is exactly the mistake that rule exists to
+stop. **206 real checks: 191 green, 15 red or dead, and all fifteen are
+`origin/main`'s.** Zero empty tails (§298.3: an empty tail is a failure and
+never a pass).
+
+**TWO OF THE FIFTEEN DID NOT FAIL — THEY DIED** (§215): `scoring-bands.py` ends
+on a Playwright stack trace (`Cannot read properties of null (reading 'click')`)
+and `welcome.py` on *"Execution context was destroyed, most likely because of a
+navigation"*. **And two more printed something that is not a verdict at all** —
+`objectives-table.py`'s last line is a FAIL line (the real verdict, one line up,
+is `1 checks failed`) and `setup-rail.py`'s is a PROGRESS line (`- no label is
+clipped`, with the actual `FAILED: 1` above it). *A tail is the verdict only
+when the file writes one*, so each red was opened individually rather than taken
+from the sweep, and each was then re-run with `SMP_BUILT` pointed at main's
+build: **thirteen reproduce character for character** — `chat-settings-scroll` 1,
+`enter-commits` 2, `master-picker` 1, `measure-score-spread` 1, `no-jump` 1,
+`objectives-table` 1, `save-fidelity` 1, `scoring-bands` (dead), `setup-rail` 1
+(which CLAUDE.md already records as main's §495 rename), `state-contrast` 1,
+`team-page` 3, `wave3` 1, `welcome` (dead).
+
+**AND THE LAST TWO COULD NOT BE RUN AT ALL UNTIL THE DATABASE EXISTED, AND THEN
+DIED ON A TAB** — which is the finding of the round. `multi-client.py` and
+`platform-look.py` reported *"No database connection configured"* in the sweep,
+which is §328.3's recorded condition and the runner's missing `DATABASE_URL`
+rather than the check (§366.5). Given the three-step rehearsal database both
+then **timed out waiting for `.ccard`**, and the cause is neither the data nor
+the cards: the server answers three client cards perfectly (read off
+`/api/platform` by hand), and **the console lands on *My work***, which is
+§400's own first tab and has been on main since 23 September. A check that signs
+in and waits for a client card is waiting on a page the console no longer opens
+on. **Measured rather than inferred**: pressing Clients draws **5 `.ccard`, 4 of
+them `[data-client]`**, and `multi-client.py`, `platform-look.py` and
+`platform.html` are all three **byte-identical to `origin/main`** — so the
+product is right, the checks are stale, and it is §366.3's shape for the second
+time (*what has gone is the check's SUBJECT*). **Recorded, not fixed**: where
+those two walks should land is a decision about a screen this branch did not
+design (rule 1b).
+
+### §520.1 — the isolation proof was dying on the Copilot's first binary column
+
+The one product-side edit in the round, and it is `smp-app/spike/_harness.mjs`.
+Spike **S2 is the tenant-isolation proof** and it walks every tenant-owned table
+in foreign-key order, seeding a row in each — and it **threw on
+`copilot_files.bytes`**, which is `bytea NOT NULL` (spec 064), so every table
+after it in that order went **unwalked**. On an isolation proof unwalked means
+**unproven rather than merely unreported**, which is the difference worth
+writing down: the run looked like one failing table and was in fact a proof that
+had stopped covering most of its subject. **§442.12 wrote this exact warning
+down** — *"a fixture that throws on the first missing thing hides the second"* —
+and it came true the moment the Copilot's tables landed, because nobody re-ran
+the spike after them. **Main's, by file identity**: the whole of `smp-app/spike/`
+and `smp-app/db/` is byte-identical to `origin/main` (§303). One line, and
+**empty is the right placeholder rather than a convenient one** — neither
+`copilot_files` nor `copilot_sources` constrains the length, and the one table
+that does (`copilot_assets`) is the PLATFORM's and is never in this walk
+(§331). S2 now reads **63 tenant tables isolated on all three verbs**, against
+the **56** §443.10 recorded, and **both of its falsifications are still red**.
+**S8 is UNRUN rather than passing** and says so in its own words (§54.5): it
+wants a v2.0-shaped database this container does not hold.
+
+### §520.2 — what the harness taught, which is three things and none of them the product
+
+**A LONG SWEEP OUTLIVES THE DATABASE IT WAS GIVEN.** The throwaway Postgres had
+stopped by the time the sweep finished, so the first attempt at the rehearsal
+database answered *"Connection refused"* on all three steps — read as a missing
+database rather than a stopped one for a moment, which is §105.6's family. And
+**the scratchpad cannot hold a Postgres data directory**: `/tmp/claude-0` is
+`drwx------ root`, so the `postgres` user cannot traverse it and `pg_ctl` reports
+*"could not access directory"* about a directory that is plainly there — the
+cluster lives outside it.
+
+**THE REHEARSAL DATABASE HAS AN ORDER AND THE ORDER IS NOT A CONVENIENCE**
+(§328.3): seed a tenant in `public` (`scripts/test-roundtrip.js`), split it
+(`scripts/migrate-to-multi-client.js`), then the fixture
+(`checks/fixture-platform.js`) — **and nothing after it**, because the round trip
+re-seeds `public`. An earlier run of this round put a second round trip in the
+same command block and read **1 FAIL**, which is §385.2f's recorded artefact of
+asserting a FIRST deploy twice against one database: a false red, and
+indistinguishable from a real one without knowing that rule.
+
+**AND I GUESSED AN ACTION NAME THE PRODUCT DOES NOT HAVE.** Asking the door by
+hand with `{"action":"signin","key":…}` came back `unknown action`; `api/auth.js`
+says **`login`** and reads **`user`**. §190 wrote that rule after the same
+mistake made a working build report two whole kinds of attention item as not
+raised — *read an action name out of the source, never guess it* — and it cost a
+round trip here before the source was opened.
+
+### §520.3 — two facts the record owed
+
+**`sw.js`'s `SHELL` is `smp-shell-v6.25-progress-apply-done` where §519.1 says
+v6.24.** The merge bumped it past main's `v6.21-direction-part` and the record
+was not told, which is the harmless half of §94.12's collision — the FILE is
+right and unique, and the sentence about it was stale. One live `const SHELL`
+(the other three matches are prose in that file's own comments, §383.2's shape)
+and `node --check sw.js` clean (§146.2). **And the served worker's release stamp
+moved `d8b1ab7c` → `b7c5a549`** (§397), so a release that reaches production
+will offer §258's reload banner.
+
+**VERIFIED, on the merged tree**: 191 of 206 frozen checks green with all fifteen
+reds attributed to `origin/main`; `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the identical figure on a build from main's own
+sources, so 234 is main's; `built-in-step.py` all good; `generated-in-step.mjs`
+all clear; cold `npm run typecheck` clean; `test-authorize` 1034/0; change list
+140/0; platform rules 69/0; session-state ok; db-url-choice 10/0; KB audience all
+clear; **access UNMOVED** against `origin/main`; and on the stack production
+serves — copilot 332/0, shell 384/0, modules 234/0, door 146/0, state 92/0,
+insights 137/0, insights:tab 24/0, setup 49/0, blob 23/23, comms 47/47, upload
+9/0, room 10/0, deploy 5/0, record 73 all good, viewas 20/0, standing 7/0, demo
+28/0, frameworks 90/0, assistant 10/0, memory 16/0 · boundary 14/0 · api 36/0 ·
+split 21/0 · page 42/0 · ask 16/0, unsaved 26/0, release 9/0, drivers 99/0, look
+122/0, store 31/0, tracker 251/0, notes 170/0, sop 17/0, pick 12/0 — plus eight
+of the nine spike proofs with S2 restored to 63 tables. **Five app-side reds are
+`origin/main`'s and are left as main's** (§303, which settles whose a red is and
+never that somebody must clear it): `test-nav-row` (dies in `myUnits`),
+`test-my-reporting` 64/1, `check:frameworks:page` 1/14, `check:portfolio` 134/1,
+`check:portfolio:module` 206/1. **`main` is untouched: the merge is Islam's word,
+on that merge.**

@@ -63809,3 +63809,71 @@ worker byte-identical at 4192 bytes, because the generator drops the caching
 half (§316.10). The whole-platform sweep: `qa.py` through `qa-run.py` **33 viewers / 234 destinations / ERRORS none**, the destinations SUMMED from the run's own lines (§332) and §520.5's figure to the digit, which is what a round adding a tab for one made seat and no destination on the worked example must reproduce.
 
 **On the branch, not merged** — the merge is Islam's word, on that merge.
+
+## §520.7 — A capability planned in pillars reports its measures and tactics (2026-10-11)
+
+Islam, with two screenshots from his own tenant minutes after §520.6 was built:
+the company Reporting tab, viewed as Ehab, read *"Capability — ERP Enhancement …
+No Projects to report on."* and the same for Digital Transformation, under a bar
+reading **"0 of 42"**; the Strategy › Capabilities page beside it showed C002
+ERP Enhancement **planned in pillars** with 3 key measures and 4 tactics.
+*"how does ehab has nothing to erport while he owns 2 capabilities. what on
+earth is going on why are you that confused FOCUS!!"*
+
+**THE GATE WAS RIGHT AND THE BODY WAS THE WRONG SHAPE.** §520.6 opened the tab
+to a capability's owner and drew every capability through `capReportBody(c)`,
+which is the PROJECTS shape — key objectives, then each project's deliverables,
+outcomes and milestones. A capability may plan in pillars since §491, and his
+two do. So the page looked for projects, found none, printed *"No Projects to
+report on"* — and the bar above it was already counting those rows in its 42,
+because `reportedCount` walks the holder whatever shape it has. Two readers of
+one capability, one of them blind to half the model (§53.5). **AND §520.6's OWN
+FIXTURE MADE ONLY A PROJECTS CAPABILITY**, so its check passed on exactly the
+build Islam was looking at (§94.5).
+
+**THE BODY A DIRECTION REPORTS THROUGH IS THE BODY A PILLARS CAPABILITY REPORTS
+THROUGH.** `renderReport(u, opt)` gains `opt.bodyOnly`: it returns the key
+objectives section and the pillars section — measures and tactics — and NO
+chrome, no bar, no note banner, because the company page draws its own bar once
+for the whole page. The capability section asks `capPlansInPillars(c)` and
+draws `renderReport(capAsUnit(c.id), {bodyOnly:true})` for a pillars
+capability and `capReportBody(c)` for a projects one. Nothing new is decided
+about who may type: the `cap:<id>` target already answered edit on every gate
+for its owner and the office and none for a direction's owner, measured before
+a line was written (§520.6), so the boxes drawn there are the boxes that gate
+had been opening for nobody to see. A closed cycle returns an empty body, as the
+whole page is read-only then.
+
+**NO SERVER CHANGE** — `test-authorize.js` 1057/0 unmoved; a figure typed into
+a pillars capability's measure is classified as it was the day §394 made a
+capability's plan a `collectUnit` target. The access baseline is UNMOVED
+against a HEAD-written baseline (§520.5c's method; the committed one still
+reads 189 on HEAD).
+
+**§520.7a — THE CHECK'S FIRST RED WAS THE CHECK**: the pillars fixture's tactic
+spelled its quarters `q:[1,1,1,1]` where the plan stores `q1..q4`, so
+`tacticDue` never asked it and the owner's tactic box was reported absent on a
+correct build (§100.3, the fixture's own shape). Corrected, `direction-part.py`
+all good, **red SIX ways on two breaks from the SOURCES** (§276): the §520.6
+copy of `group-render.js` restored, and `bodyOnly` kept with the pillars branch
+routed back through `capReportBody` — each asserted to have MATCHED exactly once
+(§344.1; the first spelling of break B matched nought and its green run is
+recorded as proving nothing, §54.5), the tree restored from the saved copy and
+the rebuild asserted byte-identical (§343.9). Both breaks print the reported
+symptom verbatim: `noProjects: True`, no measure box, no tactic box.
+
+**WHAT ISLAM READS AS "View only" IS NOT A FAULT AND IS SAID**: the company
+bar's pill reads *View only* for anybody who cannot SUBMIT, and neither a
+direction's owner nor a capability's owner may — submitting stays the office's
+and the CEO's (§469, §520.6). The boxes under it are live; the word describes
+the Submit button, not the rows. Changing that word is its own decision.
+
+**VERIFIED**: `direction-part.py` all good, red 6 / 6; `access-merged`,
+`capability-report-column`, `direction-owner-role`, `single-company` green;
+`built-in-step` all good; `generated-in-step` every comparison ok with the
+§349.4 guard refusing the uncommitted tree; `sw.js` bumped to
+`v6.27-cap-pillars-reporting`, held by no commit in the history, one live
+`const SHELL`, `node --check` clean, confirmed against `origin/main`'s
+`v6.21`; `qa.py` through `qa-run.py` — see §520.7's tracker entry for the
+summed figure (§332). **On the branch, not merged** — the merge is Islam's
+word, on that merge.

@@ -9488,3 +9488,33 @@ What to go and check, after a merge:
 - Press the eye again. Both read the whole company as before.
 
 Still open: your word to merge.
+
+## 2026-10-11 — A capability planned in pillars reports its measures and tactics (§520.7)
+
+On the branch, not merged. Your screenshots: Ehab's two capabilities on the
+company Reporting tab said "No Projects to report on." under a bar counting
+0 of 42.
+
+Why: your capabilities plan in pillars (key measures and tactics). The company
+Reporting page knew only the projects shape — it looked for projects, found
+none and said so, over rows the bar was already counting. The rule about who
+may type was right; the drawing was wrong.
+
+Now: a capability planned in pillars draws its key measures and tactics on the
+company Reporting tab through the same body a direction reports through. Ehab
+gets a box on every measure and every tactic of both his capabilities, a typed
+figure lands in the plan, Amr (a direction's owner) sees no capability section,
+and the office types there too. Nothing moved for anybody else.
+
+One word to know: the bar still says **View only** for Ehab, as it does for
+Amr. That word is about the Submit button — neither kind of owner submits,
+the office and the CEO do. The boxes under it are live. If you want a
+different word there, that is its own change.
+
+What to check:
+- View as Ehab: company › Reporting. Both capabilities show their measures and
+  tactics with boxes. Type a figure, refresh, it is still there.
+- View as Amr Hassan: no capability section; his direction's rows as before.
+- As the SMO: both capabilities' boxes are live.
+
+Still open: your word to merge.

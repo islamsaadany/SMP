@@ -31761,7 +31761,16 @@ function repOutTarget(t, x){
       ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
 }
 
-function renderReport(u){
+/* §520.7: `opt.bodyOnly` returns the two SECTIONS alone — the key objectives
+   and the pillars — and sets no chrome, draws no bar, no summary and no
+   waiting note. It is how a capability planned in pillars is drawn INSIDE the
+   company's Reporting page (§520.6's section), through `capAsUnit(c.id)`: the
+   same builder a unit and a pillars function already report through, with
+   every gate below asking `u.ukey` = "cap:<id>" (§53.5, §59). A second body
+   for the same tables is how the Plan page came to know both shapes while
+   this page knew one. */
+function renderReport(u, opt){
+  var bodyOnly = !!(opt && opt.bodyOnly);
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
   var may = canReport(u.ukey);
@@ -31774,6 +31783,8 @@ function renderReport(u){
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
   if (REVIEW.state !== "open") {
+    /* §520.7: inside the company's page the closed note is already above. */
+    if (bodyOnly) return "";
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
       'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
   }
@@ -32108,6 +32119,12 @@ function renderReport(u){
   /* §301: what a bounded reporter is told in place of "View only" — built
      from the SAME pillarTally() the rail rows read, so the chip and the rail
      can never disagree about how much is entered. */
+  /* §520.7: the body alone, for a capability drawn inside the company's
+     report — its objectives where it has any, and its pillars. */
+  if (bodyOnly) {
+    return (objs.length ? section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) : "") +
+      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars);
+  }
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
                             reportParked(u.ukey), submitWhyShort(u.ukey),
     !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
@@ -32177,7 +32194,14 @@ function renderReport(u){
     (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP)
       ? capsHere().map(function(c){
           return section("", L1("capability") + " &mdash; " + esc(c.name), null,
-            '<div class="capbody">' + capReportBody(c) + '</div>');
+            /* §520.7: a capability planned in PILLARS reports its measures and
+               tactics the way a direction does — the unit report's own body
+               over `capAsUnit`, never the projects body, which looked for
+               projects, found none and said so over rows the bar was already
+               counting. */
+            '<div class="capbody">' + (capPlansInPillars(c)
+              ? renderReport(capAsUnit(c.id), { bodyOnly: true })
+              : capReportBody(c)) + '</div>');
         }).join("")
       : "") +
     summary;

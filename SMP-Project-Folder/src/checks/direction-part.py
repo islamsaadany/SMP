@@ -25,6 +25,9 @@ person MADE for the check whose only road to the company is that direction.
   5b · §520.6: and they REPORT — the company Reporting tab, their own
       capability's rows live and nobody else's, no Submit; a direction owner
       as the control; the office the lot. Both ends.
+  5c · §520.7: a capability planned in PILLARS reports its measures and
+       tactics there, through the body a direction reports through — the
+       owner types, a direction owner gets no section, the office types too.
 
 SMP_BUILT points it at another build (§276). Every probe degrades (§215).
 """
@@ -364,6 +367,60 @@ with sync_playwright() as p:
        rs.get("caps") == 2 and "Second capability" in (rs.get("text") or ""), rs.get("caps"))
     ck("§520.6: …the directions", (rs.get("dirBoxes") or 0) > 0, rs.get("dirBoxes"))
     ck("§520.6: …and Submit", rs.get("submit") is True and rs.get("speak") is True, {"submit": rs.get("submit"), "speak": rs.get("speak")})
+    # ── 5c. §520.7: a capability planned in PILLARS reports its measures ──
+    #  Islam, with Ehab's two capabilities on screen: "how does ehab has
+    #  nothing to erport while he owns 2 capabilities". §520.6 drew every
+    #  capability through the PROJECTS body, so one planned in pillars printed
+    #  "No Projects to report on." over rows the count was already asking for
+    #  — and §520.6's own fixture made only a projects capability (§94.5).
+    #  The state is MADE: the SECOND capability becomes the same owner's and
+    #  plans in pillars, which is Ehab's shape exactly (two owned, one of
+    #  them pillars). A pillars capability goes through `renderReport(
+    #  capAsUnit(c.id), {bodyOnly:true})`, the body a direction reports
+    #  through (§53.5, §59), so its measures and tactics get the same boxes.
+    ck("§520.7: a pillars-format capability is made for the same owner", safe(pg, """()=>{
+      var c = GROUP.capabilities.find(x=>x.id==='capZZ'); if(!c) return false;
+      c.head = 't520'; c.format = 'pillars';
+      c.items = [{id:'capZZ-P1', code:'', name:'Cap pillar', owner:'',
+        measures:[{id:'capZZ-P1-M1', name:'Cap measure', dir:'\u2265', target:'10%', compile:'Latest'}],
+        tactics:[{id:'capZZ-P1-T1', name:'Cap tactic', owner:'', q1:1, q2:1, q3:1, q4:1}]}];
+      return capPlansInPillars(c) === true}""") is True)
+    PILL = """()=>{current='group'; REPORTING='group'; currentSub='report'; paint();
+      var p = document.getElementById('panel');
+      //  THE PILLARS CAPABILITY'S OWN BOXES, by their ids — a measure's figure
+      //  and a tactic's — never an unscoped count, which the first
+      //  capability's objective box already satisfies (§113.8).
+      var m = p.querySelector('.capbody [data-rep="capZZ-P1-M1"]');
+      var t = p.querySelector('.capbody [data-rep="capZZ-P1-T1"]');
+      return {caps: p.querySelectorAll('.capbody').length,
+              noProjects: /No Projects to report on/.test(p.textContent),
+              measure: !!m, measureLive: !!(m && !m.disabled),
+              tactic: !!t, tacticLive: !!(t && !t.disabled),
+              words: /Cap measure/.test(p.textContent) && /Cap tactic/.test(p.textContent)}}"""
+    as_(pg, "t520")
+    rpp = safe(pg, PILL, {}) or {}
+    ck("§520.7: the owner's Reporting page draws BOTH their capabilities", rpp.get("caps") == 2, rpp.get("caps"))
+    ck("§520.7: …and never says a pillars capability has no projects to report on",
+       rpp.get("noProjects") is False, rpp.get("noProjects"))
+    ck("§520.7: …its measure and its tactic are on the page", rpp.get("words") is True, rpp.get("words"))
+    ck("§520.7: …with the measure's box live for its owner", rpp.get("measureLive") is True, {"box": rpp.get("measure"), "live": rpp.get("measureLive")})
+    ck("§520.7: …and the tactic's", rpp.get("tacticLive") is True, {"box": rpp.get("tactic"), "live": rpp.get("tacticLive")})
+    #  A TYPED FIGURE REACHES THE STORED PLAN (§96): the box is the real bound
+    #  field, so the figure is read back off GROUP, never off the screen.
+    typed = safe(pg, """()=>{var p=document.getElementById('panel');
+      var m = p.querySelector('.capbody [data-rep="capZZ-P1-M1"]'); if(!m) return null;
+      m.focus(); m.value='7'; m.dispatchEvent(new Event('change',{bubbles:true})); m.blur();
+      return GROUP.capabilities.find(x=>x.id==='capZZ').items[0].measures[0].actual}""")
+    ck("§520.7: …and a typed figure reaches the stored plan", typed == "7%", typed)
+    #  BOTH ENDS (§94.2): a direction owner is drawn no capability section at
+    #  all, and the office is drawn the same two boxes.
+    as_(pg, "t517")
+    rq2 = safe(pg, PILL, {}) or {}
+    ck("§520.7: a direction owner is drawn no capability section", rq2.get("caps") == 0 and rq2.get("measure") is False, rq2)
+    as_(pg, "smo")
+    rs2 = safe(pg, PILL, {}) or {}
+    ck("§520.7: …and the office is drawn the pillars capability's boxes too",
+       rs2.get("caps") == 2 and rs2.get("measureLive") is True and rs2.get("tacticLive") is True and rs2.get("noProjects") is False, rs2)
     ck("no page errors", not errs, errs[:3])
     b.close()
 print(("%d FAILED" % bad) if bad else "all good")

@@ -505,6 +505,8 @@ model ProcessStep {
   links               ProcessStepLink[]
   outgoingEdges       StepConnection[]     @relation("FromStep")
   incomingEdges       StepConnection[]     @relation("ToStep")
+  handoffsOut         StepHandoff[]        @relation("HandoffFrom")
+  handoffsIn          StepHandoff[]        @relation("HandoffTo")
   activities          Activity[]
   reviewFindings      ReviewFinding[]
   authorityAssignment AuthorityAssignment?
@@ -542,6 +544,24 @@ model StepConnection {
 
   @@index([processId])
   @@map("step_connections")
+}
+
+/// A hand-over between two steps in DIFFERENT processes: the `from` step is a
+/// predecessor of the `to` step, which lives in another process. Kept apart
+/// from StepConnection on purpose — that table is same-process only and the
+/// layout, arrange, readiness, print and export code all rely on it.
+model StepHandoff {
+  id         String  @id @default(uuid())
+  fromStepId String
+  toStepId   String
+  label      String?
+
+  fromStep ProcessStep @relation("HandoffFrom", fields: [fromStepId], references: [id], onDelete: Cascade)
+  toStep   ProcessStep @relation("HandoffTo", fields: [toStepId], references: [id], onDelete: Cascade)
+
+  @@unique([fromStepId, toStepId])
+  @@index([toStepId])
+  @@map("step_handoffs")
 }
 
 // ============================================================================

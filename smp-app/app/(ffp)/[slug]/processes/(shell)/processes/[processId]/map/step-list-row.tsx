@@ -18,6 +18,10 @@ import { DecisionBranchEditor, seedBranchDrafts } from "./decision-branch-editor
 import { reconcileBranchDrafts, type BranchDraft } from "@/ffp/lib/domain/decision-branches";
 import { PredecessorEditor, seedPredecessorDrafts } from "./predecessor-editor";
 import { reconcilePredecessorDrafts, type PredecessorDraft } from "@/ffp/lib/domain/predecessor-editor";
+import { reconcileHandoffDrafts, type HandoffDraft } from "@/ffp/lib/domain/step-handoff";
+import { createStepHandoff, deleteStepHandoff } from "@/ffp/lib/actions/step-handoff";
+import { HandoffEditor, seedHandoffDrafts } from "./handoff-editor";
+import type { HandoffT, HandoffStepOption } from "./handoff-types";
 
 const TYPE_STYLES: Record<string, string> = {
   START: "bg-emerald-50 text-emerald-700",
@@ -70,6 +74,9 @@ export function StepListRow({
   roles,
   stepOptions,
   otherProcesses,
+  handoffsIn,
+  handoffsOut,
+  handoffStepOptions,
 }: {
   workspaceId: string;
   processId: string;
@@ -87,6 +94,11 @@ export function StepListRow({
   roles: RoleRef[];
   stepOptions: StepOption[];
   otherProcesses: ProcessOption[];
+  /** Steps of other processes this step waits on. */
+  handoffsIn: HandoffT[];
+  /** Steps of other processes this one continues into. */
+  handoffsOut: HandoffT[];
+  handoffStepOptions: HandoffStepOption[];
 }) {
   const canEdit = useCanEdit();
   const [editing, setEditing] = useState(false);
@@ -101,6 +113,7 @@ export function StepListRow({
   const [predecessorDrafts, setPredecessorDrafts] = useState<PredecessorDraft[]>(() =>
     seedPredecessorDrafts(incomingConnections.map((c) => ({ id: c.id, fromStepId: c.fromStepId, label: c.label })))
   );
+  const [handoffDrafts, setHandoffDrafts] = useState<HandoffDraft[]>(() => seedHandoffDrafts(handoffsIn));
   const [joinRequiresAll, setJoinRequiresAll] = useState(step.joinRequiresAll);
   const [branchDrafts, setBranchDrafts] = useState<BranchDraft[]>(() =>
     seedBranchDrafts(outgoingConnections.map((c) => ({ id: c.id, toStepId: c.toStepId, label: c.label })))
@@ -148,6 +161,7 @@ export function StepListRow({
     setPredecessorDrafts(
       seedPredecessorDrafts(incomingConnections.map((c) => ({ id: c.id, fromStepId: c.fromStepId, label: c.label })))
     );
+    setHandoffDrafts(seedHandoffDrafts(handoffsIn));
     setJoinRequiresAll(step.joinRequiresAll);
     setBranchDrafts(
       seedBranchDrafts(outgoingConnections.map((c) => ({ id: c.id, toStepId: c.toStepId, label: c.label })))
@@ -209,6 +223,30 @@ export function StepListRow({
             opResult.error === "VALIDATION_ERROR" ? (opResult.message ?? "A predecessor could not be saved.") : opResult.error
           );
           router.refresh(); // whatever did apply is real; reflect it
+          return;
+        }
+      }
+
+      const handoffOperations = reconcileHandoffDrafts(
+        handoffsIn.map((h) => ({ id: h.id, fromStepId: h.fromStepId, label: h.label })),
+        handoffDrafts
+      );
+      for (const op of handoffOperations) {
+        const opResult =
+          op.kind === "delete"
+            ? await deleteStepHandoff({ workspaceId, processId, handoffId: op.handoffId })
+            : await createStepHandoff({
+                workspaceId,
+                processId,
+                fromStepId: op.fromStepId,
+                toStepId: step.id,
+                label: op.label || undefined,
+              });
+        if (!opResult.ok) {
+          setError(
+            opResult.error === "VALIDATION_ERROR" ? (opResult.message ?? "A hand-over could not be saved.") : opResult.error
+          );
+          router.refresh();
           return;
         }
       }
@@ -310,6 +348,7 @@ export function StepListRow({
           onChange={setPredecessorDrafts}
           stepOptions={stepOptions.map((s) => ({ id: s.id, label: `[${STEP_TYPE_PREFIX[s.type]}] ${s.label}` }))}
         />
+        <HandoffEditor drafts={handoffDrafts} onChange={setHandoffDrafts} options={handoffStepOptions} />
         <label className="flex items-center gap-1.5 text-xs font-medium text-slate-600">
           <input
             type="checkbox"
@@ -483,8 +522,34 @@ export function StepListRow({
           )}
         </div>
         <div className="mt-1 text-xs text-slate-500">
-          {predecessorSummary(predecessors, step.joinRequiresAll)}
+          {predecessorSummary(predecessors, step.joinRequiresAll, handoffsIn.length > 0)}
         </div>
+        {(handoffsIn.length > 0 || handoffsOut.length > 0) && (
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {handoffsIn.map((h) => (
+              <Link
+                key={h.id}
+                href={`/${workspaceId}/processes/processes/${h.otherProcessId}/map`}
+                title={h.label ?? undefined}
+                className="rounded-full border border-dashed border-amber-500 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
+              >
+                ← {h.otherProcessCode}
+                {h.otherStepNumber > 0 ? ` · step ${h.otherStepNumber}` : ""} · {h.otherStepLabel}
+              </Link>
+            ))}
+            {handoffsOut.map((h) => (
+              <Link
+                key={h.id}
+                href={`/${workspaceId}/processes/processes/${h.otherProcessId}/map`}
+                title={h.label ?? undefined}
+                className="rounded-full border border-dashed border-amber-500 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
+              >
+                → continues in {h.otherProcessCode}
+                {h.otherStepNumber > 0 ? ` · step ${h.otherStepNumber}` : ""} · {h.otherStepLabel}
+              </Link>
+            ))}
+          </div>
+        )}
         {step.reviewNotes && (
           <div className="mt-2 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/50 px-2.5 py-1.5 text-xs text-indigo-800">
             <span className="font-semibold">AI Review note:</span> {step.reviewNotes}
@@ -592,8 +657,12 @@ function joinNames(names: string[]): string {
   return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
 }
 
-function predecessorSummary(predecessors: PredecessorRef[], joinRequiresAll: boolean): string {
-  if (predecessors.length === 0) return "Entry point — no predecessor";
+function predecessorSummary(
+  predecessors: PredecessorRef[],
+  joinRequiresAll: boolean,
+  hasHandoff: boolean
+): string {
+  if (predecessors.length === 0) return hasHandoff ? "Waits on a step in another process" : "Entry point — no predecessor";
   // The rule has no visible effect until there are two or more predecessors
   // to actually require all of (spec 015 Edge Cases).
   if (joinRequiresAll && predecessors.length > 1) {

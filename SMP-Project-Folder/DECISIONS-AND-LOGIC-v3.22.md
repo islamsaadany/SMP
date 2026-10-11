@@ -62995,3 +62995,18 @@ Islam: *"i want to add SOPs for each process … collecting all steps and operat
 ## §511 — The Helicopter view chooses which processes it draws
 
 Islam picked option A (a "Processes" dropdown with a searchable tick list beside the Milestones | Cards switch), applied to both views, the rest left to judgement. **Hides from the picture only — nothing is deleted or archived.** Starts with everything shown; the choice is remembered per browser as the HIDDEN ids (so a process added later shows by default), wrapped in try/catch. Ticking a main ticks its subs, its box reads indeterminate when only some are on; Select all / none; label "All (N)" / "N of M"; search by code or name; empty selection says so in words. A shown process that branches from a hidden one reads "↰ from ADM105, hidden" instead of a dashed line; links to hidden processes drop from the cards. The PNG exports what is drawn. Rules live in `ffp/lib/domain/helicopter-pick.ts` (pure); `check:pick` 12/0, `check:pick:red` all five breaks red. Snapshot: `ui-versions/ffp-helicopter-picker/`. Screen only; no schema, no server rule. Recorded, not done: the dropdown has not been looked at on a real workspace in a browser; cards do not name a hidden link target.
+
+
+## §512 — A step can wait on, or carry on in, a step in another process (Processes workspace)
+
+Islam: *"a process is linked from another process step … the IT step for onboarding requirements, and now we need it to be a predecessor."* Then: *"if step A needs to link to step B and continue with the process of B?"* Answers taken: a sign or arrow shows where a link comes from or goes to; the picker offers steps from any process in the workspace; "ready" is wanted.
+
+**It is its own table, `step_handoffs`** (from step, to step, optional label, both ends cascade on delete), not a loosening of `StepConnection`. A connection is same-process by rule and layout, arrange, print and export all rely on that, so none of them is touched. One link is both things: seen from the later step it is a predecessor, seen from the earlier step it is "continues in IT-05 · step 3". It is drawn from both sides, never stored twice.
+
+**Rules (`lib/domain/step-handoff.ts`, pure):** a step cannot link to itself or to a step in its own process (that is an ordinary connection); no duplicates; and no loop, counted across connections AND handoffs, so two processes cannot wait on each other. The server action also requires the later step to belong to the process being edited, and delete requires the process to be one end.
+
+**Screens:** in the step editor, "+ Add a step from another process" beside the ordinary predecessors, staged and reconciled on Save the same way (deletes before creates). Read mode shows amber dashed chips linking to the other map. On the map an incoming link is a dashed amber box in the left gutter beside the step it feeds; an outgoing one is a box past the right edge. They are not draggable and take no part in lanes or routing. A step fed only by a handoff no longer counts as "no predecessor" in the readiness check.
+
+**Stated plainly:** "ready" here means the dependency is *documented*; steps have no done status, so nothing blocks a step until another is done. If a real blocking rule is wanted, it is a separate decision. Print/PDF, import and template are not changed and do not carry handoffs.
+
+Check: `npm run check:handoff` (16) red 10 ways. Mockup: `design-mockups/process-cross-predecessor/`.

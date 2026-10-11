@@ -46,6 +46,8 @@
     "check:sop": "node --experimental-strip-types checks/process-sop.mjs",
     "check:pick": "node --experimental-strip-types checks/helicopter-pick.mjs",
     "check:pick:red": "node --experimental-strip-types checks/helicopter-pick.mjs --red",
+    "check:handoff": "node --experimental-strip-types checks/process-handoff.mjs",
+    "check:handoff:red": "node --experimental-strip-types checks/process-handoff.mjs --red",
     "check:sop:red": "node --experimental-strip-types checks/process-sop.mjs --red",
     "check:viewas": "node --experimental-strip-types checks/view-as.mjs",
     "check:viewas:red": "for b in viewas-any-seat viewas-unknown-ok viewas-keeps-seat; do SMP_BREAK=$b node --experimental-strip-types checks/view-as.mjs >/dev/null 2>&1 && { echo \"NOT RED: $b\"; exit 1; }; echo \"red: $b\"; done",

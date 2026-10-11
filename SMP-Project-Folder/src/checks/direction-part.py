@@ -226,8 +226,55 @@ with sync_playwright() as p:
     #  do: it left them the Foundation and no way to their own part at all.
     #  The narrowing is the MATRIX's (`capsReachable`), never the half eye's.
     cid = safe(pg, "()=>(GROUP.capabilities||[])[0].id", "")
+    mine520 = safe(pg, "()=>(GROUP.capabilities||[])[0].name", "\u0000") or "\u0000"
     ck("§520: their own capability's section is offered", "caps" in secs, secs)
     ck("§520: …listing theirs and not the other", reach == [cid], {"want": [cid], "got": reach})
+    #  §520.11: AND THEY LAND ON IT. Islam: "the capability default opens on
+    #  the perfromance which is wrong it should open on the capbility page
+    #  itself". `entrySub("group")` landed on Strategy only when the directions
+    #  list was offered (§449), and the half eye hides that list from a
+    #  capability's owner (§520.2) — so they fell to Performance while the
+    #  Capabilities section was offered and never considered. The rule is asked
+    #  directly (§94.8) with TOPCAP first pointed at the OTHER capability, or
+    #  "TOPCAP is theirs" passes on a build that never set it (§113.8); then
+    #  the page is painted the way a landing paints it and read.
+    LAND = """()=>{current=null; currentSub=null; TOPCAP='capZZ';
+      try{sessionStorage.removeItem('smp.where')}catch(e){}
+      var s = entrySub('group'); return {sub:s, sec:CURSEC.strategy, topcap:TOPCAP}}"""
+    ld = safe(pg, LAND, {}) or {}
+    ck("§520.11: a capability's owner lands on Strategy", ld.get("sub") == "strategy", ld)
+    ck("§520.11: …on the Capabilities section", ld.get("sec") == "caps", ld)
+    ck("§520.11: …with their own capability selected", ld.get("topcap") == cid, {"want": cid, "got": ld})
+    go(pg, "strategy", "caps")
+    lit = safe(pg, "()=>{var b=document.querySelector('[data-topcap].on'); return b ? b.dataset.topcap : null}")
+    ck("§520.11: …and the drawn rail lights theirs", lit == cid, {"want": cid, "got": lit})
+    ptxt = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
+    ck("§520.11: …and the pane holds their capability", mine520 in ptxt, ptxt[:200])
+    #  BOTH ENDS (§94.2): a direction's owner under the same half eye still
+    #  lands on the directions list, the office still lands there, and a part
+    #  owner offered NEITHER list still lands on Performance — or a build that
+    #  sent everybody to the capabilities section passes the three above.
+    as_(pg, "t517")
+    l2 = safe(pg, LAND, {}) or {}
+    ck("§520.11: a direction's owner still lands on the directions list",
+       l2.get("sub") == "strategy" and l2.get("sec") == "plan", l2)
+    as_(pg, "smo")
+    l3 = safe(pg, LAND, {}) or {}
+    ck("§520.11: …and so does the office",
+       l3.get("sub") == "strategy" and l3.get("sec") == "plan", l3)
+    #  The "neither" state is MADE honestly: removing their capability head
+    #  leaves them holding no part at all, and somebody reaching no part has
+    #  no group destination (entrySub answers null), which is a different
+    #  state. What the office CAN do is shut the Capability owner row's own
+    #  Performance cell — then the capability is not reachable, so Capabilities
+    #  is not offered, while the group's Foundation still is.
+    as_(pg, "t520")
+    safe(pg, "()=>{ACCESS.capowner=ACCESS.capowner||{}; ACCESS.capowner.a_fn_own='none'; paint(); return true}")
+    l4 = safe(pg, LAND, {}) or {}
+    ck("§520.11: …and a part owner offered neither list still lands on Performance",
+       l4.get("sub") == "performance", l4)
+    safe(pg, "()=>{delete ACCESS.capowner.a_fn_own; if(!Object.keys(ACCESS.capowner).length) delete ACCESS.capowner; paint(); return true}")
+    as_(pg, "t520")
     #  §520.5: AND GROUP PERFORMANCE DRAWS THEIR OWN CAPABILITY'S FIGURES.
     #  Islam: "a capability doesn't see a group performance same like the
     #  direction owner." §520 drew every capability there (the section read

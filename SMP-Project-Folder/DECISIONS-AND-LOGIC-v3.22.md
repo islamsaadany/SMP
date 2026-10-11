@@ -64051,3 +64051,68 @@ confirmed against `origin/main`'s `v6.28`. **No CSS moved and no new element
 was drawn** — the chip is §301's `rc-state` repeated, so rule 1c's mockup was
 not owed. **On the branch, not merged** — the merge is Islam's word, on that
 merge.
+
+## §520.11 — a capability's owner opens on their capability (2026-10-11)
+
+Islam, viewing as Ehab on the build §520.10 left: *"the capability default
+opens on the perfromance which is wrong it should open on the capbility page
+itself"* — then, of the shape put to him in plain words, **"build it"**.
+
+**MEASURED FIRST, AND IT IS §449'S OWN TEST ONE ROLE OVER.** `entrySub()`
+decides where a destination opens. For the group it asks one question —
+*is the Strategy tab offering the plan section?* — and lands on Strategy › Plan
+when it is, falling to the tab marked `primary` (Performance) when it is not.
+That was the whole truth while the only narrowed owner was a direction's,
+because §517 keeps the directions list for them. §520 made a capability's
+owner a part owner, and §517's half eye then hides the SWOT, the directions
+list and the plan section for them **while leaving Capabilities offered** —
+so the one section they are shown is the one §449's test never asks about,
+and the company fell through to Performance. Not a regression of the landing
+rule; a landing rule written for one part owner meeting a second kind.
+
+**THE FIX IS THE SAME TEST, ASKED OF THE NEXT SECTION DOWN.** When the plan
+section is not offered and the Capabilities section is, the group opens on
+Strategy › Capabilities with their own capability selected — `capsReachable()`
+is the matrix's own answer to *which capabilities does this person reach*
+(§520.5), so holding exactly one sets `TOPCAP` to it and holding several
+leaves the page on its first, which is the stated cost. **Nobody else moves**:
+the office and a direction's owner still land Strategy › Plan (the plan test
+runs first and still wins), and somebody offered neither list still lands
+Performance. §173's refresh stays put, because this decides only where a
+SESSION opens. Screen only — no `api/`, `lib/` or `db/` file, read off the
+diff; nothing stored, nothing migrated, no CSS, so rule 1c's mockup was not
+owed.
+
+**§520.11a — THE "NEITHER" FIXTURE WAS MADE WRONG FIRST, AND THE CHECK SAID
+SO.** The first draft of *offered neither list still lands on Performance*
+took the capability head OFF t520, and the assertion came back `sub: None`.
+That is a different state, and the right answer for it: with no part at all
+they reach no group tab, so `entrySub` answers null and the group is not a
+destination for them (§383's own rule). The honest way to make *offered
+neither* is the office shutting the Capability owner row's own-function
+Performance cell (`ACCESS.capowner.a_fn_own = "none"`) — the capability stops
+being reachable, Capabilities is not offered, and the group's Foundation still
+is, so the group IS a destination and lands on Performance. Put back
+afterwards (§94.2). *A fixture that removes the person's standing measures a
+different person.*
+
+**§520.11b — FALSIFIED FROM THE SOURCES** (§276): the pre-edit `shell.html`
+restored from its saved copy, rebuilt, and `direction-part.py` reads **4 red**
+— the three §520.11 landing assertions printing `sub: performance` verbatim,
+Islam's report in the check's own words, plus one knock-on in §520.6, whose
+Reporting-tab press was left standing on Performance by the landing it
+inherits. Restored from the saved copy (§343.9) and the rebuild asserted
+byte-identical.
+
+**VERIFIED**: `direction-part.py` all good; `capability-first.py` 0 failed;
+`single-company.py`, `direction-owner-role.py`, `access-merged.py` all good;
+`stay-put.py` all clear; `welcome.py` OK — **and once in three runs it died
+at its own resume-a-live-session step** (`Execution context was destroyed`),
+which that file's own comment records as a gate-redirect race (§215) and is
+not this round's; `built-in-step.py` all good; the four generators re-run with
+`generated-in-step` every comparison ok and §349.4's guard refusing the
+uncommitted tree; `sw.js` bumped to `smp-shell-v6.30-cap-landing` against
+`origin/main`'s `v6.28`, one live `const SHELL`, `node --check` clean; `qa.py`
+through `qa-run.py` — the figure is in the progress tracker's entry, summed
+from the run's own lines (§332). **On the branch, not merged** — the merge is
+Islam's word, on that merge.

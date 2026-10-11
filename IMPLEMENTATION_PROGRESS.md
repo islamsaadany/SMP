@@ -9518,3 +9518,31 @@ What to check:
 - As the SMO: both capabilities' boxes are live.
 
 Still open: your word to merge.
+
+## 2026-10-11 — A capability owner opens on their capability (§520.11)
+
+On the branch, not merged. Your report, viewing as Ehab: the company opened on
+Performance when it should open on the capability page.
+
+Why: the rule that decides where a place opens asked one question — is the
+plan section on offer? — and fell back to Performance when it was not. That
+was right while the only part owner was a direction's, who still gets the
+directions list. With the half eye on, a capability owner is shown
+Capabilities and not the plan, so that one question never reached the section
+they actually have.
+
+Now: when the plan section is not offered but Capabilities is, the company
+opens on Strategy › Capabilities with their own capability selected. The cost
+is small and known: somebody owning two capabilities lands on the first of
+theirs. The office and a direction's owner still land on Strategy › Plan as
+before; a refresh still stays where you were. Nothing stored, no rule moved.
+The whole-platform sweep read 33 viewers, 234 destinations, errors none —
+the same figure as the round before, as it should be when no page is added.
+
+What to check:
+- View as Ehab: press the company. It opens on Strategy › Capabilities with
+  his capability selected.
+- View as Amr Hassan: it opens on Strategy with his directions, as before.
+- As the SMO: the company opens exactly as before.
+
+Still open: your word to merge.

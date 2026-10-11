@@ -2238,6 +2238,23 @@
       if (gs) {
         var gsecs = allowed(gs.sections(), t);
         if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+        /* §520.11: A CAPABILITY'S OWNER OPENS ON THEIR CAPABILITY (Islam:
+           "the capability default opens on the perfromance which is wrong it
+           should open on the capbility page itself"). With the half eye on
+           (§517, §520) the directions list is not offered to them, so the
+           §449 test above falls through and they landed on Performance —
+           while the Capabilities section WAS offered and never considered as
+           a landing. If Strategy offers Capabilities, open there with their
+           own capability selected: TOPCAP is set only when they reach exactly
+           one, so an owner of two lands on the first of theirs (stated cost)
+           and nobody else is touched — the office and a direction's owner are
+           answered by the plan test first, and somebody offered neither still
+           lands on Performance. Screen only; nothing stored, no rule moves. */
+        if (gsecs.some(function(x){ return x.k === "caps"; })) {
+          var mine = (typeof capsReachable === "function") ? capsReachable() : [];
+          if (mine.length === 1) TOPCAP = mine[0].id;
+          CURSEC.strategy = "caps"; return "strategy";
+        }
       }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;

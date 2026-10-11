@@ -13204,6 +13204,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -32142,13 +32153,44 @@ function renderReport(u, opt){
     return (objs.length ? '<h4 class="mini">' + L("keyobj","bu") + ' ' + tally(doneOf(objs), objs.length) + '</h4>' + objTable : "") +
       pillars;
   }
+  /* ── THE CHIP'S LIST IS THE PARTS THIS PERSON HOLDS (§520.10) ───────
+     A unit's list is every pillar and `ownStateChip` keeps the ones named
+     for this viewer. The COMPANY's is built here, because its parts are two
+     kinds: a direction, whose seats are register NAMES judged by
+     `SMPRules.ownsDirection` (§469), and a capability, whose seats are
+     register KEYS (§412, §520). A capability is not in `u.items` at all —
+     it is counted on its own rail (§520.8) — so without this the owner of
+     two capabilities read the company's 42 and none of their own.
+     Each entry is marked `mine` so the chip does not ask `mayMarkDoneOn`,
+     which reads the EDIT grants and would drop every one (§520.10). The
+     tallies are the rail's own: `pillarTally` for a direction,
+     `reportedCount` for a capability planned in pillars and `capReported`
+     for one planned in projects — the same readers `reportCapsSplit` asks,
+     so the chip and the rail cannot disagree (§53.5). */
+  function ownParts(){
+    if (u.ukey !== "group")
+      return (u.items || []).map(function(p, pi){
+        var t = pillarTally(p);
+        return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
+                 done:t.done, total:t.total };
+      });
+    var w = world(), me = viewer(), out = [];
+    (u.items || []).forEach(function(p, pi){
+      if (!SMPRules.ownsDirection(w, me, p)) return;
+      var t = pillarTally(p);
+      out.push({ id:p.id, code:pillarCode(u, pi), done:t.done, total:t.total, mine:true });
+    });
+    capsHere().forEach(function(cp){
+      if (!(cp.head === me.key || cp.custodian === me.key)) return;
+      var cu = capPlansInPillars(cp) ? capAsUnit(cp.id) : null;
+      var t = cu ? reportedCount(cu) : capReported(cp);
+      out.push({ id:cp.id, code:topCapCode(cp), done:t.done, total:t.total, mine:true, noMark:true });
+    });
+    return out;
+  }
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
                             reportParked(u.ukey), submitWhyShort(u.ukey),
-    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
-      var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
-               done:t.done, total:t.total };
-    }), L("pillar","bu")));
+    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, ownParts(), L("pillar","bu")));
   var bar = "";
 
   var summary =
@@ -34394,10 +34436,21 @@ function doneCtl(target, id, owner, code, cust){
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
-  var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
-  var tip = 'You report your own rows. The ' + submits +
-            ' custodian submits the report.';
+  /* §520.10: an entry marked `mine` was filtered by its caller — the
+     company's parts are judged by their SEATS, never by the edit grants
+     `mayMarkDoneOn` reads (both of its owner roles ship at view). */
+  var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
+  var top = String(target) === "group";
+  var submits = top ? "office or the CEO" :
+                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+  var tip = 'You report your own rows. The ' + submits + ' submits the report.';
+  /* A capability carries no saved-draft mark (§309 is a project's and a
+     direction's), so "done" there — and ONLY there, `noMark` — is every
+     asked figure entered. A project's or a pillar's chip keeps reading
+     "3 of 3 entered" until its owner presses the mark: the first build read
+     entered-equals-done for every part and `project-done.py` went 2 red on
+     a unit's chip this change was meant to leave alone (§520.10). */
+  var isDone = function(c){ return !!doneMark(c.id) || (!!c.noMark && c.total > 0 && c.done >= c.total); };
   /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
      §220 disables every control in the pane the moment the report is
      submitted or parked — and the word that explains it, `Submitted` /
@@ -34429,20 +34482,28 @@ function ownStateChip(target, list, word){
       return '<span class="rc-state draft">Draft saved</span>' +
         '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>';
     return '<span class="rc-state done" title="' +
-      esc('Submitted — the ' + submits + ' custodian reopens it.') +
+      esc('Submitted — the ' + submits + ' reopens it.') +
       '">Submitted</span>';
   }
   if (!mine.length)
     return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
-  if (mine.length === 1) {
-    var c = mine[0];
-    return doneMark(c.id)
+  var chipOf = function(c){
+    return isDone(c)
       ? '<span class="rc-state done" title="' + esc(tip) + '">' +
         esc(c.code) + ' · Done</span>'
       : '<span class="rc-state draft" title="' + esc(tip) + '">' +
         esc(c.code) + ' · ' + c.done + ' of ' + c.total + ' entered</span>';
-  }
-  var n = mine.filter(function(c){ return !!doneMark(c.id); }).length;
+  };
+  if (mine.length === 1) return chipOf(mine[0]);
+  /* §520.10: ON THE COMPANY'S OWN REPORT EVERY PART GETS ITS OWN CHIP —
+     Islam: *"as it shows them progress"* — a direction's or a capability's
+     tally each, because the collapsed "Your 2 Pillars · 0 of 2 done" below
+     names a part by the wrong word (a capability is not a pillar) and says
+     nothing about the figures inside it. The chip is §301's own shape,
+     repeated; the two-or-more collapse stays for a unit's and a function's
+     page exactly as it was. */
+  if (top) return mine.map(chipOf).join('');
+  var n = mine.filter(isDone).length;
   return '<span class="rc-state ' + (n >= mine.length ? "done" : "draft") +
     /* NEVER `plural()` HERE (§107.8, and §160.6 for the second time): a
        tenant's label is already plural — `L("pillar","bu")` is "Pillars" —

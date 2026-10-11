@@ -63961,3 +63961,93 @@ and published for Islam's look, with the record copy under
 shown after the build because the shape is the product's own and the question
 was the words, §1c's content-first rule). **On the branch, not merged** — the
 merge is Islam's word, on that merge.
+
+
+## §520.10 — a capability's owner and a direction's owner read their own progress in the bar (2026-10-11)
+
+Islam, minutes after §520.9 reached `main` and typing figures into his own
+capability on Group › Reporting: *"we will need to fix the counter as I'm
+adding numbers but the counter at the top is still counting 0"* — then, of two
+options put to him with the cost of each, **"1 and same for the direction
+owners as it shows them progress"**.
+
+**THE COUNTER WAS NOT WRONG ABOUT WHAT IT COUNTS, AND SAYING SO FIRST DECIDED
+THE SHAPE OF THE ANSWER.** `renderReport(u)` opens with `reportedCount(u)`, and
+for the company's own page that is the company's own key objectives plus its
+directions' measures and tactics — the **42**. A capability's rows are a
+separate subject (`cap:<id>`), counted on its own rail since §520.8, and never
+part of that 42. So a capability owner typing figures moves his rail's tally
+and leaves the bar at *0 of 42 · View only*, which reads as "nothing you did
+counted" while every figure landed. **Option 2 — fold every capability's rows
+into the company's count — was refused**: it counts the same figure twice (on
+the rail and in the bar), and it widens what the company's own Submit speaks
+for, which §520.6 deliberately kept the office's and the CEO's. **Option 1 is
+§301's own answer one level up**: a bounded reporter is told their OWN progress
+in the bar, one chip per part they hold, in §301's chip shape — `C002 · 1 of 2
+entered` → `C002 · Done` — and the office and the CEO keep the company's count
+and Submit. And it reaches a direction's owner for the same reason: Amr reads
+his direction's figures on Performance (§517) and the bar told him *View only*
+over rows he was typing into.
+
+**NO GRANT MOVES, WHICH IS WHY THE BAR NEEDED A GROUP BRANCH OF ITS OWN.**
+`boundedReporter(target)` was `canReport(target) && boundedHere(target)`, and
+`boundedHere` asks `onlyOwnLines` → `editingRoles`, which reads the EDIT grants
+at the target; `dirowner` and `capowner` both ship at `a_group:"view"`
+(§505, §520), so the answer there is *nobody*, and widening it to `view` would
+have moved the access baseline §520.5c asserts UNMOVED. The group gets the
+question `doneCtl` already asks for a group seat (§469): *may this person
+report but not submit the company's own report* — `canReport("group") &&
+!SMPRules.mayReportTop(world(), viewer())`. Every other target keeps the line
+it had, byte for byte.
+
+**THE PARTS ARE JUDGED BY THEIR SEATS, NEVER BY THE EDIT GRANTS
+`mayMarkDoneOn` READS**: `ownParts()` beside `repChrome`'s call filters the
+company's directions by `SMPRules.ownsDirection(w, me, p)` (§469, by NAME) and
+`capsHere()` by `head === me.key || custodian === me.key` (§520, by KEY), each
+pushed with `mine:true`, which `ownStateChip` accepts in place of
+`mayMarkDoneOn`. A direction's tally is `pillarTally(p)` under
+`pillarCode(topAsUnit(), i)` — the `D001` the page draws since §482, never the
+stored code; a capability's is `reportedCount(capAsUnit(id))` for one planned
+in pillars and `capReported(c)` for one planned in projects, under
+`topCapCode(c)`. **ONE CHIP PER PART ON THE GROUP ALONE**: a unit's or a
+function's owner with several parts keeps §301's *"Your 2 Pillars · 1 of 2
+done"* collapse, asserted byte-identical, because this round is about the
+company's bar and nobody asked for the unit's to change. The hover names who
+submits: *the office or the CEO*.
+
+**§520.10a — AND THE FIRST BUILD CALLED A UNIT'S FINISHED PROJECT "DONE" WITH
+NOBODY HAVING PRESSED THE MARK.** A capability carries no saved-draft mark
+(§309 is a project's and a direction's), so its chip reads Done when every
+asked figure is entered — and the first `isDone` read entered-equals-done for
+EVERY part, so `checks/project-done.py` went **2 red** on a unit's chip this
+change was meant to leave alone (`ITF01 · Done` where §301 reads `ITF01 · 3 of
+3 entered` until the owner presses the mark). Found by running the neighbours
+rather than the file that was edited (§214), scoped with `noMark` to the one
+kind of part that has no mark, and the unit-side chip is §301's again.
+
+**§520.10b — AND THE CHECK ASSERTED THE STORED CODE WHERE THE PAGE DRAWS THE
+POSITION** (§100.3): the direction owner's chip was first asserted as `EA01`,
+the pillar's stored code, and the page has drawn `D001` for a company
+direction since §482; it asks `pillarCode(topAsUnit(), 0)` now.
+
+**VERIFIED**: `checks/direction-part.py` all good with a §520.10 section
+asserting both owner kinds at both ends (§94.2) — Ehab's two chips with their
+tallies and no *View only*, no *Your rows only*, no Submit; a figure typed
+into `capZZ-P1-T1` moving the chip to Done; Amr's chip opening with the drawn
+code; the SMO keeping `N of M` and Submit with no chip — proved able to fail
+**4 / 4 / 3** red from the SOURCES (§276), each break asserted to have matched
+(§344.1), the tree restored from saved copies and the rebuild byte-identical
+(§343.9); `project-done.py` all passed and `report-chrome` OK after
+§520.10a; `test-authorize.js` **1057/0** — the server needed nothing and it is
+asserted (§172); `direction-owner-role`, `single-company`,
+`capability-first`, `hide-slide` 42/0 green; `built-in-step.py` all good;
+the four generators re-run and `generated-in-step` every comparison ok, its one
+FAIL §349.4's guard refusing the uncommitted tree; `qa.py` through
+`qa-run.py` **33 viewers / 234 destinations / ERRORS none**, summed from the
+run's own lines (§332) and §520.8's figure to the digit — a chip in a bar adds
+no destination. `sw.js` bumped to `v6.29-own-progress-chips` because the
+built file's bytes changed (§91), one live `const SHELL`, held by no commit,
+confirmed against `origin/main`'s `v6.28`. **No CSS moved and no new element
+was drawn** — the chip is §301's `rc-state` repeated, so rule 1c's mockup was
+not owed. **On the branch, not merged** — the merge is Islam's word, on that
+merge.

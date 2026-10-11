@@ -457,6 +457,55 @@ with sync_playwright() as p:
     rs2 = safe(pg, PILL, {}, "capZZ") or {}
     ck("§520.7: …and the office is drawn the pillars capability's boxes too",
        rs2.get("caps") == 2 and rs2.get("measureLive") is True and rs2.get("tacticLive") is True and rs2.get("noProjects") is False, rs2)
+    #  ── §520.10: THE BAR SAYS THEIR OWN PROGRESS ─────────────────────────
+    #  Islam, adding figures as a capability owner: "the counter at the top is
+    #  still counting 0" — the 42 is the COMPANY's own rows and a part's never
+    #  join it (option 2 was refused: double-counting, and it widens Submit).
+    #  So a part owner reads one §301 chip PER PART with its own tally,
+    #  "C002 · 1 of 2 entered", and never "0 of 42 · View only". Both ends
+    #  (§94.2): the office keeps the company count and Submit with no chip,
+    #  and a direction owner reads their direction's chip and no capability's.
+    CHIP = """()=>{current='group'; REPORTING='group'; currentSub='report'; paint();
+      var r = document.querySelector('.repchrome'); if(!r) return null;
+      return {chips:[...r.querySelectorAll('.rc-state')].map(e=>e.textContent.trim()),
+              submit: !!r.querySelector('[data-submit]'),
+              viewOnly: /View only/.test(r.textContent),
+              rowsOnly: !!r.querySelector('.pill.none'),
+              count: (r.textContent.match(/(\\d+) of (\\d+)/)||[]).slice(1,3)}}"""
+    as_(pg, "t520")
+    ch = safe(pg, CHIP) or {}
+    chips = ch.get("chips") or []
+    ck("§520.10: a capability owner's bar holds one chip per capability they hold",
+       len(chips) == 2 and all(" · " in c for c in chips), chips)
+    ck("§520.10: …each a tally of its own figures, never 'View only' or 'Your rows only'",
+       all((" entered" in c or c.endswith("Done")) for c in chips) and ch.get("viewOnly") is False and ch.get("rowsOnly") is False, ch)
+    ck("§520.10: …and no Submit for them", ch.get("submit") is False, ch.get("submit"))
+    #  THE TALLY MOVES WITH A FIGURE (§96): the tactic's box on capZZ is still
+    #  empty (only the measure was typed above), so entering it takes that
+    #  capability's chip from "1 of 2 entered" to Done — read off the chrome
+    #  the product draws again, never computed here.
+    before = [c for c in chips if c.startswith("C")]
+    moved = safe(pg, """()=>{var p=document.getElementById('panel');
+      var row = p.querySelector('[data-repcaprail] .ritem[data-topcap="capZZ"]');
+      if (row && !row.classList.contains('on')) { row.click(); p = document.getElementById('panel'); }
+      var t = p.querySelector('.capbody [data-rep="capZZ-P1-T1"]'); if(!t) return null;
+      t.focus(); t.value='50'; t.dispatchEvent(new Event('change',{bubbles:true})); t.blur(); paint();
+      var r = document.querySelector('.repchrome');
+      return [...r.querySelectorAll('.rc-state')].map(e=>e.textContent.trim())}""")
+    ck("§520.10: …and the chip MOVES when a figure is entered", moved is not None and moved != chips and any(c.endswith("Done") for c in (moved or [])), {"before": chips, "after": moved})
+    as_(pg, "t517")
+    ch2 = safe(pg, CHIP) or {}
+    #  THE CODE IS THE ONE THE PAGE DRAWS (§482: a company's direction reads
+    #  D001…), asked of `pillarCode` rather than typed from the fixture's
+    #  stored EA01 — which is how this section's first run called a correct
+    #  build broken (§100.3).
+    code1 = safe(pg, "()=>pillarCode(topAsUnit(), 0)")
+    ck("§520.10: a direction owner reads their own direction's chip and no capability's",
+       (ch2.get("chips") or []) and all(c.startswith(code1 + " · ") for c in ch2.get("chips")) and ch2.get("submit") is False, {"chips": ch2.get("chips"), "code": code1})
+    as_(pg, "smo")
+    ch3 = safe(pg, CHIP) or {}
+    ck("§520.10: …and the office keeps the company's own count and Submit, with no chip",
+       ch3.get("submit") is True and not ch3.get("chips") and len(ch3.get("count") or []) == 2, ch3)
     ck("no page errors", not errs, errs[:3])
     b.close()
 print(("%d FAILED" % bad) if bad else "all good")

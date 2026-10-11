@@ -93,7 +93,31 @@ export function topBarHtml(t: TopBar): string {
     mods.map((m) => item(m.label + " settings", clientHref(t.slug, m.key, "setup"), false)).join("") +
     item("Client settings", "/" + t.slug + "/setup", false);
   const sep = '<span class="tbsep" aria-hidden="true">›</span>';
-  return '<header class="tb"><div class="tbin">' +
+  /* ── AND THE TRAIL QUIETENS WHILE A VIEW IS ON (§519) ────────────────
+     The same decision as the frozen bar's (§519 in arrange.css), because the
+     look of *a view is on* must not depend on which module you are standing
+     in (§53.5). The SIGNAL differs because what each bar has differs: this
+     one is rendered by the server and already knows, so the mark is on the
+     header and there is no moment at which it is drawn at full weight; the
+     frozen bar is painted in the browser, so sync.js writes a root attribute
+     from `actingAs()` at the end of every paint. One answer, two readers.
+
+     The bar itself STAYS, and the viewer switcher is why (§61): it is in this
+     row, so a bar that went away would leave the office with no way back to
+     their own face. What was wrong is only the weight. */
+  /* §519's TWO BREAKS LIVE WITH THE TWO THINGS THEY FALSIFY, because the
+     signal and the treatment are separate claims and one edit asserting
+     both would pass on a build that got either half right (§94.2).
+     `tb-always` stamps the mark whoever is being viewed — so *on self it
+     is absent* goes red and the quietening is proved to be CONDITIONAL
+     rather than merely present; `tb-no-quiet` (below, on the stylesheet)
+     leaves the mark and takes the treatment away. Read inside the
+     function rather than at module scope, or it reads BARBRK in its own
+     temporal dead zone. Never set on a deployment. */
+  const viewing = BARBRK === "tb-always"
+    ? true
+    : !!(t.viewer && t.viewer.current && t.viewer.current !== t.viewer.self);
+  return '<header class="tb' + (viewing ? " tbviewing" : "") + '"><div class="tbin">' +
     '<nav class="tbtrail" aria-label="Where you are">' +
       '<a class="tbff" href="/platform">Platform</a>' + sep +
       '<details class="tbstep tbclient"><summary><span>' + esc(t.tenantName) + "</span>" + DOWN + "</summary>" +
@@ -140,6 +164,13 @@ const TOPBAR_CSS_RAW = `
 .tbstep>summary:hover,.tbstep[open]>summary{background:var(--tb-surface-2);color:var(--tb-ink)}
 .tbstep>summary>span{overflow:hidden;text-overflow:ellipsis;max-width:220px}
 .tbstep>summary>svg{width:10px;height:10px;flex:none;color:var(--tb-ink-3)}
+/* §519: quieter while a view is on — the resting weight is what reads as
+   the viewed person's own access, so the ground still answers the pointer
+   (the control plainly works) and only the ink stands down. Islam's A of two
+   drawn; B, which also held the menus, is refused in arrange.css's own note. */
+.tbviewing .tbff,.tbviewing .tbstep>summary,.tbviewing .tbclient>summary,.tbviewing .tbstep>summary:hover,.tbviewing .tbstep[open]>summary{color:var(--tb-ink-3)}
+.tbviewing .tbstep>summary>svg{color:var(--tb-ink-3)}
+.tbviewing .tbsep{color:var(--tb-line)}
 .tbmenu{position:absolute;z-index:40;top:calc(100% + 6px);left:0;min-width:290px;background:var(--tb-surface);border:1px solid var(--tb-line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.16);padding:4px 0;white-space:normal}
 .tbmenu a{display:block;text-decoration:none;font-size:13.5px;color:var(--tb-ink);padding:9px 14px}
 .tbmenu a:hover{background:var(--tb-surface-2)}
@@ -189,6 +220,12 @@ export const TOPBAR_CSS = BARBRK === "bar-ink"
   ? TOPBAR_CSS_RAW
       .replace("--tb-ink:#171B22", "--tb-ink:#AEB5BE")        /* 2.07 on #FFFFFF */
       .replaceAll("--tb-ink:#E9ECF1", "--tb-ink:#2E343D")     /* 1.30 on #1C2027 */
+  : BARBRK === "tb-no-quiet"
+  /* §519: the mark is still stamped and nothing answers it, which is the
+     shape this would ship in if the three rules were ever swept away by
+     a later retheme — the ONE selector line, so a build that kept the
+     caret rule and lost the words still goes red (§94.2). */
+  ? TOPBAR_CSS_RAW.replaceAll(".tbviewing ", ".tbviewing-off ")
   : TOPBAR_CSS_RAW;
 
 /* A page's dark block, made to answer the switch as well as the device. The

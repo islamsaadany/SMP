@@ -63272,3 +63272,123 @@ diff, which in those files is **string literals only**, no logic and no types.
 `sw.js` bumped to `v6.22-competitive-discipline`, because the built file's bytes
 changed (§91). **On the branch, not merged** — the merge is Islam's word, on that
 merge.
+
+## §519 — The trail is quiet while you are viewing as somebody else (2026-10-10)
+
+Islam, with a screenshot of El Abd's Strategy page while viewing as Amr Hassan:
+***"the half eye was not pressed .. I did and it's working but a very strange issue,
+while viewing as Amr hassan I'm seeing the white bar at the top which is for the smo
+only is that a glitch?"*** — then ***"I think yes greyed is better not to get
+confused that the user has access by anyone else"***, and, of two treatments drawn
+for him, ***"A"***.
+
+**IT IS NOT A GLITCH, AND SAYING SO FIRST IS MOST OF THE ANSWER** (and the first half
+of his message is the confirmation that §517's half eye works). Three things support
+it and all three were measured rather than remembered. **The trail follows the SEAT on
+the SESSION**, which is what a simulation means (§185): viewing as somebody narrows
+what is DRAWN for them and the person signed in is still the office — if the trail
+answered the simulated person it would be a claim about who is signed in, which is
+false. **A client's own person never gets it whoever they view as**:
+`cards: r.user.kind !== "client"` (`lib/state-api.ts`) reads the kind fixed at
+sign-in, so the bar is Forefront's by construction rather than by a rule somebody
+could widen. **And the viewer switcher is inside that same `.top-in` row**
+(`shell.html`'s `label for="asWho"` and its note) — so a bar that went AWAY while a
+view is on would take the way out of the view with it, which is §61 at its plainest:
+the one control that ends the state would be hidden by the state. So the bar stays
+and only its WEIGHT changes, which is also exactly what he asked for.
+
+**A IS HIS PICK AND B IS REFUSED, AND THE DIFFERENCE IS THE ONE ASSERTION WORTH
+HAVING**: **A** quietens the trail to the page's dim ink while a view is on, brings it
+back to full weight on switching back, and **both menus keep working**; **B** was quiet
+AND held — the carets dropped and the menus refusing. B is recorded as refused rather
+than left undrawn, because it is the shape somebody reaches for next and its cost is
+not obvious from a still: a control that cannot be pressed is how the office loses the
+way out of the view they are in (§61 again, from the inside). So *the menus still open
+while quiet* is the claim that separates what shipped from what he turned down, and it
+is asserted by pressing them.
+
+**THE SIGNAL IS ASKED, NEVER RE-DERIVED** (§42, §53.5): `SYNC.actingAs()` already
+answers *is a view on* for the save path, with its two guards built in — the session
+is the office's and the key is on the register — so the chrome asks the same function
+rather than comparing `VIEWER` against the signed-in key a second time. **Written at
+the END of every paint and never at each `VIEWER` assignment** (§104.7): there are
+three such sites and one of them is a temporary swap inside a reader, so marking at the
+write would mark the chrome for the length of a read. **Stored as an ABSENCE** (§50.6)
+— `html[data-viewing-as]` exists while a view is on and the attribute is REMOVED
+otherwise, so a build that never writes it reads identically to one that has just
+cleared it. **AND THERE IS NO INITIAL-PAINT CASE, WHICH WAS CHECKED RATHER THAN
+ASSUMED**: `chromeFor(paint)` sets `window.VIEWER` to the signed-in person on every
+hydration and nothing persists a simulated key, so a view-as is OFF after a page load
+and the attribute's absence at load is the truth rather than a gap.
+
+**ONE DECISION, TWO BARS, AND THE SIGNAL DIFFERS BECAUSE WHAT EACH BAR HAS DIFFERS**:
+the §400 trail is drawn by the SERVED stack's own browser file (`shell/route.js`,
+because a module list only exists where a server says which modules a client has,
+§61), so it is marked from the paint; §444's `topBarHtml()` — the one bar Insights,
+the Tracker, Notes and Portfolio share — is handed `TopBar.viewer` and therefore knows
+server-side, so it stamps its own mark with no script and no flash. Two
+implementations of one answer is the drift §53.5 keeps recording, so the check asserts
+BOTH, and the two treatments are the same three rules written against each bar's own
+token set.
+
+**THE MOCKUP WOULD HAVE SHIPPED THE LOOK HE REFUSED, AND MEASURING IS WHAT CAUGHT
+IT** (§38.5): the drawing put the `›` separators **and the caret** on `--line`, and
+`--line` is a hairline rather than an ink — measured as a WCAG ratio in all four
+palettes, **1.38 forefront-light, 1.43 forefront-dark, 1.23 slate-light, 1.45
+slate-dark**, against `--ink-3`'s **5.31 / 5.96 / 5.19 / 6.64**. A caret at 1.23 is
+not quiet, it is gone — so the one mark saying *this opens* would have been taken
+away, which lands the LOOK on B while the behaviour stayed A: a menu that opens with
+nothing on screen saying it does. The caret takes `--ink-3` and only the separators
+recede. **One stated departure from a signed-off drawing, in the direction of his own
+decision**, and asserted in both halves so it cannot drift back. *And the figure I
+first carried for `--line` was the forefront pair alone; slate light is 1.23, which is
+worse — so re-measuring rather than quoting strengthened the argument instead of
+weakening it* (§124).
+
+**§519.1 — AND THE CHECK DIED RATHER THAN REPORTING, IN THE FILE WHOSE OWN HEADER
+PROMISES IT DOES NOT** (§215, §298.3). `held-menus` is the break that makes a control
+UNREACHABLE — `pointer-events:none`, which is B — and `pg.click` waits thirty seconds
+on one, retries, and then throws out of the top level: so node exited 1, which is loud
+enough for a caller, and **the one assertion that break exists for never printed its
+verdict and §3 was never reached**. A falsification that kills the run has proved the
+break lands and nothing about what it lands ON. Every press goes through a degrading
+wrapper now — a short clock, and a refusal comes back as false carrying its reason —
+so `held-menus` reads **52 ok, 2 failed**, reaches §3, and prints B's own behaviour
+verbatim: `{"press":"refused — the control could not be reached","open":false}`.
+**AND MY OWN MEASUREMENT OF THAT DEATH WAS WRONG FIRST**: piped through
+`| tail -15; echo "exit $?"` the run reported **exit 0**, which is `tail`'s status and
+not node's — re-measured with the pipe removed it is **1**. Worth recording because
+*a dead run that exits 0* would have been a far more serious finding than the real
+one, and it was an artefact of how I was looking.
+
+**VERIFIED**: `smp-app/checks/viewing-as-bar.mjs` **54 ok, 0 failed**, proved able to
+fail **six ways from the SOURCES** (§276), each break asserted to have MATCHED exactly
+once before it is written (§344.1) and each reddening its own assertions —
+`no-quiet` **4**, `caret-line` **4**, `no-mark` **13**, `held-menus` **2**,
+`tb-always` **5**, `tb-no-quiet` **2**. Every colour is resolved through the page and
+asserted as an AGREEMENT with a token rather than against a hex (§94.8), in all four
+palettes; §1 DRIVES the served bar from `topBarHtml()` and `TOPBAR_CSS` with no
+database, §2 DRIVES the frozen trail with `markViewing()` **sliced out of `sync.js` by
+matched text** so the product's own bytes write the attribute, and §3 READS
+`route.js` for the one fact a paint cannot show — which half is which is said in the
+file (§100.3). No falsification writes to the tree, confirmed after the six-break run.
+Beside it: `qa.py` through `qa-run.py` **33 viewers, ERRORS none**;
+`smp-app/checks/view-as.mjs` **20 ok, 0 failed**; `built-in-step.py` all good after
+the rebuild (§349); `generated-in-step.mjs` all clear once committed, its one FAIL
+before that being §349.4's guard refusing an uncommitted tree and naming which errand
+it is. `sw.js` bumped to **v6.23-quiet-trail**, because the built file's bytes changed
+(§91), one `const SHELL`, parsing, and a name the history has never held.
+**TWELVE `smp-app` CHECKS ARE UNRUN RATHER THAN PASSING** (§54.5): this container
+holds no `pg` and runs no Postgres, so everything importing `lib/db.ts` could not
+launch — `modules.mjs` and `shell.mjs` among them, and with `modules.mjs` goes the
+**pre-existing `trail-for-staff`** break, which is the assertion that a client's own
+staff are drawn no trail at all. Answered in the code at two sites
+(`route.js`'s `data-console` gate and `topbar.ts`'s own) and **not exercisable here**.
+*I considered carrying that claim into this check, which does run here, and declined
+it as scope-widening*: it is §400 and §444's claim about who the bar is FOR, where
+§519's is only about its weight — and a check that quietly grows somebody else's
+subject is how one file comes to answer two questions (rule 1b).
+**Nothing stored moves, nothing is migrated, no rule about who may save what changes
+and nobody's access moves** — read off the diff: two frozen sources, one served
+browser file, one served library, the check, and the record. **On the branch, not
+merged** — the merge is Islam's word, on that merge.

@@ -64584,6 +64584,48 @@ var SYNC = (function () {
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
   function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
+     Islam, of the trail standing at full weight while he viewed as somebody:
+     *"I think yes greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     THE BAR ITSELF IS CORRECT AND STAYS, which is most of what this answers.
+     It is the SIGNED-IN person's chrome — drawn only where the server says
+     `cards`, which is the session's KIND and is fixed at sign-in, so a
+     client's own person can never be shown it whoever they are viewing as
+     — and the viewer switcher is physically inside that same row, so taking
+     the bar away while a view is on would strand the office inside the
+     simulation with no control left to leave it (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the VIEWED person's own
+     access.
+
+     SO IT QUIETENS AND KEEPS WORKING, Islam's A of two drawn with the cost
+     of each stated (rule 1c): the alternative held both menus shut, which
+     costs a real journey — switch back, cross, switch again — and buys two
+     controls that refuse, each of which then has to say why (§221). His
+     worry is about confusion rather than capability, and nothing is taken
+     away.
+
+     ONE ANSWER, FROM `actingAs()` AND NEVER A SECOND TEST (§42, §53.5): that
+     is the same function the save stamps itself with and the same one
+     §383's reads narrow through, so the bar cannot disagree with who the
+     server is judging — and it already carries the switcher's own two guards
+     (the seat that draws it, and the key being on the register), so a
+     bootstrap session pointed at a stranger (§69.15) does not grey the bar
+     for nobody's choice.
+
+     WRITTEN AT THE END OF EVERY PAINT, never at each place `VIEWER` is
+     assigned: there are three such places and one of them is a temporary
+     swap inside a reader (`config-render.js`'s owner walk, restored in its
+     own `finally`), so a per-assignment rule would be both a list to forget
+     and wrong (§104.7). Stored as an ABSENCE, so a build that never writes
+     it reads exactly as the build before (§50.6). */
+  function markViewing() {
+    if (typeof document === "undefined") return;
+    var el = document.documentElement;
+    if (actingAs()) el.setAttribute("data-viewing-as", "1");
+    else el.removeAttribute("data-viewing-as");
+  }
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
@@ -64988,6 +65030,9 @@ var SYNC = (function () {
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
        exactly as `isSMOSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
+    /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
+       — the shell calls this at the end of every paint. */
+    markViewing: function () { markViewing(); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit
@@ -77509,6 +77554,37 @@ var SYNC = (function () {
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
+      /* ── AND THE TRAIL SAYS A VIEW IS ON (§519) ───────────────────────
+         Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing
+         the white bar at the top which is for the smo only is that a
+         glitch?"* IT IS NOT, and establishing that first was most of the
+         answer: `cards` is the SESSION's kind (`state-api.ts`), fixed at
+         sign-in, so the trail is drawn for Forefront's own people and for
+         nobody else whoever they view as — and the viewer switcher is INSIDE
+         that same row, so a bar that went away would strand the office with
+         no way back to themselves (§61). The CHROME follows the seat on the
+         session, never the simulated view, which is the whole point of the
+         simulation (§185's own three readers of the real session; this is a
+         fourth of that family).
+
+         What was wrong is the WEIGHT: at full strength the trail reads as the
+         viewed person's own access. Islam: *"greyed is better not to get
+         confused that the user has access by anyone else."* Two treatments
+         were drawn at real size with the cost of each stated, and he picked
+         **A** — quieter while a view is on, full weight the moment you switch
+         back, and both menus still working. B (quiet AND held) is recorded as
+         refused: a control that cannot be pressed is how the office loses the
+         way out of the view they are in.
+
+         THE SIGNAL IS `actingAs()` AND NEVER A SECOND TEST (§42, §53.5) — it
+         already carries both guards that make a view-as real rather than a
+         bootstrap session pointed at a stranger. WRITTEN AT THE END OF EVERY
+         PAINT rather than at each `VIEWER` assignment: there are three of
+         those and one is a temporary swap inside a reader (§104.7, a list of
+         call sites is a list somebody forgets to add to). Stored as an
+         ABSENCE (§50.6), so a session nobody is simulating is byte-identical
+         to one that never simulated. */
+      try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }

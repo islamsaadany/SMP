@@ -747,6 +747,48 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      for the one reader with no trail: a client's own office on the client's
      settings. */
   html[data-console] .setuprail .railback-row { display:none; }
+  /* ── AND IT QUIETENS WHILE A VIEW IS ON (§519) ─────────────────────
+     Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing the
+     white bar at the top which is for the smo only is that a glitch?"*
+     IT IS NOT — the trail follows the SEAT on the session, which is the whole
+     point of the simulation, and the viewer switcher is in this same row, so
+     a bar that went away would strand the office (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the viewed person's own
+     access. Islam: *"greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     HIS PICK OF TWO DRAWN AT REAL SIZE (rule 1c, each with its cost stated):
+     **A**, quieter while a view is on and full weight the moment you switch
+     back, with both menus still working. **B** — quiet AND held, the carets
+     dropped and the menus refusing — is recorded as refused rather than
+     merely not built: a control that cannot be pressed is how the office
+     loses the way out of the view they are in.
+
+     THE HOVER AND THE OPEN STATE ARE QUIETENED TOO, with their GROUND left
+     alone: the resting weight is what reads as access, and the background
+     still answering the pointer is what says the control works. Keyed on
+     `data-viewing-as`, which sync.js writes from `actingAs()` at the end of
+     every paint and REMOVES when nobody is being viewed (§50.6) — so a
+     session nobody is simulating paints byte-identically to one that never
+     did, and this whole block is dormant over `file://`, where there is no
+     trail to quieten at all. */
+  html[data-viewing-as] nav.trail .trff,
+  html[data-viewing-as] nav.trail details.trstep > summary,
+  html[data-viewing-as] nav.trail details.trclient > summary,
+  html[data-viewing-as] nav.trail details.trstep > summary:hover,
+  html[data-viewing-as] nav.trail details.trstep[open] > summary { color:var(--ink-3); }
+  /* THE CARET KEEPS A WEIGHT A WORD KEEPS, AND THE SEPARATOR DOES NOT —
+     one stated departure from the drawing, in the direction of Islam's own
+     decision. Measured, `--line` on the bar's surface is **1.38:1 light and
+     1.43 dark**: invisible rather than quiet, which on the caret takes away
+     the one mark saying *this opens* and lands the look on **B**, the option
+     he refused. So the caret takes the same quiet ink as the words (5.19–6.64
+     across the four palettes, so the quieting costs no legibility at all) and
+     only the › separators — ornament, never a word and never a control —
+     recede to the line colour, which is what leaves the trail reading as
+     three quiet words. */
+  html[data-viewing-as] nav.trail details.trstep > summary > svg { color:var(--ink-3); }
+  html[data-viewing-as] nav.trail .trsep { color:var(--line); }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;

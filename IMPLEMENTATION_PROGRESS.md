@@ -9519,9 +9519,42 @@ What to check:
 
 Still open: your word to merge.
 
+## 2026-10-11 — The bar tells an owner their own progress (§520.10)
+
+Merged to main 2026-10-11 on your word. Your report, typing figures into your
+own capability on the company's Reporting tab: "the counter at the top is
+still counting 0".
+
+Why: the 42 in that bar was never your figures. It is the company's own rows,
+and a capability's rows are counted on their own rail — the fix earlier the
+same day. So the figures landed and the bar, correctly, said nothing about
+them.
+
+Two ways were put to you and you took the first: the bar tells a capability
+owner or custodian, and a direction owner or custodian, their OWN progress.
+One chip per part they hold — "C002 · 1 of 2 entered", then "C002 · Done"
+once every figure is in; "D001 · 3 of 5 entered" for a direction. The other
+way would have folded every capability into the company's 42, which counts
+one figure twice and widens who may submit.
+
+The office and the CEO keep the company's count and the Submit button.
+Nobody's access changed, nothing is stored and nothing is migrated. A
+business unit's or a function's own bar is exactly as it was.
+
+One thing the checks caught: a unit's project chip briefly read "Done" for a
+project nobody had marked done. Put back the same hour.
+
+What to check:
+- View as Ehab: company › Reporting. Two chips at the top, one per
+  capability, moving as you type.
+- View as Amr Hassan: his direction's chip.
+- As the SMO: the company count and Submit, no chips.
+
+Merged to main 2026-10-11 on your word.
+
 ## 2026-10-11 — A capability owner opens on their capability (§520.11)
 
-On the branch, not merged. Your report, viewing as Ehab: the company opened on
+Merged to main 2026-10-11 on your word. Your report, viewing as Ehab: the company opened on
 Performance when it should open on the capability page.
 
 Why: the rule that decides where a place opens asked one question — is the
@@ -9545,4 +9578,4 @@ What to check:
 - View as Amr Hassan: it opens on Strategy with his directions, as before.
 - As the SMO: the company opens exactly as before.
 
-Still open: your word to merge.
+Merged to main 2026-10-11 on your word.

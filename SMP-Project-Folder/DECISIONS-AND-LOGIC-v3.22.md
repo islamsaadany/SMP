@@ -63963,6 +63963,57 @@ was the words, §1c's content-first rule). **On the branch, not merged** — the
 merge is Islam's word, on that merge.
 
 
+## §520.9 — Merged to `main` (2026-10-11)
+
+Islam, with the screenshot of the rail working: *"merge to main."* The merge is
+his word, on this merge, and it is a clean **fast-forward** — `origin/main`
+stood at §517.1, this branch's own base, and had not moved, so no renumber is
+owed (§264.3), nothing is resolved and nothing is recombined: the tree pushed
+is byte for byte the tree that was verified (§378.2's standing).
+
+**THE RECORD COMMIT IS WHAT MAKES MAIN'S TIP UNIQUE** (§91, by §357.4's road):
+the branch tip `4484bdf` is already pushed, and Vercel deduplicates by SHA, so
+`main` fast-forwarded onto it alone would be one deployment on a ref already
+holding it — this commit, which the branch does not hold, is the way back, and
+it is one worth making because the three record files still read *"on the
+branch, not merged"* over work `main` now holds (§378.2's finding again).
+
+**WHAT CROSSES**: §518 (Competitive Discipline), §519 (the quiet trail while
+viewing as somebody), §520–§520.8 (a capability's owner as a part owner, their
+own capability's figures on the group's Performance, their own capability on
+the company's Reporting tab, planned in pillars or in projects, in one section
+with a rail). **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): no
+`api/` or `db/` file and `lib/authorize.js` untouched; the one shared-rules
+change is `lib/rules.js`, and it only WIDENS — `ownsTopCapability` opens the
+company Reporting tab to a capability's owner, and `partOnly` reads the same
+stored `dirScope` key for one more role — so no save that worked before is
+refused now.
+
+**VERIFIED ON THE TREE BEING MERGED**: `built-in-step` all good,
+`generated-in-step` all clear (three carried `.cjs` in step), `test-authorize.js`
+**1057/0**, `test-platform-rules.js` 69/0, `node --check sw.js` clean with ONE
+live `const SHELL` at `v6.28-cap-rail-reporting`, held by no commit in the
+history and confirmed against `origin/main`'s `v6.21-direction-part`
+immediately before the push (§94.16).
+
+**AND THE LIVE READ COULD NOT BE MADE FROM HERE** (§91.5, §377.6's situation):
+this environment's proxy refuses `smp-orpin-tau.vercel.app` at CONNECT (403),
+so nobody here has seen production serve this commit, and it is said rather
+than claimed (§54.5). The witnesses for whoever reads the site: `data-dpl-id`
+on the door must MOVE from what it served before; `shell.js` must read
+**4,646,770 bytes / `8f160ea8…`** and `platform.css` **780,584 / `9848738b…`**,
+each byte-identical to the generated copy; the served `/sw.js` carries no
+`SHELL` (the generator drops the caching half, §316.10), so the bump reaches the
+offline copy alone and its release stamp (§397) is the third witness. **THE
+BRANCH IS DELIBERATELY NOT FAST-FORWARDED** until then (§374.1, §380.2): while
+it stays behind, `main`'s tip is on no other ref.
+
+**RECORDED, NOT DONE, AND NEXT**: Islam, in the same message — *"and then we
+will need to fix the counter as I'm adding numbers but the counter at the top
+is still counting 0"*. The company Reporting bar reads **0 of 42** while a
+capability owner enters figures. Not diagnosed here; measured first and put to
+him in plain words before anything moves (rule 1b).
+
 ## §520.10 — a capability's owner and a direction's owner read their own progress in the bar (2026-10-11)
 
 Islam, minutes after §520.9 reached `main` and typing figures into his own
@@ -64049,8 +64100,8 @@ no destination. `sw.js` bumped to `v6.29-own-progress-chips` because the
 built file's bytes changed (§91), one live `const SHELL`, held by no commit,
 confirmed against `origin/main`'s `v6.28`. **No CSS moved and no new element
 was drawn** — the chip is §301's `rc-state` repeated, so rule 1c's mockup was
-not owed. **On the branch, not merged** — the merge is Islam's word, on that
-merge.
+not owed. **Merged to `main` 2026-10-11 on Islam's word** (§520.12).
+
 
 ## §520.11 — a capability's owner opens on their capability (2026-10-11)
 
@@ -64114,5 +64165,112 @@ not this round's; `built-in-step.py` all good; the four generators re-run with
 uncommitted tree; `sw.js` bumped to `smp-shell-v6.30-cap-landing` against
 `origin/main`'s `v6.28`, one live `const SHELL`, `node --check` clean; `qa.py`
 through `qa-run.py` — the figure is in the progress tracker's entry, summed
-from the run's own lines (§332). **On the branch, not merged** — the merge is
-Islam's word, on that merge.
+from the run's own lines (§332). **Merged to `main` 2026-10-11 on Islam's word** (§520.12).
+
+## §520.12 — Merged to `main` (2026-10-11)
+
+Islam: *"merge to main"* — the word on this merge, which is the only word
+that moves `main` (rule 4). What is merged is **§520.10** (a capability's
+owner and a direction's owner read their own progress in the bar) and
+**§520.11** (a capability's owner opens on their capability), the branch at
+`127eea1`.
+
+**`--ff-only` REFUSED, AND THAT IS THE PROTOCOL WORKING RATHER THAN A
+SURPRISE.** `main` had not moved in product terms and the histories were
+still **divergent**: it holds `3a60a35`, its own §520.9 merge record, which
+the branch does not — so the refusal is `--ff-only` reporting a divergence
+instead of inventing a merge commit (rule 4), and the way through is the
+recorded one: merge `main` INTO the branch, resolve there, re-run the checks
+on the merged tree, then fast-forward.
+
+**MAIN'S EXTRA COMMIT IS RECORDS ONLY, MEASURED RATHER THAN ASSUMED**: over
+the merge base its diff is `CLAUDE.md` (4), this file (+51) and the short
+tracker (8) — **no product file, no source, no built file, no generated
+copy** — so nothing of main's needed rebuilding on its own account and
+§56.7's merged-declaration scan had nowhere to bite.
+
+**NO RENUMBER WAS OWED AND IT WAS CHECKED IN ALL THREE SPELLINGS** (§264.3,
+§336.1): §520.10 and §520.11 are free on `main` — 0 hits each for `§NNN`,
+`&sect;NNN` and the `§NNN` JavaScript escape, across all three record
+files — so this branch's numbers are its own and no citation of main's was
+swept up.
+
+**NO §335 RE-CARRY IS OWED, READ OFF THE DIFF**: the branch's non-record
+changes are `checks/direction-part.py`, `config-data.js`, `group-render.js`,
+`shell.html`, the shipped built file, `smp-app/public/shell.js`,
+`smp-app/public/sw.js` and `sw.js` — **`lib/rules.js` and `lib/authorize.js`
+are untouched**, so the carried `.cjs` modules cannot be stale, and
+`generated-in-step` confirms every one is its frozen twin under the one
+declared transform with `assistant.cjs` and `push.cjs` still the only two
+named rewrites (§316.7).
+
+**ALL THREE CONFLICTS WERE COMBINED, NEVER PICKED** (§318.7), and **the
+combination is asserted line by line rather than eyeballed** (§356.17: there
+is no `generated-in-step` for prose, so a merge can drop a whole block with
+nothing able to go red). Each reported **0 lost from ours and 0 lost from
+main**: `CLAUDE.md` keeps our two lines with main's §520.9 `*Last Updated:*`
+demoted to `*Earlier:*`, that file's own convention, each prefix asserted;
+this file takes main's self-contained 50-line §520.9 block first and then
+ours' 154 lines, append order, each side trimmed and joined by exactly one
+blank line; the short tracker keeps both entries newest-first.
+**AND ONE OF MY OWN LOSS ASSERTIONS REPORTED A FALSE POSITIVE** — it flagged
+a *"built, on the branch, not merged"* heading as lost from ours, because it
+only tried flipping the date to today and main's flip is 2026-10-08. *A
+staleness-flip assertion must allow for every date the other side may have
+written.*
+
+**AND CHECKING THE RECORD FOUND TWO REAL GAPS IN IT, WHICH IS WORTH MORE
+THAN THE MERGE.** The short Islam-facing tracker had **no §520.11 entry at
+all** and its §520.10 heading still read *"(built, on the branch, not
+merged)"* over work this merge puts on `main`; and the long root tracker had
+**no entry for §520.8, §520.9 or §520.10**, with §520.11's own entry opening
+*"On the branch, not merged."* — §356.17's class of fault twice more.
+**WHAT WAS CORRECTED IS THIS MERGE'S OWN AND THE REST IS NAMED RATHER THAN
+SWEPT** (rule 1b): §520.11's entry written, §520.10's inserted before it in
+chronological order, and the two stale closes flipped, every edit under an
+assertion on the exact prior text and guarded on the heading being found
+exactly once (§353.4). **NAMED AND NOT DONE**: §520.8 and §520.9 have no
+entry in the root tracker at all, three of its closes still read *"Still open:
+your word to merge"*, and this file carries **19** blocks still closing *"On
+the branch, not merged"* — all of them long-merged rounds, mostly main's, and
+sweeping them inside a merge is the scope widening rule 1b forbids.
+
+**AND THE SHELL-UNIQUENESS CHECK LOOKED LIKE A COLLISION AND WAS NOT**: a
+sweep over `git rev-list --all -- sw.js` returned `smp-shell-v6.30-cap-landing`
+as already held, which reads as §94.12 — and the commit holding it is
+`127eea1`, the branch's own, which is inside `--all`. Narrowed to
+`origin/main`'s history it is **never held**. *A "has anybody else served this
+name" check must exclude the ref that wrote it.* Confirmed again immediately
+before the push (§94.16), `v6.30-cap-landing` against main's `v6.28`,
+`node --check sw.js` clean with exactly one live `const SHELL`.
+
+**SPEC 029: NO FORCED SIGN-OUT IS OWED, AND IT IS READ OFF THE DIFF RATHER
+THAN ASSUMED.** Not one `api/` or `db/` file is in the range; nothing about
+how a save is judged, what the change list says or what a save touches moves;
+nothing stored moves and nothing is migrated. §520.10 draws a chip from counts
+the product already had and §520.11 decides where a session opens, so a tab
+left open on the old build saves exactly as it did.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365) — the figures are
+in the merge commit's own message, with `qa.py`'s destination count SUMMED
+from the run's own per-viewer lines rather than quoted from this record
+(§332), and §520.11's falsification re-made from the SOURCES on that tree
+(§94.5, §276), the break asserted to have MATCHED before it was written
+(§344.1) and the tree restored from the saved copy with the rebuild asserted
+byte-identical (§343.9).
+
+**AND THE WITNESS IS READ OFF THE LIVE SITE, NEVER THE DASHBOARD** (§91.5),
+with the baseline taken BEFORE the push so a landed build can be told from one
+that has not: `data-dpl-id` on the served document first (§443.10), beside
+`shell.js`, `platform.css` and the served `/sw.js` release stamp (§397), each
+asserted to have **MOVED**. **`sw.js`'s SHELL name is not a witness and saying
+so is part of the protocol** — `scripts/build-sw.mjs` drops the caching half
+where `SHELL` lives (§316.10, §365), so the served worker can be
+byte-identical across a bump and the name reaches only the offline copy.
+**AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE BRANCH TIP WAS
+ALREADY PUSHED** (§91, by §357.4's road): Vercel deduplicates by SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost — the way back is a
+commit `main` holds and the branch does not, and this block is it, which the
+record owed anyway. **The branch is held behind until the live read succeeds**
+and fast-forwarded only then (§378.2, §380.2).

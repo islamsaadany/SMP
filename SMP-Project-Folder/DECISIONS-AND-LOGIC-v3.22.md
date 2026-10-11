@@ -63392,3 +63392,50 @@ subject is how one file comes to answer two questions (rule 1b).
 and nobody's access moves** — read off the diff: two frozen sources, one served
 browser file, one served library, the check, and the record. **On the branch, not
 merged** — the merge is Islam's word, on that merge.
+
+**§519.2 — AND THE DESTINATION COUNT IS ACCOUNTED FOR RATHER THAN QUOTED (§332).**
+The whole-platform sweep reads **234** destinations where §367 recorded **243**, and
+a figure that differs from the record is owed an account before it is owed a
+sentence. Measured rather than reasoned about, with the baseline taken from a
+WORKTREE and never from this tree (§303): the build immediately before this round
+reads **234**, **identical viewer for viewer**, so §519 moves no destination; and
+the build before §516 (`1a309c6^`) reads **243**, with the whole difference landing
+on **three viewers and nine pages** — `ceo` 31 → 28, `co_dist` 21 → 18, `co_b2c`
+21 → 18, every other one of the thirty-three to the digit.
+**THAT IS §516.2 AND §516.3'S OWN WRITTEN LIST, WHICH IS WHAT MAKES IT AN ACCOUNT
+RATHER THAN A COINCIDENCE**: a CEO held exactly three Setup rail pages — Reporting
+cycle, Import & storage, Focus measures — and with Setup itself shut the gear is no
+longer drawn for them at all, so each loses three and nobody else loses any. The
+mechanism is in `qa.py` and was read rather than assumed: a "destination" there is
+the nav destinations `walk_destinations()` finds PLUS one per Setup rail page the
+viewer loop walks (`seen += 1`), which is how an ACCESS decision moves a number
+nobody thought was about access.
+**AND THE HARNESS COST MORE THAN THE MEASUREMENT.** A sweep started with
+`nohup … &` inside a backgrounded call outlived its wrapper; a second launch's `>`
+then TRUNCATED the log the first was still writing into, and the empty tail read as
+§385.2e's *a launcher that did not launch* when what it actually was is two runs
+interleaving into one file. *An empty tail can be a truncation rather than a failed
+launch, and two Chromium sweeps at once make both figures worthless* (§442.14's
+contention, §298.3's rule from the other side). Beside it, `pkill -f "qa-run.py"`
+killed my own shell because the pattern matched the wrapper's own command line, and
+`pgrep -cf qa-run` reported two processes when none remained — §385.2e's *a
+measurement that includes the measurer*, twice in one session — so a process is
+counted with `ps … | grep -v " grep "` and killed by PID. **Run them SERIALLY**:
+one sweep, one log, one waiter.
+
+**§519.2a — AND THE "MISSING TRACKER ENTRY" WAS A GREP FOR A SPELLING THE FILE
+DOES NOT USE.** `IMPLEMENTATION_PROGRESS.md` was read as carrying no §519 entry,
+because `grep -n "519"` over it returns nothing — and that file contains the
+string `§` **nought** times, by rule 1b-iii: it is what is said to a person, so
+it is written in plain words and a section number in it would be a reference
+nobody reading it needs. The entry is there and is first, headed *"The top bar
+goes quiet while you are viewing as somebody else (built, on the branch, not
+merged)"*, with §519's own *"Still to do"* line on it. §93's shape in a search
+rather than in a column: **a file searched for a spelling it deliberately never
+uses reports as empty**, and the reassuring reading — *the record is owed an
+entry* — is the one that produces work nobody needed. Nothing is added for
+§519.2 itself: the tracker says what is on a screen, and the sweep's own
+destination count is not on one.
+
+**On the branch, not merged** — the merge is
+Islam's word, on that merge.

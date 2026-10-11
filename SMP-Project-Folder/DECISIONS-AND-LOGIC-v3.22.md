@@ -63961,3 +63961,54 @@ and published for Islam's look, with the record copy under
 shown after the build because the shape is the product's own and the question
 was the words, §1c's content-first rule). **On the branch, not merged** — the
 merge is Islam's word, on that merge.
+
+## §520.9 — Merged to `main` (2026-10-11)
+
+Islam, with the screenshot of the rail working: *"merge to main."* The merge is
+his word, on this merge, and it is a clean **fast-forward** — `origin/main`
+stood at §517.1, this branch's own base, and had not moved, so no renumber is
+owed (§264.3), nothing is resolved and nothing is recombined: the tree pushed
+is byte for byte the tree that was verified (§378.2's standing).
+
+**THE RECORD COMMIT IS WHAT MAKES MAIN'S TIP UNIQUE** (§91, by §357.4's road):
+the branch tip `4484bdf` is already pushed, and Vercel deduplicates by SHA, so
+`main` fast-forwarded onto it alone would be one deployment on a ref already
+holding it — this commit, which the branch does not hold, is the way back, and
+it is one worth making because the three record files still read *"on the
+branch, not merged"* over work `main` now holds (§378.2's finding again).
+
+**WHAT CROSSES**: §518 (Competitive Discipline), §519 (the quiet trail while
+viewing as somebody), §520–§520.8 (a capability's owner as a part owner, their
+own capability's figures on the group's Performance, their own capability on
+the company's Reporting tab, planned in pillars or in projects, in one section
+with a rail). **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): no
+`api/` or `db/` file and `lib/authorize.js` untouched; the one shared-rules
+change is `lib/rules.js`, and it only WIDENS — `ownsTopCapability` opens the
+company Reporting tab to a capability's owner, and `partOnly` reads the same
+stored `dirScope` key for one more role — so no save that worked before is
+refused now.
+
+**VERIFIED ON THE TREE BEING MERGED**: `built-in-step` all good,
+`generated-in-step` all clear (three carried `.cjs` in step), `test-authorize.js`
+**1057/0**, `test-platform-rules.js` 69/0, `node --check sw.js` clean with ONE
+live `const SHELL` at `v6.28-cap-rail-reporting`, held by no commit in the
+history and confirmed against `origin/main`'s `v6.21-direction-part`
+immediately before the push (§94.16).
+
+**AND THE LIVE READ COULD NOT BE MADE FROM HERE** (§91.5, §377.6's situation):
+this environment's proxy refuses `smp-orpin-tau.vercel.app` at CONNECT (403),
+so nobody here has seen production serve this commit, and it is said rather
+than claimed (§54.5). The witnesses for whoever reads the site: `data-dpl-id`
+on the door must MOVE from what it served before; `shell.js` must read
+**4,646,770 bytes / `8f160ea8…`** and `platform.css` **780,584 / `9848738b…`**,
+each byte-identical to the generated copy; the served `/sw.js` carries no
+`SHELL` (the generator drops the caching half, §316.10), so the bump reaches the
+offline copy alone and its release stamp (§397) is the third witness. **THE
+BRANCH IS DELIBERATELY NOT FAST-FORWARDED** until then (§374.1, §380.2): while
+it stays behind, `main`'s tip is on no other ref.
+
+**RECORDED, NOT DONE, AND NEXT**: Islam, in the same message — *"and then we
+will need to fix the counter as I'm adding numbers but the counter at the top
+is still counting 0"*. The company Reporting bar reads **0 of 42** while a
+capability owner enters figures. Not diagnosed here; measured first and put to
+him in plain words before anything moves (rule 1b).

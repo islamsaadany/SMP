@@ -54,6 +54,22 @@ def go(pg, sub, sec=None):
     safe(pg, js); pg.wait_for_timeout(300)
 def as_(pg, key):
     safe(pg, "()=>{switchViewer('%s'); return true}" % key); pg.wait_for_timeout(400)
+#  §520.5: THE GROUP'S PERFORMANCE DRAWS ONE SECTION AT A TIME (`SECS[GSEC]`),
+#  so a read at `GSEC = 0` is a read of whichever section happens to come
+#  first — the capabilities one for a narrowed part owner, the headline for
+#  the office, which is how this file's own first run reported a correct
+#  build broken (§100.3). The section is selected BY ITS OWN TITLE
+#  (`GROUP_SECTIONS` is what the shell builds the section row from), so the
+#  assertion is about that section rather than about which fixture ran
+#  (§113.8) — and a null answer means it was never drawn, which the caller
+#  has to tell apart from a section drawn holding nothing.
+def perfcaps(pg):
+    go(pg, "performance")
+    hit = safe(pg, """()=>{var i = GROUP_SECTIONS.indexOf(L('capability','bu'));
+      if (i < 0) return false; GSEC = i; paint(); return true}""")
+    pg.wait_for_timeout(300)
+    if not hit: return None
+    return safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
 RAIL = "()=>[...document.querySelectorAll('[data-urail]')].map(b=>b.dataset.urail)"
 #  §520: WHAT THE GROUP DESTINATION OFFERS, asked of the product rather than
 #  of the markup. `allowed()` is the one answer the shell's own tab row and
@@ -128,6 +144,22 @@ with sync_playwright() as p:
     secs = (safe(pg, OFFERED, {}) or {}).get("secs") or []
     ck("the Foundation is kept", "found" in secs, secs)
     ck("the SWOT is not offered", "swot" not in secs, secs)
+    #  §520.5: AND THE GATE, MEASURED ON THE PERSON WHO REACHES NO
+    #  CAPABILITY. A direction owner is a part owner and reaches none, so
+    #  `capsHere()` is empty for them — asserted FIRST, or this says nothing
+    #  about the gate and everything about which fixture ran (§113.8). Without
+    #  the gate the caps heading is pushed over nought cards (§45.2,
+    #  §520.2's own fault one section along).
+    ck("§520.5: a direction owner reaches no capability", safe(pg, "()=>capsHere().length") == 0)
+    ck("§520.5: …so the capabilities section is not drawn for them", "caps" not in secs, secs)
+    #  AND NOT ON PERFORMANCE EITHER, which is a different gate and had to be
+    #  asserted separately: the line above reads the Strategy tab's sections,
+    #  and breaking the Performance one left this whole file GREEN (§54.5).
+    #  The capability exists on this tenant and this person reaches none of
+    #  them, so the section must not be pushed at all — a heading over nought
+    #  cards (§520.2, §45.2).
+    ck("§520.5: …nor on Performance, where they would read a heading over nothing",
+       safe(pg, "()=>SMPRules.capExists(GROUP)") is True and perfcaps(pg) is None)
     # ── 4. Both ends ─────────────────────────────────────────────────
     safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; paint(); return true}")
     go(pg, "strategy", "plan")
@@ -184,13 +216,28 @@ with sync_playwright() as p:
     cid = safe(pg, "()=>(GROUP.capabilities||[])[0].id", "")
     ck("§520: their own capability's section is offered", "caps" in secs, secs)
     ck("§520: …listing theirs and not the other", reach == [cid], {"want": [cid], "got": reach})
-    #  AND GROUP PERFORMANCE SAYS SO RATHER THAN DRAWING A HEADING OVER
-    #  NOTHING (§45.2): §517's filter empties the directions list for a part
-    #  owner who owns none, which before §520 could not happen.
-    go(pg, "performance")
-    txt = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
-    ck("§520: Performance says there is nothing to show", "Nothing to show yet." in txt, txt[:200])
+    #  §520.5: AND GROUP PERFORMANCE DRAWS THEIR OWN CAPABILITY'S FIGURES.
+    #  Islam: "a capability doesn't see a group performance same like the
+    #  direction owner." §520 drew every capability there (the section read
+    #  `GROUP.capabilities` whole) and then §517's filter kept only the
+    #  directions sections, which a capability owner has none of — so the page
+    #  read "Nothing to show yet." REWRITTEN, never loosened (§218): the claim
+    #  that survives is that they read THEIRS and nobody else's.
+    mine = safe(pg, "()=>(GROUP.capabilities||[])[0].name", "\u0000") or "\u0000"
+    txt = perfcaps(pg)
+    ck("§520.5: Performance draws the capabilities section at all", txt is not None)
+    txt = txt or ""
+    ck("§520.5: Performance draws their own capability", mine in txt, {"want": mine, "got": txt[:200]})
+    ck("§520.5: …and not the other one", "Second capability" not in txt, txt[:200])
     ck("§520: …and never the other direction", "Direction two" not in txt, txt[:200])
+    ck("§520.5: …and never the empty-handed note", "Nothing to show yet." not in txt, txt[:200])
+    #  THE TABLE VIEW IS THE SAME LIST READ A SECOND WAY (§53.5), so a
+    #  narrowing reaching the cards alone leaks every capability through it.
+    safe(pg, "()=>{GVIEW.caps='table'; paint(); return true}"); pg.wait_for_timeout(300)
+    tv = safe(pg, "()=>document.getElementById('panel').textContent", "") or ""
+    ck("§520.5: the table view narrows too",
+       mine in tv and "Second capability" not in tv, tv[:200])
+    safe(pg, "()=>{GVIEW.caps='cards'; paint(); return true}"); pg.wait_for_timeout(200)
     #  BOTH ENDS (§94.2): with the half eye off the same person is offered
     #  the lot — or a build that simply deleted those sections passes above.
     safe(pg, "()=>{delete GROUP[SMPRules.DIR_SCOPE]; paint(); return true}")
@@ -233,6 +280,12 @@ with sync_playwright() as p:
     ck("§520: with it on the office still sees the SWOT and the plan",
        "swot" in secs3 and "plan" in secs3, secs3)
     ck("§520: …and both capabilities", len(reach3) == 2, reach3)
+    #  §520.5 BOTH ENDS (§94.2): with the half eye ON the office's own
+    #  Performance still draws every capability — or a build that narrowed the
+    #  section for EVERYBODY passes every assertion above.
+    to = perfcaps(pg) or ""
+    ck("§520.5: …and Performance draws both for the office",
+       mine in to and "Second capability" in to, to[:200])
     ck("no page errors", not errs, errs[:3])
     b.close()
 print(("%d FAILED" % bad) if bad else "all good")

@@ -1647,7 +1647,10 @@ function unitsTable(keys){
    have (§15.1). Key objectives are optional, so ranking on them would order
    the haves above the have-nots by shape rather than by standing. */
 function capsTable(){
-  var sorted = GROUP.capabilities.slice().sort(function(a, b){
+  /* §520.5: `capsHere()` and never `GROUP.capabilities` — the table view and
+     the cards are two readings of one list, so a narrowing reaching one of
+     them leaks every capability through the other. */
+  var sorted = capsHere().slice().sort(function(a, b){
     var pa = capPerf(a), pb = capPerf(b);
     return (pb == null ? -1 : pb) - (pa == null ? -1 : pa);
   });
@@ -2481,7 +2484,13 @@ function renderGroupPerformance(){
      one \u2014 performance from its measures, execution from its tactics, both
      derived. It was the last place in the product still carrying typed scores,
      which meant its execution figure could not be checked against anything. */
-  var caps = GROUP.capabilities.map(function(c, ci){
+  /* §520.5: drawn from `capsHere()`, and `data-oi` stays the STORED position
+     — a drop commits through `applyOrder(GROUP.capabilities, order)`, which
+     keys on it (§118), so a filtered index would reorder the wrong rows. An
+     arranger is never narrowed (`canArrange("group")`), so the two cannot
+     meet today; the stored index costs nothing and is what keeps it true. */
+  var caps = capsHere().map(function(c){
+    var ci = GROUP.capabilities.indexOf(c);
     /* A capability no longer scores like a pillar. Its performance is its
        projects' \u2014 half what they handed over, half what that achieved \u2014 and
        its execution is milestones completed. Key objectives are optional and
@@ -2766,7 +2775,11 @@ function whereNext(keys){
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
-  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
+  /* §520.5: the section is KEPT for a narrowed part owner — their own
+     capability's figures are theirs to read — and drawn only while they hold
+     one, or the heading stands over nothing (§520.2, §45.2). Everybody else
+     is unchanged: with the half eye off `partOnly()` is false. */
+  if (SMPRules.capExists(GROUP) && (!partOnly() || capsHere().length)) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -2775,10 +2788,12 @@ function whereNext(keys){
       TIP_CAP(), viewToggle("caps")) });
 
   /* §517: a direction owner narrowed to their part reads their directions and
-     nothing else here — the company's headline, its themes and its
-     capabilities are the whole company's figures. */
+     nothing else here — the company's headline and its themes are the whole
+     company's figures. §520.5 keeps the capabilities section beside them,
+     narrowed to the ones this person reaches: the part a capability's owner
+     holds is a capability, so dropping it left them nothing at all. */
   if (partOnly()) {
-    SECS = SECS.filter(function(x){ return x.dir; });
+    SECS = SECS.filter(function(x){ return x.dir || x.cap; });
     if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
   }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });

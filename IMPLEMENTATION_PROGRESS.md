@@ -9404,3 +9404,46 @@ capability owner reads *Nothing to show yet* there today. Showing them their own
 capability's figures means narrowing that page, and measured against the example
 data that would take the capability figures away from 27 of the 33 people, so it
 is not done quietly. Second, the word to merge.
+
+## 2026-10-11 — A capability owner reads their own capability's figures (§520.5)
+
+On the branch, not merged. The two things §520 left with you are both answered,
+and on the first of them you were right and I had measured the wrong thing.
+
+A capability owner opening the group's Performance page used to read *Nothing to
+show yet*. They now read their own capability's figures there and nobody else's
+— which is what a direction owner already gets for their own directions. My
+handover said doing this would take the capability figures away from 27 of the
+33 people on the example data; that is the cost of narrowing that page for
+**everybody**, which nobody asked for. What you asked for only reaches somebody
+the half eye has narrowed, so for every other person — the office included — the
+page is exactly what it was. Said plainly because I had argued against it on a
+number that was about something else.
+
+The second one needs no work. You are right that a part owner's row covers a
+capability and a function, and that somebody seeing only their own function is
+normal and is a different question from what they may report. So no permission
+moves — which is what shipped yesterday — and the *differs* word on that one
+cell is the table being honest about two rows that genuinely ship differently,
+not something to fix by taking reporting away. If the word bothers you when you
+look at it, pressing one answer settles it and that is still one line.
+
+Checked: the capability owner reads their own capability and not the other one,
+on the cards and in the table view; the direction owner, who owns no capability,
+is shown no capabilities section at all rather than an empty heading; everybody
+else's page is untouched and nobody's access has moved, measured person by
+person. Four deliberate breaks each turned the checks red, including one that
+put the reported fault back and one that reproduced the empty page.
+
+What to go and check, after a merge:
+
+- Open **Roles & access** and press the half eye in the Part owner row's
+  *The top* cell. Then view as Ehab.
+- On the company's **Performance** tab he should see the capabilities section
+  with *Product Mindset* on it and nothing else of anybody's.
+- View as Amr Hassan, who owns a direction and no capability. His Performance
+  should show his directions and no capabilities heading at all.
+- Press the eye again to turn it off. Both of them should read the whole company
+  exactly as before.
+
+Still open: your word to merge.

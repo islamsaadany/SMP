@@ -10704,6 +10704,21 @@ function capsReachable(){
   });
 }
 
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
+}
+
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick
    `fnAsUnit` plays one level along, for the same reason: a pillar is a pillar
    whoever holds it, so the unit's own pages draw it rather than a third copy

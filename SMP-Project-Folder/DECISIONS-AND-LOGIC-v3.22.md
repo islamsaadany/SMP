@@ -63579,7 +63579,12 @@ says nothing about which drawn row a role sits in. The faithful inverse is
 file moves. *A rewrite is only a rewrite once the break that reaches it has been
 found; the break from the round's own harness is not automatically that break.*
 
-### §520.5 — Recorded, not done
+### §520 — Recorded, not done
+
+*(This block was first written as §520.5, which was a mis-numbering: it is
+§520's own list of open items and not a decision of its own. The number is
+handed to the work below, which answers its first bullet. The bullet is kept
+as written, with its correction beside it — Principle II.)*
 
 - **A capability owner's group Performance reads "Nothing to show yet."**
   rather than their own capability's figures, because §517 keeps only the
@@ -63591,6 +63596,11 @@ found; the break from the round's own harness is not automatically that break.*
   narrowing would REMOVE those figures from 27 viewers on the worked example.
   A wide behaviour change nobody asked for (rule 1b) — Islam's to settle, with
   that cost stated.
+  **CORRECTED AND DONE AT §520.5 BELOW, AND THE MEASUREMENT ABOVE IS OF THE
+  WRONG OPTION** (§124): 27 of 33 is the cost of narrowing that section's data
+  source for EVERYBODY, which nobody asked for; what Islam asked for is scoped
+  to `partOnly()` holders — the half eye's own scope — and costs every other
+  viewer, the office included, nothing at all.
 - **The demo seed derives no `capowner` and no `dirowner`**, so every check
   MAKES its state (§255) — and the access baseline sweeps **no `cap:` target at
   all**, so a cell at a capability is asserted nowhere. `scripts/test-nav-row.js`
@@ -63607,5 +63617,125 @@ found; the break from the round's own harness is not automatically that break.*
   (§303): `setup-rail`'s clipped *Planning & reporting cycle* label (§495's
   rename, already recorded) and `no-jump`'s *adding a person, through the
   dialog* trial — a different trial from the one §118.7 records.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.
+
+---
+
+## §520.5 — A capability owner reads their own capability's figures (2026-10-11)
+
+Islam, of the two decisions §520 handed over: *"a capability doesn't see a group
+performance same like the direction owner why is this confusing to you am I
+missing something?"* and *"the part owner row is relevant to the capability and
+apply to the function sa well when shown the person as well sees their own
+function only whch is normal and differnt from the reporting. or am I missing
+something?"* Then, of the plan put back to him in plain words, **"proceed"**.
+
+**HE WAS NOT MISSING ANYTHING AND I HAD MEASURED THE WRONG OPTION** (§124).
+§520's handover said narrowing the group's Performance page *"would take the
+capability figures away from 27 of the 33 people on the example data"* — and
+that figure is the cost of narrowing that section's **data source for
+everybody**, which nobody asked for. What he asked for is §517's own scope: a
+part owner the half eye has narrowed, which costs every other viewer — the
+office included — nothing. Said plainly, the objection withdrawn, and the
+correction is the reason this is one line rather than a round.
+
+**AND THE SECOND ANSWER REMOVES WORK RATHER THAN ADDING IT.** My framing was
+that the drawn cell and the reporting grant ought to agree; that premise was
+mine and not his. A part owner's row covers a capability AND a function, a part
+owner reading their own function only is normal, and *what is reported is a
+different question from what is drawn* (§469). So **no grant moves** — which is
+what §520 already shipped (0 grants moved, the access baseline UNMOVED) — and
+§516's *mixed* cell stands as that model being honest rather than as something
+to settle by taking reporting away.
+
+**THE GAP IS §517's FILTER MEETING §520's NEW ROLE.** That filter keeps only
+`x.dir`, and a capability's owner owns no direction, so a narrowed owner fell
+through to *"Nothing to show yet."* — §520.1's fault one page over, where
+dropping a section left them nothing at all rather than narrowing it.
+
+**ONE READER, ASKED BY THE TABLE VIEW AND THE CARDS** (§53.5): `capsHere()` in
+`config-data.js`, beside `capsReachable()`, answering `GROUP.capabilities`
+unless `partOnly()`. A narrowing that reached the cards alone would leak every
+capability through the table view, which is the same list read a second way.
+
+**WHAT A PART OWNER REACHES IS THE MATRIX'S OWN ANSWER** (§42): `capsReachable()`
+already asks `grantAt("k_perf","cap:"+c.id)` per capability and already narrows
+correctly, and the company's own Capabilities section on Strategy has read it
+since §447 — so this is one surface catching up with its neighbour rather than a
+second rule about who reaches a capability.
+
+**`data-oi` STAYS THE STORED POSITION** (§118, §310): a drop commits through
+`applyOrder(GROUP.capabilities, order)`, which keys on it, so a filtered index
+would reorder the wrong rows. An arranger is never narrowed (`canArrange("group")`),
+so the two cannot meet today; the stored index costs nothing and is what keeps
+that true. `arrangeBar("capabilities", GROUP.capabilities.length)` is left alone
+for the same reason.
+
+**AND THE SECTION IS GATED ON HOLDING ONE** (§520.2, §45.2): a narrowed part
+owner who reaches no capability is not pushed a heading over nothing — which is
+the direction owner, whose own assertion is that they reach **nought** of them,
+asserted FIRST so the gate assertion is about the gate (§113.8).
+
+**§520.5a — THE PAGE DRAWS ONE SECTION AT A TIME, AND THAT REPORTED A CORRECT
+BUILD BROKEN** (§100.3). `renderGroupPerformance()` ends
+`SECS[Math.min(GSEC, SECS.length - 1)].h`, so a read at `GSEC = 0` is a read of
+whichever section happens to come first — the capabilities one for a narrowed
+part owner, the headline for the office. The check's office assertion failed on
+a build that is right, **and the part-owner assertion beside it had been passing
+only because its filtered SECS puts the cap section first**, which is a §113.8
+weakness rather than a measurement. The section is selected BY ITS OWN TITLE now
+(`GROUP_SECTIONS.indexOf(L('capability','bu'))`, which is what the shell builds
+the section row from), so the assertion is about that section rather than about
+which fixture ran — and a null answer means it was never drawn, which the caller
+has to tell apart from a section drawn holding nothing.
+
+**§520.5b — AND THE GATE'S FALSIFICATION WENT GREEN** (§54.5: a green
+falsification run is indistinguishable from a working guard). The gate's only
+neighbouring assertion read the **Strategy tab's** sections, while the gate
+under test is the **Performance** section push — so nothing in the file asserted
+it at all. Asserted separately now (the capability exists on this tenant, this
+person reaches none of them, so the section must not be pushed), and `nogate`
+reddens exactly that one.
+
+**PROVED ABLE TO FAIL FOUR WAYS FROM THE SOURCES** (§276 — §238's hashed CSP
+silences an edited built file), each break asserted to have MATCHED exactly once
+(§344.1) and the tree restored from the saved copy with the rebuild asserted
+**byte-identical** (§343.9): `whole` **3 red**, the reported fault — every
+capability drawn, and the direction owner now reaching one; `dironly` **3 red**,
+the section gone and *"Nothing to show yet."* in its place; `nogate` **1 red**,
+the heading over nothing; `table` **1 red**, the table view leaking every
+capability.
+
+**§520.5c — AND THE COMMITTED ACCESS BASELINE IS STALE, WHICH IS A FINDING AND
+NOT THIS ROUND'S** (§303). `specs/058-the-client-and-its-modules/access-baseline.json`
+reads **189 differences** against this tree — and the identical 189 against
+HEAD, established by stashing this work and running it there. It is a snapshot
+from an older commit, and `scripts/test-access-unmoved.js`'s own header
+prescribes the method: *write it from the build you are comparing AGAINST, then
+compare.* Written from a worktree at HEAD, this tree reads **UNMOVED — every
+person opens exactly what they opened, at every target**. Regenerating the
+committed file is its own decision and not something to ride along in a
+screen-only round (rule 1b).
+
+**VERIFIED**: `checks/direction-part.py` all good (no page errors), red four
+ways; `checks/access-merged.py` all good; `test-authorize.js` **1042/0**; the
+access baseline **UNMOVED** against a baseline written from HEAD;
+`checks/built-in-step.py` all good; the four `smp-app/public/` generators re-run
+and `generated-in-step` every comparison line ok (§329, with `public/sw.js`
+moving because §397's release stamp hashes every held file and `shell.js`
+changed — the reload banner working as designed); `checks/direction-owner-role.py`
+and `checks/single-company.py` all good; `qa.py` through `qa-run.py`. `sw.js`
+bumped to `v6.25-caps-performance` because the built file's bytes changed
+(§91), proved held by no commit in the history and confirmed against
+`origin/main` immediately before any push (§94.16).
+
+**TWO REDS ARE `main`'s** and are left as `main`'s (§303): `setup-rail`'s
+clipped *Planning &amp; reporting cycle* label (§495's rename) and `no-jump`'s
+*adding a person, through the dialog* trial.
+
+**RECORDED, NOT DONE**: the §516.1 *mixed* cell stands at Islam's own word, so
+option (b) — narrowing `capowner:a_fn_own` to `view` so the row agrees — is one
+line whenever he wants it and moves a grant, which is why it is not taken here.
 
 **On the branch, not merged** — the merge is Islam's word, on that merge.

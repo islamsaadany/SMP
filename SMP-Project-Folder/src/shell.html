@@ -55,7 +55,7 @@
 <div class="banner refused" id="refused" hidden></div>
 <div class="banner safety" id="unsaved" role="status" hidden></div>
 
-<!-- IS IT SAVED? (§521) The platform has never had a Save button (§268,
+<!-- IS IT SAVED? (§527) The platform has never had a Save button (§268,
      §273.4): every box writes when the cursor leaves it and the autosave
      carries it. Which is right, and left the person doing the typing with
      nothing at all to read - the five outcomes of a save were told only to
@@ -3687,7 +3687,7 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* AND THE KEYS, over that same list and in the same one place (§522).
+    /* AND THE KEYS, over that same list and in the same one place (§528).
        Not inside wire(): these boxes are built by eight renderers and a
        keydown wired at each of them is eight places to forget, which is the
        whole reason the marks above are put on here. Idempotent per element
@@ -4250,7 +4250,7 @@
      bar is counting) and applied to the DOM the paint just produced. Driven
      from the CONTROLS rather than from the ids, so no id ever has to be
      escaped into a selector. */
-  /* The six reporting boxes, named ONCE and read by both walks and by §522's
+  /* The six reporting boxes, named ONCE and read by both walks and by §528's
      keys (§104.7, §53.5: a second copy of this list is the one somebody
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
@@ -4343,7 +4343,7 @@
     if (els.length) gapLight(els[0]);
   }
 
-  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§522) ───────────────
+  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§528) ───────────────
      Islam, of the four behaviours put to him: "all". MEASURED FIRST (rule 3a)
      on the shipped build, and the first finding is that Enter already WORKED
      and already went nowhere: a bound box writes on `change`, which for a text
@@ -4360,7 +4360,7 @@
        Enter / Shift+Enter  the next typed figure, and back
        Alt+Enter            §279's Next → from the keyboard
        Escape               put this box back to what it held
-       Alt+N                the row's note, which §522 took out of the tab path
+       Alt+N                the row's note, which §528 took out of the tab path
 
      NOTHING IS DRAWN, which is why rule 1c has nothing to sign off: every hint
      rides the hover on the bar's own Next button and an `aria-keyshortcuts` set
@@ -4458,7 +4458,7 @@
       el.addEventListener("focus", function(){ was = el.value; });
       el.addEventListener("keydown", function(e){
         if (e.ctrlKey || e.metaKey) return;
-        /* ALT+N — the note §522 took out of the tab path. Matched on `e.code`
+        /* ALT+N — the note §528 took out of the tab path. Matched on `e.code`
            and not on `e.key`, because Option+N on a Mac is the tilde dead key
            and `e.key` there is "Dead"; preventDefault stops it inserting. */
         if (e.altKey && e.code === "KeyN") {

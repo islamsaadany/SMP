@@ -3701,7 +3701,7 @@ function textOr(page, value, cls, setter){
    through, so `grow` here means "size yourself to your content" and nothing
    about the key.
 
-   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§522, item 4 of
+   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§528, item 4 of
    Islam's own four). `want` IS "this row needs explaining" — §105 holds Submit
    until a figure at risk carries one — so it is already the answer to "is this
    box part of the work", and no second test is invented for it (§104.8). With
@@ -6410,7 +6410,7 @@ function reportBar(target){
      in, the only thing left is on another tab, and a walk button that could
      only ever wrap on itself is a control with nothing behind it. */
   /* AND THE KEYBOARD IS NAMED ON THE ONE CONTROL THAT IS ABOUT GETTING
-     THROUGH THE REPORT (§522): four keys were added and nothing drawn, which
+     THROUGH THE REPORT (§528): four keys were added and nothing drawn, which
      is the eye's and the monthly mark's own answer — a fact the screen does
      not otherwise state belongs on a HOVER (1b-ii, §88, §278.2) — and this
      button had no `title` at all. Never one per box: eighteen identical hovers

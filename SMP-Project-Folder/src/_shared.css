@@ -403,7 +403,7 @@
   @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
-  /* ── IS IT SAVED? (§521) ───────────────────────────────
+  /* ── IS IT SAVED? (§527) ───────────────────────────────
      One message, bottom left, in the shape Islam signed off. BOTTOM RIGHT IS
      THE CHAT CORNER'S (§97), so this takes the other end.
      THE Z-INDEX IS BELOW EVERY FLOATING CONTROL and above the page: .kmenu is

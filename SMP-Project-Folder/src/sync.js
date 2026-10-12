@@ -163,7 +163,7 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
-  /* WHEN the server last accepted one, for the hover (§521). `lastSaved`
+  /* WHEN the server last accepted one, for the hover (§527). `lastSaved`
      carries no time of its own and never needed one: it is compared, not
      read. Set at the ONE place a save is accepted, so a landing or a rebase
      — which set the baseline from the server's copy rather than from a
@@ -175,7 +175,7 @@ var SYNC = (function () {
   /* When the last save actually LEFT, so the leading edge below can tell a
      first change from the fourth in a burst. */
   var lastFlush = 0;
-  /* ── IS IT SAVED? (§521) ──────────────────────────────────
+  /* ── IS IT SAVED? (§527) ──────────────────────────────────
 
      Islam, of the usability audit's first finding: a platform with no Save
      button tells the person typing nothing at all. Every box writes when the
@@ -226,7 +226,7 @@ var SYNC = (function () {
              : null;
     /* `clean` LEAVES EVERYTHING ALONE, THE PENDING FADE INCLUDED — and the
        first build of this cleared the fade timer ABOVE this line, which is
-       the one thing it may not do (§521.1). §170's debounce is leading-edge:
+       the one thing it may not do (§527.1). §170's debounce is leading-edge:
        the first change of a burst posts at once and the trailing 800ms timer
        still runs, so a second save follows with nothing to send and answers
        `clean` — every single time. So the clear cancelled the fade a beat

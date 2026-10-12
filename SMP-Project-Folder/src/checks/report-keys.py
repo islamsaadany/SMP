@@ -1,4 +1,4 @@
-"""THE FIGURES ARE ENTERED FROM THE KEYBOARD (§522).
+"""THE FIGURES ARE ENTERED FROM THE KEYBOARD (§528).
 
 Islam, of the usability audit's second item: *"all"* — all four of the
 keyboard behaviours put to him for the reporting page. Measured first, on the
@@ -493,7 +493,7 @@ with sync_playwright() as p:
       return true;}""", UNIT)
     pg.wait_for_timeout(400)
     # 10 ── A YES/NO ROW ANSWERED IN PROGRESS (the shape the step guards against)
-    print("\n10 · a yes/no row's two halves are told apart (§300, §522's own "
+    print("\n10 · a yes/no row's two halves are told apart (§300, §528's own "
           "identity)")
     # Through the same helper §4 uses — which also lands on the pillar the row
     # is in, because a unit's page draws ONE pillar at a time (§279) and §8 has

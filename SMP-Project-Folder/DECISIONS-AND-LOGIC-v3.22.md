@@ -63222,7 +63222,7 @@ Islam, of El Abd (business units off, directions with named owners): *"when they
 **§517.1 — MERGED TO `main` 2026-10-10 on Islam's word** (*"merge to main"*). `main` had not moved since the branch was cut (`origin/main` an ancestor of the branch, measured), so the merge is a clean fast-forward and the tree pushed is the tree verified; §517 was free on `main`. `sw.js` confirmed against `origin/main` immediately before the push (§94.16): `v6.21-direction-part` against main's `v6.20-cycle-office`, one live `const SHELL`, `node --check` clean. The branch tip was already pushed, so `main` carries this record commit of its own (§91). **No forced sign-out is owed** (spec 029): the authoriser changed and only ADDS — a new group key nobody's tab has ever written, refused to everybody but the Super user — so no save that worked before is refused now. **§91.5's live read could not be made from this session**: the proxy refuses the production address (403 at CONNECT), so the deployment is unverified from here and said so rather than claimed. The witnesses for whoever reads it: `shell.js` **4,619,585 / `3dc70320` → 4,627,912 / `b44ea287`** and the served `sw.js` stamp **`d7a28757` → `c65f9364`** (§397 — so the reload banner is offered); `platform.css` is unchanged at 777,706 / `9f586d49` and is no witness this round (§113.8). The branch is held behind `main` until that read is made.
 
 
-## §521 — The platform says it has saved (usability audit, item 1; 2026-10-11)
+## §527 — The platform says it has saved (usability audit, item 1; 2026-10-11)
 
 Islam, setting the queue after the usability audit: *"let's start with the silent
 save, show me the mockups and after we can tackle the shortcuts of entry then the
@@ -63298,7 +63298,7 @@ is stamped at the ONE place a save lands (the ok branch) and never at the two
 other sites that assign `lastSaved` (a refresh, and the boot landing), because
 neither of those is a save.
 
-**§521.1 — ONE PRODUCT FAULT, AND IT IS THE PROMISE THE DRAWING MAKES.** The
+**§527.1 — ONE PRODUCT FAULT, AND IT IS THE PROMISE THE DRAWING MAKES.** The
 first build cleared the pending fade at the top of `saveTip`, above the `clean`
 early return — and §170's debounce is LEADING-EDGE, so the first change of a
 burst posts at once and the trailing 800ms timer still runs, which means a
@@ -63312,7 +63312,7 @@ check on its first run, not by reading** — and **my first fix made the
 word test fired first (caught by me rather than by a check; `offline` is handled
 first now, with its own clear).
 
-**§521.2 — AND ONE FALSIFICATION COULD NOT FALSIFY, WHICH IS THE FINDING OF
+**§527.2 — AND ONE FALSIFICATION COULD NOT FALSIFY, WHICH IS THE FINDING OF
 THE ROUND.** `tip-fades-failure` made a failure fade like a success and the check
 reported **ALL GOOD** — a green falsification run, indistinguishable from a
 guard that works (§54.5). Chasing it rather than accepting it found the real
@@ -63336,7 +63336,7 @@ everywhere** (§94.2) and proved able to fail **five ways from the SOURCES**
 (§276, because §238's hashed policy silences an edited built file) —
 `no-tip` **18 red**, printing the reported silence verbatim
 (`{'shown': False, 'op': 0, 'display': 'none'}`); `tip-clean-clears` **3 red**,
-§521.1's own three (`op:1 shown:True word:'Saved'`); `tip-always-pointer`,
+§527.1's own three (`op:1 shown:True word:'Saved'`); `tip-always-pointer`,
 `tip-on-projector` and `tip-no-width-floor` **1 red each**, every one reddening
 its own assertions and no others. The tree was restored from the saved copies
 rather than with `git checkout` (§343.9) and the rebuild asserted
@@ -63361,7 +63361,7 @@ for everybody outside the office.
 
 ---
 
-## §522 — Entering figures from the keyboard (usability audit, item 2; 2026-10-12)
+## §528 — Entering figures from the keyboard (usability audit, item 2; 2026-10-12)
 
 Islam, of the four behaviours put to him: **"all"**.
 
@@ -63431,7 +63431,7 @@ element that is not there — `gapLight(els[here + by] || els[here])` keeps it o
 the box it was already on, which is what *at either end, do nothing* has to mean
 in practice.
 
-**§522.1 — FIVE OF THE CHECK'S OWN FAULTS, EACH AN OLD RULE IN A NEW PLACE.**
+**§528.1 — FIVE OF THE CHECK'S OWN FAULTS, EACH AN OLD RULE IN A NEW PLACE.**
 A probe with a trailing semicolon in its arrow body (§104.7); §1 asking for a
 `Y/N` target the demo does not hold, so the state is MADE (§255, `make_yn()`);
 the focus settled in two acts, so a probe reading it between them measured
@@ -63441,7 +63441,7 @@ rewritten as MEMBERSHIP in the walk's own field list with the target asked of th
 page (§94.8, §218); and **a length test reported a correct build broken**,
 because the walk holds notes and the two counts legitimately differ.
 
-**§522.2 — AND FIVE HARNESS FAULTS, ONE OF THEM &sect;298.3's OWN RULE BROKEN BY
+**§528.2 — AND FIVE HARNESS FAULTS, ONE OF THEM &sect;298.3's OWN RULE BROKEN BY
 THE HARNESS THAT QUOTES IT.** Six neighbours were run through a grep for
 `FAIL|passed|FAILED|all |good|Error|Traceback` and **printed nothing**, which is
 indistinguishable from a clean run: **a grep is not a verdict, and an empty grep
@@ -63451,10 +63451,10 @@ Beside it: a saved build named `built.good` ran **no script at all** over
 by file extension** (renamed `built-good.html`, it runs); a one-line break pattern
 that never matched the multi-line source, so the run was green for the wrong
 reason (§54.5, §344.1 — assert the break MATCHED before writing it); two
-mis-escaped patterns in `break.py`; and my own §522 comment wrong twice
+mis-escaped patterns in `break.py`; and my own §528 comment wrong twice
 (§104.8).
 
-**§522.3 — AND THE REPAIR OF A STALE NEIGHBOUR, FOUND WHILE ESTABLISHING WHOSE
+**§528.3 — AND THE REPAIR OF A STALE NEIGHBOUR, FOUND WHILE ESTABLISHING WHOSE
 THE REDS WERE.** `checks/enter-commits.py` read **2 FAILED** and was established
 as not this work's by reproducing it identically on `origin/main`'s own build
 (§303) — and §303 settles whose a red is and says nothing about whether anybody
@@ -63478,7 +63478,7 @@ rebuild asserted byte-identical.
 **AND §229 CORRECTLY DOES NOT REACH A CLAUSE BOX, MEASURED RATHER THAN
 ASSUMED**: that box is `rows="2"` and not `.grow` (className `'fld '`), and
 §229's keydown is wired inside the `TEXTAREA` branch gated on `.grow` — so it has
-never reached an INPUT however that input is bound, which is why §522's handler
+never reached an INPUT however that input is bound, which is why §528's handler
 has no conflict with it.
 
 **VERIFIED**: `checks/report-keys.py` all good, proved able to fail **THIRTEEN**
@@ -63492,7 +63492,7 @@ Beside it: `enter-commits` **all ok** (repaired) and red 2 from the sources,
 all good, `generated-in-step` every served copy byte-identical to its generator
 (its one FAIL is §349.4's guard refusing an uncommitted tree and saying which
 errand that is), and `qa.py` through `qa-run.py` **33 viewers / 234 destinations /
-ERRORS none** — §521's own figure to the digit, which is what a round that adds
+ERRORS none** — §527's own figure to the digit, which is what a round that adds
 KEYS rather than PLACES must reproduce.
 
 **SCREEN ONLY, READ OFF THE DIFF**: nothing stored moves, nothing is migrated, no
@@ -63503,8 +63503,8 @@ nowhere in the history (§94.12, §94.16).
 
 **`no-jump`'s 1 JUMPED IS NOT THIS WORK'S AND IS RECORDED RATHER THAN FIXED**
 (§303, rule 1b): *adding a person, through the dialog* — box `top 600 → 0` —
-reproduces with identical numbers on the build before §522 **and** on
-`origin/main`'s own build. It is the register's Add dialog, a surface §522 does
+reproduces with identical numbers on the build before §528 **and** on
+`origin/main`'s own build. It is the register's Add dialog, a surface §528 does
 not touch.
 
 **RECORDED, NOT DONE** — the rest of Islam's own queue, in his order: the browser's

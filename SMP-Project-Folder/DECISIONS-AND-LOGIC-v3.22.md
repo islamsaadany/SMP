@@ -64311,7 +64311,7 @@ Islam, using §514's flow: *"1. check shouldn't stop sovmething to be saved a ch
 
 **CHECKS.** `smp-app/checks/copilot.mjs` **328/0**: a saved flow can still be written to and an unchanged re-save is refused by name; a changed draft saves as v2 of the same deliverable; Apply refuses a deliverable that is not here and one that is not a Foundation; Apply records the latest version and the page reads it back, with the end year written in and the `{Y}` kept in store; a client's own person cannot apply. Two breaks added (`save-same-twice`, `apply-any-type`), both red. Three literals moved as a consequence of v2 now being the changed draft (nextVersion 3, `v.n = 3`) — rewritten, never loosened (§218). `smp-app/checks/shell.mjs` §3i **67/0**: the bar (Save live, Apply dimmed with its hover, no Save in the messages), the dialog's title and body read together, Yes writing the six parts and the end year with the old aspiration archived, the database holding both, the deliverable page's six cards and *On the plan as v1*, and a pen edit after the save reading *v2 in progress* with the plan keeping v1. **Three of §3i's own first failures were the check**: it read the dialog's title out of `#modal-b` where `openModalHtml` writes it to `#modal-t`; it joined the values rows as strings where `applyFoundationParts` stores `{name, def}` objects (`[object Object]`); and it pressed a deliverable with the rails folded to their strip (§490.2) and died rather than reporting (§215) — the rail toggle and the Deliverables fold are pressed first, the way a person would. The §3i fixture snapshots `foundationSnapshot(UNITS.mobile)` and `ARCHIVES` before and puts both back after (§94.2), or the sweep that follows measures a Mobile the check rewrote. Built-in-step all good, generated-in-step all clear, cold typecheck clean. `sw.js` shell `v6.21-apply-to-plan`, past main's `v6.20`.
 
-**Built as §515, renumbered §517 before the commit, §518 again at that merge and §524 at this one**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **On the branch, not merged** — a merge owes bringing main's §515–§516 in first, and `main` is Islam's word, on that merge.
+**Built as §515, renumbered §517 before the commit, §518 again at that merge and §524 at this one**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **Merged to `main` 2026-10-12** (§526.1), with main's §515–§516 brought in first.
 
 **Recorded, not done**: the server does not re-check that the person may write the Foundation before stamping `applied` — the browser's save is where the authoriser refuses, so a refused save leaves a stamp on the deliverable with nothing on the plan; the archive is written by the browser from what the plan held, never from a stored copy on the server; and the mockup still says *Move to the plan*.
 
@@ -64594,5 +64594,89 @@ of the nine spike proofs with S2 restored to 63 tables. **Five app-side reds are
 `origin/main`'s and are left as main's** (§303, which settles whose a red is and
 never that somebody must clear it): `test-nav-row` (dies in `myUnits`),
 `test-my-reporting` 64/1, `check:frameworks:page` 1/14, `check:portfolio` 134/1,
-`check:portfolio:module` 206/1. **`main` is untouched: the merge is Islam's word,
-on that merge.**
+`check:portfolio:module` 206/1. **Merged to `main` 2026-10-12 on Islam's word
+(§526.1).**
+
+## §526.1 — the merge, and the two reds the sweep could only find by being re-run
+
+Islam: **"mrege"** — the word on this merge, which §4 requires every time.
+**THE RENUMBER RAN FIRST, WHICH IS THE ONLY MOMENT ONE IS PROVABLY SCOPED** (§264.3):
+`main` had taken §518–§520 while this was in flight, so the branch's three became
+§524/§525/§526 before anything was merged, in all three spellings (§336.1)
+with every count declared in advance and the pass refused on a mismatch (§344.1).
+**EVERY CONFLICT BY CLASS**: the three record files **COMBINED, never picked**
+(§318.7, §356.17 — either side taken whole drops the other session's round and
+there is no `generated-in-step` for prose); the built file and the four generated copies
+**REBUILT rather than merged** (§91, §329) and asserted in step afterwards; and
+`sw.js` rebuilt from main's copy with this branch's one line re-applied (§146.2) at
+**`v6.31-foundation-flow`**, a name no ref in that file's whole history has held
+(§94.12), one live `const SHELL`, `node --check` clean, **confirmed against
+`origin/main` again immediately before the push** (§94.16).
+
+**WHICH KIND OF MERGE THIS IS, READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029):
+against `origin/main` it changes six files, four of them frozen sources and the other two
+`smp-app/lib/copilot.ts` and `copilot-flow.ts` — both reading and writing the Copilot's
+OWN tables, with no authoriser, no change list, no state-graph rule and no migration in it,
+so **no forced sign-out is owed** and a save that worked before is not refused now.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365), every verdict read from its
+own TAIL and an empty tail treated as a failure (§298.3, §385.2e): `qa.py` **33
+viewers / 234 destinations / ERRORS none**, the destinations **SUMMED from the run's own
+per-viewer lines** rather than quoted from the record (§332) and **main's own figure to
+the digit**, which is what a merge changing no navigation must reproduce; `built-in-step.py`
+all good; `generated-in-step.mjs` all clear; authoriser **1057/0**; change list 140/0;
+platform rules 69/0; session-state ok; db-url-choice 10/0; KB audience all clear; **access
+UNMOVED** against `origin/main`; `typecheck` clean **COLD** (§3, §442.16) after a
+real `next build`; and on the stack production serves — shell **384/0**, copilot 332/0,
+modules 234/0, door 146/0, state 92/0, insights 137/0 · tab 24/0, setup 49/0, blob
+23/23, comms 47/47, upload 9/0, room 10/0, deploy 5/0, record 73 all good, viewas 20/0,
+standing 7/0, demo 28/0, frameworks 90/0, assistant 10/0, memory 16/0 · boundary 14/0
+· api 36/0 · split 21/0 · page 42/0 · ask 16/0, unsaved 26/0, release 9/0,
+drivers 99/0, look 122/0, store 31/0, tracker 251/0, notes 170/0, sop 20/0, pick 12/0,
+handoff 16/16, spike S2 **64/0 with 63 tenant tables isolated on all three verbs**.
+
+**AND `check:shell` READ RED BEFORE IT READ GREEN, WHICH IS §442.14 RATHER THAN A
+FAULT**: **131 ok / 10 failed** in a batch with three memory checks running beside it, and
+**384/0 run alone**. No port clash — contention — which is exactly why that rule says
+the served-stack checks are run **serially**: *a contended run is a measurement of the
+machine, and 131 of 141 is neither a clean run nor a plausible partial, so it is read again
+before it is believed.*
+
+**SEVEN REDS, EVERY ONE ESTABLISHED AS `origin/main`'s AND LEFT AS MAIN'S** — §303
+settles whose a red is and says nothing about whether anybody clears it: `test-nav-row`
+dying in `myUnits`, `test-my-reporting` 64/1, `check:portfolio` 134/1,
+`check:portfolio:module` 206/1, **`check:frameworks:page` 1/14 with not one frameworks file
+differing from `origin/main`** (so a merge changing no byte of a check's subject cannot have
+changed its verdict), spike **S8 UNRUN** for want of the v2.0-shaped database it names in
+its own words (§54.5), and **spike S9 red on BOTH trees**. **That last one is the
+finding of the round rather than a tally entry**: on `main` S9 dies at the `bytea`
+placeholder and here, past it, at the harness's reverse-FK DELETE order meeting
+`tracker_actions.topic_id` — so §520.1's fix **moved that failure one step along
+rather than causing it**, which is §442.12's own warning coming true a second time (*a
+fixture that throws on the first missing thing hides the second*) — **and S9 sits behind
+S8 in the chain's `|| exit 1`, so no `npm run spike` in this container has ever reached it**,
+which is why §520.1 recorded S8 and never saw S9. Both are the FIXTURE and neither is the
+product; flagged rather than folded into a merge (rule 1b), since the harness's topological
+delete order is also what S2 walks and S2 is green.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO IT IS SAID RATHER THAN CLAIMED**
+(§54.5, rule 3a): this environment's egress policy refuses `smp-orpin-tau.vercel.app` at
+the proxy's own CONNECT, which its README says to report rather than route around — so
+**nobody here has seen production serve this commit**. The witnesses are recorded for whoever
+can open the site, each asserted to have **MOVED** or a match would hold whether or not
+production built this (§113.8): `shell.js` **4651934 → 4674322**, `platform.css`
+**780584 → 785658**, and the served `sw.js` **4192 → 4192 bytes** with its release
+stamp **`2d3c089830037241` → `fe9f934f8a46966a`** — the bytes unmoved being
+§316.10's generator dropping the caching half, and the stamp moving being §397 working
+as designed, so §258's reload banner still fires. **Read `data-dpl-id` off the `<html>`
+element first for the baseline and again after** (§443.10's method), which is a
+measurement rather than a wait (§108.17). **The branch is deliberately held one commit
+behind `main` until that read is made** (§91): while it stays there main's tip is on no
+other ref by construction, and putting that SHA on a second ref is the one thing left that
+could still cost the deployment.
+
+**RECORDED, NOT DONE**: the root `IMPLEMENTATION_PROGRESS.md` carries five of main's own
+"on the branch, not merged" statuses about work main demonstrably holds — main's to
+correct, not a merge's to sweep (rule 1b, §388a: a status from somebody else's round is a
+historical fact here); the two console walks `multi-client.py` and `platform-look.py` still
+land where the console used to open; and the harness's delete order above.

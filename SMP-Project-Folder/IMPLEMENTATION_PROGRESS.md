@@ -1,4 +1,4 @@
-### The checking round, after bringing main in (done, on the branch, not merged)
+### The checking round, after bringing main in (done, merged to main 2026-10-12)
 We brought main's latest work into this branch and then checked the whole
 platform again — on the combined copy, because that is the only one anybody
 would ever be shown. Of the 222 checks, 16 are picture-makers that correctly
@@ -27,7 +27,38 @@ Everything else came back clean: the whole-platform walk (33 people, 234 pages,
 no errors), the permission rules, the save rules, and every check on the version
 the live site actually serves.
 
-**Still waiting on Islam:** whether to merge this to main.
+**Merged to main on 2026-10-12**, on Islam's word. Main had moved while this was being
+built, so main was brought in first, the three written records were combined rather than one
+side being kept, and the offline file and the four files the live site serves were rebuilt from
+the joined-up sources rather than trusted to the merge. Then the whole round of checking was
+run again on the joined-up tree rather than on the branch, because that is the only tree
+anybody is ever served: the walk of the whole platform came back 33 people, 234 pages, no
+errors — main's own figure to the digit, which is what it should be when nothing about the
+navigation moved — and every rule check, every save check and every check on the stack the
+live site serves came back clean.
+
+**Nobody is signed out by this.** Only two files outside the offline sources changed, both of
+them the Copilot's own, and neither touches how a save is judged or what is stored — so a
+save that worked before this still works, and no migration runs.
+
+**One check read red before it read green, and it was the machine rather than the product**:
+the shell check came back 131 of 141 while three other checks were running beside it, and 384
+of 384 run on its own. Those checks each start their own server, so they are run one at a time.
+
+**Seven things are still red and all seven are main's**, each established by running them
+against main's own copy before anything here was blamed: three checks and one test that fail
+identically there, one whose every file is byte-for-byte main's, and two of the nine database
+proofs — one wanting an old-shape database this machine does not hold and saying so itself,
+and one whose fixture deletes two tables in the wrong order. That second one is red on main
+too, a step earlier, so last week's fix moved its failure along rather than causing it; and it
+sits behind the first in the chain, which is why last week's round never reached it. Recorded
+rather than fixed inside a merge.
+
+**The one thing not yet done is reading the live site.** This machine's network policy refuses
+the production address outright, so nobody here has seen production serve this. What to compare
+once somebody can open it is written down in the decisions document, and the branch is
+deliberately left one step behind main until then, so the deployment cannot be confused about
+which commit it was building.
 
 ### A capability owner opens on their capability (built, merged to main 2026-10-11)
 Viewing as Ehab, the company opened on Performance. It should open on his capability, and now it does: somebody who owns or looks after one capability lands on Strategy › Capabilities with their own capability already chosen. Holding more than one lands on the first of them. The office and a direction's owner still land on Strategy › Plan exactly as before, and anybody offered neither list still lands on Performance. Refreshing the page still leaves you where you were. Nothing stored moves and nobody's access changed.

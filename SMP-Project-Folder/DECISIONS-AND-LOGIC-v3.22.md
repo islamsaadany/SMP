@@ -63010,3 +63010,9 @@ Islam: *"a process is linked from another process step … the IT step for onboa
 **Stated plainly:** "ready" here means the dependency is *documented*; steps have no done status, so nothing blocks a step until another is done. If a real blocking rule is wanted, it is a separate decision. Print/PDF, import and template are not changed and do not carry handoffs.
 
 Check: `npm run check:handoff` (16) red 10 ways. Mockup: `design-mockups/process-cross-predecessor/`.
+
+## §513 — The report prints as one continuous page
+Islam: the document is mainly shared as PDF, so the cut at the end of each sheet is avoided by printing ONE tall page (option one of those offered); other print options are to be revisited later. At `beforeprint` the paper is sized to the measured content (`@page`), removed at `afterprint`; above Chrome's 200in limit it falls back to ordinary pages. Unverified in a real print dialog.
+
+## §514 — The SOP: hand-overs between processes, and one continuous page
+The SOP's hand-over column reads §512's `StepHandoff` rows (outgoing "→ code · step n", incoming "from code · step n"), loaded in `loadReportData` beside the report so the two cannot disagree. The SOP prints as one continuous page on the same rule as §513 (`data-sop-root`, A4 width, default on). `checks/process-sop.mjs` gains §2b and a `no-handoff-in` break. Snapshots in `ui-versions/processes-sop/`.

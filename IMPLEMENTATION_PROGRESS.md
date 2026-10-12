@@ -9345,3 +9345,8 @@ Built on the branch, not merged. Each process can now be exported as a Standard 
 
 ## §513 — Processes report PDF as one continuous page (2026-10-11)
 Islam: the shared PDF should be continuous like the preview, no cut at page end. The export preview now has a "One continuous page" tick (on by default). At print time the sheet is measured at its on-screen width and printed as ONE page, 297mm wide and as tall as the content, so the PDF is the preview. A document taller than Chrome's 200in page limit falls back to ordinary A4 pages. Untick it for the old paged print. Typecheck clean. NOT yet checked in a real browser print (headless cannot show the print dialog) — owed. SOP and map PDFs unchanged.
+
+## §514 — The SOP shows hand-overs between processes, and prints as one page (on the branch, not merged)
+- **Hand-overs in the SOP**: the "Approval, hand-over" column now says where work goes in another process (`→ IT-05 · step 3`) and, in amber, where it arrives from (`from IT-01 · step 7`). Same data as the process map (§512), loaded once with the report data.
+- **One continuous page**: the SOP print has the same "One continuous page" tick as the report (§513), on by default; very long packs fall back to ordinary pages.
+- Checked: `check:sop` 20/0, every break red, cold typecheck clean. NOT yet tried in a real browser print dialog.

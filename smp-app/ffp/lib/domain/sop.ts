@@ -31,6 +31,9 @@ export type SopSource = {
     assignedRole: { name: string } | null;
     slaDays: number | null;
     links: { targetProcess: { code: string; name: string } }[];
+    /** Hand-overs to / from a step in another process (§512). */
+    handoffsOut?: { code: string; name: string; number: number }[];
+    handoffsIn?: { code: string; name: string; number: number }[];
   }[];
   connections: { fromStepId: string; toStepId: string; label: string | null }[];
   combinedRows: { label: string; approverLabel: string | null; requiresApproval: boolean }[];
@@ -50,6 +53,8 @@ export type SopStep = {
   /** Approval and time limit, e.g. "Approver: Finance Manager · within 2 days"; null when the step needs none. */
   approval: string | null;
   handoff: string | null;
+  /** Where the work arrives from another process, e.g. "from IT-01 · step 7"; null when it does not. */
+  handoffIn: string | null;
   /** Which SOP detail cells are blank on a step that should carry them. */
   missing: ("who" | "how" | "inputs" | "output")[];
 };
@@ -96,6 +101,8 @@ export function compileSop(src: SopSource): Sop {
       })
       .filter((x): x is string => !!x);
     for (const l of s.links) handoffParts.push(`→ ${l.targetProcess.code} ${l.targetProcess.name}`);
+    for (const h of s.handoffsOut ?? []) handoffParts.push(`→ ${h.code} · step ${h.number}`);
+    const inParts = (s.handoffsIn ?? []).map((h) => `${h.code} · step ${h.number}`);
 
     const isWork = s.type === "TASK" || s.type === "DECISION";
     const how = s.detailedAction.map((a) => a.trim()).filter(Boolean);
@@ -120,6 +127,7 @@ export function compileSop(src: SopSource): Sop {
       errors: blank(s.sopErrors),
       approval: parts.length ? parts.join(" · ") : null,
       handoff: handoffParts.length ? handoffParts.join("; ") : null,
+      handoffIn: inParts.length ? `from ${inParts.join(", ")}` : null,
       missing,
     };
   });

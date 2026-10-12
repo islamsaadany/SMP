@@ -23,6 +23,7 @@ const BREAKS = {
   "approval-needs-no-flag": ["row?.requiresApproval && row.approverLabel", "row?.approverLabel"],
   "no-handoff-number": ["const n = src.steps.findIndex((x) => x.id === to.id) + 1;", "const n = 0;"],
   "blank-is-text": ["(v && v.trim() ? v.trim() : null)", "(v ?? null)"],
+  "no-handoff-in": ["inParts.length ? `from ${inParts.join(\", \")}` : null", "null"],
   "end-step-missing": ['const isWork = s.type === "TASK" || s.type === "DECISION";', "const isWork = true;"],
 };
 
@@ -89,6 +90,15 @@ check("a step with neither says nothing", s.procedure[0].approval === null && s.
 check("hand-over names the next step by number", s.procedure[0].handoff === "→ 2. Check invoice", String(s.procedure[0].handoff));
 check("a labelled branch keeps its label", s.procedure[1].handoff === "Valid → 3. Approve payment", String(s.procedure[1].handoff));
 check("a link to another process is a hand-over", /→ P02 Banking/.test(s.procedure[2].handoff || ""), String(s.procedure[2].handoff));
+
+console.log("\n§2b  hand-overs between processes (§512), both directions");
+const hx = full();
+hx.steps[1].handoffsOut = [{ code: "IT-05", name: "Banking", number: 3 }];
+hx.steps[0].handoffsIn = [{ code: "IT-01", name: "Onboarding", number: 7 }];
+const h = compileSop(hx);
+check("an outgoing hand-over names the other process and step", /→ IT-05 · step 3/.test(h.procedure[1].handoff || ""), String(h.procedure[1].handoff));
+check("an incoming hand-over says where the work comes from", h.procedure[0].handoffIn === "from IT-01 · step 7", String(h.procedure[0].handoffIn));
+check("a step with none says nothing", s.procedure[1].handoffIn === null && h.procedure[2].handoffIn === null);
 
 console.log("\n§3  blanks are Missing, and only where they should be");
 const blanky = full();

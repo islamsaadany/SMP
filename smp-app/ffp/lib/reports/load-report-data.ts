@@ -241,6 +241,42 @@ export async function loadReportData(workspaceId: string, processIds: string[]):
         prisma.authorityAssignment.findMany({ where: { processId: process.id }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
       ]);
 
+      const stepIds = steps.map((s) => s.id);
+      const handoffRows = await prisma.stepHandoff.findMany({
+        where: { OR: [{ fromStepId: { in: stepIds } }, { toStepId: { in: stepIds } }] },
+        select: { fromStepId: true, toStepId: true, label: true },
+      });
+      const otherIds = [
+        ...new Set(handoffRows.flatMap((h) => [h.fromStepId, h.toStepId]).filter((id) => !stepIds.includes(id))),
+      ];
+      const otherSteps = otherIds.length
+        ? await prisma.processStep.findMany({
+            where: { id: { in: otherIds } },
+            select: {
+              id: true,
+              label: true,
+              process: {
+                select: {
+                  code: true,
+                  name: true,
+                  steps: { select: { id: true }, orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
+                },
+              },
+            },
+          })
+        : [];
+      const otherRef = new Map(
+        otherSteps.map((o) => [
+          o.id,
+          {
+            code: o.process.code,
+            name: o.process.name,
+            number: o.process.steps.findIndex((x) => x.id === o.id) + 1,
+            label: o.label,
+          },
+        ])
+      );
+
       const raciRows = buildRaciTableRows(
         steps,
         activities.map((a) => ({
@@ -313,6 +349,14 @@ export async function loadReportData(workspaceId: string, processIds: string[]):
             targetProcessId: l.targetProcessId,
             targetProcess: { code: l.targetProcess.code, name: l.targetProcess.name },
           })),
+          handoffsOut: handoffRows.flatMap((h) => {
+            const ref = h.fromStepId === s.id ? otherRef.get(h.toStepId) : undefined;
+            return ref ? [ref] : [];
+          }),
+          handoffsIn: handoffRows.flatMap((h) => {
+            const ref = h.toStepId === s.id ? otherRef.get(h.fromStepId) : undefined;
+            return ref ? [ref] : [];
+          }),
           slaDays: authorityByStepId.get(s.id)?.slaDays ?? null,
           threshold: authorityByStepId.get(s.id)?.threshold ?? null,
           direction: authorityByStepId.get(s.id)?.direction,

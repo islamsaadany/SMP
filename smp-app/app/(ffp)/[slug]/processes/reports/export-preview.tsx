@@ -113,6 +113,9 @@ export type ExportProcessData = {
     /** Whether this step needs every one of its predecessors, not just one (spec 015). */
     joinRequiresAll: boolean;
     links: { id: string; targetProcessId: string; targetProcess: { code: string; name: string } }[];
+    /** Hand-overs to / from steps of OTHER processes (§512) — read by the SOP. */
+    handoffsOut?: { code: string; name: string; number: number; label: string }[];
+    handoffsIn?: { code: string; name: string; number: number; label: string }[];
     slaDays: number | null;
     threshold: number | null;
     direction?: AuthorityDirection;

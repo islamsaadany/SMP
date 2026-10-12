@@ -5113,7 +5113,12 @@ function canReport(unitKey){
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
            /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer());
+           SMPRules.ownsTopProject(world(), viewer()) ||
+           /* §520.6: and a capability's owner or custodian enters their own
+              capability's figures here, exactly as a direction's owner does —
+              the capability's rows ask `cap:<id>` for themselves, so this
+              opens the page and nothing else. */
+           SMPRules.ownsTopCapability(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -6029,6 +6034,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -8538,15 +8554,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }
@@ -9817,6 +9841,100 @@ function archiveCapPlan(c, why){
   return a;
 }
 
+/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§524) ─────────────────────
+   Islam, of the Copilot's Apply to plan: *"anything old is not deleted it's
+   archived."* A plan archive (`kind:"unit"`) carries the Foundation beside
+   the pillars and the SWOT, and restoring one puts ALL of it back — which is
+   the wrong size for an act that replaces six paragraphs and nothing else. So
+   a Foundation is its own kind, taken by `applyFoundationParts()` and by its
+   own restore, and never by the plan's archive. The record it reads is the
+   one the Foundation page draws (§404's three owners): the group's own row,
+   a company's `coFound`, or a unit's (a pillars function's through its view,
+   written back the way every other writer does — §129, §232). */
+function foundationRecord(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("co:") === 0) return coFoundWritable(t.slice(3));
+  return unitLikeWritable(t);
+}
+function foundationSnapshot(o){
+  return { clauses: clone(Array.isArray(o.clauses) ? o.clauses : []),
+           aspiration: o.aspiration || "", endInMind: o.endInMind || "", mission: o.mission || "",
+           keyObjectives: clone(Array.isArray(o.keyObjectives) ? o.keyObjectives : []),
+           values: clone(Array.isArray(o.values) ? o.values : []) };
+}
+function foundationIsEmpty(s){
+  return !s.clauses.length && !s.aspiration && !s.endInMind && !s.mission &&
+         !s.keyObjectives.length && !s.values.length;
+}
+function foundationName(target){
+  var t = String(target || "");
+  if (t === "group") return labelWord("topword","group") || GROUP.org || "Group";
+  if (t.indexOf("co:") === 0) return (COMPANIES[t.slice(3)] || {}).name || t;
+  var u = unitLike(t);
+  return (u && u.name) || t;
+}
+/* Returns the archive taken, or null when the place held no Foundation at all
+   — a first Foundation archives nothing and says so (archiveUnitPlan's rule). */
+function archiveFoundation(target, why){
+  var o = foundationRecord(target);
+  if (!o) return null;
+  var snap = foundationSnapshot(o);
+  if (foundationIsEmpty(snap)) return null;
+  var counts = { parts: ["clauses","aspiration","endInMind","mission","keyObjectives","values"]
+                   .filter(function(k){ return Array.isArray(snap[k]) ? snap[k].length : !!snap[k]; }).length,
+                 objectives: snap.keyObjectives.length };
+  var a = { id:archiveId(), kind:"foundation", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+/* The six parts the Copilot saved, written INTO the place's Foundation —
+   REPLACING what stood (the old one is archived first by the caller, §49.2).
+   `parts` is `[{key, name, text}]` in the flow's own order; a part the flow
+   skipped is absent and leaves what the plan holds untouched.
+   - who  → one clause per line, with no head (§129 pushes `["", ""]`, so an
+            empty head is a shape the page already draws).
+   - asp / eim / pur → the three statements.
+   - obj  → one key objective per line, MINTED FROM THE MAXIMUM (`koMint`,
+            §96.2 — never positionally, a snapshot is keyed by id, §48), with
+            no target: the Copilot agreed the words, not the number, and an
+            empty target is a counted gap the page already says (§249).
+   - val  → one value per line, `Name — definition` split on the first dash;
+            emptied, the key is DELETED (§479, §50.6). */
+function applyFoundationParts(target, parts){
+  var o = foundationRecord(target);
+  if (!o) return false;
+  var lines = function(t){ return String(t || "").split(/\n+/).map(function(l){ return l.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean); };
+  var by = {};
+  (parts || []).forEach(function(p){ if (p && p.key) by[p.key] = String(p.text || ""); });
+  if ("who" in by) o.clauses = lines(by.who).map(function(l){ return ["", l]; });
+  if ("asp" in by) o.aspiration = by.asp.trim();
+  if ("eim" in by) o.endInMind = by.eim.trim();
+  if ("pur" in by) o.mission = by.pur.trim();
+  if ("obj" in by) {
+    var pre = koPrefixOf(o);
+    o.keyObjectives = [];
+    lines(by.obj).forEach(function(l){
+      var ko = koMint(o.keyObjectives, pre); ko.name = l;
+      if (String(target) === "group") ko.group = null;
+      o.keyObjectives.push(ko);
+    });
+  }
+  if ("val" in by) {
+    o.values = lines(by.val).map(function(l){
+      var m = /^(.*?)\s+[—–-]\s+(.*)$/.exec(l);
+      return m ? { name: m[1].trim(), def: m[2].trim() } : { name: l, def: "" };
+    });
+    if (!o.values.length) delete o.values;
+  }
+  var t = String(target || "");
+  if (o.ukey && t !== "group") renumberUnit(o);
+  var fk = fnKeyOfTarget(t);
+  if (fk) fnWriteBack(fk, o);
+  return true;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -9847,6 +9965,19 @@ function restoreArchive(id){
     renumberUnit(u);
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
+  }
+  else if (a.kind === "foundation") {
+    /* §524: six parts, put back whole; what stands is archived first so the
+       restore can itself be undone (the plan branches' own rule). */
+    if (!foundationRecord(a.key)) return false;
+    archiveFoundation(a.key, "replaced by restoring the " + a.at + " archive");
+    var fo = foundationRecord(a.key), fs = a.plan;
+    fo.clauses = clone(fs.clauses); fo.aspiration = fs.aspiration; fo.endInMind = fs.endInMind;
+    fo.mission = fs.mission; fo.keyObjectives = clone(fs.keyObjectives);
+    if (fs.values && fs.values.length) fo.values = clone(fs.values); else delete fo.values;
+    if (fo.ukey && a.key !== "group") renumberUnit(fo);
+    var fFk = fnKeyOfTarget(a.key);
+    if (fFk) fnWriteBack(fFk, fo);
   } else {
     /* holderByIdWritable, never capById (§334, and §232's own note one branch
        up wearing a different hat): since §326 a supporting function holds its
@@ -10694,6 +10825,21 @@ function capsReachable(){
   return GROUP.capabilities.filter(function(c){
     return c && grantAt("k_perf", "cap:" + c.id) !== "none";
   });
+}
+
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
 }
 
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick

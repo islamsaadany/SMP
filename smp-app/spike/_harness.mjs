@@ -190,6 +190,19 @@ function placeholder(col, table, checks) {
   if (t === "date") return "current_date";
   if (t.startsWith("time")) return "'00:00'";
   if (t === "real" || t === "double precision") return "1";
+  /* AND `bytea` IS THE NEXT ONE, WHICH IS §442.12'S OWN WARNING COMING TRUE:
+     "a fixture that throws on the first missing thing hides the second".
+     `copilot_files.bytes` is `bytea NOT NULL` (spec 064), so from the day the
+     Copilot's tables landed S2 threw on it and every tenant table after it in
+     the FK order went unwalked — 63 in the catalogue against the 56 §443.10
+     recorded as isolated, and on the ISOLATION proof unwalked means unproven
+     rather than merely unreported. Established as main's by file identity: the
+     whole of `spike/` and `db/` is byte-identical to `origin/main` (§303), and
+     nobody re-ran the spike after those tables arrived. Empty is the right
+     placeholder — neither `copilot_files` nor `copilot_sources` constrains the
+     length, and the one table that does (`copilot_assets`) is the PLATFORM's
+     and is never in this walk (§331). */
+  if (t === "bytea") return "'\\x'::bytea";
   if (t === "uuid") return "gen_random_uuid()";
   throw new Error("seed: no placeholder for " + table + "." + col.name + " " + t);
 }

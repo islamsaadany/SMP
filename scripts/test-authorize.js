@@ -5772,12 +5772,127 @@ console.log("\n§517 · the half eye");
   P.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", owner: "Testcase Part Reader", measures: [], tactics: [] },
                    { id: "group-P2", code: "EA02", name: "Direction two", owner: "Somebody Else Entirely", measures: [], tactics: [] }];
   const w = R.worldOf(P), me = personOf(P, "t517_dir");
-  check("§517: a direction's owner reads their part only", R.dirPartOnly(w, me) === true);
+  check("§517: a direction's owner reads their part only", R.partOnly(w, me) === true);
   check("§517: …their own direction is theirs", R.ownsDirection(w, me, P.group.items[0]) === true);
   check("§517: …another's is not", R.ownsDirection(w, me, P.group.items[1]) === false);
-  check("§517: the office still sees the full plan", R.dirPartOnly(w, personOf(P, "smo")) === false);
+  check("§517: the office still sees the full plan", R.partOnly(w, personOf(P, "smo")) === false);
   const F = clone(P); delete F.group[R.DIR_SCOPE];
-  check("§517: with the half eye off they see the full plan", R.dirPartOnly(R.worldOf(F), personOf(F, "t517_dir")) === false);
+  check("§517: with the half eye off they see the full plan", R.partOnly(R.worldOf(F), personOf(F, "t517_dir")) === false);
+})();
+
+/* ── §520: A CAPABILITY'S OWNER IS A PART OWNER ────────────────────
+   Islam: "a capability owner is a part owner and it's set to see only his
+   capability like the pillars owners ... his access hsould match the direction
+   owner". A capability sits INSIDE a function exactly as a project and a
+   pillar sit inside a place, so being on the Owner drawn row is why the half
+   eye beside the PART OWNER row's Group cell could not reach them.
+   BOTH ENDS (§94.2): the half eye off, and the office, must still read the
+   full plan — or a build that narrowed everybody passes every assertion
+   about the capability owner being narrowed. And the state is MADE (§255):
+   the seed's one capability carries no head, so it derives no capowner. */
+console.log("\n§520 · a capability's owner is a part owner");
+(function () {
+  const rowOf = function (k) { return R.ACCESS_ROWS.find(function (r) { return r.key === k; }); };
+  check("§520: capowner is on the Part owner row", rowOf("part").of.indexOf("capowner") > -1,
+        JSON.stringify(rowOf("part").of));
+  check("§520: …and no longer on the Owner row", rowOf("owner").of.indexOf("capowner") === -1,
+        JSON.stringify(rowOf("owner").of));
+  check("§520: the narrowed roles are the direction's and the capability's",
+        R.PART_ONLY_ROLES.join(",") === "dirowner,capowner", R.PART_ONLY_ROLES.join(","));
+
+  const P = clone(SEED);
+  P.people = P.people.concat([{ key: "t520_cap", name: "Testcase Capability Owner", unit: "group" }]);
+  const cap = P.group.capabilities[0];
+  cap.head = "t520_cap";
+  P.group[R.DIR_SCOPE] = "part";
+  /* a direction of somebody else's, so "they own no direction" is a
+     measurement rather than an empty list (§113.8). */
+  P.group.items = [{ id: "group-P1", code: "EA01", name: "Direction one", owner: "Somebody Else Entirely", measures: [], tactics: [] }];
+  const w = R.worldOf(P), me = personOf(P, "t520_cap");
+  const rs = R.personRoles(w, me).map(function (r) { return r.role; });
+  check("§520: being named the head derives capowner", rs.indexOf("capowner") > -1, rs.join(","));
+  check("§520: the half eye reaches them", R.partOnly(w, me) === true);
+  check("§520: …and they own no direction", R.ownsDirection(w, me, P.group.items[0]) === false);
+  check("§520: the office still sees the full plan", R.partOnly(w, personOf(P, "smo")) === false);
+  const F = clone(P); delete F.group[R.DIR_SCOPE];
+  check("§520: with the half eye off they see the full plan",
+        R.partOnly(R.worldOf(F), personOf(F, "t520_cap")) === false);
+})();
+
+
+/* ── §520.6: A CAPABILITY'S OWNER ENTERS THEIR OWN CAPABILITY'S FIGURES ─────
+   With the business units off and the half eye on, a capability's owner (and
+   its custodian) is treated like a direction's owner: the rule
+   `ownsTopCapability` is what opens the company's Reporting tab to them, and
+   what they may then WRITE needs no new server rule at all — a capability's
+   rows have been judged at `cap:<id>` since §334, where the holder's head and
+   custodian already pass and everybody else is refused. BOTH ENDS (§94.2):
+   the figure allowed on their own capability, refused on a direction, refused
+   to a direction's owner on the capability, and the group's own submission
+   and note still refused to them. */
+console.log("\n§520.6 · a capability's owner enters their own capability's figures");
+(function () {
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t5206_own", name: "Testcase Capability Owner", unit: "group" },
+    { key: "t5206_cus", name: "Testcase Capability Custodian", unit: "group" },
+    { key: "t5206_dir", name: "Testcase Direction Owner", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group[R.DIR_SCOPE] = "part";
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner",
+      measures: [{ id: "group-P1-M1", name: "Revenue", dir: ">=", target: "100 M EGP", compile: "Sum", actual: "" }],
+      tactics: [] }];
+  const cap = B.group.capabilities.filter(function (c) { return c && c.fn && (c.projects || []).length; })[0];
+  check("§520.6: the seed holds a capability with projects", !!cap, cap && cap.id);
+  if (!cap) return;
+  cap.head = "t5206_own"; cap.custodian = "t5206_cus";
+  let PI = -1, MI = -1;
+  (cap.projects || []).forEach(function (pr, pi) {
+    (pr.milestones || []).forEach(function (m, mi) {
+      if (PI < 0 && m && m.id && m.status !== "todo") { PI = pi; MI = mi; }
+    });
+  });
+  check("§520.6: and a milestone whose status the fixture moves", PI > -1, PI + "/" + MI);
+  if (PI < 0) return;
+  const w = R.worldOf(B);
+  const own = personOf(B, "t5206_own"), cus = personOf(B, "t5206_cus"), dir = personOf(B, "t5206_dir");
+  check("§520.6: the rule names the head", R.ownsTopCapability(w, own) === true);
+  check("§520.6: …and the custodian", R.ownsTopCapability(w, cus) === true);
+  check("§520.6: …and not a direction's owner", R.ownsTopCapability(w, dir) === false);
+  check("§520.6: …and not the office by this road (theirs is the seat)",
+        R.ownsTopCapability(w, personOf(B, "smo")) === false);
+  const ON = clone(B); ON.group[R.STRUCTURE] = { bu: { exists: true } };
+  check("§520.6: with the business units on the rule answers nothing",
+        R.ownsTopCapability(R.worldOf(ON), personOf(ON, "t5206_own")) === false);
+
+  function as(who, mutate) { const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who)); }
+  function capOf(inc) { return inc.group.capabilities.filter(function (c) { return c.id === cap.id; })[0]; }
+  function figure(inc) { capOf(inc).projects[PI].milestones[MI].status = "todo"; }
+  const W = A.worldOf ? A.worldOf : function (x) { return x; };
+  const inc0 = clone(B); figure(inc0);
+  const kinds = (A.collect(B, inc0, W(B)) || []);
+  check("§520.6: the figure is still judged at the capability as capReporting — no server rule moved",
+        kinds.length > 0 && kinds.every(function (c) { return c.target === "cap:" + cap.id && c.kind === "capReporting"; }),
+        kinds.map(function (c) { return c.kind + "@" + c.target; }).join(","));
+  let v = as("t5206_own", figure);
+  check("§520.6: the head enters a figure on their own capability", v.ok, (v.refusals || []).join(" / "));
+  v = as("t5206_cus", figure);
+  check("§520.6: …so does the custodian", v.ok, (v.refusals || []).join(" / "));
+  v = as("t5206_dir", figure);
+  check("§520.6 REFUSED: a direction's owner on the capability's rows", !v.ok, "was ALLOWED");
+  v = as("t5206_own", function (inc) { inc.group.items[0].measures[0].actual = "40 M EGP"; });
+  check("§520.6 REFUSED: the capability's owner on a direction's rows", !v.ok, "was ALLOWED");
+  v = as("t5206_own", function (inc) { inc.review = Object.assign({}, inc.review);
+    inc.review.submitted = Object.assign({}, inc.review.submitted); inc.review.submitted.group = true; });
+  check("§520.6 REFUSED: submitting the company's report stays the office's", !v.ok, "was ALLOWED");
+  v = as("t5206_own", function (inc) { inc.review = Object.assign({}, inc.review);
+    inc.review.note = Object.assign({}, inc.review.note); inc.review.note.group = "our quarter"; });
+  check("§520.6 REFUSED: …and so does its note", !v.ok, "was ALLOWED");
+  v = as("smo", function (inc) { inc.review = Object.assign({}, inc.review);
+    inc.review.submitted = Object.assign({}, inc.review.submitted); inc.review.submitted.group = true; });
+  check("§520.6: the office submits it", v.ok, (v.refusals || []).join(" / "));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

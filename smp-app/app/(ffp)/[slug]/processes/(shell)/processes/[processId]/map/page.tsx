@@ -58,6 +58,58 @@ export default async function ProcessMapPage(
     prisma.authorityAssignment.findMany({ where: { processId }, include: AUTHORITY_ASSIGNMENT_INCLUDE }),
   ]);
 
+  // Hand-overs with other processes' steps (StepHandoff): the ones that wait on
+  // a step elsewhere (in) and the ones that continue into another process (out).
+  // The other end's number comes from its own process's step order, so it
+  // matches what that map shows.
+  const ownStepIds = process.steps.map((s) => s.id);
+  const handoffRows = await prisma.stepHandoff.findMany({
+    where: { OR: [{ toStepId: { in: ownStepIds } }, { fromStepId: { in: ownStepIds } }] },
+    include: {
+      fromStep: { select: { id: true, label: true, processId: true, process: { select: { code: true } } } },
+      toStep: { select: { id: true, label: true, processId: true, process: { select: { code: true } } } },
+    },
+  });
+  const pickerProcesses = await prisma.process.findMany({
+    where: { workspaceId, archivedAt: null, id: { not: processId } },
+    orderBy: { code: "asc" },
+    select: {
+      id: true,
+      code: true,
+      steps: { select: { id: true, label: true }, orderBy: [{ order: "asc" }, { createdAt: "asc" }] },
+    },
+  });
+  const numberInOwnProcess = new Map<string, number>();
+  for (const p of pickerProcesses) p.steps.forEach((st, i) => numberInOwnProcess.set(st.id, i + 1));
+  const stepNumberOf = (stepId: string) => numberInOwnProcess.get(stepId) ?? 0;
+  const handoffsIn = handoffRows
+    .filter((h) => ownStepIds.includes(h.toStepId))
+    .map((h) => ({
+      id: h.id,
+      fromStepId: h.fromStepId,
+      toStepId: h.toStepId,
+      label: h.label,
+      otherStepLabel: h.fromStep.label,
+      otherStepNumber: stepNumberOf(h.fromStepId),
+      otherProcessId: h.fromStep.processId,
+      otherProcessCode: h.fromStep.process.code,
+    }));
+  const handoffsOut = handoffRows
+    .filter((h) => ownStepIds.includes(h.fromStepId))
+    .map((h) => ({
+      id: h.id,
+      fromStepId: h.fromStepId,
+      toStepId: h.toStepId,
+      label: h.label,
+      otherStepLabel: h.toStep.label,
+      otherStepNumber: stepNumberOf(h.toStepId),
+      otherProcessId: h.toStep.processId,
+      otherProcessCode: h.toStep.process.code,
+    }));
+  const handoffStepOptions = pickerProcesses.flatMap((p) =>
+    p.steps.map((st, i) => ({ id: st.id, label: st.label, number: i + 1, processId: p.id, processCode: p.code }))
+  );
+
   const externalEntities = process.externalEntities as unknown as { name: string; description: string }[];
 
   const activityData = activities.map((activity) => ({
@@ -82,7 +134,7 @@ export default async function ProcessMapPage(
     })),
     activities: activityData,
     authorityAssignments: authorityData,
-    incomingStepIds: new Set(connections.map((c) => c.toStepId)),
+    incomingStepIds: new Set([...connections.map((c) => c.toStepId), ...handoffsIn.map((h) => h.toStepId)]),
   });
 
   // The SLA and approval threshold each step's card shows on the diagram —
@@ -193,6 +245,9 @@ export default async function ProcessMapPage(
         connections={connections}
         roles={roles.map((r) => ({ id: r.id, name: r.name }))}
         branchFrom={branchFrom}
+        handoffsIn={handoffsIn}
+        handoffsOut={handoffsOut}
+        handoffStepOptions={handoffStepOptions}
         otherProcesses={otherProcesses.map((p) => ({ id: p.id, code: p.code, name: p.name }))}
       />
 

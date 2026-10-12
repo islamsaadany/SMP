@@ -533,7 +533,7 @@
                people: state.people,
                topItems: (state.group || {}).items,
                topProjects: (state.group || {}).topProjects,
-               /* §517: and the direction owners' scope, read by dirPartOnly().
+               /* §517: and the direction owners' scope, read by partOnly().
                   Here AND in W()'s `group` (§102.4) — W passes the object
                   through whole, so this is the one list to edit. */
                group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
@@ -941,12 +941,19 @@
       note:"Heads the whole client — the top layer." },
     { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
       note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
-    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
-      note:"Owns a place: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead"],
+      note:"Owns a place: a business unit owner or a function head. On the function page and the register the word stays Function head." },
     { key:"custodian", name:"Custodian", of:["custodian"],
       note:"Keeps a place's plan and figures." },
-    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
-      note:"Owns one part inside a place: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    /* §520: AND A CAPABILITY'S OWNER IS A PART OWNER. Islam: "a capability
+       owner is a part owner and it's set to see only his capability like the
+       pillars owners". A capability sits INSIDE a function exactly as a
+       project and a pillar sit inside a place, so it was on the wrong row —
+       and being on the Owner row is why the half eye beside this row's Group
+       cell could not reach them. Drawing only: their stored pairs are
+       untouched, and the access baseline reads UNMOVED. */
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner", "capowner"],
+      note:"Owns one part inside a place: a project, a pillar, a direction or a capability — as its owner or its custodian. Reaches only that part." },
     { key:"contrib", name:"Contributor", of:["contrib"],
       note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
     { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
@@ -4430,13 +4437,33 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      reaches the group by another role (a unit owner, a CEO, the office) sees
      the full plan whatever this says, because a narrowing must never take
      away what another row of the table gives (§33's most-generous rule). */
+  /* §520 — AND IT IS EVERY PART OWNER, NOT THE DIRECTION'S ALONE. Islam, of a
+     capability owner who reached the whole group: "his access hsould match the
+     direction owner like Amr hassan only seeing his directions plus the
+     corporate foundation". A capability owner holds ONE part inside a
+     function, which is what a direction owner holds inside the company, so
+     this is the same rule pointed at a second role rather than a second
+     answer to it (§53.5) — one switch, one stored key, one half eye.
+
+     THE STORED KEY DOES NOT MOVE. `dirScope` is a key and not a label
+     (§30.2): renaming it would reset every client that has already pressed
+     the half eye, for a word nobody reads. The FUNCTION is renamed, because
+     what it answers is no longer about directions.
+
+     WHAT IT LEAVES A CAPABILITY OWNER FALLS OUT OF THE SAME FILTERS: the
+     group's lists are narrowed to the parts that are theirs, and a capability
+     owner owns no direction, so the company's plan has nothing of theirs in
+     it and what remains is the Foundation. Their own capability is a
+     destination of its own and is untouched — that is the half of "his
+     capability" the navigation already had right. */
+  var PART_ONLY_ROLES = ["dirowner", "capowner"];
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
-  function dirPartOnly(w, person) {
+  function partOnly(w, person) {
     if (!person || !w || !dirScopePart(w.group)) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
-      if (rs[i].role === "dirowner") { holds = true; continue; }
+      if (PART_ONLY_ROLES.indexOf(rs[i].role) > -1) { holds = true; continue; }
       if (!companyAllows(w, rs[i], "group")) continue;
       if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
     }
@@ -4445,6 +4472,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* Whether ONE direction is theirs — ownsTopPillar asked of that row. */
   function ownsDirection(w, person, p) {
     return !!p && ownsTopPillar(w, person, p.owner || "", p.custodian || "");
+  }
+  /* §520.6 — A CAPABILITY'S OWNER IS TREATED LIKE A DIRECTION'S. Islam: "the
+     capability owner is treated like the direction owner … sees the
+     foundation … and sees the reporting." With the units OFF a capability is a
+     section of the company's plan and never a destination (§520.1), so the only
+     Reporting page its owner or custodian can reach is the COMPANY's — and
+     `canReport("group")` admitted a direction's owner (§447) and nobody who
+     held a capability. The seats are person KEYS on the capability row (§412),
+     where a direction names its owner and this reads the register; both are
+     asked here and nowhere else. Which rows they may TYPE on is the
+     capability's own question (`cap:<id>`, §334), on the screen and on the
+     server, so this opens the page and narrows nothing by itself. */
+  function ownsTopCapability(w, person) {
+    if (!person || !w || buExists(w.group)) return false;
+    return (w.capabilities || []).some(function (c) {
+      return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
+    });
   }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
@@ -5070,7 +5114,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, dirPartOnly: dirPartOnly, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -12239,7 +12283,12 @@ function canReport(unitKey){
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
            /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer());
+           SMPRules.ownsTopProject(world(), viewer()) ||
+           /* §520.6: and a capability's owner or custodian enters their own
+              capability's figures here, exactly as a direction's owner does —
+              the capability's rows ask `cap:<id>` for themselves, so this
+              opens the page and nothing else. */
+           SMPRules.ownsTopCapability(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -13155,6 +13204,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -15664,15 +15724,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }
@@ -16943,6 +17011,100 @@ function archiveCapPlan(c, why){
   return a;
 }
 
+/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§524) ─────────────────────
+   Islam, of the Copilot's Apply to plan: *"anything old is not deleted it's
+   archived."* A plan archive (`kind:"unit"`) carries the Foundation beside
+   the pillars and the SWOT, and restoring one puts ALL of it back — which is
+   the wrong size for an act that replaces six paragraphs and nothing else. So
+   a Foundation is its own kind, taken by `applyFoundationParts()` and by its
+   own restore, and never by the plan's archive. The record it reads is the
+   one the Foundation page draws (§404's three owners): the group's own row,
+   a company's `coFound`, or a unit's (a pillars function's through its view,
+   written back the way every other writer does — §129, §232). */
+function foundationRecord(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("co:") === 0) return coFoundWritable(t.slice(3));
+  return unitLikeWritable(t);
+}
+function foundationSnapshot(o){
+  return { clauses: clone(Array.isArray(o.clauses) ? o.clauses : []),
+           aspiration: o.aspiration || "", endInMind: o.endInMind || "", mission: o.mission || "",
+           keyObjectives: clone(Array.isArray(o.keyObjectives) ? o.keyObjectives : []),
+           values: clone(Array.isArray(o.values) ? o.values : []) };
+}
+function foundationIsEmpty(s){
+  return !s.clauses.length && !s.aspiration && !s.endInMind && !s.mission &&
+         !s.keyObjectives.length && !s.values.length;
+}
+function foundationName(target){
+  var t = String(target || "");
+  if (t === "group") return labelWord("topword","group") || GROUP.org || "Group";
+  if (t.indexOf("co:") === 0) return (COMPANIES[t.slice(3)] || {}).name || t;
+  var u = unitLike(t);
+  return (u && u.name) || t;
+}
+/* Returns the archive taken, or null when the place held no Foundation at all
+   — a first Foundation archives nothing and says so (archiveUnitPlan's rule). */
+function archiveFoundation(target, why){
+  var o = foundationRecord(target);
+  if (!o) return null;
+  var snap = foundationSnapshot(o);
+  if (foundationIsEmpty(snap)) return null;
+  var counts = { parts: ["clauses","aspiration","endInMind","mission","keyObjectives","values"]
+                   .filter(function(k){ return Array.isArray(snap[k]) ? snap[k].length : !!snap[k]; }).length,
+                 objectives: snap.keyObjectives.length };
+  var a = { id:archiveId(), kind:"foundation", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+/* The six parts the Copilot saved, written INTO the place's Foundation —
+   REPLACING what stood (the old one is archived first by the caller, §49.2).
+   `parts` is `[{key, name, text}]` in the flow's own order; a part the flow
+   skipped is absent and leaves what the plan holds untouched.
+   - who  → one clause per line, with no head (§129 pushes `["", ""]`, so an
+            empty head is a shape the page already draws).
+   - asp / eim / pur → the three statements.
+   - obj  → one key objective per line, MINTED FROM THE MAXIMUM (`koMint`,
+            §96.2 — never positionally, a snapshot is keyed by id, §48), with
+            no target: the Copilot agreed the words, not the number, and an
+            empty target is a counted gap the page already says (§249).
+   - val  → one value per line, `Name — definition` split on the first dash;
+            emptied, the key is DELETED (§479, §50.6). */
+function applyFoundationParts(target, parts){
+  var o = foundationRecord(target);
+  if (!o) return false;
+  var lines = function(t){ return String(t || "").split(/\n+/).map(function(l){ return l.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean); };
+  var by = {};
+  (parts || []).forEach(function(p){ if (p && p.key) by[p.key] = String(p.text || ""); });
+  if ("who" in by) o.clauses = lines(by.who).map(function(l){ return ["", l]; });
+  if ("asp" in by) o.aspiration = by.asp.trim();
+  if ("eim" in by) o.endInMind = by.eim.trim();
+  if ("pur" in by) o.mission = by.pur.trim();
+  if ("obj" in by) {
+    var pre = koPrefixOf(o);
+    o.keyObjectives = [];
+    lines(by.obj).forEach(function(l){
+      var ko = koMint(o.keyObjectives, pre); ko.name = l;
+      if (String(target) === "group") ko.group = null;
+      o.keyObjectives.push(ko);
+    });
+  }
+  if ("val" in by) {
+    o.values = lines(by.val).map(function(l){
+      var m = /^(.*?)\s+[—–-]\s+(.*)$/.exec(l);
+      return m ? { name: m[1].trim(), def: m[2].trim() } : { name: l, def: "" };
+    });
+    if (!o.values.length) delete o.values;
+  }
+  var t = String(target || "");
+  if (o.ukey && t !== "group") renumberUnit(o);
+  var fk = fnKeyOfTarget(t);
+  if (fk) fnWriteBack(fk, o);
+  return true;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -16973,6 +17135,19 @@ function restoreArchive(id){
     renumberUnit(u);
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
+  }
+  else if (a.kind === "foundation") {
+    /* §524: six parts, put back whole; what stands is archived first so the
+       restore can itself be undone (the plan branches' own rule). */
+    if (!foundationRecord(a.key)) return false;
+    archiveFoundation(a.key, "replaced by restoring the " + a.at + " archive");
+    var fo = foundationRecord(a.key), fs = a.plan;
+    fo.clauses = clone(fs.clauses); fo.aspiration = fs.aspiration; fo.endInMind = fs.endInMind;
+    fo.mission = fs.mission; fo.keyObjectives = clone(fs.keyObjectives);
+    if (fs.values && fs.values.length) fo.values = clone(fs.values); else delete fo.values;
+    if (fo.ukey && a.key !== "group") renumberUnit(fo);
+    var fFk = fnKeyOfTarget(a.key);
+    if (fFk) fnWriteBack(fFk, fo);
   } else {
     /* holderByIdWritable, never capById (§334, and §232's own note one branch
        up wearing a different hat): since §326 a supporting function holds its
@@ -17820,6 +17995,21 @@ function capsReachable(){
   return GROUP.capabilities.filter(function(c){
     return c && grantAt("k_perf", "cap:" + c.id) !== "none";
   });
+}
+
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
 }
 
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick
@@ -26806,7 +26996,10 @@ function unitsTable(keys){
    have (§15.1). Key objectives are optional, so ranking on them would order
    the haves above the have-nots by shape rather than by standing. */
 function capsTable(){
-  var sorted = GROUP.capabilities.slice().sort(function(a, b){
+  /* §520.5: `capsHere()` and never `GROUP.capabilities` — the table view and
+     the cards are two readings of one list, so a narrowing reaching one of
+     them leaks every capability through the other. */
+  var sorted = capsHere().slice().sort(function(a, b){
     var pa = capPerf(a), pb = capPerf(b);
     return (pb == null ? -1 : pb) - (pa == null ? -1 : pa);
   });
@@ -27640,7 +27833,13 @@ function renderGroupPerformance(){
      one \u2014 performance from its measures, execution from its tactics, both
      derived. It was the last place in the product still carrying typed scores,
      which meant its execution figure could not be checked against anything. */
-  var caps = GROUP.capabilities.map(function(c, ci){
+  /* §520.5: drawn from `capsHere()`, and `data-oi` stays the STORED position
+     — a drop commits through `applyOrder(GROUP.capabilities, order)`, which
+     keys on it (§118), so a filtered index would reorder the wrong rows. An
+     arranger is never narrowed (`canArrange("group")`), so the two cannot
+     meet today; the stored index costs nothing and is what keeps it true. */
+  var caps = capsHere().map(function(c){
+    var ci = GROUP.capabilities.indexOf(c);
     /* A capability no longer scores like a pillar. Its performance is its
        projects' \u2014 half what they handed over, half what that achieved \u2014 and
        its execution is milestones completed. Key objectives are optional and
@@ -27913,11 +28112,23 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
+       empties this list for a part owner who owns no direction — which
+       before §520 could not happen, since the only part owner was a
+       direction's — and the section was pushed regardless, so a
+       capability's owner read the word "Pillars" over an empty row while
+       the "Nothing to show yet." note below could never fire (§45.2).
+       Nobody else is reached: with no filter `ditems` is `itemsNow` and
+       `topHasPlan()` has already said there is a plan. */
+    if (ditems.length) SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
-  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
+  /* §520.5: the section is KEPT for a narrowed part owner — their own
+     capability's figures are theirs to read — and drawn only while they hold
+     one, or the heading stands over nothing (§520.2, §45.2). Everybody else
+     is unchanged: with the half eye off `partOnly()` is false. */
+  if (SMPRules.capExists(GROUP) && (!partOnly() || capsHere().length)) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -27926,10 +28137,12 @@ function whereNext(keys){
       TIP_CAP(), viewToggle("caps")) });
 
   /* §517: a direction owner narrowed to their part reads their directions and
-     nothing else here — the company's headline, its themes and its
-     capabilities are the whole company's figures. */
-  if (dirPartOnly()) {
-    SECS = SECS.filter(function(x){ return x.dir; });
+     nothing else here — the company's headline and its themes are the whole
+     company's figures. §520.5 keeps the capabilities section beside them,
+     narrowed to the ones this person reaches: the part a capability's owner
+     holds is a capability, so dropping it left them nothing at all. */
+  if (partOnly()) {
+    SECS = SECS.filter(function(x){ return x.dir || x.cap; });
     if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
   }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
@@ -28860,7 +29073,7 @@ function textOr(page, value, cls, setter){
    through, so `grow` here means "size yourself to your content" and nothing
    about the key.
 
-   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§522, item 4 of
+   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§528, item 4 of
    Islam's own four). `want` IS "this row needs explaining" — §105 holds Submit
    until a figure at risk carries one — so it is already the answer to "is this
    box part of the work", and no second test is invented for it (§104.8). With
@@ -31569,7 +31782,7 @@ function reportBar(target){
      in, the only thing left is on another tab, and a walk button that could
      only ever wrap on itself is a control with nothing behind it. */
   /* AND THE KEYBOARD IS NAMED ON THE ONE CONTROL THAT IS ABOUT GETTING
-     THROUGH THE REPORT (§522): four keys were added and nothing drawn, which
+     THROUGH THE REPORT (§528): four keys were added and nothing drawn, which
      is the eye's and the monthly mark's own answer — a fact the screen does
      not otherwise state belongs on a HOVER (1b-ii, §88, §278.2) — and this
      button had no `title` at all. Never one per box: eighteen identical hovers
@@ -31695,7 +31908,19 @@ function repOutTarget(t, x){
       ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
 }
 
-function renderReport(u){
+/* §520.7, reshaped by §520.8: `opt.paneOnly` returns the key objectives and
+   the selected pillar's PANE alone — no chrome, no bar, no summary, no waiting
+   note, and no rail or section heading of its own, because the capability
+   already sits on a rail of capabilities one level up. It is how a capability
+   planned in pillars is drawn INSIDE the company's Reporting page
+   (`reportCapsSplit`), through `capAsUnit(c.id)`: the same builder a unit and
+   a pillars function already report through, with every gate below asking
+   `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
+   the Plan page came to know both shapes while this page knew one. */
+function renderReport(u, opt){
+  /* §520.8: the PANE alone — a capability drawn inside the company's report
+     has its own rail there, so this hands back only what sits in the pane. */
+  var paneOnly = !!(opt && opt.paneOnly);
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
   var may = canReport(u.ukey);
@@ -31708,6 +31933,8 @@ function renderReport(u){
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
   if (REVIEW.state !== "open") {
+    /* §520.7: inside the company's page the closed note is already above. */
+    if (paneOnly) return "";
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
       'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
   }
@@ -31988,7 +32215,10 @@ function renderReport(u){
   }
   var pillars;
   if (!sel) {
-    pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
+    /* §520.8: a capability with nothing planned says so in the words its own
+       rail already uses (`topCapBody`), never "this unit has no directions". */
+    pillars = paneOnly ? '<div class="note">Nothing planned yet.</div>'
+      : '<div class="note">This unit has no ' + L("pillar","bu") +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -32031,7 +32261,16 @@ function renderReport(u){
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(partItems(u))
+    /* §520.8: inside the company's capabilities split the capability's own
+       rail is the one on the left, and a pillars capability is ONE pillar
+       named as the capability (§491) — so the pane stands alone, and the
+       inner rail is drawn only where there is genuinely more than one
+       pillar to pick between. */
+    pillars = paneOnly
+      ? (partItems(u).length > 1
+          ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+          : pane)
+      : railWorthIt(partItems(u))
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -32042,13 +32281,52 @@ function renderReport(u){
   /* §301: what a bounded reporter is told in place of "View only" — built
      from the SAME pillarTally() the rail rows read, so the chip and the rail
      can never disagree about how much is entered. */
+  /* §520.8: the pane alone, for a capability drawn inside the company's
+     report — its objectives where it has any, then its pillar's tables. No
+     section heading and no rail of its own: the capabilities rail beside it
+     is the rail, and the heading over the split names every capability. */
+  if (paneOnly) {
+    return (objs.length ? '<h4 class="mini">' + L("keyobj","bu") + ' ' + tally(doneOf(objs), objs.length) + '</h4>' + objTable : "") +
+      pillars;
+  }
+  /* ── THE CHIP'S LIST IS THE PARTS THIS PERSON HOLDS (§520.10) ───────
+     A unit's list is every pillar and `ownStateChip` keeps the ones named
+     for this viewer. The COMPANY's is built here, because its parts are two
+     kinds: a direction, whose seats are register NAMES judged by
+     `SMPRules.ownsDirection` (§469), and a capability, whose seats are
+     register KEYS (§412, §520). A capability is not in `u.items` at all —
+     it is counted on its own rail (§520.8) — so without this the owner of
+     two capabilities read the company's 42 and none of their own.
+     Each entry is marked `mine` so the chip does not ask `mayMarkDoneOn`,
+     which reads the EDIT grants and would drop every one (§520.10). The
+     tallies are the rail's own: `pillarTally` for a direction,
+     `reportedCount` for a capability planned in pillars and `capReported`
+     for one planned in projects — the same readers `reportCapsSplit` asks,
+     so the chip and the rail cannot disagree (§53.5). */
+  function ownParts(){
+    if (u.ukey !== "group")
+      return (u.items || []).map(function(p, pi){
+        var t = pillarTally(p);
+        return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
+                 done:t.done, total:t.total };
+      });
+    var w = world(), me = viewer(), out = [];
+    (u.items || []).forEach(function(p, pi){
+      if (!SMPRules.ownsDirection(w, me, p)) return;
+      var t = pillarTally(p);
+      out.push({ id:p.id, code:pillarCode(u, pi), done:t.done, total:t.total, mine:true });
+    });
+    capsHere().forEach(function(cp){
+      if (!(cp.head === me.key || cp.custodian === me.key)) return;
+      var cu = capPlansInPillars(cp) ? capAsUnit(cp.id) : null;
+      var t = cu ? reportedCount(cu) : capReported(cp);
+      out.push({ id:cp.id, code:topCapCode(cp), done:t.done, total:t.total, mine:true, noMark:true });
+    });
+    return out;
+  }
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
                             reportParked(u.ukey), submitWhyShort(u.ukey),
-    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
-      var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
-               done:t.done, total:t.total };
-    }), L("pillar","bu")));
+    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, ownParts(), L("pillar","bu")));
   var bar = "";
 
   var summary =
@@ -32096,9 +32374,64 @@ function renderReport(u){
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
     /* §517: and a direction owner narrowed to their part is not shown them. */
-    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
-    section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
+    (u.topLayer && (!objs.length || partOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    /* §520.6: a part owner narrowed to a part that is not a direction is not
+       told the company has no directions to report against (§45.2, §61) —
+       the section is theirs only where one of its rows is. */
+    (u.topLayer && partOnly() && !partItems(u).length ? "" :
+      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
+       a section of the company's plan and never a destination (§520.1), so
+       this page is the only Reporting page its owner can reach. `capsHere()`
+       is the one narrowing (§520.5).
+       §520.8: ONE SECTION, SHAPED LIKE THE DIRECTIONS' — Islam, of §520.7's
+       stacked blocks: "the name of the capability is written at the top of
+       the page which is wrong and another line says directions key measures
+       and tactics which is wrong it should say Capabilities - key measures
+       and tactics". A rail of capabilities on the left (the Strategy tab's
+       own rail, `renderTopCaps`, so the two read alike) and the chosen one's
+       report in the pane: a pillars capability through `renderReport`'s pane
+       (§520.7's body without its heading or its one-row rail), a projects
+       capability through `capReportBody`. The owner types on theirs, a
+       direction's owner reads it, the office types on all — the pane asks
+       `cap:<id>` for itself exactly as before. */
+    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+      ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
+          reportCapsSplit(capsHere()))
+      : "") +
     summary;
+}
+
+
+/* §520.8: the company report's capabilities rail and pane. The rail reads
+   the Strategy tab's own shape (`renderTopCaps`): the same `data-topcap`
+   press, the same code and name, with the REPORT's tally in place of the
+   plan's gap count — entries given of asked, off `reportedCount`, the one
+   reader the bar and the rail both ask — and the places still owing a figure
+   named in the rail's alarm, exactly as a direction's row says it. */
+function reportCapsSplit(caps){
+  var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
+  var rows = caps.map(function(c){
+    var pil = capPlansInPillars(c), cu = pil ? capAsUnit(c.id) : null;
+    var t = cu ? reportedCount(cu) : null;
+    var owes = cu ? reportPlaces(cu.ukey).some(function(e){ return e.count > 0; }) : false;
+    var sub = !cu ? "" : t.total === 0 ? 'Not asked this cycle'
+            : t.done >= t.total ? 'Complete'
+            : (t.total - t.done) + ' still to enter';
+    return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
+      railName(topCapCode(c), c.name) +
+      (cu ? '<span class="rnum"><span class="rtally' +
+              (t.total && t.done >= t.total && !owes ? ' full' : '') + '">' +
+              t.done + '/' + t.total + '</span></span>' : '') +
+      railSub(owes ? "" : sub, owes ? '<span class="missing">Still to enter</span>' : "") +
+      '</button>';
+  }).join("");
+  var rail = '<div class="rail" data-repcaprail="1">' + railHead(L("capability","bu"), caps.length) + rows +
+    '<div class="rfoot">Tally is entries given of asked</div></div>';
+  var pane = '<div class="capbody">' + (capPlansInPillars(sel)
+    ? renderReport(capAsUnit(sel.id), { paneOnly: true })
+    : capReportBody(sel)) + '</div>';
+  return '<div class="split" data-repcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
 
@@ -33860,7 +34193,13 @@ function capReportBody(c){
      question, because a project owner speaks for their project and a
      capability's key objectives belong to no project. Each project asks for
      ITSELF, below, through the same pair the server enforces. */
-  var may = canReportFnWhole(c.fn);
+  /* §520.6: THE CAPABILITY'S OWN TARGET, never the holding function's. Asked
+     of `fn:<key>` this answered for the FUNCTION — true for its head, false for
+     the capability's own owner (§412) — so on the company's Reporting page
+     Ehab's rows drew read-only while a direction's owner typed on his. Through
+     `holderCodeOwner` so a function's own work keeps asking `fn:<key>` and a
+     capability asks `cap:<id>`, which is what the server judges (§334). */
+  var may = canReportFnWhole(holderCodeOwner(c));
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
@@ -33877,7 +34216,7 @@ function capReportBody(c){
   /* §279: the same mark the unit's rail carries, off the same map — this
      side's rail had exactly the unit's fault and no banner above it either. */
   var owedAt = {};
-  reportPlaces("fn:" + c.fn).forEach(function(e){ owedAt[e.key] = e; });
+  reportPlaces(holderTarget(holderCodeOwner(c))).forEach(function(e){ owedAt[e.key] = e; });
   var owesPr = function(p){
     var e = owedAt["pr:" + p.id];
     return e && e.count > 0 ? e : null;
@@ -34233,10 +34572,21 @@ function doneCtl(target, id, owner, code, cust){
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
-  var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
-  var tip = 'You report your own rows. The ' + submits +
-            ' custodian submits the report.';
+  /* §520.10: an entry marked `mine` was filtered by its caller — the
+     company's parts are judged by their SEATS, never by the edit grants
+     `mayMarkDoneOn` reads (both of its owner roles ship at view). */
+  var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
+  var top = String(target) === "group";
+  var submits = top ? "office or the CEO" :
+                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+  var tip = 'You report your own rows. The ' + submits + ' submits the report.';
+  /* A capability carries no saved-draft mark (§309 is a project's and a
+     direction's), so "done" there — and ONLY there, `noMark` — is every
+     asked figure entered. A project's or a pillar's chip keeps reading
+     "3 of 3 entered" until its owner presses the mark: the first build read
+     entered-equals-done for every part and `project-done.py` went 2 red on
+     a unit's chip this change was meant to leave alone (§520.10). */
+  var isDone = function(c){ return !!doneMark(c.id) || (!!c.noMark && c.total > 0 && c.done >= c.total); };
   /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
      §220 disables every control in the pane the moment the report is
      submitted or parked — and the word that explains it, `Submitted` /
@@ -34268,20 +34618,28 @@ function ownStateChip(target, list, word){
       return '<span class="rc-state draft">Draft saved</span>' +
         '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>';
     return '<span class="rc-state done" title="' +
-      esc('Submitted — the ' + submits + ' custodian reopens it.') +
+      esc('Submitted — the ' + submits + ' reopens it.') +
       '">Submitted</span>';
   }
   if (!mine.length)
     return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
-  if (mine.length === 1) {
-    var c = mine[0];
-    return doneMark(c.id)
+  var chipOf = function(c){
+    return isDone(c)
       ? '<span class="rc-state done" title="' + esc(tip) + '">' +
         esc(c.code) + ' · Done</span>'
       : '<span class="rc-state draft" title="' + esc(tip) + '">' +
         esc(c.code) + ' · ' + c.done + ' of ' + c.total + ' entered</span>';
-  }
-  var n = mine.filter(function(c){ return !!doneMark(c.id); }).length;
+  };
+  if (mine.length === 1) return chipOf(mine[0]);
+  /* §520.10: ON THE COMPANY'S OWN REPORT EVERY PART GETS ITS OWN CHIP —
+     Islam: *"as it shows them progress"* — a direction's or a capability's
+     tally each, because the collapsed "Your 2 Pillars · 0 of 2 done" below
+     names a part by the wrong word (a capability is not a pillar) and says
+     nothing about the figures inside it. The chip is §301's own shape,
+     repeated; the two-or-more collapse stays for a unit's and a function's
+     page exactly as it was. */
+  if (top) return mine.map(chipOf).join('');
+  var n = mine.filter(isDone).length;
   return '<span class="rc-state ' + (n >= mine.length ? "done" : "draft") +
     /* NEVER `plural()` HERE (§107.8, and §160.6 for the second time): a
        tenant's label is already plural — `L("pillar","bu")` is "Pillars" —
@@ -42058,7 +42416,8 @@ function impCycleLabel(){
 function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
-    var v = a.kind === "unit" ? a.key : "cap:" + a.key;
+    /* §524: a Foundation archive is keyed by its place already. */
+    var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -42412,6 +42771,10 @@ function renderArchives(){
     var held = a.kind === "figures"
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
+      : a.kind === "foundation"
+      /* §524: the six parts of a Foundation, replaced from the Copilot. */
+      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
+        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
       : a.kind === "unit"
       ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
          plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
@@ -42421,7 +42784,9 @@ function renderArchives(){
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
        restore itself. */
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+    var live = a.kind === "figures" ? true
+             : a.kind === "foundation" ? !!foundationRecord(a.key)
+             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -46557,8 +46922,8 @@ function competeSlides(u){
   var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
     return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
   var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
-  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
-    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+  return ['<section class="dslide d-compete"' + anch("compete", "After Competitive Discipline") + '>' +
+    '<h2>Competitive Discipline</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
     '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
     (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
     '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +
@@ -57281,7 +57646,7 @@ var COPILOT = (function(){
   var SECTIONS = [
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
-    { k:"compete",    label:"How we compete" },
+    { k:"compete",    label:"Competitive Discipline" },
     { k:"directions", label:"Directions" },
     { k:"capabilities", label:"Capabilities" },
     { k:"execution",  label:"Execution" },
@@ -57928,7 +58293,49 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
+  /* §525.1 — A WAY TO SEE THE RESULT AFTER APPLY (Islam: "ok for all", of
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     Applying changed the bar's words and nothing else, so checking the one
+     thing Apply is for meant leaving the Copilot and finding Strategy ›
+     Foundation by hand. One green line with one link, shown where the state
+     is already read — the flow's save bar and the deliverable page (§524.1's
+     "keep in both") — and nothing is stored for it.
+     THE ADDRESS IS WORKED OUT THE WAY THE ROUTER WRITES ONE
+     (smp-app/shell/route.js `addressOf`): the module word, the destination's
+     own segment, its tab, then the section. A company's Foundation is a TAB
+     of its own (`foundation`) where a unit's, a function's and the group's
+     are a SECTION of Strategy (`found`) — read off shell.html rather than
+     guessed. A capability is a destination the router cannot spell, so there
+     the line is drawn with no link rather than a link that lands nowhere
+     (§61): a dead link is worse than no link. */
+  function foundHref(){
+    var t = place(), s = slug();
+    if (!s || !t || /^cap:/.test(t)) return "";
+    if (/^co:/.test(t)) return "/" + s + "/strategy/co/" + t.slice(3) + "/foundation";
+    return "/" + s + "/strategy/" + (/^fn:/.test(t) ? "fn/" + t.slice(3) : t) + "/strategy/found";
+  }
+  /* The page's own name is the client's word for it, as every part's name is
+     (§514) — asked of the one rule that answers it, never spelt here. */
+  function foundPageWord(){
+    try { if (typeof SMPRules !== "undefined" && SMPRules.foundTitle) { var w = SMPRules.foundTitle(GROUP, place()); if (w) return w; } } catch (e) {}
+    return "Foundation";
+  }
+  function fdoneHtml(n){
+    var h = foundHref();
+    return '<div class="copfdone" data-cop-fdone>' +
+      '<span>✓ v' + E(n) + ' is on ' + E(placeWord()) + '’s plan.</span>' +
+      (h ? ' <a href="' + E(h) + '">Open the ' + E(foundPageWord()) + ' page ›</a>' : '') + '</div>';
+  }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
+  /* §524 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
+     cards stay editable after a save (Islam: "let the card be editable to
+     begin a new version"), so what decides whether Save is live is whether
+     any counted part differs from what vN holds, never the phase. */
+  function savedNow(f){
+    if (!f.saved || !Array.isArray(f.saved.drafts)) return false;
+    return steps().every(function(_, i){ return !on(i) || String(f.drafts[i] || "").trim() === String(f.saved.drafts[i] || "").trim(); });
+  }
+  function countedParts(f){ return steps().filter(function(_, i){ return on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -57981,6 +58388,19 @@ var COPILOT = (function(){
      "Answering 1/4" — the question's POSITION — beside a panel saying
      "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
   function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
+  /* §525.1 — ONE COUNT OF PROGRESS, read by the top bar and the save bar
+     (Islam, of the UX review: "ok for all", from
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     The questions bar counted ANSWERS GIVEN out of questions asked, which on
+     the "start from what is there" road is 0 of 18 over six parts already
+     agreed — a 0% track on a Foundation that is five sixths done, because
+     nobody was asked anything. What the page is asking is *how much of the
+     Foundation is settled*, so the one number is parts agreed out of the
+     parts this place has, and it moves on either road. Named here once:
+     `agreedAll` is this same test asked of every part (§53.5). */
+  function agreedCount(f){
+    return steps().filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
+  }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -58008,8 +58428,9 @@ var COPILOT = (function(){
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
        now any part opens while the parts are being worked or checked —
-       never before the road is chosen, and never once the Foundation is
-       saved, because the server refuses a save to a saved flow. */
+       never before the road is chosen. Since §524 a SAVED Foundation opens
+       too: a change after a save starts the next version on the rail, and
+       the plan moves only when Apply to plan is pressed. */
     var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
     var pick = ed && phaseOk, pen = penHere() && phaseOk ? CARDPEN : null;
     return '<div class="copcards">' + S.map(function(el, i){
@@ -58017,7 +58438,11 @@ var COPILOT = (function(){
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering"; cls += " now"; }
+      /* §525.1 — WHERE THE QUESTION COUNT BELONGS IS THE CARD BEING
+         ANSWERED, never the page: the position through one part's questions
+         is a fact about that part, and on the head it sat beside a track
+         counting something else. */
+      if (now && f.phase === "ask") { st = "Question " + (f.qi + 1) + " of " + n; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
@@ -58058,13 +58483,16 @@ var COPILOT = (function(){
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + partName(el);
-      p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
+      /* The question's position is the card's (§525.1), so the head says
+         which part and which step of it, never how far through its
+         questions — said twice on one screen otherwise (§87). */
+      p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
     }
-    var total = 0, ans = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; ans += answered(f, i); });
+    var total = countedParts(f), agreed = agreedCount(f);
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + ans + '"><i style="width:' + (total ? Math.round(ans / total * 100) : 0) + '%"></i></div>';
+      '<div class="copfbar"><span class="copfcount" data-cop-progress>' + agreed + ' of ' + total + ' parts agreed</span>' +
+      '<div class="coptrack" role="progressbar" aria-label="Parts agreed" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + agreed + '"><i style="width:' + (total ? Math.round(agreed / total * 100) : 0) + '%"></i></div></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -58144,9 +58572,11 @@ var COPILOT = (function(){
       out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
-          '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
+        /* §524 — the check is an extra move, never the door to saving
+           (Islam: "a check is an extra move"), so Save is on the bar under
+           the cards and only "Go back to" stays here, when there is one. */
+        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
+            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") + '</div>' : ''), true));
     }
     /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
        A pen save during the check left the OLD results standing, "Go back
@@ -58159,7 +58589,7 @@ var COPILOT = (function(){
         (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
+      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
@@ -58169,7 +58599,7 @@ var COPILOT = (function(){
      review, and a part half answered opens on its next unanswered question
      — never back at question one, which would make returning to a part you
      were in the middle of cost the answers already given. */
-  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check"];
+  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check", "saved"];
   function openPart(g, i){
     var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
     g.e = i; g.done[i] = false; NUDGE = null;
@@ -58199,14 +58629,19 @@ var COPILOT = (function(){
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
-    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
+    var vn = f.saved ? f.saved.n : (PANE.nextVersion || 1), sNow = savedNow(f);
+    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> · ' + (sNow ? "saved" : "in progress") +
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
       (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
-        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + '</div>') +
+        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
+        /* §525 — Save and Apply live in the card column, so closing the cards
+           with × used to take them away too. With the cards shut the same bar
+           stands at the head of the chat. */
+        (shut ? savebarHtml(f) : '') +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
         (!canEdit() ? VIEWONLY
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
@@ -58214,12 +58649,50 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
+  /* §524 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
+     it is APPLIED. Islam: "where do I press save for the foundation? in the
+     chat?" — the save was a button inside the check's own message, so it
+     could only be reached by running the check; now the check is an extra
+     move and the save stands at the foot of the cards (mockup
+     design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html).
+     Save is live the moment every counted part is agreed and differs from
+     the last version; Apply is dimmed until a version exists, because it
+     always writes the last SAVED version and never the cards' unsaved words
+     (Islam: "the plan only changes when we apply to plan"). The mockup
+     spells Apply as "Move"; the word is Islam's later one. */
+  function savebarHtml(f){
+    var S = steps(), ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
+    var early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded" && !f.start;
+    if (!ed || early) return '';
+    var total = countedParts(f), agreed = agreedCount(f);
+    var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
+    /* §525 — whether the plan holds it, read off the same extra.applied the
+       deliverable page reads (Islam: "keep in both"). */
+    var ap = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
+    var onPlan = ap ? (ap === vn && f.saved ? ' · on the plan' : ' · v' + ap + ' is on the plan') : '';
+    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + onPlan + '</span>'
+      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + onPlan + '</span>'
+      : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
+      : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
+    var saveN = f.saved && !sNow ? vn + 1 : vn;
+    /* §525.1 — the green line only where the words beside it would otherwise
+       be the only thing saying it landed: the version that is on the plan is
+       the one just saved. A LATER unsaved version is a different state and
+       the bar already names it ("v3 in progress · v2 is on the plan"), so a
+       done line there would read as a claim about work nobody has applied. */
+    var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
+      '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
+      '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
+      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      '</div></div>';
+  }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
      carries, worked out from the flow as it stands — nothing is stored for it.
      Start, each part with its answers counted, then the check and the save. */
   function ftodoHtml(f){
     var S = steps(), li = function(name, state, cnt, part){
-      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : "To do";
+      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : state === "opt" ? "Optional" : "To do";
       return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
         '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
         '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
@@ -58229,14 +58702,19 @@ var COPILOT = (function(){
     var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
-      var a = answered(f, i), q = el.questions.length;
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+      /* §525.1 — NO SECOND COUNT HERE. A part agreed from the plan carries
+         no answers, so this read "0/4" beside a row whose own pill says
+         Agreed — a number disagreeing with the word next to it. How many
+         questions a part has answered is on its card while it is the part
+         being answered, and nowhere else. */
+      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", "", true);
     }).join("");
-    var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
-              li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
-    var n = 2 + 2 + S.filter(function(_, i){ return on(i); }).length;
-    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (f.phase === "saved" ? 2 : 0);
+    /* §524 — the check is optional and not counted; the save is. */
+    var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
+              li("Save as Foundation", savedNow(f) ? "done" : agreedAll(f) ? "now" : "todo")];
+    var n = 2 + 1 + S.filter(function(_, i){ return on(i); }).length;
+    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (savedNow(f) ? 1 : 0);
     return '<aside class="copftodo"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + Math.round(done * 100 / n) + '%"></i></div></div>' +
       '<div class="copsw-tg"><div class="copsw-th">Start</div><ul>' + g1.join("") + '</ul></div>' +
@@ -58418,6 +58896,74 @@ var COPILOT = (function(){
     }
     return false;
   }
+  /* §524 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
+     the place's own Foundation page, replacing what the plan holds — and
+     what it replaces is ARCHIVED first (Islam: "anything old is not deleted
+     it's archived"), restorable from Import & storage › Archived plans. It
+     is asked for through the platform's own dialog, never a browser
+     confirm() (§95); the server stamps which version went in, the browser
+     writes the plan through the same writers the Foundation page uses
+     (applyFoundationParts, config-data.js) and the autosave carries it. */
+  function applyAsk(did, title, o){
+    if (!did || typeof openModalHtml !== "function") { SAY = "Save the Foundation first."; draw(); return; }
+    o = o || {};
+    /* §525 — the count is the parts this Foundation holds (Structure can
+       switch Purpose and Core Values off), and applying a version already on
+       the plan says so, since it files another copy of it in Archived plans. */
+    var partsWord = o.parts ? (o.parts === 1 ? "its one part goes" : "its " + o.parts + " parts go") : "its parts go";
+    var again = o.n && o.on === o.n ? '<div class="kv"><span class="k">Already applied</span><span>v' + E(o.n) + ' is on the plan already. Applying it again changes nothing on the plan and files another copy in Archived plans.</span></div>' : '';
+    openModalHtml("Apply to the plan?", "",
+      '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
+      '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
+      '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
+      /* §525.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
+         colour of an act with no way back, and the row above this button
+         says in its own words that the Foundation the plan holds is archived
+         first and can be put back — so the colour said the opposite of the
+         sentence it sat under. It is the dialog's own main action, filled in
+         the client's navy exactly as the master flow's Start button is
+         (`.mflow .cbtns button.mfgo`, §266) rather than a new treatment —
+         and `--panel-ink` is the derived ink for that ground, so §38.4's
+         trap (white on a fill that is pale in dark) cannot bite. Red stays
+         for deleting and for closing a cycle. */
+      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="copgo" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
+    var mb = document.getElementById("modal-b"); if (!mb) return;
+    mb.addEventListener("click", function(ev){
+      var y;
+      if (hit(ev, "[data-cop-apply-no]")) { closeModal(); return; }
+      if ((y = hit(ev, "[data-cop-apply-yes]"))) { closeModal(); applyGo(y.getAttribute("data-cop-apply-yes"), title); }
+    });
+  }
+  /* §524.1 — THE NOTE FOLLOWS THE FACT. The server hands over the parts
+     and records nothing; the plan is written here and saved through the
+     ordinary save (the authoriser judges it, §42), and only a save that
+     LANDED — "saved", or "clean" when the plan already held exactly this —
+     sends `foundationApplied`. A refused or failed save says so on the page
+     already (§171, §184) and leaves the deliverable "Not on the plan yet",
+     which is the truth (§124). */
+  function applyGo(did, title){
+    var tgt = place();
+    act({ act:"applyFoundation", id:did }, function(j){
+      if (typeof applyFoundationParts !== "function" || typeof archiveFoundation !== "function") {
+        SAY = "The plan could not be written from here. Nothing was changed."; draw(); return; }
+      archiveFoundation(tgt, "replaced from the Copilot — " + title + " v" + j.n);
+      var wrote = !!applyFoundationParts(tgt, j.foundation || []);
+      if (wrote && typeof paint === "function") paint(); else draw();
+      var saveNow = typeof SYNC !== "undefined" && SYNC.saveNow;
+      if (!saveNow) { SAY = "The plan could not be saved from here, so it is not marked as applied."; draw(); return; }
+      SYNC.saveNow(function(how){
+        if (how !== "saved" && how !== "clean") {
+          SAY = "The plan did not save, so " + title + " v" + j.n + " is not marked as on the plan. Try Apply to plan again once the save goes through.";
+          draw(); loadList(true); return; }
+        act({ act:"foundationApplied", id:did, n:j.n }, function(k){
+          if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = k.applied;
+          if (PANE && PANE.chat && PANE.flow && PANE.flow.saved && PANE.flow.saved.deliverableId === did) PANE.applied = k.applied;
+          SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+          draw(); loadList(true);
+        });
+      });
+    });
+  }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
   var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
@@ -58439,6 +58985,30 @@ var COPILOT = (function(){
         '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
         '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
+    /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
+       client's own words, with whether it is on the plan and the same
+       Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
+       plain-text edit of the whole version; a card is edited from the chat. */
+    var fp = cur && cur.body && Array.isArray(cur.body.foundation) ? cur.body.foundation : [];
+    /* §525 — A FOUNDATION IS EDITED IN ITS CHAT. The plain-text box made a
+       version holding no parts, and Apply to plan then refused it; so Edit
+       opens the chat the latest version was built in, where the cards, the
+       pen and Edit with AI already work, and a change there starts vN+1. */
+    var fchat = "";
+    vs.forEach(function(v){ if (!fchat && v.chatId) fchat = v.chatId; });
+    if (d.type === "foundation" && fp.length && !editing) {
+      var words = partWords();
+      body = '<div class="copfcards">' + fp.map(function(x){
+        return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
+        /* §525.1 — the same green line the flow's bar carries, on the same
+           test: the version shown is the version the plan holds. An older
+           one applied is said by the row below, which names both numbers. */
+        (d.applied && d.applied.n === cur.n ? fdoneHtml(d.applied.n) : '') +
+        '<div class="copplanrow" data-cop-planrow>' + (d.applied
+          ? '<span class="copsvst ok">On the plan as v' + E(d.applied.n) + (d.applied.n < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
+          : '<span class="copsvst warn">Not on the plan yet</span>') +
+        (canEdit() ? '<button type="button" class="copbtn solid" data-cop-fapply="' + E(d.id) + '" data-cop-fapply-title="' + E(d.title) + '" data-cop-fapply-n="' + E(cur.n) + '" data-cop-fapply-on="' + E(d.applied ? d.applied.n : 0) + '" data-cop-fapply-parts="' + fp.length + '">Apply to plan</button>' : '') + '</div>';
+    }
     var hist = vs.map(function(v, i){
       return '<li class="copver' + (i === 0 ? " latest" : "") + '"><span class="copvn">v' + v.n + '</span>' +
         '<span class="copvnote">' + E(v.note || (v.restoredFrom ? "Restored from v" + v.restoredFrom : "")) + '</span>' +
@@ -58449,7 +59019,9 @@ var COPILOT = (function(){
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
+        (editing || !canEdit() ? '' : d.type === "foundation"
+          ? (fchat ? '<button type="button" class="copbtn quiet" data-cop-edit-chat="' + E(fchat) + '">Edit' + (cur ? ' as v' + (cur.n + 1) : '') + '</button>' : '')
+          : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
       body +
       '<h4 class="copvh">Versions</h4><ol class="copvers">' + hist + '</ol>' +
@@ -58984,7 +59556,7 @@ var COPILOT = (function(){
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
-  function cpTitle(){ return "How we compete — " + placeWord(); }
+  function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
   function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
@@ -59124,8 +59696,8 @@ var COPILOT = (function(){
           '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
           '<button type="button" class="copbtn" data-cop-cp-refine' + (busyHere ? ' disabled' : '') + '>Send</button></div>' +
           '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
-          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to How we compete</button></div>';
-        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under How we compete.");
+          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
+        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under Competitive Discipline.");
       }
     }
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
@@ -59196,8 +59768,8 @@ var COPILOT = (function(){
         cpProgress(id);
         var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
         var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
-        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the How we compete page."
-          : on ? "" : "Saved. How we compete is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
+        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the Competitive Discipline page."
+          : on ? "" : "Saved. Competitive Discipline is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
         LISTS[key()] = null; loadList(true);
         if (wrote && typeof paint === "function") paint(); else draw();
       });
@@ -60060,6 +60632,8 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
+      { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
          button"). It opens on "start from what is there, or fresh?" where
@@ -60178,6 +60752,7 @@ var COPILOT = (function(){
       EDIT = { id: PANE.deliverable.id, text: cur && cur.body && typeof cur.body.text === "string" ? cur.body.text : "", note: "" };
       draw(); var e = document.querySelector("[data-cop-edit-text]"); if (e) e.focus(); return;
     }
+    if ((b = hit(ev, "[data-cop-edit-chat]"))) { openItem("chat", b.getAttribute("data-cop-edit-chat")); return; }
     if ((b = hit(ev, "[data-cop-edit-cancel]"))) { EDIT = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-edit-save]"))) {
       if (!EDIT) return;
@@ -62724,7 +63299,7 @@ var CLIENTSETUP = (function () {
        `compete` component: off until ticked, and off hides and keeps. */
     if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
       var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
-      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "Competitive Discipline"));
       var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
       hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
       sc.appendChild(hc);
@@ -63773,7 +64348,7 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
-  /* WHEN the server last accepted one, for the hover (§521). `lastSaved`
+  /* WHEN the server last accepted one, for the hover (§527). `lastSaved`
      carries no time of its own and never needed one: it is compared, not
      read. Set at the ONE place a save is accepted, so a landing or a rebase
      — which set the baseline from the server's copy rather than from a
@@ -63785,7 +64360,7 @@ var SYNC = (function () {
   /* When the last save actually LEFT, so the leading edge below can tell a
      first change from the fourth in a burst. */
   var lastFlush = 0;
-  /* ── IS IT SAVED? (§521) ──────────────────────────────────
+  /* ── IS IT SAVED? (§527) ──────────────────────────────────
 
      Islam, of the usability audit's first finding: a platform with no Save
      button tells the person typing nothing at all. Every box writes when the
@@ -63836,7 +64411,7 @@ var SYNC = (function () {
              : null;
     /* `clean` LEAVES EVERYTHING ALONE, THE PENDING FADE INCLUDED — and the
        first build of this cleared the fade timer ABOVE this line, which is
-       the one thing it may not do (§521.1). §170's debounce is leading-edge:
+       the one thing it may not do (§527.1). §170's debounce is leading-edge:
        the first change of a burst posts at once and the trailing 800ms timer
        still runs, so a second save follows with nothing to send and answers
        `clean` — every single time. So the clear cancelled the fade a beat
@@ -64712,6 +65287,48 @@ var SYNC = (function () {
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
   function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
+     Islam, of the trail standing at full weight while he viewed as somebody:
+     *"I think yes greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     THE BAR ITSELF IS CORRECT AND STAYS, which is most of what this answers.
+     It is the SIGNED-IN person's chrome — drawn only where the server says
+     `cards`, which is the session's KIND and is fixed at sign-in, so a
+     client's own person can never be shown it whoever they are viewing as
+     — and the viewer switcher is physically inside that same row, so taking
+     the bar away while a view is on would strand the office inside the
+     simulation with no control left to leave it (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the VIEWED person's own
+     access.
+
+     SO IT QUIETENS AND KEEPS WORKING, Islam's A of two drawn with the cost
+     of each stated (rule 1c): the alternative held both menus shut, which
+     costs a real journey — switch back, cross, switch again — and buys two
+     controls that refuse, each of which then has to say why (§221). His
+     worry is about confusion rather than capability, and nothing is taken
+     away.
+
+     ONE ANSWER, FROM `actingAs()` AND NEVER A SECOND TEST (§42, §53.5): that
+     is the same function the save stamps itself with and the same one
+     §383's reads narrow through, so the bar cannot disagree with who the
+     server is judging — and it already carries the switcher's own two guards
+     (the seat that draws it, and the key being on the register), so a
+     bootstrap session pointed at a stranger (§69.15) does not grey the bar
+     for nobody's choice.
+
+     WRITTEN AT THE END OF EVERY PAINT, never at each place `VIEWER` is
+     assigned: there are three such places and one of them is a temporary
+     swap inside a reader (`config-render.js`'s owner walk, restored in its
+     own `finally`), so a per-assignment rule would be both a list to forget
+     and wrong (§104.7). Stored as an ABSENCE, so a build that never writes
+     it reads exactly as the build before (§50.6). */
+  function markViewing() {
+    if (typeof document === "undefined") return;
+    var el = document.documentElement;
+    if (actingAs()) el.setAttribute("data-viewing-as", "1");
+    else el.removeAttribute("data-viewing-as");
+  }
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
@@ -65116,6 +65733,9 @@ var SYNC = (function () {
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
        exactly as `isSMOSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
+    /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
+       — the shell calls this at the end of every paint. */
+    markViewing: function () { markViewing(); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit
@@ -65650,20 +66270,36 @@ var SYNC = (function () {
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
-                  { k:"compete", ac:"g_found", label:"How we compete",
+                    when: function(){ return compOn("group", "swot") && !partOnly(); } },
+                  { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    /* §520: a part owner sees their own part and nothing
+                       else — so a capability's owner, who owns no direction,
+                       is not shown the directions rail at all rather than an
+                       empty one (§61). partMine() is the one question. */
+                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    /* §517: and none of the three is shown to a direction
-                       owner the office narrowed to their part. */
-                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
+                    /* §517 narrowed all three of these together, and §520
+                       measured that this one needs no help: `capsReachable()`
+                       is the MATRIX's own answer and is already narrowed per
+                       role — a capability's owner reaches their own and not
+                       the other, a direction owner reaches none, so for them
+                       `topCapsOn()` is false on its own.
+                       AND HIDING IT WAS THE ONE THING THE HALF EYE MAY NOT DO
+                       (§61): with the business units off a capability is
+                       always a section of this tab and never a destination
+                       (`capAtTop` returns true outright), so `!partOnly()`
+                       here left a capability's owner the Foundation and no
+                       way to their own part at all. The half eye narrows what
+                       is drawn of the COMPANY's plan; what somebody reaches is
+                       the matrix's to say, and this asks it (§53.5). */
+                    when: topCapsOn }];
       } };
   }
   var SUBS = {
@@ -65841,13 +66477,15 @@ var SYNC = (function () {
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn() && !dirPartOnly(); } },
+        when: function(){ return focusOn() && !partOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group") && !dirPartOnly(); } },
+        when: function(){ return templeOn("group") && !partOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
-        when: function(){ return buExists(); } },
+        /* §520: and it is neither the owner's own part nor the Foundation,
+           so it goes with the rest for a narrowed part owner. */
+        when: function(){ return buExists() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -65880,7 +66518,7 @@ var SYNC = (function () {
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   /* spec 064 §3.1: How we compete, after the SWOT. */
-                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                  { k:"compete", ac:"u_anal", label:"Competitive Discipline", render:renderUnitCompete,
                     when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
@@ -67539,6 +68177,23 @@ var SYNC = (function () {
       if (gs) {
         var gsecs = allowed(gs.sections(), t);
         if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+        /* §520.11: A CAPABILITY'S OWNER OPENS ON THEIR CAPABILITY (Islam:
+           "the capability default opens on the perfromance which is wrong it
+           should open on the capbility page itself"). With the half eye on
+           (§517, §520) the directions list is not offered to them, so the
+           §449 test above falls through and they landed on Performance —
+           while the Capabilities section WAS offered and never considered as
+           a landing. If Strategy offers Capabilities, open there with their
+           own capability selected: TOPCAP is set only when they reach exactly
+           one, so an owner of two lands on the first of theirs (stated cost)
+           and nobody else is touched — the office and a direction's owner are
+           answered by the plan test first, and somebody offered neither still
+           lands on Performance. Screen only; nothing stored, no rule moves. */
+        if (gsecs.some(function(x){ return x.k === "caps"; })) {
+          var mine = (typeof capsReachable === "function") ? capsReachable() : [];
+          if (mine.length === 1) TOPCAP = mine[0].id;
+          CURSEC.strategy = "caps"; return "strategy";
+        }
       }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
@@ -68985,7 +69640,7 @@ var SYNC = (function () {
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* AND THE KEYS, over that same list and in the same one place (§522).
+    /* AND THE KEYS, over that same list and in the same one place (§528).
        Not inside wire(): these boxes are built by eight renderers and a
        keydown wired at each of them is eight places to forget, which is the
        whole reason the marks above are put on here. Idempotent per element
@@ -69548,7 +70203,7 @@ var SYNC = (function () {
      bar is counting) and applied to the DOM the paint just produced. Driven
      from the CONTROLS rather than from the ids, so no id ever has to be
      escaped into a selector. */
-  /* The six reporting boxes, named ONCE and read by both walks and by §522's
+  /* The six reporting boxes, named ONCE and read by both walks and by §528's
      keys (§104.7, §53.5: a second copy of this list is the one somebody
      forgets to add to the day a seventh box kind arrives). */
   var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
@@ -69641,7 +70296,7 @@ var SYNC = (function () {
     if (els.length) gapLight(els[0]);
   }
 
-  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§522) ───────────────
+  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§528) ───────────────
      Islam, of the four behaviours put to him: "all". MEASURED FIRST (rule 3a)
      on the shipped build, and the first finding is that Enter already WORKED
      and already went nowhere: a bound box writes on `change`, which for a text
@@ -69658,7 +70313,7 @@ var SYNC = (function () {
        Enter / Shift+Enter  the next typed figure, and back
        Alt+Enter            §279's Next → from the keyboard
        Escape               put this box back to what it held
-       Alt+N                the row's note, which §522 took out of the tab path
+       Alt+N                the row's note, which §528 took out of the tab path
 
      NOTHING IS DRAWN, which is why rule 1c has nothing to sign off: every hint
      rides the hover on the bar's own Next button and an `aria-keyshortcuts` set
@@ -69756,7 +70411,7 @@ var SYNC = (function () {
       el.addEventListener("focus", function(){ was = el.value; });
       el.addEventListener("keydown", function(e){
         if (e.ctrlKey || e.metaKey) return;
-        /* ALT+N — the note §522 took out of the tab path. Matched on `e.code`
+        /* ALT+N — the note §528 took out of the tab path. Matched on `e.code`
            and not on `e.key`, because Option+N on a Mac is the tilde dead key
            and `e.key` there is "Dead"; preventDefault stops it inserting. */
         if (e.altKey && e.code === "KeyN") {
@@ -77814,6 +78469,37 @@ var SYNC = (function () {
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
+      /* ── AND THE TRAIL SAYS A VIEW IS ON (§519) ───────────────────────
+         Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing
+         the white bar at the top which is for the smo only is that a
+         glitch?"* IT IS NOT, and establishing that first was most of the
+         answer: `cards` is the SESSION's kind (`state-api.ts`), fixed at
+         sign-in, so the trail is drawn for Forefront's own people and for
+         nobody else whoever they view as — and the viewer switcher is INSIDE
+         that same row, so a bar that went away would strand the office with
+         no way back to themselves (§61). The CHROME follows the seat on the
+         session, never the simulated view, which is the whole point of the
+         simulation (§185's own three readers of the real session; this is a
+         fourth of that family).
+
+         What was wrong is the WEIGHT: at full strength the trail reads as the
+         viewed person's own access. Islam: *"greyed is better not to get
+         confused that the user has access by anyone else."* Two treatments
+         were drawn at real size with the cost of each stated, and he picked
+         **A** — quieter while a view is on, full weight the moment you switch
+         back, and both menus still working. B (quiet AND held) is recorded as
+         refused: a control that cannot be pressed is how the office loses the
+         way out of the view they are in.
+
+         THE SIGNAL IS `actingAs()` AND NEVER A SECOND TEST (§42, §53.5) — it
+         already carries both guards that make a view-as real rather than a
+         bootstrap session pointed at a stranger. WRITTEN AT THE END OF EVERY
+         PAINT rather than at each `VIEWER` assignment: there are three of
+         those and one is a temporary swap inside a reader (§104.7, a list of
+         call sites is a list somebody forgets to add to). Stored as an
+         ABSENCE (§50.6), so a session nobody is simulating is byte-identical
+         to one that never simulated. */
+      try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }

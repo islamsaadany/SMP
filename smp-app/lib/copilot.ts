@@ -26,7 +26,7 @@ const iso = (v: unknown) => (v instanceof Date ? v.toISOString() : str(v));
 export const SECTIONS = ["foundation", "analysis", "compete", "directions", "capabilities", "execution", "advisory"] as const;
 export type Section = (typeof SECTIONS)[number];
 export const SECTION_WORD: Record<Section, string> = {
-  foundation: "Foundation", analysis: "Analysis", compete: "How we compete", directions: "Directions",
+  foundation: "Foundation", analysis: "Analysis", compete: "Competitive Discipline", directions: "Directions",
   capabilities: "Capabilities", execution: "Execution", advisory: "Advisory",
 };
 export function isSection(s: unknown): s is Section { return typeof s === "string" && (SECTIONS as readonly string[]).includes(s); }
@@ -308,13 +308,19 @@ export const KINDS = ["promotable", "copilot-only"] as const;
 export type Kind = (typeof KINDS)[number];
 export function isKind(s: unknown): s is Kind { return typeof s === "string" && (KINDS as readonly string[]).includes(s); }
 
+/* §524 — `applied` is which version of a Foundation last went into the
+   plan (`extra.applied`, written by the applyFoundation act), null where
+   none has. Carried on every read so the rail and the deliverable page
+   cannot disagree about it. */
+export type Applied = { n: number; at: string; by: string } | null;
 export type Deliverable = { id: string; place: string; section: Section; type: string; kind: Kind; title: string;
-  approach: string; by: string; at: string; latest: number; latestBy: string; latestAt: string };
+  approach: string; by: string; at: string; latest: number; latestBy: string; latestAt: string; applied: Applied };
+const appliedOf = (v: any): Applied => (v && typeof v === "object" && Number(v.n) > 0 ? { n: Number(v.n), at: str(v.at), by: str(v.by) } : null);
 const delivOf = (r: any): Deliverable => ({ id: str(r.id), place: str(r.place), section: r.section, type: str(r.type),
   kind: r.kind, title: str(r.title), approach: str(r.approach), by: str(r.created_by), at: iso(r.created_at),
-  latest: Number(r.latest) || 0, latestBy: str(r.latest_by), latestAt: iso(r.latest_at) });
+  latest: Number(r.latest) || 0, latestBy: str(r.latest_by), latestAt: iso(r.latest_at), applied: appliedOf(r.applied) });
 const DELIV_SELECT =
-  "SELECT d.id, d.place, d.section, d.type, d.kind, d.title, d.approach, d.created_by, d.created_at, " +
+  "SELECT d.id, d.place, d.section, d.type, d.kind, d.title, d.approach, d.created_by, d.created_at, d.extra->'applied' AS applied, " +
   "v.n AS latest, v.by_key AS latest_by, v.at AS latest_at FROM copilot_deliverables d " +
   "LEFT JOIN LATERAL (SELECT n, by_key, at FROM copilot_versions x WHERE x.deliverable_id = d.id ORDER BY n DESC LIMIT 1) v ON true ";
 
@@ -377,10 +383,12 @@ export async function newDeliverable(c: Q, a: { place: string; section: Section;
 }
 
 /* AN EDIT ADDS A VERSION (decisions §3.6) — never an UPDATE of the last one. */
-export async function addVersion(c: Q, id: string, a: { body: unknown; note: string; by: string }): Promise<number> {
+export async function addVersion(c: Q, id: string, a: { body: unknown; note: string; by: string; chatId?: string | null; chatTitle?: string }): Promise<number> {
   const n = await nextN(c, id);
-  await c.query("INSERT INTO copilot_versions (deliverable_id, n, body, note, by_key) VALUES ($1, $2, $3, $4, $5)",
-    [id, n, JSON.stringify(a.body ?? {}), a.note, a.by]);
+  /* §525 — a version made in a chat names that chat, as v1 always has, so
+     a saved Foundation's Edit can open the chat its parts live in. */
+  await c.query("INSERT INTO copilot_versions (deliverable_id, n, body, note, by_key, chat_id, chat_title) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    [id, n, JSON.stringify(a.body ?? {}), a.note, a.by, a.chatId || null, a.chatTitle || ""]);
   return n;
 }
 

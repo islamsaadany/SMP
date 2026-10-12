@@ -7,6 +7,7 @@ import type { StepGap } from "@/ffp/lib/domain/step-readiness";
 import type { AuthorityDirection } from "@/ffp/lib/domain/authority-table";
 import { computeStepNumberLabels } from "@/ffp/lib/domain/parallel-step-numbering";
 import { ProcessMapCanvas, type BranchFromT } from "./process-map-canvas";
+import type { HandoffT, HandoffStepOption } from "./handoff-types";
 import { StepListRow } from "./step-list-row";
 
 type RoleRef = { id: string; name: string };
@@ -43,6 +44,9 @@ export function MapView({
   connections,
   roles,
   branchFrom,
+  handoffsIn,
+  handoffsOut,
+  handoffStepOptions,
   otherProcesses,
 }: {
   workspaceId: string;
@@ -52,6 +56,9 @@ export function MapView({
   connections: ConnectionT[];
   roles: RoleRef[];
   branchFrom?: BranchFromT | null;
+  handoffsIn: HandoffT[];
+  handoffsOut: HandoffT[];
+  handoffStepOptions: HandoffStepOption[];
   otherProcesses: ProcessOption[];
 }) {
   const [mode, setMode] = useState<"diagram" | "list">("diagram");
@@ -143,6 +150,8 @@ export function MapView({
           steps={steps}
           connections={connections}
           branchFrom={branchFrom}
+          handoffsIn={handoffsIn}
+          handoffsOut={handoffsOut}
         />
       ) : (
         <div className="flex flex-col gap-2">
@@ -172,6 +181,9 @@ export function MapView({
                 roles={roles}
                 stepOptions={stepOptions}
                 otherProcesses={otherProcesses}
+                handoffsIn={handoffsIn.filter((h) => h.toStepId === step.id)}
+                handoffsOut={handoffsOut.filter((h) => h.fromStepId === step.id)}
+                handoffStepOptions={handoffStepOptions}
               />
             );
           })}

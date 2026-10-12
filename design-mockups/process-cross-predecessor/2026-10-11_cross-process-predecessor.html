@@ -1,0 +1,100 @@
+<title>Cross-Process Predecessor</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#0f172a;--ink2:#475569;--line:#e2e8f0;--ind:#4338ca;--indbg:#eef2ff;--amb:#b45309;--ambbg:#fffbeb;--ambln:#f59e0b;--ok:#047857;--okbg:#ecfdf5;--bad:#b91c1c;--badbg:#fef2f2;--font:system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1020;--card:#131a2e;--ink:#e5e9f5;--ink2:#9aa6c4;--line:#27314d;--ind:#a5b4fc;--indbg:#1d2447;--amb:#fbbf24;--ambbg:#2a2110;--ambln:#b7791f;--ok:#6ee7b7;--okbg:#0f2a22;--bad:#fca5a5;--badbg:#2f1516;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1020;--card:#131a2e;--ink:#e5e9f5;--ink2:#9aa6c4;--line:#27314d;--ind:#a5b4fc;--indbg:#1d2447;--amb:#fbbf24;--ambbg:#2a2110;--ambln:#b7791f;--ok:#6ee7b7;--okbg:#0f2a22;--bad:#fca5a5;--badbg:#2f1516;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);padding-block:24px;padding-inline:16px;line-height:1.5}
+.w{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+h1{font-size:22px;margin:0}h2{font-size:15px;margin:0 0 4px}
+.sub{color:var(--ink2);font-size:13px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.tag{display:inline-block;font:700 10px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.code{background:var(--indbg);color:var(--ind);border-radius:6px;padding:2px 7px;font:700 11px ui-monospace,Menlo,monospace}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,input{font:13px var(--font);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.chip{display:inline-flex;gap:5px;align-items:center;border-radius:999px;padding:3px 10px;font:600 11.5px var(--font)}
+.x{border:1px dashed var(--ambln);background:var(--ambbg);color:var(--amb)}
+.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 10px;font:600 12px var(--font)}
+.scroll{overflow-x:auto}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.note{font-size:12.5px;color:var(--ink2)}
+.step{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+</style>
+
+<div class="w">
+<div>
+<h1>A step can follow a step in another process</h1>
+<p class="sub">Mockup, nothing is built. Example: <b>HR-02 Employee onboarding</b>, step 4 follows step 3 of <b>IT-05 IT onboarding requirements</b>.</p>
+</div>
+
+<section class="card">
+<span class="tag">1 · Editing the step (Predecessors box)</span>
+<h2>Step 4 · Provision laptop &amp; accounts</h2>
+<p class="note" style="margin-bottom:12px">Each predecessor now has a “From” choice: this process, or another one. The second picker lists the steps of whichever process you choose, from any process in the workspace.</p>
+<div class="box">
+<b style="font-size:12px">Predecessors</b>
+<div class="row" style="background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px">
+<select aria-label="From"><option>This process</option></select>
+<select aria-label="Step"><option>2 · Approve hire</option></select>
+<input placeholder="Label (optional)" style="flex:1;min-width:120px"><span class="btn">✕</span>
+</div>
+<div class="row" style="background:var(--card);border:1.5px dashed var(--ambln);border-radius:10px;padding:8px">
+<select aria-label="From"><option>Another process</option></select>
+<select aria-label="Process"><option>IT-05 · IT onboarding requirements</option></select>
+<select aria-label="Step"><option>3 · Confirm onboarding requirements</option></select>
+<input placeholder="Label (optional)" style="flex:1;min-width:120px" value="requirements ready"><span class="btn">✕</span>
+</div>
+<div><span class="btn">+ Add predecessor</span></div>
+</div>
+</section>
+
+<section class="card">
+<span class="tag">2 · The map of HR-02</span>
+<p class="note" style="margin-bottom:10px">It reuses the left gutter that a branch already uses. The other process's step sits there, dashed amber, and an arrow runs into step 4. Clicking it opens IT-05.</p>
+<div class="scroll">
+<svg viewBox="0 0 880 250" width="880" style="max-width:none;display:block" role="img" aria-label="Map with a step from another process feeding step 4">
+<defs><marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#64748b"/></marker>
+<marker id="b" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#f59e0b"/></marker></defs>
+<rect x="0" y="0" width="200" height="250" fill="#f59e0b" opacity=".08"/><line x1="200" y1="0" x2="200" y2="250" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="12" y="20" font-size="9.5" font-weight="700" fill="#f59e0b" letter-spacing=".5">FROM OTHER PROCESSES</text>
+<line x1="200" y1="125" x2="880" y2="125" stroke="currentColor" opacity="0" />
+<line x1="0" y1="125" x2="880" y2="125" stroke="#94a3b8" stroke-dasharray="3 5" opacity=".5"/>
+<g><rect x="25" y="97" width="150" height="56" rx="9" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="35" y="119" font-size="11.5" font-weight="600" fill="#b45309">Confirm onboarding</text><text x="35" y="133" font-size="11.5" font-weight="600" fill="#b45309">requirements</text>
+<text x="35" y="146" font-size="8.5" font-weight="700" fill="#92400e">IT-05 · STEP 3</text></g>
+<g font-size="11.5" fill="#1e293b" font-weight="600">
+<rect x="250" y="30" width="150" height="56" rx="9" fill="#fff" stroke="#cbd5e1"/><text x="262" y="55">1 · Receive request</text>
+<rect x="250" y="165" width="150" height="56" rx="9" fill="#fff" stroke="#cbd5e1"/><text x="262" y="190">2 · Approve hire</text>
+<rect x="500" y="97" width="170" height="56" rx="9" fill="#fff" stroke="#4338ca" stroke-width="1.8"/><text x="512" y="122">4 · Provision laptop</text><text x="512" y="138">&amp; accounts</text>
+<rect x="730" y="97" width="130" height="56" rx="9" fill="#fff" stroke="#cbd5e1"/><text x="742" y="130">5 · Day-one setup</text></g>
+<path d="M325 86 V125" stroke="#64748b" fill="none"/><path d="M325 165 V150 H480 V125 H500" stroke="#64748b" fill="none" marker-end="url(#a)"/>
+<path d="M400 58 H450 V118 H500" stroke="#64748b" fill="none" marker-end="url(#a)" opacity="0"/>
+<path d="M670 125 H730" stroke="#64748b" fill="none" marker-end="url(#a)"/>
+<path d="M175 125 H500" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6 4" fill="none" marker-end="url(#b)"/>
+<text x="260" y="118" font-size="10" fill="#b45309">requirements ready</text>
+</svg></div>
+<p class="note" style="margin-top:8px">If step 4 leads <i>out</i> to another process, the same thing appears on the right, with a gutter of its own.</p>
+</section>
+
+<section class="card">
+<span class="tag">3 · On the step list</span>
+<div class="step"><div class="row"><span class="mono" style="font-weight:700">4</span><b>Provision laptop &amp; accounts</b>
+<span class="chip x" title="This step follows a step in another process">← IT-05 · step 3</span></div>
+<div class="row"><span class="chip ok">has predecessor</span><span class="btn">Edit</span></div></div>
+<div class="step" style="margin-top:8px"><div class="row"><span class="mono" style="font-weight:700">3</span><b>Confirm onboarding requirements</b> <span class="code">IT-05</span>
+<span class="chip x" title="A step in another process follows this one">→ HR-02 · step 4</span></div><span class="note">seen from IT-05: the reverse chip</span></div>
+<p class="note" style="margin-top:10px"><b>“Ready”:</b> steps have no done status in this module, so I read it as “documented”: a step whose only link is a cross-process predecessor no longer shows <span class="chip bad">no predecessor</span>. If you meant something live (blocked until done), that needs a status on steps and is a bigger change. Say so and I will draw it.</p>
+</section>
+
+<section class="card">
+<span class="tag">What does not change</span>
+<div class="grid2">
+<div><b>Deleting the source step</b><p class="note">The link is removed, never the step that depended on it. Same rule as a branch today.</p></div>
+<div><b>Loops</b><p class="note">A chain that comes back to itself across processes is refused when you save, with the path named.</p></div>
+<div><b>Numbering and layout</b><p class="note">Step numbers and lanes in HR-02 are unaffected. The other step sits in the gutter and is not numbered here.</p></div>
+</div>
+</section>
+</div>

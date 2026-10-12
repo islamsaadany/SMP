@@ -1,0 +1,236 @@
+<title>Viewing as — the bar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;0,800&display=swap">
+<style>
+/* Tokens lifted from the product's FOREFRONT palette (_shared.css §38),
+   light and dark, so the bars below are the platform's own pixels. */
+:root{
+  --sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#78899F;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --gold:#C9A24D; --stone-soft:#24487A;
+  --fs-small:12px; --fs-note:13px; --fs-body:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --gold:#D9B665; --stone-soft:#5C82BC;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A; --field-line:#68758C;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --gold:#D9B665; --stone-soft:#5C82BC;
+  color-scheme:dark;
+}
+
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);margin:0}
+.page{max-width:1100px;margin:0 auto;padding-block:40px 72px;padding-left:16px;padding-right:16px}
+h1{font-size:26px;font-weight:700;margin:0 0 10px;letter-spacing:-.01em;text-wrap:balance}
+.lede{font-size:var(--fs-body);color:var(--ink-2);margin:0 0 6px;max-width:66ch;line-height:1.55}
+.lede b{color:var(--ink);font-weight:600}
+.key{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-3);margin:40px 0 4px}
+.opt{font-size:19px;font-weight:700;margin:0 0 6px}
+.opt .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+          color:var(--stone-soft);border:1px solid var(--line);border-radius:99px;
+          padding:3px 9px;margin-left:10px;vertical-align:3px}
+.says{font-size:var(--fs-note);color:var(--ink-2);margin:0 0 14px;max-width:66ch;line-height:1.55}
+.cost{font-size:var(--fs-note);color:var(--ink-2);margin:12px 0 0;max-width:66ch;line-height:1.55;
+      border-left:2px solid var(--line);padding-left:12px}
+.cost b{color:var(--ink);font-weight:600}
+.state{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+       color:var(--ink-3);margin:18px 0 6px}
+
+/* ── THE BAR, as the product draws it (arrange.css §410, §400) ───────── */
+.frame{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.top-in{display:flex;align-items:center;gap:16px;padding:0 24px;min-height:40px}
+
+nav.trail{display:flex;align-items:center;gap:6px;min-width:0;margin-right:auto;
+          font-size:13.5px;white-space:nowrap}
+.trff{color:var(--ink-2);text-decoration:none;font-weight:600;letter-spacing:.04em;
+      font-size:12px;text-transform:uppercase}
+.trsep{color:var(--ink-3);font-size:15px;line-height:1}
+.trstep{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border-radius:7px;
+        color:var(--ink);font-weight:600;min-width:0}
+.trclient{color:var(--ink-2)}
+.trstep svg{width:10px;height:10px;flex:none;color:var(--ink-3)}
+
+.viewer{margin-left:auto;display:flex;align-items:center;gap:8px;padding-right:16px;
+        min-height:22px;border-right:1px solid var(--line);justify-content:flex-end}
+.viewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+              color:var(--ink-3);font-weight:700;white-space:nowrap}
+.ssbtn{font:inherit;font-size:var(--fs-small);color:var(--ink);background:var(--surface);
+       border:1px solid var(--field-line);border-radius:6px;height:26px;padding:0 8px;
+       line-height:24px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.sscar{color:var(--ink-3);font-size:10px}
+.viewer-note{font-size:var(--fs-small);font-weight:400;color:var(--ink-3);white-space:nowrap}
+
+.topacts{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.themebtn{width:26px;height:26px;padding:0;display:inline-flex;align-items:center;
+          justify-content:center;background:none;border:1px solid var(--line);
+          border-radius:99px;color:var(--ink-3)}
+.themebtn svg{width:14px;height:14px}
+.infobtn{font:inherit;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+         font-weight:700;color:var(--ink-3);background:none;border:1px solid var(--line);
+         border-radius:99px;padding:4px 10px}
+
+/* ── A: the trail quietens while a view is on ───────────────────────── */
+.q .trff,.q .trstep,.q .trclient{color:var(--ink-3)}
+.q .trsep{color:var(--line)}
+.q .trstep svg{color:var(--line)}
+
+/* ── B: quiet AND held ──────────────────────────────────────────────── */
+.h .trff,.h .trstep,.h .trclient{color:var(--ink-3)}
+.h .trsep{color:var(--line)}
+.h .trstep svg{display:none}
+
+/* the page under the bar, so the bar is read as a bar */
+.under{height:54px;background:var(--ground);border-top:1px solid var(--line-soft);
+       display:flex;align-items:center;padding:0 24px;gap:18px}
+.ghost{height:9px;border-radius:99px;background:var(--line-soft)}
+
+@media (max-width:760px){
+  .top-in{flex-wrap:wrap;padding:8px 14px;gap:10px}
+  .viewer{margin-left:0;border-right:0;padding-right:0}
+  .frame{border-radius:8px}
+}
+</style>
+
+<div class="page">
+
+<h1>Viewing as somebody — what the bar does</h1>
+<p class="lede">You asked for the bar to go quiet while a view is on, so nobody reads it as the
+other person's. Three drawings, at the size the product actually draws them. <b>Everything still
+works in A</b> — it is only the volume that changes.</p>
+<p class="lede">The bar stays <b>yours</b> in all three: the switcher lives in it, so if it went
+away there would be no way back to yourself.</p>
+
+<!-- ── TODAY ──────────────────────────────────────────────────────── -->
+<p class="key">Today</p>
+<h2 class="opt">The bar reads the same whoever you are looking through</h2>
+<p class="says">Platform, the client and the module are at full weight beside the person's name —
+which is what reads as though <i>they</i> can open all of it.</p>
+
+<div class="frame">
+  <header class="top"><div class="top-in">
+    <nav class="trail">
+      <a class="trff" href="#">Platform</a>
+      <span class="trsep">›</span>
+      <span class="trstep trclient"><span>El Abd</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="trsep">›</span>
+      <span class="trstep"><span>Strategy</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </nav>
+    <div class="viewer">
+      <label>Viewing as</label>
+      <span class="ssbtn"><span>Amr Hassan — Retail</span><span class="sscar">▾</span></span>
+      <span class="viewer-note">Direction owner, the group</span>
+    </div>
+    <div class="topacts">
+      <span class="themebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg></span>
+      <span class="infobtn">Sign out</span>
+    </div>
+  </div></header>
+  <div class="under"><span class="ghost" style="width:120px"></span><span class="ghost" style="width:80px"></span><span class="ghost" style="width:160px"></span></div>
+</div>
+
+<!-- ── A ──────────────────────────────────────────────────────────── -->
+<p class="key">Option A</p>
+<h2 class="opt">The trail quietens<span class="tag">Recommended</span></h2>
+<p class="says">While a view is on, Platform, the client and the module drop to the quiet ink and
+the arrows fade. The person's name is then the loudest thing on the line, which is what the row is
+about. Hovering any of them brings it back to full ink, and the menus open exactly as now.</p>
+
+<p class="state">While viewing as somebody</p>
+<div class="frame">
+  <header class="top"><div class="top-in q">
+    <nav class="trail">
+      <a class="trff" href="#">Platform</a>
+      <span class="trsep">›</span>
+      <span class="trstep trclient"><span>El Abd</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="trsep">›</span>
+      <span class="trstep"><span>Strategy</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </nav>
+    <div class="viewer">
+      <label>Viewing as</label>
+      <span class="ssbtn"><span>Amr Hassan — Retail</span><span class="sscar">▾</span></span>
+      <span class="viewer-note">Direction owner, the group</span>
+    </div>
+    <div class="topacts">
+      <span class="themebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg></span>
+      <span class="infobtn">Sign out</span>
+    </div>
+  </div></header>
+  <div class="under"><span class="ghost" style="width:120px"></span><span class="ghost" style="width:80px"></span><span class="ghost" style="width:160px"></span></div>
+</div>
+
+<p class="state">Back to yourself — unchanged</p>
+<div class="frame">
+  <header class="top"><div class="top-in">
+    <nav class="trail">
+      <a class="trff" href="#">Platform</a>
+      <span class="trsep">›</span>
+      <span class="trstep trclient"><span>El Abd</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="trsep">›</span>
+      <span class="trstep"><span>Strategy</span>
+        <svg viewBox="0 0 10 10"><path d="M2 3.6 5 6.6 8 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </nav>
+    <div class="viewer">
+      <label>Viewing as</label>
+      <span class="ssbtn"><span>Islam Saadany — the office</span><span class="sscar">▾</span></span>
+      <span class="viewer-note">Super user</span>
+    </div>
+    <div class="topacts">
+      <span class="themebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg></span>
+      <span class="infobtn">Sign out</span>
+    </div>
+  </div></header>
+  <div class="under"><span class="ghost" style="width:120px"></span><span class="ghost" style="width:80px"></span><span class="ghost" style="width:160px"></span></div>
+</div>
+
+<p class="cost"><b>What it costs.</b> Nothing is taken away — you can still cross to another client
+or another module while a view is on. So the bar says <i>this is mine, standing aside</i>, and does
+not stop anybody doing anything.</p>
+
+<!-- ── B ──────────────────────────────────────────────────────────── -->
+<p class="key">Option B</p>
+<h2 class="opt">Quiet, and held</h2>
+<p class="says">The same quiet, and the two menus do not open at all while a view is on — the
+arrows go with them. Pressing one says <i>switch back to yourself first</i>.</p>
+
+<p class="state">While viewing as somebody</p>
+<div class="frame">
+  <header class="top"><div class="top-in h">
+    <nav class="trail">
+      <a class="trff" href="#">Platform</a>
+      <span class="trsep">›</span>
+      <span class="trstep trclient"><span>El Abd</span></span>
+      <span class="trsep">›</span>
+      <span class="trstep"><span>Strategy</span></span>
+    </nav>
+    <div class="viewer">
+      <label>Viewing as</label>
+      <span class="ssbtn"><span>Amr Hassan — Retail</span><span class="sscar">▾</span></span>
+      <span class="viewer-note">Direction owner, the group</span>
+    </div>
+    <div class="topacts">
+      <span class="themebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg></span>
+      <span class="infobtn">Sign out</span>
+    </div>
+  </div></header>
+  <div class="under"><span class="ghost" style="width:120px"></span><span class="ghost" style="width:80px"></span><span class="ghost" style="width:160px"></span></div>
+</div>
+
+<p class="cost"><b>What it costs.</b> A real journey. Checking somebody's view and then stepping
+across to another module becomes: switch back, cross, switch again. And it puts two controls on the
+line that refuse — the product's rule is that a control which does nothing is worse than no control,
+so each would have to say why it refused.</p>
+
+</div>

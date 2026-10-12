@@ -213,6 +213,46 @@ export function BranchEntryNode({ data }: NodeProps & { data: BranchEntryData })
   );
 }
 
+
+export type HandoffNodeData = {
+  direction: "in" | "out";
+  label: string;
+  otherCode: string;
+  otherProcessId: string;
+  otherStepNumber: number;
+  workspaceId: string;
+  edgeLabel: string | null;
+};
+
+/**
+ * A step in ANOTHER process that this one is wired to. "in" sits in the left
+ * gutter and feeds a step here; "out" sits past the right edge and is where
+ * a step here carries on. Read-only and fixed: it belongs to the other
+ * process, so it is a pointer, not a card to arrange.
+ */
+export function HandoffNode({ data }: NodeProps & { data: HandoffNodeData }) {
+  const outward = data.direction === "out";
+  return (
+    <Link
+      href={`/${data.workspaceId}/processes/processes/${data.otherProcessId}/map`}
+      className="flex h-14 w-[150px] flex-col justify-center rounded-lg border-[1.5px] border-dashed border-amber-500 bg-amber-50 px-2.5 no-underline hover:bg-amber-100"
+    >
+      {outward ? (
+        <Handle id="left-t" type="target" position={Position.Left} className="!bg-amber-300" />
+      ) : (
+        <Handle id="right" type="source" position={Position.Right} className="!bg-amber-300" />
+      )}
+      <div className="text-[11.5px] font-semibold leading-tight text-amber-700">{data.label}</div>
+      <div className="mt-0.5 text-[8.5px] font-semibold uppercase tracking-wide text-amber-800">
+        {outward ? "continues in " : ""}
+        {data.otherCode}
+        {data.otherStepNumber > 0 ? ` · step ${data.otherStepNumber}` : ""}
+        {outward ? " →" : ""}
+      </div>
+    </Link>
+  );
+}
+
 /** Tinted column the branch entry sits in, marking it as not part of this process. */
 export function BranchGutterNode({ data }: NodeProps & { data: { label: string } }) {
   return (

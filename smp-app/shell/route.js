@@ -467,6 +467,37 @@
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
+      /* ── AND THE TRAIL SAYS A VIEW IS ON (§519) ───────────────────────
+         Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing
+         the white bar at the top which is for the smo only is that a
+         glitch?"* IT IS NOT, and establishing that first was most of the
+         answer: `cards` is the SESSION's kind (`state-api.ts`), fixed at
+         sign-in, so the trail is drawn for Forefront's own people and for
+         nobody else whoever they view as — and the viewer switcher is INSIDE
+         that same row, so a bar that went away would strand the office with
+         no way back to themselves (§61). The CHROME follows the seat on the
+         session, never the simulated view, which is the whole point of the
+         simulation (§185's own three readers of the real session; this is a
+         fourth of that family).
+
+         What was wrong is the WEIGHT: at full strength the trail reads as the
+         viewed person's own access. Islam: *"greyed is better not to get
+         confused that the user has access by anyone else."* Two treatments
+         were drawn at real size with the cost of each stated, and he picked
+         **A** — quieter while a view is on, full weight the moment you switch
+         back, and both menus still working. B (quiet AND held) is recorded as
+         refused: a control that cannot be pressed is how the office loses the
+         way out of the view they are in.
+
+         THE SIGNAL IS `actingAs()` AND NEVER A SECOND TEST (§42, §53.5) — it
+         already carries both guards that make a view-as real rather than a
+         bootstrap session pointed at a stranger. WRITTEN AT THE END OF EVERY
+         PAINT rather than at each `VIEWER` assignment: there are three of
+         those and one is a temporary swap inside a reader (§104.7, a list of
+         call sites is a list somebody forgets to add to). Stored as an
+         ABSENCE (§50.6), so a session nobody is simulating is byte-identical
+         to one that never simulated. */
+      try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }

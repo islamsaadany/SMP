@@ -406,7 +406,7 @@
   @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
-  /* ── IS IT SAVED? (§521) ───────────────────────────────
+  /* ── IS IT SAVED? (§527) ───────────────────────────────
      One message, bottom left, in the shape Islam signed off. BOTTOM RIGHT IS
      THE CHAT CORNER'S (§97), so this takes the other end.
      THE Z-INDEX IS BELOW EVERY FLOATING CONTROL and above the page: .kmenu is
@@ -5996,6 +5996,48 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      for the one reader with no trail: a client's own office on the client's
      settings. */
   html[data-console] .setuprail .railback-row { display:none; }
+  /* ── AND IT QUIETENS WHILE A VIEW IS ON (§519) ─────────────────────
+     Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing the
+     white bar at the top which is for the smo only is that a glitch?"*
+     IT IS NOT — the trail follows the SEAT on the session, which is the whole
+     point of the simulation, and the viewer switcher is in this same row, so
+     a bar that went away would strand the office (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the viewed person's own
+     access. Islam: *"greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     HIS PICK OF TWO DRAWN AT REAL SIZE (rule 1c, each with its cost stated):
+     **A**, quieter while a view is on and full weight the moment you switch
+     back, with both menus still working. **B** — quiet AND held, the carets
+     dropped and the menus refusing — is recorded as refused rather than
+     merely not built: a control that cannot be pressed is how the office
+     loses the way out of the view they are in.
+
+     THE HOVER AND THE OPEN STATE ARE QUIETENED TOO, with their GROUND left
+     alone: the resting weight is what reads as access, and the background
+     still answering the pointer is what says the control works. Keyed on
+     `data-viewing-as`, which sync.js writes from `actingAs()` at the end of
+     every paint and REMOVES when nobody is being viewed (§50.6) — so a
+     session nobody is simulating paints byte-identically to one that never
+     did, and this whole block is dormant over `file://`, where there is no
+     trail to quieten at all. */
+  html[data-viewing-as] nav.trail .trff,
+  html[data-viewing-as] nav.trail details.trstep > summary,
+  html[data-viewing-as] nav.trail details.trclient > summary,
+  html[data-viewing-as] nav.trail details.trstep > summary:hover,
+  html[data-viewing-as] nav.trail details.trstep[open] > summary { color:var(--ink-3); }
+  /* THE CARET KEEPS A WEIGHT A WORD KEEPS, AND THE SEPARATOR DOES NOT —
+     one stated departure from the drawing, in the direction of Islam's own
+     decision. Measured, `--line` on the bar's surface is **1.38:1 light and
+     1.43 dark**: invisible rather than quiet, which on the caret takes away
+     the one mark saying *this opens* and lands the look on **B**, the option
+     he refused. So the caret takes the same quiet ink as the words (5.19–6.64
+     across the four palettes, so the quieting costs no legibility at all) and
+     only the › separators — ornament, never a word and never a control —
+     recede to the line colour, which is what leaves the trail reading as
+     three quiet words. */
+  html[data-viewing-as] nav.trail details.trstep > summary > svg { color:var(--ink-3); }
+  html[data-viewing-as] nav.trail .trsep { color:var(--line); }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
@@ -11316,7 +11358,13 @@ textarea.copfedit:focus { outline:2px solid var(--focus, var(--gold)); outline-o
 .copfhead { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
 .copfhead b { flex:1 1 auto; min-width:0; font-size:13.5px; color:var(--ink); overflow-wrap:anywhere; }
 .copprog { color:var(--ink-3); white-space:nowrap; }
-.coptrack { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin:6px 0 8px; flex:none; }
+/* §525.1 — ONE COUNT, AND THE WORDS SIT BESIDE THE TRACK. The number and the
+   bar are one statement, so they are one row: the count takes its own width
+   and the track what is left, which is also what stops a long count ("5 of 6
+   parts agreed") pushing the bar onto a line of its own. */
+.copfbar { display:flex; align-items:center; gap:8px; margin:6px 0 8px; }
+.copfcount { font-size:var(--fs-small, 12.5px); color:var(--ink-3); white-space:nowrap; flex:none; }
+.coptrack { height:4px; background:var(--line); border-radius:2px; overflow:hidden; flex:1 1 auto; min-width:0; }
 .coptrack i { display:block; height:100%; background:var(--gold); transition:width .2s; }
 .copfchat .copmsgs { max-height:none; }
 .copmsg.copwide { max-width:100%; }
@@ -11644,3 +11692,60 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 /* §501: the door to every chat on this client, above the chats rail. */
 .copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
 .copall:hover { color:var(--ink); text-decoration:underline; }
+
+/* §524: the bar at the foot of the cards — Save, the optional check and
+   Apply to plan — and the saved Foundation shown as its six cards on the
+   deliverable page. Existing tokens only (§25). */
+.copsavebar { position:sticky; bottom:0; margin-top:auto; display:flex; flex-direction:column; gap:6px; padding:10px 0 2px; background:var(--surface); border-top:1px solid var(--line); }
+.copsavebar .copbtns { margin-top:0; }
+/* §525 — with the cards closed the same bar stands at the head of the chat:
+   in the flow there rather than pinned to a foot it does not own. */
+.copfchat > .copsavebar { position:static; margin:0 0 8px; padding:8px 0; border-top:0; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+.copsvst { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copsvst.ok { color:var(--good-tx); }
+.copsvst.warn { color:var(--attn-tx, var(--gold-deep)); }
+.copsw-pill.opt { color:var(--ink-3); border-style:dashed; }
+.copfcards { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:10px 0 12px; }
+.copfcard { border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface); padding:10px 12px; min-width:0; }
+.copfcard h5 { margin:0 0 6px; font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copfcard p, .copfcard ul { margin:0; font-size:var(--fs-note, 13.5px); line-height:1.5; color:var(--ink); }
+.copfcard ul { padding-left:18px; }
+.copplanrow { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); margin-bottom:12px; }
+/* §525.1 — APPLY IS THE DIALOG'S MAIN ACTION AND IS FILLED NAVY. The one
+   filled main action in a confirmation already in this product is the master
+   flow's Start (`.mflow .cbtns button.mfgo`, §266), and these are its three
+   declarations rather than a fourth treatment. `config.css`'s recorded
+   refusal beside `.cbtns button.danger` does NOT reach here and it is worth
+   saying which half of it: it refuses a solid RED, because `--bad` has no
+   derived ink and white on the dark one is 2.4:1 (§38.4) — `--panel` is the
+   client's own navy and `--panel-ink` is derived FROM it, which is the pair
+   every filled control in this product uses. Keyed on a Copilot-prefixed
+   class, so `.sendconfirm` — shared by three other confirmations — is
+   untouched (§65.9).
+   AND IT NEEDS NO HOVER RULE, which is the one thing worth checking rather
+   than assuming: `.cbtns button:hover` and `.cbtns button.copgo` are both
+   (0,2,1), and `copilot.css` is concatenated LAST by build.py, so this wins
+   on source order and the navy survives the pointer (§29.2's own trap, from
+   the side where the ordering is in our favour). `mfgo` has no hover rule
+   for the same reason and is what this follows. */
+.cbtns button.copgo { border-color:var(--panel); background:var(--panel); color:var(--panel-ink); }
+/* §525.1 — THE LINE THAT SAYS IT LANDED, with one way to go and look. The
+   pair is `--good-bg` + `--good-tx`, which the save banner's own done state
+   already wears together (`.banner.safety.done`), so no token is added and
+   §38.4's trap — a colour that works as a fill failing as type — cannot bite.
+   The LINK takes the page's ordinary ink rather than the green, or the one
+   thing to press would be the quietest thing on the line. */
+.copfdone { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; padding:9px 12px;
+            border-radius:var(--r-sm, 6px); background:var(--good-bg); color:var(--good-tx);
+            font:600 var(--fs-small, 12.5px)/1.45 var(--sans); }
+.copfdone a { color:var(--ink); font-weight:700; text-decoration:underline; }
+.copfdone a:hover { text-decoration:none; }
+/* INSIDE THE BAR RATHER THAN ABOVE IT, which the mockup draws as two bands
+   and which is one thing to keep together: the bar is sticky at the foot of
+   the cards with `margin-top:auto`, so a sibling line before it would be
+   pushed UP by that same auto margin and sit among the cards, away from the
+   words it belongs to. As the bar's first child it rides with it, and
+   `flex-basis:100%` keeps it on a line of its own in both of the bar's
+   directions — column with the cards open, row with them shut. */
+.copsavebar .copfdone { margin:0; flex:0 0 100%; }
+@media (max-width:760px){ .copfcards { grid-template-columns:minmax(0, 1fr); } }

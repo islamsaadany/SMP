@@ -32,9 +32,10 @@ import {
 import { kindOf, readFile, MAX_FILE_BYTES, MAX_FILES_PER_MESSAGE, REFUSE_KIND, REFUSE_SIZE } from "../../lib/copilot-files.ts";
 import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../../lib/copilot-ask.ts";
 import {
-  FLOW_ELEMENTS, cleanSkip, allAgreed, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
+  FLOW_ELEMENTS, cleanSkip, allAgreed, savedCurrent, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
-  saveFoundation, nextFoundationVersion, cleanPartWords,
+  saveFoundation, nextFoundationVersion, appliedFoundation, cleanPartWords,
+  withYear,
 } from "../../lib/copilot-flow.ts";
 import { methodFor, templateNamesFor } from "../../lib/copilot-settings.ts";
 import { shellHeaders } from "../../lib/shell.ts";
@@ -126,7 +127,7 @@ export async function serve(a: ServeArgs): Promise<Response> {
         const pw = oneLine(q("placeWord")).slice(0, 120);
         return { ok: true, chat, messages: await messagesOf(c, id), mayDelete: grant === "edit" && mayDeleteChat(chat, who), mayEdit: grant === "edit",
           pending: await pendingFiles(c, id), assumptions: await assumptionsOf(c, id), aiOn: configured(),
-          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place) } : {}),
+          ...(flow ? { flow, flowSteps: FLOW_ELEMENTS, shortAnswer: SHORT_ANSWER, nextVersion: await nextFoundationVersion(c, chat, pw || chat.place), applied: await appliedFoundation(c, chat, pw || chat.place) } : {}),
           ...(chat.section === "analysis" ? await swotView(c, chat, pw) : {}),
           ...(chat.section === "compete" ? await competeView(c, chat) : {}),
           ...(chat.section === "directions" || chat.section === "capabilities" ? await dirsView(c, chat) : {}),
@@ -235,7 +236,6 @@ type Out = { status: number; body: Record<string, unknown> };
 const out = (status: number, body: Record<string, unknown>): Out => ({ status, body });
 const refused = (status: number, why: string): Out => out(status, { ok: false, why });
 const ARCHIVED = "This chat is archived. Restore it to keep talking.";
-const SAVED_ALREADY = "This Foundation is saved. Start a new guided run to make the next version.";
 const TOO_LONG = "That is longer than about thirty pages, so it was not kept. Send it in parts.";
 
 async function act(c: Q, b: any, who: Who): Promise<Out> {
@@ -364,7 +364,9 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     /* §479: the Structure may have changed since the flow was last written,
        so the finish carries the page's current answer of what is off. */
     if (Array.isArray(b.skip)) stored = { ...stored, skip: cleanSkip(b.skip) };
-    if (stored.saved && brk() !== "flow-reopen") return refused(400, SAVED_ALREADY);
+    /* §524 — a SAVED flow goes on being edited: the cards stay open and the
+       next Save makes the next version. The old refusal ("start a new
+       guided run") is gone, and so is the break that reopened it. */
     if (kind === "flowSave") {
       const f = sanitizeFlow(b.flow, stored);
       await writeFlow(c, id, f);
@@ -373,11 +375,62 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     /* SAVED AS A VERSION OF "Foundation — <place>" — only when all five parts
        are agreed, asked of the STORED flow (§42), never of the page. */
     if (!(allAgreed(stored) || brk() === "finish-any")) return refused(400, "Every part needs a draft you have agreed before the Foundation can be saved.");
+    /* §524 — the check is an extra step, never the door: nothing here asks
+       for `stored.check`. What IS refused is saving the same drafts twice. */
+    if (savedCurrent(stored) && brk() !== "save-same-twice") return refused(400, "Nothing has changed since v" + stored.saved!.n + " was saved.");
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
     const s = await saveFoundation(c, chat, stored, placeWord, by, cleanPartWords(b.partWords));
-    const f: Flow = { ...stored, phase: "saved", saved: { deliverableId: s.deliverableId, n: s.n, title: s.title } };
+    const f: Flow = { ...stored, phase: "saved", saved: { deliverableId: s.deliverableId, n: s.n, title: s.title, drafts: stored.drafts.slice() } };
     await writeFlow(c, id, f);
     return out(200, { ok: true, flow: f, saved: f.saved });
+  }
+
+  /* §524 — APPLY TO PLAN, in two acts (§524.1). `applyFoundation` READS:
+     it hands the browser the LATEST version's six parts, with the end year
+     written in, and records nothing. The browser writes them onto the
+     place's Foundation page (the old one archived first, §49.2) through the
+     ordinary save, which the authoriser judges (§42) — and only once that
+     save has LANDED does it send `foundationApplied`, which writes the note
+     *version N is on the plan* on the deliverable's own row (`extra.applied`,
+     no migration). §524 wrote the note FIRST, so a save that was refused,
+     failed or never left the tab left the deliverable saying "On the plan
+     as vN" over a plan that did not hold it (§124: a status claiming more
+     than happened). The note now follows the fact. Always the LATEST
+     version — the cards' unsaved words never reach the plan (Islam: "the
+     plan only changes when we apply to plan"). */
+  if (kind === "applyFoundation") {
+    const d = await oneDeliverable(c, id);
+    if (!d) return refused(404, "That deliverable is not here any more.");
+    if (d.type !== "foundation" && brk() !== "apply-any-type") return refused(400, "Only a saved Foundation can be applied to the plan.");
+    const cur = (await versionsOf(c, id))[0];
+    const body: any = cur && cur.body && typeof cur.body === "object" ? cur.body : {};
+    const parts = Array.isArray(body.foundation) ? body.foundation : [];
+    if (!parts.length) return refused(400, "This version holds no Foundation parts to apply.");
+    const years = Array.isArray(body.years) ? body.years : [null, null];
+    /* The break puts §524's order back: the note written on the READ. */
+    if (brk() === "stamp-on-read")
+      await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify({ n: cur.n, at: new Date().toISOString(), by })]);
+    /* The stored parts keep their raw {Y}; what goes onto the plan has the
+       end year written in, exactly as the version's text does. */
+    const filled = parts.map((p: any) => ({ key: String(p.key || ""), name: String(p.name || ""), text: withYear(String(p.text || ""), Number.isInteger(years[1]) ? years[1] : null) }));
+    return out(200, { ok: true, n: cur.n, foundation: filled, years });
+  }
+  /* §524.1 — the note, sent by the browser only after the plan's own save
+     came back "saved" (or had nothing left to send). It names the version
+     the browser WROTE, so a v4 saved by somebody else in between does not
+     get the credit for a v3 that went onto the plan; a version this
+     Foundation does not hold, or one with no parts, is refused by name. */
+  if (kind === "foundationApplied") {
+    const d = await oneDeliverable(c, id);
+    if (!d) return refused(404, "That deliverable is not here any more.");
+    if (d.type !== "foundation") return refused(400, "Only a saved Foundation can be applied to the plan.");
+    const n = Number(b.n);
+    const v = (await versionsOf(c, id)).find((x: any) => x.n === n);
+    const vb: any = v && v.body && typeof v.body === "object" ? v.body : {};
+    if (!v || !Array.isArray(vb.foundation) || !vb.foundation.length) return refused(400, "That version of the Foundation is not here.");
+    const applied = { n, at: new Date().toISOString(), by };
+    await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify(applied)]);
+    return out(200, { ok: true, applied });
   }
 
   if (kind === "editVersion" || kind === "restore") {
@@ -388,6 +441,11 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       if (text.length > MAX_MESSAGE) return refused(400, TOO_LONG);
       const cur = (await versionsOf(c, id))[0];
       if (cur && bodyOf(cur.body)?.text === text) return refused(400, "Nothing changed, so no new version was made.");
+      /* §525 — a Foundation is its parts, and a plain-text edit would make a
+         version holding none, which Apply to plan then refuses. Its parts
+         are changed in the chat that built it. */
+      if (d.type === "foundation" && brk() !== "text-edit-foundation")
+        return refused(400, "A Foundation is changed part by part in its chat, so its parts stay whole for Apply to plan.");
       const n = await addVersion(c, id, { body: { text }, note: oneLine(b.note) || "Edited", by });
       return out(200, { ok: true, n });
     }
@@ -539,7 +597,6 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
     if (chat.archived) return refused(400, ARCHIVED);
     const stored = await flowOf(c, id);
     if (!stored) return refused(400, "This is not a guided Foundation chat.");
-    if (stored.saved) return refused(400, SAVED_ALREADY);
     if (stored.path !== "guided" && brk() !== "flow-any-path") return refused(400, "Choose to answer the guided questions first.");
     /* The answers or the draft as the page has them now ride with the ask,
        checked as any save is, so a correction made a second ago is drafted. */
@@ -570,7 +627,7 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
     if (!agree.length && !issues.length) return refused(503, failedLine("the answer had nothing in it"));
     return withTenant(tenantId, async (c) => {
       const now = await flowOf(c, id);
-      if (!now || now.saved) return refused(400, SAVED_ALREADY);
+      if (!now) return refused(400, "This is not a guided Foundation chat.");
       const g: Flow = { ...now, phase: "check", check: { agree, issues } };
       await writeFlow(c, id, g);
       return out(200, { ok: true, flow: g });
@@ -580,7 +637,7 @@ async function flowAsk(tenantId: string, b: any, who: Who): Promise<Out> {
   if (!text) return refused(503, failedLine("the answer had nothing in it"));
   return withTenant(tenantId, async (c) => {
     const now = await flowOf(c, id);
-    if (!now || now.saved) return refused(400, SAVED_ALREADY);
+    if (!now) return refused(400, "This is not a guided Foundation chat.");
     const drafts = now.drafts.slice(); drafts[el] = text;
     const done = now.done.slice(); done[el] = false;
     const from = now.from.slice(); from[el] = false;

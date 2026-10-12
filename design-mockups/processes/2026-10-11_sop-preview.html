@@ -1,0 +1,52 @@
+<title>SOP Preview</title>
+<style>
+:root{--bg:#e9edf2;--paper:#fff;--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--head:#0f172a;--headink:#fff;--bad:#b91c1c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--paper:#141c2c;--ink:#e6ebf3;--mut:#94a3b8;--line:#2a3550;--head:#e6ebf3;--headink:#0f172a;--bad:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1220;--paper:#141c2c;--ink:#e6ebf3;--mut:#94a3b8;--line:#2a3550;--head:#e6ebf3;--headink:#0f172a;--bad:#f87171;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif;margin:0;padding-inline:16px}
+.note{max-width:900px;margin:16px auto 0;font-size:12px;color:var(--mut)}
+.paper{max-width:900px;margin:12px auto 40px;background:var(--paper);padding:32px;box-shadow:0 2px 10px rgba(15,23,42,.18)}
+.k{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+h1{font-size:24px;margin:4px 0 0}h1 small{font:16px ui-monospace,monospace;color:var(--mut)}
+header{border-bottom:2px solid var(--ink);padding-bottom:8px}
+h2{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mut);margin:22px 0 4px}
+.m{color:var(--bad);font-weight:700}
+.sc{display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:12px;margin-top:8px}
+ul,ol{margin:2px 0;padding-inline-start:18px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--head);color:var(--headink);text-align:start;padding:6px 8px}
+td,th{vertical-align:top;padding:6px 8px;text-align:start}
+tbody tr{border-bottom:1px solid var(--line)}
+.dc th{color:var(--mut);font-weight:500;width:140px}.dc{font-size:14px}
+.s{color:var(--mut)}
+</style>
+<p class="note">Preview of the SOP page with sample data (invented, not a client's). The red "Missing" shows what a blank looks like.</p>
+<article class="paper">
+<header><div class="k">Sample Co · Standard Operating Procedure</div>
+<h1>Employee Onboarding <small>HR-02</small></h1>
+<div class="m" style="font-size:12px;margin-top:4px">4 item(s) still Missing</div></header>
+<h2>Document control</h2>
+<table class="dc"><tr><th>Version</th><td>1.2</td><th>Effective date</th><td>1 Oct 2026</td></tr>
+<tr><th>Owner</th><td>HR Manager</td><th>Approved by</th><td><span class="m">Missing</span></td></tr></table>
+<h2>Purpose and scope</h2>
+<p style="margin:2px 0">Make sure every new hire has access, equipment and a plan on day one.</p>
+<div class="sc"><div><div class="k">In scope</div><ul><li>Full-time hires</li><li>Equipment and accounts</li></ul></div>
+<div><div class="k">Out of scope</div><ul><li>Contractors</li></ul></div></div>
+<h2>Who is involved</h2>
+<p style="margin:2px 0">HR Officer · Line Manager · IT Support · Finance Manager</p>
+<h2>Procedure</h2>
+<div class="tw"><table><thead><tr><th style="width:32px">#</th><th>Step and who</th><th>How</th><th>In / out</th><th>Approval, hand-over</th></tr></thead><tbody>
+<tr><td>1</td><td><b>Offer accepted</b><div class="s">—</div></td><td>—</td><td>—</td><td><div class="s">→ 2. Prepare contract</div></td></tr>
+<tr><td>2</td><td><b>Prepare contract</b><div class="s">HR Officer</div></td><td><ol><li>Fill the contract template</li><li>Attach salary letter</li></ol></td><td><div><span class="s">In:</span> Signed offer</div><div><span class="s">Out:</span> Contract draft</div></td><td><div>Approver: Finance Manager · within 2 days</div><div class="s">→ 3. Request IT setup</div></td></tr>
+<tr><td>3</td><td><b>Request IT setup</b><div class="s">HR Officer</div></td><td><ol><li>Raise the IT ticket</li></ol></td><td><div><span class="s">In:</span> Contract draft</div><div><span class="s">Out:</span> <span class="m">Missing</span></div></td><td><div>—</div><div class="s">→ IT-05 Onboarding requirements</div></td></tr>
+<tr><td>4</td><td><b>Day-one induction</b><div class="s"><span class="m">Missing</span></div></td><td><span class="m">Missing</span></td><td><div><span class="s">In:</span> <span class="m">Missing</span></div><div><span class="s">Out:</span> Induction signed</div></td><td>—</td></tr>
+<tr><td>5</td><td><b>End</b><div class="s">—</div></td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<h2>Controls and KPIs</h2>
+<ul style="font-size:12px"><li>Contract signed before access is granted</li><li>Time to productive — target 30 days, quarterly</li></ul>
+<h2>Revision history</h2>
+<table><thead style="color:var(--mut)"><tr><th style="background:none;color:var(--mut)">Version</th><th style="background:none;color:var(--mut)">Date</th><th style="background:none;color:var(--mut)">By</th><th style="background:none;color:var(--mut)">What changed</th></tr></thead>
+<tbody><tr><td>1.2</td><td>1 Oct 2026</td><td>HR Manager</td><td>Added IT setup step</td></tr></tbody></table>
+<div style="margin-top:24px;font-size:10px;color:var(--mut)">Forefront Consulting</div>
+</article>

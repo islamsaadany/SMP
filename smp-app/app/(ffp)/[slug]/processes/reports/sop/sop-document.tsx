@@ -12,7 +12,7 @@ function Val({ v }: { v: string | null }) {
 /** One SOP per process, each starting on a new printed page. */
 export function SopDocument({ companyName, firmName, sops }: { companyName: string; firmName: string; sops: Sop[] }) {
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8 text-slate-900 print:max-w-none print:px-0">
+    <main data-sop-root className="mx-auto w-full max-w-4xl px-6 py-8 text-slate-900 print:max-w-none print:px-0">
       <div className="mb-6 flex items-center justify-between print:hidden">
         <span className="text-sm text-slate-500">
           {sops.length} SOP{sops.length === 1 ? "" : "s"} · {companyName}
@@ -116,6 +116,7 @@ export function SopDocument({ companyName, firmName, sops }: { companyName: stri
                     </td>
                     <td className="px-2 py-1.5">
                       <div>{s.approval ?? "—"}</div>
+                      {s.handoffIn && <div className="text-amber-700">{s.handoffIn}</div>}
                       {s.handoff && <div className="text-slate-600">{s.handoff}</div>}
                     </td>
                   </tr>

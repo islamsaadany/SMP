@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 /**
  * Print / save as PDF. By default the SOPs print as ONE continuous page (no cut
- * at the end of a sheet), the same as the report (§513): the paper is sized to
+ * at the end of a sheet), the same as the report (§522): the paper is sized to
  * the measured content at print time. Above Chrome's page-height limit it
  * falls back to ordinary pages.
  */

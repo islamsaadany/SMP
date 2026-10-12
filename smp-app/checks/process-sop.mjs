@@ -91,7 +91,7 @@ check("hand-over names the next step by number", s.procedure[0].handoff === "→
 check("a labelled branch keeps its label", s.procedure[1].handoff === "Valid → 3. Approve payment", String(s.procedure[1].handoff));
 check("a link to another process is a hand-over", /→ P02 Banking/.test(s.procedure[2].handoff || ""), String(s.procedure[2].handoff));
 
-console.log("\n§2b  hand-overs between processes (§512), both directions");
+console.log("\n§2b  hand-overs between processes (§521), both directions");
 const hx = full();
 hx.steps[1].handoffsOut = [{ code: "IT-05", name: "Banking", number: 3 }];
 hx.steps[0].handoffsIn = [{ code: "IT-01", name: "Onboarding", number: 7 }];

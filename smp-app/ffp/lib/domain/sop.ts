@@ -31,7 +31,7 @@ export type SopSource = {
     assignedRole: { name: string } | null;
     slaDays: number | null;
     links: { targetProcess: { code: string; name: string } }[];
-    /** Hand-overs to / from a step in another process (§512). */
+    /** Hand-overs to / from a step in another process (§521). */
     handoffsOut?: { code: string; name: string; number: number }[];
     handoffsIn?: { code: string; name: string; number: number }[];
   }[];

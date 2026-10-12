@@ -62997,7 +62997,7 @@ Islam: *"i want to add SOPs for each process … collecting all steps and operat
 Islam picked option A (a "Processes" dropdown with a searchable tick list beside the Milestones | Cards switch), applied to both views, the rest left to judgement. **Hides from the picture only — nothing is deleted or archived.** Starts with everything shown; the choice is remembered per browser as the HIDDEN ids (so a process added later shows by default), wrapped in try/catch. Ticking a main ticks its subs, its box reads indeterminate when only some are on; Select all / none; label "All (N)" / "N of M"; search by code or name; empty selection says so in words. A shown process that branches from a hidden one reads "↰ from ADM105, hidden" instead of a dashed line; links to hidden processes drop from the cards. The PNG exports what is drawn. Rules live in `ffp/lib/domain/helicopter-pick.ts` (pure); `check:pick` 12/0, `check:pick:red` all five breaks red. Snapshot: `ui-versions/ffp-helicopter-picker/`. Screen only; no schema, no server rule. Recorded, not done: the dropdown has not been looked at on a real workspace in a browser; cards do not name a hidden link target.
 
 
-## §512 — A step can wait on, or carry on in, a step in another process (Processes workspace)
+## §521 — A step can wait on, or carry on in, a step in another process (Processes workspace)
 
 Islam: *"a process is linked from another process step … the IT step for onboarding requirements, and now we need it to be a predecessor."* Then: *"if step A needs to link to step B and continue with the process of B?"* Answers taken: a sign or arrow shows where a link comes from or goes to; the picker offers steps from any process in the workspace; "ready" is wanted.
 
@@ -63011,8 +63011,8 @@ Islam: *"a process is linked from another process step … the IT step for onboa
 
 Check: `npm run check:handoff` (16) red 10 ways. Mockup: `design-mockups/process-cross-predecessor/`.
 
-## §513 — The report prints as one continuous page
+## §522 — The report prints as one continuous page
 Islam: the document is mainly shared as PDF, so the cut at the end of each sheet is avoided by printing ONE tall page (option one of those offered); other print options are to be revisited later. At `beforeprint` the paper is sized to the measured content (`@page`), removed at `afterprint`; above Chrome's 200in limit it falls back to ordinary pages. Unverified in a real print dialog.
 
-## §514 — The SOP: hand-overs between processes, and one continuous page
-The SOP's hand-over column reads §512's `StepHandoff` rows (outgoing "→ code · step n", incoming "from code · step n"), loaded in `loadReportData` beside the report so the two cannot disagree. The SOP prints as one continuous page on the same rule as §513 (`data-sop-root`, A4 width, default on). `checks/process-sop.mjs` gains §2b and a `no-handoff-in` break. Snapshots in `ui-versions/processes-sop/`.
+## §523 — The SOP: hand-overs between processes, and one continuous page
+The SOP's hand-over column reads §521's `StepHandoff` rows (outgoing "→ code · step n", incoming "from code · step n"), loaded in `loadReportData` beside the report so the two cannot disagree. The SOP prints as one continuous page on the same rule as §522 (`data-sop-root`, A4 width, default on). `checks/process-sop.mjs` gains §2b and a `no-handoff-in` break. Snapshots in `ui-versions/processes-sop/`.

@@ -224,11 +224,36 @@ with sync_playwright() as p:
         office = pick("super", "setup") + pick("smoteam", "setup")
         ok("while the office's Setup cell is a live one (§94.2)",
            len(office) == 2 and all(d["st"] != "dash" and d["target"] for d in office), office)
-        part = pick("part", "plan") + pick("part", "rep")
-        ok("the Part owner may read on Plan and on Reporting (§516.1)",
-           len(part) == 2 and all(d["st"] == "view" for d in part), part)
-        ok("on the shipped defaults no cell differs, so there is no line above the table",
-           not got.get("differ") and "mixed" not in kinds, {"differ": got.get("differ"), "kinds": sorted(kinds)})
+        #  §520 MOVED `capowner` ONTO THIS ROW, AND IT SHIPS AT `edit` ON
+        #  REPORTING. Both of these asserted §516.1's state and now say
+        #  something that is no longer true, so they are REWRITTEN rather than
+        #  loosened (§218, §214.3). What changed is the GROUPING and never a
+        #  grant: §412 copied `capowner` from `fnhead`, whose own-function
+        #  Reporting has always been `edit`, and §520's own measurement is that
+        #  0 grants moved — so the Reporting cell now covers five pairs that do
+        #  not agree, which is exactly what §516's drawn-cell model is for.
+        #  PLAN STILL AGREES AND IS ASSERTED SEPARATELY, because that is
+        #  §516.1's decision surviving whole and is the half that can still
+        #  fail if a capability owner is ever opened on the plan.
+        plan = pick("part", "plan")
+        ok("the Part owner may read on Plan, every pair agreeing (§516.1)",
+           len(plan) == 1 and plan[0]["st"] == "view"
+           and "capowner:a_fn_own_strat" in plan[0]["target"], plan)
+        #  AND THE ONE THAT DIFFERS IS NAMED, never merely counted (§94.8): a
+        #  build where some OTHER pair had drifted reads `mixed` too, and this
+        #  has to tell the two apart.
+        rep = pick("part", "rep")
+        ok("…while Reporting differs, and the hover names the capability owner (§520)",
+           len(rep) == 1 and rep[0]["st"] == "mixed"
+           and "Capability owner in own supporting function" in rep[0]["title"]
+           and "capowner:a_fn_own" in rep[0]["target"], rep)
+        #  THE LINE ABOVE THE TABLE IS ASSERTED AS AN AGREEMENT WITH THE CELL
+        #  (§94.8), so it cannot read one count while the table draws another —
+        #  §516.1 had it absent on the defaults, and it is one cell now.
+        ok("…and the line above the table says so, naming that one cell (§520)",
+           "1 cell holds different answers" in (got.get("differ") or "")
+           and "Part owner · Their own: Reporting" in (got.get("differ") or ""),
+           got.get("differ"))
     else:
         ok("every cell agrees", False, exp)
     # And a stored Setup grant does not reach any non-office role (§61, §42,

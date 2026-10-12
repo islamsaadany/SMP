@@ -5113,7 +5113,12 @@ function canReport(unitKey){
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
            /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer());
+           SMPRules.ownsTopProject(world(), viewer()) ||
+           /* §520.6: and a capability's owner or custodian enters their own
+              capability's figures here, exactly as a direction's owner does —
+              the capability's rows ask `cap:<id>` for themselves, so this
+              opens the page and nothing else. */
+           SMPRules.ownsTopCapability(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -6029,6 +6034,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -8538,15 +8554,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }
@@ -10801,6 +10825,21 @@ function capsReachable(){
   return GROUP.capabilities.filter(function(c){
     return c && grantAt("k_perf", "cap:" + c.id) !== "none";
   });
+}
+
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
 }
 
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick

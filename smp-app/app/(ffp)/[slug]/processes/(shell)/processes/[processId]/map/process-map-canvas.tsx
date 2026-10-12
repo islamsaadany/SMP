@@ -39,9 +39,11 @@ import {
   LaneNode,
   BranchEntryNode,
   BranchGutterNode,
+  HandoffNode,
   type StepLinkData,
 } from "./map-nodes";
 import { RoutedEdge } from "./routed-edge";
+import type { HandoffT } from "./handoff-types";
 
 const NODE_TYPES = {
   task: TaskNode,
@@ -50,6 +52,7 @@ const NODE_TYPES = {
   lane: LaneNode,
   branchEntry: BranchEntryNode,
   branchGutter: BranchGutterNode,
+  handoff: HandoffNode,
 };
 
 const EDGE_TYPES = { routed: RoutedEdge };
@@ -147,6 +150,8 @@ export function ProcessMapCanvas({
   steps,
   connections,
   branchFrom,
+  handoffsIn = [],
+  handoffsOut = [],
 }: {
   workspaceId: string;
   processId: string;
@@ -154,6 +159,8 @@ export function ProcessMapCanvas({
   steps: StepT[];
   connections: ConnectionT[];
   branchFrom?: BranchFromT | null;
+  handoffsIn?: HandoffT[];
+  handoffsOut?: HandoffT[];
 }) {
   // Lanes and node placement come from the same answer, so a step is always
   // drawn in the lane its role says it belongs to. Its stored positionY is
@@ -181,11 +188,14 @@ export function ProcessMapCanvas({
     return map;
   }, [steps]);
 
-  const canvasWidth = Math.max(...steps.map((s) => s.positionX), 400) + 260;
+  const canvasWidth =
+    Math.max(...steps.map((s) => s.positionX), 400) + 260 + (handoffsOut.length > 0 ? 60 : 0);
   // Grows with the lane count instead of a fixed height — a process with
   // more lanes (or bigger cards) gets the room it needs rather than being
   // squeezed to fit a box sized for however many lanes a different process has.
   const canvasHeight = Math.max(layout.laneCount, 1) * LANE_HEIGHT + LANE_TOP_OFFSET;
+
+  const stepById = useMemo(() => new Map(steps.map((s) => [s.id, s])), [steps]);
 
   const initialNodes: Node[] = useMemo(() => {
     const laneNodes: Node[] = laneOrder.map((roleId, i) => ({
@@ -245,20 +255,78 @@ export function ProcessMapCanvas({
       };
     });
 
-    if (!branchFrom) return [...laneNodes, ...stepNodes];
+    // Cross-process links. Incoming ones sit in the left gutter beside the
+    // step they feed, outgoing ones past the right edge beside the step they
+    // leave; two on one row are bumped down so they never overlap.
+    const bump = (taken: number[], wanted: number) => {
+      let y = wanted;
+      while (taken.some((t) => Math.abs(t - y) < 62)) y += 64;
+      taken.push(y);
+      return y;
+    };
+    const rowY = (stepId: string) => {
+      const st = stepById.get(stepId);
+      return (layout.yOf.get(stepId) ?? st?.positionY ?? 77) - 28;
+    };
+    const takenIn: number[] = branchFrom ? [77] : [];
+    const takenOut: number[] = [];
+    const maxX = Math.max(...steps.map((x) => x.positionX), 400);
+    const handoffNodes: Node[] = [
+      ...handoffsIn.map((h): Node => ({
+        id: `handoff-in-${h.id}`,
+        type: "handoff",
+        position: { x: 22, y: bump(takenIn, rowY(h.toStepId)) },
+        data: {
+          direction: "in",
+          label: h.otherStepLabel,
+          otherCode: h.otherProcessCode,
+          otherProcessId: h.otherProcessId,
+          otherStepNumber: h.otherStepNumber,
+          workspaceId,
+          edgeLabel: h.label,
+        },
+        ariaLabel: `Comes in from ${h.otherStepLabel}, ${h.otherProcessCode}`,
+        draggable: false,
+        zIndex: 1,
+      })),
+      ...handoffsOut.map((h): Node => ({
+        id: `handoff-out-${h.id}`,
+        type: "handoff",
+        position: { x: maxX + 150, y: bump(takenOut, rowY(h.fromStepId)) },
+        data: {
+          direction: "out",
+          label: h.otherStepLabel,
+          otherCode: h.otherProcessCode,
+          otherProcessId: h.otherProcessId,
+          otherStepNumber: h.otherStepNumber,
+          workspaceId,
+          edgeLabel: h.label,
+        },
+        ariaLabel: `Continues in ${h.otherProcessCode} at ${h.otherStepLabel}`,
+        draggable: false,
+        zIndex: 1,
+      })),
+    ];
+    const gutterNode: Node[] =
+      branchFrom || handoffsIn.length > 0
+        ? [
+            {
+              id: "branch-gutter",
+              type: "branchGutter",
+              position: { x: 0, y: 0 },
+              data: { label: branchFrom ? `↰ From ${branchFrom.sourceProcessCode}` : "↰ From other processes" },
+              style: { width: BRANCH_GUTTER_WIDTH, height: canvasHeight },
+              draggable: false,
+              selectable: false,
+              focusable: false,
+              zIndex: 0,
+            },
+          ]
+        : [];
+
+    if (!branchFrom) return [...laneNodes, ...gutterNode, ...handoffNodes, ...stepNodes];
 
     const branchNodes: Node[] = [
-      {
-        id: "branch-gutter",
-        type: "branchGutter",
-        position: { x: 0, y: 0 },
-        data: { label: `↰ From ${branchFrom.sourceProcessCode}` },
-        style: { width: BRANCH_GUTTER_WIDTH, height: canvasHeight },
-        draggable: false,
-        selectable: false,
-        focusable: false,
-        zIndex: 0,
-      },
       {
         id: "branch-entry",
         type: "branchEntry",
@@ -276,10 +344,8 @@ export function ProcessMapCanvas({
       },
     ];
 
-    return [...laneNodes, ...branchNodes, ...stepNodes];
-  }, [laneOrder, layout, laneLabel, steps, canvasWidth, canvasHeight, workspaceId, branchFrom]);
-
-  const stepById = useMemo(() => new Map(steps.map((s) => [s.id, s])), [steps]);
+    return [...laneNodes, ...gutterNode, ...branchNodes, ...handoffNodes, ...stepNodes];
+  }, [laneOrder, layout, laneLabel, steps, stepById, canvasWidth, canvasHeight, workspaceId, branchFrom, handoffsIn, handoffsOut]);
 
   const buildEdge = useCallback(
     (id: string, fromStepId: string, toStepId: string, label: string | null): Edge | null => {
@@ -308,11 +374,46 @@ export function ProcessMapCanvas({
 
   const initialEdges: Edge[] = useMemo(() => {
     const stepEdges = connections.flatMap((c) => buildEdge(c.id, c.fromStepId, c.toStepId, c.label) ?? []);
-    if (!branchFrom) return stepEdges;
+    const amber = { stroke: "#b45309", strokeWidth: 2, strokeDasharray: "5 4", vectorEffect: "non-scaling-stroke" as const };
+    const marker = { type: MarkerType.ArrowClosed, color: "#b45309" };
+
+    const handoffInEdges: Edge[] = handoffsIn.map((h) => ({
+      id: `handoff-in-edge-${h.id}`,
+      source: `handoff-in-${h.id}`,
+      target: h.toStepId,
+      sourceHandle: "right",
+      targetHandle: "left-t",
+      type: "smoothstep",
+      deletable: false,
+      label: h.label ?? undefined,
+      labelStyle: { fontSize: 10, fontWeight: 700 },
+      labelBgStyle: { fill: "#fff" },
+      ariaLabel: `Comes in from ${h.otherStepLabel} in ${h.otherProcessCode}`,
+      style: amber,
+      markerEnd: marker,
+    }));
+    const handoffOutEdges: Edge[] = handoffsOut.map((h) => ({
+      id: `handoff-out-edge-${h.id}`,
+      source: h.fromStepId,
+      target: `handoff-out-${h.id}`,
+      sourceHandle: "right",
+      targetHandle: "left-t",
+      type: "smoothstep",
+      deletable: false,
+      label: h.label ?? undefined,
+      labelStyle: { fontSize: 10, fontWeight: 700 },
+      labelBgStyle: { fill: "#fff" },
+      ariaLabel: `Continues in ${h.otherProcessCode} at ${h.otherStepLabel}`,
+      style: amber,
+      markerEnd: marker,
+    }));
+    const handoffEdges = [...handoffInEdges, ...handoffOutEdges];
+    if (!branchFrom) return [...stepEdges, ...handoffEdges];
 
     // Draw the inherited entry into this process's own entry points — the
-    // steps nothing here feeds — rather than guessing a single "first" step.
-    const hasIncoming = new Set(connections.map((c) => c.toStepId));
+    // steps nothing here feeds, by a connector or a cross-process link —
+    // rather than guessing a single "first" step.
+    const hasIncoming = new Set([...connections.map((c) => c.toStepId), ...handoffsIn.map((h) => h.toStepId)]);
     const entryEdges: Edge[] = steps
       .filter((s) => !hasIncoming.has(s.id))
       .map((s) => ({
@@ -324,11 +425,11 @@ export function ProcessMapCanvas({
         type: "smoothstep",
         deletable: false,
         ariaLabel: `Picks up from ${branchFrom.stepLabel} in ${branchFrom.sourceProcessCode}`,
-        style: { stroke: "#b45309", strokeWidth: 2, strokeDasharray: "5 4", vectorEffect: "non-scaling-stroke" },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#b45309" },
+        style: amber,
+        markerEnd: marker,
       }));
-    return [...stepEdges, ...entryEdges];
-  }, [connections, buildEdge, branchFrom, steps]);
+    return [...stepEdges, ...handoffEdges, ...entryEdges];
+  }, [connections, buildEdge, branchFrom, steps, handoffsIn, handoffsOut]);
 
   const router = useRouter();
   const [nodes, setNodes] = useState(initialNodes);
@@ -412,7 +513,7 @@ export function ProcessMapCanvas({
 
   const onNodeDragStop: OnNodeDrag = useCallback(
     (_event, node) => {
-      if (node.type === "lane" || node.type === "branchEntry" || node.type === "branchGutter") return;
+      if (node.type === "lane" || node.type === "branchEntry" || node.type === "branchGutter" || node.type === "handoff") return;
       const kind = node.type as keyof typeof HALF_SIZE;
       const half = HALF_SIZE[kind];
       const centerX = Math.round(node.position.x + half.x);

@@ -533,7 +533,7 @@
                people: state.people,
                topItems: (state.group || {}).items,
                topProjects: (state.group || {}).topProjects,
-               /* §517: and the direction owners' scope, read by dirPartOnly().
+               /* §517: and the direction owners' scope, read by partOnly().
                   Here AND in W()'s `group` (§102.4) — W passes the object
                   through whole, so this is the one list to edit. */
                group: state.group ? { structure: state.group.structure, dirScope: state.group[DIR_SCOPE] } : null });
@@ -941,12 +941,19 @@
       note:"Heads the whole client — the top layer." },
     { key:"cceo", name:"Division head", of:["cceo"], word:"division", suffix:" head", mid:true,
       note:"Heads one division — the second layer. Their two switches — see the other divisions, see the group — stay on the division." },
-    { key:"owner", name:"Owner", of:["owner", "fnhead", "capowner"],
-      note:"Owns a place: a business unit owner, a function head, a capability owner. On the function page and the register the word stays Function head." },
+    { key:"owner", name:"Owner", of:["owner", "fnhead"],
+      note:"Owns a place: a business unit owner or a function head. On the function page and the register the word stays Function head." },
     { key:"custodian", name:"Custodian", of:["custodian"],
       note:"Keeps a place's plan and figures." },
-    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner"],
-      note:"Owns one part inside a place: a project, a pillar or a direction — as its owner or its custodian. Reaches only that part." },
+    /* §520: AND A CAPABILITY'S OWNER IS A PART OWNER. Islam: "a capability
+       owner is a part owner and it's set to see only his capability like the
+       pillars owners". A capability sits INSIDE a function exactly as a
+       project and a pillar sit inside a place, so it was on the wrong row —
+       and being on the Owner row is why the half eye beside this row's Group
+       cell could not reach them. Drawing only: their stored pairs are
+       untouched, and the access baseline reads UNMOVED. */
+    { key:"part", name:"Part owner", of:["powner", "plowner", "dirowner", "capowner"],
+      note:"Owns one part inside a place: a project, a pillar, a direction or a capability — as its owner or its custodian. Reaches only that part." },
     { key:"contrib", name:"Contributor", of:["contrib"],
       note:"Named on a row — a collaborator, a stakeholder, a milestone's owner. Reaches only the rows that name them." },
     { key:NO_ROLE, name:"Everyone else", of:[NO_ROLE], floor:true,
@@ -4430,13 +4437,33 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      reaches the group by another role (a unit owner, a CEO, the office) sees
      the full plan whatever this says, because a narrowing must never take
      away what another row of the table gives (§33's most-generous rule). */
+  /* §520 — AND IT IS EVERY PART OWNER, NOT THE DIRECTION'S ALONE. Islam, of a
+     capability owner who reached the whole group: "his access hsould match the
+     direction owner like Amr hassan only seeing his directions plus the
+     corporate foundation". A capability owner holds ONE part inside a
+     function, which is what a direction owner holds inside the company, so
+     this is the same rule pointed at a second role rather than a second
+     answer to it (§53.5) — one switch, one stored key, one half eye.
+
+     THE STORED KEY DOES NOT MOVE. `dirScope` is a key and not a label
+     (§30.2): renaming it would reset every client that has already pressed
+     the half eye, for a word nobody reads. The FUNCTION is renamed, because
+     what it answers is no longer about directions.
+
+     WHAT IT LEAVES A CAPABILITY OWNER FALLS OUT OF THE SAME FILTERS: the
+     group's lists are narrowed to the parts that are theirs, and a capability
+     owner owns no direction, so the company's plan has nothing of theirs in
+     it and what remains is the Foundation. Their own capability is a
+     destination of its own and is untouched — that is the half of "his
+     capability" the navigation already had right. */
+  var PART_ONLY_ROLES = ["dirowner", "capowner"];
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
-  function dirPartOnly(w, person) {
+  function partOnly(w, person) {
     if (!person || !w || !dirScopePart(w.group)) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
-      if (rs[i].role === "dirowner") { holds = true; continue; }
+      if (PART_ONLY_ROLES.indexOf(rs[i].role) > -1) { holds = true; continue; }
       if (!companyAllows(w, rs[i], "group")) continue;
       if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
     }
@@ -4445,6 +4472,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* Whether ONE direction is theirs — ownsTopPillar asked of that row. */
   function ownsDirection(w, person, p) {
     return !!p && ownsTopPillar(w, person, p.owner || "", p.custodian || "");
+  }
+  /* §520.6 — A CAPABILITY'S OWNER IS TREATED LIKE A DIRECTION'S. Islam: "the
+     capability owner is treated like the direction owner … sees the
+     foundation … and sees the reporting." With the units OFF a capability is a
+     section of the company's plan and never a destination (§520.1), so the only
+     Reporting page its owner or custodian can reach is the COMPANY's — and
+     `canReport("group")` admitted a direction's owner (§447) and nobody who
+     held a capability. The seats are person KEYS on the capability row (§412),
+     where a direction names its owner and this reads the register; both are
+     asked here and nowhere else. Which rows they may TYPE on is the
+     capability's own question (`cap:<id>`, §334), on the screen and on the
+     server, so this opens the page and narrows nothing by itself. */
+  function ownsTopCapability(w, person) {
+    if (!person || !w || buExists(w.group)) return false;
+    return (w.capabilities || []).some(function (c) {
+      return !!c && !!c.id && (c.head === person.key || c.custodian === person.key);
+    });
   }
   /* §466 — THE COMPANY PLAN IN PROJECTS. The top layer plans in pillars
      unless the office chose projects on the Directions card; stored as an
@@ -5070,7 +5114,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, dirPartOnly: dirPartOnly, ownsDirection: ownsDirection, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -12239,7 +12283,12 @@ function canReport(unitKey){
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
            /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer());
+           SMPRules.ownsTopProject(world(), viewer()) ||
+           /* §520.6: and a capability's owner or custodian enters their own
+              capability's figures here, exactly as a direction's owner does —
+              the capability's rows ask `cap:<id>` for themselves, so this
+              opens the page and nothing else. */
+           SMPRules.ownsTopCapability(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -13155,6 +13204,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -15664,15 +15724,23 @@ function topWritable(){
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
 }
-/* §517: A DIRECTION OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
    (§42) so the page and the server agree about who is narrowed; the filter
    is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
    code is its POSITION (pillarCode) and topWritable() hands out the real
    array, so filtering the array would renumber every direction and write
-   into the wrong one. partFilter(u) is null when nothing is narrowed. */
-function dirPartOnly(){ return SMPRules.dirPartOnly(world(), viewer()); }
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
 function partFilter(u){
-  if (!(u && u.topLayer) || !dirPartOnly()) return null;
+  if (!(u && u.topLayer) || !partOnly()) return null;
   var w = world(), v = viewer();
   return function(p){ return SMPRules.ownsDirection(w, v, p); };
 }
@@ -17927,6 +17995,21 @@ function capsReachable(){
   return GROUP.capabilities.filter(function(c){
     return c && grantAt("k_perf", "cap:" + c.id) !== "none";
   });
+}
+
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
 }
 
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick
@@ -26913,7 +26996,10 @@ function unitsTable(keys){
    have (§15.1). Key objectives are optional, so ranking on them would order
    the haves above the have-nots by shape rather than by standing. */
 function capsTable(){
-  var sorted = GROUP.capabilities.slice().sort(function(a, b){
+  /* §520.5: `capsHere()` and never `GROUP.capabilities` — the table view and
+     the cards are two readings of one list, so a narrowing reaching one of
+     them leaks every capability through the other. */
+  var sorted = capsHere().slice().sort(function(a, b){
     var pa = capPerf(a), pb = capPerf(b);
     return (pb == null ? -1 : pb) - (pa == null ? -1 : pa);
   });
@@ -27747,7 +27833,13 @@ function renderGroupPerformance(){
      one \u2014 performance from its measures, execution from its tactics, both
      derived. It was the last place in the product still carrying typed scores,
      which meant its execution figure could not be checked against anything. */
-  var caps = GROUP.capabilities.map(function(c, ci){
+  /* §520.5: drawn from `capsHere()`, and `data-oi` stays the STORED position
+     — a drop commits through `applyOrder(GROUP.capabilities, order)`, which
+     keys on it (§118), so a filtered index would reorder the wrong rows. An
+     arranger is never narrowed (`canArrange("group")`), so the two cannot
+     meet today; the stored index costs nothing and is what keeps it true. */
+  var caps = capsHere().map(function(c){
+    var ci = GROUP.capabilities.indexOf(c);
     /* A capability no longer scores like a pillar. Its performance is its
        projects' \u2014 half what they handed over, half what that achieved \u2014 and
        its execution is milestones completed. Key objectives are optional and
@@ -28020,11 +28112,23 @@ function whereNext(keys){
           plural(mrows.length, L1("measure"), L("measure")) + " &middot; " + plural(trows.length, L1("tactic"), L("tactic")),
           pf, ex, pl, pd, ed, p.name || code) + '</div>';
     }).join("");
-    SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
+    /* §520: A HEADING OVER NOTHING IS NOT AN EMPTY STATE. §517's filter
+       empties this list for a part owner who owns no direction — which
+       before §520 could not happen, since the only part owner was a
+       direction's — and the section was pushed regardless, so a
+       capability's owner read the word "Pillars" over an empty row while
+       the "Nothing to show yet." note below could never fire (§45.2).
+       Nobody else is reached: with no filter `ditems` is `itemsNow` and
+       `topHasPlan()` has already said there is a plan. */
+    if (ditems.length) SECS.push({ dir: true, t: L("pillar","bu"), h: section("", L("pillar","bu"), null,
       '<div class="gauges g3" data-kind="topdirs">' + dirs + '</div>') });
   }
 
-  if (SMPRules.capExists(GROUP)) SECS.push({ t: L("capability","bu"), h: section("", L("capability","bu"),
+  /* §520.5: the section is KEPT for a narrowed part owner — their own
+     capability's figures are theirs to read — and drawn only while they hold
+     one, or the heading stands over nothing (§520.2, §45.2). Everybody else
+     is unchanged: with the half eye off `partOnly()` is false. */
+  if (SMPRules.capExists(GROUP) && (!partOnly() || capsHere().length)) SECS.push({ cap: true, t: L("capability","bu"), h: section("", L("capability","bu"),
       null,
       GVIEW.caps === "table"
         ? capsTable()
@@ -28033,10 +28137,12 @@ function whereNext(keys){
       TIP_CAP(), viewToggle("caps")) });
 
   /* §517: a direction owner narrowed to their part reads their directions and
-     nothing else here — the company's headline, its themes and its
-     capabilities are the whole company's figures. */
-  if (dirPartOnly()) {
-    SECS = SECS.filter(function(x){ return x.dir; });
+     nothing else here — the company's headline and its themes are the whole
+     company's figures. §520.5 keeps the capabilities section beside them,
+     narrowed to the ones this person reaches: the part a capability's owner
+     holds is a capability, so dropping it left them nothing at all. */
+  if (partOnly()) {
+    SECS = SECS.filter(function(x){ return x.dir || x.cap; });
     if (!SECS.length) SECS.push({ t: L("pillar","bu"), h: '<div class="note">Nothing to show yet.</div>' });
   }
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
@@ -31773,7 +31879,19 @@ function repOutTarget(t, x){
       ? '<span class="subhd">of ' + esc(whole) + '</span>' : '');
 }
 
-function renderReport(u){
+/* §520.7, reshaped by §520.8: `opt.paneOnly` returns the key objectives and
+   the selected pillar's PANE alone — no chrome, no bar, no summary, no waiting
+   note, and no rail or section heading of its own, because the capability
+   already sits on a rail of capabilities one level up. It is how a capability
+   planned in pillars is drawn INSIDE the company's Reporting page
+   (`reportCapsSplit`), through `capAsUnit(c.id)`: the same builder a unit and
+   a pillars function already report through, with every gate below asking
+   `u.ukey` = "cap:<id>" (§53.5, §59). A second body for the same tables is how
+   the Plan page came to know both shapes while this page knew one. */
+function renderReport(u, opt){
+  /* §520.8: the PANE alone — a capability drawn inside the company's report
+     has its own rail there, so this hands back only what sits in the pane. */
+  var paneOnly = !!(opt && opt.paneOnly);
   var uw = unitWayOf(u);
   if (uw) return uw === "objectives" ? renderFnObjReport("u:" + u.ukey) : renderFnReport("u:" + u.ukey);
   var may = canReport(u.ukey);
@@ -31786,6 +31904,8 @@ function renderReport(u){
   var pctDone = c.total ? Math.round(c.done / c.total * 100) : 0;
 
   if (REVIEW.state !== "open") {
+    /* §520.7: inside the company's page the closed note is already above. */
+    if (paneOnly) return "";
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> Its figures are a record ' +
       'now and cannot be changed here. The SMO reopens a cycle if something has to be corrected.</div>';
   }
@@ -32066,7 +32186,10 @@ function renderReport(u){
   }
   var pillars;
   if (!sel) {
-    pillars = '<div class="note">This unit has no ' + L("pillar","bu") +
+    /* §520.8: a capability with nothing planned says so in the words its own
+       rail already uses (`topCapBody`), never "this unit has no directions". */
+    pillars = paneOnly ? '<div class="note">Nothing planned yet.</div>'
+      : '<div class="note">This unit has no ' + L("pillar","bu") +
       ' yet, so there is nothing to report against.</div>';
   } else {
     /* §279: WHAT EACH PILLAR STILL OWES, off the one map the bar reads. The
@@ -32109,7 +32232,16 @@ function renderReport(u){
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = runsNow(sel) ? reportPillarPane(sel, u.items.indexOf(sel))
       : pillarBand(pillarCode(u, u.items.indexOf(sel)), sel.name, "", sel.kind) + yearsLine(sel);
-    pillars = railWorthIt(partItems(u))
+    /* §520.8: inside the company's capabilities split the capability's own
+       rail is the one on the left, and a pillars capability is ONE pillar
+       named as the capability (§491) — so the pane stands alone, and the
+       inner rail is drawn only where there is genuinely more than one
+       pillar to pick between. */
+    pillars = paneOnly
+      ? (partItems(u).length > 1
+          ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+          : pane)
+      : railWorthIt(partItems(u))
       ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
       : '<div class="pane">' + pane + '</div>';
   }
@@ -32120,13 +32252,52 @@ function renderReport(u){
   /* §301: what a bounded reporter is told in place of "View only" — built
      from the SAME pillarTally() the rail rows read, so the chip and the rail
      can never disagree about how much is entered. */
+  /* §520.8: the pane alone, for a capability drawn inside the company's
+     report — its objectives where it has any, then its pillar's tables. No
+     section heading and no rail of its own: the capabilities rail beside it
+     is the rail, and the heading over the split names every capability. */
+  if (paneOnly) {
+    return (objs.length ? '<h4 class="mini">' + L("keyobj","bu") + ' ' + tally(doneOf(objs), objs.length) + '</h4>' + objTable : "") +
+      pillars;
+  }
+  /* ── THE CHIP'S LIST IS THE PARTS THIS PERSON HOLDS (§520.10) ───────
+     A unit's list is every pillar and `ownStateChip` keeps the ones named
+     for this viewer. The COMPANY's is built here, because its parts are two
+     kinds: a direction, whose seats are register NAMES judged by
+     `SMPRules.ownsDirection` (§469), and a capability, whose seats are
+     register KEYS (§412, §520). A capability is not in `u.items` at all —
+     it is counted on its own rail (§520.8) — so without this the owner of
+     two capabilities read the company's 42 and none of their own.
+     Each entry is marked `mine` so the chip does not ask `mayMarkDoneOn`,
+     which reads the EDIT grants and would drop every one (§520.10). The
+     tallies are the rail's own: `pillarTally` for a direction,
+     `reportedCount` for a capability planned in pillars and `capReported`
+     for one planned in projects — the same readers `reportCapsSplit` asks,
+     so the chip and the rail cannot disagree (§53.5). */
+  function ownParts(){
+    if (u.ukey !== "group")
+      return (u.items || []).map(function(p, pi){
+        var t = pillarTally(p);
+        return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
+                 done:t.done, total:t.total };
+      });
+    var w = world(), me = viewer(), out = [];
+    (u.items || []).forEach(function(p, pi){
+      if (!SMPRules.ownsDirection(w, me, p)) return;
+      var t = pillarTally(p);
+      out.push({ id:p.id, code:pillarCode(u, pi), done:t.done, total:t.total, mine:true });
+    });
+    capsHere().forEach(function(cp){
+      if (!(cp.head === me.key || cp.custodian === me.key)) return;
+      var cu = capPlansInPillars(cp) ? capAsUnit(cp.id) : null;
+      var t = cu ? reportedCount(cu) : capReported(cp);
+      out.push({ id:cp.id, code:topCapCode(cp), done:t.done, total:t.total, mine:true, noMark:true });
+    });
+    return out;
+  }
   REPORT_CHROME = repChrome(u.ukey, c.done, c.total, pctDone, mayAll, subd,
                             reportParked(u.ukey), submitWhyShort(u.ukey),
-    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, (u.items || []).map(function(p, pi){
-      var t = pillarTally(p);
-      return { id:p.id, code:pillarCode(u, pi), owner:p.owner, cust:p.custodian,
-               done:t.done, total:t.total };
-    }), L("pillar","bu")));
+    !boundedReporter(u.ukey) ? null : ownStateChip(u.ukey, ownParts(), L("pillar","bu")));
   var bar = "";
 
   var summary =
@@ -32174,9 +32345,64 @@ function renderReport(u){
        §480: until the business units are off, when there is nobody below to
        roll them up from and the office enters them here (`topReportKOs`). */
     /* §517: and a direction owner narrowed to their part is not shown them. */
-    (u.topLayer && (!objs.length || dirPartOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
-    section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars) +
+    (u.topLayer && (!objs.length || partOnly()) ? "" : section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable)) +
+    /* §520.6: a part owner narrowed to a part that is not a direction is not
+       told the company has no directions to report against (§45.2, §61) —
+       the section is theirs only where one of its rows is. */
+    (u.topLayer && partOnly() && !partItems(u).length ? "" :
+      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
+       a section of the company's plan and never a destination (§520.1), so
+       this page is the only Reporting page its owner can reach. `capsHere()`
+       is the one narrowing (§520.5).
+       §520.8: ONE SECTION, SHAPED LIKE THE DIRECTIONS' — Islam, of §520.7's
+       stacked blocks: "the name of the capability is written at the top of
+       the page which is wrong and another line says directions key measures
+       and tactics which is wrong it should say Capabilities - key measures
+       and tactics". A rail of capabilities on the left (the Strategy tab's
+       own rail, `renderTopCaps`, so the two read alike) and the chosen one's
+       report in the pane: a pillars capability through `renderReport`'s pane
+       (§520.7's body without its heading or its one-row rail), a projects
+       capability through `capReportBody`. The owner types on theirs, a
+       direction's owner reads it, the office types on all — the pane asks
+       `cap:<id>` for itself exactly as before. */
+    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+      ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
+          reportCapsSplit(capsHere()))
+      : "") +
     summary;
+}
+
+
+/* §520.8: the company report's capabilities rail and pane. The rail reads
+   the Strategy tab's own shape (`renderTopCaps`): the same `data-topcap`
+   press, the same code and name, with the REPORT's tally in place of the
+   plan's gap count — entries given of asked, off `reportedCount`, the one
+   reader the bar and the rail both ask — and the places still owing a figure
+   named in the rail's alarm, exactly as a direction's row says it. */
+function reportCapsSplit(caps){
+  var sel = caps.filter(function(c){ return c.id === TOPCAP; })[0] || caps[0];
+  var rows = caps.map(function(c){
+    var pil = capPlansInPillars(c), cu = pil ? capAsUnit(c.id) : null;
+    var t = cu ? reportedCount(cu) : null;
+    var owes = cu ? reportPlaces(cu.ukey).some(function(e){ return e.count > 0; }) : false;
+    var sub = !cu ? "" : t.total === 0 ? 'Not asked this cycle'
+            : t.done >= t.total ? 'Complete'
+            : (t.total - t.done) + ' still to enter';
+    return '<button class="ritem' + (c.id === sel.id ? ' on' : '') + '" data-topcap="' + esc(c.id) + '">' +
+      railName(topCapCode(c), c.name) +
+      (cu ? '<span class="rnum"><span class="rtally' +
+              (t.total && t.done >= t.total && !owes ? ' full' : '') + '">' +
+              t.done + '/' + t.total + '</span></span>' : '') +
+      railSub(owes ? "" : sub, owes ? '<span class="missing">Still to enter</span>' : "") +
+      '</button>';
+  }).join("");
+  var rail = '<div class="rail" data-repcaprail="1">' + railHead(L("capability","bu"), caps.length) + rows +
+    '<div class="rfoot">Tally is entries given of asked</div></div>';
+  var pane = '<div class="capbody">' + (capPlansInPillars(sel)
+    ? renderReport(capAsUnit(sel.id), { paneOnly: true })
+    : capReportBody(sel)) + '</div>';
+  return '<div class="split" data-repcaps="1">' + rail + '<div class="pane">' + pane + '</div></div>';
 }
 
 
@@ -33938,7 +34164,13 @@ function capReportBody(c){
      question, because a project owner speaks for their project and a
      capability's key objectives belong to no project. Each project asks for
      ITSELF, below, through the same pair the server enforces. */
-  var may = canReportFnWhole(c.fn);
+  /* §520.6: THE CAPABILITY'S OWN TARGET, never the holding function's. Asked
+     of `fn:<key>` this answered for the FUNCTION — true for its head, false for
+     the capability's own owner (§412) — so on the company's Reporting page
+     Ehab's rows drew read-only while a direction's owner typed on his. Through
+     `holderCodeOwner` so a function's own work keeps asking `fn:<key>` and a
+     capability asks `cap:<id>`, which is what the server judges (§334). */
+  var may = canReportFnWhole(holderCodeOwner(c));
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dirCell(m.dir) + '</td>' +
@@ -33955,7 +34187,7 @@ function capReportBody(c){
   /* §279: the same mark the unit's rail carries, off the same map — this
      side's rail had exactly the unit's fault and no banner above it either. */
   var owedAt = {};
-  reportPlaces("fn:" + c.fn).forEach(function(e){ owedAt[e.key] = e; });
+  reportPlaces(holderTarget(holderCodeOwner(c))).forEach(function(e){ owedAt[e.key] = e; });
   var owesPr = function(p){
     var e = owedAt["pr:" + p.id];
     return e && e.count > 0 ? e : null;
@@ -34311,10 +34543,21 @@ function doneCtl(target, id, owner, code, cust){
    containers that caller already tallies, so the chip can never disagree with
    the rail beside it (§53.5). */
 function ownStateChip(target, list, word){
-  var mine = (list || []).filter(function(c){ return mayMarkDoneOn(target, c.owner, c.cust); });
-  var submits = String(target).indexOf("fn:") === 0 ? "function's" : "unit's";
-  var tip = 'You report your own rows. The ' + submits +
-            ' custodian submits the report.';
+  /* §520.10: an entry marked `mine` was filtered by its caller — the
+     company's parts are judged by their SEATS, never by the edit grants
+     `mayMarkDoneOn` reads (both of its owner roles ship at view). */
+  var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
+  var top = String(target) === "group";
+  var submits = top ? "office or the CEO" :
+                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+  var tip = 'You report your own rows. The ' + submits + ' submits the report.';
+  /* A capability carries no saved-draft mark (§309 is a project's and a
+     direction's), so "done" there — and ONLY there, `noMark` — is every
+     asked figure entered. A project's or a pillar's chip keeps reading
+     "3 of 3 entered" until its owner presses the mark: the first build read
+     entered-equals-done for every part and `project-done.py` went 2 red on
+     a unit's chip this change was meant to leave alone (§520.10). */
+  var isDone = function(c){ return !!doneMark(c.id) || (!!c.noMark && c.total > 0 && c.done >= c.total); };
   /* ── A CLOSED REPORT SAYS SO TO THEM TOO (§301.2) ─────────────────
      §220 disables every control in the pane the moment the report is
      submitted or parked — and the word that explains it, `Submitted` /
@@ -34346,20 +34589,28 @@ function ownStateChip(target, list, word){
       return '<span class="rc-state draft">Draft saved</span>' +
         '<button class="rc-reopen" data-unsubmit="' + esc(target) + '">Reopen</button>';
     return '<span class="rc-state done" title="' +
-      esc('Submitted — the ' + submits + ' custodian reopens it.') +
+      esc('Submitted — the ' + submits + ' reopens it.') +
       '">Submitted</span>';
   }
   if (!mine.length)
     return '<span class="pill none" title="' + esc(tip) + '">Your rows only</span>';
-  if (mine.length === 1) {
-    var c = mine[0];
-    return doneMark(c.id)
+  var chipOf = function(c){
+    return isDone(c)
       ? '<span class="rc-state done" title="' + esc(tip) + '">' +
         esc(c.code) + ' · Done</span>'
       : '<span class="rc-state draft" title="' + esc(tip) + '">' +
         esc(c.code) + ' · ' + c.done + ' of ' + c.total + ' entered</span>';
-  }
-  var n = mine.filter(function(c){ return !!doneMark(c.id); }).length;
+  };
+  if (mine.length === 1) return chipOf(mine[0]);
+  /* §520.10: ON THE COMPANY'S OWN REPORT EVERY PART GETS ITS OWN CHIP —
+     Islam: *"as it shows them progress"* — a direction's or a capability's
+     tally each, because the collapsed "Your 2 Pillars · 0 of 2 done" below
+     names a part by the wrong word (a capability is not a pillar) and says
+     nothing about the figures inside it. The chip is §301's own shape,
+     repeated; the two-or-more collapse stays for a unit's and a function's
+     page exactly as it was. */
+  if (top) return mine.map(chipOf).join('');
+  var n = mine.filter(isDone).length;
   return '<span class="rc-state ' + (n >= mine.length ? "done" : "draft") +
     /* NEVER `plural()` HERE (§107.8, and §160.6 for the second time): a
        tenant's label is already plural — `L("pillar","bu")` is "Pillars" —
@@ -46642,8 +46893,8 @@ function competeSlides(u){
   var ul = function(a){ var l = (a || []).filter(function(x){ return String(x || "").trim(); });
     return l.length ? '<ul class="cmpul">' + l.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join("") + '</ul>' : '&mdash;'; };
   var cells = function(f){ return vals.length ? vals.map(f).join("") : '<td>&mdash;</td>'; };
-  return ['<section class="dslide d-compete"' + anch("compete", "After How we compete") + '>' +
-    '<h2>How we compete</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
+  return ['<section class="dslide d-compete"' + anch("compete", "After Competitive Discipline") + '>' +
+    '<h2>Competitive Discipline</h2><table class="cmptab"><thead><tr><th class="cmprow">Discipline</th>' +
     '<th class="cmpd" colspan="' + Math.max(1, vals.length) + '">' +
     (c.discipline ? esc(SMPRules.disciplineName(c.discipline)) : "&mdash;") + '</th></tr></thead><tbody>' +
     '<tr><th class="cmprow">Value</th>' + cells(function(v){ return '<td class="cmpval">' + esc(v.title || "") + '</td>'; }) + '</tr>' +
@@ -57366,7 +57617,7 @@ var COPILOT = (function(){
   var SECTIONS = [
     { k:"foundation", label:"Foundation" },
     { k:"analysis",   label:"Analysis" },
-    { k:"compete",    label:"How we compete" },
+    { k:"compete",    label:"Competitive Discipline" },
     { k:"directions", label:"Directions" },
     { k:"capabilities", label:"Capabilities" },
     { k:"execution",  label:"Execution" },
@@ -59276,7 +59527,7 @@ var COPILOT = (function(){
   function cpProgress(id){
     var l = list(); if (l && l.swotProgress && PANE && PANE.competeTodo) l.swotProgress[id] = { done: PANE.competeDone, of: PANE.competeTodo.length };
   }
-  function cpTitle(){ return "How we compete — " + placeWord(); }
+  function cpTitle(){ return "Competitive Discipline — " + placeWord(); }
   function cpWord(d){ return ((PANE.competeWords || {}).disc || {})[d] || d; }
   /* A press made while an earlier save is still on its way is not dropped:
      the latest patch waits and goes when the line is free. */
@@ -59416,8 +59667,8 @@ var COPILOT = (function(){
           '<div class="copcp-ask"><textarea class="fld" data-cop-cp-ask rows="2" placeholder="Ask for a change — another title, a How to drop, a Measure to add" aria-label="Ask the Copilot to change the table">' + E(CPASKTXT[id] || "") + '</textarea>' +
           '<button type="button" class="copbtn" data-cop-cp-refine' + (busyHere ? ' disabled' : '') + '>Send</button></div>' +
           '<div class="copbtns"><button type="button" class="copbtn quiet" data-cop-cp-chat>Keep chatting</button>' +
-          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to How we compete</button></div>';
-        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under How we compete.");
+          '<button type="button" class="copbtn solid" data-cop-cp-finish>Save to Competitive Discipline</button></div>';
+        if (s.saved) main += cpMsg("product", "Saved as " + E(s.saved.title) + " v" + E(String(s.saved.n)) + ". It is on the plan under Competitive Discipline.");
       }
     }
     return head + '<div class="copsw"><div class="copsw-main">' + main + work + '</div>' + cpSideHtml() + '</div>';
@@ -59488,8 +59739,8 @@ var COPILOT = (function(){
         cpProgress(id);
         var on = typeof compOn === "function" ? compOn(place(), SMPRules.COMPETE) : true;
         var wrote = cpWritePlan(PANE.compete && PANE.compete.table);
-        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the How we compete page."
-          : on ? "" : "Saved. How we compete is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
+        SAY = !wrote ? "Saved as a deliverable. The plan could not be written from here — copy it across on the Competitive Discipline page."
+          : on ? "" : "Saved. Competitive Discipline is switched off for this layer on Client set-up › Structure, so the plan keeps it hidden until it is turned on.";
         LISTS[key()] = null; loadList(true);
         if (wrote && typeof paint === "function") paint(); else draw();
       });
@@ -63019,7 +63270,7 @@ var CLIENTSETUP = (function () {
        `compete` component: off until ticked, and off hides and keeps. */
     if (SMPRules.compOffered(tgt, SMPRules.COMPETE)) {
       var sc = el("section", "stsec"); sc.setAttribute("data-stcompete", k);
-      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "How we compete"));
+      var hc = el("div", "stsech"); hc.appendChild(el("span", "stkind", "Competitive Discipline"));
       var cOn = L.on.indexOf(SMPRules.COMPETE) >= 0;
       hc.appendChild(onOff(cOn, function (v) { if (v !== cOn) compToggle(k, SMPRules.COMPETE); }, k + "|compete"));
       sc.appendChild(hc);
@@ -64908,6 +65159,48 @@ var SYNC = (function () {
      SEAT role the server returns from the session — never the simulated view,
      which is the whole point of the simulation. */
   function isSMOSession() { return !!person && person.role === "super"; }
+  /* ── AND THE BAR SAYS A VIEW IS ON (§519) ────────────────────
+     Islam, of the trail standing at full weight while he viewed as somebody:
+     *"I think yes greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     THE BAR ITSELF IS CORRECT AND STAYS, which is most of what this answers.
+     It is the SIGNED-IN person's chrome — drawn only where the server says
+     `cards`, which is the session's KIND and is fixed at sign-in, so a
+     client's own person can never be shown it whoever they are viewing as
+     — and the viewer switcher is physically inside that same row, so taking
+     the bar away while a view is on would strand the office inside the
+     simulation with no control left to leave it (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the VIEWED person's own
+     access.
+
+     SO IT QUIETENS AND KEEPS WORKING, Islam's A of two drawn with the cost
+     of each stated (rule 1c): the alternative held both menus shut, which
+     costs a real journey — switch back, cross, switch again — and buys two
+     controls that refuse, each of which then has to say why (§221). His
+     worry is about confusion rather than capability, and nothing is taken
+     away.
+
+     ONE ANSWER, FROM `actingAs()` AND NEVER A SECOND TEST (§42, §53.5): that
+     is the same function the save stamps itself with and the same one
+     §383's reads narrow through, so the bar cannot disagree with who the
+     server is judging — and it already carries the switcher's own two guards
+     (the seat that draws it, and the key being on the register), so a
+     bootstrap session pointed at a stranger (§69.15) does not grey the bar
+     for nobody's choice.
+
+     WRITTEN AT THE END OF EVERY PAINT, never at each place `VIEWER` is
+     assigned: there are three such places and one of them is a temporary
+     swap inside a reader (`config-render.js`'s owner walk, restored in its
+     own `finally`), so a per-assignment rule would be both a list to forget
+     and wrong (§104.7). Stored as an ABSENCE, so a build that never writes
+     it reads exactly as the build before (§50.6). */
+  function markViewing() {
+    if (typeof document === "undefined") return;
+    var el = document.documentElement;
+    if (actingAs()) el.setAttribute("data-viewing-as", "1");
+    else el.removeAttribute("data-viewing-as");
+  }
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
@@ -65312,6 +65605,9 @@ var SYNC = (function () {
        when a view-as is real (§42, §53.5). Exported rather than re-asked,
        exactly as `isSMOSession` is below and for the same reason. */
     actingAs: function () { return actingAs(); },
+    /* AND THE CHROME IS MARKED FROM IT (§519), asked rather than re-derived
+       — the shell calls this at the end of every paint. */
+    markViewing: function () { markViewing(); },
     person: function () { return person; },
     /* WHO THE SMO IS, ASKED AND NEVER COPIED (§179). The welcome screen draws
        the viewer switcher too, and the note above isSMOSession() is explicit
@@ -65846,20 +66142,36 @@ var SYNC = (function () {
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot") && !dirPartOnly(); } },
-                  { k:"compete", ac:"g_found", label:"How we compete",
+                    when: function(){ return compOn("group", "swot") && !partOnly(); } },
+                  { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE) && !dirPartOnly(); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    /* §520: a part owner sees their own part and nothing
+                       else — so a capability's owner, who owns no direction,
+                       is not shown the directions rail at all rather than an
+                       empty one (§61). partMine() is the one question. */
+                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
-                    /* §517: and none of the three is shown to a direction
-                       owner the office narrowed to their part. */
-                    when: function(){ return topCapsOn() && !dirPartOnly(); } }];
+                    /* §517 narrowed all three of these together, and §520
+                       measured that this one needs no help: `capsReachable()`
+                       is the MATRIX's own answer and is already narrowed per
+                       role — a capability's owner reaches their own and not
+                       the other, a direction owner reaches none, so for them
+                       `topCapsOn()` is false on its own.
+                       AND HIDING IT WAS THE ONE THING THE HALF EYE MAY NOT DO
+                       (§61): with the business units off a capability is
+                       always a section of this tab and never a destination
+                       (`capAtTop` returns true outright), so `!partOnly()`
+                       here left a capability's owner the Foundation and no
+                       way to their own part at all. The half eye narrows what
+                       is drawn of the COMPANY's plan; what somebody reaches is
+                       the matrix's to say, and this asks it (§53.5). */
+                    when: topCapsOn }];
       } };
   }
   var SUBS = {
@@ -66037,13 +66349,15 @@ var SYNC = (function () {
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn() && !dirPartOnly(); } },
+        when: function(){ return focusOn() && !partOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group") && !dirPartOnly(); } },
+        when: function(){ return templeOn("group") && !partOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
-        when: function(){ return buExists(); } },
+        /* §520: and it is neither the owner's own part nor the Foundation,
+           so it goes with the rest for a narrowed part owner. */
+        when: function(){ return buExists() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -66076,7 +66390,7 @@ var SYNC = (function () {
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   /* spec 064 §3.1: How we compete, after the SWOT. */
-                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                  { k:"compete", ac:"u_anal", label:"Competitive Discipline", render:renderUnitCompete,
                     when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
@@ -67735,6 +68049,23 @@ var SYNC = (function () {
       if (gs) {
         var gsecs = allowed(gs.sections(), t);
         if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+        /* §520.11: A CAPABILITY'S OWNER OPENS ON THEIR CAPABILITY (Islam:
+           "the capability default opens on the perfromance which is wrong it
+           should open on the capbility page itself"). With the half eye on
+           (§517, §520) the directions list is not offered to them, so the
+           §449 test above falls through and they landed on Performance —
+           while the Capabilities section WAS offered and never considered as
+           a landing. If Strategy offers Capabilities, open there with their
+           own capability selected: TOPCAP is set only when they reach exactly
+           one, so an owner of two lands on the first of theirs (stated cost)
+           and nobody else is touched — the office and a direction's owner are
+           answered by the plan test first, and somebody offered neither still
+           lands on Performance. Screen only; nothing stored, no rule moves. */
+        if (gsecs.some(function(x){ return x.k === "caps"; })) {
+          var mine = (typeof capsReachable === "function") ? capsReachable() : [];
+          if (mine.length === 1) TOPCAP = mine[0].id;
+          CURSEC.strategy = "caps"; return "strategy";
+        }
       }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
@@ -77833,6 +78164,37 @@ var SYNC = (function () {
   if (typeof paint === "function") {
     var painted = paint;
     paint = function () { var r = painted.apply(this, arguments);
+      /* ── AND THE TRAIL SAYS A VIEW IS ON (§519) ───────────────────────
+         Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing
+         the white bar at the top which is for the smo only is that a
+         glitch?"* IT IS NOT, and establishing that first was most of the
+         answer: `cards` is the SESSION's kind (`state-api.ts`), fixed at
+         sign-in, so the trail is drawn for Forefront's own people and for
+         nobody else whoever they view as — and the viewer switcher is INSIDE
+         that same row, so a bar that went away would strand the office with
+         no way back to themselves (§61). The CHROME follows the seat on the
+         session, never the simulated view, which is the whole point of the
+         simulation (§185's own three readers of the real session; this is a
+         fourth of that family).
+
+         What was wrong is the WEIGHT: at full strength the trail reads as the
+         viewed person's own access. Islam: *"greyed is better not to get
+         confused that the user has access by anyone else."* Two treatments
+         were drawn at real size with the cost of each stated, and he picked
+         **A** — quieter while a view is on, full weight the moment you switch
+         back, and both menus still working. B (quiet AND held) is recorded as
+         refused: a control that cannot be pressed is how the office loses the
+         way out of the view they are in.
+
+         THE SIGNAL IS `actingAs()` AND NEVER A SECOND TEST (§42, §53.5) — it
+         already carries both guards that make a view-as real rather than a
+         bootstrap session pointed at a stranger. WRITTEN AT THE END OF EVERY
+         PAINT rather than at each `VIEWER` assignment: there are three of
+         those and one is a temporary swap inside a reader (§104.7, a list of
+         call sites is a list somebody forgets to add to). Stored as an
+         ABSENCE (§50.6), so a session nobody is simulating is byte-identical
+         to one that never simulated. */
+      try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }

@@ -9589,3 +9589,6 @@ What to check:
 - As the SMO: the company opens exactly as before.
 
 Merged to main 2026-10-11 on your word.
+
+## §523.1 — Merged to `main` (2026-10-12)
+Merged at `00c0c31` after `main`'s §512–§514 collision was renumbered (ours are §521–§523). Checked: migration chain applied from empty on Postgres 16, build, typecheck, SOP 20/0, hand-over 16/0, built/generated files in step. Live read of the deployment could not be made from the sandbox (proxy refuses the address); real-browser print of the continuous page still owed.

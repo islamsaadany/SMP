@@ -1,4 +1,4 @@
-### Entering figures from the keyboard (built, on the branch, not merged)
+### Entering figures from the keyboard (built, merged to `main` 2026-10-12)
 Reporting is a long page of small boxes, and until now the only way through it
 was the mouse or the tab key, which stops at everything. Islam asked for all four
 of the behaviours put to him, and all four are built.
@@ -51,7 +51,7 @@ the client; then the dates, which are spelt six different ways.
 **Waiting on Islam:** whether a client's own staff get a help page of their own
 — the knowledge base is the office's today, so they have none.
 
-### The platform says it has saved (built, on the branch, not merged)
+### The platform says it has saved (built, merged to `main` 2026-10-12)
 There is no Save button anywhere in SMP and there never was one — every box
 writes itself the moment the cursor leaves it — and nothing on the screen said
 so. A reporter typed a figure, moved on, and had only the absence of an error to

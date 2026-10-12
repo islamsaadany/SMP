@@ -64974,4 +64974,99 @@ own pop-ups moved inside the platform (26 `confirm()` / 11 `alert()` / 1
 the help page for a client's own staff, which is NOT in his order and is named
 rather than dropped (heuristic 10 — the Knowledge base is `when: inOffice()`).
 
-**`main` untouched: the merge is Islam's word, on that merge.**
+**&sect;528.4 &mdash; MERGED TO `main` 2026-10-12 on Islam's word**, and `main` had
+moved **nine commits** under this branch while it was built &mdash; another
+session's &sect;518&ndash;&sect;526.3 (the Competitive Discipline block and four
+Foundation-flow fixes, a capability's owner as a part owner, the Processes SOP
+and its hand-overs, seven UX fixes and that session's own sweep) &mdash; so
+`origin/main` was fetched and READ before anything was merged (&sect;4's
+fetch-and-look, &sect;91). **THE RENUMBER RAN FIRST, WHICH IS THE ONLY MOMENT IT
+IS PROVABLY SCOPED** (&sect;264.3): main had taken &sect;521&ndash;&sect;526 for
+that work while this branch held &sect;521 and &sect;522 for its own, so the two
+moved to **&sect;527 and &sect;528** &mdash; **descending by source**, or each
+pass eats the next (&sect;365.5), in **three spellings** (&sect;336.1), every
+count DECLARED in advance with the pass refused on a mismatch (&sect;344.1,
+&sect;353.4), and the merge base asserted to hold &sect;521&ndash;&sect;528
+**nought** times in every spelling, so every occurrence in the tree was a line
+this branch wrote and there was nothing of main's to sweep up. **AND IT IS
+ASSERTED THAT ONLY CITATIONS MOVED** (&sect;385.3b): 34 lines removed, 34 added,
+**0 differing** once the numbers are masked on both sides. **AND THE SENTENCES
+THAT DESCRIBE THE NUMBERING ARE NOT SWEPT** (&sect;388a, &sect;371.5) &mdash; a
+number in these records is either a LABEL naming a section in this tree, which
+is rightly moved, or a HISTORICAL FACT about a past renumber or a measurement of
+`main` taken at that moment, which must not be, or the record calmly states
+something that never happened.
+**EVERY CONFLICT BY ITS OWN NAMED RULE**: the three record files **COMBINED,
+never picked** (&sect;318.7, &sect;356.17 &mdash; either side taken whole drops
+the other session's round, and there is no `generated-in-step` for prose), with
+every non-blank line of each side asserted present in the result, **0 lost from
+ours and 0 from main's**, and exactly one declared formatting edit; the built
+platform **REBUILT from the merged sources, never merged** (&sect;91) and
+byte-identical to `build.py`'s own output; `sw.js` **rebuilt from main's copy
+with this branch's one line re-applied** (&sect;146.2) at a name past both, and
+the four generated copies under `smp-app/public/` regenerated rather than merged
+(&sect;329, &sect;524.2). **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE PUSH**
+(&sect;94.16): `smp-shell-v6.32-report-keys` against main's
+`v6.31-foundation-flow`, **one** live `const SHELL` &mdash; the other three grep
+hits are prose in that file's own comments, which is &sect;272.8's shape in a
+search rather than in a parser &mdash; `node --check sw.js` clean, and the name
+held by **0 commits in the file's whole history**, which is stronger than
+comparing against main alone (&sect;94.12).
+**THE MERGED RESULT WAS READ, NOT BELIEVED** (&sect;313.37): the names this
+branch deletes were grepped for in the result and the intersection with main's
+own additions is EMPTY, and the duplicate top-level declaration scan over
+build.py's own concatenation (&sect;56.7, &sect;281) reads **30 scripts plus the
+shell's inline block, 1763 names, exactly SIX duplicated** &mdash; all six the
+block &sect;281.1 deliberately leaves in `config-render.js`, at that section's
+own recorded constant offset of 351 lines &mdash; so the merge introduced none.
+**AND THE MERGE'S REACH INTO THE SERVED APP IS A MEASUREMENT RATHER THAN A
+CLAIM**: `git diff --name-only origin/main -- smp-app` returns exactly four
+paths and all four are GENERATED (`public/platform.css`, `public/shell.js`,
+`public/sw.js`, `shell/body.html`), so no `smp-app` SOURCE differs from main and
+that session's own sweep of the served stack still holds.
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (&sect;365), every verdict
+read by its TAIL (&sect;298.3): `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the destinations **SUMMED from the run's own 33
+per-viewer lines** rather than quoted (&sect;332) &mdash; main's own figure to
+the digit, which is what a merge changing no frozen source of theirs must
+reproduce; `built-in-step.py` all good (run AFTER the sweep, since it deletes
+build.py's untracked intermediate in its own `finally`); `report-keys`,
+`save-tip`, `report-blockers`, `report-saves`, `report-note-wrap`,
+`submit-gate`, `gap-walk`, `gap-fill`, `enter-commits`, `save-said`,
+`save-flush` and `safety-banners` all green; `test-authorize` **1057/0**, change
+list **140/0**, platform rules **69/0**. `generated-in-step`'s one FAIL is
+&sect;349.4's uncommitted-tree guard saying WHICH errand it is, with its
+load-bearing byte-identical line and the carried-module lines (&sect;330,
+&sect;335) and the two named rewritten exceptions (&sect;316.7) all ok.
+**TWO REDS ARE MAIN'S AND ARE LEFT AS MAIN'S** (&sect;303, which settles whose a
+red is and says nothing about whether anybody clears it): `no-jump` **1 JUMPED**
+on the register's Add dialog, a surface this work never touches, and
+`test-nav-row`, which **dies identically on `origin/main`'s own built worktree**
+at the same line of its own vm sandbox.
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED**
+(spec 029): not one `api/`, `lib/` or `db/` RULE is in this branch's work, so
+nothing stored moves, nothing is migrated and nothing about how a save is judged
+changes &mdash; a tab left open on the old build keeps saving exactly as before.
+**THE WITNESSES WERE MEASURED ON THE MERGED TREE AND THE `SHELL` NAME IS NOT ONE
+OF THEM** (&sect;316.10, &sect;365, &sect;367 &mdash; `build-sw.mjs` drops the
+caching half where `SHELL` lives, so a bumped name reaches only the offline
+copy): `shell.js` **4,674,322 &rarr; 4,692,360**, `platform.css` **785,658
+&rarr; 788,369**, and the served worker's own **release stamp** `fe9f934f8a46966a`
+&rarr; `c0796429a11656a6` &mdash; which is &sect;397 working as designed, since a
+moved stamp is what fires &sect;258's *"A newer version of the platform is
+ready"* for a tab left open.
+**AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS
+UNVERIFIED AND SAID TO BE** (&sect;54.5, rule 3a, &sect;379.5's lesson that a
+limitation is TRIED rather than quoted): every request to the production address
+answered `http=000` with nothing transferred, the CONNECT tunnel negotiated
+through this environment's own proxy and the host itself unreachable, with the
+proxy reporting nothing tool-scoped in the way. This is the condition
+&sect;377.6 and &sect;378.2 already record for this container, and it is main's
+own as of its last merge. **So nobody here has seen production serve this
+commit**, and the three witnesses above are recorded for whoever reads the live
+site: each is asserted to have MOVED, or a match would hold whether or not the
+build landed (&sect;113.8). **THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED**
+(&sect;91, &sect;374.1, &sect;375.2, &sect;377.6, &sect;379.4): while it stays
+behind, `main`'s tip is on no other ref by construction, and putting that SHA on
+a second ref is the one act left that could still cost the deployment &mdash; a
+fast-forward is one command whenever somebody has read the live site.

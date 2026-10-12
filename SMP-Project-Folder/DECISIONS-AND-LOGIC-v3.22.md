@@ -64274,3 +64274,112 @@ deployment and which ref gets it is a race already lost — the way back is a
 commit `main` holds and the branch does not, and this block is it, which the
 record owed anyway. **The branch is held behind until the live read succeeds**
 and fast-forwarded only then (§378.2, §380.2).
+
+## §524 — A part owner's role names itself and no place (2026-10-12)
+
+Islam, with two screenshots of the strip beside the viewer switcher — one
+reading `VIEWING AS [Amr Hassan — Retail ▾] | Direction owner, the group` and
+the other `VIEWING AS [Ehab Hosny — the group ▾] | Capability owner, ERP
+Enhancement and Digital Transformation`: *"why in the capability the name in the
+top is meniotning the capability itself. it should be similar to the direction a
+capbility owner the group that's all"*. Then, of the two options put to him with
+the cost of each, **a third and simpler decision**: *"a capability owner sits on
+the group and by the way it was named a company already so I don't know why we
+need why we mention a group. direction owner or capability owner is enough for
+now ..noting that same people might be functions owners .. but as you know
+directions & capabilities are higher in hirarachy"*.
+
+**THE TWO LINES WERE EACH RIGHT ABOUT THEIR OWN HALF, AND THE CAUSE IS AN
+ASYMMETRY IN WHERE THE ROLE IS DERIVED.** §505 derives `dirowner` at
+**`"group"`**, so `placeLabel` answers *"the group"* and §178's rule — *a role
+held anywhere other than where the person sits is NAMED* — prints it; §412
+derives `capowner` at **`"cap:<id>"`**, and `placeLabel`'s `cap:` branch names a
+capability by its OWN name, so the same rule printed the whole capability's
+title. Neither function is wrong where it stands, which is why the fix is in
+neither: **changing `placeLabel` renames the capability on every surface §334
+deliberately names it on** (the cycle board, the register's Unit cell, the role
+chips and the switcher's own option list), and **changing the derivation target
+moves ACCESS**, because `at:"cap:<id>"` is what `roleOwns`, `grantAtPage` and
+`capsReachable` key on. So the place is dropped in `viewerRoleLine` alone, for
+the two roles he named, and nowhere else — `LINE_NO_PLACE = ["dirowner",
+"capowner"]`, an existing pairing (§517's own `PART_ONLY_ROLES`) rather than a
+new idea about which roles are alike.
+
+**IT REWRITES §178'S RULE RATHER THAN LOOSENING IT** (§218): that rule is about
+a role held in a PLACE, and a part owner's role already names the part in its
+own word — *Direction owner*, *Capability owner* — so a place after it says the
+same thing twice (§87) or, on a capability, says it at the length of the
+capability's own title. The seat is untouched and the rule it rests on stands:
+the select six pixels left has just said where the person sits, so the line
+never repeats it.
+
+**THE STATE IS MADE, BECAUSE NEITHER ROLE EXISTS ON THE WORKED EXAMPLE**
+(§255): its one capability carries no head and no custodian (§336), and
+`ownsTopPillar` answers false while business units are on (§505) — so every
+assertion here would otherwise be true of nothing. **AND THE TWO SEATS ARE
+MATCHED DIFFERENTLY**, which is what the fixture had to learn: §412 compares the
+person's **KEY** and §505 compares a top item's **OWNER NAME** through
+`namedOn` — the first fixture set `cap.head` to a name and derived nothing at
+all. The state is put back (§94.2), with three existing register people rather
+than pushed ones, or a pushed person's seat reads as a raw key.
+
+**§524.1 — AND THE SECOND FALSIFICATION IS WHY THE CONTROL IS NAMED.** Proved
+able to fail twice from the SOURCES (§276), each break asserted to have matched
+exactly once before it was written (§344.1): the no-place branch removed goes
+**2 red**, printing Islam's own two screenshots verbatim (`'Super user ·
+Function head, Strategy Management Office · Capability owner, Product Mindset'`
+and `'BU owner · Direction owner, the group'`); the drop WIDENED to every role
+goes **2 red** — **and §3b's own two assertions went GREEN on it**. What caught
+that build is §3's general rule and the **named control** (a capability's
+custodian still naming its capability), which is §113.8 paying for itself in
+the wild: *a check written against the fault alone would have applauded the
+dangerous build.*
+
+**§524.2 — AND A CAPABILITY'S CUSTODIAN IS THE ONE ROW STILL NAMING A PLACE,
+WHICH IS A FINDING RATHER THAN AN OMISSION**: a direction's custodian derives
+`dirowner` and a capability's derives `custodian` (`lib/rules.js`'s own
+comment), so the two sides of one pairing read differently — *Direction owner*
+with no place against *Strategy custodian, <the capability's name>*. It is the
+check's own control, so it cannot change unnoticed; whether it should is
+Islam's, and recorded rather than ridden in here (rule 1b).
+
+**§524.3 — AND "THE GROUP" IS A WIDER FAULT, NAMED AND NOT FIXED.** His second
+point is right: a real terminology row for the top level exists (`topword`,
+§404) and is honoured by **eight** readers across the sources, and
+**`placeLabel` is not among them** — its first line is the literal
+`if (!at || at === "group") return "the group";`. So any client that has named
+its top level a company still reads *"the group"* wherever that function
+answers, which is the register, the chips, the board and the switcher. This
+round removes the one place he saw it and changes none of those; correcting
+`placeLabel` is a change to four surfaces at once (rule 1b, rule 2b).
+
+**§524.4 — AND THE ROLE ORDER IS THE REVERSE OF HIS NOTE**, measured rather
+than assumed: `personRoles` mints seat → unit → function → capability →
+`powner` → `plowner` → **`dirowner` last** → the floor, so somebody who is both
+a function owner and a direction owner reads the function first. He says
+directions and capabilities are higher; nothing is reordered here, because the
+order reaches the chips and the matrix as well as this line.
+
+**VERIFIED**: `checks/viewer-line.py` **all good**, REWRITTEN never loosened
+(§218) and red **2 / 2** from the SOURCES, the tree restored from the saved copy
+and the rebuild asserted **byte-identical** (§343.9); seven neighbouring browser
+checks green through `qa-run.py` with `SMP_CHROME` (`direction-part`,
+`access-merged`, `capability-first`, `single-company`, `welcome`, `stay-put`,
+`viewer-line`); `built-in-step.py` all good with the shipped file byte-identical;
+the four generators re-run and `generated-in-step` every comparison ok, its one
+FAIL being §349.4's guard refusing an uncommitted tree and saying which errand
+that is. **Screen only**, read off the diff: one product source
+(`config-data.js`), no `api/`, `lib/` or `db/` file, nothing stored moves,
+nothing is migrated, and no rule about who may read or write anything changes —
+`personRoles`, `placeLabel` and both derivations are untouched. `sw.js` bumped
+to `v6.31-part-owner-line` because the built file's bytes changed (§91), proved
+held by no commit in the history and to be confirmed again against
+`origin/main` immediately before any push (§94.16).
+
+**AND THE NUMBER MOVED BEFORE ANYTHING WAS COMMITTED** (§264.3): built as
+§521, and `origin/main` has taken §521, §522 and §523 for another session's
+Processes hand-overs and SOP work — itself renumbered up into those numbers by
+`638d09e`. Five citations across two source files, one spelling, the count
+declared in advance and the pass refused on a mismatch (§344.1, §353.4), applied
+to the file on disk (§376.1), with no sentence recording a past renumber swept
+with it (§388a).

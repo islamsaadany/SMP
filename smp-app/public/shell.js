@@ -9090,12 +9090,29 @@ function placeLabel(at){
    anywhere ELSE is named, and a role held in SEVERAL places names them all,
    including the seat: dropping the seat from a list would read as though they
    held it only in the other place. */
+/* §524: A PART OWNER'S ROLE NAMES ITSELF AND NO PLACE. Islam, of the strip
+   beside the viewer switcher -- *"why in the capability the name in the top is
+   meniotning the capability itself. it should be similar to the direction"*,
+   then *"direction owner or capability owner is enough for now"*. §505 derives
+   `dirowner` at "group", so that line read "the group"; §412 derives `capowner`
+   at `cap:<id>`, and `placeLabel` names a capability by its OWN name (§334,
+   deliberately -- the cycle board, the register's Unit cell, the role chips and
+   the switcher's own option list all name it that way), so the same line read
+   the whole capability's title. NEITHER OF THOSE TWO MAY MOVE: changing
+   `placeLabel` renames the capability on every one of those surfaces, and
+   changing the derivation target moves ACCESS, because `at:"cap:<id>"` is what
+   `roleOwns`, `grantAtPage` and `capsReachable` key on. So the place is dropped
+   HERE, for these two roles, and nowhere else. */
+var LINE_NO_PLACE = ["dirowner", "capowner"];
+
 function viewerRoleLine(p){
   var seat = placeLabel(personAt(p));
-  var byRole = {}, order = [];
+  var byRole = {}, bare = {}, order = [];
   personRoles(p).forEach(function(r){
-    var n = roleName(r.role), where = placeLabel(r.at);
+    var n = roleName(r.role);
     if (!byRole[n]) { byRole[n] = []; order.push(n); }
+    if (LINE_NO_PLACE.indexOf(r.role) >= 0) { bare[n] = true; return; }
+    var where = placeLabel(r.at);
     if (byRole[n].indexOf(where) < 0) byRole[n].push(where);
   });
   /* Somebody who holds nothing says so and stops. The seat is on the control
@@ -9105,6 +9122,7 @@ function viewerRoleLine(p){
   if (!order.length) return "No role";
   return order.map(function(n){
     var pl = byRole[n];
+    if (bare[n] || !pl.length) return n;
     if (pl.length === 1 && pl[0] === seat) return n;
     return n + ", " + andList(pl);
   }).join(" \u00b7 ");

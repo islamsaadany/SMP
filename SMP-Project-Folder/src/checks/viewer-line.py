@@ -25,6 +25,23 @@ WHAT IS ASSERTED, and why each is here:
   build that printed every place twice, and one that only proved they are
   absent would pass on a build that printed none.
 
+· A PART OWNER'S ROLE NAMES NO PLACE AT ALL (§524), which REWRITES the rule
+  above for two roles rather than loosening it (§218): a direction owner and a
+  capability owner read `Direction owner` and `Capability owner` and stop.
+  §3 asserts the general rule with those two taken out, and §3b asserts them
+  on their own — both ends, or a build that dropped every place everywhere
+  satisfies §3b perfectly while saying nothing on the rest of the register.
+  THE STATE IS MADE (§255): the worked example's one capability carries no
+  head and no custodian (§336), and `ownsTopPillar` answers false while
+  business units are on, so NEITHER role exists on the demo and both
+  assertions would otherwise be true of nothing.
+
+· AND A CAPABILITY'S CUSTODIAN STILL NAMES THE CAPABILITY, which is the
+  CONTROL rather than a settled decision (§113.8): Islam named two roles, so
+  the drop is scoped to those two, and asserting the third keeps a build that
+  dropped the place for every role at a capability from passing. If he rules
+  on the custodian, this is the assertion to REWRITE.
+
 · IT IS ONE LINE, AND THE WHOLE OF IT IS ON A HOVER. The strip clips with an
   ellipsis, and the half that gets cut is the place — so the title has to
   carry it (§88's shape).
@@ -90,7 +107,7 @@ with sync_playwright() as p:
       seat: placeLabel(personAt(p)),
       line: window.__line(p),
       roles: SMPRules.personRoles(world(), p).map(r => ({
-        name: roleName(r.role), at: placeLabel(r.at) }))
+        role: r.role, name: roleName(r.role), at: placeLabel(r.at) }))
     }))""")
     ck("there is a register to measure", len(rows) > 10, len(rows))
     dashes = [r["key"] for r in rows if "—" in r["line"]]
@@ -113,7 +130,8 @@ with sync_playwright() as p:
         # a role nobody holds must not appear
         for n in set(x for x in ["Super user", "Group CEO", "Company CEO", "BU owner",
                                  "Strategy custodian", "Function head", "Project owner",
-                                 "Pillar owner"]) - set(names):
+                                 "Pillar owner", "Capability owner",
+                                 "Direction owner"]) - set(names):
             if n in r["line"]:
                 extra.append(r["key"] + " claims " + n)
     ck("every role the rule mints is on the line", not missing, missing[:4])
@@ -121,11 +139,18 @@ with sync_playwright() as p:
 
     # ── 3 · THE PLACE IS NAMED WHERE IT DIFFERS, AND ONLY THERE ──────────
     print("\n3 · a place away from the seat is named; the seat itself is not")
+    # §524 TAKES TWO ROLES OUT OF THIS RULE RATHER THAN LOOSENING IT (§218):
+    # a direction owner and a capability owner name no place at all, so their
+    # rows would trip `away_named` here while behaving exactly as decided.
+    # They are asserted on their own in §3b, with the state MADE (§255).
+    NOPLACE = ("dirowner", "capowner")
     away_named, seat_repeated = [], []
     for r in rows:
         seat = r["seat"]
         byrole = {}
         for x in r["roles"]:
+            if x["role"] in NOPLACE:
+                continue
             byrole.setdefault(x["name"], set()).add(x["at"])
         for n, places in byrole.items():
             if places == {seat}:
@@ -141,14 +166,71 @@ with sync_playwright() as p:
        not seat_repeated, seat_repeated[:4])
     # both ends: at least one of each case must EXIST on this register, or the
     # two assertions above are true of nothing (§113.8)
+    def placed(r):
+        return [x for x in r["roles"] if x["role"] not in NOPLACE]
     cases_away = [r["key"] for r in rows
-                  if any(x["at"] != r["seat"] for x in r["roles"])]
+                  if any(x["at"] != r["seat"] for x in placed(r))]
     cases_seat = [r["key"] for r in rows
-                  if r["roles"] and all(x["at"] == r["seat"] for x in r["roles"])]
+                  if placed(r) and all(x["at"] == r["seat"] for x in placed(r))]
     ck("the register holds somebody with a role away from their seat",
        len(cases_away) > 0, cases_away[:3])
     ck("...and somebody whose roles are all where they sit",
        len(cases_seat) > 0, cases_seat[:3])
+
+    # ── 3b · A PART OWNER'S ROLE NAMES NO PLACE (§524) ───────────────────
+    # THE STATE IS MADE (§255). The worked example's one capability carries no
+    # head and no custodian (§336), and `ownsTopPillar` answers false while
+    # business units are on (§505) — so NEITHER of the two roles §524 is about
+    # exists on the demo, and every assertion here would be true of nothing.
+    # Three EXISTING register people are used rather than invented ones, so
+    # each one's seat is a real label and §3's own comparison stays honest.
+    print("\n3b · a direction owner and a capability owner name no place")
+    made = pg.evaluate("""() => {
+      const cap = (GROUP.capabilities || [])[0];
+      const who = PEOPLE.filter(personActive).slice(0, 3);
+      if (!cap || who.length < 3) return { ready: false };
+      const keep = { head: cap.head, cust: cap.custodian, viewer: VIEWER,
+                     items: GROUP.items, struct: GROUP.structure };
+      // §412 matches the person's KEY; §505 matches a top item's OWNER NAME
+      cap.head = who[0].key;
+      cap.custodian = who[1].key;
+      GROUP.structure = Object.assign({}, GROUP.structure || {},
+                                      { bu: { exists: false } });
+      GROUP.items = [{ id: "VL1", code: "D001", name: "Growth",
+                       owner: who[2].name, custodian: "" }];
+      const read = (p) => ({
+        key: p.key,
+        seat: placeLabel(personAt(p)),
+        line: window.__line(p),
+        roles: SMPRules.personRoles(world(), p).map(r => ({
+          role: r.role, name: roleName(r.role), at: placeLabel(r.at) }))
+      });
+      const out = { ready: true, capName: placeLabel("cap:" + cap.id),
+                    owner: read(who[0]), cust: read(who[1]),
+                    dir: read(who[2]) };
+      // PUT IT BACK (§94.2) — the sections after this one measure the register
+      cap.head = keep.head; cap.custodian = keep.cust;
+      GROUP.items = keep.items; GROUP.structure = keep.struct;
+      VIEWER = keep.viewer; paint();
+      return out;
+    }""")
+    ck("the state could be made", made.get("ready"), made)
+    if made.get("ready"):
+        cn = made["capName"]
+        o, c, d = made["owner"], made["cust"], made["dir"]
+        ck("the capability owner role was derived",
+           any(x["role"] == "capowner" for x in o["roles"]), o)
+        ck("...and reads its role and stops",
+           "Capability owner" in o["line"] and cn not in o["line"], o)
+        ck("the direction owner role was derived",
+           any(x["role"] == "dirowner" for x in d["roles"]), d)
+        ck("...and reads its role and stops",
+           "Direction owner" in d["line"] and "the group" not in d["line"], d)
+        # THE CONTROL, NAMED (§113.8): Islam named two roles, so the drop is
+        # scoped to those two. A build that dropped the place for every role
+        # held at a capability would pass both assertions above and fail here.
+        ck("a capability's custodian still names the capability (the control)",
+           cn in c["line"], c)
 
     # ── 4 · THE STRIP AND THE DROPDOWN TELL ONE STORY ────────────────────
     print("\n4 · the strip agrees with the control beside it")

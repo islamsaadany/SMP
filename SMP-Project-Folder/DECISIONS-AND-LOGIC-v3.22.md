@@ -63358,3 +63358,159 @@ what a failed save tells the client, and the dates. And **the help page for a
 client's own staff is NOT in his order** and is named rather than dropped: the
 Knowledge base is `when: inOffice()` (§119.4), so heuristic 10 is unanswered
 for everybody outside the office.
+
+---
+
+## §522 — Entering figures from the keyboard (usability audit, item 2; 2026-10-12)
+
+Islam, of the four behaviours put to him: **"all"**.
+
+**WHAT WAS MEASURED FIRST, BECAUSE THE ASK WAS FOUR THINGS AND ONLY ONE OF THEM
+IS ABOUT SPEED.** A nine-row pillar's Reporting page draws eighteen tab stops —
+a figure, then the note that explains it, then the next figure — so entering nine
+numbers meant Tab, Tab, Tab, nine times over, and every second stop was a box
+most rows never need. A long report is not slow because the boxes are slow; it is
+slow because half of what the keyboard walks is not the work.
+
+**1 · ENTER MOVES TO THE NEXT FIGURE** (Shift+Enter back), skipping the notes.
+The cost was stated before he chose it and is the smaller half of a pair: Enter
+stops meaning *just save* — and it already saved, because a bound field writes
+when the cursor leaves it (§35), so nothing is lost and what is gained is that
+the leaving is one key rather than a reach for Tab past a box.
+**AT EITHER END ENTER IS LEFT TO THE BROWSER**, so the first and last box behave
+as every other field in the product does rather than trapping the cursor in a
+loop nobody asked for.
+
+**2 · ALT+ENTER IS §279'S WALK FROM THE KEYBOARD**, and it is the one that makes
+a long report feel short, because that walk SKIPS WHAT IS ALREADY ANSWERED —
+Enter steps to the next box and Alt+Enter steps to the next box that still owes
+something. Two keys for two questions, rather than one key guessing which was
+meant. **AND THE WALK HOLDS NOTES AS WELL AS FIGURES** (§105: a figure at risk
+carries an explanation before it can be submitted), which is why §9's own
+assertion had to be rewritten — see below.
+
+**3 · ESCAPE PUTS THE BOX BACK** to what it held before this visit, which is what
+the People register already does, so it is one answer in a second place rather
+than a second answer (§53.5). **The cursor stays in the box** — putting a value
+back and then throwing the person out of the field would make the undo cost a
+second reach — and **the stored row is not touched**, because nothing was
+committed while they were still in it.
+
+**4 · THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK.** `want` already
+answers *is this box part of the work* (§104.8), so the box is still DRAWN and
+still typeable and what goes is one stop between every figure and the next — nine
+of eighteen on that pillar. **Alt+N keeps it reachable** (§61), and the cost is
+named rather than discovered: `capNoteBox` passes `want:false` **ALWAYS** —
+§279's own recorded not-done — so on a CAPABILITY function every note leaves the
+tab path and the key is the only road to it.
+
+**§271 IS THE ONE RULE "all" DOES NOT OVERRIDE, AND IT WAS STATED AS A FACT
+RATHER THAN A CAVEAT**: Enter inside a reporting note is a NEWLINE, because a
+note is prose somebody is explaining a figure in and it is the one prose field a
+reporter is *required* to write. So the Enter rule exempts that box — **and the
+exemption is held in TWO places** (the handler's own `typed` test and
+`repTypedBoxes`' `INPUT` filter), which is why breaking either alone leaves the
+check green and both 0-red controls are KEPT and NAMED as controls (§298.2).
+
+**NOTHING DRAWN CHANGES, SO RULE 1c HAS NOTHING TO SIGN OFF** — and that is a
+measurement rather than a promise: every hint rides a hover and an
+`aria-keyshortcuts`, which is what the eye and the monthly mark already do
+(§88, §278.2, §286). The one piece of discoverability is the Next button's
+`title`, which **had none at all**, and it is **never one per box** (§94.15) —
+with its own stated cost: with nothing left to walk the button is not drawn
+(§223), so the hover has no home exactly when somebody has finished.
+
+**ONE LIST, READ BY BOTH WALKS AND BY THE KEYS** (`REP_BOXES`, §104.7, §53.5),
+and the wiring is in the paint tail beside `repMarkControls()` rather than in
+`wire()`, because eight renderers draw these boxes and `wire()` is eight places
+to forget; idempotent per element on `data-repkeys` (§24, §47.2).
+
+**ONE PRODUCT DEFECT, FOUND BY THE CHECK AND NOT BY READING**: at the end of the
+list `repStep` dropped the focus to the body, because the step landed on an
+element that is not there — `gapLight(els[here + by] || els[here])` keeps it on
+the box it was already on, which is what *at either end, do nothing* has to mean
+in practice.
+
+**§522.1 — FIVE OF THE CHECK'S OWN FAULTS, EACH AN OLD RULE IN A NEW PLACE.**
+A probe with a trailing semicolon in its arrow body (§104.7); §1 asking for a
+`Y/N` target the demo does not hold, so the state is MADE (§255, `make_yn()`);
+the focus settled in two acts, so a probe reading it between them measured
+nothing; **§9's assertion could not fail** (§113.8) — its precondition is set by
+the check's own `gapLight`, which writes the very attribute it then asserted —
+rewritten as MEMBERSHIP in the walk's own field list with the target asked of the
+page (§94.8, §218); and **a length test reported a correct build broken**,
+because the walk holds notes and the two counts legitimately differ.
+
+**§522.2 — AND FIVE HARNESS FAULTS, ONE OF THEM &sect;298.3's OWN RULE BROKEN BY
+THE HARNESS THAT QUOTES IT.** Six neighbours were run through a grep for
+`FAIL|passed|FAILED|all |good|Error|Traceback` and **printed nothing**, which is
+indistinguishable from a clean run: **a grep is not a verdict, and an empty grep
+result is not a pass** — all six were re-read by TAIL and all six are green.
+Beside it: a saved build named `built.good` ran **no script at all** over
+`file://` with no console error and no pageerror, because **Chromium decides HTML
+by file extension** (renamed `built-good.html`, it runs); a one-line break pattern
+that never matched the multi-line source, so the run was green for the wrong
+reason (§54.5, §344.1 — assert the break MATCHED before writing it); two
+mis-escaped patterns in `break.py`; and my own §522 comment wrong twice
+(§104.8).
+
+**§522.3 — AND THE REPAIR OF A STALE NEIGHBOUR, FOUND WHILE ESTABLISHING WHOSE
+THE REDS WERE.** `checks/enter-commits.py` read **2 FAILED** and was established
+as not this work's by reproducing it identically on `origin/main`'s own build
+(§303) — and §303 settles whose a red is and says nothing about whether anybody
+clears it (§442.11), so it was then measured. Its §3 **never navigated** and
+inherited §2's page — a pillars FUNCTION's Overview, where §213 draws no clauses
+at all: measured, **0** `.clause` boxes there against **6** on a unit's
+Foundation. So `press_enter_in` matched nothing, returned `None`, and both
+assertions failed **with no detail printed** (the tell: `ck` prints its detail
+only when truthy) on a build whose behaviour is exactly right — §50.6's family,
+a probe measuring the page a previous section left. **REWRITTEN, NEVER LOOSENED**
+(§218): it navigates, and **the box is asserted FOUND before Enter is asserted of
+it**, or a selector that stops matching reports as a behaviour fault for the
+second time (§215). **Proved able to fail from the SOURCES** (§276, §238's hashed
+CSP silencing an edited built file): widening §229's `.grow` gate so Enter wrongly
+reaches a `rows="2"` paragraph box reddens the same two assertions — **and now
+prints the defect in its own words** (`newline: False, stillFocused: False`),
+which is the state the old version could not tell apart from a missing selector.
+Restored from the saved copy rather than with `git checkout` (§343.9), and the
+rebuild asserted byte-identical.
+
+**AND §229 CORRECTLY DOES NOT REACH A CLAUSE BOX, MEASURED RATHER THAN
+ASSUMED**: that box is `rows="2"` and not `.grow` (className `'fld '`), and
+§229's keydown is wired inside the `TEXTAREA` branch gated on `.grow` — so it has
+never reached an INPUT however that input is bound, which is why §522's handler
+has no conflict with it.
+
+**VERIFIED**: `checks/report-keys.py` all good, proved able to fail **THIRTEEN**
+ways from the SOURCES (§276) — `no-step` 4 · `shift-forward` 2 · `end-drops` **0,
+the recorded control** · `end-both` 3 · `note-steps` **0, the recorded control** ·
+`note-steps-both` 5 · `no-escape` 2 · `no-altn` 1 · `no-walk` 1 · `id-only` 1 ·
+`no-announce` 3 · `note-in-tab` 1 · `no-hint` 1 — every restore reporting `SAME`.
+Beside it: `enter-commits` **all ok** (repaired) and red 2 from the sources,
+`report-blockers` ALL GREEN, `report-saves` OK, `report-note-wrap` ALL GREEN,
+`submit-gate` ALL OK, `gap-walk` all good, `gap-fill` ALL OK, `built-in-step.py`
+all good, `generated-in-step` every served copy byte-identical to its generator
+(its one FAIL is §349.4's guard refusing an uncommitted tree and saying which
+errand that is), and `qa.py` through `qa-run.py` **33 viewers / 234 destinations /
+ERRORS none** — §521's own figure to the digit, which is what a round that adds
+KEYS rather than PLACES must reproduce.
+
+**SCREEN ONLY, READ OFF THE DIFF**: nothing stored moves, nothing is migrated, no
+rule about who may save what changes — so **no forced sign-out is owed** (spec
+029). The built file's bytes changed, so **`sw.js` is bumped** (§91) to
+`smp-shell-v6.29-report-keys`, a name confirmed against `origin/main` and held
+nowhere in the history (§94.12, §94.16).
+
+**`no-jump`'s 1 JUMPED IS NOT THIS WORK'S AND IS RECORDED RATHER THAN FIXED**
+(§303, rule 1b): *adding a person, through the dialog* — box `top 600 → 0` —
+reproduces with identical numbers on the build before §522 **and** on
+`origin/main`'s own build. It is the register's Add dialog, a surface §522 does
+not touch.
+
+**RECORDED, NOT DONE** — the rest of Islam's own queue, in his order: the browser's
+own pop-ups moved inside the platform (26 `confirm()` / 11 `alert()` / 1
+`prompt()`), what a failed save tells the client, and the six date spellings; and
+the help page for a client's own staff, which is NOT in his order and is named
+rather than dropped (heuristic 10 — the Knowledge base is `when: inOffice()`).
+
+**`main` untouched: the merge is Islam's word, on that merge.**

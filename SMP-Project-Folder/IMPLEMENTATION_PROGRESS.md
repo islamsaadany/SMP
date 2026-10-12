@@ -1,4 +1,57 @@
 
+### Entering figures from the keyboard (built, on the branch, not merged)
+Reporting is a long page of small boxes, and until now the only way through it
+was the mouse or the tab key, which stops at everything. Islam asked for all four
+of the behaviours put to him, and all four are built.
+
+**Enter moves to the next figure**, Shift+Enter back, skipping the note boxes. At
+the last box Enter does what it always did — the box keeps the cursor and the
+figure is already saved — because a key that swallows a press and does nothing
+reads as broken.
+
+**Alt+Enter is the *Next →* button from the keyboard**, so it skips every box that
+is already answered. That is the one that makes a long report feel short rather
+than merely shorter.
+
+**Escape puts a box back** to what it held before you started typing, exactly as
+it does on the People register, and leaves the cursor where it is.
+
+**The note box is out of the tab path** unless that row is at risk and owes an
+explanation — on a nine-row pillar that was nine of eighteen stops spent on a box
+nobody is being asked to fill — and **Alt+N** opens the row's note whenever you
+want it.
+
+One thing stays exactly as it was: pressing Enter inside a note still makes a new
+line. A note is the sentence somebody writes to explain a figure, and it is the
+one place in the product where a paragraph is required, so it keeps its key.
+
+**Nothing on any screen looks different.** Every hint rides a hover and the
+keyboard-shortcut label a screen reader reads, which is how the hide-row eye and
+the monthly mark already work, so there was nothing visual to sign off.
+
+**One real fault was found while building it**: walking past the last box dropped
+the cursor onto the page itself, so the final figure of a pillar lost focus on the
+one press meant to move it. Fixed, and the check now presses both ends.
+
+The new check is all good and was proved able to fail thirteen different ways;
+two of those breaks came back clean and are recorded as such rather than quietly
+counted, because the behaviour they aim at is held in two places at once. Six
+neighbouring checks and the whole-platform walk (33 viewers, no errors) are green.
+Nothing stored moves, nothing is migrated, nobody is signed out, and no rule about
+who may save what has changed.
+
+**One neighbour was repaired on the way**: a check about the Enter key had been
+pressing a box on a page that does not draw one, so it reported two failures on a
+build that was behaving perfectly. It was failing the same way on `main`, so it
+was stale rather than broken by this; it now finds the box before it presses it,
+and was proved able to fail.
+
+**Next, in Islam's order:** the browser's own pop-up boxes moved inside the
+platform (26 confirms, 11 alerts and one prompt); then what a failed save tells
+the client; then the dates, which are spelt six different ways.
+**Waiting on Islam:** whether a client's own staff get a help page of their own
+— the knowledge base is the office's today, so they have none.
+
 ### The platform says it has saved (built, on the branch, not merged)
 There is no Save button anywhere in SMP and there never was one — every box
 writes itself the moment the cursor leaves it — and nothing on the screen said
@@ -29,12 +82,6 @@ keeps the message up.
 38 checks on the message itself, all good, each one proved able to fail; the
 whole-platform walk, 33 viewers, no errors. Nothing stored moves, nobody is
 signed out, and nothing but the screen changed.
-
-**Next, in Islam's order:** keyboard shortcuts for entering figures; then the
-browser's own pop-up boxes moved inside the platform; then what a failed save
-tells the client; then the dates, which are spelt six different ways.
-**Waiting on Islam:** whether a client's own staff get a help page of their own
-— the knowledge base is the office's today, so they have none.
 
 ### Helicopter view — choose which processes to show (built, on the branch, not merged)
 A "Processes" dropdown beside Milestones | Cards: tick the processes you want (ticking a main ticks its subs, search by code or name, Select all / none). It applies to both views and to the PNG download. Unticking only hides it from the picture; nothing is deleted. It starts with everything shown and remembers your choice in that browser. A process that picks up from a hidden one says "from ADM105, hidden". Still to do: look at it on a real workspace.

@@ -3699,10 +3699,25 @@ function textOr(page, value, cls, setter){
    somebody is explaining themselves in. Nothing is needed to get it: that key
    handler is wired in the `[data-fld]` branch, which these fields do not pass
    through, so `grow` here means "size yourself to your content" and nothing
-   about the key. */
+   about the key.
+
+   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§522, item 4 of
+   Islam's own four). `want` IS "this row needs explaining" — §105 holds Submit
+   until a figure at risk carries one — so it is already the answer to "is this
+   box part of the work", and no second test is invented for it (§104.8). With
+   it false the box is still DRAWN, still typeable, still read by everything
+   that reads a note: what goes is one stop between every figure and the next,
+   which on a nine-row pillar is nine stops of eighteen.
+
+   AND WHAT KEEPS IT REACHABLE IS A KEY, NEVER THE ABSENCE OF THE ATTRIBUTE
+   (§61): Alt+N from any figure box on the row opens its note, wired in
+   `repKeys()` beside the Enter step. That matters most on a CAPABILITY
+   function, where `capNoteBox` passes `want:false` ALWAYS (§279's own recorded
+   not-done), so EVERY note there leaves the tab path and the key is the only
+   road to it — said here rather than discovered on that page. */
 function noteBox(hook, id, value, want){
   return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1" placeholder="' +
+    '="' + esc(id) + '" rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
     (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
@@ -6394,8 +6409,22 @@ function reportBar(target){
   /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure
      in, the only thing left is on another tab, and a walk button that could
      only ever wrap on itself is a control with nothing behind it. */
+  /* AND THE KEYBOARD IS NAMED ON THE ONE CONTROL THAT IS ABOUT GETTING
+     THROUGH THE REPORT (§522): four keys were added and nothing drawn, which
+     is the eye's and the monthly mark's own answer — a fact the screen does
+     not otherwise state belongs on a HOVER (1b-ii, §88, §278.2) — and this
+     button had no `title` at all. Never one per box: eighteen identical hovers
+     down a pillar is furniture (§94.15), and `aria-keyshortcuts` carries it
+     per control from `repKeys()`, beside the handler that makes it true
+     (§104.7). The cost is stated rather than discovered: with nothing left to
+     walk this button is not drawn (§223 above), so the hover has no home —
+     acceptable, because somebody who has filled everything in is not the
+     person who needs telling how. */
   var next = walk
-    ? '<button type="button" class="fillcta" data-repnext="1">Next &rarr;&nbsp;' +
+    ? '<button type="button" class="fillcta" data-repnext="1"' +
+      ' title="Alt+Enter from any box — Enter steps to the next figure,' +
+      ' Shift+Enter back, Alt+N opens the row’s note, Escape puts a box back"' +
+      ' aria-keyshortcuts="Alt+Enter">Next &rarr;&nbsp;' +
       '<span class="ngleft">' + walk + ' left</span></button>'
     : "";
   return '<div class="missbar" data-repband="1">' +

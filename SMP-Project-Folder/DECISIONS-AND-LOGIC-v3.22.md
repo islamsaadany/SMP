@@ -63016,3 +63016,1282 @@ Islam: the document is mainly shared as PDF, so the cut at the end of each sheet
 
 ## §523 — The SOP: hand-overs between processes, and one continuous page
 The SOP's hand-over column reads §521's `StepHandoff` rows (outgoing "→ code · step n", incoming "from code · step n"), loaded in `loadReportData` beside the report so the two cannot disagree. The SOP prints as one continuous page on the same rule as §522 (`data-sop-root`, A4 width, default on). `checks/process-sop.mjs` gains §2b and a `no-handoff-in` break. Snapshots in `ui-versions/processes-sop/`.
+
+## §512 — A part of the Foundation opens at every step (2026-10-07)
+
+Islam, of the Copilot's guided Foundation flow (§473): *"I have no option to edit any section once I finish and "Done" appears until I finalize all parts and reach the consistency check"*, and *"in the consistency check, it also doesn't give me the option to edit; it only lets me write what I want in the bottom-right box, but there's no option to edit any section myself."* Two proposals put to him in plain words and taken: *"1&2 ok"*.
+
+**THE CARDS WERE A BUTTON ON ONE ROAD IN ONE PHASE.** `cardsHtml` drew a part's card pressable only on the plan road (`f.start === "plan"`) and never in the check, so on the fresh road a Done part was a picture of a part until the very end, and in the check the only way to change anything was the composer, which there said *"Noted. Use the buttons above to carry on."* and did nothing. The gate is one list now — `PICK_PHASES`: loaded, ask, review, draft, check — on both roads; the start and the saved state stay unpressable, because before the years are set there is nothing to open, and a saved Foundation is a deliverable the server refuses to change (`SAVED_ALREADY`).
+
+**OPENING A PART PUTS YOU BACK WHERE IT WAS LEFT**, which is what makes going back cheap rather than a restart: a part with a draft opens on its draft (with the three refines and its Save), one whose questions are all answered opens on its answers to review, and anything else opens on its next unanswered question. `openPart()` is the one answer to that for the card, Save and continue, and Go back to (§53.5) — Go back to had its own copy that always opened the draft. **Saving a reopened part goes to the next part not yet agreed**, so a part reopened from question 2 of the next part returns to question 2, and a part reopened from the check re-runs the check — asserted both ways, the first on question 2 rather than 1, or a build that reset to the start would pass.
+
+**A TYPED LINE OPENS THE PART IT NAMES.** In the check (and the plan road's loaded state, which had the same dead end) the composer asks `namedPart()`: a part's own words (*Who We Are*, *aspiration*, *purpose* or *mission*, *objectives*, *values*) plus its tenant name, matched as whole words, and only an answer naming exactly ONE part counts. A part with a draft is refined with the line as the request — the server already answers a refine by putting the part back in draft and clearing the check, so nothing on the server moved; a part with no draft opens on its questions. A line naming none, or two, asks the model nothing and says *"Press the part you want to change on the left, or name it, then say what to change."* **Common words were left out on purpose** (*legacy*, *value*): a line saying *"add value to the end"* must not land on Core Values.
+
+**CHECKS.** `smp-app/checks/shell.mjs` §3i gains eleven assertions, read back from the stored flow as well as the page (§96): a Done card is a button on the fresh road, pressing it opens its draft, its Save names the part you were on, saving returns to question 2; all six cards pressable in the check; a line naming no part asks nothing and leaves the check standing; a line naming Core Values opens that part with the change applied, its Save goes back to the check, and saving runs the check again. **348/0**, proved able to fail from the SOURCES (§276): the old card gate **4 red**, the name routing removed **3 red** — and the first falsifications **died rather than reporting** (§215), a press on a card that was not a button waiting thirty seconds, so every new press degrades now. `check:copilot` 315/0; full `qa.py` over `file://` **ERRORS none**; `built-in-step` all good; the served copies regenerated; `sw.js` SHELL `v6.14-parts-open-every-step`. **Screen only** — no `api/`, `lib/` or `db/` file touched, nothing stored, nothing migrated.
+
+**Recorded, not done, each waiting on Islam.** Typing into a part's text directly (*"2 yes editing the parts directly"*) changes how the draft is drawn, so it is a mockup first (rule 1c). And End in Mind (*"agreed with your definition … it needs a simple prompt as well and a naming in the foundation terminologies"*): the definition agreed is the lasting legacy long after this plan, distinct from the Winning Aspiration, which is what you win within the plan's years; its short instruction and its Terminology row are drafted for his word before they are built.
+
+## §513 — A Foundation part is edited from its card (2026-10-07)
+
+Islam, of §512 the moment it shipped: *"I believe you got something wrong when we create things they save on th left cards what we need is to edit the cards on the left so maybe we have a hovering icons on the left cards either a pen to edit or edit with ai to take it back to the chat check these copilot original cards behavior to understand more about this appeoach."* He was right, and the drawing §512 had withdrawn — an editable box in the middle of the chat — edited the wrong place: the card is where the agreed text LIVES, so the card is where it is changed. Drawn from the original Copilot's own cards (`design-mockups/copilot-foundation-flow/2026-10-07_edit-cards-hover.html`, published as an artifact, rule 1c) and signed off: *"Agreed"*.
+
+**TWO ICONS, AND A CARD WITH ICONS STOPS BEING A BUTTON.** A card holding text shows a pen (*Edit the text*) and *Edit with AI* on hover or focus, top right, on the card's own ground so they read over the status word — and the status word steps aside while they are up (`visibility`, never `display`, so the heading keeps its height), which is the one thing the drawing did not show and the first screenshot of the build did: two letters of *From the plan* beside the icons. Such a card is a `div`, not a `button`, because two controls inside a button are not two controls (§32: two targets for one act, and the smaller one is the one people press). **An empty card has no icons and stays one press into the chat** — there is nothing to edit, so the press opens it on its questions as §512 built. The card you are on carries none either; it is already in the chat. On a device with no hover the icons are always drawn, in the heading's flow, because a control that appears on hover needs something to hover (§45). **Edit with AI is §512's own `openPart()`**, so it puts you back where the part was left; the pen is new.
+
+**THE PEN EDITS IN PLACE AND SAVES THE TEXT AS TYPED.** The card becomes a text box with Cancel and Save (Escape and Ctrl+Enter); Save writes the part's draft and marks it agreed through the same `flowSave` every other step uses, so nothing on the server moved — `sanitizeFlow` already keeps a draft and its Done mark. **A save that changes nothing changes nothing**: the stored draft is kept rather than the box's copy of it, because the box shows `{Y}` already substituted with the plan's end year, and writing that back would bake one year into a draft the next set of years should still change. A changed text also stops claiming it came from the plan (`from[i] = false`). **A pen save in the consistency check runs the check again**, because a part changed under a finished check has made the check's answer stale — and only when the person is still in the check when the save lands.
+
+**END IN MIND HAS ITS OWN SHORT INSTRUCTION AND ITS OWN WORD.** §512 recorded why the part read like the Purpose and the Winning Aspiration together: nothing told the model what it is. Draft and refine now carry one sentence of it (`PART_RULES.eim`: the lasting mark the organisation works towards, long after this plan ends; never repeat the Purpose; one or two sentences), asked through one helper, and only for that part — asserted at both ends, so Who We Are carries none. **The Terminology row is `endinmind`**, last in the order, with the note his definition gave it; the plan's Foundation and the deck's aim slide read it through `L1()` where they spelled the words, so a client who renames it sees their word there. **Hydration REPLACES the label list**, so a row added to the source reaches a new client and nobody else (§346.3): migration 048 (frozen) and 027 (per tenant on the new stack) write the row where it is missing and leave a renamed one alone. **The Copilot's own card names do not follow Terminology yet**, and neither does the knowledge base or a workbook heading — recorded, not done, because the card names are the method's own words and changing them is a decision about the method.
+
+**HALF-ANSWERED READS IN PROGRESS.** A card whose questions are partly answered said *Not started* with *1 of 4 answered* under it, which contradicts itself in two lines; it reads *In progress* now.
+
+**CHECKS.** `smp-app/checks/shell.mjs` §3i: the icons drawn on a text card, absent from an empty one and from the card you are on; a text card is not a button and an empty one is; the icons hidden at rest and shown on hover, with the status word hidden while they are up and visible at rest; the pen opens a text box holding the part's text, Escape leaves it as it was, Save stores the typed text read back from the stored flow (§96), an unchanged save keeps the stored draft; Edit with AI opens the part in the chat; a pen save in the check runs the check again. **357/0**, proved able to fail from the SOURCES (§276): the icons, the hover and the status rule removed **3 red**, exactly the three; text cards made buttons again **4 red**, with the section dying at the pen press and saying so. `checks/copilot.mjs` asserts End in Mind's draft and refine carry the instruction and Who We Are's do not: **318/0**, the helper switched off **2 red**. `checks/terminology.py` names the new row (26/0); the round trip on a virgin Postgres 16 writes the row once and records migration 048; clean parity passes. `check:state` 92/0, `check:modules` 234/0, `test-authorize` 953/0, `test-graph-diff` 140/0, `typecheck` clean cold, built-in-step all good, and the plan, deck and structure neighbours green. `sw.js` SHELL `v6.15-card-pen`.
+
+**Recorded, not done.** After a pen save in the check, if the re-run check fails the previous results stay on screen. The regenerated seed also carries §505's `dirowner` access row, which that round left out of `db/seed-state.json`; a fresh deployment now seeds it, which is what §505 decided. The to-do panel beside the cards says *0/4* while a card says *Answering 1/4*; that predates this.
+
+## §514 — The part names are the client's words, the check's results belong to the drafts they ran on, and one count of answers (2026-10-08)
+
+Islam, answering the three things §513 handed over: *"1. yes the names should follwo the terminology 2. what do you mean be the rerun check fails 3. we need to fix the panel and the card."* Three asks, three small things, and the second is the one that needed explaining before it needed building.
+
+**A PERSON READS THE CLIENT'S WORD; THE AI READS THE METHOD'S.** §513 recorded that the Copilot's six part names were the method's own and left them there, because changing them read as a decision about the method. It is not: the plan's Foundation page, the deck's aim slide and the Structure step all already say the client's word for these same six things through `L1()` and `labelWord()`, so the Copilot was the one screen in the product spelling *Winning Aspiration* to a client who had renamed it. `partName(el)` asks `labelWord()` for the part's row (`brief`, `aspiration`, `endinmind`, `purpose`, `keyobj`, `values`), and every place a PERSON reads the name follows it — the cards, the to-do, the chat's *Question 1 of 4* line, *Save and continue to …*, *Go back to …*, and the saved Foundation's headings, which the browser posts as `partWords` with the save (trimmed to one line, capped, unknown keys ignored, the method's word where none was sent). **The model is still asked in the method's own words**, because the guidance, the examples and the instruction for End in Mind are written against them, and a client calling the aspiration *Ambition* has not changed what the method asks for. The default spellings now follow Terminology too — *Who we are* and *Mission* where the method said *Who We Are* and *Purpose* — which is the Foundation page's own reading and not a new one.
+
+**THE CHECK'S RESULTS BELONG TO THE DRAFTS THEY RAN ON.** §513's recorded-not-done, in plain words: after the pen saves a part during the consistency check the platform runs the check again by itself; if the AI did not answer, the OLD results stayed on the screen with *Save as Foundation* under them, nothing said they were from before the edit, and there was no button to run it again — so a person could save a Foundation whose check had been made on text that no longer existed. **The server drops the results the moment any draft differs** from the ones they were run on (`sanitizeFlow`: a save that changes a draft sets `check` to null and leaves the phase on *check*), and the page says *The check has not run on the text as it stands now.* with **Run the check** beside it (`[data-cop-fcheck]`), drawn only while there is no result and nothing is in flight; Save is not offered until the check has run and succeeded, which is today's rule kept. **The one choice that is Islam's**: whether a Save should ever be allowed without a successful check. The build keeps the answer the product already gives — no.
+
+**ONE COUNT OF ANSWERS, EVERYWHERE.** The to-do panel read *0/4* while the card beside it read *Answering 1/4*: the panel counted answers GIVEN and the card counted the question you were ON, which are different numbers that look like the same one. `answered(f, i)` is the one count — non-empty answers — read by the card's body (*0 of 4 answered.*), the to-do (`0/4`) and the progress bar; the card's pill reads **Answering** with no number, because the question's position is already on the chat's own *Question 1 of 4* line and a second number one inch away would be §87's twins. The alternative — the pill reading *Question 1 of 4* like the chat — is stated rather than built; it says the same thing twice.
+
+**CHECKS.** `smp-app/checks/shell.mjs` §3i renames two terms through the page's own `labelWord()` before it starts and reads them back, asserts the cards, the Save button, the Go back line and the saved headings in the client's words (both ends: the method's word must NOT appear where the client's does), the card, the to-do and the bar agreeing at 0 and then at 1 with the pill reading *Answering* alone, and the stale check — the model made to answer nothing, a pen save in the check, the server's `check` null with the phase still *check*, the page saying so with *Run the check* and no Save, the one 503 asserted present and set aside, then the model restored and the button bringing the results back; the labels are put back in a `finally`. **§3i 59/0, the whole file 364/0**, proved able to fail from the SOURCES (§276), each break asserted to have matched (§344.1): the names made the method's again **5 red**, the pill given its number back **1 red**, the count made the question's position **2 red**, and `--break=keep-stale-check` **3 red** — exactly the three stale-check assertions. `checks/copilot.mjs` §7: a save that changes a draft drops the check and a flowCheck brings it back; `partWords` trimmed, capped and unknown keys ignored, the method's word where none was sent — **323/0**, `keep-stale-check` **1 red**, `ignore-part-words` **2 red**. `terminology.py` 26/0, `structure.py` all good, `typecheck` clean cold, built-in-step all good. `sw.js` SHELL `v6.16-client-words`.
+
+**Recorded, not done.** The knowledge base and the workbook headings still spell the method's words. A client whose Terminology names two parts the same word gets two cards with one name.
+
+**§514.1 — MERGED TO `main` 2026-10-08 on Islam's word** (*"merge to main"*). `main` had moved ten commits under this branch — another session's Processes SOP work, recorded there as §507–§511 — so this branch's three sections were **renumbered BEFORE the merge** (§264.3: a renumber is provably scoped to the branch's own lines only while they are the only ones there): §509 → §514, §508 → §513, §507 → §512, descending so no pass eats the next, in the one spelling present (0 of the entity and 0 of the `\u00a7` escape, measured, §336.1), every count declared beforehand (30 / 50 / 32 occurrences) and **0 changed lines carrying anything but a citation**. The built file and the four generated copies were REBUILT from the renumbered sources rather than edited (§91, §329); the built file moved by exactly one §238 CSP hash, as that section designed. **Main touched no frozen source, no `sw.js` and nothing under `smp-app/public/`** (measured: 0 files), so the three overlaps were the two record files — **COMBINED, never picked** (§318.7), every non-blank line of each side asserted present in the result, main's §507–§511 before this branch's §512–§514 in the decisions document and ours first in the progress file — and `smp-app/package.json`, which auto-merged carrying both sides' check scripts and parses. The merged tree was READ before it was believed (§313.37): the two non-trivial names this branch's diff removes are both still declared, and `node --check sw.js` is clean with **one** `const SHELL`. **Re-run on the MERGED tree, never on either side** (§365): `check:shell` **364/0** (§3i 59/0), `check:copilot` **323/0**, main's own `check:sop` **17/0** and `check:pick` **12/0**, `typecheck` clean COLD (§3), `built-in-step.py` all good, `generated-in-step` all clear, `terminology.py` 26/0, `structure.py` all good, `next build` green. **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): `smp-app/lib/copilot-flow.ts` and `smp-app/modules/copilot/index.ts` change how the Copilot's flow is sanitised and saved, and not one file under `api/`, `lib/authorize`, `lib/save` or `db/` moves, so no save that worked before is refused now. `sw.js` SHELL is `v6.16-client-words` against main's `v6.13-required-fields`, a name the history has never held, confirmed again immediately before the push (§94.16). The branch tip was already pushed, so **this merge commit is the commit `main` holds and the branch does not** (§91, §357.4's road); the branch is fast-forwarded only after the live read. **PRODUCTION HAS SERVED THIS MERGE, READ OFF THE LIVE SITE** (§91.5): before the push the door carried `dpl_7F2N3Ui…` with `shell.js` 4,584,295 and `platform.css` 774,708 bytes — the previous main's own generated sizes; 45 seconds after it `dpl_FCHv6dM…`, `shell.js` **4,595,646** and `platform.css` **776,787**, each **sha256-identical** to the generated copy in this tree (`d74149c6…`, `7fbed6e7…`), and the served `sw.js` moved from `18ae41db…` to `7f0754b0…`, matching the local copy — so §258's reload banner is offered to a tab left open on the build before (§397). The branch was fast-forwarded only after that read.
+## §515 — One kind of thing: the simplification, agreed in direction (spec 066, 2026-10-07)
+
+Islam: *"the platform got very complex … every change requires me a new addition like adding a direction owner or a capability or planning in pillars only or projects in the roles and access or trying to see the BUs swot despite planning on the company level in addition to how performance is calculated and how presentations are set. please review the platform thoroughly and let's think of a simplification for all these interconnected areas."*
+
+**The review was a measurement, and the cause is one sentence.** The platform has one real kind of plan — a business unit planned in pillars, with tables behind it — and every later kind of plan holder imitates it: a function through `fnAsUnit`/`fnWritable`/`fnWriteBack`, a capability through `capAsUnit`/`capWritable`, the company through `topAsUnit`/`topWritable`, a unit planning in projects through `unitOwnHolder`, a direction through `dir:<id>`, a division through `companyMix`. Each imitation brought its own role, formula and deck branch. Counted: 8 spellings of a plan holder and ~160 places asking which one; 12 roles of which 11 are derived one per kind; a 117-cell access table plus 44 rules outside it; 10 headline formulas (a blank objective weight is the set weights' average on a unit and **1** on a function — 40/blank/blank on 100/50/50 reads 67 and 98); 3 deck builders and 34 slide kinds; ~450 setup controls. **§505, merged the same morning, is the pattern in miniature** — a new kind of plan holder needed a new role on the table.
+
+**Islam's four answers, recorded verbatim in spec 066:** (1) *one kind of thing, in a tree* — **"yes"**; (2) one weighting rule everywhere, a blank counting as the average of the set weights — **"ok"**; (3) **"nothing hides anything else. all is on and off and we make the settings of each on what to show"**; (4) **"a pillar is external and internal pillars and they are the same like directions but internal directions are called capabilities. but when we plan in pillars we put all of them under the same list but when we plan in directions and capabilities we split them like in elabd."**
+
+**What follows from them.** Every plan holder becomes one kind of object — a box in the client's tree, with a parent, a weight, the same sections, its own switches and a plan in one of three shapes. Answer 3 **reverses §447** (units off folding the unit plans into the company's and hiding the units): every box and section is on or off by its own switch, so a unit's SWOT is simply on its own page whenever its switch is on — the BU SWOT question disappears rather than being answered. Answer 4 makes the pillar's existing `kind` (§29, §324) load-bearing: a direction is an external pillar, a capability an internal one, and *one list or split* is a display setting per box — so neither is a kind of box, and `dir:`/`cap:` and `dirowner`/`capowner` go. Roles collapse to two seats plus Owner, Custodian and Contributor attached to a box, a pillar or a row; the access table to 6 × 5 = 30 cells.
+
+**Built in five stages, each aligned first and each reversible**: performance (no data moves; per-client before/after numbers shown before shipping), roles (access baseline must read UNMOVED), the tree (the one data migration, rehearsed per client, El Abd needing most care because of §447), setup, presentations.
+
+**Open, and Islam's** (spec 066 §7.1): what becomes of a capability that today has its own page held by a function and planning in projects (Raya's *Product Mindset*, §334, §412). Recommended: it becomes an internal pillar of the function that holds it, and a pillar's work may be tactics or projects, chosen per pillar — at the cost of its own entry in the navigation.
+
+**Nothing built.** Spec only; no source, check or data touched.
+
+## §515.1 — Stage 1 started: the capability question decided, and every headline measured before any rule moves (spec 066, 2026-10-07)
+
+Islam: **"ok for your recommendation, start stage 1"**.
+
+**§7.1 is decided as recommended.** A capability that today has its own page under a function (Raya's *Product Mindset*, §334, §412) becomes an **internal pillar of the function that holds it**, and a pillar's work may be **tactics or projects**, chosen per pillar. The cost was stated before he chose and stands: the capability's own entry in the navigation goes, and its owner and custodian become the pillar's. Nothing of it is built yet — it is stage 3's, the one stage that moves data.
+
+**Stage 1 starts with a measurement, because the spec says the numbers are shown to Islam BEFORE anything ships.** `scripts/stage1-readings.js` loads the platform's own sources in a vm (build.py's list, the way `test-my-reporting.js` does), hydrates a tenant exactly as `sync.js` does — the worked example, or a client's **contingency working copy** (§306), whose `smp-offline` block is the same shape `/api/state` answers — reads every headline the pages, the cards and the deck print, then installs the proposed rules **as overrides inside the vm** and reads them again. **No product file changes**: "before" is the product exactly as it is, and "after" is the product with only the proposed rules swapped in. Each proposal is switchable (`--only=P2,P4`), and **every row score (`measureScore`) is asserted unmoved**, exiting non-zero if one moves — stage 1 may change how rows are combined, never how a row is scored.
+
+**The six proposals** (spec 066 §4):
+
+- **P1 one weight rule** — a function's and a capability's objectives use the unit's rule (§243): a blank weight is the average of the weights that were set. Answer 2, already agreed.
+- **P2 one Execution** — milestones and actions count only once their date has come, exactly as tactics already do (`dueTactics`). Today a function's execution averages EVERY milestone of the year with the ones not yet due reading nought, so it reads low by construction in the first half and climbs on the calendar rather than on the work. The stated cost: a milestone done early earns nothing until its date arrives — which is what a tactic does today.
+- **P3 one roll-up** — the group's and a division's execution become the weighted average of the execution their units show, the way objectives already roll up. Today it is total delivered over total planned, so a unit with a large plan outweighs its weight. The stated cost: the group card's line *"Delivered X% against Y% planned"* stops dividing to the headline above it (§264's rule), so that line wants rewording or removing.
+- **P4 one headline** — a function's headline is its objectives when its plan HAS objectives (shown and switched on), reading *not yet* until they are reported; with none, or switched off, it is its pillars' or projects' figure. **The first form of this rule was wrong and the worked example said so**: "objectives, always" turned Marketing's 59% into a dash, because Marketing has no objectives at all — §119.1 and §437 already say a subject with none is judged by its work. Today a pillars function with no objectives reads a dash (Merchandising), and a projects function with objectives not yet reported quietly reads its projects instead. The page consequence: that function's objectives card leads, reading *not yet*, rather than the projects card standing in for it.
+- **P5 deck = page** — the deck reads a unit's objectives the way its page does (`holderKOScore`). Today a unit planning in projects or objectives shows one number on its page and another on its slide.
+- **P6 Focus board** — a yes/no measure reads its answer rather than *Not reported* while it scores 100 or 0. Text only; reported as a count.
+
+**What the worked example shows.** 116 row scores, 0 moved. **16 headline numbers move**: execution on every projects function and on *Product Mindset* (P2 — Finance 49 → 84, HR 67 → 90, Treasury, Marketing, IT, Care, the Strategy Office and Product Mindset to 100, because by June every milestone already due is done), and Merchandising's headline — → 93% (P4). Units, divisions and the group move nothing. **P1, P3, P5 and P6 move nothing here, and that is the data rather than the rules**: every weight in the demo is set or none is, every demo tactic is outcome-measured since §353 so every unit's plan reads 100%, no unit plans in projects, and no yes/no measure is marked for focus.
+
+**So each quiet proposal was proved able to move a number on a state made for it** (§94.5, §255): one blank weight on Finance's objectives moves its headline 83 → 87 (P1); taking the outcome off two tactics in three units moves B2C's execution 72 → 73 and the group's 56 → 58, with the card's own line then dividing to 56 (P3, its caveat measured rather than argued); Mobile planning in projects shows 73 on its slide against 78 on its page, and 78 on both after (P5); and a marked yes/no measure is found and counted (P6). The made states are not committed — they are four lines each, and committing them beside client copies would invite the wrong file into the repository.
+
+**What the worked example cannot answer is the point of the next step**: the real movement is on Raya Trade, RHI and El Abd, where weights are mixed, plans prorate, units plan in projects and El Abd's company plans on its own (`out.top`, read the way `topPlanCard` reads it). Their contingency working copies are asked of Islam; they are measured from the scratchpad and **never committed**, being client data.
+
+**Deliberately not in stage 1**: functions and divisions counting toward the group's number (spec 066 §4's last bullet). A function has no weight under the group until the tree exists, so that roll-up is stage 3's; stage 1 makes every number that already exists mean one thing.
+
+**Nothing built.** The script, the spec and this record; no product source, check or data touched.
+
+## §515.2 — Stage 1 built: one weight rule, one execution, one roll-up, one headline, a deck that matches the page, and Focus reading yes/no (spec 066, 2026-10-07)
+
+Islam: **"No need for client data proceed"**.
+
+**The client copies are waived, and the cost of that is said rather than dropped.** Spec 066 §8 makes stage 1's proof *before/after headline numbers for every client, shown to Islam before anything ships*. He chose not to wait for the three working copies, so what has been shown is the worked example's (§515.1), and the real movement on Raya Trade, RHI and El Abd will first be seen on their own screens after a merge. Nothing about that is irreversible — stage 1 stores nothing — and it is why the merge stays his word on that merge.
+
+**The six rules, as built** (each the rule §515.1 measured, and nothing else):
+
+- **P1 — one weight rule.** `capKOScore` is now `koScore` over the holder's key objectives, the function a unit's objectives have always asked (§243). A blank weight is the average of the set ones, none set is equal, and a hidden row (§233) is not counted — the old capability formula counted a blank as weight 1 and counted hidden rows. **One residue is §243's own and is stated rather than changed**: a hidden row's SET weight still takes part in working out what a blank is worth, because `koWeights` takes the mean over the whole list.
+- **P2 — one Execution.** `capExec` and `fnActionsTally` count a milestone or an action only once its date has come (`dueThisCycle`, the reader a tactic's due-ness already uses), and gain a `due` count beside `total`. Nothing due yet is **no figure, never nought** (§35). `pending` (In progress with no per-cent, §104.10) is still counted over every row, because an answer owed is owed whether or not the date has come. The card says *"N due so far"* whenever that is fewer than all of them, or a 100% over *3 of 12 milestones* reads as a mistake. The stated cost holds: a milestone done early earns nothing until its date arrives, exactly as a tactic does.
+- **P3 — one roll-up.** `groupRatio()` is `weightedOver(scoringUnitKeys(), unitRatio)` and a units-only division's `companyRatio` is `weightedOver(companyUnitKeys(ck), unitRatio)` — the weighted average of the execution each unit already shows, which is how the objectives already rolled up. A division that holds functions (§391) keeps §391's formula untouched. **The card's *"Delivered X% against Y% planned"* sentence is replaced** by `execLine()`, which says what the number is (*"All 10 Business units, each on its own execution, weighted by size"*, the unit word being the client's own label), because a sentence whose two numbers divide to something other than the figure above it is the card arguing with itself (§104.8, §264). The tables under *How this is calculated* still print delivered and planned per unit and now say the headline is the weighted average of their *Of plan* column.
+- **P4 — one headline.** `holderHasKOs(c)` answers *does this plan have objectives* (shown, and switched on by §437 where that applies). `fnMemberScores` — what a division reads for a function — takes a pillars function's objectives when they are counted and shown and its pillars otherwise, and a projects function's objectives when it has them and its projects otherwise. **The page asks the same question**: a pillars function with no counted objectives leads with its pillars card (`koLeads`), and a capability or projects function whose objectives nobody has reported yet leads with the objectives card reading *not yet*, rather than its projects card standing in for it. On the worked example Merchandising reads **93%** where it read a dash; Marketing, which has no objectives, keeps its projects' 59%.
+- **P5 — the deck matches the page.** The deck's *Where X stands* slide shows the objectives cell only where the function's objectives are counted (`fnKoCounted`), the capability cover's figure is `holderKOScore(c)`, and the objectives slide and cover stat are drawn only where `holderHasKOs(c)` — the page's own test. **Its reach is narrower than §515.1's wording suggested and that is said**: the made state there (Mobile planning in projects, 73 on the slide against 78 on the page) now reads 78 on both, and on the worked example as shipped no slide moves; what changes is that the deck can no longer disagree with the page about whether a holder HAS objectives. The actions footnote says *due so far* to match P2.
+- **P6 — Focus reads yes/no.** `focusFigure(m)` is `measureScore(m)` for a yes/no measure (§257, 100 or 0) and the stored `progress` otherwise, so the Focus strip and board stop saying *Not reported* beside a measure the score already counts. **Every other focus measure still reads its stored figure** (§239: reward stays a year-end judgement) — only the yes/no case changes, because it has no raw ratio to read.
+
+**No row's own score moved, and it is asserted rather than claimed.** `scripts/test-stage1-rules.js` loads the sources as they stood at commit f1f5d29 beside today's and compares every row's `measureScore` over the same tenant, then asks each of the six rules over states it MAKES (§255 — the worked example holds no blank weight beside a set one, no pillars function without objectives and no yes/no focus measure), each as an agreement with arithmetic the file does itself (§94.8) and each at both ends (§94.2): **38/0**. **Proved able to fail eleven ways from the SOURCES** (§276), one break per rule plus the row-score guard, each asserted to have matched before it was written (§344.1): P1 **4**, P2-milestones **2**, P2-actions **2**, P3-group **2**, P3-division **1**, P4-pillars **1**, P4-projects **1**, P5-stand **1**, P5-slide **1**, P6 **2**, row-score **1**. And the measurement and the build agree: `scripts/stage1-readings.js` now reports **0 numbers move** against the current sources — the built rules give exactly §515.1's "after" (Finance's execution 84, HR's 90, Merchandising's 93) — while the same script run from a checkout of f1f5d29 still prints the sixteen moves.
+
+**Three checks held the old rules and were REWRITTEN to the decided ones, never loosened** (§218, §214.3): `division-functions.py` §1 compared a functions-free division with §68's delivered-over-planned formula and now compares it with `weightedOver(units, unitRatio)`; `wave3.py` §2 asserted the delivered/planned pair on the group card and now asserts the sentence names the weighting and the unit count and carries no planned/percent pair; `project-tables.py`'s parity skips milestones not yet due, which no longer count. **`wave3.py`'s "captions with an explainer exist" fails identically on a build of f1f5d29** (§303) and is recorded as not this work's.
+
+**The merge.** `main` took **§506** for the register's required fields while this was built, so this branch's §506/§506.1 were renumbered to §507/§507.1 (and again to §515/§515.1 at the second merge, main having taken §507–§514 meanwhile; both arrows are history and stay as written, §388a) **before** merging — the merge base held no citation of either number in any spelling, which is what makes the renumber provably scoped (§264.3) — and the record files were COMBINED, never picked (§318.7). The built file and `smp-app/public/` were rebuilt from the merged sources (§91, §329), and `sw.js` takes **`smp-shell-v6.14-one-execution`**, a name `origin/main` does not hold (§94.12).
+
+**Screen and arithmetic only**: no `api/`, server rule or schema changed, nothing stored moves, nothing is migrated, nobody's access moves. **Still stage 3's**: functions and divisions counting toward the group's number, because a function has no weight under the group until the tree exists.
+
+**The whole frozen suite was run on the built branch, and every red is `main`'s** (§303). 220 files through `qa-run.py`, the TAIL read for each rather than its exit code (§298.3, §328.8): 194 green, 13 mockup generators refused by the wrapper as designed (§334.14), two needing a rehearsal database and not run (`multi-client.py`, `platform-look.py`, §328.3) — and **twelve red, nine of them by exit code and three that exit 0 while printing a failure** (`master-picker`, `no-jump`, `objectives-table`). All twelve were re-run against a build made from `origin/main`'s own sources in a worktree, pointed there with `SMP_BUILT` and, for `save-fidelity.py`'s hard-coded root, a patched copy: **every one fails on `main` exactly as it fails here, the failure detail included.** None touches a rule this stage moved, and the two assertions that do — `wave3.py` §2's group-card sentence and `division-functions.py` §1 — are green. Recorded rather than fixed (rule 1b): they are twelve pieces of other rounds' drift, and clearing them is not this stage's work.
+
+**On the branch, not merged.**
+
+## §516 — Stage 2 built: one Roles & access table of 48 cells, drawn over the stored 117, and a pillar that can name a Custodian (spec 066, 2026-10-07)
+
+Islam: **"Lets work on stage2"**, then — of the mockup published for it (commit 2a23b8c) — **"Go ahead and"**, taken as sign-off of that drawing and permission to build on the branch, and nothing more: not a merge.
+
+**THE TABLE SOMEBODY READS IS NOT THE TABLE THE RULES READ, AND THAT IS THE WHOLE DESIGN.** Roles & access was 13 roles down and 9 areas across — 117 cells — and for every person on every tenant measured the unit half and the function half of each pair gave the same answer. What is DRAWN is now **8 rows × 6 columns = 48 cells** (`SMPRules.ACCESS_ROWS` / `ACCESS_COLS`, named once in the shared module): rows Super user · SMO team · CEO (group and division) · Owner (a unit's owner, a function head, a capability owner) · Custodian · **Part owner** (a project's, a pillar's or a direction's owner or keeper) · Contributor · Everyone else; columns The top · This box — Plan · This box — Reporting · Other boxes · Reporting cycle · Setup. What is STORED is untouched: no key renamed, no row merged, nothing migrated. A drawn cell is a VIEW over every (role, area) pair under it that can come up (`accessNA`, lifted out of `renderAccess` so the cell and the check ask one function, §53.5), and `grantFor` / `grantIn` / everything the server asks read exactly what they read before.
+
+**WHY A VIEW AND NOT A MIGRATION**: merging the storage would have to pick an answer wherever a client set two of the old cells differently, and picking is the one thing Islam ruled out. Such a cell is drawn as **differing** — nothing lit, the tray ringed amber, the hover naming each pair and what it holds, one line above the table naming the cell — and a press writes every pair under it to the state pressed, so the office makes them one on purpose (§45.2: the line goes when every cell agrees). **On the shipped defaults exactly two cells differ**, both on the Part owner row (Plan and Reporting: a project owner was shipped at *none* on a unit and *view* on a function, a pillar owner at *view* on both); they stay as they are until Islam says which answer they should carry, because changing a default is a change to who can see what (rule 1b).
+
+**A pressed lit button turns the cell off** (its press is `|none`; there is no separate none button, §37's *none is the absence of the other two*), Plan offers view/fill/edit and the other columns view/edit, and every button's `aria-label` says what pressing it does. **Two cells are dashes** — the Super user's and the SMO team's Other boxes, because every box is theirs (§175). The old one-pair writer (`data-ac`) is DELETED, not left uncalled (§24). **The module table — the Copilot's own one-column access — is left as it was**, because it is one area, not a box, and merging it would invent a column.
+
+**A PILLAR CAN NAME A CUSTODIAN.** A pillar's front matter gains a Custodian beside its Owner, picked from the register (§130.1), stored on the pillar's `extra` and DELETED when cleared (§50.6) — no migration. Being named derives the same **Part owner** (`plowner`) role its owner derives (`holdsPillar` in `personRoles`), reaches exactly that pillar's rows (`boundedReach` takes `ctx.pillarCust`) and may mark that pillar finished (`mayMarkDone` takes the custodian) — and is deliberately **not** the unit's Custodian role, which speaks for the whole unit and submits its report. This is §505's answer for a company's direction carried to every pillar. Asserted on the server at both ends (the pillar beside theirs refused, the unit never submitted) in `test-authorize.js` §516.
+
+**NOBODY'S ACCESS MOVED, AND IT IS A MEASUREMENT** (§94.2): `scripts/test-access-unmoved.js` reads **UNMOVED** against the specs/058 baseline and against the build before this stage — 33 people × 36 pages × 21 targets, 10,228 grants that are not *none*, every one identical. The authoriser suite is **984/0**, its §516 sections proved able to fail three ways from the sources (6 / 2 / 1 red); the change list 140/0. **The 44 rules that live outside the table stay named rules**, each a decision about one act (who closes a cycle, who marks a project done) rather than a grant a client tunes. A division CEO's two switches stay on the division; on the function page and the register the word stays *Function head*.
+
+**`checks/access-merged.py` is new** — the shape asserted as AGREEMENT with the shared lists rather than as literals (§94.8), every one of the 48 cells against the stored pairs under it, a differing cell at both ends and its press writing exactly its pairs and nothing outside them, the pillar custodian written to the STORED pillar (§96) and its key deleted when cleared, and the line above the table measured in both palettes. All good, proved able to fail three ways (10 / 3 / 5 red). **Eight checks held the old 13 × 9 shape and were REWRITTEN to the new one, never loosened** (§218, §214.3): `access-header`, `empty-not-missing`, `gap-fill`, `setup-header`, `setup-per-module`, `smo-team`, `strategy-split` and `direction-owner-role` — each now asks the same question of the merged cell (the Reporting half offering view/edit and no fill; the box's two halves under one name; the SMO team's row matching the Super user's; §505's direction owner found under Part owner, its The top cell carrying the direction owner's pair at the group's View and no This box cell carrying it — red under a build that moves the direction owner to the Owner row). The eighth was found by the full run rather than by grepping (§51.11): it looked for a row by its NAME, *Direction owner*, which the merged table no longer draws.
+
+The built file's bytes changed, so `sw.js` takes **`smp-shell-v6.15-one-access-table`** (§91), a name `origin/main` does not hold (§94.12); `smp-app/lib/rules.cjs` and `authorize.cjs` were re-carried from their frozen twins (§335) and `smp-app/public/` regenerated (§329). UI snapshots saved under `ui-versions/` before the edit.
+
+**THE WHOLE FROZEN SUITE WAS RUN AND EVERY RED WAS PLACED** (§303): 222 checks through `qa-run.py`, each tail read (§298.3), and every one still red was run again on `origin/main`'s own build before it was blamed. **One was this stage's and was fixed**: `checks/owner-picker.py` counted the pickers on a pillar's front matter and expected one, and §516 legitimately adds a second (the Custodian) — REWRITTEN to count them BY ROW, never loosened (§218), and taught `SMP_BUILT` (§334.13), red 2 two ways from the sources. **Eleven are `main`'s and are left as `main`'s**, each red identically there: `save-fidelity` (adding a measure, screen 4 / server 4), `setup-rail` (*Planning & reporting cycle* clipped), `state-contrast` (`dlcar` in light), `team-page` (3), `wave3` (the explainer captions), `chat-settings-scroll`, `enter-commits`, `measure-score-spread`, `no-jump` (1 jump), `objectives-table`'s marks and `master-picker`'s Kind. `setup-header` is red on `main` and green here. **`multi-client` and `platform-look` need a database** this container does not hold, so they are UNRUN rather than passing (§54.5). **`welcome` died under the sweep's load** on a navigation in the middle of an evaluate and is green run alone; a run that dies is not a verdict either way, so it is recorded as that rather than as a pass (§215).
+
+**On the branch, not merged** — and stage 1 (§515.2) with it.
+
+## §516.1 — Two CEO rows, Setup never offered to them, and a Part owner who may read (spec 066, 2026-10-08)
+
+Islam, of the merged table §516 drew: *"actually the company ceo and layer 2 head needs different rows. I don't understand the part owner where project owner and directoin owner have different settings"* — then, of the mockup that answered both (`design-mockups/roles-access-ceo-split/2026-10-08_ceo-split.html`, published as an artifact, commit 2daaa77): *"1. no body will see the setup even the ceo, aclint with no second layer has no second layer row, 2. may read ok"*, and *"1. names ok 2. never offered, build it"*.
+
+**THE MERGED CEO ROW WAS TWO STORED ROLES WEARING ONE NAME.** `gceo` heads the whole client and `cceo` heads one division (§23), and the stored table always held them apart; §516 drew them as one row because they shipped with the same answers, which made a row that could not say *the group CEO may, the division head may not*. They are two rows again, named in **the client's own words** — the top layer's word with *CEO* after it, the division word with *head* after it (`ACCESS_ROWS[].word` + `.suffix`, read through `labelWord(word, "group")`, so a client that calls its top layer *Holdco* reads *Holdco CEO*). **A client with no second layer draws no Division head row** — asked of `midExists()`, the one answer the set-up flow and the Structure step already ask (§53.5) — so such a client sees 8 rows and 48 cells, and the worked example, which has divisions, 9 and 54.
+
+**SETUP IS NEVER OFFERED TO EITHER CEO, AND THAT IS A RULE, NOT A CELL** (§37's shape). Two treatments were drawn — a cell that starts shut, and one never offered — and Islam chose the second. So `SMPRules.neverOffered(role, area)` is asked FIRST inside the shared `grantFor`, the one function the screen and the server both ask (§42): a stored *view* or *edit* on either CEO's Setup answers *none* whatever a tenant once saved, because a stored grant sitting behind a dash nobody can press is Setup granted from a place nobody can take it back (§61). The table draws the cell as a dash with the reason on it (*Only the Super user and the SMO team open Setup*). Nothing moved on the worked example — both CEOs already shipped at *none* — and `test-access-unmoved.js` reads UNMOVED.
+
+**THE PART OWNER ROW STOPS DIFFERING.** It merges a project owner (`powner`) and a pillar owner (`plowner`); §405 let a business unit plan in projects, so a project owner can now hold one at a unit, and that pair shipped at *none* while the pillar owner's shipped at *view* — the only reason §516 drew Part owner's Plan and Reporting as *differs*. Both now default to **may read** (Islam's *"may read ok"*). **An existing client moves only where the stored value still holds the old *none*** — `db/migrations/049-part-owner-may-read.sql` and `smp-app/db/migrations/028-part-owner-may-read.sql`, one `UPDATE … WHERE grant_ = 'none'`, so a client that deliberately set something else keeps it. On the shipped defaults no merged cell differs any more, so the line above the table does not draw.
+
+**VERIFIED**: `test-authorize.js` **1007/0**, with two new sections (two CEO rows and Setup never offered; a part owner may read); `qa.py` 33 viewers / 243 destinations / ERRORS none; `checks/access-merged.py` all good — nine rows and 54 cells on the worked example, a made label state (*Holdco CEO* / *Sector head*) and a made client with no second layer (8 rows, 48 cells), both put back; `setup-header`, `strategy-split`, `access-header` and `built-in-step` green; `test-access-unmoved.js` UNMOVED against the specs/058 baseline; change list 140/0, platform rules 69/0. **Proved able to fail five ways from the SOURCES** (§276): the division filter removed (2 red), `neverOffered` taken out of `grantFor` (authoriser 3 red, the page 1), the reason taken off the cell (1 red), the Part owner default put back to *none* (authoriser 2, the page 2), and the client's words ignored (1 red). The seed regenerated — and it gained the `dirowner` row §505 added and never regenerated into `db/seed-state.json`; `smp-app/lib/rules.cjs` re-carried by the one declared transform; the four generators re-run; `sw.js` SHELL bumped past `main`'s v6.16. **The migrations have not been run against a real Postgres in this container** (none is available here), so that is said rather than claimed (§54.5); they are one guarded UPDATE each.
+
+**RECORDED, NOT DONE — Islam's calls.** The column names (*The top · This box — Plan · This box — Reporting · Other boxes*) are offered for renaming; and the other non-office rows (Owner, Custodian, Part owner, Contributor, Everyone else) still draw a pressable Setup cell that starts shut, so whether Setup should be *never offered* to them too is his to say. **AND A RENUMBER IS OWED BEFORE THE MERGE**: `main` has taken §507–§514 (this branch's §507–§508.3 at the time; they are §515–§516.3 now, renumbered before the merge as this sentence foresaw) for other work since this branch began, so this branch's §515.2, §516 and §516.1 must move to free numbers, scoped to this branch's own lines and in every spelling (§264.3, §336.1), as the first step of the merge.
+
+**On the branch, not merged.**
+
+## §516.2 — Setup is the office's alone, and the column headings in Islam's words (spec 066, 2026-10-08)
+
+Islam, answering the two things §516.1 left as his: *"1. Yes but for the group make it Group / Company 2. close setup for all of them even the ceo no one get the setup but the super use and the smo team"*.
+
+**SETUP IS NEVER OFFERED TO ANYBODY OUTSIDE THE OFFICE.** §516.1 made it a rule for the two CEO rows and left the other non-office rows — Owner, Custodian, Part owner, Contributor, Everyone else — drawing a pressable Setup cell that started shut. It is the same rule widened, not a second one: `SMPRules.neverOffered(role, area)` now answers *true* for `a_setup` on every role that is not `isOfficeRole()` — the ONE definition of the office (§89), so the Super user and the SMO team are the only two rows whose Setup cell can be pressed, and a role added tomorrow is shut the day it is added (§104.7: a list of the roles that may NOT would be a list somebody forgets to add to). It is still asked FIRST inside the shared `grantFor` (§42), so **a stored *view* or *edit* on any non-office role's Setup reads *none* on the screen AND is refused on the server** — the table draws a dash with the reason, and a dash in front of a stored grant nobody can take back is the trap §516.1 closed for the CEOs (§61). **Nothing moves on the worked example** — every non-office role already shipped at *none* for Setup and none was ever stored otherwise — so `test-access-unmoved.js` reads UNMOVED against a baseline taken from this branch's own previous commit (1a309c67). **What it can move is a client that once opened Setup to a non-office role**: that role loses it, which is exactly what was asked, and is said rather than discovered.
+
+**THE COLUMN HEADINGS ARE ISLAM'S WORDS, LITERAL**: *Group / Company · Their own (Plan | Reporting) · Other units & functions · Reporting cycle · Setup*. The two *Their own* columns are one heading over two (`ACCESS_COLS[].pair` + `.col`), so the line above the table names a differing cell as *Owner · Their own: Reporting* rather than a run-together *Their own — Reporting*. **The headings are fixed words and do not follow the client's terminology**, where the row names do (§516.1): *Group / Company* is his chosen wording for the top-and-division column on every client, and making it a label lookup would be a second answer to a question he has just answered. The row notes and the not-applicable reason moved with the words (*"Every unit and function is theirs, so there is no “other”."*), because a note still saying *box* under a heading that no longer does reads as two vocabularies on one table (§87).
+
+**VERIFIED**: `test-authorize.js` **1013/0**, with §516.2 assertions across every non-office row and a server case — an owner holding a stored `a_setup` *edit* has a labels change refused; `checks/access-merged.py` all good, with a new section asserting the head reads in his words (and no *box* anywhere in it), every non-office row's Setup a dash carrying the reason, and a stored *edit* on all eleven non-office roles plus the floor reading *none* while the office's still reads *edit*; `direction-owner-role`, `setup-header`, `strategy-split`, `access-header` and `built-in-step` green; `qa.py` 33 viewers / ERRORS none; `test-access-unmoved.js` UNMOVED against the previous commit. **Proved able to fail twice from the SOURCES** (§276): the rule put back to the CEOs only (authoriser 4 red, the page 2) and the old headings put back (the page 3), each restored from a saved copy and the rebuild confirmed byte-identical with `cmp` (§343.9). `smp-app/lib/rules.cjs` re-carried by the one declared transform; the four generators re-run; `sw.js` SHELL bumped to `v6.18-setup-office`, a name the history has not held. Four checks that named the old headings in a comment or a label were brought to the new words (§51.11).
+
+**And `db/kb.json` was found stale and regenerated**: `extract-kb.js --check` named one difference, the page title §495 renamed to *Planning & reporting cycle* and never re-extracted into the assistant's corpus — not this section's, and harmless, but a generated file out of step with its source is the drift that check exists to name (§103), so it rides here rather than being left. **§516.1's two "RECORDED, NOT DONE" items are answered by this section.** **A RENUMBER IS STILL OWED BEFORE ANY MERGE**: `main` has taken §507–§514 (this branch's §507–§508.3 at the time; they are §515–§516.3 now, renumbered before the merge as this sentence foresaw) for other work, so this branch's §515.2, §516, §516.1 and §516.2 must move to free numbers, scoped to this branch's own lines and in every spelling (§264.3, §336.1), as the first step of the merge.
+
+**On the branch, not merged.**
+
+## §516.3 — The Reporting cycle is the office's alone too, and the CEOs stop marking focus measures (spec 066, 2026-10-08)
+
+Islam, of §516.2's headings: *"1. ok for the namings 2. setup should be adash for anyone but the smo and the super user it's not an option and same for the reporting cycle"* — and then, asked what happens to focus marking, which that column carries: **"Close it fully."**
+
+**THE SAME RULE, ONE AREA WIDER.** `SMPRules.neverOffered(role, area)` now answers *true* for `a_setup` **and `a_cycle`** on every role that is not `isOfficeRole()` — one list, `OFFICE_ONLY_AREAS`, rather than a second rule beside §516.2's (§53.5). It is still asked FIRST inside the shared `grantFor`, so a grant a tenant stored earlier reads *none* on the screen and is refused on the server (§42, §61), and the cell is a dash carrying *"Only the Super user and the SMO team open the Reporting cycle."* **The shipped defaults moved with the rule** (`gceo`/`cceo` `a_cycle` *view* → *none*), so the defaults and the rule no longer say two different things about one cell; the seed was regenerated.
+
+**THE COLUMN HOLDS THREE PAGES, SO CLOSING IT TOOK THREE** — the Reporting cycle page (and with it the cycle summary on the welcome screen, which asks the same grant, §200), Import & storage with Archived plans, and Focus measures. **The cost was put to him before anything was built**, because the third is where the group CEO marked focus measures (§37 made that a rule, §102 kept it): with the column shut the CEO could no longer reach the page that marks them. His answer was the fuller one.
+
+**FOCUS MARKING BECOMES THE SUPER USER'S, ON BOTH SIDES.** The screen's `mayMarkFocus()` and the authoriser's `case "focus"` each lose the group CEO in the same change, and the refusal names who marks them now (§16.7) — one without the other is a control the server refuses or a refusal no screen can reach (§42). **The SMO team could not mark focus measures before this and still cannot** (`gceo || super` became `super`); said rather than left to be discovered. **The Focus board on the group's own page is untouched**: it sits in the Group / Company column, so the CEOs still SEE the marks — seeing a state is not setting it (§256's pattern).
+
+**AND THE GEAR GOES FOR BOTH CEOS — A CONSEQUENCE, MEASURED.** With Setup shut by §516.2 and the cycle shut here, a CEO has no Setup page left to open, so the gear is not drawn for them at all; on the previous build both had it, and it led to the Reporting cycle page. The office keeps it. Asserted at both ends, or a build that took the gear from everybody satisfies the CEO half.
+
+**WHAT MOVED, MEASURED RATHER THAN CLAIMED**: `test-access-unmoved.js` against the previous commit finds **141 differences, every one *view* → *none*, every one on `c_cycle`, `c_import` or `c_focus`, and only for the three CEOs** — the group CEO at 21 targets, each division head at 13. Nothing else in the 33 × page × target sweep moved. On a client that had opened the cycle to somebody outside the office, that person loses it too — which is what was asked. The prose that said the CEO marks focus measures (`pageinfo.js`, `recipes.js`) now says the Super user does, and `db/kb.json` was regenerated with it.
+
+**VERIFIED**: `test-authorize.js` **1025/0**, with §516.3 assertions on every non-office row's cycle grant and the server refusing a stored cycle grant, and the focus assertions rewritten to the decided rule (the Super user marks; the group CEO and the SMO team are refused); `checks/access-merged.py` all good, with the cycle cell a dash carrying the reason on every non-office row, a stored *edit* on every non-office role reading *none* while the office's reads *edit*, and a new section 7 asserting the gear drawn for the office and NOT for either CEO; `welcome.py`, `focus-switch`, `smo-team`, `setup-header`, `access-header`, `capability-report-column` and `cycle-edit` green; change list 140/0, platform rules 69/0, the KB corpus in step, session-state ok, db-url-choice 10/0, kb-audience all clear, `built-in-step` all good. **Proved able to fail from the SOURCES** (§276): `neverOffered` put back to Setup alone (authoriser 5 red, the page 2) and focus marking given back to the group CEO (authoriser 2 red); against the previous commit's build `access-merged.py` is **4 red** — the two cycle lines and the two CEO gear lines — with the office's gear green; each break restored from a saved copy and the rebuild confirmed byte-identical with `cmp` (§343.9). `smp-app/lib/rules.cjs` and `authorize.cjs` re-carried by the one declared transform; the four generators re-run; `sw.js` SHELL bumped to `v6.19-cycle-office`. **The full `qa.py` sweep and the rest of the neighbouring screen checks were still running when this was committed**; their results are §516.3a below.
+
+**§516.3a — THE SWEEP, AND ONE CHECK THIS DECISION MOVED.** `qa.py` through `qa-run.py`, the tail read (§298.3): **33 viewers, ERRORS none**, the CEO's own line reading 28 destinations and the SMO's 47. The twenty neighbouring screen checks run beside it — `access-header`, `capability-report-column`, `cycle-edit`, `office-chat`, `plan-arrange`, `plan-edit-line`, `role-picker`, `seat-grant`, `top-plan`, `video-slides`, `cycle-board`, `setup-per-module` (file:// half), `single-company`, `import-page`, `ytd-proration`, `repeat-project`, `setup-search`, `setup-pages` and `attention-rows` — all green after two rewrites. **`attention-rows.py` held §359's *a non-office viewer's gear lands on Reporting cycle too***, which is exactly what §516.3 removes: that page is the office's now, so a non-office viewer's rail does not draw it and the gear lands on what the rail DOES draw (§214.3, the ninth time). **REWRITTEN, never loosened** (§218), into three claims that can each fail — the rail offers no Reporting cycle (asserted on the label AND the `data-setupgo` entry), the gear lands on a page the rail draws, and that pane is not blank — with the office's landing on Reporting cycle still asserted above it, so both ends stand (§94.2). **Proved able to fail**: against the §516.2 build it is **1 red**, `['Planning & reporting cycle', 'Import & storage', 'Focus measures']` for the group CEO, which is the three pages this section closes, verbatim. **AND `video-slides.py` HELD THE SAME DECISION FROM THE OTHER SIDE** (§214.3, the tenth time): its §8 took the first non-office person on the register — the group CEO — and asserted they still reach Import & storage and its archives while losing Video storage, which was true while a CEO held the Reporting cycle column and stopped being true here, so the check read an empty pane and reported *the archives they may see are untouched* as broken. **REWRITTEN, never loosened** (§218): nobody outside the office reaches the page now, so the claims are that they are shown neither Video storage nor the archived plans (the latter asserted on the RULE as well as the pane — `reachable()` offers them no `import`), that they are not left on a blank screen, and that the office, switched back to and walked to the page, still has its archives — both ends (§94.2). It honours `SMP_BUILT` now (§334.13), which is what let it be proved: **75/0** here and **1 red** on the §516.2 build, on exactly the reachability claim. **AND ONE RED IS MAIN'S, ESTABLISHED BEFORE IT WAS BLAMED** (§303): `setup-rail.py` reports *no label is clipped — ['Planning & reporting cycle']*, and `origin/main`'s own build, run with `origin/main`'s own copy of the check in a worktree, reports the identical failure — the label is §495's rename, longer than the rail's column. Recorded rather than fixed: a shorter label or a wider rail is a visual decision with a mockup owed (rule 1c), and nothing in this round touches either. The listed name `focus-board` was a slip of the runner (the check is `focus-switch`, green at §516.3).
+
+**A RENUMBER IS STILL OWED BEFORE ANY MERGE** (§516.2's own note): `main` has taken §507–§514 (this branch's §507–§508.3 at the time; they are §515–§516.3 now, renumbered before the merge as this sentence foresaw), so this branch's §515.2 and §516–§516.3 move to free numbers, scoped to this branch's own lines and in every spelling (§264.3, §336.1), as the first step of the merge.
+
+**On the branch, not merged.**
+
+## §516.4 — The merge: spec 066 to `main`, with the renumber first (2026-10-08)
+
+Islam: *"mrege to main."* **FETCHED AND LOOKED AT FIRST** (§4, §91): `main` had moved under this branch — §507–§514 from another session (the Processes SOP, export and helicopter view; the Copilot Foundation parts, the edit cards, the client-word names) — and had taken every number this branch was wearing. So the renumber ran **BEFORE** the merge, which is the only moment it is provably scoped (§264.3): the merge base holds none of §515–§516.3 in any spelling, so every citation moved was this branch's own. §507 → §515, §507.1 → §515.1, §507.2 → §515.2, §508 → §516, §508.1–§508.3 → §516.1–§516.3, descending by source, three spellings (§336.1), each count declared and refused on a mismatch (§344.1). **AND THE MIGRATION NAMES MOVED WITH THEM**: main's §513 ships `048-the-end-in-mind-word.sql` / smp-app `027`, which production has already applied, so this branch's `048`/`027` became **`049-part-owner-may-read.sql`** and **`028-part-owner-may-read.sql`** — a migration is keyed by its filename, so the rename is the whole of the record and nothing applied moves; both proved applying cleanly on a fresh database after the merge.
+
+**§516.4a — AND THE SWEEP TOOK THREE HISTORICAL SENTENCES, WHICH IS §388a FOR THE THIRD TIME.** *"`main` has taken §507–§514"* — a fact about main at the moment it was written — came out *"§515–§514"* in three places in this file: a label was rightly swept and a measurement was wrongly swept, and the result is a sentence that calmly states something that never happened. Put back by hand with the count asserted at three, and the parenthesis saying what happened next rather than rewriting history (Principle II). *A number in these records is one of two things, and only the label may move.*
+
+**THE RESOLUTION, BY CLASS**: the three record files COMBINED, never picked (§318.7), every heading of each side asserted present after; the built file REBUILT from the merged sources (§91) and byte-identical to `build.py`'s output; `smp-app/public/` regenerated by its four generators and the three carried `.cjs` re-carried by the one declared transform (§329, §335 — `rules.cjs` differed from the carry by exactly the migration comment this round changed); `sw.js` rebuilt from main's copy with the branch's one line re-applied, at **`smp-shell-v6.20-cycle-office`** against main's `v6.16-client-words`, a name the history has never held, one `const SHELL`, `node --check` clean (§146.2, §94.12), confirmed against `origin/main` again immediately before the push (§94.16). **READ, NOT BELIEVED** (§313.37): the duplicate top-level declaration scan over build.py's own concatenation reads exactly the six §281.1 leaves, and no name this branch deleted survives anywhere but in a comment explaining the deletion.
+
+**RE-RUN ON THE MERGED TREE, NEVER THE BRANCH** (§365): `test-authorize.js` **1025/0**, `test-graph-diff.js` 140/0, `test-platform-rules.js` 69/0, `test-access-unmoved.js` UNMOVED against the branch's own base, `checks/access-merged.py` all good, modules 234/0, viewas 20/0, setup 49/0, deploy 5/0, declared-deps clear, insights-tab 24/0, state 92/0, door 146/0, `built-in-step.py` all good, `generated-in-step.mjs` all clear, `tsc` clean COLD after a real `next build` (§3), `qa.py` through `qa-run.py` **33 viewers, ERRORS none** (the tail read, §298.3), and fourteen neighbouring screen checks green — `welcome`, `focus-switch`, `smo-team`, `setup-header`, `access-header`, `capability-report-column`, `cycle-edit`, `attention-rows`, `video-slides` 75/0, `structure`, `required-fields`, `direction-owner-role`, `people-dialog` among them. The rest of the app suite on the merged tree: shell **364/0**, standing 7/0, copilot 323/0, insights 137/0, tracker 251/0, notes 170/0, room 10/0, demo **28/0**. **TWO REDS, NEITHER THIS MERGE'S.** `check:demo` first printed **nothing and then `0 ok, 1 failed`** — a run that DIED (§215, §298.3), on `password authentication failed for user "smp_app"`: the throwaway cluster's app role carried a different password from the harness's default, which is the environment and not the product (§54.5), and with the role's password set it is 28/0. `check:portfolio:module` is 206/1 on *a span that crosses a year says BOTH years*, a calendar-sensitive wording assertion in a module whose every file — the module, `lib/portfolio*`, `lib/day.ts` and the check itself — is **byte-identical to `origin/main`**, so it is main's by construction (§303, by the diff rather than by a second run) and is recorded here, not fixed inside a merge. And `scripts/test-nav-row.js` dies in `myUnits` reading `.unit` of a baked viewer that has none, identically on `origin/main`'s own tree — the same.
+
+**SPEC 029, AND WHICH KIND THIS MERGE IS**: the authoriser DID change — `neverOffered()` and `mayMarkFocus()` — and the change only NARROWS: three CEOs lose focus marking, the Reporting cycle and Setup. Each of those is a one-press control refused with its reason, with nothing half-typed to lose, so a tab left open on the old build meets a plain refusal at its next press and §258's banner has nothing it needs to save first. **No forced sign-out migration ships, and that is a decision said rather than an omission**; a `DELETE FROM sessions;` is one line in Neon's SQL editor if Islam prefers everybody signed in fresh.
+
+**THE LIVE WITNESSES WERE TAKEN BEFORE THE PUSH** (§380.2's two-read method, §379.5's lesson that a read is never written ahead of itself): `data-dpl-id` `dpl_2MYnCS2Sd7zJBk4x4VRyJ6uEYF8e`, `shell.js` **4,595,646** / `d74149c6`, `platform.css` **776,787** / `7fbed6e7`, served `sw.js` stamp `7f0754b0`. The deployment is proved by every one of them MOVING to the merged tree's own values — `shell.js` 4,619,585 / `3dc70320`, `platform.css` 777,706 / `9f586d49` — and the branch is held behind `main` until that read is made (§91).
+
+**§516.4b — THE LIVE READ, MADE RATHER THAN WRITTEN AHEAD OF ITSELF** (§91.5, §379.5): `main` pushed at ca6ec74 with the branch held behind it, and about sixty seconds later the door's `data-dpl-id` moved from `dpl_2MYnCS…` to **`dpl_FDLXgPBcdPfNN2eeTy9jZqMzQkLD`**; `shell.js` **4,619,585 / `3dc70320`**, `platform.css` **777,706 / `9f586d49`** and the served `sw.js` **4,192 / `d7a28757`** each byte-identical to this tree's generated copy and each DIFFERENT from its pre-push reading, so §397's release stamp moved and §258's *"A newer version of the platform is ready"* is offered to every open tab. The branch is fast-forwarded only after that read. **Merged to `main` 2026-10-08 on Islam's word.**
+
+## §517 — A direction owner sees their part only, when the office says so (2026-10-10)
+
+Islam, of El Abd (business units off, directions with named owners): *"when they open they see the full plan and can't report. can we make in the roles and access in the plan visiblity to have 2 visiblity buttons one for the full plan and one only for their part"*, then *"1. keep foundation 2. directions only for now 3. agreed"*, then of the icon — the first drawing used two worded chips — *"can't we have it as a 3rd icon … a half eye for the part?"* and *"ok for the half eye, build it"*.
+
+**ONE SWITCH, IN THE CELL IT NARROWS.** The Part owner row's Group / Company cell on Roles & access gains a half eye beside the eye: the eye is *may read the full company plan*, the half eye is *may read their own directions only*. Pressing the half eye sets `GROUP.dirScope = "part"` and, if the cell was at none, lifts `dirowner`'s `a_group` to view (a narrowed reading of nothing is no reading); pressing the eye, or any other answer in that cell, DELETES the key (§50.6). Stored as an ABSENCE on the group (`org.extra`), so no migration, and every tenant reads the full plan until the office presses it.
+
+**WHO IS NARROWED IS ONE RULE, ASKED BY BOTH SIDES** (§42): `SMPRules.dirPartOnly(w, person)` is true only when the person holds the derived `dirowner` role, NO other role they hold grants `a_group` (the office, a CEO, anybody granted the group for another reason reads the full plan), and the scope is part. **Directions only, for now** (his 2): the rule reaches `dirowner` and nobody else in the Part owner row.
+
+**WHAT PART MODE HIDES AND WHAT IT KEEPS** (his 1 and 3): the Foundation stays; the SWOT, How we compete, Capabilities, Focus and the Temple are not drawn; the Plan, Reporting and Performance rails list their own directions alone; the company's own key objectives leave their Reporting page; every Performance section but their directions goes. **Screen-only, agreed**: the server's reach is unchanged, and their reporting rights are §469's (`ownsTopPillar`), untouched.
+
+**FILTERED WHERE IT IS DRAWN, NEVER ON `GROUP.items`**: a direction's code is its POSITION (`pillarCode`) and `topWritable()` hands out the real array, so filtering the array would renumber every direction and write into the wrong one. `partFilter(u)` / `partItems(u)` are the one pair the rails ask, and a skipped direction keeps its number.
+
+**THE SERVER'S TWO EDITS GO TOGETHER** (§259.2): `dirScope` is classified `access` (the Super user's, §89 — the matrix is the Super user's to change) AND joins `gExtra`, or it is swept-but-unclassified and therefore allowed to everybody. `test-authorize.js` §517: the Super user sets and clears it, a MADE SMO team member and another non-office person are refused (§255 — the seed holds no SMO team member), and the rule asserted at both ends — own direction yes, another's no, the office the full plan, off the full plan. 1034/0; with the classification removed, **2 red**.
+
+**`checks/direction-part.py`** makes the state (units off, two directions, one owner) and asserts the half eye is in that one cell straight after the eye and nowhere else, the press writes and the other answer clears, the three rails and Performance narrowed, the Foundation kept and the SWOT hidden — and BOTH ENDS (§94.2): off shows both directions, the office sees both. All good, no page errors; red **3** with `partFilter` answering null and **5** with the half eye not drawn, both from the SOURCES (§276). Access baseline UNMOVED against the commit before; `access-merged`, `direction-seats`, `direction-owner-role`, `single-company`, `direction-decks`, `cycle-board-lines`, `access-header`, `top-plan` and `top-projects` green; full `qa.py` ERRORS none. `rules.cjs` and `authorize.cjs` re-carried (§335), served copies regenerated (§329), shell `v6.21-direction-part`.
+
+**NOT CLAIMED**: why El Abd's owners *"can't report"*. The code lets a named Owner or Custodian report their own direction (§469); whether El Abd's owners are named by a name the register holds is a fact about their data, and it waits on Islam viewing as one of them. **Built on the branch, not merged.**
+
+**§517.1 — MERGED TO `main` 2026-10-10 on Islam's word** (*"merge to main"*). `main` had not moved since the branch was cut (`origin/main` an ancestor of the branch, measured), so the merge is a clean fast-forward and the tree pushed is the tree verified; §517 was free on `main`. `sw.js` confirmed against `origin/main` immediately before the push (§94.16): `v6.21-direction-part` against main's `v6.20-cycle-office`, one live `const SHELL`, `node --check` clean. The branch tip was already pushed, so `main` carries this record commit of its own (§91). **No forced sign-out is owed** (spec 029): the authoriser changed and only ADDS — a new group key nobody's tab has ever written, refused to everybody but the Super user — so no save that worked before is refused now. **§91.5's live read could not be made from this session**: the proxy refuses the production address (403 at CONNECT), so the deployment is unverified from here and said so rather than claimed. The witnesses for whoever reads it: `shell.js` **4,619,585 / `3dc70320` → 4,627,912 / `b44ea287`** and the served `sw.js` stamp **`d7a28757` → `c65f9364`** (§397 — so the reload banner is offered); `platform.css` is unchanged at 777,706 / `9f586d49` and is no witness this round (§113.8). The branch is held behind `main` until that read is made.
+
+## §518 — The section is called Competitive Discipline (2026-10-10)
+
+Islam, of §492's section: ***"CHANGE how we compete to Competitive Discipline"***. A
+rename of the WORDS a person reads and nothing else.
+
+**THE INSTRUCTIONS HE WROTE ALREADY CALLED IT THAT, WHICH IS HALF THE ARGUMENT FOR
+THE RENAME AND IS A MEASUREMENT RATHER THAN A GUESS**: `copilot-defaults.generated.ts`
+— the Copilot's own method text, Islam's words carried in verbatim (§456) — holds
+**Competitive Discipline** and the phrase *How we compete* **nought** times, under
+its own `- **Name:**` heading. So the model was being told one name and the screens
+were drawing another, and the drift was ours.
+
+**NINETEEN LINES, AND NOT ONE OF THEM IS A KEY** (§30.2): the stored field is still
+`compete`, the Structure switch is still `structure.<level>.compete.on`, the deck's
+anchor is still `data-anchor="compete"`, the access keys are still `g_found`/`u_anal`
+and the Copilot's section is still `compete` — so **nothing stored moves, nothing is
+migrated, and no deliverable already saved is renamed**: a *How we compete — Mobile*
+in a client's Deliverables rail keeps the title it was saved under, because the title
+is a stored value somebody's own press produced (§96.2) and rewriting it would be the
+platform editing the record. Said rather than discovered: a client who has used the
+Copilot here will read both names for a while, the old one only in the list of what
+they made.
+
+**EVERY SURFACE IN ONE EDIT, OR THE PRODUCT READS TWO WAYS** (§53.5): the section
+label on the top level and on a business unit (`shell.html`), the Structure step's
+chip (`client-setup.js`), the deck's own heading and its picture-placer's *After…*
+word (`present.js`), and the Copilot's six — the road card, the saved deliverable's
+title, the chat's own words. Server-side, the four `lib/copilot-*.ts` and
+`modules/copilot/compete.ts` strings a person reads back in an answer.
+
+**THE COMMENTS AND THE CHECK FILENAMES ARE LEFT**, deliberately and by rule: 1b-iii
+says plain words govern what is said to a person and never the record, which is
+written for whoever has to change this in six months and cites §492 by name — so
+`checks/how-we-compete.py` keeps its name and its docstring, and nineteen source
+comments keep theirs. What they do NOT keep is a stale expectation: that check and
+`structure.py` assert the section's own label, so both were read and found to address
+it by its KEY (`[data-sec="compete"]`) rather than by the word, which is why neither
+needed editing — the two that did are `smp-app/checks/copilot.mjs` and
+`shell.mjs`, which assert the Copilot's road card and its saved title by their words.
+
+**VERIFIED**: `qa.py` through `qa-run.py` **33 viewers, ERRORS none**;
+`how-we-compete.py`, `structure.py`, `structure-sections.py`, `plan-switch.py` and
+`deck-dividers.py` all good; `built-in-step.py` all good after the rebuild and
+`generated-in-step.mjs` all clear (§329); the built file grep'd for the old phrase
+outside a comment and holding **none**. **The three `smp-app` checks and `tsc` are
+UNRUN rather than passing** (§54.5): this container holds no `smp-app/node_modules`,
+so `check:copilot`, `check:shell` and the typecheck could not launch — narrowed by the
+diff, which in those files is **string literals only**, no logic and no types.
+`sw.js` bumped to `v6.22-competitive-discipline`, because the built file's bytes
+changed (§91). **On the branch, not merged** — the merge is Islam's word, on that
+merge.
+
+## §519 — The trail is quiet while you are viewing as somebody else (2026-10-10)
+
+Islam, with a screenshot of El Abd's Strategy page while viewing as Amr Hassan:
+***"the half eye was not pressed .. I did and it's working but a very strange issue,
+while viewing as Amr hassan I'm seeing the white bar at the top which is for the smo
+only is that a glitch?"*** — then ***"I think yes greyed is better not to get
+confused that the user has access by anyone else"***, and, of two treatments drawn
+for him, ***"A"***.
+
+**IT IS NOT A GLITCH, AND SAYING SO FIRST IS MOST OF THE ANSWER** (and the first half
+of his message is the confirmation that §517's half eye works). Three things support
+it and all three were measured rather than remembered. **The trail follows the SEAT on
+the SESSION**, which is what a simulation means (§185): viewing as somebody narrows
+what is DRAWN for them and the person signed in is still the office — if the trail
+answered the simulated person it would be a claim about who is signed in, which is
+false. **A client's own person never gets it whoever they view as**:
+`cards: r.user.kind !== "client"` (`lib/state-api.ts`) reads the kind fixed at
+sign-in, so the bar is Forefront's by construction rather than by a rule somebody
+could widen. **And the viewer switcher is inside that same `.top-in` row**
+(`shell.html`'s `label for="asWho"` and its note) — so a bar that went AWAY while a
+view is on would take the way out of the view with it, which is §61 at its plainest:
+the one control that ends the state would be hidden by the state. So the bar stays
+and only its WEIGHT changes, which is also exactly what he asked for.
+
+**A IS HIS PICK AND B IS REFUSED, AND THE DIFFERENCE IS THE ONE ASSERTION WORTH
+HAVING**: **A** quietens the trail to the page's dim ink while a view is on, brings it
+back to full weight on switching back, and **both menus keep working**; **B** was quiet
+AND held — the carets dropped and the menus refusing. B is recorded as refused rather
+than left undrawn, because it is the shape somebody reaches for next and its cost is
+not obvious from a still: a control that cannot be pressed is how the office loses the
+way out of the view they are in (§61 again, from the inside). So *the menus still open
+while quiet* is the claim that separates what shipped from what he turned down, and it
+is asserted by pressing them.
+
+**THE SIGNAL IS ASKED, NEVER RE-DERIVED** (§42, §53.5): `SYNC.actingAs()` already
+answers *is a view on* for the save path, with its two guards built in — the session
+is the office's and the key is on the register — so the chrome asks the same function
+rather than comparing `VIEWER` against the signed-in key a second time. **Written at
+the END of every paint and never at each `VIEWER` assignment** (§104.7): there are
+three such sites and one of them is a temporary swap inside a reader, so marking at the
+write would mark the chrome for the length of a read. **Stored as an ABSENCE** (§50.6)
+— `html[data-viewing-as]` exists while a view is on and the attribute is REMOVED
+otherwise, so a build that never writes it reads identically to one that has just
+cleared it. **AND THERE IS NO INITIAL-PAINT CASE, WHICH WAS CHECKED RATHER THAN
+ASSUMED**: `chromeFor(paint)` sets `window.VIEWER` to the signed-in person on every
+hydration and nothing persists a simulated key, so a view-as is OFF after a page load
+and the attribute's absence at load is the truth rather than a gap.
+
+**ONE DECISION, TWO BARS, AND THE SIGNAL DIFFERS BECAUSE WHAT EACH BAR HAS DIFFERS**:
+the §400 trail is drawn by the SERVED stack's own browser file (`shell/route.js`,
+because a module list only exists where a server says which modules a client has,
+§61), so it is marked from the paint; §444's `topBarHtml()` — the one bar Insights,
+the Tracker, Notes and Portfolio share — is handed `TopBar.viewer` and therefore knows
+server-side, so it stamps its own mark with no script and no flash. Two
+implementations of one answer is the drift §53.5 keeps recording, so the check asserts
+BOTH, and the two treatments are the same three rules written against each bar's own
+token set.
+
+**THE MOCKUP WOULD HAVE SHIPPED THE LOOK HE REFUSED, AND MEASURING IS WHAT CAUGHT
+IT** (§38.5): the drawing put the `›` separators **and the caret** on `--line`, and
+`--line` is a hairline rather than an ink — measured as a WCAG ratio in all four
+palettes, **1.38 forefront-light, 1.43 forefront-dark, 1.23 slate-light, 1.45
+slate-dark**, against `--ink-3`'s **5.31 / 5.96 / 5.19 / 6.64**. A caret at 1.23 is
+not quiet, it is gone — so the one mark saying *this opens* would have been taken
+away, which lands the LOOK on B while the behaviour stayed A: a menu that opens with
+nothing on screen saying it does. The caret takes `--ink-3` and only the separators
+recede. **One stated departure from a signed-off drawing, in the direction of his own
+decision**, and asserted in both halves so it cannot drift back. *And the figure I
+first carried for `--line` was the forefront pair alone; slate light is 1.23, which is
+worse — so re-measuring rather than quoting strengthened the argument instead of
+weakening it* (§124).
+
+**§519.1 — AND THE CHECK DIED RATHER THAN REPORTING, IN THE FILE WHOSE OWN HEADER
+PROMISES IT DOES NOT** (§215, §298.3). `held-menus` is the break that makes a control
+UNREACHABLE — `pointer-events:none`, which is B — and `pg.click` waits thirty seconds
+on one, retries, and then throws out of the top level: so node exited 1, which is loud
+enough for a caller, and **the one assertion that break exists for never printed its
+verdict and §3 was never reached**. A falsification that kills the run has proved the
+break lands and nothing about what it lands ON. Every press goes through a degrading
+wrapper now — a short clock, and a refusal comes back as false carrying its reason —
+so `held-menus` reads **52 ok, 2 failed**, reaches §3, and prints B's own behaviour
+verbatim: `{"press":"refused — the control could not be reached","open":false}`.
+**AND MY OWN MEASUREMENT OF THAT DEATH WAS WRONG FIRST**: piped through
+`| tail -15; echo "exit $?"` the run reported **exit 0**, which is `tail`'s status and
+not node's — re-measured with the pipe removed it is **1**. Worth recording because
+*a dead run that exits 0* would have been a far more serious finding than the real
+one, and it was an artefact of how I was looking.
+
+**VERIFIED**: `smp-app/checks/viewing-as-bar.mjs` **54 ok, 0 failed**, proved able to
+fail **six ways from the SOURCES** (§276), each break asserted to have MATCHED exactly
+once before it is written (§344.1) and each reddening its own assertions —
+`no-quiet` **4**, `caret-line` **4**, `no-mark` **13**, `held-menus` **2**,
+`tb-always` **5**, `tb-no-quiet` **2**. Every colour is resolved through the page and
+asserted as an AGREEMENT with a token rather than against a hex (§94.8), in all four
+palettes; §1 DRIVES the served bar from `topBarHtml()` and `TOPBAR_CSS` with no
+database, §2 DRIVES the frozen trail with `markViewing()` **sliced out of `sync.js` by
+matched text** so the product's own bytes write the attribute, and §3 READS
+`route.js` for the one fact a paint cannot show — which half is which is said in the
+file (§100.3). No falsification writes to the tree, confirmed after the six-break run.
+Beside it: `qa.py` through `qa-run.py` **33 viewers, ERRORS none**;
+`smp-app/checks/view-as.mjs` **20 ok, 0 failed**; `built-in-step.py` all good after
+the rebuild (§349); `generated-in-step.mjs` all clear once committed, its one FAIL
+before that being §349.4's guard refusing an uncommitted tree and naming which errand
+it is. `sw.js` bumped to **v6.23-quiet-trail**, because the built file's bytes changed
+(§91), one `const SHELL`, parsing, and a name the history has never held.
+**TWELVE `smp-app` CHECKS ARE UNRUN RATHER THAN PASSING** (§54.5): this container
+holds no `pg` and runs no Postgres, so everything importing `lib/db.ts` could not
+launch — `modules.mjs` and `shell.mjs` among them, and with `modules.mjs` goes the
+**pre-existing `trail-for-staff`** break, which is the assertion that a client's own
+staff are drawn no trail at all. Answered in the code at two sites
+(`route.js`'s `data-console` gate and `topbar.ts`'s own) and **not exercisable here**.
+*I considered carrying that claim into this check, which does run here, and declined
+it as scope-widening*: it is §400 and §444's claim about who the bar is FOR, where
+§519's is only about its weight — and a check that quietly grows somebody else's
+subject is how one file comes to answer two questions (rule 1b).
+**Nothing stored moves, nothing is migrated, no rule about who may save what changes
+and nobody's access moves** — read off the diff: two frozen sources, one served
+browser file, one served library, the check, and the record. **On the branch, not
+merged** — the merge is Islam's word, on that merge.
+
+**§519.2 — AND THE DESTINATION COUNT IS ACCOUNTED FOR RATHER THAN QUOTED (§332).**
+The whole-platform sweep reads **234** destinations where §367 recorded **243**, and
+a figure that differs from the record is owed an account before it is owed a
+sentence. Measured rather than reasoned about, with the baseline taken from a
+WORKTREE and never from this tree (§303): the build immediately before this round
+reads **234**, **identical viewer for viewer**, so §519 moves no destination; and
+the build before §516 (`1a309c6^`) reads **243**, with the whole difference landing
+on **three viewers and nine pages** — `ceo` 31 → 28, `co_dist` 21 → 18, `co_b2c`
+21 → 18, every other one of the thirty-three to the digit.
+**THAT IS §516.2 AND §516.3'S OWN WRITTEN LIST, WHICH IS WHAT MAKES IT AN ACCOUNT
+RATHER THAN A COINCIDENCE**: a CEO held exactly three Setup rail pages — Reporting
+cycle, Import & storage, Focus measures — and with Setup itself shut the gear is no
+longer drawn for them at all, so each loses three and nobody else loses any. The
+mechanism is in `qa.py` and was read rather than assumed: a "destination" there is
+the nav destinations `walk_destinations()` finds PLUS one per Setup rail page the
+viewer loop walks (`seen += 1`), which is how an ACCESS decision moves a number
+nobody thought was about access.
+**AND THE HARNESS COST MORE THAN THE MEASUREMENT.** A sweep started with
+`nohup … &` inside a backgrounded call outlived its wrapper; a second launch's `>`
+then TRUNCATED the log the first was still writing into, and the empty tail read as
+§385.2e's *a launcher that did not launch* when what it actually was is two runs
+interleaving into one file. *An empty tail can be a truncation rather than a failed
+launch, and two Chromium sweeps at once make both figures worthless* (§442.14's
+contention, §298.3's rule from the other side). Beside it, `pkill -f "qa-run.py"`
+killed my own shell because the pattern matched the wrapper's own command line, and
+`pgrep -cf qa-run` reported two processes when none remained — §385.2e's *a
+measurement that includes the measurer*, twice in one session — so a process is
+counted with `ps … | grep -v " grep "` and killed by PID. **Run them SERIALLY**:
+one sweep, one log, one waiter.
+
+**§519.2a — AND THE "MISSING TRACKER ENTRY" WAS A GREP FOR A SPELLING THE FILE
+DOES NOT USE.** `IMPLEMENTATION_PROGRESS.md` was read as carrying no §519 entry,
+because `grep -n "519"` over it returns nothing — and that file contains the
+string `§` **nought** times, by rule 1b-iii: it is what is said to a person, so
+it is written in plain words and a section number in it would be a reference
+nobody reading it needs. The entry is there and is first, headed *"The top bar
+goes quiet while you are viewing as somebody else (built, on the branch, not
+merged)"*, with §519's own *"Still to do"* line on it. §93's shape in a search
+rather than in a column: **a file searched for a spelling it deliberately never
+uses reports as empty**, and the reassuring reading — *the record is owed an
+entry* — is the one that produces work nobody needed. Nothing is added for
+§519.2 itself: the tracker says what is on a screen, and the sweep's own
+destination count is not on one.
+
+**On the branch, not merged** — the merge is
+Islam's word, on that merge.
+
+## §520 — A capability's owner is a part owner (2026-10-11)
+
+Islam, of Ehab, who owns the capability *Product Mindset* under the
+Marketing function:
+
+> "a capability owner is a part owner and it's set to see only his capability
+> like the pillars owners but still he sees everything. his access hsould match
+> the direction owner like Amr hassan only seeing his directions plus the
+> corporate foundation"
+
+**IT IS NOT A REGRESSION, AND ESTABLISHING THAT FIRST DECIDED THE SHAPE OF THE
+ANSWER.** `a_group:"view"` has been the Capability owner row's answer since the
+row was created at §412, copied verbatim from `fnhead` — read off the history
+rather than inferred. So nothing broke; a role was given a function head's
+reach when it holds one part inside a function, and §517's half eye, built a
+day earlier for exactly this complaint, could not reach it.
+
+**THE REASON IT COULD NOT IS THE WHOLE FIX: `capowner` WAS ON THE WRONG DRAWN
+ROW.** §517's half eye sits beside the eye in the **Part owner** row's Group /
+Company cell, and §516 draws eight rows over thirteen stored roles — so a role
+grouped under **Owner** is a role that control cannot see. A capability sits
+INSIDE a function exactly as a project and a pillar sit inside a place, which is
+Islam's own sentence restated, so the row it belongs on is the one it is moved
+to. **ONE SWITCH, ONE STORED KEY, ONE HALF EYE** (§53.5): this is §517's rule
+pointed at a second role rather than a second answer to it.
+
+**THE STORED KEY DOES NOT MOVE.** `dirScope` is a key and not a label (§30.2):
+renaming it would reset every client that has already pressed the half eye, for
+a word nobody reads. The FUNCTION is renamed `partOnly` — on both sides and in
+the carried copy — because what it answers is no longer about directions.
+
+**NO GRANT MOVES, AND THAT IS A MEASUREMENT RATHER THAN A CLAIM.** The access
+baseline reads **UNMOVED** (33 people × every page key × every target): §516's
+drawn cell is a VIEW over the stored pairs, so moving a role between drawn rows
+cannot move `grantAtPage`. What changes is what is DRAWN of the company's plan
+once the office presses the half eye, and reporting rights are untouched
+(§469).
+
+**WHAT IT LEAVES THEM FALLS OUT OF §517'S OWN FILTERS RATHER THAN A SECOND
+RULE**: the group's lists are narrowed to the parts that are theirs, a
+capability owner owns no direction, so the company's plan has nothing of theirs
+in it and what remains is the **Foundation** — which is the second half of
+Islam's sentence, arrived at by arithmetic rather than by a branch.
+
+### §520.1 — And hiding the capabilities section was the one thing the half eye may not do
+
+§517 narrowed the SWOT, Competitive Discipline, the plan and the capabilities
+section together with `!dirPartOnly()`, which was right for a direction owner
+and is wrong here — and the measurement is `capAtTop`:
+
+```js
+function capAtTop(group) { if (!buExists(group)) return true; … }
+```
+
+**With the business units off a capability is ALWAYS a section of the company's
+Strategy tab and never a destination of its own.** El Abd is that shape. So
+`!partOnly()` on that section left a capability's owner the Foundation and **no
+way to their own part at all** — §61 exactly, and the opposite of what was
+asked for.
+
+**AND IT NEEDS NO HELP, WHICH IS WHY THE GATE IS SIMPLY DROPPED**:
+`capsReachable()` filters by `grantAt("k_perf", "cap:" + c.id)`, which is the
+MATRIX's own answer and is already narrowed per role — a capability's owner
+reaches their own and not the other, a direction owner reaches none, so for a
+direction owner `topCapsOn()` is false on its own. *The half eye narrows what is
+drawn of the COMPANY's plan; what somebody REACHES is the matrix's to say, and
+this asks it* (§53.5).
+
+### §520.2 — A heading over nothing is not an empty state
+
+§517's filter empties the directions rail for a part owner who owns no
+direction — which **before §520 could not happen**, the only part owner being a
+direction's — and the section was pushed regardless, so a capability's owner
+read the word *Pillars* over an empty row while the *"Nothing to show yet."*
+note below it could never fire (§45.2). Guarded on `ditems.length`, and nobody
+else is reached: with no filter `ditems` is `itemsNow` and `topHasPlan()` has
+already said there is a plan.
+
+The plan SECTION goes the same way but through a different question —
+`partMine()`, which asks whether any direction on the company is theirs — so a
+capability owner is not shown an empty directions rail rather than being shown
+one (§61), while §517's own subject keeps the section their part is in. That
+widening is what the `plan` falsification reddens, and it reddens §517's OWN
+assertion, which is the proof it is load-bearing.
+
+### §520.3 — Proved able to fail five ways from the SOURCES
+
+§238's hashed CSP silences a script block whose bytes changed, so every break
+is made from the sources and rebuilt (§276), each asserted to have MATCHED
+exactly once before it was written (§344.1), the tree restored and the rebuild
+asserted **byte-identical** to the baseline afterwards (§343.9):
+
+| break | red | what it prints |
+|---|---|---|
+| `roles` — `PART_ONLY_ROLES` back to `["dirowner"]` | **7** | the rule not reaching a capability owner, then the SWOT, the directions rail, Focus, the Temple, Performance and Weighting all coming back — **the reported fault, "he sees everything", verbatim** |
+| `weighting` | 1 | `['strategy','performance','weighting']` |
+| `plan` — the `partMine()` widening removed | 1 | **§517's own assertion**, `Plan lists their own direction — []` |
+| `caps` — `!partOnly()` put back on the section | 1 | `['found']` — §520.1's fault verbatim, the Foundation and nothing else |
+| `dirsec` — the `ditems.length` guard removed | 1 | `Pillars`, the bare heading over nothing |
+
+### §520.4 — And it moved a cell on Roles & access, which is a finding rather than a repair
+
+`checks/access-merged.py` went **2 FAILED**, on §516.1's own two assertions:
+the Part owner row's **Their own: Reporting** cell now covers five stored pairs
+where it covered four, and `capowner:a_fn_own` ships at `edit` while the other
+four ship at `view` — so the drawn cell reads *mixed*, and the line above the
+table appears **on the shipped defaults**, where §516.1 recorded that no cell
+differs.
+
+**§516's drawn-cell model is working exactly as designed**, and the grant is
+unchanged: §412 copied `capowner` from `fnhead`, whose own-function Reporting
+has always been `edit`. Two readings were weighed and **the first was taken**:
+
+- **(a)** leave the defaults and rewrite the assertions — because §520 is a
+  drawing change and the measurement is **0 grants moved**.
+- **(b)** narrow `capowner:a_fn_own` to `view` so the row agrees — which would
+  MOVE a grant, taking reporting-and-changing away from a capability owner in
+  their own function: a permission change nobody asked for (rule 1b), against
+  §469.
+
+**REWRITTEN, NEVER LOOSENED** (§218), into three assertions each still able to
+fail: Plan asserted SEPARATELY as still agreeing at `view` with
+`capowner:a_fn_own_strat` present in its target — because that is §516.1's
+decision surviving whole, and the half that can still fail if a capability
+owner is ever opened on the plan; Reporting asserted as `mixed` **with the
+hover asserted to NAME** *"Capability owner in own supporting function"*
+(§94.8), so a build where some other pair had drifted cannot pass; and the line
+above the table asserted as an AGREEMENT with the cell, naming *"Part owner ·
+Their own: Reporting"*, so it cannot read one count while the table draws
+another.
+
+**AND PROVING THE REWRITE FALSIFIABLE FOUND THAT `roles` IS THE WRONG BREAK FOR
+THIS FILE** — it is correctly GREEN here, because narrowing `PART_ONLY_ROLES`
+says nothing about which drawn row a role sits in. The faithful inverse is
+§516.1's own state, `capowner` back on the Owner row and off the Part owner row:
+**3 red**, printing both targets with `capowner` absent, and nothing else in the
+file moves. *A rewrite is only a rewrite once the break that reaches it has been
+found; the break from the round's own harness is not automatically that break.*
+
+### §520 — Recorded, not done
+
+*(This block was first written as §520.5, which was a mis-numbering: it is
+§520's own list of open items and not a decision of its own. The number is
+handed to the work below, which answers its first bullet. The bullet is kept
+as written, with its correction beside it — Principle II.)*
+
+- **A capability owner's group Performance reads "Nothing to show yet."**
+  rather than their own capability's figures, because §517 keeps only the
+  directions sections there. Showing it would mean narrowing that section, and
+  its capabilities gauges read `GROUP.capabilities` (group-render.js:2484) and
+  **not** `capsReachable()` — so keeping it unnarrowed leaks every capability,
+  and narrowing it was measured across all 33 demo people: **27 of them read
+  `capsReachable()` = 0** against a tenant with one capability, so the
+  narrowing would REMOVE those figures from 27 viewers on the worked example.
+  A wide behaviour change nobody asked for (rule 1b) — Islam's to settle, with
+  that cost stated.
+  **CORRECTED AND DONE AT §520.5 BELOW, AND THE MEASUREMENT ABOVE IS OF THE
+  WRONG OPTION** (§124): 27 of 33 is the cost of narrowing that section's data
+  source for EVERYBODY, which nobody asked for; what Islam asked for is scoped
+  to `partOnly()` holders — the half eye's own scope — and costs every other
+  viewer, the office included, nothing at all.
+- **The demo seed derives no `capowner` and no `dirowner`**, so every check
+  MAKES its state (§255) — and the access baseline sweeps **no `cap:` target at
+  all**, so a cell at a capability is asserted nowhere. `scripts/test-nav-row.js`
+  stubs the capability list to empty.
+- **§517's own group-Performance filter was unmeasured until this round**, and
+  the key names bit twice: the group's Strategy tab spells its Foundation
+  `found` and its Performance tab `performance` — not `foundation` and `perf`.
+  **And the group's Performance page draws ONE section at a time**
+  (`SECS[Math.min(GSEC, …)]`), so a panel-text assertion is not a page
+  assertion: the check presses the `[data-sec]` button and resets `GSEC`
+  afterwards (§94.2).
+- **Two neighbours are red and both are `main`'s**, reproduced detail for
+  detail on a worktree built from `origin/main` before anything here was blamed
+  (§303): `setup-rail`'s clipped *Planning & reporting cycle* label (§495's
+  rename, already recorded) and `no-jump`'s *adding a person, through the
+  dialog* trial — a different trial from the one §118.7 records.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.
+
+---
+
+## §520.5 — A capability owner reads their own capability's figures (2026-10-11)
+
+Islam, of the two decisions §520 handed over: *"a capability doesn't see a group
+performance same like the direction owner why is this confusing to you am I
+missing something?"* and *"the part owner row is relevant to the capability and
+apply to the function sa well when shown the person as well sees their own
+function only whch is normal and differnt from the reporting. or am I missing
+something?"* Then, of the plan put back to him in plain words, **"proceed"**.
+
+**HE WAS NOT MISSING ANYTHING AND I HAD MEASURED THE WRONG OPTION** (§124).
+§520's handover said narrowing the group's Performance page *"would take the
+capability figures away from 27 of the 33 people on the example data"* — and
+that figure is the cost of narrowing that section's **data source for
+everybody**, which nobody asked for. What he asked for is §517's own scope: a
+part owner the half eye has narrowed, which costs every other viewer — the
+office included — nothing. Said plainly, the objection withdrawn, and the
+correction is the reason this is one line rather than a round.
+
+**AND THE SECOND ANSWER REMOVES WORK RATHER THAN ADDING IT.** My framing was
+that the drawn cell and the reporting grant ought to agree; that premise was
+mine and not his. A part owner's row covers a capability AND a function, a part
+owner reading their own function only is normal, and *what is reported is a
+different question from what is drawn* (§469). So **no grant moves** — which is
+what §520 already shipped (0 grants moved, the access baseline UNMOVED) — and
+§516's *mixed* cell stands as that model being honest rather than as something
+to settle by taking reporting away.
+
+**THE GAP IS §517's FILTER MEETING §520's NEW ROLE.** That filter keeps only
+`x.dir`, and a capability's owner owns no direction, so a narrowed owner fell
+through to *"Nothing to show yet."* — §520.1's fault one page over, where
+dropping a section left them nothing at all rather than narrowing it.
+
+**ONE READER, ASKED BY THE TABLE VIEW AND THE CARDS** (§53.5): `capsHere()` in
+`config-data.js`, beside `capsReachable()`, answering `GROUP.capabilities`
+unless `partOnly()`. A narrowing that reached the cards alone would leak every
+capability through the table view, which is the same list read a second way.
+
+**WHAT A PART OWNER REACHES IS THE MATRIX'S OWN ANSWER** (§42): `capsReachable()`
+already asks `grantAt("k_perf","cap:"+c.id)` per capability and already narrows
+correctly, and the company's own Capabilities section on Strategy has read it
+since §447 — so this is one surface catching up with its neighbour rather than a
+second rule about who reaches a capability.
+
+**`data-oi` STAYS THE STORED POSITION** (§118, §310): a drop commits through
+`applyOrder(GROUP.capabilities, order)`, which keys on it, so a filtered index
+would reorder the wrong rows. An arranger is never narrowed (`canArrange("group")`),
+so the two cannot meet today; the stored index costs nothing and is what keeps
+that true. `arrangeBar("capabilities", GROUP.capabilities.length)` is left alone
+for the same reason.
+
+**AND THE SECTION IS GATED ON HOLDING ONE** (§520.2, §45.2): a narrowed part
+owner who reaches no capability is not pushed a heading over nothing — which is
+the direction owner, whose own assertion is that they reach **nought** of them,
+asserted FIRST so the gate assertion is about the gate (§113.8).
+
+**§520.5a — THE PAGE DRAWS ONE SECTION AT A TIME, AND THAT REPORTED A CORRECT
+BUILD BROKEN** (§100.3). `renderGroupPerformance()` ends
+`SECS[Math.min(GSEC, SECS.length - 1)].h`, so a read at `GSEC = 0` is a read of
+whichever section happens to come first — the capabilities one for a narrowed
+part owner, the headline for the office. The check's office assertion failed on
+a build that is right, **and the part-owner assertion beside it had been passing
+only because its filtered SECS puts the cap section first**, which is a §113.8
+weakness rather than a measurement. The section is selected BY ITS OWN TITLE now
+(`GROUP_SECTIONS.indexOf(L('capability','bu'))`, which is what the shell builds
+the section row from), so the assertion is about that section rather than about
+which fixture ran — and a null answer means it was never drawn, which the caller
+has to tell apart from a section drawn holding nothing.
+
+**§520.5b — AND THE GATE'S FALSIFICATION WENT GREEN** (§54.5: a green
+falsification run is indistinguishable from a working guard). The gate's only
+neighbouring assertion read the **Strategy tab's** sections, while the gate
+under test is the **Performance** section push — so nothing in the file asserted
+it at all. Asserted separately now (the capability exists on this tenant, this
+person reaches none of them, so the section must not be pushed), and `nogate`
+reddens exactly that one.
+
+**PROVED ABLE TO FAIL FOUR WAYS FROM THE SOURCES** (§276 — §238's hashed CSP
+silences an edited built file), each break asserted to have MATCHED exactly once
+(§344.1) and the tree restored from the saved copy with the rebuild asserted
+**byte-identical** (§343.9): `whole` **3 red**, the reported fault — every
+capability drawn, and the direction owner now reaching one; `dironly` **3 red**,
+the section gone and *"Nothing to show yet."* in its place; `nogate` **1 red**,
+the heading over nothing; `table` **1 red**, the table view leaking every
+capability.
+
+**§520.5c — AND THE COMMITTED ACCESS BASELINE IS STALE, WHICH IS A FINDING AND
+NOT THIS ROUND'S** (§303). `specs/058-the-client-and-its-modules/access-baseline.json`
+reads **189 differences** against this tree — and the identical 189 against
+HEAD, established by stashing this work and running it there. It is a snapshot
+from an older commit, and `scripts/test-access-unmoved.js`'s own header
+prescribes the method: *write it from the build you are comparing AGAINST, then
+compare.* Written from a worktree at HEAD, this tree reads **UNMOVED — every
+person opens exactly what they opened, at every target**. Regenerating the
+committed file is its own decision and not something to ride along in a
+screen-only round (rule 1b).
+
+**VERIFIED**: `checks/direction-part.py` all good (no page errors), red four
+ways; `checks/access-merged.py` all good; `test-authorize.js` **1042/0**; the
+access baseline **UNMOVED** against a baseline written from HEAD;
+`checks/built-in-step.py` all good; the four `smp-app/public/` generators re-run
+and `generated-in-step` every comparison line ok (§329, with `public/sw.js`
+moving because §397's release stamp hashes every held file and `shell.js`
+changed — the reload banner working as designed); `checks/direction-owner-role.py`
+and `checks/single-company.py` all good; `qa.py` through `qa-run.py`. `sw.js`
+bumped to `v6.25-caps-performance` because the built file's bytes changed
+(§91), proved held by no commit in the history and confirmed against
+`origin/main` immediately before any push (§94.16).
+
+**TWO REDS ARE `main`'s** and are left as `main`'s (§303): `setup-rail`'s
+clipped *Planning &amp; reporting cycle* label (§495's rename) and `no-jump`'s
+*adding a person, through the dialog* trial.
+
+**RECORDED, NOT DONE**: the §516.1 *mixed* cell stands at Islam's own word, so
+option (b) — narrowing `capowner:a_fn_own` to `view` so the row agrees — is one
+line whenever he wants it and moves a grant, which is why it is not taken here.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.
+
+## §520.6 — A capability's owner reports their own capability (2026-10-11)
+
+Islam, of what §520.5 handed over: *"why ehab doesn't have the reporting part?
+like Amr in the retail he should see the foundation like the direction owner and
+see thereporting. Why are you confused. the capability owner is treated like hte
+direction owner why are you still confused?"* — then, of the plan put back in
+plain words, **"yes agreed noting the the capability owner sees the foundation
+as well just like the direction owner (build it)"**.
+
+**HE IS RIGHT AND THE RULE WAS ALREADY WRITTEN ONE ROLE OVER.** §469 lets a
+company direction's owner enter their own direction's figures on the company's
+Reporting tab and no more, and §520 made a capability's owner a part owner — the
+same narrowing, the same half eye — and stopped one tab short: the company
+Reporting tab asked `canReport("group")`, whose group branch admitted the office,
+the CEO and `ownsTopPillar` and had never heard of a capability. So Amr (a
+direction's owner) reached Reporting and Ehab (a capability's owner) did not,
+with both holding the same kind of seat on the same page. The Foundation half of
+his sentence was already true — §520.1 kept it for every part owner — and is
+asserted rather than re-built.
+
+**ONE RULE, SHARED** (§42): `SMPRules.ownsTopCapability(w, person)` is the twin
+of `ownsTopPillar`, written once in `lib/rules.js` and asked by the browser's
+`canReport` group branch and by the authoriser. The server needed no new
+classification — a capability's own rows already classify as that capability's
+reporting, and the owner was already allowed them — so the server-side section
+(`test-authorize.js` §520.6) asserts what was true and now has a screen in front
+of it: the owner's figure on their own capability accepted, a figure on the OTHER
+capability refused, a submission refused. **1057/0.**
+
+**THE PAGE ASKS THE CAPABILITY, NEVER THE FUNCTION THAT HOLDS IT.**
+`capReportBody(c)` gated the capability's own key-objective rows on
+`canReportFnWhole(c.fn)` — the holding FUNCTION's column — which is right for a
+function head and wrong for somebody whose seat is on the capability alone.
+Measured on the made state: for the capability's owner the function answers
+**false** and the capability answers **true** (`k_report` on `fn:…` is none, on
+`cap:…` is edit); for the direction's owner both are false; for the office both
+are true. So the body asks `holderCodeOwner(c)` — the capability's own target —
+for the rows and for `reportPlaces()`, which is what the rail's owed marks read.
+A project's rows were already asked per project and are untouched.
+
+**SUBMITTING STAYS THE OFFICE'S AND THE CEO'S.** `canSpeakFor("group")` is not
+widened, so REPORT_CHROME draws no Submit for either owner; what they get is a
+box on their own rows and nothing on the other's — Amr sees no box on Product
+Mindset, Ehab sees no box on Amr's direction — asserted at both ends (§94.2).
+
+**AND TWO OF THE CHECK'S OWN FAULTS WERE FOUND BY FALSIFYING** (§54.5,
+§113.8). The break that puts `c.fn` back came out GREEN twice before it came out
+red. First because the fixture's capability holds NO key objectives (§333 left
+the demo's one capability empty), so the only rows that line gates did not exist
+and the line was under no measurement at all — the fixture now makes one.
+Second because the probe asked for any `[data-crep]` box, and a project's
+outcomes draw `data-crep` too, so a page with the objective's box missing still
+answered yes — it asks for the objective's own id now. With both corrected the
+break is **1 FAILED**, on exactly that assertion.
+
+**VERIFIED**: `checks/direction-part.py` all good (64 assertions), red three ways
+from the SOURCES (§276) at **5 / 5 / 1** with each break asserted to have matched
+exactly once (§344.1), the tree restored from the saved copy and the rebuild
+asserted byte-identical (§343.9); `test-authorize.js` **1057/0**; the access
+baseline **UNMOVED** against `b9155143` (33 people × 36 pages × 21 targets);
+`rules.cjs` re-carried and in step; `built-in-step.py` all good; the four
+generators re-run with `generated-in-step` every comparison line ok (its one
+FAIL is §349.4's guard refusing an uncommitted tree); `sw.js` bumped to
+`v6.26-cap-owner-reporting` because the built file's bytes changed (§91), held
+by no commit in the history and confirmed against `origin/main`; the served
+worker byte-identical at 4192 bytes, because the generator drops the caching
+half (§316.10). The whole-platform sweep: `qa.py` through `qa-run.py` **33 viewers / 234 destinations / ERRORS none**, the destinations SUMMED from the run's own lines (§332) and §520.5's figure to the digit, which is what a round adding a tab for one made seat and no destination on the worked example must reproduce.
+
+**On the branch, not merged** — the merge is Islam's word, on that merge.
+
+## §520.7 — A capability planned in pillars reports its measures and tactics (2026-10-11)
+
+Islam, with two screenshots from his own tenant minutes after §520.6 was built:
+the company Reporting tab, viewed as Ehab, read *"Capability — ERP Enhancement …
+No Projects to report on."* and the same for Digital Transformation, under a bar
+reading **"0 of 42"**; the Strategy › Capabilities page beside it showed C002
+ERP Enhancement **planned in pillars** with 3 key measures and 4 tactics.
+*"how does ehab has nothing to erport while he owns 2 capabilities. what on
+earth is going on why are you that confused FOCUS!!"*
+
+**THE GATE WAS RIGHT AND THE BODY WAS THE WRONG SHAPE.** §520.6 opened the tab
+to a capability's owner and drew every capability through `capReportBody(c)`,
+which is the PROJECTS shape — key objectives, then each project's deliverables,
+outcomes and milestones. A capability may plan in pillars since §491, and his
+two do. So the page looked for projects, found none, printed *"No Projects to
+report on"* — and the bar above it was already counting those rows in its 42,
+because `reportedCount` walks the holder whatever shape it has. Two readers of
+one capability, one of them blind to half the model (§53.5). **AND §520.6's OWN
+FIXTURE MADE ONLY A PROJECTS CAPABILITY**, so its check passed on exactly the
+build Islam was looking at (§94.5).
+
+**THE BODY A DIRECTION REPORTS THROUGH IS THE BODY A PILLARS CAPABILITY REPORTS
+THROUGH.** `renderReport(u, opt)` gains `opt.bodyOnly`: it returns the key
+objectives section and the pillars section — measures and tactics — and NO
+chrome, no bar, no note banner, because the company page draws its own bar once
+for the whole page. The capability section asks `capPlansInPillars(c)` and
+draws `renderReport(capAsUnit(c.id), {bodyOnly:true})` for a pillars
+capability and `capReportBody(c)` for a projects one. Nothing new is decided
+about who may type: the `cap:<id>` target already answered edit on every gate
+for its owner and the office and none for a direction's owner, measured before
+a line was written (§520.6), so the boxes drawn there are the boxes that gate
+had been opening for nobody to see. A closed cycle returns an empty body, as the
+whole page is read-only then.
+
+**NO SERVER CHANGE** — `test-authorize.js` 1057/0 unmoved; a figure typed into
+a pillars capability's measure is classified as it was the day §394 made a
+capability's plan a `collectUnit` target. The access baseline is UNMOVED
+against a HEAD-written baseline (§520.5c's method; the committed one still
+reads 189 on HEAD).
+
+**§520.7a — THE CHECK'S FIRST RED WAS THE CHECK**: the pillars fixture's tactic
+spelled its quarters `q:[1,1,1,1]` where the plan stores `q1..q4`, so
+`tacticDue` never asked it and the owner's tactic box was reported absent on a
+correct build (§100.3, the fixture's own shape). Corrected, `direction-part.py`
+all good, **red SIX ways on two breaks from the SOURCES** (§276): the §520.6
+copy of `group-render.js` restored, and `bodyOnly` kept with the pillars branch
+routed back through `capReportBody` — each asserted to have MATCHED exactly once
+(§344.1; the first spelling of break B matched nought and its green run is
+recorded as proving nothing, §54.5), the tree restored from the saved copy and
+the rebuild asserted byte-identical (§343.9). Both breaks print the reported
+symptom verbatim: `noProjects: True`, no measure box, no tactic box.
+
+**WHAT ISLAM READS AS "View only" IS NOT A FAULT AND IS SAID**: the company
+bar's pill reads *View only* for anybody who cannot SUBMIT, and neither a
+direction's owner nor a capability's owner may — submitting stays the office's
+and the CEO's (§469, §520.6). The boxes under it are live; the word describes
+the Submit button, not the rows. Changing that word is its own decision.
+
+**VERIFIED**: `direction-part.py` all good, red 6 / 6; `access-merged`,
+`capability-report-column`, `direction-owner-role`, `single-company` green;
+`built-in-step` all good; `generated-in-step` every comparison ok with the
+§349.4 guard refusing the uncommitted tree; `sw.js` bumped to
+`v6.27-cap-pillars-reporting`, held by no commit in the history, one live
+`const SHELL`, `node --check` clean, confirmed against `origin/main`'s
+`v6.21`; `qa.py` through `qa-run.py` — see §520.7's tracker entry for the
+summed figure (§332). **On the branch, not merged** — the merge is Islam's
+word, on that merge.
+
+## §520.8 — The capabilities reporting section is one section, with a rail (2026-10-11)
+
+Islam, with a screenshot of the company Reporting tab viewed as Ehab, minutes
+after §520.7: *"ehab has 2 capabilities but in the rporting it's sjowing one
+only and the name of the cpability is wrtte n at teh top of the page which is
+wrong and another line sayd directions key measures and tactics which is wrong
+it shold say Capbilities - key measures and tactics"*.
+
+**THREE COMPLAINTS, ONE CAUSE.** §520.7 drew a capability planned in pillars
+through `renderReport(capAsUnit(id), {bodyOnly:true})`, and that option returns
+the UNIT page's whole body — its own pillar rail, its own *Directions — Key
+measures and Tactics* heading, its own chrome. So the first capability's pane
+filled the screen under a heading written for a unit, with the capability's
+name printed over it by the section wrapper, and the second capability sat off
+the bottom of the page, one more whole unit body down. Nothing was missing from
+the data; the page was two unit pages stacked, each wearing the wrong name.
+
+**THE ANSWER IS THE PRODUCT'S OWN RAIL-AND-PANE, NEVER A SECOND SHAPE**
+(§53.5): every unit's Reporting page lists its pillars on a rail and draws the
+pressed one in a pane, and that is exactly the shape two capabilities want.
+`reportCapsSplit(caps)` is the one builder: a `.split` whose rail
+(`data-repcaprail`) carries one row per capability — `railName(topCapCode(c),
+c.name)`, the tally from `reportedCount(capAsUnit(c.id))` as entered of asked,
+and *Still to enter* in the alarm ink while anything is owed — and whose pane
+draws the PRESSED capability's body: `renderReport(capAsUnit(id),
+{paneOnly:true})` for one planned in pillars, `capReportBody(c)` for one
+planned in projects. The press is `TOPCAP`, wired in `shell.html` beside the
+other rail presses. The section is headed in the client's own word —
+`L("capability","bu") + " — " + L("measure") + " and " + L("tactic")`, so it
+reads *Capabilities — Key measures and Tactics* on the worked example and
+whatever the client named them on theirs (§392) — and the capability's name is
+on its rail row and nowhere above the section.
+
+**`paneOnly` IS `bodyOnly` MADE HONEST**: it returns the key objectives table
+and the selected pillar's PANE alone — no bar, no summary, no waiting note, and
+no inner rail or inner heading unless the capability itself holds more than one
+pillar (then the inner rail is the right control and is kept). The non-paneOnly
+path is untouched and a unit's Reporting page is asserted **byte-identical** by
+hash of the rendered body, or a change to the shared renderer could reach every
+unit through a capability.
+
+**NO RULE MOVES**: the boxes drawn in the pane are the boxes §520.6's gate
+already opened — a capability's owner types on their own capability, the other
+rows stay read-only, the office types everywhere — and a direction's owner is
+still shown no capabilities section at all. Both ends asserted (§94.2).
+
+**§520.8a — THE §520.6 ASSERTION WAS STALE AND IS REWRITTEN, NEVER LOOSENED**
+(§218): it asked for the capability's name as a page heading, which is the very
+thing this round removes on Islam's word, so it went red on the correct build
+(§214.3). It asks now for the client's word leading the section heading and for
+the owner's capability named on the rail — two claims that can each fail and
+that survive the decision.
+
+**§520.8b — AND THE SCREENSHOT FIXTURE CALLED A CORRECT BUILD BROKEN**
+(§100.3): the shot of the built page timed out pressing a rail row because the
+Reporting tab was not offered at all — `canReport("group")` answered false, and
+measuring why found `topHasPlan` false and `ownsTopCapability` false, because
+the fixture had not made the single-company state the check makes
+(`GROUP.structure.bu.exists:false`, two top directions), so `buExists` was true
+and the top layer held no plan. The product was right; the fixture was not the
+state the feature exists for. Made the same state, and both capabilities shot.
+
+**VERIFIED**: `checks/direction-part.py` all good; red **2 / 1 / 9** on three
+breaks from the SOURCES (§276) — the section drawn through the old `bodyOnly`
+path, the rail removed, and the pane drawn for the first capability whatever is
+pressed — each break asserted to have matched once (§344.1), the tree restored
+from the saved copy and the rebuild byte-identical (§343.9); `test-authorize.js`
+**1057/0** unmoved; the access baseline **UNMOVED** against a baseline written
+from HEAD (§520.5c); `access-merged`, `capability-report-column` 16/0,
+`direction-owner-role`, `single-company`, `capability-first`, `hide-slide` 42/0
+all green; `built-in-step.py` all good; the four generators re-run and
+`generated-in-step` every comparison ok with §349.4's guard refusing the
+uncommitted tree; `sw.js` bumped to `v6.28-cap-rail-reporting`, held by no
+commit in the history, one live `const SHELL`, `node --check` clean, confirmed
+against `origin/main`'s `v6.21`; `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the destinations summed from the run's own lines
+(§332) and §520.7's figure to the digit — a round that adds a rail inside one
+section must move no destination. The built page was shot on both capabilities
+and published for Islam's look, with the record copy under
+`design-mockups/capability-reporting/2026-10-11_cap-rail-built.html` (rule 1c,
+shown after the build because the shape is the product's own and the question
+was the words, §1c's content-first rule). **On the branch, not merged** — the
+merge is Islam's word, on that merge.
+
+
+## §520.9 — Merged to `main` (2026-10-11)
+
+Islam, with the screenshot of the rail working: *"merge to main."* The merge is
+his word, on this merge, and it is a clean **fast-forward** — `origin/main`
+stood at §517.1, this branch's own base, and had not moved, so no renumber is
+owed (§264.3), nothing is resolved and nothing is recombined: the tree pushed
+is byte for byte the tree that was verified (§378.2's standing).
+
+**THE RECORD COMMIT IS WHAT MAKES MAIN'S TIP UNIQUE** (§91, by §357.4's road):
+the branch tip `4484bdf` is already pushed, and Vercel deduplicates by SHA, so
+`main` fast-forwarded onto it alone would be one deployment on a ref already
+holding it — this commit, which the branch does not hold, is the way back, and
+it is one worth making because the three record files still read *"on the
+branch, not merged"* over work `main` now holds (§378.2's finding again).
+
+**WHAT CROSSES**: §518 (Competitive Discipline), §519 (the quiet trail while
+viewing as somebody), §520–§520.8 (a capability's owner as a part owner, their
+own capability's figures on the group's Performance, their own capability on
+the company's Reporting tab, planned in pillars or in projects, in one section
+with a rail). **NO FORCED SIGN-OUT IS OWED, READ OFF THE DIFF** (spec 029): no
+`api/` or `db/` file and `lib/authorize.js` untouched; the one shared-rules
+change is `lib/rules.js`, and it only WIDENS — `ownsTopCapability` opens the
+company Reporting tab to a capability's owner, and `partOnly` reads the same
+stored `dirScope` key for one more role — so no save that worked before is
+refused now.
+
+**VERIFIED ON THE TREE BEING MERGED**: `built-in-step` all good,
+`generated-in-step` all clear (three carried `.cjs` in step), `test-authorize.js`
+**1057/0**, `test-platform-rules.js` 69/0, `node --check sw.js` clean with ONE
+live `const SHELL` at `v6.28-cap-rail-reporting`, held by no commit in the
+history and confirmed against `origin/main`'s `v6.21-direction-part`
+immediately before the push (§94.16).
+
+**AND THE LIVE READ COULD NOT BE MADE FROM HERE** (§91.5, §377.6's situation):
+this environment's proxy refuses `smp-orpin-tau.vercel.app` at CONNECT (403),
+so nobody here has seen production serve this commit, and it is said rather
+than claimed (§54.5). The witnesses for whoever reads the site: `data-dpl-id`
+on the door must MOVE from what it served before; `shell.js` must read
+**4,646,770 bytes / `8f160ea8…`** and `platform.css` **780,584 / `9848738b…`**,
+each byte-identical to the generated copy; the served `/sw.js` carries no
+`SHELL` (the generator drops the caching half, §316.10), so the bump reaches the
+offline copy alone and its release stamp (§397) is the third witness. **THE
+BRANCH IS DELIBERATELY NOT FAST-FORWARDED** until then (§374.1, §380.2): while
+it stays behind, `main`'s tip is on no other ref.
+
+**RECORDED, NOT DONE, AND NEXT**: Islam, in the same message — *"and then we
+will need to fix the counter as I'm adding numbers but the counter at the top
+is still counting 0"*. The company Reporting bar reads **0 of 42** while a
+capability owner enters figures. Not diagnosed here; measured first and put to
+him in plain words before anything moves (rule 1b).
+
+## §520.10 — a capability's owner and a direction's owner read their own progress in the bar (2026-10-11)
+
+Islam, minutes after §520.9 reached `main` and typing figures into his own
+capability on Group › Reporting: *"we will need to fix the counter as I'm
+adding numbers but the counter at the top is still counting 0"* — then, of two
+options put to him with the cost of each, **"1 and same for the direction
+owners as it shows them progress"**.
+
+**THE COUNTER WAS NOT WRONG ABOUT WHAT IT COUNTS, AND SAYING SO FIRST DECIDED
+THE SHAPE OF THE ANSWER.** `renderReport(u)` opens with `reportedCount(u)`, and
+for the company's own page that is the company's own key objectives plus its
+directions' measures and tactics — the **42**. A capability's rows are a
+separate subject (`cap:<id>`), counted on its own rail since §520.8, and never
+part of that 42. So a capability owner typing figures moves his rail's tally
+and leaves the bar at *0 of 42 · View only*, which reads as "nothing you did
+counted" while every figure landed. **Option 2 — fold every capability's rows
+into the company's count — was refused**: it counts the same figure twice (on
+the rail and in the bar), and it widens what the company's own Submit speaks
+for, which §520.6 deliberately kept the office's and the CEO's. **Option 1 is
+§301's own answer one level up**: a bounded reporter is told their OWN progress
+in the bar, one chip per part they hold, in §301's chip shape — `C002 · 1 of 2
+entered` → `C002 · Done` — and the office and the CEO keep the company's count
+and Submit. And it reaches a direction's owner for the same reason: Amr reads
+his direction's figures on Performance (§517) and the bar told him *View only*
+over rows he was typing into.
+
+**NO GRANT MOVES, WHICH IS WHY THE BAR NEEDED A GROUP BRANCH OF ITS OWN.**
+`boundedReporter(target)` was `canReport(target) && boundedHere(target)`, and
+`boundedHere` asks `onlyOwnLines` → `editingRoles`, which reads the EDIT grants
+at the target; `dirowner` and `capowner` both ship at `a_group:"view"`
+(§505, §520), so the answer there is *nobody*, and widening it to `view` would
+have moved the access baseline §520.5c asserts UNMOVED. The group gets the
+question `doneCtl` already asks for a group seat (§469): *may this person
+report but not submit the company's own report* — `canReport("group") &&
+!SMPRules.mayReportTop(world(), viewer())`. Every other target keeps the line
+it had, byte for byte.
+
+**THE PARTS ARE JUDGED BY THEIR SEATS, NEVER BY THE EDIT GRANTS
+`mayMarkDoneOn` READS**: `ownParts()` beside `repChrome`'s call filters the
+company's directions by `SMPRules.ownsDirection(w, me, p)` (§469, by NAME) and
+`capsHere()` by `head === me.key || custodian === me.key` (§520, by KEY), each
+pushed with `mine:true`, which `ownStateChip` accepts in place of
+`mayMarkDoneOn`. A direction's tally is `pillarTally(p)` under
+`pillarCode(topAsUnit(), i)` — the `D001` the page draws since §482, never the
+stored code; a capability's is `reportedCount(capAsUnit(id))` for one planned
+in pillars and `capReported(c)` for one planned in projects, under
+`topCapCode(c)`. **ONE CHIP PER PART ON THE GROUP ALONE**: a unit's or a
+function's owner with several parts keeps §301's *"Your 2 Pillars · 1 of 2
+done"* collapse, asserted byte-identical, because this round is about the
+company's bar and nobody asked for the unit's to change. The hover names who
+submits: *the office or the CEO*.
+
+**§520.10a — AND THE FIRST BUILD CALLED A UNIT'S FINISHED PROJECT "DONE" WITH
+NOBODY HAVING PRESSED THE MARK.** A capability carries no saved-draft mark
+(§309 is a project's and a direction's), so its chip reads Done when every
+asked figure is entered — and the first `isDone` read entered-equals-done for
+EVERY part, so `checks/project-done.py` went **2 red** on a unit's chip this
+change was meant to leave alone (`ITF01 · Done` where §301 reads `ITF01 · 3 of
+3 entered` until the owner presses the mark). Found by running the neighbours
+rather than the file that was edited (§214), scoped with `noMark` to the one
+kind of part that has no mark, and the unit-side chip is §301's again.
+
+**§520.10b — AND THE CHECK ASSERTED THE STORED CODE WHERE THE PAGE DRAWS THE
+POSITION** (§100.3): the direction owner's chip was first asserted as `EA01`,
+the pillar's stored code, and the page has drawn `D001` for a company
+direction since §482; it asks `pillarCode(topAsUnit(), 0)` now.
+
+**VERIFIED**: `checks/direction-part.py` all good with a §520.10 section
+asserting both owner kinds at both ends (§94.2) — Ehab's two chips with their
+tallies and no *View only*, no *Your rows only*, no Submit; a figure typed
+into `capZZ-P1-T1` moving the chip to Done; Amr's chip opening with the drawn
+code; the SMO keeping `N of M` and Submit with no chip — proved able to fail
+**4 / 4 / 3** red from the SOURCES (§276), each break asserted to have matched
+(§344.1), the tree restored from saved copies and the rebuild byte-identical
+(§343.9); `project-done.py` all passed and `report-chrome` OK after
+§520.10a; `test-authorize.js` **1057/0** — the server needed nothing and it is
+asserted (§172); `direction-owner-role`, `single-company`,
+`capability-first`, `hide-slide` 42/0 green; `built-in-step.py` all good;
+the four generators re-run and `generated-in-step` every comparison ok, its one
+FAIL §349.4's guard refusing the uncommitted tree; `qa.py` through
+`qa-run.py` **33 viewers / 234 destinations / ERRORS none**, summed from the
+run's own lines (§332) and §520.8's figure to the digit — a chip in a bar adds
+no destination. `sw.js` bumped to `v6.29-own-progress-chips` because the
+built file's bytes changed (§91), one live `const SHELL`, held by no commit,
+confirmed against `origin/main`'s `v6.28`. **No CSS moved and no new element
+was drawn** — the chip is §301's `rc-state` repeated, so rule 1c's mockup was
+not owed. **Merged to `main` 2026-10-11 on Islam's word** (§520.12).
+
+
+## §520.11 — a capability's owner opens on their capability (2026-10-11)
+
+Islam, viewing as Ehab on the build §520.10 left: *"the capability default
+opens on the perfromance which is wrong it should open on the capbility page
+itself"* — then, of the shape put to him in plain words, **"build it"**.
+
+**MEASURED FIRST, AND IT IS §449'S OWN TEST ONE ROLE OVER.** `entrySub()`
+decides where a destination opens. For the group it asks one question —
+*is the Strategy tab offering the plan section?* — and lands on Strategy › Plan
+when it is, falling to the tab marked `primary` (Performance) when it is not.
+That was the whole truth while the only narrowed owner was a direction's,
+because §517 keeps the directions list for them. §520 made a capability's
+owner a part owner, and §517's half eye then hides the SWOT, the directions
+list and the plan section for them **while leaving Capabilities offered** —
+so the one section they are shown is the one §449's test never asks about,
+and the company fell through to Performance. Not a regression of the landing
+rule; a landing rule written for one part owner meeting a second kind.
+
+**THE FIX IS THE SAME TEST, ASKED OF THE NEXT SECTION DOWN.** When the plan
+section is not offered and the Capabilities section is, the group opens on
+Strategy › Capabilities with their own capability selected — `capsReachable()`
+is the matrix's own answer to *which capabilities does this person reach*
+(§520.5), so holding exactly one sets `TOPCAP` to it and holding several
+leaves the page on its first, which is the stated cost. **Nobody else moves**:
+the office and a direction's owner still land Strategy › Plan (the plan test
+runs first and still wins), and somebody offered neither list still lands
+Performance. §173's refresh stays put, because this decides only where a
+SESSION opens. Screen only — no `api/`, `lib/` or `db/` file, read off the
+diff; nothing stored, nothing migrated, no CSS, so rule 1c's mockup was not
+owed.
+
+**§520.11a — THE "NEITHER" FIXTURE WAS MADE WRONG FIRST, AND THE CHECK SAID
+SO.** The first draft of *offered neither list still lands on Performance*
+took the capability head OFF t520, and the assertion came back `sub: None`.
+That is a different state, and the right answer for it: with no part at all
+they reach no group tab, so `entrySub` answers null and the group is not a
+destination for them (§383's own rule). The honest way to make *offered
+neither* is the office shutting the Capability owner row's own-function
+Performance cell (`ACCESS.capowner.a_fn_own = "none"`) — the capability stops
+being reachable, Capabilities is not offered, and the group's Foundation still
+is, so the group IS a destination and lands on Performance. Put back
+afterwards (§94.2). *A fixture that removes the person's standing measures a
+different person.*
+
+**§520.11b — FALSIFIED FROM THE SOURCES** (§276): the pre-edit `shell.html`
+restored from its saved copy, rebuilt, and `direction-part.py` reads **4 red**
+— the three §520.11 landing assertions printing `sub: performance` verbatim,
+Islam's report in the check's own words, plus one knock-on in §520.6, whose
+Reporting-tab press was left standing on Performance by the landing it
+inherits. Restored from the saved copy (§343.9) and the rebuild asserted
+byte-identical.
+
+**VERIFIED**: `direction-part.py` all good; `capability-first.py` 0 failed;
+`single-company.py`, `direction-owner-role.py`, `access-merged.py` all good;
+`stay-put.py` all clear; `welcome.py` OK — **and once in three runs it died
+at its own resume-a-live-session step** (`Execution context was destroyed`),
+which that file's own comment records as a gate-redirect race (§215) and is
+not this round's; `built-in-step.py` all good; the four generators re-run with
+`generated-in-step` every comparison ok and §349.4's guard refusing the
+uncommitted tree; `sw.js` bumped to `smp-shell-v6.30-cap-landing` against
+`origin/main`'s `v6.28`, one live `const SHELL`, `node --check` clean; `qa.py`
+through `qa-run.py` — the figure is in the progress tracker's entry, summed
+from the run's own lines (§332). **Merged to `main` 2026-10-11 on Islam's word** (§520.12).
+
+## §520.12 — Merged to `main` (2026-10-11)
+
+Islam: *"merge to main"* — the word on this merge, which is the only word
+that moves `main` (rule 4). What is merged is **§520.10** (a capability's
+owner and a direction's owner read their own progress in the bar) and
+**§520.11** (a capability's owner opens on their capability), the branch at
+`127eea1`.
+
+**`--ff-only` REFUSED, AND THAT IS THE PROTOCOL WORKING RATHER THAN A
+SURPRISE.** `main` had not moved in product terms and the histories were
+still **divergent**: it holds `3a60a35`, its own §520.9 merge record, which
+the branch does not — so the refusal is `--ff-only` reporting a divergence
+instead of inventing a merge commit (rule 4), and the way through is the
+recorded one: merge `main` INTO the branch, resolve there, re-run the checks
+on the merged tree, then fast-forward.
+
+**MAIN'S EXTRA COMMIT IS RECORDS ONLY, MEASURED RATHER THAN ASSUMED**: over
+the merge base its diff is `CLAUDE.md` (4), this file (+51) and the short
+tracker (8) — **no product file, no source, no built file, no generated
+copy** — so nothing of main's needed rebuilding on its own account and
+§56.7's merged-declaration scan had nowhere to bite.
+
+**NO RENUMBER WAS OWED AND IT WAS CHECKED IN ALL THREE SPELLINGS** (§264.3,
+§336.1): §520.10 and §520.11 are free on `main` — 0 hits each for `§NNN`,
+`&sect;NNN` and the `§NNN` JavaScript escape, across all three record
+files — so this branch's numbers are its own and no citation of main's was
+swept up.
+
+**NO §335 RE-CARRY IS OWED, READ OFF THE DIFF**: the branch's non-record
+changes are `checks/direction-part.py`, `config-data.js`, `group-render.js`,
+`shell.html`, the shipped built file, `smp-app/public/shell.js`,
+`smp-app/public/sw.js` and `sw.js` — **`lib/rules.js` and `lib/authorize.js`
+are untouched**, so the carried `.cjs` modules cannot be stale, and
+`generated-in-step` confirms every one is its frozen twin under the one
+declared transform with `assistant.cjs` and `push.cjs` still the only two
+named rewrites (§316.7).
+
+**ALL THREE CONFLICTS WERE COMBINED, NEVER PICKED** (§318.7), and **the
+combination is asserted line by line rather than eyeballed** (§356.17: there
+is no `generated-in-step` for prose, so a merge can drop a whole block with
+nothing able to go red). Each reported **0 lost from ours and 0 lost from
+main**: `CLAUDE.md` keeps our two lines with main's §520.9 `*Last Updated:*`
+demoted to `*Earlier:*`, that file's own convention, each prefix asserted;
+this file takes main's self-contained 50-line §520.9 block first and then
+ours' 154 lines, append order, each side trimmed and joined by exactly one
+blank line; the short tracker keeps both entries newest-first.
+**AND ONE OF MY OWN LOSS ASSERTIONS REPORTED A FALSE POSITIVE** — it flagged
+a *"built, on the branch, not merged"* heading as lost from ours, because it
+only tried flipping the date to today and main's flip is 2026-10-08. *A
+staleness-flip assertion must allow for every date the other side may have
+written.*
+
+**AND CHECKING THE RECORD FOUND TWO REAL GAPS IN IT, WHICH IS WORTH MORE
+THAN THE MERGE.** The short Islam-facing tracker had **no §520.11 entry at
+all** and its §520.10 heading still read *"(built, on the branch, not
+merged)"* over work this merge puts on `main`; and the long root tracker had
+**no entry for §520.8, §520.9 or §520.10**, with §520.11's own entry opening
+*"On the branch, not merged."* — §356.17's class of fault twice more.
+**WHAT WAS CORRECTED IS THIS MERGE'S OWN AND THE REST IS NAMED RATHER THAN
+SWEPT** (rule 1b): §520.11's entry written, §520.10's inserted before it in
+chronological order, and the two stale closes flipped, every edit under an
+assertion on the exact prior text and guarded on the heading being found
+exactly once (§353.4). **NAMED AND NOT DONE**: §520.8 and §520.9 have no
+entry in the root tracker at all, three of its closes still read *"Still open:
+your word to merge"*, and this file carries **19** blocks still closing *"On
+the branch, not merged"* — all of them long-merged rounds, mostly main's, and
+sweeping them inside a merge is the scope widening rule 1b forbids.
+
+**AND THE SHELL-UNIQUENESS CHECK LOOKED LIKE A COLLISION AND WAS NOT**: a
+sweep over `git rev-list --all -- sw.js` returned `smp-shell-v6.30-cap-landing`
+as already held, which reads as §94.12 — and the commit holding it is
+`127eea1`, the branch's own, which is inside `--all`. Narrowed to
+`origin/main`'s history it is **never held**. *A "has anybody else served this
+name" check must exclude the ref that wrote it.* Confirmed again immediately
+before the push (§94.16), `v6.30-cap-landing` against main's `v6.28`,
+`node --check sw.js` clean with exactly one live `const SHELL`.
+
+**SPEC 029: NO FORCED SIGN-OUT IS OWED, AND IT IS READ OFF THE DIFF RATHER
+THAN ASSUMED.** Not one `api/` or `db/` file is in the range; nothing about
+how a save is judged, what the change list says or what a save touches moves;
+nothing stored moves and nothing is migrated. §520.10 draws a chip from counts
+the product already had and §520.11 decides where a session opens, so a tab
+left open on the old build saves exactly as it did.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365) — the figures are
+in the merge commit's own message, with `qa.py`'s destination count SUMMED
+from the run's own per-viewer lines rather than quoted from this record
+(§332), and §520.11's falsification re-made from the SOURCES on that tree
+(§94.5, §276), the break asserted to have MATCHED before it was written
+(§344.1) and the tree restored from the saved copy with the rebuild asserted
+byte-identical (§343.9).
+
+**AND THE WITNESS IS READ OFF THE LIVE SITE, NEVER THE DASHBOARD** (§91.5),
+with the baseline taken BEFORE the push so a landed build can be told from one
+that has not: `data-dpl-id` on the served document first (§443.10), beside
+`shell.js`, `platform.css` and the served `/sw.js` release stamp (§397), each
+asserted to have **MOVED**. **`sw.js`'s SHELL name is not a witness and saying
+so is part of the protocol** — `scripts/build-sw.mjs` drops the caching half
+where `SHELL` lives (§316.10, §365), so the served worker can be
+byte-identical across a bump and the name reaches only the offline copy.
+**AND THE MERGE CARRIES ITS OWN RECORD COMMIT, BECAUSE THE BRANCH TIP WAS
+ALREADY PUSHED** (§91, by §357.4's road): Vercel deduplicates by SHA, so
+fast-forwarding `main` onto a commit the branch ref already holds is ONE
+deployment and which ref gets it is a race already lost — the way back is a
+commit `main` holds and the branch does not, and this block is it, which the
+record owed anyway. **The branch is held behind until the live read succeeds**
+and fast-forwarded only then (§378.2, §380.2).

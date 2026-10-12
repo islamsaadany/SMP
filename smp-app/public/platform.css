@@ -2241,6 +2241,18 @@ html[data-client-settings] .viewer { display:none; }
   .stbtn.on.st-view { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
   .stbtn.on.st-edit { background:var(--over-bg); border-color:var(--gold-deep); color:var(--gold-deep); }
   .stbtn.on.st-fill { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
+  /* §516: A CELL THAT STANDS FOR MORE THAN ONE STORED ANSWER, WHEN THOSE
+     ANSWERS DIFFER. Nothing is lit, because no one state is true of all of
+     them, and the tray is ringed in the attention ground rather than dashed —
+     dashed is "no access", which is a chosen answer, and this is not an
+     answer at all until somebody presses one (§168: outstanding is not
+     broken). The hover names each one underneath. */
+  .stset.mixed { border:1px solid var(--attn); background:var(--attn-bg); border-radius:6px; padding:1px; }
+  .st-mixed { color:var(--attn-tx); background:var(--attn-bg); border:1px solid var(--attn); }
+  /* Sits OUTSIDE .cfg (above the grid), so it is not scoped to it. */
+  p.acdiffer { margin:0 0 10px; padding:7px 12px; border-left:3px solid var(--attn);
+                background:var(--attn-bg); color:var(--attn-tx); border-radius:4px;
+                font-size:var(--fs-note); }
 
   .chart-legend i.st { margin-right:2px; }
 
@@ -5942,6 +5954,48 @@ h4.mini.blockrule { border-top:1px solid var(--line); margin:26px -18px 9px;
      for the one reader with no trail: a client's own office on the client's
      settings. */
   html[data-console] .setuprail .railback-row { display:none; }
+  /* ── AND IT QUIETENS WHILE A VIEW IS ON (§519) ─────────────────────
+     Islam, viewing as somebody: *"while viewing as Amr hassan I'm seeing the
+     white bar at the top which is for the smo only is that a glitch?"*
+     IT IS NOT — the trail follows the SEAT on the session, which is the whole
+     point of the simulation, and the viewer switcher is in this same row, so
+     a bar that went away would strand the office (§61). What was wrong is the
+     WEIGHT: at full strength the trail reads as the viewed person's own
+     access. Islam: *"greyed is better not to get confused that the user has
+     access by anyone else."*
+
+     HIS PICK OF TWO DRAWN AT REAL SIZE (rule 1c, each with its cost stated):
+     **A**, quieter while a view is on and full weight the moment you switch
+     back, with both menus still working. **B** — quiet AND held, the carets
+     dropped and the menus refusing — is recorded as refused rather than
+     merely not built: a control that cannot be pressed is how the office
+     loses the way out of the view they are in.
+
+     THE HOVER AND THE OPEN STATE ARE QUIETENED TOO, with their GROUND left
+     alone: the resting weight is what reads as access, and the background
+     still answering the pointer is what says the control works. Keyed on
+     `data-viewing-as`, which sync.js writes from `actingAs()` at the end of
+     every paint and REMOVES when nobody is being viewed (§50.6) — so a
+     session nobody is simulating paints byte-identically to one that never
+     did, and this whole block is dormant over `file://`, where there is no
+     trail to quieten at all. */
+  html[data-viewing-as] nav.trail .trff,
+  html[data-viewing-as] nav.trail details.trstep > summary,
+  html[data-viewing-as] nav.trail details.trclient > summary,
+  html[data-viewing-as] nav.trail details.trstep > summary:hover,
+  html[data-viewing-as] nav.trail details.trstep[open] > summary { color:var(--ink-3); }
+  /* THE CARET KEEPS A WEIGHT A WORD KEEPS, AND THE SEPARATOR DOES NOT —
+     one stated departure from the drawing, in the direction of Islam's own
+     decision. Measured, `--line` on the bar's surface is **1.38:1 light and
+     1.43 dark**: invisible rather than quiet, which on the caret takes away
+     the one mark saying *this opens* and lands the look on **B**, the option
+     he refused. So the caret takes the same quiet ink as the words (5.19–6.64
+     across the four palettes, so the quieting costs no legibility at all) and
+     only the › separators — ornament, never a word and never a control —
+     recede to the line colour, which is what leaves the trail reading as
+     three quiet words. */
+  html[data-viewing-as] nav.trail details.trstep > summary > svg { color:var(--ink-3); }
+  html[data-viewing-as] nav.trail .trsep { color:var(--line); }
 
   details.dlmenu.topsel { position:relative; display:flex; }
   details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
@@ -11208,7 +11262,7 @@ body.presenting #buildband { display:none; }
 .copcards { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
 @media (max-width:520px){ .copcards { grid-template-columns:1fr; } }
 .copcard { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface);
-           display:flex; flex-direction:column; gap:4px; min-width:0; }
+           display:flex; flex-direction:column; gap:4px; min-width:0; position:relative; }
 .copcard.wide { grid-column:1 / -1; }
 .copcard.now { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
 .copcard h3 { margin:0; font-size:14px; display:flex; justify-content:space-between; gap:8px; color:var(--ink); }
@@ -11229,6 +11283,30 @@ button.copcard.pick:hover, button.copcard.pick:focus-visible { background:var(--
 .copcard li { overflow-wrap:anywhere; }
 .copcard li.copmore { list-style:none; margin-left:-16px; color:var(--ink-3); font-style:italic; }
 .copcard.empty p { color:var(--ink-3); font-style:italic; }
+/* §513 — a card with text carries a pen and "Edit with AI", shown when the
+   card is hovered or anything in it has the keyboard; on a touch screen,
+   where nothing hovers, they sit on a line of their own so the status the
+   card states is never covered. */
+.copcard.acts:hover { border-color:var(--gold); }
+.copcact { position:absolute; top:6px; right:6px; display:flex; gap:4px; padding-left:10px; background:var(--surface);
+           opacity:0; transition:opacity .12s; }
+.copcard.acts:hover .copcact, .copcard.acts:focus-within .copcact { opacity:1; }
+/* The status word ("From the plan") is wider than the two icons, so while
+   they are up it steps aside rather than showing two letters beside them;
+   visibility, never display, so the heading keeps its height. */
+@media (hover:hover){ .copcard.acts:hover .copst, .copcard.acts:focus-within .copst { visibility:hidden; } }
+@media (hover:none){ .copcact { position:static; opacity:1; justify-content:flex-end; padding:0; background:none; } }
+.copcact button { width:26px; height:26px; display:grid; place-items:center; border:1px solid var(--line); border-radius:6px;
+                  background:var(--surface); color:var(--ink-2); cursor:pointer; padding:0; }
+.copcact button:hover, .copcact button:focus-visible { color:var(--ink); border-color:var(--gold); outline:none; }
+.copcact svg { width:15px; height:15px; display:block; }
+.copcard.editing { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+textarea.copfedit { display:block; width:100%; box-sizing:border-box; font:13px/1.45 var(--sans); color:var(--ink); background:var(--surface);
+                    border:1px solid var(--field-line, var(--line)); border-radius:6px; padding:7px 9px; margin:6px 0 0;
+                    resize:vertical; field-sizing:content; min-height:5em; }
+textarea.copfedit:focus { outline:2px solid var(--focus, var(--gold)); outline-offset:0; }
+.copeact { display:flex; align-items:center; gap:8px; margin-top:8px; }
+.copeact .copkh { margin-right:auto; font-size:11.5px; color:var(--ink-3); }
 .copchoice { display:inline-block; border:1px solid var(--line); border-radius:6px; padding:4px 10px; margin:2px 4px 0 0;
              font:600 var(--fs-small, 12.5px)/1.3 var(--sans); color:var(--ink-3); background:var(--surface); }
 .copchoice.picked { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }

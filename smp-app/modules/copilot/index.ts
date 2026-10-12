@@ -34,7 +34,7 @@ import { askCopilot, askDraftOnly, askFlowJson, isPasted, configured } from "../
 import {
   FLOW_ELEMENTS, cleanSkip, allAgreed, SHORT_ANSWER, MAX_ANSWER, MAX_DRAFT, REFINES, type Flow, newFlow, sanitizeFlow, flowOf, writeFlow,
   flowInstruction, flowCorpus, draftQuestion, refineQuestion, checkQuestion, TEXT_SCHEMA, CHECK_SCHEMA,
-  saveFoundation, nextFoundationVersion,
+  saveFoundation, nextFoundationVersion, cleanPartWords,
 } from "../../lib/copilot-flow.ts";
 import { methodFor, templateNamesFor } from "../../lib/copilot-settings.ts";
 import { shellHeaders } from "../../lib/shell.ts";
@@ -374,7 +374,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
        are agreed, asked of the STORED flow (§42), never of the page. */
     if (!(allAgreed(stored) || brk() === "finish-any")) return refused(400, "Every part needs a draft you have agreed before the Foundation can be saved.");
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
-    const s = await saveFoundation(c, chat, stored, placeWord, by);
+    const s = await saveFoundation(c, chat, stored, placeWord, by, cleanPartWords(b.partWords));
     const f: Flow = { ...stored, phase: "saved", saved: { deliverableId: s.deliverableId, n: s.n, title: s.title } };
     await writeFlow(c, id, f);
     return out(200, { ok: true, flow: f, saved: f.saved });

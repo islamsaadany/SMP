@@ -26,7 +26,7 @@ const iso = (v: unknown) => (v instanceof Date ? v.toISOString() : str(v));
 export const SECTIONS = ["foundation", "analysis", "compete", "directions", "capabilities", "execution", "advisory"] as const;
 export type Section = (typeof SECTIONS)[number];
 export const SECTION_WORD: Record<Section, string> = {
-  foundation: "Foundation", analysis: "Analysis", compete: "How we compete", directions: "Directions",
+  foundation: "Foundation", analysis: "Analysis", compete: "Competitive Discipline", directions: "Directions",
   capabilities: "Capabilities", execution: "Execution", advisory: "Advisory",
 };
 export function isSection(s: unknown): s is Section { return typeof s === "string" && (SECTIONS as readonly string[]).includes(s); }

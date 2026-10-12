@@ -331,17 +331,35 @@
                     when: function(){ return SMPRules.foundOn(GROUP, "group") && ["brief","purpose","aspiration","keyobj","values"].some(function(c){ return compOn("group", c); }); } },
                   { k:"swot", ac:"g_found", label:SMPRules.swotTitle(GROUP, "group") || L("swot"),
                     render: function(){ return renderUnitAnalysis(topAsUnit()); },
-                    when: function(){ return compOn("group", "swot"); } },
-                  { k:"compete", ac:"g_found", label:"How we compete",
+                    when: function(){ return compOn("group", "swot") && !partOnly(); } },
+                  { k:"compete", ac:"g_found", label:"Competitive Discipline",
                     render: function(){ return renderUnitCompete(topAsUnit()); },
-                    when: function(){ return compOn("group", SMPRules.COMPETE); } },
+                    when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
                     render: function(){ return renderUnitPlan(topAsUnit()); },
-                    when: topPlanOn },
+                    /* §520: a part owner sees their own part and nothing
+                       else — so a capability's owner, who owns no direction,
+                       is not shown the directions rail at all rather than an
+                       empty one (§61). partMine() is the one question. */
+                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
                     render: renderTopCaps,
+                    /* §517 narrowed all three of these together, and §520
+                       measured that this one needs no help: `capsReachable()`
+                       is the MATRIX's own answer and is already narrowed per
+                       role — a capability's owner reaches their own and not
+                       the other, a direction owner reaches none, so for them
+                       `topCapsOn()` is false on its own.
+                       AND HIDING IT WAS THE ONE THING THE HALF EYE MAY NOT DO
+                       (§61): with the business units off a capability is
+                       always a section of this tab and never a destination
+                       (`capAtTop` returns true outright), so `!partOnly()`
+                       here left a capability's owner the Foundation and no
+                       way to their own part at all. The half eye narrows what
+                       is drawn of the COMPANY's plan; what somebody reaches is
+                       the matrix's to say, and this asks it (§53.5). */
                     when: topCapsOn }];
       } };
   }
@@ -520,13 +538,15 @@
       topStrategyTab(false),
       { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard,
         /* §449: off means it disappears (§102); the switch stays on Setup. */
-        when: function(){ return focusOn(); } },
+        when: function(){ return focusOn() && !partOnly(); } },
       { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple,
-        when: function(){ return templeOn("group"); } },
+        when: function(){ return templeOn("group") && !partOnly(); } },
       /* §447: the weighting sets how much each unit counts; with the units
          off there is nothing for it to weight. */
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting,
-        when: function(){ return buExists(); } },
+        /* §520: and it is neither the owner's own part nor the Foundation,
+           so it goes with the rest for a narrowed part owner. */
+        when: function(){ return buExists() && !partOnly(); } },
       /* §428: the orange Reporting tab, once the top layer has a plan of its
          own — reported by the office and the group's CEO (mayReportTop). */
       { k:"report", ac:"g_perf", label:"Reporting", dot:true, cta:true,
@@ -559,7 +579,7 @@
                   { k:"swot",  ac:"u_anal",  label:SMPRules.swotTitle(GROUP, (u && u.ukey) || "u:") || L("swot"), render:renderUnitAnalysis,
                     when: function(t){ return compOn(t, "swot"); } },
                   /* spec 064 §3.1: How we compete, after the SWOT. */
-                  { k:"compete", ac:"u_anal", label:"How we compete", render:renderUnitCompete,
+                  { k:"compete", ac:"u_anal", label:"Competitive Discipline", render:renderUnitCompete,
                     when: function(t){ return compOn(t, SMPRules.COMPETE); } },
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
@@ -2218,6 +2238,23 @@
       if (gs) {
         var gsecs = allowed(gs.sections(), t);
         if (gsecs.some(function(x){ return x.k === "plan"; })) { CURSEC.strategy = "plan"; return "strategy"; }
+        /* §520.11: A CAPABILITY'S OWNER OPENS ON THEIR CAPABILITY (Islam:
+           "the capability default opens on the perfromance which is wrong it
+           should open on the capbility page itself"). With the half eye on
+           (§517, §520) the directions list is not offered to them, so the
+           §449 test above falls through and they landed on Performance —
+           while the Capabilities section WAS offered and never considered as
+           a landing. If Strategy offers Capabilities, open there with their
+           own capability selected: TOPCAP is set only when they reach exactly
+           one, so an owner of two lands on the first of theirs (stated cost)
+           and nobody else is touched — the office and a direction's owner are
+           answered by the plan test first, and somebody offered neither still
+           lands on Performance. Screen only; nothing stored, no rule moves. */
+        if (gsecs.some(function(x){ return x.k === "caps"; })) {
+          var mine = (typeof capsReachable === "function") ? capsReachable() : [];
+          if (mine.length === 1) TOPCAP = mine[0].id;
+          CURSEC.strategy = "caps"; return "strategy";
+        }
       }
       var prim = d.filter(function(x){ return x.primary; })[0];
       if (prim) return prim.k;
@@ -4688,14 +4725,42 @@
        information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
-       so the grid is judged by using it rather than by reading it. */
-    document.querySelectorAll("[data-ac]").forEach(function(b){
+       so the grid is judged by using it rather than by reading it.
+       ONE DRAWN CELL, SEVERAL STORED ONES (§516). The merged table's press
+       carries every (role, area) pair under the cell and the one state to
+       give them all. Only a pair whose answer DIFFERS is written: a pair
+       already on that state keeps its absence (§50.6), so a tenant's stored
+       map grows by exactly the answers somebody changed, and an untouched
+       pair goes on following the shipped default. */
+    document.querySelectorAll("[data-acm]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = b.dataset.ac.split("|");
-        /* The row may not exist yet: a migrated tenant starts with an empty
-           map and every answer coming from the shipped default. Writing a cell
-           is the moment that role gets a row of its own. */
-        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        var p = b.dataset.acm.split("|"), st = p[1];
+        p[0].split(",").forEach(function(pair){
+          var ra = pair.split(":");
+          if (grantFor(ra[0], ra[1]) === st) return;
+          /* The row may not exist yet: a migrated tenant starts with an empty
+             map and every answer coming from the shipped default. Writing a
+             cell is the moment that role gets a row of its own. */
+          (ACCESS[ra[0]] = ACCESS[ra[0]] || {})[ra[1]] = st;
+        });
+        /* §517: the eye or the pen pressed while the half eye is lit is the
+           same one choice made the other way — the full plan again. */
+        if (b.dataset.dirclear) delete GROUP[SMPRules.DIR_SCOPE];
+        paint();
+      });
+    });
+    /* §517: THE HALF EYE. "part" narrows what a direction owner is shown to
+       their own directions and the Foundation; "full" DELETES the key, so a
+       tenant that never chose reads exactly as before (§50.6). It is a
+       narrowing of reading, so it needs reading: a Direction owner left at
+       none for Group / Company is given view in the same press, or the half
+       eye would light over a page they cannot open (§61). */
+    document.querySelectorAll("[data-dirscope]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (b.dataset.dirscope === "part") {
+          GROUP[SMPRules.DIR_SCOPE] = "part";
+          if (grantFor("dirowner", "a_group") === "none") (ACCESS.dirowner = ACCESS.dirowner || {}).a_group = "view";
+        } else delete GROUP[SMPRules.DIR_SCOPE];
         paint();
       });
     });

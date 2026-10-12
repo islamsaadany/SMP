@@ -6,6 +6,25 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **2026-10-11 — Processes: a step can wait on, or carry on in, a step in another process (§521).** Built on the branch, not merged. In a step's editor you can add a step from another process as a predecessor; the other process's map shows the same link as "continues in IT-05 · step 3". Each map draws it as a dashed amber box (left for incoming, right for outgoing) that opens the other map. Loops between processes are refused. "Ready" means documented, not blocked-until-done. One new table (migration `20261011120000_step_handoffs`). Check `check:handoff` 16/0, red 10 ways; typecheck clean.
 
+**2026-10-08 — Spec 066 is on `main` (§516.4).** Islam said *merge to main* and it is merged. Before the merge our sections were given new numbers (§515–§516.3) because another session had used §507–§514 on main for the Processes and Copilot work, and our two migration files were renamed the same way (049 and 028). Every check was run again on the merged copy, not on the branch: all green, with one old failure that is main's own and was already there. The change does not force anybody to sign in again: it only takes three things away from the two CEOs (focus marking, the Reporting cycle, Setup), and a page left open on the old version simply gets a plain refusal the next time it tries one of them. What to go and check: Setup › Roles & access — one table, 8 rows by 6 columns, the headings in your words, two CEO rows, a dash on Setup and Reporting cycle for every row that is not the office. Sign in as a CEO — no gear in the top bar, no Reporting cycle page, no Import & storage, no Focus measures page. Setup › Focus measures as the Super user — marking still works; as the SMO team — it does not. Roles & access — the Part owner row reads *may read* on its own Plan and Reporting cells. From the other session, now live too: Processes — SOP, export, helicopter view; the Copilot's Foundation chat — part names in the client's words, the edit cards and the one count of answers.
+
+**2026-10-08 — Roles & access: the Reporting cycle is the office's alone too (§516.3, spec 066), merged to `main` 2026-10-08.** The Reporting cycle column now works like Setup: only the Super user and the SMO team can be given it. Every other row shows a dash with the reason on it, and a setting a client saved earlier cannot give it back; the server refuses it too. That column carries three pages — the Reporting cycle page, Import & storage (with Archived plans), and Focus measures — so both CEOs lose all three, and the cycle summary on their welcome screen goes with them. Because the CEO could no longer reach Focus measures, marking focus measures is now the Super user's alone (you chose to close it fully); the CEOs still see the marks on the group's Focus board. With Setup and the cycle both closed, the CEOs have no Setup page left, so the gear no longer appears for them. Measured against the previous version: only those three pages moved, only for the three CEOs, and nothing else changed for anyone. Checked: the server rules (1025 passed, none failed), the Roles & access page, the welcome screen, focus measures and the neighbouring Setup pages all pass, and each check was shown to fail when the change is undone. The full walk of every page as every person then finished with no errors for all 33 people, and the twenty neighbouring screen checks pass. Two of them had been checking the old rules and were rewritten to check the new ones: one expected a non-office person's settings button to open on the Reporting cycle page, the other expected a group CEO to still reach the archived plans on Import & storage. Both now pass, and both fail on the version before this change, as they should. One more check reports the long name "Planning & reporting cycle" cut off in the settings side list; that is the same on main and came from main's earlier rename, so it is noted rather than changed here. Merged to `main` 2026-10-08 on his word (§516.4).
+
+**2026-10-08 — Roles & access: Setup is the office's alone, and the columns in your words (§516.2, spec 066), merged to `main` 2026-10-08.** Only the Super user and the SMO team can be given Setup now. Every other row — Owner, Custodian, Part owner, Contributor, Everyone else and both CEOs — shows a dash in the Setup column with the reason on it, and even a setting a client saved earlier cannot give it to them; the server refuses it too. The columns read **Group / Company · Their own (Plan | Reporting) · Other units & functions · Reporting cycle · Setup**. The column names are fixed words; the row names still follow each client's own words. Nothing changes on the example data, because nobody outside the office had Setup there. A client that had opened Setup to somebody outside the office loses it — which is what was asked. Checked: the server's rules 1013/0, the table's own check passes and was shown to fail when either decision is broken, the whole-platform walk has no errors, and everyone opens exactly what they opened before. Merged to `main` 2026-10-08 on his word (§516.4).
+
+**2026-10-08 — Roles & access: two CEO rows, and Setup is never theirs (§516.1, spec 066), merged to `main` 2026-10-08.** The one CEO row on the new table is two rows again: the person who heads the whole client (named in the client's own word, e.g. *Group CEO*) and the person who heads one division (*Division head*). A client with no divisions does not get the second row at all. Neither CEO is ever offered Setup — the cell shows a dash with the reason, and even an old saved setting cannot give it to them. The Part owner row now starts at *may read* on Plan and Reporting, so it no longer shows *differs*; existing clients move only where they still had the old *nothing*, so anything a client set on purpose stays. Checked: everyone opens exactly what they opened before; the server's rules 1007/0; the table's own check passes and was shown to fail five ways when each decision is broken. Not yet run against a real database here: the one-line change that moves existing clients. Waiting on Islam: whether to rename the table's columns, whether the other non-office rows should also never be offered Setup, and his word to merge (the section numbers need moving first, because main has used them since).
+
+**2026-10-07 — Simplifying the platform, stage 2 built: one Roles & access table (§516, spec 066), merged to `main` 2026-10-08.** Roles & access was 13 roles down and 9 areas across — 117 switches, most of them the same answer twice (once for business units, once for functions). It now shows **8 rows and 6 columns, 48 switches**: Super user, SMO team, CEO, Owner, Custodian, Part owner, Contributor and Everyone else down the side; The top, This box — Plan, This box — Reporting, Other boxes, Reporting cycle and Setup across. **Nothing underneath changed**: each switch on the screen sits over the old switches it replaces, and pressing it sets all of them. Where those old switches had been set to different answers, the switch says **differs** (nothing lit, an amber ring, and a line above the table naming it) instead of guessing which answer was meant — you press one answer to settle it. On the platform's own defaults only two switches read *differs*, both on the Part owner row (Plan and Reporting), because a project owner and a pillar owner were shipped with different answers; they are left as they are until you say which answer they should have. **A pillar can now name a Custodian** beside its Owner; that person can work on that pillar's rows and nothing else in the unit. The Copilot's own access table is left as it was. Checked: everyone opens exactly what they opened before (all 33 people, every page, every place — unchanged), the server's rules 984/0, a new check for the table that was shown to fail when the table is broken, and eight older checks updated to the new table (one of them, the direction-owner check, was found only by running every check, because it looked for a row by its old name). Waiting on Islam: which answer the two Part owner switches should carry, and his word to merge stages 1 and 2.
+
+**2026-10-07 — Simplifying the platform, stage 1 built: the numbers mean one thing (§515, §515.1, §515.2, spec 066), merged to `main` 2026-10-08.** The review found one cause behind the complexity: the platform has one real kind of plan (a business unit with pillars) and every other kind imitates it, so each new case needed its own role, its own scoring rule and its own slides. Islam agreed the fix and its five stages (performance, roles, the tree, setup, presentations). **Stage 1 is built.** Six rules, so the same thing is counted the same way everywhere: (1) a function's and a capability's objectives use the business unit's weighting — a blank weight counts as the average of the ones set, and a hidden row is left out; (2) a function's or capability's execution counts milestones and actions only once their date has come, the way tactics already work — before, the ones not due yet counted as zero, so these figures read low all year (Finance 49% → 84%, HR 67% → 90% on the example), and the card now says *"N due so far"*; (3) the group's and a division's execution is the weighted average of what each unit shows, and the group card's *"Delivered X% against Y% planned"* line is replaced by one saying how the figure is made; (4) a function's headline is its objectives when it has them and its pillars or projects when it does not (Merchandising now reads 93% instead of a dash); (5) the review deck asks the same question as the page about whether a function has objectives; (6) the Focus board shows a yes/no measure's answer instead of *Not reported*. No row's own score moved — checked against the version before. Islam chose not to wait for the three clients' working copies, so the real change on Raya Trade, RHI and El Abd is first seen after a merge. Not in this stage: functions and divisions counting toward the group's number (stage 3). Every check in the platform was run against it: the twelve that fail fail the same way on `main` too, so none of them comes from this stage. Merged to `main` 2026-10-08 on his word (§516.4).
+**2026-10-08 — Copilot Foundation §512–§514 merged to `main` on Islam's word.** `main` had moved: another session had merged the Processes SOP work there as §507–§511, so this branch's §507–§509 were renumbered §512–§514 before the merge (every citation in the tree was this branch's own; the merge base holds none of those numbers). Main touched no frozen source, no `sw.js` and nothing served, so the only overlaps were the two record files (both sides kept whole, nothing lost) and `package.json` (both sides' check scripts). On the merged tree: `check:shell` 364/0, `check:copilot` 323/0, main's own `check:sop` 17/0 and `check:pick` 12/0, typecheck clean, built-in-step and generated-in-step clear, `terminology.py` 26/0, `structure.py` all good. No forced sign-out owed: nothing about how a save is judged moved (`copilot-flow.ts` and the copilot module changed, not the authoriser). `sw.js` shell `v6.16-client-words`, a name never served before. Production read off the live site 45 seconds after the push: the deployment id moved, `shell.js`, `platform.css` and the served `sw.js` all byte-identical to this tree's generated copies.
+
+**2026-10-08 — Copilot Foundation: the part names are the client's words, a stale check says so, and one count of answers (§514), merged to `main` 2026-10-08.** Islam's three answers to §513. (1) The six part names on the left (Who we are, Winning Aspiration and the rest) now follow Setup › Terminology wherever a person reads them — the cards, the to-do list, the *Question 1 of 4* line, the *Save and continue to …* and *Go back to …* buttons, and the headings of the saved Foundation; the AI is still asked in the method's own words. (2) When a part is changed with the pen during the consistency check, the old results no longer stay on screen if the re-run fails: the results are dropped the moment any text differs, the page says *The check has not run on the text as it stands now*, and a *Run the check* button brings them back; Save waits for a successful check, as before — whether a Save should ever be allowed without one is Islam's call. (3) The to-do panel and the card agree: one count of answers given, so the card reads *0 of 4 answered* beside a panel reading *0/4*, and the card's pill reads *Answering* with no number. `check:shell` 364/0 (§3i 59/0) red four ways from the sources (5 / 1 / 2 / 3), `check:copilot` 323/0 red 1 / 2, `terminology.py` 26/0, `structure.py` all good, typecheck clean. `sw.js` shell `v6.16-client-words`.
+
+**2026-10-07 — Copilot Foundation: a part is edited from its card (§513), merged to `main` 2026-10-08.** In the guided Foundation chat, each part on the left that already has text now shows two small icons when you point at it: a pen, to change the text yourself right there on the card, and *Edit with AI*, to take that part back into the chat. Saving with the pen keeps exactly what you typed and marks the part agreed; if you were at the consistency check, the check runs again by itself. A part with nothing in it yet has no icons and still opens in the chat with one press. A part that is half answered now says *In progress* instead of *Not started*. End in Mind now has its own short instruction, so it no longer repeats the Purpose and the Winning Aspiration, and it has its own name on the Terminology page, so a client who renames it sees their word on the plan and the deck. Not done and said: the Copilot's own card names do not follow the Terminology page yet.
+
+**2026-10-07 — Copilot Foundation: every part opens at every step (§512), merged to `main` 2026-10-08.** In the guided Foundation chat, the parts on the left (Who We Are, Winning Aspiration and the rest) can now be pressed at any step, not only at the end. Pressing a part that is Done opens its draft to change; saving it puts you back on the question you were on, or back at the consistency check if everything was already agreed. In the consistency check you can press any part, or type a line that names one (for example "make the core values shorter") and that part opens with the change made; a line that names no part tells you to press or name one. The two things it left for later — editing a part from its card, and End in Mind's own instruction and Terminology name — are §513, above.
+
 **2026-10-08 — Processes SOP export, pickers and AI check merged to `main` on Islam's word.** `main` had not moved (fast-forward). One migration (`20261007120000_process_sop`): nullable/defaulted columns on the Processes tables only. No Strategy, `api/`, `lib/` or `db/` file changed, so no forced sign-out and no `sw.js` bump (the built file did not change). The live-site read could not be made from this environment (proxy 403), so the deployment is unverified from here and the branch is deliberately not fast-forwarded until someone has read the live site.
 
 **2026-10-07 — Processes: SOP export, helicopter picker and AI check looked at in a real browser.** Built the app, seeded a Raya Trade workspace with a full process (Order to Cash) and a sparse one (Procure to Pay), and viewed every new screen in Chrome, light and dark, screen and print: no page errors. The SOP shows what is stated and a red *Missing* for what is not, never an invented value; print drops the toolbar and breaks one SOP per page; the export picker's SOP and *Check these N end to end* buttons wake up when processes are ticked. With no AI key the check says plainly *"isn't configured for this deployment yet"* — **the real model path was not run** (no key here). The seeded process map's diagram looked tangled (an end node over a step); that is the existing map page on seed data with no stored positions, not this feature, and was not touched. Nothing needed fixing; no product file changed.
@@ -9350,3 +9369,223 @@ Islam: the shared PDF should be continuous like the preview, no cut at page end.
 - **Hand-overs in the SOP**: the "Approval, hand-over" column now says where work goes in another process (`→ IT-05 · step 3`) and, in amber, where it arrives from (`from IT-01 · step 7`). Same data as the process map (§521), loaded once with the report data.
 - **One continuous page**: the SOP print has the same "One continuous page" tick as the report (§522), on by default; very long packs fall back to ordinary pages.
 - Checked: `check:sop` 20/0, every break red, cold typecheck clean. NOT yet tried in a real browser print dialog.
+
+## 2026-10-10 — A direction owner sees their part only (§517)
+
+Merged to main 2026-10-10 on Islam's word. On Roles & access, the Part owner row's Group / Company cell now has a half eye beside the eye. The eye means a direction owner reads the whole company plan; the half eye means they read their own directions only. With the half eye on, they still see the Foundation, and their Plan, Reporting and Performance list only the directions they own; the SWOT, How we compete, Capabilities, Focus and the Temple are hidden from them. Nothing is deleted, and their reporting rights do not change. Only the Super user can set it. Still open: why El Abd's owners could not report — that needs a view-as one of them on the live client.
+
+## 2026-10-10 — The trail is quiet while you are viewing as somebody (§519)
+
+On the branch, not merged. While you are looking at the platform as somebody
+else, the trail along the top (Platform › client › module) is drawn quietly, so
+nobody reads it as that person's own access. Its menus still open — a held bar
+would be worse, because the control that takes you back out of the view is on
+that line. Nothing else about the bar changes, and for a client's own staff
+nothing changes at all. This line was missing from this file and is written in
+late; the round itself shipped on 2026-10-10.
+
+## 2026-10-11 — A capability owner sees their own capability only (§520)
+
+On the branch, not merged. Ehab owns the capability *Product Mindset* under
+Marketing and was seeing the whole company. He was on the wrong row of Roles &
+access: a capability owner sat with the Owners, who read everything, instead of
+with the Part owners, who read their own part. He is a part owner now, so the
+same half eye that narrows a direction owner narrows him, and his access reads
+the way you asked — the company's Foundation plus his own capability, and
+nothing else.
+
+With the half eye on, a capability owner opens the Foundation and the
+Capabilities section and sees their own capability on the list beside it and
+nobody else's. The SWOT, How we compete, the directions, the Temple, Focus and
+the weighting tab are hidden from them, exactly as for a direction owner.
+Nothing is deleted and their reporting rights do not change. With the half eye
+off nobody's access moves at all — measured, every person opening exactly what
+they opened before. Only the Super user can set it.
+
+One consequence worth knowing. On Roles & access the Part owner row's *Their
+own — Reporting* cell now reads **differs**, because a capability owner was
+shipped able to report in their own function where the other part owners were
+not. Nothing is broken by it: pressing one answer settles the row. It is left
+as it is until you say which answer it should carry — that is one line either
+way.
+
+Still open, and both need your word. First, the group's Performance page: a
+capability owner reads *Nothing to show yet* there today. Showing them their own
+capability's figures means narrowing that page, and measured against the example
+data that would take the capability figures away from 27 of the 33 people, so it
+is not done quietly. Second, the word to merge.
+
+## 2026-10-11 — A capability owner reads their own capability's figures (§520.5)
+
+On the branch, not merged. The two things §520 left with you are both answered,
+and on the first of them you were right and I had measured the wrong thing.
+
+A capability owner opening the group's Performance page used to read *Nothing to
+show yet*. They now read their own capability's figures there and nobody else's
+— which is what a direction owner already gets for their own directions. My
+handover said doing this would take the capability figures away from 27 of the
+33 people on the example data; that is the cost of narrowing that page for
+**everybody**, which nobody asked for. What you asked for only reaches somebody
+the half eye has narrowed, so for every other person — the office included — the
+page is exactly what it was. Said plainly because I had argued against it on a
+number that was about something else.
+
+The second one needs no work. You are right that a part owner's row covers a
+capability and a function, and that somebody seeing only their own function is
+normal and is a different question from what they may report. So no permission
+moves — which is what shipped yesterday — and the *differs* word on that one
+cell is the table being honest about two rows that genuinely ship differently,
+not something to fix by taking reporting away. If the word bothers you when you
+look at it, pressing one answer settles it and that is still one line.
+
+Checked: the capability owner reads their own capability and not the other one,
+on the cards and in the table view; the direction owner, who owns no capability,
+is shown no capabilities section at all rather than an empty heading; everybody
+else's page is untouched and nobody's access has moved, measured person by
+person. Four deliberate breaks each turned the checks red, including one that
+put the reported fault back and one that reproduced the empty page.
+
+What to go and check, after a merge:
+
+- Open **Roles & access** and press the half eye in the Part owner row's
+  *The top* cell. Then view as Ehab.
+- On the company's **Performance** tab he should see the capabilities section
+  with *Product Mindset* on it and nothing else of anybody's.
+- View as Amr Hassan, who owns a direction and no capability. His Performance
+  should show his directions and no capabilities heading at all.
+- Press the eye again to turn it off. Both of them should read the whole company
+  exactly as before.
+
+Still open: your word to merge.
+
+## 2026-10-11 — A capability's owner reports their own capability (§520.6)
+
+On the branch, not merged. Built on your word: the capability owner is treated
+like the direction owner.
+
+With the business units off and the half eye on, a capability's owner now opens
+the company's **Reporting** tab, exactly as a direction's owner does, and enters
+figures on their own capability's rows and nowhere else. The Foundation they
+already had. Submitting is still the office's and the CEO's — neither kind of
+owner gets a Submit button.
+
+Why it was missing: the Reporting tab asked one rule for who may enter figures
+on the company, and that rule knew about a direction's owner and not about a
+capability's. One shared rule now answers for both, on the screen and on the
+server. And inside the page, the capability's own rows were being asked about
+the FUNCTION that holds the capability rather than the capability itself —
+right for a function head, wrong for somebody whose seat is on the capability
+alone — so they are asked about the capability now.
+
+Checked: Ehab gets the Reporting tab, boxes on Product Mindset's rows, no box
+on Amr's direction, no Submit; Amr gets boxes on his direction and none on
+Product Mindset; the office is untouched; the server accepts Ehab's own figure
+and refuses him the other capability and a submission. Nobody's access moved,
+measured person by person. Three deliberate breaks each turned the check red —
+and the third only after the check itself was corrected twice, because the
+example data's capability had no rows to measure and the probe was looking at
+the wrong box. The whole-platform walk: 33 viewers, 234 destinations, no errors — the same count as yesterday, as it should be when nothing on the example data gains a page.
+
+What to go and check, after a merge:
+
+- Open **Roles & access**, press the half eye in the Part owner row's *The top*
+  cell, then view as Ehab.
+- The company page should show **Foundation** and **Reporting**. On Reporting,
+  Product Mindset's rows take a figure; Amr's direction shows none; there is no
+  Submit button.
+- View as Amr Hassan: his direction's rows take a figure, Product Mindset shows
+  none, no Submit.
+- Press the eye again. Both read the whole company as before.
+
+Still open: your word to merge.
+
+## 2026-10-11 — A capability planned in pillars reports its measures and tactics (§520.7)
+
+On the branch, not merged. Your screenshots: Ehab's two capabilities on the
+company Reporting tab said "No Projects to report on." under a bar counting
+0 of 42.
+
+Why: your capabilities plan in pillars (key measures and tactics). The company
+Reporting page knew only the projects shape — it looked for projects, found
+none and said so, over rows the bar was already counting. The rule about who
+may type was right; the drawing was wrong.
+
+Now: a capability planned in pillars draws its key measures and tactics on the
+company Reporting tab through the same body a direction reports through. Ehab
+gets a box on every measure and every tactic of both his capabilities, a typed
+figure lands in the plan, Amr (a direction's owner) sees no capability section,
+and the office types there too. Nothing moved for anybody else.
+
+One word to know: the bar still says **View only** for Ehab, as it does for
+Amr. That word is about the Submit button — neither kind of owner submits,
+the office and the CEO do. The boxes under it are live. If you want a
+different word there, that is its own change.
+
+What to check:
+- View as Ehab: company › Reporting. Both capabilities show their measures and
+  tactics with boxes. Type a figure, refresh, it is still there.
+- View as Amr Hassan: no capability section; his direction's rows as before.
+- As the SMO: both capabilities' boxes are live.
+
+Still open: your word to merge.
+
+## 2026-10-11 — The bar tells an owner their own progress (§520.10)
+
+Merged to main 2026-10-11 on your word. Your report, typing figures into your
+own capability on the company's Reporting tab: "the counter at the top is
+still counting 0".
+
+Why: the 42 in that bar was never your figures. It is the company's own rows,
+and a capability's rows are counted on their own rail — the fix earlier the
+same day. So the figures landed and the bar, correctly, said nothing about
+them.
+
+Two ways were put to you and you took the first: the bar tells a capability
+owner or custodian, and a direction owner or custodian, their OWN progress.
+One chip per part they hold — "C002 · 1 of 2 entered", then "C002 · Done"
+once every figure is in; "D001 · 3 of 5 entered" for a direction. The other
+way would have folded every capability into the company's 42, which counts
+one figure twice and widens who may submit.
+
+The office and the CEO keep the company's count and the Submit button.
+Nobody's access changed, nothing is stored and nothing is migrated. A
+business unit's or a function's own bar is exactly as it was.
+
+One thing the checks caught: a unit's project chip briefly read "Done" for a
+project nobody had marked done. Put back the same hour.
+
+What to check:
+- View as Ehab: company › Reporting. Two chips at the top, one per
+  capability, moving as you type.
+- View as Amr Hassan: his direction's chip.
+- As the SMO: the company count and Submit, no chips.
+
+Merged to main 2026-10-11 on your word.
+
+## 2026-10-11 — A capability owner opens on their capability (§520.11)
+
+Merged to main 2026-10-11 on your word. Your report, viewing as Ehab: the company opened on
+Performance when it should open on the capability page.
+
+Why: the rule that decides where a place opens asked one question — is the
+plan section on offer? — and fell back to Performance when it was not. That
+was right while the only part owner was a direction's, who still gets the
+directions list. With the half eye on, a capability owner is shown
+Capabilities and not the plan, so that one question never reached the section
+they actually have.
+
+Now: when the plan section is not offered but Capabilities is, the company
+opens on Strategy › Capabilities with their own capability selected. The cost
+is small and known: somebody owning two capabilities lands on the first of
+theirs. The office and a direction's owner still land on Strategy › Plan as
+before; a refresh still stays where you were. Nothing stored, no rule moved.
+The whole-platform sweep read 33 viewers, 234 destinations, errors none —
+the same figure as the round before, as it should be when no page is added.
+
+What to check:
+- View as Ehab: press the company. It opens on Strategy › Capabilities with
+  his capability selected.
+- View as Amr Hassan: it opens on Strategy with his directions, as before.
+- As the SMO: the company opens exactly as before.
+
+Merged to main 2026-10-11 on your word.

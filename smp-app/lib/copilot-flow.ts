@@ -172,7 +172,14 @@ export function sanitizeFlow(raw: unknown, stored: Flow | null): Flow {
   f.done = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.done) && j.done[i]) && !!f.drafts[i].trim());
   f.skip = Array.isArray(j.skip) ? cleanSkip(j.skip) : base.skip;
   f.from = FLOW_ELEMENTS.map((_, i) => !!(Array.isArray(j.from) && j.from[i]) && !!f.drafts[i].trim());
-  f.check = base.check; f.saved = base.saved;
+  /* §514 — THE CHECK'S RESULTS ARE ABOUT THE DRAFTS THEY WERE RUN ON. A
+     draft changed since (a pen save during the check, §513) left them
+     standing for the OLD words, drawn as though they were about the new
+     ones with the Save button under them — so they are dropped the moment
+     any draft differs, and the screen says the check has not run. */
+  const sameDrafts = f.drafts.every((d, i) => d === base.drafts[i]);
+  f.check = sameDrafts || process.env.SMP_BREAK === "keep-stale-check" ? base.check : null;
+  f.saved = base.saved;
   if (process.env.SMP_BREAK === "flow-trust-saved" && j.saved) f.saved = j.saved;
   const yearsOk = f.y0 != null && f.y1 != null && f.y1 >= f.y0;
   if (f.phase === "start" && f.start) f.phase = f.start === "plan" ? "loaded" : "path";
@@ -242,6 +249,17 @@ export const REFINES: Record<string, string> = {
   simple: "Simplify it: plainer words, shorter sentences. Keep every fact.",
 };
 
+/* WHAT A PART IS, WHERE THE ANSWERS ALONE DO NOT SAY IT (§513). Islam:
+   "In the End in Mind section I don't know why it takes both Purpose &
+   Winning aspiration content." The agreed parts travel with every draft
+   (flowCorpus), so a part with no rule of its own borrows its neighbours'
+   words; the End in Mind is the part that sat between two of them. The
+   definition is the one agreed with him in chat. */
+export const PART_RULES: Record<string, string> = {
+  eim: "The End in Mind is the lasting mark the organisation works towards, long after this plan ends: what it becomes if everything goes right for decades. It has no finish date and no figures. Don't repeat the Purpose (why it exists) or the Winning Aspiration (what it wins by the end of the plan). One or two sentences.",
+};
+const partRule = (key: string) => (PART_RULES[key] ? "\n\nWHAT THIS PART IS: " + PART_RULES[key] : "");
+
 export function flowInstruction(method: string): string {
   return "You are Forefront Consulting's strategy consultant, writing one part of an organisation's Foundation from what the client told you." +
     "\nRULES: Use only what the answers and the plan say — never invent a figure, a name or a fact. Write in the organisation's own voice, plainly, with no marketing fluff." +
@@ -262,11 +280,11 @@ export function flowCorpus(f: Flow, placeWord: string, context: string, upTo?: n
 export function draftQuestion(f: Flow, i: number): string {
   const el = FLOW_ELEMENTS[i];
   const qa = el.questions.map((q, k) => "Q: " + withYear(q, f.y1) + "\nA: " + (f.ans[i][k].trim() || "(not answered)")).join("\n\n");
-  return "Draft the " + el.name.toUpperCase() + " part of the Foundation from these answers." + (el.key === "obj" ? " Write each objective on its own numbered line." : el.key === "val" ? " Write each value on its own line, its name then a dash and what it means." : "") + "\n\n" + qa;
+  return "Draft the " + el.name.toUpperCase() + " part of the Foundation from these answers." + (el.key === "obj" ? " Write each objective on its own numbered line." : el.key === "val" ? " Write each value on its own line, its name then a dash and what it means." : "") + partRule(el.key) + "\n\n" + qa;
 }
 export function refineQuestion(f: Flow, i: number, how: string): string {
   const el = FLOW_ELEMENTS[i];
-  return "Rewrite this " + el.name.toUpperCase() + " draft. " + (REFINES[how] || ("The person asked: " + how)) + "\n\nTHE DRAFT:\n" + f.drafts[i];
+  return "Rewrite this " + el.name.toUpperCase() + " draft. " + (REFINES[how] || ("The person asked: " + how)) + partRule(el.key) + "\n\nTHE DRAFT:\n" + f.drafts[i];
 }
 export function checkQuestion(f: Flow): string {
   return "Check these parts of one Foundation against each other. Say in `agree` where two parts support each other, and in `issues` where they do not (a gap, a contradiction, an objective that measures nothing the other parts promise), naming the part to change in `element`. At most three of each. Short sentences.\n\n" +
@@ -274,9 +292,23 @@ export function checkQuestion(f: Flow): string {
 }
 
 /* ── THE FOUNDATION AS ONE TEXT, AND SAVING IT ──────────────────────── */
-export function foundationText(f: Flow, placeWord: string): string {
+/* §514 — THE SAVED TEXT'S HEADINGS ARE THE CLIENT'S WORDS. The page sends
+   each part's name as Terminology spells it for this place (one or many, as
+   the Foundation page reads that row); a key the page did not send, or a
+   value that is not a line, keeps the method's own name. The AI is never
+   handed these — its questions name the parts in the method's words. */
+export type PartWords = Partial<Record<string, string>>;
+export function cleanPartWords(raw: unknown): PartWords {
+  const j: any = raw && typeof raw === "object" ? raw : {};
+  const out: PartWords = {};
+  FLOW_ELEMENTS.forEach((el) => { const w = oneLine(j[el.key]).slice(0, 120); if (w) out[el.key] = w; });
+  return out;
+}
+export const partWord = (el: { key: string; name: string }, words?: PartWords): string =>
+  (process.env.SMP_BREAK !== "ignore-part-words" && words && words[el.key]) || el.name;
+export function foundationText(f: Flow, placeWord: string, words?: PartWords): string {
   const out = ["Foundation — " + placeWord, f.y0 != null && f.y1 != null ? f.y0 + " to the end of " + f.y1 : "", ""];
-  FLOW_ELEMENTS.forEach((el, i) => { if (live(f, i) && f.drafts[i].trim()) out.push(el.name.toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
+  FLOW_ELEMENTS.forEach((el, i) => { if (live(f, i) && f.drafts[i].trim()) out.push(partWord(el, words).toUpperCase(), withYear(f.drafts[i].trim(), f.y1), ""); });
   return out.join("\n").trim();
 }
 export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneLine(placeWord) || "this place")).slice(0, MAX_TITLE);
@@ -284,9 +316,9 @@ export const foundationTitle = (placeWord: string) => ("Foundation — " + (oneL
 /* EACH RUN IS A NEW VERSION OF ONE DELIVERABLE: the title is what the rail
    shows, so a deliverable already called "Foundation — Mobile" in this place
    and section gains a version; otherwise it is made at v1. */
-export async function saveFoundation(c: Q, chat: { id: string; place: string; section: Section; title: string }, f: Flow, placeWord: string, by: string): Promise<{ deliverableId: string; n: number; title: string; isNew: boolean }> {
+export async function saveFoundation(c: Q, chat: { id: string; place: string; section: Section; title: string }, f: Flow, placeWord: string, by: string, words?: PartWords): Promise<{ deliverableId: string; n: number; title: string; isNew: boolean }> {
   const title = foundationTitle(placeWord);
-  const body = { text: foundationText(f, placeWord), foundation: FLOW_ELEMENTS.filter((_, i) => live(f, i)).map((el) => ({ key: el.key, name: el.name, text: f.drafts[FLOW_ELEMENTS.indexOf(el)] })), years: [f.y0, f.y1] };
+  const body = { text: foundationText(f, placeWord, words), foundation: FLOW_ELEMENTS.filter((_, i) => live(f, i)).map((el) => ({ key: el.key, name: partWord(el, words), text: f.drafts[FLOW_ELEMENTS.indexOf(el)] })), years: [f.y0, f.y1] };
   const note = "Built in “" + chat.title + "”";
   const hit = await c.query(
     "SELECT id FROM copilot_deliverables WHERE place = $1 AND section = $2 AND lower(title) = lower($3) ORDER BY created_at DESC LIMIT 1",

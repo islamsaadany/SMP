@@ -64,7 +64,11 @@ var LABELS = {
     { key:"brief",       internal:"Brief",               group:"Who we are",          bu:"Who we are",
       note:"A short description of who this part of the business is" },
     { key:"swot",        internal:"SWOT",                group:"SWOT",                bu:"SWOT",
-      note:"Strengths, weaknesses, opportunities and threats" }
+      note:"Strengths, weaknesses, opportunities and threats" },
+    /* §513: the End in Mind's own word, last because migration 048 (027 on
+       the new stack) writes it last for every tenant already deployed. */
+    { key:"endinmind",   internal:"End in Mind",         group:"End in Mind",         bu:"End in Mind",
+      note:"The lasting mark the organisation works towards, long after this plan ends" }
   ]
 };
 /* What the platform would say, kept BEFORE hydration replaces the list with
@@ -3828,6 +3832,16 @@ function canMarkFocus(){
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
    above it \u2014 a measure can deliver its commitment without clearing the reward
    line, and that is neither short nor earning. */
+/* §515.2 P6: THE FIGURE A FOCUS MEASURE IS JUDGED ON. The stored raw
+   `progress` (§239: reward stays a year-end judgement), except for a yes/no
+   measure, which stores none — its answer IS its figure, 100 or 0 from the
+   one scorer (§257), and nothing said stays null. Without this a Done measure
+   read "Not reported" on the board while its own page scored it. One reader
+   for the strip, the tally and the group board, or the three disagree. */
+function focusFigure(m){
+  if (!m) return null;
+  return SMPRules.isYesNo(m.target) ? measureScore(m) : m.progress;
+}
 function focusStanding(progress){
   if (progress == null) return { key:"none",  label:"Not reported" };
   if (progress >= CYCLE.rewardAt) return { key:"over", label:"Earning" };
@@ -3941,8 +3955,9 @@ function focusTallyOf(items){
   var vals = [];
   items.forEach(function(x){
     t.total++;
-    t[focusStanding(x.m.progress).key]++;
-    if (x.m.progress != null) vals.push(x.m.progress);
+    var fv = focusFigure(x.m);
+    t[focusStanding(fv).key]++;
+    if (fv != null) vals.push(fv);
   });
   t.mean = avg(vals);
   return t;
@@ -4239,15 +4254,26 @@ function holderById(id){
    number can FALL later when the outcomes arrive below target. That is the
    project's real story rather than a defect. */
 
+/* ── ONE WEIGHT RULE (§515.2, spec 066 P1) ──────────────────────────────
+   This averaged its own way: a blank weight counted as ONE, beside rows
+   weighted 60 and 40, so a function or a capability with one weight left
+   blank was scored by a rule no unit uses — and the same objectives entered on
+   a unit read a different number (§243's rule: a blank is the average of the
+   weights that were set). It is `koScore()` now, the unit's own reader, which
+   also leaves a hidden row out (§233) where this kept it. Nothing moves where
+   every weight is set or none is, which is every row in the worked example. */
 function capKOScore(c){
   /* §437: a function's own objectives, switched off, score nothing. */
   if (c && c.own && !fnKoCounted(c.id)) return null;
-  /* Pending confirmation leaves the average (§145), as everywhere. */
-  var list = (c.keyObjectives || []).filter(function(m){ return measureScore(m) != null; });
-  if (!list.length) return null;
-  var tw = 0, sum = 0;
-  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += measureScore(m) * w; });
-  return tw ? Math.round(sum / tw) : null;
+  return koScore((c && c.keyObjectives) || []);
+}
+/* WHETHER A HOLDER'S HEADLINE IS ITS OBJECTIVES (§515.2, P4): it has some
+   that are shown, and they are switched on. Asked by the card that leads and
+   by the division's reading, so the two cannot answer differently (§53.5). */
+function holderHasKOs(c){
+  if (!c) return false;
+  if (c.own && !fnKoCounted(c.id)) return false;
+  return SMPRules.shown(c.keyObjectives || []).length > 0;
 }
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
@@ -4368,8 +4394,22 @@ function capPerf(c){
 
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
+/* ── ONE EXECUTION (§515.2, spec 066 P2) ──────────────────────────────────
+   A milestone counts once its date has come, exactly as a tactic does
+   (`dueTactics`, `tacticPlanned`). It averaged EVERY milestone of the year,
+   with the ones not yet due reading nought, so a function's execution was low
+   by construction in the first half and climbed on the calendar rather than on
+   the work — measured on the worked example at June, Finance 49% with every
+   milestone already due completed. The stated cost, agreed: a milestone done
+   early earns nothing until its date arrives, which is what a tactic does.
+   With nothing due yet the figure is NULL, never nought (§35, §276).
+
+   The counts beside it stay whole — "5 of 12 milestones" is still all twelve —
+   and `due` says how many of them the figure is made of, so the card can say
+   why a percentage and a count read differently. `pending` keeps its meaning:
+   a row In progress with no per-cent, due or not (§104.10). */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
@@ -4378,12 +4418,15 @@ function capExec(c){
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
+      if (statusPending(x)) pending++;
+      if (!dueThisCycle(x.finish)) return;
+      due++;
       if (statusPending(x)) return;
       scored++; sum += msReads(x) || 0;
     });
   });
-  return { done: done, wip: wip, todo: todo, total: total,
-           pending: total - scored,
+  return { done: done, wip: wip, todo: todo, total: total, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 /* ── THE TWO NUMBERS AN OBJECTIVES FUNCTION READS (§342) ───────────────────
@@ -4402,16 +4445,21 @@ function capExec(c){
    outstanding so the card can say why the figure rose (§106). */
 function fnActionsTally(fk){
   var list = SMPRules.shown(fnActions(fk));
-  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, wip = 0, todo = 0, sum = 0, scored = 0, due = 0, pending = 0;
   list.forEach(function(a){
     if (a.status === "done") done++;
     else if (a.status === "wip") wip++;
     else todo++;
+    if (statusPending(a)) pending++;
+    /* §515.2 (P2): an action counts once its date has come, as a milestone
+       does — one meaning of Execution wherever the word is printed. */
+    if (!dueThisCycle(a.due)) return;
+    due++;
     if (statusPending(a)) return;
     scored++; sum += msReads(a) || 0;
   });
-  return { done: done, wip: wip, todo: todo, total: list.length,
-           pending: list.length - scored,
+  return { done: done, wip: wip, todo: todo, total: list.length, due: due,
+           pending: pending,
            pct: scored ? Math.round(sum / scored) : null };
 }
 function fnObjScore(fk){
@@ -5065,7 +5113,12 @@ function canReport(unitKey){
     return SMPRules.mayReportTop(world(), viewer()) ||
            SMPRules.ownsTopPillar(world(), viewer()) ||
            /* §466: a company project's owner reports their own project. */
-           SMPRules.ownsTopProject(world(), viewer());
+           SMPRules.ownsTopProject(world(), viewer()) ||
+           /* §520.6: and a capability's owner or custodian enters their own
+              capability's figures here, exactly as a direction's owner does —
+              the capability's rows ask `cap:<id>` for themselves, so this
+              opens the page and nothing else. */
+           SMPRules.ownsTopCapability(world(), viewer());
   }
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
@@ -5120,7 +5173,7 @@ function canReportRow(unitKey, x){
      "fn". */
   return SMPRules.mayReportRow(world(), viewer(), areaOfTarget(unitKey), unitKey,
     { row: { owner: x.owner, collaborators: x.collaborators },
-      pillarOwner: x.pown });
+      pillarOwner: x.pown, pillarCust: x.pcust });
 }
 
 /* ── The function side of the same two questions (§147) ────────────
@@ -5956,11 +6009,11 @@ function areaOfTarget(target){
   var t = String(target || "");
   return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
 }
-function mayMarkDoneOn(target, owner){
+function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
   if (CYCLE.locked && !inOffice()) return false;
-  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner);
+  return SMPRules.mayMarkDone(world(), viewer(), areaOfTarget(t), t, owner, cust);
 }
 /* Does this viewer report here through bounded roles ALONE — the person the
    control exists for. Anybody unbounded has Submit, which says more than a
@@ -5981,6 +6034,17 @@ function boundedHere(target){
    answers for a unit key and an `fn:` target alike (§147.9), so there is one
    call and not two. */
 function boundedReporter(target){
+  /* ── AND THE COMPANY'S PART REPORTERS (§520.10) ──────────────────────
+     Islam, as Ehab with two capabilities: the bar read *"0 of 42 · View
+     only"* while he was entering figures. The 42 is the company's own rows
+     (§520.8 counts a capability on its own rail), and `boundedHere` asks
+     `onlyOwnLines`, which reads the roles granting EDIT at the group — a
+     direction's owner (§469) and a capability's owner (§520) both ship at
+     view there, and no grant moves (§520.5c). So the group asks its own
+     question, the one `doneCtl` already asks (§469): may they report here
+     at all, and are they NOT the office or the CEO, who hold the whole. */
+  if (String(target) === "group")
+    return canReport("group") && !SMPRules.mayReportTop(world(), viewer());
   return canReport(target) && boundedHere(target);
 }
 /* ── WHAT A SUBJECT IS ASKED FOR, BY ITS SHAPE (§242) ────────────────────
@@ -6688,11 +6752,14 @@ function passwordReach(){
   });
 }
 
-/* What carries reward is the office's decision, not a page permission. The
-   group CEO marks it and the SMO can too; nobody else, at any grant. */
+/* What carries reward is the office's decision, not a page permission.
+   §516.3: the Super user marks it and nobody else, at any grant — the group
+   CEO used to, and Islam closed the Reporting cycle column (where this page
+   lives) to everyone but the office knowing it took this with it. The server's
+   focus case says the same. */
 function mayMarkFocus(){
   var rs = personRoleKeys(viewer());
-  return (rs.indexOf("gceo") > -1 || rs.indexOf("super") > -1) && !CYCLE.locked;
+  return rs.indexOf("super") > -1 && !CYCLE.locked;
 }
 
 /* ── Key Objective weights ────────────────────────────────────────────────
@@ -7906,7 +7973,7 @@ function gapMap(target, all, fillable){
     (u.items || []).forEach(function(p, i){
       /* §416: a direction not running this year owes nothing yet. */
       if (!runsNow(p)) return;
-      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, row: row }; };
+      var n = 0, pctx = function(row){ return { pillarOwner: p.owner, pillarCust: p.custodian, row: row }; };
       /* §384: a tactic's own Owner is its own handle — see boundedReach(). */
       (p.measures || []).forEach(function(m){ n += G(w.plan, pctx(m), "measure", m); });
       (p.tactics  || []).forEach(function(x){
@@ -8486,6 +8553,30 @@ function topWritable(){
   if (!GROUP.swot || GROUP.swot === FN_NO_SWOT || typeof GROUP.swot !== "object") GROUP.swot = { s:[], w:[], o:[], t:[] };
   ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(GROUP.swot[q])) GROUP.swot[q] = []; });
   return topAsUnit();
+}
+/* §517: A PART OWNER WHO SEES THEIR PART ONLY. Asked of the shared rule
+   (§42) so the page and the server agree about who is narrowed; the filter
+   is applied where a list is DRAWN, never to GROUP.items itself — a pillar's
+   code is its POSITION (pillarCode) and topWritable() hands out the real
+   array, so filtering the array would renumber every direction and write
+   into the wrong one. partFilter(u) is null when nothing is narrowed.
+
+   §520: a capability's owner is narrowed by the same switch, and owns no
+   direction — so partFilter keeps nothing of the company's plan for them and
+   partMine() is what the page asks before it draws a list at all. */
+function partOnly(){ return SMPRules.partOnly(world(), viewer()); }
+function partMine(){
+  var u = topAsUnit();
+  return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
+}
+function partFilter(u){
+  if (!(u && u.topLayer) || !partOnly()) return null;
+  var w = world(), v = viewer();
+  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+}
+function partItems(u){
+  var f = partFilter(u), list = (u && u.items) || [];
+  return f ? list.filter(f) : list;
 }
 /* ── ONE COMPANY, ITS DIRECTIONS ON ITS OWN PAGE (§447) ─────────────────
    Islam, of El Abd: *"a one company with multiple directions … all the
@@ -10629,6 +10720,21 @@ function capsReachable(){
   });
 }
 
+/* AND THE GROUP'S PERFORMANCE PAGE ASKS THE SAME QUESTION (§520.5). Islam, of
+   a capability's owner: "a capability doesn't see a group performance same
+   like the direction owner." §517 narrows what a part owner is DRAWN of the
+   company's plan and that page was reading `GROUP.capabilities` whole, so a
+   narrowed owner read every capability's figures there — and §517's own filter
+   then kept only the directions sections, which a capability owner has none
+   of, so the page fell to "Nothing to show yet" instead.
+   ONE ANSWER FOR THE TABLE VIEW AND THE CARDS (§53.5), and the narrowing is
+   the half eye's alone: with it off this IS `GROUP.capabilities`, so nobody
+   else's page moves — the office included. What a part owner reaches is the
+   MATRIX's own answer (`capsReachable`), never a second rule (§42). */
+function capsHere(){
+  return partOnly() ? capsReachable() : GROUP.capabilities;
+}
+
 /* A CAPABILITY PLANNED IN PILLARS, READ AS A UNIT (§53.5). The same trick
    `fnAsUnit` plays one level along, for the same reason: a pillar is a pillar
    whoever holds it, so the unit's own pages draw it rather than a third copy
@@ -10992,7 +11098,16 @@ function groupUnitsObjectives(){ return weightedOver(scoringUnitKeys(), unitObje
 function groupExec(){ return weightedOver(scoringUnitKeys(), unitExec); }
 function groupPlan(){ return weightedOver(scoringUnitKeys(), unitPlan); }
 function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
+/* ONE ROLL-UP (§515.2, spec 066 P3). The group's execution was delivered over
+   planned, each averaged across the units FIRST and then divided — so a unit
+   with a large plan pulled the denominator and the headline could sit beside
+   ten unit cards whose own figures do not average to it. It is the weighted
+   average of the figures the units' own cards print now, through the same
+   weightedOver() the objectives headline already uses, so the group says
+   what its units say. groupExec()/groupPlan() stay: they are still the two
+   halves a unit card and the weighting table explain, and nothing else here
+   reads them as a ratio any more. */
+function groupRatio(){ return weightedOver(scoringUnitKeys(), unitRatio); }
 
 /* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
    performance page that includes the overall performance of the company and
@@ -11052,18 +11167,23 @@ function fnMemberScores(fk){
           : (fnHolders(fk)[0] ? capKOScore(fnHolders(fk)[0]) : null);
     return { perf: o, exec: null };
   }
+  /* ONE HEADLINE (§515.2, spec 066 P4): a function's headline is its
+     objectives when its plan HAS objectives (shown and switched on) — reading
+     "not yet" until they are reported — and its pillars' or projects' figure
+     when it has none. Before, a pillars function with none read "—" (§437
+     covered only "switched off"), and a projects function whose objectives
+     were not yet reported quietly read its projects instead: two formats, two
+     answers to one question (§53.5). */
   if (fnPlansInPillars(f)) {
     var u = unitLike("fn:" + fk);
-    /* §437: with its objectives off the headline is its pillars' own figure. */
     if (!u) return { perf:null, exec:null };
-    var uo = unitObjectives(u);
-    return { perf: uo != null || fnKoCounted(u.ukey) ? uo : unitPillars(u), exec: unitRatio(u) };
+    var has = fnKoCounted("fn:" + fk) && SMPRules.shown(u.keyObjectives || []).length > 0;
+    return { perf: has ? unitObjectives(u) : unitPillars(u), exec: unitRatio(u) };
   }
   if (fnPlansInObjectives(f)) return { perf: fnObjScore(fk), exec: fnActionsTally(fk).pct };
   var h = fnHolders(fk)[0];
   if (!h) return { perf:null, exec:null };
-  var ko = capKOScore(h);
-  return { perf: ko != null ? ko : capPerf(h), exec: capExec(h).pct };
+  return { perf: holderHasKOs(h) ? capKOScore(h) : capPerf(h), exec: capExec(h).pct };
 }
 /* EACH MEMBER'S SHARE OF THE COMPANY, summing to 100 (Islam's A).
    The functions take their share first: a weight the office set is used as
@@ -11119,9 +11239,12 @@ function companyObjectives(ck){
 }
 function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
 function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
+/* §515.2 (P3): a division of units alone is the weighted average of its
+   units' own execution figures — the group's rule, over a smaller list. With
+   functions in it, companyMix() was already that rule (§391). */
 function companyRatio(ck){
   return companyFnKeys(ck).length ? companyMix(ck, "exec")
-                                  : ratioOf(companyExec(ck), companyPlan(ck));
+                                  : weightedOver(companyUnitKeys(ck), unitRatio);
 }
 /* What share of the GROUP this company is, which is the one number that only
    makes sense at this level — the re-normalised figures above deliberately

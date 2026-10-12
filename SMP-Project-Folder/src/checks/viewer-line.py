@@ -25,7 +25,7 @@ WHAT IS ASSERTED, and why each is here:
   build that printed every place twice, and one that only proved they are
   absent would pass on a build that printed none.
 
-· A PART OWNER'S ROLE NAMES NO PLACE AT ALL (§524), which REWRITES the rule
+· A PART OWNER'S ROLE NAMES NO PLACE AT ALL (§527), which REWRITES the rule
   above for two roles rather than loosening it (§218): a direction owner and a
   capability owner read `Direction owner` and `Capability owner` and stop.
   §3 asserts the general rule with those two taken out, and §3b asserts them
@@ -139,7 +139,7 @@ with sync_playwright() as p:
 
     # ── 3 · THE PLACE IS NAMED WHERE IT DIFFERS, AND ONLY THERE ──────────
     print("\n3 · a place away from the seat is named; the seat itself is not")
-    # §524 TAKES TWO ROLES OUT OF THIS RULE RATHER THAN LOOSENING IT (§218):
+    # §527 TAKES TWO ROLES OUT OF THIS RULE RATHER THAN LOOSENING IT (§218):
     # a direction owner and a capability owner name no place at all, so their
     # rows would trip `away_named` here while behaving exactly as decided.
     # They are asserted on their own in §3b, with the state MADE (§255).
@@ -177,10 +177,10 @@ with sync_playwright() as p:
     ck("...and somebody whose roles are all where they sit",
        len(cases_seat) > 0, cases_seat[:3])
 
-    # ── 3b · A PART OWNER'S ROLE NAMES NO PLACE (§524) ───────────────────
+    # ── 3b · A PART OWNER'S ROLE NAMES NO PLACE (§527) ───────────────────
     # THE STATE IS MADE (§255). The worked example's one capability carries no
     # head and no custodian (§336), and `ownsTopPillar` answers false while
-    # business units are on (§505) — so NEITHER of the two roles §524 is about
+    # business units are on (§505) — so NEITHER of the two roles §527 is about
     # exists on the demo, and every assertion here would be true of nothing.
     # Three EXISTING register people are used rather than invented ones, so
     # each one's seat is a real label and §3's own comparison stays honest.

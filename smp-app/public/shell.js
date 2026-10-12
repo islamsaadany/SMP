@@ -9090,7 +9090,7 @@ function placeLabel(at){
    anywhere ELSE is named, and a role held in SEVERAL places names them all,
    including the seat: dropping the seat from a list would read as though they
    held it only in the other place. */
-/* §524: A PART OWNER'S ROLE NAMES ITSELF AND NO PLACE. Islam, of the strip
+/* §527: A PART OWNER'S ROLE NAMES ITSELF AND NO PLACE. Islam, of the strip
    beside the viewer switcher -- *"why in the capability the name in the top is
    meniotning the capability itself. it should be similar to the direction"*,
    then *"direction owner or capability owner is enough for now"*. §505 derives

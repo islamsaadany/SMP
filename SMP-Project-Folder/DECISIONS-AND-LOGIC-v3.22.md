@@ -64275,7 +64275,7 @@ commit `main` holds and the branch does not, and this block is it, which the
 record owed anyway. **The branch is held behind until the live read succeeds**
 and fast-forwarded only then (§378.2, §380.2).
 
-## §524 — A part owner's role names itself and no place (2026-10-12)
+## §527 — A part owner's role names itself and no place (2026-10-12)
 
 Islam, with two screenshots of the strip beside the viewer switcher — one
 reading `VIEWING AS [Amr Hassan — Retail ▾] | Direction owner, the group` and
@@ -64323,7 +64323,7 @@ person's **KEY** and §505 compares a top item's **OWNER NAME** through
 all. The state is put back (§94.2), with three existing register people rather
 than pushed ones, or a pushed person's seat reads as a raw key.
 
-**§524.1 — AND THE SECOND FALSIFICATION IS WHY THE CONTROL IS NAMED.** Proved
+**§527.1 — AND THE SECOND FALSIFICATION IS WHY THE CONTROL IS NAMED.** Proved
 able to fail twice from the SOURCES (§276), each break asserted to have matched
 exactly once before it was written (§344.1): the no-place branch removed goes
 **2 red**, printing Islam's own two screenshots verbatim (`'Super user ·
@@ -64335,7 +64335,7 @@ custodian still naming its capability), which is §113.8 paying for itself in
 the wild: *a check written against the fault alone would have applauded the
 dangerous build.*
 
-**§524.2 — AND A CAPABILITY'S CUSTODIAN IS THE ONE ROW STILL NAMING A PLACE,
+**§527.2 — AND A CAPABILITY'S CUSTODIAN IS THE ONE ROW STILL NAMING A PLACE,
 WHICH IS A FINDING RATHER THAN AN OMISSION**: a direction's custodian derives
 `dirowner` and a capability's derives `custodian` (`lib/rules.js`'s own
 comment), so the two sides of one pairing read differently — *Direction owner*
@@ -64343,7 +64343,7 @@ with no place against *Strategy custodian, <the capability's name>*. It is the
 check's own control, so it cannot change unnoticed; whether it should is
 Islam's, and recorded rather than ridden in here (rule 1b).
 
-**§524.3 — AND "THE GROUP" IS A WIDER FAULT, NAMED AND NOT FIXED.** His second
+**§527.3 — AND "THE GROUP" IS A WIDER FAULT, NAMED AND NOT FIXED.** His second
 point is right: a real terminology row for the top level exists (`topword`,
 §404) and is honoured by **eight** readers across the sources, and
 **`placeLabel` is not among them** — its first line is the literal
@@ -64353,7 +64353,7 @@ answers, which is the register, the chips, the board and the switcher. This
 round removes the one place he saw it and changes none of those; correcting
 `placeLabel` is a change to four surfaces at once (rule 1b, rule 2b).
 
-**§524.4 — AND THE ROLE ORDER IS THE REVERSE OF HIS NOTE**, measured rather
+**§527.4 — AND THE ROLE ORDER IS THE REVERSE OF HIS NOTE**, measured rather
 than assumed: `personRoles` mints seat → unit → function → capability →
 `powner` → `plowner` → **`dirowner` last** → the floor, so somebody who is both
 a function owner and a direction owner reads the function first. He says

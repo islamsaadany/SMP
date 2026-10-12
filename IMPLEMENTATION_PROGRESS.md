@@ -9592,3 +9592,6 @@ Merged to main 2026-10-11 on your word.
 
 ## §523.1 — Merged to `main` (2026-10-12)
 Merged at `00c0c31` after `main`'s §512–§514 collision was renumbered (ours are §521–§523). Checked: migration chain applied from empty on Postgres 16, build, typecheck, SOP 20/0, hand-over 16/0, built/generated files in step. Live read of the deployment could not be made from the sandbox (proxy refuses the address); real-browser print of the continuous page still owed.
+
+## §524 — AI review: "Add as a step" (2026-10-12)
+A risk or gap finding can now be added to the process as a step. "Add as a step" opens a form (step text pre-filled and editable, "Place it after", optional notes). The proposal shows on the process map, highlighted "Proposed · from AI review", with Confirm and Delete. Confirm creates the real step after the chosen one and the finding reads "✓ Added to the process after “…”". Delete returns the finding to open. Until confirmed it is not a step, so RACI, Authority, exports, numbering and the review context never see it. Typecheck clean; not yet merged.

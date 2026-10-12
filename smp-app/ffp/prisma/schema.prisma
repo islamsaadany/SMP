@@ -670,6 +670,11 @@ model ReviewFinding {
   status           ReviewFindingStatus           @default(OPEN)
   integratedStepId String?
   integrationMode  ReviewFindingIntegrationMode?
+  /// A step suggested from this finding, waiting on the map for Confirm or
+  /// Delete. Not a real step until confirmed (it is not in any export).
+  proposedLabel       String?
+  proposedNotes       String?
+  proposedAfterStepId String?
 
   process        Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
   integratedStep ProcessStep? @relation(fields: [integratedStepId], references: [id], onDelete: SetNull)

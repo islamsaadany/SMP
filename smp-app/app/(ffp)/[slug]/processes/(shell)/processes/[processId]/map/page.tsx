@@ -11,6 +11,7 @@ import { ProcessStepper } from "../process-stepper";
 import { ProcessDocumentation } from "./process-documentation";
 import { SopDocumentControl } from "./sop-document-control";
 import type { Revision } from "@/ffp/lib/domain/sop";
+import { getActiveReviewFindings } from "@/ffp/lib/data/review-findings-data";
 import { AUTHORITY_ASSIGNMENT_INCLUDE, toAuthorityAssignmentData } from "@/ffp/lib/data/authority-assignments";
 
 export default async function ProcessMapPage(
@@ -109,6 +110,17 @@ export default async function ProcessMapPage(
   const handoffStepOptions = pickerProcesses.flatMap((p) =>
     p.steps.map((st, i) => ({ id: st.id, label: st.label, number: i + 1, processId: p.id, processCode: p.code }))
   );
+
+  // Steps the AI review suggested that nobody has confirmed yet. They are not
+  // part of the process (no step exists) — the map only shows them highlighted.
+  const proposals = (await getActiveReviewFindings(processId))
+    .filter((f) => f.proposal && f.status !== "INTEGRATED" && f.status !== "DISMISSED")
+    .map((f) => ({
+      findingId: f.id,
+      label: f.proposal!.label,
+      notes: f.proposal!.notes,
+      afterStepId: f.proposal!.afterStepId,
+    }));
 
   const externalEntities = process.externalEntities as unknown as { name: string; description: string }[];
 
@@ -249,6 +261,7 @@ export default async function ProcessMapPage(
         handoffsOut={handoffsOut}
         handoffStepOptions={handoffStepOptions}
         otherProcesses={otherProcesses.map((p) => ({ id: p.id, code: p.code, name: p.name }))}
+        proposals={proposals}
       />
 
       <div className="mx-auto mt-5 flex w-full max-w-4xl flex-col gap-3">

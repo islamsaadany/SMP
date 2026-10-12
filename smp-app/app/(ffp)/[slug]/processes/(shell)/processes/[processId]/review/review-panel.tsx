@@ -7,6 +7,8 @@ import {
   updateReviewFinding,
   deleteReviewFinding,
   integrateReviewFinding,
+  proposeStepFromFinding,
+  deleteProposedStep,
   type PersistedReviewFinding,
 } from "@/ffp/lib/actions/ai-review";
 
@@ -55,6 +57,7 @@ export function ReviewPanel({
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [integratingId, setIntegratingId] = useState<string | null>(null);
+  const [addingId, setAddingId] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -103,6 +106,27 @@ export function ReviewPanel({
       if (outcome.ok) {
         setFindings((prev) => prev.map((f) => (f.id === id ? outcome.data : f)));
         setIntegratingId(null);
+        router.refresh();
+      }
+    });
+  }
+
+  function propose(id: string, input: { label: string; notes: string; afterStepId: string | null }) {
+    startTransition(async () => {
+      const outcome = await proposeStepFromFinding({ workspaceId, findingId: id, ...input, afterStepId: input.afterStepId ?? undefined });
+      if (outcome.ok) {
+        setFindings((prev) => prev.map((f) => (f.id === id ? outcome.data : f)));
+        setAddingId(null);
+        router.refresh();
+      }
+    });
+  }
+
+  function withdrawProposal(id: string) {
+    startTransition(async () => {
+      const outcome = await deleteProposedStep({ workspaceId, findingId: id });
+      if (outcome.ok) {
+        setFindings((prev) => prev.map((f) => (f.id === id ? outcome.data : f)));
         router.refresh();
       }
     });
@@ -176,6 +200,11 @@ export function ReviewPanel({
               onCancelEdit={() => setEditingId(null)}
               onSaveEdit={(edited) => saveEdit(finding.id, edited)}
               onDelete={() => remove(finding.id)}
+              adding={addingId === finding.id}
+              onStartAdd={() => setAddingId(finding.id)}
+              onCancelAdd={() => setAddingId(null)}
+              onPropose={(input) => propose(finding.id, input)}
+              onWithdrawProposal={() => withdrawProposal(finding.id)}
               onStartIntegrate={() => setIntegratingId(finding.id)}
               onCancelIntegrate={() => setIntegratingId(null)}
               onIntegrate={(stepId, mode) => integrate(finding.id, stepId, mode)}
@@ -197,6 +226,11 @@ function FindingCard({
   onCancelEdit,
   onSaveEdit,
   onDelete,
+  adding,
+  onStartAdd,
+  onCancelAdd,
+  onPropose,
+  onWithdrawProposal,
   onStartIntegrate,
   onCancelIntegrate,
   onIntegrate,
@@ -210,6 +244,11 @@ function FindingCard({
   onCancelEdit: () => void;
   onSaveEdit: (edited: { title: string; description: string; recommendation: string }) => void;
   onDelete: () => void;
+  adding: boolean;
+  onStartAdd: () => void;
+  onCancelAdd: () => void;
+  onPropose: (input: { label: string; notes: string; afterStepId: string | null }) => void;
+  onWithdrawProposal: () => void;
   onStartIntegrate: () => void;
   onCancelIntegrate: () => void;
   onIntegrate: (stepId: string, mode: "MERGED" | "REPLACED") => void;
@@ -219,7 +258,14 @@ function FindingCard({
   const [recommendation, setRecommendation] = useState(finding.recommendation);
   const [selectedStepId, setSelectedStepId] = useState(steps[0]?.id ?? "");
 
+  const [stepText, setStepText] = useState(finding.proposal?.label ?? finding.recommendation);
+  const [stepNotes, setStepNotes] = useState(finding.proposal?.notes ?? "");
+  const [afterId, setAfterId] = useState(finding.proposal?.afterStepId ?? steps[steps.length - 1]?.id ?? "");
+
   const integrated = finding.status === "INTEGRATED";
+  const proposed = !integrated && !!finding.proposal;
+  const added = integrated && !finding.integrationMode;
+  const anchorLabel = (id: string | null | undefined) => steps.find((s) => s.id === id)?.label ?? "the end of the process";
 
   return (
     <li className={`rounded-xl border px-4 py-3 ${SEVERITY_STYLES[finding.severity] ?? SEVERITY_STYLES.low} ${integrated ? "opacity-75" : ""}`}>
@@ -290,14 +336,36 @@ function FindingCard({
 
           {integrated ? (
             <div className="mt-2.5 flex items-center gap-1.5 border-t border-dashed border-current/20 pt-2.5 text-xs font-medium text-emerald-700">
-              ✓ {finding.integrationMode === "MERGED" ? "Merged into" : "Replaced"}{" "}
-              <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 font-semibold">{finding.integratedStepLabel}</span>
-              {finding.integrationMode === "MERGED" ? " as a note" : ""}
+              {added ? (
+                <>✓ Added to the process as <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 font-semibold">{finding.integratedStepLabel}</span></>
+              ) : (
+                <>
+                  ✓ {finding.integrationMode === "MERGED" ? "Merged into" : "Replaced"}{" "}
+                  <span className="rounded-md bg-emerald-100 px-1.5 py-0.5 font-semibold">{finding.integratedStepLabel}</span>
+                  {finding.integrationMode === "MERGED" ? " as a note" : ""}
+                </>
+              )}
+            </div>
+          ) : proposed ? (
+            <div className="mt-2.5 flex flex-wrap items-center gap-3 border-t border-dashed border-current/20 pt-2.5 text-xs">
+              <span className="rounded-md bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-800">
+                Proposed · waiting on the map, after “{anchorLabel(finding.proposal?.afterStepId)}”
+              </span>
+              <button type="button" disabled={pending} onClick={onWithdrawProposal} className="font-semibold text-slate-600 hover:text-red-600">
+                Withdraw
+              </button>
             </div>
           ) : (
             <div className="mt-2.5 flex gap-3 border-t border-dashed border-current/20 pt-2.5">
               <button type="button" onClick={onStartEdit} className="text-xs font-semibold text-slate-600 hover:text-slate-900">
                 Edit
+              </button>
+              <button
+                type="button"
+                onClick={adding ? onCancelAdd : onStartAdd}
+                className="text-xs font-semibold text-amber-700 hover:text-amber-900"
+              >
+                {adding ? "Cancel add" : "Add as a step"}
               </button>
               {steps.length > 0 && (
                 <button
@@ -305,12 +373,61 @@ function FindingCard({
                   onClick={integrating ? onCancelIntegrate : onStartIntegrate}
                   className="text-xs font-semibold text-indigo-700 hover:text-indigo-900"
                 >
-                  {integrating ? "Cancel integrate" : "Integrate into Process Map"}
+                  {integrating ? "Cancel" : "Merge as a note / Replace a step"}
                 </button>
               )}
               <button type="button" onClick={onDelete} className="text-xs font-semibold text-slate-600 hover:text-red-600">
-                Delete
+                Remove
               </button>
+            </div>
+          )}
+
+          {adding && !integrated && !proposed && (
+            <div className="mt-2.5 flex flex-col gap-2 border-t border-dashed border-current/20 pt-2.5">
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-slate-600">Step text</label>
+                <input
+                  value={stepText}
+                  onChange={(e) => setStepText(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-slate-600">Place it after</label>
+                <select
+                  value={afterId}
+                  onChange={(e) => setAfterId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                >
+                  {steps.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      [{s.type}] {s.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] font-semibold text-slate-600">Notes (optional)</label>
+                <textarea
+                  value={stepNotes}
+                  onChange={(e) => setStepNotes(e.target.value)}
+                  rows={2}
+                  className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={pending || !stepText.trim()}
+                  onClick={() => onPropose({ label: stepText.trim(), notes: stepNotes.trim(), afterStepId: afterId || null })}
+                  className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-40"
+                >
+                  Add to process (proposed)
+                </button>
+                <button type="button" onClick={onCancelAdd} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 

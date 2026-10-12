@@ -64295,3 +64295,6 @@ deployment and which ref gets it is a race already lost — the way back is a
 commit `main` holds and the branch does not, and this block is it, which the
 record owed anyway. **The branch is held behind until the live read succeeds**
 and fast-forwarded only then (§378.2, §380.2).
+
+## §524 — AI review "Add as a step": the proposal lives on the finding
+A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, `proposedAfterStepId`, migration `20261012120000`), never as a `ProcessStep`. This is why nothing else (RACI, Authority, exports, numbering, review context) needed changing. Confirm inserts a TASK step after the anchor in one transaction (later `order`s shift, the anchor's outgoing connections are spliced through the new step) and sets the finding INTEGRATED with `integrationMode` null. Delete clears the proposal and sets OPEN. DISMISSED titles still stop a removed finding returning on re-runs. Map shows proposals as a dashed amber row after the anchor (list view and above the diagram).

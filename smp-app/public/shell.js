@@ -16943,7 +16943,7 @@ function archiveCapPlan(c, why){
   return a;
 }
 
-/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§518) ─────────────────────
+/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§524) ─────────────────────
    Islam, of the Copilot's Apply to plan: *"anything old is not deleted it's
    archived."* A plan archive (`kind:"unit"`) carries the Foundation beside
    the pillars and the SWOT, and restoring one puts ALL of it back — which is
@@ -17069,7 +17069,7 @@ function restoreArchive(id){
     if (restFk) fnWriteBack(restFk, u);
   }
   else if (a.kind === "foundation") {
-    /* §518: six parts, put back whole; what stands is archived first so the
+    /* §524: six parts, put back whole; what stands is archived first so the
        restore can itself be undone (the plan branches' own rule). */
     if (!foundationRecord(a.key)) return false;
     archiveFoundation(a.key, "replaced by restoring the " + a.at + " archive");
@@ -42136,7 +42136,7 @@ function impCycleLabel(){
 function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
-    /* §518: a Foundation archive is keyed by its place already. */
+    /* §524: a Foundation archive is keyed by its place already. */
     var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
@@ -42492,7 +42492,7 @@ function renderArchives(){
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
       : a.kind === "foundation"
-      /* §518: the six parts of a Foundation, replaced from the Copilot. */
+      /* §524: the six parts of a Foundation, replaced from the Copilot. */
       ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
         '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
       : a.kind === "unit"
@@ -58013,12 +58013,12 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
-  /* §519.1 — A WAY TO SEE THE RESULT AFTER APPLY (Islam: "ok for all", of
+  /* §525.1 — A WAY TO SEE THE RESULT AFTER APPLY (Islam: "ok for all", of
      design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
      Applying changed the bar's words and nothing else, so checking the one
      thing Apply is for meant leaving the Copilot and finding Strategy ›
      Foundation by hand. One green line with one link, shown where the state
-     is already read — the flow's save bar and the deliverable page (§518.1's
+     is already read — the flow's save bar and the deliverable page (§524.1's
      "keep in both") — and nothing is stored for it.
      THE ADDRESS IS WORKED OUT THE WAY THE ROUTER WRITES ONE
      (smp-app/shell/route.js `addressOf`): the module word, the destination's
@@ -58047,7 +58047,7 @@ var COPILOT = (function(){
       (h ? ' <a href="' + E(h) + '">Open the ' + E(foundPageWord()) + ' page ›</a>' : '') + '</div>';
   }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
-  /* §518 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
+  /* §524 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
      cards stay editable after a save (Islam: "let the card be editable to
      begin a new version"), so what decides whether Save is live is whether
      any counted part differs from what vN holds, never the phase. */
@@ -58108,7 +58108,7 @@ var COPILOT = (function(){
      "Answering 1/4" — the question's POSITION — beside a panel saying
      "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
   function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
-  /* §519.1 — ONE COUNT OF PROGRESS, read by the top bar and the save bar
+  /* §525.1 — ONE COUNT OF PROGRESS, read by the top bar and the save bar
      (Islam, of the UX review: "ok for all", from
      design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
      The questions bar counted ANSWERS GIVEN out of questions asked, which on
@@ -58148,7 +58148,7 @@ var COPILOT = (function(){
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
        now any part opens while the parts are being worked or checked —
-       never before the road is chosen. Since §518 a SAVED Foundation opens
+       never before the road is chosen. Since §524 a SAVED Foundation opens
        too: a change after a save starts the next version on the rail, and
        the plan moves only when Apply to plan is pressed. */
     var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
@@ -58158,7 +58158,7 @@ var COPILOT = (function(){
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      /* §519.1 — WHERE THE QUESTION COUNT BELONGS IS THE CARD BEING
+      /* §525.1 — WHERE THE QUESTION COUNT BELONGS IS THE CARD BEING
          ANSWERED, never the page: the position through one part's questions
          is a fact about that part, and on the head it sat beside a track
          counting something else. */
@@ -58203,7 +58203,7 @@ var COPILOT = (function(){
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + partName(el);
-      /* The question's position is the card's (§519.1), so the head says
+      /* The question's position is the card's (§525.1), so the head says
          which part and which step of it, never how far through its
          questions — said twice on one screen otherwise (§87). */
       p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
@@ -58292,7 +58292,7 @@ var COPILOT = (function(){
       out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        /* §518 — the check is an extra move, never the door to saving
+        /* §524 — the check is an extra move, never the door to saving
            (Islam: "a check is an extra move"), so Save is on the bar under
            the cards and only "Go back to" stays here, when there is one. */
         (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
@@ -58358,7 +58358,7 @@ var COPILOT = (function(){
         '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
-        /* §519 — Save and Apply live in the card column, so closing the cards
+        /* §525 — Save and Apply live in the card column, so closing the cards
            with × used to take them away too. With the cards shut the same bar
            stands at the head of the chat. */
         (shut ? savebarHtml(f) : '') +
@@ -58369,7 +58369,7 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
-  /* §518 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
+  /* §524 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
      it is APPLIED. Islam: "where do I press save for the foundation? in the
      chat?" — the save was a button inside the check's own message, so it
      could only be reached by running the check; now the check is an extra
@@ -58386,7 +58386,7 @@ var COPILOT = (function(){
     if (!ed || early) return '';
     var total = countedParts(f), agreed = agreedCount(f);
     var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
-    /* §519 — whether the plan holds it, read off the same extra.applied the
+    /* §525 — whether the plan holds it, read off the same extra.applied the
        deliverable page reads (Islam: "keep in both"). */
     var ap = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
     var onPlan = ap ? (ap === vn && f.saved ? ' · on the plan' : ' · v' + ap + ' is on the plan') : '';
@@ -58395,7 +58395,7 @@ var COPILOT = (function(){
       : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
       : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
     var saveN = f.saved && !sNow ? vn + 1 : vn;
-    /* §519.1 — the green line only where the words beside it would otherwise
+    /* §525.1 — the green line only where the words beside it would otherwise
        be the only thing saying it landed: the version that is on the plan is
        the one just saved. A LATER unsaved version is a different state and
        the bar already names it ("v3 in progress · v2 is on the plan"), so a
@@ -58423,14 +58423,14 @@ var COPILOT = (function(){
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      /* §519.1 — NO SECOND COUNT HERE. A part agreed from the plan carries
+      /* §525.1 — NO SECOND COUNT HERE. A part agreed from the plan carries
          no answers, so this read "0/4" beside a row whose own pill says
          Agreed — a number disagreeing with the word next to it. How many
          questions a part has answered is on its card while it is the part
          being answered, and nowhere else. */
       return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", "", true);
     }).join("");
-    /* §518 — the check is optional and not counted; the save is. */
+    /* §524 — the check is optional and not counted; the save is. */
     var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
               li("Save as Foundation", savedNow(f) ? "done" : agreedAll(f) ? "now" : "todo")];
     var n = 2 + 1 + S.filter(function(_, i){ return on(i); }).length;
@@ -58616,7 +58616,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  /* §518 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
+  /* §524 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
      the place's own Foundation page, replacing what the plan holds — and
      what it replaces is ARCHIVED first (Islam: "anything old is not deleted
      it's archived"), restorable from Import & storage › Archived plans. It
@@ -58627,7 +58627,7 @@ var COPILOT = (function(){
   function applyAsk(did, title, o){
     if (!did || typeof openModalHtml !== "function") { SAY = "Save the Foundation first."; draw(); return; }
     o = o || {};
-    /* §519 — the count is the parts this Foundation holds (Structure can
+    /* §525 — the count is the parts this Foundation holds (Structure can
        switch Purpose and Core Values off), and applying a version already on
        the plan says so, since it files another copy of it in Archived plans. */
     var partsWord = o.parts ? (o.parts === 1 ? "its one part goes" : "its " + o.parts + " parts go") : "its parts go";
@@ -58636,7 +58636,7 @@ var COPILOT = (function(){
       '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
       '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
       '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
-      /* §519.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
+      /* §525.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
          colour of an act with no way back, and the row above this button
          says in its own words that the Foundation the plan holds is archived
          first and can be put back — so the colour said the opposite of the
@@ -58654,7 +58654,7 @@ var COPILOT = (function(){
       if ((y = hit(ev, "[data-cop-apply-yes]"))) { closeModal(); applyGo(y.getAttribute("data-cop-apply-yes"), title); }
     });
   }
-  /* §518.1 — THE NOTE FOLLOWS THE FACT. The server hands over the parts
+  /* §524.1 — THE NOTE FOLLOWS THE FACT. The server hands over the parts
      and records nothing; the plan is written here and saved through the
      ordinary save (the authoriser judges it, §42), and only a save that
      LANDED — "saved", or "clean" when the plan already held exactly this —
@@ -58705,12 +58705,12 @@ var COPILOT = (function(){
         '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
         '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
-    /* §518 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
+    /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
        client's own words, with whether it is on the plan and the same
        Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
        plain-text edit of the whole version; a card is edited from the chat. */
     var fp = cur && cur.body && Array.isArray(cur.body.foundation) ? cur.body.foundation : [];
-    /* §519 — A FOUNDATION IS EDITED IN ITS CHAT. The plain-text box made a
+    /* §525 — A FOUNDATION IS EDITED IN ITS CHAT. The plain-text box made a
        version holding no parts, and Apply to plan then refused it; so Edit
        opens the chat the latest version was built in, where the cards, the
        pen and Edit with AI already work, and a change there starts vN+1. */
@@ -58720,7 +58720,7 @@ var COPILOT = (function(){
       var words = partWords();
       body = '<div class="copfcards">' + fp.map(function(x){
         return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
-        /* §519.1 — the same green line the flow's bar carries, on the same
+        /* §525.1 — the same green line the flow's bar carries, on the same
            test: the version shown is the version the plan holds. An older
            one applied is said by the row below, which names both numbers. */
         (d.applied && d.applied.n === cur.n ? fdoneHtml(d.applied.n) : '') +

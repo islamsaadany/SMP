@@ -685,7 +685,7 @@ var COPILOT = (function(){
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
-  /* §518 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
+  /* §524 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
      cards stay editable after a save (Islam: "let the card be editable to
      begin a new version"), so what decides whether Save is live is whether
      any counted part differs from what vN holds, never the phase. */
@@ -773,7 +773,7 @@ var COPILOT = (function(){
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
        now any part opens while the parts are being worked or checked —
-       never before the road is chosen. Since §518 a SAVED Foundation opens
+       never before the road is chosen. Since §524 a SAVED Foundation opens
        too: a change after a save starts the next version on the rail, and
        the plan moves only when Apply to plan is pressed. */
     var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
@@ -910,7 +910,7 @@ var COPILOT = (function(){
       out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        /* §518 — the check is an extra move, never the door to saving
+        /* §524 — the check is an extra move, never the door to saving
            (Islam: "a check is an extra move"), so Save is on the bar under
            the cards and only "Go back to" stays here, when there is one. */
         (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
@@ -983,7 +983,7 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
-  /* §518 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
+  /* §524 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
      it is APPLIED. Islam: "where do I press save for the foundation? in the
      chat?" — the save was a button inside the check's own message, so it
      could only be reached by running the check; now the check is an extra
@@ -1030,7 +1030,7 @@ var COPILOT = (function(){
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
       return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
     }).join("");
-    /* §518 — the check is optional and not counted; the save is. */
+    /* §524 — the check is optional and not counted; the save is. */
     var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
               li("Save as Foundation", savedNow(f) ? "done" : agreedAll(f) ? "now" : "todo")];
     var n = 2 + 1 + S.filter(function(_, i){ return on(i); }).length;
@@ -1216,7 +1216,7 @@ var COPILOT = (function(){
     }
     return false;
   }
-  /* §518 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
+  /* §524 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
      the place's own Foundation page, replacing what the plan holds — and
      what it replaces is ARCHIVED first (Islam: "anything old is not deleted
      it's archived"), restorable from Import & storage › Archived plans. It
@@ -1273,7 +1273,7 @@ var COPILOT = (function(){
         '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
         '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
-    /* §518 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
+    /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
        client's own words, with whether it is on the plan and the same
        Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
        plain-text edit of the whole version; a card is edited from the chat. */

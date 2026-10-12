@@ -364,7 +364,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     /* §479: the Structure may have changed since the flow was last written,
        so the finish carries the page's current answer of what is off. */
     if (Array.isArray(b.skip)) stored = { ...stored, skip: cleanSkip(b.skip) };
-    /* §518 — a SAVED flow goes on being edited: the cards stay open and the
+    /* §524 — a SAVED flow goes on being edited: the cards stay open and the
        next Save makes the next version. The old refusal ("start a new
        guided run") is gone, and so is the break that reopened it. */
     if (kind === "flowSave") {
@@ -375,7 +375,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     /* SAVED AS A VERSION OF "Foundation — <place>" — only when all five parts
        are agreed, asked of the STORED flow (§42), never of the page. */
     if (!(allAgreed(stored) || brk() === "finish-any")) return refused(400, "Every part needs a draft you have agreed before the Foundation can be saved.");
-    /* §518 — the check is an extra step, never the door: nothing here asks
+    /* §524 — the check is an extra step, never the door: nothing here asks
        for `stored.check`. What IS refused is saving the same drafts twice. */
     if (savedCurrent(stored) && brk() !== "save-same-twice") return refused(400, "Nothing has changed since v" + stored.saved!.n + " was saved.");
     const placeWord = oneLine(b.placeWord).slice(0, 120) || chat.place;
@@ -385,14 +385,14 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     return out(200, { ok: true, flow: f, saved: f.saved });
   }
 
-  /* §518 — APPLY TO PLAN, in two acts (§518.1). `applyFoundation` READS:
+  /* §524 — APPLY TO PLAN, in two acts (§524.1). `applyFoundation` READS:
      it hands the browser the LATEST version's six parts, with the end year
      written in, and records nothing. The browser writes them onto the
      place's Foundation page (the old one archived first, §49.2) through the
      ordinary save, which the authoriser judges (§42) — and only once that
      save has LANDED does it send `foundationApplied`, which writes the note
      *version N is on the plan* on the deliverable's own row (`extra.applied`,
-     no migration). §518 wrote the note FIRST, so a save that was refused,
+     no migration). §524 wrote the note FIRST, so a save that was refused,
      failed or never left the tab left the deliverable saying "On the plan
      as vN" over a plan that did not hold it (§124: a status claiming more
      than happened). The note now follows the fact. Always the LATEST
@@ -407,7 +407,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const parts = Array.isArray(body.foundation) ? body.foundation : [];
     if (!parts.length) return refused(400, "This version holds no Foundation parts to apply.");
     const years = Array.isArray(body.years) ? body.years : [null, null];
-    /* The break puts §518's order back: the note written on the READ. */
+    /* The break puts §524's order back: the note written on the READ. */
     if (brk() === "stamp-on-read")
       await c.query("UPDATE copilot_deliverables SET extra = extra || jsonb_build_object('applied', $2::jsonb) WHERE id = $1", [id, JSON.stringify({ n: cur.n, at: new Date().toISOString(), by })]);
     /* The stored parts keep their raw {Y}; what goes onto the plan has the
@@ -415,7 +415,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
     const filled = parts.map((p: any) => ({ key: String(p.key || ""), name: String(p.name || ""), text: withYear(String(p.text || ""), Number.isInteger(years[1]) ? years[1] : null) }));
     return out(200, { ok: true, n: cur.n, foundation: filled, years });
   }
-  /* §518.1 — the note, sent by the browser only after the plan's own save
+  /* §524.1 — the note, sent by the browser only after the plan's own save
      came back "saved" (or had nothing left to send). It names the version
      the browser WROTE, so a v4 saved by somebody else in between does not
      get the credit for a v3 that went onto the plan; a version this
@@ -441,7 +441,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       if (text.length > MAX_MESSAGE) return refused(400, TOO_LONG);
       const cur = (await versionsOf(c, id))[0];
       if (cur && bodyOf(cur.body)?.text === text) return refused(400, "Nothing changed, so no new version was made.");
-      /* §519 — a Foundation is its parts, and a plain-text edit would make a
+      /* §525 — a Foundation is its parts, and a plain-text edit would make a
          version holding none, which Apply to plan then refuses. Its parts
          are changed in the chat that built it. */
       if (d.type === "foundation" && brk() !== "text-edit-foundation")

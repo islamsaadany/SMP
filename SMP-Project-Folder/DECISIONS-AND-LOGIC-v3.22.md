@@ -63221,7 +63221,7 @@ Islam, of El Abd (business units off, directions with named owners): *"when they
 
 **§517.1 — MERGED TO `main` 2026-10-10 on Islam's word** (*"merge to main"*). `main` had not moved since the branch was cut (`origin/main` an ancestor of the branch, measured), so the merge is a clean fast-forward and the tree pushed is the tree verified; §517 was free on `main`. `sw.js` confirmed against `origin/main` immediately before the push (§94.16): `v6.21-direction-part` against main's `v6.20-cycle-office`, one live `const SHELL`, `node --check` clean. The branch tip was already pushed, so `main` carries this record commit of its own (§91). **No forced sign-out is owed** (spec 029): the authoriser changed and only ADDS — a new group key nobody's tab has ever written, refused to everybody but the Super user — so no save that worked before is refused now. **§91.5's live read could not be made from this session**: the proxy refuses the production address (403 at CONNECT), so the deployment is unverified from here and said so rather than claimed. The witnesses for whoever reads it: `shell.js` **4,619,585 / `3dc70320` → 4,627,912 / `b44ea287`** and the served `sw.js` stamp **`d7a28757` → `c65f9364`** (§397 — so the reload banner is offered); `platform.css` is unchanged at 777,706 / `9f586d49` and is no witness this round (§113.8). The branch is held behind `main` until that read is made.
 
-## §518 — Save needs only the six parts; Apply to plan is its own press (2026-10-08)
+## §524 — Save needs only the six parts; Apply to plan is its own press (2026-10-08)
 
 Islam, using §514's flow: *"1. check shouldn't stop sovmething to be saved a chekc is an extra move 2. whhere do I press savefor the foundation? in the chat?"* — then, of the first drawing: *"the bar is ok and we might need another button to migrate to plan as saving only save it int he deliverables and let the card be editable to begin a ne version"*; then, of the word *Move*: *"move is a very vague word … we need abtter word"* — **Apply to plan** is his; and the three answers that settle the rest: *"anything old is not deleted it's archived"*, *"changing v2 on the rail doesn't change the plan, the plan only change when we apply to plan"*, and *"yes keep in both."* Signed off from `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` (rule 1c), which still spells the button *Move to the plan* — the mockup is the record of what was signed off, not of what was built (Principle II); the word is this section's.
 
@@ -63237,13 +63237,13 @@ Islam, using §514's flow: *"1. check shouldn't stop sovmething to be saved a ch
 
 **CHECKS.** `smp-app/checks/copilot.mjs` **328/0**: a saved flow can still be written to and an unchanged re-save is refused by name; a changed draft saves as v2 of the same deliverable; Apply refuses a deliverable that is not here and one that is not a Foundation; Apply records the latest version and the page reads it back, with the end year written in and the `{Y}` kept in store; a client's own person cannot apply. Two breaks added (`save-same-twice`, `apply-any-type`), both red. Three literals moved as a consequence of v2 now being the changed draft (nextVersion 3, `v.n = 3`) — rewritten, never loosened (§218). `smp-app/checks/shell.mjs` §3i **67/0**: the bar (Save live, Apply dimmed with its hover, no Save in the messages), the dialog's title and body read together, Yes writing the six parts and the end year with the old aspiration archived, the database holding both, the deliverable page's six cards and *On the plan as v1*, and a pen edit after the save reading *v2 in progress* with the plan keeping v1. **Three of §3i's own first failures were the check**: it read the dialog's title out of `#modal-b` where `openModalHtml` writes it to `#modal-t`; it joined the values rows as strings where `applyFoundationParts` stores `{name, def}` objects (`[object Object]`); and it pressed a deliverable with the rails folded to their strip (§490.2) and died rather than reporting (§215) — the rail toggle and the Deliverables fold are pressed first, the way a person would. The §3i fixture snapshots `foundationSnapshot(UNITS.mobile)` and `ARCHIVES` before and puts both back after (§94.2), or the sweep that follows measures a Mobile the check rewrote. Built-in-step all good, generated-in-step all clear, cold typecheck clean. `sw.js` shell `v6.21-apply-to-plan`, past main's `v6.20`.
 
-**Built as §515, renumbered §517 before the commit and §518 again at the merge**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **On the branch, not merged** — a merge owes bringing main's §515–§516 in first, and `main` is Islam's word, on that merge.
+**Built as §515, renumbered §517 before the commit, §518 again at that merge and §524 at this one**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **On the branch, not merged** — a merge owes bringing main's §515–§516 in first, and `main` is Islam's word, on that merge.
 
 **Recorded, not done**: the server does not re-check that the person may write the Foundation before stamping `applied` — the browser's save is where the authoriser refuses, so a refused save leaves a stamp on the deliverable with nothing on the plan; the archive is written by the browser from what the plan held, never from a stored copy on the server; and the mockup still says *Move to the plan*.
 
-## §518.1 — "On the plan" follows the save, never the press (2026-10-10)
+## §524.1 — "On the plan" follows the save, never the press (2026-10-10)
 
-Islam, of §518's recorded gap: *"yes fix it and update the mockup word too."* §518 wrote `extra.applied` inside `applyFoundation`, which runs BEFORE the browser archives the old Foundation, writes the six parts and saves. So a save the server refused, or one that failed on the network, left the deliverable saying *On the plan as vN* while the plan held the old Foundation — a status claiming more than happened (§124). It was never a way past the rules: the Copilot is office-only and so is authoring a Foundation (§94), and the save itself is still judged by the authoriser (§42). What was wrong was the note.
+Islam, of §524's recorded gap: *"yes fix it and update the mockup word too."* §524 wrote `extra.applied` inside `applyFoundation`, which runs BEFORE the browser archives the old Foundation, writes the six parts and saves. So a save the server refused, or one that failed on the network, left the deliverable saying *On the plan as vN* while the plan held the old Foundation — a status claiming more than happened (§124). It was never a way past the rules: the Copilot is office-only and so is authoring a Foundation (§94), and the save itself is still judged by the authoriser (§42). What was wrong was the note.
 
 **The note follows the fact.** `applyFoundation` now only reads the last saved version and returns its parts with the year written in; it records nothing. A second act, `foundationApplied {id, n}`, writes `extra.applied = {n, at, by}` and refuses a version that is not there or holds no parts. The browser calls it only after `SYNC.saveNow` answers `saved` or `clean`; on `refused`, `failed` or `offline` it says *the plan did not save, so vN is not marked as on the plan* and the deliverable keeps *Not on the plan yet*. Both acts are refused to anybody but the office, asserted.
 
@@ -63251,7 +63251,7 @@ Islam, of §518's recorded gap: *"yes fix it and update the mockup word too."* �
 
 `check:copilot` 329/0; the new break `stamp-on-read` (the note written on the read again) reddens exactly the new assertion, `apply-any-type` still reddens its own. `check:shell` §3i green. The mockup `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` now says *Apply to plan* throughout its words, with one line saying the pictures were taken before the rename and still show *Move to the plan*. `sw.js` shell `v6.22-apply-after-save`.
 
-## §519 — four fixes from a UX review of the Foundation flow (2026-10-10)
+## §525 — four fixes from a UX review of the Foundation flow (2026-10-10)
 
 Islam asked for a full UX review of the Foundation flow and agreed to seven findings, with three of them (4, 6, 7) to be shown in a mockup first: *"ok for all but for 4 as well show me in the mockup"*. This section is the four built.
 
@@ -63268,9 +63268,9 @@ Islam asked for a full UX review of the Foundation flow and agreed to seven find
 **Waiting on a mockup (rule 1c)**: 4 — four progress counters that disagree (and the top bar at 0% on the *start from it* road); 6 — Apply is drawn red though nothing is lost; 7 — no way from the chat to the Foundation page after Apply.
 
 
-## §519.1 — one count of progress, Apply is not a red button, and a way to see the result (2026-10-10)
+## §525.1 — one count of progress, Apply is not a red button, and a way to see the result (2026-10-10)
 
-§519's last three findings, drawn first as rule 1c requires
+§525's last three findings, drawn first as rule 1c requires
 (`design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html`,
 published as an artifact) and signed off whole: *"ok for all, build them"*.
 
@@ -63309,7 +63309,7 @@ only in the colour of their words**, with the irreversible-looking one carrying
 no more weight than the way out. *So the fault was the ink AND the absence of a
 fill, and only the measurement separated them.* Red in this product is for an act
 with no way back — a delete, a closed cycle — and Apply **archives what stood
-before it does anything** (§518), so the way back is the archive. It takes the
+before it does anything** (§524), so the way back is the archive. It takes the
 product's own precedent rather than a new rule: the one filled main action in a
 `.cbtns` row is §266's `mfgo`, navy through `--panel` with its derived
 `--panel-ink` (§38.4, never a literal — §25). **NO HOVER RULE WAS NEEDED AND THAT
@@ -63329,13 +63329,13 @@ Foundation is a TAB of its own** (`/<slug>/strategy/co/<key>/foundation`) where 
 unit's, a function's and the group's are a SECTION of Strategy — and **a `cap:`
 target cannot be addressed at all**, so it gets the line with no link rather than
 a dead one (§61). **It is drawn from the SAVE's own outcome and never from the
-press** (§518.1): absent while a version is merely saved, present once the plan
+press** (§524.1): absent while a version is merely saved, present once the plan
 has taken it — asserted at both ends, or a build that drew it always passes every
 assertion about it being there. Both the line and its link measured on the green
 ground in the check rather than argued from a token (§38.4).
 
 **FOUR FAULTS IN MY OWN HARNESS, EVERY ONE AN OLD RULE IN A NEW PLACE.**
-**§519.1a — THE SECTION DIED RATHER THAN REPORTING** (§215) on a ten-second
+**§525.1a — THE SECTION DIED RATHER THAN REPORTING** (§215) on a ten-second
 timeout, on a build that is right: a wait written when the question's position was
 on the PAGE still read `.copprog`, and fix 4 moved that word onto the card. I had
 rewritten the ASSERTION that reads it and left the WAIT that depends on it — so
@@ -63343,19 +63343,19 @@ the fix is the rule rather than the line: when a control moves, grep **every**
 place that reaches for it rather than the assertion that failed first (§51.11,
 §214.3, in this file's own harness). Both reaches found and corrected; there are
 only two.
-**§519.1b — AND ONE NEW ASSERTION REPORTED A CORRECT BUILD BROKEN** (§100.3): it
+**§525.1b — AND ONE NEW ASSERTION REPORTED A CORRECT BUILD BROKEN** (§100.3): it
 asked Cancel for `--surface`, and `.cbtns button` sets **no background at all**,
 so an outline button there computes **transparent** and never the surface colour.
 Rewritten to assert what such a button actually is — no fill, and different from
 the main action — which is also the claim that survives a later change to either.
-**§519.1c — AND THE SAVED COPY WAS THE *BEFORE* STATE**, caught before it was
+**§525.1c — AND THE SAVED COPY WAS THE *BEFORE* STATE**, caught before it was
 used: the scratchpad copy the falsification harness restores from was
 byte-identical to the mandatory `ui-versions/` snapshot, so a `restore()` would
 have wiped the whole round — §343.9's fault by a different road, *a saved copy
 that is not the state you want restored*. The harness restores from a copy taken
 of the FIXED sources, asserted byte-identical before the first break was written.
 
-**§519.1d — AND MY FALSIFICATION COUNTER READ 0 RED ON FIVE GENUINELY RED
+**§525.1d — AND MY FALSIFICATION COUNTER READ 0 RED ON FIVE GENUINELY RED
 RUNS.** The harness counted `^  FAIL` and `shell.mjs` prints `FAIL` at **column
 0**, so every break reported *0 red* while the tail printed beside it said
 `5 ok, 3 failed`. §298.3 exactly — *the tail is the verdict and the count is
@@ -63394,13 +63394,13 @@ only, read off the diff: nothing stored moves, nothing is migrated, no rule abou
 who may save what changes. **`main` untouched: the merge is Islam's word, on that
 merge.**
 
-## §520 — the sweep of the merged tree, and the proof that could not walk (2026-10-11)
+## §526 — the sweep of the merged tree, and the proof that could not walk (2026-10-11)
 
-The verification pass §519.1 owed, run **on the merged tree and never on the
+The verification pass §525.1 owed, run **on the merged tree and never on the
 branch** (§365: that is the only tree anybody will ever be served), with every
 verdict read from its own TAIL (§298.3) and every red carried to an
 `origin/main` baseline before anything here was blamed (§303). HEAD is the
-merge of main's §515–§517 into this branch's §518–§519.1; the baseline is
+merge of main's §515–§517 into this branch's §524–§525.1; the baseline is
 `origin/main` at `b9dd9a4`, built from its own sources in a worktree.
 
 **222 FROZEN CHECKS WALKED. 16 ARE MOCKUP GENERATORS AND REFUSED THEMSELVES**,
@@ -63443,7 +63443,7 @@ time (*what has gone is the check's SUBJECT*). **Recorded, not fixed**: where
 those two walks should land is a decision about a screen this branch did not
 design (rule 1b).
 
-### §520.1 — the isolation proof was dying on the Copilot's first binary column
+### §526.1 — the isolation proof was dying on the Copilot's first binary column
 
 The one product-side edit in the round, and it is `smp-app/spike/_harness.mjs`.
 Spike **S2 is the tenant-isolation proof** and it walks every tenant-owned table
@@ -63465,7 +63465,7 @@ the **56** §443.10 recorded, and **both of its falsifications are still red**.
 **S8 is UNRUN rather than passing** and says so in its own words (§54.5): it
 wants a v2.0-shaped database this container does not hold.
 
-### §520.2 — what the harness taught, which is three things and none of them the product
+### §526.2 — what the harness taught, which is three things and none of them the product
 
 **A LONG SWEEP OUTLIVES THE DATABASE IT WAS GIVEN.** The throwaway Postgres had
 stopped by the time the sweep finished, so the first attempt at the rehearsal
@@ -63492,9 +63492,9 @@ mistake made a working build report two whole kinds of attention item as not
 raised — *read an action name out of the source, never guess it* — and it cost a
 round trip here before the source was opened.
 
-### §520.3 — two facts the record owed
+### §526.3 — two facts the record owed
 
-**`sw.js`'s `SHELL` is `smp-shell-v6.25-progress-apply-done` where §519.1 says
+**`sw.js`'s `SHELL` is `smp-shell-v6.25-progress-apply-done` where §525.1 says
 v6.24.** The merge bumped it past main's `v6.21-direction-part` and the record
 was not told, which is the harmless half of §94.12's collision — the FILE is
 right and unique, and the sentence about it was stale. One live `const SHELL`

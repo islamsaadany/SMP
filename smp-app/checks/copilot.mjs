@@ -859,61 +859,61 @@ try {
     check("saved as Foundation — Mobile, version 1", fin.st === 200 && fin.j.saved.n === 1 && fin.j.saved.title === "Foundation — Mobile" && fin.j.flow.phase === "saved", JSON.stringify(fin.j).slice(0, 200));
     const vrow = (await asTenant(A, (c) => c.query("SELECT v.n, v.body->>'text' t FROM copilot_versions v WHERE v.deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
     check("...Purpose switched off does not hold it up, and the version holds the parts, the end year written in", vrow.length === 1 && /WHO WE ARE\nConnect Egypt to what matters\./.test(vrow[0].t) && /END IN MIND\nPart 3 draft for 2028/.test(vrow[0].t) && /CORE VALUES\nPart 6 draft for 2028/.test(vrow[0].t) && /draft for 2028/.test(vrow[0].t) && !/\{Y\}/.test(vrow[0].t), JSON.stringify(vrow).slice(0, 200));
-    /* §518 — a saved flow stays OPEN: the cards are still editable and the
+    /* §524 — a saved flow stays OPEN: the cards are still editable and the
        next change starts v2. What is refused is saving the SAME drafts
        twice (break `save-same-twice`). REWRITTEN from "a saved flow is
        done", never loosened (§218): both ends (§94.2). */
     const again = await call("POST", "api", { act: "flowSave", id: fid, flow: fin.j.flow }, NORAN);
     const twice = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
-    check("a saved flow can still be written to, and saving it again unchanged is refused by name (§518)",
+    check("a saved flow can still be written to, and saving it again unchanged is refused by name (§524)",
       again.st === 200 && again.j.flow.saved && again.j.flow.saved.n === 1 && twice.st === 400 && /Nothing has changed since v1/.test(twice.j.why), again.st + " · " + twice.st + " · " + (twice.j && twice.j.why));
     const FC = JSON.parse(JSON.stringify(fin.j.flow)); FC.drafts[1] = "Aspiration, second thoughts, for {Y}.";
     const svC = await call("POST", "api", { act: "flowSave", id: fid, flow: FC }, NORAN);
     const finC = await call("POST", "api", { act: "flowFinish", id: fid, placeWord: "Mobile" }, NORAN);
     check("...and a changed draft saves as v2 of the SAME deliverable", svC.st === 200 && finC.st === 200 && finC.j.saved.n === 2 && finC.j.saved.deliverableId === fin.j.saved.deliverableId, svC.st + " · " + JSON.stringify(finC.j.saved));
-    /* §518 — Apply to plan: the server records which version went and hands
+    /* §524 — Apply to plan: the server records which version went and hands
        back the parts with the end year written in; the stored parts keep
        their raw {Y}. Both ends: a missing deliverable, and one that is not a
        Foundation (break `apply-any-type`). */
     const apNone = await call("POST", "api", { act: "applyFoundation", id: "00000000-0000-4000-8000-000000000000" }, NORAN);
     const freeId = (await asTenant(A, (c) => c.query("SELECT id FROM copilot_deliverables WHERE type <> 'foundation' ORDER BY created_at LIMIT 1"))).rows[0].id;
     const apFree = await call("POST", "api", { act: "applyFoundation", id: freeId }, NORAN);
-    check("Apply refuses a deliverable that is not here, and one that is not a Foundation (§518)", apNone.st === 404 && apFree.st === 400 && /Only a saved Foundation/.test(apFree.j.why), apNone.st + " · " + apFree.st + " · " + JSON.stringify(apFree.j));
-    /* §518.1 — the READ records nothing: the note waits for the plan's own
-       save to land (break `stamp-on-read` puts §518's order back). Then the
+    check("Apply refuses a deliverable that is not here, and one that is not a Foundation (§524)", apNone.st === 404 && apFree.st === 400 && /Only a saved Foundation/.test(apFree.j.why), apNone.st + " · " + apFree.st + " · " + JSON.stringify(apFree.j));
+    /* §524.1 — the READ records nothing: the note waits for the plan's own
+       save to land (break `stamp-on-read` puts §524's order back). Then the
        note, sent for a version this Foundation holds, is what the page
        reads back; a version it does not hold is refused by name. */
     const ap = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, NORAN);
     const apRead = (await asTenant(A, (c) => c.query("SELECT extra->'applied' a FROM copilot_deliverables WHERE id = $1", [fin.j.saved.deliverableId]))).rows[0];
-    check("Apply's read hands back the LATEST version and records nothing yet — the plan has not saved (§518.1)", ap.st === 200 && ap.j.n === 2 && apRead && apRead.a == null && !("applied" in ap.j), JSON.stringify(apRead && apRead.a) + " · n " + (ap.j && ap.j.n));
+    check("Apply's read hands back the LATEST version and records nothing yet — the plan has not saved (§524.1)", ap.st === 200 && ap.j.n === 2 && apRead && apRead.a == null && !("applied" in ap.j), JSON.stringify(apRead && apRead.a) + " · n " + (ap.j && ap.j.n));
     const apBad = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 9 }, NORAN);
     const apMk = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 2 }, NORAN);
     const apRow = (await asTenant(A, (c) => c.query("SELECT extra->'applied' a FROM copilot_deliverables WHERE id = $1", [fin.j.saved.deliverableId]))).rows[0];
     const apDel = await call("GET", "deliverable", null, NORAN, "?id=" + fin.j.saved.deliverableId);
-    check("...a version the Foundation does not hold is refused, and the note for v2 is what the page reads back (§518.1)", apBad.st === 400 && /not here/.test(apBad.j.why) && apMk.st === 200 && apRow && apRow.a && apRow.a.n === 2 && apRow.a.by === NORAN.personKey && apDel.j.deliverable && apDel.j.deliverable.applied && apDel.j.deliverable.applied.n === 2, apBad.st + " · " + JSON.stringify(apRow && apRow.a) + " · " + JSON.stringify(apDel.j.deliverable && apDel.j.deliverable.applied));
+    check("...a version the Foundation does not hold is refused, and the note for v2 is what the page reads back (§524.1)", apBad.st === 400 && /not here/.test(apBad.j.why) && apMk.st === 200 && apRow && apRow.a && apRow.a.n === 2 && apRow.a.by === NORAN.personKey && apDel.j.deliverable && apDel.j.deliverable.applied && apDel.j.deliverable.applied.n === 2, apBad.st + " · " + JSON.stringify(apRow && apRow.a) + " · " + JSON.stringify(apDel.j.deliverable && apDel.j.deliverable.applied));
     const apAsp = (ap.j.foundation || []).find((x) => x.key === "asp");
     check("...and hands back the parts with the end year written in, the stored copy keeping its {Y}",
       Array.isArray(ap.j.foundation) && ap.j.foundation.length === 5 && apAsp && apAsp.text === "Aspiration, second thoughts, for 2028." && !ap.j.foundation.some((x) => /\{Y\}/.test(x.text)) && ap.j.years[1] === 2028, JSON.stringify(ap.j.foundation).slice(0, 200));
     const apHend = await call("POST", "api", { act: "applyFoundation", id: fin.j.saved.deliverableId }, HEND);
     const apHend2 = await call("POST", "api", { act: "foundationApplied", id: fin.j.saved.deliverableId, n: 2 }, HEND);
     check("a client's own person cannot apply one, nor mark one applied", apHend.st === 403 && apHend2.st === 403, apHend.st + " · " + apHend2.st);
-    /* §519 — a Foundation is changed part by part in its chat, never as one
+    /* §525 — a Foundation is changed part by part in its chat, never as one
        block of text, or the new version holds no parts and Apply refuses it
        (break `text-edit-foundation`). Both ends: an ordinary deliverable's
        text edit is still accepted (line ~398). Every version records the chat
        it came from, so the page can send Edit back there; and the chat says
        which version is on the plan, so its save bar can. */
     const fEdit = await call("POST", "api", { act: "editVersion", id: fin.j.saved.deliverableId, text: "One block of text", note: "x" }, NORAN);
-    check("a Foundation's text cannot be edited as one block — it is changed in its chat (§519)", fEdit.st === 400 && /part by part/.test(fEdit.j.why || ""), fEdit.st + " · " + JSON.stringify(fEdit.j));
+    check("a Foundation's text cannot be edited as one block — it is changed in its chat (§525)", fEdit.st === 400 && /part by part/.test(fEdit.j.why || ""), fEdit.st + " · " + JSON.stringify(fEdit.j));
     const vChats = (await asTenant(A, (c) => c.query("SELECT n, chat_id FROM copilot_versions WHERE deliverable_id = $1 ORDER BY n", [fin.j.saved.deliverableId]))).rows;
-    check("...every saved version records the chat it came from, not only the first (§519)", vChats.length === 2 && vChats.every((r) => r.chat_id === fid), JSON.stringify(vChats));
+    check("...every saved version records the chat it came from, not only the first (§525)", vChats.length === 2 && vChats.every((r) => r.chat_id === fid), JSON.stringify(vChats));
     const gAp = await call("GET", "chat", null, NORAN, "?id=" + fid + "&placeWord=Mobile");
-    check("...and the chat says which version is on the plan (§519)", gAp.j.applied && gAp.j.applied.n === 2, JSON.stringify(gAp.j.applied));
+    check("...and the chat says which version is on the plan (§525)", gAp.j.applied && gAp.j.applied.n === 2, JSON.stringify(gAp.j.applied));
     const nf2 = await call("POST", "api", { act: "newFlow", place: "mobile" }, NORAN);
     const F2 = { ...nf2.j.flow, y0: 2026, y1: 2028, path: "guided", phase: "check", drafts: F.drafts, done: F.done, skip: ["pur"] };
     await call("POST", "api", { act: "flowSave", id: nf2.j.chat.id, flow: F2 }, NORAN);
     const g2 = await call("GET", "chat", null, NORAN, "?id=" + nf2.j.chat.id + "&placeWord=Mobile");
-    check("a second run says before the press that it will be version 3 — v2 was the changed draft (§518)", g2.j.nextVersion === 3, g2.j.nextVersion + "");
+    check("a second run says before the press that it will be version 3 — v2 was the changed draft (§524)", g2.j.nextVersion === 3, g2.j.nextVersion + "");
     /* §514 — the saved text wears the CLIENT's words for the parts, sent by
        the browser; each is one line, capped, an unknown key ignored, a part
        with no word falling back to the method's. Strings only: a number

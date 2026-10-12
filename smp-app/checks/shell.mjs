@@ -1389,7 +1389,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F && F.y0 === 2026 && F.y1 === 2028 && F.phase === "ask" && F.start === "fresh", "the years are stored on the chat", JSON.stringify(F && { y0: F.y0, y1: F.y1, phase: F.phase }));
 
     /* The guided road: a question, its examples, a short answer held. */
-    /* §519.1 — ONE COUNT, AND IT IS PARTS AGREED. §514 made the card's body,
+    /* §525.1 — ONE COUNT, AND IT IS PARTS AGREED. §514 made the card's body,
        the to-do's a/q and the bar agree on ANSWERS, and its reasoning —
        one x/n shape must not carry two meanings (§53.5) — is what this
        completes rather than reverses: the bar was the third meaning, and on
@@ -1419,9 +1419,9 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const agree = (q, n, of) => q.count === n + " of " + of + " parts agreed" && q.bar === String(n) && q.max === String(of);
     const q1 = await readQ();
     check(q1.ex === 3 && q1.prog === "" && /^Question 1 of \d+$/.test(q1.now) && /^0 of \d+ answered\.$/.test(q1.body) && agree(q1, 0, 6) && q1.nameLines === 1,
-      "the first question comes with three examples, its position is on the card and not on the head, and the bar reads 0 of 6 parts agreed (§519.1)", JSON.stringify(q1));
+      "the first question comes with three examples, its position is on the card and not on the head, and the bar reads 0 of 6 parts agreed (§525.1)", JSON.stringify(q1));
     check(q1.rows === 10 && q1.badges.join("|") === "optional",
-      "…and the to-do carries no count beside a part — ten rows, and the one <i> on it is the check's Optional (§519.1, both ends)", JSON.stringify({ rows: q1.rows, badges: q1.badges }));
+      "…and the to-do carries no count beside a part — ten rows, and the one <i> on it is the check's Optional (§525.1, both ends)", JSON.stringify({ rows: q1.rows, badges: q1.badges }));
     await shot("3-ask");
     await page.fill("[data-cop-text]", "Telecom");
     await page.click("[data-cop-send]");
@@ -1431,9 +1431,9 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click("[data-cop-nudge-more]");
     await page.fill("[data-cop-text]", "We sell phones and connectivity across Egypt through 300 stores.");
     await page.click("[data-cop-send]");
-    /* §519.1 — WAIT ON THE CARD, because that is where the question's position
+    /* §525.1 — WAIT ON THE CARD, because that is where the question's position
        is now. This wait read `.copprog` and was written when the page carried
-       it; §519.1 moved the word onto the card being answered and the wait
+       it; §525.1 moved the word onto the card being answered and the wait
        stayed behind, so the section DIED on a ten-second timeout rather than
        reporting (§215) on a build that is right. §51.11 in this file's own
        harness: when a control moves, grep every place that reaches for it
@@ -1443,10 +1443,10 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(F.ans[0][0] === "We sell phones and connectivity across Egypt through 300 stores." && F.qi === 1, "the answer is stored and the next question asked", JSON.stringify(F.ans[0]));
     const q2 = await readQ();
     /* the card counts answers and the bar counts PARTS, so one answer moves
-       the card and must NOT move the bar — which is the whole of §519.1 and
+       the card and must NOT move the bar — which is the whole of §525.1 and
        the one assertion a build that merely renamed the old count would fail */
     check(/^1 of \d+ answered\.$/.test(q2.body) && /^Question 2 of \d+$/.test(q2.now) && agree(q2, 0, 6),
-      "…one answer moves the card's own count and the question on it, and leaves the bar at 0 of 6 parts (§519.1)", JSON.stringify(q2));
+      "…one answer moves the card's own count and the question on it, and leaves the bar at 0 of 6 parts (§525.1)", JSON.stringify(q2));
     /* The rest of the part's questions, answered. */
     for (let k = 1; k < 20; k++) {
       if (!(await page.$(".copexs"))) break;
@@ -1457,12 +1457,12 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForSelector("[data-cop-fdraft]", { timeout: 10000 });
     await shot("5-review");
     check((await page.$$("[data-cop-fans]")).length >= 2, "the answers come back in boxes to change before drafting");
-    /* §519.1, BOTH ENDS: the head's word is dropped only while a question is
+    /* §525.1, BOTH ENDS: the head's word is dropped only while a question is
        being answered — where the card already says the position — and Review
        and Draft are steps the card alone does not name, so they stay. */
     const qr = await readQ();
     check(qr.prog === "Review" && qr.now === "Reviewing" && agree(qr, 0, 6),
-      "…at the review step the head says Review, the card says Reviewing, and the bar still counts parts (§519.1)", JSON.stringify({ prog: qr.prog, now: qr.now, count: qr.count }));
+      "…at the review step the head says Review, the card says Reviewing, and the bar still counts parts (§525.1)", JSON.stringify({ prog: qr.prog, now: qr.now, count: qr.count }));
     await page.fill('[data-cop-fans="0"]', "We sell phones, plans and connectivity across Egypt through 300 stores.");
     await page.dispatchEvent('[data-cop-fans="0"]', "change");
     for (let i = 0; i < 20 && !/plans and/.test((F = await flowRow(cid)).ans[0][0]); i++) await page.waitForTimeout(250);
@@ -1491,7 +1491,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        this a bar frozen at nought passes every assertion above it (§113.8). */
     const qa = await readQ();
     check(agree(qa, 1, 6) && /^Question 1 of \d+$/.test(qa.now),
-      "…and the bar moves to 1 of 6 parts agreed, with the next card carrying its own first question (§519.1)", JSON.stringify({ count: qa.count, bar: qa.bar, now: qa.now }));
+      "…and the bar moves to 1 of 6 parts agreed, with the next card carrying its own first question (§525.1)", JSON.stringify({ count: qa.count, bar: qa.bar, now: qa.now }));
     await shot("7-next");
 
     /* §512 — A DONE PART STILL OPENS, ON THE FRESH ROAD TOO, and saving it
@@ -1535,7 +1535,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.click('[data-cop-chat="' + cid + '"]');
     await page.waitForSelector(".copchk", { timeout: 10000 });
     const Wc = await readW();
-    /* §518 — the plan this will be applied to, and the archive, snapshotted
+    /* §524 — the plan this will be applied to, and the archive, snapshotted
        so the finally can put both back (§94.2). */
     FD0 = await page.evaluate(() => JSON.stringify({ f: foundationSnapshot(UNITS.mobile), a: ARCHIVES }));
     await shot("8-check");
@@ -1546,11 +1546,11 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       apply: (() => { const a = document.querySelector("[data-cop-savebar] [data-cop-fapply]"); return a ? { off: a.disabled, title: a.title } : null; })() }));
     check(ck.ok === 1 && ck.iss === 1 && ck.back.length === 1 && ck.back[0].indexOf("Go back to " + Wc.val) >= 0,
       "the check lists what agrees and what does not, and offers Go back to that part", JSON.stringify(ck));
-    /* §518 — SAVING IS A BAR UNDER THE CARDS, never a button in the chat:
+    /* §524 — SAVING IS A BAR UNDER THE CARDS, never a button in the chat:
        Save as Foundation — Mobile v1 live, Run the check beside it, and
        Apply to plan dimmed with its reason until a version is saved. */
     check(/Save as Foundation — Mobile v1/.test(ck.fin || "") && ck.finOn && !ck.inMsgs && ck.run && ck.apply && ck.apply.off && /Save the Foundation first/.test(ck.apply.title),
-      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan dimmed until something is saved (§518)", JSON.stringify(ck));
+      "the bar under the cards holds Save as Foundation — Mobile v1, Run the check, and Apply to plan dimmed until something is saved (§524)", JSON.stringify(ck));
 
     /* §512 — THE PARTS OPEN FROM THE CHECK, and a line that names one part
        opens it with the change applied; a line naming none asks nothing and
@@ -1585,7 +1585,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       "a draft changed during the check drops the check's results on the server (§514)", JSON.stringify({ phase: F.phase, check: F.check, d: F.drafts[0], seen: MODEL_SEEN.length - seenS }));
     const st = await page.evaluate(() => ({ line: /has not run on the text as it stands/.test((document.querySelector("[data-cop-msgs]") || {}).textContent || ""), run: !!document.querySelector("[data-cop-fcheck]"),
       fin: !!document.querySelector("[data-cop-msgs] [data-cop-ffinish]"), bar: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish]:not([disabled])"), chk: document.querySelectorAll(".copchk").length }));
-    check(st.line && st.run && !st.fin && st.bar && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, draws no results — and the bar's Save stays live, because the check is not the door (§518)", JSON.stringify(st));
+    check(st.line && st.run && !st.fin && st.bar && st.chk === 0, "…and the page says the check has not run on the text as it stands, offers Run the check, draws no results — and the bar's Save stays live, because the check is not the door (§524)", JSON.stringify(st));
     /* The 503 the browser logs here is the refusal this block ASKS for (the
        model answered nothing); it is asserted present and taken off the
        page-error list, so the section's own closing "no page errors" still
@@ -1636,22 +1636,22 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     check(sv.length === 1 && sv[0].n === 1 && /We connect Egypt\./.test(sv[0].t) && /for 2028/.test(sv[0].t), "the Foundation is saved as version 1, the end year written in", JSON.stringify(sv).slice(0, 200));
     check(await page.waitForFunction(() => Array.from(document.querySelectorAll("[data-cop-deliv]")).some((b) => /Foundation — Mobile/.test(b.textContent)), null, { timeout: 5000 }).then(() => true, () => false),
       "…and it is on the rail under Deliverables");
-    /* §518 — AFTER THE SAVE the bar says so, Save is dimmed (nothing has
+    /* §524 — AFTER THE SAVE the bar says so, Save is dimmed (nothing has
        changed since v1) and Apply to plan is live. */
     const sb = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "",
       finOff: !!document.querySelector("[data-cop-savebar] [data-cop-ffinish][disabled]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]:not([disabled])"),
       todo: (document.querySelector(".copsw-todo, [data-cop-todo]") || {}).textContent || "" }));
-    check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§518)", JSON.stringify(sb));
-    /* §519.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there
+    check(/Saved as Foundation — Mobile v1/.test(sb.st) && sb.finOff && sb.apply, "after the save the bar reads Saved as v1, Save is dimmed and Apply to plan is live (§524)", JSON.stringify(sb));
+    /* §525.1, THE FIRST END OF THE DONE LINE: saved is not applied, so there
        is nothing on the plan to say so about. Without this, a build drawing
        the green line always passes the assertion after Apply (§113.8). */
-    check(!(await page.$("[data-cop-fdone]")), "…and the green done line is NOT there yet, because saved is not on the plan (§519.1)");
-    /* §519 — closing the cards with × used to take Save and Apply with them;
+    check(!(await page.$("[data-cop-fdone]")), "…and the green done line is NOT there yet, because saved is not on the plan (§525.1)");
+    /* §525 — closing the cards with × used to take Save and Apply with them;
        the bar now stands at the head of the chat, and Show cards puts it back. */
     await page.click('[data-cop-cards="hide"]');
     await page.waitForSelector(".copflow.nocards", { timeout: 5000 }).catch(() => {});
     const sbShut = await page.evaluate(() => ({ inChat: !!document.querySelector(".copfchat > [data-cop-savebar]"), apply: !!document.querySelector("[data-cop-savebar] [data-cop-fapply]"), cards: !!document.querySelector(".copleft") }));
-    check(sbShut.inChat && sbShut.apply && !sbShut.cards, "with the cards closed, Save and Apply to plan stay on screen at the head of the chat (§519)", JSON.stringify(sbShut));
+    check(sbShut.inChat && sbShut.apply && !sbShut.cards, "with the cards closed, Save and Apply to plan stay on screen at the head of the chat (§525)", JSON.stringify(sbShut));
     await page.click('[data-cop-cards="show"]');
     await page.waitForSelector(".copleft [data-cop-savebar]", { timeout: 5000 }).catch(() => {});
     /* APPLY TO PLAN asks first, in the platform's own dialog, then REPLACES
@@ -1665,8 +1665,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     const ask = await page.evaluate(() => ({ nParts: document.querySelectorAll("[data-cop-card]").length, t: ((document.querySelector("#modal-t") || {}).textContent || "") + " " + ((document.querySelector("#modal-b") || {}).textContent || ""), planText: UNITS.mobile.aspiration }));
     check(/Apply to the plan\?/.test(ask.t) && /Foundation — Mobile/.test(ask.t) && /last saved version/.test(ask.t) && /archived/.test(ask.t) && ask.planText === "The aspiration that stood before the Copilot.",
       "Apply asks first in the platform's own dialog, naming the version and that the old Foundation is archived — and the plan is untouched until Yes", JSON.stringify(ask).slice(0, 300));
-    check(new RegExp("its " + ask.nParts + " parts go").test(ask.t) && !/six parts/.test(ask.t), "…and counts the parts this Foundation actually has, never a fixed six (§519)", ask.nParts + " · " + ask.t.slice(0, 200));
-    /* §519.1 — APPLY IS NOT A RED BUTTON. Measured as PAINT and never as a
+    check(new RegExp("its " + ask.nParts + " parts go").test(ask.t) && !/six parts/.test(ask.t), "…and counts the parts this Foundation actually has, never a fixed six (§525)", ask.nParts + " · " + ask.t.slice(0, 200));
+    /* §525.1 — APPLY IS NOT A RED BUTTON. Measured as PAINT and never as a
        class (§94.8), because a rule can be declared and outranked, and
        BOTH ENDS: Cancel must still be the dialog's own outline button, or a
        build that filled every control in the row passes the half about
@@ -1685,7 +1685,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
        it computes TRANSPARENT and never `--surface` — the first draft asked
        for the surface colour and reported a correct build broken (§100.3). */
     check(btns.yes.bg === btns.panel && btns.yes.fg === btns.panelInk && btns.yes.bg !== btns.bad && btns.no.bg !== btns.yes.bg && /, 0\)$/.test(btns.no.bg),
-      "Apply to plan is the dialog's navy main action rather than red, and Cancel is still an outline button beside it (§519.1, both ends)", JSON.stringify(btns));
+      "Apply to plan is the dialog's navy main action rather than red, and Cancel is still an outline button beside it (§525.1, both ends)", JSON.stringify(btns));
     await page.click("#modal-b [data-cop-apply-yes]");
     await page.waitForFunction(() => /is on the plan now/.test((document.querySelector(".copsay") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     const ap = await page.evaluate((old0) => ({ say: (document.querySelector(".copsay") || {}).textContent || "", asp: UNITS.mobile.aspiration, eim: UNITS.mobile.endInMind,
@@ -1693,14 +1693,14 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       arch: ARCHIVES.length - old0, a0: ARCHIVES[0] ? { kind: ARCHIVES[0].kind, key: ARCHIVES[0].key, asp: ARCHIVES[0].plan && ARCHIVES[0].plan.aspiration } : null,
       applied: window.PANE && PANE.deliverable ? PANE.deliverable.applied : undefined }), old0);
     check(/Foundation — Mobile v1 is on the plan now/.test(ap.say) && /Integrity, speed and care\./.test(ap.vals) && /for 2028/.test(ap.eim) && /We connect Egypt/.test(ap.who) && !/\{Y\}/.test(ap.asp + ap.eim + ap.ko) && ap.ko.length > 0,
-      "Yes writes the six parts onto Mobile's Foundation, the end year written in, and says so (§518)", JSON.stringify(ap).slice(0, 400));
+      "Yes writes the six parts onto Mobile's Foundation, the end year written in, and says so (§524)", JSON.stringify(ap).slice(0, 400));
     check(ap.arch === 1 && ap.a0 && ap.a0.kind === "foundation" && ap.a0.key === "mobile" && ap.a0.asp === "The aspiration that stood before the Copilot.",
       "…and what stood before is archived, as a Foundation archive holding the old words", JSON.stringify(ap.a0));
     /* …read back from the DATABASE after the save lands, not off the screen. */
     for (let i = 0; i < 40; i++) { const r = (await asTenant(tenantId, (c) => c.query("select aspiration from units where key = 'mobile'"))).rows[0]; if (r && !/stood before/.test(r.aspiration || "")) break; await page.waitForTimeout(250); }
     const dbF = (await asTenant(tenantId, (c) => c.query("select u.aspiration, (select count(*)::int from plan_archives) n from units u where u.key = 'mobile'"))).rows[0];
     check(dbF && !/stood before/.test(dbF.aspiration || "") && dbF.n >= 1, "…and the save carries the new Foundation and the archive to the database", JSON.stringify(dbF));
-    /* §519.1 — A WAY TO SEE THE RESULT. The bar used to change its words and
+    /* §525.1 — A WAY TO SEE THE RESULT. The bar used to change its words and
        leave finding Strategy › Foundation to the person. The ADDRESS is what
        is asserted, never that a link exists: a company's Foundation is a TAB
        (`/co/<key>/foundation`) where every other kind's is a SECTION
@@ -1719,7 +1719,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
         line: +ratio(getComputedStyle(d).color, bg).toFixed(2), link: a ? +ratio(getComputedStyle(a).color, bg).toFixed(2) : 0 };
     });
     check(dl && /^✓ v1 is on Mobile’s plan\./.test(dl.t) && /Open the .* page ›/.test(dl.t) && dl.href === "/raya-trade/strategy/mobile/strategy/found" && dl.inBar,
-      "…and the bar carries one green line saying v1 is on Mobile's plan, with a link straight to that unit's Foundation page (§519.1)", JSON.stringify(dl));
+      "…and the bar carries one green line saying v1 is on Mobile's plan, with a link straight to that unit's Foundation page (§525.1)", JSON.stringify(dl));
     check(dl && dl.line >= 4.5 && dl.link >= 4.5,
       "…and both the line and its link are readable on the green ground (§38.4)", dl && JSON.stringify({ line: dl.line, link: dl.link }));
     await shot("9b-applied");
@@ -1735,8 +1735,8 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
       row: (document.querySelector(".copplanrow") || {}).textContent || "", apply: !!document.querySelector(".copplanrow [data-cop-fapply]"),
       edit: Array.from(document.querySelectorAll("button")).map((b) => b.textContent).filter((t) => /Edit as v2/.test(t)).length }));
     check(dp.cards === 6 && dp.heads.indexOf(Wc.val) >= 0 && /On the plan as v1/.test(dp.row) && dp.apply && dp.edit === 1,
-      "the deliverable page draws the six parts as cards in the client's words, says On the plan as v1 with Apply beside it, and offers Edit as v2 (§518)", JSON.stringify(dp).slice(0, 300));
-    /* §519.1 — "keep in both" (§519's own word from Islam): the page you
+      "the deliverable page draws the six parts as cards in the client's words, says On the plan as v1 with Apply beside it, and offers Edit as v2 (§524)", JSON.stringify(dp).slice(0, 300));
+    /* §525.1 — "keep in both" (§525's own word from Islam): the page you
        reach from the rail days later is where somebody asks whether this
        version is the one on the plan, so the same line is drawn there — above
        the plan row rather than inside the save bar, which that page has none
@@ -1748,18 +1748,18 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
         beforeRow: !!(d.compareDocumentPosition(document.querySelector(".copplanrow")) & Node.DOCUMENT_POSITION_FOLLOWING) } : null;
     });
     check(dl2 && /^✓ v1 is on Mobile’s plan\./.test(dl2.t) && dl2.href === "/raya-trade/strategy/mobile/strategy/found" && !dl2.inBar && dl2.beforeRow,
-      "…and the deliverable page carries the same green line above its plan row, with the same link (§519.1)", JSON.stringify(dl2));
+      "…and the deliverable page carries the same green line above its plan row, with the same link (§525.1)", JSON.stringify(dl2));
     /* A CARD CHANGED AFTER THE SAVE starts v2 on the rail and moves nothing
        on the plan. */
-    /* §519 — Edit as v2 opens the chat the Foundation came from (a text edit
+    /* §525 — Edit as v2 opens the chat the Foundation came from (a text edit
        would save a version with no parts, which Apply refuses), and that
        chat's bar says the version is on the plan. */
     const editTo = await page.evaluate(() => (document.querySelector("[data-cop-edit-chat]") || {}).getAttribute ? document.querySelector("[data-cop-edit-chat]").getAttribute("data-cop-edit-chat") : null);
-    check(editTo === cid && !(await page.$("[data-cop-edit]")), "Edit as v2 points at the chat the Foundation came from, and no text editor is offered for it (§519)", String(editTo));
+    check(editTo === cid && !(await page.$("[data-cop-edit]")), "Edit as v2 points at the chat the Foundation came from, and no text editor is offered for it (§525)", String(editTo));
     await page.click("[data-cop-edit-chat]");
     await page.waitForSelector("[data-cop-savebar]", { timeout: 10000 });
     const onp = await page.evaluate(() => (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "");
-    check(/Saved as Foundation — Mobile v1 · on the plan/.test(onp), "…and that chat's bar says v1 is on the plan (§519)", onp);
+    check(/Saved as Foundation — Mobile v1 · on the plan/.test(onp), "…and that chat's bar says v1 is on the plan (§525)", onp);
     await page.hover('[data-cop-card="1"]'); await pressIf('[data-cop-pen="1"]');
     await page.waitForSelector("[data-cop-pentext]", { timeout: 5000 }).catch(() => {});
     await page.fill("[data-cop-pentext]", "A second aspiration, for {Y}.").catch(() => {});
@@ -1768,7 +1768,7 @@ await section("3i · the Foundation chat: rail toggle, start from the plan or fr
     await page.waitForFunction(() => /v2 in progress/.test((document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || ""), null, { timeout: 10000 }).catch(() => {});
     const v2 = await page.evaluate(() => ({ st: (document.querySelector("[data-cop-savebar] .copsvst") || {}).textContent || "", fin: (document.querySelector("[data-cop-savebar] [data-cop-ffinish]") || {}).textContent || "", asp: UNITS.mobile.aspiration }));
     check(F.saved && F.saved.n === 1 && F.drafts[1] === "A second aspiration, for {Y}." && /v2 in progress/.test(v2.st) && /v2/.test(v2.fin) && !/second aspiration/.test(v2.asp),
-      "a card changed after the save starts v2 on the bar and the plan keeps v1 until Apply (§518)", JSON.stringify(v2));
+      "a card changed after the save starts v2 on the bar and the plan keeps v1 until Apply (§524)", JSON.stringify(v2));
     check(errs.length === 0, "no page errors", errs.join(" | "));
   } finally {
     if (ST0 !== undefined) await page.evaluate((st) => { if (st) GROUP.structure = st; else delete GROUP.structure; paint(); return new Promise((r) => (window.SYNC && SYNC.saveNow) ? SYNC.saveNow(r) : setTimeout(r, 1500)); }, ST0).catch(() => {});

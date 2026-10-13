@@ -17011,6 +17011,100 @@ function archiveCapPlan(c, why){
   return a;
 }
 
+/* ── THE FOUNDATION AS AN ARCHIVE OF ITS OWN (§524) ─────────────────────
+   Islam, of the Copilot's Apply to plan: *"anything old is not deleted it's
+   archived."* A plan archive (`kind:"unit"`) carries the Foundation beside
+   the pillars and the SWOT, and restoring one puts ALL of it back — which is
+   the wrong size for an act that replaces six paragraphs and nothing else. So
+   a Foundation is its own kind, taken by `applyFoundationParts()` and by its
+   own restore, and never by the plan's archive. The record it reads is the
+   one the Foundation page draws (§404's three owners): the group's own row,
+   a company's `coFound`, or a unit's (a pillars function's through its view,
+   written back the way every other writer does — §129, §232). */
+function foundationRecord(target){
+  var t = String(target || "");
+  if (t === "group") return GROUP;
+  if (t.indexOf("co:") === 0) return coFoundWritable(t.slice(3));
+  return unitLikeWritable(t);
+}
+function foundationSnapshot(o){
+  return { clauses: clone(Array.isArray(o.clauses) ? o.clauses : []),
+           aspiration: o.aspiration || "", endInMind: o.endInMind || "", mission: o.mission || "",
+           keyObjectives: clone(Array.isArray(o.keyObjectives) ? o.keyObjectives : []),
+           values: clone(Array.isArray(o.values) ? o.values : []) };
+}
+function foundationIsEmpty(s){
+  return !s.clauses.length && !s.aspiration && !s.endInMind && !s.mission &&
+         !s.keyObjectives.length && !s.values.length;
+}
+function foundationName(target){
+  var t = String(target || "");
+  if (t === "group") return labelWord("topword","group") || GROUP.org || "Group";
+  if (t.indexOf("co:") === 0) return (COMPANIES[t.slice(3)] || {}).name || t;
+  var u = unitLike(t);
+  return (u && u.name) || t;
+}
+/* Returns the archive taken, or null when the place held no Foundation at all
+   — a first Foundation archives nothing and says so (archiveUnitPlan's rule). */
+function archiveFoundation(target, why){
+  var o = foundationRecord(target);
+  if (!o) return null;
+  var snap = foundationSnapshot(o);
+  if (foundationIsEmpty(snap)) return null;
+  var counts = { parts: ["clauses","aspiration","endInMind","mission","keyObjectives","values"]
+                   .filter(function(k){ return Array.isArray(snap[k]) ? snap[k].length : !!snap[k]; }).length,
+                 objectives: snap.keyObjectives.length };
+  var a = { id:archiveId(), kind:"foundation", key:String(target || ""), name:foundationName(target),
+            at:todayLabel(), by:actingName(), why:why || "replaced from the Copilot", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+/* The six parts the Copilot saved, written INTO the place's Foundation —
+   REPLACING what stood (the old one is archived first by the caller, §49.2).
+   `parts` is `[{key, name, text}]` in the flow's own order; a part the flow
+   skipped is absent and leaves what the plan holds untouched.
+   - who  → one clause per line, with no head (§129 pushes `["", ""]`, so an
+            empty head is a shape the page already draws).
+   - asp / eim / pur → the three statements.
+   - obj  → one key objective per line, MINTED FROM THE MAXIMUM (`koMint`,
+            §96.2 — never positionally, a snapshot is keyed by id, §48), with
+            no target: the Copilot agreed the words, not the number, and an
+            empty target is a counted gap the page already says (§249).
+   - val  → one value per line, `Name — definition` split on the first dash;
+            emptied, the key is DELETED (§479, §50.6). */
+function applyFoundationParts(target, parts){
+  var o = foundationRecord(target);
+  if (!o) return false;
+  var lines = function(t){ return String(t || "").split(/\n+/).map(function(l){ return l.replace(/^\s*[-•*]\s*/, "").trim(); }).filter(Boolean); };
+  var by = {};
+  (parts || []).forEach(function(p){ if (p && p.key) by[p.key] = String(p.text || ""); });
+  if ("who" in by) o.clauses = lines(by.who).map(function(l){ return ["", l]; });
+  if ("asp" in by) o.aspiration = by.asp.trim();
+  if ("eim" in by) o.endInMind = by.eim.trim();
+  if ("pur" in by) o.mission = by.pur.trim();
+  if ("obj" in by) {
+    var pre = koPrefixOf(o);
+    o.keyObjectives = [];
+    lines(by.obj).forEach(function(l){
+      var ko = koMint(o.keyObjectives, pre); ko.name = l;
+      if (String(target) === "group") ko.group = null;
+      o.keyObjectives.push(ko);
+    });
+  }
+  if ("val" in by) {
+    o.values = lines(by.val).map(function(l){
+      var m = /^(.*?)\s+[—–-]\s+(.*)$/.exec(l);
+      return m ? { name: m[1].trim(), def: m[2].trim() } : { name: l, def: "" };
+    });
+    if (!o.values.length) delete o.values;
+  }
+  var t = String(target || "");
+  if (o.ukey && t !== "group") renumberUnit(o);
+  var fk = fnKeyOfTarget(t);
+  if (fk) fnWriteBack(fk, o);
+  return true;
+}
+
 /* Restoring is the same act in reverse: what is on screen now is archived
    first, so a restore can itself be undone. */
 function restoreArchive(id){
@@ -17041,6 +17135,19 @@ function restoreArchive(id){
     renumberUnit(u);
     var restFk = fnKeyOfTarget(a.key);
     if (restFk) fnWriteBack(restFk, u);
+  }
+  else if (a.kind === "foundation") {
+    /* §524: six parts, put back whole; what stands is archived first so the
+       restore can itself be undone (the plan branches' own rule). */
+    if (!foundationRecord(a.key)) return false;
+    archiveFoundation(a.key, "replaced by restoring the " + a.at + " archive");
+    var fo = foundationRecord(a.key), fs = a.plan;
+    fo.clauses = clone(fs.clauses); fo.aspiration = fs.aspiration; fo.endInMind = fs.endInMind;
+    fo.mission = fs.mission; fo.keyObjectives = clone(fs.keyObjectives);
+    if (fs.values && fs.values.length) fo.values = clone(fs.values); else delete fo.values;
+    if (fo.ukey && a.key !== "group") renumberUnit(fo);
+    var fFk = fnKeyOfTarget(a.key);
+    if (fFk) fnWriteBack(fFk, fo);
   } else {
     /* holderByIdWritable, never capById (§334, and §232's own note one branch
        up wearing a different hat): since §326 a supporting function holds its
@@ -28964,10 +29071,25 @@ function textOr(page, value, cls, setter){
    somebody is explaining themselves in. Nothing is needed to get it: that key
    handler is wired in the `[data-fld]` branch, which these fields do not pass
    through, so `grow` here means "size yourself to your content" and nothing
-   about the key. */
+   about the key.
+
+   AND THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK (§528, item 4 of
+   Islam's own four). `want` IS "this row needs explaining" — §105 holds Submit
+   until a figure at risk carries one — so it is already the answer to "is this
+   box part of the work", and no second test is invented for it (§104.8). With
+   it false the box is still DRAWN, still typeable, still read by everything
+   that reads a note: what goes is one stop between every figure and the next,
+   which on a nine-row pillar is nine stops of eighteen.
+
+   AND WHAT KEEPS IT REACHABLE IS A KEY, NEVER THE ABSENCE OF THE ATTRIBUTE
+   (§61): Alt+N from any figure box on the row opens its note, wired in
+   `repKeys()` beside the Enter step. That matters most on a CAPABILITY
+   function, where `capNoteBox` passes `want:false` ALWAYS (§279's own recorded
+   not-done), so EVERY note there leaves the tab path and the key is the only
+   road to it — said here rather than discovered on that page. */
 function noteBox(hook, id, value, want){
   return '<textarea class="fld grow notefld' + (want ? " needed" : "") + '" data-' + hook +
-    '="' + esc(id) + '" rows="1" placeholder="' +
+    '="' + esc(id) + '" rows="1"' + (want ? "" : ' tabindex="-1"') + ' placeholder="' +
     (want ? "Why, and what is being done" : "Note, if there is one") + '">' +
     esc(value || "") + '</textarea>';
 }
@@ -31659,8 +31781,22 @@ function reportBar(target){
   /* NO NEXT WITH NOTHING TO WALK (§223): with the plan short and every figure
      in, the only thing left is on another tab, and a walk button that could
      only ever wrap on itself is a control with nothing behind it. */
+  /* AND THE KEYBOARD IS NAMED ON THE ONE CONTROL THAT IS ABOUT GETTING
+     THROUGH THE REPORT (§528): four keys were added and nothing drawn, which
+     is the eye's and the monthly mark's own answer — a fact the screen does
+     not otherwise state belongs on a HOVER (1b-ii, §88, §278.2) — and this
+     button had no `title` at all. Never one per box: eighteen identical hovers
+     down a pillar is furniture (§94.15), and `aria-keyshortcuts` carries it
+     per control from `repKeys()`, beside the handler that makes it true
+     (§104.7). The cost is stated rather than discovered: with nothing left to
+     walk this button is not drawn (§223 above), so the hover has no home —
+     acceptable, because somebody who has filled everything in is not the
+     person who needs telling how. */
   var next = walk
-    ? '<button type="button" class="fillcta" data-repnext="1">Next &rarr;&nbsp;' +
+    ? '<button type="button" class="fillcta" data-repnext="1"' +
+      ' title="Alt+Enter from any box — Enter steps to the next figure,' +
+      ' Shift+Enter back, Alt+N opens the row’s note, Escape puts a box back"' +
+      ' aria-keyshortcuts="Alt+Enter">Next &rarr;&nbsp;' +
       '<span class="ngleft">' + walk + ' left</span></button>'
     : "";
   return '<div class="missbar" data-repband="1">' +
@@ -42280,7 +42416,8 @@ function impCycleLabel(){
 function impArchivesFor(keys){
   return (ARCHIVES || []).filter(function(a){
     if (a.kind === "figures") return false;
-    var v = a.kind === "unit" ? a.key : "cap:" + a.key;
+    /* §524: a Foundation archive is keyed by its place already. */
+    var v = a.kind === "unit" || a.kind === "foundation" ? a.key : "cap:" + a.key;
     return keys.indexOf(v) > -1;
   });
 }
@@ -42634,6 +42771,10 @@ function renderArchives(){
     var held = a.kind === "figures"
       ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
          plural(c.units || 0, "submitted unit")].join(" &middot; ")
+      : a.kind === "foundation"
+      /* §524: the six parts of a Foundation, replaced from the Copilot. */
+      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
+        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
       : a.kind === "unit"
       ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
          plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
@@ -42643,7 +42784,9 @@ function renderArchives(){
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
        restore itself. */
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
+    var live = a.kind === "figures" ? true
+             : a.kind === "foundation" ? !!foundationRecord(a.key)
+             : a.kind === "unit" ? unitLike(a.key) : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
         (a.kind === "figures"
           ? '<span class="why">the cycle\u2019s figures</span>'
@@ -58150,7 +58293,49 @@ var COPILOT = (function(){
   function steps(){ return (PANE && PANE.flowSteps) || []; }
   function withY(s, f){ return String(s).replace(/\{Y\}/g, f.y1 == null ? "the strategy" : String(f.y1)); }
   function fname(){ return "Foundation — " + placeWord(); }
+  /* §525.1 — A WAY TO SEE THE RESULT AFTER APPLY (Islam: "ok for all", of
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     Applying changed the bar's words and nothing else, so checking the one
+     thing Apply is for meant leaving the Copilot and finding Strategy ›
+     Foundation by hand. One green line with one link, shown where the state
+     is already read — the flow's save bar and the deliverable page (§524.1's
+     "keep in both") — and nothing is stored for it.
+     THE ADDRESS IS WORKED OUT THE WAY THE ROUTER WRITES ONE
+     (smp-app/shell/route.js `addressOf`): the module word, the destination's
+     own segment, its tab, then the section. A company's Foundation is a TAB
+     of its own (`foundation`) where a unit's, a function's and the group's
+     are a SECTION of Strategy (`found`) — read off shell.html rather than
+     guessed. A capability is a destination the router cannot spell, so there
+     the line is drawn with no link rather than a link that lands nowhere
+     (§61): a dead link is worse than no link. */
+  function foundHref(){
+    var t = place(), s = slug();
+    if (!s || !t || /^cap:/.test(t)) return "";
+    if (/^co:/.test(t)) return "/" + s + "/strategy/co/" + t.slice(3) + "/foundation";
+    return "/" + s + "/strategy/" + (/^fn:/.test(t) ? "fn/" + t.slice(3) : t) + "/strategy/found";
+  }
+  /* The page's own name is the client's word for it, as every part's name is
+     (§514) — asked of the one rule that answers it, never spelt here. */
+  function foundPageWord(){
+    try { if (typeof SMPRules !== "undefined" && SMPRules.foundTitle) { var w = SMPRules.foundTitle(GROUP, place()); if (w) return w; } } catch (e) {}
+    return "Foundation";
+  }
+  function fdoneHtml(n){
+    var h = foundHref();
+    return '<div class="copfdone" data-cop-fdone>' +
+      '<span>✓ v' + E(n) + ' is on ' + E(placeWord()) + '’s plan.</span>' +
+      (h ? ' <a href="' + E(h) + '">Open the ' + E(foundPageWord()) + ' page ›</a>' : '') + '</div>';
+  }
   function doneCount(f){ return f.done.filter(function(d, i){ return d && on(i); }).length; }
+  /* §524 — SAVED MEANS THESE WORDS ARE THE WORDS IN THE LAST VERSION. The
+     cards stay editable after a save (Islam: "let the card be editable to
+     begin a new version"), so what decides whether Save is live is whether
+     any counted part differs from what vN holds, never the phase. */
+  function savedNow(f){
+    if (!f.saved || !Array.isArray(f.saved.drafts)) return false;
+    return steps().every(function(_, i){ return !on(i) || String(f.drafts[i] || "").trim() === String(f.saved.drafts[i] || "").trim(); });
+  }
+  function countedParts(f){ return steps().filter(function(_, i){ return on(i); }).length; }
   function yearsWord(f){ return f.y0 + " to the end of " + f.y1 + " (" + (f.y1 - f.y0 + 1) + (f.y1 - f.y0 + 1 === 1 ? " year)" : " years)"); }
   function aiMsg(html, wide){ return '<div class="copmsg ai' + (wide ? " copwide" : "") + '"><span class="copwho">Copilot</span><div class="copbody">' + html + '</div></div>'; }
   function meMsg(text){ return '<div class="copmsg me"><span class="copwho">' + E(nameOf(PANE.chat.by)) + '</span><div class="copbody">' + E(text) + '</div></div>'; }
@@ -58203,6 +58388,19 @@ var COPILOT = (function(){
      "Answering 1/4" — the question's POSITION — beside a panel saying
      "0/4" — the answers GIVEN: two meanings in one x/n shape (§53.5). */
   function answered(f, i){ return (f.ans[i] || []).filter(function(x){ return String(x).trim(); }).length; }
+  /* §525.1 — ONE COUNT OF PROGRESS, read by the top bar and the save bar
+     (Islam, of the UX review: "ok for all", from
+     design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html).
+     The questions bar counted ANSWERS GIVEN out of questions asked, which on
+     the "start from what is there" road is 0 of 18 over six parts already
+     agreed — a 0% track on a Foundation that is five sixths done, because
+     nobody was asked anything. What the page is asking is *how much of the
+     Foundation is settled*, so the one number is parts agreed out of the
+     parts this place has, and it moves on either road. Named here once:
+     `agreedAll` is this same test asked of every part (§53.5). */
+  function agreedCount(f){
+    return steps().filter(function(_, i){ return on(i) && f.done[i] && !!String(f.drafts[i] || "").trim(); }).length;
+  }
   /* A part's text on its card: one line reads as a sentence, several as a
      list, and a long list stops at four with how many more (the mockup). */
   function cardBody(text){
@@ -58230,8 +58428,9 @@ var COPILOT = (function(){
        appears until I finalize all parts and reach the consistency check."
        Only the plan road could press a card, and never during the check;
        now any part opens while the parts are being worked or checked —
-       never before the road is chosen, and never once the Foundation is
-       saved, because the server refuses a save to a saved flow. */
+       never before the road is chosen. Since §524 a SAVED Foundation opens
+       too: a change after a save starts the next version on the rail, and
+       the plan moves only when Apply to plan is pressed. */
     var phaseOk = canEdit() && !PANE.chat.archived && PICK_PHASES.indexOf(f.phase) >= 0;
     var pick = ed && phaseOk, pen = penHere() && phaseOk ? CARDPEN : null;
     return '<div class="copcards">' + S.map(function(el, i){
@@ -58239,7 +58438,11 @@ var COPILOT = (function(){
       var st, cls = "copst", txt = String(f.drafts[i] || "").trim(), empty = false;
       var n = el.questions.length, a = answered(f, i);
       var now = i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      if (now && f.phase === "ask") { st = "Answering"; cls += " now"; }
+      /* §525.1 — WHERE THE QUESTION COUNT BELONGS IS THE CARD BEING
+         ANSWERED, never the page: the position through one part's questions
+         is a fact about that part, and on the head it sat beside a track
+         counting something else. */
+      if (now && f.phase === "ask") { st = "Question " + (f.qi + 1) + " of " + n; cls += " now"; }
       else if (now && f.phase === "review") { st = "Reviewing"; cls += " now"; }
       else if (now) { st = "Drafting"; cls += " now"; }
       else if (f.done[i] && txt) { if (f.from[i]) { st = "From the plan"; cls += " plan"; } else { st = "Done"; cls += " done"; } }
@@ -58280,13 +58483,16 @@ var COPILOT = (function(){
     else if (f.phase === "check" || f.phase === "saved") t = "Copilot · Foundation · check";
     else {
       t = "Copilot · " + partName(el);
-      p = f.phase === "ask" ? "Question " + (f.qi + 1) + " of " + el.questions.length : f.phase === "review" ? "Review" : "Draft";
+      /* The question's position is the card's (§525.1), so the head says
+         which part and which step of it, never how far through its
+         questions — said twice on one screen otherwise (§87). */
+      p = f.phase === "ask" ? "" : f.phase === "review" ? "Review" : "Draft";
     }
-    var total = 0, ans = 0;
-    S.forEach(function(x, i){ if (!on(i)) return; total += x.questions.length; ans += answered(f, i); });
+    var total = countedParts(f), agreed = agreedCount(f);
     var show = CARDSHUT[PANE.chat.id] ? '<button type="button" class="copbtn quiet" data-cop-cards="show">Show cards</button>' : '';
     return '<div class="copfhead"><b>' + E(t) + '</b>' + (p ? '<span class="copprog">' + E(p) + '</span>' : '') + show + sizeHtml() + '</div>' +
-      '<div class="coptrack" role="progressbar" aria-label="Questions answered" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + ans + '"><i style="width:' + (total ? Math.round(ans / total * 100) : 0) + '%"></i></div>';
+      '<div class="copfbar"><span class="copfcount" data-cop-progress>' + agreed + ' of ' + total + ' parts agreed</span>' +
+      '<div class="coptrack" role="progressbar" aria-label="Parts agreed" aria-valuemin="0" aria-valuemax="' + total + '" aria-valuenow="' + agreed + '"><i style="width:' + (total ? Math.round(agreed / total * 100) : 0) + '%"></i></div></div>';
   }
   function flowMsgs(f){
     var S = steps(), out = [], ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
@@ -58366,9 +58572,11 @@ var COPILOT = (function(){
       out.push(aiMsg('<span class="copeh">Consistency check across the parts</span>' +
         (agree.length ? '<ul class="copchk ok">' + agree.map(function(a){ return '<li>' + E(a) + '</li>'; }).join("") + '</ul>' : '') +
         (issues.length ? '<ul class="copchk issue">' + issues.map(function(x){ return '<li>' + E(x.text) + '</li>'; }).join("") + '</ul>' : '') +
-        (ed && f.phase === "check" ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
-            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") +
-          '<button type="button" class="copbtn solid" data-cop-ffinish' + (busyHere ? ' disabled' : '') + '>Save as ' + E(fname()) + ' v' + E(PANE.nextVersion || 1) + '</button></div>' : ''), true));
+        /* §524 — the check is an extra move, never the door to saving
+           (Islam: "a check is an extra move"), so Save is on the bar under
+           the cards and only "Go back to" stays here, when there is one. */
+        (ed && (f.phase === "check" || f.phase === "saved") && issues.some(function(x){ return x.el in byKey; }) ? '<div class="copbtns">' + issues.filter(function(x){ return x.el in byKey; }).map(function(x){
+            return '<button type="button" class="copbtn" data-cop-goback="' + byKey[x.el] + '">Go back to ' + E(partName(S[byKey[x.el]])) + '</button>'; }).join("") + '</div>' : ''), true));
     }
     /* §514 — A CHECK THAT HAS NOT RUN ON THESE WORDS IS NOT SHOWN AS ONE.
        A pen save during the check left the OLD results standing, "Go back
@@ -58381,7 +58589,7 @@ var COPILOT = (function(){
         (ed ? '<div class="copbtns"><button type="button" class="copbtn solid" data-cop-fcheck>Run the check</button></div>' : ''), true));
     }
     if (f.phase === "saved" && f.saved) {
-      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Next time you run the flow it becomes v" + E(f.saved.n + 1) + "."));
+      out.push(aiMsg("Saved as " + E(f.saved.title) + " v" + E(f.saved.n) + ". It is on the left under Deliverables. Press <b>Apply to plan</b> on the save bar to put it on the plan; a change to any card starts v" + E(f.saved.n + 1) + "."));
     }
     if (busyHere) out.push('<div class="copmsg product copworking" role="status"><div class="copbody"><span data-cop-wword>' + E(workWord()) + '</span><span class="copdots" aria-hidden="true"><i></i><i></i><i></i></span></div></div>');
     return out.join("");
@@ -58391,7 +58599,7 @@ var COPILOT = (function(){
      review, and a part half answered opens on its next unanswered question
      — never back at question one, which would make returning to a part you
      were in the middle of cost the answers already given. */
-  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check"];
+  var PICK_PHASES = ["loaded", "ask", "review", "draft", "check", "saved"];
   function openPart(g, i){
     var el = steps()[i], a = g.ans[i] || [], n = el ? el.questions.length : 0, k = 0;
     g.e = i; g.done[i] = false; NUDGE = null;
@@ -58421,14 +58629,19 @@ var COPILOT = (function(){
   }
   function flowHtml(){
     var c = PANE.chat, f = PANE.flow, S = steps();
-    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved ? f.saved.n : (PANE.nextVersion || 1)) + '</b> · ' + (f.saved ? "saved" : "in progress") +
+    var vn = f.saved ? f.saved.n : (PANE.nextVersion || 1), sNow = savedNow(f);
+    var vline = '<div class="copvline"><b>' + E(fname()) + ' v' + E(f.saved && !sNow ? vn + 1 : vn) + '</b> · ' + (sNow ? "saved" : "in progress") +
       ' · ' + doneCount(f) + ' of ' + S.filter(function(_, i){ return on(i); }).length + ' done' + (f.y0 && f.y1 ? ' · ' + f.y0 + ' to the end of ' + f.y1 : '') + '</div>';
     var shut = !!CARDSHUT[c.id];
     return '<div class="copflow' + (shut ? " nocards" : "") + '">' +
       (shut ? '' : '<div class="copleft"><div class="copsh">' + vline +
-        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + '</div>') +
+        '<button type="button" class="copcx" data-cop-cards="hide" aria-label="Close the cards" title="Close the cards">×</button></div>' + cardsHtml(f) + savebarHtml(f) + '</div>') +
       '<div class="copchat copfchat" data-cop-chatbox style="--copz:' + ZOOMS[zi()] + '">' +
         flowHead(f) +
+        /* §525 — Save and Apply live in the card column, so closing the cards
+           with × used to take them away too. With the cards shut the same bar
+           stands at the head of the chat. */
+        (shut ? savebarHtml(f) : '') +
         '<div class="copmsgs" data-cop-msgs><div class="copzoom">' + flowMsgs(f) + '</div></div>' +
         (!canEdit() ? VIEWONLY
           : c.archived ? '<div class="copsay copparked">This chat is archived. Restore it to keep going. ' +
@@ -58436,12 +58649,50 @@ var COPILOT = (function(){
           : composerHtml(c, false)) +
       '</div>' + ftodoHtml(f) + '</div>';
   }
+  /* §524 — THE BAR UNDER THE CARDS: where the Foundation is SAVED and where
+     it is APPLIED. Islam: "where do I press save for the foundation? in the
+     chat?" — the save was a button inside the check's own message, so it
+     could only be reached by running the check; now the check is an extra
+     move and the save stands at the foot of the cards (mockup
+     design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html).
+     Save is live the moment every counted part is agreed and differs from
+     the last version; Apply is dimmed until a version exists, because it
+     always writes the last SAVED version and never the cards' unsaved words
+     (Islam: "the plan only changes when we apply to plan"). The mockup
+     spells Apply as "Move"; the word is Islam's later one. */
+  function savebarHtml(f){
+    var S = steps(), ed = canEdit() && !PANE.chat.archived, busyHere = THINKING === PANE.chat.id;
+    var early = f.phase === "start" || f.phase === "path" || f.phase === "year" || f.phase === "loaded" && !f.start;
+    if (!ed || early) return '';
+    var total = countedParts(f), agreed = agreedCount(f);
+    var all = agreedAll(f), sNow = savedNow(f), vn = f.saved ? f.saved.n : (PANE.nextVersion || 1);
+    /* §525 — whether the plan holds it, read off the same extra.applied the
+       deliverable page reads (Islam: "keep in both"). */
+    var ap = PANE.applied && PANE.applied.n ? PANE.applied.n : 0;
+    var onPlan = ap ? (ap === vn && f.saved ? ' · on the plan' : ' · v' + ap + ' is on the plan') : '';
+    var st = sNow ? '<span class="copsvst ok">Saved as ' + E(fname()) + ' v' + E(vn) + onPlan + '</span>'
+      : f.saved ? '<span class="copsvst">v' + E(vn + 1) + ' in progress' + (all ? '' : ' · ' + agreed + ' of ' + total + ' parts agreed') + onPlan + '</span>'
+      : all ? '<span class="copsvst ok">All ' + total + ' parts agreed</span>'
+      : '<span class="copsvst warn">' + agreed + ' of ' + total + ' parts agreed</span>';
+    var saveN = f.saved && !sNow ? vn + 1 : vn;
+    /* §525.1 — the green line only where the words beside it would otherwise
+       be the only thing saying it landed: the version that is on the plan is
+       the one just saved. A LATER unsaved version is a different state and
+       the bar already names it ("v3 in progress · v2 is on the plan"), so a
+       done line there would read as a claim about work nobody has applied. */
+    var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
+      '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
+      '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
+      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      '</div></div>';
+  }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
      carries, worked out from the flow as it stands — nothing is stored for it.
      Start, each part with its answers counted, then the check and the save. */
   function ftodoHtml(f){
     var S = steps(), li = function(name, state, cnt, part){
-      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : "To do";
+      var pill = state === "done" ? (part ? "Agreed" : "Done") : state === "now" ? (part ? "Answering" : "Now") : state === "opt" ? "Optional" : "To do";
       return '<li class="copsw-li ' + (state === "now" ? "wait on" : state) + '"><span class="copsw-dot" aria-hidden="true"></span>' +
         '<span class="copsw-lb"><span class="copsw-tt"><span>' + E(name) + '</span>' + (cnt || "") + '</span></span>' +
         '<span class="copsw-pill ' + (state === "now" ? "wait" : state) + '">' + pill + '</span></li>';
@@ -58451,14 +58702,19 @@ var COPILOT = (function(){
     var g1 = [li("Starting point", started ? "done" : "now"), li("Plan years" + (yearsOk ? " " + f.y0 + "–" + f.y1 : ""), yearsOk ? "done" : f.phase === "year" ? "now" : "todo")];
     var g2 = S.map(function(el, i){
       if (!on(i)) return "";
-      var a = answered(f, i), q = el.questions.length;
       var now = !early && i === f.e && (f.phase === "ask" || f.phase === "review" || f.phase === "draft");
-      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", '<i>' + a + '/' + q + '</i>', true);
+      /* §525.1 — NO SECOND COUNT HERE. A part agreed from the plan carries
+         no answers, so this read "0/4" beside a row whose own pill says
+         Agreed — a number disagreeing with the word next to it. How many
+         questions a part has answered is on its card while it is the part
+         being answered, and nowhere else. */
+      return li(partName(el), f.done[i] ? "done" : now ? "now" : "todo", "", true);
     }).join("");
-    var g3 = [li("Consistency check", f.phase === "saved" ? "done" : f.phase === "check" ? "now" : "todo"),
-              li("Save as Foundation", f.phase === "saved" || f.saved ? "done" : "todo")];
-    var n = 2 + 2 + S.filter(function(_, i){ return on(i); }).length;
-    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (f.phase === "saved" ? 2 : 0);
+    /* §524 — the check is optional and not counted; the save is. */
+    var g3 = [li("Consistency check", f.check ? "done" : "opt", '<i>optional</i>'),
+              li("Save as Foundation", savedNow(f) ? "done" : agreedAll(f) ? "now" : "todo")];
+    var n = 2 + 1 + S.filter(function(_, i){ return on(i); }).length;
+    var done = (started ? 1 : 0) + (yearsOk ? 1 : 0) + doneCount(f) + (savedNow(f) ? 1 : 0);
     return '<aside class="copftodo"><div class="copsw-box copsw-todo"><div class="copsw-todoh"><div class="copsw-bh"><b>To-do</b> <span class="copsw-n">' + done + '/' + n + '</span></div>' +
       '<div class="copsw-meter" role="progressbar" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><i style="width:' + Math.round(done * 100 / n) + '%"></i></div></div>' +
       '<div class="copsw-tg"><div class="copsw-th">Start</div><ul>' + g1.join("") + '</ul></div>' +
@@ -58640,6 +58896,74 @@ var COPILOT = (function(){
     }
     return false;
   }
+  /* §524 — APPLY TO PLAN. The last SAVED version of a Foundation goes into
+     the place's own Foundation page, replacing what the plan holds — and
+     what it replaces is ARCHIVED first (Islam: "anything old is not deleted
+     it's archived"), restorable from Import & storage › Archived plans. It
+     is asked for through the platform's own dialog, never a browser
+     confirm() (§95); the server stamps which version went in, the browser
+     writes the plan through the same writers the Foundation page uses
+     (applyFoundationParts, config-data.js) and the autosave carries it. */
+  function applyAsk(did, title, o){
+    if (!did || typeof openModalHtml !== "function") { SAY = "Save the Foundation first."; draw(); return; }
+    o = o || {};
+    /* §525 — the count is the parts this Foundation holds (Structure can
+       switch Purpose and Core Values off), and applying a version already on
+       the plan says so, since it files another copy of it in Archived plans. */
+    var partsWord = o.parts ? (o.parts === 1 ? "its one part goes" : "its " + o.parts + " parts go") : "its parts go";
+    var again = o.n && o.on === o.n ? '<div class="kv"><span class="k">Already applied</span><span>v' + E(o.n) + ' is on the plan already. Applying it again changes nothing on the plan and files another copy in Archived plans.</span></div>' : '';
+    openModalHtml("Apply to the plan?", "",
+      '<div class="sendconfirm"><div class="kv"><span class="k">Where</span><span>' + E(placeWord()) + '</span></div>' +
+      '<div class="kv"><span class="k">What</span><span>The last saved version of ' + E(title) + ' — ' + partsWord + ' onto the Foundation page.</span></div>' + again +
+      '<div class="kv"><span class="k">What it replaces</span><span>The Foundation the plan holds today is archived first, under Import &amp; storage › Archived plans, and can be put back from there.</span></div>' +
+      /* §525.1 — APPLY IS NOT A RED BUTTON. Red in this product is the
+         colour of an act with no way back, and the row above this button
+         says in its own words that the Foundation the plan holds is archived
+         first and can be put back — so the colour said the opposite of the
+         sentence it sat under. It is the dialog's own main action, filled in
+         the client's navy exactly as the master flow's Start button is
+         (`.mflow .cbtns button.mfgo`, §266) rather than a new treatment —
+         and `--panel-ink` is the derived ink for that ground, so §38.4's
+         trap (white on a fill that is pale in dark) cannot bite. Red stays
+         for deleting and for closing a cycle. */
+      '<div class="cbtns"><button type="button" data-cop-apply-no="1">Cancel</button><button type="button" class="copgo" data-cop-apply-yes="' + E(did) + '">Apply to plan</button></div></div>');
+    var mb = document.getElementById("modal-b"); if (!mb) return;
+    mb.addEventListener("click", function(ev){
+      var y;
+      if (hit(ev, "[data-cop-apply-no]")) { closeModal(); return; }
+      if ((y = hit(ev, "[data-cop-apply-yes]"))) { closeModal(); applyGo(y.getAttribute("data-cop-apply-yes"), title); }
+    });
+  }
+  /* §524.1 — THE NOTE FOLLOWS THE FACT. The server hands over the parts
+     and records nothing; the plan is written here and saved through the
+     ordinary save (the authoriser judges it, §42), and only a save that
+     LANDED — "saved", or "clean" when the plan already held exactly this —
+     sends `foundationApplied`. A refused or failed save says so on the page
+     already (§171, §184) and leaves the deliverable "Not on the plan yet",
+     which is the truth (§124). */
+  function applyGo(did, title){
+    var tgt = place();
+    act({ act:"applyFoundation", id:did }, function(j){
+      if (typeof applyFoundationParts !== "function" || typeof archiveFoundation !== "function") {
+        SAY = "The plan could not be written from here. Nothing was changed."; draw(); return; }
+      archiveFoundation(tgt, "replaced from the Copilot — " + title + " v" + j.n);
+      var wrote = !!applyFoundationParts(tgt, j.foundation || []);
+      if (wrote && typeof paint === "function") paint(); else draw();
+      var saveNow = typeof SYNC !== "undefined" && SYNC.saveNow;
+      if (!saveNow) { SAY = "The plan could not be saved from here, so it is not marked as applied."; draw(); return; }
+      SYNC.saveNow(function(how){
+        if (how !== "saved" && how !== "clean") {
+          SAY = "The plan did not save, so " + title + " v" + j.n + " is not marked as on the plan. Try Apply to plan again once the save goes through.";
+          draw(); loadList(true); return; }
+        act({ act:"foundationApplied", id:did, n:j.n }, function(k){
+          if (PANE && PANE.deliverable && PANE.deliverable.id === did) PANE.deliverable.applied = k.applied;
+          if (PANE && PANE.chat && PANE.flow && PANE.flow.saved && PANE.flow.saved.deliverableId === did) PANE.applied = k.applied;
+          SAY = title + " v" + j.n + " is on the plan now. What was there before is archived under Import & storage › Archived plans.";
+          draw(); loadList(true);
+        });
+      });
+    });
+  }
   /* THE RAILS FOLD AWAY (§465, Islam: "a button to hide and show the left
      rail"), remembered on this browser only — a per-viewer convenience. */
   var RAILKEY = "smp.copilot.rail", RAILKEPT = false;
@@ -58661,6 +58985,30 @@ var COPILOT = (function(){
         '<div class="copbtns"><button type="button" class="copsend" data-cop-edit-save>Save as v' + ((cur ? cur.n : 0) + 1) + '</button>' +
         '<button type="button" class="copbtn quiet" data-cop-edit-cancel>Cancel</button></div>'
       : '<div class="copdoc">' + (text ? E(text) : '<span class="copnone">This version holds no text.</span>') + '</div>';
+    /* §524 — A SAVED FOUNDATION IS SHOWN AS ITS SIX CARDS, under the
+       client's own words, with whether it is on the plan and the same
+       Apply the flow's bar carries (Islam: "keep in both"). Edit stays the
+       plain-text edit of the whole version; a card is edited from the chat. */
+    var fp = cur && cur.body && Array.isArray(cur.body.foundation) ? cur.body.foundation : [];
+    /* §525 — A FOUNDATION IS EDITED IN ITS CHAT. The plain-text box made a
+       version holding no parts, and Apply to plan then refused it; so Edit
+       opens the chat the latest version was built in, where the cards, the
+       pen and Edit with AI already work, and a change there starts vN+1. */
+    var fchat = "";
+    vs.forEach(function(v){ if (!fchat && v.chatId) fchat = v.chatId; });
+    if (d.type === "foundation" && fp.length && !editing) {
+      var words = partWords();
+      body = '<div class="copfcards">' + fp.map(function(x){
+        return '<div class="copfcard"><h5>' + E(words[x.key] || x.name || x.key) + '</h5>' + cardBody(x.text || "") + '</div>'; }).join("") + '</div>' +
+        /* §525.1 — the same green line the flow's bar carries, on the same
+           test: the version shown is the version the plan holds. An older
+           one applied is said by the row below, which names both numbers. */
+        (d.applied && d.applied.n === cur.n ? fdoneHtml(d.applied.n) : '') +
+        '<div class="copplanrow" data-cop-planrow>' + (d.applied
+          ? '<span class="copsvst ok">On the plan as v' + E(d.applied.n) + (d.applied.n < cur.n ? ' · v' + E(cur.n) + ' is not applied yet' : '') + ' · ' + E(nameOf(d.applied.by)) + ' · ' + E(when(d.applied.at)) + '</span>'
+          : '<span class="copsvst warn">Not on the plan yet</span>') +
+        (canEdit() ? '<button type="button" class="copbtn solid" data-cop-fapply="' + E(d.id) + '" data-cop-fapply-title="' + E(d.title) + '" data-cop-fapply-n="' + E(cur.n) + '" data-cop-fapply-on="' + E(d.applied ? d.applied.n : 0) + '" data-cop-fapply-parts="' + fp.length + '">Apply to plan</button>' : '') + '</div>';
+    }
     var hist = vs.map(function(v, i){
       return '<li class="copver' + (i === 0 ? " latest" : "") + '"><span class="copvn">v' + v.n + '</span>' +
         '<span class="copvnote">' + E(v.note || (v.restoredFrom ? "Restored from v" + v.restoredFrom : "")) + '</span>' +
@@ -58671,7 +59019,9 @@ var COPILOT = (function(){
     return '<div class="copdeliv">' +
       '<div class="copheadrow"><h3 class="coph">' + E(d.title) + '</h3>' +
         '<span class="copchip">' + kindWord(d.kind) + '</span>' +
-        (editing || !canEdit() ? '' : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
+        (editing || !canEdit() ? '' : d.type === "foundation"
+          ? (fchat ? '<button type="button" class="copbtn quiet" data-cop-edit-chat="' + E(fchat) + '">Edit' + (cur ? ' as v' + (cur.n + 1) : '') + '</button>' : '')
+          : '<button type="button" class="copbtn quiet" data-cop-edit>Edit</button>') + '</div>' +
       '<div class="copm">Made by ' + E(nameOf(d.by)) + ' · ' + E(when(d.at)) + '</div>' +
       body +
       '<h4 class="copvh">Versions</h4><ol class="copvers">' + hist + '</ol>' +
@@ -60282,6 +60632,8 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
+      { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided
          button"). It opens on "start from what is there, or fresh?" where
@@ -60400,6 +60752,7 @@ var COPILOT = (function(){
       EDIT = { id: PANE.deliverable.id, text: cur && cur.body && typeof cur.body.text === "string" ? cur.body.text : "", note: "" };
       draw(); var e = document.querySelector("[data-cop-edit-text]"); if (e) e.focus(); return;
     }
+    if ((b = hit(ev, "[data-cop-edit-chat]"))) { openItem("chat", b.getAttribute("data-cop-edit-chat")); return; }
     if ((b = hit(ev, "[data-cop-edit-cancel]"))) { EDIT = null; draw(); return; }
     if ((b = hit(ev, "[data-cop-edit-save]"))) {
       if (!EDIT) return;
@@ -63995,12 +64348,108 @@ var SYNC = (function () {
   var queued = [];
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
+  /* WHEN the server last accepted one, for the hover (§527). `lastSaved`
+     carries no time of its own and never needed one: it is compared, not
+     read. Set at the ONE place a save is accepted, so a landing or a rebase
+     — which set the baseline from the server's copy rather than from a
+     change of this person's — cannot claim to be a save. */
+  var savedAt = null;
   var stale = false;       /* §431: the saved copy is on screen and the fresh one has not landed */
   var timer = null;
   var saving = false;
   /* When the last save actually LEFT, so the leading edge below can tell a
      first change from the fourth in a burst. */
   var lastFlush = 0;
+  /* ── IS IT SAVED? (§527) ──────────────────────────────────
+
+     Islam, of the usability audit's first finding: a platform with no Save
+     button tells the person typing nothing at all. Every box writes when the
+     cursor leaves it and the autosave carries it (§268, §273.4) — which is
+     right, and means the five outcomes of a save reached only the eight
+     callers that pass a callback.
+
+     DRAWN FROM `say()` AND FROM THE ONE `saving = true`, so a save path added
+     later reports without anybody remembering to add it to a list (§104.7).
+     `saving` is deliberately NOT routed through `say()`: that function has
+     exactly five states and §183 retired a sixth on purpose, so the word in
+     flight is set where the flight opens.
+
+     SAVED FADES AND A FAILURE DOES NOT, which is Islam's own asymmetry: a
+     save that landed has nothing left to say six seconds later, and one that
+     did not is the only thing on the screen saying so until the next save
+     settles it. `clean` LEAVES IT EXACTLY AS IT IS — the trailing half of
+     §170's debounce answers `clean` constantly, so re-arming the fade there
+     would hold a stale `Saved` up for ever and clearing it would take the
+     message away mid-sentence.
+
+     IT SAYS TWO WORDS AND EXPLAINS NOTHING. A refusal has §184's banner with
+     its put-back, a failure has §171's sentence with its reference and
+     §504's kept copy, and a stale tab has §258's. Four surfaces already
+     explain; a fifth that half-explained would be the drift §53.5 exists to
+     stop. */
+  var tipFade = null;
+  /* Long enough that a run of edits reads as ONE appearance rather than a
+     message per box left: §170 posts the first change of a burst at once, so
+     somebody filling a report settles several saves a minute. */
+  var TIP_QUIET = 6000;
+  function saveTip(state) {
+    var el = document.getElementById("savetip");
+    if (!el) return;
+    /* With no server there is nothing to say about saving, and before the
+       first save of a session there is nothing to say either (§35). This is
+       FIRST, and the word test below is not the place for it: `offline` has
+       no word of its own, so folding it in under the empty word would have
+       made this branch unreachable — a line nobody can reach that the next
+       reader takes for load-bearing (§24, §298.2). */
+    if (state === "offline") {
+      if (tipFade) { clearTimeout(tipFade); tipFade = null; }
+      el.hidden = true; el.classList.remove("show"); return;
+    }
+    var word = state === "saving" ? "Saving…"
+             : state === "saved"  ? "Saved"
+             : (state === "failed" || state === "refused") ? "Not saved"
+             : null;
+    /* `clean` LEAVES EVERYTHING ALONE, THE PENDING FADE INCLUDED — and the
+       first build of this cleared the fade timer ABOVE this line, which is
+       the one thing it may not do (§527.1). §170's debounce is leading-edge:
+       the first change of a burst posts at once and the trailing 800ms timer
+       still runs, so a second save follows with nothing to send and answers
+       `clean` — every single time. So the clear cancelled the fade a beat
+       after arming it and never re-armed one, and `Saved` stayed on the
+       screen for ever: exactly what this treatment promises not to do, and
+       the reason Islam chose it over the two that flash. Found by the check
+       on its first run, not by reading. */
+    if (!word) return;
+    if (tipFade) { clearTimeout(tipFade); tipFade = null; }
+    el.hidden = false;
+    el.setAttribute("data-state", state === "refused" ? "failed" : state);
+    el.innerHTML = '<span class="sdot"></span><span class="sword">' +
+                   word + "</span>";
+    /* The time is on the hover rather than on the line, because a clock on
+       the line is a figure that is wrong one minute later (1b-ii: a fact the
+       screen does not otherwise state belongs on a hover). */
+    if (state === "saved" && savedAt) el.title = "Last saved at " + savedAt;
+    else el.removeAttribute("title");
+    el.classList.add("show");
+    /* AND THIS GUARD PROVABLY FIXES NOTHING TODAY, WHICH IS WORTH SAYING
+       RATHER THAN LEAVING SOMEBODY TO WRITE A FALSIFICATION FOR IT
+       (§298.2). The asymmetry Islam asked for — `Saved` fades, `Not
+       saved` stays — holds whether or not this line is here, because a
+       save that did not land is RE-SENT every five seconds for the life of
+       the page (`setInterval(save, 5000)` below, never captured and never
+       cleared, §160.4) and each retry calls `say()` again, so a six-second
+       fade can never complete while a failure or a refusal stands. Measured
+       rather than reasoned about: with the guard removed the message is
+       still on screen seven seconds later and the check reports 0 red,
+       which is indistinguishable from a guard that works (§54.5). It is
+       kept as belt and braces for the day the retry stops — and
+       `checks/save-tip.py` §7 asserts the RETRY, which is what actually
+       holds the message there. */
+    if (state === "saved") {
+      tipFade = setTimeout(function () { el.classList.remove("show"); }, TIP_QUIET);
+    }
+  }
+
   /* Kept from boot() so a save can ask the screen to repaint itself. The
      only thing that needs it is the register's password column, which
      cannot be right until the save that created the person has landed. */
@@ -64679,6 +65128,7 @@ var SYNC = (function () {
        arrived while the flight was open — by re-running the save, because
        their change may not have been in it. */
     var say = function (state) {
+      saveTip(state);
       if (done) done(state);
       if (!queued.length || saving) return;
       var waiting = queued.splice(0, queued.length);
@@ -64730,6 +65180,7 @@ var SYNC = (function () {
       return say("refused");
     }
     saving = true;
+    saveTip("saving");
     lastFlush = Date.now();
     fetch("/api/state", {
       method: "POST",
@@ -64770,6 +65221,7 @@ var SYNC = (function () {
         showRefusal(null);
         FAILSHOWN = "";
         lastSaved = now;
+        savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
         keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then
@@ -69188,6 +69640,14 @@ var SYNC = (function () {
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
+    /* AND THE KEYS, over that same list and in the same one place (§528).
+       Not inside wire(): these boxes are built by eight renderers and a
+       keydown wired at each of them is eight places to forget, which is the
+       whole reason the marks above are put on here. Idempotent per element
+       (`data-repkeys`), because a repaint replaces most boxes and keeps the
+       ones a bound field did not rebuild — a second listener on a survivor
+       would step twice on one Enter (§24, §47.2). */
+    if (typeof repKeys === "function") repKeys();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -69743,6 +70203,11 @@ var SYNC = (function () {
      bar is counting) and applied to the DOM the paint just produced. Driven
      from the CONTROLS rather than from the ids, so no id ever has to be
      escaped into a selector. */
+  /* The six reporting boxes, named ONCE and read by both walks and by §528's
+     keys (§104.7, §53.5: a second copy of this list is the one somebody
+     forgets to add to the day a seventh box kind arrives). */
+  var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
+    "[data-cpct],[data-note],[data-cnote]";
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -69753,8 +70218,7 @@ var SYNC = (function () {
     reportPlaces(REPORTING).forEach(function(e){
       e.rows.forEach(function(r){ map[r.id] = { block:r.block, place:e.key }; });
     });
-    document.querySelectorAll("[data-rep],[data-crep],[data-cpick]," +
-      "[data-cpct],[data-note],[data-cnote]").forEach(function(el){
+    document.querySelectorAll(REP_BOXES).forEach(function(el){
       var d = el.dataset;
       /* WHICH QUESTION THIS BOX ANSWERS. A status picker and a figure box are
          both "the figure is not in yet"; the per-cent box is the row that said
@@ -69830,6 +70294,171 @@ var SYNC = (function () {
       if (c.dataset.rkey !== here) return repGoTo(c);
     }
     if (els.length) gapLight(els[0]);
+  }
+
+  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§528) ───────────────
+     Islam, of the four behaviours put to him: "all". MEASURED FIRST (rule 3a)
+     on the shipped build, and the first finding is that Enter already WORKED
+     and already went nowhere: a bound box writes on `change`, which for a text
+     field means on blur, and §229 blurs on Enter — so the one key everybody
+     presses committed the figure and left the cursor sitting in the box it had
+     just saved. Fourteen to forty-one rows per unit, with the note box in the
+     tab path on every one of them, so getting from one figure to the next cost
+     two stops of which one is a box most rows never need.
+
+     FOUR KEYS, WIRED IN ONE PLACE, over the SAME list `repMarkControls()`
+     walks — `REP_BOXES`, named once and read by both (§104.7, §53.5: a second
+     copy of that list is the one somebody forgets to add to).
+
+       Enter / Shift+Enter  the next typed figure, and back
+       Alt+Enter            §279's Next → from the keyboard
+       Escape               put this box back to what it held
+       Alt+N                the row's note, which §528 took out of the tab path
+
+     NOTHING IS DRAWN, which is why rule 1c has nothing to sign off: every hint
+     rides the hover on the bar's own Next button and an `aria-keyshortcuts` set
+     per control HERE, beside the handler that makes it true (§104.7) — the eye's
+     and the monthly mark's own answer to a fact the screen does not otherwise
+     state (1b-ii, §88, §278.2, §286).
+
+     THE STEP GOES THROUGH `gapLight`, NEVER A BARE `focus()`, and that is not
+     tidiness: it is what keeps the walk's own cursor (`data-gapat`) in step with
+     where the person actually is, so Alt+Enter after three Enters continues from
+     the box they are in rather than from wherever the last chip press left it
+     — and a §130.1 picker's furniture is lit rather than its hidden select
+     (§34).
+
+     WHAT IS DELIBERATELY NOT WIRED, each for its own reason rather than for
+     neatness. A PICKER gets no Enter: there that key is the browser's own
+     choose-the-open-option, and taking it would be removing a behaviour in
+     order to add one — and nothing is stranded, because Tab still reaches it
+     and `repWalkFields` still walks to it. A NOTE gets no Enter either, because
+     §271 settled that it is a NEWLINE there, on the one prose field a reporter
+     is REQUIRED to write. Escape is not wired on a select, where it closes the
+     dropdown. And at either end of the list Enter is left exactly as it was
+     — not prevented, not blurred — so the last figure of a pillar cannot drop
+     the focus onto the body.
+
+     AND THE STEP IS TAKEN AFTER THE PAINT, FROM THE CURRENT BOX'S OWN
+     IDENTITY, never from a "next" worked out before the commit — because the
+     commit can change the row's SHAPE: `ynBoxes` draws the per-cent box only
+     while the status says In progress (§300), so answering a yes/no row ADDS or
+     REMOVES the box after it. Every reporting handler ends in a synchronous
+     `paint()`, so a handle held across it is detached (§222) and the identity is
+     the only thing that survives. */
+  var REP_HOOKS = ["rep", "crep", "cpick", "cpct", "note", "cnote"];
+  /* The identity a box keeps across a paint, and the id alone is not enough
+     three times over: a yes/no row's status and its per-cent share one
+     `data-rep` and are told apart by `data-ynpart` (§300), a breakdown cell is
+     addressed by its COLUMN beside its row (`data-bdcol`, the pair §343 chose
+     and which `repMarkControls` already composes the same way), and My
+     reporting draws rows from several subjects at once (`data-repu`, §345).
+     Joined with a character no value can hold, so nothing is ever escaped into
+     a selector — `repMarkControls`'s own rule. */
+  function repKeyOf(el){
+    var d = el.dataset, h = "", i;
+    for (i = 0; i < REP_HOOKS.length; i++)
+      if (d[REP_HOOKS[i]] != null) { h = REP_HOOKS[i]; break; }
+    return [h, (h && d[h]) || "", d.bdcol || "", d.ynpart || "", d.repu || ""].join("\u0001");
+  }
+  /* The boxes Enter steps between: the TYPED ones, in document order. Asked of
+     the TAG rather than of a second selector list — a picker is a SELECT and a
+     note is a TEXTAREA, so "an INPUT among the reporting controls" IS the typed
+     figures, and a seventh kind of box added tomorrow is covered by what it is
+     rather than by somebody remembering this line (§104.7). */
+  function repTypedBoxes(){
+    return Array.prototype.filter.call(document.querySelectorAll(REP_BOXES),
+      function(el){ return el.tagName === "INPUT" && !el.disabled && !el.readOnly; });
+  }
+  /* AND IF THE STEP LANDS NOWHERE THE CURSOR GOES BACK TO THE BOX IT CAME
+     FROM, which is the one thing Enter must never fail to do: the blur has
+     already happened, so doing nothing drops the focus onto the body and the
+     next Tab starts at the top of the document. Two ways it can land nowhere,
+     and both are real: the list is re-read AFTER the commit's paint, so a
+     yes/no answer that removes a per-cent box can make the box we guarded
+     against the LAST one; and a box can commit itself out of existence, where
+     there is genuinely nothing to point at and nothing is better than a guess
+     at which row took its place. */
+  function repStep(key, by){
+    var els = repTypedBoxes(), i, here = null;
+    for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
+    if (here == null) return;
+    gapLight(els[here + by] || els[here]);
+  }
+  function repKeys(){
+    document.querySelectorAll(REP_BOXES).forEach(function(el){
+      /* Armed once per element (§24, §47.2). Every paint replaces these nodes,
+         so this guards a second call within one paint rather than across
+         paints. */
+      if (el.dataset.repkeys) return;
+      el.dataset.repkeys = "1";
+      var tag = el.tagName, typed = tag === "INPUT", isNote = el.dataset.note != null ||
+        el.dataset.cnote != null;
+      var row = el.closest("tr");
+      var note = isNote || !row ? null : row.querySelector("[data-note],[data-cnote]");
+      /* Remembered for Escape, and seeded at wiring time as well as on focus,
+         because a box the browser restores focus to after a paint may never
+         fire one. */
+      var was = el.value;
+      var hints = [];
+      if (typed) hints.push("Enter", "Shift+Enter");
+      hints.push("Alt+Enter");
+      if (typed || tag === "TEXTAREA") hints.push("Escape");
+      /* Announced only where it reaches something (§61 from the other side: a
+         key named on a row with no note is a control with nothing behind it). */
+      if (note) hints.push("Alt+N");
+      el.setAttribute("aria-keyshortcuts", hints.join(" "));
+      el.addEventListener("focus", function(){ was = el.value; });
+      el.addEventListener("keydown", function(e){
+        if (e.ctrlKey || e.metaKey) return;
+        /* ALT+N — the note §528 took out of the tab path. Matched on `e.code`
+           and not on `e.key`, because Option+N on a Mac is the tilde dead key
+           and `e.key` there is "Dead"; preventDefault stops it inserting. */
+        if (e.altKey && e.code === "KeyN") {
+          if (!note) return;
+          e.preventDefault();
+          gapLight(note);
+          return;
+        }
+        /* ESCAPE — put the box back, and KEEP THE FOCUS. The box is always
+           open here, unlike the register's cell (§372), so there is nothing to
+           close and nothing to remove: restoring the value without blurring
+           means no `change` fires, so nothing is written and nothing repaints.
+           Stopped as well as prevented, because this Escape is spent — the
+           chat corner closes on an Escape from anywhere (§284). */
+        if (e.key === "Escape" && (typed || tag === "TEXTAREA")) {
+          if (el.value === was) return;
+          e.preventDefault();
+          e.stopPropagation();
+          el.value = was;
+          if (tag === "TEXTAREA" && typeof growBox === "function") growBox(el);
+          return;
+        }
+        if (e.key !== "Enter") return;
+        /* ALT+ENTER — §279's walk, from wherever the cursor is. */
+        if (e.altKey) {
+          e.preventDefault();
+          repWalk();
+          return;
+        }
+        if (!typed) return;
+        var by = e.shiftKey ? -1 : 1, els = repTypedBoxes(), at = els.indexOf(el);
+        /* At either end, Enter is left to the browser, which is what it has
+           always been on these boxes: §229's Enter is wired inside the bound
+           TEXTAREA branch and gated on `.grow`, so it has never reached an
+           INPUT however it is bound, and Chromium fires `change` on Enter in
+           an input outside a form — measured, so the figure commits and the
+           cursor stays where it is. Prevented only when there is somewhere to
+           go, or the step would drop the focus on the body. */
+        if (at < 0 || !els[at + by]) return;
+        var key = repKeyOf(el);
+        e.preventDefault();
+        el.blur();
+        /* Queued behind the commit's own synchronous `paint()`, for
+           `repGoTo`'s reason one function up (§222, §145.14). */
+        setTimeout(function(){ repStep(key, by); }, 0);
+      });
+    });
   }
 
     /* ── THE MONTH PICKER (§177) ────────────────────────────────────────

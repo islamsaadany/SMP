@@ -55,6 +55,27 @@
 <div class="banner refused" id="refused" hidden></div>
 <div class="banner safety" id="unsaved" role="status" hidden></div>
 
+<!-- IS IT SAVED? (§527) The platform has never had a Save button (§268,
+     §273.4): every box writes when the cursor leaves it and the autosave
+     carries it. Which is right, and left the person doing the typing with
+     nothing at all to read - the five outcomes of a save were told only to
+     the eight callers that pass a callback. One message, drawn from sync.js's
+     own single exit so a save path added later reports without anybody
+     remembering to add it (§104.7). Bottom left, because bottom right is the
+     chat corner's (§97). Hidden until there is something to say - before the
+     first save of a session there is nothing (§35).
+     `role="status"` AND NOTHING BESIDE IT, which is #unsaved's own shape one
+     line up (§53.5): that role already means a polite, atomic live region, so
+     a second `aria-live="polite"` would be a line that changes nothing and the
+     next reader would take it for load-bearing (§298.2). It carries real
+     weight here rather than being a formality - #refused above it has no live
+     role at all, so until today a refused or failed save reached a screen
+     reader through nothing whatever. Atomic is also what keeps it quiet: each
+     word REPLACES the one before it, so a run of edits supersedes its own
+     pending announcements and what is spoken lands in the pauses, which is
+     when it is wanted. -->
+<div class="savetip" id="savetip" role="status" hidden></div>
+
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
      you are looking as, and the two buttons that leave. The org name, the unit
@@ -3701,6 +3722,14 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
+    /* AND THE KEYS, over that same list and in the same one place (§528).
+       Not inside wire(): these boxes are built by eight renderers and a
+       keydown wired at each of them is eight places to forget, which is the
+       whole reason the marks above are put on here. Idempotent per element
+       (`data-repkeys`), because a repaint replaces most boxes and keeps the
+       ones a bound field did not rebuild — a second listener on a survivor
+       would step twice on one Enter (§24, §47.2). */
+    if (typeof repKeys === "function") repKeys();
     /* AND THE MONTH PANEL GOES (§177). It is mounted on <body> so a repaint
        cannot take it with the button it belongs to — it would be left hanging
        over a page it no longer points at. Same reason SEARCHSEL.wire() closes
@@ -4256,6 +4285,11 @@
      bar is counting) and applied to the DOM the paint just produced. Driven
      from the CONTROLS rather than from the ids, so no id ever has to be
      escaped into a selector. */
+  /* The six reporting boxes, named ONCE and read by both walks and by §528's
+     keys (§104.7, §53.5: a second copy of this list is the one somebody
+     forgets to add to the day a seventh box kind arrives). */
+  var REP_BOXES = "[data-rep],[data-crep],[data-cpick]," +
+    "[data-cpct],[data-note],[data-cnote]";
   function repMarkControls(){
     document.querySelectorAll(".repwalk").forEach(function(el){
       el.classList.remove("repwalk");
@@ -4266,8 +4300,7 @@
     reportPlaces(REPORTING).forEach(function(e){
       e.rows.forEach(function(r){ map[r.id] = { block:r.block, place:e.key }; });
     });
-    document.querySelectorAll("[data-rep],[data-crep],[data-cpick]," +
-      "[data-cpct],[data-note],[data-cnote]").forEach(function(el){
+    document.querySelectorAll(REP_BOXES).forEach(function(el){
       var d = el.dataset;
       /* WHICH QUESTION THIS BOX ANSWERS. A status picker and a figure box are
          both "the figure is not in yet"; the per-cent box is the row that said
@@ -4343,6 +4376,171 @@
       if (c.dataset.rkey !== here) return repGoTo(c);
     }
     if (els.length) gapLight(els[0]);
+  }
+
+  /* ── THE KEYBOARD, FOR A REPORT OF FORTY ROWS (§528) ───────────────
+     Islam, of the four behaviours put to him: "all". MEASURED FIRST (rule 3a)
+     on the shipped build, and the first finding is that Enter already WORKED
+     and already went nowhere: a bound box writes on `change`, which for a text
+     field means on blur, and §229 blurs on Enter — so the one key everybody
+     presses committed the figure and left the cursor sitting in the box it had
+     just saved. Fourteen to forty-one rows per unit, with the note box in the
+     tab path on every one of them, so getting from one figure to the next cost
+     two stops of which one is a box most rows never need.
+
+     FOUR KEYS, WIRED IN ONE PLACE, over the SAME list `repMarkControls()`
+     walks — `REP_BOXES`, named once and read by both (§104.7, §53.5: a second
+     copy of that list is the one somebody forgets to add to).
+
+       Enter / Shift+Enter  the next typed figure, and back
+       Alt+Enter            §279's Next → from the keyboard
+       Escape               put this box back to what it held
+       Alt+N                the row's note, which §528 took out of the tab path
+
+     NOTHING IS DRAWN, which is why rule 1c has nothing to sign off: every hint
+     rides the hover on the bar's own Next button and an `aria-keyshortcuts` set
+     per control HERE, beside the handler that makes it true (§104.7) — the eye's
+     and the monthly mark's own answer to a fact the screen does not otherwise
+     state (1b-ii, §88, §278.2, §286).
+
+     THE STEP GOES THROUGH `gapLight`, NEVER A BARE `focus()`, and that is not
+     tidiness: it is what keeps the walk's own cursor (`data-gapat`) in step with
+     where the person actually is, so Alt+Enter after three Enters continues from
+     the box they are in rather than from wherever the last chip press left it
+     — and a §130.1 picker's furniture is lit rather than its hidden select
+     (§34).
+
+     WHAT IS DELIBERATELY NOT WIRED, each for its own reason rather than for
+     neatness. A PICKER gets no Enter: there that key is the browser's own
+     choose-the-open-option, and taking it would be removing a behaviour in
+     order to add one — and nothing is stranded, because Tab still reaches it
+     and `repWalkFields` still walks to it. A NOTE gets no Enter either, because
+     §271 settled that it is a NEWLINE there, on the one prose field a reporter
+     is REQUIRED to write. Escape is not wired on a select, where it closes the
+     dropdown. And at either end of the list Enter is left exactly as it was
+     — not prevented, not blurred — so the last figure of a pillar cannot drop
+     the focus onto the body.
+
+     AND THE STEP IS TAKEN AFTER THE PAINT, FROM THE CURRENT BOX'S OWN
+     IDENTITY, never from a "next" worked out before the commit — because the
+     commit can change the row's SHAPE: `ynBoxes` draws the per-cent box only
+     while the status says In progress (§300), so answering a yes/no row ADDS or
+     REMOVES the box after it. Every reporting handler ends in a synchronous
+     `paint()`, so a handle held across it is detached (§222) and the identity is
+     the only thing that survives. */
+  var REP_HOOKS = ["rep", "crep", "cpick", "cpct", "note", "cnote"];
+  /* The identity a box keeps across a paint, and the id alone is not enough
+     three times over: a yes/no row's status and its per-cent share one
+     `data-rep` and are told apart by `data-ynpart` (§300), a breakdown cell is
+     addressed by its COLUMN beside its row (`data-bdcol`, the pair §343 chose
+     and which `repMarkControls` already composes the same way), and My
+     reporting draws rows from several subjects at once (`data-repu`, §345).
+     Joined with a character no value can hold, so nothing is ever escaped into
+     a selector — `repMarkControls`'s own rule. */
+  function repKeyOf(el){
+    var d = el.dataset, h = "", i;
+    for (i = 0; i < REP_HOOKS.length; i++)
+      if (d[REP_HOOKS[i]] != null) { h = REP_HOOKS[i]; break; }
+    return [h, (h && d[h]) || "", d.bdcol || "", d.ynpart || "", d.repu || ""].join("\u0001");
+  }
+  /* The boxes Enter steps between: the TYPED ones, in document order. Asked of
+     the TAG rather than of a second selector list — a picker is a SELECT and a
+     note is a TEXTAREA, so "an INPUT among the reporting controls" IS the typed
+     figures, and a seventh kind of box added tomorrow is covered by what it is
+     rather than by somebody remembering this line (§104.7). */
+  function repTypedBoxes(){
+    return Array.prototype.filter.call(document.querySelectorAll(REP_BOXES),
+      function(el){ return el.tagName === "INPUT" && !el.disabled && !el.readOnly; });
+  }
+  /* AND IF THE STEP LANDS NOWHERE THE CURSOR GOES BACK TO THE BOX IT CAME
+     FROM, which is the one thing Enter must never fail to do: the blur has
+     already happened, so doing nothing drops the focus onto the body and the
+     next Tab starts at the top of the document. Two ways it can land nowhere,
+     and both are real: the list is re-read AFTER the commit's paint, so a
+     yes/no answer that removes a per-cent box can make the box we guarded
+     against the LAST one; and a box can commit itself out of existence, where
+     there is genuinely nothing to point at and nothing is better than a guess
+     at which row took its place. */
+  function repStep(key, by){
+    var els = repTypedBoxes(), i, here = null;
+    for (i = 0; i < els.length; i++) if (repKeyOf(els[i]) === key) { here = i; break; }
+    if (here == null) return;
+    gapLight(els[here + by] || els[here]);
+  }
+  function repKeys(){
+    document.querySelectorAll(REP_BOXES).forEach(function(el){
+      /* Armed once per element (§24, §47.2). Every paint replaces these nodes,
+         so this guards a second call within one paint rather than across
+         paints. */
+      if (el.dataset.repkeys) return;
+      el.dataset.repkeys = "1";
+      var tag = el.tagName, typed = tag === "INPUT", isNote = el.dataset.note != null ||
+        el.dataset.cnote != null;
+      var row = el.closest("tr");
+      var note = isNote || !row ? null : row.querySelector("[data-note],[data-cnote]");
+      /* Remembered for Escape, and seeded at wiring time as well as on focus,
+         because a box the browser restores focus to after a paint may never
+         fire one. */
+      var was = el.value;
+      var hints = [];
+      if (typed) hints.push("Enter", "Shift+Enter");
+      hints.push("Alt+Enter");
+      if (typed || tag === "TEXTAREA") hints.push("Escape");
+      /* Announced only where it reaches something (§61 from the other side: a
+         key named on a row with no note is a control with nothing behind it). */
+      if (note) hints.push("Alt+N");
+      el.setAttribute("aria-keyshortcuts", hints.join(" "));
+      el.addEventListener("focus", function(){ was = el.value; });
+      el.addEventListener("keydown", function(e){
+        if (e.ctrlKey || e.metaKey) return;
+        /* ALT+N — the note §528 took out of the tab path. Matched on `e.code`
+           and not on `e.key`, because Option+N on a Mac is the tilde dead key
+           and `e.key` there is "Dead"; preventDefault stops it inserting. */
+        if (e.altKey && e.code === "KeyN") {
+          if (!note) return;
+          e.preventDefault();
+          gapLight(note);
+          return;
+        }
+        /* ESCAPE — put the box back, and KEEP THE FOCUS. The box is always
+           open here, unlike the register's cell (§372), so there is nothing to
+           close and nothing to remove: restoring the value without blurring
+           means no `change` fires, so nothing is written and nothing repaints.
+           Stopped as well as prevented, because this Escape is spent — the
+           chat corner closes on an Escape from anywhere (§284). */
+        if (e.key === "Escape" && (typed || tag === "TEXTAREA")) {
+          if (el.value === was) return;
+          e.preventDefault();
+          e.stopPropagation();
+          el.value = was;
+          if (tag === "TEXTAREA" && typeof growBox === "function") growBox(el);
+          return;
+        }
+        if (e.key !== "Enter") return;
+        /* ALT+ENTER — §279's walk, from wherever the cursor is. */
+        if (e.altKey) {
+          e.preventDefault();
+          repWalk();
+          return;
+        }
+        if (!typed) return;
+        var by = e.shiftKey ? -1 : 1, els = repTypedBoxes(), at = els.indexOf(el);
+        /* At either end, Enter is left to the browser, which is what it has
+           always been on these boxes: §229's Enter is wired inside the bound
+           TEXTAREA branch and gated on `.grow`, so it has never reached an
+           INPUT however it is bound, and Chromium fires `change` on Enter in
+           an input outside a form — measured, so the figure commits and the
+           cursor stays where it is. Prevented only when there is somewhere to
+           go, or the step would drop the focus on the body. */
+        if (at < 0 || !els[at + by]) return;
+        var key = repKeyOf(el);
+        e.preventDefault();
+        el.blur();
+        /* Queued behind the commit's own synchronous `paint()`, for
+           `repGoTo`'s reason one function up (§222, §145.14). */
+        setTimeout(function(){ repStep(key, by); }, 0);
+      });
+    });
   }
 
     /* ── THE MONTH PICKER (§177) ────────────────────────────────────────

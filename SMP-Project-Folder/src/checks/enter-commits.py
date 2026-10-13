@@ -99,7 +99,23 @@ with sync_playwright() as p:
     ck("...and the stored name carries none", "\n" not in stored, repr(stored))
 
     print("\n-- 3 · a definition keeps its paragraph key (the other end)")
+    # AND THIS SECTION HAS TO NAVIGATE, which it never did: §2 leaves the page
+    # on a pillars FUNCTION's Overview, where §213 draws no clauses at all —
+    # measured, 0 `.clause` boxes there against 6 on a unit's Foundation — so
+    # `press_enter_in` matched nothing, returned None, and BOTH assertions
+    # failed with no detail on a build whose behaviour is exactly right
+    # (§50.6's family: a probe measuring the page a previous section left).
+    # Found while establishing whose the two reds were (§303) — identical on
+    # `origin/main`'s own build, so stale rather than regressed. REWRITTEN,
+    # never loosened (§218), and the box is asserted FOUND before Enter is
+    # asserted of it, or a selector that stops matching reports as a
+    # behaviour fault for the second time (§215).
+    pg.evaluate("""() => { leaveModes(); current='mobile'; currentSub='strategy';
+      CURSEC.strategy='foundation'; EDIT_PAGE.foundation=true; paint(); }""")
+    pg.wait_for_timeout(600)
     r3 = press_enter_in('#panel .clause textarea[rows="2"]')
+    ck("a clause's paragraph box is on the page to press Enter in", r3 is not None,
+       {"clauses": pg.evaluate("()=>document.querySelectorAll('#panel .clause').length")})
     ck("Enter in a rows-2 area still makes a paragraph", r3 and r3["newline"], r3)
     ck("...and does not blur it", r3 and r3["stillFocused"], r3)
 

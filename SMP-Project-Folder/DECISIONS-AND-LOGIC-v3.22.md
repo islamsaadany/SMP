@@ -64296,6 +64296,781 @@ commit `main` holds and the branch does not, and this block is it, which the
 record owed anyway. **The branch is held behind until the live read succeeds**
 and fast-forwarded only then (§378.2, §380.2).
 
+## §524 — Save needs only the six parts; Apply to plan is its own press (2026-10-08)
+
+Islam, using §514's flow: *"1. check shouldn't stop sovmething to be saved a chekc is an extra move 2. whhere do I press savefor the foundation? in the chat?"* — then, of the first drawing: *"the bar is ok and we might need another button to migrate to plan as saving only save it int he deliverables and let the card be editable to begin a ne version"*; then, of the word *Move*: *"move is a very vague word … we need abtter word"* — **Apply to plan** is his; and the three answers that settle the rest: *"anything old is not deleted it's archived"*, *"changing v2 on the rail doesn't change the plan, the plan only change when we apply to plan"*, and *"yes keep in both."* Signed off from `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` (rule 1c), which still spells the button *Move to the plan* — the mockup is the record of what was signed off, not of what was built (Principle II); the word is this section's.
+
+**THE CHECK IS AN EXTRA STEP, NOT A DOOR.** §473 made Save wait for a successful consistency check and §514 kept that; Islam ruled it the other way round — a check is something you may run, and saving is owed the moment the six parts are agreed. `countedParts()`/`savedNow()` decide the bar; *Run the check* (`[data-cop-fcheck]`) stays beside Save and runs the same check, and the check's results still belong to the drafts they ran on (§514).
+
+**THE BAR SITS UNDER THE CARDS, NEVER IN THE MESSAGES.** His second question — *where do I press save?* — had no good answer while the button lived on the last reply, which scrolls away. `savebarHtml()` draws one bar at the foot of the cards column: a status word (*x of 6 parts agreed* / *All 6 parts agreed* / *Saved as Foundation — Mobile v1* / *v2 in progress*), **Save as Foundation — <place> vN**, and **Apply to plan**, dimmed with *Save the Foundation first* on its hover until a version exists (§61: a control that cannot act says why). The check asserts no Save inside `[data-cop-msgs]` and exactly one on the bar.
+
+**THE CARDS STAY EDITABLE AFTER A SAVE, AND THE NEXT CHANGE IS THE NEXT VERSION.** A saved flow is no longer sealed: `flowSave` on it is accepted, the status reads *vN+1 in progress*, and `flowFinish` writes version N+1 of the SAME deliverable — while saving again with nothing changed is refused by name, *Nothing has changed since vN was saved.* (break `save-same-twice`), because a second version that is byte-identical to the first is a record that says something happened when nothing did.
+
+**APPLY WRITES THE LAST SAVED VERSION AND NOTHING ELSE**, his own sentence. The chat may hold v2 half-typed; the plan takes what was last SAVED, so what is on the plan is always something somebody pressed Save on. It asks first in the platform's own dialog (`openModalHtml`, never `confirm()` — §95), naming where, what, and what it replaces; Yes runs `applyFoundation` on the server (404 for a deliverable that is not here, 400 unless `d.type === "foundation"` — break `apply-any-type` — 400 with no parts), which stamps `extra.applied = {n, at, by}` and hands back the six parts with the end year written in (`withYear`), the stored copy keeping its `{Y}`. The browser then `archiveFoundation()`s what the plan held — a `kind:"foundation"` archive under Import & storage › Archived plans, restorable like a plan's — and `applyFoundationParts()` writes the six parts onto the place's Foundation page: Who we are as clauses, the aspiration, End in Mind, the purpose, the objectives minted through `koMint`, the values as `{name, def}` rows. **Nothing old is deleted**, which is the whole of his first answer. The server classifies none of it anew: writing a unit's Foundation is `unitFoundation`, which the office already holds and nobody else does.
+
+**IN BOTH PLACES.** The deliverable page opened from the rail draws the six parts as cards under the client's own words (§514), a row reading *On the plan as vN · who · when* or *Not on the plan yet* with the same Apply beside it, and *Edit as vN+1*, which opens the chat on those cards; Versions stay at the bottom.
+
+**CHECKS.** `smp-app/checks/copilot.mjs` **328/0**: a saved flow can still be written to and an unchanged re-save is refused by name; a changed draft saves as v2 of the same deliverable; Apply refuses a deliverable that is not here and one that is not a Foundation; Apply records the latest version and the page reads it back, with the end year written in and the `{Y}` kept in store; a client's own person cannot apply. Two breaks added (`save-same-twice`, `apply-any-type`), both red. Three literals moved as a consequence of v2 now being the changed draft (nextVersion 3, `v.n = 3`) — rewritten, never loosened (§218). `smp-app/checks/shell.mjs` §3i **67/0**: the bar (Save live, Apply dimmed with its hover, no Save in the messages), the dialog's title and body read together, Yes writing the six parts and the end year with the old aspiration archived, the database holding both, the deliverable page's six cards and *On the plan as v1*, and a pen edit after the save reading *v2 in progress* with the plan keeping v1. **Three of §3i's own first failures were the check**: it read the dialog's title out of `#modal-b` where `openModalHtml` writes it to `#modal-t`; it joined the values rows as strings where `applyFoundationParts` stores `{name, def}` objects (`[object Object]`); and it pressed a deliverable with the rails folded to their strip (§490.2) and died rather than reporting (§215) — the rail toggle and the Deliverables fold are pressed first, the way a person would. The §3i fixture snapshots `foundationSnapshot(UNITS.mobile)` and `ARCHIVES` before and puts both back after (§94.2), or the sweep that follows measures a Mobile the check rewrote. Built-in-step all good, generated-in-step all clear, cold typecheck clean. `sw.js` shell `v6.21-apply-to-plan`, past main's `v6.20`.
+
+**Built as §515, renumbered §517 before the commit, §518 again at that merge and §524 at this one**: `main` took §515–§516 for spec 066 while this was in flight, and HEAD holds no §515 of its own, so every citation moved was this branch's (§264.3). **Merged to `main` 2026-10-12** (§526.1), with main's §515–§516 brought in first.
+
+**Recorded, not done**: the server does not re-check that the person may write the Foundation before stamping `applied` — the browser's save is where the authoriser refuses, so a refused save leaves a stamp on the deliverable with nothing on the plan; the archive is written by the browser from what the plan held, never from a stored copy on the server; and the mockup still says *Move to the plan*.
+
+## §524.1 — "On the plan" follows the save, never the press (2026-10-10)
+
+Islam, of §524's recorded gap: *"yes fix it and update the mockup word too."* §524 wrote `extra.applied` inside `applyFoundation`, which runs BEFORE the browser archives the old Foundation, writes the six parts and saves. So a save the server refused, or one that failed on the network, left the deliverable saying *On the plan as vN* while the plan held the old Foundation — a status claiming more than happened (§124). It was never a way past the rules: the Copilot is office-only and so is authoring a Foundation (§94), and the save itself is still judged by the authoriser (§42). What was wrong was the note.
+
+**The note follows the fact.** `applyFoundation` now only reads the last saved version and returns its parts with the year written in; it records nothing. A second act, `foundationApplied {id, n}`, writes `extra.applied = {n, at, by}` and refuses a version that is not there or holds no parts. The browser calls it only after `SYNC.saveNow` answers `saved` or `clean`; on `refused`, `failed` or `offline` it says *the plan did not save, so vN is not marked as on the plan* and the deliverable keeps *Not on the plan yet*. Both acts are refused to anybody but the office, asserted.
+
+**Cost stated**: if the browser closes between the save landing and the note being written, the plan holds vN and the deliverable still reads *Not on the plan yet* — the safe direction, fixed by pressing Apply again.
+
+`check:copilot` 329/0; the new break `stamp-on-read` (the note written on the read again) reddens exactly the new assertion, `apply-any-type` still reddens its own. `check:shell` §3i green. The mockup `design-mockups/copilot-foundation-flow/2026-10-08_save-on-cards.html` now says *Apply to plan* throughout its words, with one line saying the pictures were taken before the rename and still show *Move to the plan*. `sw.js` shell `v6.22-apply-after-save`.
+
+## §525 — four fixes from a UX review of the Foundation flow (2026-10-10)
+
+Islam asked for a full UX review of the Foundation flow and agreed to seven findings, with three of them (4, 6, 7) to be shown in a mockup first: *"ok for all but for 4 as well show me in the mockup"*. This section is the four built.
+
+**1. Edit as vN+1 on a Foundation opens its chat.** The deliverable page's Edit opened the generic text editor, and `editVersion` saved `body {text}` only — a version holding no `foundation` parts, which `applyFoundation` then refuses. A Foundation is made of parts, so it is changed where its parts are: the button carries `data-cop-edit-chat` and opens the chat the version came from. That needed the chat on every version, not only v1 — `addVersion` now takes `chatId`/`chatTitle` and `saveFoundation` passes them. Older versions saved before this carry none; the page takes the newest version that does. The server refuses a text edit of a `foundation` deliverable by name (break `text-edit-foundation`), so the shape cannot be broken from outside the screen either (§42). Both ends: an ordinary deliverable's text edit is still accepted.
+
+**2. Closing the cards kept Save and Apply.** The save bar lived only in the card column, so × took it away. With the cards shut the same bar (one builder, §53.5) stands at the head of the chat column, laid out as a row.
+
+**3. The chat says whether it is on the plan.** The chat GET returns `applied` (`appliedFoundation`, read off the deliverable's `extra.applied`), and the bar's status gains *· on the plan* or *· vN is on the plan*. Applying the version already on the plan adds an *Already applied* row to the dialog: it changes nothing on the plan and files another archive.
+
+**5. The real part count.** The dialog and the Apply hover said *six parts* whatever the Foundation held; Structure can switch parts off. They count the parts the version holds.
+
+`check:copilot` 332/0, red under `text-edit-foundation` (6 — the refusal, the chat on each version, and the version numbering the later assertions depend on). `check:shell` 376/0 with four new §3i assertions; with the old behaviour put back in the sources three fail and the section stops at the press the fourth needs (§215 noted, not hidden). `qa.py` ERRORS none; built-in-step all good; typecheck clean. `sw.js` shell `v6.23-foundation-ux`.
+
+**Waiting on a mockup (rule 1c)**: 4 — four progress counters that disagree (and the top bar at 0% on the *start from it* road); 6 — Apply is drawn red though nothing is lost; 7 — no way from the chat to the Foundation page after Apply.
+
+
+## §525.1 — one count of progress, Apply is not a red button, and a way to see the result (2026-10-10)
+
+§525's last three findings, drawn first as rule 1c requires
+(`design-mockups/copilot-foundation-flow/2026-10-10_progress-apply-button.html`,
+published as an artifact) and signed off whole: *"ok for all, build them"*.
+
+**4 · ONE COUNT, AND THE OTHER THREE GO.** Measured on the *start from it* road
+before anything was proposed (rule 3a): the head read **`Questions 0 of 18`**
+over a **0%** track, six cards already reading **Agreed** each wearing a red
+**`0/n`** badge, and the save bar saying **`v2 in progress · 1 of 6 answered`** —
+four counters, three of them saying nought about a Foundation that is finished.
+**AND THE ZERO IS CORRECT ARITHMETIC, WHICH IS WHY IT HAD TO BE A DIFFERENT
+QUESTION RATHER THAN A FIXED SUM**: a part filled from the plan is agreed and was
+never asked anything, so a count of ANSWERS over that road is honestly nought
+and will stay nought however the Foundation is finished. So what is counted is
+**parts agreed** (`agreedCount(f)` — on, done, and holding a draft, never
+answers), the bar reads `N of M parts agreed`, the track is that ratio, and the
+save bar says **the same words from the same source** (§53.5) rather than a
+second number that can drift. **THE RED BADGES GO FROM THE TO-DO** for the same
+reason: `0/4` beside a row whose own pill says *Agreed* is a figure contradicting
+the word next to it (§87's twins, as a number).
+**AND THE QUESTION'S POSITION IS NOT LOST — IT MOVES ONTO THE CARD BEING
+ANSWERED** (`Question 2 of 4` in place of that card's status), because the count
+belongs to the part it is about and not to the page; **the page's own ask-phase
+word is DROPPED in the same edit**, or the position is said twice on one screen
+(§87) — asserted at both ends, and reddened on its own (`page-question-count`).
+**THIS REVERSES TWO THIRDS OF §514's RULE AND KEEPS ITS REASONING** (Principle
+II): that section's finding is that one `x of n` shape meaning two things is the
+fault, and it answered by making the shapes agree; this removes the third meaning
+instead, which is what the shapes were disagreeing about.
+
+**6 · NAVY, NOT RED — AND MEASURING IT SAID SOMETHING STRONGER THAN THE ASK.**
+The Apply dialog's main action was `btn danger`, and the mockup's note is *"Apply
+is not a red button"*. Read off the page it was not drawn as a **main action at
+all**: `.cbtns button.danger` sets a border and an ink colour and **no
+background**, so Apply measured `bg rgba(0,0,0,0) · fg rgb(140,51,39)` beside
+Cancel's `bg rgba(0,0,0,0) · fg rgb(65,74,88)` — **two outline buttons differing
+only in the colour of their words**, with the irreversible-looking one carrying
+no more weight than the way out. *So the fault was the ink AND the absence of a
+fill, and only the measurement separated them.* Red in this product is for an act
+with no way back — a delete, a closed cycle — and Apply **archives what stood
+before it does anything** (§524), so the way back is the archive. It takes the
+product's own precedent rather than a new rule: the one filled main action in a
+`.cbtns` row is §266's `mfgo`, navy through `--panel` with its derived
+`--panel-ink` (§38.4, never a literal — §25). **NO HOVER RULE WAS NEEDED AND THAT
+WAS CHECKED RATHER THAN ASSUMED**: `copilot.css` is concatenated LAST by
+`build.py`, so `.cbtns button.copgo` beats `.cbtns button:hover` at equal (0,2,1)
+specificity on source order — which is why `mfgo` has none either. **AND A SOLID
+RED FILL WAS ALREADY REFUSED ONCE** — `config.css` records white on dark `--bad`
+at 2.4:1 (§38.4) — so navy is not merely the quieter choice, it is the only
+filled answer this palette has.
+
+**7 · A WAY TO SEE WHAT APPLY DID.** One green line — *✓ vN is on <place>'s plan.
+Open the Foundation page ›* — drawn by ONE builder in two places: inside the save
+bar after Apply, and above the deliverable page's plan row. **THE ADDRESS IS
+DERIVED THE WAY THE ROUTER WRITES ONE** (`shell/route.js`'s own spelling) rather
+than composed by hand, which is what caught the exception: **a company's
+Foundation is a TAB of its own** (`/<slug>/strategy/co/<key>/foundation`) where a
+unit's, a function's and the group's are a SECTION of Strategy — and **a `cap:`
+target cannot be addressed at all**, so it gets the line with no link rather than
+a dead one (§61). **It is drawn from the SAVE's own outcome and never from the
+press** (§524.1): absent while a version is merely saved, present once the plan
+has taken it — asserted at both ends, or a build that drew it always passes every
+assertion about it being there. Both the line and its link measured on the green
+ground in the check rather than argued from a token (§38.4).
+
+**FOUR FAULTS IN MY OWN HARNESS, EVERY ONE AN OLD RULE IN A NEW PLACE.**
+**§525.1a — THE SECTION DIED RATHER THAN REPORTING** (§215) on a ten-second
+timeout, on a build that is right: a wait written when the question's position was
+on the PAGE still read `.copprog`, and fix 4 moved that word onto the card. I had
+rewritten the ASSERTION that reads it and left the WAIT that depends on it — so
+the fix is the rule rather than the line: when a control moves, grep **every**
+place that reaches for it rather than the assertion that failed first (§51.11,
+§214.3, in this file's own harness). Both reaches found and corrected; there are
+only two.
+**§525.1b — AND ONE NEW ASSERTION REPORTED A CORRECT BUILD BROKEN** (§100.3): it
+asked Cancel for `--surface`, and `.cbtns button` sets **no background at all**,
+so an outline button there computes **transparent** and never the surface colour.
+Rewritten to assert what such a button actually is — no fill, and different from
+the main action — which is also the claim that survives a later change to either.
+**§525.1c — AND THE SAVED COPY WAS THE *BEFORE* STATE**, caught before it was
+used: the scratchpad copy the falsification harness restores from was
+byte-identical to the mandatory `ui-versions/` snapshot, so a `restore()` would
+have wiped the whole round — §343.9's fault by a different road, *a saved copy
+that is not the state you want restored*. The harness restores from a copy taken
+of the FIXED sources, asserted byte-identical before the first break was written.
+
+**§525.1d — AND MY FALSIFICATION COUNTER READ 0 RED ON FIVE GENUINELY RED
+RUNS.** The harness counted `^  FAIL` and `shell.mjs` prints `FAIL` at **column
+0**, so every break reported *0 red* while the tail printed beside it said
+`5 ok, 3 failed`. §298.3 exactly — *the tail is the verdict and the count is
+not* — in the harness written to prove this round. Nothing had to be re-run,
+because the tail was printed next to each count from the first run and is what
+the numbers below are read from; the pattern is corrected and the tail is still
+printed, because a count is never the verdict.
+
+**Proved able to fail FIVE ways from the SOURCES** (§276), one break per decision,
+each **asserting it matched exactly once before writing** (§344.1) and each
+restored from the saved copy rather than with `git checkout` (§343.9):
+**bar-counts-answers 3 red · page-question-count 1 · todo-badges 1 ·
+apply-red 1 · no-done-line 3**, each reddening exactly its own assertions and no
+others, and each detail reproducing the reported shape verbatim —
+`count:"7 of 6 parts agreed"` (the answer count out of its own bounds),
+`prog:"Question 1"` beside `now:"Question 1 of 7"` (the position said twice,
+§87), `badges:["0/7","0/4","0/3","0/4","0/5","0/5","optional"]`, the two outline
+buttons measured above, and `null` for all three done-line assertions. The breaks edit the frozen source and regenerate `public/`,
+because `check:shell`'s existing ten are server-side `SMP_BREAK` names and a
+browser-side one cannot ride that mechanism — said plainly rather than implying a
+named `--break` exists for them.
+
+**VERIFIED**: `check:shell` §3i **79 ok, 0 failed**, red five ways as above with
+the restore asserted byte-identical to the saved copies; `check:copilot`
+**332/0**; `npm run typecheck` clean COLD (§3); `built-in-step.py` all good with
+the shipped file byte-identical to `build.py`'s output (§349); `qa.py` through
+`qa-run.py` **ERRORS none**, the tail read rather than the exit code (§320.6b);
+the four generators re-run and `generated-in-step` clear but for §349.4's own
+uncommitted-tree guard, which every comparison line passes and which clears on
+the commit. The built file's bytes changed, so **`sw.js` is bumped** to
+`smp-shell-v6.24-progress-apply-done` (§91) — a name proved held nowhere in the
+history and past `origin/main`'s `v6.21-direction-part` (§94.12, §94.16) — one
+live `const SHELL`, `node --check` clean (§146.2); it reaches the OFFLINE copy
+alone, the served worker holding `SHELL` nought times (§316.10, §329). Screen
+only, read off the diff: nothing stored moves, nothing is migrated, no rule about
+who may save what changes. **`main` untouched: the merge is Islam's word, on that
+merge.**
+
+## §526 — the sweep of the merged tree, and the proof that could not walk (2026-10-11)
+
+The verification pass §525.1 owed, run **on the merged tree and never on the
+branch** (§365: that is the only tree anybody will ever be served), with every
+verdict read from its own TAIL (§298.3) and every red carried to an
+`origin/main` baseline before anything here was blamed (§303). HEAD is the
+merge of main's §515–§517 into this branch's §524–§525.1; the baseline is
+`origin/main` at `b9dd9a4`, built from its own sources in a worktree.
+
+**222 FROZEN CHECKS WALKED. 16 ARE MOCKUP GENERATORS AND REFUSED THEMSELVES**,
+which is §334.14 working rather than failing — their tail is that refusal's own
+sentence, and reading it as a result is exactly the mistake that rule exists to
+stop. **206 real checks: 191 green, 15 red or dead, and all fifteen are
+`origin/main`'s.** Zero empty tails (§298.3: an empty tail is a failure and
+never a pass).
+
+**TWO OF THE FIFTEEN DID NOT FAIL — THEY DIED** (§215): `scoring-bands.py` ends
+on a Playwright stack trace (`Cannot read properties of null (reading 'click')`)
+and `welcome.py` on *"Execution context was destroyed, most likely because of a
+navigation"*. **And two more printed something that is not a verdict at all** —
+`objectives-table.py`'s last line is a FAIL line (the real verdict, one line up,
+is `1 checks failed`) and `setup-rail.py`'s is a PROGRESS line (`- no label is
+clipped`, with the actual `FAILED: 1` above it). *A tail is the verdict only
+when the file writes one*, so each red was opened individually rather than taken
+from the sweep, and each was then re-run with `SMP_BUILT` pointed at main's
+build: **thirteen reproduce character for character** — `chat-settings-scroll` 1,
+`enter-commits` 2, `master-picker` 1, `measure-score-spread` 1, `no-jump` 1,
+`objectives-table` 1, `save-fidelity` 1, `scoring-bands` (dead), `setup-rail` 1
+(which CLAUDE.md already records as main's §495 rename), `state-contrast` 1,
+`team-page` 3, `wave3` 1, `welcome` (dead).
+
+**AND THE LAST TWO COULD NOT BE RUN AT ALL UNTIL THE DATABASE EXISTED, AND THEN
+DIED ON A TAB** — which is the finding of the round. `multi-client.py` and
+`platform-look.py` reported *"No database connection configured"* in the sweep,
+which is §328.3's recorded condition and the runner's missing `DATABASE_URL`
+rather than the check (§366.5). Given the three-step rehearsal database both
+then **timed out waiting for `.ccard`**, and the cause is neither the data nor
+the cards: the server answers three client cards perfectly (read off
+`/api/platform` by hand), and **the console lands on *My work***, which is
+§400's own first tab and has been on main since 23 September. A check that signs
+in and waits for a client card is waiting on a page the console no longer opens
+on. **Measured rather than inferred**: pressing Clients draws **5 `.ccard`, 4 of
+them `[data-client]`**, and `multi-client.py`, `platform-look.py` and
+`platform.html` are all three **byte-identical to `origin/main`** — so the
+product is right, the checks are stale, and it is §366.3's shape for the second
+time (*what has gone is the check's SUBJECT*). **Recorded, not fixed**: where
+those two walks should land is a decision about a screen this branch did not
+design (rule 1b).
+
+### §526.1 — the isolation proof was dying on the Copilot's first binary column
+
+The one product-side edit in the round, and it is `smp-app/spike/_harness.mjs`.
+Spike **S2 is the tenant-isolation proof** and it walks every tenant-owned table
+in foreign-key order, seeding a row in each — and it **threw on
+`copilot_files.bytes`**, which is `bytea NOT NULL` (spec 064), so every table
+after it in that order went **unwalked**. On an isolation proof unwalked means
+**unproven rather than merely unreported**, which is the difference worth
+writing down: the run looked like one failing table and was in fact a proof that
+had stopped covering most of its subject. **§442.12 wrote this exact warning
+down** — *"a fixture that throws on the first missing thing hides the second"* —
+and it came true the moment the Copilot's tables landed, because nobody re-ran
+the spike after them. **Main's, by file identity**: the whole of `smp-app/spike/`
+and `smp-app/db/` is byte-identical to `origin/main` (§303). One line, and
+**empty is the right placeholder rather than a convenient one** — neither
+`copilot_files` nor `copilot_sources` constrains the length, and the one table
+that does (`copilot_assets`) is the PLATFORM's and is never in this walk
+(§331). S2 now reads **63 tenant tables isolated on all three verbs**, against
+the **56** §443.10 recorded, and **both of its falsifications are still red**.
+**S8 is UNRUN rather than passing** and says so in its own words (§54.5): it
+wants a v2.0-shaped database this container does not hold.
+
+### §526.2 — what the harness taught, which is three things and none of them the product
+
+**A LONG SWEEP OUTLIVES THE DATABASE IT WAS GIVEN.** The throwaway Postgres had
+stopped by the time the sweep finished, so the first attempt at the rehearsal
+database answered *"Connection refused"* on all three steps — read as a missing
+database rather than a stopped one for a moment, which is §105.6's family. And
+**the scratchpad cannot hold a Postgres data directory**: `/tmp/claude-0` is
+`drwx------ root`, so the `postgres` user cannot traverse it and `pg_ctl` reports
+*"could not access directory"* about a directory that is plainly there — the
+cluster lives outside it.
+
+**THE REHEARSAL DATABASE HAS AN ORDER AND THE ORDER IS NOT A CONVENIENCE**
+(§328.3): seed a tenant in `public` (`scripts/test-roundtrip.js`), split it
+(`scripts/migrate-to-multi-client.js`), then the fixture
+(`checks/fixture-platform.js`) — **and nothing after it**, because the round trip
+re-seeds `public`. An earlier run of this round put a second round trip in the
+same command block and read **1 FAIL**, which is §385.2f's recorded artefact of
+asserting a FIRST deploy twice against one database: a false red, and
+indistinguishable from a real one without knowing that rule.
+
+**AND I GUESSED AN ACTION NAME THE PRODUCT DOES NOT HAVE.** Asking the door by
+hand with `{"action":"signin","key":…}` came back `unknown action`; `api/auth.js`
+says **`login`** and reads **`user`**. §190 wrote that rule after the same
+mistake made a working build report two whole kinds of attention item as not
+raised — *read an action name out of the source, never guess it* — and it cost a
+round trip here before the source was opened.
+
+### §526.3 — two facts the record owed
+
+**`sw.js`'s `SHELL` is `smp-shell-v6.25-progress-apply-done` where §525.1 says
+v6.24.** The merge bumped it past main's `v6.21-direction-part` and the record
+was not told, which is the harmless half of §94.12's collision — the FILE is
+right and unique, and the sentence about it was stale. One live `const SHELL`
+(the other three matches are prose in that file's own comments, §383.2's shape)
+and `node --check sw.js` clean (§146.2). **And the served worker's release stamp
+moved `d8b1ab7c` → `b7c5a549`** (§397), so a release that reaches production
+will offer §258's reload banner.
+
+**VERIFIED, on the merged tree**: 191 of 206 frozen checks green with all fifteen
+reds attributed to `origin/main`; `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the identical figure on a build from main's own
+sources, so 234 is main's; `built-in-step.py` all good; `generated-in-step.mjs`
+all clear; cold `npm run typecheck` clean; `test-authorize` 1034/0; change list
+140/0; platform rules 69/0; session-state ok; db-url-choice 10/0; KB audience all
+clear; **access UNMOVED** against `origin/main`; and on the stack production
+serves — copilot 332/0, shell 384/0, modules 234/0, door 146/0, state 92/0,
+insights 137/0, insights:tab 24/0, setup 49/0, blob 23/23, comms 47/47, upload
+9/0, room 10/0, deploy 5/0, record 73 all good, viewas 20/0, standing 7/0, demo
+28/0, frameworks 90/0, assistant 10/0, memory 16/0 · boundary 14/0 · api 36/0 ·
+split 21/0 · page 42/0 · ask 16/0, unsaved 26/0, release 9/0, drivers 99/0, look
+122/0, store 31/0, tracker 251/0, notes 170/0, sop 17/0, pick 12/0 — plus eight
+of the nine spike proofs with S2 restored to 63 tables. **Five app-side reds are
+`origin/main`'s and are left as main's** (§303, which settles whose a red is and
+never that somebody must clear it): `test-nav-row` (dies in `myUnits`),
+`test-my-reporting` 64/1, `check:frameworks:page` 1/14, `check:portfolio` 134/1,
+`check:portfolio:module` 206/1. **Merged to `main` 2026-10-12 on Islam's word
+(§526.1).**
+
+## §526.1 — the merge, and the two reds the sweep could only find by being re-run
+
+Islam: **"mrege"** — the word on this merge, which §4 requires every time.
+**THE RENUMBER RAN FIRST, WHICH IS THE ONLY MOMENT ONE IS PROVABLY SCOPED** (§264.3):
+`main` had taken §518–§520 while this was in flight, so the branch's three became
+§524/§525/§526 before anything was merged, in all three spellings (§336.1)
+with every count declared in advance and the pass refused on a mismatch (§344.1).
+**EVERY CONFLICT BY CLASS**: the three record files **COMBINED, never picked**
+(§318.7, §356.17 — either side taken whole drops the other session's round and
+there is no `generated-in-step` for prose); the built file and the four generated copies
+**REBUILT rather than merged** (§91, §329) and asserted in step afterwards; and
+`sw.js` rebuilt from main's copy with this branch's one line re-applied (§146.2) at
+**`v6.31-foundation-flow`**, a name no ref in that file's whole history has held
+(§94.12), one live `const SHELL`, `node --check` clean, **confirmed against
+`origin/main` again immediately before the push** (§94.16).
+
+**WHICH KIND OF MERGE THIS IS, READ OFF THE DIFF RATHER THAN ASSUMED** (spec 029):
+against `origin/main` it changes six files, four of them frozen sources and the other two
+`smp-app/lib/copilot.ts` and `copilot-flow.ts` — both reading and writing the Copilot's
+OWN tables, with no authoriser, no change list, no state-graph rule and no migration in it,
+so **no forced sign-out is owed** and a save that worked before is not refused now.
+
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (§365), every verdict read from its
+own TAIL and an empty tail treated as a failure (§298.3, §385.2e): `qa.py` **33
+viewers / 234 destinations / ERRORS none**, the destinations **SUMMED from the run's own
+per-viewer lines** rather than quoted from the record (§332) and **main's own figure to
+the digit**, which is what a merge changing no navigation must reproduce; `built-in-step.py`
+all good; `generated-in-step.mjs` all clear; authoriser **1057/0**; change list 140/0;
+platform rules 69/0; session-state ok; db-url-choice 10/0; KB audience all clear; **access
+UNMOVED** against `origin/main`; `typecheck` clean **COLD** (§3, §442.16) after a
+real `next build`; and on the stack production serves — shell **384/0**, copilot 332/0,
+modules 234/0, door 146/0, state 92/0, insights 137/0 · tab 24/0, setup 49/0, blob
+23/23, comms 47/47, upload 9/0, room 10/0, deploy 5/0, record 73 all good, viewas 20/0,
+standing 7/0, demo 28/0, frameworks 90/0, assistant 10/0, memory 16/0 · boundary 14/0
+· api 36/0 · split 21/0 · page 42/0 · ask 16/0, unsaved 26/0, release 9/0,
+drivers 99/0, look 122/0, store 31/0, tracker 251/0, notes 170/0, sop 20/0, pick 12/0,
+handoff 16/16, spike S2 **64/0 with 63 tenant tables isolated on all three verbs**.
+
+**AND `check:shell` READ RED BEFORE IT READ GREEN, WHICH IS §442.14 RATHER THAN A
+FAULT**: **131 ok / 10 failed** in a batch with three memory checks running beside it, and
+**384/0 run alone**. No port clash — contention — which is exactly why that rule says
+the served-stack checks are run **serially**: *a contended run is a measurement of the
+machine, and 131 of 141 is neither a clean run nor a plausible partial, so it is read again
+before it is believed.*
+
+**SEVEN REDS, EVERY ONE ESTABLISHED AS `origin/main`'s AND LEFT AS MAIN'S** — §303
+settles whose a red is and says nothing about whether anybody clears it: `test-nav-row`
+dying in `myUnits`, `test-my-reporting` 64/1, `check:portfolio` 134/1,
+`check:portfolio:module` 206/1, **`check:frameworks:page` 1/14 with not one frameworks file
+differing from `origin/main`** (so a merge changing no byte of a check's subject cannot have
+changed its verdict), spike **S8 UNRUN** for want of the v2.0-shaped database it names in
+its own words (§54.5), and **spike S9 red on BOTH trees**. **That last one is the
+finding of the round rather than a tally entry**: on `main` S9 dies at the `bytea`
+placeholder and here, past it, at the harness's reverse-FK DELETE order meeting
+`tracker_actions.topic_id` — so §520.1's fix **moved that failure one step along
+rather than causing it**, which is §442.12's own warning coming true a second time (*a
+fixture that throws on the first missing thing hides the second*) — **and S9 sits behind
+S8 in the chain's `|| exit 1`, so no `npm run spike` in this container has ever reached it**,
+which is why §520.1 recorded S8 and never saw S9. Both are the FIXTURE and neither is the
+product; flagged rather than folded into a merge (rule 1b), since the harness's topological
+delete order is also what S2 walks and S2 is green.
+
+**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO IT IS SAID RATHER THAN CLAIMED**
+(§54.5, rule 3a): this environment's egress policy refuses `smp-orpin-tau.vercel.app` at
+the proxy's own CONNECT, which its README says to report rather than route around — so
+**nobody here has seen production serve this commit**. The witnesses are recorded for whoever
+can open the site, each asserted to have **MOVED** or a match would hold whether or not
+production built this (§113.8): `shell.js` **4651934 → 4674322**, `platform.css`
+**780584 → 785658**, and the served `sw.js` **4192 → 4192 bytes** with its release
+stamp **`2d3c089830037241` → `fe9f934f8a46966a`** — the bytes unmoved being
+§316.10's generator dropping the caching half, and the stamp moving being §397 working
+as designed, so §258's reload banner still fires. **Read `data-dpl-id` off the `<html>`
+element first for the baseline and again after** (§443.10's method), which is a
+measurement rather than a wait (§108.17). **The branch is deliberately held one commit
+behind `main` until that read is made** (§91): while it stays there main's tip is on no
+other ref by construction, and putting that SHA on a second ref is the one thing left that
+could still cost the deployment.
+
+**RECORDED, NOT DONE**: the root `IMPLEMENTATION_PROGRESS.md` carries five of main's own
+"on the branch, not merged" statuses about work main demonstrably holds — main's to
+correct, not a merge's to sweep (rule 1b, §388a: a status from somebody else's round is a
+historical fact here); the two console walks `multi-client.py` and `platform-look.py` still
+land where the console used to open; and the harness's delete order above.
+
+
+## §527 — The platform says it has saved (usability audit, item 1; 2026-10-11)
+
+Islam, setting the queue after the usability audit: *"let's start with the silent
+save, show me the mockups and after we can tackle the shortcuts of entry then the
+browser popups that we need to adjust to be inside the platform and the failed
+save telling the lcient and then the dates."* This is the first of the five.
+
+**THE AUDIT'S OWN FINDING, AND IT IS A SILENCE RATHER THAN A FAULT**: this
+platform has no Save button anywhere by design (§268, §273.4) — every box
+writes when the cursor leaves it and the autosave carries it — and until today
+**nothing on the screen said so**. A person reporting a figure typed it, saw
+nothing happen, and had no way to tell a landed save from a lost one; the only
+thing the product ever said about a save was when one went WRONG (§171,
+§502, §504). *A product whose saves are invisible asks every reporter to
+trust it, and the one thing it tells them is bad news.*
+
+**FOUR PLACEMENTS DRAWN BEFORE ANYTHING WAS BUILT** (rule 1c): the top bar, the
+section line, the pillar head, and the bottom left corner. Islam picked **D**,
+the corner, and his pick carried a premise — *"the normal user can't see the
+top bar"* — **which is false, and the correction is a measurement rather than
+an opinion**: `header.top` is unconditional markup and `chromeFor()` hides only
+the *Viewing as* dropdown, so the gap treatment A would occupy is **106px BIGGER
+for a reporter** than for the office, at every width from 1600 to 1000. Said
+plainly with the number; he kept D on its own merits (*"I like option D while
+staying while work"*), so the choice is his and the premise is corrected rather
+than carried. **AND THE REFINEMENT IS HIS TOO**: the message STAYS while the
+work is going on, with the time of day on the hover — *"yes show me the staying
+version with the time on hover"* — drawn, published as an Artifact and signed
+off before a source moved.
+
+**IT IS ONE ELEMENT DRAWN FROM THE PLATFORM'S SINGLE SAVE EXIT, WHICH IS THE
+WHOLE REASON IT IS SMALL** (§104.7): `sync.js`'s `say(state)` has its own
+comment calling itself *"ONE EXIT, so a path added later cannot forget the
+parked callers"*, and it has five states and only five — `offline` · `clean`
+· `refused` · `saved` · `failed` (`"busy"` was retired at §183). So three
+words cover every save the product can make, a sixth state added tomorrow is
+drawn the day it is added, and **nothing anywhere else in the product needed a
+line**.
+
+**IT SAYS NOTHING UNTIL THERE IS SOMETHING TO SAY** (§35) and **it does not
+explain a failure**, because three surfaces already do and a fourth would be a
+second answer to one question (§53.5): the refusal banner with its put-back
+(§184), the failure bar with the status, the reference and the reason (§171,
+§502), and the unsaved-work bar (§504). *Not saved* is a signal that points at
+them; **asserted as a PAIR**, because a build whose corner tried to explain the
+server's refusal would satisfy every assertion about the corner alone.
+
+**BOTTOM LEFT BECAUSE BOTTOM RIGHT IS THE CHAT CORNER'S** (§97), measured
+rather than assumed — `.chatdock` is `right:18px; bottom:18px` — and the one
+width where the two meet is stated rather than silently dodged: below 460px
+`chat.css` makes the dock span the page, so the corner sits behind it there, and
+the only thing lost is a `title` hover, which a phone does not have. Recorded in
+the CSS comment instead of a media query nobody asked for. **z-index 35**: above
+page content, below every floating control (`.kmenu` 40, `.chatdock` 45, the
+pickers 60, the deck 61, the tour 70, the overlay 100). **NOT DRAWN IN FRONT OF
+A ROOM** (§265), through `body.presenting` — the deck's own class — and
+asserted at both ends.
+
+**THE WORD'S BOX HAS A FLOOR SO IT DOES NOT JUMP** as `Saving…` becomes
+`Saved`, **derived from the longest of the three words in its own font and never
+a pixel measured once** (§122.5): `min-width:9ch`. **NO NEW TOKEN** (§25,
+§38.5) — `--good`/`--good-tx` and `--bad`/`--bad-tx` already exist as the
+fill-and-type pair §38.4 requires, so the dot takes the fill and the word takes
+the ink. **`role="status"` AND NOTHING BESIDE IT**, which is `#unsaved`'s own
+shape (§53.5): that role already implies `aria-live="polite"` and
+`aria-atomic="true"`, and the atomic replacement is what keeps a burst of saves
+from reading out three times — **measured rather than reasoned about, and an
+explicit `aria-live` dropped once it was** (§298.2).
+
+**THE TIME IS ON THE HOVER AND NOT ON THE LINE** (1b-ii): a clock drawn on the
+line is a figure that is wrong one minute later, and `lastSaved` — *"the
+serialized graph the server last accepted"* — carried no timestamp at all. It
+is stamped at the ONE place a save lands (the ok branch) and never at the two
+other sites that assign `lastSaved` (a refresh, and the boot landing), because
+neither of those is a save.
+
+**§527.1 — ONE PRODUCT FAULT, AND IT IS THE PROMISE THE DRAWING MAKES.** The
+first build cleared the pending fade at the top of `saveTip`, above the `clean`
+early return — and §170's debounce is LEADING-EDGE, so the first change of a
+burst posts at once and the trailing 800ms timer still runs, which means a
+second save follows with nothing to send and **answers `clean` every time**. So
+the fade was armed and then cancelled a beat later by a state that has nothing
+to say, and never re-armed: **`Saved` stayed on the screen for ever**, which is
+exactly what treatment D promises not to do. Three check failures, one cause.
+`clean` now LEAVES EVERYTHING ALONE, the pending fade included. **Found by the
+check on its first run, not by reading** — and **my first fix made the
+`offline` branch unreachable**, because `offline` has no word of its own and the
+word test fired first (caught by me rather than by a check; `offline` is handled
+first now, with its own clear).
+
+**§527.2 — AND ONE FALSIFICATION COULD NOT FALSIFY, WHICH IS THE FINDING OF
+THE ROUND.** `tip-fades-failure` made a failure fade like a success and the check
+reported **ALL GOOD** — a green falsification run, indistinguishable from a
+guard that works (§54.5). Chasing it rather than accepting it found the real
+mechanism: **`sync.js`'s `setInterval(save, 5000)` is never captured in a
+variable, so it can never be cleared and runs for the life of the page**
+(§160.4) — a failed save does not update `lastSaved`, so every retry fails
+again and calls `say("failed")`, and a refusal short-circuits straight to
+`say("refused")`. **So a six-second fade can never complete while a failure or a
+refusal stands, and `if (state === "saved")` provably does nothing today.** The
+asymmetry Islam asked for holds either way, by a route nobody designed. Answered
+three ways rather than quietly: the guard is KEPT with its own comment saying it
+fixes nothing today and why (§298.2); the break is REMOVED from the list with
+the reason in its place, because a falsification that reports 0 red is worse than
+none; and **§7 of the check asserts the RETRY** — the post count before and
+after the quiet window — beside what a person gets, or the pair would be true
+for the wrong reason (§113.8). *I had assumed the guard; only asking the code
+found it.*
+
+**VERIFIED**: `checks/save-tip.py` **38/0**, twelve sections, **both ends
+everywhere** (§94.2) and proved able to fail **five ways from the SOURCES**
+(§276, because §238's hashed policy silences an edited built file) —
+`no-tip` **18 red**, printing the reported silence verbatim
+(`{'shown': False, 'op': 0, 'display': 'none'}`); `tip-clean-clears` **3 red**,
+§527.1's own three (`op:1 shown:True word:'Saved'`); `tip-always-pointer`,
+`tip-on-projector` and `tip-no-width-floor` **1 red each**, every one reddening
+its own assertions and no others. The tree was restored from the saved copies
+rather than with `git checkout` (§343.9) and the rebuild asserted
+byte-identical to the build the green run was measured against.
+`built-in-step.py` all good, `generated-in-step.mjs` all comparison lines ok
+(its one FAIL is §349.4's dirty-tree guard, which clears on commit), `sw.js`
+bumped to `v6.22-save-said` with one live `const SHELL` and `node --check`
+clean (§91, §146.2). **Screen only**: nothing stored moves, nothing is
+migrated, no rule about who may save what changes — read off the diff
+(spec 029), so no forced sign-out is owed.
+
+**NOT THIS WORK'S** (§303): `save-fidelity.py`'s one failure
+(*adding a measure lands on the server*) reproduces identically on a baseline
+worktree built from the commit before this — recorded, not fixed here.
+
+**RECORDED, NOT DONE**: the four items after this in Islam's own order — the
+keyboard shortcuts for entry, the browser pop-ups moved inside the platform,
+what a failed save tells the client, and the dates. And **the help page for a
+client's own staff is NOT in his order** and is named rather than dropped: the
+Knowledge base is `when: inOffice()` (§119.4), so heuristic 10 is unanswered
+for everybody outside the office.
+
+---
+
+## §528 — Entering figures from the keyboard (usability audit, item 2; 2026-10-12)
+
+Islam, of the four behaviours put to him: **"all"**.
+
+**WHAT WAS MEASURED FIRST, BECAUSE THE ASK WAS FOUR THINGS AND ONLY ONE OF THEM
+IS ABOUT SPEED.** A nine-row pillar's Reporting page draws eighteen tab stops —
+a figure, then the note that explains it, then the next figure — so entering nine
+numbers meant Tab, Tab, Tab, nine times over, and every second stop was a box
+most rows never need. A long report is not slow because the boxes are slow; it is
+slow because half of what the keyboard walks is not the work.
+
+**1 · ENTER MOVES TO THE NEXT FIGURE** (Shift+Enter back), skipping the notes.
+The cost was stated before he chose it and is the smaller half of a pair: Enter
+stops meaning *just save* — and it already saved, because a bound field writes
+when the cursor leaves it (§35), so nothing is lost and what is gained is that
+the leaving is one key rather than a reach for Tab past a box.
+**AT EITHER END ENTER IS LEFT TO THE BROWSER**, so the first and last box behave
+as every other field in the product does rather than trapping the cursor in a
+loop nobody asked for.
+
+**2 · ALT+ENTER IS §279'S WALK FROM THE KEYBOARD**, and it is the one that makes
+a long report feel short, because that walk SKIPS WHAT IS ALREADY ANSWERED —
+Enter steps to the next box and Alt+Enter steps to the next box that still owes
+something. Two keys for two questions, rather than one key guessing which was
+meant. **AND THE WALK HOLDS NOTES AS WELL AS FIGURES** (§105: a figure at risk
+carries an explanation before it can be submitted), which is why §9's own
+assertion had to be rewritten — see below.
+
+**3 · ESCAPE PUTS THE BOX BACK** to what it held before this visit, which is what
+the People register already does, so it is one answer in a second place rather
+than a second answer (§53.5). **The cursor stays in the box** — putting a value
+back and then throwing the person out of the field would make the undo cost a
+second reach — and **the stored row is not touched**, because nothing was
+committed while they were still in it.
+
+**4 · THE NOTE LEAVES THE TAB PATH UNLESS THE ROW IS AT RISK.** `want` already
+answers *is this box part of the work* (§104.8), so the box is still DRAWN and
+still typeable and what goes is one stop between every figure and the next — nine
+of eighteen on that pillar. **Alt+N keeps it reachable** (§61), and the cost is
+named rather than discovered: `capNoteBox` passes `want:false` **ALWAYS** —
+§279's own recorded not-done — so on a CAPABILITY function every note leaves the
+tab path and the key is the only road to it.
+
+**§271 IS THE ONE RULE "all" DOES NOT OVERRIDE, AND IT WAS STATED AS A FACT
+RATHER THAN A CAVEAT**: Enter inside a reporting note is a NEWLINE, because a
+note is prose somebody is explaining a figure in and it is the one prose field a
+reporter is *required* to write. So the Enter rule exempts that box — **and the
+exemption is held in TWO places** (the handler's own `typed` test and
+`repTypedBoxes`' `INPUT` filter), which is why breaking either alone leaves the
+check green and both 0-red controls are KEPT and NAMED as controls (§298.2).
+
+**NOTHING DRAWN CHANGES, SO RULE 1c HAS NOTHING TO SIGN OFF** — and that is a
+measurement rather than a promise: every hint rides a hover and an
+`aria-keyshortcuts`, which is what the eye and the monthly mark already do
+(§88, §278.2, §286). The one piece of discoverability is the Next button's
+`title`, which **had none at all**, and it is **never one per box** (§94.15) —
+with its own stated cost: with nothing left to walk the button is not drawn
+(§223), so the hover has no home exactly when somebody has finished.
+
+**ONE LIST, READ BY BOTH WALKS AND BY THE KEYS** (`REP_BOXES`, §104.7, §53.5),
+and the wiring is in the paint tail beside `repMarkControls()` rather than in
+`wire()`, because eight renderers draw these boxes and `wire()` is eight places
+to forget; idempotent per element on `data-repkeys` (§24, §47.2).
+
+**ONE PRODUCT DEFECT, FOUND BY THE CHECK AND NOT BY READING**: at the end of the
+list `repStep` dropped the focus to the body, because the step landed on an
+element that is not there — `gapLight(els[here + by] || els[here])` keeps it on
+the box it was already on, which is what *at either end, do nothing* has to mean
+in practice.
+
+**§528.1 — FIVE OF THE CHECK'S OWN FAULTS, EACH AN OLD RULE IN A NEW PLACE.**
+A probe with a trailing semicolon in its arrow body (§104.7); §1 asking for a
+`Y/N` target the demo does not hold, so the state is MADE (§255, `make_yn()`);
+the focus settled in two acts, so a probe reading it between them measured
+nothing; **§9's assertion could not fail** (§113.8) — its precondition is set by
+the check's own `gapLight`, which writes the very attribute it then asserted —
+rewritten as MEMBERSHIP in the walk's own field list with the target asked of the
+page (§94.8, §218); and **a length test reported a correct build broken**,
+because the walk holds notes and the two counts legitimately differ.
+
+**§528.2 — AND FIVE HARNESS FAULTS, ONE OF THEM &sect;298.3's OWN RULE BROKEN BY
+THE HARNESS THAT QUOTES IT.** Six neighbours were run through a grep for
+`FAIL|passed|FAILED|all |good|Error|Traceback` and **printed nothing**, which is
+indistinguishable from a clean run: **a grep is not a verdict, and an empty grep
+result is not a pass** — all six were re-read by TAIL and all six are green.
+Beside it: a saved build named `built.good` ran **no script at all** over
+`file://` with no console error and no pageerror, because **Chromium decides HTML
+by file extension** (renamed `built-good.html`, it runs); a one-line break pattern
+that never matched the multi-line source, so the run was green for the wrong
+reason (§54.5, §344.1 — assert the break MATCHED before writing it); two
+mis-escaped patterns in `break.py`; and my own §528 comment wrong twice
+(§104.8).
+
+**§528.3 — AND THE REPAIR OF A STALE NEIGHBOUR, FOUND WHILE ESTABLISHING WHOSE
+THE REDS WERE.** `checks/enter-commits.py` read **2 FAILED** and was established
+as not this work's by reproducing it identically on `origin/main`'s own build
+(§303) — and §303 settles whose a red is and says nothing about whether anybody
+clears it (§442.11), so it was then measured. Its §3 **never navigated** and
+inherited §2's page — a pillars FUNCTION's Overview, where §213 draws no clauses
+at all: measured, **0** `.clause` boxes there against **6** on a unit's
+Foundation. So `press_enter_in` matched nothing, returned `None`, and both
+assertions failed **with no detail printed** (the tell: `ck` prints its detail
+only when truthy) on a build whose behaviour is exactly right — §50.6's family,
+a probe measuring the page a previous section left. **REWRITTEN, NEVER LOOSENED**
+(§218): it navigates, and **the box is asserted FOUND before Enter is asserted of
+it**, or a selector that stops matching reports as a behaviour fault for the
+second time (§215). **Proved able to fail from the SOURCES** (§276, §238's hashed
+CSP silencing an edited built file): widening §229's `.grow` gate so Enter wrongly
+reaches a `rows="2"` paragraph box reddens the same two assertions — **and now
+prints the defect in its own words** (`newline: False, stillFocused: False`),
+which is the state the old version could not tell apart from a missing selector.
+Restored from the saved copy rather than with `git checkout` (§343.9), and the
+rebuild asserted byte-identical.
+
+**AND §229 CORRECTLY DOES NOT REACH A CLAUSE BOX, MEASURED RATHER THAN
+ASSUMED**: that box is `rows="2"` and not `.grow` (className `'fld '`), and
+§229's keydown is wired inside the `TEXTAREA` branch gated on `.grow` — so it has
+never reached an INPUT however that input is bound, which is why §528's handler
+has no conflict with it.
+
+**VERIFIED**: `checks/report-keys.py` all good, proved able to fail **THIRTEEN**
+ways from the SOURCES (§276) — `no-step` 4 · `shift-forward` 2 · `end-drops` **0,
+the recorded control** · `end-both` 3 · `note-steps` **0, the recorded control** ·
+`note-steps-both` 5 · `no-escape` 2 · `no-altn` 1 · `no-walk` 1 · `id-only` 1 ·
+`no-announce` 3 · `note-in-tab` 1 · `no-hint` 1 — every restore reporting `SAME`.
+Beside it: `enter-commits` **all ok** (repaired) and red 2 from the sources,
+`report-blockers` ALL GREEN, `report-saves` OK, `report-note-wrap` ALL GREEN,
+`submit-gate` ALL OK, `gap-walk` all good, `gap-fill` ALL OK, `built-in-step.py`
+all good, `generated-in-step` every served copy byte-identical to its generator
+(its one FAIL is §349.4's guard refusing an uncommitted tree and saying which
+errand that is), and `qa.py` through `qa-run.py` **33 viewers / 234 destinations /
+ERRORS none** — §527's own figure to the digit, which is what a round that adds
+KEYS rather than PLACES must reproduce.
+
+**SCREEN ONLY, READ OFF THE DIFF**: nothing stored moves, nothing is migrated, no
+rule about who may save what changes — so **no forced sign-out is owed** (spec
+029). The built file's bytes changed, so **`sw.js` is bumped** (§91) to
+`smp-shell-v6.29-report-keys`, a name confirmed against `origin/main` and held
+nowhere in the history (§94.12, §94.16).
+
+**`no-jump`'s 1 JUMPED IS NOT THIS WORK'S AND IS RECORDED RATHER THAN FIXED**
+(§303, rule 1b): *adding a person, through the dialog* — box `top 600 → 0` —
+reproduces with identical numbers on the build before §528 **and** on
+`origin/main`'s own build. It is the register's Add dialog, a surface §528 does
+not touch.
+
+**RECORDED, NOT DONE** — the rest of Islam's own queue, in his order: the browser's
+own pop-ups moved inside the platform (26 `confirm()` / 11 `alert()` / 1
+`prompt()`), what a failed save tells the client, and the six date spellings; and
+the help page for a client's own staff, which is NOT in his order and is named
+rather than dropped (heuristic 10 — the Knowledge base is `when: inOffice()`).
+
+**&sect;528.4 &mdash; MERGED TO `main` 2026-10-12 on Islam's word**, and `main` had
+moved **nine commits** under this branch while it was built &mdash; another
+session's &sect;518&ndash;&sect;526.3 (the Competitive Discipline block and four
+Foundation-flow fixes, a capability's owner as a part owner, the Processes SOP
+and its hand-overs, seven UX fixes and that session's own sweep) &mdash; so
+`origin/main` was fetched and READ before anything was merged (&sect;4's
+fetch-and-look, &sect;91). **THE RENUMBER RAN FIRST, WHICH IS THE ONLY MOMENT IT
+IS PROVABLY SCOPED** (&sect;264.3): main had taken &sect;521&ndash;&sect;526 for
+that work while this branch held &sect;521 and &sect;522 for its own, so the two
+moved to **&sect;527 and &sect;528** &mdash; **descending by source**, or each
+pass eats the next (&sect;365.5), in **three spellings** (&sect;336.1), every
+count DECLARED in advance with the pass refused on a mismatch (&sect;344.1,
+&sect;353.4), and the merge base asserted to hold &sect;521&ndash;&sect;528
+**nought** times in every spelling, so every occurrence in the tree was a line
+this branch wrote and there was nothing of main's to sweep up. **AND IT IS
+ASSERTED THAT ONLY CITATIONS MOVED** (&sect;385.3b): 34 lines removed, 34 added,
+**0 differing** once the numbers are masked on both sides. **AND THE SENTENCES
+THAT DESCRIBE THE NUMBERING ARE NOT SWEPT** (&sect;388a, &sect;371.5) &mdash; a
+number in these records is either a LABEL naming a section in this tree, which
+is rightly moved, or a HISTORICAL FACT about a past renumber or a measurement of
+`main` taken at that moment, which must not be, or the record calmly states
+something that never happened.
+**EVERY CONFLICT BY ITS OWN NAMED RULE**: the three record files **COMBINED,
+never picked** (&sect;318.7, &sect;356.17 &mdash; either side taken whole drops
+the other session's round, and there is no `generated-in-step` for prose), with
+every non-blank line of each side asserted present in the result, **0 lost from
+ours and 0 from main's**, and exactly one declared formatting edit; the built
+platform **REBUILT from the merged sources, never merged** (&sect;91) and
+byte-identical to `build.py`'s own output; `sw.js` **rebuilt from main's copy
+with this branch's one line re-applied** (&sect;146.2) at a name past both, and
+the four generated copies under `smp-app/public/` regenerated rather than merged
+(&sect;329, &sect;524.2). **`sw.js` CONFIRMED IMMEDIATELY BEFORE THE PUSH**
+(&sect;94.16): `smp-shell-v6.32-report-keys` against main's
+`v6.31-foundation-flow`, **one** live `const SHELL` &mdash; the other three grep
+hits are prose in that file's own comments, which is &sect;272.8's shape in a
+search rather than in a parser &mdash; `node --check sw.js` clean, and the name
+held by **0 commits in the file's whole history**, which is stronger than
+comparing against main alone (&sect;94.12).
+**THE MERGED RESULT WAS READ, NOT BELIEVED** (&sect;313.37): the names this
+branch deletes were grepped for in the result and the intersection with main's
+own additions is EMPTY, and the duplicate top-level declaration scan over
+build.py's own concatenation (&sect;56.7, &sect;281) reads **30 scripts plus the
+shell's inline block, 1763 names, exactly SIX duplicated** &mdash; all six the
+block &sect;281.1 deliberately leaves in `config-render.js`, at that section's
+own recorded constant offset of 351 lines &mdash; so the merge introduced none.
+**AND THE MERGE'S REACH INTO THE SERVED APP IS A MEASUREMENT RATHER THAN A
+CLAIM**: `git diff --name-only origin/main -- smp-app` returns exactly four
+paths and all four are GENERATED (`public/platform.css`, `public/shell.js`,
+`public/sw.js`, `shell/body.html`), so no `smp-app` SOURCE differs from main and
+that session's own sweep of the served stack still holds.
+**RE-RUN ON THE MERGED TREE, NEVER ON THE BRANCH** (&sect;365), every verdict
+read by its TAIL (&sect;298.3): `qa.py` through `qa-run.py` **33 viewers / 234
+destinations / ERRORS none**, the destinations **SUMMED from the run's own 33
+per-viewer lines** rather than quoted (&sect;332) &mdash; main's own figure to
+the digit, which is what a merge changing no frozen source of theirs must
+reproduce; `built-in-step.py` all good (run AFTER the sweep, since it deletes
+build.py's untracked intermediate in its own `finally`); `report-keys`,
+`save-tip`, `report-blockers`, `report-saves`, `report-note-wrap`,
+`submit-gate`, `gap-walk`, `gap-fill`, `enter-commits`, `save-said`,
+`save-flush` and `safety-banners` all green; `test-authorize` **1057/0**, change
+list **140/0**, platform rules **69/0**. `generated-in-step`'s one FAIL is
+&sect;349.4's uncommitted-tree guard saying WHICH errand it is, with its
+load-bearing byte-identical line and the carried-module lines (&sect;330,
+&sect;335) and the two named rewritten exceptions (&sect;316.7) all ok.
+**TWO REDS ARE MAIN'S AND ARE LEFT AS MAIN'S** (&sect;303, which settles whose a
+red is and says nothing about whether anybody clears it): `no-jump` **1 JUMPED**
+on the register's Add dialog, a surface this work never touches, and
+`test-nav-row`, which **dies identically on `origin/main`'s own built worktree**
+at the same line of its own vm sandbox.
+**NO FORCED SIGN-OUT IS OWED AND IT IS READ OFF THE DIFF RATHER THAN ASSUMED**
+(spec 029): not one `api/`, `lib/` or `db/` RULE is in this branch's work, so
+nothing stored moves, nothing is migrated and nothing about how a save is judged
+changes &mdash; a tab left open on the old build keeps saving exactly as before.
+**THE WITNESSES WERE MEASURED ON THE MERGED TREE AND THE `SHELL` NAME IS NOT ONE
+OF THEM** (&sect;316.10, &sect;365, &sect;367 &mdash; `build-sw.mjs` drops the
+caching half where `SHELL` lives, so a bumped name reaches only the offline
+copy): `shell.js` **4,674,322 &rarr; 4,692,360**, `platform.css` **785,658
+&rarr; 788,369**, and the served worker's own **release stamp** `fe9f934f8a46966a`
+&rarr; `c0796429a11656a6` &mdash; which is &sect;397 working as designed, since a
+moved stamp is what fires &sect;258's *"A newer version of the platform is
+ready"* for a tab left open.
+**AND &sect;91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS
+UNVERIFIED AND SAID TO BE** (&sect;54.5, rule 3a, &sect;379.5's lesson that a
+limitation is TRIED rather than quoted): every request to the production address
+answered `http=000` with nothing transferred, the CONNECT tunnel negotiated
+through this environment's own proxy and the host itself unreachable, with the
+proxy reporting nothing tool-scoped in the way. This is the condition
+&sect;377.6 and &sect;378.2 already record for this container, and it is main's
+own as of its last merge. **So nobody here has seen production serve this
+commit**, and the three witnesses above are recorded for whoever reads the live
+site: each is asserted to have MOVED, or a match would hold whether or not the
+build landed (&sect;113.8). **THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED**
+(&sect;91, &sect;374.1, &sect;375.2, &sect;377.6, &sect;379.4): while it stays
+behind, `main`'s tip is on no other ref by construction, and putting that SHA on
+a second ref is the one act left that could still cost the deployment &mdash; a
+fast-forward is one command whenever somebody has read the live site.
+
 ## §529 — AI review "Add as a step": the proposal lives on the finding
 A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, `proposedAfterStepId`, migration `20261012120000`), never as a `ProcessStep`. This is why nothing else (RACI, Authority, exports, numbering, review context) needed changing. Confirm inserts a TASK step after the anchor in one transaction (later `order`s shift, the anchor's outgoing connections are spliced through the new step) and sets the finding INTEGRATED with `integrationMode` null. Delete clears the proposal and sets OPEN. DISMISSED titles still stop a removed finding returning on re-runs. Map shows proposals as a dashed amber row after the anchor (list view and above the diagram).
 

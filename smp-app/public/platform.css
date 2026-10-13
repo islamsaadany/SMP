@@ -406,6 +406,48 @@
   @media (max-width:680px){ #unsaved .safety-acts { margin-left:0; } }
   .banner.refused li { margin:2px 0; }
 
+  /* ── IS IT SAVED? (§527) ───────────────────────────────
+     One message, bottom left, in the shape Islam signed off. BOTTOM RIGHT IS
+     THE CHAT CORNER'S (§97), so this takes the other end.
+     THE Z-INDEX IS BELOW EVERY FLOATING CONTROL and above the page: .kmenu is
+     40, .chatdock 45, the pickers 60, the deck 61, the tour 70, a modal 100 —
+     so an open conversation, a menu or a dialog covers this rather than the
+     other way round, because those are what somebody is using and this is
+     only reading back what already happened.
+     THE SHOWN PILL TAKES THE POINTER, because the time is on its hover and a
+     hover needs one — which is the chat corner's own recorded cost at the
+     other end (§316.5), narrowed here to the seconds a save is in flight and
+     the six after it; FADED it takes none, or an invisible box would eat
+     clicks at that corner for ever.
+     Below 460px .chatdock spans the width and its own invisible box lies over
+     this one: the only thing that can cost is the hover, and a phone has no
+     hover.
+     NOT ON A PROJECTOR — §265's rule, and the one .chatdock already follows:
+     a message that comes and goes in front of a room costs the room more
+     attention than it saves the presenter. */
+  .savetip { position:fixed; left:18px; bottom:18px; z-index:35;
+             display:flex; align-items:center; gap:6px;
+             background:var(--surface); border:1px solid var(--line);
+             border-radius:6px; box-shadow:0 6px 20px rgba(10,20,40,.18);
+             padding:8px 13px; font-size:var(--fs-small); color:var(--ink-3);
+             white-space:nowrap; letter-spacing:.01em;
+             opacity:0; transition:opacity .22s ease; pointer-events:none; }
+  .savetip[hidden] { display:none; }
+  .savetip.show { opacity:1; pointer-events:auto; }
+  body.presenting .savetip { display:none; }
+  .savetip .sdot { width:7px; height:7px; border-radius:50%;
+                   background:var(--ink-3); flex:none; }
+  .savetip[data-state="saved"] { color:var(--good-tx); }
+  .savetip[data-state="saved"] .sdot { background:var(--good); }
+  .savetip[data-state="failed"] { color:var(--bad-tx); font-weight:600; }
+  .savetip[data-state="failed"] .sdot { background:var(--bad); }
+  /* THE BOX MUST NOT CHANGE WIDTH AS Saving… BECOMES Saved, or it re-animates
+     the one thing this treatment promises not to: a message that stays put
+     while somebody works. Derived from the longest of the three words
+     ("Not saved", 9 characters) in its own font, never a pixel measured once
+     (§122.5). */
+  .savetip .sword { display:inline-block; min-width:9ch; }
+
   /* ── HISTORY (§262) ─────────────────────────────────────────────────
      A setup table in the register's clothes (§88: one line per cell, the
      long value on the hover), the changed pair in the mono face so a number
@@ -11316,7 +11358,13 @@ textarea.copfedit:focus { outline:2px solid var(--focus, var(--gold)); outline-o
 .copfhead { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; }
 .copfhead b { flex:1 1 auto; min-width:0; font-size:13.5px; color:var(--ink); overflow-wrap:anywhere; }
 .copprog { color:var(--ink-3); white-space:nowrap; }
-.coptrack { height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin:6px 0 8px; flex:none; }
+/* §525.1 — ONE COUNT, AND THE WORDS SIT BESIDE THE TRACK. The number and the
+   bar are one statement, so they are one row: the count takes its own width
+   and the track what is left, which is also what stops a long count ("5 of 6
+   parts agreed") pushing the bar onto a line of its own. */
+.copfbar { display:flex; align-items:center; gap:8px; margin:6px 0 8px; }
+.copfcount { font-size:var(--fs-small, 12.5px); color:var(--ink-3); white-space:nowrap; flex:none; }
+.coptrack { height:4px; background:var(--line); border-radius:2px; overflow:hidden; flex:1 1 auto; min-width:0; }
 .coptrack i { display:block; height:100%; background:var(--gold); transition:width .2s; }
 .copfchat .copmsgs { max-height:none; }
 .copmsg.copwide { max-width:100%; }
@@ -11644,3 +11692,60 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 /* §501: the door to every chat on this client, above the chats rail. */
 .copall { display:block; font-size:12.5px; color:var(--ink-2); text-decoration:none; padding:2px 2px 6px; }
 .copall:hover { color:var(--ink); text-decoration:underline; }
+
+/* §524: the bar at the foot of the cards — Save, the optional check and
+   Apply to plan — and the saved Foundation shown as its six cards on the
+   deliverable page. Existing tokens only (§25). */
+.copsavebar { position:sticky; bottom:0; margin-top:auto; display:flex; flex-direction:column; gap:6px; padding:10px 0 2px; background:var(--surface); border-top:1px solid var(--line); }
+.copsavebar .copbtns { margin-top:0; }
+/* §525 — with the cards closed the same bar stands at the head of the chat:
+   in the flow there rather than pinned to a foot it does not own. */
+.copfchat > .copsavebar { position:static; margin:0 0 8px; padding:8px 0; border-top:0; border-bottom:1px solid var(--line); flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+.copsvst { font-size:var(--fs-small, 12.5px); color:var(--ink-3); }
+.copsvst.ok { color:var(--good-tx); }
+.copsvst.warn { color:var(--attn-tx, var(--gold-deep)); }
+.copsw-pill.opt { color:var(--ink-3); border-style:dashed; }
+.copfcards { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin:10px 0 12px; }
+.copfcard { border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface); padding:10px 12px; min-width:0; }
+.copfcard h5 { margin:0 0 6px; font-size:var(--fs-micro, 11px); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3); }
+.copfcard p, .copfcard ul { margin:0; font-size:var(--fs-note, 13.5px); line-height:1.5; color:var(--ink); }
+.copfcard ul { padding-left:18px; }
+.copplanrow { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r-sm, 6px); background:var(--surface-2); margin-bottom:12px; }
+/* §525.1 — APPLY IS THE DIALOG'S MAIN ACTION AND IS FILLED NAVY. The one
+   filled main action in a confirmation already in this product is the master
+   flow's Start (`.mflow .cbtns button.mfgo`, §266), and these are its three
+   declarations rather than a fourth treatment. `config.css`'s recorded
+   refusal beside `.cbtns button.danger` does NOT reach here and it is worth
+   saying which half of it: it refuses a solid RED, because `--bad` has no
+   derived ink and white on the dark one is 2.4:1 (§38.4) — `--panel` is the
+   client's own navy and `--panel-ink` is derived FROM it, which is the pair
+   every filled control in this product uses. Keyed on a Copilot-prefixed
+   class, so `.sendconfirm` — shared by three other confirmations — is
+   untouched (§65.9).
+   AND IT NEEDS NO HOVER RULE, which is the one thing worth checking rather
+   than assuming: `.cbtns button:hover` and `.cbtns button.copgo` are both
+   (0,2,1), and `copilot.css` is concatenated LAST by build.py, so this wins
+   on source order and the navy survives the pointer (§29.2's own trap, from
+   the side where the ordering is in our favour). `mfgo` has no hover rule
+   for the same reason and is what this follows. */
+.cbtns button.copgo { border-color:var(--panel); background:var(--panel); color:var(--panel-ink); }
+/* §525.1 — THE LINE THAT SAYS IT LANDED, with one way to go and look. The
+   pair is `--good-bg` + `--good-tx`, which the save banner's own done state
+   already wears together (`.banner.safety.done`), so no token is added and
+   §38.4's trap — a colour that works as a fill failing as type — cannot bite.
+   The LINK takes the page's ordinary ink rather than the green, or the one
+   thing to press would be the quietest thing on the line. */
+.copfdone { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; padding:9px 12px;
+            border-radius:var(--r-sm, 6px); background:var(--good-bg); color:var(--good-tx);
+            font:600 var(--fs-small, 12.5px)/1.45 var(--sans); }
+.copfdone a { color:var(--ink); font-weight:700; text-decoration:underline; }
+.copfdone a:hover { text-decoration:none; }
+/* INSIDE THE BAR RATHER THAN ABOVE IT, which the mockup draws as two bands
+   and which is one thing to keep together: the bar is sticky at the foot of
+   the cards with `margin-top:auto`, so a sibling line before it would be
+   pushed UP by that same auto margin and sit among the cards, away from the
+   words it belongs to. As the bar's first child it rides with it, and
+   `flex-basis:100%` keeps it on a line of its own in both of the bar's
+   directions — column with the cards open, row with them shut. */
+.copsavebar .copfdone { margin:0; flex:0 0 100%; }
+@media (max-width:760px){ .copfcards { grid-template-columns:minmax(0, 1fr); } }

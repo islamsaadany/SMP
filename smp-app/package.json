@@ -45,6 +45,8 @@
     "check:store": "node --experimental-strip-types checks/store-seam.mjs",
     "check:raci": "node --experimental-strip-types checks/raci-autofill.mjs",
     "check:raci:red": "node --experimental-strip-types checks/raci-autofill.mjs --red",
+    "check:propose": "node --experimental-strip-types checks/review-propose-step.mjs",
+    "check:propose:red": "node --experimental-strip-types checks/review-propose-step.mjs --red",
     "check:sop": "node --experimental-strip-types checks/process-sop.mjs",
     "check:pick": "node --experimental-strip-types checks/helicopter-pick.mjs",
     "check:pick:red": "node --experimental-strip-types checks/helicopter-pick.mjs --red",

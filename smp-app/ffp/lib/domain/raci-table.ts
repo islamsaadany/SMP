@@ -119,3 +119,49 @@ export function computeVisibleRoleIds(
   if (visible.size === 0) return allRoleIds;
   return allRoleIds.filter((id) => visible.has(id));
 }
+
+/**
+ * Per step: the Role that owns it (the step's assigned Role) and the Role its
+ * owner's manager usually holds. Built on the server from the Org Directory.
+ */
+export type StepOwners = Record<string, { ownerRoleId: string | null; managerRoleId: string | null }>;
+
+export type PlannedCell = { row: RaciTableRow; roleId: string; code: RaciCode };
+
+/**
+ * "Fill from step owners": R for each step's assigned Role, on every row of
+ * that step. Empty cells only — a cell that already holds any code is left
+ * alone — and skipped rows are never touched.
+ */
+export function planOwnerFill(rows: RaciTableRow[], owners: StepOwners): PlannedCell[] {
+  const out: PlannedCell[] = [];
+  for (const row of rows) {
+    if (row.skipped || !row.stepId) continue;
+    const ownerRoleId = owners[row.stepId]?.ownerRoleId;
+    if (!ownerRoleId || row.assignments[ownerRoleId]) continue;
+    out.push({ row, roleId: ownerRoleId, code: "RESPONSIBLE" });
+  }
+  return out;
+}
+
+/**
+ * Suggestions: the owner's manager's Role as A, only on a row that has no A
+ * yet, only into an empty cell, and only into a column that is on show.
+ * Nothing here is saved — the person accepts, edits or dismisses each one.
+ */
+export function planSuggestions(
+  rows: RaciTableRow[],
+  owners: StepOwners,
+  visibleRoleIds: string[]
+): PlannedCell[] {
+  const out: PlannedCell[] = [];
+  for (const row of rows) {
+    if (row.skipped || !row.stepId) continue;
+    if (Object.values(row.assignments).includes("ACCOUNTABLE")) continue;
+    const managerRoleId = owners[row.stepId]?.managerRoleId;
+    if (!managerRoleId || !visibleRoleIds.includes(managerRoleId)) continue;
+    if (row.assignments[managerRoleId]) continue;
+    out.push({ row, roleId: managerRoleId, code: "ACCOUNTABLE" });
+  }
+  return out;
+}

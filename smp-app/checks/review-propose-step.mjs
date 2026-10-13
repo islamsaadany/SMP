@@ -1,4 +1,4 @@
-/* ── AI REVIEW: ADD A FINDING AS A PROPOSED STEP (§524) ───────────────────
+/* ── AI REVIEW: ADD A FINDING AS A PROPOSED STEP (§529) ───────────────────
  *
  * No database here, and said so (§54.5): the pure rules are RUN, and the three
  * actions are READ for the shape that makes the flow safe. The real press

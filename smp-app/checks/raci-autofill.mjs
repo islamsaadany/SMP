@@ -1,4 +1,4 @@
-/* ── RACI: FILL FROM OWNERS AND SUGGEST (§525) ────────────────────────────
+/* ── RACI: FILL FROM OWNERS AND SUGGEST (§530) ────────────────────────────
  * No database, no browser: both planners are pure. Both ends every time
  * (§94.2): an empty cell IS filled and a filled one is NOT; a row with no A
  * IS offered one and a row with an A is NOT.

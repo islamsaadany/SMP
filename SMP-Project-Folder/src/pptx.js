@@ -655,17 +655,17 @@ function pptxPackage(slides, title, media){
 
 /* ── The one door the button calls ──────────────────────────────────── */
 function planPptxName(target){
-  var t = String(target || "");
-  var name = t.indexOf("fn:") === 0
-    ? (FUNCTIONS[t.slice(3)] || {}).name : (UNITS[t] || {}).name;
+  var t = String(target || ""), r = boxRef(t);
+  var name = r.kind === "fn"
+    ? (FUNCTIONS[r.key] || {}).name : (UNITS[t] || {}).name;
   return (name || "Plan") + " — Strategy plan.pptx";
 }
 
 function buildPlanPptx(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   var slides;
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
                                  : pptxFnSlides(fk);
   } else {

@@ -70,7 +70,7 @@ function __smpHoldsNow() {
   });
   (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
     .forEach(function (t) {
-      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
+      var tr = boxRef(t), u = tr.kind === "fn" ? FUNCTIONS[tr.key] : UNITS[t];
       if (!u) return;
       plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
       var sw = u.swot || {};

@@ -790,9 +790,9 @@ var SYNC = (function () {
      function's plan between them, and getting it wrong here would mean a
      project's rows could never be found. */
   function refusedRoots(target) {
-    var t = String(target || "group");
-    if (t.indexOf("fn:") === 0) {
-      var k = t.slice(3), out = [];
+    var t = String(target || "group"), r = boxRef(t);
+    if (r.kind === "fn") {
+      var k = r.key, out = [];
       if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
       if (typeof GROUP !== "undefined")
         (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });

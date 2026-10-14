@@ -9627,3 +9627,20 @@ Checked: the check from part 1 gained a section that loads both builds of the cl
 **Reported, not fixed:** that same thin fixture is why four capability assertions in the app's own two test files have not been running at all (one file throws at load because it looks for a capability on a function the seed does not put one on). Pre-existing on main, and it matters before step 2 moves capabilities.
 
 **Waiting on Islam:** nothing for this part. Part 3 is the screens; then the one Part owner role and the per-box one-list-or-split setting, still inside step 1.
+
+## §531.2 — Simplification step 1, part 3: the screens, the deck and the exports (2026-10-14)
+The last 44 places that read an address by hand are gone, across fifteen files — the shell, the plan and company pages, the deck and the master flow, the Excel and PowerPoint exports, the builder, the welcome, the tour, the history, the Copilot and the two server endpoints. **Across all three parts of step 1: 118 places in 18 files now ask one function.** Searching the sources for a hand-read address returns nothing.
+
+**Nothing visual changed and no stored data was touched**, so a revert undoes it.
+
+**One thing found and deliberately not changed.** Who may watch a deck, and who may speak for one, have only ever asked "is this a function?" — so a capability's deck is judged by the business-unit column rather than the function column its access actually comes from. That looks like a mistake of the same family as one fixed last month, but correcting it would move somebody's access, and step 1 is the half where nothing moves. It is preserved exactly as it was, written down beside the code, and it is yours to decide.
+
+Checked: the check now holds **86 agreements** over 23 addresses in two states (the worked example, and one it makes with a capability planned in pillars, a second capability on a second function, and a unit planning in projects) — **UNMOVED**, 1,493 real answers in the grid, and red five more ways on part 3's own files. Beside it: authoriser **1057/0**, access baseline **UNMOVED**, platform rules **69/0**, stage 1 rules **38/0**, browser QA **ERRORS: none**, and **37 of the browser checks closest to the changed screens green** (every capability, direction, deck, access, setup, master-flow, import, history, builder, presentation and tour check).
+
+**Not done, and said so:** the full 225-check browser sweep. At about a minute each it is nearly four hours, so the 37 closest were run instead and the rest is worth a single unattended run before this merges.
+
+**Reported, not fixed (both pre-existing on main, measured by rebuilding and re-running the older commits):** `checks/welcome.py` reads one failure about a gold underline on the Home page (§403) — the fix is visual, so it needs a mockup first; and the worked example's single capability on a single function is why four capability assertions in the app's own two test files have not been running at all.
+
+**Waiting on Islam:** two decisions, both small, before the rest of step 1:
+1. The capability-deck access divergence above — leave it, or fix it (it is a one-word change and it would widen or narrow who can watch one capability's deck).
+2. Nothing else. The one Part owner role and the per-box one-list-or-split setting are next, still inside step 1, and neither needs an answer to start.

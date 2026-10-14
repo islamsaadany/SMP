@@ -578,9 +578,9 @@ function slidesAssemble(){
        AFTER the picture slides so a custodian's own slide is footed too, and
        BEFORE the fit pass so a slide it splits carries the footer into every
        continuation (§52.9). */
-    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
+    if (boxRef(SLED.target).kind !== "fn" && UNITS[SLED.target]) {
       deckFootMarks(box, UNITS[SLED.target]);
-    } else if (SLED.target.indexOf("dir:") === 0) {
+    } else if (boxRef(SLED.target).kind === "dir") {
       /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
       deckFootMarks(box, null);
     }
@@ -1046,8 +1046,9 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
-  if (String(target || "").indexOf("dir:") === 0) return L1("pillar");
-  return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
+  var k = boxRef(target).kind;
+  if (k === "dir") return L1("pillar");
+  return k === "fn" ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 
 function slidesSlot(sl, p, i){

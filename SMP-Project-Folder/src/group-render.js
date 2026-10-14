@@ -1540,7 +1540,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -2227,7 +2227,7 @@ function unitCards(keys){
    an empty slot asserts something is missing when the model simply does not
    work that way (§15.1). */
 function renderCompanyPerformance(coKey){
-  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
+  var ckr = boxRef(coKey), ck = ckr.kind === "mid" ? ckr.key : String(coKey);
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
@@ -3424,7 +3424,7 @@ function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
-  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
+  var page = boxRef(TARGET).kind === "fn" ? e.fn : e.unit;
   return page ? [page, e.ac] : null;
 }
 
@@ -5672,7 +5672,7 @@ function renderUnitAnalysis(u){
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
 function renderFnSW(t){
-  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
@@ -6328,7 +6328,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
-                        (String(sub.key).indexOf("cap:") === 0
+                        (boxRef(sub.key).kind === "cap"
                           ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
@@ -9229,7 +9229,7 @@ function ownStateChip(target, list, word){
   var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
   var top = String(target) === "group";
   var submits = top ? "office or the CEO" :
-                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+                boxRef(target).kind === "fn" ? "function's custodian" : "unit's custodian";
   var tip = 'You report your own rows. The ' + submits + ' submits the report.';
   /* A capability carries no saved-draft mark (§309 is a project's and a
      direction's), so "done" there — and ONLY there, `noMark` — is every
@@ -10432,7 +10432,7 @@ function koReadBlock(list, emptyLine){
    handle the save would refuse (§94.3's fault, the safe way round). */
 function capKoTarget(c){
   var id = String(c && c.id || "");
-  if (id.indexOf("fn:") === 0) return id;
+  if (boxRef(id).kind === "fn") return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
 /* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own

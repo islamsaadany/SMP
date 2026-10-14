@@ -128,15 +128,15 @@ function anch(key, label, where){
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
 function deckHtmlFor(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
-  if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
+  if (r.kind === "dir") return dirDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
      function and a capability, which is the fault §253.3 fixed on one surface
      of three arriving as a third kind of subject. */
-  if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
+  if (r.area === "fn")
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
   /* §405: a unit that plans in projects or in objectives and actions gets the
@@ -1370,8 +1370,9 @@ function insertPictureSlides(deck, target, blank){
 function deckSubject(target){
   if (!target) return null;
   /* §481: a direction hides its own slides on the direction itself. */
-  if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
-  return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
+  var r = boxRef(target);
+  if (r.kind === "dir") { var d = dirPillar(target); return d ? d.p : null; }
+  return r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
 }
 
 /* AFTER THE PICTURES ARE PLACED, AND BEFORE THE FIT PASS. Both halves of
@@ -1548,10 +1549,12 @@ function openDeckFn(subject, from){
    capability function takes `openDeckFn`. Asking by `fn:` alone is what gave a
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
-  var t = String(target);
+  var t = String(target), r = boxRef(t);
   /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
-     each its own deck back to back — the owner's Present shows only theirs. */
-  if (t.indexOf("dir:") === 0) {
+     each its own deck back to back — the owner's Present shows only theirs.
+     A comma-joined list still reads as `dir` on its first address, which is
+     the answer the prefix test gave here before §531. */
+  if (r.kind === "dir") {
     var ds = t.split(",").filter(function(x){ return dirPillar(x); });
     if (!ds.length) return;
     openDeckWith(ds.map(function(x){ return esc(placeLabel(x)); }).join(" &middot; "), ds, from);
@@ -1560,7 +1563,7 @@ function openDeckFor(target, from){
   /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
+  if (r.area === "fn") {
     if (plansInPillars(t)) openDeck(unitLike(t), from);
     else openDeckFn(t, from);
     return;
@@ -1864,10 +1867,11 @@ function masterCount(t){
 function masterKind(t){
   t = String(t);
   /* §481: four kinds in the company's flow, said in the picker's own chips. */
-  if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
-  if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
+  var k = boxRef(t).kind;
+  if (k === "dir") return '<span class="mfkind">DIR</span>';
+  if (k === "cap") return '<span class="mfkind fn">CAP</span>';
   if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return t.indexOf("fn:") === 0
+  return k === "fn"
     ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
 }
 function masterPaint(){
@@ -2273,12 +2277,12 @@ function deckFitPass(deck){
    and not yet given a prefix. Two letters, because one is not a name and three
    from an unknown word is a guess. */
 function deckCode(target, name){
-  if (String(target).indexOf("dir:") === 0) {
+  var r = boxRef(target);
+  if (r.kind === "dir") {
     var dd = dirPillar(target);
     if (dd) return pillarCode(topAsUnit(), dd.i);
   }
-  var o = String(target).indexOf("fn:") === 0
-    ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
+  var o = r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
   var pre = o && o.codePrefix;
   if (pre) return String(pre).toUpperCase();
   var words = String(name || target).trim().split(/\s+/).filter(Boolean);

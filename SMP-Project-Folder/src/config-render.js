@@ -1014,7 +1014,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(boxRef(where).area === "fn" ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -1599,7 +1599,7 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    show nothing selected. The subject already says which plan it keeps, so
    changing the format IS changing the subject. */
 function impFmtOf(target){
-  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
+  return boxRef(target).kind === "cap" ? "projects" : "pillars";
 }
 /* The subjects a progress file can be downloaded for, in the chosen format. */
 function impSubjects(fmt){
@@ -2355,7 +2355,7 @@ function renderPeople(){
        gets no such line, which is honest: nothing here knows who else holds
        it. */
     function roleHolder(role){
-      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      var hr = boxRef(home), fn = hr.kind === "fn" ? FUNCTIONS[hr.key] : null;
       if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
       if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
       if (role === "fnhead")    return fn ? fn.head : null;
@@ -2371,7 +2371,7 @@ function renderPeople(){
            off `roleWheres()` rather than guessed (§135.6). */
         var hint = "";
         if (!fits) {
-          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
                  (atCo ? "Company" : "Unit") + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
@@ -6325,12 +6325,12 @@ function renderUnitNaming(u){
    reads is not what this round is for (§58's rule for a stored field, applied
    to a local one). */
 function impHolderTarget(){
-  var t = String(IMP.unit || "");
-  if (t.indexOf("cap:") === 0) return t.slice(4);
+  var t = String(IMP.unit || ""), r = boxRef(t);
+  if (r.kind === "cap") return r.key;
   /* §405: a unit that is not planned in pillars imports through its own
      holder, exactly as a projects or objectives function does. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return "u:" + t;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
 }
 function impIsCap(){ return !!impHolderTarget(); }
@@ -9700,9 +9700,9 @@ function vidStoreWhere(path){
   return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
 }
 function deckSubjectName(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     return f ? f.name + " (function)" : t;
   }
   var u = UNITS[t];

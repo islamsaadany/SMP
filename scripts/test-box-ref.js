@@ -352,7 +352,22 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
       "foundationName(T)", "peopleFor(T) && peopleFor(T).here.length",
       "attachPersonAt({}, T)", "gapMap(T) && Object.keys(gapMap(T)).length",
       "focusBands(T) && focusBands(T).length", "myLinesHome()",
-      "roleAtWord('owner')", "roleAtWord('custodian')", "roleAtWord('cceo')", "roleAtWord('fnhead')"
+      "roleAtWord('owner')", "roleAtWord('custodian')", "roleAtWord('cceo')", "roleAtWord('fnhead')",
+      /* ── PART 3's SCREENS, in the same grid (§531.2) ────────────────────
+         The deck, the export and the builder read an address too, and they
+         are in this vm already because build.py inlines them. Only the ones
+         reachable without a DOM are here; `shell.html`'s own script is the
+         page body rather than one of build.py's files, so its five converted
+         helpers (navLabelFor, capForBounded, isFn, isCapDest, isCo) are not
+         in scope at all and are held by qa.py and the browser checks instead.
+         Named so the list is honest about what it does not reach. */
+      "deckSubject(T) && (deckSubject(T).ukey || deckSubject(T).name || true)",
+      "deckCode(T, 'A name')", "masterKind(T)", "deckSubjectWord(T)",
+      "deckSubjectName(T)", "planPptxName(T)",
+      "impSubjectFormat(T)", "impHolderFor(T) && impHolderFor(T).id",
+      "builderRoute(T)", "builderSubjectName(T)", "builderHasPlan(T)",
+      "capKoTarget({ id: T })", "capKoTarget({ id: 'x', fn: T })",
+      "renderFnSW(T).length"
     ];
     const ask = function (run, call, a) {
       const pre = "var T = " + JSON.stringify(a) + "; ";

@@ -861,9 +861,9 @@
      mapping runs twice on one question and a `fn:` target has to map to
      itself. */
   function capHolderTarget(w, target) {
-    var s = String(target || "");
-    if (s.indexOf("cap:") !== 0) return s;
-    var id = s.slice(4), cs = (w && w.capabilities) || [];
+    var s = String(target || ""), r = boxRef(s);
+    if (r.kind !== "cap") return s;
+    var id = r.key, cs = (w && w.capabilities) || [];
     for (var i = 0; i < cs.length; i++)
       if (cs[i] && cs[i].id === id) return cs[i].fn ? "fn:" + cs[i].fn : "group";
     return "group";
@@ -22245,7 +22245,7 @@ function planWorkbook(u){
 
      A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
      validation range — and that is asserted rather than assumed. */
-  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+  var isFn = !!(u && boxRef(u.ukey).kind === "fn");
 
   return [
     readmeSheet]
@@ -23065,8 +23065,9 @@ function impSubjectFormat(v){
   /* §405: a business unit that plans in projects or in objectives and
      actions downloads the function's file for that way. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && fnPlansInObjectives(f)) return "objectives";
   }
   return "projects";
@@ -23075,11 +23076,11 @@ function impSubjectFormat(v){
    resolves the one it was handed — or the two disagree about what `fn:finance`
    means and a file downloads and will not come back (§22). */
 function impHolderFor(v){
-  var t = String(v || "");
-  if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  var t = String(v || ""), r = boxRef(t);
+  if (r.kind === "cap") return capById(r.key);
   /* §405: a unit that is not planned in pillars is its own holder. */
   if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
 
@@ -24618,17 +24619,17 @@ function pptxPackage(slides, title, media){
 
 /* ── The one door the button calls ──────────────────────────────────── */
 function planPptxName(target){
-  var t = String(target || "");
-  var name = t.indexOf("fn:") === 0
-    ? (FUNCTIONS[t.slice(3)] || {}).name : (UNITS[t] || {}).name;
+  var t = String(target || ""), r = boxRef(t);
+  var name = r.kind === "fn"
+    ? (FUNCTIONS[r.key] || {}).name : (UNITS[t] || {}).name;
   return (name || "Plan") + " — Strategy plan.pptx";
 }
 
 function buildPlanPptx(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   var slides;
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
                                  : pptxFnSlides(fk);
   } else {
@@ -27008,7 +27009,7 @@ function presentMenu(kind, key){
      differently. */
   var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
     '<span class="dlsub">Open the review deck for this ' +
-    (target === "group" ? "top layer" : String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
+    (target === "group" ? "top layer" : boxRef(target).kind === "fn" ? "function" : "unit") + '</span></button>';
   /* ── THE DECK AS A PDF (§305) ───────────────────────────────
      BESIDE PRESENT, because it is the same deck: one entry opens it on a
      projector and the next takes it away as a file. §252.2's entry below
@@ -27695,7 +27696,7 @@ function unitCards(keys){
    an empty slot asserts something is missing when the model simply does not
    work that way (§15.1). */
 function renderCompanyPerformance(coKey){
-  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
+  var ckr = boxRef(coKey), ck = ckr.kind === "mid" ? ckr.key : String(coKey);
   var co = COMPANIES[ck];
   if (!co) return '<div class="note">No such company.</div>';
   syncWeights();
@@ -28892,7 +28893,7 @@ function secPagePair(sec){
   if (TARGET === "group") return SEC_PENS_TOP[sec] || null;
   var e = SEC_PENS[sec];
   if (!e) return null;
-  var page = String(TARGET || "").indexOf("fn:") === 0 ? e.fn : e.unit;
+  var page = boxRef(TARGET).kind === "fn" ? e.fn : e.unit;
   return page ? [page, e.ac] : null;
 }
 
@@ -31140,7 +31141,7 @@ function renderUnitAnalysis(u){
    show here at once and its o/t are kept untouched (§96.2). No migration:
    a function's unmapped keys ride `functions.extra`. */
 function renderFnSW(t){
-  var fk = String(t).indexOf("fn:") === 0 ? String(t).slice(3) : t;
+  var tr = boxRef(t), fk = tr.kind === "fn" ? tr.key : t;
   var f = FUNCTIONS[fk];
   if (!f) return "";
   var sw = f.swot || FN_NO_SWOT;
@@ -31796,7 +31797,7 @@ function renderFocusBoard(){
                    (u ? '<span class="why" style="margin:3px 0 0">weight ' + u.weight + '%</span>'
                       : sub.key === "group" ? ''
                       : '<span class="why" style="margin:3px 0 0">' +
-                        (String(sub.key).indexOf("cap:") === 0
+                        (boxRef(sub.key).kind === "cap"
                           ? L1("capability") : L1("fnword")) + '</span>') +
                    '</td>' : '') +
         '<td>' + esc(x.m.name) + '</td>' +
@@ -34697,7 +34698,7 @@ function ownStateChip(target, list, word){
   var mine = (list || []).filter(function(c){ return c.mine || mayMarkDoneOn(target, c.owner, c.cust); });
   var top = String(target) === "group";
   var submits = top ? "office or the CEO" :
-                String(target).indexOf("fn:") === 0 ? "function's custodian" : "unit's custodian";
+                boxRef(target).kind === "fn" ? "function's custodian" : "unit's custodian";
   var tip = 'You report your own rows. The ' + submits + ' submits the report.';
   /* A capability carries no saved-draft mark (§309 is a project's and a
      direction's), so "done" there — and ONLY there, `noMark` — is every
@@ -35900,7 +35901,7 @@ function koReadBlock(list, emptyLine){
    handle the save would refuse (§94.3's fault, the safe way round). */
 function capKoTarget(c){
   var id = String(c && c.id || "");
-  if (id.indexOf("fn:") === 0) return id;
+  if (boxRef(id).kind === "fn") return id;
   return c && c.fn ? "fn:" + c.fn : null;
 }
 /* §430: THE PAGE AND ITS KEY ARE THE CALLER'S. The Overview asks with its own
@@ -37082,7 +37083,7 @@ function assignPicker(where, roleKey, current, editable){
       /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
          is a caption on something the reader has already scrolled past. */
       '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
-      group((String(where).indexOf("fn:") === 0 || String(where).indexOf("cap:") === 0) ? "In this function" : "In this unit", pool.here) +
+      group(boxRef(where).area === "fn" ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
@@ -37667,7 +37668,7 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    show nothing selected. The subject already says which plan it keeps, so
    changing the format IS changing the subject. */
 function impFmtOf(target){
-  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
+  return boxRef(target).kind === "cap" ? "projects" : "pillars";
 }
 /* The subjects a progress file can be downloaded for, in the chosen format. */
 function impSubjects(fmt){
@@ -38423,7 +38424,7 @@ function renderPeople(){
        gets no such line, which is honest: nothing here knows who else holds
        it. */
     function roleHolder(role){
-      var fn = String(home).indexOf("fn:") === 0 ? FUNCTIONS[String(home).slice(3)] : null;
+      var hr = boxRef(home), fn = hr.kind === "fn" ? FUNCTIONS[hr.key] : null;
       if (role === "owner")     return fn ? fn.head : (UNIT_ROLES[home] || {}).head;
       if (role === "custodian") return fn ? fn.custodian : (UNIT_ROLES[home] || {}).custodian;
       if (role === "fnhead")    return fn ? fn.head : null;
@@ -38439,7 +38440,7 @@ function renderPeople(){
            off `roleWheres()` rather than guessed (§135.6). */
         var hint = "";
         if (!fits) {
-          var atCo = wheres.every(function(w){ return String(w.v).indexOf("co:") === 0; });
+          var atCo = wheres.every(function(w){ return boxRef(w.v).kind === "mid"; });
           hint = "held at " + roleAtWord(r.key) + " \u2014 set the " +
                  (atCo ? "Company" : "Unit") + " first";
         } else if (SMPRules.isSeatRole(r.key)) {
@@ -42393,12 +42394,12 @@ function renderUnitNaming(u){
    reads is not what this round is for (§58's rule for a stored field, applied
    to a local one). */
 function impHolderTarget(){
-  var t = String(IMP.unit || "");
-  if (t.indexOf("cap:") === 0) return t.slice(4);
+  var t = String(IMP.unit || ""), r = boxRef(t);
+  if (r.kind === "cap") return r.key;
   /* §405: a unit that is not planned in pillars imports through its own
      holder, exactly as a projects or objectives function does. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return "u:" + t;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? t : "";
 }
 function impIsCap(){ return !!impHolderTarget(); }
@@ -45768,9 +45769,9 @@ function vidStoreWhere(path){
   return m ? deckSubjectName(m[1].replace(/-/g, ":").replace(/^fn:/, "fn:")) : "—";
 }
 function deckSubjectName(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     return f ? f.name + " (function)" : t;
   }
   var u = UNITS[t];
@@ -45952,9 +45953,9 @@ function builderHere(){
    own reader and answers all three, so a fourth format is a case here rather
    than a fall-through. */
 function builderRoute(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return UNITS[t] ? "unit" : null;  /* §405: the unit's own work is chosen in builderSections */
+  var f = FUNCTIONS[r.key];
   if (!f) return null;
   var fmt = fnFormat(f);
   return fmt === "pillars" ? "fnpillars"
@@ -45972,7 +45973,8 @@ function builderSubjectName(target){
      a projects function is not drawn by them — asked through it, every
      projects function built here was nameless (found by driving, §51.7). */
   var t = String(target || "");
-  if (t.indexOf("fn:") === 0) { var f = FUNCTIONS[t.slice(3)]; return f ? f.name : ""; }
+  var br = boxRef(t);
+  if (br.kind === "fn") { var f = FUNCTIONS[br.key]; return f ? f.name : ""; }
   return UNITS[t] ? UNITS[t].name : "";
 }
 function builderHasPlan(target){
@@ -46861,15 +46863,15 @@ function anch(key, label, where){
    unit key and an `fn:` key in one place, exactly as the Present button has
    done since §224. */
 function deckHtmlFor(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
-  if (t.indexOf("dir:") === 0) return dirDeckHtml(t);
+  if (r.kind === "dir") return dirDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
      function and a capability, which is the fault §253.3 fixed on one surface
      of three arriving as a third kind of subject. */
-  if (t.indexOf("cap:") === 0 || t.indexOf("fn:") === 0)
+  if (r.area === "fn")
     return plansInPillars(t) ? (unitLike(t) ? deckSlides(unitLike(t)) : "")
                              : deckSlidesFn(t);
   /* §405: a unit that plans in projects or in objectives and actions gets the
@@ -48103,8 +48105,9 @@ function insertPictureSlides(deck, target, blank){
 function deckSubject(target){
   if (!target) return null;
   /* §481: a direction hides its own slides on the direction itself. */
-  if (target.indexOf("dir:") === 0) { var d = dirPillar(target); return d ? d.p : null; }
-  return target.indexOf("fn:") === 0 ? FUNCTIONS[target.slice(3)] : UNITS[target];
+  var r = boxRef(target);
+  if (r.kind === "dir") { var d = dirPillar(target); return d ? d.p : null; }
+  return r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
 }
 
 /* AFTER THE PICTURES ARE PLACED, AND BEFORE THE FIT PASS. Both halves of
@@ -48281,10 +48284,12 @@ function openDeckFn(subject, from){
    capability function takes `openDeckFn`. Asking by `fn:` alone is what gave a
    pillars function a deck reading "Capability review - 0 capabilities". */
 function openDeckFor(target, from){
-  var t = String(target);
+  var t = String(target), r = boxRef(t);
   /* §481: one direction, or the several a person owns ("dir:a,dir:b"),
-     each its own deck back to back — the owner's Present shows only theirs. */
-  if (t.indexOf("dir:") === 0) {
+     each its own deck back to back — the owner's Present shows only theirs.
+     A comma-joined list still reads as `dir` on its first address, which is
+     the answer the prefix test gave here before §531. */
+  if (r.kind === "dir") {
     var ds = t.split(",").filter(function(x){ return dirPillar(x); });
     if (!ds.length) return;
     openDeckWith(ds.map(function(x){ return esc(placeLabel(x)); }).join(" &middot; "), ds, from);
@@ -48293,7 +48298,7 @@ function openDeckFor(target, from){
   /* §334: a capability joins the same branch — the FORM decides, so one
      planned in pillars takes the unit deck exactly as a pillars function
      does, and one planned in projects takes the holder deck. */
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
+  if (r.area === "fn") {
     if (plansInPillars(t)) openDeck(unitLike(t), from);
     else openDeckFn(t, from);
     return;
@@ -48597,10 +48602,11 @@ function masterCount(t){
 function masterKind(t){
   t = String(t);
   /* §481: four kinds in the company's flow, said in the picker's own chips. */
-  if (t.indexOf("dir:") === 0) return '<span class="mfkind">DIR</span>';
-  if (t.indexOf("cap:") === 0) return '<span class="mfkind fn">CAP</span>';
+  var k = boxRef(t).kind;
+  if (k === "dir") return '<span class="mfkind">DIR</span>';
+  if (k === "cap") return '<span class="mfkind fn">CAP</span>';
   if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';
-  return t.indexOf("fn:") === 0
+  return k === "fn"
     ? '<span class="mfkind fn">FUNC</span>' : '<span class="mfkind">BU</span>';
 }
 function masterPaint(){
@@ -49006,12 +49012,12 @@ function deckFitPass(deck){
    and not yet given a prefix. Two letters, because one is not a name and three
    from an unknown word is a guess. */
 function deckCode(target, name){
-  if (String(target).indexOf("dir:") === 0) {
+  var r = boxRef(target);
+  if (r.kind === "dir") {
     var dd = dirPillar(target);
     if (dd) return pillarCode(topAsUnit(), dd.i);
   }
-  var o = String(target).indexOf("fn:") === 0
-    ? FUNCTIONS[String(target).slice(3)] : UNITS[target];
+  var o = r.kind === "fn" ? FUNCTIONS[r.key] : UNITS[target];
   var pre = o && o.codePrefix;
   if (pre) return String(pre).toUpperCase();
   var words = String(name || target).trim().split(/\s+/).filter(Boolean);
@@ -50124,9 +50130,9 @@ function slidesAssemble(){
        AFTER the picture slides so a custodian's own slide is footed too, and
        BEFORE the fit pass so a slide it splits carries the footer into every
        continuation (§52.9). */
-    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
+    if (boxRef(SLED.target).kind !== "fn" && UNITS[SLED.target]) {
       deckFootMarks(box, UNITS[SLED.target]);
-    } else if (SLED.target.indexOf("dir:") === 0) {
+    } else if (boxRef(SLED.target).kind === "dir") {
       /* §481: footed as the projector foots it (deckBuild), with the group's mark. */
       deckFootMarks(box, null);
     }
@@ -50592,8 +50598,9 @@ function vslideCtl(sl){
 /* The subject's own word, so the ceiling reads "This business unit already
    has…" rather than naming a key nobody uses (§93.12's vocabulary). */
 function deckSubjectWord(target){
-  if (String(target || "").indexOf("dir:") === 0) return L1("pillar");
-  return String(target || "").indexOf("fn:") === 0 ? labelWord("fnword", "group") : labelWord("unitword", "group");
+  var k = boxRef(target).kind;
+  if (k === "dir") return L1("pillar");
+  return k === "fn" ? labelWord("fnword", "group") : labelWord("unitword", "group");
 }
 
 function slidesSlot(sl, p, i){
@@ -55408,7 +55415,7 @@ var TOUR = (function(){
       if (at) return;
       if (r.role === "custodian" || r.role === "owner" || r.role === "fnhead") at = r.at;
     });
-    if (!at || at === "group" || String(at).indexOf("co:") === 0) return null;
+    if (!at || at === "group" || boxRef(at).kind === "mid") return null;
     return at;
   }
 
@@ -55426,7 +55433,7 @@ var TOUR = (function(){
 
      Stated here, in one place, which is the other half of §53's rule: where
      the two sides differ, say which and why. */
-  function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
+  function isFnPlace(k){ return boxRef(k).kind === "fn"; }
   var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
   var FN_SECS = { found:"found", plan:"proj", swot:null };
   /* §211.2 dropped `found` here for a function that plans in pillars, because
@@ -56189,9 +56196,10 @@ var WELCOME = (function(){
   function ownTargets(row, rs){
     var out = [];
     function add(t){
-      if (!t || t === "group" || String(t).indexOf("co:") === 0) return;
-      var real = String(t).indexOf("fn:") === 0
-        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[String(t).slice(3)])
+      var r = boxRef(t);
+      if (!t || t === "group" || r.kind === "mid") return;
+      var real = r.kind === "fn"
+        ? !!(typeof FUNCTIONS !== "undefined" && FUNCTIONS[r.key])
         : !!(typeof UNITS !== "undefined" && UNITS[t]);
       if (real && out.indexOf(t) < 0) out.push(t);
     }
@@ -56219,7 +56227,7 @@ var WELCOME = (function(){
     dismiss();
     setTimeout(function(){
       press('#units [data-u="' + t + '"]');
-      var fn = String(t).indexOf("fn:") === 0;
+      var fn = boxRef(t).kind === "fn";
       if (tab === "strategy") press('#subtabs [data-s="' + (fn ? "fnstrat" : "strategy") + '"]');
       if (tab === "performance") press('#subtabs [data-s="' + (fn ? "fnperf" : "performance") + '"]');
       /* §222: REPORTING IS A TAB NOW, so this door presses the tab rather
@@ -56680,7 +56688,7 @@ var WELCOME = (function(){
       var home = targets[0] || null;
       if (home) {
         var nm = subjectName(home);
-        var isFn = String(home).indexOf("fn:") === 0;
+        var isFn = boxRef(home).kind === "fn";
         pageLink(nm + " — Strategy", isFn ? "" : "Plan · Foundation · SWOT",
           function(){ goPlace(home, "strategy"); });
         pageLink(nm + " — Performance", "", function(){ goPlace(home, "performance"); });
@@ -57151,7 +57159,7 @@ var TRAIL = (function(){
   function target(){
     var c = typeof current !== "undefined" ? current : null;
     if (!c || c === "setup" || c === "manage" || c === "group") return null;
-    if (String(c).indexOf("co:") === 0) return null;
+    if (boxRef(c).kind === "mid") return null;
     return typeof TARGET !== "undefined" ? TARGET : null;
   }
   function lineHtml(t, entry){
@@ -57230,7 +57238,7 @@ var TRAIL = (function(){
          that function's capabilities are still walked beside its own work or
          a restore that used to work stops. */
       var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();
-      if (String(t).indexOf("fn:") === 0)
+      if (boxRef(t).kind === "fn")
         (GROUP.capabilities || []).forEach(function(c){
           if ("fn:" + c.fn === String(t) && holders.indexOf(c) === -1) holders.push(c); });
       holders.forEach(function(c){
@@ -58093,12 +58101,13 @@ var COPILOT = (function(){
     }
     var holder = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") {
-        var fk = t.slice(3), F = FUNCTIONS[fk];
+      var r = boxRef(t);
+      if (r.kind === "fn" && typeof FUNCTIONS !== "undefined") {
+        var fk = r.key, F = FUNCTIONS[fk];
         if (F) { if (!u) { o.def = F.def; o.keyObjectives = F.keyObjectives; } }
         holder = typeof fnHolders === "function" ? fnHolders(fk) : [];
-      } else if (t.indexOf("cap:") === 0 && typeof capById === "function") {
-        var C = capById(t.slice(4));
+      } else if (r.kind === "cap" && typeof capById === "function") {
+        var C = capById(r.key);
         if (C && !u) { o.def = C.def; o.keyObjectives = C.keyObjectives; holder = [C]; }
       }
     } catch (e) { holder = null; }
@@ -59247,7 +59256,7 @@ var COPILOT = (function(){
   function planSwot(){
     var t = place(), sw = null;
     try {
-      if (t.indexOf("fn:") === 0 && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[t.slice(3)] || {}).swot;
+      if (boxRef(t).kind === "fn" && typeof FUNCTIONS !== "undefined") sw = (FUNCTIONS[boxRef(t).key] || {}).swot;
       else if (t === "group" && typeof GROUP !== "undefined") sw = GROUP.swot;
       else { var u = typeof unitLike === "function" ? unitLike(t) : null; sw = u && u.swot; }
     } catch (e) { sw = null; }
@@ -61740,7 +61749,7 @@ function __smpHoldsNow() {
   });
   (UNIT_KEYS || []).concat((FUNCTION_KEYS || []).map(function (k) { return "fn:" + k; }))
     .forEach(function (t) {
-      var u = String(t).indexOf("fn:") === 0 ? FUNCTIONS[String(t).slice(3)] : UNITS[t];
+      var tr = boxRef(t), u = tr.kind === "fn" ? FUNCTIONS[tr.key] : UNITS[t];
       if (!u) return;
       plans += ((u.items || []).length) + ((u.keyObjectives || []).length);
       var sw = u.swot || {};
@@ -65094,9 +65103,9 @@ var SYNC = (function () {
      function's plan between them, and getting it wrong here would mean a
      project's rows could never be found. */
   function refusedRoots(target) {
-    var t = String(target || "group");
-    if (t.indexOf("fn:") === 0) {
-      var k = t.slice(3), out = [];
+    var t = String(target || "group"), r = boxRef(t);
+    if (r.kind === "fn") {
+      var k = r.key, out = [];
       if (typeof FUNCTIONS !== "undefined" && FUNCTIONS[k]) out.push(FUNCTIONS[k]);
       if (typeof GROUP !== "undefined")
         (GROUP.capabilities || []).forEach(function (c) { if (c && c.fn === k) out.push(c); });
@@ -67577,8 +67586,9 @@ var SYNC = (function () {
      in Setup shows in the navigation the day it is set rather than being
      stored and read by nothing. */
   function navLabelFor(k){
-    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
-    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    var r = boxRef(k);
+    if (r.kind === "cap") return navName(capOfTarget(k));
+    if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
   function unitTabs(){
@@ -68366,8 +68376,9 @@ var SYNC = (function () {
      arbitrary, and landing on the function is the honest answer there: the
      switch is one press away and both are in the list. */
   function capForBounded(at, reach){
-    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
-    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var ar = boxRef(at);
+    if (ar.kind !== "fn" || !boundedHere(at)) return null;
+    var fk = ar.key, own = fnOwnHolder(fk);
     var mineOf = function(c){
       return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
                         function(p){ return p.owner; });
@@ -68384,16 +68395,16 @@ var SYNC = (function () {
     return dests.length ? dests[0].k : null;
   }
 
-  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isFn(k){ return typeof k === "string" && boxRef(k).kind === "fn" && !!fnOf(k); }
   /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
      pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
-    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+    return typeof k === "string" && boxRef(k).kind === "cap" && !!capOfTarget(k);
   }
   function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+    return typeof k === "string" && boxRef(k).kind === "mid" && !!COMPANIES[boxRef(k).key];
   }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -73374,7 +73385,7 @@ var SYNC = (function () {
              definition of what may be held where; this only reads which of the
              two fields it points at. */
           var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
+            return boxRef(w.v).kind === "mid"; });
           var fld = atCo ? "Company" : "Unit";
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
@@ -75824,10 +75835,10 @@ var SYNC = (function () {
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -75866,9 +75877,9 @@ var SYNC = (function () {
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             !confirm("Remove this line? This cannot be undone here.")) return;
@@ -77671,7 +77682,7 @@ var SYNC = (function () {
     if (!it) return;
     var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
-    var scoresOf = String(ukey).indexOf("fn:") === 0
+    var scoresOf = boxRef(ukey).kind === "fn"
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),

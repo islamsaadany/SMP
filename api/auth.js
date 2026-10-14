@@ -457,8 +457,9 @@ module.exports = async function handler(req, res) {
       raw.forEach(function (at) {
         const t = String(at);
         if (t === "group") return;
-        if (t.indexOf("co:") === 0) {
-          inCompany(t.slice(3)).forEach(function (k) {
+        const r = Rules.boxRef(t);
+        if (r.kind === "mid") {
+          inCompany(r.key).forEach(function (k) {
             if (ats.indexOf(k) === -1) ats.push(k);
           });
           return;
@@ -525,8 +526,9 @@ module.exports = async function handler(req, res) {
          the comment above this handler says "validated against the same list
          whereList builds", and it was not: this accepted a retired unit the
          list no longer shows. */
-      const known = at.indexOf("fn:") === 0
-        ? (await client.query("SELECT 1 FROM functions WHERE key = $1 AND active", [at.slice(3)])).rowCount
+      const atRef = Rules.boxRef(at);
+      const known = atRef.kind === "fn"
+        ? (await client.query("SELECT 1 FROM functions WHERE key = $1 AND active", [atRef.key])).rowCount
         : (await client.query("SELECT 1 FROM units WHERE key = $1 AND active", [at])).rowCount;
       if (!known) return send(res, 400, { ok: false, error: "That is not somewhere in this organisation." });
       await client.query(

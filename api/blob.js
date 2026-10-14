@@ -112,14 +112,23 @@ function targetOfPath(p) {
    the reading grant rather than the reporting one — but "none" is a WORD, and
    testing the answer for truth rather than for its value is what let everybody
    watch everything (see the note at the call site). */
+/* §531: THESE TWO ASK `kind`, NOT `area`, AND THAT IS DELIBERATE. Every other
+   converted site reads `boxRef(t).area`, which answers "fn" for a capability
+   as well as a function (§334: a capability's access comes from the function
+   that holds it). These two have only ever tested `fn:`, so a `cap:` target is
+   judged here in the UNIT area — which looks like the fault §334 and the
+   paragraph above `areaOfTarget` both record. Stage 3a MOVES NO ANSWER, so it
+   is preserved exactly and reported rather than fixed inside a refactor: a
+   capability's deck is a reading grant and changing which column decides it is
+   an access change, which is Islam's to see first. */
 function mayWatch(world, person, target) {
-  const isFn = String(target || "").indexOf("fn:") === 0;
+  const isFn = R.boxRef(target).kind === "fn";
   const g = R.grantIn(world, person, isFn ? "fn" : "unit", target);
   return !!g && g !== "none";
 }
 
 function maySpeakFor(world, person, target) {
-  const isFn = String(target || "").indexOf("fn:") === 0;
+  const isFn = R.boxRef(target).kind === "fn";
   const area = isFn ? "fn" : "unit";
   if (R.grantIn(world, person, area, target) !== "edit") return false;
   if (R.onlyOwnLines(world, person, area, target)) return false;

@@ -542,7 +542,7 @@ function planWorkbook(u){
 
      A UNIT'S WORKBOOK IS UNTOUCHED — every sheet, every column, every
      validation range — and that is asserted rather than assumed. */
-  var isFn = !!(u && String(u.ukey || "").indexOf("fn:") === 0);
+  var isFn = !!(u && boxRef(u.ukey).kind === "fn");
 
   return [
     readmeSheet]
@@ -1362,8 +1362,9 @@ function impSubjectFormat(v){
   /* §405: a business unit that plans in projects or in objectives and
      actions downloads the function's file for that way. */
   if (UNITS[t] && unitOwnWay(UNITS[t])) return unitFormat(UNITS[t]);
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && fnPlansInObjectives(f)) return "objectives";
   }
   return "projects";
@@ -1372,11 +1373,11 @@ function impSubjectFormat(v){
    resolves the one it was handed — or the two disagree about what `fn:finance`
    means and a file downloads and will not come back (§22). */
 function impHolderFor(v){
-  var t = String(v || "");
-  if (t.indexOf("cap:") === 0) return capById(t.slice(4));
+  var t = String(v || ""), r = boxRef(t);
+  if (r.kind === "cap") return capById(r.key);
   /* §405: a unit that is not planned in pillars is its own holder. */
   if (UNITS[t]) return unitOwnWay(UNITS[t]) ? unitOwnHolder(t) : null;
-  var fk = t.indexOf("fn:") === 0 ? t.slice(3) : "";
+  var fk = r.kind === "fn" ? r.key : "";
   return (fk && FUNCTIONS[fk] && !fnPlansInPillars(FUNCTIONS[fk])) ? fnOwnHolder(fk) : null;
 }
 

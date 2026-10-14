@@ -1540,8 +1540,9 @@
      in Setup shows in the navigation the day it is set rather than being
      stored and read by nothing. */
   function navLabelFor(k){
-    if (String(k).indexOf("cap:") === 0) return navName(capOfTarget(k));
-    if (String(k).indexOf("fn:") === 0)  return navName(FUNCTIONS[String(k).slice(3)]);
+    var r = boxRef(k);
+    if (r.kind === "cap") return navName(capOfTarget(k));
+    if (r.kind === "fn")  return navName(FUNCTIONS[r.key]);
     return navName(UNITS[k]);
   }
   function unitTabs(){
@@ -2329,8 +2330,9 @@
      arbitrary, and landing on the function is the honest answer there: the
      switch is one press away and both are in the list. */
   function capForBounded(at, reach){
-    if (String(at).indexOf("fn:") !== 0 || !boundedHere(at)) return null;
-    var fk = String(at).slice(3), own = fnOwnHolder(fk);
+    var ar = boxRef(at);
+    if (ar.kind !== "fn" || !boundedHere(at)) return null;
+    var fk = ar.key, own = fnOwnHolder(fk);
     var mineOf = function(c){
       return !!railMine(holderTarget(holderCodeOwner(c)), c.projects || [],
                         function(p){ return p.owner; });
@@ -2347,16 +2349,16 @@
     return dests.length ? dests[0].k : null;
   }
 
-  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isFn(k){ return typeof k === "string" && boxRef(k).kind === "fn" && !!fnOf(k); }
   /* §334: A CAPABILITY IS A DESTINATION. It takes SUBS.fn — the same three
      tabs, because it is planned the same two ways and the pages are the same
      pages (spec 048 §4). Drawing a second tab list for it would be the drift
      §211 and §213 each cost a day to undo. */
   function isCapDest(k){
-    return typeof k === "string" && k.indexOf("cap:") === 0 && !!capOfTarget(k);
+    return typeof k === "string" && boxRef(k).kind === "cap" && !!capOfTarget(k);
   }
   function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+    return typeof k === "string" && boxRef(k).kind === "mid" && !!COMPANIES[boxRef(k).key];
   }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -7337,7 +7339,7 @@
              definition of what may be held where; this only reads which of the
              two fields it points at. */
           var atCo = wheres.every(function(w){
-            return String(w.v).indexOf("co:") === 0; });
+            return boxRef(w.v).kind === "mid"; });
           var fld = atCo ? "Company" : "Unit";
           /* THE ROLE TRAVELS WITH THE REFUSAL (§372). It used to be read back
              out of `ADDROLE_KIND` — the open picker's current value — and
@@ -9787,10 +9789,10 @@
         /* §212: a function's page is gated on the FUNCTION's key. Gating an
            `fn:` target on `u_found` is §211's fault exactly, and here it fails
            CLOSED — the button renders and the click returns silently. */
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
         if (BUILDER && BUILDER.target === t) { openBuilderForm("clause", { target:t }); return; }
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses)) return;
         o.clauses.push(["", ""]);
         if (o.ukey) renumberUnit(o);
@@ -9829,9 +9831,9 @@
     document.querySelectorAll("[data-clauserm]").forEach(function(b){
       b.addEventListener("click", function(){
         var a = b.dataset.clauserm.split("|"), t = a[0], i = +a[1];
-        var isCo = t.indexOf("co:") === 0;
+        var tr = boxRef(t), isCo = tr.kind === "mid";
         if (!mayAuthor(foundKeyFor(t), (t === "group" || isCo) ? null : t)) return;
-        var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
+        var o = t === "group" ? GROUP : isCo ? coFoundWritable(tr.key) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
             !confirm("Remove this line? This cannot be undone here.")) return;
@@ -11634,7 +11636,7 @@
     if (!it) return;
     var word = L1("pillar");
     var code = pillarCode(u, u.items.indexOf(it));
-    var scoresOf = String(ukey).indexOf("fn:") === 0
+    var scoresOf = boxRef(ukey).kind === "fn"
       ? "the function's scores" : "the unit's scores";
     rmConfirmOpen("Remove this " + word + "?",
       (code ? code + " — " : "") + (it.name || "Untitled"),

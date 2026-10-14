@@ -286,7 +286,7 @@ var TRAIL = (function(){
   function target(){
     var c = typeof current !== "undefined" ? current : null;
     if (!c || c === "setup" || c === "manage" || c === "group") return null;
-    if (String(c).indexOf("co:") === 0) return null;
+    if (boxRef(c).kind === "mid") return null;
     return typeof TARGET !== "undefined" ? TARGET : null;
   }
   function lineHtml(t, entry){
@@ -365,7 +365,7 @@ var TRAIL = (function(){
          that function's capabilities are still walked beside its own work or
          a restore that used to work stops. */
       var holders = (typeof capsShown === "function" ? capsShown(t) : []).slice();
-      if (String(t).indexOf("fn:") === 0)
+      if (boxRef(t).kind === "fn")
         (GROUP.capabilities || []).forEach(function(c){
           if ("fn:" + c.fn === String(t) && holders.indexOf(c) === -1) holders.push(c); });
       holders.forEach(function(c){

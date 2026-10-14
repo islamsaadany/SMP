@@ -6774,7 +6774,12 @@
     });
     document.querySelectorAll("[data-mbdrop]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = this.dataset.mbdrop.split("|");
+        var val = this.dataset.mbdrop, p = val.split("|");
+        /* §533.4: it asked nothing at all, which the drawing named as a
+           difference to decide rather than leave. Islam: they should ask. */
+        if (rmAsk(this, "mbdrop", val,
+            "Stop " + esc(p[0]) + " pointing at " +
+            esc(roleWhereLabel(p.slice(1).join("|"))) + "?")) return;
         removeMainbuAt(p[0], p.slice(1).join("|"));
         paint();
       });
@@ -6798,7 +6803,17 @@
     });
     document.querySelectorAll("[data-mbdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        removeMainbu(b.dataset.mbdel);
+        /* §533.4: the same, one row out. It only asks when the row points at
+           something — a name typed by mistake and mapped to nothing is the
+           BU list's empty line, and the family lets those go on one press.
+           People are already handled: the control is not drawn at all while
+           anybody carries the name. */
+        var nm = b.dataset.mbdel;
+        var ats = mainbuAts(mainbuBy(nm));
+        if (ats.length && rmAsk(b, "mbdel", nm,
+            "Remove \u201c" + esc(nm) + "\u201d and " +
+            plural(ats.length, "mapping") + "?")) return;
+        removeMainbu(nm);
         paint();
       });
     });

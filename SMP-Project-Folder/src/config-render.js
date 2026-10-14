@@ -4289,7 +4289,9 @@ function renderMainbus(){
       return '<span class="uchip">' + esc(roleWhereLabel(at)) +
         (editable ? '<button class="chipx" data-mbdrop="' + esc(b.name) + '|' + esc(at) +
                     '" title="Remove ' + esc(roleWhereLabel(at)) + '">&times;</button>' : '') +
-        '</span>';
+        '</span>' +
+        /* §533.4: the question under the chip it belongs to. */
+        rmStrip("mbdrop", b.name + "|" + at, RMASK ? RMASK.say : "");
     }).join(" ");
     if (!editable) return chips;
     var left = wheres.map(function(g){
@@ -4344,7 +4346,8 @@ function renderMainbus(){
         !mayEdit || editable ? '' :
           (n ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
              : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')) +
-      '</tr>';
+      '</tr>' +
+      rmStripRow("mbdel", b.name, RMASK ? RMASK.say : "", 5);
   }).join("");
 
   /* The Add row and the table's own existence are the PAGE's question, not a

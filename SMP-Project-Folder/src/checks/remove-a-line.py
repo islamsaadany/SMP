@@ -235,7 +235,64 @@ with sync_playwright() as p:
     else:
         ck("(fixture) a period with drivers could be drawn", False, drv)
 
-    print("\n§9 · and the build is quiet")
+    print("\n§9 · the BU list, which used to ask nothing at all")
+    # The drawing named these two as a difference to DECIDE rather than leave;
+    # Islam: they should ask.
+    #
+    # THE TWO CONTROLS WANT OPPOSITE STATES, which the first draft of this
+    # section did not know: the chip's × is drawn only while the row's pen is
+    # OPEN, and the row's Remove only while it is SHUT. A fixture that set one
+    # state measured one control and threw on the other.
+    natives.clear()
+    bu = ev(pg, """() => {
+      GROUP.mainbus = [{ name:"Payments", at: UNIT_KEYS[0] }];
+      current='setup'; currentSub='mainbu'; ROWEDIT = "mainbu:0"; RMASK = null; paint();
+      return { drop: !!document.querySelector('[data-mbdrop]') };
+    }""")
+    pg.wait_for_timeout(350)
+    ck("(fixture) a mapped BU with its row open", bu.get("drop"), bu)
+    if bu.get("drop"):
+        pg.eval_on_selector("[data-mbdrop]", "e => e.click()"); pg.wait_for_timeout(300)
+        d1 = ev(pg, """() => { const r = document.querySelector('.rmask');
+          return { there: !!r, say: r ? r.innerText.replace(/\\s+/g,' ').trim() : "",
+                   mapped: !!GROUP.mainbus[0].at }; }""", None, {})
+        ck("unmapping asks now", d1.get("there"), d1)
+        ck("...naming the BU and where it points", "Payments" in d1.get("say", ""), d1.get("say"))
+        ck("...and has unmapped nothing yet", d1.get("mapped") is True, d1)
+        pg.eval_on_selector(".rmask [data-rmnow]", "e => e.click()"); pg.wait_for_timeout(300)
+        ck("...pressing it through unmaps it",
+           ev(pg, "() => !GROUP.mainbus[0].at", None, False))
+
+    # The row's own Remove, with the pen shut. It asks while the row points at
+    # something and lets a bare name go on one press -- the family's rule for
+    # an empty line.
+    shut = ev(pg, """() => {
+      GROUP.mainbus = [{ name:"Payments", at: UNIT_KEYS[0] }];
+      ROWEDIT = null; RMASK = null; paint();
+      return !!document.querySelector('[data-mbdel]');
+    }""", None, False)
+    pg.wait_for_timeout(300)
+    ck("(fixture) the row's Remove is drawn with the pen shut", shut)
+    if shut:
+        pg.eval_on_selector("[data-mbdel]", "e => e.click()"); pg.wait_for_timeout(300)
+        d2 = ev(pg, """() => ({ row: !!document.querySelector('tr.rmaskrow'),
+          say: (document.querySelector('tr.rmaskrow') || {}).innerText || "",
+          n: (GROUP.mainbus || []).length })""", None, {})
+        ck("removing a mapped BU asks", d2.get("row"), d2)
+        ck("...naming what goes with it", "mapping" in d2.get("say", ""), d2.get("say"))
+        ck("...and has removed nothing yet", d2.get("n") == 1, d2)
+        pg.eval_on_selector("tr.rmaskrow [data-rmnow]", "e => e.click()"); pg.wait_for_timeout(300)
+        ck("...pressing it through removes it",
+           ev(pg, "() => (GROUP.mainbus || []).length", None, -1) == 0)
+        ev(pg, """() => { GROUP.mainbus = [{ name:"Spare" }]; ROWEDIT = null; RMASK = null; paint(); }""")
+        pg.wait_for_timeout(300)
+        if ev(pg, "() => !!document.querySelector('[data-mbdel]')", None, False):
+            pg.eval_on_selector("[data-mbdel]", "e => e.click()"); pg.wait_for_timeout(300)
+            ck("a BU pointing at nothing still goes on one press",
+               ev(pg, "() => (GROUP.mainbus || []).length", None, -1) == 0)
+    ck("no browser dialog in any of that", not natives, natives)
+
+    print("\n§10 · and the build is quiet")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

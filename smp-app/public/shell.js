@@ -8982,13 +8982,39 @@ function personIdentified(p){
    row then reads "Strategy custodian · Care" twice and looks like a duplicate
    rather than two real roles over two different things. The kind is part of
    the answer, so it is part of the label. */
-/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers "the
-   group" for a null, which is right on a role chip (a role is always held over
-   something) and wrong in a file column, where blank means "nothing to say"
-   and "the group" would be an assertion nobody made (§65). */
+/* ── THE TOP LEVEL IS CALLED WHAT THE CLIENT CALLS IT (§534) ───────────
+   `topword` has been a real terminology row since §404 — "The level at the
+   top: the group, the company, or the client's own word" — and eight screens
+   read it. The place-naming functions below were not among them: they said
+   "the group" as a literal, so a tenant whose top level is a COMPANY read its
+   own word on the navigation and "the group" on every role chip, every place
+   list and every refusal sentence. One wording, wrong in four places.
+
+   LOWERCASED, because it is read mid-sentence ("held at the company", "Strategy
+   custodian · the company") and the row stores the word as a heading does
+   ("Group", "Company"). That is `client-setup.js`'s own treatment of the same
+   row, so the two agree rather than each choosing a case.
+
+   `labelWord()` and not `L1()`: these functions return PLAIN text that their
+   callers escape (`esc`, `wesc`), and L1 escapes on the way out — so L1 here
+   would escape an ampersand twice. Called from this file as §461's
+   `roleAtWord` already calls it: the scripts are concatenated in build.py's
+   order and these run long after config-render.js has loaded. */
+function topWord(){
+  try {
+    var w = labelWord("topword", "group");
+    if (w) return "the " + String(w).toLowerCase();
+  } catch (e) {}
+  return "the group";
+}
+
+/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers the
+   top level's word for a null, which is right on a role chip (a role is always
+   held over something) and wrong in a file column, where blank means "nothing
+   to say" and naming the top level would be an assertion nobody made (§65). */
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topWord();
   if (String(at).indexOf("cap:") === 0) {
     var cw = capById(String(at).slice(4));
     return (cw ? cw.name : String(at).slice(4)) + " (" + L1("capability").toLowerCase() + ")";
@@ -9009,10 +9035,15 @@ function roleWhereLabel(at){
    names, and for the units remove the word function that comes between
    brackets."
 
-   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
-   because it is also the people workbook's vocabulary — the Unit column is
-   written from it and read back against it (§65), so renaming it would leave
-   every file downloaded before today failing to match.
+   Two changes, and only on the REGISTER. `roleWhereLabel()` keeps its own
+   wording for the units and functions, because it is also the people
+   workbook's vocabulary — the Unit column is written from it and read back
+   against it (§65), so renaming it would leave every file downloaded before
+   today failing to match. §534 moved its word for the TOP LEVEL onto
+   `topword` and that one case is safe for exactly one reason: `placeByLabel()`
+   still accepts "the group" and "group" alongside the client's own word, so a
+   file downloaded before today reads back unchanged. A rename anywhere else
+   in here would not have that, and is still off the table.
 
    1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
        where somebody learned the word: this tenant's `it` unit is "IT Dist." in
@@ -9028,7 +9059,7 @@ function roleWhereLabel(at){
        that is not — the same shape as §81.1's names and §65's own near-miss
        rule: disambiguate the pair that clashes, leave everybody else alone. */
 function placeLabel(at){
-  if (!at || at === "group") return "the group";
+  if (!at || at === "group") return topWord();   /* §534: the client's own word */
   /* §334: a capability is a place now — it has an entry, pages and a row on
      the cycle board, and `placeLabel` is what every one of those names it by.
      Its own name, with no suffix: a capability and a unit sharing a name is
@@ -9525,7 +9556,7 @@ function mergePeople(keepKey, dropKey, picks){
    whose scope is the group has exactly one answer, and the control says so
    rather than offering a list of one. */
 function roleWheres(roleKey){
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:"the group" }];
+  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:topWord() }];
   if (roleKey === "cceo") {
     /* A retired company is not somewhere a new CEO can be seated (§49.3). An
        existing role pointing at one is left alone — restoring the company
@@ -9952,7 +9983,21 @@ function placeOptions(){
 function placeByLabel(name){
   var want = String(name == null ? "" : name).trim().toLowerCase();
   if (!want) return { at:null };
-  if (want === "the group" || want === "group") return { at:"group" };
+  /* THE TOP LEVEL ANSWERS TO THREE NAMES, NOT ONE (§534). The screen now
+     writes the client's own word for it (`topword` — "the company" on a tenant
+     whose top level is a company), and "the group" and "group" are kept
+     BESIDE it rather than replaced: the Unit column is written from
+     `roleWhereLabel()` and read back through here (§65), so a workbook
+     downloaded before today would otherwise arrive with a column this cannot
+     resolve — and it is the one place in the file where an unresolved name
+     means every person at the top level silently detaches. Widening what is
+     accepted can only ever make a file land; narrowing it is what breaks one.
+
+     THE THREE CANNOT COLLIDE, because `topword` names the top level and
+     `placeOptions()` lists only units and functions — and if a client ever did
+     call a unit "Group", this branch answers first and the exact-match below
+     never sees it. That is the pre-§534 behaviour for that name, unchanged. */
+  if (want === "the group" || want === "group" || want === topWord().toLowerCase()) return { at:"group" };
   var opts = placeOptions();
   var exact = opts.filter(function(o){ return o.label.toLowerCase() === want; });
   if (exact.length > 1) return { ambiguous:exact.map(function(o){ return o.label; }) };
@@ -10321,7 +10366,7 @@ function roleAtWord(roleKey){
         : String(w.v).indexOf("fn:") === 0 ? "fn"
         : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
   });
-  var WORD = { group:"the group", unit:"a " + labelWord("unitword","group"),
+  var WORD = { group:topWord(), unit:"a " + labelWord("unitword","group"),
                fn:"a " + labelWord("fnword","group"), co:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";
@@ -56445,9 +56490,44 @@ var WELCOME = (function(){
     try { name = SMPRules.firstName(row); } catch(e){}
     if (!name) name = String(row.name || person.name || "").split(/\s+/)[0] || "";
 
+    /* ── A ROLE OVER ITS OWN THING NAMES ITSELF AND STOPS (§534) ────────
+       Islam's ask, of the chips under the name on this screen: a capability's
+       owner and a direction's owner should read the ROLE and nothing after it.
+       Each printed its place — the capability's own title for one, the top
+       level's word for the other — and neither says anything the role name has
+       not already said.
+
+       THEY LOOKED LIKE ONE FAULT AND WERE TWO. A direction's owner holds a
+       role recorded AT THE TOP LEVEL (§505: `dirowner`, scope "group" —
+       nothing records WHICH direction, because `ownsTopPillar` is what
+       answers that), so the place it printed was the top level's word. A
+       capability's owner and custodian hold theirs at the capability (§412),
+       and `roleWhereLabel()` has named a capability by its own title since
+       §334 — deliberately, because that is the word the cycle board, the
+       register's Unit column, the role chips and the switcher's own dropdown
+       all read.
+
+       SO NEITHER OF THOSE TWO COULD MOVE. Renaming the capability inside
+       `roleWhereLabel()` renames it on five screens, and moving where a
+       direction's role is recorded moves who may open what (§505 ships it at
+       VIEW on the group and NONE everywhere else). What is wrong is only that
+       THIS STRIP prints a place for a role whose place is already in its name
+       — so the place is dropped here, in the one line that prints it, and the
+       two functions that answer *what is this place called* are untouched.
+
+       KEYED ON WHERE THE ROLE IS HELD, not on a list of role keys, because
+       that is the actual question: a role held at a capability has the
+       capability in its name already. That covers the owner (scope "cap", so
+       always there) and the capability's Strategy custodian in one rule, which
+       is what Islam asked for after the first build covered only the owners. A
+       DIRECTION's custodian needs nothing here: being named one derives
+       `dirowner` (§505), so they arrive as a direction owner and are already
+       out. Every other role keeps its place — a unit custodian and a function
+       head read exactly as they did before. */
     var chips = rs.slice(0, 3).map(function(r){
       var where = "";
       try { where = roleWhereLabel(r.at); } catch(e){ where = String(r.at || ""); }
+      if (String(r.at || "").indexOf("cap:") === 0 || r.role === "dirowner") where = "";
       return '<span class="wchip">' + wesc(roleName(r.role)) +
              (where ? " · " + wesc(where) : "") + "</span>";
     });

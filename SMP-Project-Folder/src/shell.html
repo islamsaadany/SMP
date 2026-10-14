@@ -7142,29 +7142,22 @@
               p.name + "?")) return;
           retirePerson(key);
         } else {
-          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4) ────────────────
+          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §533.1) ────────
              It used to hand the person back with nothing, so they returned as
              a Contributor of their unit and nobody was told. A seat somebody
              else has taken up meanwhile is named and NOT offered — restoring
-             one person must never quietly unseat another. */
-          var back = personHeldRoles(key), free = back.filter(function(r){ return !r.taken; });
-          var give = false;
-          if (back.length) {
-            var name = function(r){ return roleName(r.role) + " of " + roleWhereLabel(r.at); };
-            var taken = back.filter(function(r){ return r.taken; });
-            give = confirm(p.name + " held " + plural(back.length, "role") + " when they were retired.\n\n" +
-              (free.length
-                ? "Give back: " + free.map(name).join(", ") + "\n"
-                : "None can be given back.\n") +
-              (taken.length
-                ? "Held by somebody else now, so left alone: " +
-                  taken.map(function(r){ return name(r) + " (" + personName(r.taken) + ")"; }).join(", ") + "\n"
-                : "") +
-              "\nOK gives back what it can. Cancel brings " + p.name +
-              " back with no role \u2014 a Contributor of their unit.");
-            if (!give && !confirm("Bring " + p.name + " back with no role?")) return;
-          }
-          restorePerson(key, give && free.length > 0);
+             one person must never quietly unseat another.
+
+             THE ASKING IS A DIALOG NOW, because the question has three
+             answers and a yes/no box cannot carry three (§533.1). Opened
+             BEFORE the menu is cleared, so the dialog remembers the control
+             to put focus back on; the work happens in its handlers, so this
+             one returns. */
+          var back = personHeldRoles(key);
+          if (back.length) { restoreOpen(key); PMENU = null; paint(); return; }
+          /* Holding nothing, nothing is being decided, so nothing is asked —
+             the row simply becomes active again, as it always has. */
+          restorePerson(key, false);
         }
         /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
            after retiring somebody the panel stayed on screen now reading
@@ -11621,6 +11614,98 @@
     });
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
+  }
+  /* ── RESTORING A PERSON: three answers, so three controls (§533.1) ─────
+     The one place in the product where the browser's box had been made to
+     carry a question with three answers. OK gave back the roles it could,
+     CANCEL brought the person back with no role, and not restoring at all
+     was a SECOND box behind the Cancel.
+
+     Pressing Cancel to mean "yes, but differently" is the opposite of what
+     Cancel means everywhere else here, and the way out of the act sat behind
+     the thing it escapes — four presses, worst case, to do nothing. Worse:
+     Escape, or a browser that has decided to stop showing the box (§95),
+     landed on RESTORE WITH NO ROLE, which is a real change chosen by nobody.
+
+     THE RULE IS UNTOUCHED (§49.4): a seat somebody else holds now is named
+     and not offered. What changes is that each answer carries its own
+     sentence and its own button — the shape Islam signed off for the
+     capability (§325) and again here (design-mockups/restore-a-person/),
+     with the weight on GIVE THEM BACK because that is what somebody reaching
+     for Restore nearly always means.
+
+     NO RETIRED DATE IN THE HEAD. `retirePerson()` records what it took and
+     not when, so the mockup's "Retired 2 Feb 2026" would be a date this
+     platform does not hold — the sub carries the job title and the unit,
+     which it does.
+
+     RESOLVED AT PRESS TIME (§48.2): the answers re-read the person, because
+     the register behind has been repainted since the dialog opened. */
+  function restoreOpen(key){
+    var p = personBy(key); if (!p) return;
+    var back = personHeldRoles(key);
+    var free = back.filter(function(r){ return !r.taken; });
+    var one = back.length === 1;
+    var nm = function(r){
+      return "<b>" + esc(roleName(r.role)) + "</b> of " + esc(roleWhereLabel(r.at));
+    };
+    var say = !free.length
+      ? "Somebody else holds " + (one ? "it" : "them") + " now, so " +
+        (one ? "it cannot" : "none can") + " be given back."
+      : free.length === back.length
+      ? (one ? "It is still free." : "They are all still free.")
+      : plural(free.length, "is still free", "are still free") + ".";
+    var sub = [p.title || "", p.unit ? roleWhereLabel(p.unit) : ""]
+      .filter(function(x){ return x; }).join(" \u00b7 ");
+    openModalHtml(esc("Bring " + p.name + " back?"), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(p.name) + '</b> held ' + plural(back.length, "role") +
+          ' when they were retired. ' + say + '</p>' +
+        '<div class="rolelist">' +
+          back.map(function(r){
+            return r.taken
+              ? '<div class="r taken"><span class="mk">Taken</span><span class="tx">' +
+                  nm(r) + '<span class="sub">' + esc(personName(r.taken)) +
+                  ' holds it now, so it is left alone either way.</span></span></div>'
+              : '<div class="r back"><span class="mk">Free</span><span class="tx">' +
+                  nm(r) + '</span></div>';
+          }).join("") +
+        '</div>' +
+        (free.length
+          ? '<div class="pick safe"><div class="txt">' +
+              '<p class="t">Give back ' +
+                (free.length === back.length && one ? "their role"
+                  : "the " + plural(free.length, "free role")) + '</p>' +
+              '<p class="d">' + esc(p.name) + ' returns as ' +
+                free.map(nm).join(free.length === 2 ? " and " : ", ")
+                    .replace(/, ([^,]*)$/, " and $1") +
+                ', and their sign-in opens again.</p>' +
+            '</div><button class="go" data-rsgive="1">Give ' +
+              (one ? "it" : "them") + ' back</button></div>'
+          : '') +
+        '<div class="pick"><div class="txt">' +
+          '<p class="t">Bring them back with no role</p>' +
+          '<p class="d">A Contributor of their unit. Their sign-in opens' +
+            (free.length
+              ? ', and the ' + plural(free.length, "free role") +
+                ' stay' + (free.length === 1 ? "s" : "") + ' empty until somebody is named.'
+              : '. To give them a role, take it off whoever holds it first.') +
+          '</p></div><button class="keepbtn" data-rsnone="1">' +
+          (free.length ? "No role" : "Bring them back") + '</button></div>' +
+        '<div class="mrow"><button class="quiet" data-rsno="1">Cancel</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rsno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var give = box.querySelector("[data-rsgive]");
+    if (give) give.addEventListener("click", function(){
+      closeModal(); restorePerson(key, true); paint();
+    });
+    var none = box.querySelector("[data-rsnone]");
+    if (none) none.addEventListener("click", function(){
+      closeModal(); restorePerson(key, false); paint();
+    });
   }
   /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ───────
      Islam signed off the drawing with the cost on it: *"ok with the promirting

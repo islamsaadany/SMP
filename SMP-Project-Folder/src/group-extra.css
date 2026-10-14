@@ -521,6 +521,33 @@
     .rmconfirm .ledger .mk { width:auto; }
   }
 
+  /* ── THE ROLES A RESTORE WOULD GIVE BACK, ONE PER LINE (§533.1) ────────
+     The browser's box said them as two runs of commas — "Give back: A, B"
+     and "Held by somebody else now, so left alone: C (Noura)". Three roles
+     in a comma list is readable; six is not, and six is a BU owner who is
+     also custodian of two functions. The WORD at the front of each line is
+     what the answer turns on, so it leads rather than trails. */
+  .rmconfirm .rolelist { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .rolelist .r { display:flex; gap:11px; align-items:baseline;
+    padding:10px 13px; font-size:13px; border-top:1px solid var(--line-soft); }
+  .rmconfirm .rolelist .r:first-child { border-top:0; }
+  .rmconfirm .rolelist .mk { flex:0 0 auto; width:9ch; padding-top:2px;
+    font:700 10.5px/1.4 var(--sans); letter-spacing:.07em; text-transform:uppercase; }
+  .rmconfirm .rolelist .tx { flex:1; min-width:0; line-height:1.5; color:var(--ink-2); }
+  .rmconfirm .rolelist .tx b { color:var(--ink); }
+  .rmconfirm .rolelist .tx .sub { display:block; font-size:12px; color:var(--ink-3);
+    margin-top:1px; }
+  .rmconfirm .rolelist .back .mk { color:var(--good-tx); }
+  /* Taken is not an alarm — nothing is wrong, somebody is simply in the seat
+     — so it wears the page's own quiet ground and the warn ink (§168). */
+  .rmconfirm .rolelist .taken { background:var(--surface-2); }
+  .rmconfirm .rolelist .taken .mk { color:var(--warn-tx); }
+  @media (max-width:520px) {
+    .rmconfirm .rolelist .r { flex-direction:column; gap:2px; }
+    .rmconfirm .rolelist .mk { width:auto; }
+  }
+
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }

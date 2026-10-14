@@ -9644,3 +9644,21 @@ Checked: the check now holds **86 agreements** over 23 addresses in two states (
 **Waiting on Islam:** two decisions, both small, before the rest of step 1:
 1. The capability-deck access divergence above — leave it, or fix it (it is a one-word change and it would widen or narrow who can watch one capability's deck).
 2. Nothing else. The one Part owner role and the per-box one-list-or-split setting are next, still inside step 1, and neither needs an answer to start.
+
+## §532 — A capability's video clips follow its own seats (2026-10-14)
+Your answer to the one thing step 1 left open. The two gates were about the **video clips** on a review — may you play one, may you add or remove one — and they asked "is this a function?", so a capability was judged by the business-unit column. That column cannot see the two seats that sit on the capability itself, so **the capability's own owner could neither play nor add a clip on their own capability's review**, while the SMO could, and so could anybody who happened to own a business unit as well.
+
+Both gates now read the capability's own seats, which is the same rule every other capability decision already uses. Measured over all 33 people before changing it, with the seats empty and filled: **the capability's owner and the holding function's head gain; nobody loses anything, in either case.**
+
+Checked: a new check, 14 agreements, red six ways when broken. It asserts the **list** of who moves rather than a count, and asserts who *loses* first — a check that only said "the owner can now play" would pass over a build that had quietly taken the right off everyone else. It needed a third fixture before it could fail at all: deleting the rule that stops a bounded role speaking for the whole subject left it green, because nobody in the worked example is bounded on a capability. Everything else unchanged: authoriser **1057/0**, graph-diff **140/0**, access baseline **UNMOVED**, platform rules **69/0**, stage 1 rules **38/0**, the box check **UNMOVED**.
+
+## §532.1 — Correcting what I told you about the broken capability tests (2026-10-14)
+I said "four capability assertions have not been running". Measured properly that was wrong in both directions, and the cause is not what I said.
+
+**What is actually broken:** the app folder carries **two stale copies** of test suites that live in `scripts/`. One of them crashes on startup because it looks for a capability on a function the worked example does not put one on, with two projects where there is one — so **183 of its 352 checks never run**. The other reads 3 failures for the same reason. And because the app's test command chains them, the second never runs either.
+
+**But nothing is actually untested.** Both copies are strict subsets of the live suites, and those are green: **1057/0** and **140/0**. Every section that "stops running" runs and passes in the real ones.
+
+**So the real cost is misleading, not missing:** anyone running the app's own test command is told the authoriser is broken when it is not.
+
+**Waiting on Islam — one small choice:** delete the two stale copies and point the app's test command at the two real suites, or add the fixture the copies want (a second capability on a second function) to the worked example. I would delete them — but the fixture is wanted for step 2 anyway, since that is the migration that moves capabilities, so doing both is defensible.

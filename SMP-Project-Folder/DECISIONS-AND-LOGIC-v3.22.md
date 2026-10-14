@@ -65123,3 +65123,36 @@ The last 44 hand-sliced prefix reads are gone, across fifteen files: `shell.html
 Beside it: the authoriser suite **1057/0**, `test-access-unmoved` **UNMOVED**, `test-platform-rules` **69/0**, `test-stage1-rules` **38/0**, `qa.py` **ERRORS: none** (31 script blocks parse), and **38 of the browser checks closest to the changed files** green by exit code — every `capability-*`, `direction-*`, `deck-*`, `access-*`, `client-setup*`, `master-*`, `import-page`, `history-page`, `plan-builder`, `present-loop`, `presentation-timer`, `review-pptx`, `nav-scroll`, `people-dialog`, `foundation-objectives`, `division-functions`, `single-company` and `tour`.
 
 **`checks/welcome.py` reads 1 FAILURE and it is not this change**: *"the place carries no gold underline while Home is open (§403)"*. Identical at `f9b1a80` and at `554b0ef`, measured by rebuilding both and running it. Reported rather than fixed, because the fix is a visual change and those are mocked up first (rule 1c).
+
+## §532 — A capability's video clips follow its own seats
+Islam, asked which of three ways should decide: *"who may watch a capability deck should be set by the capability owner set"*.
+
+**What the two gates actually are.** `mayWatch` and `maySpeakFor` in `api/blob.js` are the VIDEO CLIPS on a review, not the deck as a whole: play one, and add or remove one. §531.2 reported them as the one divergence it preserved — both had only ever tested `fn:`, so a `cap:` target was judged in the **unit** column.
+
+**Why that was wrong, and it is a real fault rather than a tidy.** §412 put a capability's two seats ON the capability, where `roleOwns` already honours them (its first line: a seat held at the capability owns it and nothing else). The unit column cannot see that seat. Measured: a capability's own owner reads `none` in the unit column and `edit` in the function column — so **the capability's owner could neither play nor add a clip on their own capability's review**, while the SMO and anybody who happened to own a unit as well could. The custodian passed only when they also owned a unit, which is an accident of that person and not of the seat.
+
+**Measured over all 33 people of the worked example before choosing** (§303 — measuring after is measuring the change), in both states, because the capability ships with both seats EMPTY and the seat path is invisible until they are filled (§531.1's lesson about this fixture):
+
+| | gains PLAY | gains ADD | loses anything |
+|---|---|---|---|
+| seats empty, as it ships | nobody | the holding function's head | **nobody** |
+| seats filled | the capability's owner | the capability's owner, the function's head | **nobody** |
+
+**The fix is `area`** — the same answer every other capability decision in the platform already reads since §531, not a new rule. One word in each of the two gates.
+
+**Proof.** `scripts/test-capability-clips.js`, **14 agreements**. It asserts the LIST of who moves and not a count, and it asserts who LOSES first and in every state, because a check that only said *"the owner may now play"* would pass over a build that had quietly taken the right off everybody else. It also holds that a unit's, a function's and the top layer's clips are untouched. **It does not copy the two gates' expressions into itself** — it reads them out of `api/blob.js` and runs them, so a rewrite travels into the check and a deletion fails it (`api/blob.js` cannot be required: it reaches for `pg`, which is not installed at the repository root).
+
+**A THIRD STATE, added because the second could not fail.** `maySpeakFor` also refuses an own-rows-only role — §50/§53.5: a picture slide, a video slide, the cycle note and Submit all speak for the whole subject in front of the board. Deleting that guard left the check **green**, because `capowner` is not in `OWN_LINES_ONLY` (`contrib`, the floor, `powner`, `plowner`, `dirowner`) and no bounded role reached the capability in either state. The third state gives the capability's project a bounded owner — §520.6's own case — and `cfo` is used rather than a seat, because they are the only person in the register whose ONLY role reaching this capability is the project owner; a capability's own owner would also hold `capowner` and `every` in `onlyOwnLines` would fail, making the state the first one wearing a label (§113.8 — it was, the first try). Proved able to fail **six** ways: either gate back to the unit column, `mayWatch` testing truth instead of the word (§104.10's own old fault), the bounded guard deleted, the edit-grant test deleted, and a gate rewritten so the check cannot lift it — **red each time**.
+
+Unchanged beside it: the authoriser suite **1057/0**, `test-access-unmoved` **UNMOVED** (that baseline reads `grantAtPage`, which these two gates are not, so it was never going to move — said so rather than offered as proof), `test-graph-diff` **140/0**, `test-platform-rules` **69/0**, `test-stage1-rules` **38/0**, `test-box-ref` **UNMOVED, 86**.
+
+## §532.1 — `smp-app/tests/` carries two stale copies of suites that live in `scripts/`
+Reported at §531 as *"four capability assertions have not been running"*. **Measured properly, that was both overstated and understated, and the cause is not what I said.**
+
+- `smp-app/tests/authorize.cjs` **throws at load**, inside its §147.7 section: `capOf()` looks for a capability on function `it` with at least **two projects**, and the worked example holds one capability, on `marketing`, with one project. So **183 of its 352 assertions never run** — its sections 18 through 35.
+- `smp-app/tests/graph-diff.cjs` reads **129/3**: its §216 section wants capabilities across several functions, and the seed has one on one.
+- `npm run test:rules` in `smp-app` chains the two with `&&`, so the first one's non-zero exit means the second never runs either.
+
+**But nothing is actually unchecked.** Both files are **stale duplicates**. The live suites are `scripts/test-authorize.js` (**5,899 lines, 1057/0**) and `scripts/test-graph-diff.js` (**140/0**), and a diff of the § numbers each file cites shows the app copies are **strict subsets** — every section in them is in the live ones, which additionally cover §063, §130.7, §147.8, §215, §249.3, §255, §313.32, §324 and §326. So the sections that "stop running" all run, and pass, in `scripts/`.
+
+**What it costs, which is the real finding:** `npm run test:rules` inside `smp-app` crashes, so whoever runs the app's own test command is told the authoriser is broken when it is not. Left as it is pending Islam's word on the remedy: delete the two copies and point `test:rules` at the two suites in `scripts/`, or carry the fixture the copies want into the seed. The first is a deletion and the second adds a second capability on a second function to every client's worked example — and stage 3b is the migration that moves capabilities, so that fixture is wanted there anyway.

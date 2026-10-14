@@ -112,24 +112,40 @@ function targetOfPath(p) {
    the reading grant rather than the reporting one — but "none" is a WORD, and
    testing the answer for truth rather than for its value is what let everybody
    watch everything (see the note at the call site). */
-/* §531: THESE TWO ASK `kind`, NOT `area`, AND THAT IS DELIBERATE. Every other
-   converted site reads `boxRef(t).area`, which answers "fn" for a capability
-   as well as a function (§334: a capability's access comes from the function
-   that holds it). These two have only ever tested `fn:`, so a `cap:` target is
-   judged here in the UNIT area — which looks like the fault §334 and the
-   paragraph above `areaOfTarget` both record. Stage 3a MOVES NO ANSWER, so it
-   is preserved exactly and reported rather than fixed inside a refactor: a
-   capability's deck is a reading grant and changing which column decides it is
-   an access change, which is Islam's to see first. */
+/* ── A CAPABILITY'S CLIPS ARE ITS OWNER'S (§532) ──────────────────────
+   Islam, shown the measurement below: *"who may watch a capability deck should
+   be set by the capability owner set"*.
+
+   These two gates are the video clips on a review: `mayWatch` is may this
+   person PLAY one, `maySpeakFor` is may they ADD or REMOVE one. Both had only
+   ever tested `fn:`, so a `cap:` target was judged in the UNIT column — and
+   §412 put a capability's two seats ON the capability, where `roleOwns`
+   already honours them (its first line: a seat held at the capability owns it
+   and nothing else). The unit column cannot see that seat, so the capability's
+   own OWNER could neither play nor add a clip on their own capability's
+   review, while the SMO and anybody who happened to own a unit as well could.
+
+   MEASURED OVER ALL 33 PEOPLE OF THE WORKED EXAMPLE, both with the
+   capability's seats empty (as it ships) and filled, before choosing — because
+   this is an access change and the only honest way to put one is the list of
+   who moves (§303):
+
+     seats empty    gains ADD: the holding function's head.  Loses: nobody.
+     seats filled    gains PLAY: the capability's owner.
+                     gains ADD: the capability's owner, the function's head.
+                     Loses: nobody, in either state.
+
+   So the answer is `area`, which is what every other capability decision in
+   the platform already reads (§531) — not a new rule, the same one. The
+   custodian passed before only when they happened to own a unit too, which is
+   an accident of that person and not of the seat. */
 function mayWatch(world, person, target) {
-  const isFn = R.boxRef(target).kind === "fn";
-  const g = R.grantIn(world, person, isFn ? "fn" : "unit", target);
+  const g = R.grantIn(world, person, R.boxRef(target).area, target);
   return !!g && g !== "none";
 }
 
 function maySpeakFor(world, person, target) {
-  const isFn = R.boxRef(target).kind === "fn";
-  const area = isFn ? "fn" : "unit";
+  const area = R.boxRef(target).area;
   if (R.grantIn(world, person, area, target) !== "edit") return false;
   if (R.onlyOwnLines(world, person, area, target)) return false;
   return true;

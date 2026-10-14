@@ -210,7 +210,13 @@ with sync_playwright() as p:
     # cycle this check drives starts one press earlier. §51.11: a check keyed on
     # markup that moved does not fail, it passes quietly.
     pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
-    pg.click(".newcycle [data-closecycle]"); pg.wait_for_timeout(600)
+    pg.click(".newcycle [data-closecycle]"); pg.wait_for_timeout(400)
+    # §533.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
+    # beside it has always used, so the turn of the cycle this check drives
+    # takes one more press. §51.11 from the other side: a check keyed on a
+    # control that grew a question does not fail usefully, it hangs for 30
+    # seconds on the NEXT control and reports a timeout nobody can read.
+    pg.click(".overlay.on [data-ccyes]"); pg.wait_for_timeout(600)
     pg.click("[data-opencycle]"); pg.wait_for_timeout(400)
     pg.fill("#nc-name", "H2 2026")
     # §239: A CYCLE IS NOW OPENED WITH A REVIEW POINT, and it is picked rather
@@ -233,7 +239,13 @@ with sync_playwright() as p:
     ck("the new cycle carries the month it covers to",
        pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to") == "Dec 2026",
        pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to"))
-    pg.click("[data-nc-go]"); pg.wait_for_timeout(800)
+    pg.click("[data-nc-go]"); pg.wait_for_timeout(400)
+    # §533.3: AND OPENING ASKS BEFORE IT ARCHIVES. It used to archive, ask
+    # in a browser box, and undo the archive on Cancel; the archive this
+    # section is about is filed on the answer now, so the answer has to be
+    # given or "the run was archived first" reads 0 against a build that is
+    # behaving correctly.
+    pg.click(".overlay.on [data-ncyes]"); pg.wait_for_timeout(800)
 
     after = pg.evaluate("""(ids) => {
       const caps = [fnOwnHolder("finance")];

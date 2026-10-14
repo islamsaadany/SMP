@@ -10591,21 +10591,63 @@
         var path = b.dataset.viddel;
         var row = vidStoreRows().filter(function(r){ return r.path === path; })[0];
         if (!row) return;
-        if (!confirm("Delete this clip for good?\n\n" +
-              (row.name || path) + " — " + vidSize(row.bytes) + ", from " + row.where +
-              "\n\nThe slide stays where it is and will say the clip was removed. " +
-              "The bytes cannot be brought back.")) return;
-        vidStoreDrop([path]);
+        destroyConfirmOpen({
+          title: "Delete this clip for good?",
+          sub: row.where + (row.title ? " \u00b7 " + row.title : ""),
+          /* The file, its size and WHEN, which the table beside the button
+             carries and the browser's box did not: two site visits of the
+             same name are told apart by the date and by nothing else. */
+          goes: "<b>" + esc(row.name || path.split("/").pop()) + "</b> \u2014 " +
+                esc(vidSize(row.bytes)) +
+                (row.at ? ", uploaded " + esc(String(row.at).slice(0, 10)) : ""),
+          goesWhy: "The file itself. This is the only thing in the platform where " +
+                   "the bytes are destroyed rather than archived.",
+          stays: "The slide, in its place in the review",
+          staysWhy: "It will say the clip was removed. Nothing else about the review " +
+                    "changes, and no figure moves.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files. If the clip is needed again it has " +
+                 "to be uploaded again.",
+          yesWord: "Delete the clip",
+          onYes: function(){ vidStoreDrop([path]); }
+        });
       });
     });
     document.querySelectorAll("[data-viddelold]").forEach(function(b){
       b.addEventListener("click", function(){
-        var old = vidStoreRows().filter(function(r){ return !r.open; });
+        var all = vidStoreRows();
+        var old = all.filter(function(r){ return !r.open; });
         if (!old.length) return;
-        if (!confirm("Delete " + plural(old.length, "clip") + " for good, freeing " +
-              vidSize(vidStoreBytes(old)) + "?\n\nNothing on the review that is open " +
-              "now is touched. The bytes cannot be brought back.")) return;
-        vidStoreDrop(old.map(function(r){ return r.path; }));
+        var keep = all.filter(function(r){ return r.open; });
+        /* §186 AT TWELVE TIMES THE REACH. The single clip's question names
+           its file, its size and its review; this one named a COUNT, and a
+           count catches none of the mistakes a confirmation exists for — if
+           one of the twelve is something somebody wanted, nothing here said
+           so. The list is the question. */
+        destroyConfirmOpen({
+          title: "Delete " + plural(old.length, "clip") + " for good?",
+          sub: "Everything not on a slide in " + REVIEW.name,
+          lead: "These " + plural(old.length, "clip") + " are on slides in reviews that " +
+                "have closed. Deleting them frees <b>" + esc(vidSize(vidStoreBytes(old))) + "</b>.",
+          list: '<div class="scroll"><table><thead><tr><th>File</th><th>Review</th>' +
+            '<th class="cc">Size</th></tr></thead><tbody>' +
+            old.map(function(r){
+              return "<tr><td><b>" + esc(r.name || r.path.split("/").pop()) + "</b></td>" +
+                "<td>" + esc(r.where) + "</td>" +
+                '<td class="cc">' + esc(vidSize(r.bytes)) + "</td></tr>";
+            }).join("") + "</tbody></table></div>",
+          stays: keep.length
+            ? "The " + plural(keep.length, "clip") + " on slides in " + esc(REVIEW.name)
+            : "Every slide, in its place",
+          staysWhy: (keep.length
+            ? "The review that is open now is not touched. "
+            : "") + "Every slide in the closed reviews stays where it is and says its " +
+            "clip was removed.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files.",
+          yesWord: "Delete " + plural(old.length, "clip"),
+          onYes: function(){ vidStoreDrop(old.map(function(r){ return r.path; })); }
+        });
       });
     });
     document.querySelectorAll("[data-vidrefresh]").forEach(function(b){
@@ -10615,10 +10657,34 @@
       b.addEventListener("click", function(){
         var a = ARCHIVES.filter(function(x){ return x.id === b.dataset.forget; })[0];
         if (!a) return;
-        if (!confirm("Delete " + a.name + "'s archive of " + a.at +
-                     " for good? This is the one thing here that cannot be undone.")) return;
-        forgetArchive(a.id);
-        paint();
+        /* FORGET, NOT DELETE, on the button and in the question (Islam's
+           pick): the thing in front of you is already the record of
+           something cleared, and "delete the archive of the deletion" is a
+           sentence nobody can hold. The platform's own function has always
+           been called `forgetArchive`. */
+        var fig = a.kind === "figures";
+        destroyConfirmOpen({
+          title: "Forget this archive for good?",
+          sub: a.name + " \u00b7 archived " + a.at,
+          /* `archiveHeld()` is the row's own builder (§53.5) and is already
+             markup, so it is not escaped again. */
+          goes: "<b>" + archiveHeld(a) + "</b> from " + esc(a.name),
+          goesWhy: (a.by ? "Filed by " + esc(a.by) : "Filed") +
+                   (a.why ? " \u2014 " + esc(a.why) : "") +
+                   ". This archive is the only copy.",
+          stays: fig
+            ? esc(a.name) + "\u2019s closed score, and this cycle\u2019s figures"
+            : "The plan standing now",
+          staysWhy: fig
+            ? "The history keeps a score per unit. What it has never kept is the raw " +
+              "figures, which is what this archive holds."
+            : "This is the plan it replaced; what is live now is untouched.",
+          noway: "<b>There is no way back, and no way back to the plan either.</b> " +
+                 "<b>Restore</b> on this row is the undo for the change that filed it \u2014 " +
+                 "forgetting the archive takes that away too.",
+          yesWord: "Forget this archive",
+          onYes: function(){ forgetArchive(a.id); paint(); }
+        });
       });
     });
     /* The receipt's way back for a capability: its function's pages. */
@@ -11389,6 +11455,57 @@
     if (no) no.addEventListener("click", function(){ closeModal(); });
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
+  }
+  /* ── DELETING FOR GOOD: the three acts with nothing behind them (§533) ──
+     `rmConfirmOpen()`'s opposite number, and the reason it is a second
+     builder rather than a flag on the first: that one closes by saying the
+     plan is archived first and where the way back is, and these three have
+     no way back to offer. A flag would leave one function whose two halves
+     share nothing but their buttons.
+
+     THREE CALLERS, all on Setup › Import & storage: a clip's bytes, every
+     clip outside the open review, and a filed archive. Everything else in
+     the product that reads like a deletion archives first — an imported
+     plan, a pillar, a project, a retired person — so these are the whole of
+     the exception, and the mockup Islam signed off
+     (design-mockups/delete-for-good/) is their shape: what goes, what stays,
+     there is no way back, and the ACT on the button rather than "Okay".
+
+     WHAT STAYS IS NOT PADDING. It is the half the browser's box was worst at
+     and the half somebody hesitates over — the fear is rarely "will this
+     delete" and nearly always "what does it take with it". Two of the three
+     leave something standing that reads as if it should have gone with the
+     rest (a slide, a closed cycle's score), and saying so is the answer to
+     the question actually being asked.
+
+     RESOLVED AT PRESS TIME (§48.2), like every other dialog here: `onYes` is
+     a function, never a closure over a row read when the dialog was drawn.
+     `goes` and `stays` carry HTML, so every caller escapes its own values —
+     `archiveHeld()` is already markup and would be shown as its own source
+     otherwise. */
+  function destroyConfirmOpen(o){
+    var led =
+      (o.goes ? '<div class="lrow goes"><span class="mk">Goes</span><span class="tx">' +
+        o.goes + (o.goesWhy ? '<span class="sub">' + o.goesWhy + '</span>' : '') +
+        '</span></div>' : '') +
+      (o.stays ? '<div class="lrow stays"><span class="mk">Stays</span><span class="tx">' +
+        o.stays + (o.staysWhy ? '<span class="sub">' + o.staysWhy + '</span>' : '') +
+        '</span></div>' : '');
+    openModalHtml(esc(o.title), esc(o.sub || ""),
+      '<div class="rmconfirm">' +
+        (o.lead ? '<p>' + o.lead + '</p>' : '') +
+        (o.list || '') +
+        (led ? '<div class="ledger">' + led + '</div>' : '') +
+        '<p class="noway">' + o.noway + '</p>' +
+        '<div class="mrow"><button class="quiet" data-dstno="1">Cancel</button>' +
+        '<button class="danger" data-dstyes="1">' + esc(o.yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-dstno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-dstyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); o.onYes(); });
   }
   /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the

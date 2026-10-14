@@ -472,6 +472,55 @@
     .rmconfirm .pick button { width:100%; }
   }
 
+  /* ── DELETING FOR GOOD: what goes, what stays, and no way back (§533) ──
+     Three acts in the product take something away with nothing behind them:
+     a clip's bytes, a batch of them, and a filed archive. Everything else
+     that reads like a deletion archives first and `.archline` says so — so
+     this block is the shape for the three that cannot, and `.noway` is
+     `.archline`'s opposite: same place in the dialog, the other answer.
+
+     TWO ROWS, NOT ONE PARAGRAPH. The browser's box these replace held one
+     run of text, so what goes, what stays and there is no way back arrived
+     as one paragraph with blank lines in it. The mockup Islam signed off
+     (design-mockups/delete-for-good/) splits them, because WHAT STAYS is the
+     half the box was worst at and the half somebody hesitates over: the fear
+     is rarely "will this delete" and nearly always "what does it take with
+     it". The ground is --bad-bg under what goes and nothing under what
+     stays — the alarm is spent once, on the half that earns it (§41). */
+  .rmconfirm .ledger { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .ledger .lrow { display:flex; gap:12px; padding:11px 13px;
+    font-size:13px; line-height:1.5; border-top:1px solid var(--line-soft); }
+  .rmconfirm .ledger .lrow:first-child { border-top:0; }
+  .rmconfirm .ledger .mk { flex:0 0 auto; width:7ch; padding-top:2px;
+    font:700 12px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+  .rmconfirm .ledger .tx { flex:1; min-width:0; }
+  .rmconfirm .ledger .tx b { color:var(--ink); }
+  .rmconfirm .ledger .tx .sub { display:block; color:var(--ink-3);
+    font-size:12.5px; margin-top:2px; line-height:1.45; }
+  .rmconfirm .ledger .goes { background:var(--bad-bg); }
+  .rmconfirm .ledger .goes .mk { color:var(--bad-tx); }
+  .rmconfirm .ledger .goes .tx { color:var(--ink); }
+  .rmconfirm .ledger .stays .mk { color:var(--good-tx); }
+  .rmconfirm .ledger .stays .tx { color:var(--ink-2); }
+  /* `.archline`'s opposite, and deliberately the same size and place: the one
+     sentence the rest of the product can never truthfully say. */
+  .rmconfirm .noway { font-size:12.5px; color:var(--bad-tx); margin:0 0 16px;
+    line-height:1.45; }
+  .rmconfirm .noway b { font-weight:700; }
+  /* THE LIST OF WHAT GOES SCROLLS AND THE DIALOG DOES NOT GROW. Twelve clips
+     named is the whole reason the bulk question is worth asking (§186: a
+     confirmation that does not say which line catches none of the mistakes
+     it exists for) — and twelve rows unrolled would push the buttons off a
+     laptop. Seven are visible and the rest are reached. */
+  .rmconfirm .scroll { max-height:168px; overflow-y:auto; margin:0 0 14px; }
+  .rmconfirm .scroll table { font-size:12.5px; }
+  .rmconfirm .scroll th { position:sticky; top:0; background:var(--surface-2); }
+  @media (max-width:520px) {
+    .rmconfirm .ledger .lrow { flex-direction:column; gap:3px; }
+    .rmconfirm .ledger .mk { width:auto; }
+  }
+
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }

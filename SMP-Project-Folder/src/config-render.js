@@ -6829,6 +6829,26 @@ function renderImportUpload(){
    nervous one: an upload never deletes, and the proof is a list you can read.
 
    The only destructive control in the import flow is Delete, and it asks. */
+/* WHAT AN ARCHIVE HOLDS, SAID IN ONE PLACE (§53.5). The row prints it and
+   the Forget dialog repeats it back before destroying it — two copies of
+   this is how the table and the question come to disagree about what is
+   about to be lost, which is the one disagreement that question cannot
+   survive. Three kinds: a unit's plan, a capability's plan, and a CYCLE's
+   figures, taken when a new cycle clears the last one's numbers (§49.1). */
+function archiveHeld(a){
+  var c = (a && a.counts) || {};
+  return a.kind === "figures"
+    ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
+       plural(c.units || 0, "submitted unit")].join(" &middot; ")
+    : a.kind === "foundation"
+    ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : a.kind === "unit"
+    ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")),
+       plural(c.tactics, L1("tactic"), L("tactic")),
+       plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
+    : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
+       c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+}
 function renderArchives(){
   var can = grant("c_import") === "edit";
   if (!ARCHIVES.length)
@@ -6840,21 +6860,11 @@ function renderArchives(){
 
   var rows = ARCHIVES.map(function(a){
     var c = a.counts || {};
-    /* Three kinds now: a unit's plan, a capability's plan, and a CYCLE's
-       figures — taken when a new cycle clears the last one's numbers (§49.1).
-       A figures archive belongs to no one unit, so it is always restorable. */
-    var held = a.kind === "figures"
-      ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
-         plural(c.units || 0, "submitted unit")].join(" &middot; ")
-      : a.kind === "foundation"
+    var held = archiveHeld(a) +
       /* §524: the six parts of a Foundation, replaced from the Copilot. */
-      ? [plural(c.parts || 0, "part"), plural(c.objectives || 0, L1("keyobj"), L("keyobj"))].join(" &middot; ") +
-        '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
-      : a.kind === "unit"
-      ? [plural(c.pillars, L1("pillar"), L("pillar")), plural(c.measures, L1("measure"), L("measure")), plural(c.tactics, L1("tactic"), L("tactic")),
-         plural(c.objectives, L1("keyobj"), L("keyobj"))].join(" &middot; ")
-      : [plural(c.projects, L1("project"), L("project")), c.deliverables + " deliverables",
-         c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+      (a.kind === "foundation"
+        ? '<span class="why">Foundation only &mdash; the plan beneath it is untouched</span>'
+        : '');
     /* unitLike, never UNITS[] (§232): a pillars function's archive is keyed
        `fn:<key>`, and asking UNITS printed "cannot be restored" for a
        function still on the platform — the same one-line fault as the
@@ -6878,7 +6888,7 @@ function renderArchives(){
           : '<span class="why">nothing reported</span>') + '</td>' +
       '<td class="cc">' + (can && live
         ? '<button class="editbtn" data-restore="' + esc(a.id) + '">Restore</button> ' +
-          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Delete</button>'
+          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Forget</button>'
         : '<span class="pill none">View only</span>') + '</td></tr>';
   }).join("");
 

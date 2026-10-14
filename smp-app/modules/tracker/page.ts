@@ -34,7 +34,8 @@ import { clientHref, MODULE_DEF, type ModuleKey } from "../../lib/modules.ts";
 import {
   type Action, type Who, type View, type Group, type Format, type Person, type Event, VIEWS, VIEW_WORD, STATUSES, STATUS_WORD, GROUPS, GROUP_WORD,
   FORMATS, FORMAT_WORD, todayIn, weekOf, weekLabel, readableDay, isLate, carriedWeeks, lateWord, inView, summary, mayChange,
-  thursdayOf, weekWord, sameWeek, weekOptions,
+  thursdayOf, weekWord, sameWeek, weekOptions, weekDays, weekInMonth,
+  type CheckWeek, CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay, topicShown,
   officeRows, namesOf, shortNames, listActions, eventsOf, listTopics, type Topic,
 } from "../../lib/tracker.ts";
 
@@ -110,6 +111,51 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .tmenu{display:grid;min-width:150px}
 .tmenu button.danger{color:var(--bad)}
 .tmenu .sure{display:grid;gap:4px;padding:4px 9px;font-size:13px;color:var(--ink-2);max-width:220px;white-space:normal}
+/* TOPICS JOINS THE TWO SETTINGS (§533), on a row of its own under them
+   because it is not a third way of reading the list — it is the list of
+   topics itself. So the menu stacks: the two columns, then the way in. */
+.setmenu{display:grid}
+.setmenu .two{display:flex;gap:4px}
+.setmenu .sep{display:block;border-top:1px solid var(--line);margin:2px 3px 0;padding-top:3px}
+.setmenu .sep button{width:100%}
+.setmenu .sep svg{width:14px;height:14px;color:var(--ink-3);flex:none}
+.setmenu .sep .arr{margin-left:auto;color:var(--ink-3);display:grid}
+.setmenu .sep .arr svg{width:12px;height:12px}
+/* THE TOPICS PANEL (§533): every topic on this client, open and closed, and
+   the ones with no actions on them — which the page could not reach at all
+   before, because a heading is only drawn over rows that are in view. */
+.tpanel{position:absolute;top:32px;right:0;z-index:9;width:380px;max-width:min(380px,calc(100vw - 48px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,28,43,.2);text-align:left}
+.tpanel .ph{display:flex;align-items:center;gap:8px;padding:9px 12px 8px;border-bottom:1px solid var(--line)}
+.tpanel .ph .lab{font:600 10.5px/1.6 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.tpanel .ph .hint{margin-left:auto;font:400 12px/1.4 var(--font);color:var(--ink-3)}
+.tlist{display:block;max-height:304px;overflow-y:auto}
+.trow{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto 24px;gap:9px;align-items:center;padding:4px 8px 4px 12px;border-bottom:1px solid var(--line-2)}
+.trow:last-child{border-bottom:0}
+.trow:hover{background:var(--ground)}
+.trow .nm{min-width:0;display:flex;align-items:center;gap:7px;font:400 14.5px/1.35 var(--font);color:var(--ink);background:none;border:0;border-radius:6px;padding:4px 5px;margin-left:-5px;cursor:text;text-align:left}
+.trow .nm .who2{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .nm svg{width:13px;height:13px;color:var(--gold);opacity:0;flex:none}
+.trow:hover .nm svg,.trow .nm:focus-visible svg{opacity:1}
+.trow .nm:focus-visible{outline:none;background:var(--surface-2)}
+.trow .shut{font:600 9.5px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:3px 6px;flex:none}
+.trow .ct{font:500 12px/1 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.trow .ct.nil{font-style:italic}
+.trow .tdots>button{background:none;border:0;border-radius:6px;color:var(--ink-3);padding:3px 5px;cursor:pointer;display:grid;place-items:center}
+.trow .tdots{position:relative}
+.trow .tdots>button:hover,.trow .tdots>button.on{background:var(--surface-2);color:var(--ink)}
+.trow .tdots svg{width:16px;height:16px}
+.trow .tmenu{top:26px;z-index:11}
+.trow input{display:block;width:100%;min-width:0;font:400 14.5px/1.3 var(--font);color:var(--ink);background:var(--surface);border:1.5px solid var(--gold);border-radius:7px;padding:4px 8px;outline:none}
+/* While a name is being typed over, the line is the box and nothing else:
+   the count and the ⋯ would only be in the way of the one thing being done. */
+.trow.edit{background:var(--gold-bg)}
+.trow.edit input{grid-column:1/-1}
+.trow.edit .ct,.trow.edit .tdots{display:none}
+.tpanel .tadd{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);padding:7px 12px}
+.tpanel .tadd .pl{color:var(--gold);font-weight:600}
+.tpanel .tadd input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:400 14px/1.5 var(--font);padding:2px 0;outline:none}
+.tpanel .tadd input::placeholder{color:var(--ink-3)}
+.tpanel .tnone{padding:14px 12px;font-size:13.5px;color:var(--ink-3)}
 /* the tools: write the next action, or search */
 .tools{display:flex;gap:18px;align-items:stretch;margin:0 0 22px;flex-wrap:wrap}
 .write{flex:1 1 380px;min-width:0;border-bottom:1.5px solid var(--gold)}
@@ -121,6 +167,10 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 .cnt{font:500 12.5px/1 var(--font);color:var(--ink-3);white-space:nowrap}
 .find .cnt{display:none}
 .counted{font:500 12.5px/1 var(--font);color:var(--ink-3);margin:-14px 0 18px;text-align:right}
+/* THE CHECK COUNTS TOPICS, NOT ACTIONS (§532), and says how far through the
+   meeting you are: the gold is what is still owed to next week. */
+.counted.ck{text-align:left;margin:4px 0 4px;font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase}
+.counted.ck .left{color:var(--gold)}
 .list{display:flex;flex-direction:column}
 .none{padding:30px 4px 10px;color:var(--ink-3);font-size:14px;max-width:60ch}
 .none b{color:var(--ink);font-weight:600;display:block;font-size:15.5px;margin-bottom:6px}
@@ -150,7 +200,13 @@ h2.pt{margin:0;font:600 24px/1.15 var(--font);letter-spacing:-.01em;color:var(--
 /* DONE FOLDS UNDER ITS SECTION (§497): a section shows what is still to do,
    and "N done ›" opens the rest. A row ticked a moment ago stays where the
    hand left it, and an opened row always shows. */
-.sec:not(.showdone) .row.done:not(.fresh):not(.on){display:none}
+/* ...BUT NEVER ON THE WEEKLY CHECK (§532), where a finished action is not
+   something to fold away: last week's card holds nothing else, so this rule
+   emptied it and left a card standing over nothing — the very thing §497
+   refused for headings, in a box. A done row ticked during the meeting also
+   has to stay where the hand left it, under this week. Caught by drawing the
+   real page and looking at it, not by reading this file. */
+.sec:not(.showdone) .row.done:not(.fresh):not(.on):not(.chk){display:none}
 /* the row: tick · name · when · owner · status · the arrow */
 .row{display:grid;grid-template-columns:20px minmax(0,1fr) 132px 84px 64px 128px 26px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line-2)}
 .row .t{min-width:0;font-size:15px;line-height:1.35}
@@ -273,7 +329,46 @@ select.st option{text-transform:none;letter-spacing:0;color:var(--ink);backgroun
 .said{margin:0 0 12px;padding:9px 13px;border:1px solid var(--bad);border-radius:8px;background:var(--bad-bg);color:var(--bad);font-size:13.5px}
 .said:empty{display:none}
 .unread{margin:0 0 12px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink-2);font-size:13.5px}
+/* ══ THE WEEKLY CHECK (§532) ═══════════════════════════════════════════
+   EACH WEEK INSIDE A TOPIC IS ITS OWN CARD — option D of the four put to
+   Islam, chosen over the band this file would otherwise have drawn. Nothing
+   can be mistaken for belonging to the wrong week, and this week's is the
+   only one lit: last week plain, this week ringed in gold, next week a
+   dashed outline with no fill, which says "not written yet" as a shape
+   rather than as a second word. Measured before it was built: four topics
+   stand 1258px, about one and a half laptop screens. */
+.blk{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:10px 0 0}
+.blk.now{border-color:var(--gold);box-shadow:0 2px 10px rgba(156,93,8,.10)}
+.blk.next{border-style:dashed;background:transparent}
+.wkh{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:9px 9px 0 0;font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.wkh .days{margin-left:auto;font:500 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.blk.now .wkh{background:var(--gold-bg);border-bottom-color:var(--gold);color:var(--gold)}
+.blk.now .wkh .days{color:var(--gold)}
+.blk.next .wkh{background:transparent;border-bottom-style:dashed;color:var(--gold)}
+/* The row sheds two columns here: the heading says the topic and the card
+   says the week (§87), so what is left is the tick, the name, how late it
+   is, the owner, the status, the carry and the arrow. */
+.row.chk{grid-template-columns:20px minmax(0,1fr) 84px 64px 128px 140px 26px;padding:9px 14px}
+.row.chk:last-child{border-bottom:0}
+.blk .row.on{background:var(--surface-2)}
+.blk .open{padding-left:46px;padding-right:14px}
+.carry{display:inline-flex;align-items:center;gap:6px;font:500 12.5px/1 var(--font);color:var(--gold);background:none;border:1px solid transparent;border-radius:7px;padding:5px 8px;white-space:nowrap;cursor:pointer;justify-self:start}
+.carry svg{width:13px;height:13px;flex:none}
+.carry:hover,.carry:focus-visible{border-color:var(--gold);background:var(--gold-bg);outline:none}
+.carry.off{visibility:hidden}
+/* THE WRITE LINE SITS IN THE TOPIC IT IS FOR, and it is the SAME line the
+   page writes at the top — one renderer, one behaviour (§53.5) — with its
+   topic fixed by the card it stands in and its week already Next week. */
+.addrow.chk{grid-template-columns:20px minmax(0,1fr) auto auto auto 0 26px;padding:7px 14px;gap:10px}
+.addrow.chk .when,.addrow.chk .who,.addrow.chk .more{visibility:visible}
+.addrow.chk .ent{font:600 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:4px 6px;white-space:nowrap}
+.blk .quiet{padding:10px 14px;font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic}
+.sec .asleep{font:400 13.5px/1.4 var(--font);color:var(--ink-3);font-style:italic;padding:10px 0 0}
 @media (max-width:760px){.strip{gap:14px}.open{grid-template-columns:1fr;padding-left:4px}
+  .row.chk{grid-template-columns:20px minmax(0,1fr) auto 26px;grid-template-areas:"tick t t more" ". when st more" ". carry carry carry"}
+  .row.chk .tick{grid-area:tick}.row.chk .tn2{grid-area:t}.row.chk .st{grid-area:st}.row.chk .when{grid-area:when}.row.chk .who{display:none}.row.chk .carry{grid-area:carry}.row.chk .more{grid-area:more}
+  .addrow.chk{grid-template-columns:20px minmax(0,1fr) 26px}.addrow.chk .when,.addrow.chk .who,.addrow.chk .ent{display:none}
+  .tpanel{width:min(380px,calc(100vw - 32px))}
   .addrow{grid-template-columns:20px minmax(0,1fr) 26px}.addrow .tpk,.addrow .when,.addrow .who,.addrow .st{display:none}
   .row{grid-template-columns:20px minmax(0,1fr) auto auto 26px;grid-template-areas:"tick t t st more" ". when tcol who more"}.row .tick{grid-area:tick}.row .tn2{grid-area:t}.row .tcol{grid-area:tcol;justify-self:start}.row .st{grid-area:st}.row .when{grid-area:when}.row .who{grid-area:who}.row .more{grid-area:more}
   .team,.weeks,.topics{right:auto;left:0}}
@@ -421,23 +516,50 @@ const PEN = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13l1-3 7-7 
 const LENS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const CARET = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const DOTS3 = '<svg class="d3" viewBox="0 0 16 16" aria-hidden="true"><circle cx="3" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="13" cy="8" r="1.4" fill="currentColor"/></svg>';
+const LINES = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+const RIGHT = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 
 /* THE ROW (§497): tick · the name, with its topic beside it unless the list
    is grouped by topic (the heading says it then, §87) · when · owner · the
    status as a word · the arrow. A late row's tick is ringed in the alarm. */
-function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group): string {
+function row(a: Action, L: Loaded, who: Who, today: string, dates: Format, opened: boolean, group: Group, chk = false): string {
   const live = brk() === "who-everyone" ? true : mayChange(a, who);
   const late = a.status !== "done" && !!a.due && isLate(a.due, today);
-  return '<div class="row' + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
+  return '<div class="row' + (chk ? " chk" : "") + (a.status === "done" ? " done" : "") + (late ? " late" : "") + (opened ? " on" : "") + '" data-id="' + esc(a.id) + '" data-status="' + a.status + '">' +
     '<button class="tick" type="button" role="checkbox" aria-checked="' + (a.status === "done") + '" aria-label="' + (a.status === "done" ? "Mark not done" : "Mark done") + '"' +
     (live ? ' data-act="tick"' : " disabled") + ">" + (a.status === "done" ? TICK : "") + "</button>" +
     '<div class="tn2"><div class="t"' + (live ? ' data-rename="1" title="Double-click to rename"' : "") + ">" + esc(a.title) + "</div></div>" +
-    topicCell(a, L, live, group) +
-    whenCell(a, today, dates, live) +
+    (chk ? "" : topicCell(a, L, live, group)) +
+    (chk ? checkWhenCell(a, today, dates, live) : whenCell(a, today, dates, live)) +
     whoCell(a, L, live) +
     statusPill(a, live) +
+    (chk ? carryCell(a, today, live) : "") +
     '<button class="more' + (opened ? " on" : "") + '" type="button" data-act="more" aria-expanded="' + opened + '" aria-label="' + (opened ? "Close" : "Notes and history") + '" title="' + (opened ? "Close" : "Notes and history") + '">' + ARROW + "</button>" +
     "</div>";
+}
+
+/* ON THE CHECK THE WHEN CELL SAYS ONLY WHAT THE CARD CANNOT (§87, §532).
+   The card already names the week, so a row simply due in its own card
+   would repeat it — the cell is empty there. What the card does not say is
+   HOW LATE a row is (the alarm, which is the whole reason a late row sits
+   under this week rather than under the week it was due) and WHICH DAY a
+   finished one was finished. Both come from whenCell, never from a second
+   spelling of them (§53.5), so a late row keeps its week picker too. */
+function checkWhenCell(a: Action, today: string, dates: Format, live: boolean): string {
+  const w = whenText(a, today, dates);
+  if (a.status !== "done" && !w.late) return '<span class="when"></span>';
+  return whenCell(a, today, dates, live);
+}
+
+const CARRY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 8h10M9 4.5 12.5 8 9 11.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/* CARRY TO NEXT WEEK (§532): drawn only where the server would allow it —
+   an open row under this week, changeable by whoever is looking (§42, §61).
+   The cell keeps its width when there is nothing to press, so the columns
+   do not shuffle down a card as rows are finished. */
+function carryCell(a: Action, today: string, live: boolean): string {
+  if (brk() === "no-carry") return '<span class="carry off"></span>';          /* §532 put back: the week picker, four presses */
+  if (!live || !mayCarry(a, today)) return '<span class="carry off"></span>';
+  return '<button class="carry" type="button" data-act="carry" title="Carry this action to next week">' + CARRY + "Carry to next week</button>";
 }
 
 /* THE TOPIC CELL (§503): its own column, immediately before the week. Grouped
@@ -527,12 +649,106 @@ function grouped(shown: Action[], L: Loaded, group: Group, today: string, dates:
   return keys.map((k) => ({ key: k, label: label(k), rows: by.get(k)! }));
 }
 
+/* ══ THE WEEKLY CHECK (§532) ═══════════════════════════════════════════
+   THE WRITE LINE IS THE PAGE'S OWN ADD LINE, moved inside the topic it is
+   for. Not a second kind of line: same classes, same controls, same script,
+   same `add` the top of the page posts (§53.5) — with two things already
+   answered, because at a check they always have the same answer. The TOPIC
+   is the card it stands in, so it is not asked for; the WEEK is Next week,
+   because that is what the meeting is writing. Both are still changeable:
+   the week opens the same picker every other line opens. */
+function writeLine(t: Topic | null, L: Loaded, me: string, meShort: string, today: string, dates: Format): string {
+  const nx = nextWeekDay(today);
+  const label = t ? "Write next week's action for " + t.name : "Write next week's action";
+  return '<div class="addrow chk" data-due="' + esc(nx) + '" data-owner="' + esc(me) + '"' + (t ? ' data-topic="' + esc(t.id) + '"' : "") + ">" +
+    '<span class="plus">' + PEN + "</span>" +
+    '<div class="tn"><input class="new" data-act="add" placeholder="' + esc(label) + '" aria-label="' + esc(label) + '" maxlength="200">' +
+    '<input class="nt" placeholder="A note, if the line needs one" aria-label="Note for the new action" maxlength="5000" hidden></div>' +
+    (dates === "weeks"
+      ? '<span class="when pick" role="button" tabindex="0" data-act="due" data-due="' + esc(nx) + '" aria-haspopup="listbox" aria-expanded="false" title="Which week"><span class="wk">' + esc(weekWord(nx, today)) + "</span>" + weeksList(today, nx) + "</span>"
+      : '<button class="when pick" type="button" data-act="due" data-due="' + esc(nx) + '" title="Which day">' + esc(readableDay(nx, today)) + "</button>") +
+    '<span class="who pick" role="button" tabindex="0" data-act="who" aria-haspopup="listbox" aria-expanded="false" title="Whose it is"><span class="wn">' + esc(meShort) + "</span>" + teamList(L, me) + "</span>" +
+    '<span class="ent" aria-hidden="true">Enter</span><span class="st"></span>' +
+    '<button class="more" type="button" data-act="add-note" aria-expanded="false" aria-label="Add a note" title="Add a note">' + ARROW + "</button>" +
+    "</div>";
+}
+
+/* ONE WEEK'S CARD. Drawn only where there is something in it — a card over
+   nothing is the empty heading §497 already refused, in a box. Next week is
+   the exception and always stands, because its write line IS the something:
+   the meeting's whole purpose is the line that is not there yet. */
+function weekCard(k: CheckWeek, rows: string, today: string, extra = ""): string {
+  if (!rows && !extra) return "";
+  const w = checkWeeks(today)[k];
+  return '<div class="blk ' + (k === "now" ? "now" : k === "next" ? "next" : "past") + '">' +
+    '<div class="wkh">' + esc(CHECK_WORD[k]) + '<span class="days">' + esc(weekInMonth(w.from)) + " &middot; " + esc(weekDays(w, today)) + "</span></div>" +
+    rows + extra + "</div>";
+}
+
+/* A TOPIC, READ DOWN ITS THREE WEEKS. The heading is the grouped list's own
+   — number, name, counts, how much is done, its ⋯ — so a topic looks the
+   same wherever the page draws it (§53.5). Under it: what happened, what is
+   being decided, what is being promised. */
+function checkSections(L: Loaded, p: PageArgs, today: string, dates: Format): { html: string; count: string; countHtml: string } {
+  const all = L.actions;
+  const shown = all.filter((a) => inView(a, "check", p.who, today));
+  const me = p.who.personKey;
+  const meShort = me ? L.short.get(me) || L.names.get(me) || me : "";
+  /* EVERY TOPIC THE LIST STILL HOLDS, not only the ones with rows in these
+     three weeks (§532's own point): a topic skipped three weeks running is
+     the one the meeting most needs to see. A closed one leaves once its last
+     open action is done, which is topicShown's rule and not a second one. */
+  const topics = L.topics.filter((t) => topicShown(t, all));
+  const loose = shown.filter((a) => !a.topicId);
+  let ix = 0;
+  const secOf = (t: Topic | null): string => {
+    const rows = t ? shown.filter((a) => a.topicId === t.id) : loose;
+    const byWeek = (k: CheckWeek) => rows.filter((a) => checkWeek(a, today) === k);
+    const open = rows.filter((a) => a.status !== "done");
+    const late = open.filter((a) => isLate(a.due, today)).length;
+    const nowRows = byWeek("now");
+    const draw = (k: CheckWeek) =>
+      byWeek(k).map((a) => row(a, L, p.who, today, dates, a.id === L.open, "topic", true) + (a.id === L.open ? openPanel(a, L, p.who, today) : "")).join("");
+    const mine = t ? all.filter((a) => a.topicId === t.id) : all.filter((a) => !a.topicId);
+    const done = mine.filter((a) => a.status === "done").length;
+    const head = t
+      ? '<div class="grp sh' + (nowRows.length ? "" : " quiet") + '" data-key="' + esc(t.id) + '">' +
+        '<span class="ix">' + String(++ix).padStart(2, "0") + "</span>" +
+        "<h3>" + esc(t.name) + "</h3>" +
+        '<span class="meta">' + (nowRows.length ? open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") : "nothing this week") + "</span>" +
+        '<span class="end">' + (t.closed ? '<span class="shut">Closed</span>' : "") + done + " of " + mine.length + " done" + topicMenu(t) + "</span></div>" +
+        '<div class="meter"><i style="width:' + (mine.length ? Math.round(done * 100 / mine.length) : 0) + '%"></i></div>'
+      : '<div class="grp sh quiet" data-key="none"><span class="ix">&mdash;</span><h3>No topic</h3>' +
+        '<span class="meta">' + open.length + " open" + (late ? ' &middot; <span class="bad">' + late + " late</span>" : "") + '</span><span class="end"></span></div>';
+    /* A TOPIC NOBODY HAS TOUCHED FOR THESE THREE WEEKS SAYS SO, and points
+       at the one control that clears it away — otherwise the check fills up
+       with threads the office has quietly left (§61). */
+    const asleep = t && !rows.length
+      ? '<div class="asleep">Nothing on this topic in these three weeks. Write the next action, or close the topic from its &middot;&middot;&middot;</div>'
+      : "";
+    const line = me && t && !t.closed ? writeLine(t, L, me, meShort, today, dates) : "";
+    const body = weekCard("last", draw("last"), today) + weekCard("now", draw("now"), today) +
+      (t ? weekCard("next", draw("next"), today, line) : weekCard("next", draw("next"), today));
+    return '<div class="sec" data-key="' + esc(t ? t.id : "none") + '">' + head + asleep + body + "</div>";
+  };
+  const html = topics.map((t) => secOf(t)).join("") + (loose.length ? secOf(null) : "");
+  /* HOW FAR THROUGH THE MEETING YOU ARE: the topics, and the ones whose next
+     week is still empty — which is the question the check exists to answer. */
+  const toWrite = topics.filter((t) => !shown.some((a) => a.topicId === t.id && checkWeek(a, today) === "next")).length;
+  const tail = toWrite + " still to write for next week";
+  return {
+    html,
+    count: plural(topics.length, "topic", "topics") + " · " + tail,
+    countHtml: plural(topics.length, "topic", "topics") + " &middot; " + (toWrite ? '<span class="left">' + tail + "</span>" : "all written for next week"),
+  };
+}
+
 export type ListOut = { body: string; count: string; open: string | null };
 
 /* THE MASTHEAD (§497): the week, the name, the four counts and the views on
    the client's own colour. It is part of what a press redraws, so the counts
    follow a tick without a reload. */
-function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number; late: number; dueWeek: number; doneWeek: number } | null): string {
+function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number; late: number; dueWeek: number; doneWeek: number } | null, L: Loaded | null = null): string {
   const here = clientHref(p.slug, "tracker", "");
   const q = String(p.ask.q || "").trim().slice(0, 120);
   const view: View = p.ask.view;
@@ -553,14 +769,23 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
   /* the two settings behind "Group by" on the far right (§356.14, §497):
      each choice names its value, the one in force marked; the script writes
      a cookie and reads the list again */
-  const settings = '<span class="dots"><button type="button" data-act="settings" aria-haspopup="menu" aria-expanded="false" title="Settings">' +
-    'Group by <b>' + esc(GROUP_WORD[p.ask.group]) + "</b>" + CARET + DOTS3 + "</button>" +
-    '<span class="setmenu" role="menu" hidden>' +
-    '<span class="col"><span class="lab">Group by</span>' +
-    GROUPS.map((g) => '<button type="button" role="menuitemradio" data-act="set-group" data-value="' + g + '"' + (g === p.ask.group ? ' class="on" aria-checked="true"' : ' aria-checked="false"') + ">" + esc(GROUP_WORD[g]) + "</button>").join("") + "</span>" +
+  /* ON THE WEEKLY CHECK THE GROUPING IS NOT A CHOICE (§532): the view is read
+     by topic because the topic is what the meeting walks down, so the column
+     that would offer four other answers is not drawn and the button stops
+     naming one. A control that cannot change anything is worse than no
+     control (§96). Dates as, and Topics, go on working there. */
+  const isCheck = view === "check";
+  const settings = '<span class="dots"><button type="button" data-act="settings" aria-haspopup="menu" aria-expanded="false" title="Settings"' + (isCheck ? ' aria-label="Settings"' : "") + ">" +
+    (isCheck ? "" : "Group by <b>" + esc(GROUP_WORD[p.ask.group]) + "</b>" + CARET) + DOTS3 + "</button>" +
+    '<span class="setmenu" role="menu" hidden><span class="two">' +
+    (isCheck ? "" :
+      '<span class="col"><span class="lab">Group by</span>' +
+      GROUPS.map((g) => '<button type="button" role="menuitemradio" data-act="set-group" data-value="' + g + '"' + (g === p.ask.group ? ' class="on" aria-checked="true"' : ' aria-checked="false"') + ">" + esc(GROUP_WORD[g]) + "</button>").join("") + "</span>") +
     '<span class="col"><span class="lab">Dates as</span>' +
     FORMATS.map((f) => '<button type="button" role="menuitemradio" data-act="set-dates" data-value="' + f + '"' + (f === p.ask.dates ? ' class="on" aria-checked="true"' : ' aria-checked="false"') + ">" + esc(FORMAT_WORD[f]) + "</button>").join("") + "</span>" +
-    "</span></span>";
+    "</span>" +
+    '<span class="sep"><button type="button" role="menuitem" data-act="topics">' + LINES + "Topics" + '<span class="arr">' + RIGHT + "</span></button></span>" +
+    "</span>" + topicsPanel(L) + "</span>";
   return '<header class="mast"><div class="mrow"><div class="mt">' +
     '<div class="wkof">' + esc(weekWord(thu, today)) + " &middot; " + esc(weekLabel(weekOf(today), today)) + "</div>" +
     '<h2 class="pt">' + esc(MODULE_DEF.tracker.label) + "</h2></div>" + strip + "</div>" +
@@ -569,8 +794,54 @@ function masthead(p: PageArgs, today: string, all: Action[], sum: { open: number
     '<span class="sp"></span>' + settings + "</nav></header>";
 }
 
-/* A TOPIC'S OWN MENU, on its heading: rename, close or reopen, delete behind
-   a question. Anybody in the office (§497, Islam's third answer). */
+/* ══ THE TOPICS PANEL (§533) ═══════════════════════════════════════════
+   Islam: "in the internal tracker module I want to be able to edit the
+   topics names." He could already — from ONE place: group the list by Topic,
+   then the ⋯ on a topic's heading. Two topics could not be reached from the
+   page at all, because a heading is only ever drawn over rows that are in
+   view: a topic with NO actions, and a closed one whose last action is done.
+   Neither could be renamed, closed or deleted by any route.
+
+   So the list of topics gets a place of its own, behind the ⋯ where the
+   list's own settings already live, open whatever the page is grouped by.
+   Each line: the name (pressed, it becomes a box in place — Enter saves,
+   Escape puts it back, and there is no Save button anywhere in SMP), how
+   many actions hold it and how many are done, Closed if it is closed, and
+   the SAME ⋯ the heading carries — the same three words calling the same
+   acts, so one rule is not written twice (§53.5). Ordered as listTopics
+   orders it, open first then by name, so one list is not ordered two ways.
+
+   THE HEADING'S OWN ⋯ IS UNTOUCHED. This is a second door to one room, not
+   a second room. */
+function topicsPanel(L: Loaded | null): string {
+  if (!L) return "";
+  /* §533 put back: only the topics that already hold an action, which is
+     every list the page could draw BEFORE the panel — and leaves the empty
+     one and the finished closed one unreachable all over again. */
+  const list = brk() === "topics-with-actions" ? L.topics.filter((t) => L.actions.some((a) => a.topicId === t.id)) : L.topics;
+  const rows = list.map((t) => {
+    const mine = L.actions.filter((a) => a.topicId === t.id);
+    const done = mine.filter((a) => a.status === "done").length;
+    const ct = !mine.length
+      ? '<span class="ct nil">no actions yet</span>'
+      : '<span class="ct">' + plural(mine.length, "action", "actions") + " &middot; " + (done === mine.length ? "all done" : done + " done") + "</span>";
+    return '<div class="trow" data-topic="' + esc(t.id) + '">' +
+      '<button type="button" class="nm" data-act="topic-rename" data-topic="' + esc(t.id) + '" title="Rename this topic">' +
+      '<span class="who2">' + esc(t.name) + "</span>" + (t.closed ? '<span class="shut">Closed</span>' : "") + PEN + "</button>" +
+      ct + topicMenu(t) + "</div>";
+  }).join("");
+  return '<span class="tpanel" hidden>' +
+    '<span class="ph"><span class="lab">Topics</span><span class="hint">Press a name to rename it</span></span>' +
+    (rows
+      ? '<div class="tlist">' + rows + "</div>"
+      : '<div class="tnone">No topics yet. Make the first one here, or type one on any action\'s topic tag.</div>') +
+    '<div class="tadd"><span class="pl" aria-hidden="true">+</span>' +
+    '<input class="tpnew" placeholder="New topic&hellip;" aria-label="New topic" maxlength="120"></div></span>';
+}
+
+/* A TOPIC'S OWN MENU, on its heading AND on its line in the panel: rename,
+   close or reopen, delete behind a question. Anybody in the office (§497,
+   Islam's third answer). */
 function topicMenu(t: Topic): string {
   return '<span class="tdots"><button type="button" data-act="topic-menu" data-topic="' + esc(t.id) + '" aria-haspopup="menu" aria-expanded="false" aria-label="Topic options" title="Topic options">' + DOTS3 + "</button>" +
     '<span class="tmenu" role="menu" hidden>' +
@@ -608,6 +879,22 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
      much of it is done, a thin bar, its menu and "+ Add to <topic>". A topic
      with no rows in this view is not drawn: a heading never stands over
      nothing. Grouped by nothing, one section and no heading. */
+  /* THE WEEKLY CHECK IS NOT THE LIST WITH A FILTER ON IT (§532). It is read
+     by topic, three weeks deep, and it carries no add line or search at the
+     top: the writing happens inside the topic the meeting is on, which is
+     the whole reason the view exists. */
+  if (view === "check") {
+    const ck = checkSections(L, p, today, dates);
+    const nothing = ck.html ? ""
+      : '<div class="none"><b>No topics yet for ' + esc(p.tenantName) + ".</b>" +
+        "The check is read one topic at a time, so it needs a topic first. Make one on any action's topic tag, or behind the &middot;&middot;&middot; above.</div>";
+    return {
+      body: masthead(p, today, all, sum, L) + '<div class="counted ck">' + ck.countHtml + "</div>" +
+        '<div class="list">' + ck.html + "</div>" + nothing,
+      count: ck.count, open: L.open,
+    };
+  }
+
   const groups = grouped(shown, L, group, today, dates);
   let ix = 0;
   const secs = groups.map((g) => {
@@ -670,7 +957,7 @@ export function listBody(L: Loaded, p: PageArgs, today: string): ListOut {
     : !shown.length
       ? '<div class="none"><b>Nothing ' + (q ? "matches" : "here") + '.</b>' + (q ? "Try another word, or " : "Add one on the line above, or ") + '<a href="' + esc(viewHref("all")) + '">see all of them</a>.</div>'
       : "";
-  return { body: masthead(p, today, all, sum) + tools + counted + '<div class="list">' + secs + "</div>" + none, count, open: L.open };
+  return { body: masthead(p, today, all, sum, L) + tools + counted + '<div class="list">' + secs + "</div>" + none, count, open: L.open };
 }
 
 /* A press's answer: the list read again under the tenant and drawn by the

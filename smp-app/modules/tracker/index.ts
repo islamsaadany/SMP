@@ -32,7 +32,7 @@ import { APP_JS } from "./script.ts";
 import {
   type Who, type Group, type Format, isView, isGroup, isFormat, isStatus, isOffice, calendarDay, oneLine, GROUP_COOKIE, FORMAT_COOKIE,
   oneAction, addAction, setFields, setStatus, deleteAction, isOfficeRow, mayChange, thursdayOf, todayIn,
-  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic,
+  oneTopic, addTopic, renameTopic, setTopicClosed, deleteTopic, mayCarry, nextWeekDay,
 } from "../../lib/tracker.ts";
 
 const brk = () => process.env.SMP_BREAK || "";
@@ -188,7 +188,7 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
   if (!id) return refused(400, "Which action?");
   const cur = await oneAction(c, id);
   if (!cur) return refused(404, "That action is not on this client's list any more.");
-  if (!["status", "due", "notes", "rename", "owner", "topic", "delete"].includes(kind)) return refused(400, "Not something this list does.");
+  if (!["status", "due", "notes", "rename", "owner", "topic", "delete", "carry"].includes(kind)) return refused(400, "Not something this list does.");
   if (!mayChange(cur, who)) return refused(403, ONLY);
 
   if (kind === "status") {
@@ -218,6 +218,24 @@ async function act(c: Q, b: any, who: Who): Promise<Out> {
       topicId = t.id;
     } else if (oneLine(b.topicName)) topicId = (await addTopic(c, String(b.topicName), by)).id;
     await setFields(c, id, { topicId });
+  } else if (kind === "carry") {
+    /* CARRY IT TO NEXT WEEK (§532, Islam's choice of the four put to him):
+       the SAME action moved a week on — never a second line for one piece of
+       work — so its title, owner, notes and history ride with it and the
+       meeting is not retyping last week's words.
+       THE ALARM IS NOT RESET, and that is the whole reason this is a move
+       rather than a new row: `setFields` writes `first_due` only where there
+       is none (spec 054 §5), so a thing pushed four weeks running goes on
+       reading Late 4 w and cannot hide behind a fresh date.
+       WHAT MAY BE CARRIED IS ASKED OF THE STORED ROW (§42): open, and under
+       this week by the view's own rule — the page only draws the press where
+       that holds, and a stale tab pressing it anyway is told so. */
+    const today = todayIn();
+    if (!mayCarry(cur, today))
+      return refused(400, cur.status === "done"
+        ? "A finished action has nothing to carry."
+        : "Only an action on this week can be carried to next week.");
+    await setFields(c, id, { due: nextWeekDay(today) });
   } else if (kind === "delete") {
     await deleteAction(c, id);
   }

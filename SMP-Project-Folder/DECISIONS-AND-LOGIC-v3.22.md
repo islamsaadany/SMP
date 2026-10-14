@@ -65076,3 +65076,299 @@ A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, 
 
 ## §530 — RACI fill and suggest
 Signed off from `design-mockups/raci-autofill/2026-10-13_fill-and-suggest.html` ("build"). Two pure planners in `ffp/lib/domain/raci-table.ts` (`planOwnerFill`, `planSuggestions`) so the rules are testable with no browser; the page only draws and saves their output. Owner fill: R for the step's assigned role, empty cells only, skipped and stepless rows excluded. Suggest: the manager's role (most frequent among managers of holders of the owner role, excluding the owner role, ties to the lower id) as A, only where the row has no A, the target cell is empty and the column is visible; unsaved until accepted. Source is Org Directory `managerId`/`PersonRole`; no manager data means no suggestions. A suggestion's main click accepts rather than cycles, so a stray click cannot silently store a code. Cycling an owner-filled cell clears its dot. Recorded, not done: a browser run of the page, and an automated check of the §524 propose/confirm/delete flow.
+
+---
+
+# Back-filled sub-sections (2026-10-14)
+
+These sixteen sub-numbers were decided and recorded in `CLAUDE.md` (now
+`CLAUDE.full.md`) but had never been given a section of their own in this file —
+found by the slimming pass of 2026-10-14 (§531), which compared every `§`
+reference in `CLAUDE.full.md` against this file's headings **and** its in-prose
+mentions. Each is reproduced from its source prose in `CLAUDE.full.md`; nothing
+here is new reasoning. They are appended as a block rather than inserted at their
+numeric places so the change stays a pure append to a 4 MB file — read them by
+number, not by position.
+
+## §67.6 — Renaming a unit broke every save
+
+Source: `CLAUDE.full.md:6452`.
+
+The line attaching a weighting row to a unit was written to FIX name-matching,
+added `key` to every row — **and went on overwriting that key from the name
+anyway.** A rename survives the session; on the NEXT load `row.key` is null,
+`weighting_rows.unit_key` is NOT NULL, and the tenant can never write again.
+Found only by renaming a unit AND running the round trip against a real
+database. The row's own key wins now; the name-match is the fallback.
+
+## §101.6 — A max-height fed by `--chrome-h` closes nothing (amending §28.3)
+
+Source: `CLAUDE.full.md:22955`.
+
+§28.3's rule — **the sticky OFFSET may read `--chrome-h`, a max-height never
+may** — came out of the v2.8 loop. **§101.5/§101.6 amend it**: that loop ran
+through the header CONDENSE, which this same version deleted, so `--chrome-h` is
+now a constant and a max-height fed by it closes nothing.
+
+The Setup rail is therefore capped to the window since v3.30. Two conditions,
+both asserted by `checks/setup-rail.py`:
+
+1. **nothing above the box may move when the box resizes**, and
+2. the capped list must **say that it continues** — a visible scrollbar track
+   and a sticky fade, because §100.5's objection is right even where its refusal
+   is not.
+
+Context, from the same version: the rail lost its `max-height` outright first (a
+capped rail cut lists off mid-row — *a navigation list must never say "it ends
+here"*), which is what this sub-section reverses under the two conditions above.
+
+## §142.8 — The greeting must sit outside `data-mail-body`
+
+Source: `CLAUDE.full.md:7676`.
+
+The message is typed INTO the preview and read back with `innerText`, so a
+greeting emitted inside that div is absorbed into the body by the first
+keystroke — the email then carries it twice and the stored message holds a name
+nobody typed.
+
+**Measured, not reasoned**; every existing assertion passed while it was broken,
+because none typed into the body with the greeting on and then asked the DATA.
+
+(The surrounding §142 decisions: the badge stays outside the email, because a
+badge inside would be a line nobody receives. `greet TEXT` on `messages` and
+`message_drafts` (migration 027), **one column holding the word** and never a
+boolean beside it (§104.7); NULL is off, so nothing is backfilled. And
+`SYNC.mailSend()` NAMES EVERY FIELD IT FORWARDS, so `greet` was silently dropped
+and the RECORD would have said no message ever greeted anybody — found by asking
+what the page POSTS, not by reading it.)
+
+## §254.7 — A unit written twice, with or without a gap
+
+Source: `CLAUDE.full.md:19279`.
+
+His stored `40 %%` survived §254.1's collapse, which split the unit on
+WHITESPACE, and `%%` is one word. Guarded so `mm` is not read as a doubled `m`.
+
+**And it caught a regression of my own**: §254.1 rebuilt the string with a space
+for any unit it did not recognise, so `40%%` came out as `40 %%` — made WORSE by
+the function that exists to tidy it. It never adds a separator now; the only
+thing it does on its own is close one.
+
+## §294.3 — A project's repeat mark had no column
+
+Source: `CLAUDE.full.md:1726`. One of the five gaps §294 found in the plan and
+progress templates.
+
+Which is not a label: at the next cycle a marked project is archived, cleared
+and date-shifted where an unmarked one keeps its figures. `repeatFromLabel()` is
+named once and the pen asks it too (§53.5), answering **null** for the default so
+the caller DELETES the key (§50.6).
+
+## §294.5 — A unit's progress file could not finish a report
+
+Source: `CLAUDE.full.md:1741`.
+
+No Note column anywhere, and §105 holds Submit until a figure at risk is
+explained. And since §248 an outcome-measured tactic is asked for the OUTCOME's
+figure in the outcome's own unit, while the sheet went on asking for a per-cent —
+so the number landed in `actual`, clamped 0–100, moving the status pill.
+
+The sheet asks what the screen asks: a **Measured by** column, decided by
+`outcomeOf`, never a second reading of *has it a target*; `"New %"` becomes
+`"New value"` and **both are read** (§58); and **a note is a change of its own**
+on both routes.
+
+## §294.6 — The CSV route came too
+
+Source: `CLAUDE.full.md:1749`.
+
+A plan may only arrive as a workbook, but reporting still takes a CSV, and the
+deliverable's `current` column read the field migration 024 removed and had
+therefore been EMPTY on every deliverable row since.
+
+**RECORDED, NOT DONE**: `diffPlan`, `applyPlan`, `diffCapPlan` and `applyCapPlan`
+are callerless (every plan upload replaces), and the CSV *plan* templates are
+download-only because `loadCSV` refuses a plan outright. **Nothing stored moves
+and nothing is migrated.**
+
+## §295.2 — The builder's door moved, and the page already answered where
+
+Source: `CLAUDE.full.md:1677`.
+
+`data-buildplan` appeared EXACTLY ONCE in the product and
+`openBuilderChooser()` had no other caller, so taking the band off stranded spec
+020 (§61). Told that, Islam said *"keep the builder"*, and an emptied subject's
+Plan page already offered TWO routes, so the guided build is the third route in a
+sentence that existed rather than a control on a line §268 got down to one.
+
+**RECORDED, NOT DONE**: the chooser and four functions with it are callerless,
+and deleting five functions in the change that MOVES a door is how a restoration
+and a removal get confused.
+
+## §295.3 — Which cycle
+
+Source: `CLAUDE.full.md:1685`.
+
+A figures archive is ALREADY named after its cycle, so the list is read rather
+than invented; a PLAN archive stores none, which is stated rather than
+discovered; and **no workbook named a cycle at all** — measured, `xlsx.js` never
+read `REVIEW.name` — so two progress files taken a cycle apart were identical in
+their headings.
+
+## §295.4 — Upload states its cycle
+
+Source: `CLAUDE.full.md:1690`.
+
+Islam's own correction — *"the upload only makes sense for new cycles not closed
+ones"* — and the cheaper of two: a closed cycle takes no figures from ANYONE, and
+reopening is §273.2's control.
+
+## §295.5 — No CSV leaves, and a CSV is still read
+
+Source: `CLAUDE.full.md:1693`.
+
+*"nobody builds in csv"*. `csvFor()` and `fileName()` go with the links,
+`loadCSV` is untouched, and the four CSV builders are callerless and deliberately
+left for their own sweep.
+
+## §295.6 — A zip may hold bytes
+
+Source: `CLAUDE.full.md:1696`.
+
+One line the whole export rests on: `zipStore()` encoded every member with
+`TextEncoder`, and a `Uint8Array` through that is mangled SILENTLY — the archive
+builds, downloads and refuses to open. Falsified: **0 of 19 workbooks open** with
+`testzip` still passing.
+
+**AND ONE FAULT CAME FROM READING TWO FILENAMES**: a single subject is sent as
+one file and the folder is dropped when it is, so the plan and the progress file
+for one subject had **the same name on disk**.
+
+`checks/import-page.py` 1 red / 2 red on two falsifications from the SOURCES;
+**`plan-builder.py` REWRITTEN, never loosened** (§218), and **three of the new
+check's own first failures were the CHECK** (§215's death on Python slicing
+inside an evaluate; the collaborators button found by a class that is on the
+SELECT; and `EDIT_PAGE` ASSIGNED where §269 made it a map, so it opened nothing
+and measured a page the product never draws).
+
+## §313.9 — The tour runs on the person's own plan
+
+Source: `CLAUDE.full.md:8027`.
+
+`SMPRules.tourReady(w, target)` — at least one pillar or capability and one key
+objective — and it is not offered until there is one. The Knowledge base's replay
+button is **absent** for a viewer whose roles fit no story and **explained** for
+one whose plan is empty.
+
+## §313.11 — Neither product sweep reaches Forefront's own two pages
+
+Source: `CLAUDE.full.md:10928`.
+
+`checks/platform-look.py` exists because of this: Forefront's own two pages get
+contrast in both themes and no sideways scroll at four widths, and **neither of
+the two product sweeps ever reaches them**. 27/0 given a database; a suite line
+reading "red" for it is the runner's missing `DATABASE_URL` and never the check
+(§366.5, measured rather than quoted).
+
+## §365.7 — `roleCell` was two functions, one namespace
+
+Source: `CLAUDE.full.md:14567`.
+
+It closes §365's same shape one screen away: `roleCell` was TWO functions —
+§362.5's top-level builder for the access matrix's role row, and one nested in
+`renderPeople()` for the register's. Different subject, different signature, one
+global namespace (§65.9).
+
+Both callers of each resolved right, so §365's first draft recorded it as untidy;
+**§365.6 changed that reading**, because leaving a name that resolves to
+something other than what its caller meant is recording a trap rather than
+closing it.
+
+**Proved behaviour-neutral by MEASUREMENT rather than ceremony**: with the rename
+normalised away, the built file differs from the previous one in nothing else.
+
+## §487.2 — Main's §488–§490.2 were brought in first
+
+Source: `CLAUDE.full.md:11296`.
+
+§487's branch was **merged to `main` 2026-10-05 on Islam's word**, with main's
+§488–§490.2 brought in **first** — the merge direction that keeps the branch's
+own checks running against what main already held, rather than discovering the
+conflict on main.
+
+## §531 — CLAUDE.md is an index, and the history is an archive (2026-10-14)
+
+Islam: *"We are slimming the project memory file."* `CLAUDE.md` had reached
+**1,894,597 bytes / 23,048 lines** and was being read in full at the start of
+every session. It was renamed to **`CLAUDE.full.md`** (commit `f9b1a80`) so it no
+longer loads automatically, and a new `CLAUDE.md` of **147,615 bytes / 2,141
+lines (7.8% of the original)** was written in its place.
+
+**THE RULE WAS THAT NO DATA MAY BE LOST, AND NOTHING WAS DELETED.**
+`CLAUDE.full.md` stays in the repository untouched. Every piece of its content
+ends up in one of three places, and the check below proves it: verbatim in the
+new `CLAUDE.md`, in full in this file, or in `CLAUDE.full.md` itself with a
+pointer to it from the index line that replaced it.
+
+**WHAT IS KEPT WORD FOR WORD** (83,093 bytes — byte-identical, asserted by
+comparing line blocks rather than by reading): the H1 and its blockquote; Steering
+Documents; Working Guidelines §1–§5 entire, including Git Workflow, Communication,
+Engineering Preferences and its six lesson sub-headings (§158, §267, §302, §53.7,
+§53.5, the HR_ERP carry-overs); *What This App Is*; Technology Stack; the opening
+Repository facts (the thirteen bullets from **GitHub** through **Authorisation**,
+which carry §289, §313.34, §313.35, §313.36 and §313.37 — the connection and
+client-boundary rules a session cannot work without); the twelve standing
+engineering rules that closed the Repository section (the field-rename rule,
+§51.11's stale-check rule, Manage slides, `--gold-deep`, `localStorage`, menu
+ordering, Setup-is-a-page, searchable dropdowns, the version-bump checklist);
+Current Directory Layout; Configuration; and Common Tasks.
+
+**WHAT BECAME AN INDEX**: the **297** decision bullets that filled the Repository
+section (`CLAUDE.full.md` lines 1017–8517) and the **311** trailing changelog
+entries (lines 11115–23048). One line each, **capped at 100 characters** on
+Islam's instruction, carrying the decision's own title and a pointer — `→ §N` to
+read that section of this file, or `→ full:N` to read `CLAUDE.full.md` from that
+line. *The title is the index entry because in this archive the titles are
+already declarative*: "A clock on the review", "A reported figure follows the
+target's unit", "The deck on paper". A first attempt also pasted the opening
+clause of each bullet into the spare room under the cap and **it was abandoned
+rather than shipped** — the clauses came back as Islam's raw quotes, orphaned
+possessives where a `§` ref had been stripped, and mangled capitalisation, which
+is a worse index than a clean title and a pointer (§100.3: a summary nobody can
+trust is read as a summary nobody reads).
+
+**BUILD COMMANDS KEEP EVERY COMMAND**: all **169** of them — the 159 inside the
+three fenced blocks, the 9 that only ever appeared inline in the prose between
+those blocks, and one more recovered from damage (below) — each with one line on
+what it is for, derived from its own comment. The reasoning behind each check,
+which ran to 205,899 bytes, stays at `CLAUDE.full.md:8633–11090`.
+
+**A PRE-EXISTING CORRUPTION, NAMED RATHER THAN QUIETLY REPAIRED**: at
+`CLAUDE.full.md:10858` and `:10872` the invocations of
+`scripts/test-functional-projects.js` and `scripts/test-capability-move.js` are
+spliced into each other — an earlier edit interleaved a command line with
+another's prose, leaving `DATABASE_URL=… A function's projects need no column…`
+and a stranded `node scripts/test-capability-move.js\``. Both commands are
+written out correctly in the new `CLAUDE.md` and the damage is left in the
+archive as it is, with a note in the new file pointing at both lines. *A silent
+repair in the file whose whole purpose is that nothing was lost is the one edit
+that cannot be audited.*
+
+**SIXTEEN SUB-NUMBERS HAD NEVER BEEN WRITTEN DOWN HERE.** Every `§` reference in
+`CLAUDE.full.md` (1,197 distinct numbers) was compared against this file's
+numbered headings (943) **and** its in-prose mentions (1,615). Sixteen appeared
+in neither: **§67.6, §101.6, §142.8, §254.7, §294.3, §294.5, §294.6, §295.2,
+§295.3, §295.4, §295.5, §295.6, §313.9, §313.11, §365.7, §487.2**. They were
+decided, recorded in the old `CLAUDE.md`, and would have become unreachable the
+moment that file stopped being read — so they were written into this file **in
+full, first, before the new `CLAUDE.md` was written at all**, each reproduced
+from its source prose with the archive line it came from named. They are appended
+as a block under *Back-filled sub-sections* rather than inserted at their numeric
+places, so the change stays a pure append to a 4 MB file; read them by number,
+not by position.
+
+**THE CHECK IS THE POINT OF THE EXERCISE**, and it is kept as
+`scripts/check-claude-index.py`: every `§` number and every markdown heading in
+`CLAUDE.full.md` must resolve either into the new `CLAUDE.md` or into this file.
+Run it before touching either file. *A slimming pass that cannot prove nothing
+was lost is indistinguishable from a deletion.*

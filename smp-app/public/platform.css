@@ -4662,6 +4662,32 @@ html[data-client-settings] .viewer { display:none; }
              border:1px solid var(--bad); }
   .pickdym { font-size:11px; font-weight:600; color:var(--warn-tx); padding:6px 4px 2px; }
 
+  /* ── AND THE ADDRESS IS NEEDED, SO THE BOX SAYS SO BEFORE THE PRESS
+         (§531) ──────────────────────────────────────────────────────
+     §506 marked the register's Add form and left this control alone, which
+     made the picker the one remaining way to mint somebody with no address.
+     Same rule now, same sentence, read from the same `PERSON_NEEDED` entry.
+
+     THE STAR IS INSIDE THE BOX, out of flow, because there is no label to
+     hang it beside: §506 puts it in `.pdfl`, and the picker's fields carry
+     placeholders instead. `padding-right` is what holds a typed address off
+     it — a star sitting over live text is worse than no star — and the span
+     is `pointer-events:none` so the box underneath still takes every click
+     (§93.4: present, correctly sized and unreachable is a fault this project
+     has shipped three times). */
+  .picknew .pickreq { position:relative; display:flex; flex:1 1 0; min-width:0; }
+  .picknew .pickreq input.fld { padding-right:20px; }
+  .picknew .pickreq .reqmark { position:absolute; right:8px; top:50%;
+    transform:translateY(-50%); margin:0; pointer-events:none; }
+  /* The refused box wears §506's ring: the attention ring's shape in the
+     ALARM colour, out of flow so the flex row does not reflow under it. The
+     offset is 2px and not §506's 4 — these two boxes sit 6px apart, and a 4px
+     ring would close that gap and read as one outline around both. */
+  .picknew input.fld.reqmiss { outline:2px solid var(--bad-tx); outline-offset:2px;
+    background:var(--bad-bg); }
+  /* The sentence under them, spaced like the refusal it sits beside. */
+  .picker .reqsay { margin-bottom:6px; }
+
   /* ── The rows an upload could not place (§87.5) ──────────────────
      Above the table of ordinary changes, because they are the only thing that
      stops Apply and a reason sitting below thirty rows is a reason nobody
@@ -5132,7 +5158,10 @@ html[data-client-settings] .viewer { display:none; }
     outline:2px solid var(--bad-tx); outline-offset:4px;
     box-shadow:0 0 0 4px var(--bad-bg); background:var(--bad-bg); }
   .pdlg .pdf.reqmiss > .pdfl { color:var(--bad-tx); }
-  .pdlg .reqsay { font-size:12px; font-weight:600; line-height:1.45;
+  /* ONE DECLARATION FOR ONE SENTENCE (§531): the picker refuses in the same
+     words for the same reason, so it is added to this selector rather than
+     given a second block that would drift from it. */
+  .pdlg .reqsay, .picker .reqsay { font-size:12px; font-weight:600; line-height:1.45;
     color:var(--bad-tx); white-space:normal; }
   .pdfoot { display:flex; align-items:center; justify-content:space-between;
     gap:16px; border-top:1px solid var(--line-soft); margin-top:18px;

@@ -9609,3 +9609,43 @@ A risk or gap finding can now be added to the process as a step. "Add as a step"
 
 ## §530 — RACI: fill from step owners, and suggestions (2026-10-13)
 On the RACI page, people who can edit get two new buttons. **Fill from step owners** puts R for each step's assigned role on that step's rows — only into empty cells, never over anything already there, never on skipped rows; filled cells carry a small dot. **Suggest** shows dashed amber cells proposing the owner's manager's role as A, only on rows that have no A yet; nothing is saved until you Accept (✓), Edit (✎ cycles R/A/C/I) or Dismiss (✕). Suggestions come from the Org Directory's manager links — where nobody has a manager recorded, there are none to show. Viewers see neither button. Checked: pure planner check 13/0, each of six deliberate breaks turns it red (`npm run check:raci`, `check:raci:red`); cold typecheck clean. Not yet driven in a browser.
+
+## §531 — The role picker asks for an email before adding somebody new (2026-10-14)
+Built from the mockup you signed off (`design-mockups/role-picker-email/2026-10-12_email-needed.html`, "build as drawn").
+
+When you give somebody a role and they are not on the register yet, you type a
+name and press "+ Add". That used to add them with no email. Now the Email box
+in the picker carries the same red star the Add someone form has, and pressing
+Add with no email adds nobody: the box is ringed, the reason is written under
+it in the same words the Add someone form uses, the cursor goes into it, and
+everything you typed stays where it was. Typing an address clears the ring.
+Emp ID is still optional.
+
+The reason is the one behind the star on the Add someone form: people sign in
+with their email and are written to there, so a row with none is somebody who
+cannot open the platform or be told anything — and this picker was the last
+place that could still make one.
+
+**What it costs**: you can no longer give a role to somebody new by name alone.
+If you do not have their address yet, ask for it or add them later. This
+reverses the earlier rule that neither box in the picker was required.
+
+**Untouched**: picking somebody already on the register works exactly as before,
+even if their row has no email. The people upload is unchanged.
+
+It is one picker, so this reaches all five places it appears: a business unit's
+head and custodian, a supporting function's head and custodian, a function's
+Led by, the capabilities table, and the group's capability seats.
+
+Checked: a new check drives the real control in the real page — 28 assertions,
+none failing — and it was proved able to fail by running it against the build
+from before the change, where it goes red in six of its seven sections and
+stays green in the one that is about what must not change. The picker's three
+existing checks still pass. Both states photographed from the running platform
+in the light and the dark theme and set beside the mockup.
+
+What to check: Setup › Business units › ⋮ › Edit details, press BU head or
+Strategy custodian, type a name nobody has, press + Add with the Email box
+empty.
+
+Not yet merged to main.

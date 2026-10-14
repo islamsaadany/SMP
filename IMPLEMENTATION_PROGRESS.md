@@ -9649,3 +9649,15 @@ Strategy custodian, type a name nobody has, press + Add with the Email box
 empty.
 
 Not yet merged to main.
+
+Merged to main 2026-10-14 on your word. The whole-platform sweep read 33
+viewers, 234 destinations, errors none — the same figure as the round before,
+as it should be when no page is added. The offline copy's name was bumped so
+returning browsers fetch the new platform rather than their own disk, and the
+reload banner will fire for a tab left open. Nothing about saving changed, so
+nobody is signed out.
+
+Not seen: production actually serving it. This container cannot reach the live
+address — the same limitation as the last two merges — so the two marks that
+prove a deployment are written down in the decisions document for whoever can
+open the site.

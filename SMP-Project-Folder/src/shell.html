@@ -5214,22 +5214,28 @@
         /* The question replaces the menu in the same corner (§46.2), so the
            menu closes as the question opens or both would draw in one cell. */
         CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; FNMENU = null;
+        REFUSEDLATE = null;
         paint();
       });
     });
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = this.dataset.fndelyes;
-        if (grant("c_fns") !== "edit") {
-          alert("Functions are the SMO's. Nothing has been deleted.");
-          CLEARING = null; paint(); return;
-        }
+        /* ── §533.2: THE PANEL KEEPS THE REFUSAL ────────────────────────
+           Both of these raised a browser box and CLOSED the panel, so the
+           row being worked on went with the answer. The panel stays open and
+           redraws its own refusal — the shape it has always had for the same
+           sentence on the way in (fnPanels). Nothing is cleared, and
+           REFUSEDLATE lets it say the one thing that is different about
+           arriving a moment later.
+
+           The grant is read in both places on purpose (§48.2): the panel
+           decides what to offer, this decides what happens, and a screen that
+           has been open a while is not evidence of either. */
+        if (grant("c_fns") !== "edit") { REFUSEDLATE = "fn:" + fk; paint(); return; }
         var why = fnDeleteBlockers(fk);
-        if (why.length) {
-          alert("Not deleted \u2014 " +
-                why.map(function(w){ return w.full; }).join(". ") + ".");
-          CLEARING = null; paint(); return;
-        }
+        if (why.length) { REFUSEDLATE = "fn:" + fk; paint(); return; }
+        REFUSEDLATE = null;
         deleteFunction(fk);
         CLEARING = null;
         /* Deleting happens on Setup, so the deleted function is not what the
@@ -5492,8 +5498,12 @@
       /* A name is the one thing nothing can be derived from, and it is what
          every snapshot, delta and archived plan will be filed under. */
       if (!String(d.name || "").trim()) {
-        alert("Give the cycle a name — it is what its figures are filed under " +
-              "once it closes, and what the next cycle compares against.");
+        /* §533.2: THE REFUSAL GOES UNDER THE BOX, and the panel draws it from
+           `why` — so the sentence and the empty field are on screen together,
+           which a dialog over the form could never manage. Focus is taken
+           AFTER the repaint, or it lands on the node paint() is about to
+           replace. */
+        d.why = "name"; paint();
         var f = document.getElementById("nc-name"); if (f) f.focus();
         return;
       }
@@ -5508,8 +5518,11 @@
          §307: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
          earlier, because the cycle's end IS the review point. */
       if (!String(d.to || "").trim()) {
-        alert("Pick the month this cycle covers to \u2014 it decides what every " +
-              "figure is measured against, and what is asked for at all.");
+        /* AND THIS ONE TAKES FOCUS TOO. The name's box moved the cursor and
+           this one did not — one form, two behaviours, for no reason beyond
+           which notice somebody wrote first. */
+        d.why = "to"; paint();
+        var t = document.querySelector(".newcycle .tobtn"); if (t) t.focus();
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -5751,8 +5764,19 @@
        it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var t = b.dataset.submit, why = submitRefusal(t);
-        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        var t = b.dataset.submit;
+        /* ── §533.2: THE GATE SAYS NOTHING, BECAUSE THE PAGE ALREADY HAS ──
+           This was the THIRD telling of one refusal. The button is drawn
+           `aria-disabled` carrying the same list in a bubble that opens on
+           hover and on focus (§221, §163); the bar beneath it names the
+           places holding it and walks to the exact box (§279). The box was
+           the only one of the three that could not be read BEFORE pressing,
+           and the only one that could not take anybody to the thing it named.
+
+           `submitRefusal()` still stands here and still refuses: it is the
+           enforcement, and a page that has been open a while is not evidence
+           (§48.2). What is gone is its voice, not its gate. */
+        if (submitRefusal(t)) return;
         REVIEW.submitted[t] = true;
         /* Submitting supersedes a parked draft: two closed states at once
            would leave Reopen clearing one of them. */
@@ -6049,7 +6073,7 @@
     });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
       b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null;
+        CLEARING = null; CLEARMENU = null; REFUSEDLATE = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
@@ -6597,6 +6621,19 @@
        never had a season and one whose last season was removed must be
        byte-identical, or the difference is a change the authoriser has to
        judge that nobody made. */
+    /* §533.2: the refusal's own way out — a unit named in it opens that
+       unit's Drivers, which is the page the sentence sends you to. */
+    document.querySelectorAll("[data-goseas]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEASWHY = null;
+        /* Drivers is a SECTION of the unit's Strategy tab, not a tab of its
+           own (shell's nav): the address is the unit, that tab, and CURSEC —
+           setting `currentSub` to the section key alone is normalised away on
+           the next paint and lands on Strategy's first section instead. */
+        current = b.dataset.goseas; currentSub = "strategy"; CURSEC.strategy = "drivers";
+        paint(); window.scrollTo(0, 0);
+      });
+    });
     document.querySelectorAll("[data-seasrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var id = b.dataset.seasrm;
@@ -6604,17 +6641,16 @@
         var se = SMPRules.seasonById(list, id);
         var used = SMPRules.seasonUsedBy(seasonsUnits(), id);
         if (used.length) {
-          alert('"' + (se && se.name ? se.name : "This season") + '" cannot be removed — ' +
-                (used.length === 1 ? 'a unit still has it as a period of its own: '
-                                   : used.length + ' units still have it as a period of their own: ') +
-                used.map(function(u){ return u.name; }).join(", ") +
-                '. Take it off their Drivers page first.');
+          /* §533.2: the refusal is a line under the row that refused, where
+             the units it names can be pressed. */
+          SEASWHY = id; paint();
           return;
         }
         var i = list.indexOf(se);
         if (i < 0) return;
         list.splice(i, 1);
         if (!list.length) delete GROUP[SMPRules.SEASONS];
+        SEASWHY = null;
         paint();
       });
     });
@@ -6647,9 +6683,14 @@
         var was = inp.dataset.mbname, now = inp.value.trim();
         if (now && now !== was && !renameMainbu(was, now)) {
           /* Refused rather than silently merged: two departments becoming one
-             is a decision, and it is not one a typo gets to make. */
-          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
-                'renaming one into the other \u2014 move the people first.');
+             is a decision, and it is not one a typo gets to make.
+             §533.2: the refusal is a line under this box rather than a
+             browser's box over the page, and what was typed is kept with it —
+             the repaint below used to restore the old name, so the correction
+             had to be typed a second time to be read at all. */
+          MBWHY = { at: was, typed: now };
+        } else {
+          MBWHY = null;
         }
         paint();
       });
@@ -7181,11 +7222,11 @@
        unmounts the button the click is still inside (§47.2). */
     document.querySelectorAll("[data-pdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        PDEL = b.dataset.pdel; PMENU = null; paint();
+        PDEL = b.dataset.pdel; PMENU = null; REFUSEDLATE = null; paint();
       });
     });
     document.querySelectorAll("[data-pdel-no]").forEach(function(b){
-      b.addEventListener("click", function(){ PDEL = null; paint(); });
+      b.addEventListener("click", function(){ PDEL = null; REFUSEDLATE = null; paint(); });
     });
     document.querySelectorAll("[data-pdel-yes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -7193,14 +7234,16 @@
            This does not check them again — two copies of "may this be deleted"
            is exactly the drift the one function exists to prevent — it reads
            the ANSWER, and says so when the answer is no. */
-        var key = b.dataset.pdelYes, p = personBy(key), name = p ? p.name : key;
+        var key = b.dataset.pdelYes;
         var done = deletePerson(key);
+        /* §533.2: "Open the menu again to see what" was the platform asking
+           somebody to do its own work — it had just refused on the basis of
+           what points at them, so it knows. The panel stays open and names
+           it, in the shape it already uses on the way in (deletePanel). */
+        if (!done) { REFUSEDLATE = "p:" + key; paint(); return; }
+        REFUSEDLATE = null;
         PDEL = null;
         paint();
-        if (!done) {
-          alert(name + " could not be deleted \u2014 something has come to point at " +
-                "them since this was asked. Open the menu again to see what.");
-        }
       });
     });
 
@@ -10506,10 +10549,11 @@
          plan archives and replaces a whole unit's plan in memory before any
          save is attempted. Checked here rather than trusted from the page that
          drew the button (§48.2). */
-      if (grant("c_import") !== "edit") {
-        alert("Importing is the SMO's. Nothing has been applied.");
-        return;
-      }
+      /* §533.2: the page no longer offers a live Apply to somebody this will
+         refuse — the button is held and the reason is a line beside it. This
+         stays, unsaid: it is the gate, and the screen that drew the button is
+         not what authorises the act (§48.2). */
+      if (grant("c_import") !== "edit") return;
       var what, arch;
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;

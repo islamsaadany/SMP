@@ -404,6 +404,27 @@ function newPersonReset(){
    the repaint any other change causes would otherwise throw away what is
    half typed. */
 var NEWMAINBU = "";
+/* The BU rename the platform refused, and what was typed when it did (§533.2).
+   Held rather than discarded, because the repaint that follows a refusal used
+   to put the old name back — so the correction had to be typed twice. */
+var MBWHY = null;
+/* ── AN ACT REFUSED AFTER ITS QUESTION WAS ALREADY OPEN (§533.2) ───────
+   Two panels in the product draw a refusal of their own when they open on
+   something that cannot be deleted — a function with capabilities under it, a
+   person something still points at. Both ALSO had a browser box, for the case
+   where the blocker appeared between the question opening and Yes being
+   pressed: the same refusal, a moment later, in another medium, and closing
+   the panel as it went.
+
+   The panels draw it now. This names which act was refused late, so the
+   sentence can say the one thing that is genuinely different about that
+   moment — not "cannot be deleted" but "was not deleted, since this was
+   asked" — and nothing else about either panel has to change. Cleared
+   whenever a question is opened or closed. */
+var REFUSEDLATE = null;
+/* The season whose removal was refused, so the row can say so under itself
+   rather than in a box over the page (§533.2). */
+var SEASWHY = null;
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */

@@ -31,6 +31,15 @@ function layerOverride(key, which){
   var t = typeof TARGET !== "undefined" ? TARGET : "group";
   return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
 }
+/* ── WHOSE ROW THE BU REFUSAL BELONGS TO (§533.2) ───────────────────────
+   Asked three times while one row is drawn — the mark on the box, the value
+   in it, and the sentence under it — and all three must agree or the box
+   holds one name while the line names another. MBWHY is cleared by the next
+   rename that lands, and names the row by the name it had when it was
+   refused, which is the one thing a repaint cannot have changed. */
+function mbWhy(name){
+  return !!(typeof MBWHY !== "undefined" && MBWHY && MBWHY.at === name);
+}
 function labelWord(key, which){
   var o = layerOverride(key, which);
   if (o) return o;
@@ -2993,8 +3002,17 @@ function renderPeople(){
            are and the blocker itself opens with a count of its own, so one
            blocker naming two roles read "There is 2 roles still held". The
            blockers are sentences; they do not need introducing. */
-        '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
-        blockers.map(function(b){ return b.full; }).join('; and ') + '.' +
+        /* §533.2: THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO. Drawn
+           on open it says what cannot be done; drawn after Yes was pressed
+           and refused it says what was not done and why that is news —
+           which is the whole of the difference between the two, and the
+           reason the second one is not simply the first repeated. */
+        (REFUSEDLATE === "p:" + p.key
+          ? '<b>' + esc(p.name) + ' was not deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') +
+            ', since this was asked.'
+          : '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
+            blockers.map(function(b){ return b.full; }).join('; and ') + '.') +
         ' <b>Retire</b> closes the door and keeps every attribution true.</div>' +
         '<div class="cbtns"><button data-pdel-no="1">Close</button></div></div>';
     }
@@ -4275,8 +4293,21 @@ function renderMainbus(){
     return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"' +
       (editable ? ' class="tk-open"' : '') + '><td class="idx">' +
       (i + 1) + '</td>' +
+      /* §533.2: THE REFUSAL SITS UNDER THE BOX, AND KEEPS WHAT WAS TYPED.
+         This one fires on leaving the field, which is where the sentence
+         belongs — and the browser's box could not do the other half: the
+         repaint behind it put the old name back, so by the time the refusal
+         had been read the typing was gone and had to be done again. The box
+         holds the refused name, to be corrected rather than retyped. */
       '<td>' + (editable
-        ? '<input class="fld tk-firstfield" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
+        ? '<input class="fld tk-firstfield' + (mbWhy(b.name) ? ' bad' : '') + '" value="' +
+            esc(mbWhy(b.name) ? MBWHY.typed : b.name) + '" data-mbname="' + esc(b.name) + '"' +
+            (mbWhy(b.name) ? ' aria-invalid="true"' : '') + '>' +
+          (mbWhy(b.name)
+            ? '<p class="picerr">There is already a BU called <b>' +
+              esc(MBWHY.typed) + '</b>. Two cannot be merged by renaming one into the ' +
+              'other \u2014 move the people first.</p>'
+            : '')
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
       '<td>' + target(b, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + n + '</span></td>' +
@@ -5439,7 +5470,29 @@ function renderSeasons(){
               (mayEdit
                 ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
                     'title="Remove this season">×</button></td>'
-                : '') + '</tr>';
+                : '') + '</tr>' +
+              /* ── §533.2: THE REFUSAL IS A LINE UNDER THE ROW ──────────
+                 It was a browser box, which could say the units' names but
+                 could not make them reachable — and this page's own rule is
+                 that a count which cannot take you to what it counts makes
+                 work (§16.7). The names were already here, in the `title` of
+                 the Used by cell: visible to a mouse that hovers the right
+                 four pixels and to nothing else. Pressed, each one opens that
+                 unit's Drivers, which is where the sentence says to go. */
+              (SEASWHY === s.id && used.length
+                ? '<tr class="seasrefuse"><td colspan="' + (mayEdit ? 7 : 6) + '">' +
+                    '<p class="picerr"><b>' + esc(s.name || "This season") +
+                    ' is still in use.</b> ' + plural(used.length, "unit") + ' ' +
+                    (used.length === 1 ? "has" : "have") + ' it as a period of ' +
+                    (used.length === 1 ? "its" : "their") + ' own \u2014 ' +
+                    UNIT_KEYS.filter(function(k){
+                      return SMPRules.seasonUsedBy([UNITS[k]], s.id).length;
+                    }).map(function(k){
+                      return '<button class="linkbu" data-goseas="' + esc(k) + '">' +
+                             esc(UNITS[k].name) + '</button>';
+                    }).join(" ") +
+                    '. Take it off their Drivers page first.</p></td></tr>'
+                : '');
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No seasons yet. A season is a named window of real ' +
           'days that a unit can pull out of its base year — Ramadan, the school ' +
@@ -6696,7 +6749,23 @@ function renderImportUpload(){
     '</div></div>';
 
   var chk = IMP.check;
-  var blocked = chk && chk.problems.length;
+  /* ── §533.2: THE BUTTON IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──────
+     "Importing is the SMO's. Nothing has been applied." was a browser box
+     raised by a live Apply — the whole flow walked through, a file read and
+     checked, and the answer no at the last press. The grant is read here, so
+     the refusal is a line where the button is and the button is held.
+
+     HELD, NEVER `disabled`, and never hidden (§221, §163, §45.2): a disabled
+     button takes no focus, so the reason beside it would be unreachable
+     without a mouse, and a control that vanishes leaves somebody wondering
+     whether the act exists at all. The handler still checks — that is the
+     enforcement, this is what to read (§48.2). */
+  var notMine = grant("c_import") !== "edit";
+  var blocked = (chk && chk.problems.length) || notMine;
+  var notMineSay = notMine
+    ? '<p class="picerr"><b>Importing is the SMO\u2019s.</b> You can read this file and ' +
+      'check it against the plan; applying it is the office\u2019s.</p>'
+    : '';
   var checkBlock = chk && (chk.problems.length || chk.notices.length)
     ? '<div class="imp-checks">' +
         chk.problems.map(function(x){
@@ -6785,8 +6854,13 @@ function renderImportUpload(){
           'Kept as an archive dated today and restorable from <b>Archived plans</b> at any ' +
           'time. Nothing is destroyed.</div>'
         : '') +
+      notMineSay +
       '<div class="imp-row" style="margin-top:14px">' +
-        (blocked
+        (notMine
+          ? '<button class="editbtn apply" aria-disabled="true" ' +
+            'data-tip="Importing is the SMO\u2019s.">' +
+            (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>'
+          : blocked
           ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
           : '<button class="editbtn apply" data-apply="1">' +
             (hasPlan ? "Replace " : "Write ") + esc(u.name) + '’s plan</button>') +
@@ -6812,8 +6886,15 @@ function renderImportUpload(){
         '<button class="linkbu" data-cancel="1">Choose a different file</button></div>' +
       checkBlock + rowsHtml +
       (changed.length
-        ? '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
+        ? notMineSay +
+          '<div class="imp-row" style="margin-top:14px">' +
+          /* notMine is tested FIRST in both branches: `blocked` already holds
+             it, so the generic "Apply blocked" would otherwise win and say
+             nothing about whose the act is. */
+          (notMine
+            ? '<button class="editbtn apply" aria-disabled="true" ' +
+              'data-tip="Importing is the SMO\u2019s.">Apply to ' + esc(u.name) + '</button>'
+            : blocked
             ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
             : '<button class="editbtn apply" data-apply="1">Apply to ' + esc(u.name) + '</button>') +
           '<button class="linkbu" data-cancel="1">Discard</button></div>'
@@ -7686,19 +7767,48 @@ function renderCycle(){
            an end its own arithmetic could not read. The dates go through
            `cyclePick` and write into the draft through FIELDS; only the NAME
            is still typed, so only the name is still read by id. */
-        '<div class="nc-grid nc-1line">' +
-          '<label class="nm-lab"><span>Name</span><input class="fld" id="nc-name" value="' +
-            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
-          cyclePick("Covers from", NEWCYCLE.from, function(v){
-            NEWCYCLE.from = String(v).trim();
-          }, { wide:true }) +
-          cyclePick("to", NEWCYCLE.to, function(v){
-            NEWCYCLE.to = String(v).trim();
-          }, { wide:true, cls:"tobtn" }) +
-          cyclePick("Reports due", NEWCYCLE.due, function(v){
-            NEWCYCLE.due = String(v).trim();
-          }, { day:true }) +
-        '</div>' +
+        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§533.2) ──────
+           Both of this panel's refusals were browser boxes, and a box opens
+           OVER the form: the empty field could not be seen while the sentence
+           about it was on screen. The name's box then put the cursor in the
+           field afterwards and the month's did not — one form, two
+           behaviours, because a notice said away from its control has no
+           natural place to point.
+
+           DERIVED, NEVER STORED STALE (§48.2's instinct, one layer down):
+           `NEWCYCLE.why` names the field that was empty when Open was
+           pressed, and this reads it back against the CURRENT value, so
+           filling the box clears the line with no handler to remember. */
+        (function(){
+          var why = NEWCYCLE.why;
+          if (why === "name" && String(NEWCYCLE.name || "").trim()) why = null;
+          if (why === "to" && String(NEWCYCLE.to || "").trim()) why = null;
+          return '<div class="nc-grid nc-1line">' +
+            '<label class="nm-lab"><span>Name</span><input class="fld' +
+              (why === "name" ? " bad" : "") + '" id="nc-name"' +
+              (why === "name" ? ' aria-invalid="true"' : '') + ' value="' +
+              esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
+            cyclePick("Covers from", NEWCYCLE.from, function(v){
+              NEWCYCLE.from = String(v).trim();
+            }, { wide:true }) +
+            cyclePick("to", NEWCYCLE.to, function(v){
+              NEWCYCLE.to = String(v).trim();
+            }, { wide:true, cls:"tobtn" + (why === "to" ? " bad" : "") }) +
+            cyclePick("Reports due", NEWCYCLE.due, function(v){
+              NEWCYCLE.due = String(v).trim();
+            }, { day:true }) +
+          '</div>' +
+          (why === "name"
+            ? '<p class="picerr"><b>The cycle needs a name.</b> It is what its figures ' +
+              'are filed under once it closes, and what the next cycle compares against.</p>'
+            : why === "to"
+            /* The band below already says what the month decides, and it is on
+               screen — so the refusal names the control and leaves the
+               explaining to the sentence that was always there. */
+            ? '<p class="picerr"><b>Pick the month this cycle covers to.</b> ' +
+              'It is the review point, and the line below says what it decides.</p>'
+            : '');
+        })() +
         '<div class="nc-why"><b>The month it covers to decides what every figure is ' +
           'measured against.</b> A target that adds up across the year is compared with ' +
           'the share of it due by then, and a tactic whose span has not started yet is ' +
@@ -8082,15 +8192,33 @@ function fnKebab(fk, f, mayEdit){
    delete question. */
 function fnPanels(fk, f){
   if (CLEARING === "fndel|" + fk) {
+    /* ── §533.2: THE QUESTION IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──
+       "Functions are the SMO's. Nothing has been deleted." was a browser box
+       raised by the SECOND press — the question was asked, Yes was pressed,
+       and only then was the answer no. The grant is read here, so what opens
+       is the refusal and there is no Yes to press. The handler still checks
+       (§48.2): this decides what to READ, that decides what happens. */
+    if (grant("c_fns") !== "edit")
+      return '<div class="kmenu kconfirm"><div class="cq">' +
+        '<b>' + esc(f.name) + ' cannot be deleted from here.</b> Functions are the ' +
+        "SMO's. <b>Retire</b> takes it out of your navigation and keeps everything " +
+        'under it.</div>' +
+        '<div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var why = fnDeleteBlockers(fk);
     if (why.length) return '<div class="kmenu kconfirm"><div class="cq">' +
-      '<b>' + esc(f.name) + ' cannot be deleted.</b> ' +
+      /* THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO (§533.2): drawn on
+         open it says what cannot be done; drawn after Yes was pressed and
+         refused it says what was not done, and that this is news. */
+      (REFUSEDLATE === "fn:" + fk
+        ? '<b>' + esc(f.name) + ' was not deleted.</b> '
+        : '<b>' + esc(f.name) + ' cannot be deleted.</b> ') +
       /* Each reason is a sentence in a paragraph of them, so it starts with a
          capital. Written where they are JOINED, not baked into the strings,
          because the same text is spoken mid-sentence by the server's refusal. */
       why.map(function(w){
         return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
       }).join(" ") +
+      (REFUSEDLATE === "fn:" + fk ? ' That has come to be true since this was asked.' : '') +
       ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
       '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var takes = fnDeleteTakes(fk);

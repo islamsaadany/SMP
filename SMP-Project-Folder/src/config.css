@@ -2041,6 +2041,17 @@
   .nc-1line .nm-lab .fld { width:100%; }
   .nc-1line .dt { flex:0 0 auto; }
   .nc-1line .cycbtn { width:150px; }
+  /* ── A CONTROL THE PLATFORM HAS JUST REFUSED (§533.2) ──────────────
+     The refusal itself is a sentence under the control — `.picerr`, the
+     picture editor's own line, which is already the product's answer for a
+     refusal belonging to ONE control and is why nothing new is invented
+     here. This is the mark on the control it points at, and both halves are
+     needed: the line alone leaves somebody hunting the box in a row of four,
+     and the mark alone says something is wrong without saying what.
+     `aria-invalid` goes on beside it, which is the half a screen reader
+     gets (§163's rule: the reason has to be reachable without a mouse). */
+  .fld.bad, .cycbtn.bad { border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg); }
+  .newcycle .picerr { margin:11px 0 0; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }

@@ -9657,7 +9657,12 @@ returning browsers fetch the new platform rather than their own disk, and the
 reload banner will fire for a tab left open. Nothing about saving changed, so
 nobody is signed out.
 
-Not seen: production actually serving it. This container cannot reach the live
-address — the same limitation as the last two merges — so the two marks that
-prove a deployment are written down in the decisions document for whoever can
-open the site.
+Seen live: production built 40 seconds after the push and is serving it. The
+file the platform runs from is the same size as the one built here, down to
+the byte, and the new code is in it.
+
+A correction to what I wrote an hour ago: I first recorded that this container
+could not reach the live site, because it could not at the last two merges. I
+wrote that without trying it. It worked on the first attempt, so that claim is
+withdrawn — it was not true today, and I should have found that out by running
+the check rather than by remembering.

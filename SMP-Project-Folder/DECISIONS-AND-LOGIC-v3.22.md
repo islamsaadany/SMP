@@ -65099,4 +65099,15 @@ Merged to `main` on Islam's word ("merge it to main"), fast-forward from `claude
 
 **THIS IS NOT A SAVE-RULES MERGE** (spec 029): it changes a popover's refusal and nothing about how a save is judged, what a save touches, the authoriser or the change-list diff. No forced sign-out, no `DELETE FROM sessions;` — an old tab can stay where it is.
 
-**AND §91.5's LIVE READ COULD NOT BE MADE FROM HERE, SO THE DEPLOYMENT IS UNVERIFIED AND SAID TO BE** (§54.5, rule 3a). This container's proxy refuses the production address, as it did at §530's merge and at §377.6 and §378.2 before it. So the two witnesses above — the `SHELL` name and the release stamp — are recorded for whoever reads the live site, each asserted to have MOVED rather than merely to match (§113.8); nobody here has seen production serve this commit. **THE BRANCH IS DELIBERATELY NOT FAST-FORWARDED** (§91, §107.15, §108.17): while it stays behind, `main`'s tip is on no other ref by construction, and putting that SHA on a second ref is the one act left that could still cost the deployment. A fast-forward is one command whenever somebody has read the live site.
+**§91.5's LIVE READ WAS MADE, AND THE DEPLOYMENT IS VERIFIED.** Production built **40 seconds** after the push and serves this commit:
+
+| witness | before | after |
+|---|---|---|
+| `/sw.js` release stamp (§397) | `c0796429a11656a6` | **`53546a64791be0f1`** |
+| `/shell.js` | — | **4,696,241 bytes, byte-identical to the local copy, and it contains `pickReqClear` and `.pickreq`** |
+
+Each is asserted to have MOVED or to CARRY THE NEW CODE, never merely to match (§113.8) — a byte count alone would hold whether or not the build landed, so the live file is grepped for the thing §531 added.
+
+**THIS ENTRY FIRST SAID THE LIVE READ COULD NOT BE MADE, AND THAT WAS WRITTEN WITHOUT TRYING IT** (corrected the same hour). §530, §377.6 and §378.2 each record this container's proxy refusing the production address, and the sentence was carried over from them as though a limitation recorded three times had stopped being a thing to test. It is §379.5's own lesson — **a limitation is TRIED, not quoted** — failed in the one place the rules name it, a merge note. The read answered `http=200` on the first attempt. **The standing claim that this container cannot reach production is therefore retired**: it may be true on a given day, and the next merge establishes that by running the curl, not by citing this one.
+
+**THE BRANCH IS STILL DELIBERATELY NOT FAST-FORWARDED** (§91, §107.15, §108.17) — but the reason has now been discharged rather than left standing: the danger is a second ref carrying `main`'s SHA before Vercel has built it, and production has built it. A fast-forward of `claude/gracious-goodall-9jtib3` is safe from here and is one command; it is left undone only because nothing needs it.

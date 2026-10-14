@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { arrangeProcessStepsByFlow } from "@/ffp/lib/actions/process";
+import { confirmProposedStep, deleteProposedStep } from "@/ffp/lib/actions/ai-review";
 import type { StepGap } from "@/ffp/lib/domain/step-readiness";
 import type { AuthorityDirection } from "@/ffp/lib/domain/authority-table";
 import { computeStepNumberLabels } from "@/ffp/lib/domain/parallel-step-numbering";
@@ -34,6 +35,7 @@ type StepT = {
   direction?: AuthorityDirection;
 };
 type ConnectionT = { id: string; fromStepId: string; toStepId: string; label: string | null };
+type ProposalT = { findingId: string; label: string; notes: string | null; afterStepId: string | null };
 type ProcessOption = { id: string; code: string; name: string };
 
 export function MapView({
@@ -48,6 +50,7 @@ export function MapView({
   handoffsOut,
   handoffStepOptions,
   otherProcesses,
+  proposals = [],
 }: {
   workspaceId: string;
   processId: string;
@@ -60,6 +63,7 @@ export function MapView({
   handoffsOut: HandoffT[];
   handoffStepOptions: HandoffStepOption[];
   otherProcesses: ProcessOption[];
+  proposals?: ProposalT[];
 }) {
   const [mode, setMode] = useState<"diagram" | "list">("diagram");
   const [arrangeError, setArrangeError] = useState<string | null>(null);
@@ -142,6 +146,19 @@ export function MapView({
       </div>
       {arrangeError && <p className="mb-2 text-xs text-red-600">{arrangeError}</p>}
 
+      {mode === "diagram" && proposals.length > 0 && (
+        <div className="mb-3 flex flex-col gap-2">
+          {proposals.map((p) => (
+            <ProposalRow
+              key={p.findingId}
+              workspaceId={workspaceId}
+              proposal={p}
+              afterLabel={p.afterStepId ? (stepById.get(p.afterStepId)?.label ?? null) : null}
+            />
+          ))}
+        </div>
+      )}
+
       {mode === "diagram" ? (
         <ProcessMapCanvas
           workspaceId={workspaceId}
@@ -155,6 +172,9 @@ export function MapView({
         />
       ) : (
         <div className="flex flex-col gap-2">
+          {proposals.filter((p) => !p.afterStepId || !stepById.has(p.afterStepId)).map((p) => (
+            <ProposalRow key={p.findingId} workspaceId={workspaceId} proposal={p} afterLabel={null} />
+          ))}
           {steps.map((step, i) => {
             const incomingConnections = incomingConnectionsOf.get(step.id) ?? [];
             const predecessors = incomingConnections
@@ -167,8 +187,8 @@ export function MapView({
               .filter((s) => s.id !== step.id)
               .map((s) => ({ id: s.id, label: s.label, type: s.type }));
             return (
+              <div key={step.id} className="flex flex-col gap-2">
               <StepListRow
-                key={step.id}
                 workspaceId={workspaceId}
                 processId={processId}
                 isFirst={i === 0}
@@ -185,6 +205,10 @@ export function MapView({
                 handoffsOut={handoffsOut.filter((h) => h.fromStepId === step.id)}
                 handoffStepOptions={handoffStepOptions}
               />
+              {proposals.filter((p) => p.afterStepId === step.id).map((p) => (
+                <ProposalRow key={p.findingId} workspaceId={workspaceId} proposal={p} afterLabel={step.label} />
+              ))}
+              </div>
             );
           })}
           {steps.length === 0 && (
@@ -194,6 +218,60 @@ export function MapView({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// A step the AI review suggested — not part of the process until confirmed.
+function ProposalRow({
+  workspaceId,
+  proposal,
+  afterLabel,
+}: {
+  workspaceId: string;
+  proposal: ProposalT;
+  afterLabel: string | null;
+}) {
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const run = (fn: typeof confirmProposedStep) =>
+    start(async () => {
+      setError(null);
+      const r = await fn({ workspaceId, findingId: proposal.findingId });
+      if (!r.ok) {
+        setError(r.error === "VALIDATION_ERROR" ? (r.message ?? "Could not do that") : r.error);
+        return;
+      }
+      router.refresh();
+    });
+  return (
+    <div className="rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 px-4 py-3">
+      <div className="text-[10px] font-bold uppercase tracking-wide text-amber-700">Proposed · from AI review</div>
+      <div className="mt-0.5 text-sm font-semibold text-slate-900">{proposal.label}</div>
+      <div className="text-xs text-slate-600">
+        {afterLabel ? <>After “{afterLabel}”</> : "Not placed yet — it will be added at the end"}
+        {proposal.notes ? <> · {proposal.notes}</> : null}
+      </div>
+      <div className="mt-2 flex gap-2">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => run(confirmProposedStep)}
+          className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+        >
+          Confirm
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => run(deleteProposedStep)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        >
+          Delete
+        </button>
+      </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

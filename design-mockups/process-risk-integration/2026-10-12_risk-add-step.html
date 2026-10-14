@@ -1,0 +1,52 @@
+<title>Risk Add Step</title>
+<style>
+:root{--bg:#F4F6FA;--surface:#fff;--ink:#16325C;--ink2:#4A5B78;--line:#D6DCE5;--gold:#B8860B;--goldbg:#FFF6DC;--bad:#A4332B;--good:#1F7A4D;--navy:#16325C;--on:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10151D;--surface:#1A222E;--ink:#E9ECF1;--ink2:#AEB8C8;--line:#333A45;--gold:#E0B84A;--goldbg:#3A3115;--bad:#E58A82;--good:#6CCB9A;--navy:#2A4A7F}}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,sans-serif;margin:0;padding-inline:16px;padding-block:20px}
+.wrap{max-width:980px;margin:auto;display:grid;gap:28px}
+h1{font-size:18px;margin:0}h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;min-width:0}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.b{font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 8px;color:var(--ink2)}.b.hi{color:var(--bad);border-color:var(--bad)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 11px}
+button.p{background:var(--navy);color:var(--on);border-color:var(--navy)}button.g{border-color:var(--gold);color:var(--gold)}button.d{color:var(--bad);border-color:var(--bad)}
+.form{margin-top:10px;padding:10px;border:1px dashed var(--gold);border-radius:6px;background:var(--goldbg);display:grid;gap:8px}
+label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
+input,select,textarea{font:inherit;width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.map{display:flex;align-items:center;gap:0;overflow-x:auto;padding:10px 0}
+.n{flex:none;border:1px solid var(--navy);border-radius:6px;padding:8px 12px;background:var(--surface);min-width:110px;text-align:center}
+.a{flex:none;width:28px;height:2px;background:var(--ink2)}
+.n.pend{border:2px dashed var(--gold);background:var(--goldbg);padding:8px 12px 10px;min-width:170px}
+.tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700}
+.n.pend .acts{justify-content:center;margin-top:6px}
+.note{font-size:12px;color:var(--ink2);margin-top:8px}
+</style>
+<div class="wrap">
+<h1>AI review → add a risk as a step (mockup)</h1>
+
+<section><h2>1 · The risk card</h2>
+<div class="card">
+<div class="badges"><span class="b">risk</span><span class="b">process map</span><span class="b hi">high</span><span class="b">Open</span></div>
+<strong>No second approval on payments above 50,000 EGP</strong>
+<div class="note">A single person can release a large payment with no check.</div>
+<div class="note"><b>Recommendation:</b> Add a second approver before release.</div>
+<div class="acts"><button>Edit</button><button class="g">Add as a step</button><button>Merge as a note</button><button>Replace a step</button><button class="d">Remove</button></div>
+<div class="form">
+<div><label>Step text (adjust it)</label><input value="Second approval of payment"></div>
+<div><label>Place it after</label><select><option>Prepare payment</option><option>Approve payment</option></select></div>
+<div><label>Notes (optional)</label><textarea rows="2">Required for payments above 50,000 EGP.</textarea></div>
+<div class="acts"><button class="p">Add to process (proposed)</button><button>Cancel</button></div>
+</div></div></section>
+
+<section><h2>2 · The process map afterwards — proposed step highlighted</h2>
+<div class="card"><div class="map">
+<div class="n">Start</div><div class="a"></div><div class="n">Prepare payment</div><div class="a"></div>
+<div class="n pend"><div class="tag">Proposed · from AI review</div>Second approval of payment<div class="acts"><button class="p">Confirm</button><button class="d">Delete</button></div></div>
+<div class="a"></div><div class="n">Release payment</div><div class="a"></div><div class="n">End</div></div>
+<div class="note">Until you press Confirm it is not part of the real process: no export, no RACI, no numbering. Delete removes it and the risk goes back to open.</div></div></section>
+
+<section><h2>3 · The risk card after Confirm</h2>
+<div class="card"><div class="badges"><span class="b">risk</span><span class="b hi">high</span><span class="b" style="color:var(--good);border-color:var(--good)">Integrated</span></div>
+<strong>No second approval on payments above 50,000 EGP</strong>
+<div class="note" style="color:var(--good)">✓ Added to the process after “Prepare payment”</div></div></section>
+</div>

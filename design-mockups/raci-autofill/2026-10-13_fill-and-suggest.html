@@ -1,0 +1,89 @@
+<title>RACI Fill and Suggest</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--fg:#0f172a;--mut:#64748b;--line:#e2e8f0;--dash:#cbd5e1;
+--r-bg:#e0f2fe;--r-fg:#0369a1;--a-bg:#e0e7ff;--a-fg:#4338ca;--c-bg:#d1fae5;--c-fg:#047857;--i-bg:#f1f5f9;--i-fg:#64748b;
+--sug-bg:#fffbeb;--sug-bd:#f59e0b;--sug-fg:#92400e;--btn:#0f172a;--btnfg:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#111a2e;--fg:#e2e8f0;--mut:#94a3b8;--line:#243049;--dash:#475569;
+--r-bg:#0c4a6e;--r-fg:#bae6fd;--a-bg:#312e81;--a-fg:#c7d2fe;--c-bg:#064e3b;--c-fg:#a7f3d0;--i-bg:#1e293b;--i-fg:#94a3b8;
+--sug-bg:#3b2a07;--sug-bd:#f59e0b;--sug-fg:#fcd34d;--btn:#e2e8f0;--btnfg:#0f172a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#111a2e;--fg:#e2e8f0;--mut:#94a3b8;--line:#243049;--dash:#475569;
+--r-bg:#0c4a6e;--r-fg:#bae6fd;--a-bg:#312e81;--a-fg:#c7d2fe;--c-bg:#064e3b;--c-fg:#a7f3d0;--i-bg:#1e293b;--i-fg:#94a3b8;
+--sug-bg:#3b2a07;--sug-bd:#f59e0b;--sug-fg:#fcd34d;--btn:#e2e8f0;--btnfg:#0f172a;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif;padding-inline:16px;padding-block:20px}
+.wrap{max-width:980px;margin:auto}
+h1{font-size:18px;margin:0 0 4px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.btn{border:0;border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer;background:var(--btn);color:var(--btnfg)}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.badge{font-size:11px;font-weight:700;border-radius:99px;padding:2px 8px;background:var(--i-bg);color:var(--i-fg)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+th{font-size:12px;color:var(--mut);font-weight:600}
+td:first-child,th:first-child{text-align:left;min-width:220px}
+tr.act td:first-child{padding-left:28px;color:var(--mut)}
+.cell{display:inline-flex;align-items:center;justify-content:center;width:34px;height:28px;border-radius:6px;font-weight:700;position:relative;border:1px dashed var(--dash);color:transparent}
+.R{background:var(--r-bg);color:var(--r-fg);border:0}.A{background:var(--a-bg);color:var(--a-fg);border:0}
+.C{background:var(--c-bg);color:var(--c-fg);border:0}.I{background:var(--i-bg);color:var(--i-fg);border:0}
+.cell.own::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--r-fg);border:2px solid var(--card)}
+.cell.sug{background:var(--sug-bg);border:1px dashed var(--sug-bd);color:var(--sug-fg);opacity:.9;cursor:default}
+.cell.sug:hover,.cell.sug:focus-within{width:auto;padding:0 4px;gap:2px}
+.cell.sug .x{display:none;gap:2px;margin-left:3px}
+.cell.sug:hover .x,.cell.sug:focus-within .x{display:inline-flex}
+.x button{border:0;background:transparent;color:inherit;font-size:13px;cursor:pointer;padding:0 2px;font-weight:700}
+.x button:hover{background:var(--sug-bd);color:#000;border-radius:4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--mut)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.msg{font-size:12px;color:var(--mut)}
+[title]{cursor:help}
+</style>
+<div class="wrap">
+<h1>Customer Onboarding · RACI</h1>
+<div class="bar">
+  <button class="btn" id="fill" title="Puts R for each step's assigned role on its activities. Empty cells only. Nothing existing is overwritten.">Fill from step owners</button>
+  <button class="btn ghost" id="sugg" title="Shows suggested entries, e.g. the owner's manager as A. Nothing is saved until you accept.">Suggest</button>
+  <button class="btn ghost" id="reset">Reset demo</button>
+  <span class="badge">DRAFT</span><span class="msg" id="msg"></span>
+</div>
+<div class="tbl"><table id="t">
+<thead><tr><th>Step / activity</th><th>Account Manager</th><th>Sales Director</th><th>Finance</th><th>Legal</th></tr></thead>
+<tbody></tbody></table></div>
+<div class="legend">
+  <span><i class="cell R" style="width:22px;height:18px">R</i> Saved</span>
+  <span><i class="cell R own" style="width:22px;height:18px">R</i> Filled from owner (saved, dot shows origin)</span>
+  <span><i class="cell sug" style="width:22px;height:18px">A</i> Suggested — hover to accept ✓, edit ✎ or dismiss ✕</span>
+</div>
+</div>
+<script>
+const roles=["Account Manager","Sales Director","Finance","Legal"];
+const seed=()=>[
+ {n:"Collect customer details",k:"step",owner:0,mgr:1,c:[null,null,null,null]},
+ {n:"Capture contact form",k:"act",owner:0,mgr:1,c:[null,null,null,null]},
+ {n:"Verify credit",k:"step",owner:2,mgr:1,c:[null,"A",null,null]},
+ {n:"Contract review",k:"step",owner:3,mgr:1,c:[null,null,null,"R"]},
+ {n:"Redline clauses",k:"act",owner:3,mgr:1,c:[null,null,null,null]}];
+let rows=seed(),own={},sug={};
+const L=["R","A","C","I"];
+function draw(){
+ const tb=document.querySelector("tbody");tb.innerHTML="";
+ rows.forEach((r,i)=>{const tr=document.createElement("tr");if(r.k==="act")tr.className="act";
+  let h="<td>"+r.n+"</td>";
+  roles.forEach((_,j)=>{const v=r.c[j],s=sug[i+","+j];
+   if(v)h+=`<td><span class="cell ${v} ${own[i+","+j]?"own":""}" ${own[i+","+j]?'title="Filled from step owner"':""}>${v}</span></td>`;
+   else if(s)h+=`<td><span class="cell sug" title="Suggested: ${s.why}">${s.code}<span class="x"><button data-a="ok" data-k="${i},${j}" title="Accept">✓</button><button data-a="ed" data-k="${i},${j}" title="Edit (cycle R/A/C/I)">✎</button><button data-a="no" data-k="${i},${j}" title="Dismiss">✕</button></span></span></td>`;
+   else h+=`<td><span class="cell">·</span></td>`;});
+  tr.innerHTML=h;tb.appendChild(tr);});
+}
+document.getElementById("fill").onclick=()=>{let n=0;rows.forEach((r,i)=>{if(!r.c[r.owner]){r.c[r.owner]="R";own[i+","+r.owner]=1;n++;}});
+ msg.textContent=n+" empty cells filled · existing entries untouched";draw();};
+document.getElementById("sugg").onclick=()=>{rows.forEach((r,i)=>{if(r.c.some(x=>x==="A"))return;if(!r.c[r.mgr]&&!sug[i+","+r.mgr])sug[i+","+r.mgr]={code:"A",why:"owner's manager is the natural accountable role"};});
+ msg.textContent="Suggestions shown — nothing saved yet";draw();};
+document.getElementById("reset").onclick=()=>{rows=seed();own={};sug={};msg.textContent="";draw();};
+document.addEventListener("click",e=>{const b=e.target.closest("button[data-a]");if(!b)return;
+ const k=b.dataset.k,[i,j]=k.split(",").map(Number),s=sug[k];
+ if(b.dataset.a==="ok"){rows[i].c[j]=s.code;delete sug[k];msg.textContent="Accepted and saved";}
+ if(b.dataset.a==="no"){delete sug[k];msg.textContent="Dismissed";}
+ if(b.dataset.a==="ed"){s.code=L[(L.indexOf(s.code)+1)%4];}
+ draw();});
+const msg=document.getElementById("msg");draw();
+</script>

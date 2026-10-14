@@ -2,7 +2,7 @@ import { registerReady } from "@/ffp/lib/register-sync";
 import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import { validateRaciMatrix } from "@/ffp/lib/domain/raci-validation";
-import { buildRaciTableRows, computeVisibleRoleIds } from "@/ffp/lib/domain/raci-table";
+import { buildRaciTableRows, computeVisibleRoleIds, type StepOwners } from "@/ffp/lib/domain/raci-table";
 import { getProcessStepperCounts } from "@/ffp/lib/data/process-stepper-data";
 import { RaciIntro, RaciTable } from "./raci-table";
 import { AddActivityForm } from "./activity-form";
@@ -17,7 +17,7 @@ export default async function RaciMatrixPage(
   const process = await prisma.process.findUnique({ where: { id: processId } });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [roles, activities, matrixStatus, steps, stepperCounts] = await Promise.all([
+  const [roles, activities, matrixStatus, steps, stepperCounts, people] = await Promise.all([
     prisma.role.findMany({ where: { workspaceId, archivedAt: null }, orderBy: { name: "asc" } }),
     prisma.activity.findMany({
       where: { processId },
@@ -39,7 +39,42 @@ export default async function RaciMatrixPage(
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],
     }),
     getProcessStepperCounts(processId),
+    prisma.person.findMany({
+      where: { workspaceId, archivedAt: null },
+      select: { id: true, managerId: true, personRoles: { select: { roleId: true } } },
+    }),
   ]);
+
+  // For each Role: the Role its holders' managers most often hold (ties go to
+  // the lower id so the answer is stable). This is where "the owner's manager"
+  // comes from — the Org Directory, never a guess.
+  const rolesOf = new Map(people.map((p) => [p.id, p.personRoles.map((pr) => pr.roleId)]));
+  const managerRoleOf = new Map<string, string>();
+  const tally = new Map<string, Map<string, number>>();
+  for (const p of people) {
+    if (!p.managerId) continue;
+    for (const ownerRole of rolesOf.get(p.id) ?? []) {
+      const counts = tally.get(ownerRole) ?? new Map<string, number>();
+      for (const mr of rolesOf.get(p.managerId) ?? []) {
+        if (mr === ownerRole) continue;
+        counts.set(mr, (counts.get(mr) ?? 0) + 1);
+      }
+      tally.set(ownerRole, counts);
+    }
+  }
+  for (const [ownerRole, counts] of tally) {
+    const best = [...counts.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0];
+    if (best) managerRoleOf.set(ownerRole, best[0]);
+  }
+  const stepOwners: StepOwners = Object.fromEntries(
+    steps.map((s) => [
+      s.id,
+      {
+        ownerRoleId: s.assignedRoleId,
+        managerRoleId: s.assignedRoleId ? (managerRoleOf.get(s.assignedRoleId) ?? null) : null,
+      },
+    ])
+  );
 
   // Owner/supporting Roles a step already names — set on the Value Chain
   // board or the Process Map, independent of any RACI cell being clicked yet.
@@ -122,6 +157,7 @@ export default async function RaciMatrixPage(
         initialRows={rows}
         initialIssues={issues}
         initialStatus={matrixStatus?.status ?? "DRAFT"}
+        stepOwners={stepOwners}
       />
 
       <AddActivityForm workspaceId={workspaceId} processId={processId} />

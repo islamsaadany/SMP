@@ -15,6 +15,8 @@ import {
 import { runProcessReview } from "@/ffp/lib/ai/process-review";
 import { ok, notFound, validationError, aiUnavailable, type ActionResult } from "@/ffp/lib/actions/errors";
 import type { ReviewFindingCategory, ReviewFindingArea, ReviewFindingSeverity } from "@/ffp/generated/prisma/client";
+import { laneY, nextStepX } from "@/ffp/lib/domain/process-layout";
+import { insertPositionAfter } from "@/ffp/lib/domain/step-order";
 import { loadProcessReviewContext } from "@/ffp/lib/data/process-review-context";
 import { getActionLocale } from "@/ffp/lib/i18n/server";
 import { withAnswerLanguage } from "@/ffp/lib/i18n/locale";
@@ -230,5 +232,164 @@ export async function integrateReviewFinding(
 
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${finding.processId}/review`);
   revalidatePath(`/${parsed.data.workspaceId}/processes/processes/${finding.processId}/map`);
+  return ok(toPersistedFinding(updated));
+}
+
+const proposeStepSchema = findingIdSchema.extend({
+  label: z.string().trim().min(1).max(200),
+  notes: z.string().trim().max(1000).optional().or(z.literal("")),
+  afterStepId: z.string().min(1).optional().or(z.literal("")),
+});
+
+function revalidateReview(workspaceId: string, processId: string) {
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}/review`);
+  revalidatePath(`/${workspaceId}/processes/processes/${processId}/map`);
+}
+
+/**
+ * Suggests a new step from a finding. Nothing is added to the process yet:
+ * the suggestion is only stored on the finding and shown, highlighted, on the
+ * map until the user confirms or deletes it.
+ */
+export async function proposeStepFromFinding(
+  input: z.infer<typeof proposeStepSchema>
+): Promise<ActionResult<PersistedReviewFinding>> {
+  const parsed = proposeStepSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+
+  const finding = await loadFindingInWorkspace(parsed.data.workspaceId, parsed.data.findingId);
+  if (!finding) return notFound();
+  if (finding.status === "DISMISSED" || finding.status === "INTEGRATED") {
+    return validationError("This finding is already handled.");
+  }
+
+  let afterStepId: string | null = null;
+  if (parsed.data.afterStepId) {
+    const anchor = await prisma.processStep.findUnique({ where: { id: parsed.data.afterStepId } });
+    if (!anchor || anchor.processId !== finding.processId) return notFound();
+    afterStepId = anchor.id;
+  }
+
+  const updated = await prisma.reviewFinding.update({
+    where: { id: finding.id },
+    data: {
+      proposedLabel: parsed.data.label,
+      proposedNotes: parsed.data.notes || null,
+      proposedAfterStepId: afterStepId,
+    },
+    include: { integratedStep: true },
+  });
+
+  revalidateReview(parsed.data.workspaceId, finding.processId);
+  return ok(toPersistedFinding(updated));
+}
+
+/** Turns a waiting proposal into a real step placed after its chosen step. */
+export async function confirmProposedStep(
+  input: z.infer<typeof findingIdSchema>
+): Promise<ActionResult<PersistedReviewFinding>> {
+  const parsed = findingIdSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+
+  const finding = await loadFindingInWorkspace(parsed.data.workspaceId, parsed.data.findingId);
+  if (!finding) return notFound();
+  if (!finding.proposedLabel) return validationError("There is no proposed step to confirm.");
+  const label = finding.proposedLabel;
+  const notes = finding.proposedNotes;
+  const processId = finding.processId;
+
+  const steps = await prisma.processStep.findMany({
+    where: { processId },
+    select: { id: true, positionX: true, swimlaneRoleId: true, assignedRoleId: true, order: true },
+    orderBy: { order: "asc" },
+  });
+  const orderedIds = steps.map((s) => s.id);
+  // If the chosen step has been deleted meanwhile, fall back to the end.
+  const anchorId =
+    finding.proposedAfterStepId && orderedIds.includes(finding.proposedAfterStepId)
+      ? finding.proposedAfterStepId
+      : null;
+  const position = insertPositionAfter(orderedIds, anchorId);
+  const laneOrder: string[] = [];
+  for (const s of steps) {
+    const roleId = s.swimlaneRoleId ?? s.assignedRoleId;
+    if (roleId && !laneOrder.includes(roleId)) laneOrder.push(roleId);
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    if (position < orderedIds.length) {
+      await tx.processStep.updateMany({
+        where: { processId, id: { in: orderedIds.slice(position) } },
+        data: { order: { increment: 1 } },
+      });
+    }
+    const created = await tx.processStep.create({
+      data: {
+        processId,
+        type: "TASK",
+        label,
+        reviewNotes: notes || undefined,
+        positionX: nextStepX(steps.map((s) => s.positionX)),
+        positionY: laneY(null, laneOrder),
+        order: position,
+      },
+    });
+    if (anchorId) {
+      // Slot it into the flow: what followed the chosen step now follows the new one.
+      await tx.stepConnection.updateMany({
+        where: { processId, fromStepId: anchorId },
+        data: { fromStepId: created.id },
+      });
+      await tx.stepConnection.create({ data: { processId, fromStepId: anchorId, toStepId: created.id } });
+    }
+    return tx.reviewFinding.update({
+      where: { id: finding.id },
+      data: {
+        status: "INTEGRATED",
+        integratedStepId: created.id,
+        integrationMode: null,
+        proposedLabel: null,
+        proposedNotes: null,
+        proposedAfterStepId: null,
+      },
+      include: { integratedStep: true },
+    });
+  });
+
+  revalidateReview(parsed.data.workspaceId, processId);
+  return ok(toPersistedFinding(updated));
+}
+
+/** Throws a waiting proposal away; the finding goes back to open. */
+export async function deleteProposedStep(
+  input: z.infer<typeof findingIdSchema>
+): Promise<ActionResult<PersistedReviewFinding>> {
+  const parsed = findingIdSchema.safeParse(input);
+  if (!parsed.success) return validationError("Invalid input", parsed.error.issues);
+
+  const access = await requireWorkspaceAccess(parsed.data.workspaceId, "EDITOR");
+  if (!access.ok) return access;
+
+  const finding = await loadFindingInWorkspace(parsed.data.workspaceId, parsed.data.findingId);
+  if (!finding) return notFound();
+
+  const updated = await prisma.reviewFinding.update({
+    where: { id: finding.id },
+    data: {
+      proposedLabel: null,
+      proposedNotes: null,
+      proposedAfterStepId: null,
+      ...(finding.status === "INTEGRATED" || finding.status === "DISMISSED" ? {} : { status: "OPEN" }),
+    },
+    include: { integratedStep: true },
+  });
+
+  revalidateReview(parsed.data.workspaceId, finding.processId);
   return ok(toPersistedFinding(updated));
 }

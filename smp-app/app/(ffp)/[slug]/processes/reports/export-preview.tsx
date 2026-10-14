@@ -320,7 +320,8 @@ export function ExportPreview({
         .print-break-before { break-before: auto !important; }
         .print-keep, tr, h1, h2, h3, h4 { break-inside: auto !important; }
       `;
-      document.head.appendChild(style);
+      // Appended to the END of the body: the page's own A4 `@page` lives in a body <style>, and at equal weight the later rule wins, so a head <style> lost.
+      document.body.appendChild(style);
     };
     const after = () => {
       document.getElementById(styleId)?.remove();

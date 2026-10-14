@@ -24,6 +24,8 @@ export type PersistedReviewFinding = {
   integratedStepId: string | null;
   integratedStepLabel: string | null;
   integrationMode: "MERGED" | "REPLACED" | null;
+  /** Set while a step suggested from this finding waits for Confirm/Delete. */
+  proposal: { label: string; notes: string; afterStepId: string | null } | null;
 };
 
 /** Shapes a ReviewFinding row (with its integratedStep included) for the client. */
@@ -39,6 +41,9 @@ export function toPersistedFinding(f: {
   integratedStepId: string | null;
   integrationMode: string | null;
   integratedStep: { label: string } | null;
+  proposedLabel?: string | null;
+  proposedNotes?: string | null;
+  proposedAfterStepId?: string | null;
 }): PersistedReviewFinding {
   return {
     id: f.id,
@@ -52,6 +57,9 @@ export function toPersistedFinding(f: {
     integratedStepId: f.integratedStepId,
     integratedStepLabel: f.integratedStep?.label ?? null,
     integrationMode: f.integrationMode as PersistedReviewFinding["integrationMode"],
+    proposal: f.proposedLabel
+      ? { label: f.proposedLabel, notes: f.proposedNotes ?? "", afterStepId: f.proposedAfterStepId ?? null }
+      : null,
   };
 }
 

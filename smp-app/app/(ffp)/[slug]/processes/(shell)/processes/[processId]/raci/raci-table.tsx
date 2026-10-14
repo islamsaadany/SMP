@@ -17,7 +17,7 @@ import {
 } from "@/ffp/lib/actions/raci";
 import { createRole } from "@/ffp/lib/actions/org";
 import type { RaciIssue } from "@/ffp/lib/domain/raci-validation";
-import type { RaciTableRow } from "@/ffp/lib/domain/raci-table";
+import { planOwnerFill, planSuggestions, type RaciTableRow, type StepOwners } from "@/ffp/lib/domain/raci-table";
 
 type Code = "RESPONSIBLE" | "ACCOUNTABLE" | "CONSULTED" | "INFORMED";
 const CYCLE: (Code | null)[] = [null, "RESPONSIBLE", "ACCOUNTABLE", "CONSULTED", "INFORMED"];
@@ -69,7 +69,9 @@ export function RaciTable({
   initialRows,
   initialIssues,
   initialStatus,
+  stepOwners,
 }: {
+  stepOwners: StepOwners;
   workspaceId: string;
   processId: string;
   allRoles: RoleT[];
@@ -83,6 +85,9 @@ export function RaciTable({
   const [status, setStatus] = useState(initialStatus);
   const [visibleRoles, setVisibleRoles] = useState(initialVisibleRoles);
   const [pending, startTransition] = useTransition();
+  const [ownFilled, setOwnFilled] = useState<Set<string>>(new Set());
+  const [suggestions, setSuggestions] = useState<Record<string, Code>>({});
+  const [message, setMessage] = useState<string | null>(null);
   const [focusedCell, setFocusedCell] = useState({ row: 0, col: 0 });
   const canEdit = useCanEdit();
   const [editingRowId, setEditingRowId] = useState<string | null>(null);
@@ -162,15 +167,102 @@ export function RaciTable({
     );
     setRows(nextRows);
     setIssues(recomputeLocalIssues(nextRows));
+    setOwnFilled((prev) => {
+      const k = `${row.id}:${roleId}`;
+      if (!prev.has(k)) return prev;
+      const n = new Set(prev);
+      n.delete(k);
+      return n;
+    });
 
     startTransition(async () => {
-      if (row.kind === "activity") {
-        await setRaciAssignment({ workspaceId, activityId: row.id, roleId, code: next });
-      } else {
-        await setStepRaciCell({ workspaceId, processId, stepId: row.id, roleId, code: next });
-      }
+      await persistCell(row, roleId, next);
       router.refresh();
     });
+  }
+
+  function applyCells(cells: { row: RaciTableRow; roleId: string; code: Code | null }[]) {
+    const nextRows = rows.map((r) => {
+      const mine = cells.filter((c) => c.row.id === r.id);
+      if (mine.length === 0) return r;
+      const assignments = { ...r.assignments } as Record<string, Code | undefined>;
+      for (const c of mine) assignments[c.roleId] = c.code ?? undefined;
+      return { ...r, assignments: assignments as Record<string, Code> };
+    });
+    setRows(nextRows);
+    setIssues(recomputeLocalIssues(nextRows));
+    return nextRows;
+  }
+
+  async function persistCell(row: RaciTableRow, roleId: string, code: Code | null) {
+    if (row.kind === "activity") {
+      await setRaciAssignment({ workspaceId, activityId: row.id, roleId, code });
+    } else {
+      await setStepRaciCell({ workspaceId, processId, stepId: row.id, roleId, code });
+    }
+  }
+
+  function fillFromOwners() {
+    const planned = planOwnerFill(rows, stepOwners);
+    if (planned.length === 0) {
+      setMessage("0 empty cells filled · existing entries untouched");
+      return;
+    }
+    applyCells(planned.map((p) => ({ row: p.row, roleId: p.roleId, code: p.code as Code })));
+    setOwnFilled((prev) => {
+      const next = new Set(prev);
+      for (const p of planned) next.add(`${p.row.id}:${p.roleId}`);
+      return next;
+    });
+    setMessage(`${planned.length} empty cells filled · existing entries untouched`);
+    startTransition(async () => {
+      for (const p of planned) await persistCell(p.row, p.roleId, p.code as Code);
+      router.refresh();
+    });
+  }
+
+  function showSuggestions() {
+    const planned = planSuggestions(rows, stepOwners, roles.map((r) => r.id));
+    const next: Record<string, Code> = {};
+    for (const p of planned) next[`${p.row.id}:${p.roleId}`] = p.code as Code;
+    setSuggestions(next);
+    setMessage(
+      planned.length === 0 ? "Nothing to suggest" : "Suggestions shown — nothing saved yet"
+    );
+  }
+
+  function dropSuggestion(row: RaciTableRow, roleId: string) {
+    setSuggestions((prev) => {
+      const next = { ...prev };
+      delete next[`${row.id}:${roleId}`];
+      return next;
+    });
+  }
+
+  function acceptSuggestion(row: RaciTableRow, roleId: string) {
+    const code = suggestions[`${row.id}:${roleId}`];
+    if (!code) return;
+    dropSuggestion(row, roleId);
+    applyCells([{ row, roleId, code }]);
+    setMessage("Accepted and saved");
+    startTransition(async () => {
+      await persistCell(row, roleId, code);
+      router.refresh();
+    });
+  }
+
+  function editSuggestion(row: RaciTableRow, roleId: string) {
+    const key = `${row.id}:${roleId}`;
+    const current = suggestions[key];
+    if (!current) return;
+    const order: Code[] = ["RESPONSIBLE", "ACCOUNTABLE", "CONSULTED", "INFORMED"];
+    const next = order[(order.indexOf(current) + 1) % order.length];
+    setSuggestions((prev) => ({ ...prev, [key]: next }));
+  }
+
+  function dismissSuggestion(row: RaciTableRow, roleId: string) {
+    dropSuggestion(row, roleId);
+    setMessage("Dismissed");
   }
 
   function toggleSkip(row: RaciTableRow) {
@@ -297,6 +389,34 @@ export function RaciTable({
         >
           {status}
         </span>
+
+        {canEdit && (
+          <>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={fillFromOwners}
+              title="Puts R for each step's assigned role on its activities. Empty cells only. Nothing existing is overwritten."
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              Fill from step owners
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              onClick={showSuggestions}
+              title="Shows suggested entries, e.g. the owner's manager as A. Nothing is saved until you accept."
+              className="rounded-lg border border-amber-400 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
+            >
+              Suggest
+            </button>
+            {message && (
+              <span role="status" className="text-xs text-slate-500">
+                {message}
+              </span>
+            )}
+          </>
+        )}
 
         <div className="ms-auto">
           {!canEdit ? null : addingTitle ? (
@@ -459,9 +579,61 @@ export function RaciTable({
                   </th>
                   {roles.map((r, colIdx) => {
                     const code = row.assignments[r.id] as Code | undefined;
+                    const sKey = `${row.id}:${r.id}`;
+                    const suggested = canEdit && !code ? suggestions[sKey] : undefined;
                     return (
                       <td key={r.id} role={canEdit ? "gridcell" : undefined} className="px-3 py-2 text-center">
-                        {canEdit ? (
+                        {suggested ? (
+                          <span
+                            className="group relative inline-flex"
+                            title="Suggested: owner's manager is the natural accountable role"
+                          >
+                            <button
+                              ref={(el) => {
+                                if (el) cellRefs.current.set(cellKey(rowIdx, colIdx), el);
+                                else cellRefs.current.delete(cellKey(rowIdx, colIdx));
+                              }}
+                              type="button"
+                              tabIndex={focusedCell.row === rowIdx && focusedCell.col === colIdx ? 0 : -1}
+                              onFocus={() => setFocusedCell({ row: rowIdx, col: colIdx })}
+                              onClick={() => acceptSuggestion(row, r.id)}
+                              onKeyDown={(e) => onCellKeyDown(e, rowIdx, colIdx)}
+                              aria-label={`${row.label}, ${r.name}: suggested ${CODE_NAME[suggested]}, not saved`}
+                              className="h-8 w-8 rounded-lg border border-dashed border-amber-500 bg-amber-50 font-mono text-xs font-bold text-amber-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+                            >
+                              {LETTER[suggested]}
+                            </button>
+                            <span className="absolute left-1/2 top-full z-10 mt-0.5 hidden -translate-x-1/2 gap-0.5 rounded-md border border-slate-200 bg-white p-0.5 shadow group-focus-within:flex group-hover:flex">
+                              <button
+                                type="button"
+                                aria-label="Accept suggestion"
+                                title="Accept"
+                                onClick={() => acceptSuggestion(row, r.id)}
+                                className="rounded px-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Edit suggestion"
+                                title="Edit"
+                                onClick={() => editSuggestion(row, r.id)}
+                                className="rounded px-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                              >
+                                ✎
+                              </button>
+                              <button
+                                type="button"
+                                aria-label="Dismiss suggestion"
+                                title="Dismiss"
+                                onClick={() => dismissSuggestion(row, r.id)}
+                                className="rounded px-1.5 text-xs font-bold text-red-600 hover:bg-red-50"
+                              >
+                                ✕
+                              </button>
+                            </span>
+                          </span>
+                        ) : canEdit ? (
                           <button
                             ref={(el) => {
                               if (el) cellRefs.current.set(cellKey(rowIdx, colIdx), el);
@@ -473,9 +645,15 @@ export function RaciTable({
                             onClick={() => cycleCell(row, r.id)}
                             onKeyDown={(e) => onCellKeyDown(e, rowIdx, colIdx)}
                             aria-label={`${row.label}, ${r.name}: ${code ? CODE_NAME[code] : "not assigned"}`}
-                            className={`h-8 w-8 rounded-lg font-mono text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 ${code ? CELL_STYLE[code] : "border border-dashed border-slate-300 text-slate-300"}`}
+                            className={`relative h-8 w-8 rounded-lg font-mono text-xs font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 ${code ? CELL_STYLE[code] : "border border-dashed border-slate-300 text-slate-300"}`}
                           >
                             {code ? LETTER[code] : ""}
+                            {code && ownFilled.has(sKey) && (
+                              <span
+                                title="Filled from step owner"
+                                className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-sky-600 ring-2 ring-white"
+                              />
+                            )}
                           </button>
                         ) : (
                           // Same letter, same colour, no affordance — the
@@ -590,6 +768,20 @@ export function RaciTable({
         <span><b className="text-indigo-700">A</b> Accountable</span>
         <span><b className="text-emerald-700">C</b> Consulted</span>
         <span><b className="text-slate-500">I</b> Informed</span>
+        {canEdit && (
+          <>
+            <span className="inline-flex items-center gap-1">
+              <span className="relative inline-block h-3 w-3 rounded bg-sky-50">
+                <span className="absolute -right-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-sky-600 ring-1 ring-white" />
+              </span>
+              Filled from owner
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-3 w-3 rounded border border-dashed border-amber-500 bg-amber-50" />
+              Suggested
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

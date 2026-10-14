@@ -1,0 +1,220 @@
+<title>Weekly Check Week Split</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,500&display=swap">
+<style>
+*{box-sizing:border-box}
+:root{--bar:#16325C;--bar-ink:#FFF;--bar-quiet:#C6D2E5;--bar-accent:#E8A33A;--bar-late:#FF9B8F;
+  --ink:#141C2B;--ink-2:#465268;--ink-3:#5E6E85;--line:#D8DEE8;--line-2:#E6EAF0;--ground:#F5F6F9;--surface:#FFF;--surface-2:#EDF0F5;--gold:#9C5D08;--gold-bg:#FBF3E4;
+  --good:#1B6E4E;--good-bg:#E9F4EF;--bad:#B23025;--bad-bg:#FBEDEB;
+  --font:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}}
+:root[data-theme="dark"]{--ink:#E7EBF2;--ink-2:#AAB4C6;--ink-3:#8590A3;--line:#333B4A;--line-2:#2A303C;--ground:#12151C;--surface:#1A1F29;--surface-2:#222834;--gold:#F5A623;--gold-bg:#2E2715;
+  --good:#63BE96;--good-bg:#1B2C26;--bad:#E8776B;--bad-bg:#33211F;color-scheme:dark}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.55 var(--font);-webkit-font-smoothing:antialiased;padding-inline:16px}
+.doc{max-width:1180px;margin:0 auto;padding-block:26px 64px}
+.doc>h1{font-size:23px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.doc>p.lede{max-width:76ch;color:var(--ink-2);margin:0 0 4px}
+.doc>p.lede b{color:var(--ink)}
+.cap{font:600 10.5px/1.6 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:34px 0 7px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.cap em{font:600 13px/1.4 var(--font);letter-spacing:0;text-transform:none;font-style:normal;color:var(--ink)}
+.cap .pick{font:600 9.5px/1 var(--font);letter-spacing:.09em;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:4px 8px}
+.stage{border:1px solid var(--line);border-radius:12px;background:var(--ground)}
+.pg{padding:16px 18px 20px}
+svg{display:block}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:11px 14px;font-size:14px;color:var(--ink-2);margin:10px 0 0}
+.note b{color:var(--ink)}
+.note .cost{color:var(--bad)}
+
+/* ── the topic heading, unchanged in every option ── */
+.sh{display:flex;align-items:baseline;gap:12px;padding:0 0 8px;border-bottom:2px solid var(--ink)}
+.sh .ix{font:600 12px/1 var(--font);color:var(--gold);font-variant-numeric:tabular-nums}
+.sh h3{margin:0;font:600 17px/1.2 var(--font);letter-spacing:-.005em}
+.sh .meta{font:400 13px/1 var(--font);color:var(--ink-3)}
+.sh .meta .bad{color:var(--bad);font-weight:600}
+.sh .end{margin-left:auto;font:500 12.5px/1 var(--font);color:var(--ink-3);font-variant-numeric:tabular-nums}
+.meter{height:2px;background:var(--line-2);position:relative;top:-2px;margin-bottom:-2px}
+.meter i{display:block;height:100%;background:var(--good)}
+
+/* ── the row, unchanged in every option ── */
+.r{display:grid;grid-template-columns:20px minmax(0,1fr) 72px 58px 112px 16px;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.tk{width:17px;height:17px;border:1.5px solid var(--line);border-radius:4px;background:var(--surface);display:grid;place-items:center;color:#fff}
+.tk svg{width:11px;height:11px;opacity:0}
+.r.dn .tk{background:var(--good);border-color:var(--good)}
+.r.dn .tk svg{opacity:1}
+.r.lt .tk{border-color:var(--bad)}
+.r .t{font:400 15px/1.35 var(--font);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r.dn .t{color:var(--ink-3)}
+.r .lw{font:600 12.5px/1 var(--font);color:var(--bad);white-space:nowrap}
+.r .lw.q{color:var(--ink-3);font-weight:500}
+.r .p{font:500 13px/1 var(--font);color:var(--ink-2)}
+.r .s{font:600 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;display:flex;align-items:center;gap:7px}
+.r .s::before{content:"";width:12px;height:2px;background:currentColor;border-radius:1px;flex:none}
+.r .s.prog{color:var(--gold)}
+.r .s.done{color:var(--good)}
+.r .ar{color:var(--ink-3)}
+.write{display:flex;align-items:center;gap:10px;border-bottom:1.5px solid var(--gold);padding:9px 0 8px;font-size:15px;color:var(--ink-3)}
+.write .pen{color:var(--gold);flex:none}
+.write .ty{flex:1;min-width:0}
+.write .opt{display:flex;gap:12px;font:500 13px/1 var(--font);color:var(--ink-3);white-space:nowrap;align-items:center}
+.write .opt u{text-decoration:none;border-bottom:1px dotted var(--ink-3);padding-bottom:1px}
+.write .opt u.set{color:var(--gold);border-bottom:1.5px solid var(--gold);font-weight:600}
+
+/* ════════ TODAY — what is on the mockup now: a word and a hairline ════════ */
+.o0 .wk{display:flex;align-items:center;gap:9px;padding:13px 0 5px;font:600 10.5px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.o0 .wk::before{content:"";width:7px;height:7px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.o0 .wk .days{font:400 11.5px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3);opacity:.85}
+.o0 .wk .rule{flex:1;height:1px;background:var(--line-2)}
+.o0 .wk.now{color:var(--ink)}
+.o0 .wk.now::before{background:var(--gold);border-color:var(--gold)}
+.o0 .wk.next{color:var(--gold)}
+.o0 .wk.next::before{border-color:var(--gold);border-style:dashed}
+
+/* ════════ A — a filled band, right across ════════ */
+.oA .wk{display:flex;align-items:center;gap:10px;margin:14px 0 0;padding:8px 12px;border-radius:8px;background:var(--surface-2);border-left:3px solid var(--line);
+  font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.oA .wk .days{margin-left:auto;font:500 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.oA .wk.now{background:var(--gold-bg);border-left-color:var(--gold);color:var(--gold)}
+.oA .wk.now .days{color:var(--gold)}
+.oA .wk.next{background:transparent;border:1px dashed var(--line);border-left:3px solid var(--gold);color:var(--gold)}
+.oA .wk.next .days{color:var(--ink-3)}
+.oA .r{padding-inline:12px}
+.oA .write{padding-inline:12px}
+
+/* ════════ B — one rule across, the week sitting on it ════════ */
+.oB .wk{display:flex;align-items:center;margin:26px 0 0;border-top:1.5px solid var(--ink);height:0}
+.oB .wk .chip{display:inline-flex;align-items:center;gap:8px;transform:translateY(-50%);background:var(--ground);padding:0 12px 0 0;
+  font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.oB .wk .days{font:400 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.oB .wk .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.oB .wk.now{border-top-color:var(--gold);border-top-width:2.5px}
+.oB .wk.now .chip{color:var(--gold);font-size:12px}
+.oB .wk.now .dot{background:var(--gold);border-color:var(--gold)}
+.oB .wk.next{border-top-style:dashed;border-top-color:var(--gold)}
+.oB .wk.next .chip{color:var(--gold)}
+.oB .wk.next .dot{border-color:var(--gold);border-style:dashed}
+.oB .r:first-of-type{margin-top:4px}
+
+/* ════════ C — a spine down the left, the rows hanging off it ════════ */
+.oC .blk{border-left:3px solid var(--line);padding-left:15px;margin:10px 0 0}
+.oC .blk.now{border-left-color:var(--gold)}
+.oC .blk.next{border-left-style:dashed;border-left-color:var(--gold)}
+.oC .wk{display:flex;align-items:center;gap:9px;padding:2px 0 4px;font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.oC .wk .days{font:400 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.oC .blk.now .wk{color:var(--gold);font-size:12px}
+.oC .blk.next .wk{color:var(--gold)}
+.oC .r:last-child{border-bottom:0}
+
+/* ════════ D — each week its own card ════════ */
+.oD .blk{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:12px 0 0;overflow:hidden}
+.oD .blk.now{border-color:var(--gold);box-shadow:0 2px 10px rgba(156,93,8,.1)}
+.oD .blk.next{border-style:dashed;border-color:var(--line);background:transparent}
+.oD .wk{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface-2);border-bottom:1px solid var(--line);
+  font:600 11px/1 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.oD .wk .days{margin-left:auto;font:500 12px/1 var(--font);letter-spacing:0;text-transform:none;color:var(--ink-3)}
+.oD .blk.now .wk{background:var(--gold-bg);border-bottom-color:var(--gold);color:var(--gold)}
+.oD .blk.now .wk .days{color:var(--gold)}
+.oD .blk.next .wk{background:transparent;border-bottom-style:dashed;color:var(--gold)}
+.oD .r{padding-inline:14px}
+.oD .r:last-child{border-bottom:0}
+.oD .write{padding:9px 14px 8px;border-bottom:0}
+
+.chg{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);font-size:14px;margin:12px 0 0}
+.chg th{text-align:left;font:600 10.5px/1.4 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);padding:9px 12px;border-bottom:2px solid var(--ink)}
+.chg td{padding:9px 12px;border-bottom:1px solid var(--line-2);vertical-align:top;color:var(--ink-2)}
+.chg td:first-child{width:110px;color:var(--ink);font-weight:600}
+.chg tr:last-child td{border-bottom:0}
+.chg .y{color:var(--good);font-weight:600}
+.chg .n{color:var(--bad);font-weight:600}
+.tw{overflow-x:auto}
+@media (max-width:860px){.r{grid-template-columns:20px minmax(0,1fr) auto 16px}.r .p,.r .lw{display:none}}
+</style>
+<div class="doc">
+<h1>The weekly check — splitting the weeks</h1>
+<p class="lede">Islam: <i>“the titles of last week this week and next week needs to be maybe highlighted as a full line to show the separation, as they are not clear somehow.”</i></p>
+<p class="lede">He is right about why: what is there now <b>announces</b> a week, it does not <b>separate</b> one. A small word and a hairline sit at the same weight as the ruled rows around them, so the eye reads one long list with labels dropped into it. Four ways to make the split actually split, <b>all on the same topic and the same rows</b>, so only the separator differs.</p>
+
+<p class="cap">Today <em>a word and a hairline</em></p>
+<div class="stage"><div class="pg o0">
+  <div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open &middot; <span class="bad">1 late</span></span><span class="end">2 of 6 done</span></div><div class="meter"><i style="width:33%"></i></div>
+  <div class="wk">Last week<span class="days">W2 Oct &middot; 4 – 8 Oct</span><span class="rule"></span></div>
+  <div class="r dn"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t">Agree the budget calendar with Finance</span><span class="lw q">Done 7 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk now">This week<span class="days">W3 Oct &middot; 11 – 15 Oct</span><span class="rule"></span></div>
+  <div class="r lt"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="lw">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Confirm the payroll forecast with HR</span><span class="lw q"></span><span class="p">Noran</span><span class="s">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk next">Next week<span class="days">W4 Oct &middot; 18 – 22 Oct</span><span class="rule"></span></div>
+  <div class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Write next week's action for Budget</span><span class="opt"><u class="set">Next week</u><u>Islam</u><u>+ note</u></span></div>
+</div></div>
+
+<p class="cap">A <em>A filled band, right across</em> <span class="pick">My pick</span></p>
+<div class="stage"><div class="pg oA">
+  <div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open &middot; <span class="bad">1 late</span></span><span class="end">2 of 6 done</span></div><div class="meter"><i style="width:33%"></i></div>
+  <div class="wk">Last week<span class="days">W2 Oct &middot; 4 – 8 Oct</span></div>
+  <div class="r dn"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t">Agree the budget calendar with Finance</span><span class="lw q">Done 7 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk now">This week<span class="days">W3 Oct &middot; 11 – 15 Oct</span></div>
+  <div class="r lt"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="lw">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Confirm the payroll forecast with HR</span><span class="lw q"></span><span class="p">Noran</span><span class="s">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk next">Next week<span class="days">W4 Oct &middot; 18 – 22 Oct</span></div>
+  <div class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Write next week's action for Budget</span><span class="opt"><u class="set">Next week</u><u>Islam</u><u>+ note</u></span></div>
+</div></div>
+<div class="note"><b>What you asked for, literally:</b> a full line, filled. The three weeks are one family at three weights — <b>last week grey and settled, this week gold and live, next week an open dashed outline</b> — so which one you are in is readable from across a meeting room. The days move to the far right, where the counts already sit, so the band has a left edge and a right edge instead of trailing off. <span class="cost">Cost:</span> three filled bands inside every topic, and there are four to eight topics on the page — a lot of tint on one screen.</div>
+
+<p class="cap">B <em>One rule across, the week sitting on it</em></p>
+<div class="stage"><div class="pg oB">
+  <div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open &middot; <span class="bad">1 late</span></span><span class="end">2 of 6 done</span></div><div class="meter"><i style="width:33%"></i></div>
+  <div class="wk"><span class="chip"><span class="dot"></span>Last week<span class="days">W2 Oct &middot; 4 – 8 Oct</span></span></div>
+  <div class="r dn"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t">Agree the budget calendar with Finance</span><span class="lw q">Done 7 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk now"><span class="chip"><span class="dot"></span>This week<span class="days">W3 Oct &middot; 11 – 15 Oct</span></span></div>
+  <div class="r lt"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="lw">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="r"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Confirm the payroll forecast with HR</span><span class="lw q"></span><span class="p">Noran</span><span class="s">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  <div class="wk next"><span class="chip"><span class="dot"></span>Next week<span class="days">W4 Oct &middot; 18 – 22 Oct</span></span></div>
+  <div class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Write next week's action for Budget</span><span class="opt"><u class="set">Next week</u><u>Islam</u><u>+ note</u></span></div>
+</div></div>
+<div class="note"><b>A real rule, not a hairline.</b> The line runs the full width and the week word straddles it, the way the topic heading already sits on its own dark rule — so the page keeps one language: <b>a rule means a new section.</b> This week's rule is gold and thicker; next week's is dashed, which reads as “not written yet” without any fill. <span class="cost">Cost:</span> it separates but does not <b>enclose</b> — the rows below still belong to the week only by being below it.</div>
+
+<p class="cap">C <em>A spine down the left, the rows hanging off it</em></p>
+<div class="stage"><div class="pg oC">
+  <div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open &middot; <span class="bad">1 late</span></span><span class="end">2 of 6 done</span></div><div class="meter"><i style="width:33%"></i></div>
+  <div class="blk"><div class="wk">Last week<span class="days">W2 Oct &middot; 4 – 8 Oct</span></div>
+    <div class="r dn"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t">Agree the budget calendar with Finance</span><span class="lw q">Done 7 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+  <div class="blk now"><div class="wk">This week<span class="days">W3 Oct &middot; 11 – 15 Oct</span></div>
+    <div class="r lt"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="lw">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="r"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Confirm the payroll forecast with HR</span><span class="lw q"></span><span class="p">Noran</span><span class="s">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+  <div class="blk next"><div class="wk">Next week<span class="days">W4 Oct &middot; 18 – 22 Oct</span></div>
+    <div class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Write next week's action for Budget</span><span class="opt"><u class="set">Next week</u><u>Islam</u><u>+ note</u></span></div>
+  </div>
+</div></div>
+<div class="note"><b>The only one that groups rather than announces.</b> The rows are physically held by the week — you can see where a week begins and ends without reading a word, and the gold spine runs the whole height of this week, not just its title. <span class="cost">Cost, and it is a real one:</span> every row shifts 18px right, so <b>the ticks, names and statuses no longer line up with the topic heading above them</b> — on a ledger page where every column lines up down the whole list, that is the thing most likely to look wrong once there are six topics.</div>
+
+<p class="cap">D <em>Each week its own card</em></p>
+<div class="stage"><div class="pg oD">
+  <div class="sh"><span class="ix">01</span><h3>Budget</h3><span class="meta">3 open &middot; <span class="bad">1 late</span></span><span class="end">2 of 6 done</span></div><div class="meter"><i style="width:33%"></i></div>
+  <div class="blk"><div class="wk">Last week<span class="days">W2 Oct &middot; 4 – 8 Oct</span></div>
+    <div class="r dn"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="t">Agree the budget calendar with Finance</span><span class="lw q">Done 7 Oct</span><span class="p">Islam</span><span class="s done">Done</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+  <div class="blk now"><div class="wk">This week<span class="days">W3 Oct &middot; 11 – 15 Oct</span></div>
+    <div class="r lt"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Collect units' revenue assumptions for 2027</span><span class="lw">Late 1 w</span><span class="p">Noran</span><span class="s prog">In progress</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+    <div class="r"><span class="tk"><svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg></span><span class="t">Confirm the payroll forecast with HR</span><span class="lw q"></span><span class="p">Noran</span><span class="s">Not started</span><span class="ar"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+  </div>
+  <div class="blk next"><div class="wk">Next week<span class="days">W4 Oct &middot; 18 – 22 Oct</span></div>
+    <div class="write"><span class="pen"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 13l1-3 7-7 2 2-7 7z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span><span class="ty">Write next week's action for Budget</span><span class="opt"><u class="set">Next week</u><u>Islam</u><u>+ note</u></span></div>
+  </div>
+</div></div>
+<div class="note"><b>The strongest split there is</b> — nothing can be mistaken for belonging to the wrong week, and this week's card is the only one lit. <span class="cost">Cost:</span> three boxes per topic and six topics is <b>eighteen boxes on one screen</b>, and the page stops being a ledger and becomes a wall of cards. It also doubles the vertical space, so a check that fitted on one screen now needs scrolling — in a meeting that matters.</div>
+
+<p class="cap">The four, side by side</p>
+<div class="tw"><table class="chg">
+<tr><th></th><th>A &middot; band</th><th>B &middot; rule</th><th>C &middot; spine</th><th>D &middot; cards</th></tr>
+<tr><td>Separates</td><td class="y">Strongly</td><td>Clearly</td><td class="y">Strongly</td><td class="y">Strongest</td></tr>
+<tr><td>Groups the rows</td><td>No — announces</td><td>No — announces</td><td class="y">Yes</td><td class="y">Yes</td></tr>
+<tr><td>Columns stay lined up</td><td class="y">Yes</td><td class="y">Yes</td><td class="n">No — rows shift right</td><td class="y">Yes</td></tr>
+<tr><td>Keeps the ledger look</td><td>Mostly</td><td class="y">Yes</td><td>Mostly</td><td class="n">No — becomes cards</td></tr>
+<tr><td>Height on screen</td><td>Same</td><td class="y">Same</td><td>Same</td><td class="n">About double</td></tr>
+<tr><td>Ink on one screen</td><td>Heavy — 3 bands a topic</td><td class="y">Light</td><td>Light</td><td class="n">Heaviest</td></tr>
+</table></div>
+<div class="note"><b>Mine would be A</b>, because it is what you asked for and it survives a glance from across the room, which is what a weekly check needs. <b>B is the one I would argue for if the page starts to feel loud</b> once there are six topics on it: it is the same separation done with a rule instead of a fill, and the page already uses a rule to mean “new section” at the topic heading. The two are the same idea at two volumes, so starting at A and turning it down to B later costs nothing.</div>
+<p style="font-size:13px;color:var(--ink-3);margin-top:22px">Static mockup &middot; <code>design-mockups/internal-tracker/2026-10-14_weekly-check-week-split.html</code> &middot; nothing here is wired up. Only the week separator differs between the four — the heading, the rows and the write line are identical in all of them.</p>
+</div>

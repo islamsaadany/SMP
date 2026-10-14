@@ -548,6 +548,48 @@
     .rmconfirm .rolelist .mk { width:auto; }
   }
 
+  /* ── THE QUESTION UNDER THE LINE (§533.4) ─────────────────────────────
+     Nine controls across six screens asked one sentence — "Remove X? This
+     cannot be undone here." — in the browser's box, which covers the list it
+     is asking about and never says WHICH line. Islam picked B of the two
+     drawn (design-mockups/remove-a-line/): the line stays where it is and
+     readable, and the question opens under it.
+
+     ITS COST IS KNOWN AND ACCEPTED: the list grows by a strip as you press,
+     so what is below moves. A was the other answer — the line turning into
+     the question, nothing moving, the line's text hidden while it asks.
+
+     ONE SHAPE FOR ALL NINE, built by `rmStrip`/`rmStripRow`, because the
+     sentence and the two words have to be the same in nine places and nine
+     copies is how they stop being (§53.5). Inside a table it is a row of its
+     own; everywhere else it is a block under the field. */
+  .rmask { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--surface-2); border-left:3px solid var(--bad);
+    border-radius:var(--r-sm); padding:8px 11px; margin:4px 0 2px; }
+  .rmask .q { flex:1; min-width:0; font-size:var(--fs-note); color:var(--bad-tx);
+    line-height:1.45; }
+  .rmask .q b { color:var(--ink); font-weight:600; }
+  .rmask button { font:600 12px/1 var(--sans); border-radius:var(--r-sm);
+    padding:6px 10px; cursor:pointer; white-space:nowrap; }
+  .rmask .rmkeep { background:var(--surface); border:1px solid var(--line); color:var(--ink-2); }
+  .rmask .rmkeep:hover { background:var(--surface-2); color:var(--ink); }
+  /* --bad as a FILL carries the page's lightest surface, never white literal
+     (§25, §38.4) — the same pairing `.rmconfirm .danger` uses. */
+  .rmask .rmgo { background:var(--bad); border:1px solid var(--bad); color:var(--surface); }
+  .rmask .rmgo:hover { filter:brightness(1.08); }
+  /* The SWOT's line is a grid of `22px 1fr auto` (arrange.css §270), so the
+     strip takes the two columns UNDER the field rather than a row of its own
+     beside the number. */
+  .swotlist li .rmask { grid-column:2 / -1; }
+  /* In a table the strip is a row, and the cell holding it adds no padding of
+     its own — the strip has its own and a doubled inset reads as a gap in the
+     table rather than a line under the row above. */
+  tr.rmaskrow > td { padding:4px 10px 6px; }
+  /* THE LINE BEING ASKED ABOUT IS MARKED, which is the half the browser's box
+     could never do: it said "this line" over a list of nine. */
+  .rmasking > .fld, .rmasking .fld, .rmasking input, .rmasking textarea { border-color:var(--bad); }
+  tr.rmasking > td { background:var(--bad-bg); }
+
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
   .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }

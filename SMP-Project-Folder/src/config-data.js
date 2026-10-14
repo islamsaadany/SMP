@@ -432,6 +432,10 @@ var PRET = null;
    the reason NEWMAINBU is: the repaint that follows any other change on the
    page would take a half-typed name with it (§533.3). */
 var NEWFN = "";
+/* Which line's × has been pressed, and the question it opened under that line
+   (§533.4). One at a time: pressing another × moves the question rather than
+   leaving two open, which is what a list of nine asks for. */
+var RMASK = null;
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */

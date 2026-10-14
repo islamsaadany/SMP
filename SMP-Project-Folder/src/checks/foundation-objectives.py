@@ -134,8 +134,15 @@ def side(pg, where, label):
 
     # REMOVE the middle one. It carries a target, so it asks — and the answer
     # being yes is part of the contract.
+    #
+    # §533.4: IT ASKS UNDER THE ROW NOW, in a strip of its own, rather than in
+    # the browser's box over the table. The dialog handler stays registered:
+    # it is what proves no box is raised as well. The strip's Remove carries
+    # the same `data-korm` the × does, so it is pressed the same way.
     pg.once("dialog", lambda d: d.accept())
     pg.click('[data-korm="0|1"]')
+    pg.wait_for_timeout(350)
+    pg.click('.rmask [data-korm="0|1"][data-rmnow]')
     pg.wait_for_timeout(500)
     r4 = pg.evaluate(READ, where)
     ck("Remove takes the row out", r4["rows"] == r3["rows"] - 1, (r3["rows"], r4["rows"]))

@@ -6154,6 +6154,12 @@
         CLEARING = b.dataset.clear; CLEARMENU = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
+    /* Keep closes the question and does nothing else — which is what Cancel
+       has to mean everywhere in this product (§533.1's lesson from the one
+       place it did not). */
+    document.querySelectorAll("[data-rmkeep]").forEach(function(b){
+      b.addEventListener("click", function(){ RMASK = null; paint(); });
+    });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
       b.addEventListener("click", function(){
         CLEARING = null; CLEARMENU = null; REFUSEDLATE = null;
@@ -6236,7 +6242,7 @@
           if (cc) capRemoveOpen(cc.id);
           return;
         }
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "trm", b.dataset.trm, "Remove " + esc(what) + "?")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
         paint();
@@ -6261,7 +6267,7 @@
           ? 'the objective "' + (m.name || "") + '"' +
             (m.actual ? " and its reported " + m.actual : "")
           : null;
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "korm", b.dataset.korm, "Remove " + esc(what) + "?")) return;
         e.list.splice(i, 1);
         koSettle(e);
         fieldSaved();
@@ -9796,7 +9802,7 @@
         var w = competeWritable(t); if (!w || !w.values[i]) return;
         var v = w.values[i];
         if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
-            !confirm("Remove this value? This cannot be undone here.")) return;
+            rmAsk(b, "cmprm", b.dataset.cmprm, "Remove this value?")) return;
         w.values.splice(i, 1);
         competeTidy(t);
         fieldSaved(); paint();
@@ -9809,7 +9815,7 @@
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
         if (String(sw[q][i]).trim() &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "swrm", b.dataset.swrm, "Remove this line?")) return;
         sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
@@ -9861,8 +9867,9 @@
         var a = b.dataset.drvsrm.split("|"), u = drvUnit(a[0]), c = drvCh(u);
         var sub = drvSubAt(u, +a[1]);
         if (!sub || c.subs.length < 2) return;
-        if (!confirm("Remove “" + (sub.name || "this route") +
-              "” and everything in it? This cannot be undone here.")) return;
+        if (rmAsk(b, "drvsrm", b.dataset.drvsrm,
+              "Remove “" + esc(sub.name || "this route") +
+              "” and everything in it?")) return;
         c.subs.splice(+a[1], 1);
         delete RAIL["drv:" + u.ukey];
         fieldSaved(); paint();
@@ -9898,8 +9905,9 @@
         var sub = drvSubAt(u, +a[1]), p = sub && sub.periods[+a[2]];
         if (!p) return;
         if ((p.drivers || []).length &&
-            !confirm("Remove “" + (p.name || "this period") + "” and its " +
-              plural(p.drivers.length, "driver") + "? This cannot be undone here.")) return;
+            rmAsk(b, "drvprm", b.dataset.drvprm,
+              "Remove “" + esc(p.name || "this period") + "” and its " +
+              plural(p.drivers.length, "driver") + "?")) return;
         sub.periods.splice(+a[2], 1);
         fieldSaved(); paint();
       });
@@ -9935,8 +9943,8 @@
         var hit = u && SMPRules.driverById(u, a[1]);
         if (!hit) return;
         if (String(hit.driver.name || "").trim() &&
-            !confirm("Remove “" + hit.driver.name +
-              "”? This cannot be undone here.")) return;
+            rmAsk(b, "drvrm", b.dataset.drvrm,
+              "Remove “" + esc(hit.driver.name) + "”?")) return;
         var list = hit.period.drivers, i = list.indexOf(hit.driver);
         if (i < 0) return;
         list.splice(i, 1);
@@ -10038,7 +10046,7 @@
         var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
         o.clauses.splice(i, 1);
         if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
@@ -10095,7 +10103,8 @@
         if (!h || !h.list || !h.list[i]) return;
         if (!mayAuthor("k_found", h.target)) return;
         if (h.list[i].name &&
-            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+            rmAsk(b, "capkorm", b.dataset.capkorm,
+              "Remove " + esc(h.list[i].name) + "?")) return;
         h.list.splice(i, 1);
         fieldSaved(); paint();
       });
@@ -11669,6 +11678,24 @@
     if (no) no.addEventListener("click", function(){ closeModal(); });
     var yes = box.querySelector("[data-dstyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); o.onYes(); });
+  }
+  /* ── REMOVING A LINE: the gate the nine share (§533.4) ─────────────────
+     Returns true when it has just OPENED the question, so the handler that
+     called it returns and nothing is removed; false when the press came from
+     the strip's own Remove, so the handler carries on exactly as it did
+     behind the browser's box.
+
+     THE SAME HANDLER ANSWERS BOTH PRESSES. The strip's button carries the
+     same `data-` attribute the × does (rmStripInner), so it is picked up by
+     the selector that was already there, resolves the row from its dataset
+     at press time (§48.2), and the one thing that distinguishes it is
+     `rmnow`. No handler learns a second way in, and there is no second copy
+     of "what does this × remove" to drift. */
+  function rmAsk(btn, attr, val, say){
+    if (btn && btn.dataset && btn.dataset.rmnow) { RMASK = null; return false; }
+    RMASK = { t: attr + ":" + val, say: say };
+    paint();
+    return true;
   }
   /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the

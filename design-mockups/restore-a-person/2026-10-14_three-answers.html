@@ -1,0 +1,304 @@
+<title>Restoring a person</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#FBEAE7;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+      --warn-bg:#33241A; --warn-tx:#E1935F;
+      --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+    --warn-bg:#33241A; --warn-tx:#E1935F;
+    --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px; padding-left:20px; padding-right:20px; }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:30px 18px; display:flex; justify-content:center; }
+  .stage.pair{ gap:18px; flex-wrap:wrap; align-items:flex-start; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
+  .shapehead{ font-size:19px; margin:44px 0 4px; letter-spacing:-.1px; }
+  .shapehead span{ font-size:12.5px; color:var(--ink-3); font-weight:400; letter-spacing:0; }
+
+  /* today's browser dialog */
+  .osdlg{ background:var(--surface); border:1px solid var(--line); border-radius:12px;
+          width:min(450px,100%); padding:20px 22px 16px; box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .osdlg .host{ font-size:12.5px; color:var(--ink-3); margin:0 0 12px; }
+  .osdlg .msg{ font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; white-space:pre-line; }
+  .osdlg .row{ display:flex; justify-content:flex-end; gap:10px; }
+  .osdlg .row span{ font:600 13px/1 var(--sans); border-radius:7px; padding:10px 16px;
+                    border:1px solid var(--line); color:var(--ink-2); }
+  .osdlg .row .ok{ background:var(--ink); color:var(--surface); border-color:var(--ink); }
+  .seq{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .seq .arrow{ font-size:20px; color:var(--surface); opacity:.8; }
+
+  /* the platform's own dialog */
+  .modal{ background:var(--surface); border:1px solid var(--line); border-radius:3px;
+          width:min(540px,100%); box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .modal-h{ display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
+            border-bottom:1px solid var(--line-soft); }
+  .modal-h div{ flex:1; min-width:0; }
+  .modal-h h3{ font-size:21px; margin:0; }
+  .modal-h p{ margin:4px 0 0; font-size:13px; color:var(--ink-3); }
+  .modal-x{ font-size:22px; line-height:1; background:none; border:0; cursor:pointer;
+            color:var(--ink-3); padding:2px 8px; border-radius:2px; }
+  .modal-b{ padding:20px 24px 24px; }
+  .modal-b > p{ font-size:13.5px; color:var(--ink-2); margin:0 0 12px; line-height:1.5; }
+
+  /* the two explained answers — the shape signed off for a capability */
+  .pick{ border:1px solid var(--line-soft); border-radius:10px; padding:13px 14px;
+         display:flex; gap:14px; align-items:center; margin:0 0 10px; }
+  .pick .txt{ flex:1; min-width:0; }
+  .pick .t{ font:600 13.5px/1.3 var(--sans); margin:0 0 3px; }
+  .pick .d{ font-size:12.5px; color:var(--ink-3); margin:0; line-height:1.45; }
+  .pick .d b{ color:var(--ink-2); }
+  .pick button{ font:600 13px/1 var(--sans); border-radius:8px; padding:10px 14px;
+                cursor:pointer; white-space:nowrap; }
+  .pick.safe{ border-color:var(--stone); }
+  .pick.off{ background:var(--surface-2); }
+  .cancelrow{ display:flex; justify-content:flex-end; margin-top:14px; }
+  .cancelrow button{ font:600 13px/1 var(--sans); border-radius:8px; padding:10px 14px; cursor:pointer; }
+  .quiet{ background:none; border:1px solid var(--line); color:var(--ink-2); }
+  .keepbtn{ background:var(--surface); border:1px solid var(--stone); color:var(--stone); }
+  .gobtn{ background:var(--panel); border:1px solid var(--panel); color:var(--panel-ink); }
+  .mrow{ display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+  .mrow button{ font:600 13px/1 var(--sans); border-radius:8px; padding:10px 14px; cursor:pointer; }
+
+  /* the roles, named */
+  .rolelist{ border:1px solid var(--line-soft); border-radius:10px; overflow:hidden; margin:0 0 14px; }
+  .rolelist .r{ display:flex; gap:11px; align-items:baseline; padding:10px 13px;
+                border-top:1px solid var(--line-soft); font-size:13px; }
+  .rolelist .r:first-child{ border-top:0; }
+  .rolelist .r .mk{ flex:0 0 auto; width:9ch; font:700 10.5px/1.4 var(--sans); letter-spacing:.07em;
+                    text-transform:uppercase; padding-top:2px; }
+  .rolelist .back .mk{ color:var(--good-tx); }
+  .rolelist .taken{ background:var(--surface-2); }
+  .rolelist .taken .mk{ color:var(--warn-tx); }
+  .rolelist .r .tx{ flex:1; min-width:0; line-height:1.5; }
+  .rolelist .r .tx b{ color:var(--ink); }
+  .rolelist .r .tx .sub{ display:block; font-size:12px; color:var(--ink-3); margin-top:1px; }
+
+  /* the register row and its menu */
+  .cfg{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+        width:min(720px,100%); padding:15px 16px 16px; }
+  .cfg h4{ font:700 13.5px/1.3 var(--sans); margin:0 0 12px; }
+  .cfg table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .cfg th{ text-align:left; font:700 10.5px/1 var(--sans); letter-spacing:.09em;
+           text-transform:uppercase; color:var(--ink-3); padding:0 10px 8px; }
+  .cfg td{ padding:9px 10px; border-top:1px solid var(--line-soft); color:var(--ink-2);
+           vertical-align:top; }
+  .cfg td b{ color:var(--ink); }
+  .cfg .why{ display:block; font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .cfg td.cc{ text-align:right; }
+  .pill{ font:600 11px/1 var(--sans); border:1px solid var(--line); border-radius:999px;
+         padding:5px 9px; color:var(--ink-3); }
+  .kebab{ font:700 13px/1 var(--sans); background:none; border:1px solid var(--line);
+          color:var(--ink-3); border-radius:6px; padding:5px 9px; cursor:pointer; }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:40px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .pick{ flex-direction:column; align-items:stretch; } .pick button{ width:100%; }
+    .rolelist .r{ flex-direction:column; gap:2px; } .rolelist .r .mk{ width:auto; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>Restoring a person</h1>
+  <p class="lede">This is the one place in the platform where the browser's box has been made to
+  carry three answers. <b>Okay</b> gives back the roles it can, <b>Cancel</b> brings the person back
+  with no role, and the way to <i>not restore at all</i> is a second box behind the Cancel. A yes/no
+  control answering a three-way question — so this one cannot be swapped for a yes/no dialog, and it
+  has to be drawn.</p>
+
+  <hr class="rule">
+  <span class="key">Today <b>— two boxes, and Cancel does not mean cancel</b></span>
+  <div class="stage">
+    <div class="seq">
+      <div class="osdlg">
+        <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+        <p class="msg">Khalid Al-Mutairi held 3 roles when they were retired.
+
+Give back: BU owner of Trade Finance, Strategy custodian of Payments
+Held by somebody else now, so left alone: Capability owner of Cash Management (Noura Al-Harbi)
+
+OK gives back what it can. Cancel brings Khalid Al-Mutairi back with no role — a Contributor of their unit.</p>
+        <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+      </div>
+      <span class="arrow">&rarr;</span>
+      <div class="osdlg" style="width:min(330px,100%)">
+        <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+        <p class="msg">Bring Khalid Al-Mutairi back with no role?</p>
+        <div class="row"><span>Cancel</span><span class="ok">Okay</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">Pressing Cancel to mean &ldquo;yes, but differently&rdquo; is the opposite of
+  what Cancel means everywhere else in the platform. And the only way out of the act — having opened
+  it by mistake — is Cancel, then Cancel again: the escape is behind the thing it escapes.
+  A box that is dismissed with Escape, or by a browser that decides to stop showing it, lands on
+  <i>restore with no role</i> — a real change, chosen by nobody.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Proposed <span>&nbsp; three answers, each saying what it does</span></h2>
+  <p class="lede">The same shape you picked for removing a capability: each answer carries its own
+  sentence and its own button, and Cancel is a cancel again.</p>
+
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Bring Khalid Al-Mutairi back?</h3><p>Retired 2 Feb 2026 &middot; Trade Finance</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <p><b>Khalid Al-Mutairi</b> held 3 roles when they were retired. Two are still free.</p>
+        <div class="rolelist">
+          <div class="r back"><span class="mk">Free</span><span class="tx">
+            <b>BU owner</b> of Trade Finance</span></div>
+          <div class="r back"><span class="mk">Free</span><span class="tx">
+            <b>Strategy custodian</b> of Payments</span></div>
+          <div class="r taken"><span class="mk">Taken</span><span class="tx">
+            <b>Capability owner</b> of Cash Management
+            <span class="sub">Noura Al-Harbi holds it now, so it is left alone either way.</span></span></div>
+        </div>
+        <div class="pick safe">
+          <div class="txt">
+            <p class="t">Give back the 2 free roles</p>
+            <p class="d">Khalid returns as <b>BU owner of Trade Finance</b> and
+            <b>Strategy custodian of Payments</b>, and their sign-in opens again.</p>
+          </div>
+          <button class="gobtn">Give them back</button>
+        </div>
+        <div class="pick">
+          <div class="txt">
+            <p class="t">Bring them back with no role</p>
+            <p class="d">A Contributor of their unit. Their sign-in opens, and the two free roles
+            stay empty until somebody is named.</p>
+          </div>
+          <button class="keepbtn">No role</button>
+        </div>
+        <div class="cancelrow"><button class="quiet">Cancel</button></div>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>Recommended.</b> Three answers, three controls, and the one that changes nothing
+  is the one marked Cancel. The weight sits on <i>Give them back</i>, because that is the answer
+  somebody reaching for Restore almost always means. Nothing about the rule changes: a seat somebody else has taken is named
+  and not offered, which is the thing that must never quietly happen.</p>
+
+  <span class="key">When nothing can be given back <b>— two answers, not two boxes</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Bring Khalid Al-Mutairi back?</h3><p>Retired 2 Feb 2026 &middot; Trade Finance</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <p><b>Khalid Al-Mutairi</b> held 2 roles when they were retired. Somebody else holds both
+        now, so neither can be given back.</p>
+        <div class="rolelist">
+          <div class="r taken"><span class="mk">Taken</span><span class="tx">
+            <b>BU owner</b> of Trade Finance
+            <span class="sub">Omar Siddiqui holds it now.</span></span></div>
+          <div class="r taken"><span class="mk">Taken</span><span class="tx">
+            <b>Strategy custodian</b> of Payments
+            <span class="sub">Noura Al-Harbi holds it now.</span></span></div>
+        </div>
+        <div class="pick">
+          <div class="txt">
+            <p class="t">Bring them back with no role</p>
+            <p class="d">A Contributor of their unit. Their sign-in opens. To give them a role, take
+            it off whoever holds it first.</p>
+          </div>
+          <button class="gobtn">Bring them back</button>
+        </div>
+        <div class="cancelrow"><button class="quiet">Cancel</button></div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Today this case is two boxes in a row, the first of which offers an <b>Okay</b> that
+  gives back nothing — a live button for an act with no effect. Here there is one answer, and the
+  reason there is only one is written above it.</p>
+
+  <span class="key">And when they held nothing <b>— no question, as today</b></span>
+  <div class="stage" style="background:var(--surface-2)">
+    <div class="cfg">
+      <h4>People</h4>
+      <table>
+        <thead><tr><th style="width:30%">Name</th><th style="width:28%">Job title</th>
+          <th>Roles</th><th class="cc" style="width:12%"></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>Sara Belhaj</b><span class="why">Retired 14 Dec 2025</span></td>
+            <td>Analyst<span class="why">Trade Finance</span></td>
+            <td><span class="pill">No role held</span></td>
+            <td class="cc"><button class="kebab">&hellip;</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="note">Nothing is being decided, so nothing is asked — the row simply becomes active again,
+  which is what the platform does today. I am not proposing to add a question here; I am naming it so
+  all three cases are accounted for.</p>
+
+  <hr class="rule">
+  <span class="key">The one thing I changed beyond the frame</span>
+  <p class="lede">Today's box says <i>&ldquo;Give back: BU owner of Trade Finance, Strategy custodian
+  of Payments&rdquo;</i> and <i>&ldquo;Held by somebody else now, so left alone: &hellip;&rdquo;</i>
+  as two runs of commas. Above, each role is a line, and whether it comes back is a word at the front
+  of it. Three roles in a comma list is readable; six is not, and six is a BU owner who was also a
+  custodian of two functions.</p>
+
+  <div class="ask">
+    <h2>What I need from you</h2>
+    <ul>
+      <li><b>The three answers — yes or no.</b> It is the shape you already picked for the capability,
+      with a third answer added because this question genuinely has three.</li>
+      <li><b>The two words:</b> <i>Give them back</i> and <i>No role</i>. The second is the one I am
+      least sure of — <i>Bring them back only</i>, <i>Just the sign-in</i>, or yours.</li>
+      <li><b>One real question of behaviour:</b> should restoring be able to give back <i>some</i> of
+      the free roles rather than all of them? Today it is all or nothing, and I have kept that. A tick
+      per free role is a small change to draw and a larger one to reason about, so I would rather hear
+      that you want it than assume it.</li>
+      <li>Whether the retired date and unit belong in the header, as I have put them. They are not in
+      today's question at all, and they are how you tell two people of the same name apart.</li>
+    </ul>
+  </div>
+</div>

@@ -465,8 +465,14 @@ with sync_playwright() as p:
       const c = r && r.querySelector('.mpopen'); if (c) c.click();
     }""")
     pg.wait_for_timeout(400)
+    # §533.3: CLEARING ASKS IN THE PLATFORM'S OWN DIALOG NOW — what goes
+    # (the twelve months) and what stays (the annual target), which is the half
+    # this act has always had and the browser's box could never lay out. The
+    # dialog handler stays registered: it proves no browser box is raised either.
     pg.on("dialog", lambda d: d.accept())
     press(pg, "[data-mpclear]")
+    pg.wait_for_timeout(350)
+    ev(pg, "() => { const y = document.querySelector('.overlay.on [data-dstyes]'); if (y) y.click(); }")
     pg.wait_for_timeout(500)
     cleared = ev(pg, """() => {
       const m = UNITS.mobile.items.find(x => x.code === '03')

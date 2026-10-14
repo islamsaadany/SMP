@@ -2931,7 +2931,7 @@ function renderPeople(){
 
        The open row's cell is lifted instead of raising the menu: the menu's
        own z-index cannot escape a context its parent created. */
-    var lifted = open || PDEL === p.key || PSETPW.key === p.key;
+    var lifted = open || PDEL === p.key || PRET === p.key || PSETPW.key === p.key;
     return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
       '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
       'aria-haspopup="true" aria-expanded="' + open + '" ' +
@@ -2940,7 +2940,7 @@ function renderPeople(){
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
       (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + pwPanel(p) + '</td>';
+      retirePanel(p) + deletePanel(p) + pwPanel(p) + '</td>';
   }
 
   /* ── THE PASSWORD PANEL (§69.22) ────────────────────────────────
@@ -2993,6 +2993,31 @@ function renderPeople(){
      BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
      the render that drew this (§48.2). What is drawn here is what to READ;
      what is enforced is asked again at the moment it matters. */
+  /* ── RETIRING, IN THE SAME CORNER AS DELETING (§533.3) ─────────────────
+     The two acts sit next to each other in this row's menu and asked in two
+     different mediums — delete in the panel below, retire in the browser's
+     box. This is the panel's shape, and nothing about it is new: the same
+     frame, the same corner, the same second press.
+
+     IT ONLY ASKS WHEN THERE IS SOMETHING TO TAKE, which the browser's box
+     also did and which must survive the move — a version that asked whatever
+     the row held would be worse than what was there. Somebody holding
+     nothing is retired by the press, because nothing is being decided. */
+  function retirePanel(p){
+    if (PRET !== p.key) return "";
+    var held = personRoles(p).length;
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Retire ' + esc(p.name) + '?</b> ' +
+      (held
+        ? 'They hold ' + plural(held, "role") + '. Retiring takes ' +
+          (held === 1 ? "it" : "them") + ' away and closes their sign-in.'
+        : 'This closes their sign-in.') +
+      ' Everything already reported in their name stays, and <b>Restore</b> ' +
+      'brings them back.</div>' +
+      '<div class="cbtns"><button data-pret-no="1">Cancel</button>' +
+      '<button class="danger" data-pret-yes="' + esc(p.key) + '">Retire</button>' +
+      '</div></div>';
+  }
   function deletePanel(p){
     if (PDEL !== p.key) return "";
     var blockers = personDeleteBlockers(p.key);
@@ -8408,8 +8433,19 @@ function renderFunctions(){
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
+      /* ── §533.3: THE NAME IS TYPED IN THE PAGE, NOT IN A prompt() ──────
+         The last browser prompt in the product. §69.22 took the other one
+         out for the reason that applies here too: a browser is allowed to
+         SUPPRESS a prompt, and a suppressed prompt is a control that looks
+         live and does nothing. The shape is the BU list's own add row — a
+         field and an Add beside it — so the two places you name a new thing
+         are named the same way (§53.5). */
       (mayEdit && !arranging
-        ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
+        ? '<div class="addrow">' +
+          '<input class="fld" id="newfn" value="' + esc(NEWFN) + '" ' +
+          'placeholder="' + L1("fnword") + ' name" ' +
+          'aria-label="Name of the ' + L1("fnword") + '">' +
+          '<button class="editbtn" id="addfn">+ Add a ' + L1("fnword") + '</button></div>'
         : ''));
 }
 

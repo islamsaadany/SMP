@@ -5251,13 +5251,29 @@
        (§53.5): a second copy here is how the register's twins get made. A
        taken key is suffixed rather than refused, the same answer addUnit
        gives — two functions may genuinely share a name's letters. */
-    var addFn = document.getElementById("addfn");
-    if (addFn) addFn.addEventListener("click", function(){
-      var name = prompt("Name of the " + labelWord("fnword","group"));
-      if (!name || !name.trim()) return;
+    /* §533.3: the name comes off the page's own field now, never a prompt()
+       — which a browser may suppress, leaving a control that looks live and
+       does nothing (§95's argument, and §69.22's precedent for the other
+       one). Typing is held in NEWFN so a repaint cannot take a half-typed
+       name with it, exactly as the BU list holds NEWMAINBU. */
+    var fnFld = document.getElementById("newfn");
+    if (fnFld) {
+      fnFld.addEventListener("input", function(){ NEWFN = fnFld.value; });
+      /* Enter adds, because the control this replaces took Enter and a field
+         beside an Add button that ignores it is a field that feels broken. */
+      fnFld.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addFnFromField(); }
+      });
+    }
+    function addFnFromField(){
+      var name = String(NEWFN || "").trim();
+      if (!name) { var f = document.getElementById("newfn"); if (f) f.focus(); return; }
       addFunction(name);
+      NEWFN = "";
       paint();
-    });
+    }
+    var addFn = document.getElementById("addfn");
+    if (addFn) addFn.addEventListener("click", addFnFromField);
     document.querySelectorAll("[data-capfn]").forEach(function(el){
       el.addEventListener("change", function(){
         GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
@@ -5334,23 +5350,58 @@
          writing as they are left there is no unsaved state to protect, so
          there is nothing to hold: the button is live, behind the pen, which is
          where Islam asked for it. */
-      var gaps = 0;
-      activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
-      if (!confirm("Close " + REVIEW.name + "?" +
-          (gaps ? "\n\n" + gaps + " items are unreported and will close as unreported." : "") +
-          "\n\nThe figures become a record and the plan reopens to unit owners.")) return;
-      /* The snapshot. Everything a later cycle needs in order to say what a
-         score was last time. */
-      var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
-      activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
-      HISTORY.push(snap);
-      REVIEW.state = "closed";
-      /* The pen goes with the cycle it was editing (§273). Leaving it open
-         would put an "Edit this cycle" panel under a strip that has just
-         started offering "Open a new cycle...", with a Close button in it for
-         a cycle that is already closed. */
-      CYCLEEDIT = null;
-      paint();
+      var gaps = 0, asked = 0;
+      activeKeys().forEach(function(k){
+        var c = reportedCount(UNITS[k]); gaps += c.total - c.done; asked += c.total;
+      });
+      /* ── §533.3: REOPEN'S OWN SHAPE, FOR REOPEN'S OPPOSITE ───────────
+         The two controls sit in the same strip and did the same kind of
+         thing in two different mediums — Reopen in the platform's dialog
+         with its facts laid out, Close in the browser's box with its facts
+         run together. This is that dialog, with the same `.kv` rows.
+
+         AND IT SAYS CLOSING CAN BE UNDONE, which the box never did. Closing
+         files the figures and marks the cycle closed; it takes nothing away,
+         and Reopen is the control beside this one. A question that sounds
+         more final than the act is its own kind of wrong (§45.2). */
+      openModalHtml("Close " + esc(REVIEW.name) + "?", "",
+        '<div class="sendconfirm reopenconfirm">' +
+          '<div class="kv"><span class="k">Covers</span><span>' +
+            esc(cycleMeta()) + '</span></div>' +
+          '<div class="kv"><span class="k">Reported</span><span><b>' +
+            (asked - gaps) + '</b> of ' + asked +
+            (gaps ? ' \u2014 the other ' + gaps + ' close as unreported' : '') +
+            '</span></div>' +
+          '<div class="kv"><span class="k">What happens</span><span>The figures ' +
+            'become a record and the plan reopens to unit owners.</span></div>' +
+          '<div class="kv"><span class="k">The way back</span><span><b>Reopen</b> ' +
+            'stands in this strip once it is closed. The figures become live ' +
+            'again and the closing record is taken back.</span></div>' +
+          '<div class="cbtns"><button data-ccno="1">Cancel</button>' +
+          '<button class="danger" data-ccyes="1">Close ' + esc(REVIEW.name) +
+          '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var ccno = box.querySelector("[data-ccno]");
+      if (ccno) ccno.addEventListener("click", function(){ closeModal(); });
+      var ccyes = box.querySelector("[data-ccyes]");
+      if (ccyes) ccyes.addEventListener("click", function(){
+        closeModal();
+        /* The snapshot. Everything a later cycle needs in order to say what a
+           score was last time. Taken at the PRESS, never when the dialog was
+           drawn (§48.2) — a figure entered while it stood belongs in it. */
+        var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
+        activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
+        HISTORY.push(snap);
+        REVIEW.state = "closed";
+        /* The pen goes with the cycle it was editing (§273). Leaving it open
+           would put an "Edit this cycle" panel under a strip that has just
+           started offering "Open a new cycle...", with a Close button in it for
+           a cycle that is already closed. */
+        CYCLEEDIT = null;
+        paint();
+      });
     });
 
     /* ── EDITING THE OPEN CYCLE (§273, restructured by §273.4) ──────
@@ -5536,25 +5587,57 @@
          never the raw figures: a clear with nothing behind it would destroy
          the closed cycle's numbers. Same act an import performs on the plan
          it replaces, same Restore. */
-      var arch = archiveFigures("cleared when " + String(d.name).trim() + " opened");
-      if (!confirm("Open " + String(d.name).trim() + "?\n\n" +
-          (arch
-            ? arch.counts.reported + " reported figure" + (arch.counts.reported === 1 ? "" : "s") +
-              " and " + arch.counts.notes + " note" + (arch.counts.notes === 1 ? "" : "s") +
-              " from " + REVIEW.name + " are cleared so every unit is asked again.\n" +
-              "They are kept as an archive dated today and can be restored from Archived plans."
-            : "Nothing has been reported yet, so there is nothing to clear."))) {
-        if (arch) ARCHIVES.shift();
-        return;
-      }
-      clearForNewCycle();
-      REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
-                 due:d.due || "", state:"open", note:{}, submitted:{},
-                 cadence:REVIEW.cadence };
-      /* §307: nothing else to carry. The review point travelled as a field of
-         its own here; it is `to`, which the line above already wrote. */
-      NEWCYCLE = null;
-      paint();
+      /* ── §533.3: THE QUESTION IS IN FRONT OF THE ACT NOW ─────────────
+         It used to ARCHIVE, then ask, then undo the archive on Cancel —
+         the one place in the product where pressing Cancel had work to
+         reverse rather than nothing to do. It was safe only while the undo
+         ran; a reload while the browser's box stood left an archive of a
+         clear that never happened, filed under a cycle that never opened.
+
+         The counts come from the same snapshot the archive is made of, so
+         the dialog says exactly what the archive will hold, and NOTHING is
+         written until Yes. Both are taken again at the press (§48.2): a
+         figure entered while the dialog stood belongs in the archive. */
+      var counts = figuresSnapshotCounts(figuresSnapshot());
+      var empty = figuresAreEmpty(counts);
+      var nm = String(d.name).trim();
+      openModalHtml("Open " + esc(nm) + "?",
+        esc([d.from || "", d.to || ""].filter(function(x){ return x; }).join(" \u2013 ")),
+        '<div class="rmconfirm">' +
+          (empty
+            ? '<p>Nothing has been reported yet, so there is nothing to clear.</p>'
+            : '<p><b>' + plural(counts.reported, "reported figure") + '</b> and <b>' +
+              plural(counts.notes, "note") + '</b> from ' + esc(REVIEW.name) +
+              ' are cleared, so every unit is asked again.</p>') +
+          (empty ? '' :
+            '<p class="archline">They are kept as an archive dated today. ' +
+            '<b>Setup \u203a Import &amp; storage</b> holds the way back ' +
+            '\u2014 <b>Restore</b> on that row puts them into whatever plan ' +
+            'is standing then.</p>') +
+          '<div class="mrow"><button class="quiet" data-ncno="1">Cancel</button>' +
+          '<button class="danger" data-ncyes="1">Open ' + esc(nm) + '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var nno = box.querySelector("[data-ncno]");
+      if (nno) nno.addEventListener("click", function(){ closeModal(); });
+      var nyes = box.querySelector("[data-ncyes]");
+      if (nyes) nyes.addEventListener("click", function(){
+        closeModal();
+        /* Archived BEFORE cleared, because HISTORY keeps a score per unit and
+           never the raw figures: a clear with nothing behind it would destroy
+           the closed cycle's numbers. Same act an import performs on the plan
+           it replaces, same Restore. */
+        archiveFigures("cleared when " + nm + " opened");
+        clearForNewCycle();
+        REVIEW = { name:nm, from:d.from || "", to:d.to || "",
+                   due:d.due || "", state:"open", note:{}, submitted:{},
+                   cadence:REVIEW.cadence };
+        /* §307: nothing else to carry. The review point travelled as a field
+           of its own here; it is `to`, which the line above already wrote. */
+        NEWCYCLE = null;
+        paint();
+      });
     });
     /* ── §382: MY REPORTING'S THREE CONTROLS ──────────────────────────
        The FIGURE needs none of its own — the boxes are `repEntry`'s, so they
@@ -6205,13 +6288,25 @@
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpclear];
         if (!e) return;
-        if (!confirm("Clear this monthly plan? The twelve months are removed. " +
-                     "The annual target keeps the figure they added up to, and " +
-                     "the row goes back to being spread evenly across the year."))
-          return;
-        delete e.row[e.fld];
-        fieldSaved();
-        paint();
+        /* §533.3: GOES AND STAYS, which this act has always had and could
+           never lay out — the twelve numbers go and the annual target stays,
+           and the second half is the one somebody hesitates over, because
+           the row does not visibly change until you look at the benchmark. */
+        destroyConfirmOpen({
+          title: "Clear this monthly plan?",
+          sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
+          goes: "<b>The twelve months</b> somebody typed",
+          goesWhy: "The row goes back to being spread evenly across the year.",
+          stays: "The annual target",
+          staysWhy: "It keeps the figure the twelve added up to, as the authored one.",
+          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
+          yesWord: "Clear the twelve",
+          onYes: function(){
+            delete e.row[e.fld];
+            fieldSaved();
+            paint();
+          }
+        });
       });
     });
     document.querySelectorAll("[data-koadd]").forEach(function(b){
@@ -6885,7 +6980,7 @@
     document.querySelectorAll("[data-setpw]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: b.dataset.setpw, pw: "", err: "", done: null };
-        PMENU = null; PDEL = null;
+        PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -7176,11 +7271,11 @@
         var p = personBy(key);
         if (!p) return;
         if (personActive(p)) {
-          var held = personRoles(p).length;
-          if (held && !confirm(p.name + " holds " + plural(held, "role") +
-              ". Retiring takes " + (held === 1 ? "it" : "them") +
-              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
-              p.name + "?")) return;
+          /* §533.3: the question opens in this row's own corner, the way the
+             delete question beside it in the same menu always has. It only
+             asks when there is something to take — somebody holding nothing
+             is retired by the press, because nothing is being decided. */
+          if (personRoles(p).length) { PRET = key; PMENU = null; paint(); return; }
           retirePerson(key);
         } else {
           /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §533.1) ────────
@@ -7222,7 +7317,20 @@
        unmounts the button the click is still inside (§47.2). */
     document.querySelectorAll("[data-pdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        PDEL = b.dataset.pdel; PMENU = null; REFUSEDLATE = null; paint();
+        PDEL = b.dataset.pdel; PMENU = null; PRET = null; REFUSEDLATE = null; paint();
+      });
+    });
+    document.querySelectorAll("[data-pret-no]").forEach(function(b){
+      b.addEventListener("click", function(){ PRET = null; paint(); });
+    });
+    document.querySelectorAll("[data-pret-yes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Resolved at press time (§48.2): the row is re-read rather than
+           trusted from the render that drew this. */
+        var key = b.dataset.pretYes;
+        if (personBy(key)) retirePerson(key);
+        PRET = null;
+        paint();
       });
     });
     document.querySelectorAll("[data-pdel-no]").forEach(function(b){
@@ -8049,7 +8157,7 @@
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: "bulk:" + b.dataset.pwbulk, pw: "", err: "", done: null };
-        PWMENU = false; PMENU = null; PDEL = null;
+        PWMENU = false; PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -8353,13 +8461,31 @@
     });
     document.querySelectorAll("[data-draftdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (!confirm("Delete this draft? It cannot be brought back.")) return;
         var id = b.dataset.draftdel;
-        SYNC.mailDraftDelete(id, function(){
-          var st = sendmsg();
-          if (String(st.draftId || "") === String(id)) st.draftId = null;
-          DRAFTLIST = null;
-          paint();
+        /* §533.3: the shape for an act with nothing behind it (§533). The
+           heading is the only thing that tells one draft from another — it
+           is what the table is sorted and read by — so it is what the
+           question names (§186). */
+        var d = (DRAFTLIST || []).filter(function(x){ return String(x.id) === String(id); })[0];
+        destroyConfirmOpen({
+          title: "Delete this draft?",
+          sub: d && d.updated_at
+            ? "Last saved " + String(d.updated_at).slice(0, 16).replace("T", " ") : "",
+          goes: "<b>" + esc((d && d.subject) || "(no heading yet)") + "</b>",
+          goesWhy: "The draft and everything typed into it.",
+          stays: "Every message already sent",
+          staysWhy: "A draft has never been sent, so nothing anybody has received changes.",
+          noway: "<b>There is no way back.</b> A draft is not archived \u2014 it is the " +
+                 "working copy, and this is the only one.",
+          yesWord: "Delete the draft",
+          onYes: function(){
+            SYNC.mailDraftDelete(id, function(){
+              var st = sendmsg();
+              if (String(st.draftId || "") === String(id)) st.draftId = null;
+              DRAFTLIST = null;
+              paint();
+            });
+          }
         });
       });
     });

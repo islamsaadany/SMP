@@ -425,6 +425,13 @@ var REFUSEDLATE = null;
 /* The season whose removal was refused, so the row can say so under itself
    rather than in a box over the page (§533.2). */
 var SEASWHY = null;
+/* The person whose retirement is being asked about, in the row's own corner
+   (§533.3) — PDEL's twin, for the act beside it in the same menu. */
+var PRET = null;
+/* The name being typed for a new supporting function, held in a global for
+   the reason NEWMAINBU is: the repaint that follows any other change on the
+   page would take a half-typed name with it (§533.3). */
+var NEWFN = "";
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */

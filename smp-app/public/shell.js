@@ -7360,6 +7360,14 @@ var LABEL_DEFAULTS = LABELS.entries.map(function(e){ return { key:e.key, one:e.g
    list, not two (spec 006 §2). */
 var ROLES = SMPRules.ROLES;
 var ROLE_KEYS = SMPRules.ROLE_KEYS;
+/* ── ONE ADDRESS, ONE PARSE (§531) ───────────────────────────────────
+   The same reason as the two lines above: the browser and the server have to
+   read an address the same way, so the parse is lib/rules.js's and this is the
+   alias. `boxRef(target)` answers `{ at, kind, key, named, area }` for the six
+   kinds that hold a plan — see the section it is defined in for what each
+   field is and for why `u:<key>` is NOT one of them (it is a holder id, not a
+   target; `subjKey` and `isUnitHolderId` are that namespace's one place). */
+var boxRef = SMPRules.boxRef;
 function roleName(k){
   var r = ROLES.filter(function(x){ return x.key === k; })[0];
   return r ? r.name : k;
@@ -7424,9 +7432,9 @@ function unitGapOff(u){
    Anything that is not a function answers true, so no unit, capability or
    group moves. */
 function fnKoCounted(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return true;
-  var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind !== "fn") return true;
+  var f = FUNCTIONS[r.key];
   if (f && fnPlansInObjectives(f)) return true;
   return compOn(t, "keyobj");
 }
@@ -9070,17 +9078,18 @@ function personIdentified(p){
 function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
   if (!at || at === "group") return "the group";
-  if (String(at).indexOf("cap:") === 0) {
-    var cw = capById(String(at).slice(4));
-    return (cw ? cw.name : String(at).slice(4)) + " (" + L1("capability").toLowerCase() + ")";
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var cw = capById(r.key);
+    return (cw ? cw.name : r.key) + " (" + L1("capability").toLowerCase() + ")";
   }
-  if (String(at).indexOf("fn:") === 0) {
-    var f = FUNCTIONS[String(at).slice(3)];
-    return (f ? f.name : String(at).slice(3)) + " (function)";
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
+    return (f ? f.name : r.key) + " (function)";
   }
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? c.name : String(at).slice(3);
+  if (r.kind === "mid") {
+    var c = COMPANIES[r.key];
+    return c ? c.name : r.key;
   }
   return UNITS[at] ? UNITS[at].name : at;
 }
@@ -9116,22 +9125,23 @@ function placeLabel(at){
      not the clash §65 guards (a unit and a FUNCTION of one name are two
      things a person is attached TO, and this is not), and adding the word
      everywhere would spend it on a case nobody has met. */
-  if (String(at).indexOf("cap:") === 0) {
-    var cc = capById(String(at).slice(4));
-    return cc ? navName(cc) : String(at).slice(4);
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var cc = capById(r.key);
+    return cc ? navName(cc) : r.key;
   }
   /* §481: a direction is a place in the company's flow, named by itself. */
-  if (String(at).indexOf("dir:") === 0) {
+  if (r.kind === "dir") {
     var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
-      return p && p.id === String(at).slice(4); })[0];
-    return dp ? dp.name : String(at).slice(4);
+      return p && p.id === r.key; })[0];
+    return dp ? dp.name : r.key;
   }
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? navName(c) : String(at).slice(3);
+  if (r.kind === "mid") {
+    var c = COMPANIES[r.key];
+    return c ? navName(c) : r.key;
   }
-  if (String(at).indexOf("fn:") === 0) {
-    var fk = String(at).slice(3), f = FUNCTIONS[fk];
+  if (r.kind === "fn") {
+    var fk = r.key, f = FUNCTIONS[fk];
     var nm = f ? navName(f) : fk;
     /* Asked of the units by their NAVIGATION name, because that is the name
        being shown — comparing against `.name` would keep the suffix on a
@@ -9214,28 +9224,30 @@ var SEAT_AT_GROUP = ["super", "smoteam", "gceo"];
 function grantPersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
   if (!p) return;
-  var at = where || "group";
+  var at = where || "group", r = boxRef(at);
   /* THE SEAT ROLES HELD OVER THE GROUP, named once (§89). SMO team joins
      Super user and Group CEO here: a seat is a property of the PERSON (§33),
      and adding it to the list is the whole of what "grant it" means. */
   if (SEAT_AT_GROUP.indexOf(roleKey) > -1) {
     p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
   } else if (roleKey === "cceo") {
-    p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
+    /* A company CEO's attachment is stored as the bare company key, so a
+       `co:<key>` address and a bare one both land on the key (§531). */
+    p.role = "cceo"; p.company = r.kind === "mid" ? r.key : at; p.unit = null;
   } else if (roleKey === "owner") {
     unitRolesFor(at).head = personKey; p.unit = at;
-  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
+  } else if (r.kind === "cap" && (roleKey === "capowner" || roleKey === "custodian")) {
     /* §412: a capability's seats sit on the capability. The person is not
        ATTACHED to it -- a capability is not somewhere somebody works -- so
        their unit or function stays what it was. */
-    var cg = capById(at.slice(4));
+    var cg = capById(r.key);
     if (cg) cg[roleKey === "capowner" ? "head" : "custodian"] = personKey;
-  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
-    FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "custodian" && r.kind === "fn") {
+    FUNCTIONS[r.key].custodian = personKey; p.fn = r.key;
   } else if (roleKey === "custodian") {
     unitRolesFor(at).custodian = personKey; p.unit = at;
   } else if (roleKey === "fnhead") {
-    FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
+    FUNCTIONS[r.key].head = personKey; p.fn = r.key;
   } else if (SMPRules.isOwnLinesRole(roleKey)) {
     /* Neither floor role is granted (roleIsGrantable refuses both), but the
        attachment they are read off is the same one thing: which unit this
@@ -9245,21 +9257,21 @@ function grantPersonRole(personKey, roleKey, where){
 }
 function revokePersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
-  var at = where || "group";
+  var at = where || "group", r = boxRef(at);
   if (SEAT_AT_GROUP.indexOf(roleKey) > -1 || roleKey === "cceo") {
     if (p) { delete p.role; delete p.company; }
   } else if (roleKey === "owner") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
-  } else if (at.indexOf("cap:") === 0 && (roleKey === "capowner" || roleKey === "custodian")) {
-    var cr = capById(at.slice(4)), fk2 = roleKey === "capowner" ? "head" : "custodian";
+  } else if (r.kind === "cap" && (roleKey === "capowner" || roleKey === "custodian")) {
+    var cr = capById(r.key), fk2 = roleKey === "capowner" ? "head" : "custodian";
     if (cr && cr[fk2] === personKey) delete cr[fk2];
-  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[at.slice(3)];
+  } else if (roleKey === "custodian" && r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (f && f.custodian === personKey) f.custodian = null;
   } else if (roleKey === "custodian") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].custodian === personKey) UNIT_ROLES[at].custodian = null;
   } else if (roleKey === "fnhead") {
-    var g = FUNCTIONS[at.slice(3)];
+    var g = FUNCTIONS[r.key];
     if (g && g.head === personKey) g.head = null;
   }
   /* contrib is p.unit, which is also how a person is FOUND — clearing it would
@@ -9304,15 +9316,16 @@ function personHeldRoles(key){
   });
 }
 function roleHolderAt(roleKey, at){
-  if (String(at).indexOf("cap:") === 0) {
-    var ch = capById(String(at).slice(4)) || {};
+  var r = boxRef(at);
+  if (r.kind === "cap") {
+    var ch = capById(r.key) || {};
     return (roleKey === "capowner" ? ch.head : roleKey === "custodian" ? ch.custodian : null) || null;
   }
   if (roleKey === "owner")  return (UNIT_ROLES[at] || {}).head || null;
-  if (roleKey === "fnhead") return (FUNCTIONS[String(at).replace(/^fn:/, "")] || {}).head || null;
+  if (roleKey === "fnhead") return (FUNCTIONS[r.kind === "fn" ? r.key : r.at] || {}).head || null;
   if (roleKey === "custodian") {
-    return String(at).indexOf("fn:") === 0
-      ? (FUNCTIONS[at.slice(3)] || {}).custodian || null
+    return r.kind === "fn"
+      ? (FUNCTIONS[r.key] || {}).custodian || null
       : (UNIT_ROLES[at] || {}).custodian || null;
   }
   /* A seat is a property of the PERSON, so two people may hold it at once and
@@ -9901,9 +9914,10 @@ function attachPersonAt(p, at){
   if (!p) return;
   delete p.unit; delete p.fn; delete p.company;
   if (!at) return;
+  var r = boxRef(at);
   if (at === "group") p.unit = "group";
-  else if (String(at).indexOf("fn:") === 0) p.fn = String(at).slice(3);
-  else if (String(at).indexOf("co:") === 0) p.company = String(at).slice(3);
+  else if (r.kind === "fn") p.fn = r.key;
+  else if (r.kind === "mid") p.company = r.key;
   else p.unit = at;
 }
 /* Where the person's Main BU says they should be, which is not always where
@@ -10398,12 +10412,14 @@ function attentionQueue(){
 function roleAtWord(roleKey){
   var kinds = {};
   roleWheres(roleKey).forEach(function(w){
-    kinds[w.v === "group" ? "group"
-        : String(w.v).indexOf("fn:") === 0 ? "fn"
-        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+    /* §531: `top`, `fn` and `mid` are the three kinds this sentence has a word
+       for; everything else — a unit, a capability, a direction — reads as the
+       unit's word, which is the answer the chain here gave before. */
+    var k = boxRef(w.v).kind;
+    kinds[w.v === "group" ? "top" : (k === "fn" || k === "mid") ? k : "unit"] = 1;
   });
-  var WORD = { group:"the group", unit:"a " + labelWord("unitword","group"),
-               fn:"a " + labelWord("fnword","group"), co:"a " + labelWord("division","group") };
+  var WORD = { top:"the group", unit:"a " + labelWord("unitword","group"),
+               fn:"a " + labelWord("fnword","group"), mid:"a " + labelWord("division","group") };
   var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
   if (!out.length) return "somewhere that does not exist yet";
   if (out.length === 1) return out[0];
@@ -10994,10 +11010,10 @@ function peopleFor(where){
   var here = [], rest = [];
   PEOPLE.forEach(function(p){
     if (!personActive(p)) return;
-    var w = String(where || ""), cap = w.indexOf("cap:") === 0 ? capById(w.slice(4)) : null;
+    var r = boxRef(where), cap = r.kind === "cap" ? capById(r.key) : null;
     /* §412: a capability's nearest people are its holding function's. */
     var mine = cap ? !!(cap.fn && p.fn === cap.fn)
-      : w.indexOf("fn:") === 0 ? p.fn === w.slice(3)
+      : r.kind === "fn" ? p.fn === r.key
       : p.unit === where;
     (mine ? here : rest).push(p);
   });
@@ -11143,16 +11159,17 @@ function focusBands(key){
      (§130.5's own reason for reaching supporting functions in the first
      place). Both forms: pillars through the unit-shaped view, an overview and
      projects as one band of its own objectives. */
-  if (String(key).indexOf("cap:") === 0) {
+  var kr = boxRef(key);
+  if (kr.kind === "cap") {
     var cc = capOfTarget(key);
     if (!cc) return [];
     if (capPlansInPillars(cc)) return unitBands(capAsUnit(cc.id));
     return [{ band:cc.name, src:cc.name, items:cc.keyObjectives || [] }];
   }
-  /* The prefix test rather than `isFn()`, which is the shell's own local
-     helper and not in scope here. */
-  if (String(key).indexOf("fn:") === 0) {
-    var fk = String(key).slice(3), f = FUNCTIONS[fk];
+  /* `boxRef` rather than `isFn()`, which is the shell's own local helper and
+     not in scope here (§531 — it used to be the prefix, read by hand). */
+  if (kr.kind === "fn") {
+    var fk = kr.key, f = FUNCTIONS[fk];
     if (!f) return [];
     if (f.format === "pillars") return unitBands(fnAsUnit(fk));
     /* THE BAND IS THE CAPABILITY'S NAME, and no code is invented for it. A
@@ -11446,20 +11463,22 @@ function functionOf(key){ return FUNCTIONS[key] || null; }
    nothing. `checks/plan-builder.py` caught it, on a UNIT, which is the
    argument for running the whole suite rather than the file you edited. */
 function foundKeyFor(target){
-  var t = String(target || "");
+  var k = boxRef(target).kind;
   /* §404: a company's Foundation is the group's own strategy, drawn over the
-     company's record, so it is asked the group's key. */
-  if (t === "group" || t.indexOf("co:") === 0) return "g_found";
-  return t.indexOf("fn:") === 0 ? "k_found" : "u_found";
+     company's record, so it is asked the group's key. §531: an EMPTY target
+     shares the top layer's kind and has always been asked `u_found` here, so
+     the literal "group" is still the test for the first answer. */
+  if (String(target || "") === "group" || k === "mid") return "g_found";
+  return k === "fn" ? "k_found" : "u_found";
 }
 function koHolderById(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) {
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") {
     /* §326: through fnKoHolderWritable, not unitLikeWritable — the latter
        answers only for a function that plans in PILLARS, so on the other
        format an added objective was pushed nowhere and a removed one found
        nothing. The Overview is one page (§213) and its holder is one answer. */
-    var u = fnKoHolderWritable(s.slice(3));
+    var u = fnKoHolderWritable(r.key);
     if (!u) return null;
     return { list: u.keyObjectives, target: s };
   }
@@ -11475,13 +11494,15 @@ function capById(id){
    capability" in twenty places and would start answering with something that
    is not one. */
 function holderById(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) return fnOwnHolder(s.slice(3));
-  /* §405: a business unit's own holder. */
-  if (s.indexOf("u:") === 0) return unitOwnHolder(s.slice(2));
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") return fnOwnHolder(r.key);
+  /* §405: a business unit's own holder. `u:` is the HOLDER namespace, which
+     `boxRef` deliberately does not parse (§531), so it is asked of that
+     namespace's own two functions. */
+  if (isUnitHolderId(s)) return unitOwnHolder(subjKey(s));
   /* A capability answers to its bare id AND to its destination spelling, so a
      caller holding either asks one function (§53.5). */
-  return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
+  return capById(capKeyOf(s));
 }
 /* Who reaches a capability: the SMO and CEO see all of them; a function's own
    people see theirs. A unit head has no business in a capability at all. */
@@ -12314,17 +12335,19 @@ function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null
    rather than a shape for a function that plans in projects, because there is
    no unit-shaped thing there to return. */
 function unitLike(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   /* §334: a capability planned in pillars is drawn by the unit's own pages,
      for the reason a pillars function already is (§59) — a pillar is a pillar
-     whoever holds it. Asked FIRST, because `cap:` is not `fn:` and the bare
-     fallback below would hand back UNITS["cap:x"], which is undefined and
-     renders as a page with nothing on it. */
-  if (t.indexOf("cap:") === 0) return capAsUnit(t);
+     whoever holds it. §531: the ORDER this used to be written in was the whole
+     care of it — `cap:` had to be asked before the bare fallback or it handed
+     back UNITS["cap:x"], which is undefined and renders as a page with nothing
+     on it. One parse answers all five at once, so the order cannot be got
+     wrong again. */
+  if (r.kind === "cap") return capAsUnit(t);
   /* §428: the top layer's own plan, read as a unit. */
   if (t === "group") return topAsUnit();
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnAsUnit(t.slice(3));
+  if (r.kind === "fn") return fnAsUnit(r.key);
+  return UNITS[t] || null;
 }
 function deltaFor(key){
   var h = lastClose(); if (!h) return null;
@@ -12445,8 +12468,9 @@ function canReportRow(unitKey, x){
    function that holds it (§334). */
 function holderTarget(x){
   var t = String(x || "");
-  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("u:") === 0)
-    ? t : "fn:" + t;
+  /* Already addressed — as a function, as a capability, or as a unit's own
+     holder — or a bare function key from the old signature (§531). */
+  return (boxRef(t).area === "fn" || isUnitHolderId(t)) ? t : "fn:" + t;
 }
 function canReportFn(target){
   /* §405: a unit's own holder reports on the UNIT's column, through the gate
@@ -12538,15 +12562,15 @@ function canSpeakForDir(t){
 }
 function canSpeakFor(target){
   var t = subjKey(target);
-  if (String(target || "").indexOf("dir:") === 0) return canSpeakForDir(String(target));
+  if (boxRef(target).kind === "dir") return canSpeakForDir(String(target));
   /* §447: a direction's owner reports their own rows and never submits the
      company's report — that stays the office's and the CEO's (§428). */
   if (t === "group") return canReport("group") && SMPRules.mayReportTop(world(), viewer());
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) {
-    return canReportFn(t) &&
-           !SMPRules.onlyOwnLines(world(), viewer(), "fn", t);
-  }
-  return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
+  /* §531: `area` is the same pair of kinds this asked for by hand — and it is
+     the same word `onlyOwnLines` is then passed, so the two cannot drift. */
+  var area = boxRef(t).area;
+  if (area === "fn") return canReportFn(t) && !SMPRules.onlyOwnLines(world(), viewer(), area, t);
+  return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), area, t);
 }
 
 /* ── THE DOT ON THE PERFORMANCE TAB HAS TO MEAN SOMETHING (§69.9) ──
@@ -12573,11 +12597,11 @@ function canSpeakFor(target){
      nag somebody who has no control that would clear it. */
 function reportPending(target){
   if (!REVIEW || REVIEW.state !== "open") return false;
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   if (t && !planOn(t)) return false;
   /* §428: the top layer submits once it has a plan of its own. */
   if (t === "group") return topHasPlan() && !(REVIEW.submitted && REVIEW.submitted.group) && canSpeakFor("group");
-  if (t.indexOf("co:") === 0) return false;
+  if (r.kind === "mid") return false;
   /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
      resolved in ONE place. A function that plans in projects still submits —
      it is `unitLike()` that has nothing unit-shaped to return for it, not the
@@ -12588,8 +12612,8 @@ function reportPending(target){
      never said *not submitted yet* and its Performance tab never wore the dot
      (§69), on the one subject whose whole page is somebody's project. The
      board asked for the report and the tab above it said nothing. */
-  var real = t.indexOf("cap:") === 0 ? !!capOfTarget(t)
-           : t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
+  var real = r.kind === "cap" ? !!capOfTarget(t)
+           : r.kind === "fn" ? !!FUNCTIONS[r.key] : !!UNITS[t];
   if (!real) return false;
   if (REVIEW.submitted && REVIEW.submitted[t]) return false;
   return canSpeakFor(t);
@@ -12792,7 +12816,8 @@ function myLinesHome(){
   if (!at) return "group";
   if (at === "group") return "group";
   if (UNITS[at]) return at;
-  if (String(at).indexOf("fn:") === 0 || String(at).indexOf("co:") === 0) return at;
+  var k = boxRef(at).kind;
+  if (k === "fn" || k === "mid") return at;
   return "group";
 }
 function myLinesHere(target){
@@ -13256,10 +13281,12 @@ function ownDraftShut(target, id){
    capability, and the mark §301 built for them was not drawn — the whole of
    §310's promise silently dead on the one page it is about, with nothing on
    the screen and nothing on the console (§96's family). */
-function areaOfTarget(target){
-  var t = String(target || "");
-  return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0) ? "fn" : "unit";
-}
+/* §531: and now it is not even a line of its own — `boxRef` carries the same
+   answer as `area`, which is what the server's three `isFn` sites and
+   `capArea` were taught to read at the same time. The name stays because it
+   is what twenty callers here ask by, and because the paragraph above it is
+   the reason this must be one answer and not two. */
+function areaOfTarget(target){ return boxRef(target).area; }
 function mayMarkDoneOn(target, owner, cust){
   var t = String(target || "");
   if (REVIEW.state !== "open") return false;
@@ -15289,8 +15316,9 @@ function gapMap(target, all, fillable){
       });
     });
   };
-  if (t.indexOf("fn:") === 0) {
-    var fk = t.slice(3), fo = functionOf(fk);
+  var gr = boxRef(t);
+  if (gr.kind === "fn") {
+    var fk = gr.key, fo = functionOf(fk);
     if (fo && String(fo.format) === "pillars") {
       /* THE SAME OVERVIEW ENTRY A CAPABILITY FUNCTION GETS, because since
          §213 it is the same page, counted from the same field list (§53.5).
@@ -15303,7 +15331,7 @@ function gapMap(target, all, fillable){
       entry("ov", "Overview", fov, { sec: "found", page: "capfoundation" });
       unitHalf(unitLike(t), FN_WORDS); return out; }
     holderHalf(fnHolders(fk));
-  } else if (t.indexOf("cap:") === 0) {
+  } else if (gr.kind === "cap") {
     /* §334.13: A CAPABILITY COUNTS ITS OWN GAPS. Stage 2 gave it a page, a
        band and a rail of its own, and this had a `fn:` branch and a unit
        branch and nothing else — so `cap:<id>` fell through to `UNITS[t]`,
@@ -15523,13 +15551,14 @@ function projCode(owner, p){
   if (!p) return "";
   var t = String(owner || ""), c = isCapTarget(t) ? capById(capKeyOf(t)) : null;
   var list, pre;
-  if (t.indexOf("fn:") === 0) t = t.slice(3);
+  if (boxRef(t).kind === "fn") t = boxRef(t).key;
   /* §405: a unit's own projects are coded in the unit's letters (RS01), the
-     way its pillars are. */
-  if (t.indexOf("u:") === 0) {
-    var uo = ownUnit(t.slice(2));
+     way its pillars are. `u:` is the holder namespace, asked of its own two
+     functions rather than of `boxRef` (§531). */
+  if (isUnitHolderId(t)) {
+    var uo = ownUnit(subjKey(t));
     if (!uo) return "";
-    list = unitOwnProjects(t.slice(2)); pre = uo.codePrefix || "";
+    list = unitOwnProjects(subjKey(t)); pre = uo.codePrefix || "";
     var ui = list.map(function(x){ return x.id; }).indexOf(p.id);
     return ui < 0 ? "" : pre + String(ui + 1).padStart(2, "0");
   }
@@ -15927,9 +15956,9 @@ function fnWriteBack(fk, u){
    A projects or objectives function holds no unit-shaped view, which is why
    the Add and Remove handlers could not reach one through unitLikeWritable(). */
 function swotWritable(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") === 0) {
-    var f = FUNCTIONS[t.slice(3)];
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "fn") {
+    var f = FUNCTIONS[r.key];
     if (!f) return null;
     if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
     ["s","w","o","t"].forEach(function(q){ if (!Array.isArray(f.swot[q])) f.swot[q] = []; });
@@ -15946,9 +15975,13 @@ function swotWritable(target){
    (§50.6); the writer mints it. */
 var COMPETE_NONE = Object.freeze({ values: Object.freeze([]) });
 function competeHolder(target){
-  var t = String(target || "");
+  var t = String(target || ""), k = boxRef(t).kind;
   if (t === "group") return GROUP;
-  if (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0 || t.indexOf("co:") === 0) return null;
+  /* Only a unit and the top layer carry one (COMPETE_LEVELS in the shared
+     rules says the same thing from the other end). §531: an EMPTY target
+     shares the top layer's kind but has never answered GROUP here — the
+     literal above is still the test — and falls through to UNITS[""]. */
+  if (k === "fn" || k === "cap" || k === "mid") return null;
   return UNITS[t] || null;
 }
 function competeOf(target){
@@ -15976,24 +16009,24 @@ function competeTidy(target){
 }
 /* unitLike() for somebody about to write. Same two answers, same one place. */
 function unitLikeWritable(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return capWritable(t);
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return capWritable(t);
   if (t === "group") return topWritable();
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnWritable(t.slice(3));
+  if (r.kind === "fn") return fnWritable(r.key);
+  return UNITS[t] || null;
 }
 function fnKeyOfTarget(target){
-  var t = String(target || "");
-  return t.indexOf("fn:") === 0 ? t.slice(3) : null;
+  var r = boxRef(target);
+  return r.kind === "fn" ? r.key : null;
 }
 
 /* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
 function plansInPillars(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return capPlansInPillars(capOfTarget(t));
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return capPlansInPillars(capOfTarget(t));
+  if (r.kind === "fn") return fnPlansInPillars(FUNCTIONS[r.key]);
   /* §405: a unit plans in pillars unless it has chosen otherwise. */
-  if (t.indexOf("fn:") !== 0) { var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars"; }
-  return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
+  var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars";
 }
 /* And whether it is drawn by the objectives-and-actions pages (§342). A
    capability is deliberately NOT offered this format: Islam's word was about a
@@ -16002,10 +16035,10 @@ function plansInPillars(target){
    false for one rather than reading `capFormat`, which would silently accept a
    stored value nothing can set. */
 function plansInObjectives(target){
-  var t = String(target || "");
-  if (t.indexOf("cap:") === 0) return false;
-  if (t.indexOf("fn:") !== 0) { var ou = subjUnit(t); return !!ou && unitFormat(ou) === "objectives"; }
-  return fnPlansInObjectives(FUNCTIONS[t.slice(3)]);
+  var t = String(target || ""), r = boxRef(t);
+  if (r.kind === "cap") return false;
+  if (r.kind === "fn") return fnPlansInObjectives(FUNCTIONS[r.key]);
+  var ou = subjUnit(t); return !!ou && unitFormat(ou) === "objectives";
 }
 
 function pillarCarrier(p){
@@ -17103,9 +17136,9 @@ function archiveCapPlan(c, why){
    a company's `coFound`, or a unit's (a pillars function's through its view,
    written back the way every other writer does — §129, §232). */
 function foundationRecord(target){
-  var t = String(target || "");
+  var t = String(target || ""), r = boxRef(t);
   if (t === "group") return GROUP;
-  if (t.indexOf("co:") === 0) return coFoundWritable(t.slice(3));
+  if (r.kind === "mid") return coFoundWritable(r.key);
   return unitLikeWritable(t);
 }
 function foundationSnapshot(o){
@@ -17120,8 +17153,9 @@ function foundationIsEmpty(s){
 }
 function foundationName(target){
   var t = String(target || "");
+  var r = boxRef(t);
   if (t === "group") return labelWord("topword","group") || GROUP.org || "Group";
-  if (t.indexOf("co:") === 0) return (COMPANIES[t.slice(3)] || {}).name || t;
+  if (r.kind === "mid") return (COMPANIES[r.key] || {}).name || t;
   var u = unitLike(t);
   return (u && u.name) || t;
 }
@@ -17988,7 +18022,7 @@ function ownUnit(k){ return k === "group" ? topAsUnit() : UNITS[k]; }
 function subjUnit(t){
   if (String(t || "") === "u:group") return topAsUnit();
   var s = subjKey(t);
-  return (s.indexOf("fn:") === 0 || s.indexOf("cap:") === 0) ? null : (UNITS[s] || null);
+  return boxRef(s).area === "fn" ? null : (UNITS[s] || null);
 }
 function unitActions(k){
   var u = ownUnit(k);
@@ -18045,8 +18079,11 @@ function unitHolders(k){ var h = unitOwnHolder(k); return h ? [h] : []; }
    projects may hold a capability planned in pillars and neither page does two
    jobs. Absent reads as "projects", which is every capability that exists
    today (§50.6: a default is an absence, so nothing is migrated). */
-function isCapTarget(t){ return String(t || "").indexOf("cap:") === 0; }
-function capKeyOf(t){ var s = String(t || ""); return s.indexOf("cap:") === 0 ? s.slice(4) : s; }
+/* §531: both through the one parse. `capKeyOf` keeps answering a BARE id with
+   itself — a capability is addressed either way and thirteen callers hold
+   whichever they were given (§53.5) — so it reads `kind` rather than `key`. */
+function isCapTarget(t){ return boxRef(t).kind === "cap"; }
+function capKeyOf(t){ var r = boxRef(t); return r.kind === "cap" ? r.key : String(t || ""); }
 function capOfTarget(t){ return isCapTarget(t) ? capById(capKeyOf(t)) : null; }
 function capFormat(c){ return (c && c.format === "pillars") ? "pillars" : "projects"; }
 function capPlansInPillars(c){ return capFormat(c) === "pillars"; }
@@ -18150,10 +18187,10 @@ function fnKoHolderWritable(fk){
   return fnPlansInPillars(f) ? unitLikeWritable("fn:" + fk) : fnOwnHolderWritable(fk);
 }
 function holderByIdWritable(id){
-  var s = String(id || "");
-  if (s.indexOf("fn:") === 0) return fnOwnHolderWritable(s.slice(3));
-  if (s.indexOf("u:") === 0) return unitOwnHolderWritable(s.slice(2));
-  return capById(s.indexOf("cap:") === 0 ? s.slice(4) : s);
+  var s = String(id || ""), r = boxRef(s);
+  if (r.kind === "fn") return fnOwnHolderWritable(r.key);
+  if (isUnitHolderId(s)) return unitOwnHolderWritable(subjKey(s));
+  return capById(capKeyOf(s));
 }
 /* The other half of that pair, and a no-op for a capability, which IS the
    stored object. A function's holder is a fresh wrapper on every call, so
@@ -18163,16 +18200,17 @@ function holderWriteBack(id, h){
   var s = String(id || "");
   /* §405: a unit's holder is a wrapper too, so the same rule. */
   if (h && s === "u:group") { GROUP.topProjects = h.projects; return; }
-  if (h && s.indexOf("u:") === 0) {
-    var uu = UNITS[s.slice(2)];
+  if (h && isUnitHolderId(s)) {
+    var uu = UNITS[subjKey(s)];
     if (!uu) return;
     if (unitFormat(uu) === "objectives") uu.actions = h.actions;
     else if (unitFormat(uu) === "projects") uu.projects = h.projects;
     uu.keyObjectives = h.keyObjectives;
     return;
   }
-  if (!h || s.indexOf("fn:") !== 0) return;
-  var f = FUNCTIONS[s.slice(3)];
+  var r = boxRef(s);
+  if (!h || r.kind !== "fn") return;
+  var f = FUNCTIONS[r.key];
   if (!f) return;
   /* §342: the holder is a WRAPPER, so every array a restore assigned has to
      be written back or it is thrown away one line later — the trap §326

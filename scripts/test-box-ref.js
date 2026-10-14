@@ -73,7 +73,10 @@ const ADDRESSES = [
   /* a missing target, as text — the three spellings that reach this code */
   "", "undefined", "null",
   /* and nearly-a-prefix, where indexOf and split disagree */
-  "capx", "fnord", "cooperations", "u:group", "u:mobile", "dir", "fn:", "cap:", "co:",
+  "capx", "fnord", "cooperations", "u:group", "u:mobile", "dir", "fn:", "cap:", "co:", "cap:cap7",
+  /* `u:retailstores` is the unit the made state below switches to projects, so
+     the holder namespace has something to answer with (see `doctored`). */
+  "u:retailstores",
   /* a key with a colon in it, which a client's own naming can mint */
   "fn:a:b", "cap:a:b"
 ];
@@ -203,6 +206,195 @@ console.log("3 · the authoriser's wording, against the expression it replaced")
     if (wasDir !== (r.kind === "dir")) moves.push(["dir", a, wasDir, r.kind === "dir"]);
   });
   ok(moves.length === 0, "the authoriser's five converted expressions read as they read before", moves);
+}
+
+/* ── 4 · THE CLIENT'S OWN DATA LAYER, BOTH BUILDS, EVERY ADDRESS ──────────
+   config-data.js is not a module — it is inlined into the page by build.py —
+   so both builds are loaded in a vm the way scripts/stage1-readings.js loads
+   them, over the worked example from db/seed-state.json. Thirty-one functions
+   were converted there; every one that can be asked with a target alone is
+   asked here, on all 22 addresses, in both builds.
+
+   THE STATE IS A FRESH COPY FOR EACH BUILD and the SAME copy for both, so a
+   difference can only come from the code (§94.2). Several of these functions
+   READ the viewer and the cycle, which is why they are asked after `hydrate`
+   rather than over an empty world: asked over nothing they would all answer
+   false and agree perfectly. */
+console.log("4 · the client's data layer answers what it answered at " + BASE);
+{
+  const vm = require("node:vm");
+  const SEED = JSON.parse(fs.readFileSync(path.join(ROOT, "db", "seed-state.json"), "utf8"));
+  function clientAt(read, state) {
+    const build = read("build.py");
+    const files = [...build.match(/for tag, f in \[([\s\S]*?)\]:/)[1]
+                         .matchAll(/\("[A-Z]+"\s*,\s*"([^"]+)"\)/g)].map((m) => m[1]);
+    const ctx = vm.createContext({ console: { log() {}, warn() {}, error() {} }, JSON, Math, Date, Intl, setTimeout });
+    vm.runInContext("var window = this, document = undefined, localStorage = undefined;", ctx);
+    files.forEach(function (f) {
+      /* Reading is outside the try and running inside it, for the reason
+         scripts/test-stage1-rules.js gives: a file that cannot be READ is a
+         failure of this check, while the files that reach for the page at load
+         throw and define nothing this check asks for. */
+      const code = read(f);
+      try { vm.runInContext(code, ctx, { filename: f }); } catch (e) { /* see above */ }
+    });
+    const run = (code) => vm.runInContext(code, ctx);
+    if (run("typeof boxRef") === "undefined" && read === readNow)
+      throw new Error("the sources did not alias boxRef");
+    if (run("typeof unitLike") !== "function") throw new Error("the sources did not define unitLike");
+    ctx.__state = state();
+    run(`(function(s){
+      GROUP = s.group; UNIT_KEYS = s.unitKeys; UNITS = s.units;
+      FUNCTION_KEYS = s.functionKeys; FUNCTIONS = s.functions;
+      if (typeof fnPruneNulls === "function") (FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(FUNCTIONS[k]); });
+      COMPANY_KEYS = s.companyKeys || []; COMPANIES = s.companies || {};
+      PEOPLE = s.people; UNIT_ROLES = s.unitRoles; ACCESS = s.access;
+      LABELS.entries = s.labels; BANDS.bands = s.bands;
+      KO_WEIGHTS = s.koWeights || {}; CYCLE = s.cycle; REVIEW = s.review;
+      HISTORY = s.history; ARCHIVES = s.archives || [];
+      PRIOR_CYCLE = s.priorCycle || { factors: [] };
+      UNIT_KEYS.forEach(function (k) { UNITS[k].ukey = k; });
+      syncWeights();
+    })(__state)`);
+    return run;
+  }
+  const SRC = path.join(ROOT, "SMP-Project-Folder", "src");
+  const readNow = (f) => fs.readFileSync(path.join(SRC, f), "utf8");
+  /* NORMALISED FIRST, and this is §54.5's trap exactly: build.py lists the
+     shared files as "../../lib/rules.js", relative to src, and git has no
+     notion of `..` inside a path — asked for
+     "SMP-Project-Folder/src/../../lib/rules.js" it answers that the path
+     exists on disk but not in the commit. It did, the first time this section
+     ran. So the path is resolved against the repository root and made
+     repo-relative before git is asked. */
+  const readWas = function (f) {
+    const rel = path.relative(ROOT, path.resolve(SRC, f)).split(path.sep).join("/");
+    return execFileSync("git", ["show", BASE + ":" + rel],
+                        { cwd: ROOT, maxBuffer: 1 << 28 }).toString("utf8");
+  };
+  /* ── THE TWO STATES, AND WHY THERE ARE TWO (§255, §113.8) ──────────────
+     The worked example holds ONE capability, on one function, planned in
+     PROJECTS. So `capAsUnit` answers null for it, and the whole
+     capability-planned-in-pillars path — the one `unitLike`'s comment is about,
+     and the one a stage 3b migration walks — is never entered. Measured: with
+     `unitLike`'s `cap:` branch deliberately deleted, the grid over the seed
+     alone read UNMOVED, because both builds fell to UNITS["cap:cap6"] and both
+     answered null. An agreement like that is worth nothing.
+     So the grid runs twice: over the seed as it is, and over a state this file
+     MAKES — the capability switched to pillars with a pillar and an objective
+     on it, and a SECOND capability on a second function, which is also the
+     shape smp-app/tests/graph-diff.cjs's §216 section wants and the seed does
+     not have. */
+  const plain = () => JSON.parse(JSON.stringify(SEED));
+  const doctored = function () {
+    const s = plain();
+    const caps = s.group.capabilities || (s.group.capabilities = []);
+    const first = caps[0];
+    if (first) {
+      first.format = "pillars";
+      first.items = [{ id: "cp1", name: "A pillar on a capability", kind: "Capability",
+                       measures: [{ id: "cm1", name: "A measure", dir: "≥", target: "100",
+                                    compile: "Latest", actual: "80", weight: 50 }],
+                       tactics: [] }];
+      first.keyObjectives = [{ id: "ck1", name: "A capability objective", dir: "≥",
+                               target: "100", compile: "Latest", actual: "60" }];
+    }
+    /* On a DIFFERENT function from the first, so "capabilities across several
+       functions" is true of this state. */
+    const otherFn = (s.functionKeys || []).filter((k) => !first || k !== first.fn)[0];
+    caps.push({ id: "cap7", name: "A second capability", fn: otherFn,
+                head: null, custodian: null, format: "projects",
+                keyObjectives: [], projects: [{ id: "p7", name: "Its project",
+                                                outcomes: [], milestones: [] }] });
+    /* AND A UNIT THAT PLANS IN PROJECTS (§405). Every unit in the worked
+       example plans in pillars, so `unitOwnHolder` answers null for all of
+       them and the whole `u:<key>` holder namespace is dead in the grid —
+       measured: with `holderById`'s `u:` branch deliberately deleted, the grid
+       read UNMOVED. */
+    const u2 = (s.unitKeys || [])[1];
+    if (u2 && s.units[u2]) {
+      s.units[u2].format = "projects";
+      s.units[u2].projects = [{ id: "up1", name: "A unit's own project",
+                                outcomes: [], milestones: [] }];
+      s.units[u2].keyObjectives = s.units[u2].keyObjectives || [];
+    }
+    return s;
+  };
+  const STATES = [["the worked example", plain], ["a capability in pillars, and a second one", doctored]];
+
+  let builds = null;
+  try {
+    builds = STATES.map(function (st) {
+      return { name: st[0], now: clientAt(readNow, st[1]), was: clientAt(readWas, st[1]) };
+    });
+  } catch (e) { ok(false, "both client builds load over both states", e.message); }
+
+  if (builds) {
+    /* Each entry is a converted function, called with a target alone. The ones
+       that take a second argument, or a holder rather than a target
+       (`holderCodeOwner`, `projCode`, `fnWriteBack`, `capWriteBack`), are
+       exercised by qa.py and the gap suite instead — named here so the list is
+       honest about what it does not reach. */
+    const CALLS = [
+      "roleWhereLabel(T)", "roleWhereLabel2(T)", "placeLabel(T)",
+      "roleHolderAt('owner', T)", "roleHolderAt('fnhead', T)",
+      "roleHolderAt('custodian', T)", "roleHolderAt('capowner', T)",
+      "foundKeyFor(T)", "koHolderById(T)", "holderById(T)", "holderByIdWritable(T)",
+      "unitLike(T) && (unitLike(T).ukey || unitLike(T).name || true)",
+      "unitLikeWritable(T) && (unitLikeWritable(T).ukey || unitLikeWritable(T).name || true)",
+      "holderTarget(T)", "canSpeakFor(T)", "reportPending(T)", "areaOfTarget(T)",
+      "fnKeyOfTarget(T)", "plansInPillars(T)", "plansInObjectives(T)",
+      "isCapTarget(T)", "capKeyOf(T)", "capOfTarget(T) && capOfTarget(T).id",
+      "subjKey(T)", "subjUnit(T) && (subjUnit(T).ukey || subjUnit(T).name || true)",
+      "isUnitHolderId(T)", "fnKoCounted(T)", "fnKoHolder(T)", "swotWritable(T)",
+      "competeHolder(T) && (competeHolder(T).ukey || competeHolder(T).org || true)",
+      "competeOf(T)", "foundationRecord(T) && (foundationRecord(T).ukey || foundationRecord(T).org || true)",
+      "foundationName(T)", "peopleFor(T) && peopleFor(T).here.length",
+      "attachPersonAt({}, T)", "gapMap(T) && Object.keys(gapMap(T)).length",
+      "focusBands(T) && focusBands(T).length", "myLinesHome()",
+      "roleAtWord('owner')", "roleAtWord('custodian')", "roleAtWord('cceo')", "roleAtWord('fnhead')"
+    ];
+    const ask = function (run, call, a) {
+      const pre = "var T = " + JSON.stringify(a) + "; ";
+      try { return String(run("JSON.stringify((function(){" + pre + "return " + call + ";})())")); }
+      catch (e) { return "threw: " + e.message; }
+    };
+    CALLS.forEach(function (call) {
+      const moves = [];
+      builds.forEach(function (b) {
+        ADDRESSES.forEach(function (a) {
+          const was = ask(b.was, call, a), now = ask(b.now, call, a);
+          if (was !== now) moves.push([b.name, a, was, now]);
+        });
+      });
+      ok(moves.length === 0, call + " · unmoved", moves.slice(0, 6));
+    });
+    /* BOTH ENDS AGAIN (§94.2): an agreement where every call threw in both
+       builds is no agreement at all, so the run has to have produced real
+       answers. Counted over the whole grid rather than asserted per call,
+       because several of these legitimately answer null for most addresses. */
+    let real = 0;
+    builds.forEach(function (b) {
+      CALLS.forEach(function (call) {
+        ADDRESSES.forEach(function (a) {
+          const v = ask(b.now, call, a);
+          if (v !== "undefined" && v !== "null" && v !== "false" && v !== '""' &&
+              v.indexOf("threw: ") !== 0) real++;
+        });
+      });
+    });
+    ok(real > 400, "the grid produced " + real + " answers that are not null, false or empty", real);
+    /* And the made state has to have actually entered the path it was made for,
+       or the second run is the first run again (§113.8). */
+    const capUnit = ask(builds[1].now, "unitLike(T) && unitLike(T).ukey", "cap:cap6");
+    ok(capUnit === '"cap:cap6"',
+       "in the made state a capability planned in pillars IS read as a unit", capUnit);
+    const capSecond = ask(builds[1].now, "capOfTarget(T) && capOfTarget(T).id", "cap:cap7");
+    ok(capSecond === '"cap7"', "and the second capability, on a second function, is reachable", capSecond);
+    const ownHolder = ask(builds[1].now, "holderById(T) && holderById(T).id", "u:retailstores");
+    ok(ownHolder === '"u:retailstores"',
+       "and a unit that plans in projects HAS an own holder to answer with", ownHolder);
+  }
 }
 
 console.log("");

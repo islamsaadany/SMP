@@ -1025,14 +1025,38 @@ function assignPicker(where, roleKey, current, editable){
        the row a later upload cannot match — so the upload adds the person a
        second time, and the role sits on the copy nobody can email.
 
-       Two fields, and neither is required (the SMO may know only a name), but
-       they are IN FRONT OF the person adding somebody rather than a correction
-       to make later on a page they have no reason to open. */
+       §87.3 PUT BOTH FIELDS IN FRONT OF THE PERSON AND REQUIRED NEITHER — the
+       SMO may know only a name — and §531 REVERSES THE EMAIL HALF of that, at
+       Islam's direction and from a mockup of this popover. The reason is the
+       one §506 gave the register's own Add form: the address is what somebody
+       signs in with (§69) and is written to, so a row with none is a person
+       who cannot open the platform or be told anything — and this control,
+       which mints people WITHOUT that form, was the last door that could
+       still make one. Emp ID stays optional: nothing is unreachable without
+       an employee number.
+
+       THE RULE IS §506's, READ RATHER THAN COPIED. `PERSON_NEEDED` carries
+       the star's promise and the refusal's words in one place, and the press
+       in shell.html reads the same entry — so the star here cannot promise a
+       rule the button does not keep (§53.5).
+
+       THE STAR IS INSIDE THE BOX because these fields have no labels to hang
+       it on: the picker is a popover and they are placeholders, where §506
+       had `.pdfl` to put it beside. */
     '<div class="picknew" hidden>' +
       '<input class="fld" id="pickNewId" placeholder="Emp ID" autocomplete="off">' +
-      '<input class="fld" id="pickNewEmail" placeholder="Email" type="email" ' +
-        'autocomplete="off" spellcheck="false">' +
+      '<span class="pickreq">' +
+        '<input class="fld" id="pickNewEmail" placeholder="Email" type="email" ' +
+          'autocomplete="off" spellcheck="false" aria-label="Email, needed">' +
+        '<span class="reqmark" aria-hidden="true">*</span>' +
+      '</span>' +
     '</div>' +
+    /* The refusal goes UNDER the box it is about rather than above the
+       popover (§190), and it is §506's own `.reqsay` rather than a second
+       shape for the same sentence. Empty until somebody presses Add: a form
+       that rings before anybody has tried is scolding them for not having
+       finished yet (§506). */
+    '<div class="reqsay" hidden></div>' +
     '<div class="pickerr" hidden></div>' +
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +

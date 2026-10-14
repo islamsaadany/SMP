@@ -65077,6 +65077,40 @@ A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, 
 ## §530 — RACI fill and suggest
 Signed off from `design-mockups/raci-autofill/2026-10-13_fill-and-suggest.html` ("build"). Two pure planners in `ffp/lib/domain/raci-table.ts` (`planOwnerFill`, `planSuggestions`) so the rules are testable with no browser; the page only draws and saves their output. Owner fill: R for the step's assigned role, empty cells only, skipped and stepless rows excluded. Suggest: the manager's role (most frequent among managers of holders of the owner role, excluding the owner role, ties to the lower id) as A, only where the row has no A, the target cell is empty and the column is visible; unsaved until accepted. Source is Org Directory `managerId`/`PersonRole`; no manager data means no suggestions. A suggestion's main click accepts rather than cycles, so a stray click cannot silently store a code. Cycling an owner-filled cell clears its dot. Recorded, not done: a browser run of the page, and an automated check of the §524 propose/confirm/delete flow.
 
+## §531 — The role picker asks for an address before it mints anybody
+Signed off from `design-mockups/role-picker-email/2026-10-12_email-needed.html` ("build as drawn"). **This reverses the email half of §87.3**, which put both identifier fields in the picker and required neither on the ground that the SMO may know only a name. §506 had since marked the register's own Add form with a star and refused the press without an address — so the picker, which mints a person *without* that form, was the one remaining door that could still make a row nobody can sign in as (§69) or write to. Emp ID stays optional: nothing is unreachable without an employee number.
+
+**The rule is `PERSON_NEEDED`'s, read rather than copied** (§53.5). `assignPicker()` draws the star, `wirePicker()`'s `[data-pick-new]` press reads the same entry for the refusal's sentence, and `checks/role-picker-email.py` asserts the drawn sentence *equals* that entry rather than carrying a third copy of the words — so a reword moves all three together and a picker that stopped reading it parts from the check.
+
+**The star is inside the box.** §506 hangs it on `.pdfl`; the picker's two fields are placeholders in a popover with no label to hang anything beside, so `.pickreq` positions a `.reqmark` at the right of the Email box, `pointer-events:none` with `padding-right:20px` on the input beneath it — §93.4's "present, correctly sized and unreachable" is a fault this project has shipped three times, and the check presses `elementFromPoint` at the star's own centre.
+
+**The refusal draws onto the open popover and never repaints.** A repaint closes the picker (which is why §87.3 kept the duplicate refusal in the popover too), so the name, the typed Emp ID and the open control all survive the press; the box takes `.reqmiss` (§506's ring in the alarm colour at a 2px offset, not 4 — these boxes sit 6px apart and a 4px ring reads as one outline around both), the sentence goes under them in §506's own `.reqsay` (the selector was widened rather than a second block written), and `focusNoScroll` puts the cursor in the box (§110.7). `pickReqClear()` takes it down on typing in the box and on retyping the NAME — a different name is a different person, the same reason `.pickerr` clears there.
+
+**What did NOT change, and is asserted both ways** (§54.5): choosing somebody already on the register is untouched, address or not — the rule is about creating a person, not about picking one, which is the line §506 drew at the register's form and the cost the mockup was signed off on. The people upload is untouched. One picker serves all five places (`assignPicker` has one definition), so the change reaches a BU's head and custodian, a supporting function's head and custodian, a function's Led by, the capabilities table and the group's capability seats without any of them knowing about it.
+
+**Checked**: `checks/role-picker-email.py` 28/0 against the built file, and PROVED ABLE TO FAIL — pointed at the pre-change build (`SMP_BUILT=…`) sections 1–5 and 7 go red while section 6, the half that must not change, stays green on both, and it reports rather than dying on the control that is no longer there (§215). Built file byte-identical to `build.py`'s output (`checks/built-in-step.py`), `smp-app/public/shell.js` and `platform.css` regenerated. The two states were photographed from the running platform at 1440px in both themes and set beside the mockup's shots.
+
+### §531.1 — the merge, the sweep, and the one witness that could not be read
+Merged to `main` on Islam's word ("merge it to main"), fast-forward from `claude/gracious-goodall-9jtib3` after `origin/main` was fetched and found unmoved since §530.
+
+**The whole-platform sweep read 33 viewers, 234 destinations, errors none** — the same figure as the round before (§520.11), which is what it should be when no page is added and the only change is inside one popover. `qa.py` also re-ran the register's own ground: the people file's 33 rows at a fixed point, the identity ladder stopping an add on the identifier, and the merge moving a role — the three things §531 sits closest to.
+
+**`SHELL` bumped `smp-shell-v6.32-report-keys` → `smp-shell-v6.33-picker-email`** (§91: the trigger is the built file's bytes, and they changed). Confirmed free against `git show origin/main:sw.js` immediately before the push (§94.16), not only at the start of the merge. `node --check sw.js` passes (§146.2). The served worker's **release stamp moved `c0796429a11656a6` → `53546a64791be0f1`** (§397), which is what fires §258's reload banner for a tab left open.
+
+**THIS IS NOT A SAVE-RULES MERGE** (spec 029): it changes a popover's refusal and nothing about how a save is judged, what a save touches, the authoriser or the change-list diff. No forced sign-out, no `DELETE FROM sessions;` — an old tab can stay where it is.
+
+**§91.5's LIVE READ WAS MADE, AND THE DEPLOYMENT IS VERIFIED.** Production built **40 seconds** after the push and serves this commit:
+
+| witness | before | after |
+|---|---|---|
+| `/sw.js` release stamp (§397) | `c0796429a11656a6` | **`53546a64791be0f1`** |
+| `/shell.js` | — | **4,696,241 bytes, byte-identical to the local copy, and it contains `pickReqClear` and `.pickreq`** |
+
+Each is asserted to have MOVED or to CARRY THE NEW CODE, never merely to match (§113.8) — a byte count alone would hold whether or not the build landed, so the live file is grepped for the thing §531 added.
+
+**THIS ENTRY FIRST SAID THE LIVE READ COULD NOT BE MADE, AND THAT WAS WRITTEN WITHOUT TRYING IT** (corrected the same hour). §530, §377.6 and §378.2 each record this container's proxy refusing the production address, and the sentence was carried over from them as though a limitation recorded three times had stopped being a thing to test. It is §379.5's own lesson — **a limitation is TRIED, not quoted** — failed in the one place the rules name it, a merge note. The read answered `http=200` on the first attempt. **The standing claim that this container cannot reach production is therefore retired**: it may be true on a given day, and the next merge establishes that by running the curl, not by citing this one.
+
+**THE BRANCH IS STILL DELIBERATELY NOT FAST-FORWARDED** (§91, §107.15, §108.17) — but the reason has now been discharged rather than left standing: the danger is a second ref carrying `main`'s SHA before Vercel has built it, and production has built it. A fast-forward of `claude/gracious-goodall-9jtib3` is safe from here and is one command; it is left undone only because nothing needs it.
 ## §532 — The Internal Tracker's weekly check: three weeks inside each topic
 Islam, describing the meeting rather than the screen: *"when we come on our weekly check we mainly have topics with actions for every week and we make this week actions done or still in progress or keep it didn't start as is and we create a new action for next week — how do you think we can show this?"*
 

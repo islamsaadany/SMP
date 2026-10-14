@@ -8991,6 +8991,17 @@
       });
   }
 
+  /* Takes the needed-email refusal off the picker (§531). One function
+     rather than the same four lines in three handlers, and it is safe to
+     call when the picker is shut: every lookup is a query that may answer
+     nothing. */
+  function pickReqClear(){
+    var mlf = document.getElementById("pickNewEmail");
+    if (mlf) mlf.classList.remove("reqmiss");
+    var say = document.querySelector(".picker .reqsay");
+    if (say) { say.hidden = true; say.textContent = ""; }
+  }
+
   /* SCOPED, FOR THE DIALOG (§272). The owner and custodian pickers are drawn
      inside the row dialog now, and its body is replaced after `wire()` has run
      — so the same argument `wireSetupFields` carries applies here, and for the
@@ -9030,6 +9041,25 @@
         if (!name) return;
         var idf = document.getElementById("pickNewId");
         var mlf = document.getElementById("pickNewEmail");
+        /* ── THE ADDRESS IS NEEDED BEFORE ANYBODY IS MINTED (§531) ────────
+           §506's rule and §506's sentence, read off `PERSON_NEEDED` rather
+           than written out again, so the star the picker draws and the press
+           that refuses can never promise different things (§53.5).
+
+           NOBODY IS ADDED AND NOTHING IS REPAINTED: the refusal is drawn onto
+           the boxes that are already on screen, which is what keeps the typed
+           name, the typed Emp ID and the open popover exactly where they were
+           (a repaint here would close the picker, which is §87.3's reason for
+           keeping its own refusal in the popover too). The cursor goes into
+           the box, without scrolling to get there (§110.7). */
+        var needMail = PERSON_NEEDED.filter(function(n){ return n.field === "email"; })[0];
+        if (needMail && mlf && !String(mlf.value || "").trim()) {
+          mlf.classList.add("reqmiss");
+          var say = document.querySelector(".picker .reqsay");
+          if (say) { say.hidden = false; say.textContent = needMail.say; }
+          focusNoScroll(mlf);
+          return;
+        }
         var o = { name:name, empId:(idf ? idf.value : "").trim(),
                   email:(mlf ? mlf.value : "").trim() };
         /* REFUSED, IN THE PICKER, NAMING WHO (§87.3). An employee number or an
@@ -9081,6 +9111,15 @@
         PICKING = null; PICKQ = ""; paint();
       });
     });
+
+    /* ── A REFUSAL IS ANSWERED, NOT ARGUED WITH (§531) ─────────────────
+       The ring and the sentence answer a PRESS; leaving them up while
+       somebody types the address they were asked for is the form arguing
+       with them. Bound here rather than inline, with the rest of the
+       picker's wiring, because the popover is redrawn by `paint()` and an
+       inline handler would need the CSP hash of a block that moves. */
+    var mlf = document.getElementById("pickNewEmail");
+    if (mlf) mlf.addEventListener("input", function(){ pickReqClear(); });
 
     var q = document.getElementById("pickQ");
     if (!q) return;
@@ -9138,6 +9177,9 @@
       if (mk) mk.hidden = !needle;
       var er = document.querySelector(".pickerr");
       if (er) { er.hidden = true; er.textContent = ""; }
+      /* Retyping the NAME is a different person being added, so the email's
+         refusal goes with it (§531) — the same reason `.pickerr` clears. */
+      pickReqClear();
       var hint = document.querySelector(".pickhint");
       if (hint) hint.hidden = !!needle;
     });

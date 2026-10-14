@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-14 — Internal Tracker: the weekly check, and every topic reachable (§532, §533).** A fifth view, **Weekly check**, built for the Monday meeting: always read by topic, three weeks deep. Inside each topic, last week, this week and next week each get their own card — this week's lit in gold, next week's an outline — and next week's card holds a write line already set to next week, so the next action is written where you are instead of at the top of the page. A line that did not get done is **carried to next week in one press**, as the same action: its notes and history ride with it and the late mark goes on climbing, so nothing can hide behind a fresh date. A topic with nothing this week is still on the list and says so, rather than being skipped in silence. Separately, **Topics** behind the ⋯ lists every topic on the client — including ones with no actions and closed ones, which could not be reached from the page at all — and a name is renamed by typing over it. Nothing new is stored: no table, no column, no migration. Checked: 96 tracker checks green before the database sections, 31 of them new, each rule broken on purpose four ways to prove the checks catch it; the page rendered and the script driven in Chromium (31 assertions), which caught two faults reading the code had not. **The database sections of the tracker check were NOT run — this container has no Postgres**, so that is said rather than claimed.
+
 **2026-10-12 — Entering figures from the keyboard (§528).** The second item on your usability list, and you asked for all four. On a Reporting page: **Enter** moves to the next figure and **Shift+Enter** back, so a long report is typed straight down the page without reaching for the mouse — at the last box Enter stays where it is rather than dropping the cursor onto the page, which it did before this. **Alt+Enter** is the *Next →* button from the keyboard, the one that skips every box already answered. **Escape** puts a box back to what it was before you started typing, the same as it does on the People register, and leaves the cursor in it. And the **note box is out of the tab path** unless that row is at risk — it was nine of eighteen stops on a nine-row pillar, so half the presses were landing on a box nobody is asked to fill — with **Alt+N** as the way to it when you do want it. Enter inside a note is still a new line, deliberately: a note is prose explaining a figure, and it is the one thing a reporter is required to write. **Nothing on the screen changes** — every key is on a hover and announced to a screen reader, the way the eye and the monthly mark already are — so there was nothing to draw and sign off. Nothing stored moves, nothing is migrated, and nobody is signed out. Checked: a new check for the keys passes and was shown to fail thirteen ways from the sources; the five neighbouring reporting checks pass; the whole-platform walk is clean for all 33 people with no errors; and the shipped file and the served copies are in step. One older check about Enter in a plan title had been looking at the wrong page since an earlier version and is repaired here. One check reports the register's *Add someone* dialog jumping; that is the same on `main` and is noted rather than changed, being a screen this work does not touch. **Next, in your order:** the browser's own pop-up boxes moved inside the platform (26 confirms, 11 alerts and one prompt); then what a failed save tells the client; then the dates, which are spelt six different ways. **Merged to `main` on your word.** Production has not been read from here — this container cannot reach the live site — so the deployment is unverified until somebody opens it.
 
 **2026-10-11 — Processes: a step can wait on, or carry on in, a step in another process (§521).** Built on the branch, not merged. In a step's editor you can add a step from another process as a predecessor; the other process's map shows the same link as "continues in IT-05 · step 3". Each map draws it as a dashed amber box (left for incoming, right for outgoing) that opens the other map. Loops between processes are refused. "Ready" means documented, not blocked-until-done. One new table (migration `20261011120000_step_handoffs`). Check `check:handoff` 16/0, red 10 ways; typecheck clean.
@@ -47,8 +49,6 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **2026-10-07 — A failed save is kept on this computer (§504), merged to `main` 2026-10-07.** When the server or the connection fails, what the person typed is kept in their browser and saved by itself as soon as the server answers — even if they close the page. A calm amber bar says *"Your changes are safe on this computer"* with one button, *Send to the Strategy Office*; the old red *Not saved* bar and the *Copy error* button are gone. The office sees what was sent on a new Setup page, *Unsaved changes*, and can apply a line (it is saved as the person who sent it, so nothing they could not have done gets through), discard it, or pick between two people who sent the same line. A refusal still looks and works as before. Waiting on Islam: the word to merge.
 
 **2026-10-06 — A capability's Target box can be read, and a failed save says enough to trace (§502), merged to `main` 2026-10-06 on Islam's word.** On a company capability planned in pillars, the Target box in Key measures was a sliver, so typed numbers could not be seen; it is now a 110px box in a compact column, as signed off. Business units are unchanged. When a save fails, the red "Not saved" bar keeps its plain sentence and gains a link, "Copy error for the Strategy Office", which copies the time, the page, the server's reason and a reference like SMP-7F3K2Q. The same details go on the hover and into the browser console, and the server writes the full account into its log under that reference — so the next failure on El Abd can be found and fixed. The cause of that failure is not yet known.
-
-**2026-10-14 — Internal Tracker: the weekly check, and every topic reachable (§532, §533).** A fifth view, **Weekly check**, built for the Monday meeting: always read by topic, three weeks deep. Inside each topic, last week, this week and next week each get their own card — this week's lit in gold, next week's an outline — and next week's card holds a write line already set to next week, so the next action is written where you are instead of at the top of the page. A line that did not get done is **carried to next week in one press**, as the same action: its notes and history ride with it and the late mark goes on climbing, so nothing can hide behind a fresh date. A topic with nothing this week is still on the list and says so, rather than being skipped in silence. Separately, **Topics** behind the ⋯ lists every topic on the client — including ones with no actions and closed ones, which could not be reached from the page at all — and a name is renamed by typing over it. Nothing new is stored: no table, no column, no migration. Checked: 96 tracker checks green before the database sections, 31 of them new, each rule broken on purpose four ways to prove the checks catch it; the page rendered and the script driven in Chromium (31 assertions), which caught two faults reading the code had not. **The database sections of the tracker check were NOT run — this container has no Postgres**, so that is said rather than claimed.
 
 **2026-10-06 — The Copilot lives inside Strategy, its settings on the console (§501, spec 064), merged to `main` 2026-10-06 on Islam's word.** Turning the Copilot on now only shows its tab inside Strategy: the console card and the client's module menu no longer list it. Its settings — the AI instructions and the templates, which are the same for every client — moved to a new *Copilot* tab on the console, readable by every consultant and editable only by a Forefront super user. Old settings addresses send you there. Strategy's chats rail gains *All chats on this client ›*.
 
@@ -9611,3 +9611,60 @@ A risk or gap finding can now be added to the process as a step. "Add as a step"
 
 ## §530 — RACI: fill from step owners, and suggestions (2026-10-13)
 On the RACI page, people who can edit get two new buttons. **Fill from step owners** puts R for each step's assigned role on that step's rows — only into empty cells, never over anything already there, never on skipped rows; filled cells carry a small dot. **Suggest** shows dashed amber cells proposing the owner's manager's role as A, only on rows that have no A yet; nothing is saved until you Accept (✓), Edit (✎ cycles R/A/C/I) or Dismiss (✕). Suggestions come from the Org Directory's manager links — where nobody has a manager recorded, there are none to show. Viewers see neither button. Checked: pure planner check 13/0, each of six deliberate breaks turns it red (`npm run check:raci`, `check:raci:red`); cold typecheck clean. Not yet driven in a browser.
+
+## §531 — The role picker asks for an email before adding somebody new (2026-10-14)
+Built from the mockup you signed off (`design-mockups/role-picker-email/2026-10-12_email-needed.html`, "build as drawn").
+
+When you give somebody a role and they are not on the register yet, you type a
+name and press "+ Add". That used to add them with no email. Now the Email box
+in the picker carries the same red star the Add someone form has, and pressing
+Add with no email adds nobody: the box is ringed, the reason is written under
+it in the same words the Add someone form uses, the cursor goes into it, and
+everything you typed stays where it was. Typing an address clears the ring.
+Emp ID is still optional.
+
+The reason is the one behind the star on the Add someone form: people sign in
+with their email and are written to there, so a row with none is somebody who
+cannot open the platform or be told anything — and this picker was the last
+place that could still make one.
+
+**What it costs**: you can no longer give a role to somebody new by name alone.
+If you do not have their address yet, ask for it or add them later. This
+reverses the earlier rule that neither box in the picker was required.
+
+**Untouched**: picking somebody already on the register works exactly as before,
+even if their row has no email. The people upload is unchanged.
+
+It is one picker, so this reaches all five places it appears: a business unit's
+head and custodian, a supporting function's head and custodian, a function's
+Led by, the capabilities table, and the group's capability seats.
+
+Checked: a new check drives the real control in the real page — 28 assertions,
+none failing — and it was proved able to fail by running it against the build
+from before the change, where it goes red in six of its seven sections and
+stays green in the one that is about what must not change. The picker's three
+existing checks still pass. Both states photographed from the running platform
+in the light and the dark theme and set beside the mockup.
+
+What to check: Setup › Business units › ⋮ › Edit details, press BU head or
+Strategy custodian, type a name nobody has, press + Add with the Email box
+empty.
+
+Not yet merged to main.
+
+Merged to main 2026-10-14 on your word. The whole-platform sweep read 33
+viewers, 234 destinations, errors none — the same figure as the round before,
+as it should be when no page is added. The offline copy's name was bumped so
+returning browsers fetch the new platform rather than their own disk, and the
+reload banner will fire for a tab left open. Nothing about saving changed, so
+nobody is signed out.
+
+Seen live: production built 40 seconds after the push and is serving it. The
+file the platform runs from is the same size as the one built here, down to
+the byte, and the new code is in it.
+
+A correction to what I wrote an hour ago: I first recorded that this container
+could not reach the live site, because it could not at the last two merges. I
+wrote that without trying it. It worked on the first attempt, so that claim is
+withdrawn — it was not true today, and I should have found that out by running
+the check rather than by remembering.

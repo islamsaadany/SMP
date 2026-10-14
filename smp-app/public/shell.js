@@ -36974,14 +36974,38 @@ function assignPicker(where, roleKey, current, editable){
        the row a later upload cannot match — so the upload adds the person a
        second time, and the role sits on the copy nobody can email.
 
-       Two fields, and neither is required (the SMO may know only a name), but
-       they are IN FRONT OF the person adding somebody rather than a correction
-       to make later on a page they have no reason to open. */
+       §87.3 PUT BOTH FIELDS IN FRONT OF THE PERSON AND REQUIRED NEITHER — the
+       SMO may know only a name — and §531 REVERSES THE EMAIL HALF of that, at
+       Islam's direction and from a mockup of this popover. The reason is the
+       one §506 gave the register's own Add form: the address is what somebody
+       signs in with (§69) and is written to, so a row with none is a person
+       who cannot open the platform or be told anything — and this control,
+       which mints people WITHOUT that form, was the last door that could
+       still make one. Emp ID stays optional: nothing is unreachable without
+       an employee number.
+
+       THE RULE IS §506's, READ RATHER THAN COPIED. `PERSON_NEEDED` carries
+       the star's promise and the refusal's words in one place, and the press
+       in shell.html reads the same entry — so the star here cannot promise a
+       rule the button does not keep (§53.5).
+
+       THE STAR IS INSIDE THE BOX because these fields have no labels to hang
+       it on: the picker is a popover and they are placeholders, where §506
+       had `.pdfl` to put it beside. */
     '<div class="picknew" hidden>' +
       '<input class="fld" id="pickNewId" placeholder="Emp ID" autocomplete="off">' +
-      '<input class="fld" id="pickNewEmail" placeholder="Email" type="email" ' +
-        'autocomplete="off" spellcheck="false">' +
+      '<span class="pickreq">' +
+        '<input class="fld" id="pickNewEmail" placeholder="Email" type="email" ' +
+          'autocomplete="off" spellcheck="false" aria-label="Email, needed">' +
+        '<span class="reqmark" aria-hidden="true">*</span>' +
+      '</span>' +
     '</div>' +
+    /* The refusal goes UNDER the box it is about rather than above the
+       popover (§190), and it is §506's own `.reqsay` rather than a second
+       shape for the same sentence. Empty until somebody presses Add: a form
+       that rings before anybody has tried is scolding them for not having
+       finished yet (§506). */
+    '<div class="reqsay" hidden></div>' +
     '<div class="pickerr" hidden></div>' +
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
@@ -74909,6 +74933,17 @@ var SYNC = (function () {
       });
   }
 
+  /* Takes the needed-email refusal off the picker (§531). One function
+     rather than the same four lines in three handlers, and it is safe to
+     call when the picker is shut: every lookup is a query that may answer
+     nothing. */
+  function pickReqClear(){
+    var mlf = document.getElementById("pickNewEmail");
+    if (mlf) mlf.classList.remove("reqmiss");
+    var say = document.querySelector(".picker .reqsay");
+    if (say) { say.hidden = true; say.textContent = ""; }
+  }
+
   /* SCOPED, FOR THE DIALOG (§272). The owner and custodian pickers are drawn
      inside the row dialog now, and its body is replaced after `wire()` has run
      — so the same argument `wireSetupFields` carries applies here, and for the
@@ -74948,6 +74983,25 @@ var SYNC = (function () {
         if (!name) return;
         var idf = document.getElementById("pickNewId");
         var mlf = document.getElementById("pickNewEmail");
+        /* ── THE ADDRESS IS NEEDED BEFORE ANYBODY IS MINTED (§531) ────────
+           §506's rule and §506's sentence, read off `PERSON_NEEDED` rather
+           than written out again, so the star the picker draws and the press
+           that refuses can never promise different things (§53.5).
+
+           NOBODY IS ADDED AND NOTHING IS REPAINTED: the refusal is drawn onto
+           the boxes that are already on screen, which is what keeps the typed
+           name, the typed Emp ID and the open popover exactly where they were
+           (a repaint here would close the picker, which is §87.3's reason for
+           keeping its own refusal in the popover too). The cursor goes into
+           the box, without scrolling to get there (§110.7). */
+        var needMail = PERSON_NEEDED.filter(function(n){ return n.field === "email"; })[0];
+        if (needMail && mlf && !String(mlf.value || "").trim()) {
+          mlf.classList.add("reqmiss");
+          var say = document.querySelector(".picker .reqsay");
+          if (say) { say.hidden = false; say.textContent = needMail.say; }
+          focusNoScroll(mlf);
+          return;
+        }
         var o = { name:name, empId:(idf ? idf.value : "").trim(),
                   email:(mlf ? mlf.value : "").trim() };
         /* REFUSED, IN THE PICKER, NAMING WHO (§87.3). An employee number or an
@@ -74999,6 +75053,15 @@ var SYNC = (function () {
         PICKING = null; PICKQ = ""; paint();
       });
     });
+
+    /* ── A REFUSAL IS ANSWERED, NOT ARGUED WITH (§531) ─────────────────
+       The ring and the sentence answer a PRESS; leaving them up while
+       somebody types the address they were asked for is the form arguing
+       with them. Bound here rather than inline, with the rest of the
+       picker's wiring, because the popover is redrawn by `paint()` and an
+       inline handler would need the CSP hash of a block that moves. */
+    var mlf = document.getElementById("pickNewEmail");
+    if (mlf) mlf.addEventListener("input", function(){ pickReqClear(); });
 
     var q = document.getElementById("pickQ");
     if (!q) return;
@@ -75056,6 +75119,9 @@ var SYNC = (function () {
       if (mk) mk.hidden = !needle;
       var er = document.querySelector(".pickerr");
       if (er) { er.hidden = true; er.textContent = ""; }
+      /* Retyping the NAME is a different person being added, so the email's
+         refusal goes with it (§531) — the same reason `.pickerr` clears. */
+      pickReqClear();
       var hint = document.querySelector(".pickhint");
       if (hint) hint.hidden = !!needle;
     });

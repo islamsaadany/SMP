@@ -45,6 +45,7 @@
      · the deck's heading dropping the second kind        →  1 of 38 red
      · the empty capabilities section kept on Performance →  2 of 38 red
      · Reporting drawing no second section                →  2 of 38 red
+     · the deck naming both kinds on a JOINED box          →  2 of 42 red
 
    Usage:
      node scripts/test-capability-fold.js
@@ -194,6 +195,48 @@ console.log("1 · §539's code, over a client that has not moved, changes nothin
   ok(size > 3000, "and those pages really drew something — " + size + " words of it", size);
   ok(WORDS(now(CAPTAB[0])).indexOf(CAPS[0]) >= 0,
      "the capabilities tab names the first capability, so the state really has them");
+}
+
+/* ── 1b · AND IT MOVES NOTHING FOR A JOINED BOX HOLDING BOTH KINDS ──────
+   THE GAP THIS SECTION WAS WRITTEN FROM. Section 1 measures the COMPANY, and
+   the company's capabilities are records, so nothing above asks what §539's
+   code does to a box whose ONE JOINED LIST already holds pillars marked
+   Capability — which is six of the worked example's ten units, today, on
+   every client built like Raya. The first draft of the deck's roll-call
+   asked the MARK instead of the SETTING and put "Pillars & Capabilities"
+   over all six of their decks, and a "Capability" line under rows that had
+   none. Every assertion in this file passed. `checks/deck-figures.py` caught
+   it; this is the same question asked here, where it belongs. */
+console.log("1b · a joined box holding both kinds is untouched, on every surface");
+{
+  const was = clientAt(readWas, elAbd()), now = clientAt(readNow, elAbd());
+  const mixed = now(`UNIT_KEYS.filter(function(k){ var it = UNITS[k].items || [];
+    return it.some(function(p){ return SMPRules.pillarIsCap(p); }) &&
+           it.some(function(p){ return !SMPRules.pillarIsCap(p); }); })`);
+  ok(mixed.length >= 2, "the state holds " + mixed.length + " joined units carrying both kinds", mixed);
+  const per = `(function(k){ var u = UNITS[k]; return WORDSX([
+      renderUnitPlan(u), renderReport(u), deckHtmlFor(k)
+    ].join(" \u2016 ")); })`;
+  const helper = `var WORDSX = function(h){ return String(h).replace(/<[^>]*>/g," ")
+    .replace(/&middot;/g,"\u00b7").replace(/&mdash;/g,"\u2014").replace(/&amp;/g,"&")
+    .replace(/&nbsp;/g," ").replace(/\s+/g," ").trim(); };`;
+  was(helper); now(helper);
+  const moves = [];
+  mixed.forEach(function (k) {
+    let a, b;
+    try { b = was(per + "(" + JSON.stringify(k) + ")"); } catch (e) { b = "threw: " + e.message; }
+    try { a = now(per + "(" + JSON.stringify(k) + ")"); } catch (e) { a = "threw: " + e.message; }
+    if (a !== b) { let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+      moves.push([k, b.slice(Math.max(0, i - 40), i + 80), a.slice(Math.max(0, i - 40), i + 80)]); }
+  });
+  ok(moves.length === 0,
+     "their plan, their reporting and their deck are word for word what they were", moves.slice(0, 2));
+  /* BOTH ENDS (§94.2): three pages apiece, really drawn. */
+  const size = mixed.reduce(function (n, k) { return n + now(per + "(" + JSON.stringify(k) + ")").length; }, 0);
+  ok(size > 10000, "and those " + (mixed.length * 3) + " pages really drew something — " + size + " words", size);
+  /* The specific thing that went wrong, named, so a future reader sees it. */
+  ok(now(`deckHtmlFor(${JSON.stringify(mixed[0])})`).indexOf("&amp; " + now(`L("capability","bu")`)) < 0,
+     "no joined unit's deck heading names a second kind, however its rows are marked");
 }
 
 /* ── 2 · THE MOVE REFUSES WHAT IT CANNOT CARRY ──────────────────────────── */

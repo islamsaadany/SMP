@@ -47813,11 +47813,18 @@ function deckSlides(u){
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
   var pNames = u.items.map(function(p, i){
-    /* §539: an INTERNAL pillar says what it is where it has nothing else to
-       say, exactly as a capability's own card does below — so a client whose
-       capabilities have become pillars reads the same roll-call it read when
-       they were records. Its own sub-line still wins where it has one. */
-    var sub = p.sub || (SMPRules.pillarIsCap(p) ? L1("capability") : "");
+    /* §539: on a box SHOWN APART, an internal pillar says what it is where
+       it has nothing else to say — exactly as a capability's own card does
+       below, so a client whose capabilities have become pillars reads the
+       roll-call it read when they were records. Its own sub-line still wins.
+
+       THE SETTING DECIDES, NEVER THE MARK ALONE, and that is not a detail:
+       six of the worked example's ten units carry a pillar marked Capability
+       in one joined list, and the first draft of this line put the word
+       "Capability" under every one of them on their decks. checks/
+       deck-figures.py caught it on the heading below; the same mistake was
+       here, one line up, and the same guard closes both. */
+    var sub = p.sub || (boxSplit(u) && SMPRules.pillarIsCap(p) ? L1("capability") : "");
     return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
       (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
@@ -47847,9 +47854,11 @@ function deckSlides(u){
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
     /* §539: the heading names both kinds whether the capabilities are
-       records beside the list or pillars inside it. */
+       records beside the list or pillars inside a list SHOWN APART — never
+       because a joined list happens to hold a marked row (see the sub-line
+       above, and checks/deck-figures.py, which went red on exactly that). */
     '><h2>' + L("pillar","bu") +
-      (capCards || u.items.some(function(p){ return SMPRules.pillarIsCap(p); })
+      (capCards || (boxSplit(u) && u.items.some(function(p){ return SMPRules.pillarIsCap(p); }))
         ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
     '<div class="pcards" style="--n:' + nCards +
       ';--c:' + pillarCols(nCards) +

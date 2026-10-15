@@ -900,15 +900,21 @@ var SYNC = (function () {
       var missed = putBackRefused(changes);
       if (missed.length) {
         /* Said, never swallowed: a row the platform cannot find is a row it
-           cannot put back, and pretending otherwise re-posts the refusal. */
-        notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
-          "<span>" + plural(missed.length, "refused line") +
-          " could not be put back automatically \u2014 they are no longer on this " +
-          "page. Reload to take the stored version again.</span>" +
-          '<span><button type="button" class="refused-undo" id="refused-undo">' +
-          "Discard everything and reload</button></span>");
-        var u2 = document.getElementById("refused-undo");
-        if (u2) u2.addEventListener("click", function () { location.reload(); });
+           cannot put back, and pretending otherwise re-posts the refusal.
+           §533.5: WRITTEN AS A FUNCTION so the discard question can put this
+           band back — it replaces whatever row it is opened over, and the way
+           out has to restore the band it covered, not the one before it. */
+        var showMissed = function () {
+          notSaved("<span><strong>Not saved.</strong> " + esc(list[0]) + "</span>" +
+            "<span>" + plural(missed.length, "refused line") +
+            " could not be put back automatically \u2014 they are no longer on this " +
+            "page. Reload to take the stored version again.</span>" +
+            '<span id="refused-acts"><button type="button" class="refused-undo" ' +
+            'id="refused-undo">Discard everything and reload</button></span>');
+          var u2 = document.getElementById("refused-undo");
+          if (u2) u2.addEventListener("click", function () { askDiscard(showMissed); });
+        };
+        showMissed();
         return;
       }
       refusedWhy = null; refusedRows = null; refusedBody = null;
@@ -920,7 +926,11 @@ var SYNC = (function () {
       save();
     });
     var u = document.getElementById("refused-undo");
-    if (u) u.addEventListener("click", askDiscard);
+    if (u) u.addEventListener("click", function () {
+      askDiscard(function () {
+        showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
+      });
+    });
   }
 
   /* ── DISCARD ASKS IN THE BAND (§533.5) ──────────────────────────────────
@@ -940,7 +950,7 @@ var SYNC = (function () {
      NO paint() AND NO GLOBAL STATE: this runs when the server has refused a
      save, which is not a moment to make a repaint of the whole page part of
      the way out. The band rewrites its own row, the way it builds itself. */
-  function askDiscard() {
+  function askDiscard(back) {
     var row = document.getElementById("refused-acts") ||
               document.getElementById("refused");
     /* No band on screen means no button was pressed on one; do nothing rather
@@ -953,11 +963,17 @@ var SYNC = (function () {
       '<button type="button" class="refused-keep" id="discard-no">Keep editing</button> ' +
       '<button type="button" class="refused-undo" id="discard-yes">Discard and reload</button>';
     var no = document.getElementById("discard-no");
-    if (no) no.addEventListener("click", function () {
-      showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
-    });
+    if (no) no.addEventListener("click", function () { if (back) back(); });
     var yes = document.getElementById("discard-yes");
     if (yes) yes.addEventListener("click", function () {
+      /* ── AND BOTH DISCARDS NOW DO THE SAME THING (§533.5) ──────────────
+         The second one — offered when the refused lines could not be put back
+         — reloaded WITHOUT clearing the copy this tab keeps, so the reload
+         handed the unsaved work straight back. Under a button reading
+         "Discard everything and reload" that was already wrong; with both of
+         them now carrying the same question, which says in words that what
+         was typed will be lost, it would be a sentence the product does not
+         keep. One answer, one act. */
       keepClear();
       location.reload();
     });

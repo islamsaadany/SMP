@@ -28,6 +28,56 @@ function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
+/* ── REMOVING A LINE: the question under it (§534.4) ───────────────────────
+   Nine controls across six screens — a key objective, a theme, a capability's
+   objective, a clause of Who we are, a SWOT line, a value on How we compete,
+   and the revenue tree's route, period and driver — asked ONE sentence in the
+   browser's box. The box covers the list it is asking about and never says
+   which line of it is going, which is the whole of what §186 asks a
+   confirmation to do.
+
+   Islam picked B of two drawn (design-mockups/remove-a-line/): the line stays
+   where it is and readable, and the question opens under it. The cost is
+   known and accepted — the list grows by a strip as you press, so what is
+   below moves.
+
+   THREE FUNCTIONS, NOT NINE COPIES. The two words and the closing sentence
+   have to be identical in nine places, and nine copies is how they stop being
+   (§53.5). What differs per site is only the QUESTION, because three of the
+   nine take more than the line and have always said so.
+
+   THE STRIP'S Remove CARRIES THE SAME ATTRIBUTE THE × DOES, plus `rmnow`. So
+   the handler that was already bound to the × is bound to both, resolves the
+   row from its dataset exactly as before (§48.2), and the only thing that
+   tells the two presses apart is which one of them asks. Nothing new is wired
+   and no handler learns a second way in. */
+function rmAsking(attr, val){
+  return !!(typeof RMASK !== "undefined" && RMASK && RMASK.t === attr + ":" + val);
+}
+/* The closing sentence lives HERE and not in any caller, so it cannot come to
+   differ between the nine. */
+function rmStripInner(attr, val, say){
+  return '<div class="rmask"><span class="q">' + say +
+    ' This cannot be undone here.</span>' +
+    '<button class="rmkeep" data-rmkeep="1">Keep</button>' +
+    '<button class="rmgo" data-' + attr + '="' + esc(val) + '" data-rmnow="1">Remove</button></div>';
+}
+/* Under a field, in a list, a cell or a definition — anywhere that is not a
+   table row. */
+function rmStrip(attr, val, say){
+  return rmAsking(attr, val) ? rmStripInner(attr, val, say) : "";
+}
+/* And inside a table, where a block between two rows is not markup a browser
+   will keep: it becomes a row of its own, spanning the columns. */
+function rmStripRow(attr, val, say, cols){
+  return rmAsking(attr, val)
+    ? '<tr class="rmaskrow"><td colspan="' + cols + '">' +
+      rmStripInner(attr, val, say) + '</td></tr>'
+    : "";
+}
+/* The class that marks the line being asked about — the half the browser's box
+   could never do, since it said "this line" over a list of nine. */
+function rmMark(attr, val){ return rmAsking(attr, val) ? " rmasking" : ""; }
 function band(v){ return bandOf(v).key; }
 /* ── A BAND'S COLOUR AS *TYPE*, NOT AS A MARK (§154) ────────────────────
    §38.4's rule, applied where it had never been: "a colour that works as a
@@ -2828,14 +2878,16 @@ function templeTables(){
     '</div>';
 
   var koRows = GROUP.keyObjectives.map(function(m, i){
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
+    return '<tr class="' + rmMark("trm", "ko|" + i).replace(/^ /, "") + '">' +
+      '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + fieldOr("temple", m.name, "", function(v){ m.name = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.group || "", "", function(v){ m.group = v || null; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.dir, "mono", function(v){ m.dir = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.target3y || "", "mono", function(v){ m.target3y = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.target || "", "mono", function(v){ m.target = v; }) + '</td>' +
       '<td class="cc">' + inputOr("temple", m.compile, "", function(v){ m.compile = v; }) + '</td>' +
-      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>';
+      '<td class="cc">' + (editing ? '<button class="rmbtn" data-trm="ko|' + i + '">Remove</button>' : '') + '</td></tr>' +
+      rmStripRow("trm", "ko|" + i, RMASK ? RMASK.say : "", 8);
   }).join("");
 
   var themeRows = GROUP.themes.map(function(t, i){
@@ -2976,11 +3028,13 @@ function foundationBody(o, tgt, gpg){
   return '<div class="fgrid">' + (on("brief") ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       (o.clauses || []).map(function(c, ci){
-        return '<div class="clause"><dt>' +
+        var clt = tgt + "|" + ci;
+        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
           (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="' + esc(tgt) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          (gpg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
       (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(tgt) + '">+ Add a line</button></div>' : '') +
@@ -5341,6 +5395,7 @@ function koEdit(list, page, acKey, owner){
           ? eyeBtn(m, page, acKey) +
             ' <button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
         '</td></tr>' +
+        rmStripRow("korm", li + "|" + i, RMASK ? RMASK.say : "", 9) +
         (pg && !yn ? monthlyRowFor(m, "monthly", "target", 9, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
@@ -5560,11 +5615,13 @@ function renderUnitFoundation(u){
       ? '<div class="card"><h2 class="sec first">' + L("brief") + '</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
+        var clt = u.ukey + "|" + ci;
+        return '<div class="clause' + rmMark("clauserm", clt) + '"><dt>' +
           (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
           fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(u.ukey) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
+          (upg ? '<button class="xbtn" data-clauserm="' + esc(clt) +
+            '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+            rmStrip("clauserm", clt, RMASK ? RMASK.say : "") : '') +
           '</dd></div>';
       }).join("") + '</dl>' +
       (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
@@ -5716,9 +5773,11 @@ function renderUnitCompete(u){
   };
   var body =
     row("Value", function(v, i){
-      return '<td class="cmpval">' + (ed
+      var cmt = t + "|" + i;
+      return '<td class="cmpval' + rmMark("cmprm", cmt) + '">' + (ed
         ? inputOr(page, v.title || "", "", function(x){ var w = competeWritable(t); if (w && w.values[i]) w.values[i].title = String(x || "").trim(); }) +
-          '<button class="xbtn" data-cmprm="' + esc(t) + '|' + i + '" title="Remove this value" aria-label="Remove this value">&times;</button>'
+          '<button class="xbtn" data-cmprm="' + esc(cmt) + '" title="Remove this value" aria-label="Remove this value">&times;</button>' +
+          rmStrip("cmprm", cmt, RMASK ? RMASK.say : "")
         : esc(v.title || "")) + '</td>';
     }) +
     row("How", function(v, i){
@@ -5742,11 +5801,14 @@ function swotBoxes(u, quads, page, ac){
     var ed = authoring(page, ac);
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
-        return '<li><span class="swot-n">' + (i + 1) + '</span>' +
+        var swt = u.ukey + "|" + key + "|" + i;
+        return '<li class="' + rmMark("swrm", swt).replace(/^ /, "") + '">' +
+          '<span class="swot-n">' + (i + 1) + '</span>' +
           (ed
             ? fieldOr(page, x, "", function(v){ list[i] = v; }) +
-              '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
-              '" title="Remove this line" aria-label="Remove this line">&times;</button>'
+              '<button class="xbtn" data-swrm="' + esc(swt) +
+              '" title="Remove this line" aria-label="Remove this line">&times;</button>' +
+              rmStrip("swrm", swt, RMASK ? RMASK.say : "")
             : '<span>' + esc(x) + '</span>') + '</li>';
       }).join("") + '</ol>' +
       (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
@@ -5980,7 +6042,8 @@ function drvSubTable(u, seasons, ch, sub, si, ed){
         '<td>' + drvAnswerCell(u, d, ed) + '</td>' +
         (ed ? '<td class="xcell"><button class="xbtn" data-drvrm="' + esc(u.ukey) + '|' +
           esc(d.id) + '" title="Remove this driver" aria-label="Remove this driver">' +
-          '&times;</button></td>' : '') + '</tr>';
+          '&times;</button></td>' : '') + '</tr>' +
+        rmStripRow("drvrm", u.ukey + "|" + d.id, RMASK ? RMASK.say : "", ed ? 8 : 7);
     }).join("");
     return '<tr class="dxband"><th colspan="' + (ed ? 8 : 7) + '">' +
         esc(p.name || "Period") + '<em>' + drvBandLine(seasons, ch, sub, p, f) + '</em>' +
@@ -5988,7 +6051,8 @@ function drvSubTable(u, seasons, ch, sub, si, ed){
           '<button class="linkbu" data-drvadd="' + at + '">+ Add a driver</button>' +
           '<button class="linkbu" data-drvprm="' + at + '">Remove this period</button>' +
           '</span>' : '') +
-      '</th></tr>' + rows;
+      '</th></tr>' +
+      rmStripRow("drvprm", at, RMASK ? RMASK.say : "", ed ? 8 : 7) + rows;
   }).join("");
   return '<div class="scroll"><table class="drvtbl">' + head +
     '<tbody>' + body + '</tbody></table></div>';
@@ -6053,7 +6117,8 @@ function drvPaneActs(u, ch, sub, si, seasons, flat){
         function(v){ return v === SMPRules.driverMode(ch); }) + '</select>' +
     '<button class="editbtn" data-drvsnew="' + esc(u.ukey) + '">+ Add a route</button>' +
     (flat ? '' : '<button class="editbtn" data-drvsrm="' + esc(u.ukey) + '|' + si +
-      '">Remove this route</button>') +
+      '">Remove this route</button>' +
+      rmStrip("drvsrm", u.ukey + "|" + si, RMASK ? RMASK.say : "")) +
     (!free.length && !(seasons || []).length
       ? '<span class="why" style="margin:0">Seasons are set once for the client on ' +
         '<b>Setup \u2192 Seasons</b>.</span>' : '') + '</div>';
@@ -10493,6 +10558,7 @@ function capKoEdit(c, pgIn, acIn){
         '<td class="cc acts1">' + (ed ? eyeBtn(m, pg, ac) +
           ' <button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
           '">Remove</button>' : '') + '</td></tr>' +
+        rmStripRow("capkorm", c.id + "|" + i, RMASK ? RMASK.say : "", 8) +
         (ed && !isYesNoRow(m) ? monthlyRowFor(m, "monthly", "target", 8, m.name, pg) : "");
     }).join("") + '</tbody></table></div>' +
     (ed ? '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +

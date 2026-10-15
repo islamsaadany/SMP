@@ -5214,22 +5214,28 @@
         /* The question replaces the menu in the same corner (§46.2), so the
            menu closes as the question opens or both would draw in one cell. */
         CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; FNMENU = null;
+        REFUSEDLATE = null;
         paint();
       });
     });
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = this.dataset.fndelyes;
-        if (grant("c_fns") !== "edit") {
-          alert("Functions are the SMO's. Nothing has been deleted.");
-          CLEARING = null; paint(); return;
-        }
+        /* ── §534.2: THE PANEL KEEPS THE REFUSAL ────────────────────────
+           Both of these raised a browser box and CLOSED the panel, so the
+           row being worked on went with the answer. The panel stays open and
+           redraws its own refusal — the shape it has always had for the same
+           sentence on the way in (fnPanels). Nothing is cleared, and
+           REFUSEDLATE lets it say the one thing that is different about
+           arriving a moment later.
+
+           The grant is read in both places on purpose (§48.2): the panel
+           decides what to offer, this decides what happens, and a screen that
+           has been open a while is not evidence of either. */
+        if (grant("c_fns") !== "edit") { REFUSEDLATE = "fn:" + fk; paint(); return; }
         var why = fnDeleteBlockers(fk);
-        if (why.length) {
-          alert("Not deleted \u2014 " +
-                why.map(function(w){ return w.full; }).join(". ") + ".");
-          CLEARING = null; paint(); return;
-        }
+        if (why.length) { REFUSEDLATE = "fn:" + fk; paint(); return; }
+        REFUSEDLATE = null;
         deleteFunction(fk);
         CLEARING = null;
         /* Deleting happens on Setup, so the deleted function is not what the
@@ -5245,13 +5251,29 @@
        (§53.5): a second copy here is how the register's twins get made. A
        taken key is suffixed rather than refused, the same answer addUnit
        gives — two functions may genuinely share a name's letters. */
-    var addFn = document.getElementById("addfn");
-    if (addFn) addFn.addEventListener("click", function(){
-      var name = prompt("Name of the " + labelWord("fnword","group"));
-      if (!name || !name.trim()) return;
+    /* §534.3: the name comes off the page's own field now, never a prompt()
+       — which a browser may suppress, leaving a control that looks live and
+       does nothing (§95's argument, and §69.22's precedent for the other
+       one). Typing is held in NEWFN so a repaint cannot take a half-typed
+       name with it, exactly as the BU list holds NEWMAINBU. */
+    var fnFld = document.getElementById("newfn");
+    if (fnFld) {
+      fnFld.addEventListener("input", function(){ NEWFN = fnFld.value; });
+      /* Enter adds, because the control this replaces took Enter and a field
+         beside an Add button that ignores it is a field that feels broken. */
+      fnFld.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addFnFromField(); }
+      });
+    }
+    function addFnFromField(){
+      var name = String(NEWFN || "").trim();
+      if (!name) { var f = document.getElementById("newfn"); if (f) f.focus(); return; }
       addFunction(name);
+      NEWFN = "";
       paint();
-    });
+    }
+    var addFn = document.getElementById("addfn");
+    if (addFn) addFn.addEventListener("click", addFnFromField);
     document.querySelectorAll("[data-capfn]").forEach(function(el){
       el.addEventListener("change", function(){
         GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
@@ -5328,23 +5350,58 @@
          writing as they are left there is no unsaved state to protect, so
          there is nothing to hold: the button is live, behind the pen, which is
          where Islam asked for it. */
-      var gaps = 0;
-      activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
-      if (!confirm("Close " + REVIEW.name + "?" +
-          (gaps ? "\n\n" + gaps + " items are unreported and will close as unreported." : "") +
-          "\n\nThe figures become a record and the plan reopens to unit owners.")) return;
-      /* The snapshot. Everything a later cycle needs in order to say what a
-         score was last time. */
-      var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
-      activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
-      HISTORY.push(snap);
-      REVIEW.state = "closed";
-      /* The pen goes with the cycle it was editing (§273). Leaving it open
-         would put an "Edit this cycle" panel under a strip that has just
-         started offering "Open a new cycle...", with a Close button in it for
-         a cycle that is already closed. */
-      CYCLEEDIT = null;
-      paint();
+      var gaps = 0, asked = 0;
+      activeKeys().forEach(function(k){
+        var c = reportedCount(UNITS[k]); gaps += c.total - c.done; asked += c.total;
+      });
+      /* ── §534.3: REOPEN'S OWN SHAPE, FOR REOPEN'S OPPOSITE ───────────
+         The two controls sit in the same strip and did the same kind of
+         thing in two different mediums — Reopen in the platform's dialog
+         with its facts laid out, Close in the browser's box with its facts
+         run together. This is that dialog, with the same `.kv` rows.
+
+         AND IT SAYS CLOSING CAN BE UNDONE, which the box never did. Closing
+         files the figures and marks the cycle closed; it takes nothing away,
+         and Reopen is the control beside this one. A question that sounds
+         more final than the act is its own kind of wrong (§45.2). */
+      openModalHtml("Close " + esc(REVIEW.name) + "?", "",
+        '<div class="sendconfirm reopenconfirm">' +
+          '<div class="kv"><span class="k">Covers</span><span>' +
+            esc(cycleMeta()) + '</span></div>' +
+          '<div class="kv"><span class="k">Reported</span><span><b>' +
+            (asked - gaps) + '</b> of ' + asked +
+            (gaps ? ' \u2014 the other ' + gaps + ' close as unreported' : '') +
+            '</span></div>' +
+          '<div class="kv"><span class="k">What happens</span><span>The figures ' +
+            'become a record and the plan reopens to unit owners.</span></div>' +
+          '<div class="kv"><span class="k">The way back</span><span><b>Reopen</b> ' +
+            'stands in this strip once it is closed. The figures become live ' +
+            'again and the closing record is taken back.</span></div>' +
+          '<div class="cbtns"><button data-ccno="1">Cancel</button>' +
+          '<button class="danger" data-ccyes="1">Close ' + esc(REVIEW.name) +
+          '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var ccno = box.querySelector("[data-ccno]");
+      if (ccno) ccno.addEventListener("click", function(){ closeModal(); });
+      var ccyes = box.querySelector("[data-ccyes]");
+      if (ccyes) ccyes.addEventListener("click", function(){
+        closeModal();
+        /* The snapshot. Everything a later cycle needs in order to say what a
+           score was last time. Taken at the PRESS, never when the dialog was
+           drawn (§48.2) — a figure entered while it stood belongs in it. */
+        var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
+        activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
+        HISTORY.push(snap);
+        REVIEW.state = "closed";
+        /* The pen goes with the cycle it was editing (§273). Leaving it open
+           would put an "Edit this cycle" panel under a strip that has just
+           started offering "Open a new cycle...", with a Close button in it for
+           a cycle that is already closed. */
+        CYCLEEDIT = null;
+        paint();
+      });
     });
 
     /* ── EDITING THE OPEN CYCLE (§273, restructured by §273.4) ──────
@@ -5492,8 +5549,12 @@
       /* A name is the one thing nothing can be derived from, and it is what
          every snapshot, delta and archived plan will be filed under. */
       if (!String(d.name || "").trim()) {
-        alert("Give the cycle a name — it is what its figures are filed under " +
-              "once it closes, and what the next cycle compares against.");
+        /* §534.2: THE REFUSAL GOES UNDER THE BOX, and the panel draws it from
+           `why` — so the sentence and the empty field are on screen together,
+           which a dialog over the form could never manage. Focus is taken
+           AFTER the repaint, or it lands on the node paint() is about to
+           replace. */
+        d.why = "name"; paint();
         var f = document.getElementById("nc-name"); if (f) f.focus();
         return;
       }
@@ -5508,8 +5569,11 @@
          §307: IT IS `to` THAT IS ASKED FOR NOW — the same refusal, one box
          earlier, because the cycle's end IS the review point. */
       if (!String(d.to || "").trim()) {
-        alert("Pick the month this cycle covers to \u2014 it decides what every " +
-              "figure is measured against, and what is asked for at all.");
+        /* AND THIS ONE TAKES FOCUS TOO. The name's box moved the cursor and
+           this one did not — one form, two behaviours, for no reason beyond
+           which notice somebody wrote first. */
+        d.why = "to"; paint();
+        var t = document.querySelector(".newcycle .tobtn"); if (t) t.focus();
         return;
       }
       /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
@@ -5523,25 +5587,57 @@
          never the raw figures: a clear with nothing behind it would destroy
          the closed cycle's numbers. Same act an import performs on the plan
          it replaces, same Restore. */
-      var arch = archiveFigures("cleared when " + String(d.name).trim() + " opened");
-      if (!confirm("Open " + String(d.name).trim() + "?\n\n" +
-          (arch
-            ? arch.counts.reported + " reported figure" + (arch.counts.reported === 1 ? "" : "s") +
-              " and " + arch.counts.notes + " note" + (arch.counts.notes === 1 ? "" : "s") +
-              " from " + REVIEW.name + " are cleared so every unit is asked again.\n" +
-              "They are kept as an archive dated today and can be restored from Archived plans."
-            : "Nothing has been reported yet, so there is nothing to clear."))) {
-        if (arch) ARCHIVES.shift();
-        return;
-      }
-      clearForNewCycle();
-      REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
-                 due:d.due || "", state:"open", note:{}, submitted:{},
-                 cadence:REVIEW.cadence };
-      /* §307: nothing else to carry. The review point travelled as a field of
-         its own here; it is `to`, which the line above already wrote. */
-      NEWCYCLE = null;
-      paint();
+      /* ── §534.3: THE QUESTION IS IN FRONT OF THE ACT NOW ─────────────
+         It used to ARCHIVE, then ask, then undo the archive on Cancel —
+         the one place in the product where pressing Cancel had work to
+         reverse rather than nothing to do. It was safe only while the undo
+         ran; a reload while the browser's box stood left an archive of a
+         clear that never happened, filed under a cycle that never opened.
+
+         The counts come from the same snapshot the archive is made of, so
+         the dialog says exactly what the archive will hold, and NOTHING is
+         written until Yes. Both are taken again at the press (§48.2): a
+         figure entered while the dialog stood belongs in the archive. */
+      var counts = figuresSnapshotCounts(figuresSnapshot());
+      var empty = figuresAreEmpty(counts);
+      var nm = String(d.name).trim();
+      openModalHtml("Open " + esc(nm) + "?",
+        esc([d.from || "", d.to || ""].filter(function(x){ return x; }).join(" \u2013 ")),
+        '<div class="rmconfirm">' +
+          (empty
+            ? '<p>Nothing has been reported yet, so there is nothing to clear.</p>'
+            : '<p><b>' + plural(counts.reported, "reported figure") + '</b> and <b>' +
+              plural(counts.notes, "note") + '</b> from ' + esc(REVIEW.name) +
+              ' are cleared, so every unit is asked again.</p>') +
+          (empty ? '' :
+            '<p class="archline">They are kept as an archive dated today. ' +
+            '<b>Setup \u203a Import &amp; storage</b> holds the way back ' +
+            '\u2014 <b>Restore</b> on that row puts them into whatever plan ' +
+            'is standing then.</p>') +
+          '<div class="mrow"><button class="quiet" data-ncno="1">Cancel</button>' +
+          '<button class="danger" data-ncyes="1">Open ' + esc(nm) + '</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (!box) return;
+      var nno = box.querySelector("[data-ncno]");
+      if (nno) nno.addEventListener("click", function(){ closeModal(); });
+      var nyes = box.querySelector("[data-ncyes]");
+      if (nyes) nyes.addEventListener("click", function(){
+        closeModal();
+        /* Archived BEFORE cleared, because HISTORY keeps a score per unit and
+           never the raw figures: a clear with nothing behind it would destroy
+           the closed cycle's numbers. Same act an import performs on the plan
+           it replaces, same Restore. */
+        archiveFigures("cleared when " + nm + " opened");
+        clearForNewCycle();
+        REVIEW = { name:nm, from:d.from || "", to:d.to || "",
+                   due:d.due || "", state:"open", note:{}, submitted:{},
+                   cadence:REVIEW.cadence };
+        /* §307: nothing else to carry. The review point travelled as a field
+           of its own here; it is `to`, which the line above already wrote. */
+        NEWCYCLE = null;
+        paint();
+      });
     });
     /* ── §382: MY REPORTING'S THREE CONTROLS ──────────────────────────
        The FIGURE needs none of its own — the boxes are `repEntry`'s, so they
@@ -5751,8 +5847,19 @@
        it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var t = b.dataset.submit, why = submitRefusal(t);
-        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        var t = b.dataset.submit;
+        /* ── §534.2: THE GATE SAYS NOTHING, BECAUSE THE PAGE ALREADY HAS ──
+           This was the THIRD telling of one refusal. The button is drawn
+           `aria-disabled` carrying the same list in a bubble that opens on
+           hover and on focus (§221, §163); the bar beneath it names the
+           places holding it and walks to the exact box (§279). The box was
+           the only one of the three that could not be read BEFORE pressing,
+           and the only one that could not take anybody to the thing it named.
+
+           `submitRefusal()` still stands here and still refuses: it is the
+           enforcement, and a page that has been open a while is not evidence
+           (§48.2). What is gone is its voice, not its gate. */
+        if (submitRefusal(t)) return;
         REVIEW.submitted[t] = true;
         /* Submitting supersedes a parked draft: two closed states at once
            would leave Reopen clearing one of them. */
@@ -6047,9 +6154,15 @@
         CLEARING = b.dataset.clear; CLEARMENU = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
+    /* Keep closes the question and does nothing else — which is what Cancel
+       has to mean everywhere in this product (§534.1's lesson from the one
+       place it did not). */
+    document.querySelectorAll("[data-rmkeep]").forEach(function(b){
+      b.addEventListener("click", function(){ RMASK = null; paint(); });
+    });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
       b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null;
+        CLEARING = null; CLEARMENU = null; REFUSEDLATE = null;
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
@@ -6129,7 +6242,7 @@
           if (cc) capRemoveOpen(cc.id);
           return;
         }
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "trm", b.dataset.trm, "Remove " + esc(what) + "?")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
         paint();
@@ -6154,7 +6267,7 @@
           ? 'the objective "' + (m.name || "") + '"' +
             (m.actual ? " and its reported " + m.actual : "")
           : null;
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (what && rmAsk(b, "korm", b.dataset.korm, "Remove " + esc(what) + "?")) return;
         e.list.splice(i, 1);
         koSettle(e);
         fieldSaved();
@@ -6181,13 +6294,25 @@
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpclear];
         if (!e) return;
-        if (!confirm("Clear this monthly plan? The twelve months are removed. " +
-                     "The annual target keeps the figure they added up to, and " +
-                     "the row goes back to being spread evenly across the year."))
-          return;
-        delete e.row[e.fld];
-        fieldSaved();
-        paint();
+        /* §534.3: GOES AND STAYS, which this act has always had and could
+           never lay out — the twelve numbers go and the annual target stays,
+           and the second half is the one somebody hesitates over, because
+           the row does not visibly change until you look at the benchmark. */
+        destroyConfirmOpen({
+          title: "Clear this monthly plan?",
+          sub: esc(e.row && (e.row.name || e.row.code) ? (e.row.name || e.row.code) : ""),
+          goes: "<b>The twelve months</b> somebody typed",
+          goesWhy: "The row goes back to being spread evenly across the year.",
+          stays: "The annual target",
+          staysWhy: "It keeps the figure the twelve added up to, as the authored one.",
+          noway: "<b>There is no way back.</b> The twelve numbers are not archived.",
+          yesWord: "Clear the twelve",
+          onYes: function(){
+            delete e.row[e.fld];
+            fieldSaved();
+            paint();
+          }
+        });
       });
     });
     document.querySelectorAll("[data-koadd]").forEach(function(b){
@@ -6597,6 +6722,19 @@
        never had a season and one whose last season was removed must be
        byte-identical, or the difference is a change the authoriser has to
        judge that nobody made. */
+    /* §534.2: the refusal's own way out — a unit named in it opens that
+       unit's Drivers, which is the page the sentence sends you to. */
+    document.querySelectorAll("[data-goseas]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SEASWHY = null;
+        /* Drivers is a SECTION of the unit's Strategy tab, not a tab of its
+           own (shell's nav): the address is the unit, that tab, and CURSEC —
+           setting `currentSub` to the section key alone is normalised away on
+           the next paint and lands on Strategy's first section instead. */
+        current = b.dataset.goseas; currentSub = "strategy"; CURSEC.strategy = "drivers";
+        paint(); window.scrollTo(0, 0);
+      });
+    });
     document.querySelectorAll("[data-seasrm]").forEach(function(b){
       b.addEventListener("click", function(){
         var id = b.dataset.seasrm;
@@ -6604,17 +6742,16 @@
         var se = SMPRules.seasonById(list, id);
         var used = SMPRules.seasonUsedBy(seasonsUnits(), id);
         if (used.length) {
-          alert('"' + (se && se.name ? se.name : "This season") + '" cannot be removed — ' +
-                (used.length === 1 ? 'a unit still has it as a period of its own: '
-                                   : used.length + ' units still have it as a period of their own: ') +
-                used.map(function(u){ return u.name; }).join(", ") +
-                '. Take it off their Drivers page first.');
+          /* §534.2: the refusal is a line under the row that refused, where
+             the units it names can be pressed. */
+          SEASWHY = id; paint();
           return;
         }
         var i = list.indexOf(se);
         if (i < 0) return;
         list.splice(i, 1);
         if (!list.length) delete GROUP[SMPRules.SEASONS];
+        SEASWHY = null;
         paint();
       });
     });
@@ -6637,7 +6774,12 @@
     });
     document.querySelectorAll("[data-mbdrop]").forEach(function(b){
       b.addEventListener("click", function(){
-        var p = this.dataset.mbdrop.split("|");
+        var val = this.dataset.mbdrop, p = val.split("|");
+        /* §534.4: it asked nothing at all, which the drawing named as a
+           difference to decide rather than leave. Islam: they should ask. */
+        if (rmAsk(this, "mbdrop", val,
+            "Stop " + esc(p[0]) + " pointing at " +
+            esc(roleWhereLabel(p.slice(1).join("|"))) + "?")) return;
         removeMainbuAt(p[0], p.slice(1).join("|"));
         paint();
       });
@@ -6647,16 +6789,31 @@
         var was = inp.dataset.mbname, now = inp.value.trim();
         if (now && now !== was && !renameMainbu(was, now)) {
           /* Refused rather than silently merged: two departments becoming one
-             is a decision, and it is not one a typo gets to make. */
-          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
-                'renaming one into the other \u2014 move the people first.');
+             is a decision, and it is not one a typo gets to make.
+             §534.2: the refusal is a line under this box rather than a
+             browser's box over the page, and what was typed is kept with it —
+             the repaint below used to restore the old name, so the correction
+             had to be typed a second time to be read at all. */
+          MBWHY = { at: was, typed: now };
+        } else {
+          MBWHY = null;
         }
         paint();
       });
     });
     document.querySelectorAll("[data-mbdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        removeMainbu(b.dataset.mbdel);
+        /* §534.4: the same, one row out. It only asks when the row points at
+           something — a name typed by mistake and mapped to nothing is the
+           BU list's empty line, and the family lets those go on one press.
+           People are already handled: the control is not drawn at all while
+           anybody carries the name. */
+        var nm = b.dataset.mbdel;
+        var ats = mainbuAts(mainbuBy(nm));
+        if (ats.length && rmAsk(b, "mbdel", nm,
+            "Remove \u201c" + esc(nm) + "\u201d and " +
+            plural(ats.length, "mapping") + "?")) return;
+        removeMainbu(nm);
         paint();
       });
     });
@@ -6844,7 +7001,7 @@
     document.querySelectorAll("[data-setpw]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: b.dataset.setpw, pw: "", err: "", done: null };
-        PMENU = null; PDEL = null;
+        PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -7135,36 +7292,29 @@
         var p = personBy(key);
         if (!p) return;
         if (personActive(p)) {
-          var held = personRoles(p).length;
-          if (held && !confirm(p.name + " holds " + plural(held, "role") +
-              ". Retiring takes " + (held === 1 ? "it" : "them") +
-              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
-              p.name + "?")) return;
+          /* §534.3: the question opens in this row's own corner, the way the
+             delete question beside it in the same menu always has. It only
+             asks when there is something to take — somebody holding nothing
+             is retired by the press, because nothing is being decided. */
+          if (personRoles(p).length) { PRET = key; PMENU = null; paint(); return; }
           retirePerson(key);
         } else {
-          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4) ────────────────
+          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §534.1) ────────
              It used to hand the person back with nothing, so they returned as
              a Contributor of their unit and nobody was told. A seat somebody
              else has taken up meanwhile is named and NOT offered — restoring
-             one person must never quietly unseat another. */
-          var back = personHeldRoles(key), free = back.filter(function(r){ return !r.taken; });
-          var give = false;
-          if (back.length) {
-            var name = function(r){ return roleName(r.role) + " of " + roleWhereLabel(r.at); };
-            var taken = back.filter(function(r){ return r.taken; });
-            give = confirm(p.name + " held " + plural(back.length, "role") + " when they were retired.\n\n" +
-              (free.length
-                ? "Give back: " + free.map(name).join(", ") + "\n"
-                : "None can be given back.\n") +
-              (taken.length
-                ? "Held by somebody else now, so left alone: " +
-                  taken.map(function(r){ return name(r) + " (" + personName(r.taken) + ")"; }).join(", ") + "\n"
-                : "") +
-              "\nOK gives back what it can. Cancel brings " + p.name +
-              " back with no role \u2014 a Contributor of their unit.");
-            if (!give && !confirm("Bring " + p.name + " back with no role?")) return;
-          }
-          restorePerson(key, give && free.length > 0);
+             one person must never quietly unseat another.
+
+             THE ASKING IS A DIALOG NOW, because the question has three
+             answers and a yes/no box cannot carry three (§534.1). Opened
+             BEFORE the menu is cleared, so the dialog remembers the control
+             to put focus back on; the work happens in its handlers, so this
+             one returns. */
+          var back = personHeldRoles(key);
+          if (back.length) { restoreOpen(key); PMENU = null; paint(); return; }
+          /* Holding nothing, nothing is being decided, so nothing is asked —
+             the row simply becomes active again, as it always has. */
+          restorePerson(key, false);
         }
         /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
            after retiring somebody the panel stayed on screen now reading
@@ -7188,11 +7338,24 @@
        unmounts the button the click is still inside (§47.2). */
     document.querySelectorAll("[data-pdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        PDEL = b.dataset.pdel; PMENU = null; paint();
+        PDEL = b.dataset.pdel; PMENU = null; PRET = null; REFUSEDLATE = null; paint();
+      });
+    });
+    document.querySelectorAll("[data-pret-no]").forEach(function(b){
+      b.addEventListener("click", function(){ PRET = null; paint(); });
+    });
+    document.querySelectorAll("[data-pret-yes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Resolved at press time (§48.2): the row is re-read rather than
+           trusted from the render that drew this. */
+        var key = b.dataset.pretYes;
+        if (personBy(key)) retirePerson(key);
+        PRET = null;
+        paint();
       });
     });
     document.querySelectorAll("[data-pdel-no]").forEach(function(b){
-      b.addEventListener("click", function(){ PDEL = null; paint(); });
+      b.addEventListener("click", function(){ PDEL = null; REFUSEDLATE = null; paint(); });
     });
     document.querySelectorAll("[data-pdel-yes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -7200,14 +7363,16 @@
            This does not check them again — two copies of "may this be deleted"
            is exactly the drift the one function exists to prevent — it reads
            the ANSWER, and says so when the answer is no. */
-        var key = b.dataset.pdelYes, p = personBy(key), name = p ? p.name : key;
+        var key = b.dataset.pdelYes;
         var done = deletePerson(key);
+        /* §534.2: "Open the menu again to see what" was the platform asking
+           somebody to do its own work — it had just refused on the basis of
+           what points at them, so it knows. The panel stays open and names
+           it, in the shape it already uses on the way in (deletePanel). */
+        if (!done) { REFUSEDLATE = "p:" + key; paint(); return; }
+        REFUSEDLATE = null;
         PDEL = null;
         paint();
-        if (!done) {
-          alert(name + " could not be deleted \u2014 something has come to point at " +
-                "them since this was asked. Open the menu again to see what.");
-        }
       });
     });
 
@@ -8013,7 +8178,7 @@
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
         PSETPW = { key: "bulk:" + b.dataset.pwbulk, pw: "", err: "", done: null };
-        PWMENU = false; PMENU = null; PDEL = null;
+        PWMENU = false; PMENU = null; PDEL = null; PRET = null;
         paint();
       });
     });
@@ -8317,13 +8482,31 @@
     });
     document.querySelectorAll("[data-draftdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (!confirm("Delete this draft? It cannot be brought back.")) return;
         var id = b.dataset.draftdel;
-        SYNC.mailDraftDelete(id, function(){
-          var st = sendmsg();
-          if (String(st.draftId || "") === String(id)) st.draftId = null;
-          DRAFTLIST = null;
-          paint();
+        /* §534.3: the shape for an act with nothing behind it (§534). The
+           heading is the only thing that tells one draft from another — it
+           is what the table is sorted and read by — so it is what the
+           question names (§186). */
+        var d = (DRAFTLIST || []).filter(function(x){ return String(x.id) === String(id); })[0];
+        destroyConfirmOpen({
+          title: "Delete this draft?",
+          sub: d && d.updated_at
+            ? "Last saved " + String(d.updated_at).slice(0, 16).replace("T", " ") : "",
+          goes: "<b>" + esc((d && d.subject) || "(no heading yet)") + "</b>",
+          goesWhy: "The draft and everything typed into it.",
+          stays: "Every message already sent",
+          staysWhy: "A draft has never been sent, so nothing anybody has received changes.",
+          noway: "<b>There is no way back.</b> A draft is not archived \u2014 it is the " +
+                 "working copy, and this is the only one.",
+          yesWord: "Delete the draft",
+          onYes: function(){
+            SYNC.mailDraftDelete(id, function(){
+              var st = sendmsg();
+              if (String(st.draftId || "") === String(id)) st.draftId = null;
+              DRAFTLIST = null;
+              paint();
+            });
+          }
         });
       });
     });
@@ -9634,7 +9817,7 @@
         var w = competeWritable(t); if (!w || !w.values[i]) return;
         var v = w.values[i];
         if ((String(v.title || "").trim() || (v.how || []).length || (v.measure || []).length) &&
-            !confirm("Remove this value? This cannot be undone here.")) return;
+            rmAsk(b, "cmprm", b.dataset.cmprm, "Remove this value?")) return;
         w.values.splice(i, 1);
         competeTidy(t);
         fieldSaved(); paint();
@@ -9647,7 +9830,7 @@
         var sw = swotWritable(t);
         if (!sw || !Array.isArray(sw[q]) || sw[q][i] == null) return;
         if (String(sw[q][i]).trim() &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "swrm", b.dataset.swrm, "Remove this line?")) return;
         sw[q].splice(i, 1);
         fieldSaved(); paint();
       });
@@ -9699,8 +9882,9 @@
         var a = b.dataset.drvsrm.split("|"), u = drvUnit(a[0]), c = drvCh(u);
         var sub = drvSubAt(u, +a[1]);
         if (!sub || c.subs.length < 2) return;
-        if (!confirm("Remove “" + (sub.name || "this route") +
-              "” and everything in it? This cannot be undone here.")) return;
+        if (rmAsk(b, "drvsrm", b.dataset.drvsrm,
+              "Remove “" + esc(sub.name || "this route") +
+              "” and everything in it?")) return;
         c.subs.splice(+a[1], 1);
         delete RAIL["drv:" + u.ukey];
         fieldSaved(); paint();
@@ -9736,8 +9920,9 @@
         var sub = drvSubAt(u, +a[1]), p = sub && sub.periods[+a[2]];
         if (!p) return;
         if ((p.drivers || []).length &&
-            !confirm("Remove “" + (p.name || "this period") + "” and its " +
-              plural(p.drivers.length, "driver") + "? This cannot be undone here.")) return;
+            rmAsk(b, "drvprm", b.dataset.drvprm,
+              "Remove “" + esc(p.name || "this period") + "” and its " +
+              plural(p.drivers.length, "driver") + "?")) return;
         sub.periods.splice(+a[2], 1);
         fieldSaved(); paint();
       });
@@ -9773,8 +9958,8 @@
         var hit = u && SMPRules.driverById(u, a[1]);
         if (!hit) return;
         if (String(hit.driver.name || "").trim() &&
-            !confirm("Remove “" + hit.driver.name +
-              "”? This cannot be undone here.")) return;
+            rmAsk(b, "drvrm", b.dataset.drvrm,
+              "Remove “" + esc(hit.driver.name) + "”?")) return;
         var list = hit.period.drivers, i = list.indexOf(hit.driver);
         if (i < 0) return;
         list.splice(i, 1);
@@ -9876,7 +10061,7 @@
         var o = t === "group" ? GROUP : isCo ? coFoundWritable(t.slice(3)) : unitLikeWritable(t);
         if (!o || !Array.isArray(o.clauses) || !o.clauses[i]) return;
         if ((String(o.clauses[i][0] || "").trim() || String(o.clauses[i][1] || "").trim()) &&
-            !confirm("Remove this line? This cannot be undone here.")) return;
+            rmAsk(b, "clauserm", b.dataset.clauserm, "Remove this line?")) return;
         o.clauses.splice(i, 1);
         if (o.ukey) renumberUnit(o);
         fieldSaved(); paint();
@@ -9933,7 +10118,8 @@
         if (!h || !h.list || !h.list[i]) return;
         if (!mayAuthor("k_found", h.target)) return;
         if (h.list[i].name &&
-            !confirm("Remove " + h.list[i].name + "? This cannot be undone here.")) return;
+            rmAsk(b, "capkorm", b.dataset.capkorm,
+              "Remove " + esc(h.list[i].name) + "?")) return;
         h.list.splice(i, 1);
         fieldSaved(); paint();
       });
@@ -10513,10 +10699,11 @@
          plan archives and replaces a whole unit's plan in memory before any
          save is attempted. Checked here rather than trusted from the page that
          drew the button (§48.2). */
-      if (grant("c_import") !== "edit") {
-        alert("Importing is the SMO's. Nothing has been applied.");
-        return;
-      }
+      /* §534.2: the page no longer offers a live Apply to somebody this will
+         refuse — the button is held and the reason is a line beside it. This
+         stays, unsaid: it is the gate, and the screen that drew the button is
+         not what authorises the act (§48.2). */
+      if (grant("c_import") !== "edit") return;
       var what, arch;
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;
@@ -10591,21 +10778,63 @@
         var path = b.dataset.viddel;
         var row = vidStoreRows().filter(function(r){ return r.path === path; })[0];
         if (!row) return;
-        if (!confirm("Delete this clip for good?\n\n" +
-              (row.name || path) + " — " + vidSize(row.bytes) + ", from " + row.where +
-              "\n\nThe slide stays where it is and will say the clip was removed. " +
-              "The bytes cannot be brought back.")) return;
-        vidStoreDrop([path]);
+        destroyConfirmOpen({
+          title: "Delete this clip for good?",
+          sub: row.where + (row.title ? " \u00b7 " + row.title : ""),
+          /* The file, its size and WHEN, which the table beside the button
+             carries and the browser's box did not: two site visits of the
+             same name are told apart by the date and by nothing else. */
+          goes: "<b>" + esc(row.name || path.split("/").pop()) + "</b> \u2014 " +
+                esc(vidSize(row.bytes)) +
+                (row.at ? ", uploaded " + esc(String(row.at).slice(0, 10)) : ""),
+          goesWhy: "The file itself. This is the only thing in the platform where " +
+                   "the bytes are destroyed rather than archived.",
+          stays: "The slide, in its place in the review",
+          staysWhy: "It will say the clip was removed. Nothing else about the review " +
+                    "changes, and no figure moves.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files. If the clip is needed again it has " +
+                 "to be uploaded again.",
+          yesWord: "Delete the clip",
+          onYes: function(){ vidStoreDrop([path]); }
+        });
       });
     });
     document.querySelectorAll("[data-viddelold]").forEach(function(b){
       b.addEventListener("click", function(){
-        var old = vidStoreRows().filter(function(r){ return !r.open; });
+        var all = vidStoreRows();
+        var old = all.filter(function(r){ return !r.open; });
         if (!old.length) return;
-        if (!confirm("Delete " + plural(old.length, "clip") + " for good, freeing " +
-              vidSize(vidStoreBytes(old)) + "?\n\nNothing on the review that is open " +
-              "now is touched. The bytes cannot be brought back.")) return;
-        vidStoreDrop(old.map(function(r){ return r.path; }));
+        var keep = all.filter(function(r){ return r.open; });
+        /* §186 AT TWELVE TIMES THE REACH. The single clip's question names
+           its file, its size and its review; this one named a COUNT, and a
+           count catches none of the mistakes a confirmation exists for — if
+           one of the twelve is something somebody wanted, nothing here said
+           so. The list is the question. */
+        destroyConfirmOpen({
+          title: "Delete " + plural(old.length, "clip") + " for good?",
+          sub: "Everything not on a slide in " + REVIEW.name,
+          lead: "These " + plural(old.length, "clip") + " are on slides in reviews that " +
+                "have closed. Deleting them frees <b>" + esc(vidSize(vidStoreBytes(old))) + "</b>.",
+          list: '<div class="scroll"><table><thead><tr><th>File</th><th>Review</th>' +
+            '<th class="cc">Size</th></tr></thead><tbody>' +
+            old.map(function(r){
+              return "<tr><td><b>" + esc(r.name || r.path.split("/").pop()) + "</b></td>" +
+                "<td>" + esc(r.where) + "</td>" +
+                '<td class="cc">' + esc(vidSize(r.bytes)) + "</td></tr>";
+            }).join("") + "</tbody></table></div>",
+          stays: keep.length
+            ? "The " + plural(keep.length, "clip") + " on slides in " + esc(REVIEW.name)
+            : "Every slide, in its place",
+          staysWhy: (keep.length
+            ? "The review that is open now is not touched. "
+            : "") + "Every slide in the closed reviews stays where it is and says its " +
+            "clip was removed.",
+          noway: "<b>There is no way back.</b> Nothing is archived \u2014 the archive on " +
+                 "this page holds plans, never files.",
+          yesWord: "Delete " + plural(old.length, "clip"),
+          onYes: function(){ vidStoreDrop(old.map(function(r){ return r.path; })); }
+        });
       });
     });
     document.querySelectorAll("[data-vidrefresh]").forEach(function(b){
@@ -10615,10 +10844,34 @@
       b.addEventListener("click", function(){
         var a = ARCHIVES.filter(function(x){ return x.id === b.dataset.forget; })[0];
         if (!a) return;
-        if (!confirm("Delete " + a.name + "'s archive of " + a.at +
-                     " for good? This is the one thing here that cannot be undone.")) return;
-        forgetArchive(a.id);
-        paint();
+        /* FORGET, NOT DELETE, on the button and in the question (Islam's
+           pick): the thing in front of you is already the record of
+           something cleared, and "delete the archive of the deletion" is a
+           sentence nobody can hold. The platform's own function has always
+           been called `forgetArchive`. */
+        var fig = a.kind === "figures";
+        destroyConfirmOpen({
+          title: "Forget this archive for good?",
+          sub: a.name + " \u00b7 archived " + a.at,
+          /* `archiveHeld()` is the row's own builder (§53.5) and is already
+             markup, so it is not escaped again. */
+          goes: "<b>" + archiveHeld(a) + "</b> from " + esc(a.name),
+          goesWhy: (a.by ? "Filed by " + esc(a.by) : "Filed") +
+                   (a.why ? " \u2014 " + esc(a.why) : "") +
+                   ". This archive is the only copy.",
+          stays: fig
+            ? esc(a.name) + "\u2019s closed score, and this cycle\u2019s figures"
+            : "The plan standing now",
+          staysWhy: fig
+            ? "The history keeps a score per unit. What it has never kept is the raw " +
+              "figures, which is what this archive holds."
+            : "This is the plan it replaced; what is live now is untouched.",
+          noway: "<b>There is no way back, and no way back to the plan either.</b> " +
+                 "<b>Restore</b> on this row is the undo for the change that filed it \u2014 " +
+                 "forgetting the archive takes that away too.",
+          yesWord: "Forget this archive",
+          onYes: function(){ forgetArchive(a.id); paint(); }
+        });
       });
     });
     /* The receipt's way back for a capability: its function's pages. */
@@ -11390,6 +11643,75 @@
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
+  /* ── DELETING FOR GOOD: the three acts with nothing behind them (§534) ──
+     `rmConfirmOpen()`'s opposite number, and the reason it is a second
+     builder rather than a flag on the first: that one closes by saying the
+     plan is archived first and where the way back is, and these three have
+     no way back to offer. A flag would leave one function whose two halves
+     share nothing but their buttons.
+
+     THREE CALLERS, all on Setup › Import & storage: a clip's bytes, every
+     clip outside the open review, and a filed archive. Everything else in
+     the product that reads like a deletion archives first — an imported
+     plan, a pillar, a project, a retired person — so these are the whole of
+     the exception, and the mockup Islam signed off
+     (design-mockups/delete-for-good/) is their shape: what goes, what stays,
+     there is no way back, and the ACT on the button rather than "Okay".
+
+     WHAT STAYS IS NOT PADDING. It is the half the browser's box was worst at
+     and the half somebody hesitates over — the fear is rarely "will this
+     delete" and nearly always "what does it take with it". Two of the three
+     leave something standing that reads as if it should have gone with the
+     rest (a slide, a closed cycle's score), and saying so is the answer to
+     the question actually being asked.
+
+     RESOLVED AT PRESS TIME (§48.2), like every other dialog here: `onYes` is
+     a function, never a closure over a row read when the dialog was drawn.
+     `goes` and `stays` carry HTML, so every caller escapes its own values —
+     `archiveHeld()` is already markup and would be shown as its own source
+     otherwise. */
+  function destroyConfirmOpen(o){
+    var led =
+      (o.goes ? '<div class="lrow goes"><span class="mk">Goes</span><span class="tx">' +
+        o.goes + (o.goesWhy ? '<span class="sub">' + o.goesWhy + '</span>' : '') +
+        '</span></div>' : '') +
+      (o.stays ? '<div class="lrow stays"><span class="mk">Stays</span><span class="tx">' +
+        o.stays + (o.staysWhy ? '<span class="sub">' + o.staysWhy + '</span>' : '') +
+        '</span></div>' : '');
+    openModalHtml(esc(o.title), esc(o.sub || ""),
+      '<div class="rmconfirm">' +
+        (o.lead ? '<p>' + o.lead + '</p>' : '') +
+        (o.list || '') +
+        (led ? '<div class="ledger">' + led + '</div>' : '') +
+        '<p class="noway">' + o.noway + '</p>' +
+        '<div class="mrow"><button class="quiet" data-dstno="1">Cancel</button>' +
+        '<button class="danger" data-dstyes="1">' + esc(o.yesWord) + '</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-dstno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var yes = box.querySelector("[data-dstyes]");
+    if (yes) yes.addEventListener("click", function(){ closeModal(); o.onYes(); });
+  }
+  /* ── REMOVING A LINE: the gate the nine share (§534.4) ─────────────────
+     Returns true when it has just OPENED the question, so the handler that
+     called it returns and nothing is removed; false when the press came from
+     the strip's own Remove, so the handler carries on exactly as it did
+     behind the browser's box.
+
+     THE SAME HANDLER ANSWERS BOTH PRESSES. The strip's button carries the
+     same `data-` attribute the × does (rmStripInner), so it is picked up by
+     the selector that was already there, resolves the row from its dataset
+     at press time (§48.2), and the one thing that distinguishes it is
+     `rmnow`. No handler learns a second way in, and there is no second copy
+     of "what does this × remove" to drift. */
+  function rmAsk(btn, attr, val, say){
+    if (btn && btn.dataset && btn.dataset.rmnow) { RMASK = null; return false; }
+    RMASK = { t: attr + ":" + val, say: say };
+    paint();
+    return true;
+  }
   /* ── REMOVING A CAPABILITY: two answers, not one (§325) ───────────────
      The mockup Islam signed off (design-mockups/capability-remove/) draws the
      two acts as two rows, each saying what it does, rather than as two
@@ -11504,6 +11826,98 @@
     });
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
+  }
+  /* ── RESTORING A PERSON: three answers, so three controls (§534.1) ─────
+     The one place in the product where the browser's box had been made to
+     carry a question with three answers. OK gave back the roles it could,
+     CANCEL brought the person back with no role, and not restoring at all
+     was a SECOND box behind the Cancel.
+
+     Pressing Cancel to mean "yes, but differently" is the opposite of what
+     Cancel means everywhere else here, and the way out of the act sat behind
+     the thing it escapes — four presses, worst case, to do nothing. Worse:
+     Escape, or a browser that has decided to stop showing the box (§95),
+     landed on RESTORE WITH NO ROLE, which is a real change chosen by nobody.
+
+     THE RULE IS UNTOUCHED (§49.4): a seat somebody else holds now is named
+     and not offered. What changes is that each answer carries its own
+     sentence and its own button — the shape Islam signed off for the
+     capability (§325) and again here (design-mockups/restore-a-person/),
+     with the weight on GIVE THEM BACK because that is what somebody reaching
+     for Restore nearly always means.
+
+     NO RETIRED DATE IN THE HEAD. `retirePerson()` records what it took and
+     not when, so the mockup's "Retired 2 Feb 2026" would be a date this
+     platform does not hold — the sub carries the job title and the unit,
+     which it does.
+
+     RESOLVED AT PRESS TIME (§48.2): the answers re-read the person, because
+     the register behind has been repainted since the dialog opened. */
+  function restoreOpen(key){
+    var p = personBy(key); if (!p) return;
+    var back = personHeldRoles(key);
+    var free = back.filter(function(r){ return !r.taken; });
+    var one = back.length === 1;
+    var nm = function(r){
+      return "<b>" + esc(roleName(r.role)) + "</b> of " + esc(roleWhereLabel(r.at));
+    };
+    var say = !free.length
+      ? "Somebody else holds " + (one ? "it" : "them") + " now, so " +
+        (one ? "it cannot" : "none can") + " be given back."
+      : free.length === back.length
+      ? (one ? "It is still free." : "They are all still free.")
+      : plural(free.length, "is still free", "are still free") + ".";
+    var sub = [p.title || "", p.unit ? roleWhereLabel(p.unit) : ""]
+      .filter(function(x){ return x; }).join(" \u00b7 ");
+    openModalHtml(esc("Bring " + p.name + " back?"), esc(sub),
+      '<div class="rmconfirm">' +
+        '<p><b>' + esc(p.name) + '</b> held ' + plural(back.length, "role") +
+          ' when they were retired. ' + say + '</p>' +
+        '<div class="rolelist">' +
+          back.map(function(r){
+            return r.taken
+              ? '<div class="r taken"><span class="mk">Taken</span><span class="tx">' +
+                  nm(r) + '<span class="sub">' + esc(personName(r.taken)) +
+                  ' holds it now, so it is left alone either way.</span></span></div>'
+              : '<div class="r back"><span class="mk">Free</span><span class="tx">' +
+                  nm(r) + '</span></div>';
+          }).join("") +
+        '</div>' +
+        (free.length
+          ? '<div class="pick safe"><div class="txt">' +
+              '<p class="t">Give back ' +
+                (free.length === back.length && one ? "their role"
+                  : "the " + plural(free.length, "free role")) + '</p>' +
+              '<p class="d">' + esc(p.name) + ' returns as ' +
+                free.map(nm).join(free.length === 2 ? " and " : ", ")
+                    .replace(/, ([^,]*)$/, " and $1") +
+                ', and their sign-in opens again.</p>' +
+            '</div><button class="go" data-rsgive="1">Give ' +
+              (one ? "it" : "them") + ' back</button></div>'
+          : '') +
+        '<div class="pick"><div class="txt">' +
+          '<p class="t">Bring them back with no role</p>' +
+          '<p class="d">A Contributor of their unit. Their sign-in opens' +
+            (free.length
+              ? ', and the ' + plural(free.length, "free role") +
+                ' stay' + (free.length === 1 ? "s" : "") + ' empty until somebody is named.'
+              : '. To give them a role, take it off whoever holds it first.') +
+          '</p></div><button class="keepbtn" data-rsnone="1">' +
+          (free.length ? "No role" : "Bring them back") + '</button></div>' +
+        '<div class="mrow"><button class="quiet" data-rsno="1">Cancel</button></div>' +
+      '</div>');
+    var box = document.getElementById("modal-b");
+    if (!box) return;
+    var no = box.querySelector("[data-rsno]");
+    if (no) no.addEventListener("click", function(){ closeModal(); });
+    var give = box.querySelector("[data-rsgive]");
+    if (give) give.addEventListener("click", function(){
+      closeModal(); restorePerson(key, true); paint();
+    });
+    var none = box.querySelector("[data-rsnone]");
+    if (none) none.addEventListener("click", function(){
+      closeModal(); restorePerson(key, false); paint();
+    });
   }
   /* ── MAKING A FUNCTION'S PROJECTS A CAPABILITY (§334, spec 048 §6) ───────
      Islam signed off the drawing with the cost on it: *"ok with the promirting

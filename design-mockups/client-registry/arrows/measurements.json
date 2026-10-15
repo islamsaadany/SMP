@@ -1,35 +1,34 @@
 {
  "today_rest": {
-  "tableW": 1382,
+  "tableW": 1182,
   "boxW": 1165,
-  "rolesColW": 236,
-  "boxesDrawn": 33,
-  "arrowsDrawn": 33,
+  "rolesColW": 174,
+  "boxesDrawn": 0,
+  "arrowsDrawn": 0,
   "rowH": 39
  },
  "today_open": {
-  "openRowH": 60.1,
+  "openRowH": 39.1,
   "otherRowH": 39,
-  "listOpen": false,
-  "arrow": true,
-  "arrowOnItsOwnLine": true
+  "listOpen": true,
+  "arrow": false
  },
  "now_rest": {
-  "tableW": 1355,
+  "tableW": 1182,
   "boxW": 1165,
-  "rolesColW": 209,
+  "rolesColW": 174,
   "rowH": 39
  },
  "now_rest_more": {
-  "tableW": 1355,
+  "tableW": 1182,
   "boxW": 1165,
-  "rolesColW": 209,
+  "rolesColW": 174,
   "boxesDrawn": 0,
   "arrowsDrawn": 0,
   "rowH": 39
  },
  "now_open": {
-  "openRowH": 42.5,
+  "openRowH": 39.1,
   "otherRowH": 39,
   "listOpen": true,
   "arrow": false,

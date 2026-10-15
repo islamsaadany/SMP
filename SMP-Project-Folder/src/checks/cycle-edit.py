@@ -578,6 +578,17 @@ with sync_playwright() as p:
     # is held here, so the press is an ordinary one; forcing only keeps the
     # check able to report on the build before it.
     press(pg, ".newcycle [data-closecycle]", "Close the cycle in the pen", force=True)
+    # §534.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
+    # beside it has always used. The press opens the question; the cycle closes
+    # on its answer. Asserted in that order, so a build that closed on the
+    # FIRST press — no question at all — fails here rather than passing by
+    # accident, and `said` below still proves no browser box was raised.
+    ok("Close asks first, in the platform's own dialog",
+       pg.evaluate("() => !!document.querySelector('.overlay.on [data-ccyes]')"),
+       pg.evaluate("() => !!document.querySelector('.overlay.on')"))
+    ok("...and the cycle is NOT closed until it is answered",
+       review(pg).get("state") == "open", review(pg))
+    pg.eval_on_selector("[data-ccyes]", "e => e.click()"); pg.wait_for_timeout(300)
     ok("the cycle closes", review(pg).get("state") == "closed", review(pg))
     shut = strip_state(pg)
     ok("the pen goes with it", pen_state(pg).get("none") is True)

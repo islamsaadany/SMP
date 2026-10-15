@@ -404,6 +404,38 @@ function newPersonReset(){
    the repaint any other change causes would otherwise throw away what is
    half typed. */
 var NEWMAINBU = "";
+/* The BU rename the platform refused, and what was typed when it did (§534.2).
+   Held rather than discarded, because the repaint that follows a refusal used
+   to put the old name back — so the correction had to be typed twice. */
+var MBWHY = null;
+/* ── AN ACT REFUSED AFTER ITS QUESTION WAS ALREADY OPEN (§534.2) ───────
+   Two panels in the product draw a refusal of their own when they open on
+   something that cannot be deleted — a function with capabilities under it, a
+   person something still points at. Both ALSO had a browser box, for the case
+   where the blocker appeared between the question opening and Yes being
+   pressed: the same refusal, a moment later, in another medium, and closing
+   the panel as it went.
+
+   The panels draw it now. This names which act was refused late, so the
+   sentence can say the one thing that is genuinely different about that
+   moment — not "cannot be deleted" but "was not deleted, since this was
+   asked" — and nothing else about either panel has to change. Cleared
+   whenever a question is opened or closed. */
+var REFUSEDLATE = null;
+/* The season whose removal was refused, so the row can say so under itself
+   rather than in a box over the page (§534.2). */
+var SEASWHY = null;
+/* The person whose retirement is being asked about, in the row's own corner
+   (§534.3) — PDEL's twin, for the act beside it in the same menu. */
+var PRET = null;
+/* The name being typed for a new supporting function, held in a global for
+   the reason NEWMAINBU is: the repaint that follows any other change on the
+   page would take a half-typed name with it (§534.3). */
+var NEWFN = "";
+/* Which line's × has been pressed, and the question it opened under that line
+   (§534.4). One at a time: pressing another × moves the question rather than
+   leaving two open, which is what a list of nine asks for. */
+var RMASK = null;
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */

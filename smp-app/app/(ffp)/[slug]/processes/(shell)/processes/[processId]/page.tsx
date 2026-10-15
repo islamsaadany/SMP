@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import type { Revision } from "@/ffp/lib/domain/sop";
 import { ProcessTabs, parseTab } from "./process-tabs";
+import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 
 type Kpi = { metric: string; target: string; frequency: string };
 
@@ -45,6 +46,18 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     include: { parentProcess: true, _count: { select: { steps: true } } },
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
+
+  const [controls, ncs, stepList] = await Promise.all([
+    prisma.processControl.findMany({
+      where: { processId },
+      include: { step: true },
+      orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    }),
+    prisma.processNonConformance.findMany({ where: { processId }, orderBy: { raisedAt: "desc" } }),
+    prisma.processStep.findMany({ where: { processId }, orderBy: { order: "asc" } }),
+  ]);
+  const covered = new Set(controls.filter((c) => c.control && c.stepId).map((c) => c.stepId));
+  const stepsNoControl = stepList.filter((s) => !covered.has(s.id));
 
   const base = `/${workspaceId}/processes/processes/${processId}`;
   const kpis = (process.kpis as unknown as Kpi[]) ?? [];
@@ -159,8 +172,125 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
           </>
         )}
 
-        {tab === "risks" && <Empty>Risks and controls are not recorded yet for this process.</Empty>}
-        {tab === "quality" && <Empty>Quality checks and non-conformances are not recorded yet for this process.</Empty>}
+        {tab === "risks" && (
+          <>
+            <div className="mb-4 grid grid-cols-3 gap-3 text-sm">
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Risks recorded</div>
+                <div className="text-xl font-semibold">{controls.length}</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Risks with no control</div>
+                <div className="text-xl font-semibold">{controls.filter((c) => !c.control).length}</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Steps with no control</div>
+                <div className="text-xl font-semibold">{stepsNoControl.length}</div>
+              </div>
+            </div>
+            <Card title="Risks and controls">
+              {controls.length === 0 ? (
+                <p className="text-sm text-slate-500">Risks and controls are not recorded yet for this process.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-slate-500">
+                    <tr>
+                      <th className="py-1 text-start">Risk</th>
+                      <th className="py-1 text-start">Step</th>
+                      <th className="py-1 text-start">Level</th>
+                      <th className="py-1 text-start">Control</th>
+                      <th className="py-1 text-start">Type</th>
+                      <th className="py-1 text-start">Last test</th>
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {controls.map((c) => (
+                      <tr key={c.id} className="border-t border-slate-100 align-top">
+                        <td className="py-1.5">{c.risk}</td>
+                        <td className="py-1.5">{c.step?.label ?? "Whole process"}</td>
+                        <td className="py-1.5 capitalize">{c.riskLevel}</td>
+                        <td className="py-1.5">
+                          {c.control ? (
+                            <>
+                              {c.control}
+                              {(c.owner || c.frequency) && (
+                                <div className="text-xs text-slate-500">
+                                  {[c.owner, c.frequency].filter(Boolean).join(" · ")}
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <span className="font-semibold text-red-600">No control</span>
+                          )}
+                        </td>
+                        <td className="py-1.5 capitalize">{c.controlType ?? "—"}</td>
+                        <td className="py-1.5">
+                          {c.lastTestResult && c.lastTestResult !== "not_tested"
+                            ? `${c.lastTestResult === "pass" ? "Pass" : "Fail"}${c.lastTestedAt ? ` · ${String(c.lastTestedAt.toISOString()).slice(0, 10)}` : ""}`
+                            : "Not tested"}
+                        </td>
+                        <td className="py-1.5 text-end">
+                          <DeleteControlButton workspaceId={workspaceId} processId={processId} id={c.id} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Card>
+            <Card title="Add a risk and its control">
+              <AddControlForm
+                workspaceId={workspaceId}
+                processId={processId}
+                steps={stepList.map((s) => ({ id: s.id, label: s.label }))}
+              />
+            </Card>
+          </>
+        )}
+        {tab === "quality" && (
+          <>
+            <div className="mb-4 grid grid-cols-3 gap-3 text-sm">
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Open non-conformances</div>
+                <div className="text-xl font-semibold">{ncs.filter((n) => n.status !== "closed").length}</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Closed</div>
+                <div className="text-xl font-semibold">{ncs.filter((n) => n.status === "closed").length}</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3">
+                <div className="text-xs text-slate-500">Failed control tests</div>
+                <div className="text-xl font-semibold">{controls.filter((c) => c.lastTestResult === "fail").length}</div>
+              </div>
+            </div>
+            <Card title="Non-conformances">
+              {ncs.length === 0 ? (
+                <p className="text-sm text-slate-500">No non-conformances recorded yet for this process.</p>
+              ) : (
+                <ul className="space-y-3 text-sm">
+                  {ncs.map((n) => (
+                    <li key={n.id} className="border-t border-slate-100 pt-2 first:border-0 first:pt-0">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-semibold">{n.title}</span>
+                        <NonConformanceStatus workspaceId={workspaceId} processId={processId} id={n.id} status={n.status} />
+                      </div>
+                      {n.detail && <div className="text-slate-600">{n.detail}</div>}
+                      <div className="text-xs text-slate-500">
+                        Raised {String(n.raisedAt.toISOString()).slice(0, 10)}
+                        {n.correctiveAction ? ` · Action: ${n.correctiveAction}` : ""}
+                        {n.actionOwner ? ` · ${n.actionOwner}` : ""}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+            <Card title="Record a non-conformance">
+              <AddNonConformanceForm workspaceId={workspaceId} processId={processId} />
+            </Card>
+          </>
+        )}
         {tab === "people" && <Empty>Who reads and acknowledges this process is not recorded yet.</Empty>}
         {tab === "compliance" && <Empty>Compliance coverage is not recorded yet for this process.</Empty>}
         {tab === "connections" && (

@@ -170,7 +170,7 @@ var TRAIL = (function(){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
       h += '<tr data-hist-row="' + i + '">' +
-        '<td class="hist-t" title="' + E(new Date(e.at).toLocaleString()) + '">' + E(dateWord(e.at)) + '</td>' +
+        '<td class="hist-t" title="' + E(dateStamp(e.at)) + '">' + E(dateWord(e.at)) + '</td>' +
         '<td class="hist-t">' + E(timeWord(e.at)) + '</td>' +
         '<td title="' + E(e.person_name || "") + '">' + E(whoWord(e)) + '</td>' +
         (opts.noPlace ? '' : '<td>' + E(placeWord(e.target)) + '</td>') +

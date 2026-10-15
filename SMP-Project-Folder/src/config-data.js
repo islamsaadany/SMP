@@ -9818,6 +9818,60 @@ function clearForNewCycle(){
    "1 person" / "2 people". Optional, so every existing call is unchanged —
    and it is here rather than at the call sites because this file already
    records "3 pillarss" as the cost of doing it by hand (§59). */
+/* ── ONE WAY TO WRITE A DATE (§537) ───────────────────────────────────────
+   The usability audit counted six spellings across the product: two spacings
+   of the same options object, "en-GB" hard-coded in two places and the
+   browser's locale everywhere else, and a bare `toLocaleString()`. So how a
+   date read depended on which screen you were standing on — and, wherever the
+   locale was the browser's, on whose machine you were standing at.
+
+   THE LOCALE IS PINNED, and that is the decision rather than an oversight.
+   The platform writes dates BY HAND in several places and always day first:
+   `dayValue()` makes "30 Sep 2026", the month picker makes "Jul 26", the
+   reports-due day is "30 Sep". A browser set to en-US renders
+   `{day, month:"short"}` as "Sep 30" — so one screen would carry the
+   platform's own "30 Sep" beside a "Sep 30" it had just formatted. One of the
+   two has to give, and the authored strings are the ones this product has
+   always shown.
+
+   TWO SHAPES AND A STAMP, because that is what the call sites need and no
+   more: a day near enough that the year is noise, a date that has to carry
+   its year, and a moment with a time on it for a hover.
+
+   A VALUE THAT IS NOT A DATE COMES BACK EMPTY rather than as "Invalid Date" —
+   these are fed from stored strings, and the product's rule is that a value
+   it cannot read is left alone rather than rewritten into nonsense (§96.2). */
+var DATE_LOCALE = "en-GB";
+function dateOf(x){
+  /* NOTHING IS NOT A DATE, and the browser disagrees: `new Date(null)` is the
+     epoch and `new Date(0)` is a real moment, so a missing value came back as
+     "1 Jan" — the stored-value-rewritten-into-nonsense this is meant to stop,
+     arriving through the one input nobody tests. Caught by the check on its
+     first run, not by reading. */
+  if (x == null || x === "") return null;
+  var d = (x instanceof Date) ? x : new Date(x);
+  return isNaN(d.getTime()) ? null : d;
+}
+function dateShort(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleDateString(DATE_LOCALE, { day:"numeric", month:"short" }) : "";
+}
+function dateFull(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleDateString(DATE_LOCALE, { day:"numeric", month:"long", year:"numeric" }) : "";
+}
+/* A day with a time on it, for a line that says when something was taken.
+   Found late: the first sweep searched for `toLocaleString()` with empty
+   parens and walked straight past two calls that pass date options to it. */
+function dateAt(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleString(DATE_LOCALE, { day:"numeric", month:"short",
+                                             hour:"2-digit", minute:"2-digit" }) : "";
+}
+function dateStamp(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleString(DATE_LOCALE) : "";
+}
 function plural(n, word, many){
   return n + " " + (n === 1 ? word : (many || word + "s"));
 }

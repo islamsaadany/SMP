@@ -4723,7 +4723,7 @@ function whenWord(at){
   if (sameDay) return "today";
   var y = new Date(now.getTime() - 864e5);
   if (d.toDateString() === y.toDateString()) return "yesterday";
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return dateShort(d);
 }
 
 function oneLine160(v){
@@ -6735,10 +6735,7 @@ function contCard(){
 }
 
 function contWhen(iso){
-  var d = new Date(iso);
-  return isFinite(d.getTime())
-    ? d.toLocaleString(undefined, { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })
-    : "";
+  return dateAt(iso);
 }
 
 /* ── The Upload tab ───────────────────────────────────────────────── */
@@ -7193,7 +7190,7 @@ function contTakenSection(){
 function reviewDayWord(){
   var w = SMPRules.reviewMoment(REVIEW);
   if (!w) return "";
-  var day = w.toLocaleDateString(undefined, { day:"numeric", month:"short" });
+  var day = dateShort(w);
   return REVIEW.reviewAt
     ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
     : day;

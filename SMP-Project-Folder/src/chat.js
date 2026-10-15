@@ -241,7 +241,7 @@ var CHAT = (function(){
     if (sameDay) return hm;
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday " + hm;
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " " + hm;
+    return dateShort(d) + " " + hm;
   }
   function dayOf(at){
     var d = new Date(at), now = new Date();
@@ -249,7 +249,7 @@ var CHAT = (function(){
     if (d.toDateString() === now.toDateString()) return "Today";
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday";
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+    return dateFull(d);
   }
   function ago(at){
     if (!at) return "";

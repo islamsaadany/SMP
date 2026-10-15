@@ -65460,3 +65460,14 @@ Islam, 2026-10-15, reading §535.9's list: *"No the capability tab should stay a
 Both are now requirements the migration is held to, not outcomes to be checked afterwards. `pillarCode` taking the code from the pillar's KIND (§535.9 b) and the joined-or-split setting (a) exist for no other purpose than to make these two true; if either fails to, the data does not move.
 
 **And the check follows from it**: before and after the move, every code on El Abd's company plan reads the same string — D001…D005 and C001…C005 — and the Strategy tab draws the same two sections with the same words. That is the proof obligation for stage 3b on this client, and it is a comparison, not a judgement.
+
+## §536.1 — The mockup's tab error, and the order in one list is settled
+Islam, 2026-10-15, of §536: *"the concept is right but you are having the mark on directions and showing capabilities"*, and *"for question 6 yes directions are first"*.
+
+**The concept is signed off. The drawing had a real error** and he found it: section 1 lit the **Directions** tab while the rail beneath it read **CAPABILITIES 5** with C001–C005 — a page that could not exist. Fixed in both panes by lighting the tab whose rail is shown (Capabilities), which is also what his own second screenshot shows.
+
+**And a second inconsistency, mine, found while fixing the first**: section 4's unit example drew *split* as **two sections stacked under one tab**, while El Abd's split is **two tabs**. One setting cannot mean two things. Redrawn as two tabs, so split means the same at every level — the unit gains a Capabilities tab exactly as the company has one. The now-unused `.secthd` rule went with it.
+
+**§536's open question is answered: directions first.** In one list the rows come out directions then capabilities — the order the merge leaves them in — not a free drag order mixing the two kinds. That was the only guess on the page; there is none left.
+
+Published as version 2. The five sign-off points of §536 §5 stand unchanged; the correction is to the drawing, not to the design.

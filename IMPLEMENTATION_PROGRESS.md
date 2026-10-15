@@ -9875,3 +9875,12 @@ Written down as a fixed requirement rather than my inference:
 Those are now the standard the migration is held to, not something to check afterwards. The two code steps exist for no other reason than to make them true — and if either fails, the data doesn't move.
 
 **The proof is a comparison, not a judgement:** before and after, every code on El Abd's company plan reads the same string, and the Strategy tab draws the same two sections with the same words.
+
+## §536.1 — Mockup corrected, and the order is settled (2026-10-15)
+You caught a real error: the **Directions** tab was lit while the list below it showed **Capabilities**. A page that couldn't exist. Fixed in both panes.
+
+Fixing it turned up a second one, mine: in the unit example I had drawn *split* as **two sections stacked on one page**, while El Abd's split is **two tabs**. One setting can't mean two different things. Now it's two tabs everywhere — a unit that splits gains a Capabilities tab exactly as the company has one.
+
+**And the order question is answered: directions first.** That was the only thing on the page I was guessing at. Nothing is a guess now.
+
+The concept is signed off and the five points stand. Version 2 published.

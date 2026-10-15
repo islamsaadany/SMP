@@ -9692,3 +9692,16 @@ Measured anyway, so step 2 starts with the answer ready. Best candidate: **a par
 **Waiting on you, to start step 2:**
 1. Confirm the part-owner answer above (report your own part, read the plan around it) — or tell me a different one.
 2. El Abd, RHI and Raya data. I cannot see any of it from here, and step 2 is the half that moves data, so every client needs its own before-and-after list in front of you before anything runs.
+
+## §535 — A capability belongs to a unit or the company, not to a function's plan (2026-10-15)
+Islam corrected the model: a capability is never part of a function's plan. It belongs to a unit or to the company. Who owns it — a person, a function head, a unit head — is a separate question from where it lives.
+
+**This reverses a decision recorded a week ago** ("a capability with its own page becomes an internal pillar of the function that holds it"). Recorded as a reversal, not quietly overwritten.
+
+**And the platform already agreed with him.** The spec written in September lists, under "what the platform does today, and every one of them is the fault": *"A capability can only belong to a supporting function … a capability naming no function is drawn nowhere at all — not on a unit, not at the group"*, and *"a real capability has nowhere of its own to live."* The decision I was working from did not fix that; it made it permanent.
+
+**The awkward case I put to you yesterday has dissolved.** I asked what should happen to Raya's *Product Mindset* and gave you three options. You had already answered it in September: *"the capabilities in Raya Trade are not capabilities, they are just projects under functions."* So it was never a capability — it is Marketing's own project wearing the only label the platform had. Give Marketing its project back, drop the label. No flattening, no choice needed.
+
+**What the data is missing.** A capability records which function, and nothing else. That one field is doing two jobs at once — it decides access, it decides which list the capability appears in, and it decides whose people are offered as its owners. There is no field anywhere saying which unit or which company a capability belongs to. Step 2 has to add that, and turn the function link into plain ownership.
+
+**What I need from you:** El Abd's and RHI's data. The corrected model turns on where each of their capabilities actually sits, and I cannot see either client from here. Raya is the only one in this repository, and by your own answer its capabilities are not capabilities.

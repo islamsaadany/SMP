@@ -65220,3 +65220,30 @@ Islam's shapes: *"they appear separated like in elabd or joined like in rhi or b
 
 ### What stage 3a actually shipped
 §531 / §531.1 / §531.2 (one address, one parse — 118 sites in 18 files), §532 (a capability's video clips follow its own seats), §533 (a part owner is somebody who owns only a part). No stored data moved in any of them.
+
+## §535 — A capability belongs to a unit or the company, never to a function's plan (reverses spec 066 §7.1)
+Islam, 2026-10-15: *"When we create a capability, the capability is not on the function. The capability is either on a unit or it's on the company … regardless of who owns it (a person, a BU, or a function), the capability is not the functional plan. The functional plan plans for something very, very function-driven. It's to enhance the function role or to measure something about the function when the capability is happening … It belongs to something bigger than the function, so they will always stay two different things."*
+
+**THIS REVERSES spec 066 §7.1**, recorded 2026-10-07 as *"ok for your recommendation"*: *"such a capability becomes an internal pillar of the function that holds it."* Recorded as a reversal rather than overwritten (Principle II) — §7.1 was built on the platform's current shape, and the current shape is the fault.
+
+**THE PLATFORM ALREADY ADMITS IT.** Spec 048 §2, written 2026-09-12, lists three rules under the heading *"what the platform does today … and every one of them is the fault"*. The third is: *"**A capability can only belong to a supporting function.** Every read goes through `capsOfFunction(fk)`, so a capability naming no function is drawn nowhere at all — not on a unit, not at the group."* And §1 of that spec: *"The only container the platform owns for a supporting function's projects is called a capability — so every function that plans in projects appears to hold a strategic capability whether it holds one or not, and **a real capability has nowhere of its own to live**."*
+
+So §7.1 did not fix that fault, it cemented it: it took a capability that should live on a unit or the company and made it permanent furniture inside a function's plan.
+
+### The model, corrected
+- A **pillar** lives on a **box that carries strategy** — a unit, or the company. It is **external** (a direction) or **internal** (a capability). Both plan in measures and tactics; either may plan in projects instead.
+- A **supporting function's plan is a different thing** and stays one: function-driven work, to enhance the function's role or to measure the function's part while a capability is being worked on. It may reference a capability; it never contains one.
+- **Who owns a capability is not where it lives.** A person, a function head or a unit head may own one. Ownership is a name on the row; placement is which box the row sits in. Today the platform conflates them in a single field.
+
+### What the data holds, and what it is missing
+A capability record is `{ name, def, keyObjectives, projects, fn, id }`. `fn` is the only link it has, and it is doing both jobs at once — `capHolderTarget` maps `cap:<id>` to `fn:<its fn>` for every access question, `capsOfFunction` groups them for every list, and `peopleFor` reads the holding function's people as the capability's nearest. **There is no field saying which unit or which company a capability belongs to**, and `structure.cap.at` is a group-wide placement switch, not a per-capability one.
+
+So stage 3b has to add placement and keep the function link as ownership, rather than the field rename §7.1 implied.
+
+### And the awkward case dissolves
+Raya's *Product Mindset* was the one worked example of a capability held by a function that plans in projects, and the question was what its project becomes. **Islam already answered it in spec 048**, answer 3: *"the capabilities in Raya Trade are not capabilities, they are just projects under functions."*
+
+So it is not a capability and never was — it is Marketing's own project wearing the only label the platform had for it. Its migration is **give Marketing its project back and drop the label**, not flatten anything into a pillar. The three-way choice put to Islam on 2026-10-15 (A: the function starts planning in pillars; B: the project joins the function's list; C: only flatten where the function already plans in pillars) is answered by his own earlier words: **B**, and for the reason that it was never a capability.
+
+### Not known from here
+Where El Abd's and RHI's capabilities actually sit. Neither client's data is in this repository, and the corrected model turns on exactly that: whether each of their capabilities belongs to a unit or to the company. Asked for.

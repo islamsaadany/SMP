@@ -65574,3 +65574,26 @@ Three functions in `config-data.js`: `capFoldBlockers()` (what stops it, by name
 `scripts/test-capability-fold.js` — **38 agreements**, five sections, over an El-Abd-shaped state the file makes so it runs for anybody with the repository: the code alone moves nothing on an unmigrated client (with the Reporting fill bar asserted as the one named exception); the move refuses each of the four shapes it cannot carry, by name; the plan it prints is row for row what it runs; all 15 identified rows survive; and page by page what a person reads is the same, with the capabilities tab compared **across the two different renderers** that draw it before and after. The three pages that do change are asserted to be exactly those three.
 
 Eight deliberate breaks, each counted: the move refusing nothing → 8 red; the owner not carried → 1; the row not marked internal → 14; the split not set → 5; the Temple reading records only → 2; the deck heading dropping a kind → 1; the empty Performance section kept → 2; Reporting drawing no second section → 2. And `checks/top-plan.py` caught a mistake of mine that none of those would have: rewriting the Temple's base, I dropped the Structure step's own gate, so a client with capabilities switched OFF would have been shown a base again. Both guards are there now, in that order.
+
+## §539.2 — Stage 3b (d): the SQL, generated from the move and rehearsed on a real Postgres
+Islam set the terms for the data move: the list first, a rehearsal on a copy, *"and the final step handed over as SQL for Neon's SQL editor"*. This is the SQL, and it has been run.
+
+**It is generated, never typed.** `scripts/stage3-move-sql.js` reads a working copy, asks `capFoldBlockers()` whether the move may run at all and `capFoldPlan()` what it would do, and emits statements doing exactly that — so the list Islam approves, the rehearsal that was measured and the statements that run are one thing (§100.3). Change the move and the SQL changes with it; it refuses to emit anything at all where the move is blocked.
+
+**No figure is ever retyped.** Each new pillar is built FROM THE ROW ALREADY IN THE DATABASE (`capabilities.extra->'items'->0`), with three fields laid over it: the kind, the name where the inner pillar stores none, and the owner where it stores none. Every measure, tactic, target, actual and note travels inside the object that is already there. A generator printing the data back out could mistranscribe it; this one cannot, because it never handles it.
+
+**Where the data actually lives, which is why the SQL is short.** The company's own pillars are **not** in the `pillars` table — that table's `unit_key` is `NOT NULL REFERENCES units(key)`, and the company is not a unit. They ride whole, as JSON, in `org.extra->'items'`, and a capability's inner pillars ride the same way in `capabilities.extra->'items'` (`items` is neither a column of `capabilities` nor in state-io's drop list for it). So the move is three statements inside one jsonb column plus a delete; `pillars`, `measures` and `tactics` are never touched. Found by reading `lib/state-io.js` rather than assumed from the schema's table names, which point the other way.
+
+### Rehearsed on a real Postgres, not reasoned about
+A throwaway PostgreSQL 16 cluster, the real `db/schema.sql` applied into an `el_abd` schema, and El Abd's **actual working copy** loaded into `org`, `people` and `capabilities`. Then:
+
+1. **The SQL ran and committed.** Ten rows on the company plan: D001–D005 then C001–C005, every row id intact (`cap:cap3-P1` … `cap:cap8-P1`), every owner carried, measure and tactic counts 6/4, 3/4, 3/7, 3/5, 4/4 — the numbers the reading script printed.
+2. **It matches the product's own move byte for byte.** The database's `org.extra.items` after the SQL was compared against what `capFoldIntoTop()` produces in memory from the same working copy, deeply key-sorted: **identical, all ten rows**. That is the assertion that matters — the SQL is not a second implementation that happens to look right, it demonstrably does the same thing.
+3. **And the pages built from the database are the pages the rehearsal predicted.** The post-SQL `org.extra` was fed back through the platform's own renderers: Directions, Capabilities, Performance's sections, Reporting, the Temple, the deck and every code — all seven identical to the in-memory move.
+4. **A second run is refused**, by the precondition rather than by accident: *expected 5 capabilities by id, found 0*, and nothing changes. The guards were reordered to come **before** the backup tables for exactly this reason — the first version tripped over its own backup table and gave a worse message.
+5. **The undo works**: 10 pillars and 0 capabilities back to 5 and 5, with the split setting absent again.
+6. An earlier run **rolled back cleanly** on a `RAISE` with too many parameters, leaving the database untouched — an accidental test of the rollback, and the fault was in the message, not the move.
+
+The cluster was removed afterwards. Nothing was run against any real client.
+
+**What is still Islam's to decide**, and the only thing left before this can run: the four named differences in §539's before-and-after list, and the word to go.

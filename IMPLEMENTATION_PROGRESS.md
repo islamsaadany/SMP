@@ -9941,3 +9941,27 @@ On the branch, nothing merged, and **no client has been touched**. This is the b
 `node scripts/stage3-before-after.js <the file>`
 
 **Next is (d) — your El Abd data.** I'll rehearse it on a copy and bring you the list and the SQL. Nothing runs until you say so.
+
+## §539.2 — Step (d) ready: the SQL is written and I have already run it (2026-10-15)
+**Nothing has been run against El Abd.** What follows is a rehearsal on a throwaway copy. The SQL is waiting for your word.
+
+**I didn't hand-write it.** A script reads your working copy, asks the platform itself what the move would do, and writes the SQL from that answer. So the list you approve, the rehearsal I measured, and the statements that run are the same thing — and if the move ever changes, the SQL changes with it.
+
+**And no number is ever retyped.** The SQL builds each new row *from the row already in the database*, adding only three things: that it is a Capability, its name where the inner row has none, and its owner where the inner row has none. Every measure, target, actual and note travels inside the object that's already there, so there is nothing to mistype.
+
+**I set up a real PostgreSQL, loaded your actual El Abd file into it, and ran the SQL.** Not reasoned about — run. What happened:
+
+- **Ten rows on the company plan afterwards: D001–D005, then C001–C005.** Every row id unchanged, every owner carried, the measure and tactic counts exactly as the list says (6/4, 3/4, 3/7, 3/5, 4/4).
+- **It produces exactly what the platform's own move produces** — I compared the database's contents against the in-memory move, field by field: identical, all ten rows. The SQL isn't a second version of the move that happens to look right; it provably does the same thing.
+- **And the pages built from that database are the pages I showed you.** I fed the database's contents back through the platform and rendered Directions, Capabilities, Performance, Reporting, the Temple, the deck and every code: all identical.
+- **Running it twice is refused** — *"expected 5 capabilities by id, found 0"* — and nothing changes.
+- **The undo works**: back to 5 and 5, exactly as it was.
+
+The test database was deleted afterwards.
+
+**The SQL does this, in one transaction:** checks the client is in the state it was written for (and stops if not); copies both tables it touches, so there is an undo; moves the five rows; turns on the two-tab setting so the tabs don't move; deletes the five old records; then checks its own work row by row and refuses to commit if anything is off. It finishes by printing the ten rows so you can read them.
+
+**What I need from you — this is the point I said I'd stop at:**
+
+1. **The four differences** from the before-and-after list: the separator dot on the Capabilities tab, the Reporting fill bar appearing, the Temple's base reading measures and tactics instead of "0 Projects", and the deck showing C001–C005 instead of EQ / EE / DT / T& / OE. Each is listed; say if any of them is not acceptable.
+2. **The word to run it**, and confirmation that El Abd's schema really is `el_abd`.

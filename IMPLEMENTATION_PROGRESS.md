@@ -9756,3 +9756,14 @@ Both make the point sharper, not softer: **a capability at company level has no 
 **One question left, and your Setup screen asks it in a column of its own — "Plans in".** A capability set to *projects* becomes one internal pillar whose work is those projects; that is settled. A capability set to *pillars* holds a list, and one row cannot become several without a rule. So: does any El Abd capability plan in pillars — and if so, should **the capability become one pillar with its pillars as tactics**, or should **each of its pillars become an internal pillar of its own**, with the capability's name surviving as a grouping?
 
 That answer plus El Abd's rows, and the migration can be written. Drawing updated to version 3.
+
+## §535.5 — The open question is closed; a capability already is one pillar (2026-10-15)
+El Abd's Capabilities tab settles it, and the answer is better than either option I offered: **each capability already looks exactly like a direction.** C001 has 6 key measures and 4 tactics. RHI's D001 has 4 and 6. Same pane, same shape.
+
+**And the platform already knew.** The code carries your own sentence from an earlier round: *"a capability planning in a pillar approach is typical to a direction"* — so it draws a capability using the Directions pane itself, and its note says the capability's **one pillar row** carries the measures and tactics. A capability planned in pillars is already one pillar wearing a container's record. My question had been answered before I asked it.
+
+**So the migration is one-to-one.** Each of the five becomes one internal pillar of the company, keeping its measures, tactics, name, description, owner, custodian and its C code — and keeping its id, so every figure and every bit of history still points at the same row. The Capabilities tab then comes from the display setting being *split*, and El Abd's page looks exactly as it does today.
+
+**One edge, already decided by the product:** if a capability carries more than one pillar row, the page today shows the first and says *"holds N plans from before"*. The migration will do the same — and will **report** every capability with extra rows rather than dropping them quietly.
+
+**What's left:** just the five rows themselves, to confirm each carries one pillar and to produce your before-and-after list. There is no open question left in the rule.

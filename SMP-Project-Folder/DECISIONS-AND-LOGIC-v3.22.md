@@ -65309,3 +65309,30 @@ Its columns are `# · Capability · Held by · Owner · Custodian · Plans in ·
 
 ### The one question left
 A capability whose **Plans in** is *projects* becomes one internal pillar whose work is those projects — settled. A capability whose **Plans in** is *pillars* holds a list, and one row cannot become several without a rule. So: does any El Abd capability plan in pillars, and if so does **the capability become one pillar with its pillars as tactics**, or does **each of its pillars become an internal pillar of its own** with the capability's name surviving as a grouping? Put to Islam. Drawing updated to version 3 with the layers figure, both corrections and the revised per-client table.
+
+## §535.5 — Question 8 is closed: a capability already IS one pillar, and the product says so
+Islam sent El Abd's Capabilities tab: a rail reading **CAPABILITIES 5** (C001 End-to-End Quality Mindset, C002 ERP Enhancement, C003 Digital Transformation, C004 Talent & Workforce…, C005 Operational excellence) and C001's pane showing **KEY MEASURES 6** and **TACTICS 4**, with Owner and Custodian on the band. Beside RHI's D001 — *Developing Brand Presence*, **KEY MEASURES 4**, **TACTICS 6** — the two panes are the same picture.
+
+**Neither branch of the question put to him applies**, and the reason is already in the code. §488.1, quoting him: *"a capability planning in a pillar approach is typical to a direction"*. So `topCapBody` draws a pillars-capability with **the Directions pane's own body (`unitPlanBody`, bare) under the capability's band — never a list of directions inside it**, and its comment records the storage: *"the capability's **one pillar row** carries them, so reporting, scoring and the deck are unmoved."*
+
+So a capability planned in pillars is **already one pillar** wearing a container's record. The question of whether one row becomes one pillar or several was answered before it was asked.
+
+### The migration rule, settled
+Each of El Abd's five capabilities becomes **one internal pillar of the company**, one-to-one:
+
+| from the capability | to the pillar |
+|---|---|
+| its one pillar row's measures and tactics | the pillar's measures and tactics — the same row, unmoved |
+| name (*End-to-End Quality Mindset*) | the pillar's name |
+| `def` | the pillar's sub-line |
+| owner · custodian | the pillar's owner · custodian |
+| code C001…C005 | kept |
+| — | `kind` = **Capability** (internal) |
+
+Ids are kept throughout, so every figure, snapshot and history entry still points at the same row. The Capabilities tab then comes from the box's display setting being *split*, and El Abd's page looks exactly as it does today.
+
+### The one edge, and the product has already decided it
+`topCapBody` handles `items.length > 1` by drawing the first and printing *"This capability holds N plans from before; the first is shown."* So extra pillar rows are **already legacy and already hidden**. The migration follows the same rule — the first row is the plan — and **reports every capability carrying extra rows** rather than dropping them silently, so nothing disappears without being named.
+
+### What is left before stage 3b can run
+Only the records themselves: El Abd's five capability rows, to confirm each carries exactly one pillar row and to produce the before-and-after list. The *rule* no longer has an open question in it.

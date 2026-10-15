@@ -529,6 +529,15 @@
   .ssrow:hover { background:var(--surface-2); }
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* ── §536: WHERE THE ARROW KEYS ARE ───────────────────────────────────
+     The row the arrows are on, which is NOT the row the mouse is over and
+     NOT a focused one — focus stays in the search box so the next three
+     letters still land there. It wears the same ground `:hover` does plus a
+     mark of its own, because on a ticking list a row can be lit (`on`),
+     hovered and arrowed-to at once and three states that look alike are one
+     state nobody can read (§41). */
+  .ssrow.ssrow-at { background:var(--surface-2); box-shadow:inset 2px 0 0 var(--gold); }
+  .ssrow.on.ssrow-at { background:var(--over-bg); }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
   /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
      The plan's owner list is fifty entries made of two different kinds of

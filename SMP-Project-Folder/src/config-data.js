@@ -8563,6 +8563,11 @@ function topAsUnit(){
            /* §466: the way it plans and, in projects, its projects — the view
               a unit's own holder reads (§405), so the function pages draw it. */
            format:topWay() === "projects" ? "projects" : undefined,
+           /* §537: and whether its pillars show as one list or as two — the
+              Structure step's own key, surfaced here so one reader answers
+              for the company and for a unit alike. `undefined` where it is
+              not set, so the box is the same shape it was (§50.6). */
+           pillarSplit:SMPRules.topSplit(GROUP) ? true : undefined,
            projects:topProjectsList(),
            active:true };
 }
@@ -8598,10 +8603,60 @@ function partMine(){
   var u = topAsUnit();
   return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
 }
+/* ── §537 · THE HALF OF A SPLIT BOX A PAGE IS DRAWING ────────────────────
+   The rule (`SMPRules.pillarsSplit`) says whether a box shows its pillars as
+   one list or as two; this says WHICH of the two is on screen, and it rides
+   beside §517's part filter rather than beside it as a second mechanism —
+   every list the product draws already asks `partFilter`/`partItems` and
+   honours what they say, so one hook splits the Plan tab, the rail, the
+   counts and the Reporting page together (§53.5).
+
+   A FILTER AND NEVER A FILTERED ARRAY, for §517's own recorded reason: a
+   pillar's displayed code is its POSITION in `u.items` (`pillarCode`) and the
+   pen writes back through that same index, so handing a page a shortened copy
+   would renumber every row and edit the wrong one. The halves skip; they
+   never renumber.
+
+   SET AROUND A RENDER, CLEARED AFTER IT. `drawHalf()` is the only way in and
+   restores whatever was there even when the renderer throws — the alternative
+   is a global somebody forgets to clear, and a stale one would silently hide
+   half of the next page drawn. */
+var PILLAR_HALF = "";
+function drawHalf(half, fn){
+  var was = PILLAR_HALF;
+  PILLAR_HALF = half;
+  try { return fn(); } finally { PILLAR_HALF = was; }
+}
+/* Whether THIS box is shown apart. The company answers through topAsUnit(),
+   which carries the Structure step's own key (§466's shape). */
+function boxSplit(u){ return SMPRules.pillarsSplit(u); }
+/* Does this box hold anything in the internal half? The question a tab asks
+   before it draws itself, because a heading over nothing is not an empty
+   state (§520.2, §45.2) — and today it is false for every box in every
+   client, which is why turning the setting on moves nobody yet. */
+function boxHasHalf(u, half){
+  if (!u || !boxSplit(u)) return false;
+  return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
+}
+function halfFilter(u){
+  if (!PILLAR_HALF || !boxSplit(u)) return null;
+  var half = PILLAR_HALF;
+  return function(p){ return SMPRules.pillarInHalf(p, half); };
+}
+/* §537: BOTH REASONS A ROW MIGHT BE SKIPPED, ANSWERED ONCE. The half and the
+   half eye are independent — a narrowed direction owner looking at a split
+   company sees their own directions on the Directions tab and nothing on the
+   Capabilities one — so they compose rather than override. `null` when
+   neither applies, which is every client today and every page before §517. */
 function partFilter(u){
-  if (!(u && u.topLayer) || !partOnly()) return null;
-  var w = world(), v = viewer();
-  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+  var pf = null, hf = halfFilter(u);
+  if (u && u.topLayer && partOnly()) {
+    var w = world(), v = viewer();
+    pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  if (!pf) return hf;
+  if (!hf) return pf;
+  return function(p){ return pf(p) && hf(p); };
 }
 function partItems(u){
   var f = partFilter(u), list = (u && u.items) || [];

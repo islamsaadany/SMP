@@ -10041,11 +10041,14 @@ function renderUnitPlan(u){
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
       "this " + L1("pillar")) +
+    /* §537: the count and the rail are of the list AS DRAWN — on a split box
+       this tab holds one half of it, and a hint reading "15 Directions" over
+       a rail of five is the kind of disagreement §116.2 exists to stop. */
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
+      ? '<p class="sec-hint">' + partItems(u).length + ' ' + L("pillar","bu") +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L1("pillar") + '</p>' : '') +
-    (railWorthIt(u.items)
+    (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +

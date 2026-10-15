@@ -1259,6 +1259,27 @@ function unitPlansInCell(k, u){
   return '<span class="pill kind">' + esc(unitPlanWord(unitFormat(u))) + '</span> ' +
     '<span class="mono">' + unitPlanCount(k) + '</span>';
 }
+/* ── §537 · PILLARS SHOWN AS ONE LIST, OR APART ──────────────────────────
+   The row beside "Plans in", and only where the box plans in pillars — there
+   is nothing to join or split otherwise. Two options, both named from the
+   BOX'S OWN WORDS: a client that calls its pillars Directions and its
+   internal ones Core Capabilities reads its own names here, because the whole
+   point of the setting is that the tabs keep saying what they say today.
+
+   ABSENT IS ONE LIST (§50.6). Every box in every client reads that way now,
+   so the control opens on the answer the box already gives and changing
+   nothing changes nothing. */
+function pillarSplitWord(split){
+  return split ? L("pillar", "bu") + " and " + L("capability", "bu") + " apart" : "One list";
+}
+function pillarSplitSelect(k, u){
+  var on = SMPRules.pillarsSplit(u);
+  return '<select class="fld" data-usplit="' + esc(k) + '"' +
+      ' aria-label="How ' + esc(u.name) + ' shows its ' + esc(L("pillar","bu").toLowerCase()) + '">' +
+    [false, true].map(function(v){
+      return '<option value="' + (v ? "split" : "one") + '"' + (on === v ? " selected" : "") + '>' +
+        esc(pillarSplitWord(v)) + '</option>'; }).join("") + '</select>';
+}
 function unitFormatSelect(k, u){
   var f = unitFormat(u);
   return '<select class="fld" data-uformat="' + esc(k) + '"' +
@@ -1433,6 +1454,12 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdField("Plans in", unitFormatSelect(k, u)) +
+        /* §537: and, while it plans in pillars, whether they show as one list
+           or apart. Hidden for the other two ways rather than greyed: there
+           are no pillars on screen to join or to split, so the row would be
+           answering about something the box is not doing (§61). */
+        (unitFormat(u) === "pillars"
+          ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
         pdField(L1("division"),
           '<select class="fld" data-ucomp="' + esc(k) + '">' +

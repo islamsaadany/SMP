@@ -4622,6 +4622,75 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return b && b.way === "projects" ? "projects" : "pillars";
   }
+  /* ── 2b · ONE PILLAR LIST, SHOWN AS ONE OR AS TWO (§537) ────────────────
+     Islam, of a capability: *"a pillar is external and internal pillars and
+     they are the same like directions but internal directions are called
+     capabilities"*, and of the whole of stage 3b: *"ok noting that nothing
+     will change for the users this is just a structural change"*.
+
+     SO THE KIND IS THE THING AND THE SPLIT IS A SETTING. A pillar carries a
+     `kind` already — the workbook has validated B2:B60 against these two
+     words since the first import, the `pillars` table has the column, and the
+     rail and the pane have drawn the pill since §488. What the platform has
+     never had is a way to say *and show them apart*: El Abd reads Directions
+     and Capabilities on two tabs only because its capabilities are a SECOND
+     RECORD TYPE, and that record type is what spec 066 removes.
+
+     THIS IS THE SETTING THAT LETS IT BE REMOVED WITHOUT ANYBODY NOTICING. Set
+     on the box, over the one pillar list it already holds: joined, which is
+     every client today, or apart, which is what El Abd's company will be set
+     to on the day its five capabilities become five internal pillars. Each
+     half then keeps its own stored word — `pillar` for the external half and
+     `capability` for the internal one — so the tabs read Directions and
+     Capabilities exactly as they do now (§404's labels, untouched).
+
+     ABSENT IS JOINED (§50.6, §30.2). Not because joined is the better answer
+     but because it is TODAY'S: every box in every client draws its pillar
+     list as one list, Raya's units included, and a default of "apart" would
+     put a second tab on every one of them the day this shipped. The one
+     client that wants two tabs is the one client that already has them, and
+     it is set explicitly, in the same commit as its data moves (stage 3b, d).
+
+     THE BOX IS A UNIT, A COMPANY, OR ANY BOX THAT PLANS IN PILLARS — and it
+     is asked of the UNIT-LIKE OBJECT rather than of the group, so the company
+     answers through `topAsUnit()` exactly as it answers `format` (§466). Not
+     a supporting function: a capability *"is either on a unit or it's on the
+     company … It belongs to something bigger than the function"* (Islam,
+     2026-10-14), so a function's pillar list holds one kind and has nothing
+     to show apart. Not a capability either, for the plainer reason that it
+     IS one.
+
+     THE KINDS ARE READ HERE AND NOWHERE ELSE. `xlsx.js` held the list and
+     built the workbook's validation and the pen's picker from it (§53.5);
+     it reads this one now, so the browser, the server and the spreadsheet
+     cannot disagree about what a kind may say. */
+  var PILLAR_KINDS = ["Direction", "Capability"];
+  var PILLAR_CAP = "Capability";
+  /* INTERNAL IS SAID, NEVER ASSUMED. `addPillar` mints `kind: ""` and most
+     stored pillars carry nothing at all (§488's own finding), so the question
+     is *is this one marked as a capability* and everything else — the blank,
+     "Direction", a word somebody typed — is external. Written this way round
+     so that an unsaid kind lands in the half every client reads today. */
+  function pillarIsCap(p) { return !!p && String(p.kind || "") === PILLAR_CAP; }
+  /* The one stored key, on the box. A boolean and not a word: there are two
+     answers and a third would be a different question (§50.6). */
+  var PILLAR_SPLIT = "pillarSplit";
+  function pillarsSplit(box) { return !!box && box[PILLAR_SPLIT] === true; }
+  /* And where the COMPANY keeps it: beside `way` on the Structure step's own
+     plan block, which is the row the setting is drawn next to (§466). The
+     company has no stored record of its own — `topAsUnit()` is built fresh on
+     every read — so this is what that builder reads. */
+  function topSplit(group) {
+    var s = structureOf(group), t = s && s.top, b = t && t.plan;
+    return !!(b && b.split === true);
+  }
+  /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
+     asking the question in opposite directions. `half` is "cap" or "dir";
+     anything else means the whole list and every pillar is in it. */
+  function pillarInHalf(p, half) {
+    if (half !== "cap" && half !== "dir") return true;
+    return pillarIsCap(p) === (half === "cap");
+  }
   /* A company project's named Owner enters that project's figures (Islam:
      the function's own rule, §301) and never submits. A RULE beside
      mayReportTop, and only while the company plans in projects. */
@@ -5240,7 +5309,9 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,
@@ -15859,6 +15930,11 @@ function topAsUnit(){
            /* §466: the way it plans and, in projects, its projects — the view
               a unit's own holder reads (§405), so the function pages draw it. */
            format:topWay() === "projects" ? "projects" : undefined,
+           /* §537: and whether its pillars show as one list or as two — the
+              Structure step's own key, surfaced here so one reader answers
+              for the company and for a unit alike. `undefined` where it is
+              not set, so the box is the same shape it was (§50.6). */
+           pillarSplit:SMPRules.topSplit(GROUP) ? true : undefined,
            projects:topProjectsList(),
            active:true };
 }
@@ -15894,10 +15970,60 @@ function partMine(){
   var u = topAsUnit();
   return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
 }
+/* ── §537 · THE HALF OF A SPLIT BOX A PAGE IS DRAWING ────────────────────
+   The rule (`SMPRules.pillarsSplit`) says whether a box shows its pillars as
+   one list or as two; this says WHICH of the two is on screen, and it rides
+   beside §517's part filter rather than beside it as a second mechanism —
+   every list the product draws already asks `partFilter`/`partItems` and
+   honours what they say, so one hook splits the Plan tab, the rail, the
+   counts and the Reporting page together (§53.5).
+
+   A FILTER AND NEVER A FILTERED ARRAY, for §517's own recorded reason: a
+   pillar's displayed code is its POSITION in `u.items` (`pillarCode`) and the
+   pen writes back through that same index, so handing a page a shortened copy
+   would renumber every row and edit the wrong one. The halves skip; they
+   never renumber.
+
+   SET AROUND A RENDER, CLEARED AFTER IT. `drawHalf()` is the only way in and
+   restores whatever was there even when the renderer throws — the alternative
+   is a global somebody forgets to clear, and a stale one would silently hide
+   half of the next page drawn. */
+var PILLAR_HALF = "";
+function drawHalf(half, fn){
+  var was = PILLAR_HALF;
+  PILLAR_HALF = half;
+  try { return fn(); } finally { PILLAR_HALF = was; }
+}
+/* Whether THIS box is shown apart. The company answers through topAsUnit(),
+   which carries the Structure step's own key (§466's shape). */
+function boxSplit(u){ return SMPRules.pillarsSplit(u); }
+/* Does this box hold anything in the internal half? The question a tab asks
+   before it draws itself, because a heading over nothing is not an empty
+   state (§520.2, §45.2) — and today it is false for every box in every
+   client, which is why turning the setting on moves nobody yet. */
+function boxHasHalf(u, half){
+  if (!u || !boxSplit(u)) return false;
+  return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
+}
+function halfFilter(u){
+  if (!PILLAR_HALF || !boxSplit(u)) return null;
+  var half = PILLAR_HALF;
+  return function(p){ return SMPRules.pillarInHalf(p, half); };
+}
+/* §537: BOTH REASONS A ROW MIGHT BE SKIPPED, ANSWERED ONCE. The half and the
+   half eye are independent — a narrowed direction owner looking at a split
+   company sees their own directions on the Directions tab and nothing on the
+   Capabilities one — so they compose rather than override. `null` when
+   neither applies, which is every client today and every page before §517. */
 function partFilter(u){
-  if (!(u && u.topLayer) || !partOnly()) return null;
-  var w = world(), v = viewer();
-  return function(p){ return SMPRules.ownsDirection(w, v, p); };
+  var pf = null, hf = halfFilter(u);
+  if (u && u.topLayer && partOnly()) {
+    var w = world(), v = viewer();
+    pf = function(p){ return SMPRules.ownsDirection(w, v, p); };
+  }
+  if (!pf) return hf;
+  if (!hf) return pf;
+  return function(p){ return pf(p) && hf(p); };
 }
 function partItems(u){
   var f = partFilter(u), list = (u && u.items) || [];
@@ -22066,7 +22192,10 @@ function monthNums(start){
 var DIRS = ["\u2265", "\u2264"];
 /* §276: the workbook validates the list the pen offers, read from one place. */
 var COMPILES = SMPRules.COMPILES;
-var KINDS = ["Direction", "Capability"];
+/* §537: the two kinds are the shared rule's now, read here exactly as
+   COMPILES is above — the workbook's validation, the pen's picker and the
+   platform's own "is this one internal" test are one list (§53.5). */
+var KINDS = SMPRules.PILLAR_KINDS;
 var YESNO = ["Yes", "No"];
 
 /* A theme is chosen by NAME, never by its code. The codes (OT, VC, DIV) are
@@ -35555,11 +35684,14 @@ function renderUnitPlan(u){
       (sel.tactics || []).reduce(function(a, t){
         return a + SMPRules.gapMissing("tactic", t).length; }, 0),
       "this " + L1("pillar")) +
+    /* §537: the count and the rail are of the list AS DRAWN — on a split box
+       this tab holds one half of it, and a hint reading "15 Directions" over
+       a rail of five is the kind of disagreement §116.2 exists to stop. */
     (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu") +
+      ? '<p class="sec-hint">' + partItems(u).length + ' ' + L("pillar","bu") +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L1("pillar") + '</p>' : '') +
-    (railWorthIt(u.items)
+    (railWorthIt(partItems(u))
       ? '<div class="split"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
           unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane"' + gapPlaceAttr(unitRailKey(u), pillarRailId(sel)) + '>' +
@@ -37373,6 +37505,27 @@ function unitPlansInCell(k, u){
   return '<span class="pill kind">' + esc(unitPlanWord(unitFormat(u))) + '</span> ' +
     '<span class="mono">' + unitPlanCount(k) + '</span>';
 }
+/* ── §537 · PILLARS SHOWN AS ONE LIST, OR APART ──────────────────────────
+   The row beside "Plans in", and only where the box plans in pillars — there
+   is nothing to join or split otherwise. Two options, both named from the
+   BOX'S OWN WORDS: a client that calls its pillars Directions and its
+   internal ones Core Capabilities reads its own names here, because the whole
+   point of the setting is that the tabs keep saying what they say today.
+
+   ABSENT IS ONE LIST (§50.6). Every box in every client reads that way now,
+   so the control opens on the answer the box already gives and changing
+   nothing changes nothing. */
+function pillarSplitWord(split){
+  return split ? L("pillar", "bu") + " and " + L("capability", "bu") + " apart" : "One list";
+}
+function pillarSplitSelect(k, u){
+  var on = SMPRules.pillarsSplit(u);
+  return '<select class="fld" data-usplit="' + esc(k) + '"' +
+      ' aria-label="How ' + esc(u.name) + ' shows its ' + esc(L("pillar","bu").toLowerCase()) + '">' +
+    [false, true].map(function(v){
+      return '<option value="' + (v ? "split" : "one") + '"' + (on === v ? " selected" : "") + '>' +
+        esc(pillarSplitWord(v)) + '</option>'; }).join("") + '</select>';
+}
 function unitFormatSelect(k, u){
   var f = unitFormat(u);
   return '<select class="fld" data-uformat="' + esc(k) + '"' +
@@ -37547,6 +37700,12 @@ var ROWDLG_SPECS = {
         pdField("Code prefix", '<input class="fld mono" value="' + esc(u.codePrefix) +
                         '" data-upx="' + esc(k) + '">') +
         pdField("Plans in", unitFormatSelect(k, u)) +
+        /* §537: and, while it plans in pillars, whether they show as one list
+           or apart. Hidden for the other two ways rather than greyed: there
+           are no pillars on screen to join or to split, so the row would be
+           answering about something the box is not doing (§61). */
+        (unitFormat(u) === "pillars"
+          ? pdField(L("pillar","bu") + " show as", pillarSplitSelect(k, u)) : "") +
         pdSect("Where it sits, and who runs it") +
         pdField(L1("division"),
           '<select class="fld" data-ucomp="' + esc(k) + '">' +
@@ -63764,6 +63923,44 @@ var CLIENTSETUP = (function () {
         structWrite(nx);
       });
       wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
+      /* ── §537 · AND WHETHER THEY SHOW AS ONE LIST OR APART ──────────────
+         The row beside "plans in", for the same reason it sits beside it in
+         a unit's dialog: both answer *what does this box's plan look like*.
+         Only while it plans in pillars — projects have no second kind.
+
+         TWO OPTIONS NAMED FROM THE CLIENT'S OWN WORDS, so El Abd reads
+         "Directions and Capabilities apart" and a client that calls them
+         something else reads its own. ABSENT IS ONE LIST (§50.6): the key is
+         deleted rather than written false, so a company set apart and set
+         back leaves the structure exactly as it found it.
+
+         WRITTEN STRAIGHT TO THE STRUCTURE, never through `switchPlanWay`:
+         nothing is hidden either way. The same pillars are drawn, in one tab
+         or in two, so there is nothing to warn about and nothing to keep. */
+      if (topWayNow === "pillars") {
+        var sr = el("div", "stsech");
+        var st = el("span", "wzrt");
+        st.appendChild(el("span", "wzsub", W("pillar", "many", "Directions") + " show as"));
+        var ssel = el("select", "fld");
+        [["one", "One list"],
+         ["split", W("pillar", "many", "Directions") + " and " + W("capability", "many", "Capabilities") + " apart"]
+        ].forEach(function (f) {
+          var o = el("option", null, f[1]); o.value = f[0];
+          if ((SMPRules.topSplit(GROUP) ? "split" : "one") === f[0]) o.selected = true;
+          ssel.appendChild(o);
+        });
+        ssel.setAttribute("data-wztopsplit", "1");
+        ssel.setAttribute("aria-label", "How the " + W("topword", "one", "company").toLowerCase() +
+          " shows its " + W("pillar", "many", "Directions").toLowerCase());
+        ssel.addEventListener("change", function () {
+          var nx = structNow(), t = nx.top;
+          t.plan = t.plan || {};
+          if (ssel.value === "split") t.plan.split = true;
+          else { delete t.plan.split; if (!Object.keys(t.plan).length) delete t.plan; }
+          structWrite(nx);
+        });
+        st.appendChild(ssel); sr.appendChild(st); dr.appendChild(sr);
+      }
       planWays(dr, "top", "group", [topWayNow], ["pillar"]);
     } else dr.appendChild(el("p", "sthid", atCo
       ? "Off: the " + topLow + " plans nothing of its own."
@@ -66448,12 +66645,42 @@ var SYNC = (function () {
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    /* §537: the external half, where the box is shown apart.
+                       `drawHalf` is a no-op on a joined box, which is every
+                       box in every client today — so this line changes the
+                       markup of nothing and is passed unconditionally rather
+                       than behind a branch that would have to ask the same
+                       question twice (§53.5). */
+                    render: function(){ return drawHalf("dir", function(){ return renderUnitPlan(topAsUnit()); }); },
                     /* §520: a part owner sees their own part and nothing
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
                     when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                  /* ── §537 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
+                     The same renderer over the same list, filtered to the
+                     pillars marked Capability and labelled with the client's
+                     own word for them — which is how El Abd keeps the two
+                     tabs it reads today once its five capabilities stop being
+                     a record type of their own (spec 066, stage 3b).
+
+                     DRAWN ONLY WHILE IT HOLDS SOMETHING (§45.2, §520.2). The
+                     setting alone is not enough: a box set apart with nothing
+                     marked internal would grow a tab standing over an empty
+                     rail, and the empty state under it would be answering a
+                     question nobody asked. Today that is every box, which is
+                     why turning the setting on moves nobody until the data
+                     moves with it.
+
+                     IT SITS ABOVE `caps` AND TAKES ITS PLACE. While both
+                     could be drawn they are different things — this half is
+                     the company's own pillars, `caps` is the separate record
+                     type — and the order puts them where El Abd's eye already
+                     goes. `caps` hides itself once there is nothing left in
+                     it (`capsReachable()`), so the handover needs no flag. */
+                  { k:"plancap", ac:"g_found", label:L("capability", "bu"),
+                    render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap") && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -66696,8 +66923,21 @@ var SYNC = (function () {
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
+                  /* §537: one pillar list, shown as one tab or as two. The
+                     wrapper is a no-op on a joined box — every box today — so
+                     a unit that never touches the setting draws exactly the
+                     tab it drew before. */
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
+                    render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
                     when: function(t){ return planOn(t); } },
+                  /* §537: and the internal half, with the client's own word
+                     for a capability over it, while the box is shown apart
+                     AND holds one (§45.2). Raya's units carry both kinds in
+                     one list today and keep doing so; this is the row that
+                     lets one of them be asked to show them apart. */
+                  { k:"plancap", ac:"u_plan", label:L("capability"),
+                    render: function(x){ return drawHalf("cap", function(){ return renderUnitPlan(x); }); },
+                    when: function(t){ return planOn(t) && boxHasHalf(unitLike(t), "cap"); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -74951,6 +75191,20 @@ var SYNC = (function () {
       root.querySelectorAll("select[data-uformat]").forEach(function(sel){
         sel.addEventListener("change", function(){
           switchPlanWay("unit", this.dataset.uformat, this.value, this);
+        });
+      });
+      /* §537: one list or apart. No warning and no switch-and-keep, because
+         nothing is hidden either way — the same rows are drawn, in one tab or
+         in two (unlike `data-uformat`, where the OTHER way's rows go quiet).
+         STORED AS AN ABSENCE: "one list" deletes the key rather than writing
+         `false`, so a box that is set apart and set back is byte for byte the
+         box it was before anybody pressed anything (§50.6). */
+      root.querySelectorAll("select[data-usplit]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var u = UNITS[this.dataset.usplit];
+          if (this.value === "split") u[SMPRules.PILLAR_SPLIT] = true;
+          else delete u[SMPRules.PILLAR_SPLIT];
+          paint();
         });
       });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){

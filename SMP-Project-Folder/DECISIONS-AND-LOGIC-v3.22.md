@@ -65471,3 +65471,46 @@ Islam, 2026-10-15, of §536: *"the concept is right but you are having the mark 
 **§536's open question is answered: directions first.** In one list the rows come out directions then capabilities — the order the merge leaves them in — not a free drag order mixing the two kinds. That was the only guess on the page; there is none left.
 
 Published as version 2. The five sign-off points of §536 §5 stand unchanged; the correction is to the drawing, not to the design.
+
+## §537 — Stage 3b (a): joined or split, as one setting on the box
+Islam, 2026-10-15, authorising it: *"go ahead with a"*. The mockup it builds is §536 / §536.1, signed off at version 2.
+
+**The problem it solves.** El Abd reads **Directions** and **Capabilities** on two tabs. It reads them that way only because its capabilities are a *second record type* — `GROUP.capabilities`, drawn by a section of its own — and that record type is exactly what spec 066 removes. The moment those five rows become five pillars of the company's own list, the Capabilities tab has nothing left to draw and its five rows appear under Directions. §535.10 forbids that. So the platform needs a way to say *one pillar list, shown as two*, **before** the rows move. This is it.
+
+**One setting, on the box, over the one list.**
+- Two answers: **One list**, and **Directions and Capabilities apart** — both named from the box's own words, so a client that calls them something else reads its own names (§404's labels, untouched).
+- It is a property of the **box**, asked of the unit-like object: a unit reads `pillarSplit` on itself; the company reads `structure.top.plan.split` and `topAsUnit()` surfaces it under the same name, exactly as it already does for `format` (§466). One reader, two storage places, because the company has no record of its own.
+- **Not on a supporting function, and not on a capability.** Islam, 2026-10-14: a capability *"is either on a unit or it's on the company … It belongs to something bigger than the function"* — so a function's pillar list holds one kind and has nothing to show apart. A capability-as-box is left out for the plainer reason that it is one.
+
+**Absent is one list, and that is the whole safety argument (§50.6, §30.2).** Not because joined is the better answer but because it is *today's*: every box in every client draws its pillar list as one list, Raya's units included. A default of "apart" would have put a second Plan tab on six of the worked example's ten units the day this shipped. The one client that wants two tabs is the one client that already has them, and it will be set explicitly, in the same commit as its data moves (stage 3b, d).
+
+**The kind decides the half, and the kind already exists.** A pillar has carried `kind` since the first import: the workbook validates B2:B60 against `["Direction","Capability"]`, the `pillars` table has the column, and the rail and the pane have drawn the pill since §488. That list moved into `lib/rules.js` and `xlsx.js` reads it from there, so the workbook's validation, the pen's picker and the platform's own *is this one internal* test are one list (§53.5). **Internal is said, never assumed**: `addPillar` mints `kind: ""` and most stored pillars carry nothing, so the question is *is this one marked Capability* and a blank lands in the half every client reads today.
+
+**A filter, never a filtered array.** §517 wrote the trap down and it applies unchanged: a pillar's displayed code is its POSITION in `u.items` and the pen writes back through that index, so handing a page a shortened copy would renumber every row and edit the wrong one. The halves **skip**; they never renumber. And the hook is `partFilter`/`partItems` — the one pair every rail, count and pane already goes through — so one change splits the Plan tab, its rail, its counts and its hints together rather than in nine places that would drift (§53.5).
+
+**It composes with the half eye rather than replacing it.** They are independent questions: a narrowed part owner looking at a split company sees their own directions on the Directions tab and their own capability on the Capabilities one. `partFilter` returns both conditions ANDed, `null` when neither applies — which is every client today.
+
+**`drawHalf` sets the half around a render and puts back what it found**, in a `finally`, so a renderer that throws cannot leave the next page drawn half-hidden, and an inner half (the Capabilities tab calls a renderer that asks for a list) is restored to the outer one rather than to nothing.
+
+**The tab is about content, not about the switch.** A box set apart that holds nothing internal is offered **no** second tab — a heading over nothing is not an empty state (§45.2, §520.2). That guard is what makes the setting inert today, and it is the one the check nearly missed: see below.
+
+### What changed, and what did not
+| | |
+|---|---|
+| New | `PILLAR_KINDS` · `PILLAR_CAP` · `pillarIsCap` · `PILLAR_SPLIT` · `pillarsSplit` · `topSplit` · `pillarInHalf` in `lib/rules.js`; `PILLAR_HALF` · `drawHalf` · `boxSplit` · `boxHasHalf` · `halfFilter` in `config-data.js` |
+| Changed | `partFilter` composes two reasons instead of one; `topAsUnit()` carries `pillarSplit`; `renderUnitPlan`'s count and rail read the list **as drawn**; `xlsx.js`'s `KINDS` reads the shared list |
+| Added to the pages | one `plancap` section on the company's Strategy tab and one on a unit's, each a no-op while the box is joined |
+| Added to Set-up | one row beside "Plans in" — in a unit's dialog, and on the Structure step's company card — drawn only where the box plans in pillars |
+| Moved | **nothing.** No data, no default, no client. |
+
+### What this step does NOT yet do, said plainly
+The split reaches the **Strategy** tab, which is where a plan is read and written and what the mockup draws. It does **not** yet reach Performance or Reporting, and that is deliberate rather than unfinished: on those two pages a capability is still drawn from `GROUP.capabilities`, and moving them is stage 3b **(c)** — the 77 reads of the container that become reads of a kind. Writing them now would mean writing each of them twice. **(d) cannot run until (c) has**, and (c) is now the next step.
+
+One smaller limit, recorded rather than fixed: the two halves share a rail selection, so picking a row on one tab and then opening the other lands on that tab's first row. Nothing is lost and nothing is wrong — it is the behaviour of a box nobody has set yet — and the rail key gains its half in (c), where it has to change anyway.
+
+### The check, and the break that found the real fault
+`scripts/test-pillar-split.js` — **35 agreements**, in five sections: the drawn list unmoved against `2158aab` for all eleven boxes of the worked example with the half eye off and on; the two halves a **partition** of the one list on a made El-Abd-shaped company (asserted as a partition, because a filter answering "everything" or "nothing" satisfies either end alone); the setting an absence at every depth and a round trip leaving the box byte for byte what it was; the composition with the half eye, measured on a part owner the file **makes**; and `drawHalf` restoring its half through a return, a throw and a nesting.
+
+Seven deliberate breaks, each counted rather than predicted: `pillarIsCap` always true → 7 red; always false → 8; `halfFilter` ignoring the setting → 1; `pillarsSplit` reading `!== false` → 3; `partFilter` returning the half instead of composing → 2; `drawHalf` clearing instead of restoring → 2.
+
+**And the seventh came back GREEN.** With the setting test taken out of `boxHasHalf`, every assertion in the file passed over a build in which **every Raya unit holding a pillar marked Capability would have grown a second Plan tab overnight** — six of the ten units in the worked example, and precisely the one thing Islam said must not happen. The file had measured what the setting *does* and never asked what it does to a box that was never set. §255's fault with a new face: the state it was asked about was the state it had made. Two assertions were written from that break — the worked example holds six units with an internal pillar, and not one of them is offered a second tab — and the break is red now.

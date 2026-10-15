@@ -9884,3 +9884,21 @@ Fixing it turned up a second one, mine: in the unit example I had drawn *split* 
 **And the order question is answered: directions first.** That was the only thing on the page I was guessing at. Nothing is a guess now.
 
 The concept is signed off and the five points stand. Version 2 published.
+
+## §537 — Step (a) built: one list, or two tabs (2026-10-15)
+The setting from the mockup is in. On the branch, nothing merged, and **no client has been touched**.
+
+**What it is.** One row in Set-up, on the box, next to "Plans in", reading **Directions show as** — in each client's own words. Two answers: **One list**, and **Directions and Capabilities apart**. It is on a unit's own card and on the company's card on the Structure step, and it only appears where that box plans in pillars; there is nothing to join or split otherwise.
+
+**What it does.** Set to apart, the box's one list of pillars is drawn on two tabs — the ones marked *Direction* on the first, the ones marked *Capability* on the second, each tab wearing the client's own word. Nothing is copied, moved or renumbered: the same rows, drawn in two places instead of one, with the codes they already have.
+
+**What it does for El Abd.** Nothing yet, and that is the point. When its five capabilities become five rows of the company's own list, this is the switch that keeps the Capabilities tab exactly where it is. It is set on the day the data moves, not before.
+
+**And nothing changed for anybody today.** Every box in every client is unset, and unset means one list — the way all of them read now. Worth saying out loud because it was nearly not true: six of the ten units in the example already hold a row marked *Capability*, so a version that split on the mark rather than on the switch would have given six units a second tab overnight. It doesn't, and that is now one of the things the checks refuse to let slip.
+
+**Checked.** Two new checks, 35 + 46 agreements. The first holds every box's drawn list to exactly what the previous version drew, and proves the two tabs between them hold every pillar, none twice. The second presses the actual controls: the row appears where it should and nowhere else, reads the client's words when the client renames them, adds the tab only when the box is set apart, and leaves nothing behind when set back. Both were broken on purpose, twelve ways between them, to confirm each goes red — and one of those breaks came back **green** the first time, which is how the "six units would have grown a tab" fault above was found. It is red now. Eleven existing screen checks and the server's own rules all pass unchanged.
+
+**What is left before the data can move.**
+- **(b)** a pillar's code comes from its kind, so a capability keeps C001 rather than becoming D006.
+- **(c)** the remaining pages — Performance and Reporting — read a row's kind instead of reading the old capabilities list. The split only reaches the Strategy tab today, deliberately: on those two pages a capability is still a separate record, and writing them now would mean writing them twice.
+- **(d)** El Abd's own move, after the before-and-after list comes out identical.

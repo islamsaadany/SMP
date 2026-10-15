@@ -2040,6 +2040,44 @@ var CLIENTSETUP = (function () {
         structWrite(nx);
       });
       wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
+      /* ── §537 · AND WHETHER THEY SHOW AS ONE LIST OR APART ──────────────
+         The row beside "plans in", for the same reason it sits beside it in
+         a unit's dialog: both answer *what does this box's plan look like*.
+         Only while it plans in pillars — projects have no second kind.
+
+         TWO OPTIONS NAMED FROM THE CLIENT'S OWN WORDS, so El Abd reads
+         "Directions and Capabilities apart" and a client that calls them
+         something else reads its own. ABSENT IS ONE LIST (§50.6): the key is
+         deleted rather than written false, so a company set apart and set
+         back leaves the structure exactly as it found it.
+
+         WRITTEN STRAIGHT TO THE STRUCTURE, never through `switchPlanWay`:
+         nothing is hidden either way. The same pillars are drawn, in one tab
+         or in two, so there is nothing to warn about and nothing to keep. */
+      if (topWayNow === "pillars") {
+        var sr = el("div", "stsech");
+        var st = el("span", "wzrt");
+        st.appendChild(el("span", "wzsub", W("pillar", "many", "Directions") + " show as"));
+        var ssel = el("select", "fld");
+        [["one", "One list"],
+         ["split", W("pillar", "many", "Directions") + " and " + W("capability", "many", "Capabilities") + " apart"]
+        ].forEach(function (f) {
+          var o = el("option", null, f[1]); o.value = f[0];
+          if ((SMPRules.topSplit(GROUP) ? "split" : "one") === f[0]) o.selected = true;
+          ssel.appendChild(o);
+        });
+        ssel.setAttribute("data-wztopsplit", "1");
+        ssel.setAttribute("aria-label", "How the " + W("topword", "one", "company").toLowerCase() +
+          " shows its " + W("pillar", "many", "Directions").toLowerCase());
+        ssel.addEventListener("change", function () {
+          var nx = structNow(), t = nx.top;
+          t.plan = t.plan || {};
+          if (ssel.value === "split") t.plan.split = true;
+          else { delete t.plan.split; if (!Object.keys(t.plan).length) delete t.plan; }
+          structWrite(nx);
+        });
+        st.appendChild(ssel); sr.appendChild(st); dr.appendChild(sr);
+      }
       planWays(dr, "top", "group", [topWayNow], ["pillar"]);
     } else dr.appendChild(el("p", "sthid", atCo
       ? "Off: the " + topLow + " plans nothing of its own."

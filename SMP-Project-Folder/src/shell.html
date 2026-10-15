@@ -357,12 +357,42 @@
                     render: function(){ return renderUnitCompete(topAsUnit()); },
                     when: function(){ return compOn("group", SMPRules.COMPETE) && !partOnly(); } },
                   { k:"plan", ac:"g_found", label:SMPRules.planTitle(GROUP, "group", topWay()) || (buExists() ? "Plan" : (topWay() === "projects" ? L("project", "bu") : L("pillar", "bu"))),
-                    render: function(){ return renderUnitPlan(topAsUnit()); },
+                    /* §537: the external half, where the box is shown apart.
+                       `drawHalf` is a no-op on a joined box, which is every
+                       box in every client today — so this line changes the
+                       markup of nothing and is passed unconditionally rather
+                       than behind a branch that would have to ask the same
+                       question twice (§53.5). */
+                    render: function(){ return drawHalf("dir", function(){ return renderUnitPlan(topAsUnit()); }); },
                     /* §520: a part owner sees their own part and nothing
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
                     when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                  /* ── §537 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
+                     The same renderer over the same list, filtered to the
+                     pillars marked Capability and labelled with the client's
+                     own word for them — which is how El Abd keeps the two
+                     tabs it reads today once its five capabilities stop being
+                     a record type of their own (spec 066, stage 3b).
+
+                     DRAWN ONLY WHILE IT HOLDS SOMETHING (§45.2, §520.2). The
+                     setting alone is not enough: a box set apart with nothing
+                     marked internal would grow a tab standing over an empty
+                     rail, and the empty state under it would be answering a
+                     question nobody asked. Today that is every box, which is
+                     why turning the setting on moves nobody until the data
+                     moves with it.
+
+                     IT SITS ABOVE `caps` AND TAKES ITS PLACE. While both
+                     could be drawn they are different things — this half is
+                     the company's own pillars, `caps` is the separate record
+                     type — and the order puts them where El Abd's eye already
+                     goes. `caps` hides itself once there is nothing left in
+                     it (`capsReachable()`), so the handover needs no flag. */
+                  { k:"plancap", ac:"g_found", label:L("capability", "bu"),
+                    render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap") && (!partOnly() || partMine()); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -605,8 +635,21 @@
                   { k:"drivers", ac:"u_plan", label:"Drivers",   render:renderUnitDrivers,
                     /* OFF FOR A CLIENT UNTIL THE OFFICE TURNS IT ON (2026-09-23). */
                     when: function(){ return driversOn(); } },
-                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan", render:renderUnitPlan,
+                  /* §537: one pillar list, shown as one tab or as two. The
+                     wrapper is a no-op on a joined box — every box today — so
+                     a unit that never touches the setting draws exactly the
+                     tab it drew before. */
+                  { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
+                    render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
                     when: function(t){ return planOn(t); } },
+                  /* §537: and the internal half, with the client's own word
+                     for a capability over it, while the box is shown apart
+                     AND holds one (§45.2). Raya's units carry both kinds in
+                     one list today and keep doing so; this is the row that
+                     lets one of them be asked to show them apart. */
+                  { k:"plancap", ac:"u_plan", label:L("capability"),
+                    render: function(x){ return drawHalf("cap", function(){ return renderUnitPlan(x); }); },
+                    when: function(t){ return planOn(t) && boxHasHalf(unitLike(t), "cap"); } },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
         } },
@@ -8860,6 +8903,20 @@
       root.querySelectorAll("select[data-uformat]").forEach(function(sel){
         sel.addEventListener("change", function(){
           switchPlanWay("unit", this.dataset.uformat, this.value, this);
+        });
+      });
+      /* §537: one list or apart. No warning and no switch-and-keep, because
+         nothing is hidden either way — the same rows are drawn, in one tab or
+         in two (unlike `data-uformat`, where the OTHER way's rows go quiet).
+         STORED AS AN ABSENCE: "one list" deletes the key rather than writing
+         `false`, so a box that is set apart and set back is byte for byte the
+         box it was before anybody pressed anything (§50.6). */
+      root.querySelectorAll("select[data-usplit]").forEach(function(sel){
+        sel.addEventListener("change", function(){
+          var u = UNITS[this.dataset.usplit];
+          if (this.value === "split") u[SMPRules.PILLAR_SPLIT] = true;
+          else delete u[SMPRules.PILLAR_SPLIT];
+          paint();
         });
       });
       root.querySelectorAll("input[data-upx]").forEach(function(inp){

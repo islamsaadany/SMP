@@ -65396,3 +65396,33 @@ And their names mirror the company's five directions almost one for one — Maxi
 ### Two smaller facts, recorded
 - **The words are already stored per level**: the top layer calls its pillars *Direction / Directions*, the capability layer calls its own *Core Capability / Core Capabilities*. After the merge the two tabs keep their own words — nothing to invent, and nothing Islam has to re-type.
 - **0 of 22 functions carry a plan.** The function-plan question does not arise for this client at all.
+
+## §535.8 — El Abd's units are not coming back; they are deleted (reverses spec 066 §2.2 for this client)
+Islam, 2026-10-15: *"the business units were a mistake that we removed later and adjusted the planning to pillars under the company directly so they need to be removed ensuring that the directions and capabilities under the company are untouched"*, and *"there is not units coming back"*. Also: *"the file should be named ElAbd yes that's the right copy"* — so the working copy whose `org` reads **"Test 2"** is El Abd's, confirmed.
+
+**THIS REVERSES spec 066 §2.2 and §9 for this client.** Those sections had El Abd's folded units *"coming back as boxes"* — §2.2 reasoning that nothing hides anything else, §9 naming El Abd as the migration needing the most care because of it. For El Abd that is now wrong in its premise: the units were never a shape to restore, they were a mistake already undone in the plan. Recorded as a reversal, not overwritten (Principle II). **§2.2's rule itself stands** — nothing hides anything else — it simply has no units to apply to here.
+
+That makes stage 3b's second move a **delete**, which is the most dangerous operation in the whole of spec 066. `scripts/stage3-unit-removal-readings.js` puts the whole of what would go in front of Islam first; it deletes nothing and writes nothing.
+
+### Measured on El Abd's own working copy
+**Every reference to the five keys, found by walking the whole stored tree** rather than by checking remembered places — **25 in total**, and every one is structure: `unitKeys[]`, `units.<key>`, `units.<key>.ukey`, `unitRoles.<key>`, `group.weighting.units[].key`. Not one is a figure, a report or a person.
+
+**What a delete would break — ten questions, each asserted at zero on its own** rather than inferred from the walk finding nothing (§94.2): people attached · history entries · archives · submitted reports · cycle notes · deck slides · objective weights · access rows · an owner or custodian · a figure sourced from one. **All ten clean. A delete breaks no pointer.** Every weight is zero and every `unitRoles` entry is `{head:null, custodian:null}`.
+
+**What content would go:** 21 objectives (**0 carrying a reported figure**), 20 actions, 5 foundation clauses, across Retail Expansion Accross Egypt (3·5), Maximizing Current Stores (6·3), FMCG Growth (4·6), Exploring Catering and Events (3·0), E-Commerce Growth (5·6). No pillars, no projects, no SWOT lines.
+
+**And the finding that decides it: 16 of the 21 objectives are copies.** These units were folded INTO the company's plan by §447, so most of what they hold already stands there as a key measure on a direction. **Five do not appear anywhere on the company plan**, and those are what a delete actually loses:
+
+| on the hidden unit | the objective |
+|---|---|
+| Retail Expansion Accross Egypt | new shops contribute 10% of overall retail sales |
+| Maximizing Current Stores | Customer Satisfaction (NPS) |
+| FMCG Growth | New Category Revenue Contribution |
+| FMCG Growth | FMCG Profit Margin |
+| Exploring Catering and Events | Model profitability % |
+
+Matching is by **wording**, so it is a prompt to look and never a verdict: a "copy" should still be eyeballed. Put to Islam as the one decision left on this move — each of the five carried onto a direction as a key measure, or let go deliberately.
+
+### What this makes El Abd's stage 3b
+1. **The five capabilities become internal pillars of the company** (§535.5, §535.7) — settled, one-to-one, ids kept.
+2. **The five switched-off units are deleted**, with the five orphan objectives above decided first. The company's directions and capabilities are untouched by it, which is what he asked to be ensured and what the reference walk above establishes: nothing the directions or capabilities hold points at a unit.

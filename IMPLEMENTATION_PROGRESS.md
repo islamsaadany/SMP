@@ -9812,3 +9812,30 @@ And their names are almost exactly your five company directions. That is the old
 **Two smaller notes:** the words are already stored per level — the top calls them *Directions*, the capability layer calls its own *Core Capabilities* — so after the merge each tab keeps its own word and you re-type nothing. And **none of your 22 functions carries a plan**, so the whole function question doesn't arise for this client.
 
 **One thing to confirm:** the file's tenant is named **"Test 2"**, though the data is plainly El Abd's. Tell me that's the right copy before anything is written for real.
+
+## §535.8 — The units get deleted, and here is exactly what that costs (2026-10-15)
+Your answer changes move 2 from "bring them back" to "delete them" — which is the more dangerous of the two, so I measured the whole of it before writing anything. **Nothing has been changed; this only reads.**
+
+**Good news first. A delete breaks nothing.** I walked your entire stored state rather than checking the places I happened to remember. The five units are referenced **25 times, and every one is structure** — the lists that name a unit. Not one is a figure, a report or a person.
+
+Then I asked ten separate questions, each on its own: people attached, history, archives, submitted reports, cycle notes, deck slides, objective weights, access rows, owners, figures sourced from them. **All ten clean.** No owner on any of them, every weight zero.
+
+**What would actually go:** 21 objectives — **none of them with a reported figure** — 20 actions, and 5 foundation clauses.
+
+**And the part that matters: 16 of those 21 objectives already exist on your company plan.** They were copied up when the units were switched off, so deleting the units loses nothing of them.
+
+**Five do not exist anywhere on the company plan.** These are the real cost of the delete:
+
+| on the hidden unit | the objective |
+|---|---|
+| Retail Expansion Accross Egypt | new shops contribute 10% of overall retail sales |
+| Maximizing Current Stores | Customer Satisfaction (NPS) |
+| FMCG Growth | New Category Revenue Contribution |
+| FMCG Growth | FMCG Profit Margin |
+| Exploring Catering and Events | Model profitability % |
+
+**That's the one decision left on this move:** each of those five either gets carried onto the matching direction as a key measure, or is let go on purpose. I matched by wording, so please read the list rather than trust my count — a near-match might not be the same thing.
+
+**Also worth recording:** the spec said El Abd's units would "come back as boxes", and named it the hardest part of the whole migration. Your answer makes that wrong in its premise — they were never a shape to restore. Written down as a reversal rather than quietly dropped.
+
+**So El Abd's step 2 is now two clear moves:** the five capabilities become internal pillars (settled, one-to-one, ids kept), and the five dead units get deleted once you have ruled on those five objectives.

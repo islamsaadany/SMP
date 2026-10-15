@@ -901,7 +901,7 @@ var SYNC = (function () {
       if (missed.length) {
         /* Said, never swallowed: a row the platform cannot find is a row it
            cannot put back, and pretending otherwise re-posts the refusal.
-           §533.5: WRITTEN AS A FUNCTION so the discard question can put this
+           §534.5: WRITTEN AS A FUNCTION so the discard question can put this
            band back — it replaces whatever row it is opened over, and the way
            out has to restore the band it covered, not the one before it. */
         var showMissed = function () {
@@ -933,8 +933,8 @@ var SYNC = (function () {
     });
   }
 
-  /* ── DISCARD ASKS IN THE BAND (§533.5) ──────────────────────────────────
-     The last browser dialog in the product, and the one the §533 sweep missed
+  /* ── DISCARD ASKS IN THE BAND (§534.5) ──────────────────────────────────
+     The last browser dialog in the product, and the one the §534 sweep missed
      because that count was taken over shell.html alone.
 
      It is the same fault as the other twenty-nine, with one of its own on
@@ -966,7 +966,7 @@ var SYNC = (function () {
     if (no) no.addEventListener("click", function () { if (back) back(); });
     var yes = document.getElementById("discard-yes");
     if (yes) yes.addEventListener("click", function () {
-      /* ── AND BOTH DISCARDS NOW DO THE SAME THING (§533.5) ──────────────
+      /* ── AND BOTH DISCARDS NOW DO THE SAME THING (§534.5) ──────────────
          The second one — offered when the refused lines could not be put back
          — reloaded WITHOUT clearing the copy this tab keeps, so the reload
          handed the unsaved work straight back. Under a button reading

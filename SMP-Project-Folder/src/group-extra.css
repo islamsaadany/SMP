@@ -472,7 +472,7 @@
     .rmconfirm .pick button { width:100%; }
   }
 
-  /* ── DELETING FOR GOOD: what goes, what stays, and no way back (§533) ──
+  /* ── DELETING FOR GOOD: what goes, what stays, and no way back (§534) ──
      Three acts in the product take something away with nothing behind them:
      a clip's bytes, a batch of them, and a filed archive. Everything else
      that reads like a deletion archives first and `.archline` says so — so
@@ -521,7 +521,7 @@
     .rmconfirm .ledger .mk { width:auto; }
   }
 
-  /* ── THE ROLES A RESTORE WOULD GIVE BACK, ONE PER LINE (§533.1) ────────
+  /* ── THE ROLES A RESTORE WOULD GIVE BACK, ONE PER LINE (§534.1) ────────
      The browser's box said them as two runs of commas — "Give back: A, B"
      and "Held by somebody else now, so left alone: C (Noura)". Three roles
      in a comma list is readable; six is not, and six is a BU owner who is
@@ -548,7 +548,7 @@
     .rmconfirm .rolelist .mk { width:auto; }
   }
 
-  /* ── THE QUESTION UNDER THE LINE (§533.4) ─────────────────────────────
+  /* ── THE QUESTION UNDER THE LINE (§534.4) ─────────────────────────────
      Nine controls across six screens asked one sentence — "Remove X? This
      cannot be undone here." — in the browser's box, which covers the list it
      is asking about and never says WHICH line. Islam picked B of the two

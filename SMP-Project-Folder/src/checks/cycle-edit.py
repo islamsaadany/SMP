@@ -578,7 +578,7 @@ with sync_playwright() as p:
     # is held here, so the press is an ordinary one; forcing only keeps the
     # check able to report on the build before it.
     press(pg, ".newcycle [data-closecycle]", "Close the cycle in the pen", force=True)
-    # §533.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
+    # §534.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
     # beside it has always used. The press opens the question; the cycle closes
     # on its answer. Asserted in that order, so a build that closed on the
     # FIRST press — no question at all — fails here rather than passing by

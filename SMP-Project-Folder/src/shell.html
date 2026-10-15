@@ -5221,7 +5221,7 @@
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
       b.addEventListener("click", function(){
         var fk = this.dataset.fndelyes;
-        /* ── §533.2: THE PANEL KEEPS THE REFUSAL ────────────────────────
+        /* ── §534.2: THE PANEL KEEPS THE REFUSAL ────────────────────────
            Both of these raised a browser box and CLOSED the panel, so the
            row being worked on went with the answer. The panel stays open and
            redraws its own refusal — the shape it has always had for the same
@@ -5251,7 +5251,7 @@
        (§53.5): a second copy here is how the register's twins get made. A
        taken key is suffixed rather than refused, the same answer addUnit
        gives — two functions may genuinely share a name's letters. */
-    /* §533.3: the name comes off the page's own field now, never a prompt()
+    /* §534.3: the name comes off the page's own field now, never a prompt()
        — which a browser may suppress, leaving a control that looks live and
        does nothing (§95's argument, and §69.22's precedent for the other
        one). Typing is held in NEWFN so a repaint cannot take a half-typed
@@ -5354,7 +5354,7 @@
       activeKeys().forEach(function(k){
         var c = reportedCount(UNITS[k]); gaps += c.total - c.done; asked += c.total;
       });
-      /* ── §533.3: REOPEN'S OWN SHAPE, FOR REOPEN'S OPPOSITE ───────────
+      /* ── §534.3: REOPEN'S OWN SHAPE, FOR REOPEN'S OPPOSITE ───────────
          The two controls sit in the same strip and did the same kind of
          thing in two different mediums — Reopen in the platform's dialog
          with its facts laid out, Close in the browser's box with its facts
@@ -5549,7 +5549,7 @@
       /* A name is the one thing nothing can be derived from, and it is what
          every snapshot, delta and archived plan will be filed under. */
       if (!String(d.name || "").trim()) {
-        /* §533.2: THE REFUSAL GOES UNDER THE BOX, and the panel draws it from
+        /* §534.2: THE REFUSAL GOES UNDER THE BOX, and the panel draws it from
            `why` — so the sentence and the empty field are on screen together,
            which a dialog over the form could never manage. Focus is taken
            AFTER the repaint, or it lands on the node paint() is about to
@@ -5587,7 +5587,7 @@
          never the raw figures: a clear with nothing behind it would destroy
          the closed cycle's numbers. Same act an import performs on the plan
          it replaces, same Restore. */
-      /* ── §533.3: THE QUESTION IS IN FRONT OF THE ACT NOW ─────────────
+      /* ── §534.3: THE QUESTION IS IN FRONT OF THE ACT NOW ─────────────
          It used to ARCHIVE, then ask, then undo the archive on Cancel —
          the one place in the product where pressing Cancel had work to
          reverse rather than nothing to do. It was safe only while the undo
@@ -5848,7 +5848,7 @@
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
         var t = b.dataset.submit;
-        /* ── §533.2: THE GATE SAYS NOTHING, BECAUSE THE PAGE ALREADY HAS ──
+        /* ── §534.2: THE GATE SAYS NOTHING, BECAUSE THE PAGE ALREADY HAS ──
            This was the THIRD telling of one refusal. The button is drawn
            `aria-disabled` carrying the same list in a bubble that opens on
            hover and on focus (§221, §163); the bar beneath it names the
@@ -6155,7 +6155,7 @@
         FNMENU = null; UMENU = null; COMENU = null; paint(); });
     });
     /* Keep closes the question and does nothing else — which is what Cancel
-       has to mean everywhere in this product (§533.1's lesson from the one
+       has to mean everywhere in this product (§534.1's lesson from the one
        place it did not). */
     document.querySelectorAll("[data-rmkeep]").forEach(function(b){
       b.addEventListener("click", function(){ RMASK = null; paint(); });
@@ -6294,7 +6294,7 @@
       b.addEventListener("click", function(){
         var e = MONTHREG[+b.dataset.mpclear];
         if (!e) return;
-        /* §533.3: GOES AND STAYS, which this act has always had and could
+        /* §534.3: GOES AND STAYS, which this act has always had and could
            never lay out — the twelve numbers go and the annual target stays,
            and the second half is the one somebody hesitates over, because
            the row does not visibly change until you look at the benchmark. */
@@ -6722,7 +6722,7 @@
        never had a season and one whose last season was removed must be
        byte-identical, or the difference is a change the authoriser has to
        judge that nobody made. */
-    /* §533.2: the refusal's own way out — a unit named in it opens that
+    /* §534.2: the refusal's own way out — a unit named in it opens that
        unit's Drivers, which is the page the sentence sends you to. */
     document.querySelectorAll("[data-goseas]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -6742,7 +6742,7 @@
         var se = SMPRules.seasonById(list, id);
         var used = SMPRules.seasonUsedBy(seasonsUnits(), id);
         if (used.length) {
-          /* §533.2: the refusal is a line under the row that refused, where
+          /* §534.2: the refusal is a line under the row that refused, where
              the units it names can be pressed. */
           SEASWHY = id; paint();
           return;
@@ -6775,7 +6775,7 @@
     document.querySelectorAll("[data-mbdrop]").forEach(function(b){
       b.addEventListener("click", function(){
         var val = this.dataset.mbdrop, p = val.split("|");
-        /* §533.4: it asked nothing at all, which the drawing named as a
+        /* §534.4: it asked nothing at all, which the drawing named as a
            difference to decide rather than leave. Islam: they should ask. */
         if (rmAsk(this, "mbdrop", val,
             "Stop " + esc(p[0]) + " pointing at " +
@@ -6790,7 +6790,7 @@
         if (now && now !== was && !renameMainbu(was, now)) {
           /* Refused rather than silently merged: two departments becoming one
              is a decision, and it is not one a typo gets to make.
-             §533.2: the refusal is a line under this box rather than a
+             §534.2: the refusal is a line under this box rather than a
              browser's box over the page, and what was typed is kept with it —
              the repaint below used to restore the old name, so the correction
              had to be typed a second time to be read at all. */
@@ -6803,7 +6803,7 @@
     });
     document.querySelectorAll("[data-mbdel]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* §533.4: the same, one row out. It only asks when the row points at
+        /* §534.4: the same, one row out. It only asks when the row points at
            something — a name typed by mistake and mapped to nothing is the
            BU list's empty line, and the family lets those go on one press.
            People are already handled: the control is not drawn at all while
@@ -7292,21 +7292,21 @@
         var p = personBy(key);
         if (!p) return;
         if (personActive(p)) {
-          /* §533.3: the question opens in this row's own corner, the way the
+          /* §534.3: the question opens in this row's own corner, the way the
              delete question beside it in the same menu always has. It only
              asks when there is something to take — somebody holding nothing
              is retired by the press, because nothing is being decided. */
           if (personRoles(p).length) { PRET = key; PMENU = null; paint(); return; }
           retirePerson(key);
         } else {
-          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §533.1) ────────
+          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4, §534.1) ────────
              It used to hand the person back with nothing, so they returned as
              a Contributor of their unit and nobody was told. A seat somebody
              else has taken up meanwhile is named and NOT offered — restoring
              one person must never quietly unseat another.
 
              THE ASKING IS A DIALOG NOW, because the question has three
-             answers and a yes/no box cannot carry three (§533.1). Opened
+             answers and a yes/no box cannot carry three (§534.1). Opened
              BEFORE the menu is cleared, so the dialog remembers the control
              to put focus back on; the work happens in its handlers, so this
              one returns. */
@@ -7365,7 +7365,7 @@
            the ANSWER, and says so when the answer is no. */
         var key = b.dataset.pdelYes;
         var done = deletePerson(key);
-        /* §533.2: "Open the menu again to see what" was the platform asking
+        /* §534.2: "Open the menu again to see what" was the platform asking
            somebody to do its own work — it had just refused on the basis of
            what points at them, so it knows. The panel stays open and names
            it, in the shape it already uses on the way in (deletePanel). */
@@ -8483,7 +8483,7 @@
     document.querySelectorAll("[data-draftdel]").forEach(function(b){
       b.addEventListener("click", function(){
         var id = b.dataset.draftdel;
-        /* §533.3: the shape for an act with nothing behind it (§533). The
+        /* §534.3: the shape for an act with nothing behind it (§534). The
            heading is the only thing that tells one draft from another — it
            is what the table is sorted and read by — so it is what the
            question names (§186). */
@@ -10699,7 +10699,7 @@
          plan archives and replaces a whole unit's plan in memory before any
          save is attempted. Checked here rather than trusted from the page that
          drew the button (§48.2). */
-      /* §533.2: the page no longer offers a live Apply to somebody this will
+      /* §534.2: the page no longer offers a live Apply to somebody this will
          refuse — the button is held and the reason is a line beside it. This
          stays, unsaid: it is the gate, and the screen that drew the button is
          not what authorises the act (§48.2). */
@@ -11643,7 +11643,7 @@
     var yes = box.querySelector("[data-rmyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); onYes(); });
   }
-  /* ── DELETING FOR GOOD: the three acts with nothing behind them (§533) ──
+  /* ── DELETING FOR GOOD: the three acts with nothing behind them (§534) ──
      `rmConfirmOpen()`'s opposite number, and the reason it is a second
      builder rather than a flag on the first: that one closes by saying the
      plan is archived first and where the way back is, and these three have
@@ -11694,7 +11694,7 @@
     var yes = box.querySelector("[data-dstyes]");
     if (yes) yes.addEventListener("click", function(){ closeModal(); o.onYes(); });
   }
-  /* ── REMOVING A LINE: the gate the nine share (§533.4) ─────────────────
+  /* ── REMOVING A LINE: the gate the nine share (§534.4) ─────────────────
      Returns true when it has just OPENED the question, so the handler that
      called it returns and nothing is removed; false when the press came from
      the strip's own Remove, so the handler carries on exactly as it did
@@ -11827,7 +11827,7 @@
     var all = box.querySelector("[data-caprmall]");
     if (all) all.addEventListener("click", function(){ closeModal(); doCapRemove(id, null); });
   }
-  /* ── RESTORING A PERSON: three answers, so three controls (§533.1) ─────
+  /* ── RESTORING A PERSON: three answers, so three controls (§534.1) ─────
      The one place in the product where the browser's box had been made to
      carry a question with three answers. OK gave back the roles it could,
      CANCEL brought the person back with no role, and not restoring at all

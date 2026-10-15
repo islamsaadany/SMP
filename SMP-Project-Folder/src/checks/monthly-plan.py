@@ -465,7 +465,7 @@ with sync_playwright() as p:
       const c = r && r.querySelector('.mpopen'); if (c) c.click();
     }""")
     pg.wait_for_timeout(400)
-    # §533.3: CLEARING ASKS IN THE PLATFORM'S OWN DIALOG NOW — what goes
+    # §534.3: CLEARING ASKS IN THE PLATFORM'S OWN DIALOG NOW — what goes
     # (the twelve months) and what stays (the annual target), which is the half
     # this act has always had and the browser's box could never lay out. The
     # dialog handler stays registered: it proves no browser box is raised either.

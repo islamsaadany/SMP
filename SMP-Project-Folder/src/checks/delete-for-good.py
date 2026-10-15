@@ -1,4 +1,4 @@
-"""DELETING FOR GOOD: what goes, what stays, and no way back (§533).
+"""DELETING FOR GOOD: what goes, what stays, and no way back (§534).
 
 Three acts in the product take something away with nothing behind them: a
 clip's bytes, every clip outside the open review, and a filed archive.

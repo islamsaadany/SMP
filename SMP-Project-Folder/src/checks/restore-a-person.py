@@ -1,4 +1,4 @@
-"""RESTORING A PERSON: three answers, so three controls (§533.1).
+"""RESTORING A PERSON: three answers, so three controls (§534.1).
 
 The one place in the product where the browser's box had been made to carry a
 question with three answers. OK gave back the roles it could; CANCEL brought

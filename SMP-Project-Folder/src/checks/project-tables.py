@@ -520,7 +520,7 @@ with sync_playwright() as p:
     ck("...keyed by the fn: target the server authorises",
        btn and btn[0][0] == DEST, btn)
 
-    # §533.2: THE REFUSAL NO LONGER SPEAKS IN A BROWSER BOX, so a box raised
+    # §534.2: THE REFUSAL NO LONGER SPEAKS IN A BROWSER BOX, so a box raised
     # here is a regression rather than the thing being measured. Recorded for
     # the whole section and asserted once, after both refusals.
     boxes = []
@@ -529,7 +529,7 @@ with sync_playwright() as p:
     def press():
         """Press Submit and hand back the reason the PAGE gives for refusing.
 
-        §533.2 deleted the box this used to read. The same list is in the
+        §534.2 deleted the box this used to read. The same list is in the
         bubble the dimmed button carries (§221, §163 -- it opens on hover AND
         on focus) and in the bar beneath, which names the places holding it
         and walks to the exact box; the box was the third telling, and the
@@ -574,10 +574,10 @@ with sync_playwright() as p:
     said = press()
     ck("a figure at risk with no note refuses it too",
        "no note" in said and not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
-    # Both halves of §533.2 at once: the refusal is still said, and it is no
+    # Both halves of §534.2 at once: the refusal is still said, and it is no
     # longer said twice. A build that kept the box passes everything above
     # this line and fails here.
-    ck("...and neither refusal raises a browser dialog (§533.2)", not boxes, boxes)
+    ck("...and neither refusal raises a browser dialog (§534.2)", not boxes, boxes)
 
     # 3 · nothing in the way -> it goes, and the dot the tab has been showing
     #     since §69.9 finally has something that clears it

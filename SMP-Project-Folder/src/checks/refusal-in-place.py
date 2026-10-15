@@ -1,4 +1,4 @@
-"""NINE REFUSALS, SAID WHERE THEY HAPPENED (§533.2).
+"""NINE REFUSALS, SAID WHERE THEY HAPPENED (§534.2).
 
 Nine of the product's browser boxes were not questions at all: each fired
 AFTER the platform had already refused and changed nothing, so nothing was

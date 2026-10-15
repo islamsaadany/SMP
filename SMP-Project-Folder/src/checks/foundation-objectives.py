@@ -135,7 +135,7 @@ def side(pg, where, label):
     # REMOVE the middle one. It carries a target, so it asks — and the answer
     # being yes is part of the contract.
     #
-    # §533.4: IT ASKS UNDER THE ROW NOW, in a strip of its own, rather than in
+    # §534.4: IT ASKS UNDER THE ROW NOW, in a strip of its own, rather than in
     # the browser's box over the table. The dialog handler stays registered:
     # it is what proves no box is raised as well. The strip's Remove carries
     # the same `data-korm` the × does, so it is pressed the same way.

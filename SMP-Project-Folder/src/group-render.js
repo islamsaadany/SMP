@@ -28,7 +28,7 @@ function esc(s){ return String(s).replace(/&(?!(?:amp|lt|gt|quot|#39);)/g,"&amp;
 /* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
    the strategy layer and the functional layer never disagree about a colour;
    85 is the added top edge that splits on-track from needs-attention. */
-/* ── REMOVING A LINE: the question under it (§533.4) ───────────────────────
+/* ── REMOVING A LINE: the question under it (§534.4) ───────────────────────
    Nine controls across six screens — a key objective, a theme, a capability's
    objective, a clause of Who we are, a SWOT line, a value on How we compete,
    and the revenue tree's route, period and driver — asked ONE sentence in the

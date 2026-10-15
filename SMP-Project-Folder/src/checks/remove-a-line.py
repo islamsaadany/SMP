@@ -1,4 +1,4 @@
-"""REMOVING A LINE: the question under it (§533.4).
+"""REMOVING A LINE: the question under it (§534.4).
 
 The last nine browser dialogs in the product asked ONE sentence — "Remove X?
 This cannot be undone here." — across six screens: a key objective, a theme,
@@ -21,7 +21,7 @@ What is asserted, and why each end matters (§94.2):
     is the whole of why B was picked over A;
   - the line is MARKED, because the sentence says "this line" and the browser
     could not point;
-  - KEEP removes nothing — the fault §533.1 found in the one place Cancel was
+  - KEEP removes nothing — the fault §534.1 found in the one place Cancel was
     an answer, asserted here so it cannot come back;
   - REMOVE takes exactly that line and leaves its neighbours, read back from
     the DATA (§96);
@@ -60,7 +60,7 @@ print("\n§1 · no browser dialog is left in the whole build")
 src = open(os.path.abspath(BUILT), encoding="utf-8").read()
 # CALLS, NOT THE WORD, and the comments have to go before the count. These
 # sources are thick with prose ABOUT confirm() and prompt() -- the §95 rulings,
-# the §69.22 note, and now §533's own reasoning -- written both in backticks
+# the §69.22 note, and now §534's own reasoning -- written both in backticks
 # and bare, so no regex over the raw text can tell "it was a confirm()" from
 # "it is a confirm()". The comments are stripped first and the scan runs on
 # what is left, which is the code.
@@ -74,7 +74,7 @@ code = re.sub(r"(?m)^\s*//.*$", " ", code)
 calls = re.findall(r"(?<![A-Za-z.`'\"])(confirm|prompt|alert)\(", code)
 # NONE LEFT, ANYWHERE. This file first allowed one: sync.js's "Discard
 # everything changed since the last successful save", which was outside this
-# family and had not been drawn. §533.5 converted it, so the number is zero and
+# family and had not been drawn. §534.5 converted it, so the number is zero and
 # the check says zero — an allowance kept after the thing it allowed is gone
 # is a hole somebody's next browser dialog slips through.
 ck("no browser dialog is left anywhere in the product",

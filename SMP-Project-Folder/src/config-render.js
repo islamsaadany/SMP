@@ -31,7 +31,7 @@ function layerOverride(key, which){
   var t = typeof TARGET !== "undefined" ? TARGET : "group";
   return SMPRules.layerWord(GROUP, t, key, which === "group" ? "one" : "many");
 }
-/* ── WHOSE ROW THE BU REFUSAL BELONGS TO (§533.2) ───────────────────────
+/* ── WHOSE ROW THE BU REFUSAL BELONGS TO (§534.2) ───────────────────────
    Asked three times while one row is drawn — the mark on the box, the value
    in it, and the sentence under it — and all three must agree or the box
    holds one name while the line names another. MBWHY is cleared by the next
@@ -2993,7 +2993,7 @@ function renderPeople(){
      BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
      the render that drew this (§48.2). What is drawn here is what to READ;
      what is enforced is asked again at the moment it matters. */
-  /* ── RETIRING, IN THE SAME CORNER AS DELETING (§533.3) ─────────────────
+  /* ── RETIRING, IN THE SAME CORNER AS DELETING (§534.3) ─────────────────
      The two acts sit next to each other in this row's menu and asked in two
      different mediums — delete in the panel below, retire in the browser's
      box. This is the panel's shape, and nothing about it is new: the same
@@ -3027,7 +3027,7 @@ function renderPeople(){
            are and the blocker itself opens with a count of its own, so one
            blocker naming two roles read "There is 2 roles still held". The
            blockers are sentences; they do not need introducing. */
-        /* §533.2: THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO. Drawn
+        /* §534.2: THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO. Drawn
            on open it says what cannot be done; drawn after Yes was pressed
            and refused it says what was not done and why that is news —
            which is the whole of the difference between the two, and the
@@ -4290,7 +4290,7 @@ function renderMainbus(){
         (editable ? '<button class="chipx" data-mbdrop="' + esc(b.name) + '|' + esc(at) +
                     '" title="Remove ' + esc(roleWhereLabel(at)) + '">&times;</button>' : '') +
         '</span>' +
-        /* §533.4: the question under the chip it belongs to. */
+        /* §534.4: the question under the chip it belongs to. */
         rmStrip("mbdrop", b.name + "|" + at, RMASK ? RMASK.say : "");
     }).join(" ");
     if (!editable) return chips;
@@ -4320,7 +4320,7 @@ function renderMainbus(){
     return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"' +
       (editable ? ' class="tk-open"' : '') + '><td class="idx">' +
       (i + 1) + '</td>' +
-      /* §533.2: THE REFUSAL SITS UNDER THE BOX, AND KEEPS WHAT WAS TYPED.
+      /* §534.2: THE REFUSAL SITS UNDER THE BOX, AND KEEPS WHAT WAS TYPED.
          This one fires on leaving the field, which is where the sentence
          belongs — and the browser's box could not do the other half: the
          repaint behind it put the old name back, so by the time the refusal
@@ -5499,7 +5499,7 @@ function renderSeasons(){
                 ? '<td class="cc"><button class="xbtn" data-seasrm="' + esc(s.id) + '" ' +
                     'title="Remove this season">×</button></td>'
                 : '') + '</tr>' +
-              /* ── §533.2: THE REFUSAL IS A LINE UNDER THE ROW ──────────
+              /* ── §534.2: THE REFUSAL IS A LINE UNDER THE ROW ──────────
                  It was a browser box, which could say the units' names but
                  could not make them reachable — and this page's own rule is
                  that a count which cannot take you to what it counts makes
@@ -6777,7 +6777,7 @@ function renderImportUpload(){
     '</div></div>';
 
   var chk = IMP.check;
-  /* ── §533.2: THE BUTTON IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──────
+  /* ── §534.2: THE BUTTON IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──────
      "Importing is the SMO's. Nothing has been applied." was a browser box
      raised by a live Apply — the whole flow walked through, a file read and
      checked, and the answer no at the last press. The grant is read here, so
@@ -7795,7 +7795,7 @@ function renderCycle(){
            an end its own arithmetic could not read. The dates go through
            `cyclePick` and write into the draft through FIELDS; only the NAME
            is still typed, so only the name is still read by id. */
-        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§533.2) ──────
+        /* ── THE REFUSAL IS UNDER THE BOX THAT REFUSED (§534.2) ──────
            Both of this panel's refusals were browser boxes, and a box opens
            OVER the form: the empty field could not be seen while the sentence
            about it was on screen. The name's box then put the cursor in the
@@ -8220,7 +8220,7 @@ function fnKebab(fk, f, mayEdit){
    delete question. */
 function fnPanels(fk, f){
   if (CLEARING === "fndel|" + fk) {
-    /* ── §533.2: THE QUESTION IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──
+    /* ── §534.2: THE QUESTION IS NOT OFFERED TO SOMEBODY IT WILL REFUSE ──
        "Functions are the SMO's. Nothing has been deleted." was a browser box
        raised by the SECOND press — the question was asked, Yes was pressed,
        and only then was the answer no. The grant is read here, so what opens
@@ -8234,7 +8234,7 @@ function fnPanels(fk, f){
         '<div class="cbtns"><button data-clearno="1">Close</button></div></div>';
     var why = fnDeleteBlockers(fk);
     if (why.length) return '<div class="kmenu kconfirm"><div class="cq">' +
-      /* THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO (§533.2): drawn on
+      /* THE SAME SENTENCE, AND THE MOMENT IT BELONGS TO (§534.2): drawn on
          open it says what cannot be done; drawn after Yes was pressed and
          refused it says what was not done, and that this is news. */
       (REFUSEDLATE === "fn:" + fk
@@ -8436,7 +8436,7 @@ function renderFunctions(){
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
-      /* ── §533.3: THE NAME IS TYPED IN THE PAGE, NOT IN A prompt() ──────
+      /* ── §534.3: THE NAME IS TYPED IN THE PAGE, NOT IN A prompt() ──────
          The last browser prompt in the product. §69.22 took the other one
          out for the reason that applies here too: a browser is allowed to
          SUPPRESS a prompt, and a suppressed prompt is a control that looks

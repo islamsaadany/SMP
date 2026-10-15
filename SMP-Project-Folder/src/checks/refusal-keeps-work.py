@@ -306,7 +306,7 @@ with sync_playwright() as pw:
        pg.evaluate("!document.getElementById('refused-keep')"))
     ck("...while Discard still is", pg.evaluate("!!document.getElementById('refused-undo')"))
 
-    # §533.5: DISCARD ASKS IN THE BAND, not in a browser box. It was the last
+    # §534.5: DISCARD ASKS IN THE BAND, not in a browser box. It was the last
     # browser dialog in the product, and the one with a fault of its own: a box
     # opens OVER the band that has just said why the save was refused, so the
     # sentence somebody needs in order to answer is the one it covers.
@@ -334,7 +334,7 @@ with sync_playwright() as pw:
     ck("...and the question is gone",
        pg.evaluate("!document.getElementById('discard-yes')"))
 
-    # §533.5: AND THE SECOND DISCARD, which is the one nothing had ever
+    # §534.5: AND THE SECOND DISCARD, which is the one nothing had ever
     # pressed. It is offered when the refused lines cannot be put back because
     # they are no longer on the page -- so the fixture makes exactly that: a
     # refusal with rows to put back, and then the row taken off the page before

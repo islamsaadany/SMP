@@ -211,7 +211,7 @@ with sync_playwright() as p:
     # markup that moved does not fail, it passes quietly.
     pg.click("[data-editcycle]"); pg.wait_for_timeout(400)
     pg.click(".newcycle [data-closecycle]"); pg.wait_for_timeout(400)
-    # §533.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
+    # §534.3: CLOSING ASKS IN THE PLATFORM'S OWN DIALOG NOW, the shape Reopen
     # beside it has always used, so the turn of the cycle this check drives
     # takes one more press. §51.11 from the other side: a check keyed on a
     # control that grew a question does not fail usefully, it hangs for 30
@@ -240,7 +240,7 @@ with sync_playwright() as p:
        pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to") == "Dec 2026",
        pg.evaluate("()=>NEWCYCLE && NEWCYCLE.to"))
     pg.click("[data-nc-go]"); pg.wait_for_timeout(400)
-    # §533.3: AND OPENING ASKS BEFORE IT ARCHIVES. It used to archive, ask
+    # §534.3: AND OPENING ASKS BEFORE IT ARCHIVES. It used to archive, ask
     # in a browser box, and undo the archive on Cancel; the archive this
     # section is about is filed on the answer now, so the answer has to be
     # given or "the run was archived first" reads 0 against a build that is

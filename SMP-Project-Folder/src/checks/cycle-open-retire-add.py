@@ -1,6 +1,6 @@
-"""§533.3 — THE THREE PATHS NOTHING ELSE WALKS.
+"""§534.3 — THE THREE PATHS NOTHING ELSE WALKS.
 
-Three conversions in §533.3 have no check between them: opening a new cycle,
+Three conversions in §534.3 have no check between them: opening a new cycle,
 retiring a person, and naming a new supporting function. cycle-edit.py covers
 CLOSING a cycle and monthly-plan.py covers clearing a plan; these three were
 browser dialogs nothing pressed.

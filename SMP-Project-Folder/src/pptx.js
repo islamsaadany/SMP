@@ -403,7 +403,7 @@ function pptxCover(orgLine, name, subLine){
    which is the whole point of that reader existing (§61). */
 function pptxUnitSlides(u, kicker){
   var C = pptxColors(), slides = [];
-  var today = dateFull(new Date());
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", u.name,
     "Strategy plan — as agreed, no reported figures · " + today));
 
@@ -501,7 +501,7 @@ function pptxUnitSlides(u, kicker){
    product is where a project's inside lives. */
 function pptxFnSlides(fk){
   var f = FUNCTIONS[fk], C = pptxColors(), slides = [];
-  var today = dateFull(new Date());
+  var today = dateDay(new Date());
   slides.push(pptxCover(GROUP.org || "Strategy Management Platform", f.name,
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){

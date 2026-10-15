@@ -163,12 +163,10 @@ var COPILOT = (function(){
     if (!p) return k;
     return (typeof knownName === "function" ? knownName(p) : "") || p.name || k;
   }
-  function when(iso){
-    if (!iso) return "";
-    var d = new Date(iso); if (isNaN(d)) return "";
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + " " + d.getFullYear();
-  }
+  /* The product's one day writer (§537). This had its own month array and
+     its own four-digit year, so a deliverable dated beside anything else on
+     screen read "11 Mar 2026" next to "11 Mar 26". */
+  function when(iso){ return dateDay(iso); }
 
   /* ── THE PANE ────────────────────────────────────────────────────────── */
   function renderPane(){

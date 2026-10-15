@@ -1086,7 +1086,7 @@ var SYNC = (function () {
         showRefusal(null);
         FAILSHOWN = "";
         lastSaved = now;
-        savedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        savedAt = timeOf(new Date());
         keepLanded();
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then

@@ -9825,23 +9825,38 @@ function clearForNewCycle(){
    date read depended on which screen you were standing on — and, wherever the
    locale was the browser's, on whose machine you were standing at.
 
-   THE LOCALE IS PINNED, and that is the decision rather than an oversight.
-   The platform writes dates BY HAND in several places and always day first:
-   `dayValue()` makes "30 Sep 2026", the month picker makes "Jul 26", the
-   reports-due day is "30 Sep". A browser set to en-US renders
-   `{day, month:"short"}` as "Sep 30" — so one screen would carry the
-   platform's own "30 Sep" beside a "Sep 30" it had just formatted. One of the
-   two has to give, and the authored strings are the ones this product has
-   always shown.
+   THE FIRST SWEEP FOUND SIX AND THERE WERE NINE. It searched for the
+   browser's formatters and walked past three day dates written out by hand
+   from a `["Jan","Feb",...]` array of their own — the history log's day
+   column, the history log's "set by X on Y", and the Copilot's deliverable
+   dates. Those are the ones this file now also answers; the array is gone
+   from all three. A spelling is a spelling whether a browser made it or a
+   loop did.
 
-   TWO SHAPES AND A STAMP, because that is what the call sites need and no
-   more: a day near enough that the year is noise, a date that has to carry
-   its year, and a moment with a time on it for a hover.
+   THE SHAPE IS ISLAM'S, and it is one shape: a day reads "5 Mar 26" — day
+   first, no leading zero, the month in three letters, the year in two
+   digits. It is written ONCE, in `DATE_DAY`, so changing it is changing one
+   line. The month picker's "Jul 26" is the same shape with the day taken
+   off, and `dayValue()`'s "30 Sep 2026" is NOT display and is left alone:
+   the platform reads the year back out of that string to do its arithmetic
+   (Islam, asked directly: *"don't touch the stored one"*).
+
+   THE LOCALE IS PINNED, and that is the decision rather than an oversight. A
+   browser set to en-US renders `{day, month:"short"}` as "Sep 30" and a bare
+   time as "09:00 AM" — so one screen would carry the platform's own "30 Sep"
+   beside a "Sep 30" it had just formatted. One of the two has to give, and
+   the authored strings are the ones this product has always shown.
+
+   A DAY, A TIME, AND A STAMP — and the day-with-time is COMPOSED from the
+   first two rather than being a fourth options object. Three formatter calls
+   exist in the whole product and the check counts them.
 
    A VALUE THAT IS NOT A DATE COMES BACK EMPTY rather than as "Invalid Date" —
    these are fed from stored strings, and the product's rule is that a value
    it cannot read is left alone rather than rewritten into nonsense (§96.2). */
 var DATE_LOCALE = "en-GB";
+var DATE_DAY = { day:"numeric", month:"short", year:"2-digit" };
+var DATE_TIME = { hour:"2-digit", minute:"2-digit" };
 function dateOf(x){
   /* NOTHING IS NOT A DATE, and the browser disagrees: `new Date(null)` is the
      epoch and `new Date(0)` is a real moment, so a missing value came back as
@@ -9852,22 +9867,24 @@ function dateOf(x){
   var d = (x instanceof Date) ? x : new Date(x);
   return isNaN(d.getTime()) ? null : d;
 }
-function dateShort(x){
+function dateDay(x){
   var d = dateOf(x);
-  return d ? d.toLocaleDateString(DATE_LOCALE, { day:"numeric", month:"short" }) : "";
+  return d ? d.toLocaleDateString(DATE_LOCALE, DATE_DAY) : "";
 }
-function dateFull(x){
+function timeOf(x){
   var d = dateOf(x);
-  return d ? d.toLocaleDateString(DATE_LOCALE, { day:"numeric", month:"long", year:"numeric" }) : "";
+  return d ? d.toLocaleTimeString(DATE_LOCALE, DATE_TIME) : "";
 }
 /* A day with a time on it, for a line that says when something was taken.
    Found late: the first sweep searched for `toLocaleString()` with empty
    parens and walked straight past two calls that pass date options to it. */
 function dateAt(x){
   var d = dateOf(x);
-  return d ? d.toLocaleString(DATE_LOCALE, { day:"numeric", month:"short",
-                                             hour:"2-digit", minute:"2-digit" }) : "";
+  return d ? dateDay(d) + ", " + timeOf(d) : "";
 }
+/* The exact moment, on a hover and nowhere else. Deliberately a different
+   register from the day shape: this one is the log's precision, down to the
+   second, and nobody reads it off the screen alongside another date. */
 function dateStamp(x){
   var d = dateOf(x);
   return d ? d.toLocaleString(DATE_LOCALE) : "";

@@ -4723,7 +4723,7 @@ function whenWord(at){
   if (sameDay) return "today";
   var y = new Date(now.getTime() - 864e5);
   if (d.toDateString() === y.toDateString()) return "yesterday";
-  return dateShort(d);
+  return dateDay(d);
 }
 
 function oneLine160(v){
@@ -7190,10 +7190,11 @@ function contTakenSection(){
 function reviewDayWord(){
   var w = SMPRules.reviewMoment(REVIEW);
   if (!w) return "";
-  var day = dateShort(w);
-  return REVIEW.reviewAt
-    ? day + ", " + w.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" })
-    : day;
+  /* The day and the day-with-time are the SAME two writers everything else
+     uses; this used to build the second one itself out of the day plus the
+     browser's idea of a time, which is "09:00" here and "09:00 AM" on an
+     American machine. */
+  return REVIEW.reviewAt ? dateAt(w) : dateDay(w);
 }
 
 function reviewDayBlock(){

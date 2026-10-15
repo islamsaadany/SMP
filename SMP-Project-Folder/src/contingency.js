@@ -397,11 +397,11 @@ var CONT = (function () {
     var w = when();
     if (!w) return "";
     var mins = Math.round((w.getTime() - Date.now()) / 60000);
-    var at = w.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    var at = timeOf(w);
     if (mins < 60) return "in " + mins + " minutes";
     if (mins < 24 * 60) return "today at " + at;
     if (mins < 48 * 60) return "tomorrow at " + at;
-    return dateShort(w) + " at " + at;
+    return dateDay(w) + " at " + at;
   }
 
   function paintBanner() {

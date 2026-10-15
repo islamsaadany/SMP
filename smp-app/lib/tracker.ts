@@ -43,9 +43,16 @@ export function isStatus(s: unknown): s is Status { return typeof s === "string"
 export const OFFICE_SEATS = ["super", "smoteam"] as const;
 export function isOffice(seat: unknown): boolean { return typeof seat === "string" && (OFFICE_SEATS as readonly string[]).includes(seat); }
 
-export const VIEWS = ["week", "all", "mine", "undated"] as const;
+/* THE FIFTH VIEW IS NOT A FILTER, IT IS THE MEETING (§532). Islam: "when we
+   come on our weekly check we mainly have topics with actions for every week
+   and we make this week actions done or still in progress or keep it didn't
+   start as is and we create a new action for next week." The four before it
+   narrow one week's list; this one widens to THREE weeks and is always read
+   by topic, because a topic is the thread the meeting walks down. Last,
+   because it is the one you go to rather than the one you land on. */
+export const VIEWS = ["week", "all", "mine", "undated", "check"] as const;
 export type View = (typeof VIEWS)[number];
-export const VIEW_WORD: Record<View, string> = { week: "This week", all: "All", mine: "Mine", undated: "Undated" };
+export const VIEW_WORD: Record<View, string> = { week: "This week", all: "All", mine: "Mine", undated: "Undated", check: "Weekly check" };
 export function isView(s: unknown): s is View { return typeof s === "string" && (VIEWS as readonly string[]).includes(s); }
 
 /* HOW THE LIST IS GROUPED IS A CHOICE (§356.11, loosening decision 6 from
@@ -158,6 +165,13 @@ export function weekWord(day: string, today: string): string {
   if (sameWeek(day, today)) return "This week";
   if (sameWeek(day, addDays(weekOf(today).from, 7))) return "Next week";
   if (brk() === "week-of-year") return "W" + weekNumber(day);   /* §356.16 put back */
+  return weekInMonth(day);
+}
+/* A WEEK'S PLACE IN ITS MONTH, with no word in front of it — "W1 Oct". Split
+   out of weekWord for §532's three cards, whose headings already say Last /
+   This / Next in words and want the W-form BESIDE them rather than instead
+   of them. One rule for which month a week belongs to, not two (§53.5). */
+export function weekInMonth(day: string): string {
   const thu = toDate(thursdayOf(day));
   return "W" + Math.ceil(thu.getUTCDate() / 7) + " " + MONTH[thu.getUTCMonth()];
 }
@@ -242,6 +256,7 @@ export function inView(a: Action, view: View, who: Who, today: string): boolean 
   const w = weekOf(today);
   if (view === "all") return true;
   if (view === "mine") return isMine(a, who);
+  if (view === "check") return checkWeek(a, today) !== null;
   if (view === "undated") return a.status !== "done" && !a.due;
   if (a.status === "done") return !!a.doneDay && a.doneDay >= w.from && a.doneDay <= w.to;
   /* AN OPEN ACTION WITH NO DATE IS ON THIS WEEK. The spec first wrote the
@@ -254,6 +269,69 @@ export function inView(a: Action, view: View, who: Who, today: string): boolean 
      what still needs a date, inside This week rather than beside it. */
   return !a.due || a.due <= w.to;
 }
+/* ══ the weekly check's three weeks (§532) ════════════════════════════
+   WHICH CARD A ROW SITS IN. Three weeks, and the rule for each is the one
+   the meeting already uses out loud:
+
+   LAST WEEK IS WHAT HAPPENED, so only a FINISHED action is in it, under the
+   week it was finished in. An action that was due last week and is still
+   open is not history — it is this week's business, and the Late mark on it
+   says how long it has been. Putting it under Last week would file an
+   unfinished thing as done with (§96) and bury the one row the meeting most
+   needs to look at.
+
+   THIS WEEK IS WHAT IS BEING DECIDED: everything still open and due by
+   Thursday, LATE ONES INCLUDED however far back they go, and an open action
+   with no date at all — which `inView`'s week list already calls this
+   week's, so the two lists cannot disagree about one row (§53.5).
+
+   NEXT WEEK IS WHAT IS BEING PROMISED: due in the week after this one.
+   Beyond that is somebody else's meeting and is not drawn here.
+
+   Nothing outside the three is in the view at all, which is what makes it a
+   view rather than the whole list read three times. */
+export type CheckWeek = "last" | "now" | "next";
+export const CHECK_WEEKS = ["last", "now", "next"] as const;
+export const CHECK_WORD: Record<CheckWeek, string> = { last: "Last week", now: "This week", next: "Next week" };
+/* The three weeks themselves, named once so the headings, the filter and the
+   carry cannot drift apart about which days "next week" means. */
+export function checkWeeks(today: string): Record<CheckWeek, Week> {
+  const now = weekOf(today);
+  return { last: weekOf(addDays(now.from, -7)), now, next: weekOf(addDays(now.from, 7)) };
+}
+export function checkWeek(a: Action, today: string): CheckWeek | null {
+  const w = checkWeeks(today);
+  const inside = (k: CheckWeek, day: string) => day >= w[k].from && day <= w[k].to;
+  if (a.status === "done") {
+    if (!a.doneDay) return null;
+    return (CHECK_WEEKS as readonly CheckWeek[]).find((k) => inside(k, a.doneDay!)) || null;
+  }
+  if (!a.due) return "now";
+  /* §532 put back: an action still open that was due last week filed under
+     Last week as though it were history — which empties This week of the one
+     row the meeting most needs to look at. */
+  if (brk() === "check-last-open" && a.due >= w.last.from && a.due < w.now.from) return "last";
+  if (a.due <= w.now.to) return "now";
+  if (a.due <= w.next.to) return "next";
+  return null;
+}
+/* NEXT WEEK IS STORED AS ITS THURSDAY, like every other week the tracker
+   writes (thursdayOf's own rule) — the carry and the write line both land
+   here, so a line written at the check and a line carried to it hold the
+   same day. */
+export function nextWeekDay(today: string): string { return checkWeeks(today).next.to; }
+/* WHAT MAY BE CARRIED: an open action sitting under THIS WEEK — which is
+   late ones too, since they are under this week. A done action has nothing
+   to carry, and one already under next week is where it was going. Asked
+   here so the page and the server give one answer (§42, §53.5). */
+export function mayCarry(a: Action, today: string): boolean {
+  /* §532 put back: the carry offered on anything unfinished, so a line
+     already sitting under next week is pushed a week further by the press
+     that was meant to say "this one did not get done". */
+  if (brk() === "carry-anything") return a.status !== "done";
+  return a.status !== "done" && checkWeek(a, today) === "now";
+}
+
 export type Summary = { open: number; late: number; dueWeek: number; doneWeek: number };
 export function summary(all: Action[], today: string): Summary {
   const w = weekOf(today);

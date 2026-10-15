@@ -9782,3 +9782,33 @@ It names everything that isn't a plain one-to-one and decides none of it: a capa
 Proved on the worked example and on an El Abd-shaped stand-in built from your screenshots, with a hidden second plan added to one of them on purpose — the script caught it and named it.
 
 **Next:** the El Abd contingency file. Then you get the real list, and after you have seen it, the migration.
+
+## §535.7 — El Abd's real rows, and a second move nobody has looked at (2026-10-15)
+Your working copy read cleanly. Nothing was written — the script only reads.
+
+**The five capabilities are every one a plain one-to-one.** All unassigned, all planning in pillars, each with exactly one pillar row, nothing hidden behind "plans from before":
+
+| | name | measures · tactics | owner |
+|---|---|---|---|
+| C001 | End-to-End Quality Mindset | 6 · 4 | Osama Yousef |
+| C002 | ERP Enhancement | 3 · 4 | Ehab Hosny |
+| C003 | Digital Transformation | 3 · 7 | Ehab Hosny |
+| C004 | Talent & Workforce Optimization | 3 · 5 | — |
+| C005 | Operational excellence | 4 · 4 | Mohamed Said |
+
+Afterwards the company holds **10 pillars — your 5 directions and these 5** — shown as the same two tabs you have now.
+
+**Two small things in the records that no screen shows**, and the migration handles both: End-to-End Quality Mindset's underlying row has **no name** on it, so it would arrive nameless — the capability's name gets carried onto it. And all five rows are **unmarked** — none of them actually says "capability" in the data; the tab finds them another way. All five get marked.
+
+### The bigger thing I found, and it is not about capabilities
+Your tenant still holds **5 business units, switched off** — all under Commercial — and each one is **still carrying its key objectives**. Twenty-one of them in total, that no page shows anyone:
+
+Retail Expansion Across Egypt (3) · Maximizing Current Stores (6) · FMCG Growth (4) · Exploring Catering and Events (3) · E-Commerce Growth (5)
+
+And their names are almost exactly your five company directions. That is the old "units off" behaviour: it copied the units' plans up onto the company and hid the units. The spec flagged El Abd as the client needing the most care for precisely this, a week before I saw the data.
+
+**So El Abd is two moves, not one — and the second is the bigger one.** The capabilities are settled. The five folded units coming back as real boxes is a separate job, with its own list and its own questions for you: are those 21 objectives still wanted, and when a unit comes back, how does it relate to the direction that was copied out of it?
+
+**Two smaller notes:** the words are already stored per level — the top calls them *Directions*, the capability layer calls its own *Core Capabilities* — so after the merge each tab keeps its own word and you re-type nothing. And **none of your 22 functions carries a plan**, so the whole function question doesn't arise for this client.
+
+**One thing to confirm:** the file's tenant is named **"Test 2"**, though the data is plainly El Abd's. Tell me that's the right copy before anything is written for real.

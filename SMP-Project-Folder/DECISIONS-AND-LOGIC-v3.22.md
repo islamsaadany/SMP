@@ -65362,3 +65362,37 @@ The promise made with stage 3 was that Islam sees the row-by-row list per client
 It names everything that is **not** a plain one-to-one, and decides none of it: a capability planning in **projects** (its projects listed, not silently folded); one with **no plan yet** (an empty pillar, nothing lost); and one carrying **more than one pillar row** — which the product already hides behind *"holds N plans from before"* — printed in full with its ids, because the one thing a migration must never do is drop a row nobody was told about.
 
 Proved twice: on the worked example (Raya's one capability, held by Marketing, planning in projects) and on an El-Abd-shaped stand-in built from the screenshots — five capabilities, unassigned, planning in pillars, **with a second pillar row added to one of them on purpose**, which the script catches and names. The stand-in is scratch, not committed: it is a shape, not Islam's data, and is labelled as such in its own output.
+
+## §535.7 — El Abd's real rows, read from the working copy
+Islam handed `SMP-working-copy-Q3-Review-2026-10-15-1112.html`, a contingency working copy (§306). `scripts/stage3-capability-readings.js` read it; nothing was written. **The tenant's `org` reads "Test 2"**, while its data is plainly El Abd's (direction *ELABD Corner, Events and Catering*; the five capability names from his screenshot) — recorded as read, and to be confirmed before anything runs for real.
+
+### The company's list today — 5 directions, all external
+`group-P1` Maximizing Current Stores (5 measures, 3 tactics) · `group-P2` Egypt Expansion (3, 3) · `group-P3` Growing FMCG (4, 5) · `group-P4` ELABD Corner, Events and Catering (4, 2) · `group-P5` E-Commerce Growth (5, 4). Every one carries `kind: "Direction"`.
+
+### The five capabilities — every one a plain one-to-one
+| code | id | name | its one pillar row | measures · tactics | owner |
+|---|---|---|---|---|---|
+| C001 | `cap3` | End-to-End Quality Mindset | `cap:cap3-P1` | 6 · 4 | osamayousef |
+| C002 | `cap5` | ERP Enhancement | `cap:cap5-P1` | 3 · 4 | ehabhosny |
+| C003 | `cap6` | Digital Transformation | `cap:cap6-P1` | 3 · 7 | ehabhosny |
+| C004 | `cap7` | Talent & Workforce Optimization | `cap:cap7-P1` | 3 · 5 | — |
+| C005 | `cap8` | Operational excellence | `cap:cap8-P1` | 4 · 4 | mohamedsaid |
+
+All five: `fn` **undefined**, `format: "pillars"`, exactly **one** `items` row, no projects, no key objectives, no custodian. **Nothing here is not one-to-one**, and nothing is hidden behind *"plans from before"*. After the move the company holds **10 pillars — 5 external, 5 internal** — drawn as two tabs by the box setting reading *split*, exactly as the page looks now.
+
+**Two details the migration must handle, found in the records and not visible on any screen:**
+1. **`cap:cap3-P1` has no name** (`name: ""`), while the other four duplicate their capability's name onto the row. Migrated as-is that pillar arrives nameless, so the capability's name is carried onto the row where the row has none.
+2. **Every one of the five rows carries `kind: ""`**, not `"Capability"`. The kind is what the split draws on, so all five are marked internal by the migration. Nothing reads them as internal today; the Capabilities tab finds them through the container, not the kind.
+
+The owner also moves: a capability's `head` is a person key and becomes the pillar's owner. Ids are untouched throughout, so every figure, snapshot and history entry still points at the same row.
+
+### The bigger finding, and spec 066 predicted it
+The tenant holds **5 business units with `exists: false`** — switched off, all under the *Commercial* division (`newco1`), each still carrying its own **key objectives**: Retail Expansion Across Egypt 3 · Maximizing Current Stores 6 · FMCG Growth 4 · Exploring Catering and Events 3 · E-Commerce Growth 5. **21 objectives that no page shows.**
+
+And their names mirror the company's five directions almost one for one — Maximizing Current Stores, FMCG Growth ↔ Growing FMCG, E-Commerce Growth, Exploring Catering and Events ↔ ELABD Corner Events and Catering, Retail Expansion ↔ Egypt Expansion. That is **§447's fold**: "units off" copied the units' plans onto the company. Spec 066 §2.2 named this as the case needing the most care, and §9 said so in as many words: *"El Abd needs the most care: its units were folded into the company plan by §447 and come back as boxes under §2.2."*
+
+**So El Abd's stage 3b is two moves, not one**, and the second is larger than the first: the capabilities become internal pillars (settled, above), and the five folded units come back as boxes carrying 21 objectives nobody can currently see. The second needs its own before-and-after list and its own decision from Islam — whether those objectives are still wanted, and how a returning unit relates to the direction that was copied from it.
+
+### Two smaller facts, recorded
+- **The words are already stored per level**: the top layer calls its pillars *Direction / Directions*, the capability layer calls its own *Core Capability / Core Capabilities*. After the merge the two tabs keep their own words — nothing to invent, and nothing Islam has to re-type.
+- **0 of 22 functions carry a plan.** The function-plan question does not arise for this client at all.

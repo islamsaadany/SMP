@@ -65282,3 +65282,30 @@ Two of the three already work the way he describes. The third is a build only be
 
 ### Still missing before a row moves
 The screens settle the SHAPES; they do not give the RECORDS. Reading El Abd's actual capability entries is still needed — how many, what each holds, and **whether any carries its own pillars rather than measures and tactics**. That last case decides whether one capability becomes one pillar or several, and a screenshot cannot show it. Drawn for Islam at `design-mockups/capability-placement/2026-10-15_where-a-capability-lives.html` (published as an artifact, version 2).
+
+## §535.3 — Layers are depth, not kinds; and two corrections about the function link
+Islam, 2026-10-15, with the Setup › Capabilities screen: *"an important note the functions already belong to the company (Layer 1) the case is Layer 2 is the functions and units. Sometimes Layer 1 become a group where Layer 2 is a company and units become layer 3 and the functions stay at layer 2. in elabd case the company is layer 1 and the directions and capabilities belong to the company so layer 2 is only in the divisions where layer 3 are functions belonging to the divisions."* And: *"for rhi and elabd ok. for raya we already removed the capabilities so there is nothing there."*
+
+### Layers are depth
+The same kind of thing sits at a different depth per client. A **function** is at **L2** in RHI and Raya (attached to the company) and at **L3** in El Abd (attached to a division). A **unit** is at L2 normally and L3 where L1 is a group and L2 a company.
+
+The platform cannot say that. `STRUCT_LEVELS` is **five fixed words — `top`, `mid`, `bu`, `fn`, `cap`** — so depth is *implied by the kind* rather than recorded as a parent. That is precisely why spec 066's first success criterion (*"a new level is a setting, not a code change"*) is not met today, and it is the same fault as the capability's: a thing's place is inferred from what it is called.
+
+**In the box model a layer is just depth in the tree.** What varies between boxes is whether a box carries pillars or is a function with its own plan. And `cap` is not a layer at all — a capability is a pillar — so the five fixed words lose two of their five.
+
+### Two corrections to what was told to Islam
+1. **The function link is already optional.** Setup › Capabilities reads *"Name it and give it an owner; a function to hold it is optional"*, and the code's own comment there says *"an unassigned capability is the one thing this page exists to fix, and the header has counted them since §15."* Earlier notes implied the link was effectively required.
+2. **"Drawn nowhere at all" was September's truth.** Spec 048 §2 said so when `capsOfFunction` was the only route; since capabilities gained a home at company level (§447, §465) `capsHere()` returns `GROUP.capabilities` **with no `fn` filter**, so El Abd's page shows every one, assigned or not.
+
+**Both corrections sharpen the finding rather than soften it:** a capability at company level has **no recorded placement whatsoever**. It appears at the top because of a client-wide switch (`structure.cap.at`), not because its record says where it belongs. The field that exists is optional and means ownership; the field that would say where it lives does not exist.
+
+### What the Setup screen also settles
+Its columns are `# · Capability · Held by · Owner · Custodian · Plans in · Key Objectives · Projects / Pillars`, and the note reads: *"A Capability carries Projects, and optionally Key Objectives … Each Project carries a brief, its deliverables and outcomes — half its performance each — and its milestones, which are its execution."* So **Plans in** is already a per-capability choice between projects and pillars — which is the one thing that decides the migration's shape.
+
+### Stage 3b, revised per client
+- **Raya — nothing. Already done.** Its capabilities have been removed; the give-back described at §535.2 has happened. (That row is now closed, not pending.)
+- **RHI — nothing moves.** One list already; the setting reads *joined*.
+- **El Abd — the only client that moves at all.** Its capabilities become internal pillars of the company, ids and figures kept; its two tabs then come from the setting being *split*.
+
+### The one question left
+A capability whose **Plans in** is *projects* becomes one internal pillar whose work is those projects — settled. A capability whose **Plans in** is *pillars* holds a list, and one row cannot become several without a rule. So: does any El Abd capability plan in pillars, and if so does **the capability become one pillar with its pillars as tactics**, or does **each of its pillars become an internal pillar of its own** with the capability's name surviving as a grouping? Put to Islam. Drawing updated to version 3 with the layers figure, both corrections and the revised per-client table.

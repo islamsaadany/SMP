@@ -9734,3 +9734,25 @@ El Abd is the only real move, and it's the one that proves the model: once its c
 **Still needed before a row moves:** El Abd's actual capability records — how many, what each holds, and whether any of them carries its own pillars instead of measures and tactics. That last case decides whether one capability becomes one pillar or several, and a screenshot cannot show it.
 
 Drawing updated: `design-mockups/capability-placement/2026-10-15_where-a-capability-lives.html`
+
+## §535.3 — Layers are depth, not kinds (2026-10-15)
+Your note about the layers is a second finding of the same shape as the capability one.
+
+**A function sits at layer 2 in RHI and Raya, and at layer 3 in El Abd** — beneath the divisions. A unit moves down a layer too when the top becomes a group. The platform cannot say any of that: it has **five fixed words** for what a thing is — top, division, unit, function, capability — so a thing's depth is implied by what it is *called* rather than recorded as *what it hangs from*.
+
+That is the same fault as the capability's, one level up. It is also exactly why "add a new level" is a code change today instead of a setting. In the box model a layer is just **depth in the tree**; what varies is whether a box carries pillars or is a function with its own plan. And a capability is not a layer at all — so two of the five words go.
+
+**Two things I told you that need correcting**, both from your Setup screen:
+1. **The function link is already optional.** Setup says so in as many words, and that page already counts the unassigned ones as the thing it exists to fix. I implied it was required.
+2. **"Drawn nowhere at all" was true in September**, not now. Once capabilities got a home at company level, El Abd's page started showing all of them, assigned or not.
+
+Both make the point sharper, not softer: **a capability at company level has no recorded placement at all.** It shows at the top because of a client-wide switch, not because its record says it belongs there. The field that exists is optional and means ownership; the field that would say where it lives doesn't exist.
+
+**Step 2, revised:**
+- **Raya — nothing. Already done**, since you've removed its capabilities.
+- **RHI — nothing moves.**
+- **El Abd — the only client that moves at all.**
+
+**One question left, and your Setup screen asks it in a column of its own — "Plans in".** A capability set to *projects* becomes one internal pillar whose work is those projects; that is settled. A capability set to *pillars* holds a list, and one row cannot become several without a rule. So: does any El Abd capability plan in pillars — and if so, should **the capability become one pillar with its pillars as tactics**, or should **each of its pillars become an internal pillar of its own**, with the capability's name surviving as a grouping?
+
+That answer plus El Abd's rows, and the migration can be written. Drawing updated to version 3.

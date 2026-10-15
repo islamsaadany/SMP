@@ -883,7 +883,7 @@ var SYNC = (function () {
         ? "<span><b>" + plural(lines.length, "line") + " refused:</b></span><ul>" +
           lines.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>"
         : "") +
-      "<span>" +
+      '<span id="refused-acts">' +
       (undoable
         ? '<button type="button" class="refused-keep" id="refused-keep">Put back ' +
           (lines.length === 1 ? "that line" : "those lines") +
@@ -920,10 +920,44 @@ var SYNC = (function () {
       save();
     });
     var u = document.getElementById("refused-undo");
-    if (u) u.addEventListener("click", function () {
-      if (!confirm("Discard everything changed since the last successful save, " +
-                   "and load the stored version again?\n\nAnything you have typed " +
-                   "that was not saved will be lost.")) return;
+    if (u) u.addEventListener("click", askDiscard);
+  }
+
+  /* ── DISCARD ASKS IN THE BAND (§533.5) ──────────────────────────────────
+     The last browser dialog in the product, and the one the §533 sweep missed
+     because that count was taken over shell.html alone.
+
+     It is the same fault as the other twenty-nine, with one of its own on
+     top: a box opens OVER the band that has just explained why the save was
+     refused, so the sentence somebody needs in order to answer is the
+     sentence the question covers up. The band is already here and already
+     carries the buttons, so the question replaces them and the refusal above
+     it stays readable.
+
+     NOTHING IS CLEARED UNTIL THE SECOND PRESS. `keepClear()` throws away the
+     copy this tab kept, and it runs on the answer, never on the way in.
+
+     NO paint() AND NO GLOBAL STATE: this runs when the server has refused a
+     save, which is not a moment to make a repaint of the whole page part of
+     the way out. The band rewrites its own row, the way it builds itself. */
+  function askDiscard() {
+    var row = document.getElementById("refused-acts") ||
+              document.getElementById("refused");
+    /* No band on screen means no button was pressed on one; do nothing rather
+       than discard, which is the one answer that cannot be taken back. */
+    if (!row) return;
+    row.innerHTML =
+      "<span><strong>Discard everything and reload?</strong> Anything typed " +
+      "since the last successful save will be lost \u2014 including the lines " +
+      "the server refused.</span> " +
+      '<button type="button" class="refused-keep" id="discard-no">Keep editing</button> ' +
+      '<button type="button" class="refused-undo" id="discard-yes">Discard and reload</button>';
+    var no = document.getElementById("discard-no");
+    if (no) no.addEventListener("click", function () {
+      showRefusal(refusedWhy, refusedRows, refusedUndoable, refusedJudged);
+    });
+    var yes = document.getElementById("discard-yes");
+    if (yes) yes.addEventListener("click", function () {
       keepClear();
       location.reload();
     });

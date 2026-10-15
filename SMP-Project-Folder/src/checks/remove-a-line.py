@@ -72,15 +72,13 @@ code = re.sub(r"(?m)^\s*//.*$", " ", code)
 # and a check that reports a label as a browser dialog is one somebody learns
 # to ignore.
 calls = re.findall(r"(?<![A-Za-z.`'\"])(confirm|prompt|alert)\(", code)
-# `sync.js` has one of its own — "Discard everything changed since the last
-# successful save" — which was never in this family's count and is NOT drawn.
-# It is named rather than ignored, so the day somebody converts it this check
-# tells them to come back here.
-known_other = src.count('confirm("Discard everything changed since')
-ck("the nine are gone, and nothing else crept in",
-   len(calls) == known_other == 1, (len(calls), known_other, calls[:6]))
-ck("...and the one left is sync.js's own, outside this family",
-   known_other == 1, known_other)
+# NONE LEFT, ANYWHERE. This file first allowed one: sync.js's "Discard
+# everything changed since the last successful save", which was outside this
+# family and had not been drawn. §533.5 converted it, so the number is zero and
+# the check says zero — an allowance kept after the thing it allowed is gone
+# is a hole somebody's next browser dialog slips through.
+ck("no browser dialog is left anywhere in the product",
+   len(calls) == 0, calls[:6])
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path="/opt/pw-browsers/chromium",

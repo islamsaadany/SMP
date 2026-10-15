@@ -305,6 +305,35 @@ with sync_playwright() as pw:
     ck("...and NO put-back is offered, because there is no row to put back",
        pg.evaluate("!document.getElementById('refused-keep')"))
     ck("...while Discard still is", pg.evaluate("!!document.getElementById('refused-undo')"))
+
+    # §533.5: DISCARD ASKS IN THE BAND, not in a browser box. It was the last
+    # browser dialog in the product, and the one with a fault of its own: a box
+    # opens OVER the band that has just said why the save was refused, so the
+    # sentence somebody needs in order to answer is the one it covers.
+    boxes = []
+    pg.on("dialog", lambda d: (boxes.append(d.message), d.dismiss()))
+    pg.evaluate("()=>{const b=document.getElementById('refused-undo'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    ck("Discard raises no browser dialog", not boxes, boxes)
+    ck("...it asks in the band instead",
+       pg.evaluate("!!document.getElementById('discard-yes')"))
+    ck("...offering a way back",
+       pg.evaluate("!!document.getElementById('discard-no')"))
+    ck("...and the refusal above it is still readable",
+       pg.evaluate("""()=>{const el=document.getElementById('refused');
+           return !!(el && !el.hidden && /refused|not saved/i.test(el.innerText));}"""))
+    # NOTHING IS THROWN AWAY UNTIL THE SECOND PRESS: the page is still here,
+    # which it would not be if the first press had reloaded.
+    ck("...nothing has been discarded yet",
+       pg.evaluate("()=>!!document.getElementById('refused')"))
+    pg.evaluate("()=>{const b=document.getElementById('discard-no'); if(b) b.click();}")
+    pg.wait_for_timeout(300)
+    ck("Keep editing puts the band back", pg.evaluate(
+       """()=>{const el=document.getElementById('refused');
+           return !!(el && !el.hidden && document.getElementById('refused-undo'));}"""))
+    ck("...and the question is gone",
+       pg.evaluate("!document.getElementById('discard-yes')"))
+
     ck("nothing threw", not errs, errs[:1])
 
     b.close()

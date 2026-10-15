@@ -1070,10 +1070,16 @@ var COPILOT = (function(){
        the bar already names it ("v3 in progress · v2 is on the plan"), so a
        done line there would read as a claim about work nobody has applied. */
     var done = sNow && ap && ap === vn ? fdoneHtml(ap) : '';
+    /* WHY APPLY IS HELD, in the words the moment actually calls for. */
+    var fwhy = !f.saved ? "Save the Foundation first"
+             : busyHere ? "The Copilot is working on this chat" : "";
     return '<div class="copsavebar" data-cop-savebar>' + done + st + '<div class="copbtns">' +
       '<button type="button" class="copbtn quiet" data-cop-fcheck' + (all && !busyHere ? '' : ' disabled') + ' title="Optional: the Copilot reads the parts together">Run the check</button>' +
       '<button type="button" class="copbtn solid" data-cop-ffinish' + (all && !sNow && !busyHere ? '' : ' disabled') + '>Save as ' + E(fname()) + ' v' + E(saveN) + '</button>' +
-      '<button type="button" class="copbtn" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (f.saved && !busyHere ? '' : ' disabled title="Save the Foundation first"') + '>Apply to plan</button>' +
+      /* HELD, NOT DEAD (§538), and the reason is now the RIGHT one: the old
+         line said "Save the Foundation first" even while the Copilot was
+         working on a Foundation already saved. */
+      '<button type="button" class="copbtn' + (fwhy ? ' hasnote' : '') + '" data-cop-fapply="' + E(f.saved ? f.saved.deliverableId : "") + '" data-cop-fapply-n="' + E(f.saved ? f.saved.n : 0) + '" data-cop-fapply-on="' + ap + '" data-cop-fapply-parts="' + total + '"' + (fwhy ? ' aria-disabled="true" data-tip="' + E(fwhy) + '"' : '') + '>Apply to plan</button>' +
       '</div></div>';
   }
   /* THE FOUNDATION'S TO-DO (§490.2): the same compact list the SWOT chat
@@ -2712,8 +2718,19 @@ var COPILOT = (function(){
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
     var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
       '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      /* NOT A CONTROL, SO NOT A BUTTON (§538). A quarter outside the plan
+         period — or any quarter in a view nobody may edit — was drawn as a
+         `disabled` button carrying "Q3 is outside the plan period" as a hover
+         that can never open. Nothing was hidden by that: the strip directly
+         above this table already says which period the plan covers. So the
+         fix is a subtraction — it stops being a button, Tab walks only the
+         quarters that can be pressed, and the sentence survives on a mark that
+         a pointer CAN reach and that a screen reader reads from `aria-label`. */
       '<td class="copex-qs">' + [1,2,3,4].map(function(q){ var inP = qs.indexOf(q) >= 0, on = t.quarters.indexOf(q) >= 0;
-        return '<button type="button" class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '"' + (ed && inP ? ' data-cop-ex-q="' + i + '|' + q + '"' : ' disabled') + ' aria-pressed="' + on + '" title="' + (inP ? "Q" + q : "Q" + q + " is outside the plan period") + '">Q' + q + '</button>'; }).join("") + '</td>' +
+        if (ed && inP) return '<button type="button" class="copex-q' + (on ? " on" : "") + '" data-cop-ex-q="' + i + '|' + q + '" aria-pressed="' + on + '" title="Q' + q + '">Q' + q + '</button>';
+        var say = inP ? ("Q" + q + (on ? ", in this tactic" : ", not in this tactic"))
+                      : ("Q" + q + " is outside the plan period");
+        return '<span class="copex-q' + (on ? " on" : "") + (inP ? "" : " off") + '" role="img" title="' + E(say) + '" aria-label="' + E(say) + '">Q' + q + '</span>'; }).join("") + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-tx="' + i + '" aria-label="Remove this tactic">&times;</button></td>' : '') + '</tr>'; };
     return '<div class="copex-item" data-cop-ex-item="' + k + '"><div class="copvline"><b>' + E(it.title) + '</b> — ' + (it.kind === "capability" ? "Capability" : "Direction") + ' ' + (k + 1) + ' of ' + PANE.exec.items.length + (it.ownedBy ? ', owned by ' + E(it.ownedBy) : '') + '</div>' +
       '<div class="copcp-wrap"><table class="copcp-tab copex-t"><thead><tr><th>Measure</th><th>Target (period)</th><th>Compile</th>' + (ed ? '<th></th>' : '') + '</tr></thead><tbody>' + it.measures.map(mrow).join("") + '</tbody></table></div>' +
@@ -3021,7 +3038,11 @@ var COPILOT = (function(){
     if ((b = hit(ev, "[data-cop-reopen]"))) { var o = OPEN[key()]; if (o) openItem(o.kind, o.id); return; }
     if ((b = hit(ev, "[data-cop-chat]"))) { SAY = ""; MENU = null; openItem("chat", b.getAttribute("data-cop-chat")); return; }
     if ((b = hit(ev, "[data-cop-deliv]"))) { SAY = ""; openItem("deliv", b.getAttribute("data-cop-deliv")); return; }
-    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled) applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
+    /* §538: the hold moved from `disabled` to `aria-disabled` so its reason
+       could be read, and `b.disabled` goes false the moment it does — a guard
+       left reading that property would let the held button act. */
+    if ((b = hit(ev, "[data-cop-fapply]"))) { if (!b.disabled && b.getAttribute("aria-disabled") !== "true")
+      applyAsk(b.getAttribute("data-cop-fapply"), b.getAttribute("data-cop-fapply-title") || fname(),
       { n: Number(b.getAttribute("data-cop-fapply-n")) || 0, on: Number(b.getAttribute("data-cop-fapply-on")) || 0, parts: Number(b.getAttribute("data-cop-fapply-parts")) || 0 }); return; }
     if ((b = hit(ev, "[data-cop-newchat]"))) {
       /* A NEW FOUNDATION CHAT IS A FLOW (§478, Islam: "remove the guided

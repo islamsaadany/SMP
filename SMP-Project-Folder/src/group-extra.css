@@ -227,6 +227,12 @@
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
+  /* AND WHEN SOMETHING INSIDE IT TAKES FOCUS (§538). A browser does not paint
+     `::after` on a form control, so a held `<select>` wears the note on a span
+     around it — and a span never takes focus, which would have left the bubble
+     open to a pointer and to nothing else. That is the half this whole section
+     exists to close. */
+  .hasnote:focus-within::after { display:block; }
   /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
      compiled cell carried `hasnote` while still setting a `title`, so this rule
      matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to

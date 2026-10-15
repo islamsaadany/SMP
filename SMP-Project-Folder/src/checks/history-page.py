@@ -196,7 +196,7 @@ def open_history(pg):
 
 
 def rows(pg):
-    return pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] table.hist tbody tr')].map(tr=>({hidden:tr.hidden, text:tr.textContent.replace(/\\s+/g,' ').trim(), rst:(()=>{const b=tr.querySelector('.hist-rst');return b?{disabled:b.disabled,title:b.title}:null})()}))")
+    return pg.evaluate("()=>[...document.querySelectorAll('[data-hist-page] table.hist tbody tr')].map(tr=>({hidden:tr.hidden, text:tr.textContent.replace(/\\s+/g,' ').trim(), rst:(()=>{const b=tr.querySelector('.hist-rst');return b?{disabled:b.disabled||b.getAttribute('aria-disabled')==='true',title:b.getAttribute('data-tip')||b.title}:null})()}))")
 
 
 with sync_playwright() as p:
@@ -279,7 +279,14 @@ with sync_playwright() as p:
     print("\n4 · Restore")
     r = rows(pg)
     sub = [x for x in r if "Submitted" in x["text"] or "submitting" in x["text"]]
+    # §538: HELD, NOT DEAD. The button used to carry `disabled` AND
+    # `aria-disabled` AND a `title` — and `disabled` wins, so the reason
+    # reached nobody. The read above now takes either greying and the bubble's
+    # text or the old title, so this asserts the SENTENCE and the greying and
+    # leaves which attribute carries them to `held-not-dead`.
     ck("a submission's Restore is greyed with the reason", sub and sub[0]["rst"] and sub[0]["rst"]["disabled"] and "Reporting tab" in sub[0]["rst"]["title"], sub and sub[0]["rst"])
+    ck("...and it is HELD rather than dead, so the reason can be read (§538)",
+       bool(sub) and pg.evaluate("()=>{const b=[...document.querySelectorAll('[data-hist-page] .hist-rst')].find(x=>x.getAttribute('aria-disabled')==='true');return !!b && !b.disabled && b.classList.contains('hasnote') && !!b.getAttribute('data-tip');}"))
     tgt = [i for i, x in enumerate(r) if "Data duplicate rate" in x["text"] and "0.8%" in x["text"]]
     ck("the target's Restore is live", bool(tgt) and r[tgt[0]]["rst"] and not r[tgt[0]]["rst"]["disabled"])
     before = pg.evaluate("()=>UNITS.mobile.items[0].measures[0].target")

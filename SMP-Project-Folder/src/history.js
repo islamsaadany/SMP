@@ -181,7 +181,14 @@ var TRAIL = (function(){
         '<td class="hist-fld">' + (m ? E(fieldWord(m.field)) : '') + '</td>' +
         '<td class="hist-fromto hist-wrap" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
         '<td class="hist-act">' + (why
-          ? '<button type="button" class="hist-rst" disabled aria-disabled="true" title="' + E(why) + '">Restore</button>'
+          /* HELD, NOT DEAD (§538). It carried BOTH attributes, and `disabled`
+             wins: the button took no pointer and no Tab, so the one sentence
+             saying why this change cannot be put back reached nobody — and
+             nothing else in the row says it. `aria-disabled` alone leaves it
+             reachable, `.hasnote` opens the product's own bubble on hover AND
+             on focus, and the press stays inert because the held button never
+             carries `data-hist-restore` for the handler to find. */
+          ? '<button type="button" class="hist-rst hasnote" aria-disabled="true" data-tip="' + E(why) + '">Restore</button>'
           : '<button type="button" class="hist-rst" data-hist-restore="' + i + '">Restore</button>') + '</td>' +
         '</tr>';
     });

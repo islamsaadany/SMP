@@ -8076,12 +8076,30 @@ function capFormatCell(c, editable){
     ? (capItems(c).length ? "its plan" : "")
     : ((c.projects || []).length
         ? plural((c.projects || []).length, L1("project"), L("project")) : "");
-  return '<select class="fld" data-capformat="' + esc(c.id) + '"' +
-      (blocked ? ' disabled title="Clear the plan on this row first"' : '') +
+  /* HELD, NOT DEAD (§538). The row says "holds its plan" beside it, which
+     names the obstacle; the way OUT of it — clear that plan first — sat on a
+     `disabled` control, which takes no pointer and no Tab, so half the answer
+     was on screen and half reached nobody.
+
+     THE BUBBLE IS ON A WRAPPER AND NOT ON THE SELECT, because a browser does
+     not paint `::after` on a form control, and the bubble IS an `::after`. The
+     span opens it on hover; `:focus-within` opens it when the select inside
+     takes focus, which is the half a plain hover never had.
+
+     AND THE REFUSAL MOVED TO THE HANDLER. `aria-disabled` leaves a select
+     genuinely changeable — unlike a button, where it is the handler that
+     declines — so the change listener puts the row back (shell.html). The
+     options are both still drawn, exactly as before: what is held is the
+     change, not the sight of what the other way would be. */
+  var sel = '<select class="fld" data-capformat="' + esc(c.id) + '"' +
+      (blocked ? ' aria-disabled="true" data-capwas="' + (pillars ? "pillars" : "projects") + '"' : '') +
       ' aria-label="How ' + esc(c.name) + ' is planned">' +
     '<option value="projects"' + (pillars ? "" : " selected") + '>' + L("project") + '</option>' +
     '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
-    '</select>' +
+    '</select>';
+  return (blocked
+      ? '<span class="hasnote capheld" data-tip="Clear the plan on this row first">' + sel + '</span>'
+      : sel) +
     (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
 }
 /* ── WHERE A FUNCTION BELONGS, AND ITS WEIGHT THERE (§391) ────────────────

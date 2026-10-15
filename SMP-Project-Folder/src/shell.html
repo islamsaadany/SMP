@@ -5292,6 +5292,15 @@
     document.querySelectorAll("[data-capformat]").forEach(function(el){
       el.addEventListener("change", function(){
         if (grant("c_caps") !== "edit") return;
+        /* §538: the row that holds a plan is HELD rather than dead, so its
+           reason stays readable by pointer and by Tab — and a held `select`,
+           unlike a held button, can still be changed. So the refusal is here,
+           and it puts back the way the row was rather than leaving the box
+           showing a word the record does not carry. */
+        if (el.getAttribute("aria-disabled") === "true") {
+          el.value = el.getAttribute("data-capwas") || el.value;
+          return;
+        }
         /* §436: through the one switch, which warns before it hides. */
         switchPlanWay("cap", el.dataset.capformat, el.value, el);
       });

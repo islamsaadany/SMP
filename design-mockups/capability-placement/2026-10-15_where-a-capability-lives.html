@@ -106,8 +106,9 @@
   <header>
     <p class="eyebrow">Platform simplification · checking the model</p>
     <h1>Where a capability lives</h1>
-    <p class="standfirst">What I understand after your correction, drawn so you can point at the
-      part I have wrong. Nothing here is built — it is the model I would build from.</p>
+    <p class="standfirst">The model after your correction, and what it means for each client.
+      You confirmed all five statements on 15 October and sent El Abd's and RHI's screens;
+      section 5 is now the migration those screens make possible. Nothing here is built yet.</p>
   </header>
 
   <h2><span class="n">1</span>The thing you corrected</h2>
@@ -353,31 +354,83 @@
       <text x="14" y="221" font-size="11" fill="var(--ink-3)">and which box is holding them — one setting each, no migration between the three.</text>
     </svg>
     </div>
-    <figcaption>Raya's is already true today: a unit's pillars carry their kind and sit in one list.
-      The other two need the capability to be a pillar first.</figcaption>
+    <figcaption>Confirmed against the real screens. <b>RHI</b> shows one list, 15 of them, with no
+      Capabilities tab at all. <b>El Abd</b> shows Directions and Capabilities as two tabs.
+      <b>Raya</b> holds its pillars under each unit. In both RHI and El Abd the word
+      <em>Directions</em> is the client's own name for <em>pillar</em>, set in Settings — the
+      platform ships that label as “Pillars”, and its note already reads
+      “a business unit's direction or capability focus areas”.</figcaption>
   </figure>
 
-  <h2><span class="n">4</span>What this means for Raya, concretely</h2>
-  <p class="lede">You answered this one yourself in September, and it removes the awkward case I put
-    to you yesterday.</p>
-  <div class="quote">
-    “the capabilities in raya trade are not capabilities they are just projects under functions.”
-    <cite>Islam, spec 048 · September 2026</cite>
-  </div>
+  <h2><span class="n">4</span>The naming is already a setting. The splitting is not.</h2>
+  <p class="lede">This is the cleanest way to see what is actually missing.</p>
   <div class="tscroll">
     <table>
-      <thead><tr><th>What Raya has</th><th>What it really is</th><th>What happens to it</th></tr></thead>
+      <thead><tr><th></th><th>What it is</th><th>Set where</th></tr></thead>
       <tbody>
         <tr>
-          <td><b>Product Mindset</b><br><span style="color:var(--ink-3)">held by Marketing, holds one project</span></td>
-          <td>Marketing's own project, wearing the only label the platform had for it</td>
-          <td>Marketing gets its project back. The label goes. <b>Nothing is flattened into a pillar.</b></td>
+          <td><b>The word</b></td>
+          <td>“Directions”, “Pillars”, “Focus areas” — whatever the client calls them</td>
+          <td style="color:var(--good)"><b>Settings, today.</b> RHI and El Abd both use it.</td>
+        </tr>
+        <tr>
+          <td><b>The kind</b></td>
+          <td>external or internal, carried on every pillar</td>
+          <td style="color:var(--good)"><b>On the row, today.</b> Raya's units already hold both.</td>
+        </tr>
+        <tr>
+          <td><b>Joined or split</b></td>
+          <td>one list, or two sections sorted by kind</td>
+          <td style="color:var(--bad)"><b>Nowhere.</b> El Abd's split is a second kind of record, not a setting.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Two of the three already work the way you describe. Only the third is a build — and it is only
+    a build because the two sides of El Abd's split are different shapes.</p>
+
+  <h2><span class="n">5</span>What step 2 does, client by client</h2>
+  <p class="lede">One client moves nothing, one moves a little, one gives something back. None of
+    them looks different afterwards.</p>
+
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Client</th><th>What it shows today</th><th>What step 2 does</th><th>What changes on screen</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>RHI</b></td>
+          <td>One list, 15 pillars, called <em>Directions</em>. No Capabilities tab.</td>
+          <td><b>Nothing moves.</b> The list is already one list. Any pillar that is really internal
+            is marked as such, and the box's setting is <em>joined</em> — which is what it does now.</td>
+          <td style="color:var(--good)">Nothing.</td>
+        </tr>
+        <tr>
+          <td><b>El&nbsp;Abd</b></td>
+          <td><em>Directions</em> and <em>Capabilities</em> as two tabs on the company's Strategy page.</td>
+          <td>The Capabilities tab's entries <b>become internal pillars in the same list</b> as the
+            directions, keeping their ids, figures and history. The two tabs then come from the
+            box's setting being <em>split</em>.</td>
+          <td style="color:var(--good)">Nothing — the split it has today is what the setting draws.</td>
+        </tr>
+        <tr>
+          <td><b>Raya</b></td>
+          <td>Pillars under each unit, both kinds in one list. “Capabilities” under functions.</td>
+          <td>Those are not capabilities — your words, September: <em>“they are just projects under
+            functions.”</em> <b>Each function gets its project back</b> and the label goes. The units
+            are untouched.</td>
+          <td style="color:var(--attn,var(--gold-deep))">A project moves from a capability page onto
+            its function's own Projects list.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <h2><span class="n">5</span>Five statements — tell me which are wrong</h2>
+  <p>El Abd is the only real migration, and it is the one that proves the model: once its
+    capabilities are pillars, the thing that made its page special becomes a setting any client can
+    turn on.</p>
+
+  <h2><span class="n">6</span>The five statements, confirmed</h2>
+  <p class="lede">Checked with you on 15 October: all five correct.</p>
   <ul class="checks">
     <li><span class="k">1</span><span class="t">A <b>pillar</b> lives on a unit or on the company. Nowhere else.</span></li>
     <li><span class="k">2</span><span class="t">A pillar is <b>external</b> (a direction) or <b>internal</b> (a capability). Both plan in measures and tactics; either may plan in projects instead.</span></li>
@@ -387,10 +440,11 @@
   </ul>
 
   <div class="ask">
-    <h2 style="margin-bottom:.4rem"><span class="n">6</span>What I still cannot see</h2>
-    <p>Where <b>El Abd's</b> and <b>RHI's</b> capabilities actually sit today. Neither client's data is
-      in the repository — Raya is the only one, and by your own answer its capabilities are not
-      capabilities. The migration turns entirely on those two, so I would be designing it blind
-      without them.</p>
+    <h2 style="margin-bottom:.4rem"><span class="n">7</span>What is still missing before anything runs</h2>
+    <p>The screens settle the shapes; they do not give me the records. Before a single row moves I
+      need to read <b>El Abd's actual capability entries</b> — how many, what each holds, and
+      whether any of them carries its own pillars rather than measures and tactics. That last case
+      is the one that decides whether each capability becomes one pillar or several, and it is not
+      visible from a screenshot. Then you get the row-by-row list, per client, before it runs.</p>
   </div>
 </div>

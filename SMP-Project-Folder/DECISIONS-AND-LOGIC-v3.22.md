@@ -65247,3 +65247,38 @@ So it is not a capability and never was — it is Marketing's own project wearin
 
 ### Not known from here
 Where El Abd's and RHI's capabilities actually sit. Neither client's data is in this repository, and the corrected model turns on exactly that: whether each of their capabilities belongs to a unit or to the company. Asked for.
+
+## §535.2 — The three client shapes, confirmed from the live screens
+Islam, 2026-10-15, with screenshots of El Abd and RHI: *"the 5 statements are correct … elabd and RHI are shown in the screenshots FYI noting that the pillars in RHI are named directions and that's a naming we do in the settings."*
+
+**The five statements of §535 are confirmed**, so the corrected model is settled: a pillar lives on a unit or the company and is external (a direction) or internal (a capability); a supporting function's plan is a separate thing that never contains one; ownership says nothing about placement; joined or split is a setting on the box.
+
+### What the screens show
+| Client | The company's Strategy page | Reading |
+|---|---|---|
+| **RHI** | Foundation · SWOT · **Directions**. No Capabilities tab. The rail reads *DIRECTIONS 15*, D001…, each with Key measures and Tactics. | **Joined.** One list of pillars. `capExists` is false for this client. |
+| **El Abd** | Foundation · SWOT · **Directions** · **Capabilities** — two tabs. | **Split**, and the split is between two different record shapes, not two halves of one list. |
+| **Raya** | No company pillars; pillars under each unit, both kinds in one list. | **Under the unit**, and already correct. |
+
+### The naming point, and what it proves
+"Directions" in both RHI and El Abd is the **client's own word for `pillar`**, set in Settings — the platform ships that label as *Pillar / Pillars*, and its note in `config-data.js` already reads **"A business unit's direction or capability focus areas."** The platform's own label note has carried Islam's model since it was written.
+
+That splits the question cleanly into three, and it is the clearest statement of what is actually missing:
+
+| | what it is | set where |
+|---|---|---|
+| **The word** | "Directions", "Pillars", whatever the client calls them | **Settings, today** — both RHI and El Abd use it |
+| **The kind** | external or internal, on every pillar row | **On the row, today** — Raya's units already carry both |
+| **Joined or split** | one list, or two sections sorted by kind | **Nowhere.** El Abd's split is a second kind of record, not a setting |
+
+Two of the three already work the way he describes. The third is a build only because the two sides of El Abd's split are different shapes.
+
+### What stage 3b does, per client
+- **RHI — nothing moves.** The list is already one list; any pillar that is really internal gets marked, and the box's setting is *joined*, which is what it does now. Nothing changes on screen.
+- **El Abd — the one real migration.** Its Capabilities tab's entries become internal pillars in the same list as its directions, keeping ids, figures and history; the two tabs then come from the box's setting being *split*. Nothing changes on screen, because the split it has today is what the setting draws.
+- **Raya — a give-back, not a move.** Its function "capabilities" are not capabilities (§535); each function gets its project back and the label goes. The units are untouched. The one visible change across all three clients: a project moves from a capability page onto its function's own Projects list.
+
+**El Abd is the only real migration, and it is the one that proves the model**: once its capabilities are pillars, the thing that makes its page special becomes a setting any client can turn on.
+
+### Still missing before a row moves
+The screens settle the SHAPES; they do not give the RECORDS. Reading El Abd's actual capability entries is still needed — how many, what each holds, and **whether any carries its own pillars rather than measures and tactics**. That last case decides whether one capability becomes one pillar or several, and a screenshot cannot show it. Drawn for Islam at `design-mockups/capability-placement/2026-10-15_where-a-capability-lives.html` (published as an artifact, version 2).

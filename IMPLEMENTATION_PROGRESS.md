@@ -9705,3 +9705,32 @@ Islam corrected the model: a capability is never part of a function's plan. It b
 **What the data is missing.** A capability records which function, and nothing else. That one field is doing two jobs at once — it decides access, it decides which list the capability appears in, and it decides whose people are offered as its owners. There is no field anywhere saying which unit or which company a capability belongs to. Step 2 has to add that, and turn the function link into plain ownership.
 
 **What I need from you:** El Abd's and RHI's data. The corrected model turns on where each of their capabilities actually sits, and I cannot see either client from here. Raya is the only one in this repository, and by your own answer its capabilities are not capabilities.
+
+## §535.2 — The three client shapes, confirmed from your screens (2026-10-15)
+All five statements confirmed, and the two screenshots settle the shapes.
+
+- **RHI** — one list, 15 pillars, no Capabilities tab. **Joined.**
+- **El Abd** — Directions and Capabilities as two tabs. **Split**, and the split is between two different kinds of record rather than two halves of one list.
+- **Raya** — pillars under each unit, both kinds in one list. Already correct.
+
+**Your naming point is the clearest way to see what is missing.** "Directions" is the client's own word for *pillar*, set in Settings. The platform ships that label as "Pillars", and its note already reads *"a business unit's direction or capability focus areas"* — your model has been written into the label all along.
+
+So there are three separate things, and only one is missing:
+
+| | set where |
+|---|---|
+| **The word** they're called | Settings, today |
+| **The kind** — external or internal | On every pillar row, today |
+| **Joined or split** | **Nowhere.** This is the only build. |
+
+**What step 2 does, per client:**
+
+- **RHI — nothing moves.** Already one list. Setting is *joined*, which is what it does now. Nothing changes on screen.
+- **El Abd — the one real migration.** Its capabilities become internal pillars in the same list as its directions, keeping their ids, figures and history. The two tabs then come from the setting being *split*. Nothing changes on screen.
+- **Raya — a give-back.** Each function gets its project back, the label goes, units untouched.
+
+El Abd is the only real move, and it's the one that proves the model: once its capabilities are pillars, the thing that makes its page special becomes a setting anyone can turn on.
+
+**Still needed before a row moves:** El Abd's actual capability records — how many, what each holds, and whether any of them carries its own pillars instead of measures and tactics. That last case decides whether one capability becomes one pillar or several, and a screenshot cannot show it.
+
+Drawing updated: `design-mockups/capability-placement/2026-10-15_where-a-capability-lives.html`

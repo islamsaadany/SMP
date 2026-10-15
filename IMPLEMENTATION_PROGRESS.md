@@ -9902,3 +9902,18 @@ The setting from the mockup is in. On the branch, nothing merged, and **no clien
 - **(b)** a pillar's code comes from its kind, so a capability keeps C001 rather than becoming D006.
 - **(c)** the remaining pages — Performance and Reporting — read a row's kind instead of reading the old capabilities list. The split only reaches the Strategy tab today, deliberately: on those two pages a capability is still a separate record, and writing them now would mean writing them twice.
 - **(d)** El Abd's own move, after the before-and-after list comes out identical.
+
+## §538 — Step (b) built: a code comes from what the row is (2026-10-15)
+On the branch, nothing merged, and **no client has been touched**.
+
+**What changed.** A row's number now counts within the set that shares its letter. At the company that means directions are numbered among the directions (D001, D002…) and capabilities among the capabilities (C001, C002…), whatever order they sit in. So when El Abd's five capabilities join the company's one list, they stay **C001–C005** instead of becoming D006–D010.
+
+**What did not change: every other code in the platform.** A unit uses one letter prefix for everything it holds — MB01, MB02 — and a supporting function the same, so their numbering runs straight through as it always has. This is the part that needed care rather than cleverness: six of the ten units in the example already hold a row marked *Capability*, so a rule that numbered by the mark instead of by the letter would have turned MB03 into MB01 and RS03 into RS01 overnight, on clients that changed nothing. I wrote that version as a deliberate break to see the damage: seven boxes renumbered. The real rule doesn't, and the check refuses to let it.
+
+**One real fault found and fixed on the way.** When you switch a client's business units off, their pillars fold onto the company plan and each is given a code as it arrives. That code was worked out *before* the row joined the list, so it couldn't see whether the row was a direction or a capability — a folded capability would have taken a direction's code. It is now worked out after. The fault couldn't show until the two kinds were coded apart, so it is fixed in the same change that makes it reachable.
+
+**And the El Abd comparison is already green.** The check builds El Abd's shape exactly as it is stored today, reads its ten codes from the two readers the platform uses now, performs the move, and reads all ten from the one reader. Same ten strings, each still on the row whose name it was on. That was going to be the test on the day the data moves; it passes today, before anything has been touched.
+
+**Checked.** 19 new agreements, four deliberate breaks all confirmed red, plus everything from step (a) re-run: the server's rules 1082/0, the data comparison 140/0, the address check 86/0, the split check 35/0, and the screen checks around pillars and codes. The whole functional sweep runs clean.
+
+**Next: (c)** — the Performance and Reporting pages read a row's kind instead of the old capabilities list. Then (d), El Abd's own move.

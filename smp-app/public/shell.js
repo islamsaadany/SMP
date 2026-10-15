@@ -15618,11 +15618,50 @@ function setKoThisYear(on){
   try { localStorage.setItem(KO_YEAR_KEY, SHOW_KO_THIS_YEAR ? "1" : "0"); } catch (e) {}
 }
 
+/* ── A PILLAR'S CODE COMES FROM ITS KIND (§538, spec 066 stage 3b b) ──────
+   Islam, 2026-10-15: *"the capability tab should stay as is and the coding is
+   c001 to c005"*.
+
+   THE NUMBER COUNTS WITHIN THE SET THAT SHARES ITS PREFIX. That is the whole
+   rule, and it is one sentence because the two cases fall out of it:
+
+     · THE COMPANY HAS TWO PREFIXES — D for a direction, C for a capability
+       (§482: *"capabilities take the C, directions another code"*). So a
+       direction is numbered among the directions and a capability among the
+       capabilities, and El Abd's five internal pillars read C001–C005 however
+       far down the one list they sit. Before this they would have read
+       D011–D015 the moment they joined it, which §535.10 forbids.
+
+     · A UNIT HAS ONE PREFIX for everything it holds (`codePrefix`: MB01,
+       RS02). One prefix, one set, so the number counts across the whole list
+       exactly as it always has. This matters more than it looks: six of the
+       worked example's ten units carry pillars marked Capability, and a rule
+       that numbered per KIND rather than per PREFIX would have renumbered
+       every one of them — MB03 becoming MB01 — on a client that has said
+       nothing and changed nothing. Measured before the rule was written.
+
+   SO THE GUARD IS THE PREFIXES, NOT THE KINDS. Where the internal prefix is
+   absent it falls back to the external one, the two are equal, and the
+   function returns exactly what it returned before §538 — which is every box
+   in the product but the company.
+
+   STILL DERIVED, NEVER STORED (§46.3). This changes what is SHOWN; `p.code`
+   is an identifier and nothing here writes one. The two places that DO mint a
+   code for a row — §447's fold of a unit onto the company plan — now mint it
+   after the row is in the list, so the row's own kind is readable; before,
+   the code was computed from an index one past the end, which could not see
+   the kind of the row it was for. */
 function pillarCode(u, i){
-  /* §482: the company's own directions are D001, D002… (Islam: capabilities
-     take the C, directions another code); everything else is unchanged. */
-  if (u.pillarPrefix) return u.pillarPrefix + String(i + 1).padStart(3, "0");
-  return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
+  var pre = u && u.pillarPrefix;
+  if (!pre) return ((u && u.codePrefix) || "") + String(i + 1).padStart(2, "0");
+  var capPre = u.pillarCapPrefix || pre;
+  if (capPre === pre) return pre + String(i + 1).padStart(3, "0");
+  /* `items[j]` is undefined past the end, which reads as not-a-capability and
+     so counts toward the external run — which is the right answer for the one
+     caller that asks for "the code the next row would take". */
+  var items = u.items || [], cap = SMPRules.pillarIsCap(items[i]), n = 0;
+  for (var j = 0; j <= i; j++) if (SMPRules.pillarIsCap(items[j]) === cap) n++;
+  return (cap ? capPre : pre) + String(n).padStart(3, "0");
 }
 
 /* ── A PROJECT IS THE FUNCTION'S PILLAR, SO IT IS CODED LIKE ONE (§51.3) ──
@@ -15923,7 +15962,10 @@ function topPrefix(){
 }
 function topAsUnit(){
   return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
-           navName:null, codePrefix:topPrefix(), pillarPrefix:"D",
+           /* §538: two prefixes, because the company's two kinds of pillar
+              are coded apart — D001 for a direction, C001 for a capability,
+              which is what El Abd's Capabilities tab reads today. */
+           navName:null, codePrefix:topPrefix(), pillarPrefix:"D", pillarCapPrefix:"C",
            items:Array.isArray(GROUP.items) ? GROUP.items : FN_NO_ROWS,
            keyObjectives:FN_NO_ROWS, aspiration:"", endInMind:"", clauses:FN_NO_ROWS,
            swot:(GROUP.swot && typeof GROUP.swot === "object") ? GROUP.swot : FN_NO_SWOT,
@@ -16067,7 +16109,7 @@ function buFoldIntoTop(){
       var acts = Array.isArray(u.actions) ? u.actions : [];
       if (!kos.length && !acts.length) return;
       var pid = mintRowId(GROUP.items, "group-P");
-      var dp = { id: pid, code: pillarCode(top, GROUP.items.length), name: u.name || "", sub: "",
+      var dp = { id: pid, code: "", name: u.name || "", sub: "",
                  kind: "", theme: "", owner: head ? head.name : "", measures: [], tactics: [],
                  fromUnit: k, fromId: "u:" + k };
       kos.forEach(function(o, i){
@@ -16091,7 +16133,12 @@ function buFoldIntoTop(){
         if (a.hide) t.hide = true;
         dp.tactics.push(t);
       });
-      GROUP.items.push(dp); moved++;
+      /* §538: coded AFTER it is in the list, so `pillarCode` can read the
+         row's own kind. Computed from an index one past the end it could
+         not, and a folded capability would have taken a direction's code. */
+      GROUP.items.push(dp);
+      dp.code = pillarCode(top, GROUP.items.length - 1);
+      moved++;
       archiveUnitPlan(u, "moved to the company page");
       return;
     }
@@ -16100,12 +16147,15 @@ function buFoldIntoTop(){
       if (GROUP.items.some(function(q){ return q && q.fromUnit === k && q.fromId === p.id; })) return;
       var c = clone(p);
       c.id = mintRowId(GROUP.items, "group-P");
-      c.code = pillarCode(top, GROUP.items.length);
       c.fromUnit = k; c.fromId = p.id;
       if (!c.owner && head) c.owner = head.name;
       (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
-      GROUP.items.push(c); moved++; took = true;
+      /* §538: coded after the push, so a folded pillar marked Capability
+         takes a C and not the next D (see the fold above). */
+      GROUP.items.push(c);
+      c.code = pillarCode(top, GROUP.items.length - 1);
+      moved++; took = true;
     });
     if (took) archiveUnitPlan(u, "moved to the company page");
   });

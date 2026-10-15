@@ -9675,3 +9675,20 @@ The safeguard still earned its place, but for a smaller reason than I claimed: i
 Checked: authoriser **1082/0**, with a new section over two client shapes (one with business units, one without, since a direction owner can only exist when there are no units). It asserts both ends — a pure part owner is narrowed, a unit head who also owns a pillar is not, a function head who also owns a direction is not, the office and CEO never are, and with the half-eye off nobody is. Red six ways when broken. Everything else unchanged: access baseline **UNMOVED**, graph-diff **140/0**, platform rules **69/0**, stage 1 rules **38/0**, browser QA **ERRORS: none**, and the seven browser checks on this ground all green.
 
 **Before this reaches anybody:** I can only measure the worked example — there is no El Abd, RHI or Raya data in this repository. The same before/after list has to be run on each of the three and shown to you first. That is the one thing standing between this and live.
+
+## §534 — Step 1 is finished, and the two pieces I thought were left are step 2 (2026-10-15)
+You said continue with the rest of step 1. I measured instead of assuming, and there is no rest — **both remaining pieces move stored data**, which is the line step 1 was defined by.
+
+**Folding the four part owners into one role.** They already share one row on the table, but each still keeps its **own stored set of answers** in every client, and those answers disagree in four columns. Making them one role means collapsing four stored sets into one — that is a migration, not a code change.
+
+Measured anyway, so step 2 starts with the answer ready. Best candidate: **a part owner can report their own part, and read the plan around it.** On the worked example that moves six permissions, all upwards — five people gain the ability to report the part they own, each exactly where they own it, and **nobody loses anything**. I checked the thing that matters about giving somebody "edit": all six are still locked to the rows that carry their own name, so it cannot spill onto anybody else's work. The opposite candidate (give part owners nothing) takes those same six away and would stop a project owner reporting their own project — rejected.
+
+**The one-list-or-split setting.** Two parts to this:
+- **Under a unit there is nothing to build.** A unit's pillars already carry whether they are a direction or a capability, and they already show in one list. That is Raya's shape, and it ships today.
+- **At company level — El Abd separated, RHI joined — it cannot be built yet**, and this corrects what I told you earlier. A direction and a capability are not the same kind of thing today: a direction is a pillar, with measures and tactics. A capability is a **container** that holds its own pillars and projects — one level above a direction. You cannot offer "show these as one list" for two different shapes. The setting becomes easy the moment a capability becomes a pillar, which is exactly the move in step 2.
+
+**So step 1 is done.** What it shipped: one address read in one place instead of 118; a capability's video clips following its own seats; and one rule for every part owner. No stored data moved in any of it, so any of it reverts cleanly.
+
+**Waiting on you, to start step 2:**
+1. Confirm the part-owner answer above (report your own part, read the plan around it) — or tell me a different one.
+2. El Abd, RHI and Raya data. I cannot see any of it from here, and step 2 is the half that moves data, so every client needs its own before-and-after list in front of you before anything runs.

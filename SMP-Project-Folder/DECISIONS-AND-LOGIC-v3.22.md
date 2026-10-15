@@ -65180,3 +65180,43 @@ Proved able to fail six ways: back to the grant test (**1** red — the configur
 Unchanged beside it: `test-access-unmoved` **UNMOVED**, `test-graph-diff` **140/0**, `test-platform-rules` **69/0**, `test-stage1-rules` **38/0**, `test-box-ref` **UNMOVED 86**, `test-capability-clips` **14**, `qa.py` **ERRORS: none**, and the seven browser checks on this ground (`direction-part`, `direction-owner-role`, `direction-seats`, `capability-seats`, `capability-entry`, `access-merged`, `access-header`) all green.
 
 **NOT MEASURED, and it has to be before this reaches anybody:** the live clients. There is no El Abd, RHI or Raya data in this repository — only the worked example. The same list (who is narrowed before, who after) must be run against each of the three and shown to Islam before this ships.
+
+## §534 — Stage 3a is finished, and the two pieces thought to remain are stage 3b
+Islam: *"continue with the rest of step 1"*. Measured rather than assumed, and the answer is that there is no rest: both remaining pieces move stored data, which is the line stage 3a was defined by (code only, revertible by a revert).
+
+### 1 · Folding the four part roles into one is a data move
+`powner`, `plowner`, `dirowner` and `capowner` share one row on Roles & access (§516) but keep **four stored sets of answers**, and they disagree in **4 of the 9 columns**:
+
+| column | powner | plowner | dirowner | capowner |
+|---|---|---|---|---|
+| This unit — Plan | view | view | none | none |
+| This unit — Reporting | view | view | none | none |
+| This function — Plan | view | view | none | view |
+| This function — Reporting | view | view | none | **edit** |
+
+Making them ONE role means one stored set, so the four collapse into one — a migration, not a code change.
+
+**Measured, both ways, because the two are easy to confuse and the first run confused them.** Candidate answers for the four columns, all four roles set the same: *own = edit, plan = view* ("report your own part, read the plan around it"). Against the worked example:
+
+- **rewriting the stored answers** (what a migration does): **6 grants move, all upgrades, nobody loses.** Five people gain the ability to report the part they own — `own_mob` and `own_ret` on Care, `mrchead` on Retail, `fn_tre` on Finance, and `dir` on both Mobile and IT. Each gains it exactly where they own a part.
+- **changing only the shipped default**: **0 grants move**, because the worked example already stores an answer for all four roles, and a stored answer beats a default (§30.2).
+
+**And the six upgrades are safe**, which is the question that matters about an `edit`: all six people read `own-rows-only = true`, so the edit reaches the rows that name them and nothing else. Asked of `onlyOwnLines`, which is the rule the server itself asks.
+
+**The narrowest candidate (all four columns to `none`) loses those same 6** and is recorded as rejected: it would stop a project owner reporting their own project, which is what being named on it is for.
+
+So the recommendation for stage 3b, with the measurement behind it: **own = edit, plan = view, the same for all four.** It is Islam's to confirm, and it needs the same list run against El Abd, RHI and Raya first — none of which is in this repository.
+
+### 2 · The one-list-or-split setting cannot be built before capabilities are pillars
+Islam's shapes: *"they appear separated like in elabd or joined like in rhi or both under the unit in raya"*.
+
+**At unit level there is nothing to build.** A unit's pillar already carries `kind`, and the worked example already holds both values — `["Capability", "Direction"]` across its units — in **one list**. Raya's shape is what ships.
+
+**At company level the two are not the same kind of thing**, which is the whole obstacle. Read off the records: a direction is an entry in `GROUP.items` — a pillar, with `measures` and `tactics`. A capability is an entry in `GROUP.capabilities` — `{ name, def, keyObjectives, projects, fn, id }`, a **container that holds its own pillars and projects**, one level up from a direction. The company's Strategy page pushes them as two separate sections and there is no setting, because there could not be one: you cannot offer "show these as one list" for two different shapes.
+
+**So the setting is downstream of §7.1's decision** (a capability with its own page becomes an internal pillar of the function that holds it). Once a capability IS a pillar, "one list or split" is a display choice over one array and costs almost nothing. Before that it is not a setting, it is the migration.
+
+**This corrects what was said to Islam** when the two halves were first put to him: the display setting was listed as part of step 1. It is not, and the reason is in the shapes above.
+
+### What stage 3a actually shipped
+§531 / §531.1 / §531.2 (one address, one parse — 118 sites in 18 files), §532 (a capability's video clips follow its own seats), §533 (a part owner is somebody who owns only a part). No stored data moved in any of them.

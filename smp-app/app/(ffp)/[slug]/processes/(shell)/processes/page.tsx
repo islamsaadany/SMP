@@ -237,7 +237,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                     />
                     <ArchiveProcessButton workspaceId={workspaceId} processId={p.id} />
                     <Link
-                      href={`/${workspaceId}/processes/processes/${p.id}/map`}
+                      href={`/${workspaceId}/processes/processes/${p.id}`}
                       className="text-xs font-semibold text-slate-700 hover:text-slate-900"
                     >
                       Open →

@@ -8282,11 +8282,22 @@ function renderFunctions(){
    The SMO decides which capabilities exist and which function owns each. Each
    belongs to exactly one function; the enhancement work inside them arrives by
    template, the way a unit's plan does. */
+/* §539: the company's internal pillars, read as capabilities — code, name
+   and owner, which is all this page ever showed that a pillar also has. */
+function capsAsPillars(){
+  var u = topAsUnit(), out = [];
+  (u.items || []).forEach(function(p, i){
+    if (SMPRules.pillarIsCap(p)) out.push({ code: pillarCode(u, i), name: p.name || "", owner: p.owner || "" });
+  });
+  return out;
+}
 function renderCaps(){
   /* §85. This page had NO pen at all — it was editable for the SMO the whole
      time, which is how §84.3's silent sort bug hid: every name cell was an
      input. A row now opens deliberately, like the other six. */
   var mayEdit = grant("c_caps") === "edit";
+  /* §539: this client's capabilities are pillars, not records. */
+  var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
@@ -8364,10 +8375,34 @@ function renderCaps(){
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (mayEdit
+      (mayEdit && !capsAreP
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a ' + L1("capability") + '</button>' +
           '<span class="picsub" style="margin-left:10px">Name it and give it an owner; ' +
           'a function to hold it is optional.</span></div>'
+        : '') +
+      /* ── §539 · WHERE THEY WENT, WHEN THEY ARE PILLARS NOW ───────────────
+         A client whose capabilities have become internal pillars of the
+         company's plan (stage 3b) opened this page on an EMPTY table with an
+         Add button that would mint the very record type the move removed.
+         §61's fault twice over: a page saying nothing about the thing it is
+         named after, and the only control on it being the wrong one.
+
+         SO IT NAMES THEM AND POINTS AT THE DOOR. Read-only on purpose: a
+         pillar's name, owner and custodian are edited on the plan with the
+         pen, like every other pillar's, and a second place to type them is a
+         second answer to who owns this (§53.5). The Add button goes with
+         them — there is nothing on this page left to add. */
+      (capsAreP
+        ? '<div class="note"><b>' + L("capability") + ' are part of the ' +
+            L1("topword").toLowerCase() + '\u2019s own plan on this client.</b> ' +
+            'They are named, owned and planned on Strategy \u203a ' + L("capability","bu") +
+            ', on their own tab beside the ' + L("pillar","bu").toLowerCase() +
+            ', with the pen \u2014 so there is nothing to set here.<ul class="capsmoved">' +
+            capsAsPillars().map(function(r){
+              return '<li><span class="mono">' + esc(r.code) + '</span> ' + esc(r.name) +
+                ' <span class="why" style="margin:0">' +
+                (r.owner ? esc(r.owner) : 'no owner yet') + '</span></li>'; }).join("") +
+          '</ul></div>'
         : '') +
       '<div class="note"><b>A ' + L1("capability") + ' carries ' + L("project") + ', and optionally ' + L("keyobj") + '.</b> ' +
         L("keyobj") + ' are optional because some ' + L("capability") + ' hold interrelated ' + L("project") + ' serving ' +

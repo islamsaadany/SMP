@@ -374,15 +374,42 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
       try { return String(run("JSON.stringify((function(){" + pre + "return " + call + ";})())")); }
       catch (e) { return "threw: " + e.message; }
     };
+    /* ── ONE ANSWER HAS DELIBERATELY MOVED SINCE, AND IT IS NAMED (§218) ───
+       §539 taught `plansInPillars` to answer for the TOP LAYER, which it had
+       never done: the company is not in `UNITS`, so `subjUnit("group")` was
+       null and a company planning in pillars answered FALSE — which sent
+       `subjectAsked("group")` down the holder branch to an empty list and
+       left El Abd's Reporting rail unable to say which direction still owed
+       a figure, though `askedItems(topAsUnit())` held 42 rows.
+
+       SO THE EXCEPTION IS AN ASSERTION, NOT A SKIP. The grid below still
+       holds every other address of this call to its old answer; `group` is
+       asserted to have moved from false to true, in both states, which is
+       exactly as strict and says why. A check loosened to pass is a check
+       deleted slowly (§218); this one gained a line. */
+    const MOVED = { "plansInPillars(T)": { group: ["false", "true"] } };
     CALLS.forEach(function (call) {
-      const moves = [];
+      const moves = [], expected = MOVED[call] || {}, kept = [];
       builds.forEach(function (b) {
         ADDRESSES.forEach(function (a) {
           const was = ask(b.was, call, a), now = ask(b.now, call, a);
+          const want = Object.prototype.hasOwnProperty.call(expected, a) ? expected[a] : null;
+          if (want) {
+            if (was === want[0] && now === want[1]) kept.push([b.name, a]);
+            else moves.push([b.name, a, "expected " + want.join(" → "), was + " → " + now]);
+            return;
+          }
           if (was !== now) moves.push([b.name, a, was, now]);
         });
       });
-      ok(moves.length === 0, call + " · unmoved", moves.slice(0, 6));
+      ok(moves.length === 0, call + " · unmoved" +
+         (Object.keys(expected).length ? " but for " + Object.keys(expected).join(", ") : ""),
+         moves.slice(0, 6));
+      /* And the named move really happened, in both states — or the
+         exception above is covering for a reader that never changed. */
+      if (Object.keys(expected).length)
+        ok(kept.length === builds.length * Object.keys(expected).length,
+           call + " · and " + Object.keys(expected).join(", ") + " moved as §539 says, in both states", kept);
     });
     /* BOTH ENDS AGAIN (§94.2): an agreement where every call threw in both
        builds is no agreement at all, so the run has to have produced real

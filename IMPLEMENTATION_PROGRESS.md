@@ -9917,3 +9917,27 @@ On the branch, nothing merged, and **no client has been touched**.
 **Checked.** 19 new agreements, four deliberate breaks all confirmed red, plus everything from step (a) re-run: the server's rules 1082/0, the data comparison 140/0, the address check 86/0, the split check 35/0, and the screen checks around pillars and codes. The whole functional sweep runs clean.
 
 **Next: (c)** — the Performance and Reporting pages read a row's kind instead of the old capabilities list. Then (d), El Abd's own move.
+
+## §539 — Step (c) built: the pages read what a row is (2026-10-15)
+On the branch, nothing merged, and **no client has been touched**. This is the big one.
+
+**I changed how I did it, and that's worth telling you.** The plan said "move the 77 places in the code that read the old capabilities list". I started by measuring instead: I loaded your El Abd file, rendered every page a capability appears on, performed the move on a copy in memory, and rendered them all again. That turned 77 places into **six surfaces that actually move**, and told me exactly what each one does wrong. Most of those 77 reads are correct as they are.
+
+**The six, all fixed:** the Capabilities tab's heading; the Performance page's cards; the Reporting page's rail; the Temple's base; the review deck's roll-call; and Setup › Capabilities, which would otherwise have shown the office an empty table whose only button would create the old kind of record again — it now says where they went and lists them.
+
+**The move itself is now part of the platform, not a script.** It refuses rather than guesses: a capability that plans in projects, holds more than one pillar, has objectives of its own, a definition, or a function attached is named with the reason, and the whole move stops. Every row keeps its id, so no figure, no reported number and no past cycle loses its place. Where the capability's owner is on the record rather than on the pillar — which is true of three of your five — the owner comes with it. And it turns on the two-tab setting from step (a) in the same breath, so the tabs don't move.
+
+**A real fault found by measuring, and fixed.** Your El Abd Reporting page has never been able to tell you which direction still owes figures — the "28 to finish" bar and the per-direction counts were missing, because of a lookup that returns nothing for a company (it works for every unit and every capability). Your capabilities *did* show their marks, so the move would have taken five red *Still to enter* flags off the page and left the directions' silence. Rather than accept that, I fixed the lookup. **This adds the fill bar to your Reporting page even before anything moves** — it's listed as a change, not hidden.
+
+**The before-and-after, for El Abd.** I wrote it as three columns, not two, because "the page changed" is useless if you can't tell whether the code or the move changed it: *today* / *the new code, same data* / *the new code, after the move*. On your file:
+
+- Five rows move. **C001 → C001, C002 → C002, C003 → C003, C004 → C004, C005 → C005.** Every code unchanged, every id kept, every owner carried.
+- **Four differences on the pages**, all of them named: a separator dot appears between Owner and Custodian on the Capabilities tab; the Reporting fill bar appears (the fix above) and then counts all ten rows instead of five; the Temple's base reads *6 Key Measures · 4 Tactics* where it read *0 Projects*; and the deck's roll-call reads C001–C005 where it read the two-letter EQ / EE / DT / T& / OE — which is your own rule finally reaching the last surface that disagreed with it.
+- Everything else — the Directions tab, Foundation, SWOT, the Performance sections, the Focus board, the workbook, who can reach what — is word for word identical.
+
+**Checked.** 38 new agreements, eight deliberate breaks all confirmed red. One of my own mistakes was caught by an existing check rather than by me: rewriting the Temple's base I dropped the switch that hides it for a client with capabilities turned off. It's back. Everything else re-run clean: the server's rules 1082/0, the data comparison 140/0, the address check 87/0, steps (a) and (b) 35/0 and 19/0, and the capability screen checks.
+
+**You can run the comparison yourself** on any client's working copy:
+`node scripts/stage3-before-after.js <the file>`
+
+**Next is (d) — your El Abd data.** I'll rehearse it on a copy and bring you the list and the SQL. Nothing runs until you say so.

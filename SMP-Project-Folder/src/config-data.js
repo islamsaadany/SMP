@@ -5709,8 +5709,11 @@ function reportItems(u){
        broken — address by the identifier, label with the word — and it would
        fail invisibly on a tenant where the two happen to coincide. Found by
        pressing Next and watching the rail not move. */
+    /* §539: the rail that HOLDS this pillar, which on a split box is the
+       half its kind puts it in — not the half on screen, because this walk
+       runs outside any render. */
     var place = { key:"p:" + (p.id || pi), label:code,
-                  rail:unitRailKey(u), code:pillarRailId(p) };
+                  rail:pillarRailKey(u, p), code:pillarRailId(p) };
     /* `owner` travels with the row so canReportRow() can answer without
        walking back up to the pillar. A MEASURE names nobody of its own, so it
        carries its pillar's owner — the nearest thing the data supports until
@@ -8014,8 +8017,11 @@ function gapMap(target, all, fillable){
                      : (canAuthor[w.plan] = mayAuthor(w.plan, target)))))
           n += extraOutcomeGaps(x);
       });
+      /* §539: and the SECTION that holds it, so the walk opens the tab the
+         pillar is actually drawn on. */
       entry("p:" + (p.id || i), pillarCode(u, i), n,
-            { sec: w.sec, page: "plan", rail: unitRailKey(u), code: pillarRailId(p) });
+            { sec: pillarSecKey(u, p, w.sec), page: "plan",
+              rail: pillarRailKey(u, p), code: pillarRailId(p) });
     });
   };
   /* ONE HOLDER'S GAPS, WHOEVER HOLDS IT (§334.13). A function's own work and
@@ -8680,6 +8686,19 @@ function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
   return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
 }
+/* §539 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
+   headed with the client's word for a capability and its external half with
+   the word for a pillar, because the two tabs are the two words — that is
+   what §537's setting is for. Asked here rather than at each rail, heading
+   and empty state, so the page cannot call the same list two things
+   (§53.5). Joined, and everywhere outside a split box, it is the pillar
+   word exactly as it was. */
+function halfWord(u){
+  return (PILLAR_HALF === "cap" && boxSplit(u)) ? L("capability", "bu") : L("pillar", "bu");
+}
+function halfWord1(u){
+  return (PILLAR_HALF === "cap" && boxSplit(u)) ? L1("capability") : L1("pillar");
+}
 function halfFilter(u){
   if (!PILLAR_HALF || !boxSplit(u)) return null;
   var half = PILLAR_HALF;
@@ -8794,6 +8813,113 @@ function buFoldIntoTop(){
   });
   return moved;
 }
+/* ── §539 · A CAPABILITY BECOMES AN INTERNAL PILLAR OF THE COMPANY ────────
+   Spec 066 stage 3b, the move itself. Islam: *"a pillar is external and
+   internal pillars and they are the same like directions but internal
+   directions are called capabilities"*, and *"the capability is either on a
+   unit or it's on the company"*.
+
+   THIS IS THE PRODUCT'S OWN MIGRATION, NOT A SCRIPT'S (§100.3). The same
+   function runs in the rehearsal, in the check that proves the pages do not
+   move, and on the client — so there is one answer to *what does the move
+   do*, and the thing measured is the thing that runs.
+
+   IT REFUSES RATHER THAN GUESSES. A capability is a RICHER record than a
+   pillar: it may plan in projects, hold key objectives and a definition of
+   its own, name a function, and carry more than one inner pillar. None of
+   those is representable on a pillar, so each is a REFUSAL with a reason
+   rather than a silent loss, and the move is all or nothing — a half-moved
+   client is the worst state of the three. Measured on El Abd before this was
+   written: five capabilities, every one of them already exactly one pillar,
+   no definition, no key objectives, no projects, no function (§535.6).
+
+   THE INNER PILLAR'S ID IS KEPT. That is the whole safety of the move: every
+   figure, every snapshot, every history entry and every submitted report is
+   keyed on the row's id (§48), so a move that mints a new one silently drops
+   a cycle's reporting. `cap:cap3-P1` stays `cap:cap3-P1` in the company's
+   list, and nothing that points at it has to be found.
+
+   THE OWNER COMES OFF THE RECORD WHERE THE PILLAR HAS NONE. A capability's
+   seat is `head`, which holds a person's KEY; a pillar's `owner` holds their
+   NAME (`namedOn` matches by name, §33). On El Abd all five inner pillars
+   store an empty owner and three of the five records name a head, so without
+   this three capabilities would arrive ownerless and three people would lose
+   the rows they report.
+
+   AND IT SETS THE SPLIT (§537) IN THE SAME BREATH, because the one thing the
+   move must not do is change what anybody sees: the five rows join the
+   company's one pillar list, and the setting is what keeps them on their own
+   tab, reading Capabilities, exactly as they read now. */
+function capFoldBlockers(){
+  var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  var out = [];
+  caps.forEach(function(c){
+    if (!c || !c.id) return;
+    var why = [];
+    if (!capPlansInPillars(c)) why.push("plans in " + L("project").toLowerCase() + ", not " + L("pillar","bu").toLowerCase());
+    else if (capItems(c).length !== 1) why.push("holds " + capItems(c).length + " " + L("pillar","bu").toLowerCase() + ", not one");
+    if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
+    if ((c.projects || []).length) why.push((c.projects || []).length + " " + L("project").toLowerCase().toLowerCase());
+    if (String(c.def || "").trim()) why.push("a definition of its own");
+    if (c.fn) why.push("held by " + ((FUNCTIONS[c.fn] || {}).name || c.fn));
+    if (why.length) out.push({ id: c.id, name: c.name || "", why: why });
+  });
+  return out;
+}
+/* What the move WOULD do, row by row, without doing it. The rehearsal and
+   the before-and-after list are built from this, so what Islam signs off on
+   and what runs are the same list (§100.3). */
+function capFoldPlan(){
+  var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
+  var top = topAsUnit(), n = (GROUP.items || []).length, out = [];
+  caps.forEach(function(c){
+    if (!c || !c.id || !capPlansInPillars(c) || capItems(c).length !== 1) return;
+    var p = capItems(c)[0], head = personBy(c.head), cust = personBy(c.custodian);
+    out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c),
+               name: p.name || c.name || "", at: n,
+               owner: p.owner || (head ? head.name : ""),
+               custodian: p.custodian || (cust ? cust.name : ""),
+               measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+    n++;
+  });
+  /* The code each row will read, worked out over the list as it WILL be —
+     asked of `pillarCode` itself rather than counted here a second time
+     (§53.5), so the rehearsal cannot disagree with the page. */
+  var after = (GROUP.items || []).concat(out.map(function(r){
+    return { id: r.pillarId, name: r.name, kind: SMPRules.PILLAR_CAP }; }));
+  var asList = { pillarPrefix: top.pillarPrefix, pillarCapPrefix: top.pillarCapPrefix,
+                 codePrefix: top.codePrefix, items: after };
+  out.forEach(function(r){ r.becomes = pillarCode(asList, r.at); });
+  return out;
+}
+/* The move. Returns how many rows went, or -1 where something blocks it. */
+function capFoldIntoTop(){
+  if (capFoldBlockers().length) return -1;
+  var rows = capFoldPlan();
+  if (!rows.length) return 0;
+  if (!Array.isArray(GROUP.items)) GROUP.items = [];
+  var byId = {};
+  (GROUP.capabilities || []).forEach(function(c){ if (c && c.id) byId[c.id] = c; });
+  rows.forEach(function(r){
+    var c = byId[r.capId], p = capItems(c)[0];
+    /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
+       own ids too, and an object the page already holds a handle on stays
+       the same object (§48). */
+    p.name = r.name;
+    p.kind = SMPRules.PILLAR_CAP;
+    p.owner = r.owner;
+    if (r.custodian) p.custodian = r.custodian;
+    GROUP.items.push(p);
+  });
+  /* The records go only once every one of their pillars is in the list. */
+  GROUP.capabilities = (GROUP.capabilities || []).filter(function(c){
+    return !c || !c.id || !rows.some(function(r){ return r.capId === c.id; }); });
+  /* §537: and the company shows its pillars apart, so the tabs do not move. */
+  var st = SMPRules.structureOf(GROUP) ? clone(SMPRules.structureOf(GROUP)) : {};
+  st.top = st.top || {}; st.top.plan = st.top.plan || {}; st.top.plan.split = true;
+  GROUP.structure = st;
+  return rows.length;
+}
 function fnWriteBack(fk, u){
   var f = FUNCTIONS[fk];
   if (!f || !u) return;
@@ -8879,6 +9005,29 @@ function plansInPillars(target){
   var t = String(target || ""), r = boxRef(t);
   if (r.kind === "cap") return capPlansInPillars(capOfTarget(t));
   if (r.kind === "fn") return fnPlansInPillars(FUNCTIONS[r.key]);
+  /* §539 — AND THE COMPANY ITSELF, WHICH THIS HAS NEVER ANSWERED FOR. The
+     top layer is not in `UNITS`, so `subjUnit("group")` is null and this
+     returned FALSE for a company planning in pillars — which sent
+     `subjectAsked("group")` down the holder branch to an empty list. The
+     visible cost, on El Abd today: its Reporting rail knows which figures
+     each direction still owes (`askedItems(topAsUnit())` has 42 rows) and
+     says nothing, because the one reader that would carry them to the rail
+     answers for every box in the product except this one. §61's fault — a
+     count with no route to what it counts — hidden behind a null lookup.
+
+     FOUND BY MEASURING STAGE 3b, not by reading: its capabilities DO carry
+     the alarm, because each is addressed as `cap:<id>` and that branch above
+     answers properly. So the move would have taken five red *Still to enter*
+     marks off the page and left the directions' silence in their place. It
+     is fixed here rather than reported and left, because leaving it is the
+     regression (§539's own requirement) — and the fix gives the directions
+     the mark they should always have had. STATED AS A CHANGE in the
+     before-and-after list, since it adds marks to five rows that had none.
+
+     `topWay()` and not `topHasPlan()`: the question is how the box plans,
+     not whether anything is in it. A company planning in projects answers
+     false here exactly as a projects unit does. */
+  if (r.kind === "top" && r.named) return topWay() === "pillars";
   /* §405: a unit plans in pillars unless it has chosen otherwise. */
   var pu = subjUnit(t); return !!pu && unitFormat(pu) === "pillars";
 }

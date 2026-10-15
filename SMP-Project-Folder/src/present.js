@@ -521,9 +521,14 @@ function deckSlides(u){
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
   var pNames = u.items.map(function(p, i){
+    /* §539: an INTERNAL pillar says what it is where it has nothing else to
+       say, exactly as a capability's own card does below — so a client whose
+       capabilities have become pillars reads the same roll-call it read when
+       they were records. Its own sub-line still wins where it has one. */
+    var sub = p.sub || (SMPRules.pillarIsCap(p) ? L1("capability") : "");
     return '<div class="pcard"><span class="pcard-c">' + pillarCode(u, i) + '</span>' +
       '<span class="pcard-n">' + esc(p.name) + '</span>' +
-      (p.sub ? '<span class="pcard-s">' + esc(p.sub) + '</span>' : '') +
+      (sub ? '<span class="pcard-s">' + esc(sub) + '</span>' : '') +
       /* §416: the years each direction runs in, and a later one says when. */
       (yearsOn(p) ? '<span class="pcard-y">' + esc(runsNow(p) ? yearsTag(p) : yearsLater(p)) + '</span>' : '') +
       '</div>';
@@ -549,7 +554,11 @@ function deckSlides(u){
 
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    '><h2>' + L("pillar","bu") + (capCards ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
+    /* §539: the heading names both kinds whether the capabilities are
+       records beside the list or pillars inside it. */
+    '><h2>' + L("pillar","bu") +
+      (capCards || u.items.some(function(p){ return SMPRules.pillarIsCap(p); })
+        ? ' &amp; ' + L("capability","bu") : '') + '</h2>' +
     '<div class="pcards" style="--n:' + nCards +
       ';--c:' + pillarCols(nCards) +
       ';--r:' + Math.ceil(nCards / pillarCols(nCards)) + '">' +

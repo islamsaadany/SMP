@@ -65448,3 +65448,15 @@ Islam, 2026-10-15, on El Abd's two moves: *"ok noting that nothing will change f
 | d | **then** El Abd's five capabilities become internal pillars, and its five dead units are deleted | **yes** |
 
 a, b and c are code-only and revertible, exactly like stage 3a. Only d touches a client, and by the time it runs every page already draws the result the same way it draws it today — which is the whole of what Islam asked to be true.
+
+## §535.10 — Stated as a constraint in Islam's own words: the tab stays, the codes stay
+Islam, 2026-10-15, reading §535.9's list: *"No the capability tab should stay as is and the coding is c001 to c005… are we still confused about these?"*
+
+**Not confused — the same thing, written badly.** §535.9 listed the Capabilities tab vanishing and C001–C005 renumbering as what WOULD happen if the data moved before the code, which is the argument for building the code first. Read as a proposal it says the opposite of what it means. Restated here as a constraint rather than left as an inference from *"nothing will change for the users"*:
+
+- **El Abd's Capabilities tab stays exactly as it is** — same tab, same place, same rail, same pane.
+- **Its codes stay C001–C005.** Not D006–D010, not renumbered, not re-derived from a merged position.
+
+Both are now requirements the migration is held to, not outcomes to be checked afterwards. `pillarCode` taking the code from the pillar's KIND (§535.9 b) and the joined-or-split setting (a) exist for no other purpose than to make these two true; if either fails to, the data does not move.
+
+**And the check follows from it**: before and after the move, every code on El Abd's company plan reads the same string — D001…D005 and C001…C005 — and the Strategy tab draws the same two sections with the same words. That is the proof obligation for stage 3b on this client, and it is a comparison, not a judgement.

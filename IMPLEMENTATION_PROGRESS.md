@@ -9863,3 +9863,15 @@ Then I asked ten separate questions, each on its own: people attached, history, 
 a, b and c are code only and revert cleanly, exactly like step 1. Only d touches your data — and by the time it runs, every page already draws the result the same way it draws it today. Which is exactly what you asked to be true.
 
 **Nothing is written to any client until a, b and c are built and proved.** That is the next block of work, and none of it needs anything further from you.
+
+## §535.10 — Your constraint, in your words (2026-10-15)
+Not confused — I wrote it badly. That list was what *would* break if the data moved before the code. It was the argument for doing the code first, and it read like a proposal.
+
+Written down as a fixed requirement rather than my inference:
+
+- **The Capabilities tab stays exactly as it is** — same tab, same place, same rail, same pane.
+- **The codes stay C001–C005.**
+
+Those are now the standard the migration is held to, not something to check afterwards. The two code steps exist for no other reason than to make them true — and if either fails, the data doesn't move.
+
+**The proof is a comparison, not a judgement:** before and after, every code on El Abd's company plan reads the same string, and the Strategy tab draws the same two sections with the same words.

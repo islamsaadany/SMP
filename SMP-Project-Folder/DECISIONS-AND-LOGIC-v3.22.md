@@ -65426,3 +65426,25 @@ Matching is by **wording**, so it is a prompt to look and never a verdict: a "co
 ### What this makes El Abd's stage 3b
 1. **The five capabilities become internal pillars of the company** (§535.5, §535.7) — settled, one-to-one, ids kept.
 2. **The five switched-off units are deleted**, with the five orphan objectives above decided first. The company's directions and capabilities are untouched by it, which is what he asked to be ensured and what the reference walk above establishes: nothing the directions or capabilities hold points at a unit.
+
+## §535.9 — "Nothing changes for the users" is the requirement, and it puts the code before the data
+Islam, 2026-10-15, on El Abd's two moves: *"ok noting that nothing will change for the users this is just a structural change"*, and of the five orphan objectives: *"Let them go."*
+
+**Decided: the five go.** No carry-across onto a direction. They are listed by name at §535.8 and in `scripts/stage3-unit-removal-readings.js`'s output, so what was let go stays on the record rather than vanishing with the rows. None carries a reported figure, none is pointed at by anything, and 16 of their 21 siblings already stand on the company's plan.
+
+**And his first sentence is a REQUIREMENT, not an observation.** Measured against the code, moving El Abd's data today would change three visible things, so the move cannot go first:
+
+1. **The Capabilities tab would vanish.** El Abd's two tabs come from capabilities being a different RECORD, not from a setting; the split display setting does not exist (§535.2's table: the word is a setting, the kind is on the row, joined-or-split is **nowhere**). Merge the records with nothing to draw the split and the five land inside Directions.
+2. **C001–C005 would become D006–D010.** `pillarCode(u, i)` is the prefix plus the row's POSITION, and `topCapCode(c)` is `"C" + index in GROUP.capabilities`. Merged into `GROUP.items` the capabilities take positions 6–10 of one list and the C is lost — against Islam's own instruction recorded at §482: *"capabilities take the C"*. So the code has to come from the pillar's KIND, not from one shared position.
+3. **77 mentions of the capability container across 14 files** (`GROUP.capabilities` / `w.capabilities`: config-data 27, group-render 7, shell 6, rules 5, copilot 5, client-setup 5, config-render 4, authorize 3, and six more) read the container rather than a pillar's kind. Until each reads the kind, the rail, the deck, the reporting board, the gap counts, the Copilot, the export and Set-up all stop seeing the five. A count of mentions is a scale, not a task list — but the scale is the point.
+
+**So stage 3b's order is forced, and it is the opposite of how it was framed:** the *data move is the small part*, and the code that makes the move invisible is the large one. Nothing is written to a client until all three are built and proved:
+
+| | what | moves data? |
+|---|---|---|
+| a | joined-or-split as a setting on the box, over one pillar list, each section keeping its own stored word | no |
+| b | a pillar's code from its kind, so an internal pillar keeps the C | no |
+| c | the 77 readers moved from the container to the kind | no |
+| d | **then** El Abd's five capabilities become internal pillars, and its five dead units are deleted | **yes** |
+
+a, b and c are code-only and revertible, exactly like stage 3a. Only d touches a client, and by the time it runs every page already draws the result the same way it draws it today — which is the whole of what Islam asked to be true.

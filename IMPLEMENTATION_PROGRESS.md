@@ -9839,3 +9839,27 @@ Then I asked ten separate questions, each on its own: people attached, history, 
 **Also worth recording:** the spec said El Abd's units would "come back as boxes", and named it the hardest part of the whole migration. Your answer makes that wrong in its premise — they were never a shape to restore. Written down as a reversal rather than quietly dropped.
 
 **So El Abd's step 2 is now two clear moves:** the five capabilities become internal pillars (settled, one-to-one, ids kept), and the five dead units get deleted once you have ruled on those five objectives.
+
+## §535.9 — "Nothing changes for the users" is the requirement, and it reorders the work (2026-10-15)
+**The five objectives go.** Recorded by name so what was let go stays on the record rather than disappearing with the rows.
+
+**Your other sentence is the important one, and I want to be straight about it.** "Nothing will change for the users" is achievable — but it is not free, and if the data moved today **three things would visibly change**:
+
+1. **El Abd's Capabilities tab would disappear.** Those two tabs exist today because a capability is a different *kind of record*, not because of a setting. The setting doesn't exist yet. Merge the records with nothing to draw the split, and the five land inside Directions.
+
+2. **C001–C005 would become D006–D010.** A pillar's code is its position in the list. Merge the two lists and the capabilities take positions 6 to 10 — and the C goes. You told us "capabilities take the C" when that code was built, so losing it is a real change, not a detail.
+
+3. **77 places across 14 files still look for the capability container** rather than asking a pillar whether it's internal. Until each one is changed, the rail, the deck, the reporting board, the gap counts, the Copilot, the export and Set-up all stop seeing those five.
+
+**So the order is forced, and it's the reverse of how I framed it.** The data move is the *small* part. The code that makes the move invisible is the big part.
+
+| | | moves data? |
+|---|---|---|
+| a | joined-or-split as a setting, each section keeping its own word | no |
+| b | a pillar's code comes from its kind, so an internal one keeps its C | no |
+| c | the 77 readers ask the kind instead of the container | no |
+| d | **then** the five capabilities move and the five dead units are deleted | **yes** |
+
+a, b and c are code only and revert cleanly, exactly like step 1. Only d touches your data — and by the time it runs, every page already draws the result the same way it draws it today. Which is exactly what you asked to be true.
+
+**Nothing is written to any client until a, b and c are built and proved.** That is the next block of work, and none of it needs anything further from you.

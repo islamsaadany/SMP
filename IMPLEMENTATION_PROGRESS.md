@@ -9767,3 +9767,18 @@ El Abd's Capabilities tab settles it, and the answer is better than either optio
 **One edge, already decided by the product:** if a capability carries more than one pillar row, the page today shows the first and says *"holds N plans from before"*. The migration will do the same — and will **report** every capability with extra rows rather than dropping them quietly.
 
 **What's left:** just the five rows themselves, to confirm each carries one pillar and to produce your before-and-after list. There is no open question left in the rule.
+
+## §535.6 — El Abd's five, and the script that prints your list (2026-10-15)
+Your Set-up screen answers everything. All five capabilities **plan in Pillars**, so each is already one pillar and each becomes one internal pillar — one-to-one, nothing to decide.
+
+**And all five are "— unassigned —".** Not one of them names a function. **Your data already matches the model you described**: the capabilities are the company's, and the function link — the field this whole problem turns on — is empty on every single row. The migration doesn't have to re-point anything. It has to stop the platform guessing placement from a field nobody filled in.
+
+**I've written the script that prints your list.** It reads and reports; it moves nothing. It asks the product's own code for every answer rather than working anything out for itself.
+
+**And it solves the problem of me not being able to see your clients.** The platform already hands out what I need: Setup › Reporting cycle › **Contingency files** gives you a working copy of a client with its whole plan inside it. Hand me that file for El Abd and I can print the real list — real names, real counts, real ids — rather than a stand-in.
+
+It names everything that isn't a plain one-to-one and decides none of it: a capability planning in projects, one with no plan yet, and one carrying more than one pillar row — which the page already hides behind *"holds N plans from before"*. Those get printed in full, because the one thing a migration must never do is drop a row nobody was told about.
+
+Proved on the worked example and on an El Abd-shaped stand-in built from your screenshots, with a hidden second plan added to one of them on purpose — the script caught it and named it.
+
+**Next:** the El Abd contingency file. Then you get the real list, and after you have seen it, the migration.

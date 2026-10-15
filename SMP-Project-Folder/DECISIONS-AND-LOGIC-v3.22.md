@@ -65336,3 +65336,29 @@ Ids are kept throughout, so every figure, snapshot and history entry still point
 
 ### What is left before stage 3b can run
 Only the records themselves: El Abd's five capability rows, to confirm each carries exactly one pillar row and to produce the before-and-after list. The *rule* no longer has an open question in it.
+
+## §535.6 — El Abd's five capabilities, read off its Set-up step, and the script that prints the list
+Islam sent **Client set-up › 6 Capabilities** for El Abd. Every row, verbatim from the screen:
+
+| | carried by | plans in |
+|---|---|---|
+| End-to-End Quality Mindset | **— unassigned —** | **Pillars** |
+| ERP Enhancement | **— unassigned —** | **Pillars** |
+| Digital Transformation | **— unassigned —** | **Pillars** |
+| Talent & Workforce Optimization | **— unassigned —** | **Pillars** |
+| Operational excellence | **— unassigned —** | **Pillars** |
+
+**All five plan in pillars**, so by §535.5 each already carries one pillar row with its measures and tactics, and each becomes one internal pillar — one-to-one, nothing to decide.
+
+**And all five are unassigned.** Not one names a function. **El Abd's data already matches the model Islam described**: the capabilities are the company's, and the function link — the field the whole fault turns on — is empty on every row. The migration does not have to re-point anything; it has to stop the platform inferring placement from a field nobody filled in.
+
+The step list also confirms §535.3's layers for this client: **1 The client · 2 Structure · 3 Divisions · 4 Directions · 5 Functions · 6 Capabilities · 7 The office** — divisions above functions, as he described. And the banner on the step reads *"This client has a plan in it, so its shape is set from here on … they are read-only here"*, which is why these five are shown and not editable there.
+
+### `scripts/stage3-capability-readings.js`
+The promise made with stage 3 was that Islam sees the row-by-row list per client BEFORE anything runs. This prints it. It **moves nothing and writes nothing**: it loads the platform's own sources in a vm, hydrates a tenant and reports, asking the product's own readers for every answer (`capPlansInPillars`, `capItems`, `topCapCode`, `capAtTop`, `buExists`) rather than re-deriving any of them — a second opinion about those is how a migration comes to move something the product never showed (§42).
+
+**It solves the "I cannot see the client" problem**, using `stage1-readings.js`'s own door: a **contingency working copy** (Setup › Reporting cycle › Contingency files, §306) carries the tenant's whole graph in a `<script type="application/json" id="smp-offline">` block, the same shape `/api/state` answers. So a client this repository does not hold is measured by handing the script that file.
+
+It names everything that is **not** a plain one-to-one, and decides none of it: a capability planning in **projects** (its projects listed, not silently folded); one with **no plan yet** (an empty pillar, nothing lost); and one carrying **more than one pillar row** — which the product already hides behind *"holds N plans from before"* — printed in full with its ids, because the one thing a migration must never do is drop a row nobody was told about.
+
+Proved twice: on the worked example (Raya's one capability, held by Marketing, planning in projects) and on an El-Abd-shaped stand-in built from the screenshots — five capabilities, unassigned, planning in pillars, **with a second pillar row added to one of them on purpose**, which the script catches and names. The stand-in is scratch, not committed: it is a shape, not Islam's data, and is labelled as such in its own output.

@@ -5797,8 +5797,15 @@ console.log("\n§520 · a capability's owner is a part owner");
         JSON.stringify(rowOf("part").of));
   check("§520: …and no longer on the Owner row", rowOf("owner").of.indexOf("capowner") === -1,
         JSON.stringify(rowOf("owner").of));
-  check("§520: the narrowed roles are the direction's and the capability's",
-        R.PART_ONLY_ROLES.join(",") === "dirowner,capowner", R.PART_ONLY_ROLES.join(","));
+  /* §533 REWRITES THIS ASSERTION rather than widening it (§218). It read
+     "dirowner,capowner" — the two the half eye reached when only those two
+     existed as parts. Islam: *"a part can be project and pillar as well …
+     they are parts that should follow the same rule for consistency"*, so the
+     list is all four and the narrowing is governed by the sentence below it:
+     a part owner is somebody who owns ONLY a part. */
+  check("§533: all four parts are narrowed roles",
+        R.PART_ONLY_ROLES.slice().sort().join(",") === "capowner,dirowner,plowner,powner",
+        R.PART_ONLY_ROLES.join(","));
 
   const P = clone(SEED);
   P.people = P.people.concat([{ key: "t520_cap", name: "Testcase Capability Owner", unit: "group" }]);
@@ -5817,6 +5824,165 @@ console.log("\n§520 · a capability's owner is a part owner");
   const F = clone(P); delete F.group[R.DIR_SCOPE];
   check("§520: with the half eye off they see the full plan",
         R.partOnly(R.worldOf(F), personOf(F, "t520_cap")) === false);
+})();
+
+/* ── §533 · A PART OWNER IS SOMEBODY WHO OWNS ONLY A PART ─────────────────
+   Islam: *"a part can be project and pillar as well … they are parts that
+   should follow the same rule for consistency"*, and the sentence the whole
+   thing rests on — *"the CEO sees everything, and the business unit sees his
+   own business unit"*. So: you see the thing you own, whole, and the BIGGEST
+   thing you own decides.
+
+   THE TRAP THIS SECTION EXISTS FOR, measured on the worked example before the
+   rule was built: adding `powner` and `plowner` to the narrowed list and
+   changing nothing else narrowed 24 of its 33 people — eight business-unit
+   OWNERS and five function HEADS among them, because each also happens to own
+   one pillar inside their own unit. That is the exact opposite of what he
+   asked for, and it is the shape a future change would most easily bring
+   back, so it is asserted from both ends: a pure part owner IS narrowed, and
+   a box owner who ALSO holds a part is NOT (§94.2).
+
+   THE STATES ARE MADE (§255): the worked example has no direction owner and
+   no capability owner at all, so every assertion here would pass over a build
+   that narrowed nobody. */
+console.log("\n§533 · a part owner is somebody who owns only a part");
+(function () {
+  /* TWO STATES, because a DIRECTION owner cannot exist beside business units
+     at all: `ownsTopPillar` refuses outright while `buExists`, so a direction
+     owner is El Abd's shape and a pillar owner is everybody else's. Asserting
+     both in one state would have asserted one of them against nothing. */
+  const P = clone(SEED);
+  P.group[R.DIR_SCOPE] = "part";
+  /* A unit that plans in pillars already; one of its pillars gets an owner, so
+     a plain pillar owner exists, and the unit's own head keeps their unit. */
+  const U = P.units[P.unitKeys[0]];
+  U.items = U.items || [];
+  if (!U.items.length) U.items.push({ id: "u533", code: "U1", name: "A pillar", measures: [], tactics: [] });
+  U.items[0].owner = "Testcase Pillar Owner";
+  P.people = P.people.concat([
+    { key: "t533_pil",  name: "Testcase Pillar Owner", unit: "group" },
+    { key: "t533_both", name: "Testcase Unit Head",    unit: "group" }]);
+  /* The unit's own head, who ALSO owns a pillar inside it — the 24-person
+     case, in one person. */
+  U.items.push({ id: "u533b", code: "U2", name: "A second pillar", owner: "Testcase Unit Head", measures: [], tactics: [] });
+  P.unitRoles = P.unitRoles || {};
+  P.unitRoles[P.unitKeys[0]] = Object.assign({}, P.unitRoles[P.unitKeys[0]], { head: "t533_both" });
+  const w = R.worldOf(P);
+  const roles = function (k) { return R.personRoles(w, personOf(P, k)).map(function (r) { return r.role; }); };
+
+  /* The states really are what they claim, or the assertions below are true
+     for the wrong reason (§113.8). */
+  check("§533: the pillar owner derives plowner and nothing bigger",
+        roles("t533_pil").join(",") === "plowner", roles("t533_pil").join(","));
+  check("§533: the unit head derives owner AND plowner",
+        roles("t533_both").indexOf("owner") > -1 && roles("t533_both").indexOf("plowner") > -1,
+        roles("t533_both").join(","));
+
+  check("§533: a pillar owner owns only a part — narrowed",
+        R.partOnly(w, personOf(P, "t533_pil")) === true);
+  check("§533: a UNIT HEAD who also owns a pillar is NOT narrowed",
+        R.partOnly(w, personOf(P, "t533_both")) === false);
+  /* And every box role, one at a time, because "not a part and not the floor"
+     is the definition and a list would rot (§53.5). */
+  ["super", "smoteam", "gceo", "cceo", "owner", "custodian", "fnhead"].forEach(function (k) {
+    check("§533: " + k + " is a box role, so it never narrows",
+          R.PART_ONLY_ROLES.indexOf(k) === -1);
+  });
+  /* The office is never narrowed however many parts they hold. */
+  check("§533: the SMO is not narrowed", R.partOnly(w, personOf(P, "smo")) === false);
+  check("§533: the CEO is not narrowed", R.partOnly(w, personOf(P, "ceo")) === false);
+
+  /* THE WHOLE REGISTER, counted: exactly the people who own only parts. A
+     count rather than a name, because the point is that the other 33 did NOT
+     move (§303). */
+  const narrowed = P.people.filter(function (p) { return R.partOnly(w, p); }).map(function (p) { return p.key; });
+  check("§533: in the worked example only the pure part owners are narrowed",
+        narrowed.sort().join(",") === "dir,t533_pil", narrowed.sort().join(","));
+
+  /* ── WHAT THE BOX TEST IS ACTUALLY FOR, and the correction behind it ────
+     MEASURED, after a first measurement of this got it wrong and was reported
+     wrong: on the worked example as it SHIPS, adding the two new parts to the
+     list narrows exactly ONE person with or without the box test, because the
+     grant test underneath already answers for a unit owner and a function
+     head — the shipped access table gives both of them something on the
+     company's pages. The "24 of 33" first reported came from a reimplementation
+     of partOnly() in a scratch script that asked the PERSON's overall grant
+     where the real one asks each ROLE's, and whose own agreement check was
+     vacuous because nobody is narrowed under the old list at all (§94.8: an
+     assertion has to agree with something computed independently, and that one
+     agreed with nothing).
+
+     SO THE BOX TEST GUARDS A CONFIGURATION, not the default: the grant test
+     reads the ACCESS TABLE, and the table offers "none" on the company column
+     for the BU owner row. An office that presses it would, without the box
+     test, narrow every unit head who also owns one pillar inside their own
+     unit — *the business unit sees his own business unit*, gone, by a press
+     two columns away. That is the state below, and it is the only state in
+     which the box test changes an answer. Both ends (§94.2). */
+  const N = clone(P);
+  N.access = N.access || {};
+  N.access.owner = Object.assign({}, N.access.owner, { a_group: "none" });
+  const wn = R.worldOf(N);
+  check("§533: the state really does take the company column off the BU owner",
+        R.grantFor(wn, "owner", "a_group") === "none", R.grantFor(wn, "owner", "a_group"));
+  check("§533: with the company column set to none, a unit head who also owns a pillar is STILL not narrowed",
+        R.partOnly(wn, personOf(N, "t533_both")) === false);
+  check("§533: …while a pure pillar owner still is",
+        R.partOnly(wn, personOf(N, "t533_pil")) === true);
+
+  /* AND THE FLOOR IS NOT A PART, so somebody who holds only it is not
+     narrowed. There is deliberately no "a part owner who also holds contrib"
+     case here: `contrib` is pushed only behind `!out.length`, so it can never
+     sit beside a part role, and a state claiming to make one would be making
+     something the platform cannot produce (§100.3). Asserted rather than
+     assumed, because that guard is what this reasoning rests on. */
+  const C = clone(P);
+  C.people = C.people.concat([{ key: "t533_flr", name: "Testcase Contributor", unit: C.unitKeys[0] }]);
+  C.units[C.unitKeys[0]].items[0].measures = (C.units[C.unitKeys[0]].items[0].measures || []).concat(
+    [{ id: "m533", name: "A row they are named on", owner: "Testcase Contributor", dir: "≥", target: "100", compile: "Latest" }]);
+  const wc = R.worldOf(C);
+  const crol = R.personRoles(wc, personOf(C, "t533_flr")).map(function (r) { return r.role; });
+  check("§533: being named on a row alone derives the floor and nothing else",
+        crol.join(",") === "contrib", crol.join(","));
+  check("§533: somebody who holds only the floor is NOT narrowed",
+        R.partOnly(wc, personOf(C, "t533_flr")) === false);
+  const pilRoles = R.personRoles(wc, personOf(C, "t533_pil")).map(function (r) { return r.role; });
+  check("§533: and the floor never sits beside a part role",
+        pilRoles.indexOf("contrib") === -1, pilRoles.join(","));
+
+  /* With the half eye OFF nobody is narrowed, whatever they own (§517). */
+  const F = clone(P); delete F.group[R.DIR_SCOPE];
+  const wf = R.worldOf(F);
+  const anyNarrowed = F.people.filter(function (p) { return R.partOnly(wf, p); });
+  check("§533: with the half eye off, nobody is narrowed at all",
+        anyNarrowed.length === 0, anyNarrowed.map(function (p) { return p.key; }).join(","));
+
+  /* ── THE SECOND STATE: El Abd's shape, where a DIRECTION owner exists ──
+     The units are off, so `ownsTopPillar` answers at all, and the company's
+     own plan carries the direction. The function's head is kept as the box
+     owner who also holds a part, so the trap is asserted here too — with no
+     units, the box role in play is `fnhead` rather than `owner`. */
+  const E = clone(SEED);
+  E.group[R.DIR_SCOPE] = "part";
+  E.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice() } };
+  E.group.items = [
+    { id: "g533a", code: "D1", name: "A direction", owner: "Testcase Direction Owner", measures: [], tactics: [] },
+    { id: "g533b", code: "D2", name: "A second direction", owner: "Testcase Function Head", measures: [], tactics: [] }];
+  E.people = E.people.concat([
+    { key: "t533_dir", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t533_fn",  name: "Testcase Function Head",   unit: "group" }]);
+  E.functions[E.functionKeys[0]] = Object.assign({}, E.functions[E.functionKeys[0]], { head: "t533_fn" });
+  const we = R.worldOf(E);
+  const eroles = function (k) { return R.personRoles(we, personOf(E, k)).map(function (r) { return r.role; }); };
+  check("§533: with the units off, a direction owner derives dirowner and nothing bigger",
+        eroles("t533_dir").join(",") === "dirowner", eroles("t533_dir").join(","));
+  check("§533: …and the function head derives fnhead AND dirowner",
+        eroles("t533_fn").indexOf("fnhead") > -1 && eroles("t533_fn").indexOf("dirowner") > -1,
+        eroles("t533_fn").join(","));
+  check("§533: a direction owner owns only a part — narrowed",
+        R.partOnly(we, personOf(E, "t533_dir")) === true);
+  check("§533: a FUNCTION HEAD who also owns a direction is NOT narrowed",
+        R.partOnly(we, personOf(E, "t533_fn")) === false);
 })();
 
 

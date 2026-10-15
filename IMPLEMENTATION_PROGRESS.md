@@ -9662,3 +9662,16 @@ I said "four capability assertions have not been running". Measured properly tha
 **So the real cost is misleading, not missing:** anyone running the app's own test command is told the authoriser is broken when it is not.
 
 **Waiting on Islam — one small choice:** delete the two stale copies and point the app's test command at the two real suites, or add the fixture the copies want (a second capability on a second function) to the worked example. I would delete them — but the fixture is wanted for step 2 anyway, since that is the migration that moves capabilities, so doing both is defensible.
+
+## §533 — One rule for every part owner (2026-10-15)
+Your rule, built: **you see the thing you own, whole, and the biggest thing you own decides.** A project, a pillar, a direction and a capability are parts; a unit, a function and the company are whole things. The half-eye now reaches all four kinds of part owner instead of two, and somebody is only narrowed by it when a part is **all** they own. Own a whole unit and you see your whole unit, however many pillars you also hold inside it.
+
+The half-eye stays one switch for the client, and the office is still the only one who sets it.
+
+**I have to correct a number I gave you.** I said adding project and pillar would narrow 24 of 33 people, including unit owners and function heads, and I used that to argue for an extra safeguard. That was wrong — my measuring script was faulty. Measured against the real code: today it narrows **nobody** in the worked example, and after the change it narrows **one person** — Ramy, who owns one project and one pillar and nothing else. Exactly what you'd want, and no unit owner or function head is touched either way.
+
+The safeguard still earned its place, but for a smaller reason than I claimed: if the office ever sets the business-unit-owner row's company column to "none", the old way **would** have narrowed every unit head who also owns a pillar. The new way doesn't. That case is now a test.
+
+Checked: authoriser **1082/0**, with a new section over two client shapes (one with business units, one without, since a direction owner can only exist when there are no units). It asserts both ends — a pure part owner is narrowed, a unit head who also owns a pillar is not, a function head who also owns a direction is not, the office and CEO never are, and with the half-eye off nobody is. Red six ways when broken. Everything else unchanged: access baseline **UNMOVED**, graph-diff **140/0**, platform rules **69/0**, stage 1 rules **38/0**, browser QA **ERRORS: none**, and the seven browser checks on this ground all green.
+
+**Before this reaches anybody:** I can only measure the worked example — there is no El Abd, RHI or Raya data in this repository. The same before/after list has to be run on each of the three and shown to you first. That is the one thing standing between this and live.

@@ -9,7 +9,10 @@ Insights, Processes, the Internal Tracker, Meeting Notes, the Copilot (except
 where it draws inside Strategy, §501) and Forefront's own console.
 
 **This is findings only.** Rule 1b: nothing here is built, and any fix is a
-separate decision aligned in plain words first. Every finding below is a
+separate decision aligned in plain words first. **Status lines and the "Where
+this stands" section were added on 2026-10-16 and are marked as such; no
+finding below them has been edited, including the three that turned out to be
+undercounts.** Every finding below is a
 MEASUREMENT of the sources, not a reading of the record — where a section
 number appears it is there to say which decision the measurement bears on.
 
@@ -20,22 +23,34 @@ number appears it is there to say which decision the measurement bears on.
 Three real gaps, two decisions for Islam, five heuristics that pass on
 measurement.
 
-| # | Heuristic | Verdict |
-|---|---|---|
-| 1 | Visibility of system status | **GAP** — a successful save is silent |
-| 2 | Match system / real world | Passes (measured) |
-| 3 | User control and freedom | Passes, with 26 browser dialogs against our own rule |
-| 4 | Consistency and standards | Two findings: six date spellings; a dropdown that declares a pattern it does not implement |
-| 5 | Error prevention | Passes well; one break of the house rule, in the Copilot |
-| 6 | Recognition rather than recall | Passes (measured) |
-| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector |
-| 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below |
-| 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic |
-| 10 | Help and documentation | **GAP** — the knowledge base is the office's alone |
+| # | Heuristic | Verdict on 10 Oct | Where it stands, 16 Oct |
+|---|---|---|---|
+| 1 | Visibility of system status | **GAP** — a successful save is silent | **CLOSED** — §527 (the saved tip), §535 (the door). Its ellipsis nit was never real on screen |
+| 2 | Match system / real world | Passes (measured) | — |
+| 3 | User control and freedom | Passes, with 26 browser dialogs against our own rule | **CLOSED** — §534. The count was 30, not 26 |
+| 4 | Consistency and standards | Two findings: six date spellings; a dropdown that declares a pattern it does not implement | **CLOSED** — §537 / §537.1 (there were nine spellings, not six) and §536 (one of its three claims was wrong) |
+| 5 | Error prevention | Passes well; one break of the house rule, in the Copilot | **CLOSED** — §538. There were four breaks, and this one was the mildest |
+| 6 | Recognition rather than recall | Passes (measured) | — |
+| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **OPEN.** Partly answered by §528 (reporting) and §536 (the dropdown). The rest is a design project, not a fix |
+| 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **UNMEASURED STILL** — the 224 `.why` / `.note` strings have not been read one by one |
+| 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **AWAITING ISLAM.** Not a defect; nobody has ruled on it |
+| 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
+
+### Where this stands (added 2026-10-16)
+
+**This section is the only part of this file written after 10 October.** Everything below it is the original measurement and is left exactly as it was taken — including where it turned out to be wrong, because what an audit MISSED is worth as much as what it found, and three of its findings were undercounts:
+
+- heuristic 3 counted **26** browser dialogs over `shell.html` alone; a scan of the whole built file found **30** (§534);
+- heuristic 4(a) counted **six** date spellings by searching for the browser's own formatters; there were **nine**, three of them written out by hand from a month array (§537.1);
+- heuristic 5 named **one** control greyed the dead way while carrying a reason; there were **four**, and the one it named was the mildest of them (§538).
+
+And twice it was read as a to-do list when it was not: the saved indicator it reports missing was built the day after this file was written (§527), and the ASCII-ellipsis nit under heuristic 1 was never true of anything on screen — only of the comments describing the button. **So: measure the product, never this file.**
 
 ---
 
-## 1. Visibility of system status — GAP
+## 1. Visibility of system status — GAP · **CLOSED**
+
+> **Closed by §527** (the saving/saved tip, built 11 Oct — the day after this file) **and §535** (the door's refusal reaches a screen reader; the button says what it is doing). The ellipsis nit below is **not real**: the rendered string is `Open a new cycle&hellip;` and only the comments spell it with dots.
 
 **A successful ordinary save is silent.** Measured in `sync.js`: `save()`'s
 reporter is
@@ -100,7 +115,9 @@ measures feature name and a pillar's kind.
 
 ---
 
-## 3. User control and freedom — PASSES, with one systemic weakness
+## 3. User control and freedom — PASSES, with one systemic weakness · **CLOSED**
+
+> **Closed by §534.** The count below is `shell.html` only; the whole built file carried **30**, the thirtieth being Discard in `sync.js`. Four mockups drawn and signed off first.
 
 **What works:** Escape closes the platform's modal (document-level listener),
 the searchable dropdown, the role picker and every field editor. Destructive
@@ -125,7 +142,11 @@ failure it has"*), and it was replaced everywhere except here.
 
 ---
 
-## 4. Consistency and standards — TWO FINDINGS
+## 4. Consistency and standards — TWO FINDINGS · **BOTH CLOSED**
+
+> **(a) closed by §537 and §537.1** — and there were **nine** spellings, not six: this sweep searched for the browser's formatters and walked past three day dates written out by hand. The shape is Islam's: a day reads `5 Mar 26`.
+>
+> **(b) closed by §536** — and one of its three claims was wrong: Enter-to-pick was already there, and had been since before this file was written. The arrows and Home/End were what was missing.
 
 **(a) Six date spellings.** Measured:
 
@@ -156,7 +177,9 @@ past five options in the product (§45.5).
 
 ---
 
-## 5. Error prevention — PASSES WELL
+## 5. Error prevention — PASSES WELL · **CLOSED**
+
+> **Closed by §538** — and the break named below is **one of four**, and the mildest: nothing is hidden at the quarter marks, because the strip above that table already says which period the plan covers. The serious one is Restore in the change log, which this file does not mention.
 
 Submit is HELD with its reason before the press rather than refused after
 (§221, §279); `aria-disabled` rather than `disabled` wherever a reason must
@@ -190,7 +213,9 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 
 ---
 
-## 7. Flexibility and efficiency of use — GAP
+## 7. Flexibility and efficiency of use — GAP · **OPEN**
+
+> **Still open, and the last real gap.** Two of its bullets are answered: the universal dropdown has its arrows and ends (§536), and reporting has a keyboard idiom of its own (§528 — Enter to the next figure, Alt+Enter for the walk, Escape to put the box back). The rest — a keyboard route between destinations, an accelerator for Submit or the pen, and customisation of any kind — is a design project and not a fix.
 
 **The platform has one keyboard idiom and it is the projector.** `present.js`
 binds arrows, PageUp/PageDown, Home, End, Escape, `f` (fullscreen), `w`
@@ -236,7 +261,9 @@ pass and is the honest limit of this finding.
 
 ---
 
-## 9. Help users recognise, diagnose and recover — A DELIBERATE TRADE
+## 9. Help users recognise, diagnose and recover — A DELIBERATE TRADE · **AWAITING ISLAM**
+
+> **Unchanged, and deliberately.** This is a decision nobody has made yet, not a defect anybody has left.
 
 A failed save names the step it stopped at, which is §123's rule working as
 designed. What it puts on a client unit head's screen is four lines of
@@ -263,7 +290,9 @@ right audience for it. The client-facing banner is the question.
 
 ---
 
-## 10. Help and documentation — GAP
+## 10. Help and documentation — GAP · **DROPPED**
+
+> **Dropped at Islam's word, 16 Oct 2026** (*"drop the knowledge base"*). Left in full below rather than deleted: a finding that was decided against is a decision, and the next audit should find it already answered rather than re-raise it.
 
 The Knowledge base page carries `when: function(){ return inOffice(); }`
 (`shell.html:1010`) — **the office's alone**, per §119.4, which reversed §30 and

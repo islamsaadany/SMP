@@ -481,8 +481,9 @@
   table.hist.uns tr.grp td { background:var(--surface-2); color:var(--ink-2); font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
   table.hist.uns td.hist-act .hist-err { font-size:var(--fs-micro); margin-top:4px; text-align:right; }
   .hist-rst { font:inherit; font-size:var(--fs-micro); font-weight:600; border:1px solid var(--line); background:transparent; color:var(--ink-2); border-radius:6px; padding:3px 9px; cursor:pointer; }
-  .hist-rst:hover:not(:disabled) { border-color:var(--gold-deep); color:var(--ink); }
-  .hist-rst:disabled { opacity:.45; cursor:default; }
+  .hist-rst:hover:not(:disabled):not([aria-disabled="true"]) { border-color:var(--gold-deep); color:var(--ink); }
+  /* §538: HELD looks exactly as dead looked — the change is that it answers. */
+  .hist-rst:disabled, .hist-rst[aria-disabled="true"] { opacity:.45; cursor:default; }
   .hist-rst:focus-visible { outline:2px solid var(--gold-deep); outline-offset:2px; }
   .hist-confirm { border:1px solid var(--attn); background:var(--attn-bg); color:var(--attn-tx); border-radius:8px; padding:12px 14px; font-size:var(--fs-small); margin:0 0 14px; }
   .hist-confirm p { margin:0 0 8px; } .hist-confirm b, .hist-confirm strong { color:inherit; }
@@ -1119,6 +1120,12 @@ html[data-client-settings] .viewer { display:none; }
     pointer-events:none; z-index:20; text-align:left;
   }
   .hasnote:hover::after, .hasnote:focus::after, .hasnote:focus-visible::after { display:block; }
+  /* AND WHEN SOMETHING INSIDE IT TAKES FOCUS (§538). A browser does not paint
+     `::after` on a form control, so a held `<select>` wears the note on a span
+     around it — and a span never takes focus, which would have left the bubble
+     open to a pointer and to nothing else. That is the half this whole section
+     exists to close. */
+  .hasnote:focus-within::after { display:block; }
   /* AN EMPTY BUBBLE IS A BLACK BOX, AND THAT IS WHAT SHIPPED (§163.3). The
      compiled cell carried `hasnote` while still setting a `title`, so this rule
      matched it with no `data-tip` to fill: `content:attr(data-tip)` resolved to
@@ -1363,6 +1370,124 @@ html[data-client-settings] .viewer { display:none; }
     .rmconfirm .pick { flex-direction:column; align-items:stretch; }
     .rmconfirm .pick button { width:100%; }
   }
+
+  /* ── DELETING FOR GOOD: what goes, what stays, and no way back (§534) ──
+     Three acts in the product take something away with nothing behind them:
+     a clip's bytes, a batch of them, and a filed archive. Everything else
+     that reads like a deletion archives first and `.archline` says so — so
+     this block is the shape for the three that cannot, and `.noway` is
+     `.archline`'s opposite: same place in the dialog, the other answer.
+
+     TWO ROWS, NOT ONE PARAGRAPH. The browser's box these replace held one
+     run of text, so what goes, what stays and there is no way back arrived
+     as one paragraph with blank lines in it. The mockup Islam signed off
+     (design-mockups/delete-for-good/) splits them, because WHAT STAYS is the
+     half the box was worst at and the half somebody hesitates over: the fear
+     is rarely "will this delete" and nearly always "what does it take with
+     it". The ground is --bad-bg under what goes and nothing under what
+     stays — the alarm is spent once, on the half that earns it (§41). */
+  .rmconfirm .ledger { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .ledger .lrow { display:flex; gap:12px; padding:11px 13px;
+    font-size:13px; line-height:1.5; border-top:1px solid var(--line-soft); }
+  .rmconfirm .ledger .lrow:first-child { border-top:0; }
+  .rmconfirm .ledger .mk { flex:0 0 auto; width:7ch; padding-top:2px;
+    font:700 12px/1.4 var(--sans); letter-spacing:.06em; text-transform:uppercase; }
+  .rmconfirm .ledger .tx { flex:1; min-width:0; }
+  .rmconfirm .ledger .tx b { color:var(--ink); }
+  .rmconfirm .ledger .tx .sub { display:block; color:var(--ink-3);
+    font-size:12.5px; margin-top:2px; line-height:1.45; }
+  .rmconfirm .ledger .goes { background:var(--bad-bg); }
+  .rmconfirm .ledger .goes .mk { color:var(--bad-tx); }
+  .rmconfirm .ledger .goes .tx { color:var(--ink); }
+  .rmconfirm .ledger .stays .mk { color:var(--good-tx); }
+  .rmconfirm .ledger .stays .tx { color:var(--ink-2); }
+  /* `.archline`'s opposite, and deliberately the same size and place: the one
+     sentence the rest of the product can never truthfully say. */
+  .rmconfirm .noway { font-size:12.5px; color:var(--bad-tx); margin:0 0 16px;
+    line-height:1.45; }
+  .rmconfirm .noway b { font-weight:700; }
+  /* THE LIST OF WHAT GOES SCROLLS AND THE DIALOG DOES NOT GROW. Twelve clips
+     named is the whole reason the bulk question is worth asking (§186: a
+     confirmation that does not say which line catches none of the mistakes
+     it exists for) — and twelve rows unrolled would push the buttons off a
+     laptop. Seven are visible and the rest are reached. */
+  .rmconfirm .scroll { max-height:168px; overflow-y:auto; margin:0 0 14px; }
+  .rmconfirm .scroll table { font-size:12.5px; }
+  .rmconfirm .scroll th { position:sticky; top:0; background:var(--surface-2); }
+  @media (max-width:520px) {
+    .rmconfirm .ledger .lrow { flex-direction:column; gap:3px; }
+    .rmconfirm .ledger .mk { width:auto; }
+  }
+
+  /* ── THE ROLES A RESTORE WOULD GIVE BACK, ONE PER LINE (§534.1) ────────
+     The browser's box said them as two runs of commas — "Give back: A, B"
+     and "Held by somebody else now, so left alone: C (Noura)". Three roles
+     in a comma list is readable; six is not, and six is a BU owner who is
+     also custodian of two functions. The WORD at the front of each line is
+     what the answer turns on, so it leads rather than trails. */
+  .rmconfirm .rolelist { border:1px solid var(--line-soft); border-radius:10px;
+    overflow:hidden; margin:0 0 14px; }
+  .rmconfirm .rolelist .r { display:flex; gap:11px; align-items:baseline;
+    padding:10px 13px; font-size:13px; border-top:1px solid var(--line-soft); }
+  .rmconfirm .rolelist .r:first-child { border-top:0; }
+  .rmconfirm .rolelist .mk { flex:0 0 auto; width:9ch; padding-top:2px;
+    font:700 10.5px/1.4 var(--sans); letter-spacing:.07em; text-transform:uppercase; }
+  .rmconfirm .rolelist .tx { flex:1; min-width:0; line-height:1.5; color:var(--ink-2); }
+  .rmconfirm .rolelist .tx b { color:var(--ink); }
+  .rmconfirm .rolelist .tx .sub { display:block; font-size:12px; color:var(--ink-3);
+    margin-top:1px; }
+  .rmconfirm .rolelist .back .mk { color:var(--good-tx); }
+  /* Taken is not an alarm — nothing is wrong, somebody is simply in the seat
+     — so it wears the page's own quiet ground and the warn ink (§168). */
+  .rmconfirm .rolelist .taken { background:var(--surface-2); }
+  .rmconfirm .rolelist .taken .mk { color:var(--warn-tx); }
+  @media (max-width:520px) {
+    .rmconfirm .rolelist .r { flex-direction:column; gap:2px; }
+    .rmconfirm .rolelist .mk { width:auto; }
+  }
+
+  /* ── THE QUESTION UNDER THE LINE (§534.4) ─────────────────────────────
+     Nine controls across six screens asked one sentence — "Remove X? This
+     cannot be undone here." — in the browser's box, which covers the list it
+     is asking about and never says WHICH line. Islam picked B of the two
+     drawn (design-mockups/remove-a-line/): the line stays where it is and
+     readable, and the question opens under it.
+
+     ITS COST IS KNOWN AND ACCEPTED: the list grows by a strip as you press,
+     so what is below moves. A was the other answer — the line turning into
+     the question, nothing moving, the line's text hidden while it asks.
+
+     ONE SHAPE FOR ALL NINE, built by `rmStrip`/`rmStripRow`, because the
+     sentence and the two words have to be the same in nine places and nine
+     copies is how they stop being (§53.5). Inside a table it is a row of its
+     own; everywhere else it is a block under the field. */
+  .rmask { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    background:var(--surface-2); border-left:3px solid var(--bad);
+    border-radius:var(--r-sm); padding:8px 11px; margin:4px 0 2px; }
+  .rmask .q { flex:1; min-width:0; font-size:var(--fs-note); color:var(--bad-tx);
+    line-height:1.45; }
+  .rmask .q b { color:var(--ink); font-weight:600; }
+  .rmask button { font:600 12px/1 var(--sans); border-radius:var(--r-sm);
+    padding:6px 10px; cursor:pointer; white-space:nowrap; }
+  .rmask .rmkeep { background:var(--surface); border:1px solid var(--line); color:var(--ink-2); }
+  .rmask .rmkeep:hover { background:var(--surface-2); color:var(--ink); }
+  /* --bad as a FILL carries the page's lightest surface, never white literal
+     (§25, §38.4) — the same pairing `.rmconfirm .danger` uses. */
+  .rmask .rmgo { background:var(--bad); border:1px solid var(--bad); color:var(--surface); }
+  .rmask .rmgo:hover { filter:brightness(1.08); }
+  /* The SWOT's line is a grid of `22px 1fr auto` (arrange.css §270), so the
+     strip takes the two columns UNDER the field rather than a row of its own
+     beside the number. */
+  .swotlist li .rmask { grid-column:2 / -1; }
+  /* In a table the strip is a row, and the cell holding it adds no padding of
+     its own — the strip has its own and a doubled inset reads as a gap in the
+     table rather than a line under the row above. */
+  tr.rmaskrow > td { padding:4px 10px 6px; }
+  /* THE LINE BEING ASKED ABOUT IS MARKED, which is the half the browser's box
+     could never do: it said "this line" over a list of nine. */
+  .rmasking > .fld, .rmasking .fld, .rmasking input, .rmasking textarea { border-color:var(--bad); }
+  tr.rmasking > td { background:var(--bad-bg); }
 
   /* ── Split metric boxes inside a card ─────────────────── */
   .gcard { padding:0; }
@@ -2695,6 +2820,15 @@ html[data-client-settings] .viewer { display:none; }
   .ssrow:hover { background:var(--surface-2); }
   .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
   .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* ── §536: WHERE THE ARROW KEYS ARE ───────────────────────────────────
+     The row the arrows are on, which is NOT the row the mouse is over and
+     NOT a focused one — focus stays in the search box so the next three
+     letters still land there. It wears the same ground `:hover` does plus a
+     mark of its own, because on a ticking list a row can be lit (`on`),
+     hovered and arrowed-to at once and three states that look alike are one
+     state nobody can read (§41). */
+  .ssrow.ssrow-at { background:var(--surface-2); box-shadow:inset 2px 0 0 var(--gold); }
+  .ssrow.on.ssrow-at { background:var(--over-bg); }
   .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
   /* ── A GROUP IN THE LIST, AND A LIST YOU TICK (§130.1) ────────────────
      The plan's owner list is fifty entries made of two different kinds of
@@ -4207,6 +4341,17 @@ html[data-client-settings] .viewer { display:none; }
   .nc-1line .nm-lab .fld { width:100%; }
   .nc-1line .dt { flex:0 0 auto; }
   .nc-1line .cycbtn { width:150px; }
+  /* ── A CONTROL THE PLATFORM HAS JUST REFUSED (§534.2) ──────────────
+     The refusal itself is a sentence under the control — `.picerr`, the
+     picture editor's own line, which is already the product's answer for a
+     refusal belonging to ONE control and is why nothing new is invented
+     here. This is the mark on the control it points at, and both halves are
+     needed: the line alone leaves somebody hunting the box in a row of four,
+     and the mark alone says something is wrong without saying what.
+     `aria-invalid` goes on beside it, which is the half a screen reader
+     gets (§163's rule: the reason has to be reachable without a mouse). */
+  .fld.bad, .cycbtn.bad { border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg); }
+  .newcycle .picerr { margin:11px 0 0; }
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; flex-wrap:wrap; }
@@ -5395,6 +5540,11 @@ html[data-client-settings] .viewer { display:none; }
          border:1px solid var(--field-line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* §538: a held control reads as held. `aria-disabled` changes nothing a
+     browser paints, so the look has to be asked for. The wrapper is
+     inline-block so the bubble it carries has something to centre on. */
+  .fld[aria-disabled="true"] { opacity:.45; cursor:default; }
+  .capheld { display:inline-block; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
      A yes/no target carries no number, so the direction, the figure and the
      compile rule beside it have nothing to act on. They stay DRAWN — a hole
@@ -11683,7 +11833,13 @@ select.copdv-own { width:auto; min-width:0; max-width:160px; padding:3px 6px; fo
 .copex-q { width:26px; height:24px; margin:0 1px; padding:0; border-radius:4px; border:1px solid var(--field-line, var(--line)); background:var(--surface); color:var(--ink-3); font:600 11px/1 var(--sans); cursor:pointer; }
 .copex-q.on { background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
 .copex-q.off { background:var(--surface-2); opacity:.45; text-decoration:line-through; cursor:default; }
-.copex-q:disabled:not(.off) { cursor:default; }
+/* `.copex-q:disabled:not(.off)` was here, for the read-only view's quarters.
+   §538 made those a mark rather than a disabled button, so nothing matches it
+   any more and a dead rule is a rule somebody later reads as a live one. */
+/* §538: Q1–Q4 are buttons only where they can be pressed; everywhere else they
+   are marks. A span needs the box the button got for free. */
+span.copex-q { display:inline-block; box-sizing:border-box; line-height:22px;
+               text-align:center; vertical-align:middle; cursor:default; }
 .copex-pick { flex-wrap:wrap; align-items:center; font-size:13px; }
 .copex-y { width:72px; }
 

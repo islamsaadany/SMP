@@ -26,5 +26,20 @@ check("progress counts only expected people", pr.total === 2 && pr.done === 1 &&
 check("an acknowledgement by somebody not expected does not count", R.acknowledgementProgress(exp, new Set(["c"])).done === 0);
 check("all acknowledged leaves none outstanding", R.acknowledgementProgress(exp, new Set(["a", "b"])).outstanding.length === 0);
 
+// The bar's reading link
+const B = await import("../lib/bar-extras.ts");
+const offer = (o) => R.offersReadingLink({ clientHasProcesses: true, office: false, userKind: "client", personKey: "k1", ...o });
+check("a client person on the register is offered the link", offer({}));
+check("not offered when the client does not use Processes", !offer({ clientHasProcesses: false }));
+check("not offered to the office", !offer({ office: true }));
+check("not offered to a consultant", !offer({ userKind: "consultant" }));
+check("not offered without a register key", !offer({ personKey: null }));
+check("no link when nothing is published", B.readingLink({ published: 0, waiting: 0 }) === null && B.readingLink(null) === null);
+check("link with a count when something waits", B.readingLink({ published: 3, waiting: 2 }).count === "2 to read");
+check("link stays, no count, when all read", B.readingLink({ published: 3, waiting: 0 }).count === null && B.readingLink({ published: 3, waiting: 0 }).label === "Processes");
+check("outside a request the bar has nothing", B.barExtras().processesRead === null);
+check("inside a request the bar reads what the router set", B.withBarExtras({ processesRead: { published: 1, waiting: 1 } }, () => B.barExtras().processesRead.waiting) === 1);
+check("it survives an await", await B.withBarExtras({ processesRead: { published: 1, waiting: 4 } }, async () => { await Promise.resolve(); return B.barExtras().processesRead.waiting; }) === 4);
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

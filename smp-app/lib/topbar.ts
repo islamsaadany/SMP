@@ -34,6 +34,7 @@
    `[data-theme="dark"]`), and the script sets the attribute in the head,
    before the body paints, from the same `smp.theme` key Strategy reads — the
    same browser, so the same choice. */
+import { barExtras, readingLink, type ProcessesRead } from "./bar-extras.ts";
 import type { ModuleKey } from "./modules.ts";
 import { MODULE_DEF, moduleMenu, clientHref, DEFAULT_MODULE } from "./modules.ts";
 
@@ -52,6 +53,10 @@ export type TopBar = {
      get the trail — Islam: "they don't get it it's only for the consultants". */
   consultant: boolean;
   viewer?: TopViewer | null;
+  /* The staff reading link (lib/bar-extras.ts). Left out, the request's own
+     answer is read; passed (even as null) it is used as given — the Processes
+     frame, which is not served by the router, passes its own. */
+  processesRead?: ProcessesRead | null;
 };
 
 const esc = (v: unknown): string =>
@@ -79,9 +84,14 @@ export function topBarHtml(t: TopBar): string {
     /* A CLIENT'S OWN PERSON: no trail and no module menu (his rule), and the
        product's name is the way back into their platform, so a page reached
        by its address is never a room with no door (§61). */
+    const link = readingLink(t.processesRead === undefined ? barExtras().processesRead : t.processesRead);
+    const reading = link
+      ? '<a class="tbread" href="' + esc(clientHref(t.slug, "processes", "read")) + '"' + (t.module === "processes" ? ' aria-current="page"' : "") + ">" +
+        esc(link.label) + (link.count ? '<span class="tbn">' + esc(link.count) + "</span>" : "") + "</a>"
+      : "";
     return '<header class="tb"><div class="tbin">' +
       '<a class="tbbrand" href="' + esc(clientHref(t.slug, DEFAULT_MODULE, "")) + '">Strategy Management Platform</a>' +
-      '<span class="tborg">' + esc(t.tenantName) + "</span>" + right + "</div></header>";
+      '<span class="tborg">' + esc(t.tenantName) + "</span>" + reading + right + "</div></header>";
   }
   const mods = moduleMenu(t.have);
   /* A module that lives inside another (the Copilot, §501) is not in this
@@ -181,6 +191,9 @@ const TOPBAR_CSS_RAW = `
 .tbbrand{font-weight:600;font-size:14px;color:var(--tb-ink);text-decoration:none}
 .tbbrand:hover{text-decoration:underline}
 .tborg{color:var(--tb-ink-3);font-size:13.5px;margin-right:auto}
+.tbread{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--tb-ink);text-decoration:none;padding:3px 8px;border-radius:7px}
+.tbread:hover,.tbread[aria-current="page"]{background:var(--tb-surface-2)}
+.tbn{font-size:11.5px;font-weight:700;color:var(--tb-ink);background:color-mix(in srgb,var(--tb-gold) 22%,var(--tb-surface));border:1px solid var(--tb-gold);border-radius:99px;padding:0 7px;line-height:18px}
 .tbviewer{display:flex;align-items:center;gap:8px;padding-right:16px;border-right:1px solid var(--tb-line);min-width:0}
 .tbviewer label{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--tb-ink-2);white-space:nowrap}
 .tbviewer select{font-family:inherit;font-size:12.5px;max-width:260px;border:1px solid var(--tb-line);border-radius:5px;padding:2px 6px;background:var(--tb-surface);color:var(--tb-ink)}

@@ -79213,6 +79213,32 @@ var SYNC = (function () {
         (it.note ? '<span class="dlsub">' + esc(it.note) + "</span>" : "") + "</button>";
     }).join("") + "</div>";
   }
+  /* THE STAFF READING LINK (spec: Processes lifecycle, §542). A client's own
+     person on the People register, at a client that has published a process,
+     gets ONE link beside Sign out — not a menu: they have no module menu and
+     keep none. The words and the count are stamped on the document by the
+     server (lib/shell.ts, from lib/bar-extras.ts — the one place they are
+     decided, §53.5); this draws them and holds no copy of the rule. Absent
+     stamp, no link; and Forefront's own people have the module menu instead. */
+  function mountProcessesLink() {
+    var bar = document.querySelector(".top .top-in");
+    if (!bar) return;
+    var root = document.documentElement;
+    var cur = bar.querySelector("a.processes-read");
+    var say = null;
+    try { say = JSON.parse(root.getAttribute("data-processes-read") || "null"); } catch (e) { say = null; }
+    if (!say || !say.label || root.hasAttribute("data-console")) { if (cur) cur.parentNode.removeChild(cur); return; }
+    var html = esc(say.label) + (say.count ? '<span class="prn">' + esc(say.count) + "</span>" : "");
+    if (!cur) {
+      cur = document.createElement("a");
+      cur.className = "processes-read";
+      bar.insertBefore(cur, document.getElementById("topacts"));
+    }
+    var href = "/" + SLUG + "/processes/read";
+    if (cur.getAttribute("href") !== href) cur.setAttribute("href", href);
+    if (cur.innerHTML !== html) cur.innerHTML = html;
+  }
+  try { mountProcessesLink(); } catch (e) {}
   function mountTrail() {
     var root = document.documentElement;
     /* data-break="trail-for-staff" is checks/modules.mjs's falsification: a
@@ -79502,6 +79528,7 @@ var SYNC = (function () {
          to one that never simulated. */
       try { if (typeof SYNC !== "undefined" && SYNC.markViewing) SYNC.markViewing(); } catch (e) {}
       try { mountTrail(); } catch (e) {}
+      try { mountProcessesLink(); } catch (e) {}
       try { sync(true); scrollToWanted(); } catch (e) {} return r; };
   }
   window.addEventListener("popstate", function (ev) {

@@ -17,6 +17,8 @@
    FFProcess's root layout set the language on <html>; SMP's root layout owns
    <html>, so the language and direction ride a wrapper element instead —
    Tailwind's rtl: variants and logical properties read the nearest `dir`. */
+import { readingFor } from "@/ffp/lib/data/process-reading";
+import { offersReadingLink } from "@/ffp/lib/domain/process-reader";
 import { registerReady } from "@/ffp/lib/register-sync";
 import "@/ffp/globals.css";
 import { redirect } from "next/navigation";
@@ -59,7 +61,13 @@ export default async function ProcessesFrame(props: LayoutProps<"/[slug]/process
      register-sync.ts registerReady — the pages that list people await the
      same per-request sync, so none reads ahead of it). */
   if (office) await registerReady(slug);
-  const bar = topBarHtml({ slug, tenantName: door.tenant.name, module: "processes", have, consultant: user.kind !== "client" });
+  // The staff reading link, for a client's own person on the register: this frame is not
+  // served by the router that sets it for every other page (lib/bar-extras.ts).
+  const processesRead =
+    !office && door.personKey && offersReadingLink({ clientHasProcesses: true, office, userKind: user.kind, personKey: door.personKey })
+      ? await readingFor(slug, door.personKey)
+      : null;
+  const bar = topBarHtml({ slug, tenantName: door.tenant.name, module: "processes", have, consultant: user.kind !== "client", processesRead });
   const locale = await getLocale();
 
   return (

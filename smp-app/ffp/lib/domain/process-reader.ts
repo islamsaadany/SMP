@@ -39,3 +39,17 @@ export function acknowledgementProgress(expected: readonly Expected[], ackedKeys
   const outstanding = expected.filter((e) => !ackedKeys.has(e.personKey));
   return { total: expected.length, done: expected.length - outstanding.length, outstanding };
 }
+
+/**
+ * Whether the top bar offers a client's own person the reading link: the client
+ * uses Processes, the person is not the office (who has Processes in the module
+ * menu), is a client's own person, and holds a row on the People register.
+ */
+export function offersReadingLink(args: {
+  clientHasProcesses: boolean;
+  office: boolean;
+  userKind: string;
+  personKey: string | null | undefined;
+}): boolean {
+  return args.clientHasProcesses && !args.office && mayRead({ office: false, userKind: args.userKind, personKey: args.personKey });
+}

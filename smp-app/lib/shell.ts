@@ -8,6 +8,7 @@
    external script. No inline script anywhere, so the page carries
    `script-src 'self'` — §238's net without a hash to go stale. The rest of
    the policy is vercel.json's, word for word. */
+import { barExtras, readingLink } from "./bar-extras.ts";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MODULE_DEF, isModule } from "./modules.ts";
@@ -162,6 +163,12 @@ export function shellDocument(tenantName: string, module: string | null = null, 
     /* THE CHECK'S BREAK: a build that served the client's own settings under a
        module's bar — the fault §362 exists to remove — must go red. Never set
        on a deployment. */
+    /* THE STAFF READING LINK (lib/bar-extras.ts): the words the bar says, for a
+       client's own person on the register when something is published. The
+       frozen shell draws it from this (shell/route.js mountProcessesLink) and
+       holds no list of its own. Absent for everybody else. */
+    (readingLink(barExtras().processesRead) && brk !== "no-reading-link"
+      ? " data-processes-read='" + esc(JSON.stringify(readingLink(barExtras().processesRead))) + "'" : "") +
     (scope && brk !== "no-setup-scope" ? " data-setup-scope='" + esc(scope) + "'" : "") + ">\n<head>\n<meta charset='utf-8'>\n" +
     "<meta name='viewport' content='width=device-width,initial-scale=1'>\n" +
     "<title>" + esc(tenantName) + " — Strategy Management Platform</title>\n" +

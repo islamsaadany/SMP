@@ -1,0 +1,355 @@
+<title>The shape, working</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --gold-wash:#FBF6E9; --gold-line:#E8D9AE;
+    --bad:#B04434;
+    --sans:'Source Sans 3', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0E1014; --navy-ink:#EAF0FA;
+    --gold:#D9B665; --gold-deep:#E6C65C; --gold-wash:#332C16; --gold-line:#4A3F1E;
+    --bad:#D97066; color-scheme: dark; }
+
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; }
+  .wrap { max-width:66rem; margin:0 auto;
+          padding-left:max(16px, env(safe-area-inset-left, 0px));
+          padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:2.2rem 4rem; }
+  header { border-bottom:2px solid var(--navy); padding-bottom:1rem; margin-bottom:1.3rem; }
+  .eyebrow { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+             color:var(--gold-deep); margin:0 0 .35rem; }
+  h1 { font-size:1.8rem; line-height:1.15; margin:0 0 .45rem; font-weight:700; }
+  .standfirst { margin:0; color:var(--ink-2); max-width:46rem; }
+  p { max-width:48rem; }
+
+  .bar { display:flex; flex-wrap:wrap; gap:.5rem; align-items:center; margin:0 0 1rem; }
+  .cbtn { border:1px solid var(--line); background:var(--surface); color:var(--ink);
+          border-radius:999px; padding:.3rem .85rem; font:600 13px var(--sans); cursor:pointer; }
+  .cbtn[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .reset { margin-left:auto; border:0; background:none; color:var(--gold-deep);
+           font:600 12.5px var(--sans); cursor:pointer; }
+
+  .screen { background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .schead { background:var(--navy); color:var(--navy-ink); padding:.5rem .85rem;
+            font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+            display:flex; justify-content:space-between; gap:1rem; }
+  .schead .crumb { font-weight:400; letter-spacing:0; text-transform:none; opacity:.85; }
+  .scbody { display:grid; grid-template-columns:1.3fr 1fr; min-height:26rem; }
+  @media (max-width:760px){ .scbody { grid-template-columns:1fr; min-height:0; } }
+  .shape { padding:1rem .9rem; border-right:1px solid var(--line-soft); }
+  @media (max-width:760px){ .shape { border-right:0; border-bottom:1px solid var(--line-soft); } }
+  .panel { padding:1rem .9rem; background:var(--surface-2); }
+
+  .lvl { font-size:10.5px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+         color:var(--ink-3); margin:1rem 0 .4rem; display:flex; align-items:baseline; gap:.55rem; }
+  .lvl:first-child { margin-top:0; }
+  .lvl button { border:0; background:none; padding:0; font:inherit; letter-spacing:inherit;
+                text-transform:inherit; color:inherit; cursor:pointer; }
+  .lvl button:hover, .lvl button:focus-visible { color:var(--gold-deep); }
+  .lvl .n { font-variant-numeric:tabular-nums; opacity:.8; }
+  .row { margin-left:1.1rem; border-left:2px solid var(--line-soft); padding-left:.75rem; }
+  .row.top { margin-left:0; border-left:0; padding-left:0; }
+  .box { display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--line);
+         background:var(--surface); color:var(--ink); border-radius:7px; padding:.3rem .6rem;
+         margin:0 .3rem .35rem 0; font:400 13.5px var(--sans); cursor:pointer; }
+  .box:hover { border-color:var(--gold); }
+  .box.top { border-color:var(--navy); font-weight:700; }
+  .box.sel { border-color:var(--gold); background:var(--gold-wash); font-weight:600;
+             box-shadow:0 0 0 2px var(--gold-wash); }
+  .box .n { font-size:11px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  .box.ghost { font-style:italic; color:var(--ink-3); }
+  .add { display:inline-flex; align-items:center; border:1px dashed var(--line); color:var(--ink-3);
+         background:none; border-radius:7px; padding:.3rem .6rem; margin:0 .3rem .35rem 0;
+         font:400 13px var(--sans); cursor:pointer; }
+  .add:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .newin { border:1px solid var(--gold); background:var(--gold-wash); color:var(--ink);
+           border-radius:7px; padding:.3rem .5rem; margin:0 .3rem .35rem 0;
+           font:600 13.5px var(--sans); width:11rem; }
+  .why { font-size:12px; color:var(--ink-3); margin:.45rem 0 0; max-width:30rem; }
+
+  .ptitle { font-size:12px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+            color:var(--gold-deep); margin:0 0 .15rem; }
+  .psub { font-size:12px; color:var(--ink-3); margin:0 0 .9rem; }
+  .prow { display:flex; align-items:center; gap:.55rem; margin:0 0 .5rem; }
+  .plab { flex:0 0 8.5rem; font-size:12.5px; color:var(--ink-2); font-weight:600; }
+  .fld { flex:1; min-width:0; border:1px solid var(--line); background:var(--surface); color:var(--ink);
+         border-radius:6px; padding:.28rem .45rem; font:400 13px var(--sans); }
+  .chips { display:flex; flex-wrap:wrap; gap:.3rem; margin:.25rem 0 .2rem; }
+  .chip { font:400 12px var(--sans); border:1px solid var(--line); border-radius:999px;
+          padding:.18rem .6rem; background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .chip[aria-pressed="true"] { background:var(--navy); border-color:var(--navy);
+                               color:var(--navy-ink); font-weight:600; }
+  .danger { border:0; background:none; color:var(--bad); font:600 12.5px var(--sans);
+            cursor:pointer; padding:0; margin-top:1rem; }
+  .note { background:var(--gold-wash); border:1px solid var(--gold-line); border-radius:8px;
+          padding:.6rem .75rem; font-size:12.5px; color:var(--ink-2); margin-top:1rem; }
+  .ask { background:var(--gold-wash); border:1px solid var(--gold-line); border-radius:9px;
+         padding:1rem 1.1rem; margin-top:2rem; }
+  .ask h2 { font-size:1.1rem; margin:0 0 .4rem; }
+  .steps { display:flex; flex-wrap:wrap; gap:.4rem; margin:1.4rem 0 .2rem; }
+  .step { border:1px solid var(--line); background:var(--surface); border-radius:999px;
+          padding:.28rem .8rem; font-size:12.5px; font-weight:600; }
+  .step.on { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .cap { font-size:12.5px; color:var(--ink-3); margin:.3rem 0 0; }
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Spec 066 · stage 4 · set-up</p>
+  <h1>The shape, working</h1>
+  <p class="standfirst">Press things. Both clients hold their real structure — El&nbsp;Abd's three
+    divisions and twenty-two functions, Raya's two divisions, ten business units and eight
+    functions. Adding is option&nbsp;A: type it onto the picture where it belongs.</p>
+</header>
+
+<div class="steps">
+  <span class="step">The client</span><span class="step on">The shape</span><span class="step">The office</span>
+</div>
+<p class="cap">Three steps instead of seven. This is the middle one.</p>
+
+<div class="bar" style="margin-top:1.2rem">
+  <button class="cbtn" data-client="elabd" aria-pressed="true">El Abd</button>
+  <button class="cbtn" data-client="raya" aria-pressed="false">Raya Trade</button>
+  <button class="reset" id="reset">start again</button>
+</div>
+
+<div class="screen">
+  <div class="schead"><span>Client set-up · The shape</span><span class="crumb" id="crumb"></span></div>
+  <div class="scbody">
+    <div class="shape" id="shape"></div>
+    <div class="panel" id="panel"></div>
+  </div>
+</div>
+
+<div class="ask">
+  <h2>What I still need</h2>
+  <p style="margin:0">Press around, then tell me what is wrong with it. In particular: is one
+    screen enough for El&nbsp;Abd's twenty-two functions, or does that need to stay a list?</p>
+</div>
+</div>
+
+<script>
+/* ── the two clients, as they are stored today ──────────────────────────── */
+const PARTS = [["found","Foundation"],["swot","SWOT"],["theme","Themes"],
+               ["pillar","Pillars"],["keyobj","North Star"],["values","Values"],["project","Projects"]];
+function mk(list, lvl, parent) {
+  return list.map((n, i) => ({ id: lvl + "-" + i + "-" + n.replace(/\W+/g,""), lvl, name: n, parent }));
+}
+function elabd() {
+  const mid = mk(["Commercial","Operations","Corporate Support"], "mid", "top");
+  const by = {
+    "Commercial": ["Retail","External Sales","E-Commerce","Marketing","Customer Experience"],
+    "Operations": ["Planning","Procurement","Production","Quality","Engineering","HSE","Warehouses","Fleet and Distribution"],
+    "Corporate Support": ["Internal Audit","Finance","HR","IT","PMO","Legal","Corporate Governance","Admin","Security"]
+  };
+  let fns = [];
+  mid.forEach(m => { fns = fns.concat(mk(by[m.name], "fn", m.id)); });
+  return {
+    name: "ElAbd",
+    levels: [ { k:"top", one:"Company",  many:"Company",   on:["found","swot","pillar","keyobj"] },
+              { k:"mid", one:"Division", many:"Divisions", on:["found","swot"], under:"top" },
+              { k:"fn",  one:"Function", many:"Functions", on:["found","keyobj","project"], under:"mid" } ],
+    boxes: mid.concat(fns)
+  };
+}
+function raya() {
+  const mid = mk(["Distribution","B2C"], "mid", "top");
+  const byCo = { "Distribution":["Mobile","Consumer Electronics","IT Dist."],
+                 "B2C":["Retail Stores","Online Shop","Care"] };
+  let bus = [];
+  mid.forEach(m => { bus = bus.concat(mk(byCo[m.name], "bu", m.id)); });
+  bus = bus.concat(mk(["B2B Ecomm","Corporate","Logistics","Nigeria"], "bu", "top"));
+  const fns = mk(["Finance","HR","Treasury","Marketing","IT","Care","Strategy Management Office","Merchandising"], "fn", "top");
+  return {
+    name: "Raya Trade",
+    levels: [ { k:"top", one:"Group",    many:"Group",          on:["found","theme","keyobj"] },
+              { k:"mid", one:"Division", many:"Divisions",      on:["found"], under:"top" },
+              { k:"bu",  one:"Business unit", many:"Business units", on:["found","swot","pillar","keyobj"], under:"mid" },
+              { k:"fn",  one:"Function", many:"Supporting Functions", on:["found","project"], under:"top" } ],
+    boxes: mid.concat(bus, fns)
+  };
+}
+const MAKE = { elabd, raya };
+
+let which = "elabd", S = MAKE[which](), sel = { kind:"box", id:"top" }, adding = null;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+const lvlOf = (k) => S.levels.filter(l => l.k === k)[0];
+const boxOf = (id) => id === "top" ? { id:"top", lvl:"top", name:S.name, parent:null }
+                                   : S.boxes.filter(b => b.id === id)[0];
+const kids = (id, lvl) => S.boxes.filter(b => b.lvl === lvl && b.parent === id);
+
+/* which box is chosen at each level — the path down the shape */
+let chosen = {};
+function pathTo(id) {
+  chosen = {};
+  let b = boxOf(id);
+  while (b && b.id !== "top") { chosen[b.lvl] = b.id; b = boxOf(b.parent); }
+}
+/* the parent whose children a level shows: the chosen box of the level it sits
+   under, or that level's first box when nothing is chosen there yet. */
+function parentFor(l) {
+  if (!l.under || l.under === "top") return "top";
+  if (chosen[l.under]) return chosen[l.under];
+  const first = S.boxes.filter(b => b.lvl === l.under)[0];
+  return first ? first.id : "top";
+}
+
+function drawShape() {
+  const out = [];
+  S.levels.forEach((l, li) => {
+    if (l.k === "top") {
+      out.push('<div class="lvl"><button data-lvl="top">' + esc(l.many) + '</button></div>');
+      out.push('<div class="row top"><button class="box top' + (sel.kind === "box" && sel.id === "top" ? " sel" : "") +
+               '" data-box="top">' + esc(S.name) + '</button></div>');
+      return;
+    }
+    const par = parentFor(l), list = kids(par, l.k), all = S.boxes.filter(b => b.lvl === l.k);
+    out.push('<div class="lvl"><button data-lvl="' + l.k + '">' + esc(l.many) +
+             '</button><span class="n">' + all.length + '</span>' +
+             (par !== "top" ? '<span class="n" style="text-transform:none;letter-spacing:0">under ' +
+                esc(boxOf(par).name) + '</span>' : '') + '</div>');
+    const rows = list.map(b => {
+      const next = S.levels.filter(x => x.under === l.k)[0];
+      const n = next ? kids(b.id, next.k).length : 0;
+      return '<button class="box' + (sel.kind === "box" && sel.id === b.id ? " sel" : "") +
+             '" data-box="' + b.id + '">' + esc(b.name) +
+             (n ? '<span class="n">' + n + '</span>' : '') + '</button>';
+    }).join("");
+    const addLabel = par === "top" ? "+ add" : "+ add under " + boxOf(par).name;
+    const add = adding === l.k
+      ? '<input class="newin" id="newin" placeholder="name it, then Enter" autocomplete="off">'
+      : '<button class="add" data-add="' + l.k + '">' + esc(addLabel) + '</button>';
+    out.push('<div class="row">' + rows + add + '</div>');
+    if (!list.length && adding !== l.k)
+      out.push('<p class="why">None here yet.</p>');
+  });
+  $("shape").innerHTML = out.join("");
+  if (adding) { const i = $("newin"); if (i) i.focus(); }
+  const c = sel.kind === "lvl" ? lvlOf(sel.id).many : boxOf(sel.id).name;
+  $("crumb").textContent = S.name + " › " + c;
+}
+
+function drawPanel() {
+  if (sel.kind === "lvl") {
+    const l = lvlOf(sel.id), n = l.k === "top" ? 1 : S.boxes.filter(b => b.lvl === l.k).length;
+    $("panel").innerHTML =
+      '<p class="ptitle">' + esc(l.many) + '</p>' +
+      '<p class="psub">The level, set once — ' + n + (n === 1 ? " box" : " boxes") + ' follow it.</p>' +
+      '<div class="prow"><span class="plab">Called, one</span><input class="fld" data-lw="one" value="' + esc(l.one) + '"></div>' +
+      '<div class="prow"><span class="plab">Called, many</span><input class="fld" data-lw="many" value="' + esc(l.many) + '"></div>' +
+      '<p class="ptitle" style="margin-top:1.2rem">What it carries</p>' +
+      '<div class="chips">' + PARTS.map(p =>
+        '<button class="chip" data-part="' + p[0] + '" aria-pressed="' +
+        (l.on.indexOf(p[0]) > -1) + '">' + esc(p[1]) + '</button>').join("") + '</div>' +
+      '<p class="why">Set once for every ' + esc(l.one.toLowerCase()) +
+        '. One that differs says so on itself, and only then.</p>' +
+      '<div class="note">Today this is the Structure step, on a screen of its own.</div>';
+    return;
+  }
+  const b = boxOf(sel.id), l = lvlOf(b.lvl);
+  const next = S.levels.filter(x => x.under === b.lvl)[0];
+  const n = next ? kids(b.id, next.k).length : 0;
+  $("panel").innerHTML =
+    '<p class="ptitle">' + esc(b.name) + '</p>' +
+    '<p class="psub">' + esc(l.one) + (n ? ' · ' + n + ' ' + esc(next.many.toLowerCase()) : '') + '</p>' +
+    '<div class="prow"><span class="plab">Name</span><input class="fld" data-f="name" value="' + esc(b.name) + '"></div>' +
+    '<div class="prow"><span class="plab">Shown in the nav</span><input class="fld" data-f="nav" placeholder="' + esc(b.name) + '"></div>' +
+    '<div class="prow"><span class="plab">Code</span><input class="fld" data-f="code" style="max-width:5.5rem" value="' +
+      esc(b.name.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()) + '"></div>' +
+    '<div class="prow"><span class="plab">Head</span><input class="fld" data-f="head" placeholder="— nobody yet —"></div>' +
+    (b.id === "top" ? '' :
+      '<div class="prow"><span class="plab">Sits under</span><select class="fld" data-f="parent">' +
+        parentChoices(b).map(o => '<option value="' + o.id + '"' + (o.id === b.parent ? " selected" : "") +
+          '>' + esc(o.name) + '</option>').join("") + '</select></div>') +
+    '<p class="why" style="margin-top:1rem">Everything this level carries is already set on the level.' +
+      ' Only what differs here would be asked here.</p>' +
+    (b.id === "top" ? '' : '<button class="danger" id="rm">Remove this ' + esc(l.one.toLowerCase()) + '</button>');
+}
+function parentChoices(b) {
+  const l = lvlOf(b.lvl);
+  if (!l.under || l.under === "top") return [{ id:"top", name:S.name }];
+  return S.boxes.filter(x => x.lvl === l.under).map(x => ({ id:x.id, name:x.name }))
+    .concat([{ id:"top", name:"— its own —" }]);
+}
+function draw() { drawShape(); drawPanel(); }
+
+/* ── pressing things ─────────────────────────────────────────────────────── */
+$("shape").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-box]"), l = e.target.closest("[data-lvl]"),
+        a = e.target.closest("[data-add]");
+  if (a) { adding = a.dataset.add; draw(); return; }
+  if (b) { adding = null; sel = { kind:"box", id:b.dataset.box }; pathTo(b.dataset.box); draw(); return; }
+  if (l) { adding = null; sel = { kind:"lvl", id:l.dataset.lvl }; draw(); }
+});
+$("shape").addEventListener("keydown", (e) => {
+  if (e.target.id !== "newin") return;
+  if (e.key === "Escape") { adding = null; draw(); return; }
+  if (e.key !== "Enter") return;
+  const name = e.target.value.trim();
+  if (!name) { adding = null; draw(); return; }
+  const l = lvlOf(adding), par = parentFor(l);
+  const id = l.k + "-" + Date.now();
+  S.boxes.push({ id, lvl:l.k, name, parent:par });
+  sel = { kind:"box", id }; pathTo(id);
+  /* stay in adding mode: naming eight functions should be eight keystrokes
+     and eight Enters, not eight round trips to a button. */
+  draw();
+  const i = $("newin"); if (i) { i.value = ""; i.focus(); }
+});
+$("panel").addEventListener("input", (e) => {
+  const f = e.target.dataset.f, lw = e.target.dataset.lw;
+  if (f === "name" && sel.kind === "box") {
+    if (sel.id === "top") S.name = e.target.value; else boxOf(sel.id).name = e.target.value;
+    drawShape();
+  }
+  if (lw && sel.kind === "lvl") { lvlOf(sel.id)[lw] = e.target.value; drawShape(); }
+});
+$("panel").addEventListener("change", (e) => {
+  if (e.target.dataset.f === "parent" && sel.kind === "box") {
+    boxOf(sel.id).parent = e.target.value; pathTo(sel.id); draw();
+  }
+});
+$("panel").addEventListener("click", (e) => {
+  const c = e.target.closest("[data-part]");
+  if (c && sel.kind === "lvl") {
+    const l = lvlOf(sel.id), k = c.dataset.part, i = l.on.indexOf(k);
+    if (i > -1) l.on.splice(i, 1); else l.on.push(k);
+    drawPanel(); return;
+  }
+  if (e.target.id === "rm" && sel.kind === "box" && sel.id !== "top") {
+    const gone = sel.id;
+    S.boxes = S.boxes.filter(b => b.id !== gone && b.parent !== gone);
+    sel = { kind:"box", id:"top" }; chosen = {}; draw();
+  }
+});
+document.querySelectorAll("[data-client]").forEach(btn => btn.addEventListener("click", () => {
+  which = btn.dataset.client; S = MAKE[which]();
+  document.querySelectorAll("[data-client]").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.client === which)));
+  sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw();
+}));
+$("reset").addEventListener("click", () => {
+  S = MAKE[which](); sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw();
+});
+draw();
+</script>

@@ -162,6 +162,80 @@
   ];
   var ROLE_KEYS = ROLES.map(function (r) { return r.key; });
 
+  /* ── 1a · ONE ADDRESS, ONE PARSE (§531, spec 066 stage 3a) ────────
+     A TARGET IS THE ADDRESS OF A THING THAT HOLDS A PLAN: the top layer
+     ("group"), a division ("co:<key>"), a business unit (its bare key), a
+     supporting function ("fn:<key>"), a capability ("cap:<id>") and — for its
+     deck alone — a company direction ("dir:<id>"). Every one of those was
+     added by making it imitate a business unit, and each imitation taught one
+     more reader to read the prefix for itself. Counted before this section was
+     written: 58 places in config-data.js, 14 in this file, 9 in the authoriser
+     and 9 in the shell each asked *which kind is this?* by slicing the string.
+
+     THAT IS THE COMPLEXITY SPEC 066 IS ABOUT, in its smallest form. Five
+     prefixes read in five orders is five chances to put `cap:` after the bare
+     fallback and hand back `UNITS["cap:x"]`, which is undefined and renders as
+     a page with nothing on it — `unitLike` carries the comment of the day that
+     happened. So the parse is ONE function, here, in the file both sides
+     already share (the browser inlines it, api/state.js requires it), for the
+     reason given at the top of this file: two copies of an answer are two
+     copies that will drift, and this drift is silent.
+
+     NOTHING ABOUT IT IS NEW. Each field below is an answer some caller already
+     worked out for itself, returned in one shape instead of five:
+
+       at      the address as given, so a caller can pass it on unchanged
+       kind    top · mid · bu · fn · cap · dir — `structLevelOf`'s own words,
+               which are the Structure step's levels and the product's
+       key     the address with its prefix taken off ("group" for the top)
+       named   whether the address names anything: "", "undefined" and "null"
+               are how a missing target reaches here as text, and `UNIT_TARGET`
+               has guarded against them since it was written
+       area    "fn" for a function and a capability, "unit" for the rest —
+               `areaOfTarget`'s answer, and the pair-of-pages question in
+               `strategyPageOf` below
+
+     WHAT IT DOES NOT PARSE: "u:<key>", which is a HOLDER id and not a target.
+     The two namespaces overlap in text and not in meaning — `u:group` is the
+     top layer's own plan holder, while `group` is the top layer — so folding
+     them into one parse would answer the second question with the first's
+     answer. `subjKey` and `isUnitHolderId` are that namespace's one place.
+
+     STAGE 3a ONLY MOVES THE READING. `kind` still names today's five kinds
+     because today's data still holds them; stage 3b is where a capability
+     becomes an internal pillar and El Abd's units come back as boxes, and the
+     callers that read `kind` are the list of what that migration has to visit
+     (spec 066 §8). Until then every answer here is the answer that was given
+     before, which is what `scripts/test-box-ref.js` holds it to. */
+  var BOX_PREFIX = [
+    { prefix: "co:",  kind: "mid" },
+    { prefix: "fn:",  kind: "fn"  },
+    { prefix: "cap:", kind: "cap" },
+    { prefix: "dir:", kind: "dir" }
+  ];
+  /* The strings a missing target arrives as. `String(undefined)` is how a page
+     that lost its `current` reaches the authoriser, and it must not read as a
+     business unit called "undefined" (§94.2's shape: a guard asserted at both
+     ends or half a build passes). */
+  var BOX_UNNAMED = { "": 1, "undefined": 1, "null": 1 };
+  function boxRef(target) {
+    var at = String(target == null ? "" : target);
+    var named = !BOX_UNNAMED[at];
+    /* Falsy and "group" are the top layer; "undefined" is NOT, because it is
+       not an address at all and `structLevelOf` has always answered "bu" for
+       it. `named` is the field that says so. */
+    if (!at || at === "group") return boxOf(at, "top", "group", named);
+    for (var i = 0; i < BOX_PREFIX.length; i++) {
+      var p = BOX_PREFIX[i];
+      if (at.indexOf(p.prefix) === 0) return boxOf(at, p.kind, at.slice(p.prefix.length), named);
+    }
+    return boxOf(at, "bu", at, named);
+  }
+  function boxOf(at, kind, key, named) {
+    return { at: at, kind: kind, key: key, named: named,
+             area: (kind === "fn" || kind === "cap") ? "fn" : "unit" };
+  }
+
   /* ── 2 · Areas (§37; the own pair split in two, §117) ───────────
      THE OWN COLUMNS ARE TWO QUESTIONS EACH (Islam, 2026-08-26): "the strategy
      should be locked from the non SMO but the reporting should be editable by
@@ -785,9 +859,9 @@
      mapping runs twice on one question and a `fn:` target has to map to
      itself. */
   function capHolderTarget(w, target) {
-    var s = String(target || "");
-    if (s.indexOf("cap:") !== 0) return s;
-    var id = s.slice(4), cs = (w && w.capabilities) || [];
+    var s = String(target || ""), r = boxRef(s);
+    if (r.kind !== "cap") return s;
+    var id = r.key, cs = (w && w.capabilities) || [];
     for (var i = 0; i < cs.length; i++)
       if (cs[i] && cs[i].id === id) return cs[i].fn ? "fn:" + cs[i].fn : "group";
     return "group";
@@ -798,13 +872,13 @@
        before the capability resolves to its holder, or the seat would be
        compared against the function and never match. The holder's own seats
        still reach it below, because the function stays an option. */
-    if (String(r.at || "") === String(target || "") && String(target || "").indexOf("cap:") === 0) return true;
+    if (String(r.at || "") === String(target || "") && boxRef(target).kind === "cap") return true;
     target = capHolderTarget(w, target);
     if (ownsEveryPlace(r.role)) return true;
     var at = String(r.at || "");
-    if (at.indexOf("cap:") === 0) return false;
-    if (String(target).indexOf("fn:") === 0) return at === target;
-    if (at.indexOf("fn:") === 0) return false;
+    if (boxRef(at).kind === "cap") return false;
+    if (boxRef(target).kind === "fn") return at === target;
+    if (boxRef(at).kind === "fn") return false;
     if (r.role === "cceo") {
       var ck = at.replace(/^co:/, "");
       if (target === "group") return false;
@@ -814,7 +888,7 @@
          page into an "other company" and handed the answer to the seeOthers
          flag. Their own is theirs; anybody else's still goes through
          companyAllows(). */
-      if (String(target).indexOf("co:") === 0) return at === target;
+      if (boxRef(target).kind === "mid") return at === target;
       return unitsOfCompany(w, ck).indexOf(target) > -1;
     }
     return at === target;
@@ -826,7 +900,7 @@
     target = capHolderTarget(w, target);
     var co = w.companies[String(r.at || "").replace(/^co:/, "")] || {};
     if (target === "group") return co.seeGroup !== false;
-    if (String(target).indexOf("fn:") === 0) return true;
+    if (boxRef(target).kind === "fn") return true;
     if (roleOwns(w, r, target)) return true;
     return !!co.seeOthers;
   }
@@ -2150,10 +2224,8 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* A unit key or `fn:<key>`, resolved in ONE place (§59's rule). */
   function unitLikeOf(w, target) {
     if (!w || !target || target === "group") return null;
-    if (String(target).indexOf("fn:") === 0) {
-      var f = (w.functions || {})[String(target).slice(3)];
-      return f || null;
-    }
+    var r = boxRef(target);
+    if (r.kind === "fn") return (w.functions || {})[r.key] || null;
     return (w.units || {})[target] || null;
   }
 
@@ -2225,8 +2297,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        unit it would consult `u_plan` and `u_found`, which are a business
        unit's columns, and a function head filling a gap on their own
        capability would be refused by the wrong column entirely. */
-    var t = String(target);
-    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
+    return boxRef(target).area === "fn"
       ? (STRATEGY_PAIR[unitPage] || unitPage)
       /* §405: AND THE OTHER WAY. A business unit that plans in projects or
          actions is drawn by the function's own pages, which ask `k_proj`,
@@ -2234,12 +2305,16 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
          FUNCTION columns, which a unit's head owns none of. So on a unit the
          function's keys resolve to the unit's own, and nobody's access moves:
          a unit's plan is judged by the unit's column whichever way it plans. */
-      : (UNIT_TARGET(t) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
+      : (UNIT_TARGET(target) ? (UNIT_PAIR[unitPage] || unitPage) : unitPage);
   }
   var UNIT_PAIR = { k_found: "u_found", k_proj: "u_plan", k_report: "u_report" };
-  function UNIT_TARGET(t) {
-    return !!t && t !== "group" && t !== "undefined" && t !== "null" &&
-      t.indexOf("co:") !== 0 && t.indexOf("fn:") !== 0 && t.indexOf("cap:") !== 0;
+  /* §531: "a target that is judged by a business unit's own columns" — every
+     address but the top layer, a division, a function, a capability and the
+     three ways a missing target arrives as text. A `dir:<id>` answers TRUE
+     here, as it always has; see `structLevelOf` for why that is left alone. */
+  function UNIT_TARGET(target) {
+    var r = boxRef(target);
+    return r.named && r.kind !== "top" && r.kind !== "mid" && r.area !== "fn";
   }
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */
@@ -2248,9 +2323,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   }
   /* The same pairing for the Reporting half (§117). */
   function reportPageOf(target) {
-    var t = String(target);
-    return (t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0)
-      ? "k_report" : "u_report";
+    return boxRef(target).area === "fn" ? "k_report" : "u_report";
   }
 
   /* ── THE PLAN LEAVES AS SLIDES (§117) ────────────────────────────
@@ -4121,18 +4194,23 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     var s = group && group[STRUCTURE];
     return s && typeof s === "object" ? s : null;
   }
+  /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
+     Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
+     office saves that card, the capability layer READS the functions' answers
+     (effLevel below), which is exactly what it carried before that card
+     existed — nothing moves for any client.
+
+     §531: the five prefixes are read once, by `boxRef`. A DIRECTION HAS NO
+     LEVEL OF ITS OWN and is answered here as "bu", which is the answer
+     `dir:<id>` has always got from this function — it reached the bare
+     fallback because no branch named it. Said out loud rather than left to the
+     fallback, because `boxRef` now CAN tell a direction apart and a reader who
+     saw that would expect this to as well. It should not: a direction is a
+     pillar, not a layer of the tree (spec 066 §2.3), and the address goes at
+     stage 3b. Until then this is the answer it had. */
   function structLevelOf(target) {
-    var t = String(target || "");
-    if (!t || t === "group") return "top";
-    if (t.indexOf("co:") === 0) return "mid";
-    if (t.indexOf("fn:") === 0) return "fn";
-    /* §428: A CAPABILITY IS A LAYER OF ITS OWN, with its own card on the
-       Structure step (Islam, 2026-09-30: *"ok for all, build it"*). Until the
-       office saves that card, the capability layer READS the functions'
-       answers (effLevel below), which is exactly what it carried before this
-       card existed — nothing moves for any client. */
-    if (t.indexOf("cap:") === 0) return "cap";
-    return "bu";
+    var k = boxRef(target).kind;
+    return k === "dir" ? "bu" : k;
   }
   /* The level whose stored answers apply. The capability layer falls back to
      the functions' while nobody has set it (§428). */
@@ -4258,7 +4336,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     return "";
   }
   function compOffered(target, comp) {
-    var isFn = String(target || "").indexOf("fn:") === 0;
+    var isFn = boxRef(target).kind === "fn";
     if (comp === FN_DESC) return isFn;
     if (comp === COMPETE) return COMPETE_LEVELS.indexOf(structLevelOf(target)) >= 0;
     return !(isFn && STRUCT_NEVER_FN.indexOf(comp) >= 0);
@@ -4266,7 +4344,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   /* The part that draws a function's or a capability's "What it is" card:
      a capability keeps its brief (§334), a function asks its description. */
   function descPart(target) {
-    return String(target || "").indexOf("fn:") === 0 ? FN_DESC : "brief";
+    return boxRef(target).kind === "fn" ? FN_DESC : "brief";
   }
   /* §427 (Islam, 2026-09-30, of the audit of what each Structure tick
      changes: *"A for 4,5,6,7"*, then *"leave them ticked off and greyed …
@@ -4454,16 +4532,61 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      it and what remains is the Foundation. Their own capability is a
      destination of its own and is untouched — that is the half of "his
      capability" the navigation already had right. */
-  var PART_ONLY_ROLES = ["dirowner", "capowner"];
+  /* §533 — AND IT IS ALL FOUR PARTS, UNDER ONE SENTENCE. Islam, asked whether
+     a project and a pillar are parts too: *"don't you think they are parts
+     that should follow the same rule for consistency?"* — and, of the rule
+     itself: *"the visibility is set by the owner of the item … the CEO sees
+     everything, and the business unit sees his own business unit"*.
+
+     SO THE SENTENCE IS: **you see the thing you own, whole.** The biggest
+     thing you own decides. A project, a pillar, a direction and a capability
+     are all PARTS inside something; a unit, a function and the company are
+     BOXES. Own a box and you see that box whole, whatever parts you also hold
+     inside it. Own nothing but parts and this switch narrows you to them.
+
+     A PART OWNER IS SOMEBODY WHO OWNS ONLY A PART, and that correction is the
+     whole of why this is not just two more entries in the list below. Measured
+     on the worked example before it was built: adding `powner` and `plowner`
+     to the list and changing nothing else narrowed **24 of 33 people** —
+     including eight business-unit OWNERS and five function HEADS, because each
+     of them also happens to own one pillar inside their own unit. That is the
+     exact opposite of *the business unit sees his own business unit*. Under
+     the sentence above it narrows ONE person in that client: the one who owns
+     a project in IT and a pillar in Mobile and nothing else.
+
+     SO THE WHOLE RULE IS ONE LINE: narrowed only when EVERY role you hold is
+     a part role. Anything else you hold is bigger, and the biggest wins.
+
+     THAT REPLACES §517's GRANT TEST, which asked instead whether one of your
+     other roles was GRANTED the company's pages. It is replaced and not kept
+     beside it, because the two disagree in a case the table offers: an office
+     that sets the BU-owner row's company column to `none` would, under the
+     grant test, narrow every unit head who also owns one pillar inside their
+     own unit — *the business unit sees his own business unit*, gone, by a
+     press two columns away. Measured, and the only case where the two differ
+     on the worked example. The new rule is also strictly the more generous of
+     the two, so §33's rule that a narrowing must never take away what another
+     row gives is kept rather than weakened.
+
+     THE FLOOR NEEDS NO CASE OF ITS OWN. `contrib` is only ever derived when
+     the person holds NO other role (`!out.length` guards both places it is
+     pushed), so it can never sit beside a part — and somebody whose only role
+     is the floor holds no part, so `holds` stays false and they are not
+     narrowed. Written as "not a part role" rather than as a list of box
+     roles on purpose: the next role somebody adds then defaults to NOT
+     narrowing, which is the safe direction — a new role that silently took
+     the company's pages away from whoever held it is the kind of surprise
+     spec 066 exists to stop. */
+  var PART_ONLY_ROLES = ["powner", "plowner", "dirowner", "capowner"];
+  function isPartRole(role) { return PART_ONLY_ROLES.indexOf(role) > -1; }
   var DIR_SCOPE = "dirScope";
   function dirScopePart(group) { return !!group && group[DIR_SCOPE] === "part"; }
   function partOnly(w, person) {
     if (!person || !w || !dirScopePart(w.group)) return false;
     var rs = personRoles(w, person), holds = false;
     for (var i = 0; i < rs.length; i++) {
-      if (PART_ONLY_ROLES.indexOf(rs[i].role) > -1) { holds = true; continue; }
-      if (!companyAllows(w, rs[i], "group")) continue;
-      if (grantFor(w, rs[i].role, areaFor("a_group", w, rs[i], "group")) !== "none") return false;
+      if (!isPartRole(rs[i].role)) return false;
+      holds = true;
     }
     return holds;
   }
@@ -4496,6 +4619,75 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
   function topWay(group) {
     var s = structureOf(group), t = s && s.top, b = t && t.plan;
     return b && b.way === "projects" ? "projects" : "pillars";
+  }
+  /* ── 2b · ONE PILLAR LIST, SHOWN AS ONE OR AS TWO (§540) ────────────────
+     Islam, of a capability: *"a pillar is external and internal pillars and
+     they are the same like directions but internal directions are called
+     capabilities"*, and of the whole of stage 3b: *"ok noting that nothing
+     will change for the users this is just a structural change"*.
+
+     SO THE KIND IS THE THING AND THE SPLIT IS A SETTING. A pillar carries a
+     `kind` already — the workbook has validated B2:B60 against these two
+     words since the first import, the `pillars` table has the column, and the
+     rail and the pane have drawn the pill since §488. What the platform has
+     never had is a way to say *and show them apart*: El Abd reads Directions
+     and Capabilities on two tabs only because its capabilities are a SECOND
+     RECORD TYPE, and that record type is what spec 066 removes.
+
+     THIS IS THE SETTING THAT LETS IT BE REMOVED WITHOUT ANYBODY NOTICING. Set
+     on the box, over the one pillar list it already holds: joined, which is
+     every client today, or apart, which is what El Abd's company will be set
+     to on the day its five capabilities become five internal pillars. Each
+     half then keeps its own stored word — `pillar` for the external half and
+     `capability` for the internal one — so the tabs read Directions and
+     Capabilities exactly as they do now (§404's labels, untouched).
+
+     ABSENT IS JOINED (§50.6, §30.2). Not because joined is the better answer
+     but because it is TODAY'S: every box in every client draws its pillar
+     list as one list, Raya's units included, and a default of "apart" would
+     put a second tab on every one of them the day this shipped. The one
+     client that wants two tabs is the one client that already has them, and
+     it is set explicitly, in the same commit as its data moves (stage 3b, d).
+
+     THE BOX IS A UNIT, A COMPANY, OR ANY BOX THAT PLANS IN PILLARS — and it
+     is asked of the UNIT-LIKE OBJECT rather than of the group, so the company
+     answers through `topAsUnit()` exactly as it answers `format` (§466). Not
+     a supporting function: a capability *"is either on a unit or it's on the
+     company … It belongs to something bigger than the function"* (Islam,
+     2026-10-14), so a function's pillar list holds one kind and has nothing
+     to show apart. Not a capability either, for the plainer reason that it
+     IS one.
+
+     THE KINDS ARE READ HERE AND NOWHERE ELSE. `xlsx.js` held the list and
+     built the workbook's validation and the pen's picker from it (§53.5);
+     it reads this one now, so the browser, the server and the spreadsheet
+     cannot disagree about what a kind may say. */
+  var PILLAR_KINDS = ["Direction", "Capability"];
+  var PILLAR_CAP = "Capability";
+  /* INTERNAL IS SAID, NEVER ASSUMED. `addPillar` mints `kind: ""` and most
+     stored pillars carry nothing at all (§488's own finding), so the question
+     is *is this one marked as a capability* and everything else — the blank,
+     "Direction", a word somebody typed — is external. Written this way round
+     so that an unsaid kind lands in the half every client reads today. */
+  function pillarIsCap(p) { return !!p && String(p.kind || "") === PILLAR_CAP; }
+  /* The one stored key, on the box. A boolean and not a word: there are two
+     answers and a third would be a different question (§50.6). */
+  var PILLAR_SPLIT = "pillarSplit";
+  function pillarsSplit(box) { return !!box && box[PILLAR_SPLIT] === true; }
+  /* And where the COMPANY keeps it: beside `way` on the Structure step's own
+     plan block, which is the row the setting is drawn next to (§466). The
+     company has no stored record of its own — `topAsUnit()` is built fresh on
+     every read — so this is what that builder reads. */
+  function topSplit(group) {
+    var s = structureOf(group), t = s && s.top, b = t && t.plan;
+    return !!(b && b.split === true);
+  }
+  /* WHICH HALF A PILLAR BELONGS TO, as one answer rather than two call sites
+     asking the question in opposite directions. `half` is "cap" or "dir";
+     anything else means the whole list and every pillar is in it. */
+  function pillarInHalf(p, half) {
+    if (half !== "cap" && half !== "dir") return true;
+    return pillarIsCap(p) === (half === "cap");
   }
   /* A company project's named Owner enters that project's figures (Islam:
      the function's own rule, §301) and never submits. A RULE beside
@@ -5108,11 +5300,16 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
     STRUCT_NEVER_FN: STRUCT_NEVER_FN, compOffered: compOffered,
     FN_DESC: FN_DESC, descPart: descPart, COMPETE: COMPETE, DISCIPLINES: DISCIPLINES, disciplineName: disciplineName,
     STRUCT_NOT_BUILT: STRUCT_NOT_BUILT, compBuilt: compBuilt,
+    /* §531: the one address parse, exported so the browser's own pages read
+       the same answer the server does (spec 066 stage 3a). */
+    boxRef: boxRef,
     structureOf: structureOf, structLevelOf: structLevelOf,
     effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
-    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
+    fnExists: fnExists, buExists: buExists, ownsTopPillar: ownsTopPillar, DIR_SCOPE: DIR_SCOPE, dirScopePart: dirScopePart, partOnly: partOnly, PART_ONLY_ROLES: PART_ONLY_ROLES, ownsDirection: ownsDirection, ownsTopCapability: ownsTopCapability, topWay: topWay, topSplit: topSplit, PILLAR_KINDS: PILLAR_KINDS, PILLAR_CAP: PILLAR_CAP,
+    PILLAR_SPLIT: PILLAR_SPLIT, pillarIsCap: pillarIsCap, pillarsSplit: pillarsSplit, pillarInHalf: pillarInHalf,
+    ownsTopProject: ownsTopProject, foundOn: foundOn, foundTitle: foundTitle,
     swotTitle: swotTitle, swotQuads: swotQuads, SWOT_QUADS: SWOT_QUADS,
     PLAN_WAYS: PLAN_WAYS, planTitle: planTitle, layerWord: layerWord, planOn: planOn,
     OVERVIEW_AREAS: OVERVIEW_AREAS,

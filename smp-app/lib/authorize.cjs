@@ -447,7 +447,7 @@ function collect(stored, incoming, w) {
          `dir:<pillar id>`. That is the only report state a direction has —
          it is never submitted or parked on its own, so anything else under
          such a key is refused rather than guessed at. */
-      if (String(t).indexOf("dir:") === 0) {
+      if (R.boxRef(t).kind === "dir") {
         if (out.some(function (c) { return c.target === t; })) return;
         add(field === "slides" ? "dirSlides" : "dirBad", t,
             field === "slides" ? "the direction's picture slides" : "a direction's report state");
@@ -1482,15 +1482,18 @@ function collectProjects(aP, bP, target, add) {
    (§16.7, §123). It is the stored NAME where there is one, because the world a
    verdict is built from is the stored one (§42). */
 function targetWord(w, t) {
-  const s = String(t || "");
-  if (s.indexOf("cap:") === 0) {
-    const id = s.slice(4);
+  const r = R.boxRef(t);
+  if (r.kind === "cap") {
     const hit = ((w && w.capabilities) || []).filter(function (c) {
-      return c && c.id === id; })[0];
-    return hit && hit.name ? hit.name : id;
+      return c && c.id === r.key; })[0];
+    return hit && hit.name ? hit.name : r.key;
   }
-  if (s === "group") return "the top layer";
-  return s.replace(/^fn:/, "");
+  /* `named` and not just the kind: an EMPTY target is the top layer's kind
+     (§531) and has never been worded as the top layer here — it prints as
+     itself, which is what tells the reader of a refusal that the page sent no
+     target at all. */
+  if (r.named && r.kind === "top") return "the top layer";
+  return r.kind === "fn" ? r.key : r.at;
 }
 
 function collectCapabilities(sList, iList, add, w) {
@@ -1645,9 +1648,9 @@ function ctxOfUnitOwn(u) {
    target names (§42: the narrowest true answer, never the convenient one). */
 function ctxOfFn(w, subject) {
   const out = {};
-  const s = String(subject || "");
-  const capId = s.indexOf("cap:") === 0 ? s.slice(4) : null;
-  const fnKey = capId ? null : s.replace(/^fn:/, "");
+  const r = R.boxRef(subject);
+  const capId = r.kind === "cap" ? r.key : null;
+  const fnKey = capId ? null : (r.kind === "fn" ? r.key : r.at);
   /* §334.18: THE HOLDERS THIS SUBJECT DRAWS, asked of the shared rule. This
      walked `w.capabilities` alone, so since §326 not one row of a supporting
      function's OWN projects was in the index — and every id missing from the
@@ -2046,7 +2049,7 @@ function authorize(stored, incoming, person) {
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */
-        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
+        const isFn = R.boxRef(t).area === "fn";
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
@@ -2077,7 +2080,7 @@ function authorize(stored, incoming, person) {
         /* §334: a CAPABILITY's rows are found through the capabilities, not
            through `stored.functions` — `t.slice(3)` on a `cap:` target is
            nonsense and would have handed every row "not yours". */
-        const ctxs = t.indexOf("cap:") === 0
+        const ctxs = R.boxRef(t).kind === "cap"
           ? ctxOfFn(w, t)
           : ctxOfUnit(isFn
               ? asUnit((stored.functions || {})[t.slice(3)] || {}, t)
@@ -2112,7 +2115,7 @@ function authorize(stored, incoming, person) {
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */
-        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
+        const isFn = R.boxRef(t).area === "fn";
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
@@ -2154,7 +2157,7 @@ function authorize(stored, incoming, person) {
            where its access comes from — the function that holds it. Read as a
            unit it would consult the wrong column entirely, and a function head
            reporting their own capability would be refused. */
-        const isFn = t.indexOf("fn:") === 0 || t.indexOf("cap:") === 0;
+        const isFn = R.boxRef(t).area === "fn";
         if (!edits(w, person, isFn ? "fn" : "unit", t)) {
           no("You cannot report for " + targetWord(w, t) + ".");
           return;
@@ -2382,7 +2385,7 @@ function authorize(stored, incoming, person) {
                (notMineP.length === 1 ? " figure" : " figures") + " is not yours.");
           return;
         }
-        const capArea = (capT.indexOf("fn:") === 0 || capT.indexOf("cap:") === 0) ? "fn" : "unit";
+        const capArea = R.boxRef(capT).area;
         if (!edits(w, person, capArea, ch.target)) { no("You cannot report for " + where.trim() + "."); return; }
         if (locked && !office) {
           no("This cycle is locked. Ask the SMO to reopen it before entering figures.");
@@ -2399,7 +2402,7 @@ function authorize(stored, incoming, person) {
         if (!R.onlyOwnLines(w, person, capArea, ch.target)) return;
         if (!ch.ids) {
           no("Your role reports its own rows — " + ch.what + where +
-             " is the " + (String(ch.target || "").indexOf("cap:") === 0
+             " is the " + (R.boxRef(ch.target).kind === "cap"
                             ? "capability's." : "function's."));
           return;
         }

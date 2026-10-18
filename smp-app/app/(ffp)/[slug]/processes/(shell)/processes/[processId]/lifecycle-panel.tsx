@@ -41,6 +41,9 @@ export function LifecyclePanel(p: PanelProps) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
+  // The approver cannot also be a reviewer: their box is greyed and left out.
+  const [approverId, setApproverId] = useState("");
+  const [reviewerIds, setReviewerIds] = useState<ReadonlySet<string>>(new Set());
 
   function run(fn: () => Promise<{ ok: boolean; error?: string; message?: string }>) {
     setError(null);
@@ -64,7 +67,7 @@ export function LifecyclePanel(p: PanelProps) {
       submitProcessForReview({
         ...ids,
         approverPersonId: String(f.get("approver") ?? ""),
-        reviewerPersonIds: f.getAll("reviewer").map(String),
+        reviewerPersonIds: [...reviewerIds].filter((id) => id !== approverId),
         changeNote: String(f.get("changeNote") ?? ""),
       })
     );
@@ -108,7 +111,13 @@ export function LifecyclePanel(p: PanelProps) {
           </p>
           <label className="block text-sm">
             <span className="mb-1 block font-semibold text-slate-700">Approver</span>
-            <select name="approver" required defaultValue="" className={field}>
+            <select
+              name="approver"
+              required
+              value={approverId}
+              onChange={(e) => setApproverId(e.target.value)}
+              className={field}
+            >
               <option value="" disabled>
                 Choose from the People register…
               </option>
@@ -132,8 +141,24 @@ export function LifecyclePanel(p: PanelProps) {
             <div className="grid max-h-40 grid-cols-1 gap-1 overflow-y-auto rounded-md border border-slate-200 p-2 sm:grid-cols-2">
               {p.people.map((x) => (
                 <label key={x.id} className="flex items-center gap-2">
-                  <input type="checkbox" name="reviewer" value={x.id} className="h-4 w-4 rounded border-slate-300" />
-                  <span>{label(x)}</span>
+                  <input
+                    type="checkbox"
+                    name="reviewer"
+                    value={x.id}
+                    checked={x.id !== approverId && reviewerIds.has(x.id)}
+                    disabled={x.id === approverId}
+                    onChange={(e) => {
+                      const next = new Set(reviewerIds);
+                      if (e.target.checked) next.add(x.id);
+                      else next.delete(x.id);
+                      setReviewerIds(next);
+                    }}
+                    className="h-4 w-4 rounded border-slate-300"
+                  />
+                  <span>
+                    {label(x)}
+                    {x.id === approverId ? " (approver)" : ""}
+                  </span>
                 </label>
               ))}
             </div>

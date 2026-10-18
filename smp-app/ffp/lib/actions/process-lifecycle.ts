@@ -83,6 +83,7 @@ export async function submitProcessForReview(input: z.infer<typeof submitSchema>
 
   const reviewers: Reviewer[] = [];
   for (const id of new Set(d.reviewerPersonIds)) {
+    if (id === d.approverPersonId) continue; // the approver is not also a reviewer
     const r = await registerPerson(d.workspaceId, id);
     if (!r) return refuse("A reviewer is not on the People register");
     reviewers.push({ personId: r.id, name: r.name, role: r.role });

@@ -32,7 +32,7 @@ measurement.
 | 5 | Error prevention | Passes well; one break of the house rule, in the Copilot | **CLOSED** — §538. There were four breaks, and this one was the mildest |
 | 6 | Recognition rather than recall | Passes (measured) | — |
 | 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **CLOSED, bar customisation** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E), §547 (Alt+G, go to a place). Customisation is left, and it is a product question |
-| 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **UNMEASURED STILL** — the 224 `.why` / `.note` strings have not been read one by one |
+| 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **MEASURED AND CLOSED** — §548. All 257 read: not one is a description. But this file's own "zero `note:` to `section()`" was wrong — there were three, and one stood on the page |
 | 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **AWAITING ISLAM.** Not a defect; nobody has ruled on it |
 | 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
 
@@ -44,6 +44,8 @@ measurement.
 - heuristic 4(a) counted **six** date spellings by searching for the browser's own formatters; there were **nine**, three of them written out by hand from a month array (§537.1);
 - heuristic 5 named **one** control greyed the dead way while carrying a reason; there were **four**, and the one it named was the mildest of them (§538);
 - heuristic 7 says the product has **one** keyboard idiom; it had **four**, and the real finding — that none of them was written down anywhere — it does not make at all (§539).
+
+**And once in the other direction**, which is the harder kind to catch, because it reads as a clean pass rather than as a gap: heuristic 8 reports **zero** `note:` arguments passed to a `section()` call. There were **three** (§548). A claimed pass nobody re-measured is how a rule quietly stops being kept.
 
 And twice it was read as a to-do list when it was not: the saved indicator it reports missing was built the day after this file was written (§527), and the ASCII-ellipsis nit under heuristic 1 was never true of anything on screen — only of the comments describing the button. **So: measure the product, never this file.**
 
@@ -253,7 +255,14 @@ the Setup rail's folds. No saved views, no default filters, no favourites.
 
 ---
 
-## 8. Aesthetic and minimalist design — SUBSTANTIALLY PASSES, not fully measured
+## 8. Aesthetic and minimalist design — SUBSTANTIALLY PASSES, not fully measured · **MEASURED AND CLOSED**
+
+> **The pass this section says it did not do was done in §548**, and both of its halves came out differently than written.
+>
+> - **The `.why` / `.note` strings: this file's guess was right.** 257 of them now (it counted 224): 185 built from a value, 18 a bare mark, and some fifty of real prose — all pending states, empty states, values on a row, or warnings about consequence. **Not one is a description.** §127 already settles the empty states: it kept *"No one is set"* because a status is not a description.
+> - **The `section()` count below is WRONG.** It reports **zero** notes passed; there were **three**. Two are conditional and appear only when there is something true to say. The third stood on the page every time and is now on a hover (§548) — moved, not deleted, which is what rule 1b-ii prescribes for a sentence that carries a real fact.
+>
+> **It is measured now rather than guessed**, and `checks/no-grey-descriptions.py` keeps it so: no heading followed by a grey paragraph, no `section()` carrying a standing note, and the moved fact asserted to still exist — because a check that only counted paragraphs would be satisfied by deleting it.
 
 Rule 1b-ii (no grey descriptions under page and section headings) is honoured
 for new work, and this is a measurement rather than a reading: **zero** `note:`

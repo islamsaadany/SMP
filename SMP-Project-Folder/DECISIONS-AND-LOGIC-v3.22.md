@@ -65995,3 +65995,25 @@ The last piece of heuristic 7. Alt+G opens a list of every place you can reach, 
 **THE PLUMBING IS INERT.** The select and the button `searchsel` builds for it are not controls: both out of the tab order and out of the accessibility tree, so a host left standing is unreachable. §536 records what a hidden select with its furniture left on did here — every page became a keyboard trap on its first control.
 
 **CHECK.** `checks/go-to-a-place.py` — green here, **10 red on the build before**. And the sheet learned Alt+G the same day (§539), which is the whole reason the sheet exists.
+
+## §548 — The one grey description, moved to the hover (usability audit, heuristic 8; 2026-10-18)
+Heuristic 8 is the one the audit measured **halfway and said so**: it counted the `.why` and `.note` strings and admitted in its own words that reading them *"needs a page-by-page pass and is the honest limit of this finding."* This is that pass, and a check so it stays done.
+
+**WHAT THE PASS FOUND.** **257** `.why` and `.note` strings — 185 built from a value (a fact by construction), 18 a bare mark, and some fifty of real prose which are pending states (*"Asking…"*), empty states (*"Nothing planned yet."*), values on a row (*"only the SMO can move it"*), and warnings about consequence (*"Floors must descend. Two bands overlap, so a figure would fall into both."*). **NOT ONE is a description.** §127 already settles the empty states: it kept *"No one is set"* because **a status is not a description**. The audit's guess about these was right, and it is worth saying so plainly — the value of the pass is that it is now measured rather than guessed.
+
+**AND THE AUDIT WAS WRONG THE OTHER WAY on the half it did measure.** It reports **zero** `note:` arguments passed to a `section()` call. There were **three**. Two are **conditional** — written `x ? null : "…"`, so they appear only when there is something true to say (no factor values entered; nothing written yet) — and §127 protects those. The third stood on the page every time, under *Who got &lt;subject&gt;*:
+
+> *"Written when it was sent, so it is what actually happened rather than what the screen worked out beforehand."*
+
+**MOVED, NOT DELETED**, which is exactly what rule 1b-ii says to do with it: *"it is information, and it belongs on a hover … never as a paragraph"*, and *"flag it rather than deleting it silently."* **The fact is worth keeping** — without it the table reads as something the screen worked out just now, when it is the record written at the moment of sending. **`section()`'s own fifth argument draws the hover, so nothing new was built and the words did not change.**
+
+**SHOWN BEFORE IT WAS CHOSEN, and not as a drawing.** Islam: *"I don't know what you are talking about it .. always show me visually."* Two screenshots of the **real** `section()` rendered from the built file with the real words — the page as it stands, and the same page with the sentence on the hover — so the choice was made against the thing itself rather than a description of it. The standing instruction out of it is wider than this section: **show it, do not describe it.**
+
+**CHECK.** `checks/no-grey-descriptions.py` — green here, **2 red on the build before**, where it names the sentence. It asserts the rule's **shape** rather than a judgement about tone, so it cannot drift with whoever runs it: no heading followed by a grey paragraph, and no `section()` carrying a standing note, with the two conditional ones asserted to still be there. **And it asserts THE FACT SURVIVED** — a check that only counted paragraphs would be satisfied by deleting the sentence, which is the one outcome the rule forbids.
+
+**TWO FAULTS IN THE PASS ITSELF, both recorded in the check rather than quietly fixed**, because both are the kind that make a measurement look authoritative while being wrong:
+
+- the first run **stripped the comments outright**, so every line number after the first comment was wrong and it reported a heading-followed-by-a-paragraph **that does not exist in the file**. Comments are blanked and their newlines kept now, so a position still means something;
+- the call scan read **`function section(eyebrow, title, note, body, …)` as a call** carrying a standing note, because that parameter is named `note`.
+
+**AND THIS CLOSES THE AUDIT.** Of its ten: 1, 3, 4, 5, 7 and 8 are closed; 2 and 6 passed on measurement; 9 is Islam's ruling and not a defect; 10 was dropped at his word. **It was wrong five times** and every correction is now in the record rather than only in a reply — four undercounts (26 dialogs that were 30, six date spellings that were nine, one dead-greyed control that was four, one keyboard idiom that was four) and **one overcount the other way**, the zero section notes that were three. It also twice reported as missing something already built. That is not a criticism of the audit; it is why each of these closed with **a check that goes red** rather than a note saying somebody looked.

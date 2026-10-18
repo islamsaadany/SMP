@@ -189,7 +189,7 @@ with sync_playwright() as p:
     NAMED = {"Enter": '"Enter"', "Esc": '"Escape"', "Home": '"Home"', "End": '"End"',
              "F": '"f"', "W": '"w"', "P": '"p"', "N": 'KeyN', "Alt": "altKey",
              # §546's three, matched on the PHYSICAL key like §528's Alt+N
-             "S": 'KeyS', "D": 'KeyD', "E": 'KeyE',
+             "S": 'KeyS', "D": 'KeyD', "E": 'KeyE', "G": 'KeyG',
              "Shift": "shiftKey", "Tab": "Tab", "Space": '" "'}
     missing = []
     for sec in ("figures", "deck", "anywhere", "lists", "rows"):

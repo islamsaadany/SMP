@@ -92,7 +92,8 @@ var KEYSHEET = (function(){
       rows:[
         { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },
         { keys:[["Alt","D"]], what:"Save draft" },
-        { keys:[["Alt","E"]], what:"The pen, on or off" }
+        { keys:[["Alt","E"]], what:"The pen, on or off" },
+        { keys:[["Alt","G"]], what:"Go to another place — type a few letters" }
       ] },
     { id:"figures", name:"Entering figures", where:"Reporting",
       rows:[

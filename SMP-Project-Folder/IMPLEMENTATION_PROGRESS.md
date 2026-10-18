@@ -171,3 +171,6 @@ The section that used to read "How we compete" now reads **Competitive Disciplin
 
 ### Helicopter view — choose which processes to show (built, merged to main 2026-10-08)
 A "Processes" dropdown beside Milestones | Cards: tick the processes you want (ticking a main ticks its subs, search by code or name, Select all / none). It applies to both views and to the PNG download. Unticking only hides it from the picture; nothing is deleted. It starts with everything shown and remembers your choice in that browser. A process that picks up from a hidden one says "from ADM105, hidden". Still to do: look at it on a real workspace.
+
+## 2026-10-15 — Processes: Risks & controls and Quality tabs (§538)
+**Built (branch, not merged):** on a process page, the Risks & controls tab lists risks with their control, owner and last test, flags risks and steps with no control, and lets the office add or delete them; the Quality tab records non-conformances and moves them open → in progress → closed. Two new tables, applied automatically at deploy. **Next:** staff Reader view with Acknowledge, then People tab, Governance, list columns. **Waiting on Islam:** the merge, and a look at the two tabs in the browser.

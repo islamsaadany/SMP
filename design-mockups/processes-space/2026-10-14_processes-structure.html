@@ -1,0 +1,152 @@
+<title>Processes Space</title>
+<style>
+:root{--bg:#F3F5F9;--surf:#fff;--surf2:#EFF2F6;--ink:#1B2430;--ink2:#414A58;--ink3:#5F6B7C;--line:#D6DCE5;--navy:#16325C;--navy-ink:#fff;--navy-q:#B9C6DC;--gold:#B8862B;--gold-bg:#FBF3E0;--good:#1E7A4D;--good-bg:#E4F3EA;--warn:#8A5A00;--warn-bg:#FBF0D6;--bad:#A4332A;--bad-bg:#F8E4E1;--info:#1F5FA8;--info-bg:#E2EDF9}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--navy-ink:#fff;--navy-q:#9DB0CF;--gold:#E0B25A;--gold-bg:#3A2F17;--good:#6FD0A0;--good-bg:#173626;--warn:#EBC36A;--warn-bg:#3A2F17;--bad:#F0968D;--bad-bg:#3C1F1C;--info:#8DBBEF;--info-bg:#18304C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161D;--surf:#1A2029;--surf2:#222A36;--ink:#E9ECF1;--ink2:#C3CAD6;--ink3:#97A2B3;--line:#333A45;--navy:#0F2547;--navy-ink:#fff;--navy-q:#9DB0CF;--gold:#E0B25A;--gold-bg:#3A2F17;--good:#6FD0A0;--good-bg:#173626;--warn:#EBC36A;--warn-bg:#3A2F17;--bad:#F0968D;--bad-bg:#3C1F1C;--info:#8DBBEF;--info-bg:#18304C;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,sans-serif;font-size:14.5px;line-height:1.45;padding-inline:16px;padding-block:0 40px}
+*{box-sizing:border-box}
+.app{max-width:1180px;margin:0 auto}
+.top{background:var(--navy);color:var(--navy-ink);border-radius:0 0 10px 10px;padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.top b{font-size:15px}.top .q{color:var(--navy-q);font-size:13px}
+.mods{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.mods span{font-size:12.5px;padding:3px 9px;border-radius:5px;color:var(--navy-q)}
+.mods span.on{background:rgba(255,255,255,.14);color:#fff;font-weight:600}
+.nav{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0 12px;border-bottom:1px solid var(--line)}
+.nav button{background:none;border:0;border-bottom:3px solid transparent;color:var(--ink2);font:inherit;font-weight:600;padding:8px 14px;cursor:pointer}
+.nav button.on{color:var(--ink);border-bottom-color:var(--gold)}
+.nav .who{margin-left:auto;align-self:center;font-size:12px;color:var(--ink3)}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--surf2);color:var(--ink2);margin-left:5px}
+.view{display:none}.view.on{display:block}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:14px;margin:0 0 8px}
+.h{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);font-weight:700;margin:0 0 6px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px}
+th{background:var(--navy);color:var(--navy-ink);text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even) td{background:var(--surf2)}
+tr.clk{cursor:pointer}tr.clk:hover td{outline:0;background:var(--gold-bg)}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.good{background:var(--good-bg);color:var(--good)}.warn{background:var(--warn-bg);color:var(--warn)}.bad{background:var(--bad-bg);color:var(--bad)}.info{background:var(--info-bg);color:var(--info)}.grey{background:var(--surf2);color:var(--ink2)}
+.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:5px 12px;border-radius:6px;cursor:pointer}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#16120A}
+.crumb{font-size:12.5px;color:var(--ink3);margin-bottom:6px}.crumb a{color:var(--info);cursor:pointer}
+.ph{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:8px}.ph h2{margin:0}
+.links{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.links a{font-size:12.5px;border:1px solid var(--line);background:var(--surf);color:var(--info);padding:2px 9px;border-radius:99px;cursor:pointer;font-weight:600}
+.tabs{display:flex;gap:2px;flex-wrap:wrap;margin:12px 0}
+.tabs button{font:inherit;font-weight:600;padding:6px 14px;background:var(--surf2);color:var(--ink2);border:1px solid var(--line);border-radius:6px 6px 0 0;cursor:pointer}
+.tabs button.on{background:var(--surf);color:var(--ink);border-bottom-color:var(--surf);box-shadow:inset 0 3px 0 var(--gold)}
+.pane{display:none}.pane.on{display:block}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 12px}
+.st{padding:5px 11px;border-radius:6px;background:var(--surf2);color:var(--ink2);font-weight:600;font-size:13px}
+.st.on{background:var(--navy);color:#fff}.st.done{background:var(--good-bg);color:var(--good)}
+.bar2{height:8px;background:var(--surf2);border-radius:5px;overflow:hidden;min-width:90px}.bar2 i{display:block;height:100%;background:var(--good)}
+.bar2.w i{background:var(--gold)}.bar2.b i{background:var(--bad)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
+.sub{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.sub button{font:inherit;font-size:13px;font-weight:600;padding:4px 12px;border-radius:99px;border:1px solid var(--line);background:var(--surf);color:var(--ink2);cursor:pointer}
+.sub button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:10px 14px}.stat b{font-size:24px;display:block}.stat span{font-size:12.5px;color:var(--ink3)}
+.rd{max-width:760px;margin:0 auto}
+.rd .step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.rd .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.ack{position:sticky;bottom:10px;background:var(--surf);border:1px solid var(--gold);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+.note{border-left:3px solid var(--gold);background:var(--gold-bg);padding:8px 12px;border-radius:0 8px 8px 0;font-size:13.5px;margin-top:10px}
+</style>
+<div class="app">
+<div class="top"><b>Raya Trade</b><span class="q">Processes</span><div class="mods"><span>Strategy</span><span class="on">Processes</span><span>Tracker</span><span>Insights</span></div></div>
+
+<div class="nav" id="nav">
+<button data-v="list" class="on">Processes</button>
+<button data-v="gov">Governance</button>
+<button data-v="rd">Reader view<span class="tag">Staff</span></button>
+<span class="who" id="who">Viewing as: Strategy Office</span>
+</div>
+
+<!-- LIST -->
+<div class="view on" id="v-list">
+<div class="card"><div class="ph"><h2>All processes</h2><span class="pill info">48 processes</span><span class="pill warn">6 reviews due</span><button class="btn gold" style="margin-left:auto">+ New process</button></div>
+<div class="tw"><table><thead><tr><th>Code</th><th>Process</th><th>Owner</th><th>Stage</th><th>Version</th><th>Next review</th><th>Read by staff</th><th>Controls</th></tr></thead><tbody>
+<tr class="clk" data-go="proc"><td>SOP-014</td><td><b>Order-to-Cash</b></td><td>Hend Mourad</td><td><span class="pill good">Approved</span></td><td>v3.0</td><td>12 Nov 2026 <span class="pill warn">30 days</span></td><td>38 / 44</td><td><span class="pill warn">1 gap</span></td></tr>
+<tr class="clk" data-go="proc"><td>SOP-021</td><td><b>Procure-to-Pay</b></td><td>Karim Fouad</td><td><span class="pill info">In review</span></td><td>v2.1</td><td>03 Dec 2026</td><td>21 / 30</td><td><span class="pill good">Covered</span></td></tr>
+<tr class="clk" data-go="proc"><td>SOP-009</td><td><b>New Store Opening</b></td><td>Amr Hassan</td><td><span class="pill good">Approved</span></td><td>v1.4</td><td>20 Sep 2026 <span class="pill bad">Overdue</span></td><td>12 / 25</td><td><span class="pill bad">3 gaps</span></td></tr>
+<tr class="clk" data-go="proc"><td>SOP-031</td><td><b>Customer Complaints</b></td><td>Nour Samir</td><td><span class="pill grey">Draft</span></td><td>v0.3</td><td>—</td><td>—</td><td><span class="pill grey">Not mapped</span></td></tr>
+</tbody></table></div></div></div>
+
+<!-- PROCESS -->
+<div class="view" id="v-proc">
+<div class="crumb"><a data-go="list">Processes</a> › SOP-014</div>
+<div class="card">
+<div class="ph"><h2>Order-to-Cash</h2><span class="pill good">Approved</span><span class="pill grey">v3.0</span><span style="margin-left:auto" class="btn">Download SOP</span><button class="btn gold">Propose change</button></div>
+<div class="links"><a data-go="gov">Supports: Digital Operations pillar</a><a>3 actions in the Tracker</a><a>Notify owners</a><a>Systems: SAP · Salesforce</a><a>Process map</a></div>
+<div class="tabs" id="ptabs"><button data-t="ov" class="on">Overview</button><button data-t="lc">Lifecycle</button><button data-t="rk">Risks &amp; controls</button><button data-t="ql">Quality</button></div>
+
+<div class="pane on" id="p-ov"><div class="cols">
+<div><p class="h">Purpose</p>Take a confirmed customer order through delivery, invoicing and cash collection.<p class="h" style="margin-top:12px">Roles (RACI)</p>
+<div class="row"><span>Sales Ops</span><span class="pill info">Responsible</span></div><div class="row"><span>Finance</span><span class="pill info">Accountable</span></div><div class="row"><span>Logistics</span><span class="pill grey">Consulted</span></div></div>
+<div><p class="h">Steps</p>
+<div class="row"><span>1 · Confirm order</span><span class="pill grey">Sales Ops</span></div><div class="row"><span>2 · Credit check</span><span class="pill grey">Finance</span></div><div class="row"><span>3 · Deliver</span><span class="pill grey">Logistics</span></div><div class="row"><span>4 · Invoice</span><span class="pill grey">Finance</span></div></div></div></div>
+
+<div class="pane" id="p-lc">
+<p class="h">Where this version stands</p>
+<div class="flow"><span class="st done">Draft</span>›<span class="st done">In review</span>›<span class="st on">Approved</span>›<span class="st">Published</span>›<span class="st">Retired</span></div>
+<div class="cols"><div class="card" style="margin:0"><h3>Approvals</h3>
+<div class="row"><span>Process owner · Hend Mourad</span><span class="pill good">Signed 02 Oct</span></div><div class="row"><span>Finance director</span><span class="pill good">Signed 04 Oct</span></div><div class="row"><span>Strategy Office</span><span class="pill warn">Waiting</span></div></div>
+<div class="card" style="margin:0"><h3>Version history</h3>
+<div class="row"><span>v3.0 · credit check added</span><span class="pill good">Current</span></div><div class="row"><span>v2.2 · invoice timing</span><span class="pill grey">Archived</span></div><div class="row"><span>v2.0 · first approved</span><span class="pill grey">Archived</span></div></div></div></div>
+
+<div class="pane" id="p-rk"><div class="tw"><table><thead><tr><th>Step</th><th>Risk</th><th>Rating</th><th>Control</th><th>Type</th><th>Last tested</th><th>Result</th></tr></thead><tbody>
+<tr><td>2 · Credit check</td><td>Order shipped to a customer over limit</td><td><span class="pill bad">High</span></td><td>Auto-block over credit limit</td><td>Preventive</td><td>Aug 2026</td><td><span class="pill good">Effective</span></td></tr>
+<tr><td>4 · Invoice</td><td>Invoice sent with wrong price</td><td><span class="pill warn">Medium</span></td><td>Price list sign-off</td><td>Detective</td><td>Mar 2026</td><td><span class="pill warn">Retest due</span></td></tr>
+<tr><td>3 · Deliver</td><td>Proof of delivery missing</td><td><span class="pill warn">Medium</span></td><td><span class="pill bad">No control</span></td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div></div>
+
+<div class="pane" id="p-ql"><div class="stats">
+<div class="stat"><b>96%</b><span>Orders on time (target 95%)</span></div><div class="stat"><b>2.1 days</b><span>Order to invoice (target 2)</span></div><div class="stat"><b>3</b><span>Open non-conformances</span></div></div>
+<div class="row"><span>Invoice errors this quarter</span><span class="bar2 w" style="width:160px"><i style="width:62%"></i></span></div>
+<div class="row"><span>Late deliveries</span><span class="bar2" style="width:160px"><i style="width:18%"></i></span></div>
+<div class="note">Non-conformance NC-07 · wrong price on 4 invoices · owner Finance · due 30 Oct</div></div>
+</div></div>
+
+<!-- GOVERNANCE -->
+<div class="view" id="v-gov">
+<div class="stats"><div class="stat"><b>6</b><span>Reviews due in 60 days</span></div><div class="stat"><b>82%</b><span>Controls covered</span></div><div class="stat"><b>7</b><span>Open non-conformances</span></div><div class="stat"><b>76%</b><span>Staff acknowledged</span></div></div>
+<div class="sub" id="gsub"><button data-g="cal" class="on">Review calendar</button><button data-g="cov">Compliance coverage</button><button data-g="nc">Non-conformances</button><button data-g="ack">Acknowledgements</button><button data-g="aud">Audit trail &amp; pack</button></div>
+<div class="card">
+<div class="pane on" id="g-cal"><div class="tw"><table><thead><tr><th>Process</th><th>Owner</th><th>Review due</th><th>Status</th></tr></thead><tbody>
+<tr><td>New Store Opening</td><td>Amr Hassan</td><td>20 Sep 2026</td><td><span class="pill bad">Overdue 24 days</span></td></tr>
+<tr><td>Order-to-Cash</td><td>Hend Mourad</td><td>12 Nov 2026</td><td><span class="pill warn">30 days</span></td></tr>
+<tr><td>Procure-to-Pay</td><td>Karim Fouad</td><td>03 Dec 2026</td><td><span class="pill info">50 days</span></td></tr></tbody></table></div></div>
+<div class="pane" id="g-cov"><div class="row"><span>ISO 9001 · clause 8.5</span><span class="bar2" style="width:200px"><i style="width:90%"></i></span></div><div class="row"><span>Internal financial controls</span><span class="bar2 w" style="width:200px"><i style="width:74%"></i></span></div><div class="row"><span>Data protection</span><span class="bar2 b" style="width:200px"><i style="width:48%"></i></span></div><div class="note">Data protection: 5 processes have no mapped control</div></div>
+<div class="pane" id="g-nc"><div class="tw"><table><thead><tr><th>Ref</th><th>Process</th><th>Issue</th><th>Owner</th><th>Due</th><th>Stage</th></tr></thead><tbody>
+<tr><td>NC-07</td><td>Order-to-Cash</td><td>Wrong price on 4 invoices</td><td>Finance</td><td>30 Oct</td><td><span class="pill warn">Action set</span></td></tr>
+<tr><td>NC-05</td><td>New Store Opening</td><td>Permit checked after fit-out</td><td>Amr Hassan</td><td>15 Oct</td><td><span class="pill bad">Late</span></td></tr></tbody></table></div></div>
+<div class="pane" id="g-ack"><div class="row"><span>Order-to-Cash v3.0</span><span><span class="bar2" style="width:160px;display:inline-block;vertical-align:middle"><i style="width:86%"></i></span> 38 / 44</span></div><div class="row"><span>New Store Opening v1.4</span><span><span class="bar2 b" style="width:160px;display:inline-block;vertical-align:middle"><i style="width:48%"></i></span> 12 / 25</span></div><div style="margin-top:10px"><button class="btn gold">Remind the 13 who have not read</button></div></div>
+<div class="pane" id="g-aud"><div class="row"><span>02 Oct · Hend Mourad signed Order-to-Cash v3.0</span><span class="pill grey">Approval</span></div><div class="row"><span>29 Sep · Finance changed control “Price list sign-off”</span><span class="pill grey">Edit</span></div><div class="row"><span>21 Sep · SOP-009 review became overdue</span><span class="pill grey">System</span></div><div style="margin-top:10px"><button class="btn gold">Build audit pack</button> <button class="btn">Choose processes and period</button></div></div>
+</div></div>
+
+<!-- READER -->
+<div class="view" id="v-rd">
+<div class="rd"><div class="card">
+<div class="ph"><h2>Order-to-Cash</h2><span class="pill grey">v3.0</span><span class="pill warn">New since you last read</span></div>
+<div class="note" style="margin:0 0 6px">What changed: a credit check now happens before delivery (step 2).</div>
+<div class="step"><span class="n">1</span><div><b>Confirm order</b><br>Sales Ops checks the order matches the quote.</div></div>
+<div class="step"><span class="n">2</span><div><b>Credit check</b><br>Finance confirms the customer is within limit. Over limit: stop and escalate.</div></div>
+<div class="step"><span class="n">3</span><div><b>Deliver</b><br>Logistics ships and collects signed proof of delivery.</div></div>
+<div class="step"><span class="n">4</span><div><b>Invoice</b><br>Finance invoices within 2 days of delivery.</div></div>
+<div class="links"><a>Process map</a><a>Download SOP</a><a>Ask the owner</a></div>
+<div class="ack"><span>I have read and understood this version.</span><button class="btn gold" id="ackbtn">Acknowledge</button></div>
+</div></div></div>
+</div>
+<script>
+function show(v){document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
+document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v||(v==='proc'&&b.dataset.v==='list')));
+document.getElementById('who').textContent=v==='rd'?'Viewing as: Sales Ops staff':'Viewing as: Strategy Office'}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+document.querySelectorAll('[data-go]').forEach(e=>e.onclick=()=>show(e.dataset.go));
+function tabs(box,attr,pre){document.querySelectorAll(box+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll(box+' button').forEach(x=>x.classList.toggle('on',x===b));
+document.querySelectorAll('[id^="'+pre+'"]').forEach(p=>p.classList.toggle('on',p.id===pre+b.dataset[attr]))})}
+tabs('#ptabs','t','p-');tabs('#gsub','g','g-');
+document.getElementById('ackbtn').onclick=function(){this.textContent='Acknowledged ✓';this.disabled=true}
+</script>

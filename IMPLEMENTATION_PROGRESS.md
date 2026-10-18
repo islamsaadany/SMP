@@ -9612,6 +9612,9 @@ A risk or gap finding can now be added to the process as a step. "Add as a step"
 ## §530 — RACI: fill from step owners, and suggestions (2026-10-13)
 On the RACI page, people who can edit get two new buttons. **Fill from step owners** puts R for each step's assigned role on that step's rows — only into empty cells, never over anything already there, never on skipped rows; filled cells carry a small dot. **Suggest** shows dashed amber cells proposing the owner's manager's role as A, only on rows that have no A yet; nothing is saved until you Accept (✓), Edit (✎ cycles R/A/C/I) or Dismiss (✕). Suggestions come from the Org Directory's manager links — where nobody has a manager recorded, there are none to show. Viewers see neither button. Checked: pure planner check 13/0, each of six deliberate breaks turns it red (`npm run check:raci`, `check:raci:red`); cold typecheck clean. Not yet driven in a browser.
 
+## §530.1 — Merged to `main` (2026-10-13)
+The Processes work (§529 AI review "Add as a step", §530 RACI fill and suggest, the continuous-page print fix, and the propose/confirm/delete check) went to `main` as 2db3eac. The live site could not be read from the session that merged it, so the deployment is unconfirmed. Branch-only record commit; its tip differs from `main`'s.
+
 ## §531 — The role picker asks for an email before adding somebody new (2026-10-14)
 Built from the mockup you signed off (`design-mockups/role-picker-email/2026-10-12_email-needed.html`, "build as drawn").
 

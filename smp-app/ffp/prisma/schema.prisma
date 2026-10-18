@@ -348,6 +348,8 @@ model Process {
   raciMatrixStatus     RaciMatrixStatus?
   linkedFromSteps      ProcessStepLink[]     @relation("LinkTargetProcess")
   reviewFindings       ReviewFinding[]
+  controls             ProcessControl[]
+  nonConformances      ProcessNonConformance[]
   authorityAssignments AuthorityAssignment[]
 
   createdAt DateTime @default(now())
@@ -509,6 +511,7 @@ model ProcessStep {
   handoffsIn          StepHandoff[]        @relation("HandoffTo")
   activities          Activity[]
   reviewFindings      ReviewFinding[]
+  controls            ProcessControl[]
   authorityAssignment AuthorityAssignment?
   branchedProcesses   Process[]            @relation("ProcessBranchOrigin")
 
@@ -550,6 +553,51 @@ model StepConnection {
 /// predecessor of the `to` step, which lives in another process. Kept apart
 /// from StepConnection on purpose — that table is same-process only and the
 /// layout, arrange, readiness, print and export code all rely on it.
+// A risk and the control that answers it, on a process (optionally on one step).
+model ProcessControl {
+  id             String    @id @default(uuid())
+  processId      String
+  stepId         String?
+  risk           String
+  riskLevel      String    @default("medium") // low | medium | high
+  control        String?
+  controlType    String?   // preventive | detective | corrective
+  frequency      String?
+  owner          String?
+  evidence       String?
+  lastTestedAt   DateTime?
+  lastTestResult String?   // pass | fail | not_tested
+  order          Int       @default(0)
+
+  process Process      @relation(fields: [processId], references: [id], onDelete: Cascade)
+  step    ProcessStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([processId])
+  @@index([stepId])
+  @@map("process_controls")
+}
+
+// Something that went wrong in a process, and what is being done about it.
+model ProcessNonConformance {
+  id               String    @id @default(uuid())
+  processId        String
+  title            String
+  detail           String?
+  raisedAt         DateTime  @default(now())
+  status           String    @default("open") // open | in_progress | closed
+  correctiveAction String?
+  actionOwner      String?
+  dueAt            DateTime?
+  closedAt         DateTime?
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@index([processId])
+  @@map("process_non_conformances")
+}
+
 model StepHandoff {
   id         String  @id @default(uuid())
   fromStepId String

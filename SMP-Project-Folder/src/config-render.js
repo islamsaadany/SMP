@@ -9620,11 +9620,18 @@ function renderSentOne(){
           '\u2014 nobody resolved into the audience at all.</span>');
   }
   var m = (SENTONE.data && SENTONE.data.message) || {};
+  /* §548: THE FACT MOVES TO THE HOVER, which is where rule 1b-ii sends a
+     sentence like this one — "it is information, and it belongs on a hover
+     ... never as a paragraph". It is worth keeping: without it this table
+     reads as something the screen worked out just now, when it is the record
+     written at the moment of sending. `section()`'s own fifth argument draws
+     it, so nothing new was built and the words did not change. */
   return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
-    "Written when it was sent, so it is what actually happened rather than what the " +
-    "screen worked out beforehand.",
+    null,
     body + '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+      '<button class="linkbu" data-sentclose="1">Close</button></div>',
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.");
 }
 
 function renderSentList(){

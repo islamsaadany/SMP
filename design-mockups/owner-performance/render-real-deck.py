@@ -35,11 +35,14 @@ STAND = """
      slide inside it would measure 0, which reads exactly like an empty deck.
      Nothing else is on this page to hide. */
   #dclock{display:none !important;}
-  #deckroot.deckroot{position:static;display:block;background:transparent;inset:auto;}
-  #deckroot .deckbar{display:none;}
-  #deckroot .deckstage{position:static;display:block;padding:0;}
-  #deckroot .deck{width:1600px;height:auto;transform-origin:top left;}
-  #deckroot .dslide{position:static;display:flex;width:1600px;height:900px;
+  /* BY CLASS, NOT BY ID, though the print block writes `#deckroot`: an id
+     can only ever be on one element, and a before-and-after page stands two
+     of these decks side by side. The id is dropped on the way out. */
+  .deckroot{position:static;display:block;background:transparent;inset:auto;}
+  .deckroot .deckbar{display:none;}
+  .deckroot .deckstage{position:static;display:block;padding:0;}
+  .deckroot .deck{width:1600px;height:auto;transform-origin:top left;}
+  .deckroot .dslide{position:static;display:flex;width:1600px;height:900px;
     margin:0 0 34px;border-radius:0;box-shadow:0 3px 22px rgba(0,0,0,.20);}
   .slideno{font:700 13px/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.18em;
     text-transform:uppercase;color:#6b6b6b;margin:0 0 9px;}
@@ -48,12 +51,13 @@ STAND = """
 
 FIT = """
   (function(){
-    var box = document.querySelector('.fitbox'),
-        deck = document.querySelector('#deckroot .deck');
     function go(){
-      var k = Math.min(1, (box.clientWidth - 32) / 1600);
-      deck.style.transform = 'scale(' + k + ')';
-      box.style.height = (deck.scrollHeight * k) + 'px';
+      [].forEach.call(document.querySelectorAll('.fitbox'), function(box){
+        var deck = box.querySelector('.deck');
+        var k = Math.min(1, (box.clientWidth - 32) / 1600);
+        deck.style.transform = 'scale(' + k + ')';
+        box.style.height = (deck.scrollHeight * k) + 'px';
+      });
     }
     addEventListener('resize', go); go();
   })();
@@ -86,7 +90,8 @@ with sync_playwright() as p:
     if not info:
         print("no deck opened for " + TARGET); b.close(); sys.exit(1)
 
-    deck = pg.evaluate("()=>document.getElementById('deckroot').outerHTML")
+    deck = pg.evaluate("()=>{var r=document.getElementById('deckroot');"
+                       " r.removeAttribute('id'); return r.outerHTML}")
     styles = pg.evaluate("()=>[...document.querySelectorAll('style')]"
                          ".map(s=>s.textContent).join('\\n')")
     b.close()

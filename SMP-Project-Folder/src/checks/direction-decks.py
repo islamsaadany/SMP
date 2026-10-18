@@ -81,10 +81,23 @@ with sync_playwright() as p:
     ck("…its cover names who presents it", "Hazem Roushdy" in (who or "") and "Hossam Farid" in (who or ""), who)
 
     # ── 3. The master flow: directions, capabilities, functions, company last
-    ms = safe(pg, "()=>masterSubjects()", []) or []
+    # ASKED OF THE ORDER, NOT THE CATALOGUE (§218). It read `masterSubjects()`,
+    # which is everything that can be PLACED — and since §553 that list opens
+    # with the company's Foundation and Analysis, so the claim failed while
+    # the running order it was making was unchanged. `masterOrder()` is what
+    # a client with no stored choice actually presents, which is the rule.
+    ms = safe(pg, "()=>masterOrder()", []) or []
     ck("the master flow leads with the directions and ends on the company",
        ms[:2] == ["dir:group-P1", "dir:group-P2"] and ms[-1:] == ["group"], ms)
-    kinds = safe(pg, "()=>masterSubjects().map(t=>masterKind(t).replace(/<[^>]+>/g,''))", []) or []
+    # AND THE CATALOGUE IS THE WIDER ONE, asserted here rather than left as
+    # the thing that quietly broke the claim above (§553): the two company
+    # sections can be placed, and they are not in the order until somebody
+    # places them.
+    subs = safe(pg, "()=>masterSubjects()", []) or []
+    ck("…the company's Foundation and Analysis can be placed, and are not placed yet (§553)",
+       subs[:2] == ["sec:found", "sec:swot"]
+       and not [t for t in ms if t.startswith("sec:")], [subs[:3], ms[:3]])
+    kinds = safe(pg, "()=>masterOrder().map(t=>masterKind(t).replace(/<[^>]+>/g,''))", []) or []
     ck("…each kind named in the picker", "DIR" in kinds and kinds[-1] == "CO", kinds)
 
     # ── 4. The office's menu ──────────────────────────────────────────

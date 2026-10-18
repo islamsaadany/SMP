@@ -1066,6 +1066,48 @@ function dirDeckHtml(t){
     '<p class="coversub">' + esc(code) + ' &middot; Strategy review &middot; ' + esc(REVIEW.name) + '</p>' +
     (who ? '<p class="coversub dwho">' + who + '</p>' : '') + '</section>'];
   if (planOn(u)) S = S.concat(pillarSlidesOf(u, p, d.i));
+
+  /* ── AND IT ENDS ON ITS READING (§553.3) ──────────────────────────────
+     The deck a direction's owner presents had no slide that said how the
+     direction did. It carried the two figures in the corner of every slide
+     after the title (`deckPillarHead`, until §553.3) and presented neither,
+     so the owner stood in front of 95% with nothing on the screen saying
+     what it counts or what it is measured against.
+
+     IT IS THE SAME SLIDE THE FULL DECK ENDS ON, through the same builder
+     (§553.2, §53.5): a word under each reading saying what it counts, and a
+     line under both saying why they are different questions. Only the cells
+     are this direction's.
+
+     AND IT IS SAID LAST, where §254.4 put it — Islam: *"where the units
+     stands to be the last slide"*. The measures, the categories and the
+     tactics are worked through first; then the reading they add up to.
+
+     DRAWN ONLY WHERE THERE IS A READING (§45.2). A direction with no
+     measures and nothing delivered would otherwise get a headline slide
+     carrying two dashes, which says the plan owes an answer nobody asked
+     it for. */
+  var dirPerf = planOn(u) ? pillarPerf(p) : null;
+  var dirExec = planOn(u) && pillarExec(p) && pillarPlan(p)
+    ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
+  if (dirPerf != null || dirExec != null) {
+    S.push(standSlideOf(esc(p.name),
+      [ dirPerf != null && standCell(L("measure") + ' performance', dirPerf,
+          SMPRules.shown(p.measures || []).length + ' ' + esc(L("measure")) +
+          ', by their targets'),
+        dirExec != null && standCell('Execution performance', dirExec,
+          dPct(pillarExec(p)) + ' delivered against ' + dPct(pillarPlan(p)) + ' planned') ],
+      /* AND THE FOOTNOTE NAMES ONLY THE READINGS ON THE SLIDE (§243): a
+         direction with nothing delivered draws no Execution cell, and a
+         footnote explaining Execution would be the slide explaining a
+         figure it is not showing. */
+      (dirPerf != null
+        ? esc(L("measure")) + ' measure how the work set against this ' +
+          esc(p.kind || L1("pillar")).toLowerCase() + ' is going. ' : '') +
+      (dirExec != null
+        ? 'Execution measures whether that work is landing on time.' : '')));
+  }
+
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
     sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(p.name) +
@@ -1073,29 +1115,37 @@ function dirDeckHtml(t){
   return S.join("");
 }
 
+/* ── THE RUNNING HEAD SAYS WHICH SLIDE, NOT HOW IT WENT (§553.3) ────────
+   Islam, of a direction owner's own deck: *"the user view of a performance
+   where he opens the presentation is not clear as the user only sees the
+   performance of his directions in the presentation directly"* — and, shown
+   that deck rendered: the two readings stood in the corner of four slides
+   out of six, and no slide presented them.
+
+   A NUMBER REPEATED IS NOT A NUMBER PRESENTED. Key Measures and Execution
+   were drawn here, small, over the measures, the categories and the tactics
+   — three slides that are each ABOUT something else, and none of which can
+   explain what the two figures mean or what they are measured against. The
+   reader meets 95% four times and is told once what it is: never.
+
+   So the figures leave the running head and are said ONCE, properly, on
+   "Where it stands" — the slide §553.2 made every box's, with a word under
+   each reading saying what it counts and a line under both saying why they
+   are different questions. A direction's own deck gets that slide for the
+   first time (`dirDeckHtml`); the full plan deck already ended on it.
+
+   NOTHING IS HIDDEN BY THIS. The pillar's own title page still carries both
+   readings large (`.leadstats`, the slide immediately before these), and the
+   score table still scores every pillar. What goes is the third printing.
+
+   IT GOES EVERYWHERE, not only in a direction's own deck. The four callers
+   are all `pillarSlidesOf`, which is the ONE builder a direction's deck and
+   the full plan deck share (§53.5) — so "only on the owner's copy" is not a
+   setting, it is a fork of the shared builder, and it would make the same
+   direction read two different ways depending on who opened it. */
 function deckPillarHead(u, p, pi, which){
-  var r = pillarExec(p) && pillarPlan(p) ? Math.round(pillarExec(p) / pillarPlan(p) * 100) : null;
   return '<div class="dphdr"><h2><span class="dcode">' + pillarCode(u, pi) + '</span> ' +
-    esc(p.name) + '<span class="dwhich">' + which + '</span></h2>' +
-    /* ── TWO NUMBERS, NOT FOUR (§254.10) ──────────────────────────────
-       Islam: *"remove the deliverd /planned from the slides maintain just the
-       2 numbers of measurs and execution"*, and of the reading put back to
-       him, *"yes drop for both keep the 2 measures only across."*
-
-       DELIVERED AND PLANNED APPEARED IN TWO PLACES, SPELLED DIFFERENTLY, which
-       is why the instruction was read back before it was obeyed: the pillar's
-       title slide carried Key measures · Execution · Delivered / planned, so
-       dropping the third leaves the two he named — while THIS head carried
-       Measures · Delivered · Planned and had no Execution on it at all.
-       Dropping two here would have left one number, so Execution takes their
-       place and both surfaces end up saying the same two things.
-
-       The figures are unchanged: `pillarExec` and `pillarPlan` are still what
-       Execution is computed from, and are still explained in words on "Where
-       the unit stands", which he looked at and kept. */
-    '<div class="dstats"><span><i>' + L("measure") + '</i><b class="' + dBand(pillarPerf(p)) + '">' +
-      dPct(pillarPerf(p)) + '</b></span>' +
-    '<span><i>Execution</i><b class="' + dBand(r) + '">' + dPct(r) + '</b></span></div></div>';
+    esc(p.name) + '<span class="dwhich">' + which + '</span></h2></div>';
 }
 
 /* ── A supporting function's review (§15.12) ──────────────────────────────

@@ -66852,3 +66852,84 @@ the measures page, the categories page and the tactics page — and has no
 moment that presents them. The numbers are not missing; they are in the
 corner of everything and announced by nothing. What a part-owner's standing
 should be is a design question, not a merge, and nothing is built for it here.
+
+## §553.3 — Stage 5 (c): a direction owner's deck ends on its reading (2026-10-18)
+
+Islam, shown his own deck rendered — Amr Hassan's, for El Abd's direction
+D001 *Maximizing Current Stores* — picked both halves of what §553.2 left
+open: **A+B**.
+
+**WHAT HE WAS LOOKING AT.** Six slides. `Key Measures 95%` and `Execution —`
+on the title page, and the same two figures again in the corner of the
+measures slide, the categories slide and the tactics slide. Four printings of
+one pair, and no slide that presents it. His words, from §553.2: *"the user
+view of a performance where he opens the presentation is not clear as the
+user only sees the performance of his directions in the presentation
+directly"*.
+
+**A — IT IS SAID ONCE, PROPERLY.** A direction's own deck now ends on "Where
+&lt;direction&gt; stands", the slide §553.2 made every box's: a word under
+each figure saying what it counts, and a line under both saying why they are
+different questions. Only the cells are this direction's, so a change to the
+wording or the bands reaches it by construction (§53.5).
+
+It is said LAST, where §254.4 put it for a unit — Islam: *"where the units
+stands to be the last slide"*. And it is drawn only where there IS a reading
+(§45.2): four of El Abd's eleven presentable directions and capabilities have
+neither a measure score nor anything delivered, and a headline slide carrying
+two dashes says the plan owes an answer nobody asked it for. The footnote
+loses the clause for a figure the slide is not showing (§243).
+
+**B — AND IT LEAVES THE RUNNING HEAD.** `deckPillarHead` drew the pair over
+the measures, the categories and the tactics: three slides each ABOUT
+something else, none of which can say what the figures mean. Nothing is
+hidden by taking them off (§405 is about switches, not about printing the
+same number four times): the pillar's own title page still carries both,
+large, and the score table still scores every pillar.
+
+**IT GOES EVERYWHERE, AND THAT WAS THE QUESTION.** The four callers are all
+`pillarSlidesOf`, the ONE builder a direction's own deck and the full plan
+deck share. "Only on the owner's copy" is not a setting — it is a fork of a
+shared builder, and it would make the same direction read two different ways
+depending on who opened it. Islam did not need the question put twice: *"I
+like the mockup / I don't understand your last questions"*, which is the
+answer a question deserves when the alternative only exists in the person
+asking it.
+
+**MEASURED, NOT REASONED, ON ALL THREE LIVE CLIENTS** (every box's deck, two
+builds, a real browser, each client's own state):
+
+| | decks | gained the standing slide | slides that lost the repeated pair | heads still carrying one |
+|---|---|---|---|---|
+| El Abd | 20 | 4 (D001, D003, D004, D005) | 28 | 0 |
+| Wander | 15 | 0 — it presents its pillars inside the company deck, which already ended on its reading | 24 | 0 |
+| the demo | 21 | 0 | 54 | 0 |
+
+**AND THE RENDER THAT STARTED IT WAS WRONG FIRST.** The deck was first stood
+up in a 1180×664 box with no fit pass, and every table overran its slide.
+That is the renderer's damage, not the product's: a slide is AUTHORED at
+1600×900 and `deckFitPass()` decides how many rows a table gets by MEASURING
+against that box. Rendered at the real size this deck needs neither — 0
+tight, 0 continuations, 0 overflow. `design-mockups/owner-performance/`
+carries the renderer, and the before-and-after page built from two of its
+runs.
+
+**FOUR CHECKS REWRITTEN TO THE NEW RULE, NEVER LOOSENED (§218).**
+`deck-figures` claimed *"every pillar head reads Measures and Execution, and
+nothing else"*; it now claims the heads are drawn and none carries a figure,
+and — the half that makes it a change rather than a deletion — that the title
+page still carries both. Its probe was asking the fixture's own ten-times-
+rewritten unit and getting an empty list back, so the old claim was half
+vacuous pass and half bare fail; it now asks every active unit, and it learned
+`SMP_BUILT` so the new claim could be shown FAILING on the build it changed
+from (§113.8): 48 heads, each reading `Key measures · Execution`.
+`review-pptx` §6 checked the pair in the exported head band and now checks
+that band is empty while the head still names the slide (§61).
+`deck-dividers` §4 said *"a capability function's deck is byte-for-byte what
+it was"* — stale since §553.2, which gave a projects box the same Overall
+performance divider a pillars box has; it now asserts the one divider AND the
+slide behind it (§253). `direction-decks` §3 asked `masterSubjects()`, the
+catalogue of everything PLACEABLE, for a claim about the running ORDER; since
+§553 that catalogue opens with the company's Foundation and Analysis, so the
+claim failed while the order it described was unchanged. It asks
+`masterOrder()` now, and asserts the wider catalogue separately.

@@ -281,20 +281,30 @@ def main():
         ok("every heading has room for itself", not bad, bad[:3])
 
         # ── §6 ───────────────────────────────────────────────────────────
-        print("\n§6 · the headline pair is in the head, not the lead")
+        # REWRITTEN TO THE NEW RULE, NOT LOOSENED (§218, §553.3). This section
+        # read "the headline pair is in the head, not the lead" and checked
+        # that the export drew the two figures in the measures slide's head
+        # band. §553.3 took them off the running head altogether: they were
+        # printed over the measures, the categories and the tactics and
+        # presented on none of them, and they are now said once on "Where …
+        # stands" — which §2 above already reads out of the same file.
+        #
+        # SO THE CLAIM IS THAT THEY ARE GONE, at both ends (§94.2): the deck
+        # draws no pair, and the exported slide has nothing in the band where
+        # the pair used to sit. Asserting only the first would pass on an
+        # export that still carried a stale pair of its own.
+        print("\n§6 · the pillar's running head carries no reading (§553.3)")
         stats = facts.get("stats") or []
-        ok("the deck draws a pair on a pillar's tables", len(stats) >= 2, len(stats))
-        if meas and stats:
+        ok("the deck draws no pair on a pillar's tables", stats == [], stats)
+        if meas:
             pair = re.findall(r'<a:off x="(\d+)" y="388620"/>', meas)
-            ok("the pair is drawn in the head band", len(pair) == len(stats), pair)
-            ok("right-aligned there",
-               meas.count('algn="r"') >= 2 * len(stats), meas.count('algn="r"'))
-            body = meas.split("<p:graphicFrame")[0]
-            lead = re.findall(r'<a:off x="640080" y="1381125"/>', body)
-            ok("and not stacked above the table as lead prose", not lead, lead)
-            ok("the pair's values are the deck's own",
-               all(s["v"] in [unesc(t) for t in texts(meas)] for s in stats),
-               [s["v"] for s in stats])
+            ok("and the exported head band is empty where it sat", pair == [], pair)
+            # AND THE SLIDE IS STILL THE SLIDE: the head's own words stay, or
+            # this section would pass just as well on an export that lost the
+            # whole band (§61's control with nothing behind it).
+            ok("…while the head still names the pillar and what the slide is",
+               any("Key measures" in t for t in [unesc(x) for x in texts(meas)]),
+               [unesc(t) for t in texts(meas)][:4])
 
         # ── §7 ───────────────────────────────────────────────────────────
         print("\n§7 · the pillars roll-call is cards")

@@ -9977,4 +9977,30 @@ The SQL now does both, as **step 8**, in a transaction of its own — so you can
 
 Tested: both read **ElAbd** afterwards, and running it again leaves it alone.
 
+## §539.5 — The file failed, and why (2026-10-18)
+**Nothing was changed** — the guard caught it and rolled everything back, which is what it is for.
+
+**The cause was mine.** I wrote the file from the code in this repository and assumed the live database matched it. It doesn't. Your database has **three copies** of the SMP tables:
+
+- **`smp`** — the live one. One set of tables with a tenant column on each row, and `smp.tenants` as the client list.
+- **`elabd`** — a leftover. Holds the name "ElAbd" and nothing else: no capabilities, no directions.
+- **`public`** — the original tables, still holding Raya Trade's old data.
+
+Plus an older client list, `platform.clients`, pointing at the last two.
+
+So my file was right about your data and wrong about every name around it. **I should have asked the database to describe itself before writing a line.** That's three read-only queries and one message; instead it cost three rounds. The generator now takes the layout as an explicit option, so it can't be guessed again.
+
+**Rebuilt and re-run.** I made a local copy of your live layout — with **two** clients in it, El Abd and RHI, so the "only this client" filter is actually tested rather than true by accident — loaded your real El Abd rows, and ran the new file:
+
+- Ten rows afterwards: D001–D005, then C001–C005. Every id and owner intact.
+- **RHI completely untouched.**
+- Byte-for-byte what the platform's own move produces; the pages built from it match what I showed you.
+- Running it twice is refused. Pointing it at another client is refused.
+- The name reads **ElAbd** in both places.
+
+**Two things in your live data you should know about, which I have not touched:**
+
+1. A retired client **"ElAbd Foods"** holding 8 capabilities.
+2. Two of El Abd's directions are owned by **"Tamer Abdelhamid"**, but the person in your register is **"Tamer Abdelhameed"**. Different spelling, so those two won't match a real person.
+
 **All that's left is your word to run it.**

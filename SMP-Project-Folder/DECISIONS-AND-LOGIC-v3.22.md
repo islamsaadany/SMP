@@ -65616,4 +65616,30 @@ So the generator takes `--rename` and emits both, as **step 8, in a transaction 
 
 Run end to end on a throwaway Postgres with both the client schema and a `platform.clients` row: the move commits, the rename commits, both read `ElAbd`, and running the rename again leaves it `ElAbd`.
 
+### §539.5 — the live database is not the one in this repository
+The first file was run against Neon and **failed at its first precondition, rolling everything back** — the guard doing exactly its job. Two more read-only rounds showed why, and the finding is bigger than the file.
+
+**The deployment has moved past this repository's schema, twice over.** `db/schema.sql` and `scripts/migrate-to-multi-client.js` describe a schema per client — `el_abd.org`, `platform.clients`. The live database has:
+
+| | |
+|---|---|
+| `smp.*` | **the live one** — one set of tables with a `tenant_id` column on every row, and `smp.tenants` as the register. `smp.org` has no `id` at all, which is what produced *column "id" does not exist*. |
+| `elabd.*` | a leftover of the per-schema design. Named `elabd`, not `el_abd`. Holds an org row reading ElAbd and **nothing else** — 0 capabilities, 0 pillars. |
+| `public.*` | the original single-tenant tables, still holding Raya Trade with 10 capabilities. |
+| `platform.clients` | the older register, two rows, pointing at the two schemas above. |
+
+So a file generated from the repository was correct about the data and wrong about every name around it. **The lesson is the ordinary one and it was learnt the expensive way: the database is the authority on its own shape, and the way to find out is to ask it, not to read the code that was supposed to have built it.** Three rounds of read-only queries — list the schemas, list the columns, count the rows in each copy — would have cost one message at the start.
+
+**The generator now takes the layout as a flag rather than guessing**: `--tenant <key>` for the live shape, `--schema <name>` for the older one. Both emit the same five statements; only the table names and the row filter differ. Guessing cost two rounds; a flag costs a word.
+
+**And the rehearsal was rebuilt to the live shape.** A local PostgreSQL with `smp.*`, a `tenant_id` on every row, **two** tenants — El Abd and RHI — so the row filter is genuinely exercised rather than trivially satisfied by there being only one client. El Abd's real rows loaded from the working copy. Then:
+
+- the move commits, and the ten rows read D001–D005 then C001–C005 with every id and owner intact;
+- **RHI is untouched** — 1 pillar, 1 capability, no split setting;
+- the result is byte-for-byte identical to `capFoldIntoTop()`, and the pages rendered from it match on all seven surfaces;
+- a second run is refused, and so is the same file pointed at another tenant;
+- the rename sets both places to **ElAbd**.
+
+**Two things found in the live data, reported rather than touched**: a retired tenant *ElAbd Foods* holding 8 capabilities, and two of El Abd's directions owned by "Tamer Abdelhamid" while the register holds "Tamer Abdelhameed" — a spelling that will not match a person.
+
 **What is still Islam's**: the word to run it. Nothing else is outstanding.

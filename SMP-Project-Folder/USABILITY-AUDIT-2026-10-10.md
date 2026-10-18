@@ -33,7 +33,7 @@ measurement.
 | 6 | Recognition rather than recall | Passes (measured) | — |
 | 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **CLOSED, bar customisation** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E), §547 (Alt+G, go to a place). Customisation is left, and it is a product question |
 | 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **MEASURED AND CLOSED** — §548. All 257 read: not one is a description. But this file's own "zero `note:` to `section()`" was wrong — there were three, and one stood on the page |
-| 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **AWAITING ISLAM.** Not a defect; nobody has ruled on it |
+| 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **CLOSED — there was nothing to decide.** This section is WRONG: the codes are not on the screen. §549 |
 | 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
 
 ### Where this stands (added 2026-10-16)
@@ -46,6 +46,8 @@ measurement.
 - heuristic 7 says the product has **one** keyboard idiom; it had **four**, and the real finding — that none of them was written down anywhere — it does not make at all (§539).
 
 **And once in the other direction**, which is the harder kind to catch, because it reads as a clean pass rather than as a gap: heuristic 8 reports **zero** `note:` arguments passed to a `section()` call. There were **three** (§548). A claimed pass nobody re-measured is how a rule quietly stops being kept.
+
+**And once it invented a decision that did not exist**, which is the most expensive kind: heuristic 9 reports that a client's unit head is shown four lines of error codes, calls the result a trade between two rules, and hands it to Islam as his call. **The codes are not on the screen** — they are on a hover and a copy link, exactly where this audit asks for them everywhere else. An open question was carried for eight days that had been answered before the file was written (§549).
 
 And twice it was read as a to-do list when it was not: the saved indicator it reports missing was built the day after this file was written (§527), and the ASCII-ellipsis nit under heuristic 1 was never true of anything on screen — only of the comments describing the button. **So: measure the product, never this file.**
 
@@ -281,9 +283,18 @@ pass and is the honest limit of this finding.
 
 ---
 
-## 9. Help users recognise, diagnose and recover — A DELIBERATE TRADE · **AWAITING ISLAM**
+## 9. Help users recognise, diagnose and recover — A DELIBERATE TRADE · **CLOSED, AND THIS SECTION IS WRONG**
 
-> **Unchanged, and deliberately.** This is a decision nobody has made yet, not a defect anybody has left.
+> **The trade below does not exist, and it was never Islam's to decide** (§549). This section reports that a client's unit head is shown four lines of developer vocabulary. **They are not.** What the banner puts on the screen is:
+>
+> > **Your changes are safe, and the office has a copy.**
+> > They still save by themselves as soon as the server answers.
+>
+> The `HTTP 500 · reference 7f3a2c` block below is real and still exists — **it is simply not drawn on the page.** It rides the hover on that bold line, goes into the console, and is on the clipboard from the copy link, so the person can paste it to the office and the office can find the failure in the log by its reference.
+>
+> **So the two rules this section says pull against each other do not.** Nielsen asks for plain language and no error codes on screen: met. §502 asks for a traceable reference: met. §502 did not choose between them — it put them in different places, which is what the rest of this audit asked for everywhere else.
+>
+> **How the mistake was made is worth more than the mistake.** The section quotes `sync.js:963`, the line that BUILDS the string — and never asked where that string is drawn. A measurement of the source that is not a measurement of the screen; the same reading that would have called §538's unreachable sentences "reachable" because they exist in the file. **Measure the product, never the source alone.**
 
 A failed save names the step it stopped at, which is §123's rule working as
 designed. What it puts on a client unit head's screen is four lines of

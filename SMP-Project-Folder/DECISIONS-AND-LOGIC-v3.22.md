@@ -66017,3 +66017,23 @@ Heuristic 8 is the one the audit measured **halfway and said so**: it counted th
 - the call scan read **`function section(eyebrow, title, note, body, …)` as a call** carrying a standing note, because that parameter is named `note`.
 
 **AND THIS CLOSES THE AUDIT.** Of its ten: 1, 3, 4, 5, 7 and 8 are closed; 2 and 6 passed on measurement; 9 is Islam's ruling and not a defect; 10 was dropped at his word. **It was wrong five times** and every correction is now in the record rather than only in a reply — four undercounts (26 dialogs that were 30, six date spellings that were nine, one dead-greyed control that was four, one keyboard idiom that was four) and **one overcount the other way**, the zero section notes that were three. It also twice reported as missing something already built. That is not a criticism of the audit; it is why each of these closed with **a check that goes red** rather than a note saying somebody looked.
+
+## §549 — Heuristic 9 was answered before it was asked (usability audit, heuristic 9; 2026-10-18)
+The audit's ninth section reports that a failed save puts **four lines of developer vocabulary** on a client unit head's screen — `HTTP 500 · reference 7f3a2c`, a reason, a table, the server's own sentence — calls the result a **trade** between Nielsen's *plain language, no error codes* and §502's *a fault must carry a traceable reference*, and hands it to Islam: *"this is Islam's call, not a defect to fix."*
+
+**THERE WAS NOTHING TO DECIDE.** What the banner draws is:
+
+> **Your changes are safe, and the office has a copy.**
+> They still save by themselves as soon as the server answers.
+
+That is the whole of it. The technical block **exists and is untouched** — it simply is not drawn on the page. It rides the `title` on that bold line, goes into the console as an error, and sits on the clipboard behind the copy link, so the person can paste it to the office and the office can find the failure in the log by its reference (§502's own words: *"the details travel with the bar"*).
+
+**SO THE TWO RULES DO NOT PULL AGAINST EACH OTHER.** Nielsen asks for plain language and no codes on screen: met. §502 asks for a traceable reference: met. §502 did not choose between them — **it put them in different places**, which is what the rest of the audit asks for everywhere else, and what §538 spent a whole section on.
+
+**AND IT IS NOT STALENESS.** The plain-English banner landed in **§504 on 2026-10-07**, three days BEFORE this audit was written. The section quotes `sync.js:963` — the line that **builds** the string — and never asked where that string is **drawn**. A measurement of the source that is not a measurement of the screen. The same reading would have called §538's unreachable sentences *reachable*, because they exist in the file.
+
+**WHAT IT COST.** An open question carried for eight days, presented as a decision the product's owner had to make, about a product that already did the right thing. That is worse than any of the five miscounts before it: a wrong number is corrected the first time somebody re-measures, but an invented dilemma is **never** re-measured, because it does not look like a finding — it looks like a choice somebody owes an answer to.
+
+**SHOWN, NOT ARGUED.** The banner was rendered from the built file with a real HTTP 500 behind it and put in front of Islam before a word of this was written, under the instruction he gave the day before: *"always show me visually."* He then closed it.
+
+**NOTHING WAS BUILT FOR THIS SECTION, AND NOTHING SHOULD BE.** The only change is in the record: the audit's heuristic 9 is marked wrong, with the reading error named, so nobody brings the same question back next year.

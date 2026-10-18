@@ -66377,6 +66377,93 @@ the fill bar is asserted present in this build instead.
 Proved able to fail: `pillarIsCap` forced false reds it 19 ways, and
 breaking `renderGroupFoundation` reds §1's rewritten assertion by name.
 
+### §544.14 — a layer can be removed on a client that is already running
+
+Islam, looking at El Abd on the live site the hour stage 4 shipped: *"layer 2
+above the business units I want to remove it but no option there to do
+that."*
+
+**There was none, and not for that client — for every client that matters.**
+The link exists (`data-shungroup`) and has since §544.1, but it was drawn
+only `if (shape)`, and `canShape()` goes false the moment a client holds a
+plan line. Measured on the demo: 182 plan lines, and the tree draws **no**
+"remove this layer", **no** "group these under a layer", **no** "+ add". So
+the control was there for a client with nothing in it and gone for every
+client anyone had used — which is the exact set that would ever need it.
+
+**WHY IT WAS GATED, AND WHY THAT WAS TOO WIDE A NET.** `canShape()` is older
+than stage 4: the seven-step flow REWROTE the lists from the form, so letting
+somebody re-shape a client with data in it would strand the data. That is a
+real danger and it still is — for **adding** a row. It was never true of
+these two links: by their own rule (§405) removing a layer **hides and keeps**
+— every division, every assignment and every plan stays, and grouping again
+brings all of it back. The screen was refusing a switch while offering the
+units' own On/Off beside it, which is the same kind of act on a bigger
+subject.
+
+**Asked which to unlock**, Islam chose **"add and remove layers"** — the two
+layer links come back for every client, and **"+ add" stays locked**. So the
+line is drawn where the danger actually is, and the banner is corrected to
+say so: it read *"adding and removing is read-only here"*, which is no longer
+true, and now reads that ADDING is. Both links carry a hover saying what is
+kept (1b-ii).
+
+**Proof.** `checks/shape.py` gains §3b, which MAKES the harder state (§255):
+section 3 runs on the open fixture and could never have seen this, so §3b
+writes one pillar onto a unit, asserts `canShape()` has shut (the banner is
+drawn, "+ add" is gone), and then asserts the two links survive it, that
+pressing one takes the row away while every division, every assignment and
+the plan line itself are kept, and that pressing the other brings it back.
+Both halves of the pair, because a control you can press one way and not the
+other is a trap (§61, §94.2). Proved able to fail: putting the old `if
+(shape)` back reds it **four ways**.
+
+### §544.15 — Meridian is closed, not parked
+
+Islam: *"forget meridian"*, after *"meridian is not live and not a
+priority"*.
+
+§544.11 left five questions open about its two capability records and said
+the move was waiting on him. It is not waiting any more — **it is not
+happening**, and the record says so rather than leaving a to-do nobody
+intends to do (§54.5).
+
+**WHAT THAT LEAVES IN THE DATABASE, said plainly rather than quietly
+dropped.** Meridian Group still holds `cap6` and `cap9` in `smp.capabilities`
+with their inner pillars, their project and its rows. Nothing reads them into
+a layer any more (§544.13), so they show in its company plan like any other
+client's — and the five things §544.11 could not answer (definitions, cap9's
+own objectives, cap6's outcome, the dated and stated rows, and `cap9-P2`
+marked `kind: "Direction"`) stay unanswered inside the records. They harm
+nobody while the tenant is not live. **If Meridian is ever switched on, this
+section is where to start**, and `scripts/meridian/look.sql` still reads it.
+
+**AND FOUR BACKUP TABLES ARE STILL THERE**, from El Abd's and Wander's moves:
+`smp.org_before_20261018`, `smp.capabilities_before_20261018`,
+`smp.org_before_wander_development_20261018` and
+`smp.capabilities_before_wander_development_20261018`. Both clients have been
+looked at and both are right, so these are droppable whenever Islam wants —
+they are named here so dropping them is a decision rather than a discovery.
+
+**DROPPED, 2026-10-18.** Islam: *"drop the backup tables"*, then *"done"*.
+`scripts/backups/drop.sql` is what he ran — read-only first (every copy
+actually in the schema, proof both moves landed, what each copy holds), then
+one transaction whose check re-asks that question and refuses to commit if
+either client does not look moved. Rehearsed three ways on a throwaway
+PostgreSQL 16: the happy path drops all four and reads back empty; a client
+that has not moved is refused with all four surviving; a renamed tenant key
+is refused with all four surviving. That third rehearsal earned its place —
+the guard's first draft asked only *"is any of them unmoved?"*, which answers
+0 when a mistyped key matches NO rows, so the copies would have gone with
+their reason never checked (§94.2: a check that cannot tell "all well" from
+"I found nothing" is not a check).
+
+**SAID PLAINLY: THIS ENTRY IS HIS WORD, NOT A MEASUREMENT.** Nothing here
+reaches the live database, so "done" is what is recorded and the read-back
+was not seen. If El Abd or Wander ever needs its pre-move plan again, it is
+gone and `scripts/wander/move.sql` and `scripts/stage3-move-sql.js` are the
+only description of what changed.
+
 ## §545 — A bounded reporter enters a category figure
 From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
 
@@ -66617,71 +66704,3 @@ The audit: *"no keyboard route between destinations, tabs or sections"*. Measure
 **VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
 
 **AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
-
-### §544.14 — a layer can be removed on a client that is already running
-
-Islam, looking at El Abd on the live site the hour stage 4 shipped: *"layer 2
-above the business units I want to remove it but no option there to do
-that."*
-
-**There was none, and not for that client — for every client that matters.**
-The link exists (`data-shungroup`) and has since §544.1, but it was drawn
-only `if (shape)`, and `canShape()` goes false the moment a client holds a
-plan line. Measured on the demo: 182 plan lines, and the tree draws **no**
-"remove this layer", **no** "group these under a layer", **no** "+ add". So
-the control was there for a client with nothing in it and gone for every
-client anyone had used — which is the exact set that would ever need it.
-
-**WHY IT WAS GATED, AND WHY THAT WAS TOO WIDE A NET.** `canShape()` is older
-than stage 4: the seven-step flow REWROTE the lists from the form, so letting
-somebody re-shape a client with data in it would strand the data. That is a
-real danger and it still is — for **adding** a row. It was never true of
-these two links: by their own rule (§405) removing a layer **hides and keeps**
-— every division, every assignment and every plan stays, and grouping again
-brings all of it back. The screen was refusing a switch while offering the
-units' own On/Off beside it, which is the same kind of act on a bigger
-subject.
-
-**Asked which to unlock**, Islam chose **"add and remove layers"** — the two
-layer links come back for every client, and **"+ add" stays locked**. So the
-line is drawn where the danger actually is, and the banner is corrected to
-say so: it read *"adding and removing is read-only here"*, which is no longer
-true, and now reads that ADDING is. Both links carry a hover saying what is
-kept (1b-ii).
-
-**Proof.** `checks/shape.py` gains §3b, which MAKES the harder state (§255):
-section 3 runs on the open fixture and could never have seen this, so §3b
-writes one pillar onto a unit, asserts `canShape()` has shut (the banner is
-drawn, "+ add" is gone), and then asserts the two links survive it, that
-pressing one takes the row away while every division, every assignment and
-the plan line itself are kept, and that pressing the other brings it back.
-Both halves of the pair, because a control you can press one way and not the
-other is a trap (§61, §94.2). Proved able to fail: putting the old `if
-(shape)` back reds it **four ways**.
-
-### §544.15 — Meridian is closed, not parked
-
-Islam: *"forget meridian"*, after *"meridian is not live and not a
-priority"*.
-
-§544.11 left five questions open about its two capability records and said
-the move was waiting on him. It is not waiting any more — **it is not
-happening**, and the record says so rather than leaving a to-do nobody
-intends to do (§54.5).
-
-**WHAT THAT LEAVES IN THE DATABASE, said plainly rather than quietly
-dropped.** Meridian Group still holds `cap6` and `cap9` in `smp.capabilities`
-with their inner pillars, their project and its rows. Nothing reads them into
-a layer any more (§544.13), so they show in its company plan like any other
-client's — and the five things §544.11 could not answer (definitions, cap9's
-own objectives, cap6's outcome, the dated and stated rows, and `cap9-P2`
-marked `kind: "Direction"`) stay unanswered inside the records. They harm
-nobody while the tenant is not live. **If Meridian is ever switched on, this
-section is where to start**, and `scripts/meridian/look.sql` still reads it.
-
-**AND FOUR BACKUP TABLES ARE STILL THERE**, from El Abd's and Wander's moves:
-`smp.org_before_20261018`, `smp.capabilities_before_20261018`,
-`smp.org_before_wander_development_20261018` and
-`smp.capabilities_before_wander_development_20261018`. Both clients have been
-looked at and both are right, so these are droppable whenever Islam wants —
-they are named here so dropping them is a decision rather than a discovery.

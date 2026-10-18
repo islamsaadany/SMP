@@ -131,6 +131,8 @@ function deckHtmlFor(target){
   var t = String(target || ""), r = boxRef(t);
   /* §481: a direction's own deck, presented by whoever owns it. */
   if (r.kind === "dir") return dirDeckHtml(t);
+  /* §553: and a part of the order that is not a box at all. */
+  if (r.kind === "sec") return secDeckHtml(t);
   /* §253.3: ONE ANSWER TO WHICH DECK A TARGET GETS, asked by the Present
      button, the slide editor and the anchors alike. §334: and the FORM
      decides, never the prefix — `plansInPillars` answers for a unit, a
@@ -979,6 +981,52 @@ function companyAnalysisSlides(u){
         }).join("") + '</ol>' : '<p class="dswnone">&mdash;</p>') + '</div>';
     }).join("") + '</div></section>'];
 }
+/* ── §553 — A PART OF THE RUNNING ORDER THAT IS NOT A BOX ────────────────
+   Islam, of the presentation: *"we choose to present the foundation and then
+   the swot if needed and then every direction and capability in the sequence
+   selected and then the functions in the sequence selected as well"*.
+
+   The company's Foundation and its SWOT were only ever drawn INSIDE the
+   company's own deck, which the flow puts LAST (§481, his *"company comes
+   last"*) — so a review that wants to set the scene first could not. They are
+   parts now, placed anywhere in the order, and `sec:found` / `sec:swot` are
+   how you place them.
+
+   NOT A SECOND DESCRIPTION OF THE SAME SLIDES (§53.5). It calls the very
+   functions the company review calls — `companyFoundationSlides` and
+   `companyAnalysisSlides` — so a change to either reaches both, and a part
+   presented on its own cannot drift from the same part presented in the
+   company's deck. The cover and the Thank you are `dirDeckHtml`'s, for the
+   same reason: a part is a part. */
+var SEC_PART_KEYS = ["found", "swot"];
+var SEC_PARTS = {
+  found: { name: "Foundation", slides: function(u){ return companyFoundationSlides(u); } },
+  swot:  { name: "Analysis",   slides: function(u){ return companyAnalysisSlides(u); } }
+};
+function secDeckHtml(t){
+  var key = boxRef(t).key, part = SEC_PARTS[key];
+  if (!part) return "";
+  var u = topAsUnit(), body = part.slides(u) || [];
+  /* NOTHING TO SHOW IS NOTHING TO PRESENT (§45.2): a cover and a Thank you
+     over an empty section is a blank slide with a heading on it. */
+  if (!body.length) return "";
+  var title = part.name;
+  var S = ['<section class="dslide d-cover"' + anch("cover", "After the cover") +
+    sec("COVER", title, true) + '>' +
+    (deckMark(u)
+        ? '<img class="dcovermark" src="' + esc(deckMark(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<h1 class="cover">' + esc(title) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">' + esc(GROUP.org) + ' &middot; Strategy review &middot; ' +
+    esc(REVIEW.name) + '</p></section>'];
+  S = S.concat(body);
+  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last — before Thank you", "before") +
+    sec("END", "Thank you") + '><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(title) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+  return S.join("");
+}
+
 /* A direction's own deck: its cover naming who presents it, the direction's
    own slides — the very ones the full plan deck draws, through the one
    builder (§53.5) — and Thank you. */
@@ -1704,23 +1752,53 @@ function masterSubjects(){
   /* §481: with the company's plan the whole plan, the flow is its directions,
      its capabilities and its functions, and the short company review LAST —
      Islam: *"company comes last"*. */
+  /* §553 — THE COMPANY'S OWN SECTIONS ARE PARTS, AND THEY COME FIRST in the
+     list the picker opens on. Islam: *"the foundation and then the swot if
+     needed and then every direction and capability"* — "if needed" is the
+     half that matters, so a part is offered only where it would draw
+     something (`secDeckHtml` answers "" over an empty section, §45.2) and a
+     client with no Foundation written never sees it in the picker (§61).
+
+     OFFERED TO EVERY SHAPE, not only a company that plans its own strategy:
+     Raya's review can open on the group's Foundation before its units, which
+     is the same sentence read on a client with units.
+
+     OFFERED, NOT PLACED — and the first draft of this got it wrong. Putting
+     the parts in `masterSubjects` alone also put them in the DEFAULT order,
+     because `masterOrder` falls back to the whole list when nobody has
+     chosen — so every tenant that never touched its flow would have found
+     the Foundation at the front of its review. The comment here claimed
+     "no tenant's order moves" while the code moved every one of them.
+     Islam's word was *"we CHOOSE to present the foundation"*, so a section
+     part is placeable and is not placed until somebody places it:
+     `masterDefault()` is the order a tenant that has chosen nothing gets,
+     and it is the list WITHOUT them. */
+  var secs = SEC_PART_KEYS.filter(function(k){ return secDeckHtml("sec:" + k) !== ""; })
+                          .map(function(k){ return "sec:" + k; });
   if (companyReviewOn()) {
     var dirs = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){
       return p && p.id && runsNow(p) && planOn("group"); }).map(function(p){ return "dir:" + p.id; });
-    return dirs.concat(boardCapTargets()).concat(boardFunctionTargets())
+    return secs.concat(dirs).concat(boardCapTargets()).concat(boardFunctionTargets())
       .concat(topHasPlan() && planOn("group") ? ["group"] : []);
   }
-  return boardUnitTargets().concat(boardCapTargets()).concat(boardFunctionTargets());
+  return secs.concat(boardUnitTargets()).concat(boardCapTargets()).concat(boardFunctionTargets());
 }
 /* The running order to open the picker on: the stored one, filtered to
    subjects that still report, and the whole list in board order when nothing
    is stored. A subject added to the tenant AFTER an order was agreed arrives
    NOT presenting rather than being appended — walking a new unit into a board
    meeting because somebody created it is the office's decision, not ours. */
+/* §553: everything the picker may offer, minus the parts nobody has placed.
+   Two lists where there was one, because "what can be in the order" and
+   "what IS in the order when nobody has said" stopped being the same
+   question the moment a part could be offered without being default. */
+function masterDefault(){
+  return masterSubjects().filter(function(t){ return t.indexOf("sec:") !== 0; });
+}
 function masterOrder(){
   var all = masterSubjects();
   var kept = SMPRules.masterFlow(GROUP).filter(function(t){ return all.indexOf(t) >= 0; });
-  return kept.length ? kept : all.slice();
+  return kept.length ? kept : masterDefault();
 }
 /* Stored as an ABSENCE (§50.6): an order that is simply everybody in the
    board's own order is what an untouched tenant already has, so it deletes the
@@ -1728,7 +1806,11 @@ function masterOrder(){
    added tomorrow joins the flow of a tenant that never chose one, and does not
    join one that did. */
 function masterWrite(list){
-  var all = masterSubjects();
+  /* §553: measured against the DEFAULT, not against everything placeable —
+     otherwise an order that is exactly the default would be written out in
+     full rather than deleting the key (§50.6), and tomorrow's new unit would
+     not join the flow of a tenant that never chose one. */
+  var all = masterDefault();
   if (list.length && !(list.length === all.length && list.every(function(t, i){ return t === all[i]; })))
     GROUP[SMPRules.MASTER_FLOW] = list.slice();
   else delete GROUP[SMPRules.MASTER_FLOW];
@@ -1886,6 +1968,9 @@ function masterKind(t){
   t = String(t);
   /* §481: four kinds in the company's flow, said in the picker's own chips. */
   var k = boxRef(t).kind;
+  /* §553: without this a section part falls to the bottom line and the
+     picker calls the company's Foundation a BUSINESS UNIT. */
+  if (k === "sec") return '<span class="mfkind">SECTION</span>';
   if (k === "dir") return '<span class="mfkind">DIR</span>';
   if (k === "cap") return '<span class="mfkind fn">CAP</span>';
   if (t === "group" && companyReviewOn()) return '<span class="mfkind">CO</span>';

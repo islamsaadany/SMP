@@ -66704,3 +66704,89 @@ The audit: *"no keyboard route between destinations, tabs or sections"*. Measure
 **VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
 
 **AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+
+## §553 — Stage 5 (a): a part of the running order that is not a box
+
+Islam, having rejected the way stage 5 had been framed — *"there is no thin
+deck and thick ones. rethink the whole module"* — and said what it is:
+
+> *"for a company like elabd where we choose to present the foundation and
+> then the swot if needed and then every direction and capability in the
+> sequence selected and then the functions in the sequence selected as well.
+> and this might match rhi as well where rhi presents in pillars on the
+> company level"*
+
+**A presentation is ONE ORDERED LIST OF PARTS.** Approved from
+`design-mockups/presentation-order/2026-10-18_the-running-order.html`
+(*"let's build it"*), which draws all three shapes on one screen.
+
+**THE SPINE ALREADY EXISTED.** The running order, the picker, the drag by
+the number and *"company comes last"* are §266.10's and §481's, built and
+shipped. What was missing is the one thing he asked for: the company's own
+Foundation and SWOT were drawn only INSIDE the company's deck, which the
+flow puts LAST — so a review that wants to set the scene first could not.
+
+**SO A PART GETS A TARGET.** `sec:found` and `sec:swot`, through a fifth
+prefix on `boxRef` — listed there rather than handled beside it, because the
+fallthrough reads an unknown target as a BUSINESS UNIT and `sec:found` would
+have become a unit of that name on every page that asks who the target is
+(§531: the prefixes are read once, in one place).
+
+**AND IT IS NOT A SECOND DESCRIPTION OF THE SAME SLIDES (§53.5).**
+`secDeckHtml` calls the very functions the company review calls —
+`companyFoundationSlides`, `companyAnalysisSlides` — so a change to either
+reaches both and a part presented on its own cannot drift from the same part
+inside the company's deck. The check asserts that as an AGREEMENT measured in
+the same run (§94.8), never as a literal.
+
+**OFFERED, NOT PLACED — AND THE FIRST DRAFT GOT THIS WRONG.** Adding the
+parts to `masterSubjects` alone also added them to the DEFAULT order, because
+`masterOrder` falls back to the whole list when nobody has chosen. Every
+tenant that never touched its flow would have found its Foundation at the
+front of its review, and the comment in that draft claimed *"no tenant's
+order moves"* while the code moved all of them. His word was *"we CHOOSE to
+present the foundation"*, so there are two lists now: `masterSubjects()` is
+what may be placed, `masterDefault()` is what a tenant that has chosen
+nothing gets, and it is the list without them. `masterWrite` measures the
+absence against the DEFAULT too, or placing a part and taking it out again
+would store a copy of the default rather than deleting the key (§50.6) — and
+then tomorrow's new unit would never join that tenant's flow.
+
+**"IF NEEDED" IS HALF THE SENTENCE.** A part that would draw nothing is not
+offered at all: `secDeckHtml` answers "" over an empty section rather than a
+cover and a Thank you around nothing (§45.2), and the picker never lists it
+(§61). Both ends are made in the check — the SWOT off, then switched on.
+
+**Proof:** `checks/presentation-parts.py`, 22 assertions, all good; proved
+able to fail three ways by restoring the default-order fault. `deck-figures`,
+`deck-strip`, `presentation-timer` and `capability-entry` all good.
+`master-picker` reads 57/1 — **identically on main**, measured in the same
+run, so it is the pre-existing failure and not this.
+
+**Still to come in stage 5:** (b) a box that plans in projects gets no
+performance and no standings while the same box planning in pillars does —
+the one genuine drift left after §553.1's corrections; (c) one template.
+
+### §553.1 — two things I told him that were wrong
+
+Both were offered as the ARGUMENT for stage 5, which makes them worse than
+ordinary mistakes, and both are corrected here rather than quietly dropped.
+
+**"A pillar gets three slides in a unit and four as a direction — same
+content, two shapes."** It does not. The fourth is the Categories slide and
+`if (bdRows)` draws it only where the pillar HAS categories. El Abd's
+direction has them; the Raya pillar it was compared against does not. Content,
+not two builders disagreeing.
+
+**"A function gets no Foundation and no SWOT, which is drift."** It is not:
+it is his own recorded decision (§243, §399) — *"it has a title of winning
+aspiration but it shouldn't show this as they don't have it"*.
+
+What survives is narrower and still worth fixing, and is stage 5 (b) above.
+
+**AND THE MOCKUP INVENTED ITS SLIDE NAMES.** "What it is aiming at", "Its
+work", "How it is doing" were written out of the air while
+`scripts/decks/compare.py`, which reads the real ones, sat in the same
+commit. Islam: *"that's a very strange components. did you assume that?"*
+Every name in it is measured now, and `drive-the-mockup.py` asserts the
+headings are the product's so the same fault cannot return silently.

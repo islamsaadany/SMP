@@ -1911,6 +1911,19 @@ function placeLabel(at){
     var cc = capById(r.key);
     return cc ? navName(cc) : r.key;
   }
+  /* §553: a section of the company's own review is a place in the flow too,
+     and it is named by what it IS — the picker, the running order and the
+     deck's cover all read this one function, so naming it here is naming it
+     everywhere (§53.5). The company's word for its SWOT is the client's own
+     (§15.1), never the literal "Analysis". */
+  if (r.kind === "sec") {
+    if (r.key === "swot") {
+      var sw = "";
+      try { sw = String(SMPRules.swotTitle(GROUP, "group") || "").trim(); } catch (e) { sw = ""; }
+      return (sw || "Analysis") + " — the " + labelWord("topword", "group").toLowerCase() + "'s";
+    }
+    return "Foundation — the " + labelWord("topword", "group").toLowerCase() + "'s";
+  }
   /* §481: a direction is a place in the company's flow, named by itself. */
   if (r.kind === "dir") {
     var dp = (Array.isArray(GROUP.items) ? GROUP.items : []).filter(function(p){

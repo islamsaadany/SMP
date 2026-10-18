@@ -31,7 +31,7 @@ measurement.
 | 4 | Consistency and standards | Two findings: six date spellings; a dropdown that declares a pattern it does not implement | **CLOSED** — §537 / §537.1 (there were nine spellings, not six) and §536 (one of its three claims was wrong) |
 | 5 | Error prevention | Passes well; one break of the house rule, in the Copilot | **CLOSED** — §538. There were four breaks, and this one was the mildest |
 | 6 | Recognition rather than recall | Passes (measured) | — |
-| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **MOSTLY CLOSED** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E). What is left: a "go to" list, and customisation |
+| 7 | Flexibility and efficiency | **GAP** — one keyboard idiom in the whole product, and it is the projector | **CLOSED, bar customisation** — §528, §536, §539 (the keys written down at last), §544 (arrows on every row of tabs), §546 (Alt+S / Alt+D / Alt+E), §547 (Alt+G, go to a place). Customisation is left, and it is a product question |
 | 8 | Aesthetic and minimalist | Substantially passes; not fully measured, said so below | **UNMEASURED STILL** — the 224 `.why` / `.note` strings have not been read one by one |
 | 9 | Recognise / diagnose / recover | A deliberate trade, pulling against this heuristic | **AWAITING ISLAM.** Not a defect; nobody has ruled on it |
 | 10 | Help and documentation | **GAP** — the knowledge base is the office's alone | **DROPPED** at Islam's word, 16 Oct |
@@ -214,9 +214,9 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 
 ---
 
-## 7. Flexibility and efficiency of use — GAP · **MOSTLY CLOSED**
+## 7. Flexibility and efficiency of use — GAP · **CLOSED, BAR CUSTOMISATION**
 
-> **Four of its five bullets are answered, and its headline claim was wrong.** It says the product has ONE keyboard idiom. Measured against the sources at the time of writing it had **four**, and the finding it does not make is the one that mattered: *nothing on any screen said so*. There was no list of keys anywhere in the product.
+> **Every bullet about the keyboard is answered, and its headline claim was wrong.** It says the product has ONE keyboard idiom. Measured against the sources at the time of writing it had **four**, and the finding it does not make is the one that mattered: *nothing on any screen said so*. There was no list of keys anywhere in the product.
 >
 > - a keyboard route between destinations, tabs and sections → **§544**. Not a missing feature but a promise already made: eight `role="tablist"` groups, none of which bound an arrow. §536 again, one control over.
 > - no accelerator for Submit, Save draft or the pen → **§546**. Islam picked Alt+S, Alt+D, Alt+E. Submit JUMPS to the button rather than sending, at his word.
@@ -224,7 +224,9 @@ by eye (§272, §279). Codes carry their names on hovers (§88, §266.9).
 > - no shortcut to the next gap → **§528** (Alt+Enter), which predates this file's publication by two days.
 > - **and a fifth the audit did not list: none of it was discoverable.** §539 wrote the keys down, and every idiom added since has appeared on that sheet the same day it was built.
 >
-> **STILL OPEN:** a *"go to"* list — one key opening a searchable list of places, which §536's list already makes keyboard-driven — and **customisation**, which this file is right to name and which is a product decision rather than a usability fix. A key per destination is **not possible** and the audit does not claim otherwise: destinations are each tenant's own units, capabilities and functions, so there is nothing fixed to bind.
+> - a *"go to"* list → **§547**. Alt+G, built on §536's list rather than a second one, and reading the navigation's own buttons so there is no second idea of what the places are. A key per destination is **not possible** and the audit does not claim otherwise: destinations are each tenant's own units, capabilities and functions, so there is nothing fixed to bind.
+>
+> **STILL OPEN: customisation** — no saved views, no default filters, no favourites. This file is right to name it, and it is a **product decision rather than a usability fix**, so it is left rather than built.
 
 **The platform has one keyboard idiom and it is the projector.** `present.js`
 binds arrows, PageUp/PageDown, Home, End, Escape, `f` (fullscreen), `w`

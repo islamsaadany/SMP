@@ -65969,3 +65969,29 @@ The pen's selector is read from the check that already walks it, which records t
 
 **THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§544.1**.
 
+
+## §547 — Going to a place: Alt+G (usability audit, heuristic 7; 2026-10-18)
+The last piece of heuristic 7. Alt+G opens a list of every place you can reach, you type a few letters, and Enter takes you there. Islam picked the letter, joining §546's Alt+S, Alt+D and Alt+E — one modifier for everything that does something. Drawn first and signed off (`design-mockups/go-to-a-place/`).
+
+**A KEY PER DESTINATION IS NOT POSSIBLE**, and that is why this shape rather than a row of them: the places are each tenant's **own** units, capabilities, functions and divisions. There is nothing fixed to bind. This was reported the other way round earlier in the same session and corrected.
+
+**ALMOST NONE OF IT IS NEW, AND THAT IS THE ARGUMENT FOR IT:**
+
+- **THE LIST IS THE NAVIGATION'S OWN BUTTONS**, read off the page. Measured before anything was written: every destination is in the DOM at once as a `[data-u]` button, including the ones inside closed folds. So there is no second idea of what the places are (§53.5), and a place added tomorrow appears without anybody being told — the check asserts the list IS those buttons, name for name, so a build that grew its own list goes red.
+- **PICKING PRESSES THE REAL BUTTON**, which is exactly what the product's own `[data-gounit]` jump already does. Dropping out of edit mode and landing on the tab that place opens on happen here because it **is** the same press. A second route to a destination is a second place for that behaviour to drift.
+- **THE LIST IS `searchsel`'s**, through `openOn` — the entry the register already uses to reopen a list after a repaint. The box, the rows, match-anywhere, and every key §536 gave it arrive with it. A second popup here would be writing §536 again and then maintaining both.
+
+**ONE THING `searchsel` HAD TO LEARN.** It enhances a single select only past five options, which is the right rule for a form field and the wrong one here: **a tenant with four places needs this list more than one with forty, not less.** `data-ss-always` is the opt-in, one line there rather than a second popup here.
+
+**IT OPENS ON WHERE YOU ARE**, marked and under the cursor, read from the nav's own `aria-current`/`aria-selected` rather than decided again — so Alt+G then Escape costs nothing and the list reads as a map rather than a blank box.
+
+**TWO REAL FAULTS, BOTH FOUND BY THE CHECK AND BOTH FIXED:**
+
+- **`close()` removed the host and left the POPUP**, which lives on `<body>`. Escape hid it, because `searchsel`'s own handler closes the popup — so the two looked like one act until a check called `close()` by itself and the next press found a list already open. A half-close is how a control comes back wrong.
+- **IT HELD THE BUTTONS, NOT THEIR KEYS.** A repaint between opening the list and picking replaces them, so it was pressing a node no longer in the document — **and it still navigated**, because a listener bound to a detached element still fires. Working by luck, which is the kind that stops. The live button is found at the moment of the press now, as `[data-gounit]` has always done.
+
+**AND ONE FAULT WAS THE CHECK'S OWN**, recorded in its docstring rather than quietly fixed: its `ev()` helper accepted an argument and called `pg.evaluate` without it, so the assertion watching the real button get pressed attached its listener to **nothing** and reported the PRODUCT broken. Traced by hand — the right button was being clicked all along. **This project has made that exact mistake once before**, in `restore-a-person`'s own `who()`. A helper that silently drops what it is handed turns a check into a thing that measures nothing and says FAIL.
+
+**THE PLUMBING IS INERT.** The select and the button `searchsel` builds for it are not controls: both out of the tab order and out of the accessibility tree, so a host left standing is unreachable. §536 records what a hidden select with its furniture left on did here — every page became a keyboard trap on its first control.
+
+**CHECK.** `checks/go-to-a-place.py` — green here, **10 red on the build before**. And the sheet learned Alt+G the same day (§539), which is the whole reason the sheet exists.

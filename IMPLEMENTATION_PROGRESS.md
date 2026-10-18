@@ -9961,7 +9961,13 @@ The test database was deleted afterwards.
 
 **The SQL does this, in one transaction:** checks the client is in the state it was written for (and stops if not); copies both tables it touches, so there is an undo; moves the five rows; turns on the two-tab setting so the tabs don't move; deletes the five old records; then checks its own work row by row and refuses to commit if anything is off. It finishes by printing the ten rows so you can read them.
 
-**What I need from you — this is the point I said I'd stop at:**
+## §539.3 — The four differences are accepted; you don't need to know the schema name (2026-10-18)
+You said the four differences are fine. On the schema: you asked a fair question and my answer was a poor one — I was asking you to confirm a name I'd read out of a file.
 
-1. **The four differences** from the before-and-after list: the separator dot on the Capabilities tab, the Reporting fill bar appearing, the Temple's base reading measures and tactics instead of "0 Projects", and the deck showing C001–C005 instead of EQ / EE / DT / T& / OE. Each is listed; say if any of them is not acceptable.
-2. **The word to run it**, and confirmation that El Abd's schema really is `el_abd`.
+**You shouldn't have to know it.** The SQL file now opens with a short read-only query. Run that first, on its own, and the database tells you: one row per client, with the name you see on screen and how many capability records each one holds. El Abd is the row reading **Test 2, 5 capabilities** — identified by what's in it, not by a name anyone has to remember.
+
+**And if the name is wrong anyway, nothing happens.** The very first thing the transaction checks is that the schema really holds this client. Point it at the wrong one and it stops with *"this schema is not Test 2, which this file was generated for"* and changes nothing. I tested that by pointing the El Abd file at a schema holding Raya Trade.
+
+I re-ran the whole rehearsal on the exact file you now have, not an earlier one: it commits, it produces byte-for-byte what the platform's own move produces, and the pages built from the resulting database match what I showed you.
+
+**All that's left is your word to run it.**

@@ -65596,4 +65596,13 @@ A throwaway PostgreSQL 16 cluster, the real `db/schema.sql` applied into an `el_
 
 The cluster was removed afterwards. Nothing was run against any real client.
 
-**What is still Islam's to decide**, and the only thing left before this can run: the four named differences in §539's before-and-after list, and the word to go.
+### §539.3 — the four differences are accepted, and the schema names itself
+Islam, 2026-10-18: *"the 4 differences are fine, schema how can I know it's name"*. The four are approved; the second half is a fair question with a bad answer, which was *"it is `el_abd` because a migration script says so"*. He should not have to know, and I should not be asking him to confirm a name I read out of a file.
+
+**So the file opens with a read-only lookup that makes the database name itself** — one row per client, each with the name the platform shows on screen and how many capability records it holds, so the right schema is identified by its CONTENT and not by a name anybody has to remember. It skips the `platform` schema on its own, because that one carries no `org` table. Written as a plain `SELECT` (through `query_to_xml`, since a schema name cannot be a parameter) rather than a `DO` block, so Neon's editor returns it as a table instead of hiding it in a notices pane. Tested against a five-schema database built to the real shape before it was handed over.
+
+**And the transaction refuses the wrong client outright.** The first precondition is now that `org.org_name` is the client this file was generated from; pointed at another schema it raises *this schema is not Test 2, which this file was generated for* and changes nothing. That is the guard that matters: the `SET search_path` line is one word a person could get wrong, and a destructive statement should not depend on them getting it right. Measured by running the El Abd file against a schema holding Raya Trade.
+
+The whole rehearsal was then run again, on the exact file being handed over rather than an earlier one: it commits, its result is byte-for-byte identical to `capFoldIntoTop()`, and the pages rendered from the resulting database match the rehearsal on all seven surfaces.
+
+**What is still Islam's**: the word to run it. Nothing else is outstanding.

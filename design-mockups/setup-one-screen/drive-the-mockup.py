@@ -109,8 +109,9 @@ with sync_playwright() as p:
     pg.locator('[data-client="raya"]').click(); pg.wait_for_timeout(300)
     ck("Raya's sides are the two KINDS, not its divisions \u2014 as today",
        sides(pg)==["Raya Trade","Business units","Supporting Functions"], sides(pg))
-    ck("its divisions group the units inside their own side",
-       any("Distribution" in x for x in inside(pg)), inside(pg))
+    ck("and pressing Business units shows ALL ten, flat \u2014 no divisions in sight",
+       len(inside(pg))>=10 and not any("Distribution" in x or "B2C" in x for x in inside(pg)),
+       inside(pg))
     pg.locator('[data-client="fresh"]').click(); pg.wait_for_timeout(300)
     ck("a new client has no sides yet, because it has no boxes", sides(pg)==["New client"], sides(pg))
     ck("but its two kinds open ticked, so the navigation is never a dead end",
@@ -126,8 +127,16 @@ with sync_playwright() as p:
     ck("unticking them empties the navigation", sides(pg)==["ElAbd"], sides(pg))
     pg.locator('[data-nav="fn"]').click(); pg.wait_for_timeout(250)
     ck("ticking the functions puts them there instead", sides(pg)==["ElAbd","Functions"], sides(pg))
-    ck("and inside, the 22 are grouped by their three divisions rather than listed flat",
-       len(inside(pg))==3 and all("\u203a" in x for x in inside(pg)), inside(pg))
+    """ THE PREVIEW SHOWS TWELVE AND COUNTS THE REST. All 22 functions are in
+        the navigation, flat; the strip on this screen is a preview, so it
+        prints the first twelve and says "+10 more". Asserting a flat 22 here
+        was my mistake, not the page's \u2014 so assert what the preview owes:
+        twelve names, the tail counted, and no division among them. """
+    more = pg.locator("#navrow2 .none").inner_text().strip()
+    ck("and inside is the functions, flat \u2014 twelve shown, the rest counted, no division",
+       len(inside(pg))==12 and more=="+10 more"
+       and not any(x in ("Commercial","Operations","Corporate Support") for x in inside(pg)),
+       (len(inside(pg)), more))
     ck("no script errors anywhere", not errs, errs[:2])
     pg.screenshot(path="/tmp/claude-0/-home-user-SMP/a7f5ef4d-11bc-512f-b7f0-b2913a11888a/scratchpad/shape.png")
     b.close()

@@ -455,8 +455,13 @@ function drawNav() {
       const par = chosen[gKey(k.k)] || (at(gKey(k.k))[0] || {}).id;
       if (par) kids(par, k.k).forEach(x => inside.push(x.name));
     } else if (k.nav) {
-      if (k.group) at(gKey(k.k)).forEach(g => inside.push(g.name + " \u203a " + kids(g.id, k.k).length));
-      else at(k.k).forEach(x => inside.push(x.name));
+      /* A TICKED ROW SHOWS ITS OWN BOXES, FLAT. Islam: "when I click on the
+         business units on the navigation it will show all the units correct?"
+         — yes. An earlier draft grouped them by their layer whenever one
+         existed, which put Distribution and B2C in a navigation he had not
+         ticked them into. The tick is the whole of the rule: what is in the
+         navigation is what was asked for, and nothing else. */
+      at(k.k).forEach(x => inside.push(x.name));
     }
   });
   $("navrow2").innerHTML = inside.length

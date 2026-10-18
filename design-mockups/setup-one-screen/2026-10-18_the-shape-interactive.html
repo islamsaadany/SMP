@@ -66,6 +66,17 @@
                 text-transform:inherit; color:inherit; cursor:pointer; }
   .lvl button:hover, .lvl button:focus-visible { color:var(--gold-deep); }
   .lvl .n { font-variant-numeric:tabular-nums; opacity:.8; }
+  .lay { font-size:9.5px; font-weight:700; letter-spacing:var(--track); color:var(--navy-ink);
+         background:var(--navy); border-radius:3px; padding:.08rem .34rem; }
+  .under { margin-left:auto; display:flex; align-items:center; gap:.35rem;
+           font-size:11px; letter-spacing:0; text-transform:none; color:var(--ink-3); }
+  .under select { border:1px solid var(--line); background:var(--surface); color:var(--ink);
+                  border-radius:5px; padding:.08rem .3rem; font:600 11.5px var(--sans); }
+  .needs { margin-top:.5rem; border:1px dashed var(--bad); border-radius:8px;
+           padding:.45rem .55rem; background:color-mix(in srgb, var(--bad) 7%, transparent); }
+  .needs .h { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+              color:var(--bad); margin:0 0 .35rem; }
+  .box.orphan { border-color:var(--bad); border-style:dashed; }
   .row { margin-left:1.1rem; border-left:2px solid var(--line-soft); padding-left:.75rem; }
   .row.top { margin-left:0; border-left:0; padding-left:0; }
   .box { display:inline-flex; align-items:center; gap:.4rem; border:1px solid var(--line);
@@ -198,6 +209,24 @@ const boxOf = (id) => id === "top" ? { id:"top", lvl:"top", name:S.name, parent:
                                    : S.boxes.filter(b => b.id === id)[0];
 const kids = (id, lvl) => S.boxes.filter(b => b.lvl === lvl && b.parent === id);
 
+/* §stage4: THE LAYER NUMBER IS COMPUTED, NEVER STORED. A thing's layer is
+   where it actually sits: the top is 1, divisions are 2, and a kind that
+   hangs off a division is 3 while the same kind hanging off the company is 2.
+   So turning the division layer off for functions moves the Functions row up
+   a layer, and the screen says so rather than leaving the reader to work it
+   out from the indent. */
+function layerOf(l) {
+  if (l.k === "top") return 1;
+  if (l.k === "mid") return 2;
+  return l.under === "mid" ? 3 : 2;
+}
+const hasMid = () => S.levels.some(l => l.k === "mid");
+/* The boxes of a level that have no parent while the level says they should:
+   all-or-nothing switching (Islam's B) means these are not a second shape,
+   they are rows waiting to be assigned, and the screen names them. */
+const orphans = (l) => (l.under === "mid" && hasMid())
+  ? S.boxes.filter(b => b.lvl === l.k && b.parent === "top") : [];
+
 /* which box is chosen at each level — the path down the shape */
 let chosen = {};
 function pathTo(id) {
@@ -218,16 +247,35 @@ function drawShape() {
   const out = [];
   S.levels.forEach((l, li) => {
     if (l.k === "top") {
-      out.push('<div class="lvl"><button data-lvl="top">' + esc(l.many) + '</button></div>');
+      out.push('<div class="lvl"><span class="lay">Layer 1</span>' +
+               '<button data-lvl="top">' + esc(l.many) + '</button></div>');
       out.push('<div class="row top"><button class="box top' + (sel.kind === "box" && sel.id === "top" ? " sel" : "") +
                '" data-box="top">' + esc(S.name) + '</button></div>');
       return;
     }
-    const par = parentFor(l), list = kids(par, l.k), all = S.boxes.filter(b => b.lvl === l.k);
-    out.push('<div class="lvl"><button data-lvl="' + l.k + '">' + esc(l.many) +
+    const all = S.boxes.filter(b => b.lvl === l.k);
+    /* A LEVEL SITTING UNDER THE TOP SHOWS ALL OF ITSELF. It has no parent to
+       filter by, and filtering by one anyway showed NOTHING the first time
+       this was switched: El Abd's functions still store the division they
+       had, so `kids("top","fn")` found none of them. The stored division is
+       kept and ignored, which is what makes the switch reversible. */
+    const underTop = (l.under !== "mid") || !hasMid();
+    const par = underTop ? "top" : parentFor(l);
+    const list = underTop ? all : kids(par, l.k);
+    const need = orphans(l);
+    out.push('<div class="lvl"><span class="lay">Layer ' + layerOf(l) + '</span>' +
+             '<button data-lvl="' + l.k + '">' + esc(l.many) +
              '</button><span class="n">' + all.length + '</span>' +
              (par !== "top" ? '<span class="n" style="text-transform:none;letter-spacing:0">(' +
-                list.length + ' under ' + esc(boxOf(par).name) + ')</span>' : '') + '</div>');
+                list.length + ' under ' + esc(boxOf(par).name) + ')</span>' : '') +
+             /* the layer-2 switch, per kind, on the row it moves */
+             (l.k !== "mid" && hasMid()
+               ? '<span class="under">sits under <select data-under="' + l.k + '">' +
+                   '<option value="top"' + (l.under === "top" ? " selected" : "") + '>the ' +
+                     esc(lvlOf("top").one) + '</option>' +
+                   '<option value="mid"' + (l.under === "mid" ? " selected" : "") + '>' +
+                     esc(lvlOf("mid").many) + '</option></select></span>'
+               : '') + '</div>');
     const rows = list.map(b => {
       const next = S.levels.filter(x => x.under === l.k)[0];
       const n = next ? kids(b.id, next.k).length : 0;
@@ -242,6 +290,15 @@ function drawShape() {
     out.push('<div class="row">' + rows + add + '</div>');
     if (!list.length && adding !== l.k)
       out.push('<p class="why">None here yet.</p>');
+    /* AND THE ONES WAITING FOR A PARENT, always on screen rather than hidden
+       behind whichever division happens to be chosen — a row nobody can see
+       is a row nobody assigns. */
+    if (need.length) out.push('<div class="row"><div class="needs">' +
+      '<p class="h">' + need.length + ' need a ' + esc(lvlOf("mid").one) + '</p>' +
+      need.map(b => '<button class="box orphan' +
+        (sel.kind === "box" && sel.id === b.id ? " sel" : "") +
+        '" data-box="' + b.id + '">' + esc(b.name) + '</button>').join("") +
+      '</div></div>');
   });
   $("shape").innerHTML = out.join("");
   if (adding) { const i = $("newin"); if (i) i.focus(); }
@@ -287,13 +344,25 @@ function drawPanel() {
 }
 function parentChoices(b) {
   const l = lvlOf(b.lvl);
-  if (!l.under || l.under === "top") return [{ id:"top", name:S.name }];
-  return S.boxes.filter(x => x.lvl === l.under).map(x => ({ id:x.id, name:x.name }))
-    .concat([{ id:"top", name:"— its own —" }]);
+  if (!l.under || l.under === "top" || !hasMid()) return [{ id:"top", name:S.name }];
+  /* "its own" is gone (Islam's B): with the level set to sit under divisions,
+     having none is a GAP TO FILL, not a shape to choose. It leads the list so
+     an unassigned box says so rather than looking settled. */
+  return [{ id:"top", name:"— needs one —" }]
+    .concat(S.boxes.filter(x => x.lvl === l.under).map(x => ({ id:x.id, name:x.name })));
 }
 function draw() { drawShape(); drawPanel(); }
 
 /* ── pressing things ─────────────────────────────────────────────────────── */
+$("shape").addEventListener("change", (e) => {
+  const u = e.target.closest("[data-under]");
+  if (!u) return;
+  /* HIDDEN, NEVER CLEARED (§405's rule): moving a kind up to the company
+     leaves each box's division stored, so moving it back restores every one
+     of them. Nothing a person typed is thrown away by a switch. */
+  lvlOf(u.dataset.under).under = u.value;
+  chosen = {}; draw();
+});
 $("shape").addEventListener("click", (e) => {
   const b = e.target.closest("[data-box]"), l = e.target.closest("[data-lvl]"),
         a = e.target.closest("[data-add]");

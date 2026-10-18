@@ -8899,18 +8899,52 @@ function buFoldIntoTop(){
    move must not do is change what anybody sees: the five rows join the
    company's one pillar list, and the setting is what keeps them on their own
    tab, reading Capabilities, exactly as they read now. */
+/* §544.6 — AND WHAT WANDER NEEDED, WHICH EL ABD DID NOT. Measured on
+   Wander Development's own working copy before any of this was written:
+   three capabilities, every one held by the Strategy Management Office, one
+   of them holding TWO inner pillars and one planning in projects. The move
+   refused all three, each for a different reason, which is the refusal
+   working — and then Islam answered all three:
+
+     · *"the capabilities are on the company level"* — so a record held by a
+       function is no longer a blocker ONCE THE OFFICE HAS SAID the
+       capabilities live in the company plan (`capAtTop`). That setting is
+       the statement; without it the refusal stands, because §7.1's answer
+       (a capability becomes a pillar of the function holding it) is still
+       the other way to do this and nothing should guess between them.
+     · Data Management's two pillars: *"two capability pillars"* — each
+       keeps its own name, measures and tactics. One capability may become
+       several; nothing is merged.
+     · Decision Making's project: *"a capability whose work is its
+       milestones"* — one pillar under the capability's own name, the
+       project's milestones as its tactics, timed by the quarter their
+       finish date falls in, exactly as §447.1 times an action.
+
+   WHAT STILL REFUSES: a capability with objectives of its own or a
+   definition of its own (nobody has said what either becomes), one holding
+   more than one project, one holding nothing at all, and a milestone with
+   a `covers` entered — a tactic has nowhere to put it and dropping it
+   silently is the one thing this must not do (§96.2). */
 function capFoldBlockers(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
-  var out = [];
+  var out = [], toTop = SMPRules.capAtTop(GROUP);
   caps.forEach(function(c){
     if (!c || !c.id) return;
-    var why = [];
-    if (!capPlansInPillars(c)) why.push("plans in " + L("project").toLowerCase() + ", not " + L("pillar","bu").toLowerCase());
-    else if (capItems(c).length !== 1) why.push("holds " + capItems(c).length + " " + L("pillar","bu").toLowerCase() + ", not one");
+    var why = [], prs = c.projects || [];
+    if (capPlansInPillars(c)) {
+      if (!capItems(c).length) why.push("holds no " + L("pillar","bu").toLowerCase());
+      if (prs.length) why.push(prs.length + " " + L("project").toLowerCase() + " beside its " + L("pillar","bu").toLowerCase());
+    } else {
+      if (!prs.length) why.push("holds no " + L("project").toLowerCase());
+      else if (prs.length > 1) why.push("holds " + prs.length + " " + L("project").toLowerCase() + ", not one");
+      else (prs[0].milestones || []).forEach(function(m){
+        if (m && String(m.covers || "").trim() && why.indexOf("a milestone covers something") < 0)
+          why.push("a milestone covers something");
+      });
+    }
     if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
-    if ((c.projects || []).length) why.push((c.projects || []).length + " " + L("project").toLowerCase().toLowerCase());
     if (String(c.def || "").trim()) why.push("a definition of its own");
-    if (c.fn) why.push("held by " + ((FUNCTIONS[c.fn] || {}).name || c.fn));
+    if (c.fn && !toTop) why.push("held by " + ((FUNCTIONS[c.fn] || {}).name || c.fn));
     if (why.length) out.push({ id: c.id, name: c.name || "", why: why });
   });
   return out;
@@ -8922,13 +8956,32 @@ function capFoldPlan(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
   var top = topAsUnit(), n = (GROUP.items || []).length, out = [];
   caps.forEach(function(c){
-    if (!c || !c.id || !capPlansInPillars(c) || capItems(c).length !== 1) return;
-    var p = capItems(c)[0], head = personBy(c.head), cust = personBy(c.custodian);
-    out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c),
-               name: p.name || c.name || "", at: n,
-               owner: p.owner || (head ? head.name : ""),
-               custodian: p.custodian || (cust ? cust.name : ""),
-               measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+    if (!c || !c.id) return;
+    var head = personBy(c.head), cust = personBy(c.custodian);
+    /* §544.6: one row per inner pillar — one capability may become several,
+       and each keeps its own name. A capability planning in projects becomes
+       ONE row under the capability's own name, its project's milestones the
+       tactics; the project's id is kept as the pillar's, so nothing keyed on
+       it has to be found (§48). */
+    if (capPlansInPillars(c)) {
+      var list = capItems(c), many = list.length > 1;
+      list.forEach(function(p, i){
+        out.push({ capId: c.id, pillarId: p.id, was: topCapCode(c) + (many ? "." + (i + 1) : ""),
+                   name: p.name || c.name || "", at: n,
+                   owner: p.owner || (head ? head.name : ""),
+                   custodian: p.custodian || (cust ? cust.name : ""),
+                   measures: (p.measures || []).length, tactics: (p.tactics || []).length });
+        n++;
+      });
+      return;
+    }
+    var pr = (c.projects || [])[0];
+    if (!pr) return;
+    out.push({ capId: c.id, pillarId: pr.id, projectId: pr.id, fromProject: true,
+               was: topCapCode(c), name: c.name || pr.name || "", at: n,
+               owner: pr.owner || (head ? head.name : ""),
+               custodian: cust ? cust.name : "",
+               measures: 0, tactics: (pr.milestones || []).length });
     n++;
   });
   /* The code each row will read, worked out over the list as it WILL be —
@@ -8950,10 +9003,37 @@ function capFoldIntoTop(){
   var byId = {};
   (GROUP.capabilities || []).forEach(function(c){ if (c && c.id) byId[c.id] = c; });
   rows.forEach(function(r){
-    var c = byId[r.capId], p = capItems(c)[0];
-    /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
-       own ids too, and an object the page already holds a handle on stays
-       the same object (§48). */
+    var c = byId[r.capId], p;
+    if (r.fromProject) {
+      /* §544.6 — A PROJECT BECOMES A PILLAR WHOSE TACTICS ARE ITS
+         MILESTONES (Islam's own pick). The project's id becomes the
+         pillar's and each milestone keeps its own id, so every figure,
+         snapshot and report keyed on them still matches (§48). A finish
+         date becomes the ONE quarter it falls in, the date kept on the row
+         beside it, exactly as §447.1 times an action. */
+      var pr = (c.projects || []).filter(function(x){ return x && x.id === r.projectId; })[0];
+      p = { id: pr.id, code: "", name: r.name, sub: "", kind: "", theme: "",
+            owner: "", measures: [], tactics: [] };
+      (pr.milestones || []).forEach(function(m, i){
+        var t = { id: m.id || (pr.id + "-T" + (i + 1)), name: m.name || "", owner: m.owner || "",
+                  q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+        var mo = monthsOf(m.finish);
+        if (mo != null) t["q" + (Math.floor((mo % 12) / 3) + 1)] = 1;
+        if (m.finish) t.due = m.finish;
+        var st = String(m.status || "").toLowerCase();
+        if (st === "done") { t.status = "Done"; t.actual = 100; }
+        else if (st === "wip") t.status = "WIP";
+        p.tactics.push(t);
+      });
+      /* the record's own project list goes with it */
+      c.projects = (c.projects || []).filter(function(x){ return !x || x.id !== r.projectId; });
+    } else {
+      /* THE ROW ITSELF, not a copy of it: the measures and tactics keep their
+         own ids too, and an object the page already holds a handle on stays
+         the same object (§48). */
+      p = capItems(c).filter(function(x){ return x && x.id === r.pillarId; })[0];
+      if (!p) return;
+    }
     p.name = r.name;
     p.kind = SMPRules.PILLAR_CAP;
     p.owner = r.owner;
@@ -8966,6 +9046,18 @@ function capFoldIntoTop(){
   /* §540: and the company shows its pillars apart, so the tabs do not move. */
   var st = SMPRules.structureOf(GROUP) ? clone(SMPRules.structureOf(GROUP)) : {};
   st.top = st.top || {}; st.top.plan = st.top.plan || {}; st.top.plan.split = true;
+  /* §544.6 — AND THE COMPANY HAS TO BE SHOWING A PLAN, or the rows arrive
+     stored and invisible. Measured on a company that had never planned
+     anything of its own (Wander's): the three landed in `GROUP.items` and
+     the Strategy tab went on reading Foundation alone, because §428.2
+     starts the top layer's plan OFF and `pillar` is not in its components
+     until somebody ticks it. El Abd never showed this — its top already
+     carried both. Switched on here rather than left to be noticed (§61):
+     the move's whole promise is that nothing it carries disappears. */
+  delete st.top.plan.on;
+  if (!Object.keys(st.top.plan).length) delete st.top.plan;
+  st.top.on = (SMPRules.levelComponents(GROUP, "top") || []).slice();
+  if (st.top.on.indexOf("pillar") < 0) st.top.on.push("pillar");
   GROUP.structure = st;
   return rows.length;
 }

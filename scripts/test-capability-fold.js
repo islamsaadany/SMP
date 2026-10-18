@@ -244,12 +244,20 @@ console.log("1b · a joined box holding both kinds is untouched, on every surfac
 }
 
 /* ── 2 · THE MOVE REFUSES WHAT IT CANNOT CARRY ──────────────────────────── */
-console.log("2 · a capability that is not one clean pillar blocks the move, by name");
+console.log("2 · what the move cannot carry it refuses, by name — and what it can, it carries");
 {
   const clean = clientAt(readNow, elAbd());
   ok(JSON.stringify(clean(`capFoldBlockers()`)) === "[]", "the clean shape has no blockers",
      clean(`capFoldBlockers()`));
-  [["projects", "plans in"], ["two", "not one"], ["kos", "of its own"], ["fn", "held by"]].forEach(function (b) {
+  /* §544.6 LIFTED TWO OF THESE AND KEPT TWO, and the four are asserted
+     together so the line between them is visible (§218: rewritten to the
+     new rule, never loosened). Wander Development's own copy is what moved
+     it: one capability holding TWO pillars, one planning in PROJECTS, all
+     three held by a function. Islam answered each — two pillars become two
+     capabilities, a project becomes a capability whose tactics are its
+     milestones, and a record held by a function moves to the company once
+     the office has said that is where the capabilities live. */
+  [["kos", "of its own"], ["fn", "held by"]].forEach(function (b) {
     const run = clientAt(readNow, elAbd(b[0]));
     const blk = run(`capFoldBlockers()`);
     ok(blk.length === 1 && JSON.stringify(blk[0].why).indexOf(b[1]) >= 0,
@@ -257,6 +265,71 @@ console.log("2 · a capability that is not one clean pillar blocks the move, by 
     ok(run(`capFoldIntoTop()`) === -1 && run(`GROUP.capabilities.length`) === 5,
        "and the whole move is refused — all five records are still there", b[0]);
   });
+  /* held by a function, once the office says the capabilities are the
+     company's: the refusal lifts and nothing else about it changes */
+  {
+    const st = elAbd("fn");
+    st.group.structure = { cap: { at: "top", exists: true } };
+    const run = clientAt(readNow, st);
+    ok(JSON.stringify(run(`capFoldBlockers()`)) === "[]",
+       "…and the held-by refusal lifts once the office says they live in the company plan",
+       run(`capFoldBlockers()`));
+    ok(run(`capFoldIntoTop()`) === 5 && run(`GROUP.capabilities.length`) === 0,
+       "…and then all five move");
+  }
+  /* two inner pillars: two rows, each under its OWN name */
+  {
+    const run = clientAt(readNow, elAbd("two"));
+    ok(JSON.stringify(run(`capFoldBlockers()`)) === "[]", "two pillars is no longer a refusal",
+       run(`capFoldBlockers()`));
+    const plan = run(`capFoldPlan()`);
+    ok(plan.length === 6, "…it plans six rows out of five records", plan.length);
+    const was = plan.map(function (r) { return r.was; });
+    ok(was.filter(function (w) { return w.indexOf(".") > 0; }).length === 2,
+       "…and the two from one record are told apart in the rehearsal", was);
+    const was0 = run(`GROUP.items.length`);
+    ok(run(`capFoldIntoTop()`) === 6 && run(`GROUP.items.length`) === was0 + 6 && run(`GROUP.capabilities.length`) === 0,
+       "…and six pillars arrive beside the directions, the records gone",
+       [was0, run(`GROUP.items.length`), run(`GROUP.capabilities.length`)]);
+    ok(run(`GROUP.items.filter(function(p){ return p.kind === "Capability"; }).length`) === 6,
+       "…all six marked a capability, and the directions beside them untouched",
+       run(`GROUP.items.map(function(p){ return p.kind || "-"; })`));
+  }
+  /* a capability planning in projects: one row, its milestones the tactics */
+  {
+    const st = elAbd();
+    const c = st.group.capabilities[2];
+    c.format = "projects"; c.items = [];
+    c.projects = [{ id: "cap3-PR1", name: "A programme", owner: "Hany Nabil", outcomes: [],
+                    milestones: [{ id: "m1", name: "First step", finish: "Aug 26", status: "done" },
+                                 { id: "m2", name: "Second step", finish: "", status: "" }] }];
+    const run = clientAt(readNow, st);
+    ok(JSON.stringify(run(`capFoldBlockers()`)) === "[]", "a capability planning in projects is no longer a refusal",
+       run(`capFoldBlockers()`));
+    const row = run(`capFoldPlan().filter(function(r){ return r.fromProject; })[0]`);
+    ok(!!row && row.tactics === 2 && row.name === st.group.capabilities[2].name,
+       "…the rehearsal says one row, under the capability's own name, with two tactics", row);
+    ok(run(`capFoldIntoTop()`) === 5, "…and the move runs");
+    const got = run(`(function(){ var p = GROUP.items.filter(function(x){ return x.id === "cap3-PR1"; })[0];
+      return p ? { name:p.name, kind:p.kind, ts:p.tactics.map(function(t){ return [t.name, t.id, t.status, t.actual, t.q3, t.due]; }) } : null; })()`);
+    ok(!!got && got.kind === "Capability" && got.ts.length === 2,
+       "…the project IS the pillar, keeping its own id, with its milestones as tactics", got);
+    ok(!!got && got.ts[0][1] === "m1" && got.ts[0][2] === "Done" && got.ts[0][3] === 100 && got.ts[0][5] === "Aug 26",
+       "…each milestone keeps its id, its state and its date", got && got.ts[0]);
+    ok(!!got && got.ts[0][4] === 1, "…and is timed by the quarter its date falls in", got && got.ts[0]);
+  }
+  /* and a milestone carrying something a tactic cannot hold still refuses */
+  {
+    const st = elAbd();
+    const c = st.group.capabilities[2];
+    c.format = "projects"; c.items = [];
+    c.projects = [{ id: "cap3-PR1", name: "A programme", outcomes: [],
+                    milestones: [{ id: "m1", name: "First step", covers: "Q1-Q2" }] }];
+    const run = clientAt(readNow, st);
+    const blk = run(`capFoldBlockers()`);
+    ok(blk.length === 1 && JSON.stringify(blk[0].why).indexOf("covers") >= 0,
+       "a milestone that covers something is named, and refuses (§96.2: nothing dropped silently)", blk);
+  }
 }
 
 /* ── 3 · THE PLAN IS WHAT RUNS ──────────────────────────────────────────── */

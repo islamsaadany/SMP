@@ -65945,3 +65945,28 @@ So the office's answer is the whole of it: one switch on the company's capabilit
 **The checks.** `plan-level.py`'s *"and the capabilities follow into the company plan"* is reversed into the claim that matters — they do **not** follow, their side stays, and their card stays live (§218). `single-company.py` keeps §465's claims whole by having the fixture **say** where the capabilities live, which is the press the office makes. `checks/shape.py` asserts it at the screen: switch the units off and the capabilities are exactly where they were. Proved able to fail by putting the coupling back: 1 red in `shape.py`, 5 in `plan-level.py`.
 
 **Still open, and it is his sentence that names it:** *"a capability belongs to the company in general and maybe a business unit if chosen to"*. Today a capability RECORD is carried by a **function** (§334). Stage 3b made a capability an internal pillar of a box — the company's, or a unit's — which is exactly what he describes; what is left are the five records on Demo (2) and Wander Development (3) that have not moved yet. Moving them is what makes the Capabilities layer, its card, its Setup page, its navigation side and `capAtTop` itself disappear for everybody.
+
+### §544.6 — the move, taught what Wander needs
+Islam asked where capabilities sit on the tree, and the honest answer was: nowhere, because a capability is an internal pillar now — but Wander Development still holds the old kind, which is why they are in its navigation and not in its shape. He then described the shape he wants: *"We have two business units, and these two business units have their plans. The capabilities are on the company level… We say that the company level has only capabilities, right? That's what we will do, and it has two units. Every unit has its own pillars, and then the function has its own plans."*
+
+**Measured on Wander's own working copy before anything was written** (three units, not two — Commercial has no plan in it yet; thirteen functions; no divisions; the company's plan empty). The move refused all three capabilities, each for a different reason, which is the refusal doing its job:
+
+| Capability | Plans in | Holds | Refused because |
+|---|---|---|---|
+| Data Management | pillars | *Data analysis and dashboard* (5 measures, 5 tactics), *FFP – Fit-For-purpose tools* (9 measures, 1 tactic) | holds **two** pillars, not one; held by the Strategy Management Office |
+| Leadership and Development | pillars | *HIPOs Program & Talent Management* (5 measures, 4 tactics), owner HR | held by the Strategy Management Office |
+| Decision Making | **projects** | *Re-establishing financial and Business models* (5 milestones), owner BD | plans in projects, not pillars; held by the Strategy Management Office |
+
+Islam answered all three, and the move was taught each answer:
+
+- **Held by a function** is no longer a blocker **once the office has said the capabilities live in the company plan** (`capAtTop`). That setting is the statement; without it the refusal stands, because §7.1's other answer — a capability becomes a pillar of the function holding it — is still a real way to do this and nothing should guess between them.
+- **Two inner pillars become two capabilities**, each keeping its own name, measures and tactics. One record may become several; nothing is merged. The rehearsal tells them apart as `C001.1` and `C001.2`.
+- **A capability planning in projects becomes one capability** under its own name, the project's **milestones as its tactics**, timed by the quarter their finish date falls in — exactly as §447.1 times an action. The project's id becomes the pillar's and each milestone keeps its own, so nothing keyed on them has to be found (§48).
+
+**And the company has to be showing a plan.** Measured on Wander, whose company had never planned anything of its own: the rows landed in `GROUP.items` and the Strategy tab went on reading Foundation alone, because §428.2 starts the top layer's plan off and `pillar` is not in its components until somebody ticks it. El Abd never showed this — its top already carried both. The move switches them on now, because its whole promise is that nothing it carries disappears (§61).
+
+**What still refuses:** objectives of its own, a definition of its own, more than one project, nothing at all, and a milestone with a `covers` entered — a tactic has nowhere to put that and dropping it silently is the one thing this must not do (§96.2).
+
+**The rehearsal, on Wander's real numbers:** four rows — C001 *Data analysis and dashboard*, C002 *FFP – Fit-For-purpose tools*, C003 *HIPOs Program & Talent Management*, C004 *Decision Making* — 19 measures and 15 tactics on the company's Capabilities tab, the three units' 8 pillars untouched, the functions untouched, and the Capabilities side gone from the navigation. Nothing was written: the state lived in a browser tab.
+
+**The check** goes from 52 agreements to 62: the two refusals §544.6 lifts are rewritten into what now happens (two pillars → six rows out of five records, each marked a capability, the directions beside them untouched; a project → one pillar keeping its own id, its milestones keeping theirs, a done milestone arriving Done at 100 and timed into its quarter), the two it keeps are asserted unchanged, and the held-by refusal is asserted at **both ends** — it stands, and it lifts the moment the office says where the capabilities live.

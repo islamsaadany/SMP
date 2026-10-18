@@ -66658,3 +66658,30 @@ the plan line itself are kept, and that pressing the other brings it back.
 Both halves of the pair, because a control you can press one way and not the
 other is a trap (§61, §94.2). Proved able to fail: putting the old `if
 (shape)` back reds it **four ways**.
+
+### §544.15 — Meridian is closed, not parked
+
+Islam: *"forget meridian"*, after *"meridian is not live and not a
+priority"*.
+
+§544.11 left five questions open about its two capability records and said
+the move was waiting on him. It is not waiting any more — **it is not
+happening**, and the record says so rather than leaving a to-do nobody
+intends to do (§54.5).
+
+**WHAT THAT LEAVES IN THE DATABASE, said plainly rather than quietly
+dropped.** Meridian Group still holds `cap6` and `cap9` in `smp.capabilities`
+with their inner pillars, their project and its rows. Nothing reads them into
+a layer any more (§544.13), so they show in its company plan like any other
+client's — and the five things §544.11 could not answer (definitions, cap9's
+own objectives, cap6's outcome, the dated and stated rows, and `cap9-P2`
+marked `kind: "Direction"`) stay unanswered inside the records. They harm
+nobody while the tenant is not live. **If Meridian is ever switched on, this
+section is where to start**, and `scripts/meridian/look.sql` still reads it.
+
+**AND FOUR BACKUP TABLES ARE STILL THERE**, from El Abd's and Wander's moves:
+`smp.org_before_20261018`, `smp.capabilities_before_20261018`,
+`smp.org_before_wander_development_20261018` and
+`smp.capabilities_before_wander_development_20261018`. Both clients have been
+looked at and both are right, so these are droppable whenever Islam wants —
+they are named here so dropping them is a decision rather than a discovery.

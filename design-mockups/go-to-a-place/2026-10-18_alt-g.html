@@ -1,0 +1,171 @@
+<title>Going to a place</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6; --over-bg:#F3EEDF;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79; --none:#8A939F;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327;
+    --good-bg:#E4F0EA; --good-tx:#1F6248; --attn-bg:#F7EFD6;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --over-bg:#2E2510;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#7B848F;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93;
+      --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+      --panel:#0E1014; --panel-ink:#EAF0FA; --over:rgba(0,0,0,.55);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932; --over-bg:#2E2510;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA; --none:#7B848F;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --over:rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px));
+         padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .lede b{ color:var(--ink); }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:34px 16px; display:flex; justify-content:center; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .note b{ color:var(--ink-2); }
+  .good-v{ border-left:3px solid var(--good); padding:2px 0 2px 13px; margin:10px 0 0;
+           font-size:13px; color:var(--good-tx); max-width:62ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:42px 0 0; }
+  kbd{ display:inline-block; font:600 11px/1 var(--mono); color:var(--ink);
+       background:var(--surface-2); border:1px solid var(--field-line);
+       border-bottom-width:2px; border-radius:4px; padding:4px 6px; margin:0 1px; }
+
+  /* the product's own searchable list, lifted exactly */
+  .sspop{ background:var(--surface); border:1px solid var(--gold); border-radius:10px;
+          box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px;
+          width:min(380px,100%); box-sizing:border-box; }
+  .goch{ font:600 10px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+         color:var(--ink-3); padding:2px 8px 7px; display:flex; justify-content:space-between; }
+  .fld{ font:400 13px/1.45 var(--sans); padding:6px 9px; border:1px solid var(--field-line);
+        border-radius:6px; background:var(--surface); color:var(--ink); width:100%;
+        box-sizing:border-box; margin:0 0 6px; }
+  .fld::placeholder{ color:var(--none); }
+  .sslist{ max-height:238px; overflow-y:auto; }
+  .ssrow{ display:block; width:100%; text-align:left; font:inherit; font-size:13px;
+          color:var(--ink); background:none; border:0; border-radius:6px;
+          padding:6px 8px; cursor:pointer; box-sizing:border-box; }
+  .ssrow .sub{ color:var(--ink-3); font-size:11.5px; margin-left:7px; }
+  .ssrow.on{ background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
+  .ssrow.ssrow-at{ background:var(--surface-2); box-shadow:inset 2px 0 0 var(--gold); }
+  .ssrow.on.ssrow-at{ background:var(--over-bg); }
+  .ssempty{ font-size:12px; color:var(--none); padding:8px 4px; }
+  .gofoot{ border-top:1px solid var(--line-soft); margin-top:7px; padding:8px 8px 2px;
+           font-size:11.5px; color:var(--ink-3); display:flex; gap:12px; flex-wrap:wrap; }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:44px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){ .stage{ padding:22px 10px; } .gofoot{ gap:7px; } }
+</style>
+
+<div class="wrap">
+  <h1>Going to a place</h1>
+  <p class="lede">The last piece of heuristic 7. <kbd>Alt</kbd>+<kbd>G</kbd> opens a list of
+  every place you can reach, you type a few letters, and Enter takes you there.</p>
+  <p class="lede"><b>Almost none of this is new.</b> The list is the navigation's own buttons,
+  read straight off the page — so there is no second idea of what the places are, and no second
+  way of getting to one: picking a row presses that place's real button, which is exactly how
+  the product's existing <i>go to this unit</i> already works. The box and the rows are the
+  searchable dropdown's own, and its keys came with it in §536.</p>
+
+  <hr class="rule">
+  <span class="key">Alt+G <b>— just opened, nothing typed</b></span>
+  <div class="stage">
+    <div class="sspop">
+      <div class="goch"><span>Go to</span><span>13 places</span></div>
+      <input class="fld" placeholder="Type a few letters" aria-label="Find a place">
+      <div class="sslist">
+        <button class="ssrow on ssrow-at">Mobile<span class="sub">where you are</span></button>
+        <button class="ssrow">Group</button>
+        <button class="ssrow">Distribution<span class="sub">3 business units</span></button>
+        <button class="ssrow">B2C<span class="sub">3 business units</span></button>
+        <button class="ssrow">Retail Stores</button>
+        <button class="ssrow">B2B Ecomm</button>
+        <button class="ssrow">Consumer Electronics</button>
+        <button class="ssrow">Online Shop</button>
+      </div>
+      <div class="gofoot"><span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+        <span><kbd>Enter</kbd> go</span><span><kbd>Esc</kbd> close</span></div>
+    </div>
+  </div>
+  <p class="note">It opens on <b>where you are</b>, marked and already under the cursor — so
+  Alt+G then Escape costs nothing, and the list reads as a map rather than a blank box. The
+  count is there because a tenant with four places and one with forty want different things
+  from this, and the number says which you are in before you type.</p>
+
+  <span class="key">After typing <b>— three letters, one place left</b></span>
+  <div class="stage">
+    <div class="sspop">
+      <div class="goch"><span>Go to</span><span>1 of 13</span></div>
+      <input class="fld" value="ele" aria-label="Find a place">
+      <div class="sslist">
+        <button class="ssrow ssrow-at">Consumer Electronics</button>
+      </div>
+      <div class="gofoot"><span><kbd>&uarr;</kbd><kbd>&darr;</kbd> move</span>
+        <span><kbd>Enter</kbd> go</span><span><kbd>Esc</kbd> close</span></div>
+    </div>
+  </div>
+  <p class="good-v">The match is on the words anywhere in the name, not just the start —
+  &ldquo;ele&rdquo; finds Consumer <b>Ele</b>ctronics. That is what the product's existing
+  search box already does, so this inherits it rather than deciding it again.</p>
+
+  <span class="key">Nothing matches <b>— and it says so in words</b></span>
+  <div class="stage">
+    <div class="sspop">
+      <div class="goch"><span>Go to</span><span>none of 13</span></div>
+      <input class="fld" value="warehouse" aria-label="Find a place">
+      <div class="sslist">
+        <p class="ssempty">No place here is called that. Escape closes this.</p>
+      </div>
+      <div class="gofoot"><span><kbd>Esc</kbd> close</span></div>
+    </div>
+  </div>
+  <p class="note">An empty list with no sentence reads as a broken control. This one says what
+  happened and what to press &mdash; and the foot drops the keys that would now do nothing,
+  rather than naming keys with nothing behind them.</p>
+
+  <div class="ask">
+    <h2>What this is, and what it is not</h2>
+    <ul>
+      <li><b>No second list of places.</b> It reads the navigation's own buttons out of the
+      page. A place added tomorrow appears here without anybody being told.</li>
+      <li><b>No second way of going somewhere.</b> Picking a row presses the real button, so
+      everything that happens on a normal click &mdash; leaving edit mode, landing on the right
+      tab &mdash; happens here too, because it is the same press.</li>
+      <li><b>It shows only what you can reach.</b> The buttons it reads are the ones the
+      product drew for you, so somebody who holds one unit sees one place.</li>
+      <li><b>Places only, not tabs.</b> Tabs got their arrows in §544; a list mixing the two
+      would be two ideas in one box.</li>
+      <li><b>Alt+G is your letter</b>, and it joins Alt+S, Alt+D and Alt+E &mdash; one modifier
+      for everything that does something. It will not fire while you are typing.</li>
+    </ul>
+  </div>
+</div>

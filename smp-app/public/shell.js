@@ -64137,7 +64137,6 @@ var CLIENTSETUP = (function () {
     return out;
   }
   var CAP_BASE = null;
-  var BU_ASK = false;
   function structWrite(next){
     if (CAP_BASE !== null && next.cap && JSON.stringify(next.cap) === CAP_BASE) delete next.cap;
     GROUP[SMPRules.STRUCTURE] = next;
@@ -64627,44 +64626,30 @@ var CLIENTSETUP = (function () {
     if (top) {
     top.appendChild(el("p", "lab", "Called"));
     namePick(top, "topword", TOP_NAMES, "one", ro);
-    /* §448: WHERE IS THE STRATEGY PLANNED? (Islam: *"we might have an initial
-       button on the company level to say that we will plan on the company
-       level or we will plan on the unit level"*, then *"yes agreed"*.) It
-       replaces §447's On/Off on the business-units card, which described what
-       disappears rather than the decision being made. The store is the same
-       `structure.bu.exists`, so nothing moves for a client already set up:
-       absent is "on the business units". Choosing the company with units on
-       the register asks first, here, because it copies their plans across. */
-    var ph = el("div", "stsech stplanq"); ph.appendChild(el("span", "lab", "Where the strategy is planned"));
-    /* §465: the two answers are named for the level, Islam's own words. */
-    var plan = segButtons([[false, "Company level"], [true, "Units level"]],
-      lv.bu.exists, function (v) {
-        if (v) { BU_ASK = false; var nx = structNow(); delete nx.bu.exists; structWrite(nx); return; }
-        if (!UNIT_KEYS.length) { var n0 = structNow(); n0.bu.exists = false; structWrite(n0); return; }
-        BU_ASK = true; redraw();
-      });
-    plan.classList.add("stonoff"); plan.setAttribute("data-stplan", "1");
-    ph.appendChild(plan);
-    top.appendChild(ph);
-    if (BU_ASK && lv.bu.exists) {
-      var ask = el("div", "stask"); ask.setAttribute("data-buask", "1");
-      ask.appendChild(el("p", "", "Each " + W("unitword", "one", "business unit").toLowerCase() +
-        "'s plan moves onto the " + W("topword", "one", "company").toLowerCase() + "'s own page as directions, with every figure, and each one's own page is kept in the archive. " +
-        "The " + W("unitword", "many", "business units").toLowerCase() + " leave the navigation. Choosing the " +
-        W("unitword", "many", "business units").toLowerCase() + " again brings them back as they were."));
-      var go = el("button", "btn amber", "Move them and plan on the " + W("topword", "one", "company").toLowerCase()); go.type = "button"; go.setAttribute("data-buask-go", "1");
-      go.onclick = function () {
-        BU_ASK = false;
-        if (typeof buFoldIntoTop === "function") buFoldIntoTop();
-        var nx = structNow(); nx.bu.exists = false;
-        ["pillar", "swot"].forEach(function (c) { if (nx.top.on.indexOf(c) < 0) nx.top.on.push(c); });
-        structWrite(nx);
-      };
-      var no = el("button", "btn", "Cancel"); no.type = "button"; no.setAttribute("data-buask-no", "1");
-      no.onclick = function () { BU_ASK = false; redraw(); };
-      var row = el("div", "stbtns"); row.appendChild(go); row.appendChild(no); ask.appendChild(row);
-      top.appendChild(ask);
-    }
+    /* §544.4 — "WHERE IS THE STRATEGY PLANNED" IS GONE, and §448 with it.
+       Islam, of the shape screen: *"there's no question that now, if the plan
+       is on the company or in the business unit, when you go to the level on
+       the tree, you select: are there directions, are there pillars on the
+       company level, or are there directions or pillars or strategy on the
+       business unit level? You might even have both. What's the point of this
+       choice now?"*
+
+       None. Each level already answers it on its own card — the company's
+       plan is the Directions card's switch, the units' is the units' card's —
+       and BOTH CAN BE ON, which an either/or cannot say. It was a third
+       answer to a question already asked twice, and the one that could be
+       wrong. §448 replaced §447's On/Off on the business-units card with this
+       question; this puts that On/Off back, where it is symmetric with the
+       functions' (§418) and where the tree sends you.
+
+       AND OFF NOW MEANS OFF. The question did not only hide the units: it
+       COPIED every unit's plan onto the company page as directions and filed
+       the old pages (`buFoldIntoTop`). Islam, asked what switching off should
+       do now: *"just hide them, keep everything"* — which is spec 066 §2.2's
+       own words, *"nothing hides anything else"*, and the reversal of §447 that
+       spec called for. The fold is no longer reachable from the product; it
+       stays in config-data.js as the record of §447 and as the way three
+       checks make a company-level state, and is noted as debt. */
     structLevel(top, lv, "top", true);
     }
 
@@ -64824,13 +64809,16 @@ var CLIENTSETUP = (function () {
     if (want("bu")) {
     var bu = card("Third layer", row5);
     bu.setAttribute("data-stcard", "bu");
-    /* §465: shown switched off at company level, answered by the top card. */
-    if (!lv.bu.exists) hd(bu, held(false, "Answered by Where the strategy is planned, on the top card."));
+    /* §544.4: its own switch, the functions' card's exactly (§418). Off
+       hides the layer and keeps every plan, figure and page behind it. */
+    hd(bu, onOff(lv.bu.exists, function (v) {
+      var nx = structNow(); if (v) delete nx.bu.exists; else nx.bu.exists = false; structWrite(nx);
+    }, "bu|layer"));
     if (lv.bu.exists) {
       callBoxes(bu, "unitword", ro);
       structLevel(bu, lv, "bu");
       exceptBox(bu, "bu");
-    } else bu.appendChild(el("p", "sthid", "Off: the " + topLow + " plans its own (above)."));
+    } else bu.appendChild(el("p", "sthid", "Not shown in the navigation. Nothing entered is lost."));
     }
 
     /* §428: CAPABILITIES AS A LAYER OF THEIR OWN, after the functions, with

@@ -1,8 +1,10 @@
 """Where the plan lives: the Structure cards, and capabilities in one place (§465).
 
 Islam, approving design-mockups/structure-plan-level/2026-10-02_plan-level-v2.html:
-*"ok build it"*. The where-planned question reads Company level | Units level;
-the top card keeps its first and second sections and its plan becomes a
+*"ok build it"*. §544.4 took the where-planned question away — each level
+says on its own card whether it plans, and both can be on — so the units'
+layer carries an On/Off like the functions'; the top card keeps its first
+and second sections and its plan becomes a
 Directions card; capabilities get a card in the company plan beside it and
 keep the separate-layer card last, ONE of the two live at a time. The order is
 the same at both levels: top, directions, capabilities, second layer, units,
@@ -65,8 +67,9 @@ with sync_playwright() as p:
     ck("the tree's rows are the top, the units' layer, the units, the functions",
        rows == ["top", "bu@g", "bu", "fn"], rows)
     ck("the top level's card opens", lvl("top"))
-    ck("the question reads Company level | Units level",
-       safe(pg, "()=>[...document.querySelectorAll('[data-stplan] button')].map(b=>b.textContent).join('|')") == "Company level|Units level")
+    # §544.4: the either/or is gone; the units' own card answers it.
+    ck("the top card asks no where-planned question",
+       safe(pg, "()=>!document.querySelector('[data-stplan]')") is True)
     tags = safe(pg, TAGS, [])
     # §465: the top level brings its own card, its Directions and the
     # capabilities, in that order — the three that are one question.
@@ -105,22 +108,33 @@ with sync_playwright() as p:
     ck("…removes the place (an absence again)", safe(pg, "()=>!('at' in GROUP.structure.cap)") is True)
     ck("…and the layer and its side come back", safe(pg, CAPSIDE) is True and safe(pg, TAGS, [])[3:4] == ["cap"])
 
-    print("3 · company level")
-    press(pg, '[data-stplan] button:nth-child(1)')
-    ck("choosing Company level asks first", press(pg, '[data-buask-go]'))
-    ck("…and lands on it", safe(pg, "()=>!buExists() && SMPRules.capAtTop(GROUP)") is True)
+    print("3 · the units switched off, on their own card (§544.4)")
+    ck("switching the units off", lvl("bu") and press(pg, '[data-stsec="bu|layer"] button:nth-child(2)'))
+    ck("…and the capabilities follow into the company plan",
+       safe(pg, "()=>!buExists() && SMPRules.capAtTop(GROUP)") is True)
+    lvl("top")
     tags = safe(pg, TAGS, [])
     ck("the same three on the top, the capabilities in the plan and the layer greyed",
        tags == ["-", "dir", "cap", "caplayer"], tags)
     ck("…the layer card unpressable", safe(pg, LAYERHELD) is True)
-    ck("the units card shows its switch held off",
-       lvl("bu") and safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"bu\"]'); var b=[...c.querySelectorAll('.stonoff button')]; return b.length===2 && b.every(x=>x.disabled) && b[1].getAttribute('aria-pressed')==='true'}") is True)
+    ck("the units card shows its own switch, live, reading Off",
+       lvl("bu") and safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"bu\"]'); var b=[...c.querySelectorAll('.stonoff button')]; return b.length===2 && b.every(x=>!x.disabled) && b[1].getAttribute('aria-pressed')==='true'}") is True)
     lvl("top")
-    ck("the directions are switched on by the fold", safe(pg, "()=>!document.querySelector('[data-stcard=\"dir\"] .sthid') && !!document.querySelector('[data-stway=\"top|pillars\"]')") is True)
+    # §544.4 REVERSES THIS, and the reversal is the point (§218). The old
+    # button switched the company's directions on behind you, because it had
+    # just copied the units' plans there. Switching the units off copies
+    # nothing now, so it switches nothing on either: the company's plan is
+    # the company card's own answer, and it is still Off.
+    ck("the company's directions are NOT switched on behind you",
+       safe(pg, "()=>!!document.querySelector('[data-stcard=\"dir\"] .sthid') && !document.querySelector('[data-stway=\"top|pillars\"]')") is True)
+    ck("…and switching them on is the company card's own press",
+       press(pg, '[data-stsec="top|plan"] button:nth-child(1)') and
+       safe(pg, "()=>!document.querySelector('[data-stcard=\"dir\"] .sthid') && !!document.querySelector('[data-stway=\"top|pillars\"]')") is True)
+    press(pg, '[data-stsec="top|plan"] button:nth-child(2)')
     ck("no capabilities side in the navigation", safe(pg, CAPSIDE) is False)
 
-    print("4 · back to units level")
-    ck("choosing Units level", press(pg, '[data-stplan] button:nth-child(2)'))
+    print("4 · and switched back on")
+    ck("switching them on again", lvl("bu") and press(pg, '[data-stsec="bu|layer"] button:nth-child(1)'))
     ck("…the capabilities are a layer again, their side back", safe(pg, "()=>buExists() && !SMPRules.capAtTop(GROUP)") is True and safe(pg, CAPSIDE) is True)
 
     ck("no page errors", not errs, errs[:3])

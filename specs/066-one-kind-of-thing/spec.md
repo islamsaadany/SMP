@@ -343,6 +343,7 @@ eight versions): *"the shape is good, let's build stage 4"*.
 | A layer per kind | Each bottom kind carries its own layer above it, created by the kind that needs one and named per kind where a client has two. Read from use, stored as an absence | `layerOn`, `coOnLayer`, `layerCompanies`, `layerWords` |
 | The navigation | Chosen on the row, not derived. Four rows can be a side; unsaid, each answers what `navSides()` answers today | `navPicked`, `navRowUnsaid`, `companyUnitSides` |
 | The capabilities step | Gone. A capability is an internal pillar (stage 3b); the records a client still holds are managed on Setup › Capabilities, named on the tree | — |
+| Where the plan lives | §448's "Where the strategy is planned" gone. Each level says on its own card whether it plans and **both can be on**; the units' layer carries an On/Off like the functions'. Off hides and keeps — nothing is copied (§2.2's reversal of §447, finished) | `structure.bu.exists` |
 
 **Proof:** `scripts/test-shape.js` 30/0 over Raya's shape and El Abd's,
 proved able to fail four ways (2 / 1 / 2 / 2 red); `checks/shape.py` all

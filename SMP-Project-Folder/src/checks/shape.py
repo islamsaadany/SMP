@@ -237,7 +237,30 @@ with sync_playwright() as p:
     ck("…and unticking them leaves the row as it started",
        ev(pg, "()=>navSides().map(s=>s.label).join(',')", "") == sides0, ev(pg, "()=>navSides().map(s=>s.label).join(',')"))
 
-    print("\n6 · the console")
+    print("\n6 · both levels can plan at once (§544.4)")
+    # Islam, of the where-planned question: *"there's no question that now
+    # … you might even have both. What's the point of this choice now?"*
+    # So: the either/or is gone, and the state it could not express — the
+    # company planning AND the units planning — is reachable and real.
+    ev(pg, "()=>{current='setup'; currentSub='start'; paint();}"); pg.wait_for_timeout(400)
+    press(pg, ".csetup .wzstep[data-step=shape]", 400)
+    press(pg, ".csetup [data-shlvl=top]", 350)
+    ck("the top card asks no where-planned question",
+       ev(pg, "()=>!document.querySelector('.csetup [data-stplan]')", False))
+    ck("switching the company's own plan on", press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(1)', 400))
+    ck("…leaves the units planning too, both on at once",
+       ev(pg, "()=>SMPRules.planOn(GROUP,'group') && buExists() && SMPRules.planOn(GROUP, UNIT_KEYS[0])", False),
+       ev(pg, "()=>[SMPRules.planOn(GROUP,'group'), buExists(), SMPRules.planOn(GROUP, UNIT_KEYS[0])]"))
+    ck("…and both are on the pages: the company's Strategy tab and the units' sides",
+       ev(pg, """()=>{var g=allowed(SUBS.group,'group').map(d=>d.k);
+         return g.indexOf('strategy')>=0 && navSides().some(s=>s.fold==='units')}""", False))
+    ck("switching the units off leaves the company's plan exactly as it was",
+       press(pg, ".csetup [data-shlvl=bu]", 350) and press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(2)', 400) and
+       ev(pg, "()=>SMPRules.planOn(GROUP,'group')", False) is True)
+    press(pg, ".csetup [data-shlvl=bu]", 350); press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 400)
+    press(pg, ".csetup [data-shlvl=top]", 350); press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)', 400)
+
+    print("\n7 · the console")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

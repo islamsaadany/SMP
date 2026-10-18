@@ -214,8 +214,17 @@ if (TENANT) {
   SETPATH = SCHEMA;
 }
 var ORG = TB("org"), CAPS = TB("capabilities"), PPL = TB("people");
-var BK = TENANT ? "smp.org_before_" + stamp : "org_before_" + stamp;
-var BKC = TENANT ? "smp.capabilities_before_" + stamp : "capabilities_before_" + stamp;
+/* §544.9 — THE BACKUP TABLES CARRY THE CLIENT, not just the date. They did
+   not, and Wander's file stopped on `relation "org_before_20261018" already
+   exists` — El Abd's backup, made from the same generator on the same day.
+   One client's safety copy blocking another client's move is a name that is
+   not an address (§374's own lesson, in a different place). The transaction
+   rolled back and nothing was written, which is the file working; the name
+   is the fault. A per-schema run keeps the bare name, because there the
+   schema IS the client. */
+var SUFFIX = (TENANT ? String(TENANT).replace(/[^a-z0-9]+/g, "_") + "_" : "") + stamp;
+var BK = TENANT ? "smp.org_before_" + SUFFIX : "org_before_" + stamp;
+var BKC = TENANT ? "smp.capabilities_before_" + SUFFIX : "capabilities_before_" + stamp;
 
 L.push("-- 0 · WHICH CLIENT IS WHICH? Run this first, on its own. It only reads, and");
 L.push("--     it makes the database name itself rather than asking you to know. The");
@@ -298,6 +307,13 @@ PROJ.forEach(function (c) {
   L.push("     AND (coalesce(status,'') <> '' OR pct IS NOT NULL OR coalesce(note,'') <> '' OR coalesce(due,'') <> '');");
   L.push("  IF n <> 0 THEN RAISE EXCEPTION '% deliverables carry a state, a date or a note, which this file does not translate', n; END IF;");
 });
+/* §544.9: and the backup tables are checked HERE, not tripped over at the
+   CREATE. A collision is a plain sentence in the preconditions rather than
+   `relation "..." already exists` forty lines in. */
+L.push("  -- the safety copies this file is about to make are not already there");
+L.push("  IF to_regclass(" + q(BK) + ") IS NOT NULL OR to_regclass(" + q(BKC) + ") IS NOT NULL THEN");
+L.push("    RAISE EXCEPTION 'the backup tables " + BK.replace(/'/g, "''") + " and " + BKC.replace(/'/g, "''") +
+       " already exist — this file has run before, or they were left from an earlier run; look at them and drop them first'; END IF;");
 L.push("  SELECT jsonb_array_length(coalesce(extra->'items','[]'::jsonb)) INTO n FROM " + ORG +
        " WHERE " + WORG + ";");
 L.push("  IF n <> " + nBefore + " THEN");

@@ -66012,3 +66012,15 @@ What `scripts/stage3-move-sql.js` had to learn, all of it from Wander:
 - the same statements pointed at **another client** raise *this is not Wander Development* and change nothing.
 
 The file is `scripts/wander/move.sql`, with the two read-only looks beside it.
+
+### §544.9 — one client's safety copy blocked another client's move
+Islam ran Wander's file and it stopped: `relation "org_before_20261018" already exists`. The transaction rolled back and **nothing was written** — the file working exactly as it should. The fault was the name.
+
+The backup tables carried the **date** and not the **client**, so El Abd's safety copy, made by the same generator on the same day, sat in the way of Wander's. A name that cannot tell two clients apart is not an address (§374's lesson, in a different place).
+
+Two changes, and the second is the one that matters more:
+
+- the copies are `smp.org_before_<client>_<date>` now, per tenant;
+- and **the collision is a precondition**, not a `CREATE TABLE` tripped over forty lines in: *"the backup tables … already exist — this file has run before, or they were left from an earlier run; look at them and drop them first."* An error forty lines into a transaction is a reader's puzzle; a sentence in the preconditions is an instruction.
+
+**Re-rehearsed on a fresh throwaway PostgreSQL**, with the collision put there on purpose: the precondition names it and nothing is written; with the table dropped, the file runs clean and the result is **again identical, row for row and key for key, to the product's own move**; a second run is still refused by the capability count.

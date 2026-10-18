@@ -1717,7 +1717,6 @@ var CLIENTSETUP = (function () {
        second sections; its plan leaves for a Directions card, and the
        capabilities the company carries get a card beside it. The order is the
        same at both levels — what a card holds is what changes. */
-    var atCo = !lv.bu.exists;
     var topOne = W("topword", "one", "company"), topLow = topOne.toLowerCase();
     var capTop = SMPRules.capAtTop(GROUP);
     var capWord = W("capability", "many", "Capabilities");
@@ -1805,29 +1804,28 @@ var CLIENTSETUP = (function () {
         st.appendChild(ssel); sr.appendChild(st); dr.appendChild(sr);
       }
       planWays(dr, "top", "group", [topWayNow], ["pillar"]);
-    } else dr.appendChild(el("p", "sthid", atCo
-      ? "Off: the " + topLow + " plans nothing of its own."
-      : "Off: the plan is at units level."));
+    } else dr.appendChild(el("p", "sthid", "Off: the " + topLow + " plans nothing of its own."));
 
     /* Capabilities live in ONE place at a time: in the company plan (this
-       card) or as a layer of their own (the last card). At company level they
-       are always the company's; at units level the office may move them here,
-       which greys the layer card. The settings travel with them, so whichever
-       card holds them carries data-stcard="cap" and the On/Off "cap|layer". */
+       card) or as a layer of their own (the last card), and the OFFICE says
+       which. The settings travel with them, so whichever card holds them
+       carries data-stcard="cap" and the On/Off "cap|layer".
+
+       §544.5: the business units used to decide this — switching them off
+       moved the capabilities here on its own, and the switch was not drawn
+       at all. Islam: *"switching units off is not relevant to the
+       capabilities … what's the relation?"* None; it was §447's fold
+       dragging them along, and the fold is gone (§544.4). One switch, always
+       drawn, always the office's. */
     var cc = card(topOne + " " + capWord.toLowerCase(), row2);
-    if (atCo) {
-      cc.setAttribute("data-stcard", "cap");
-      capCard(cc, null, "Off: the " + topLow + " carries no " + capWord.toLowerCase() + ".", true);
-    } else {
-      cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
-      hd(cc, onOff(capTop, function (v) {
-        var nx = structNow();
-        if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
-        structWrite(nx);
-      }, "cap|top"));
-      if (capTop) capSettings(cc, true);
-      else cc.appendChild(el("p", "sthid", "Off: they are their own layer (below)."));
-    }
+    cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
+    hd(cc, onOff(capTop, function (v) {
+      var nx = structNow();
+      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
+      structWrite(nx);
+    }, "cap|top"));
+    if (capTop) capSettings(cc, true);
+    else cc.appendChild(el("p", "sthid", "Off: they are their own layer (below)."));
     }
 
     /* §418: a layer the client does not have is switched off as a whole —

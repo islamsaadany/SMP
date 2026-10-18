@@ -260,7 +260,23 @@ with sync_playwright() as p:
     press(pg, ".csetup [data-shlvl=bu]", 350); press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 400)
     press(pg, ".csetup [data-shlvl=top]", 350); press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)', 400)
 
-    print("\n7 · the console")
+    # §544.5: and the capabilities have nothing to do with the units.
+    # Islam: *"switching units off is not relevant to the capabilities.
+    # A capability is something that belongs to the company in general and
+    # maybe a business unit if chosen to. What's the relation?"* None.
+    where0 = ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", [])
+    ck("(fixture) the capabilities are a layer of their own, with a side",
+       where0 == [False, True], where0)
+    ck("switching the units off leaves them exactly there",
+       press(pg, ".csetup [data-shlvl=bu]", 350) and press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(2)', 450) and
+       ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", []) == where0,
+       ev(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP), navSides().map(s=>s.fold)]"))
+    ck("…and the office's own switch for them is drawn, whatever the units do",
+       press(pg, ".csetup [data-shlvl=top]", 350) and
+       ev(pg, "()=>{var b=[...document.querySelectorAll('.csetup [data-stsec=\"cap|top\"] button')]; return b.length===2 && b.every(x=>!x.disabled)}", False))
+    press(pg, ".csetup [data-shlvl=bu]", 350); press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 450)
+
+    print("\n8 · the console")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

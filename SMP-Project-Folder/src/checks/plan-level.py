@@ -110,13 +110,21 @@ with sync_playwright() as p:
 
     print("3 · the units switched off, on their own card (§544.4)")
     ck("switching the units off", lvl("bu") and press(pg, '[data-stsec="bu|layer"] button:nth-child(2)'))
-    ck("…and the capabilities follow into the company plan",
-       safe(pg, "()=>!buExists() && SMPRules.capAtTop(GROUP)") is True)
+    # §544.5 REVERSES WHAT THIS USED TO ASSERT, and the reversal is the
+    # point (§218). Islam: *"switching units off is not relevant to the
+    # capabilities … what's the relation?"* None — it was §447's fold
+    # dragging them along, and the fold is gone. The office's answer is the
+    # whole of it, so switching the units off leaves them exactly where they
+    # were, their side on the row and their own card live.
+    ck("…and the capabilities DO NOT follow: they stay where the office put them",
+       safe(pg, "()=>!buExists() && SMPRules.capAtTop(GROUP)===false") is True,
+       safe(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP)]"))
+    ck("…their side is still on the row", safe(pg, CAPSIDE) is True)
     lvl("top")
     tags = safe(pg, TAGS, [])
-    ck("the same three on the top, the capabilities in the plan and the layer greyed",
-       tags == ["-", "dir", "cap", "caplayer"], tags)
-    ck("…the layer card unpressable", safe(pg, LAYERHELD) is True)
+    ck("the same three on the top, the capabilities' card still offering the move",
+       tags == ["-", "dir", "capco", "cap"], tags)
+    ck("…and the layer card is live, not greyed", safe(pg, LAYERHELD) is False)
     ck("the units card shows its own switch, live, reading Off",
        lvl("bu") and safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"bu\"]'); var b=[...c.querySelectorAll('.stonoff button')]; return b.length===2 && b.every(x=>!x.disabled) && b[1].getAttribute('aria-pressed')==='true'}") is True)
     lvl("top")
@@ -131,7 +139,7 @@ with sync_playwright() as p:
        press(pg, '[data-stsec="top|plan"] button:nth-child(1)') and
        safe(pg, "()=>!document.querySelector('[data-stcard=\"dir\"] .sthid') && !!document.querySelector('[data-stway=\"top|pillars\"]')") is True)
     press(pg, '[data-stsec="top|plan"] button:nth-child(2)')
-    ck("no capabilities side in the navigation", safe(pg, CAPSIDE) is False)
+    ck("the capabilities' side is untouched by the units' switch", safe(pg, CAPSIDE) is True)
 
     print("4 · and switched back on")
     ck("switching them on again", lvl("bu") and press(pg, '[data-stsec="bu|layer"] button:nth-child(1)'))

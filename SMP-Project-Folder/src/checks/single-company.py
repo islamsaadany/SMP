@@ -106,9 +106,14 @@ with sync_playwright() as p:
        back[0] is True and back[1] > 0 and back[2] == keep0, [back, keep0])
     # §447's fold, run directly — everything below is what IT does.
     ck("the fold is still there to be run", safe(pg, "()=>typeof buFoldIntoTop==='function'") is True)
+    # §544.5: the capabilities no longer follow the units off — the office
+    # says where they live — so the fixture says it, which is the press the
+    # office makes on the company's capabilities card. §465's claims below
+    # are about THAT answer and are unchanged.
     safe(pg, """()=>{ buFoldIntoTop();
       var st = JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));
       st.bu = Object.assign({}, st.bu||{}, {exists:false});
+      st.cap = Object.assign({}, st.cap||{}, {at:'top'});
       st.top = Object.assign({}, st.top||{}, {on:(SMPRules.levelComponents(GROUP,'top')||[]).slice()});
       ['pillar','swot'].forEach(function(c){ if (st.top.on.indexOf(c)<0) st.top.on.push(c); });
       GROUP[SMPRules.STRUCTURE] = st; paint(); }""")

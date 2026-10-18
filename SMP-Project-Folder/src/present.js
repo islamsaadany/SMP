@@ -319,6 +319,36 @@ function competeSlides(u){
     '<tr><th class="cmprow">Measure</th>' + cells(function(v){ return '<td>' + ul(v.measure) + '</td>'; }) + '</tr>' +
     '</tbody></table></section>'];
 }
+/* ── §553.2 — "WHERE IT STANDS", BUILT ONCE FOR EVERY KIND OF BOX ───────
+   Stage 5 (b). A box that plans in PILLARS ends its deck on three readings —
+   its objectives, its pillars and its execution — and a box that plans in
+   PROJECTS ended on nothing at all: no Overall performance divider and no
+   standing, so a function presenting its projects never said how it did.
+
+   WHY IT IS NOT A COPY OF THE PILLARS SLIDE. A projects box has no pillars
+   score — `unitPillars` answers null for it — so pasting that slide would
+   print an empty cell where the middle reading goes. What it HAS is its
+   objectives (`capKOScore`) and its execution (`capExec`), measured. So the
+   slide is the same slide and the CELLS are whatever the box has, which is
+   what one template means: the shape is shared, the content is the box's.
+
+   ONE DESCRIPTION, NOT TWO (§53.5). Writing a second copy of this markup
+   beside `deckSlidesFn` is exactly the drift stage 5 exists to remove, so
+   both callers build cells and hand them here. A change to the wording, the
+   bands or the footer reaches both by construction. */
+function standCell(label, val, sub){
+  return '<div class="headcell"><span class="dlab">' + label + '</span>' +
+    '<b class="' + dBand(val) + '">' + dPct(val) + '</b>' +
+    '<span class="headsub">' + sub + '</span></div>';
+}
+function standSlideOf(name, cells, foot){
+  cells = cells.filter(Boolean);
+  return '<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
+    '><h2>Where ' + name + ' stands</h2>' +
+    '<div class="headgrid' + (cells.length > 2 ? ' three' : '') + '">' +
+    cells.join("") + '</div><p class="headfoot">' + foot + '</p></section>';
+}
+
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -420,27 +450,18 @@ function deckSlides(u){
      projector does not draw one either. fnKoCounted() answers true for
      everything that is not a function, so a unit's slide is unchanged. */
   var pl = unitPillars(u), koShown = fnKoCounted(u.ukey) ? SMPRules.shown(u.keyObjectives).length : 0;
-  var standSlide = ('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where ' + (u.fnKey || u.topLayer ? esc(u.name) : "the unit") + ' stands</h2>' +
-    '<div class="headgrid' + (koShown ? ' three' : '') + '">' +
-      (koShown
-        ? '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
-          '<b class="' + dBand(ko) + '">' + dPct(ko) + '</b>' +
-          '<span class="headsub">' + (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare") +
-          '</span></div>'
-        : '') +
-      '<div class="headcell"><span class="dlab">' + L("pillar","bu") + ' performance</span>' +
-        '<b class="' + dBand(pl) + '">' + dPct(pl) + '</b>' +
-        '<span class="headsub">' + itemsNow(u).length + ' ' + esc(L("pillar","bu")) +
-          ', by their measures</span></div>' +
-      '<div class="headcell"><span class="dlab">Execution performance</span>' +
-        '<b class="' + dBand(ex) + '">' + dPct(ex) + '</b>' +
-        '<span class="headsub">' + dPct(unitExec(u)) + ' delivered against ' +
-          dPct(unitPlan(u)) + ' planned</span></div>' +
-    '</div><p class="headfoot">' +
+  /* §553.2: the cells are this box's; the slide is everyone's. */
+  var standSlide = standSlideOf(
+    (u.fnKey || u.topLayer ? esc(u.name) : "the unit"),
+    [ koShown && standCell(L("keyobj","bu") + ' performance', ko,
+        (dtag ? dtag + " against the last cycle" : "no earlier cycle to compare")),
+      standCell(L("pillar","bu") + ' performance', pl,
+        itemsNow(u).length + ' ' + esc(L("pillar","bu")) + ', by their measures'),
+      standCell('Execution performance', ex,
+        dPct(unitExec(u)) + ' delivered against ' + dPct(unitPlan(u)) + ' planned') ],
     (koShown ? 'Objectives measure what was committed to. ' : '') +
     esc(L("pillar","bu")) + ' measure how the work set against them is going. ' +
-    'Execution measures whether that work is landing on time.</p></section>');
+    'Execution measures whether that work is landing on time.');
 
   /* ── AND IT IS SAID LAST (§254.4) ──────────────────────────────────────
      Islam: *"where the units stands to be the last slide"*, and *"move the
@@ -1364,6 +1385,42 @@ function deckSlidesFn(subject){
 
   /* §243: the same rule as a unit's deck — drawn only when a note is written.
      One question, one answer on both decks (§53.5). */
+  /* §553.2 — AND IT SAYS HOW IT DID. A projects box ended on its last
+     milestone: no Overall performance divider, no standing, nothing that
+     answers the question the review is for. The pillars deck has said this
+     since §254.4 (Islam: *"where the units stands to be the last slide"*),
+     and there was never a decision that a projects box should not — it
+     simply fell between two builders.
+
+     THE CELLS IT HAS, NOT THE CELLS THE OTHER ONE HAS: no pillars reading,
+     because it has no pillars. Its objectives where it has them (§515.2's
+     P4 rule — `holderHasKOs` is the same question the PAGE asks, so the two
+     cannot disagree), and its execution, which `capExec` counts the one way
+     §515.2's P2 settled. Drawn only when there IS a reading, or the slide is
+     a heading over three dashes (§45.2).
+
+     AND IT GOES BEFORE THE NOTES, which is where a unit's is: a unit reads
+     sperf, pillars, stand, notes, end. The first draft of this pushed it
+     after them, so a projects box alone would have ended notes, sperf,
+     stand — the same slides in a different order from every other box,
+     which is the drift this stage exists to remove, introduced by the
+     change meant to remove it. `checks/projects-box-stands.py` caught it. */
+  var exTally = capExec(f) || {}, exPct = exTally.pct;
+  var koHere = holderHasKOs(f) ? capKOScore(f) : null;
+  if (exPct != null || koHere != null) {
+    S.push(sectSlide("sperf", "After the Overall performance divider",
+      "Overall performance",
+      "Where " + esc(f.name) + " stands, and what the cycle is remembered for.",
+      null));
+    S.push(standSlideOf(esc(f.name),
+      [ koHere != null && standCell(L("keyobj","bu") + ' performance', koHere,
+          'by their measures'),
+        exPct != null && standCell('Execution performance', exPct,
+          (exTally.done || 0) + ' of ' + (exTally.due || 0) + ' done that are due') ],
+      (koHere != null ? 'Objectives measure what was committed to. ' : '') +
+      'Execution measures whether the work is landing on time.'));
+  }
+
   var fnote = cycleNote(noteKey);
   if (fnote) S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +

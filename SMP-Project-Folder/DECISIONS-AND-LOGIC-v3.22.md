@@ -66790,3 +66790,65 @@ work", "How it is doing" were written out of the air while
 commit. Islam: *"that's a very strange components. did you assume that?"*
 Every name in it is measured now, and `drive-the-mockup.py` asserts the
 headings are the product's so the same fault cannot return silently.
+
+### §553.2 — Stage 5 (b): a box that plans in projects says how it did
+
+A pillars box has ended its deck on its readings since §254.4 — Islam:
+*"where the units stands to be the last slide"*. A projects box ended on its
+last milestone: no Overall performance divider, no standing, nothing
+answering the question the review is for. There was never a decision that it
+should not. It fell between two builders.
+
+**NOT A COPY OF THE PILLARS SLIDE.** A projects box has no pillars score —
+`unitPillars` answers null for it — so pasting that slide would print an
+empty cell where the middle reading goes. What it HAS, measured: its
+objectives (`capKOScore`, where `holderHasKOs` says it has them — the same
+question the PAGE asks, so the two cannot disagree) and its execution
+(`capExec`, counted the one way §515.2's P2 settled). Finance reads 86% and
+84%, 5 of 12 done.
+
+**SO THE SLIDE IS THE SAME SLIDE AND THE CELLS ARE THE BOX'S** — which is
+what one template means, and the first real piece of it. `standCell` and
+`standSlideOf` are built once and both decks hand them cells; writing a
+second copy of that markup beside `deckSlidesFn` is exactly the drift this
+stage exists to remove.
+
+**MEASURED, NOT ASSUMED: 12 DECKS UNCHANGED, 8 MOVED.** Every deck of the
+worked example was compared against main in a browser. The twelve that did
+not move are every unit, the company and the pillars function — so the
+refactor of the slide they already had moved none of them. The eight that
+moved are the seven projects functions and the one projects capability, each
+gaining the divider and the standing and nothing else.
+
+**AND THE CHECK CAUGHT A FAULT THE CHANGE INTRODUCED.** The first draft
+pushed the new slides AFTER the notes, so a projects box alone would have
+read notes → performance → standing while every other box reads performance
+→ standing → notes. The same slides in a different order from everything
+else, introduced by the change meant to stop exactly that. It goes before
+the notes now, and the check asserts the ORDER on both kinds rather than
+comparing the two lists literally — a projects box with no cycle note has no
+notes slide, which is content, not order, so the order is proved on one that
+has been given a note through the product's own `setCycleNote` (§42; the
+first draft of the check wrote `CYCLE.notes`, which nothing reads).
+
+**`checks/deck-strip.py` IS REWRITTEN, NEVER LOOSENED (§218).** It read
+`len(pills) == len(fpw) + 2` — the two being COVER and END, every structural
+stamp a projects box had. It is three now. Rewritten as AGREEMENT rather
+than as three (§94.8): the frame a projects box carries must be the frame a
+pillars box carries, read in the same run, which is what the assertion was
+really claiming all along. 33/0, up from 32.
+
+**Proof:** `checks/projects-box-stands.py` 22/0, proved able to fail two ways
+— taking the standing away again reds it 10 ways, giving it the pillars cell
+it does not have reds it 2. `presentation-parts`, `deck-figures`,
+`deck-strip`, `presentation-timer`, `capability-report-column` all good.
+
+**STILL OPEN, AND IT IS ISLAM'S TO DECIDE (§54.5).** He noted alongside this:
+*"the user view of a performance where he opens the presentation is not clear
+as the user only sees the performance of his directions in the presentation
+directly"*. Measured: a direction owner's deck carries its readings in the
+HEADER of every slide — `Key Measures 95% · Execution —` on the title page,
+the measures page, the categories page and the tactics page — and has no
+moment that presents them. The numbers are not missing; they are in the
+corner of everything and announced by nothing. What a part-owner's standing
+should be is a design question, not a merge, and nothing is built for it here.

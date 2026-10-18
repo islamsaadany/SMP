@@ -520,23 +520,38 @@ with sync_playwright() as p:
     ck("...keyed by the fn: target the server authorises",
        btn and btn[0][0] == DEST, btn)
 
+    # §534.2: THE REFUSAL NO LONGER SPEAKS IN A BROWSER BOX, so a box raised
+    # here is a regression rather than the thing being measured. Recorded for
+    # the whole section and asserted once, after both refusals.
+    boxes = []
+    pg.on("dialog", lambda d: (boxes.append(d.message), d.dismiss()))
+
     def press():
-        """Press Submit and hand back whatever it said. A build with the control
-        REMOVED must fail readably rather than throw a stack trace 30 seconds
-        later -- a crash is a failure, but a failure nobody can read is one
-        somebody re-runs instead of fixing."""
+        """Press Submit and hand back the reason the PAGE gives for refusing.
+
+        §534.2 deleted the box this used to read. The same list is in the
+        bubble the dimmed button carries (§221, §163 -- it opens on hover AND
+        on focus) and in the bar beneath, which names the places holding it
+        and walks to the exact box; the box was the third telling, and the
+        only one that could not be read before pressing.
+
+        What is asserted is unchanged -- the WORDS of the refusal, and that
+        nothing was submitted. They are read off the control now rather than
+        out of a dialog. A build with the control REMOVED must still fail
+        readably rather than throw a stack trace 30 seconds later: a crash is
+        a failure, but a failure nobody can read is one somebody re-runs
+        instead of fixing."""
         if not pg.query_selector("[data-submit]"):
             return "(there is no Submit to press)"
-        said = {}
-        pg.once("dialog", lambda d: (said.update(m=d.message), d.dismiss()))
-        # §221: THE BUTTON IS DIMMED FOR EXACTLY THESE REASONS NOW, and
-        # Playwright treats `aria-disabled` as disabled and refuses to click
-        # it — which is itself worth knowing. `force` presses it anyway,
-        # because the click handler is still the enforcement: the dimming is
-        # the explanation given BEFORE the press, not a replacement for the
-        # refusal after it, and this section is about the refusal.
+        # §221: THE BUTTON IS DIMMED FOR EXACTLY THESE REASONS, and Playwright
+        # treats `aria-disabled` as disabled and refuses to click it -- which is
+        # itself worth knowing. `force` presses it anyway, because the click
+        # handler is still the enforcement: the dimming is the explanation given
+        # BEFORE the press, not a replacement for the gate behind it.
+        why = pg.eval_on_selector("[data-submit]",
+                                  "e => e.getAttribute('data-tip') || ''")
         pg.click("[data-submit]", timeout=3000, force=True); pg.wait_for_timeout(350)
-        return said.get("m", "")
+        return why
 
     # 1 · a row that owes a per-cent stops it (§104.10 with teeth)
     pg.evaluate("""() => {
@@ -559,6 +574,10 @@ with sync_playwright() as p:
     said = press()
     ck("a figure at risk with no note refuses it too",
        "no note" in said and not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
+    # Both halves of §534.2 at once: the refusal is still said, and it is no
+    # longer said twice. A build that kept the box passes everything above
+    # this line and fails here.
+    ck("...and neither refusal raises a browser dialog (§534.2)", not boxes, boxes)
 
     # 3 · nothing in the way -> it goes, and the dot the tab has been showing
     #     since §69.9 finally has something that clears it

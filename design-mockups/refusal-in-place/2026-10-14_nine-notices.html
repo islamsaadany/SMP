@@ -1,0 +1,460 @@
+<title>Nine refusals</title>
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#FBEAE7;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C; --attn:#C9A24D;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+      --warn-bg:#33241A; --warn-tx:#E1935F; --attn:#D9B665;
+      --good-bg:#1B3129; --good-tx:#8FD3B0;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#32211F;
+    --warn-bg:#33241A; --warn-tx:#E1935F; --attn:#D9B665;
+    --good-bg:#1B3129; --good-tx:#8FD3B0;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px; padding-left:20px; padding-right:20px; }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:30px 18px; display:flex; justify-content:center; }
+  .stage.plain{ background:var(--surface-2); padding:24px 18px; }
+  .stage.pair{ gap:18px; flex-wrap:wrap; align-items:flex-start; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .shapehead{ font-size:19px; margin:44px 0 4px; letter-spacing:-.1px; }
+  .shapehead span{ font-size:12.5px; color:var(--ink-3); font-weight:400; letter-spacing:0; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:40px 0 0; }
+
+  /* the browser's own dialog — what every one of the nine is today */
+  .osdlg{ background:var(--surface); border:1px solid var(--line); border-radius:12px;
+          width:min(430px,100%); padding:20px 22px 16px; box-shadow:0 18px 50px rgba(0,0,0,.22); }
+  .osdlg .host{ font-size:12.5px; color:var(--ink-3); margin:0 0 12px; }
+  .osdlg .msg{ font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; white-space:pre-line; }
+  .osdlg .row{ display:flex; justify-content:flex-end; gap:10px; }
+  .osdlg .row span{ font:600 13px/1 var(--sans); border-radius:7px; padding:10px 16px;
+                    border:1px solid var(--line); color:var(--ink-2); }
+  .osdlg .row .ok{ background:var(--ink); color:var(--surface); border-color:var(--ink); }
+
+  /* the register of the nine */
+  .tally{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+          margin-top:18px; overflow:hidden; }
+  .tally div{ display:flex; gap:14px; padding:10px 14px; border-top:1px solid var(--line-soft);
+              font-size:13px; align-items:baseline; }
+  .tally div:first-child{ border-top:0; background:var(--surface-2); font-weight:600;
+                          color:var(--ink-3); font-size:11.5px; letter-spacing:.08em;
+                          text-transform:uppercase; }
+  .tally .w{ flex:1 1 42%; min-width:0; color:var(--ink); }
+  .tally .s{ flex:0 0 36%; color:var(--ink-2); }
+  .tally .n{ flex:0 0 2ch; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+
+  /* a panel of the product: a form, a row, a bar */
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+         width:min(560px,100%); padding:16px 17px 17px; }
+  .card.wide{ width:min(680px,100%); }
+  .cardh{ font:700 13.5px/1.3 var(--sans); margin:0 0 13px; }
+  .fieldrow{ display:flex; gap:12px; flex-wrap:wrap; }
+  .nm-lab{ display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--ink-3); }
+  .nm-lab span{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; }
+  .fld{ font:400 13px/1.3 var(--sans); padding:7px 9px; border:1px solid var(--field-line);
+        border-radius:6px; background:var(--surface); color:var(--ink); min-width:130px; }
+  .fld.empty{ border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg); }
+  .fld::placeholder{ color:var(--ink-3); opacity:.6; }
+  /* THE LINE: `.picerr`, already in present.css and already the product's
+     answer for a refusal that belongs to one control. */
+  .picerr{ margin:8px 0 0; padding:9px 12px; border-radius:6px;
+           background:var(--surface-2); border-left:3px solid var(--bad);
+           color:var(--bad-tx); font-size:12.5px; line-height:1.5; }
+  .picerr b{ color:var(--bad-tx); }
+  .nc-why{ margin:13px 0 0; padding:10px 12px; border-radius:6px; background:var(--surface-2);
+           font-size:12.5px; color:var(--ink-2); line-height:1.5; }
+  .nc-act{ display:flex; gap:10px; align-items:center; margin-top:13px; }
+  .editbtn{ font:600 12.5px/1 var(--sans); background:var(--panel); color:var(--panel-ink);
+            border:1px solid var(--panel); border-radius:7px; padding:9px 13px; cursor:pointer; }
+  .editbtn[aria-disabled="true"]{ opacity:.5; cursor:not-allowed; }
+  .linkbu{ font:600 12.5px/1 var(--sans); background:none; border:0; color:var(--stone);
+           cursor:pointer; padding:9px 4px; }
+
+  /* the row menu's confirm — the shape the product ALREADY draws */
+  .kmenu{ background:var(--surface); border:1px solid var(--line); border-radius:8px;
+          box-shadow:0 12px 30px rgba(0,0,0,.16); padding:5px; text-align:left;
+          min-width:196px; }
+  .kconfirm{ min-width:262px; max-width:330px; padding:0; }
+  .kconfirm .cq{ padding:11px 13px 9px; border-bottom:1px solid var(--line-soft);
+                 font:400 12.5px/1.55 var(--sans); color:var(--ink-2); }
+  .kconfirm .cq b{ color:var(--ink); font-weight:700; }
+  .kconfirm .cbtns{ display:flex; gap:6px; justify-content:flex-end; padding:7px 9px; }
+  .kconfirm .cbtns button{ font:500 12.5px/1.4 var(--sans); background:none;
+                           border:1px solid var(--line); color:var(--ink-2);
+                           padding:5px 11px; border-radius:6px; cursor:pointer; }
+  .kconfirm .cbtns button.danger{ border-color:var(--bad); color:var(--bad-tx); }
+  .kconfirm .cbtns button.go{ border-color:var(--stone); color:var(--stone); }
+
+  /* a season chip, with the refusal under it */
+  .chiprow{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px;
+         background:var(--surface-2); border:1px solid var(--line); border-radius:999px;
+         padding:5px 7px 5px 11px; color:var(--ink); }
+  .chip b{ font-weight:600; }
+  .chip .x{ font-size:14px; line-height:1; color:var(--ink-3); border:0; background:none;
+            cursor:pointer; padding:1px 4px; border-radius:999px; }
+  .chip.held{ border-color:var(--bad); }
+  .chip.held .x{ color:var(--bad-tx); }
+  .goto{ font:600 12.5px/1 var(--sans); background:none; border:0; color:var(--stone);
+         cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px; }
+
+  /* the reporting bar, as it already is */
+  .repchrome{ display:flex; align-items:center; gap:11px; flex-wrap:wrap;
+              background:var(--surface); border:1px solid var(--line); border-radius:10px;
+              padding:10px 13px; width:min(680px,100%); }
+  .rc-n{ font:700 15px/1 var(--sans); }
+  .rc-of{ font-size:12px; color:var(--ink-3); }
+  .rc-bar{ flex:1 1 120px; height:6px; border-radius:99px; background:var(--surface-2);
+           overflow:hidden; display:block; min-width:90px; }
+  .rc-bar i{ display:block; height:100%; background:var(--good); }
+  .rc-bar.part i{ background:var(--attn); }
+  .rc-submit{ font:600 12.5px/1 var(--sans); background:var(--panel); color:var(--panel-ink);
+              border:1px solid var(--panel); border-radius:7px; padding:9px 13px; cursor:pointer; }
+  .rc-submit[aria-disabled="true"]{ opacity:.5; cursor:not-allowed; }
+  .rc-draft{ font:600 12.5px/1 var(--sans); background:none; color:var(--ink-2);
+             border:1px solid var(--line); border-radius:7px; padding:9px 13px; cursor:pointer; }
+  .tip{ position:relative; }
+  .bubble{ margin:10px 0 0; background:var(--ink); color:var(--surface); border-radius:7px;
+           padding:9px 11px; font-size:12px; line-height:1.5; width:max-content;
+           max-width:330px; white-space:pre-line; }
+  .places{ display:flex; gap:7px; flex-wrap:wrap; margin:11px 0 0; }
+  .place{ font:600 12px/1 var(--sans); border:1px solid var(--line); border-radius:999px;
+          padding:6px 10px; color:var(--ink-2); background:var(--surface); cursor:pointer; }
+  .place.hot{ border-color:var(--attn); color:var(--warn-tx); background:var(--warn-bg); }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:40px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .tally div{ flex-direction:column; gap:3px; }
+    .tally .s, .tally .w, .tally .n{ flex:none; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>Nine refusals</h1>
+  <p class="lede">Nine of the twenty-nine are not questions. Nothing is waiting on your answer —
+  the platform has already said no and changed nothing. The box in the middle of the screen is
+  only how you are told, and it is told away from the thing that refused.</p>
+  <p class="lede">So the question is not which box to use. It is whether a refusal wants a box at all.
+  Below, each of the nine as it is today, and the same refusal said where you pressed. Four shapes
+  cover all nine, and <b>three of the four are already in the product</b>.</p>
+
+  <div class="tally">
+    <div><span class="n">#</span><span class="w">The refusal, in its own words</span><span class="s">Shape</span></div>
+    <div><span class="n">1</span><span class="w">Give the cycle a name&hellip;</span><span class="s">A — a line under the box</span></div>
+    <div><span class="n">2</span><span class="w">Pick the month this cycle covers to&hellip;</span><span class="s">A — a line under the box</span></div>
+    <div><span class="n">3</span><span class="w">There is already a BU called &ldquo;Payments&rdquo;&hellip;</span><span class="s">A — a line under the box</span></div>
+    <div><span class="n">4</span><span class="w">Functions are the SMO's. Nothing has been deleted.</span><span class="s">B — the panel's own refusal</span></div>
+    <div><span class="n">5</span><span class="w">Not deleted — 2 capabilities improved here&hellip;</span><span class="s">B — the panel's own refusal</span></div>
+    <div><span class="n">6</span><span class="w">Khalid could not be deleted — something has come to point at them&hellip;</span><span class="s">B — the panel's own refusal</span></div>
+    <div><span class="n">7</span><span class="w">&ldquo;Summer&rdquo; cannot be removed — 2 units still have it&hellip;</span><span class="s">C — a line under the row</span></div>
+    <div><span class="n">8</span><span class="w">3 figures still to enter&hellip; Nothing has been submitted.</span><span class="s">D — nothing; the bar already says it</span></div>
+    <div><span class="n">9</span><span class="w">Importing is the SMO's. Nothing has been applied.</span><span class="s">D — nothing; the button is shut</span></div>
+  </div>
+
+  <hr class="rule">
+  <h2 class="shapehead">Shape A — a line under the box that refused <span>&nbsp; three of the nine</span></h2>
+  <p class="lede">All three are one empty or wrong box in a form you are still filling in.
+  The sentence belongs under that box, where you can read it and fix it in the same glance.</p>
+
+  <span class="key">Today <b>— opening a cycle with the name left empty</b></span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Give the cycle a name — it is what its figures are filed under once it closes, and what the next cycle compares against.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">One button, and nothing to decide. The form is behind the box, so the empty
+  field cannot be seen while the sentence about it is on screen. The code already puts the cursor
+  in that field afterwards — it knows exactly which box it means.</p>
+
+  <span class="key">Proposed <b>— the same sentence, under the box</b></span>
+  <div class="stage plain">
+    <div class="card wide">
+      <div class="cardh">Open a new cycle</div>
+      <div class="fieldrow">
+        <label class="nm-lab"><span>Name</span>
+          <input class="fld empty" value="" placeholder="H1 2027" aria-invalid="true"></label>
+        <label class="nm-lab"><span>Covers from</span><input class="fld" value="Jan 2027"></label>
+        <label class="nm-lab"><span>to</span><input class="fld" value="Jun 2027"></label>
+        <label class="nm-lab"><span>Reports due</span><input class="fld" value="10 Jul 2027"></label>
+      </div>
+      <p class="picerr"><b>The cycle needs a name.</b> It is what its figures are filed under once
+      it closes, and what the next cycle compares against.</p>
+      <div class="nc-why"><b>The month it covers to decides what every figure is measured against.</b>
+      A target that adds up across the year is compared with the share of it due by then, and a
+      tactic whose span has not started yet is not asked for.</div>
+      <div class="nc-act">
+        <button class="editbtn">Open this cycle</button>
+        <button class="linkbu">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <p class="note">The marked box, and the line directly under the row. <code>.picerr</code> is not new —
+  it is the product's existing line for a refusal belonging to one control, and it already carries the
+  picture editor's refusals in exactly this shape.</p>
+
+  <span class="key">The second of the three <b>— the month, which the panel already explains</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Pick the month this cycle covers to — it decides what every figure is measured against, and what is asked for at all.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">This is the third telling of one sentence. The panel carries
+  <i>&ldquo;The month it covers to decides what every figure is measured against&rdquo;</i>
+  in a band of its own, three lines above the button — and that band is on screen when the box
+  opens over it. Under the empty <b>to</b> box it would be the first telling that lands.</p>
+  <p class="note">A difference worth knowing: the name's refusal puts the cursor in the box, the
+  month's does not. Two refusals, one form, two behaviours. A line under the box it means removes
+  the question.</p>
+
+  <span class="key">The third <b>— a BU name that is already taken</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">There is already a BU called "Payments". Two names cannot be merged by renaming one into the other — move the people first.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+    <div class="card" style="width:min(380px,100%)">
+      <div class="cardh">Business units</div>
+      <label class="nm-lab" style="width:100%"><span>Name</span>
+        <input class="fld empty" value="Payments" style="width:100%" aria-invalid="true"></label>
+      <p class="picerr"><b>There is already a BU called &ldquo;Payments&rdquo;.</b> Two cannot be merged
+      by renaming one into the other — move the people first.</p>
+    </div>
+  </div>
+  <p class="note">This one fires when you leave the box, which is where the sentence belongs.
+  And it fixes something the box cannot: today the repaint puts the old name back, so what you
+  typed is gone by the time you have read why it was refused. The line keeps your text in the
+  field, to be edited rather than retyped.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Shape B — the panel's own refusal <span>&nbsp; three of the nine, and this shape already ships</span></h2>
+  <p class="lede">These three fire inside a question that is already open on the row — the delete
+  question in the kebab panel. That panel <b>already draws a refusal</b>: when a function or a person
+  cannot be deleted, it opens saying so, with one <b>Close</b>. These three are the same refusal
+  arriving a moment later, and they arrive in a different medium.</p>
+
+  <span class="key">Already in the product <b>— the panel's refusal, drawn on open</b></span>
+  <div class="stage plain">
+    <div class="kmenu kconfirm">
+      <div class="cq"><b>Treasury cannot be deleted.</b> 2 capabilities improved here
+      (Trade Finance, Cash Management) — reallocate them on Setup &rarr; Business units.
+      <b>Retire</b> takes it out of the navigation and keeps all of that.</div>
+      <div class="cbtns"><button>Close</button></div>
+    </div>
+  </div>
+  <p class="note">Not a proposal. This is what <code>config-render.js</code> emits today when the
+  blockers are known at the time the panel opens.</p>
+
+  <span class="key">Today <b>— the same refusal, when it is known a moment later</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Not deleted — 2 capabilities improved here (Trade Finance, Cash Management) — reallocate them on Setup → Business units.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Functions are the SMO's. Nothing has been deleted.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+  </div>
+  <p class="verdict">One screen answers one question two ways, and the two sit in the same handler —
+  the panel's refusal at render, the browser's box on the press. The box also closes the panel, so
+  the row you were working on is gone when you dismiss it.</p>
+
+  <span class="key">Proposed <b>— the panel stays open and re-draws its own refusal</b></span>
+  <div class="stage plain">
+    <div class="kmenu kconfirm">
+      <div class="cq"><b>Treasury was not deleted.</b> 2 capabilities have come to be improved here
+      since this was asked (Trade Finance, Cash Management) — reallocate them on
+      Setup &rarr; Business units. <b>Retire</b> takes it out of the navigation and keeps all of that.</div>
+      <div class="cbtns"><button>Close</button></div>
+    </div>
+  </div>
+  <p class="note">Same panel, same place, same words the refusal already uses — only
+  <i>&ldquo;cannot be&rdquo;</i> becomes <i>&ldquo;was not, since this was asked&rdquo;</i>, which is
+  the true difference between the two moments.</p>
+
+  <span class="key">The permission one <b>— said before the question opens, not after</b></span>
+  <div class="stage plain">
+    <div class="kmenu kconfirm">
+      <div class="cq"><b>Treasury cannot be deleted from here.</b> Functions are the SMO's.
+      <b>Retire</b> takes it out of your navigation and keeps everything under it.</div>
+      <div class="cbtns"><button>Close</button></div>
+    </div>
+  </div>
+  <p class="note">The press that fires this notice today is <i>Yes, delete it</i> — the second press,
+  after the question was offered. Nobody who cannot delete should have been asked. The notice becomes
+  the panel that opens in place of the question, in the shape above.</p>
+
+  <span class="key">And the person's <b>— which today sends you looking</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Khalid Al-Mutairi could not be deleted — something has come to point at them since this was asked. Open the menu again to see what.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+    <div class="kmenu kconfirm">
+      <div class="cq"><b>Khalid Al-Mutairi was not deleted.</b> They have become
+      Strategy custodian of Payments since this was asked. <b>Retire</b> closes the door and keeps
+      every attribution true.</div>
+      <div class="cbtns"><button>Close</button><button class="go">Retire instead</button></div>
+    </div>
+  </div>
+  <p class="verdict">&ldquo;Open the menu again to see what&rdquo; is the platform asking you to do
+  its work. It knows what came to point at them — it just refused on that basis.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Shape C — a line under the row <span>&nbsp; one of the nine</span></h2>
+
+  <span class="key">Today <b>— removing a season two units still use</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">"Summer" cannot be removed — 2 units still have it as a period of their own: Trade Finance, Payments. Take it off their Drivers page first.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+  </div>
+
+  <span class="key">Proposed <b>— under the chip you pressed, and the units reachable</b></span>
+  <div class="stage plain">
+    <div class="card">
+      <div class="cardh">Seasons</div>
+      <div class="chiprow">
+        <span class="chip"><b>Ramadan</b><button class="x" aria-label="Remove">&times;</button></span>
+        <span class="chip held"><b>Summer</b><button class="x" aria-label="Remove">&times;</button></span>
+        <span class="chip"><b>Back to school</b><button class="x" aria-label="Remove">&times;</button></span>
+      </div>
+      <p class="picerr"><b>&ldquo;Summer&rdquo; is still in use.</b> 2 units have it as a period of
+      their own — <button class="goto">Trade Finance</button> and <button class="goto">Payments</button>.
+      Take it off their Drivers page first.</p>
+    </div>
+  </div>
+  <p class="note">The two names become the way there. The platform's own rule, written in
+  <code>config-data.js</code>: a count that cannot take you to what it counts makes work.
+  Everything else is the sentence it already says.</p>
+
+  <hr class="rule">
+  <h2 class="shapehead">Shape D — nothing at all <span>&nbsp; two of the nine</span></h2>
+  <p class="lede">These two have somewhere to be said already, and both say it before the press.</p>
+
+  <span class="key">Today <b>— pressing Submit while the report is held</b></span>
+  <div class="stage">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">3 figures still to enter.
+
+1 figure is at risk or off track with no note. Add a line to each.
+
+Nothing has been submitted.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+  </div>
+
+  <span class="key">Already in the product <b>— the bar, the shut button, and the bubble on it</b></span>
+  <div class="stage plain" style="flex-direction:column; align-items:center">
+    <div class="repchrome">
+      <span><span class="rc-n">41</span> <span class="rc-of">of 45</span></span>
+      <span class="rc-bar part"><i style="width:91%"></i></span>
+      <button class="rc-submit" aria-disabled="true">Submit to the SMO</button>
+      <button class="rc-draft">Save draft</button>
+      <button class="linkbu">Close</button>
+    </div>
+    <div class="bubble">Cannot submit yet:
+&bull; 3 figures still to enter
+&bull; 1 figure at risk with no note</div>
+    <div class="places">
+      <span class="place hot">Grow the core &middot; 3 to enter</span>
+      <span class="place hot">Serve better &middot; 1 note</span>
+      <span class="place">In the plan</span>
+    </div>
+  </div>
+  <p class="verdict">The button is already dimmed, already explains itself on hover and on focus, and
+  the bar beneath already names the pillars holding it and walks you to the exact box. The notice is
+  the third telling, it is the only one of the three that cannot be read before pressing, and it is
+  the only one that cannot take you anywhere.</p>
+  <p class="note">So my proposal for this one is to delete it and keep the press doing nothing but
+  what it does already — the handler still refuses, which is the enforcement; the bar and the bubble
+  are the explanation. If a pressed-anyway button should react at all, the honest reaction is the
+  bar flashing its hot places, not a box.</p>
+
+  <span class="key">And the last <b>— &ldquo;Importing is the SMO's&rdquo;</b></span>
+  <div class="stage pair">
+    <div class="osdlg">
+      <p class="host">smp-aa5zk9awv-islam-saadanys-projects.vercel.app says</p>
+      <p class="msg">Importing is the SMO's. Nothing has been applied.</p>
+      <div class="row"><span class="ok">Okay</span></div>
+    </div>
+    <div class="card" style="width:min(400px,100%)">
+      <div class="cardh">Apply this plan to Trade Finance</div>
+      <p class="nc-why" style="margin-top:0">24 items read, 3 changed, nothing removed.</p>
+      <p class="picerr"><b>Importing is the SMO's.</b> You can read this file and check it against
+      the plan; applying it is the office's.</p>
+      <div class="nc-act"><button class="editbtn" aria-disabled="true">Apply</button>
+      <button class="linkbu">Cancel</button></div>
+    </div>
+  </div>
+  <p class="note">The same answer as the function's permission notice: the gate stays in the handler,
+  where it has to be, and the page stops offering a live button to somebody it will refuse.
+  The line sits where the button is.</p>
+
+  <div class="ask">
+    <h2>What I need from you</h2>
+    <ul>
+      <li><b>Shapes A, B and C — yes or no.</b> Each is the refusal moved to the control that refused.
+      B is the shape the product already draws; A uses the line the picture editor already uses.</li>
+      <li><b>Shape D is a deletion, and it needs your word.</b> Two notices go and nothing replaces
+      them, because the page already says both things before the press. If you would rather a press
+      always produce a visible reaction, say so and I will draw the bar's flash instead.</li>
+      <li><b>One wording call:</b> in shape B I have changed <i>&ldquo;cannot be deleted&rdquo;</i>
+      to <i>&ldquo;was not deleted &mdash; since this was asked&rdquo;</i> for the two race cases,
+      because they are genuinely a different moment. If you would rather both moments read
+      identically, that is one sentence and I will use the existing one.</li>
+      <li>Two of the nine will keep sending you to another page to fix the thing (the units' Drivers
+      page, the BU's people). I have made those reachable where it is one press; say if you want the
+      same for the capability reallocation in shape B.</li>
+    </ul>
+  </div>
+</div>

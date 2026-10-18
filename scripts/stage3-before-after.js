@@ -1,4 +1,4 @@
-/* ── WHAT THE MOVE WOULD DO TO THIS CLIENT, PAGE BY PAGE (§539) ───────────
+/* ── WHAT THE MOVE WOULD DO TO THIS CLIENT, PAGE BY PAGE (§542) ───────────
    Spec 066 stage 3b. Islam set the terms: a per-client before-and-after
    shown to him BEFORE anything runs, rehearsed on a copy, and *"nothing will
    change for the users this is just a structural change"*.
@@ -6,7 +6,7 @@
    This is that list. It reads a working copy — the file Setup › Reporting
    cycle › Contingency files hands out (§306) — and NEVER writes anything,
    anywhere. The move it rehearses is the product's own `capFoldIntoTop()`
-   (§539), not a script's idea of one, so what is shown here is what would
+   (§542), not a script's idea of one, so what is shown here is what would
    run (§100.3).
 
    THREE COLUMNS, BECAUSE TWO CANNOT TELL THE HALVES APART:

@@ -117,6 +117,11 @@
          border:1px solid var(--field-line); border-radius:var(--r);
          background:var(--surface); color:var(--ink); font-family:var(--sans); }
   .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  /* §538: a held control reads as held. `aria-disabled` changes nothing a
+     browser paints, so the look has to be asked for. The wrapper is
+     inline-block so the bubble it carries has something to centre on. */
+  .fld[aria-disabled="true"] { opacity:.45; cursor:default; }
+  .capheld { display:inline-block; }
   /* ── A CONTROL THE ROW'S OWN UNIT HAS MADE MEANINGLESS (§251) ──────────
      A yes/no target carries no number, so the direction, the figure and the
      compile rule beside it have nothing to act on. They stay DRAWN — a hole

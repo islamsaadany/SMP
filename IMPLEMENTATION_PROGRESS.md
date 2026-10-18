@@ -4,6 +4,8 @@ How things are going, in one place. Updated in the same commit as the work it
 describes. This replaces sending the built HTML and the project zip after every
 version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
+**2026-10-14 — Internal Tracker: the weekly check, and every topic reachable (§532, §533).** A fifth view, **Weekly check**, built for the Monday meeting: always read by topic, three weeks deep. Inside each topic, last week, this week and next week each get their own card — this week's lit in gold, next week's an outline — and next week's card holds a write line already set to next week, so the next action is written where you are instead of at the top of the page. A line that did not get done is **carried to next week in one press**, as the same action: its notes and history ride with it and the late mark goes on climbing, so nothing can hide behind a fresh date. A topic with nothing this week is still on the list and says so, rather than being skipped in silence. Separately, **Topics** behind the ⋯ lists every topic on the client — including ones with no actions and closed ones, which could not be reached from the page at all — and a name is renamed by typing over it. Nothing new is stored: no table, no column, no migration. Checked: 96 tracker checks green before the database sections, 31 of them new, each rule broken on purpose four ways to prove the checks catch it; the page rendered and the script driven in Chromium (31 assertions), which caught two faults reading the code had not. **The database sections of the tracker check were NOT run — this container has no Postgres**, so that is said rather than claimed.
+
 **2026-10-12 — Entering figures from the keyboard (§528).** The second item on your usability list, and you asked for all four. On a Reporting page: **Enter** moves to the next figure and **Shift+Enter** back, so a long report is typed straight down the page without reaching for the mouse — at the last box Enter stays where it is rather than dropping the cursor onto the page, which it did before this. **Alt+Enter** is the *Next →* button from the keyboard, the one that skips every box already answered. **Escape** puts a box back to what it was before you started typing, the same as it does on the People register, and leaves the cursor in it. And the **note box is out of the tab path** unless that row is at risk — it was nine of eighteen stops on a nine-row pillar, so half the presses were landing on a box nobody is asked to fill — with **Alt+N** as the way to it when you do want it. Enter inside a note is still a new line, deliberately: a note is prose explaining a figure, and it is the one thing a reporter is required to write. **Nothing on the screen changes** — every key is on a hover and announced to a screen reader, the way the eye and the monthly mark already are — so there was nothing to draw and sign off. Nothing stored moves, nothing is migrated, and nobody is signed out. Checked: a new check for the keys passes and was shown to fail thirteen ways from the sources; the five neighbouring reporting checks pass; the whole-platform walk is clean for all 33 people with no errors; and the shipped file and the served copies are in step. One older check about Enter in a plan title had been looking at the wrong page since an earlier version and is repaired here. One check reports the register's *Add someone* dialog jumping; that is the same on `main` and is noted rather than changed, being a screen this work does not touch. **Next, in your order:** the browser's own pop-up boxes moved inside the platform (26 confirms, 11 alerts and one prompt); then what a failed save tells the client; then the dates, which are spelt six different ways. **Merged to `main` on your word.** Production has not been read from here — this container cannot reach the live site — so the deployment is unverified until somebody opens it.
 
 **2026-10-11 — Processes: a step can wait on, or carry on in, a step in another process (§521).** Built on the branch, not merged. In a step's editor you can add a step from another process as a predecessor; the other process's map shows the same link as "continues in IT-05 · step 3". Each map draws it as a dashed amber box (left for incoming, right for outgoing) that opens the other map. Loops between processes are refused. "Ready" means documented, not blocked-until-done. One new table (migration `20261011120000_step_handoffs`). Check `check:handoff` 16/0, red 10 ways; typecheck clean.
@@ -9610,6 +9612,63 @@ A risk or gap finding can now be added to the process as a step. "Add as a step"
 ## §530 — RACI: fill from step owners, and suggestions (2026-10-13)
 On the RACI page, people who can edit get two new buttons. **Fill from step owners** puts R for each step's assigned role on that step's rows — only into empty cells, never over anything already there, never on skipped rows; filled cells carry a small dot. **Suggest** shows dashed amber cells proposing the owner's manager's role as A, only on rows that have no A yet; nothing is saved until you Accept (✓), Edit (✎ cycles R/A/C/I) or Dismiss (✕). Suggestions come from the Org Directory's manager links — where nobody has a manager recorded, there are none to show. Viewers see neither button. Checked: pure planner check 13/0, each of six deliberate breaks turns it red (`npm run check:raci`, `check:raci:red`); cold typecheck clean. Not yet driven in a browser.
 
+## §531 — The role picker asks for an email before adding somebody new (2026-10-14)
+Built from the mockup you signed off (`design-mockups/role-picker-email/2026-10-12_email-needed.html`, "build as drawn").
+
+When you give somebody a role and they are not on the register yet, you type a
+name and press "+ Add". That used to add them with no email. Now the Email box
+in the picker carries the same red star the Add someone form has, and pressing
+Add with no email adds nobody: the box is ringed, the reason is written under
+it in the same words the Add someone form uses, the cursor goes into it, and
+everything you typed stays where it was. Typing an address clears the ring.
+Emp ID is still optional.
+
+The reason is the one behind the star on the Add someone form: people sign in
+with their email and are written to there, so a row with none is somebody who
+cannot open the platform or be told anything — and this picker was the last
+place that could still make one.
+
+**What it costs**: you can no longer give a role to somebody new by name alone.
+If you do not have their address yet, ask for it or add them later. This
+reverses the earlier rule that neither box in the picker was required.
+
+**Untouched**: picking somebody already on the register works exactly as before,
+even if their row has no email. The people upload is unchanged.
+
+It is one picker, so this reaches all five places it appears: a business unit's
+head and custodian, a supporting function's head and custodian, a function's
+Led by, the capabilities table, and the group's capability seats.
+
+Checked: a new check drives the real control in the real page — 28 assertions,
+none failing — and it was proved able to fail by running it against the build
+from before the change, where it goes red in six of its seven sections and
+stays green in the one that is about what must not change. The picker's three
+existing checks still pass. Both states photographed from the running platform
+in the light and the dark theme and set beside the mockup.
+
+What to check: Setup › Business units › ⋮ › Edit details, press BU head or
+Strategy custodian, type a name nobody has, press + Add with the Email box
+empty.
+
+Not yet merged to main.
+
+Merged to main 2026-10-14 on your word. The whole-platform sweep read 33
+viewers, 234 destinations, errors none — the same figure as the round before,
+as it should be when no page is added. The offline copy's name was bumped so
+returning browsers fetch the new platform rather than their own disk, and the
+reload banner will fire for a tab left open. Nothing about saving changed, so
+nobody is signed out.
+
+Seen live: production built 40 seconds after the push and is serving it. The
+file the platform runs from is the same size as the one built here, down to
+the byte, and the new code is in it.
+
+A correction to what I wrote an hour ago: I first recorded that this container
+could not reach the live site, because it could not at the last two merges. I
+wrote that without trying it. It worked on the first attempt, so that claim is
+withdrawn — it was not true today, and I should have found that out by running
+the check rather than by remembering.
+
 ## §531 — The platform simplification, step 1: one address, one parse (2026-10-14)
 First part of the code-only half of the box work agreed with Islam (spec 066 stage 3a — nothing stored moves, so a revert undoes it). The platform addresses six kinds of thing that hold a plan — the top layer, a division, a business unit, a supporting function, a capability, and a direction for its deck — and until now every reader worked out which kind it had by slicing the address itself. Counted before starting: 58 such places in `config-data.js`, 14 in the shared rules, 9 in the server authoriser, 9 in the shell, and more across sixteen other files. That is the "every change requires a new addition" complaint in its smallest form: six kinds × every reader.
 
@@ -9885,7 +9944,7 @@ Fixing it turned up a second one, mine: in the unit example I had drawn *split* 
 
 The concept is signed off and the five points stand. Version 2 published.
 
-## §537 — Step (a) built: one list, or two tabs (2026-10-15)
+## §540 — Step (a) built: one list, or two tabs (2026-10-15)
 The setting from the mockup is in. On the branch, nothing merged, and **no client has been touched**.
 
 **What it is.** One row in Set-up, on the box, next to "Plans in", reading **Directions show as** — in each client's own words. Two answers: **One list**, and **Directions and Capabilities apart**. It is on a unit's own card and on the company's card on the Structure step, and it only appears where that box plans in pillars; there is nothing to join or split otherwise.
@@ -9903,7 +9962,7 @@ The setting from the mockup is in. On the branch, nothing merged, and **no clien
 - **(c)** the remaining pages — Performance and Reporting — read a row's kind instead of reading the old capabilities list. The split only reaches the Strategy tab today, deliberately: on those two pages a capability is still a separate record, and writing them now would mean writing them twice.
 - **(d)** El Abd's own move, after the before-and-after list comes out identical.
 
-## §538 — Step (b) built: a code comes from what the row is (2026-10-15)
+## §541 — Step (b) built: a code comes from what the row is (2026-10-15)
 On the branch, nothing merged, and **no client has been touched**.
 
 **What changed.** A row's number now counts within the set that shares its letter. At the company that means directions are numbered among the directions (D001, D002…) and capabilities among the capabilities (C001, C002…), whatever order they sit in. So when El Abd's five capabilities join the company's one list, they stay **C001–C005** instead of becoming D006–D010.
@@ -9918,7 +9977,7 @@ On the branch, nothing merged, and **no client has been touched**.
 
 **Next: (c)** — the Performance and Reporting pages read a row's kind instead of the old capabilities list. Then (d), El Abd's own move.
 
-## §539 — Step (c) built: the pages read what a row is (2026-10-15)
+## §542 — Step (c) built: the pages read what a row is (2026-10-15)
 On the branch, nothing merged, and **no client has been touched**. This is the big one.
 
 **I changed how I did it, and that's worth telling you.** The plan said "move the 77 places in the code that read the old capabilities list". I started by measuring instead: I loaded your El Abd file, rendered every page a capability appears on, performed the move on a copy in memory, and rendered them all again. That turned 77 places into **six surfaces that actually move**, and told me exactly what each one does wrong. Most of those 77 reads are correct as they are.
@@ -9942,7 +10001,7 @@ On the branch, nothing merged, and **no client has been touched**. This is the b
 
 **Next is (d) — your El Abd data.** I'll rehearse it on a copy and bring you the list and the SQL. Nothing runs until you say so.
 
-## §539.2 — Step (d) ready: the SQL is written and I have already run it (2026-10-15)
+## §542.2 — Step (d) ready: the SQL is written and I have already run it (2026-10-15)
 **Nothing has been run against El Abd.** What follows is a rehearsal on a throwaway copy. The SQL is waiting for your word.
 
 **I didn't hand-write it.** A script reads your working copy, asks the platform itself what the move would do, and writes the SQL from that answer. So the list you approve, the rehearsal I measured, and the statements that run are the same thing — and if the move ever changes, the SQL changes with it.
@@ -9961,7 +10020,7 @@ The test database was deleted afterwards.
 
 **The SQL does this, in one transaction:** checks the client is in the state it was written for (and stops if not); copies both tables it touches, so there is an undo; moves the five rows; turns on the two-tab setting so the tabs don't move; deletes the five old records; then checks its own work row by row and refuses to commit if anything is off. It finishes by printing the ten rows so you can read them.
 
-## §539.3 — The four differences are accepted; you don't need to know the schema name (2026-10-18)
+## §542.3 — The four differences are accepted; you don't need to know the schema name (2026-10-18)
 You said the four differences are fine. On the schema: you asked a fair question and my answer was a poor one — I was asking you to confirm a name I'd read out of a file.
 
 **You shouldn't have to know it.** The SQL file now opens with a short read-only query. Run that first, on its own, and the database tells you: one row per client, with the name you see on screen and how many capability records each one holds. El Abd is the row reading **Test 2, 5 capabilities** — identified by what's in it, not by a name anyone has to remember.
@@ -9970,14 +10029,14 @@ You said the four differences are fine. On the schema: you asked a fair question
 
 I re-ran the whole rehearsal on the exact file you now have, not an earlier one: it commits, it produces byte-for-byte what the platform's own move produces, and the pages built from the resulting database match what I showed you.
 
-## §539.4 — The name is fixed to ElAbd, in both places (2026-10-18)
+## §542.4 — The name is fixed to ElAbd, in both places (2026-10-18)
 The name is stored in **two** places, which is why doing it by hand wouldn't have stuck: one inside the client (what every page says) and one on the platform's client list (what the card says). Change one and they disagree.
 
 The SQL now does both, as **step 8**, in a transaction of its own — so you can run just the rename if you want, without the move. It ends by printing both side by side so you can see they match.
 
 Tested: both read **ElAbd** afterwards, and running it again leaves it alone.
 
-## §539.5 — The file failed, and why (2026-10-18)
+## §542.5 — The file failed, and why (2026-10-18)
 **Nothing was changed** — the guard caught it and rolled everything back, which is what it is for.
 
 **The cause was mine.** I wrote the file from the code in this repository and assumed the live database matched it. It doesn't. Your database has **three copies** of the SMP tables:

@@ -236,12 +236,12 @@ var CHAT = (function(){
   function when(at){
     var d = new Date(at), now = new Date();
     if (isNaN(d)) return "";
-    var hm = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    var hm = timeOf(d);
     var sameDay = d.toDateString() === now.toDateString();
     if (sameDay) return hm;
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday " + hm;
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " " + hm;
+    return dateAt(d);
   }
   function dayOf(at){
     var d = new Date(at), now = new Date();
@@ -249,7 +249,7 @@ var CHAT = (function(){
     if (d.toDateString() === now.toDateString()) return "Today";
     var y = new Date(now.getTime() - 864e5);
     if (d.toDateString() === y.toDateString()) return "Yesterday";
-    return d.toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+    return dateDay(d);
   }
   function ago(at){
     if (!at) return "";

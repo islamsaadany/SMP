@@ -1,0 +1,287 @@
+<title>What the keys do</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --stone:#16325C; --stone-soft:#6E88B4; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --good-bg:#E4F0EA; --good-tx:#1F6248; --attn-bg:#F7EFD6;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --stone-soft:#6E88B4; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --stone-soft:#6E88B4; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px));
+         padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .lede b{ color:var(--ink); }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--over); border:1px solid var(--line); border-radius:4px;
+          padding:26px 16px; display:flex; justify-content:center; }
+  .stage.plain{ background:var(--surface-2); }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .note b{ color:var(--ink-2); }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .good-v{ border-left:3px solid var(--good); padding:2px 0 2px 13px; margin:10px 0 0;
+           font-size:13px; color:var(--good-tx); max-width:62ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:42px 0 0; }
+
+  /* the product's own modal */
+  .modal{ background:var(--surface); border:1px solid var(--line); border-radius:3px;
+          width:min(560px,100%); box-shadow:0 18px 50px rgba(0,0,0,.22);
+          max-height:none; display:flex; flex-direction:column; box-sizing:border-box; }
+  .modal-h{ display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
+            border-bottom:1px solid var(--line-soft); }
+  .modal-h div{ flex:1; min-width:0; }
+  .modal-h h3{ font-size:21px; margin:0; font-weight:600; }
+  .modal-h p{ margin:4px 0 0; font-size:13px; color:var(--ink-3); }
+  .modal-x{ font:inherit; font-size:22px; line-height:1; background:none; border:0;
+            cursor:pointer; color:var(--ink-3); padding:0 4px; }
+  .modal-b{ padding:18px 24px 22px; }
+
+  h4.mini{ font:700 10px/1.3 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+           color:var(--gold-deep); margin:20px 0 8px; }
+  h4.mini:first-child{ margin-top:0; }
+  h4.mini .where{ color:var(--ink-3); letter-spacing:0; text-transform:none;
+                  font-weight:600; font-size:11.5px; margin-left:7px; }
+  h4.mini .here{ background:var(--good-bg); color:var(--good-tx); border-radius:99px;
+                 padding:2px 8px; font:700 9px/1 var(--sans); letter-spacing:.08em;
+                 margin-left:8px; vertical-align:1px; }
+  .krows{ display:grid; grid-template-columns:auto 1fr; gap:6px 14px; align-items:baseline;
+          margin:0 0 4px; }
+  .kk{ text-align:right; white-space:nowrap; font-size:12px; }
+  /* "type" is an instruction, not a key, so it must not wear a key's weight. */
+  .kk .typ{ font-style:italic; color:var(--ink-3); font-size:12px; }
+  .kv{ font-size:13px; color:var(--ink-2); line-height:1.45; }
+  kbd{ display:inline-block; font:600 11px/1 var(--mono); color:var(--ink);
+       background:var(--surface-2); border:1px solid var(--field-line);
+       border-bottom-width:2px; border-radius:4px; padding:4px 6px; margin:0 1px;
+       vertical-align:baseline; }
+  .sep{ color:var(--ink-3); font-size:11px; margin:0 2px; }
+  .dim{ opacity:.5; }
+  .dim .kv{ color:var(--ink-3); }
+  .foot{ border-top:1px solid var(--line-soft); margin-top:18px; padding-top:12px;
+         font-size:12px; color:var(--ink-3); line-height:1.5; }
+
+  /* the top bar, for where the button goes */
+  .top{ background:var(--panel); color:var(--panel-ink); border-radius:4px;
+        width:min(560px,100%); box-sizing:border-box; padding:10px 14px;
+        display:flex; align-items:center; gap:12px; }
+  .top .org{ font:700 13px/1 var(--sans); letter-spacing:.02em; flex:1; }
+  .infobtn{ font:700 11px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+            color:#AEBBD2; background:none; border:1px solid rgba(255,255,255,.28);
+            border-radius:99px; padding:5px 14px; cursor:pointer; }
+  .infobtn.round{ padding:5px 0; width:28px; text-align:center; letter-spacing:0;
+                  font-size:13px; text-transform:none; }
+  .infobtn.lit{ border-color:var(--gold); color:var(--gold); }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:44px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .stage{ padding:18px 10px; }
+    .krows{ grid-template-columns:1fr; gap:2px; }
+    .kk{ text-align:left; }
+    .kv{ margin-bottom:7px; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>What the keys do</h1>
+  <p class="lede">The audit says the platform has <b>one</b> keyboard idiom and it is the
+  projector. Measured against the sources today, there are <b>four</b> — and the real finding
+  is the one the audit does not make: <b>nothing on any screen says so.</b> There is no list of
+  keys anywhere in the product. The only way to discover <kbd>Alt</kbd>+<kbd>Enter</kbd> is to
+  hover the one button that carries it in a tooltip.</p>
+  <p class="lede"><b>So this adds no shortcut.</b> It writes down the ones that already work,
+  and gives every one added later somewhere to appear.</p>
+
+  <hr class="rule">
+  <span class="key">Treatment A <b>— everything, with what works HERE marked</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Keyboard</h3><p>Everything the platform answers. The marked ones work on this screen.</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <h4 class="mini">Anywhere<span class="here">here</span></h4>
+        <div class="krows">
+          <span class="kk"><kbd>Esc</kbd></span>
+          <span class="kv">Close what is open — a question, a panel, the chat corner</span>
+          <span class="kk"><kbd>Tab</kbd><span class="sep">/</span><kbd>Shift</kbd>+<kbd>Tab</kbd></span>
+          <span class="kv">Move between controls</span>
+        </div>
+
+        <h4 class="mini">Any long list<span class="where">the box you type into to pick</span><span class="here">here</span></h4>
+        <div class="krows">
+          <span class="kk"><span class="typ">type</span></span>
+          <span class="kv">Narrow the list as you go</span>
+          <span class="kk"><kbd>&darr;</kbd><span class="sep">/</span><kbd>&uarr;</kbd></span>
+          <span class="kv">Move the mark, wrapping at the ends</span>
+          <span class="kk"><kbd>Home</kbd><span class="sep">/</span><kbd>End</kbd></span>
+          <span class="kv">First or last of what is showing</span>
+          <span class="kk"><kbd>Enter</kbd></span>
+          <span class="kv">Take the marked row — or the first one showing</span>
+        </div>
+
+        <h4 class="mini">Entering figures<span class="where">Reporting</span></h4>
+        <div class="krows">
+          <span class="kk"><kbd>Enter</kbd></span>
+          <span class="kv">The next figure</span>
+          <span class="kk"><kbd>Shift</kbd>+<kbd>Enter</kbd></span>
+          <span class="kv">The one before</span>
+          <span class="kk"><kbd>Alt</kbd>+<kbd>Enter</kbd></span>
+          <span class="kv">Jump to the next thing still owed</span>
+          <span class="kk"><kbd>Alt</kbd>+<kbd>N</kbd></span>
+          <span class="kv">The note for this row</span>
+          <span class="kk"><kbd>Esc</kbd></span>
+          <span class="kv">Put the box back as it was</span>
+        </div>
+
+        <h4 class="mini">Moving a row<span class="where">wherever rows can be rearranged</span></h4>
+        <div class="krows">
+          <span class="kk"><kbd>&uarr;</kbd><span class="sep">/</span><kbd>&larr;</kbd></span>
+          <span class="kv">Up one</span>
+          <span class="kk"><kbd>&darr;</kbd><span class="sep">/</span><kbd>&rarr;</kbd></span>
+          <span class="kv">Down one</span>
+        </div>
+
+        <h4 class="mini">Presenting<span class="where">the deck</span></h4>
+        <div class="krows">
+          <span class="kk"><kbd>&rarr;</kbd><span class="sep">/</span><kbd>&darr;</kbd><span class="sep">/</span><kbd>Space</kbd></span>
+          <span class="kv">Next slide</span>
+          <span class="kk"><kbd>&larr;</kbd><span class="sep">/</span><kbd>&uarr;</kbd></span>
+          <span class="kv">Back one</span>
+          <span class="kk"><kbd>Home</kbd><span class="sep">/</span><kbd>End</kbd></span>
+          <span class="kv">First or last slide</span>
+          <span class="kk"><kbd>F</kbd></span>
+          <span class="kv">Fullscreen</span>
+          <span class="kk"><kbd>W</kbd></span>
+          <span class="kv">Fit to the window</span>
+          <span class="kk"><kbd>P</kbd></span>
+          <span class="kv">Pause the clock</span>
+          <span class="kk"><kbd>Esc</kbd></span>
+          <span class="kv">Leave fullscreen, then leave the deck</span>
+        </div>
+
+        <p class="foot">Open this with <kbd>?</kbd> from anywhere you are not typing, or from
+        the <b>?</b> beside Light and Dark.</p>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>Recommended.</b> One sheet that teaches the whole product. A reporter who
+  opens it while reporting sees their own five keys marked <i>here</i> — and also learns that
+  the deck and the lists have their own, which is the thing nobody can currently find out.
+  The cost, stated: it is longer, and four of its five sections are about somewhere else.</p>
+
+  <span class="key">Treatment B <b>— only what works where you are standing</b></span>
+  <div class="stage">
+    <div class="modal">
+      <div class="modal-h">
+        <div><h3>Keyboard</h3><p>On this screen &mdash; Reporting</p></div>
+        <button class="modal-x" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-b">
+        <h4 class="mini">Anywhere</h4>
+        <div class="krows">
+          <span class="kk"><kbd>Esc</kbd></span>
+          <span class="kv">Close what is open — a question, a panel, the chat corner</span>
+          <span class="kk"><kbd>Tab</kbd><span class="sep">/</span><kbd>Shift</kbd>+<kbd>Tab</kbd></span>
+          <span class="kv">Move between controls</span>
+        </div>
+        <h4 class="mini">Entering figures</h4>
+        <div class="krows">
+          <span class="kk"><kbd>Enter</kbd></span>
+          <span class="kv">The next figure</span>
+          <span class="kk"><kbd>Shift</kbd>+<kbd>Enter</kbd></span>
+          <span class="kv">The one before</span>
+          <span class="kk"><kbd>Alt</kbd>+<kbd>Enter</kbd></span>
+          <span class="kv">Jump to the next thing still owed</span>
+          <span class="kk"><kbd>Alt</kbd>+<kbd>N</kbd></span>
+          <span class="kv">The note for this row</span>
+          <span class="kk"><kbd>Esc</kbd></span>
+          <span class="kv">Put the box back as it was</span>
+        </div>
+        <h4 class="mini">Any long list</h4>
+        <div class="krows">
+          <span class="kk"><span class="typ">type</span></span>
+          <span class="kv">Narrow the list as you go</span>
+          <span class="kk"><kbd>&darr;</kbd><span class="sep">/</span><kbd>&uarr;</kbd></span>
+          <span class="kv">Move the mark, wrapping at the ends</span>
+          <span class="kk"><kbd>Enter</kbd></span>
+          <span class="kv">Take the marked row</span>
+        </div>
+        <p class="foot">Open this with <kbd>?</kbd>, or from the <b>?</b> beside Light and Dark.</p>
+      </div>
+    </div>
+  </div>
+  <p class="note">Shorter and entirely relevant. <b>Its cost is the thing this whole section
+  exists to fix</b>: a reporter never learns the deck has keys, because the sheet only ever
+  shows them what they are already standing in. It answers <i>what can I press now</i> and
+  never <i>what does this product do</i>.</p>
+
+  <hr class="rule">
+  <span class="key">Where it opens from <b>— the top bar, beside Light and Dark</b></span>
+  <div class="stage plain">
+    <div class="top">
+      <span class="org">Raya Group</span>
+      <button class="infobtn">Light</button>
+      <button class="infobtn round lit" aria-label="Keyboard" title="Keyboard">?</button>
+      <button class="infobtn">Sign out</button>
+    </div>
+  </div>
+  <p class="note">A <b>?</b> in the same pill the other top-bar controls wear. It needs a
+  visible route as well as the key: a sheet you can only reach by knowing the key to reach it
+  is the problem it was built to solve, one level up.</p>
+
+  <div class="ask">
+    <h2>What this is, and what it is not</h2>
+    <ul>
+      <li><b>No new shortcut.</b> Every key on the sheet already works today. Nothing is bound,
+      rebound or taken away.</li>
+      <li><b>The keys were read from the sources, not remembered.</b> Each line was taken out of
+      the file that binds it.</li>
+      <li><b>One thing to decide beyond A or B:</b> <kbd>?</kbd> must not fire while somebody is
+      typing — most of this product is fields. It opens only when the cursor is not in a box,
+      which is the same guard the reporting keys already use.</li>
+      <li><b>It makes the next round discoverable.</b> If accelerators are added later for
+      Submit, Save draft or moving between destinations, they appear here rather than in
+      another tooltip nobody hovers.</li>
+    </ul>
+  </div>
+</div>

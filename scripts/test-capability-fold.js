@@ -1,5 +1,5 @@
 /* ── A CAPABILITY BECOMES AN INTERNAL PILLAR, AND THE PAGES DO NOT MOVE ───
-   Spec 066 stage 3b (c) and the move (d) waits on. §539.
+   Spec 066 stage 3b (c) and the move (d) waits on. §542.
 
    WHAT THIS CHECK IS FOR. (a) gave a box a setting, (b) gave a pillar its
    code; this is the one that answers the question Islam actually asked —
@@ -8,9 +8,9 @@
    renders them again, and compares the words a person would read.
 
    THREE COLUMNS, NOT TWO, and that is the point of the design:
-     · TODAY     — the build before §539, over the state as stored.
+     · TODAY     — the build before §542, over the state as stored.
      · THE CODE  — this build, over the SAME state, nothing moved. Every
-                   difference here is something §539's code did on its own,
+                   difference here is something §542's code did on its own,
                    to a client that has not migrated. Those must be none, or
                    named.
      · THE MOVE  — this build, after `capFoldIntoTop()`. Differences here are
@@ -40,7 +40,7 @@
      · the move refusing nothing                          →  8 of 38 red
      · the owner not carried off the record               →  1 of 38 red
      · the moved row not marked internal                  → 14 of 38 red
-     · the move not setting the split (§537)              →  5 of 38 red
+     · the move not setting the split (§540)              →  5 of 38 red
      · the Temple's base reading the records only         →  2 of 38 red
      · the deck's heading dropping the second kind        →  1 of 38 red
      · the empty capabilities section kept on Performance →  2 of 38 red
@@ -167,7 +167,7 @@ const PAGES = {
 const CAPTAB = [`renderTopCaps()`, `drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); })`];
 
 /* ── 1 · THE CODE ALONE MOVES NOTHING ON AN UNMIGRATED CLIENT ───────────── */
-console.log("1 · §539's code, over a client that has not moved, changes nothing");
+console.log("1 · §542's code, over a client that has not moved, changes nothing");
 {
   const was = clientAt(readWas, elAbd()), now = clientAt(readNow, elAbd());
   const moves = [];
@@ -177,14 +177,14 @@ console.log("1 · §539's code, over a client that has not moved, changes nothin
     try { a = WORDS(now(PAGES[name])); } catch (e) { a = "threw: " + e.message; }
     if (a !== b) moves.push([name, b.length, a.length]);
   });
-  /* THE REPORTING PAGE IS THE ONE EXCEPTION AND IT IS NAMED (§218, §539):
+  /* THE REPORTING PAGE IS THE ONE EXCEPTION AND IT IS NAMED (§218, §542):
      `plansInPillars("group")` answered false for every company in the
      product, so the company's Reporting rail could not say which row still
      owed a figure. Fixed, which ADDS the fill bar and its per-row marks to a
      page that had neither. Asserted as a move rather than excused. */
   const rep = moves.filter(function (m) { return m[0] === "Reporting"; });
   ok(rep.length === 1 && rep[0][2] > rep[0][1],
-     "the Reporting page gains the fill bar §539 gave every other box", rep);
+     "the Reporting page gains the fill bar §542 gave every other box", rep);
   ok(WORDS(was(`renderReport(topAsUnit())`)).indexOf("to finish") < 0 &&
      WORDS(now(`renderReport(topAsUnit())`)).indexOf("to finish") >= 0,
      "and that is specifically the 'N to finish' bar, absent before and present after");
@@ -199,7 +199,7 @@ console.log("1 · §539's code, over a client that has not moved, changes nothin
 
 /* ── 1b · AND IT MOVES NOTHING FOR A JOINED BOX HOLDING BOTH KINDS ──────
    THE GAP THIS SECTION WAS WRITTEN FROM. Section 1 measures the COMPANY, and
-   the company's capabilities are records, so nothing above asks what §539's
+   the company's capabilities are records, so nothing above asks what §542's
    code does to a box whose ONE JOINED LIST already holds pillars marked
    Capability — which is six of the worked example's ten units, today, on
    every client built like Raya. The first draft of the deck's roll-call

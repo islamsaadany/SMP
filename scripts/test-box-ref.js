@@ -375,7 +375,7 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
       catch (e) { return "threw: " + e.message; }
     };
     /* ── ONE ANSWER HAS DELIBERATELY MOVED SINCE, AND IT IS NAMED (§218) ───
-       §539 taught `plansInPillars` to answer for the TOP LAYER, which it had
+       §542 taught `plansInPillars` to answer for the TOP LAYER, which it had
        never done: the company is not in `UNITS`, so `subjUnit("group")` was
        null and a company planning in pillars answered FALSE — which sent
        `subjectAsked("group")` down the holder branch to an empty list and
@@ -409,7 +409,7 @@ console.log("4 · the client's data layer answers what it answered at " + BASE);
          exception above is covering for a reader that never changed. */
       if (Object.keys(expected).length)
         ok(kept.length === builds.length * Object.keys(expected).length,
-           call + " · and " + Object.keys(expected).join(", ") + " moved as §539 says, in both states", kept);
+           call + " · and " + Object.keys(expected).join(", ") + " moved as §542 says, in both states", kept);
     });
     /* BOTH ENDS AGAIN (§94.2): an agreement where every call threw in both
        builds is no agreement at all, so the run has to have produced real

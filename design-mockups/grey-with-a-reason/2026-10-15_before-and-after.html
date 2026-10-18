@@ -1,0 +1,429 @@
+<title>Why a button is grey</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  :root{
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0; --field-line:#C4CDDA;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --bad:#B04434; --bad-tx:#8C3327; --bad-bg:#F7E3E0;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --good-tx:#1F6248; --attn-bg:#F7EFD6;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --over:rgba(23,27,34,.42);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+      --warn-bg:#33241A; --warn-tx:#E1935F;
+      --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --over:rgba(0,0,0,.55);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A; --field-line:#3C4450;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --bad:#D97066; --bad-tx:#E79A93; --bad-bg:#33201E;
+    --warn-bg:#33241A; --warn-tx:#E1935F;
+    --good-bg:#1B3129; --good-tx:#8FD3B0; --attn-bg:#2E2510;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --over:rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+  body{ margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); }
+  .wrap{ max-width:1000px; margin:0 auto; padding-block:34px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px));
+         padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  h1{ font-size:26px; margin:0 0 6px; letter-spacing:-.2px; text-wrap:balance; }
+  .lede{ font-size:14.5px; color:var(--ink-2); margin:0 0 6px; max-width:64ch; line-height:1.55; }
+  .lede b{ color:var(--ink); }
+  .key{ font:600 10.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold-deep); margin:34px 0 10px; display:block; }
+  .key b{ color:var(--ink-3); font-weight:600; letter-spacing:0; text-transform:none; font-size:12.5px; }
+  .stage{ background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+          padding:40px 18px 34px; display:flex; justify-content:center; }
+  .note{ font-size:13px; color:var(--ink-3); margin:9px 0 0; max-width:64ch; line-height:1.5; }
+  .note b{ color:var(--ink-2); }
+  .verdict{ border-left:3px solid var(--bad); padding:2px 0 2px 13px; margin:10px 0 0;
+            font-size:13px; color:var(--bad-tx); max-width:62ch; line-height:1.5; }
+  .verdict b{ color:var(--bad-tx); }
+  .good-v{ border-left:3px solid var(--good); padding:2px 0 2px 13px; margin:10px 0 0;
+           font-size:13px; color:var(--good-tx); max-width:62ch; line-height:1.5; }
+  .rule{ border:0; border-top:1px solid var(--line); margin:42px 0 0; }
+  .sec{ font:700 17px/1.3 var(--sans); margin:38px 0 4px; }
+  .secn{ color:var(--gold-deep); font-variant-numeric:tabular-nums; }
+
+  .tally{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+          margin-top:20px; overflow:hidden; }
+  .tally div{ display:flex; gap:14px; padding:9px 14px; border-top:1px solid var(--line-soft);
+              font-size:13px; align-items:baseline; }
+  .tally div:first-child{ border-top:0; background:var(--surface-2); font-weight:600;
+                          color:var(--ink-3); font-size:11.5px; letter-spacing:.08em;
+                          text-transform:uppercase; }
+  .tally .w{ flex:1 1 42%; min-width:0; color:var(--ink); }
+  .tally .s{ flex:0 0 44%; color:var(--ink-2); }
+
+  /* ── the two kinds of grey, and the sentence attached to each ───────── */
+  .holder{ position:relative; display:inline-block; }
+  /* BEFORE: the sentence is there and nothing can open it */
+  .ghost{ position:absolute; bottom:calc(100% + 9px); left:50%; transform:translateX(-50%);
+          width:max-content; max-width:min(250px,76vw); box-sizing:border-box;
+          border:1px dashed var(--bad); border-radius:3px; background:transparent;
+          color:var(--bad-tx); font-size:11.5px; line-height:1.4; padding:7px 10px;
+          text-align:left; opacity:.6; text-decoration:line-through;
+          text-decoration-color:color-mix(in srgb, var(--bad) 55%, transparent); }
+  .ghost.r{ left:auto; right:0; transform:none; }
+  .ghost em{ display:block; font:600 9.5px/1.3 var(--sans); letter-spacing:.1em;
+             text-transform:uppercase; text-decoration:none; opacity:.95; margin-bottom:3px;
+             font-style:normal; }
+  /* AFTER: the bubble the product already uses for Submit */
+  .bub{ position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+        width:max-content; max-width:min(255px,78vw); box-sizing:border-box;
+        background:var(--ink); color:var(--ground); font-size:12px; font-weight:400;
+        line-height:1.4; padding:8px 11px; border-radius:3px; text-align:left; z-index:4; }
+  .bub.r{ left:auto; right:0; transform:none; }
+  .bub::after{ content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+               border:5px solid transparent; border-top-color:var(--ink); }
+  .bub.r::after{ left:auto; right:16px; transform:none; }
+  /* IN FLOW, for the two tables. A table that can scroll sideways clips
+     whatever is drawn above a row, so inside those the bubble sits under the
+     control rather than over it. The product's own bubble floats; this is the
+     drawing's compromise, not a second design. */
+  .bub.flow, .ghost.flow{ position:static; display:block; bottom:auto; left:auto;
+                          right:auto; transform:none; margin:9px 0 1px; max-width:min(255px,100%); }
+  .bub.flow::after{ top:auto; bottom:100%; left:18px; right:auto; transform:none;
+                    border-top-color:transparent; border-bottom-color:var(--ink); }
+  td.act .bub.flow, td.act .ghost.flow{ margin-left:auto; }
+  .holder.flow{ display:block; }
+  .tag{ font:600 9.5px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+        color:var(--ink-3); display:block; margin-top:9px; text-align:center; }
+  .focusring{ outline:2px solid var(--gold-deep); outline-offset:2px; }
+
+  /* 1 · the change log */
+  .panel{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+          width:min(640px,100%); padding:14px 16px 16px; box-sizing:border-box; }
+  .panelh{ font:700 13.5px/1.3 var(--sans); margin:0 0 3px; }
+  .panelsub{ font-size:12px; color:var(--ink-3); margin:0 0 12px; }
+  .tabwrap{ overflow-x:auto; }
+  table.hist{ width:100%; border-collapse:collapse; font-size:12px; }
+  table.hist th{ text-align:left; white-space:nowrap; background:var(--surface-2);
+                 color:var(--ink-2); font:700 10px/1.3 var(--sans); letter-spacing:.06em;
+                 text-transform:uppercase; padding:6px 8px; }
+  table.hist td{ padding:9px 8px; border-top:1px solid var(--line-soft); vertical-align:middle; }
+  table.hist td.t{ color:var(--ink-3); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.hist td.ft{ font-family:var(--mono); color:var(--ink-2); }
+  table.hist td.act{ text-align:right; }
+  .arr{ color:var(--ink-3); }
+  .rst{ font:600 10px/1 var(--sans); border:1px solid var(--line); background:transparent;
+        color:var(--ink-2); border-radius:6px; padding:5px 9px; cursor:pointer; }
+  .rst.dead{ opacity:.45; cursor:default; }
+  .rst.held{ opacity:.45; cursor:default; }
+
+  /* 2 · the Copilot's button row */
+  .copbtns{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .copbtn{ font:600 12.5px/1.2 var(--sans); cursor:pointer; color:var(--ink);
+           background:var(--surface); border:1px solid var(--line); border-radius:6px;
+           padding:6px 11px; }
+  .copbtn.solid{ background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+  .copbtn.quiet{ color:var(--ink-2); }
+  .copbtn.dead, .copbtn.held{ opacity:.45; cursor:default; }
+
+  /* 3 · the planning dropdown */
+  .cfgrow{ background:var(--surface); border:1px solid var(--line); border-radius:10px;
+           width:min(640px,100%); box-sizing:border-box; overflow:hidden; }
+  table.cfg{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.cfg th{ text-align:left; background:var(--surface-2); color:var(--ink-2);
+                font:700 10px/1.3 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+                padding:7px 10px; }
+  table.cfg td{ padding:11px 10px; border-top:1px solid var(--line-soft); vertical-align:top; }
+  .sel{ font:400 12.5px/1.45 var(--sans); padding:5px 24px 5px 9px; border:1px solid var(--field-line);
+        border-radius:6px; background:var(--surface); color:var(--ink);
+        appearance:none; cursor:pointer;
+        background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),
+                         linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+        background-position:calc(100% - 13px) 52%, calc(100% - 9px) 52%;
+        background-size:4px 4px, 4px 4px; background-repeat:no-repeat; }
+  .sel.dead, .sel.held{ opacity:.45; cursor:default; }
+  .why{ display:block; font-size:11.5px; color:var(--ink-3); margin-top:4px; }
+
+  /* 4 · the quarters */
+  .period{ display:flex; justify-content:space-between; gap:8px; align-items:center;
+           flex-wrap:wrap; background:var(--attn-bg); border:1px solid var(--line);
+           border-radius:8px; padding:7px 12px; font-size:13px; color:var(--ink);
+           margin:0 0 11px; }
+  .period .linkbu{ font:600 12px/1 var(--sans); background:none; border:0; padding:0;
+                   color:var(--gold-deep); text-decoration:underline; cursor:pointer; }
+  table.qt{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  table.qt th{ background:var(--surface-2); color:var(--ink-2); font:700 10px/1.3 var(--sans);
+               letter-spacing:.06em; text-transform:uppercase; padding:6px 8px; text-align:center; }
+  table.qt th:first-child, table.qt th:nth-child(2){ text-align:left; }
+  table.qt td{ padding:7px 8px; border-top:1px solid var(--line-soft); text-align:center; }
+  table.qt td:first-child, table.qt td:nth-child(2){ text-align:left; }
+  .qs{ white-space:nowrap; }
+  .q{ width:26px; height:24px; margin:0 1px; padding:0; border-radius:4px;
+      border:1px solid var(--field-line); background:var(--surface); color:var(--ink-3);
+      font:600 11px/1 var(--sans); cursor:pointer; }
+  .q.on{ background:var(--panel); color:var(--panel-ink); border-color:var(--panel); }
+  .q.off{ background:var(--surface-2); opacity:.45; text-decoration:line-through; cursor:default; }
+  .qline{ display:inline-block; white-space:nowrap; }
+  .ghost.flow.mid{ margin-left:auto; margin-right:auto; }
+  .mark{ display:inline-block; width:26px; height:24px; margin:0 1px; border-radius:4px;
+         border:1px solid var(--field-line); background:var(--surface-2); color:var(--ink-3);
+         font:600 11px/22px var(--sans); text-align:center; opacity:.45;
+         text-decoration:line-through; }
+
+  .ask{ border:1px solid var(--line); border-radius:10px; background:var(--surface);
+        padding:16px 18px; margin-top:44px; }
+  .ask h2{ font-size:15px; margin:0 0 8px; }
+  .ask ul{ margin:0; padding-left:18px; font-size:13.5px; color:var(--ink-2); line-height:1.65; }
+  .ask li + li{ margin-top:7px; }
+  @media (max-width:560px){
+    .tally div{ flex-direction:column; gap:3px; } .tally .s, .tally .w{ flex:none; }
+    .stage{ padding:30px 12px; }
+    /* A floating bubble centred on a button near the right edge runs off a
+       phone. Narrow, every bubble drops into the flow above its control —
+       the default arrow already points down at it. */
+    .holder{ display:block; }
+    .bub:not(.flow), .ghost:not(.flow){ position:static; display:block; transform:none;
+      left:auto; right:auto; bottom:auto; margin:0 0 9px; max-width:100%; }
+  }
+</style>
+
+<div class="wrap">
+  <h1>Why a button is grey</h1>
+  <p class="lede">The product greys a control out in two ways. One leaves it alive: it looks
+  grey, it refuses to act, and it still answers a pointer and the Tab key by saying why. That is
+  <b>Submit</b>, and it is the rule the product set for itself. The other way is dead — the
+  control becomes a picture, the pointer passes through it, Tab skips it, and nothing attached
+  to it will ever be seen.</p>
+  <p class="lede"><b>Four controls use the dead way, and each has an explanation written onto
+  it.</b> Four sentences in the product that nobody can reach. The audit named one of the four,
+  and it is the mildest.</p>
+
+  <div class="tally">
+    <div><span class="w">The control</span><span class="s">The sentence nobody can reach</span></div>
+    <div><span class="w">Restore, in the change log</span><span class="s">why that change cannot be put back</span></div>
+    <div><span class="w">Apply to plan, in the Copilot</span><span class="s">&ldquo;Save the Foundation first&rdquo;</span></div>
+    <div><span class="w">How a capability is planned</span><span class="s">&ldquo;Clear the plan on this row first&rdquo;</span></div>
+    <div><span class="w">The quarter marks, in the Copilot</span><span class="s">&ldquo;Q3 is outside the plan period&rdquo; &mdash; the audit's one</span></div>
+  </div>
+
+  <hr class="rule">
+  <p class="sec"><span class="secn">1</span> &nbsp;Restore, in the change log <span style="color:var(--bad-tx);font-weight:600;font-size:13px">&mdash; the bad one</span></p>
+  <p class="lede">A change that cannot be put back shows a grey Restore. The reason is written
+  only on the dead button, and <b>nothing else on screen says anything</b>. You see a grey
+  button and there is no way to find out what is wrong with it.</p>
+
+  <span class="key">Today <b>— hovering does nothing, Tab goes straight past</b></span>
+  <div class="stage">
+    <div class="panel">
+      <div class="panelh">Change log</div>
+      <p class="panelsub">Trade Finance &middot; last 7 days</p>
+      <div class="tabwrap">
+        <table class="hist">
+          <thead><tr><th>When</th><th>Who</th><th>Field</th><th>Change</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="t">Today 09:12</td><td>Nadia H.</td><td>Target</td>
+                <td class="ft">120 <span class="arr">&rarr;</span> 145</td>
+                <td class="act"><button class="rst">Restore</button></td></tr>
+            <tr><td class="t">Today 08:40</td><td>Islam S.</td><td>Owner</td>
+                <td class="ft">&mdash; <span class="arr">&rarr;</span> Omar K.</td>
+                <td class="act"><span class="holder flow">
+                  <button class="rst dead">Restore</button>
+                  <span class="ghost flow"><em>attached, unreachable</em>Omar K. has since left the register</span></span></td></tr>
+            <tr><td class="t">14 Oct 26, 16:05</td><td>Nadia H.</td><td>Quarters</td>
+                <td class="ft">Q1 Q2 <span class="arr">&rarr;</span> Q1 Q2 Q3</td>
+                <td class="act"><button class="rst">Restore</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">The dashed box is the sentence as it exists today: written, and shown to
+  nobody. On screen there is a grey Restore between two live ones and no account of the
+  difference.</p>
+
+  <span class="key">Proposed <b>— the same bubble Submit uses, on pointer and on Tab</b></span>
+  <div class="stage">
+    <div class="panel">
+      <div class="panelh">Change log</div>
+      <p class="panelsub">Trade Finance &middot; last 7 days</p>
+      <div class="tabwrap">
+        <table class="hist">
+          <thead><tr><th>When</th><th>Who</th><th>Field</th><th>Change</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="t">Today 09:12</td><td>Nadia H.</td><td>Target</td>
+                <td class="ft">120 <span class="arr">&rarr;</span> 145</td>
+                <td class="act"><button class="rst">Restore</button></td></tr>
+            <tr><td class="t">Today 08:40</td><td>Islam S.</td><td>Owner</td>
+                <td class="ft">&mdash; <span class="arr">&rarr;</span> Omar K.</td>
+                <td class="act"><span class="holder flow">
+                  <button class="rst held focusring">Restore</button>
+                  <span class="bub flow">Omar K. has since left the register</span></span></td></tr>
+            <tr><td class="t">14 Oct 26, 16:05</td><td>Nadia H.</td><td>Quarters</td>
+                <td class="ft">Q1 Q2 <span class="arr">&rarr;</span> Q1 Q2 Q3</td>
+                <td class="act"><button class="rst">Restore</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <span class="tag">shown with the keyboard on it — a pointer opens the same bubble</span>
+    </div>
+  </div>
+  <p class="good-v">Still grey, still refuses, and now it answers. Pressing it does nothing but
+  show this. The gold ring is the product's own focus ring — the button is reachable with Tab,
+  which is what the dead version could never be.</p>
+
+  <hr class="rule">
+  <p class="sec"><span class="secn">2</span> &nbsp;Apply to plan, in the Copilot</p>
+  <p class="lede">Grey until the Foundation has been saved. &ldquo;Save the Foundation
+  first&rdquo; is written only on the dead button. The Save button happens to sit beside it, so
+  it is guessable — but the product never says it.</p>
+
+  <span class="key">Today <b>— the instruction is on the one control that cannot deliver it</b></span>
+  <div class="stage">
+    <div class="copbtns">
+      <button class="copbtn quiet">Run the check</button>
+      <button class="copbtn solid">Save as Foundation v2</button>
+      <span class="holder">
+        <span class="ghost"><em>attached, unreachable</em>Save the Foundation first</span>
+        <button class="copbtn dead">Apply to plan</button></span>
+    </div>
+  </div>
+  <p class="verdict">Three buttons, one of them grey, and the reason sits inside the grey one.</p>
+
+  <span class="key">Proposed</span>
+  <div class="stage">
+    <div class="copbtns">
+      <button class="copbtn quiet">Run the check</button>
+      <button class="copbtn solid">Save as Foundation v2</button>
+      <span class="holder">
+        <span class="bub">Save the Foundation first</span>
+        <button class="copbtn held focusring">Apply to plan</button></span>
+    </div>
+  </div>
+  <p class="good-v">One sentence, pointing at the button next to it. The press still does
+  nothing.</p>
+
+  <hr class="rule">
+  <p class="sec"><span class="secn">3</span> &nbsp;How a capability is planned</p>
+  <p class="lede">Grey when the row already holds a plan. Here the product does say something
+  beside it — <b>holds its plan</b> — but the actual instruction, &ldquo;Clear the plan on this
+  row first&rdquo;, is on the dead control. Half the answer is on screen and half is not.</p>
+
+  <span class="key">Today</span>
+  <div class="stage">
+    <div class="cfgrow">
+      <table class="cfg">
+        <thead><tr><th>Capability</th><th>Planned as</th></tr></thead>
+        <tbody>
+          <tr><td>Correspondent banking</td>
+              <td><select class="sel" aria-label="How Correspondent banking is planned"><option>Projects</option><option>Pillars</option></select></td></tr>
+          <tr><td>Trade finance platform</td>
+              <td><span class="holder flow">
+                <select class="sel dead" disabled aria-label="How Trade finance platform is planned"><option>Pillars</option></select>
+                <span class="why">holds its plan</span>
+                <span class="ghost flow"><em>attached, unreachable</em>Clear the plan on this row first</span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="verdict"><b>holds its plan</b> names the obstacle and not the way out. The way out
+  is in the dashed box.</p>
+
+  <span class="key">Proposed <b>— the visible note stays, and the instruction joins it</b></span>
+  <div class="stage">
+    <div class="cfgrow">
+      <table class="cfg">
+        <thead><tr><th>Capability</th><th>Planned as</th></tr></thead>
+        <tbody>
+          <tr><td>Correspondent banking</td>
+              <td><select class="sel" aria-label="How Correspondent banking is planned"><option>Projects</option><option>Pillars</option></select></td></tr>
+          <tr><td>Trade finance platform</td>
+              <td><span class="holder flow">
+                <select class="sel held focusring" aria-label="How Trade finance platform is planned"><option>Pillars</option></select>
+                <span class="why">holds its plan</span>
+                <span class="bub flow">Clear the plan on this row first</span></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="good-v">The small note is kept — it is the one piece of this that already worked.</p>
+
+  <hr class="rule">
+  <p class="sec"><span class="secn">4</span> &nbsp;The quarter marks <span style="color:var(--good-tx);font-weight:600;font-size:13px">&mdash; nothing is hidden here</span></p>
+  <p class="lede">The one the audit named, and the one where the explanation is
+  <b>already on the screen</b>: the strip directly above the table says which period the plan
+  covers, and the out-of-range quarters are struck through right underneath it. The dead hover
+  only repeats what is visible two centimetres higher.</p>
+
+  <span class="key">Today <b>— the sentence is already above the table, and also hidden inside each mark</b></span>
+  <div class="stage">
+    <div class="panel">
+      <div class="period"><span>This plan covers <b>Jan&ndash;Jun 2027</b></span>
+        <button class="linkbu">Change</button></div>
+      <div class="tabwrap">
+        <table class="qt">
+          <thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th></tr></thead>
+          <tbody>
+            <tr><td>Appoint two correspondent banks</td><td>Omar K.</td>
+                <td class="qs"><span class="qline"><button class="q on">Q1</button><button class="q">Q2</button><button class="q off" disabled>Q3</button><button class="q off" disabled>Q4</button></span>
+                  <span class="ghost flow mid"><em>attached, unreachable — on Q3 and on Q4</em>Q3 is outside the plan period</span></td></tr>
+            <tr><td>Publish the counterparty policy</td><td>Nadia H.</td>
+                <td class="qs"><button class="q">Q1</button><button class="q on">Q2</button>
+                  <button class="q off" disabled>Q3</button><button class="q off" disabled>Q4</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="verdict">Not harmful, just dead weight — and it would be four more Tab stops per row
+  all saying the same sentence if it were made live.</p>
+
+  <span class="key">Proposed <b>— drop the dead hover; Q3 and Q4 stop pretending to be buttons</b></span>
+  <div class="stage">
+    <div class="panel">
+      <div class="period"><span>This plan covers <b>Jan&ndash;Jun 2027</b></span>
+        <button class="linkbu">Change</button></div>
+      <div class="tabwrap">
+        <table class="qt">
+          <thead><tr><th>Tactic</th><th>Owner</th><th>Quarters</th></tr></thead>
+          <tbody>
+            <tr><td>Appoint two correspondent banks</td><td>Omar K.</td>
+                <td class="qs"><button class="q on">Q1</button><button class="q">Q2</button>
+                  <span class="mark">Q3</span><span class="mark">Q4</span></td></tr>
+            <tr><td>Publish the counterparty policy</td><td>Nadia H.</td>
+                <td class="qs"><button class="q">Q1</button><button class="q on">Q2</button>
+                  <span class="mark">Q3</span><span class="mark">Q4</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="good-v">Identical to look at. Q3 and Q4 are marks rather than buttons, so Tab walks
+  only the quarters that can be pressed, and the period is read once from the strip instead of
+  four times a row from a hover that never opened.</p>
+
+  <div class="ask">
+    <h2>What this changes, and what it does not</h2>
+    <ul>
+      <li><b>The bubble is not new.</b> It is the one Submit has used since §221, so there is no
+      new shape to approve — only four controls joining it.</li>
+      <li><b>None of the four starts working.</b> Each still refuses. What changes is that three
+      of them can now say why, to a pointer and to the Tab key alike.</li>
+      <li><b>The wording is the product's own</b> in all four cases. Nothing here is new copy.</li>
+      <li><b>One hidden repair comes with it:</b> Apply to plan decides whether to act by asking
+      whether it is dead. Once it is alive-but-refusing, that question answers wrongly and the
+      button would start working. Its guard has to change in the same breath.</li>
+    </ul>
+  </div>
+</div>

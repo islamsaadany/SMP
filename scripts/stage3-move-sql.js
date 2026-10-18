@@ -1,4 +1,4 @@
-/* ── THE MOVE, AS SQL FOR NEON'S EDITOR (§539.2, spec 066 stage 3b d) ─────
+/* ── THE MOVE, AS SQL FOR NEON'S EDITOR (§542.2, spec 066 stage 3b d) ─────
    Islam set the terms for the data move: a per-client before-and-after shown
    to him first, rehearsed on a copy, and *"the final step handed over as SQL
    for Neon's SQL editor"*.
@@ -49,7 +49,7 @@ const FLAGVAL = ["--schema", "--rename", "--tenant"];
 const input = argv.find((a) => !a.startsWith("--") && FLAGVAL.indexOf(argv[argv.indexOf(a) - 1]) < 0);
 const sIdx = argv.indexOf("--schema");
 const SCHEMA = sIdx >= 0 ? argv[sIdx + 1] : null;
-/* §539.5 — TWO LAYOUTS, BECAUSE THE LIVE DATABASE IS NOT THE ONE IN THIS
+/* §542.5 — TWO LAYOUTS, BECAUSE THE LIVE DATABASE IS NOT THE ONE IN THIS
    REPOSITORY. `db/schema.sql` and scripts/migrate-to-multi-client.js describe
    a schema per client (`el_abd.org`, `platform.clients`). The deployment has
    moved past that: one set of tables in a `smp` schema with a `tenant_id`
@@ -62,7 +62,7 @@ const SCHEMA = sIdx >= 0 ? argv[sIdx + 1] : null;
    two rounds; a flag costs a word. */
 const tIdx = argv.indexOf("--tenant");
 const TENANT = tIdx >= 0 ? argv[tIdx + 1] : null;
-/* §539.4: and the client's own name, where it is being corrected at the same
+/* §542.4: and the client's own name, where it is being corrected at the same
    time — stored in two places, so a rename done by hand in one of them leaves
    the cards and the pages disagreeing. */
 const rIdx = argv.indexOf("--rename");

@@ -81,27 +81,29 @@ var TRAIL = (function(){
     } catch (x) {}
     return e.person_name || e.person_key || "";
   }
-  function pad(n){ return (n < 10 ? "0" : "") + n; }
-  function dateWord(at){
-    var d = new Date(at); if (isNaN(d)) return "";
-    var now = new Date();
-    var sameDay = function(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
-    if (sameDay(d, now)) return "Today";
-    var y = new Date(now); y.setDate(now.getDate() - 1);
-    if (sameDay(d, y)) return "Yesterday";
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "");
+  /* TODAY AND YESTERDAY ARE THIS FILE'S OWN, and they stay: a log read
+     minutes after the act is mostly today, and "Today" says that better
+     than the date does. Everything past yesterday is the product's one day
+     writer now (§537). What went was a `["Jan","Feb",...]` array kept here
+     twice, which printed the year only when it was not this one — so the
+     log said "11 Mar" where every other screen said "11 Mar 26". */
+  function sameDayAs(a, b){
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
-  function timeWord(at){ var d = new Date(at); return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); }
+  function dayName(at){
+    var d = dateOf(at); if (!d) return "";
+    var now = new Date(), y = new Date(now); y.setDate(now.getDate() - 1);
+    return sameDayAs(d, now) ? "Today" : sameDayAs(d, y) ? "Yesterday" : "";
+  }
+  function dateWord(at){
+    var d = dateOf(at); if (!d) return "";
+    return dayName(at) || dateDay(d);
+  }
+  function timeWord(at){ return timeOf(at); }
   function whenWord(at){
-    var d = new Date(at); if (isNaN(d)) return "";
-    var now = new Date(), t = pad(d.getHours()) + ":" + pad(d.getMinutes());
-    var sameDay = function(a, b){ return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
-    if (sameDay(d, now)) return "Today " + t;
-    var y = new Date(now); y.setDate(now.getDate() - 1);
-    if (sameDay(d, y)) return "Yesterday " + t;
-    var M = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return d.getDate() + " " + M[d.getMonth()] + (d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() : "") + ", " + t;
+    var d = dateOf(at); if (!d) return "";
+    var near = dayName(at);
+    return near ? near + " " + timeOf(d) : dateAt(d);
   }
   function plain(v){
     if (v === null || v === undefined || v === "") return "nothing";
@@ -170,7 +172,7 @@ var TRAIL = (function(){
       var e = r.e, m = r.m, why = noRestore(r);
       var rowName = m ? (m.name || m.id) : (e.what || kindWord(e.kind));
       h += '<tr data-hist-row="' + i + '">' +
-        '<td class="hist-t" title="' + E(new Date(e.at).toLocaleString()) + '">' + E(dateWord(e.at)) + '</td>' +
+        '<td class="hist-t" title="' + E(dateStamp(e.at)) + '">' + E(dateWord(e.at)) + '</td>' +
         '<td class="hist-t">' + E(timeWord(e.at)) + '</td>' +
         '<td title="' + E(e.person_name || "") + '">' + E(whoWord(e)) + '</td>' +
         (opts.noPlace ? '' : '<td>' + E(placeWord(e.target)) + '</td>') +
@@ -179,7 +181,14 @@ var TRAIL = (function(){
         '<td class="hist-fld">' + (m ? E(fieldWord(m.field)) : '') + '</td>' +
         '<td class="hist-fromto hist-wrap" title="' + (m ? E(plain(m.from) + ' → ' + plain(m.to)) : '') + '">' + (m ? valHtml(m.from) + ' <span class="hist-arr">→</span> ' + valHtml(m.to) : '<span class="hist-none">—</span>') + '</td>' +
         '<td class="hist-act">' + (why
-          ? '<button type="button" class="hist-rst" disabled aria-disabled="true" title="' + E(why) + '">Restore</button>'
+          /* HELD, NOT DEAD (§538). It carried BOTH attributes, and `disabled`
+             wins: the button took no pointer and no Tab, so the one sentence
+             saying why this change cannot be put back reached nobody — and
+             nothing else in the row says it. `aria-disabled` alone leaves it
+             reachable, `.hasnote` opens the product's own bubble on hover AND
+             on focus, and the press stays inert because the held button never
+             carries `data-hist-restore` for the handler to find. */
+          ? '<button type="button" class="hist-rst hasnote" aria-disabled="true" data-tip="' + E(why) + '">Restore</button>'
           : '<button type="button" class="hist-rst" data-hist-restore="' + i + '">Restore</button>') + '</td>' +
         '</tr>';
     });

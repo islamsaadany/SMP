@@ -521,7 +521,7 @@ function deckSlides(u){
      eight both fill their line; `--n` is set from the list rather than assumed,
      and the sub-line comes only where the pillar has one (§15.1). */
   var pNames = u.items.map(function(p, i){
-    /* §539: on a box SHOWN APART, an internal pillar says what it is where
+    /* §542: on a box SHOWN APART, an internal pillar says what it is where
        it has nothing else to say — exactly as a capability's own card does
        below, so a client whose capabilities have become pillars reads the
        roll-call it read when they were records. Its own sub-line still wins.
@@ -561,7 +561,7 @@ function deckSlides(u){
 
   if (pOn && u.items.length) S.push('<section class="dslide"' +
     anch("pillarnames", "After the " + L("pillar","bu") + " names") +
-    /* §539: the heading names both kinds whether the capabilities are
+    /* §542: the heading names both kinds whether the capabilities are
        records beside the list or pillars inside a list SHOWN APART — never
        because a joined list happens to hold a marked row (see the sub-line
        above, and checks/deck-figures.py, which went red on exactly that). */

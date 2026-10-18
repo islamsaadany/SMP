@@ -1,4 +1,4 @@
-"""ONE PILLAR LIST, SHOWN AS ONE OR AS TWO (§537) — THE PERMANENT CHECK.
+"""ONE PILLAR LIST, SHOWN AS ONE OR AS TWO (§540) — THE PERMANENT CHECK.
 
 Islam, 2026-10-15, authorising stage 3b (a): *"go ahead with a"*, under the
 requirement he set for the whole of stage 3b: *"ok noting that nothing will

@@ -1,4 +1,4 @@
-/* ── A PILLAR'S CODE COMES FROM ITS KIND, AND NOBODY IS RENUMBERED (§538) ──
+/* ── A PILLAR'S CODE COMES FROM ITS KIND, AND NOBODY IS RENUMBERED (§541) ──
    Spec 066 stage 3b (b). Islam, 2026-10-15: *"the capability tab should stay
    as is and the coding is c001 to c005"*.
 
@@ -8,7 +8,7 @@
    quietly. This check is therefore mostly about what did NOT change.
 
      1 · EVERY CODE IN THE WORKED EXAMPLE IS THE CODE IT WAS, compared string
-         for string against the build before §538 — every pillar of every
+         for string against the build before §541 — every pillar of every
          unit, every pillar of every function that plans in pillars, and the
          company's own. Both builds, one state.
 
@@ -61,7 +61,7 @@ const ROOT = path.join(__dirname, "..");
 const SRC = path.join(ROOT, "SMP-Project-Folder", "src");
 const args = process.argv.slice(2);
 const baseArg = args.indexOf("--base");
-/* The commit before §538 — the build whose codes this one must reproduce. */
+/* The commit before §541 — the build whose codes this one must reproduce. */
 const BASE = baseArg >= 0 ? args[baseArg + 1] : "1f05216";
 
 let failed = 0, passed = 0;

@@ -318,7 +318,7 @@ function monthNums(start){
 var DIRS = ["\u2265", "\u2264"];
 /* §276: the workbook validates the list the pen offers, read from one place. */
 var COMPILES = SMPRules.COMPILES;
-/* §537: the two kinds are the shared rule's now, read here exactly as
+/* §540: the two kinds are the shared rule's now, read here exactly as
    COMPILES is above — the workbook's validation, the pen's picker and the
    platform's own "is this one internal" test are one list (§53.5). */
 var KINDS = SMPRules.PILLAR_KINDS;

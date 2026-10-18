@@ -62,40 +62,75 @@ export const APP_JS = `(function () {
   function remember(name, value) {
     try { document.cookie = name + "=" + encodeURIComponent(value) + "; path=" + location.pathname + "; max-age=31536000; samesite=lax"; } catch (x) {}
   }
-  /* What a hand is typing, read before a swap and put back after it: the
-     action, its note, and the week and owner picked for it. */
+  /* THERE IS MORE THAN ONE LINE TO WRITE ON NOW (§532): the page's own at the
+     top, and one inside every topic's next-week card on the weekly check.
+     They are the SAME line — same markup, same controls, same act — so every
+     function here takes the line it is working on rather than reaching for
+     the one with the id (§53.5). A line is named by what it writes into:
+     "main" for the page's own, "t:<topic>" for a topic's. */
+  function lines() { return Array.prototype.slice.call(document.querySelectorAll(".addrow")); }
+  function lineKey(ar) { return !ar ? "" : ar.classList.contains("chk") ? "t:" + (ar.getAttribute("data-topic") || "") : "main"; }
+  function lineOf(key) {
+    var all = lines();
+    for (var i = 0; i < all.length; i++) if (lineKey(all[i]) === key) return all[i];
+    return null;
+  }
+  function boxOf(ar) { return ar ? ar.querySelector("input.new") : null; }
+  function noteOf(ar) { return ar ? ar.querySelector("input.nt") : null; }
+  function lineAt(el) { return el && el.closest ? el.closest(".addrow") : null; }
+
+  /* What a hand is typing, read before a swap and put back after it: every
+     line's action and note, the week and owner picked on it, and whether the
+     topics panel was open — a rename there redraws the whole list, and a
+     panel that shut itself after each one would have to be reopened for the
+     next (§35: what a hand is doing survives a swap). */
   function keep() {
-    var a = document.activeElement, add = document.getElementById("add"), nt = document.getElementById("addnote"),
-      ar = document.querySelector(".addrow"), s = document.querySelector(".srch");
-    return { add: add ? add.value : "", note: nt ? nt.value : "", srch: s ? s.value : "",
-      due: ar ? ar.getAttribute("data-due") : null, owner: ar ? ar.getAttribute("data-owner") : null,
-      topic: ar ? ar.getAttribute("data-topic") : null, topicName: ar ? ar.getAttribute("data-topicname") : null,
-      picked: !!(ar && ar.hasAttribute("data-picked")), noteOpen: !!(nt && !nt.hidden),
-      focus: a && a.id === "add" ? "add" : (a && a.id === "addnote") ? "addnote" : (a && a.classList && a.classList.contains("srch")) ? "srch" : null };
+    var a = document.activeElement, s = document.querySelector(".srch");
+    var k = { srch: s ? s.value : "", focus: null, lines: [], panel: panelIsOpen() };
+    lines().forEach(function (r) {
+      var b = boxOf(r), nt = noteOf(r);
+      k.lines.push({ key: lineKey(r), add: b ? b.value : "", note: nt ? nt.value : "",
+        noteOpen: !!(nt && !nt.hidden), due: r.getAttribute("data-due"), owner: r.getAttribute("data-owner"),
+        /* the topic is user state on the page's own line and structure on a
+           topic's own, so only the first is carried back */
+        ptopic: r.classList.contains("chk") ? null : r.getAttribute("data-topic"),
+        topicName: r.classList.contains("chk") ? null : r.getAttribute("data-topicname"),
+        picked: r.hasAttribute("data-picked") });
+    });
+    var ar = lineAt(a);
+    if (ar) k.focus = { line: lineKey(ar), note: !!(a.classList && a.classList.contains("nt")) };
+    else if (a && a.classList && a.classList.contains("srch")) k.focus = { srch: true };
+    return k;
   }
   function swap(j, k) {
     var body = document.getElementById("body");
     if (!body || !j || typeof j.body !== "string") return;
     body.innerHTML = j.body;
     setOpen(j.open || null);
-    var add = document.getElementById("add"), nt = document.getElementById("addnote"), s = document.querySelector(".srch"), ar = document.querySelector(".addrow");
-    if (k && !k.clear) {
-      if (add && k.add) add.value = k.add;
-      if (nt && k.note) nt.value = k.note;
-      if (k.noteOpen) drawNote(true);
-      if (ar && k.picked) { if (k.due != null) setAddDue(ar, k.due); if (k.owner) setAddOwner(ar, k.owner); }
-    }
-    if (ar && k && !k.clear && (k.topic || k.topicName)) setAddTopic(ar, k.topic || "", k.topicName || "");
-    if (ar && k && k.keepTopic && (k.keepTopic.id || k.keepTopic.name)) setAddTopic(ar, k.keepTopic.id, k.keepTopic.name);
+    var s = document.querySelector(".srch");
+    if (k && k.lines) k.lines.forEach(function (st) {
+      var r = lineOf(st.key); if (!r) return;
+      var b = boxOf(r), nt = noteOf(r);
+      if (b && st.add) b.value = st.add;
+      if (nt && st.note) nt.value = st.note;
+      if (st.noteOpen) drawNote(r, true);
+      if (st.picked) { if (st.due != null) setAddDue(r, st.due); if (st.owner) setAddOwner(r, st.owner); }
+      if (st.ptopic || st.topicName) setAddTopic(r, st.ptopic || "", st.topicName || "");
+    });
     /* the sections opened to show their done rows, and the rows just ticked,
        stay as they were across the swap */
     document.querySelectorAll(".sec").forEach(function (sec) { if (shown.has(sec.getAttribute("data-key"))) sec.classList.add("showdone"); });
     fresh.forEach(function (id) { var r = document.querySelector('.row[data-id="' + id + '"]'); if (r) r.classList.add("fresh"); });
     if (s && k && k.srch) s.value = k.srch;
-    if (k && k.focus === "add" && add) add.focus();
-    else if (k && k.focus === "addnote" && nt) nt.focus();
-    else if (k && k.focus === "srch" && s) s.focus();
-    typing();
+    if (k && k.panel) showPanel(true);
+    if (k && k.focus) {
+      if (k.focus.srch) { if (s) s.focus(); }
+      else {
+        var r2 = lineOf(k.focus.line), el = r2 ? (k.focus.note ? noteOf(r2) : boxOf(r2)) : null;
+        if (el) el.focus();
+      }
+    }
+    typingAll();
   }
   var shown = new Set(), fresh = new Set();
   var chain = Promise.resolve();
@@ -127,10 +162,12 @@ export const APP_JS = `(function () {
 
   /* THE ADD LINE: its week and owner are set on the line, drawn at once,
      posted only on Enter. The line lights while anything is typed in it. */
-  function typing() {
-    var ar = document.querySelector(".addrow"), add = document.getElementById("add"), nt = document.getElementById("addnote");
-    if (ar) ar.classList.toggle("typing", !!((add && add.value) || (nt && nt.value)));
+  function typing(ar) {
+    if (!ar) return;
+    var b = boxOf(ar), nt = noteOf(ar);
+    ar.classList.toggle("typing", !!((b && b.value) || (nt && nt.value)));
   }
+  function typingAll() { lines().forEach(typing); }
   /* THE NOTE IS ASKED FOR (§356.15), and ONE RULE SAYS IT ALL: the note is
      on the line only while it is open, and FOLDING IT EMPTIES IT. A note
      folded away with words still in it would be posted by the next Enter
@@ -141,18 +178,18 @@ export const APP_JS = `(function () {
      Escape on this line already does to both boxes.
      It also folds itself when it is emptied and left, which is the line back
      to one row with nothing lost. */
-  function noteBits() { return { nt: document.getElementById("addnote"), b: document.querySelector(".addrow [data-act=add-note]") }; }
-  function drawNote(open) {
-    var x = noteBits(); if (!x.nt || !x.b) return;
-    x.nt.hidden = !open;
-    x.b.classList.toggle("on", !!open);
-    x.b.setAttribute("aria-expanded", String(!!open));
+  function noteBtn(ar) { return ar ? ar.querySelector("[data-act=add-note]") : null; }
+  function drawNote(ar, open) {
+    var nt = noteOf(ar), b = noteBtn(ar); if (!nt || !b) return;
+    nt.hidden = !open;
+    b.classList.toggle("on", !!open);
+    b.setAttribute("aria-expanded", String(!!open));
     var w = open ? "Close the note" : "Add a note";
-    x.b.setAttribute("aria-label", w); x.b.setAttribute("title", w);
+    b.setAttribute("aria-label", w); b.setAttribute("title", w);
   }
-  function openNote() { var x = noteBits(); if (!x.nt) return; drawNote(true); x.nt.focus(); }
-  function foldNote() { var x = noteBits(); if (!x.nt) return; x.nt.value = ""; drawNote(false); typing(); }
-  function noteIsOpen() { var x = noteBits(); return !!(x.nt && !x.nt.hidden); }
+  function openNote(ar) { var nt = noteOf(ar); if (!nt) return; drawNote(ar, true); nt.focus(); }
+  function foldNote(ar) { var nt = noteOf(ar); if (!nt) return; nt.value = ""; drawNote(ar, false); typing(ar); }
+  function noteIsOpen(ar) { var nt = noteOf(ar); return !!(nt && !nt.hidden); }
   function setAddDue(ar, day) {
     ar.setAttribute("data-due", day || ""); ar.setAttribute("data-picked", "1");
     var w = ar.querySelector(".when");
@@ -210,40 +247,49 @@ export const APP_JS = `(function () {
     var tw = p.querySelector(".tw"); if (tw) tw.textContent = word || "Topic";
     p.classList.toggle("set", !!word);
   }
-  function submitAdd() {
-    var add = document.getElementById("add"), nt = document.getElementById("addnote"), ar = document.querySelector(".addrow");
-    if (!add || !ar) return;
-    var t = add.value.replace(/\\s+/g, " ").trim();
-    if (!t) { add.focus(); return; }
-    add.disabled = true; if (nt) nt.disabled = true;
+  /* ENTER ADDS, AND THE LINE IS EMPTY AND STILL UNDER THE CURSOR for the
+     next one — on whichever line was written, so a check walked down topic
+     by topic never loses its place. The topic the line was picked or stood
+     in rides on it; everything else the line holds is kept across the swap
+     exactly as the other lines' is. */
+  function submitAdd(ar) {
+    var box = boxOf(ar), nt = noteOf(ar);
+    if (!ar || !box) return;
+    var t = box.value.replace(/\\s+/g, " ").trim();
+    if (!t) { box.focus(); return; }
+    box.disabled = true; if (nt) nt.disabled = true;
+    var key = lineKey(ar);
     var due = ar.getAttribute("data-due") || null, owner = ar.getAttribute("data-owner") || "";
     var tid = ar.getAttribute("data-topic") || "", tname = ar.getAttribute("data-topicname") || "";
     var payload = { act: "add", title: t, description: nt ? nt.value : "", due: due, ownerKey: owner };
     if (tid) payload.topicId = tid; else if (tname) payload.topicName = tname;
-    post(payload, { clear: true, focus: "add", keepTopic: { id: tid, name: tname } },
-      function (j) { if (!j) { add.disabled = false; if (nt) nt.disabled = false; add.focus(); } /*%BRK%*/ });
+    var k = keep();
+    k.lines.forEach(function (st) { if (st.key === key) { st.add = ""; st.note = ""; st.noteOpen = false; } });
+    k.focus = { line: key };
+    post(payload, k, function (j) { if (!j) { box.disabled = false; if (nt) nt.disabled = false; box.focus(); } /*%BRK%*/ });
   }
   document.addEventListener("keydown", function (e) {
     var t = e.target;
-    if (!t || (t.id !== "add" && t.id !== "addnote")) return;
+    if (!t || !t.classList || !(t.classList.contains("new") || t.classList.contains("nt"))) return;
+    var ar = lineAt(t); if (!ar) return;
     if (e.key === "Escape") {
-      var add = document.getElementById("add"), nt = document.getElementById("addnote");
-      if (add) add.value = ""; if (nt) nt.value = ""; drawNote(false); typing(); return;
+      var box = boxOf(ar), nt2 = noteOf(ar);
+      if (box) box.value = ""; if (nt2) nt2.value = ""; drawNote(ar, false); typing(ar); return;
     }
     /* TAB FROM THE ACTION OPENS THE NOTE, so a line that needs one is one
        key away and the arrow is not the only door (§61). Only forward, only
        from the action, and only while the note is shut — tabbing on out of
        an empty note folds it behind you, so nothing is left standing open
        for a line that did not want one. */
-    if (e.key === "Tab" && !e.shiftKey && t.id === "add" && t.value && !noteIsOpen()) {
+    if (e.key === "Tab" && !e.shiftKey && t.classList.contains("new") && t.value && !noteIsOpen(ar)) {
       /* ...and only once the line has a name on it (§356.16): at rest the
          arrow beside it is invisible, so a note reachable by Tab there would
          be the one detail the line did not hold back. */
-      e.preventDefault(); openNote(); return;
+      e.preventDefault(); openNote(ar); return;
     }
     if (e.key !== "Enter") return;
     e.preventDefault();
-    submitAdd();
+    submitAdd(ar);
   });
   document.addEventListener("keydown", function (e) {
     var t = e.target;
@@ -261,19 +307,37 @@ export const APP_JS = `(function () {
       }
       if (v) setAddTopic(ar, "", v);
       closePops(null);
-      var add = document.getElementById("add"); if (add) add.focus();
+      var add = boxOf(ar); if (add) add.focus();
     } else if (e.key === "Escape") { t.value = ""; }
   });
-  document.addEventListener("input", function (e) { if (e.target && (e.target.id === "add" || e.target.id === "addnote")) typing(); });
+  /* THE PANEL'S OWN "New topic…" (§533): the topic is made and nothing else
+     — it belongs to no action yet, which is exactly the kind of topic the
+     page could not make before. The panel is still open afterwards (keep),
+     so a list of them can be typed in one sitting. */
+  document.addEventListener("keydown", function (e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains("tpnew")) return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      var v = t.value.replace(/\\s+/g, " ").trim();
+      if (!v) return;
+      t.value = "";
+      post({ act: "topic-new", name: v });
+    } else if (e.key === "Escape") { t.value = ""; }
+  });
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t && t.classList && (t.classList.contains("new") || t.classList.contains("nt"))) typing(lineAt(t));
+  });
   document.addEventListener("focusout", function (e) {
-    if (!e.target || e.target.id !== "addnote" || e.target.value) return;
+    if (!e.target || !e.target.classList || !e.target.classList.contains("nt") || e.target.value) return;
     /* NOT WHEN THE ARROW IS WHAT TOOK THE FOCUS: focusout fires before the
        click, so folding here would leave the press to find a shut note and
        open it again — the arrow reading as a control that does nothing
        (§96), on the one press where it plainly did something. */
     var to = e.relatedTarget;
     if (to && to.closest && to.closest("[data-act=add-note]")) return;
-    drawNote(false);
+    drawNote(lineAt(e.target), false);
   });
 
   /* ONE POPUP OPEN AT A TIME — the team under a name, the weeks under a
@@ -290,6 +354,19 @@ export const APP_JS = `(function () {
       d.classList.remove("on"); d.setAttribute("aria-expanded", "false");
       var m = d.parentNode.querySelector(".setmenu, .tmenu"); if (m) m.hidden = true;
     });
+    var tp = panelEl(); if (tp && !tp.hidden) tp.hidden = true;
+  }
+  /* THE TOPICS PANEL (§533) hangs where the settings menu hangs, off the same
+     ⋯, and only one of the two is ever open: "Topics" shuts the menu and
+     opens the panel, and anything that closes a popup closes both. */
+  function panelEl() { return document.querySelector(".tpanel"); }
+  function panelIsOpen() { var p = panelEl(); return !!(p && !p.hidden); }
+  function showPanel(on) {
+    var p = panelEl(); if (!p) return;
+    closePops(null);
+    p.hidden = !on;
+    var d = document.querySelector(".dots > button[data-act=settings]");
+    if (d) { d.classList.toggle("on", !!on); d.setAttribute("aria-expanded", String(!!on)); }
   }
   function togglePop(w, sel) {
     var on = !w.classList.contains("on");
@@ -386,7 +463,7 @@ export const APP_JS = `(function () {
     } else if (act === "pick-topic") {
       var tp = b.getAttribute("data-topic") || "";
       closePops(null);
-      if (ar) { setAddTopic(ar, tp, tp ? b.textContent : ""); var add2 = document.getElementById("add"); if (add2) add2.focus(); }
+      if (ar) { setAddTopic(ar, tp, tp ? b.textContent : ""); var add2 = boxOf(ar); if (add2) add2.focus(); }
       /* A row's topic column (§503): set it there and then, unless the pick
          is the topic the row already carries. */
       else if (id && !b.classList.contains("on")) post({ act: "topic", id: id, topicId: tp || null });
@@ -394,27 +471,49 @@ export const APP_JS = `(function () {
       var sec = b.closest(".sec"), key = sec ? sec.getAttribute("data-key") : null;
       if (sec) { var on2 = !sec.classList.contains("showdone"); sec.classList.toggle("showdone", on2); if (on2) shown.add(key); else shown.delete(key); }
     } else if (act === "add-to-topic") {
-      var ar2 = document.querySelector(".addrow");
-      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = document.getElementById("add"); if (add3) { add3.focus(); add3.scrollIntoView({ block: "center" }); } }
+      var ar2 = lineOf("main");
+      if (ar2) { setAddTopic(ar2, b.getAttribute("data-topic") || "", b.getAttribute("data-name") || ""); var add3 = boxOf(ar2); if (add3) { add3.focus(); add3.scrollIntoView({ block: "center" }); } }
+    } else if (act === "carry") {
+      /* CARRY TO NEXT WEEK (§532): one press, and the same action redraws
+         inside the next card down. The server asks the stored row whether it
+         may (§42); the page only draws the press where it may. */
+      post({ act: "carry", id: id });
+    } else if (act === "topics") {
+      showPanel(true);
+      var f = panelEl() && panelEl().querySelector(".nm, .tpnew"); if (f) f.focus();
     } else if (act === "topic-menu") {
       toggleSettings(b);
     } else if (act === "topic-rename") {
-      var tid = b.getAttribute("data-topic"), sh = b.closest(".sh"), h3 = sh ? sh.querySelector("h3") : null;
+      /* RENAMED IN PLACE, in whichever of the two places the topic is being
+         looked at: its heading on a list grouped by topic, or its line on the
+         topics panel (§533). One handler, because it is one rename. */
+      var tid = b.getAttribute("data-topic"), trow = b.closest(".trow"), sh = b.closest(".sh");
+      var slot = trow ? trow.querySelector(".nm") : sh ? sh.querySelector("h3") : null;
       closePops(null);
-      if (!h3 || h3.querySelector("input")) return;
-      var was = h3.textContent, inp = document.createElement("input");
+      if (trow) showPanel(true);          /* closePops shut the panel the rename happens in */
+      if (!slot || (trow && trow.querySelector("input")) || (!trow && slot.querySelector("input"))) return;
+      var nmSpan = slot.querySelector(".who2");
+      var was = (nmSpan || slot).textContent, inp = document.createElement("input");
       inp.value = was; inp.maxLength = 120; inp.setAttribute("aria-label", "Rename the topic");
-      h3.textContent = ""; h3.appendChild(inp); inp.focus(); inp.select();
-      var settled = false, back = function () { if (settled) return; settled = true; h3.textContent = was; };
+      if (trow) { trow.classList.add("edit"); slot.hidden = true; trow.insertBefore(inp, slot); }
+      else { slot.textContent = ""; slot.appendChild(inp); }
+      inp.focus(); inp.select();
+      var settled = false, back = function () {
+        if (settled) return; settled = true;
+        if (trow) { inp.remove(); slot.hidden = false; trow.classList.remove("edit"); }
+        else slot.textContent = was;
+      };
       inp.addEventListener("keydown", function (ev) {
-        if (ev.key === "Escape") { ev.preventDefault(); back(); }
+        if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); back(); }
         else if (ev.key === "Enter") { ev.preventDefault(); inp.blur(); }
       });
       inp.addEventListener("blur", function () {
         if (settled) return;
         var v = inp.value.replace(/\\s+/g, " ").trim();
         if (!v || v === was) { back(); return; }
-        settled = true; h3.textContent = v;
+        settled = true;
+        if (trow) { inp.remove(); slot.hidden = false; trow.classList.remove("edit"); if (nmSpan) nmSpan.textContent = v; }
+        else slot.textContent = v;
         post({ act: "topic-rename", topicId: tid, name: v });
       });
     } else if (act === "topic-close" || act === "topic-reopen" || act === "topic-delete") {
@@ -425,7 +524,7 @@ export const APP_JS = `(function () {
     } else if (act === "topic-delete-no") {
       var s4 = b.closest(".sure"); if (s4) { s4.hidden = true; var d4 = s4.parentNode.querySelector("[data-act=topic-delete-ask]"); if (d4) d4.hidden = false; }
     } else if (act === "add-note") {
-      if (noteIsOpen()) foldNote(); else openNote();
+      if (noteIsOpen(ar)) foldNote(ar); else openNote(ar);
     } else if (act === "more") {
       /* Open this row (and only this row), or fold it if it is the open one;
          the address carries which, and the list is read again. */

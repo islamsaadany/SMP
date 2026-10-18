@@ -1,4 +1,4 @@
-/* ── ONE PILLAR LIST, SHOWN AS ONE OR AS TWO — AND NOBODY MOVED (§537) ────
+/* ── ONE PILLAR LIST, SHOWN AS ONE OR AS TWO — AND NOBODY MOVED (§540) ────
    Spec 066 stage 3b (a). A box gains one setting: does it draw its pillars as
    one list, or with the internal ones — the capabilities — on a tab of their
    own. Islam's requirement for the whole of stage 3b is *"ok noting that
@@ -58,7 +58,7 @@ const ROOT = path.join(__dirname, "..");
 const SRC = path.join(ROOT, "SMP-Project-Folder", "src");
 const args = process.argv.slice(2);
 const baseArg = args.indexOf("--base");
-/* The commit before §537 — the build whose drawn lists this one must reproduce. */
+/* The commit before §540 — the build whose drawn lists this one must reproduce. */
 const BASE = baseArg >= 0 ? args[baseArg + 1] : "2158aab";
 
 let failed = 0, passed = 0;
@@ -273,7 +273,7 @@ console.log("3 · absent is one list, and setting it back leaves the box as it w
 }
 
 /* ── 4 · IT COMPOSES WITH THE HALF EYE RATHER THAN REPLACING IT ──────────
-   §517's half eye narrows a part owner to the parts that are theirs; §537
+   §517's half eye narrows a part owner to the parts that are theirs; §540
    narrows a tab to one kind. They are independent questions and a change that
    made one replace the other would pass every other section of this file, so
    the person below is MADE rather than looked for: a direction owner who also

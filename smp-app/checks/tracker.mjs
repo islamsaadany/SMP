@@ -56,11 +56,12 @@ import { usePools } from "../lib/db.ts";
 import { SCHEMA } from "../db/schema-name.mjs";
 import { PLATFORM_TABLES } from "../lib/schema-check.ts";
 import { serve } from "../modules/tracker/index.ts";
-import { trackerDocument, whenText } from "../modules/tracker/page.ts";
+import { trackerDocument, whenText, listBody } from "../modules/tracker/page.ts";
 import { barInks, barVars, contrastOf } from "../lib/branding.ts";
 import {
-  STATUSES, STATUS_WORD, VIEWS, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
+  STATUSES, STATUS_WORD, VIEWS, VIEW_WORD, GROUPS, GROUP_WORD, FORMATS, FORMAT_WORD, isFormat, isStatus, isView, isGroup, isOffice, calendarDay, addDays, weekday, weekOf, isLate, carriedWeeks,
   lateWord, readableDay, weekLabel, inView, summary, mayChange, shape, oneLine, shortNames, todayIn, thursdayOf, weekNumber, weekWord, weekOptions, weekDays, sameWeek,
+  CHECK_WEEKS, CHECK_WORD, checkWeek, checkWeeks, mayCarry, nextWeekDay,
   officeRows, listActions, oneAction, addAction, addTopic, listTopics, deleteTopic, setFields, setStatus, deleteAction, eventsOf, isOfficeRow, namesOf,
 } from "../lib/tracker.ts";
 
@@ -204,6 +205,123 @@ check("the strip: 5 open · 2 late · 2 due this week (f is done, so it is not o
 check("ONE RULE: the owner may change the action, the Super user may, and nobody else — being on the same team is not being on it",
   mayChange(rows[2], SUPER) && mayChange(rows[2], { personKey: "islam", seat: "smoteam" }) && !mayChange(rows[2], ME) && !mayChange(rows[2], OTHER) && mayChange(rows[2], { personKey: "hana", seat: "super" }));
 check("somebody the register has not placed may change nothing but as Super user", !mayChange(rows[2], { personKey: null, seat: "smoteam" }) && mayChange(rows[2], { personKey: null, seat: "super" }));
+
+/* ══ §2b · the weekly check's three weeks (§532) ═══════════════════════
+   Islam's own description of the meeting: "we have topics with actions for
+   every week and we make this week actions done or still in progress or keep
+   it didn't start as is and we create a new action for next week."
+
+   THE CLAIM THAT WOULD HURT IF IT WERE FALSE is which card a row lands in,
+   because it decides what the meeting looks at. Last week is what HAPPENED,
+   so a finished action only; an action still open that was due last week is
+   LATE and is this week's business — filed under Last week it would read as
+   done with, and the row most worth asking about would be the one buried.
+   Both ends asserted (§94.2): what IS last week's, and what is not. */
+section("§2b · the weekly check: three weeks, and what may be carried");
+check("the views are five, the check is last, and a near miss is not one",
+  VIEWS.join(",") === "week,all,mine,undated,check" && VIEW_WORD.check === "Weekly check" && !isView("Check") && isView("check"), VIEWS.join(","));
+const W3 = checkWeeks(TODAY);
+check("the three weeks run Sun–Thu, back to back, with this week in the middle",
+  W3.last.from === "2026-09-06" && W3.last.to === "2026-09-10" && W3.now.from === "2026-09-13" && W3.now.to === "2026-09-17" &&
+  W3.next.from === "2026-09-20" && W3.next.to === "2026-09-24", JSON.stringify(W3));
+check("...and the three words are Last week, This week, Next week", CHECK_WEEKS.join(",") === "last,now,next" &&
+  [CHECK_WORD.last, CHECK_WORD.now, CHECK_WORD.next].join("|") === "Last week|This week|Next week");
+const cw = (o) => checkWeek(mk(o), TODAY);
+check("LAST WEEK IS WHAT HAPPENED: a finished action sits under the week it was FINISHED in, not the week it was due",
+  cw({ status: "done", doneDay: "2026-09-08", due: "2026-09-24" }) === "last" && cw({ status: "done", doneDay: "2026-09-15" }) === "now", String(cw({ status: "done", doneDay: "2026-09-08", due: "2026-09-24" })));
+check("...and an action still OPEN that was due last week is THIS week's, never history",
+  cw({ due: "2026-09-10" }) === "now" && cw({ due: "2026-09-07" }) === "now", String(cw({ due: "2026-09-10" })));
+check("...however far back it was due, it is still this week's", cw({ due: "2026-06-01" }) === "now");
+check("THIS WEEK holds what is open and due by Thursday", cw({ due: "2026-09-13" }) === "now" && cw({ due: "2026-09-17" }) === "now");
+check("...and an open action with NO DATE, which is what This week already calls it (§53.5)",
+  cw({}) === "now" && inView(mk({}), "week", SUPER, TODAY));
+check("NEXT WEEK holds what is due the week after this one", cw({ due: "2026-09-20" }) === "next" && cw({ due: "2026-09-24" }) === "next");
+check("...and nothing beyond the three weeks is in the view at all",
+  cw({ due: "2026-09-25" }) === null && cw({ due: "2026-10-20" }) === null && cw({ status: "done", doneDay: "2026-08-20" }) === null, String(cw({ due: "2026-09-25" })));
+check("the view holds exactly the rows the three weeks hold",
+  rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join("") === "abcdef", rows.filter((a) => inView(a, "check", SUPER, TODAY)).map((a) => a.id).join(""));
+check("...so last week's finished action is in it, and nothing older", inView(mk({ status: "done", doneDay: "2026-09-08" }), "check", SUPER, TODAY) && !inView(mk({ status: "done", doneDay: "2026-08-08" }), "check", SUPER, TODAY));
+/* WHAT MAY BE CARRIED, both ends (§94.2). Only an open row under THIS week:
+   a finished one has nothing to carry, and one already under next week is
+   where it was going — pressing it there would push it a week further than
+   anybody asked. */
+check("the carry is offered on an open action under this week, late ones included",
+  mayCarry(mk({ due: "2026-09-17" }), TODAY) && mayCarry(mk({ due: "2026-09-10" }), TODAY) && mayCarry(mk({}), TODAY) && mayCarry(mk({ due: "2026-06-01" }), TODAY));
+check("...and NOT on a finished one, nor on one already under next week",
+  !mayCarry(mk({ status: "done", doneDay: "2026-09-15" }), TODAY) && !mayCarry(mk({ due: "2026-09-24" }), TODAY) && !mayCarry(mk({ due: "2026-10-20" }), TODAY));
+check("next week is stored as its THURSDAY, like every other week this list writes", nextWeekDay(TODAY) === "2026-09-24" && nextWeekDay(TODAY) === thursdayOf("2026-09-20"), nextWeekDay(TODAY));
+/* THE ALARM IS THE WHOLE REASON THE CARRY IS A MOVE AND NOT A NEW ROW: the
+   first due date is written once, so a thing pushed four weeks running still
+   reads Late 4 w. Asserted on the arithmetic the carry leans on — §8 runs it
+   against the stored row, and the `reset-carried` break falsifies both. */
+check("a carry moves the date and leaves the first one, so the alarm goes on climbing",
+  carriedWeeks("2026-09-03", TODAY) === 2 && lateWord(carriedWeeks("2026-09-03", TODAY)) === "Late 2 w");
+
+/* ══ §2c · what the check and the panel actually DRAW (§532, §533) ═════
+   The rules above are nothing if the page does not obey them, and these two
+   claims are about the page: that the carry is drawn where it may be pressed
+   and nowhere else, and that the topics panel lists EVERY topic — including
+   the two the page could not reach before it existed (one with no actions,
+   and a closed one whose last action is done). Drawn with no database: the
+   same listBody the page and every press are drawn by (§53.5). */
+section("§2c · the check and the topics panel, drawn");
+const TOP = (id, name, closed = false) => ({ id, name, closed, createdBy: "islam" });
+const dTopics = [TOP("t1", "Budget"), TOP("t2", "Office move"), TOP("t3", "Q3 review", true)];
+const dRows = [
+  mk({ id: "p", owner: "islam", due: "2026-09-17" }),                                        // open, this week
+  mk({ id: "q", owner: "islam", due: "2026-09-08", status: "done", doneDay: "2026-09-08" }), // done last week
+  mk({ id: "r", owner: "islam", due: "2026-09-24" }),                                        // next week
+  mk({ id: "s", owner: "islam", due: "2026-08-20", status: "done", doneDay: "2026-08-21" }), // older: on no card
+].map((a, i) => ({ ...a, topicId: i === 3 ? "t3" : "t1" }));
+const dLoaded = {
+  office: [{ key: "islam", name: "Islam Saadany" }], names: new Map([["islam", "Islam Saadany"]]),
+  short: new Map([["islam", "Islam"]]), actions: dRows, events: [], open: null, topics: dTopics,
+};
+const draw = (view) => listBody(dLoaded, { slug: "c", tenantId: "t", tenantName: "Raya Trade", have: ["tracker"],
+  ask: { view, q: "", open: null, group: "owner", dates: "weeks" }, who: SUPER, today: TODAY }, TODAY);
+const chk = draw("check").body;
+const count = (h, re) => (h.match(re) || []).length;
+/* Budget's three weeks all have something, so it gets three cards; Office
+   move has nothing in any of them and gets ONE — its next-week card, because
+   the write line in it is the something. A card over nothing is never drawn,
+   which is why the count is four and not six. */
+check("a card is drawn per week that has rows, and next week's always — four here, never six",
+  count(chk, /class="blk /g) === 4 && count(chk, /class="wkh"/g) === 4, count(chk, /class="blk /g) + " cards");
+check("...this week's card is the lit one, next week's the dashed outline",
+  /class="blk now"/.test(chk) && /class="blk next"/.test(chk) && /class="blk past"/.test(chk));
+check("...last week's FINISHED row is drawn in it, never folded away as a done row",
+  /class="blk past"[\s\S]*?data-id="q"[\s\S]*?class="blk now"/.test(chk));
+check("...the carry is drawn on the open row under this week and on no other row",
+  count(chk, /data-act="carry"/g) === 1 && /data-id="p"[\s\S]*?data-act="carry"/.test(chk), count(chk, /data-act="carry"/g) + " carries");
+check("...and a topic with nothing in these three weeks still gets its section and its write line",
+  /class="sec" data-key="t2"/.test(chk) && /Write next week&#39;s action for Office move/.test(chk) &&
+  /Nothing on this topic in these three weeks/.test(chk));
+/* THE WRITE LINE'S TWO ANSWERS ARE ALREADY IN IT (§532): next week's
+   Thursday, and the topic of the card it stands in — asserted on the line
+   itself, because those two are what stop the meeting leaving the topic. */
+check("...every topic's write line is already set to next week, in its own topic",
+  count(chk, /class="addrow chk"/g) === 2 &&
+  count(chk, /class="addrow chk" data-due="2026-09-24" data-owner="islam" data-topic="t1"/g) === 1 &&
+  count(chk, /class="addrow chk" data-due="2026-09-24" data-owner="islam" data-topic="t2"/g) === 1,
+  (chk.match(/class="addrow chk"[^>]*/g) || []).join(" | "));
+check("...and the count says how far through the meeting you are, not how many actions there are",
+  draw("check").count === "2 topics · 1 still to write for next week", draw("check").count);
+/* THE PANEL IS ON EVERY VIEW, because a topic is renamed wherever you are. */
+for (const v of ["week", "check", "all"]) {
+  const h = draw(v).body;
+  check("the topics panel is behind the ⋯ on the " + VIEW_WORD[v] + " view", /class="tpanel"/.test(h) && /data-act="topics"/.test(h));
+}
+const wkBody = draw("week").body;
+check("the panel lists EVERY topic, the one with no actions and the closed one included",
+  count(wkBody, /class="trow"/g) === 3 && /data-act="topic-rename" data-topic="t2"/.test(wkBody) && /data-act="topic-rename" data-topic="t3"/.test(wkBody),
+  count(wkBody, /class="trow"/g) + " lines");
+check("...a topic with nothing on it says so, rather than reading as nought of nought",
+  /no actions yet/.test(wkBody) && /3 actions &middot; 1 done/.test(wkBody), (wkBody.match(/class="ct[^"]*">[^<]*/g) || []).join(" / "));
+check("...a closed topic is marked Closed on its line", /data-topic="t3"[\s\S]{0,200}?class="shut">Closed/.test(wkBody));
+check("...and every line carries the SAME three words the heading's own ⋯ carries (§53.5)",
+  count(wkBody, /data-act="topic-rename"/g) >= 3 && count(wkBody, /data-act="topic-close"/g) >= 2 && count(wkBody, /data-act="topic-reopen"/g) >= 1 && count(wkBody, /data-act="topic-delete-ask"/g) >= 3);
+check("the grouping is not offered on the check, where it cannot be changed (§96)",
+  !/data-act="set-group"/.test(chk) && /data-act="set-group"/.test(wkBody) && /data-act="set-dates"/.test(chk));
 
 /* ══ the database ═════════════════════════════════════════════════════ */
 const URL_ = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "";

@@ -65077,6 +65077,228 @@ A proposed step is stored on `ReviewFinding` (`proposedLabel`, `proposedNotes`, 
 ## §530 — RACI fill and suggest
 Signed off from `design-mockups/raci-autofill/2026-10-13_fill-and-suggest.html` ("build"). Two pure planners in `ffp/lib/domain/raci-table.ts` (`planOwnerFill`, `planSuggestions`) so the rules are testable with no browser; the page only draws and saves their output. Owner fill: R for the step's assigned role, empty cells only, skipped and stepless rows excluded. Suggest: the manager's role (most frequent among managers of holders of the owner role, excluding the owner role, ties to the lower id) as A, only where the row has no A, the target cell is empty and the column is visible; unsaved until accepted. Source is Org Directory `managerId`/`PersonRole`; no manager data means no suggestions. A suggestion's main click accepts rather than cycles, so a stray click cannot silently store a code. Cycling an owner-filled cell clears its dot. Recorded, not done: a browser run of the page, and an automated check of the §524 propose/confirm/delete flow.
 
+## §531 — The role picker asks for an address before it mints anybody
+Signed off from `design-mockups/role-picker-email/2026-10-12_email-needed.html` ("build as drawn"). **This reverses the email half of §87.3**, which put both identifier fields in the picker and required neither on the ground that the SMO may know only a name. §506 had since marked the register's own Add form with a star and refused the press without an address — so the picker, which mints a person *without* that form, was the one remaining door that could still make a row nobody can sign in as (§69) or write to. Emp ID stays optional: nothing is unreachable without an employee number.
+
+**The rule is `PERSON_NEEDED`'s, read rather than copied** (§53.5). `assignPicker()` draws the star, `wirePicker()`'s `[data-pick-new]` press reads the same entry for the refusal's sentence, and `checks/role-picker-email.py` asserts the drawn sentence *equals* that entry rather than carrying a third copy of the words — so a reword moves all three together and a picker that stopped reading it parts from the check.
+
+**The star is inside the box.** §506 hangs it on `.pdfl`; the picker's two fields are placeholders in a popover with no label to hang anything beside, so `.pickreq` positions a `.reqmark` at the right of the Email box, `pointer-events:none` with `padding-right:20px` on the input beneath it — §93.4's "present, correctly sized and unreachable" is a fault this project has shipped three times, and the check presses `elementFromPoint` at the star's own centre.
+
+**The refusal draws onto the open popover and never repaints.** A repaint closes the picker (which is why §87.3 kept the duplicate refusal in the popover too), so the name, the typed Emp ID and the open control all survive the press; the box takes `.reqmiss` (§506's ring in the alarm colour at a 2px offset, not 4 — these boxes sit 6px apart and a 4px ring reads as one outline around both), the sentence goes under them in §506's own `.reqsay` (the selector was widened rather than a second block written), and `focusNoScroll` puts the cursor in the box (§110.7). `pickReqClear()` takes it down on typing in the box and on retyping the NAME — a different name is a different person, the same reason `.pickerr` clears there.
+
+**What did NOT change, and is asserted both ways** (§54.5): choosing somebody already on the register is untouched, address or not — the rule is about creating a person, not about picking one, which is the line §506 drew at the register's form and the cost the mockup was signed off on. The people upload is untouched. One picker serves all five places (`assignPicker` has one definition), so the change reaches a BU's head and custodian, a supporting function's head and custodian, a function's Led by, the capabilities table and the group's capability seats without any of them knowing about it.
+
+**Checked**: `checks/role-picker-email.py` 28/0 against the built file, and PROVED ABLE TO FAIL — pointed at the pre-change build (`SMP_BUILT=…`) sections 1–5 and 7 go red while section 6, the half that must not change, stays green on both, and it reports rather than dying on the control that is no longer there (§215). Built file byte-identical to `build.py`'s output (`checks/built-in-step.py`), `smp-app/public/shell.js` and `platform.css` regenerated. The two states were photographed from the running platform at 1440px in both themes and set beside the mockup's shots.
+
+### §531.1 — the merge, the sweep, and the one witness that could not be read
+Merged to `main` on Islam's word ("merge it to main"), fast-forward from `claude/gracious-goodall-9jtib3` after `origin/main` was fetched and found unmoved since §530.
+
+**The whole-platform sweep read 33 viewers, 234 destinations, errors none** — the same figure as the round before (§520.11), which is what it should be when no page is added and the only change is inside one popover. `qa.py` also re-ran the register's own ground: the people file's 33 rows at a fixed point, the identity ladder stopping an add on the identifier, and the merge moving a role — the three things §531 sits closest to.
+
+**`SHELL` bumped `smp-shell-v6.32-report-keys` → `smp-shell-v6.33-picker-email`** (§91: the trigger is the built file's bytes, and they changed). Confirmed free against `git show origin/main:sw.js` immediately before the push (§94.16), not only at the start of the merge. `node --check sw.js` passes (§146.2). The served worker's **release stamp moved `c0796429a11656a6` → `53546a64791be0f1`** (§397), which is what fires §258's reload banner for a tab left open.
+
+**THIS IS NOT A SAVE-RULES MERGE** (spec 029): it changes a popover's refusal and nothing about how a save is judged, what a save touches, the authoriser or the change-list diff. No forced sign-out, no `DELETE FROM sessions;` — an old tab can stay where it is.
+
+**§91.5's LIVE READ WAS MADE, AND THE DEPLOYMENT IS VERIFIED.** Production built **40 seconds** after the push and serves this commit:
+
+| witness | before | after |
+|---|---|---|
+| `/sw.js` release stamp (§397) | `c0796429a11656a6` | **`53546a64791be0f1`** |
+| `/shell.js` | — | **4,696,241 bytes, byte-identical to the local copy, and it contains `pickReqClear` and `.pickreq`** |
+
+Each is asserted to have MOVED or to CARRY THE NEW CODE, never merely to match (§113.8) — a byte count alone would hold whether or not the build landed, so the live file is grepped for the thing §531 added.
+
+**THIS ENTRY FIRST SAID THE LIVE READ COULD NOT BE MADE, AND THAT WAS WRITTEN WITHOUT TRYING IT** (corrected the same hour). §530, §377.6 and §378.2 each record this container's proxy refusing the production address, and the sentence was carried over from them as though a limitation recorded three times had stopped being a thing to test. It is §379.5's own lesson — **a limitation is TRIED, not quoted** — failed in the one place the rules name it, a merge note. The read answered `http=200` on the first attempt. **The standing claim that this container cannot reach production is therefore retired**: it may be true on a given day, and the next merge establishes that by running the curl, not by citing this one.
+
+**THE BRANCH IS STILL DELIBERATELY NOT FAST-FORWARDED** (§91, §107.15, §108.17) — but the reason has now been discharged rather than left standing: the danger is a second ref carrying `main`'s SHA before Vercel has built it, and production has built it. A fast-forward of `claude/gracious-goodall-9jtib3` is safe from here and is one command; it is left undone only because nothing needs it.
+## §532 — The Internal Tracker's weekly check: three weeks inside each topic
+Islam, describing the meeting rather than the screen: *"when we come on our weekly check we mainly have topics with actions for every week and we make this week actions done or still in progress or keep it didn't start as is and we create a new action for next week — how do you think we can show this?"*
+
+**A topic is a thread that runs for months and a week is the unit of work on it**, so the check is read DOWN the thread. On *This week* grouped by topic that was possible but costly: `+ Add to <topic>` fills the add line at the TOP of the page and scrolls there, the week must then be moved off This week by hand, and **a topic with no action this week is not drawn at all** — so the meeting silently skips exactly the thread most worth asking about.
+
+**A FIFTH VIEW, not a fifth filter.** `VIEWS` gains `check` ("Weekly check"), last in the row because it is the one you go to rather than the one you land on. It is always read by topic, so the *Group by* column is not drawn in its settings menu — a control that cannot change anything is worse than no control (§96) — while *Dates as* and *Topics* go on working.
+
+**WHICH CARD A ROW LANDS IN** is the claim that would hurt if it were false, and `checkWeek` holds it once (§53.5):
+- **Last week is what HAPPENED** — a finished action only, under the week it was FINISHED in. An action due last week and still open is not history; it is this week's business, and the Late mark says how long it has been. Filed under Last week it would read as done with, and the row most worth looking at would be the buried one.
+- **This week is what is being decided** — everything open and due by Thursday, late ones included however far back, and an open action with no date, which `inView`'s week list already calls this week's.
+- **Next week is what is being promised** — due in the week after this one. Nothing beyond the three weeks is in the view at all.
+
+**AN UNFINISHED ACTION IS CARRIED, NOT RE-WRITTEN.** Four options were put to Islam for what happens to a line that did not get done; he chose *carry it to next week, one press*. `act: "carry"` moves the SAME action a week on, so its title, owner, notes and history ride with it and the meeting is not retyping last week's words. **The alarm is not reset, and that is the whole reason this is a move rather than a new row**: `setFields` writes `first_due` only where there is none (spec 054 §5), so a thing pushed four weeks running goes on reading *Late 4 w* and cannot hide behind a fresh date. The press is drawn only where the server would allow it — open, and under this week — and the server asks the stored row again (§42, `mayCarry`).
+
+**THE WRITE LINE IS THE PAGE'S OWN, MOVED INSIDE THE TOPIC.** Not a second kind of line: same markup, same controls, same `add` act, same script. Two things are already answered because at a check they always have the same answer — the TOPIC is the card it stands in, and the WEEK is Next week — and both stay changeable. This made `script.ts` take the LINE it is working on rather than reaching for `getElementById("add")`: `lines()`, `lineKey()`, `boxOf()`, `noteOf()`, and `keep()`/`swap()` carrying every line's state, so a check walked down topic by topic never loses what a hand was typing (§35).
+
+**THE WEEKS ARE CARDS, which is option D of four.** A mockup showed four ways to separate the weeks (a filled band, a rule with the week on it, a left spine, cards); A was recommended, **Islam chose D**. Each week inside a topic is its own box: last week plain, this week ringed in gold with a tinted header, next week a dashed outline with no fill — *not written yet* said as a shape rather than a second word. A card over nothing is never drawn, so a topic with nothing this week gets two cards and not three; next week's always stands, because its write line is the something. **The cost named against D was overstated and the measurement is recorded rather than the fear** (§262): "about double the height" came from one topic; rendered at 1200px, four topics stand 1258px, about one and a half laptop screens.
+
+**THE ROW SHEDS TWO COLUMNS HERE**: the heading says the topic and the card says the week (§87), so the when cell says only what the card cannot — how late a row is, or the day a finished one was finished — and what is left is the tick, the name, the owner, the status, the carry and the arrow.
+
+**CHECKS.** `checks/tracker.mjs` §2b (the three weeks and the carry, pure) and §2c (what the check and the panel DRAW, through the real `listBody` with no database) — 31 new assertions, 96 green before the database sections. **Proved able to fail four ways from the SOURCES** (§276): `check-last-open` files an open late row under Last week (2 red), `carry-anything` offers the carry on anything unfinished (2 red), `no-carry` never draws the press (1 red), `topics-with-actions` hides the empty topics from the panel (3 red). All four registered in `check:tracker:red`. The three database sections (§3–§10) need a Postgres this container does not have, so they are **said rather than claimed** (§54.5): they were not run.
+
+**ALSO VERIFIED BY DRIVING IT** (§96): the real page rendered offline from `listBody` and looked at, and the real `APP_JS` driven in Chromium against a stubbed server — 16 assertions on the check (panel, rename in place, Escape, new topic, carry, per-line typing and notes, Enter adding under the right topic with next week's date, two half-typed lines surviving a swap) and 15 on the week view for regression (the one add line, Tab to the note, the topic pick, Escape, the heading rename, a tick, and no carry outside the check). **Two faults the rendering caught that reading the file had not**: the week-card header class `.wk` collided with the week-word span `.wk` inside every when cell, and `.sec:not(.showdone) .row.done` emptied last week's card of the only rows it holds.
+
+Numbered §532 because main took §504 and §505 while this was built (§264.3).
+
+## §533 — Every topic is reachable: the topics panel behind the ⋯
+Islam: *"in the internal tracker module I want to be able to edit the topics names."*
+
+**He already could, from ONE place**: group the list by Topic, then the ⋯ on a topic's heading → Rename. The rename itself was built in §497 and is unchanged. **What was not reachable was two topics**, because a heading is only ever drawn over rows that are in view: a topic with NO actions on it, and a closed one whose last action is done. Neither could be renamed, closed or deleted from the page by any route.
+
+So the list of topics gets a place of its own: **Topics**, on a row under *Group by* and *Dates as* behind the same ⋯, open whatever the page is grouped by. Each line carries the name (pressed, it becomes a box in place — Enter saves, Escape puts it back, and there is no Save button anywhere in SMP, §1019), how many actions hold it and how many are done, **Closed** if it is closed, and the SAME ⋯ the heading carries — the same three words calling the same acts, so one rule is not written twice (§53.5). *New topic…* at the foot makes a topic belonging to no action yet, which is exactly the kind the page could not make before. Ordered as `listTopics` orders it, open first then by name.
+
+**THE HEADING'S OWN ⋯ IS UNTOUCHED.** This is a second door to one room, not a second room — one `topic-rename` handler serves both, and the panel stays open across the redraw a rename causes, so a list of them can be renamed in one sitting (`keep()` carries it).
+
+**A name another topic already holds is refused, never merged** — `renameTopic`'s existing `"taken"`, said in the server's own words with the box still open. Merging two topics would move actions nobody chose to move; it is a decision to ask for on its own.
+
+**CHECKS.** In §2c above: the panel is on every view, it lists EVERY topic (the empty one and the closed one by id), a topic with nothing says *no actions yet* rather than reading as nought of nought, a closed one is marked **Closed**, and every line carries the same three acts the heading does. Falsified by `topics-with-actions` (3 red).
+
+Numbered §533 for the same reason as §532.
+
+## §534 — Every browser dialog is gone: thirty of them, and what each became
+Islam, reading the first list back: *"What do you mean by 'undone'? Actually, closing a cycle can be reopened. I'm not sure what 'deleting a clip' means. Do you mean anything that is deleted? Maybe it's archived."*
+
+**That correction is where this section actually starts.** The audit had put *closing a cycle* among the acts with no way back. It is not one: closing files the figures and marks the cycle closed, and **Reopen** stands in the same strip. What clears the figures is OPENING the next cycle, and that archives first. Once the list was re-read against the product rather than against the word *delete*, the honest count of acts with nothing behind them was **three** — a clip's bytes, a filed archive, and a monthly plan's twelve numbers — and almost everything else that reads like a deletion archives and can be restored. A question that sounds more final than the act is its own kind of wrong, and the first list had four of them.
+
+**THE COUNT WAS 29 AND IS 30.** The measurement was taken over `shell.html` alone. The check written at the end scans the whole built file with its comments stripped, and found a thirtieth in `sync.js` — *"Discard everything changed since the last successful save"*. The number in CLAUDE.md said 38 before that, which was a raw search count including nine comment lines and an HTML attribute carrying the word.
+
+**NOTHING MOVED UNTIL IT WAS DRAWN.** Four mockups, each signed off before any source was touched: `design-mockups/{delete-for-good,restore-a-person,refusal-in-place,remove-a-line}/`. The rule held in both directions — the shapes already in the product were carried across without a drawing, and the one family that had no drawing (§534.4) was stopped and drawn even though the rest had already shipped.
+
+### §534 — Deleting for good: what goes, what stays, no way back
+The three acts with nothing behind them. `destroyConfirmOpen()` is `rmConfirmOpen()`'s opposite number and a second builder rather than a flag on the first: that one closes by saying the plan is archived and where the way back is, and these have none to offer — a flag would leave one function whose two halves share nothing but their buttons.
+
+**WHAT STAYS IS NOT PADDING.** It is the half the browser's box was worst at and the half somebody hesitates over: the fear is rarely *will this delete* and nearly always *what does it take with it*. Two of the three leave something standing that reads as if it should have gone — a slide, a closed cycle's score.
+
+**THE BULK QUESTION NAMES ITS TWELVE.** It asked with a count, at twelve times the reach of the single-clip question that has always named its file, its size and its review. The list scrolls so the dialog does not grow. **FORGET, NOT DELETE** for an archive, on the row's control and in the question it opens (Islam's pick): the thing in front of you is already the record of something cleared, and *delete the archive of the deletion* is a sentence nobody can hold. The platform's own function has always been `forgetArchive`. `archiveHeld()` is lifted out of `renderArchives()` so the row and the question say what the archive holds in ONE builder — two copies is how the table and the question come to disagree about what is about to be lost, which is the one disagreement that question cannot survive.
+
+### §534.1 — Restoring a person: three answers, so three controls
+The one place where the browser's box had been made to carry a question with three answers. OK gave back the roles it could, CANCEL brought the person back with no role, and not restoring at all was a SECOND box behind the Cancel.
+
+**Pressing Cancel to mean "yes, but differently" is the opposite of what Cancel means everywhere else here**, and the way out of the act sat behind the thing it escapes. Worse than the presses: Escape, a dismissed box, and a browser that has decided to stop showing them all landed on RESTORE WITH NO ROLE — a real change chosen by nobody. The rule is untouched: a seat somebody else holds now is named and not offered. One role per line with **Free** or **Taken** at the front, because the box said them as two runs of commas and six roles in a comma list is not readable. The all-taken case loses its second box — it offered an OK that would give nothing back, then asked again.
+
+**NO RETIRED DATE IN THE HEAD, though the mockup drew one**: `retirePerson()` records what it took and not when, so that line would be a date the platform does not hold.
+
+### §534.2 — The nine refusals, said where they happened
+Nine of the thirty were not questions at all. Each fired AFTER the platform had already refused and changed nothing, so nothing waited on an answer and the box was only how somebody was told — told away from the control that refused, and over the form it was complaining about. **Four shapes cover all nine, and three of the four were already in the product.**
+
+- **A line under the box that refused** (3) — the cycle's name, the month it covers to, a BU name already taken. `.picerr` is the picture editor's own line and already the answer for a refusal belonging to one control; `.fld.bad` marks the control it points at, because the line alone leaves somebody hunting a box in a row of four. **Three things the boxes could not do**: the sentence and the empty field are now on screen together; the month's refusal takes focus, as the name's always did and it never did; and the BU refusal KEEPS WHAT WAS TYPED — the repaint behind the box put the old name back, so the correction had to be typed twice.
+- **The panel's own refusal** (3) — the kebab panel has always drawn one with a single **Close** when a function or a person cannot be deleted. These three were the same refusal a moment later, in another medium, closing the panel as it went. `REFUSEDLATE` lets the panel say the one thing genuinely different about that moment: not *cannot be deleted* but *was not deleted, since this was asked*. *"Open the menu again to see what"* is gone — the platform had just refused on the basis of what points at them, so it says what. The Functions panel reads the grant where it DRAWS, so nobody is offered a question that will be refused at the second press.
+- **A line under the row** (1) — the season still in use. The units were already named in the *Used by* cell's `title`: visible to a mouse that hovers the right four pixels and to nothing else. Each is a control now and lands on that unit's Drivers.
+- **Nothing at all** (2) — Submit's refusal was the THIRD telling: the button is drawn `aria-disabled` carrying the same list in a bubble that opens on hover and on focus, and the bar beneath names the places holding it and walks to the box. The box was the only one of the three that could not be read before pressing and could not take anybody anywhere. **Its gate is untouched; what went is its voice.** *"Importing is the SMO's"* was raised by a live Apply after the whole flow had been walked: the button is held with its reason beside it.
+
+### §534.3 — The cycle, the person, the draft, the plan, and the last prompt()
+**Closing a cycle takes Reopen's own dialog** — the two sit in the same strip and did the same kind of thing in two mediums. It now says closing can be undone, which the box never did.
+
+**OPENING A CYCLE NO LONGER ARCHIVES BEFORE IT ASKS.** It archived, asked, and undid the archive on Cancel — the one place in the product where Cancel had work to reverse rather than nothing to do, and safe only while the undo ran: a reload while the box stood left an archive of a clear that never happened, filed under a cycle that never opened. The counts come from the same snapshot the archive is made of, so the question says exactly what the archive will hold, and nothing is written until Yes.
+
+Retiring asks in the row's own corner, where the delete question beside it in the same menu always has, and still only when there is something to take. The draft and the monthly plan take §534's goes/stays shape. **The last `prompt()` is gone** — a browser may suppress one, leaving a control that looks live and does nothing — and naming a function is now the BU list's own add row, a field and an Add beside it, Enter still adding.
+
+### §534.4 — Removing a line: the question under it
+The last nine, and the only family with no drawing behind it: one sentence — *"Remove X? This cannot be undone here."* — across six screens, hanging off a 24-pixel × beside a line somebody is in the middle of typing. A box over a list of nine never says which line of it is going.
+
+Two treatments were drawn; A was recommended, **Islam chose B**: the line stays where it is and readable, and the question opens under it. **Its cost is known and accepted** — the list grows by a strip as you press, so what is below moves. **Three builders, not nine copies** (`rmStrip`, `rmStripRow`, `rmMark`): the two words and the closing sentence live in one place, because nine copies of a sentence is how this family came to be nine copies of a sentence. **The strip's Remove carries the same attribute the × does**, plus `rmnow`, so the handler already bound to the × answers both presses and no handler learns a second way in.
+
+Three things kept, each the easiest to lose in a rewrite: eight of the nine still ask ONLY when the line holds something, so an empty line added a moment ago still goes on the first press; the three that take more than the line still say so; and one question is open at a time.
+
+**AND THE BU LIST JOINED THEM.** The drawing named two controls there that asked nothing at all — removing a BU, and taking one off a mapping — as a difference to decide rather than leave. Islam: *"they should yes."* Both now use the same strip; a BU pointing at nothing still goes on one press.
+
+### §534.5 — Discard asks in the band
+The thirtieth, and the one with a fault of its own on top: the box opens OVER the band that has just explained why the save was refused, so the sentence somebody needs in order to answer is the one it covers up. The band is already on screen and already carries the buttons, so the question replaces them. Nothing is cleared until the second press.
+
+**BOTH OF THEM ASK NOW** (Islam: *"yes it should ask too"*), **and making the second one ask forced a second change.** It reloaded WITHOUT clearing the copy the tab keeps, so the reload handed the unsaved work straight back — already wrong under a button reading *Discard everything and reload*, and impossible to leave once both carry a question that says in words the typing will be lost. The question replaces whichever row it opens over, so `askDiscard` takes its way back from the caller: a single shared restore would have put the earlier message back, which reads as the platform forgetting what it had just said.
+
+**CHECKS.** Six new — `delete-for-good` (37), `restore-a-person`, `refusal-in-place`, `cycle-open-retire-add`, `remove-a-line`, and `refusal-keeps-work` extended — each green on this build and **red on a build of the commit before** (`remove-a-line` 7 ways, `refusal-in-place` 16, and each catching the browser dialog by its own text). `remove-a-line`'s first section is static and total: it strips the comments from the whole built file and asserts no `confirm`/`alert`/`prompt` CALL is left anywhere, because nine controls across six screens is more navigation than one check should own and a behavioural check of three would pass on a build that left the other six. Six existing checks encoded the old medium and were taught the new controls rather than loosened: `cycle-edit` (which now also asserts the cycle is NOT closed until the question is answered, so a build that closed on the first press fails rather than passing), `monthly-plan`, `project-tables`, `repeat-project`, `foundation-objectives`, `refusal-keeps-work`.
+
+**THE SWEEP, AND WHAT IT COST TO READ IT HONESTLY.** All 228 checks were run and every failure triaged. The first triage was worthless and said so: 24 of the 27 failing checks ignore `SMP_BUILT`, so pointing it at the old build ran them against the new one twice — `repeat-project` was reported pre-existing on that basis and was in fact ours. The second triage built a **worktree of the commit before this work** and ran each failing check from inside it. Four were ours and are fixed; the rest are pre-existing, or pass alone and fail only under a four-at-a-time sweep.
+
+**WHAT IS NOT CLAIMED.** The wording of every converted question is the product's own: the B drawing paraphrased the closing sentence, and that paraphrase was a mockup's, not copy anybody approved, so each site keeps *"This cannot be undone here."* The two sibling questions raised in the drawings were answered; nothing else in them was.
+
+Numbered §534 because main published §533 (*Every topic is reachable*) while this was built — 68 references across 18 files were renumbered rather than leave two meanings for one number.
+
+## §535 — The door's refusal reaches a screen reader, and the button says what it is doing (usability audit, heuristic 1; 2026-10-15)
+The first of heuristic 1's findings and the unambiguous half of it. The sign-in refusal was a `<div className="error">` shown and hidden with `display`, carrying no role and no live region — so somebody who could not see the page was told **nothing** when their sign-in was refused. The only signal was the button coming back to life.
+
+**`role="alert"` AND `aria-live` ARE ON THE BOX FROM THE FIRST RENDER** rather than added with the text, because a live region announces what arrives IN it and not the region itself. A box created at the moment of the refusal is a box nothing was announced into.
+
+**THE FIELD SAYS IT WAS REFUSED TOO** — `aria-invalid` and `aria-describedby` pointing at the message, on the email box and on the password box, which needed two props on `PasswordField` to reach. Both forms, sign-in and set-password.
+
+**AND THE BUTTON SAYS WHAT IT IS DOING** — *Signing in…*, *Setting it…*. Disabled alone says wait without saying what for, and writing the outcome into the button is the product's own convention elsewhere (§136's *Write another*, §312's *Opening…*).
+
+**NOT TYPE-CHECKED HERE, AND SAID SO** (§54.5): `smp-app`'s `node_modules` is not installed in this container, so `tsc` cannot resolve react and every JSX line in the file errors, untouched ones included. The edits were re-read instead. Worth a `tsc` run wherever the app actually builds.
+
+**THE AUDIT'S OTHER HEURISTIC 1 NIT IS ALREADY FIXED.** It says `"Open a new cycle..."` spells its ellipsis in three ASCII dots; the rendered string is `Open a new cycle&hellip;` and only the comments describing that button still spell it with dots. Measured, not read.
+
+## §536 — The searchable dropdown answers the keys its markup promises (usability audit, heuristic 4b; 2026-10-15)
+`searchsel.js` builds every long list in the product as `role="option"` rows inside a `role="listbox"` — which is a promise about arrow keys — and bound Escape and Enter and nothing else. It was always OPERABLE, because the rows are real buttons and Tab reaches them, so nobody was locked out; it simply did not behave the way its own declaration said, and a screen reader announcing a listbox tells somebody to press keys that did nothing.
+
+**THE ARROWS MARK A ROW RATHER THAN MOVING FOCUS**, and that is the whole design decision. The point of this control is typing three letters and then picking; focus walked into the list would send the next three letters nowhere. So the search box keeps focus and POINTS at the row with `aria-activedescendant`, which is what makes the mark reachable by a screen reader as well as by an eye.
+
+Down from nowhere lands on the first row and Up on the last, both wrap, and Home and End go to the ends of what is SHOWING rather than of the whole list. **The walk is held as the ROW and never an index**, because an index would be into a list whose visible members change under it on every keystroke. A search that hides the marked row DROPS the mark, so Enter falls back to *the first row still showing* exactly as it did before any of this.
+
+**THE MARK GETS A STRIPE OF ITS OWN** rather than only a tint: on a ticking list a row can be lit, hovered and arrowed-to at once, and three states that look alike are one state nobody can read.
+
+**THE AUDIT WAS WRONG ON ONE POINT AND THE CHECK RECORDS IT** (§303's habit, applied to the audit rather than to a branch): it said *"no arrows, no Enter-to-pick, no Home/End"*. Enter-to-pick was there and had been since before the audit was written. Only the arrows and the ends were missing.
+
+**CHECK.** `checks/dropdown-keys.py` — 22 assertions, green here and **13 red on the build before**. Its own fixture was wrong twice first, and both are recorded rather than quietly fixed: five options, where `searchsel` only enhances a single select past six, so it measured a plain `<select>` and the popup never opened; then two assertions still naming the old last row.
+
+## §537 — One way to write a date (usability audit, heuristic 4a; 2026-10-15)
+The audit counted six spellings across the product: two spacings of the same options object, `"en-GB"` hard-coded in two places and the browser's locale everywhere else, and a bare `toLocaleString()`. So how a date read depended on which screen you were standing on — and, wherever the locale was the browser's, on whose machine you were standing at.
+
+**THE LOCALE IS PINNED, and that is the decision rather than an oversight.** The platform writes dates BY HAND in several places and always day first: `dayValue()` makes "30 Sep 2026", the month picker makes "Jul 26". A browser set to en-US renders `{day, month:"short"}` as "Sep 30", so one screen would carry the platform's own "30 Sep" beside a "Sep 30" it had just formatted. One of the two has to give, and the authored strings are the ones this product has always shown.
+
+**TWO THINGS THE FIRST PASS GOT WRONG**, both caught by the check on its first run rather than by reading — which is the argument for writing the check before believing the sweep:
+
+- `new Date(null)` is the EPOCH, so a missing value came back as "1 Jan" — the stored-value-rewritten-into-nonsense this helper exists to stop, arriving through the one input nobody thinks to try. Nothing is now nothing.
+- The sweep searched for `toLocaleString()` with EMPTY PARENS and walked past two more date formatters that pass date options to it. So the audit's six was an undercount, not an overcount.
+
+**CHECK.** `checks/date-spelling.py`. Its sharpest assertion opens the same page twice, once in a context set to en-US, and requires the date to read the same both times — the fault itself, measured rather than reasoned about.
+
+**AND IT WAS SHIPPED WITHOUT ASKING WHAT THE FORMAT SHOULD BE**, which §537.1 is. Islam: *"you didn't align with me on what date format are we going to use!!! did you just assume?"* — yes. The standing instruction that came out of it is **never decide without alignment**, and it is a rule of this project now rather than a note about one commit.
+
+## §537.1 — The shape Islam chose, and the three spellings the first sweep missed (2026-10-15)
+Asked, the answer was: a day reads **"5 Mar 26"** — day first, no leading zero, the month in three letters, the year in TWO digits. Asked whether the spelled-out "11 March 2026" on the printed decks and the chat's day separators becomes that too, the answer was yes. So there is now ONE day shape and not a near one and a far one.
+
+**THE FIRST SWEEP FOUND SIX WHERE THERE WERE NINE.** It searched for the browser's formatters and walked straight past three day dates written out by hand from a `["Jan","Feb",...]` array of their own: the history log's day column (which printed the year only when it was not this one, so the log and every other screen disagreed), the log's *"set by X on Y"* from the same array kept twice in one file, and the Copilot's deliverable dates with their own four-digit year. **A spelling is a spelling whether a browser made it or a loop did.** All three are the one writer now, and the log keeps its own *Today* / *Yesterday*, which is a judgement about what to say and not a way of spelling a date.
+
+**THREE TIMES ALSO FOLLOWED THE BROWSER.** `toLocaleTimeString` with no locale is "09:00" here and "09:00 AM" on an American machine, and the reports-due line, the contingency banner and the saved-at tip all used it. There is one time writer now, pinned like the day.
+
+**THE SHAPE IS WRITTEN ONCE**, in `DATE_DAY`, so changing it is changing one line. The day-with-time is COMPOSED from the day and the time rather than being a fourth options object, so it cannot drift from the day. Three formatter calls exist in the whole product: a day, a time, and the stamp on the log's hover.
+
+**TWO HAND-WRITTEN DAY DATES ARE LEFT ALONE, BY INSTRUCTION** (Islam, asked directly: *"don't touch the stored one"*), and the distinction is **data vs. display**: `dayValue()`'s "30 Sep 2026" is STORED and `cycleYear()` reads the year back out of that string, and `todayLabel()`'s "15 Oct 2026" is STAMPED into archives and slide credits as they are made. Re-spelling either would not change a date on screen — it would change what new records say while every record already filed kept the old words, which is two spellings in one table rather than one. The check asserts both are UNCHANGED, which is the only way an instruction like that survives the next sweep.
+
+**NOT CHANGED, AND NAMED RATHER THAN LEFT TO BE FOUND:** `dateStamp`, the log's hover, still reads "15/10/2026, 08:16:04" — numeric and down to the second. It is the only one left in another register, nobody reads it beside another date, and nobody has ruled on it.
+
+**CHECK.** `date-spelling.py` rewritten: green here, **12 red on the build before**. Its new total assertion is static and covers the whole built file — no array may be indexed by `getMonth()` except the one stored stamp — which is the assertion the first sweep lacked and the only kind that reaches a formatter private to a module the check cannot call into.
+
+## §538 — A control that will not work can say why: four of them (usability audit, heuristic 5; 2026-10-15)
+The product greys a control out in two ways. One leaves it alive — `aria-disabled`, so it still takes a pointer and the Tab key and opens a bubble saying why it refuses. That is Submit, and §163/§221 made it the house rule. The other is `disabled`, where the browser stops sending the control anything: no pointer, no focus, no hover. **A sentence attached to a control greyed the second way reaches NOBODY.**
+
+**THE AUDIT NAMED ONE AND THE SWEEP FOUND FOUR, the audit's being the mildest.** Drawn before anything was touched (`design-mockups/grey-with-a-reason/`), published, and signed off — *"proceed with all"*.
+
+- **RESTORE, in the change log**, carried BOTH attributes at once — and `disabled` wins, so the one sentence saying why a change cannot be put back was unreachable and nothing else in the row said it. The worst of the four, and the one the audit did not have.
+- **APPLY TO PLAN, in the Copilot**: *"Save the Foundation first"* on the one control that could not deliver it — and the WRONG sentence besides, since it said that while the Copilot was working on a Foundation already saved. It now says which of the two is holding it.
+- **HOW A CAPABILITY IS PLANNED**: *"holds its plan"* is beside the row, so the obstacle was named; the way out of it sat on the dead control. Half the answer on screen and half reaching nobody.
+- **THE QUARTER MARKS** — the audit's one, and the one where nothing was hidden: the strip directly above that table already says which period the plan covers. So it is a **SUBTRACTION**. A quarter that cannot be pressed stops being a button, Tab walks only the ones that can, and the sentence survives on a mark a pointer CAN reach and a screen reader reads from `aria-label`.
+
+**TWO THINGS THE CONVERSION FORCED, and both are where this kind of change goes wrong:**
+
+- **APPLY TO PLAN'S GUARD.** It decided whether to act by reading `b.disabled`, which goes false the moment the hold moves to `aria-disabled`. A build that moved the attribute and left the guard would have a held button that works.
+- **A HELD `select` IS GENUINELY CHANGEABLE**, unlike a held button, which its handler simply declines. So the capability dropdown's refusal moved into the change listener, which puts the row back. Its bubble also had to go on a **WRAPPER**: a browser does not paint `::after` on a form control, and the bubble is an `::after`. `.hasnote:focus-within` is new for that — it is what keeps the bubble reachable by Tab once the note is on a span.
+
+**BOTH OPTIONS ARE STILL DRAWN** on the held dropdown, exactly as before, and this departs from the drawing deliberately: the mockup showed one. What is held is the CHANGE, not the sight of what the other way would be — and keeping today's option list means nothing changed that nobody asked to change.
+
+**CHECK.** `checks/held-not-dead.py` — green here, **10 red on the build before**. Its first section is static and total over the built file (no `disabled` and a `title` in the same drawn tag, anywhere), because a behavioural check of four controls passes a build that adds a fifth. **Its first draft was weaker than it looked and says so**: two of its three sections exercised the check's OWN markup and passed on the build before, which is measuring the check (§53.5), so five plain-text assertions were added that read the product's own drawing code, the dropdown's revert, and the moved guard. `checks/history-page.py` read `b.disabled` and `b.title` off Restore; taught the new control rather than loosened.
+
+## §538.1 — The served copies were stale, but production was never serving them (2026-10-16)
+**A correction to the commit that regenerated them** (`7c7f6b0`), made the moment production could be read — and it is here rather than in a rewritten commit message because the claim is already on `main` and quietly deleting it would be the second fault.
+
+**WHAT THE CHECK FOUND IS REAL.** `generated-in-step` was red: the committed `smp-app/public/shell.js` and `platform.css` were generated before §534, so four sections of work sat in the frozen sources with the tracked copies behind them. Established as **main's** rather than this branch's by running the check in a worktree of `origin/main`, where it failed identically (§303).
+
+**WHAT I SAID ABOUT IT IS NOT.** The commit says the Next app *"served the bytes from before any of them"*. It did not. `smp-app/package.json`'s own `build` script runs all four generators before `next build`, so every deployment regenerates them from the frozen sources and the committed copies are never what anybody is served. Measured rather than argued: production was serving **shell.js 4,745,497** and **platform.css 799,429** — to the byte, what main's sources GENERATE — while main's committed copies stood at 4,696,241 and 790,388.
+
+**SO THE FAULT IS ONE DIRECTORY SMALLER THAN I DESCRIBED IT**: the repository's own record of what it serves was stale, which is worth fixing and is what §329 goes red about. Nobody was served anything old.
+
+**AND IT PUTS A QUESTION ON §329's OWN REASONING**, which is left as a question rather than answered here: that section's argument is *"a change to a frozen source that stops there leaves the new stack serving the old bytes"*, and the build script has made that untrue since whenever it gained those four lines. The check still earns its place — a tracked file that disagrees with its generator is a file somebody will read as the truth — but its stated reason is not the one it now holds. **Not rewritten, because §329 is not this section's to rewrite** (rule 1b).
+
+**THE LIVE READ WAS MADE, which §526 and §528 both had to report they could not.** `https://smp-orpin-tau.vercel.app/` answered 200 from this container. The witnesses before this merge's deployment: shell.js **4,745,497**, platform.css **799,429**, sw.js **4,192** with release stamp **7cc8f01e07f38c24**. After it they should read **4,749,817**, **800,775**, 4,192 and a moved stamp (§397) — recorded so the next reader can tell a deployment that landed from one that did not.
+
 ## §531 — One address, one parse (spec 066 stage 3a, part 1 of 3)
 Islam, of the two questions he put to the box model (a capability and a direction are both pillars, one internal and one external; and what the four part-owner roles become): *"then we can go with the 2 steps in order"*. Step 1 of the split agreed with him is **code only, no data moves**, and this is its first part.
 
@@ -65472,7 +65694,7 @@ Islam, 2026-10-15, of §536: *"the concept is right but you are having the mark 
 
 Published as version 2. The five sign-off points of §536 §5 stand unchanged; the correction is to the drawing, not to the design.
 
-## §537 — Stage 3b (a): joined or split, as one setting on the box
+## §540 — Stage 3b (a): joined or split, as one setting on the box
 Islam, 2026-10-15, authorising it: *"go ahead with a"*. The mockup it builds is §536 / §536.1, signed off at version 2.
 
 **The problem it solves.** El Abd reads **Directions** and **Capabilities** on two tabs. It reads them that way only because its capabilities are a *second record type* — `GROUP.capabilities`, drawn by a section of its own — and that record type is exactly what spec 066 removes. The moment those five rows become five pillars of the company's own list, the Capabilities tab has nothing left to draw and its five rows appear under Directions. §535.10 forbids that. So the platform needs a way to say *one pillar list, shown as two*, **before** the rows move. This is it.
@@ -65515,7 +65737,7 @@ Seven deliberate breaks, each counted rather than predicted: `pillarIsCap` alway
 
 **And the seventh came back GREEN.** With the setting test taken out of `boxHasHalf`, every assertion in the file passed over a build in which **every Raya unit holding a pillar marked Capability would have grown a second Plan tab overnight** — six of the ten units in the worked example, and precisely the one thing Islam said must not happen. The file had measured what the setting *does* and never asked what it does to a box that was never set. §255's fault with a new face: the state it was asked about was the state it had made. Two assertions were written from that break — the worked example holds six units with an internal pillar, and not one of them is offered a second tab — and the break is red now.
 
-## §538 — Stage 3b (b): a pillar's code comes from its kind
+## §541 — Stage 3b (b): a pillar's code comes from its kind
 Islam, 2026-10-15: *"go ahead with b"*, against the constraint he set in §535.10 — *"the capability tab should stay as is and the coding is c001 to c005"*.
 
 **The rule is one sentence: the number counts within the set that shares its prefix.** Both cases fall out of it, which is why it is one sentence and not two rules:
@@ -65536,7 +65758,7 @@ Islam, 2026-10-15: *"go ahead with b"*, against the constraint he set in §535.1
 
 Four deliberate breaks, each counted: numbering per kind at a unit too → 2 red (and the output names all seven boxes it would have renumbered); `pillarCapPrefix` left off `topAsUnit` → 5; the old positional rule restored → 5; the fold coding before the push → 1. **The first break was written wrong the first time and came back green**: it deleted the prefix guard inside the company's branch, which a unit never reaches, so it tested nothing. Recorded in the file's own header, because the next person to break it will reach for the same line.
 
-## §539 — Stage 3b (c): the pages read the kind, and the move the product performs
+## §542 — Stage 3b (c): the pages read the kind, and the move the product performs
 Islam, 2026-10-15: *"go ahead with c"*, then *"go ahead with all until you need something from me"*.
 
 **The brief said "move the 77 reads of `GROUP.capabilities` from the container to the kind". That was the wrong unit of work, and measuring it is what showed why.** Those 77 are spread over fourteen files and most of them are correct exactly as they are: a capability RECORD is a richer thing than a pillar — it can plan in projects, hold a definition and key objectives of its own, name a function, carry more than one inner pillar — and the reads that handle those parts are reading the right thing. Converting them wholesale would have been a large diff in service of a count.
@@ -65552,7 +65774,7 @@ Islam, 2026-10-15: *"go ahead with c"*, then *"go ahead with all until you need 
 | **The deck** | the roll-call heading names both kinds when the list holds an internal pillar, and such a pillar's card says what it is where it has no sub-line of its own. |
 | **Setup › Capabilities** | names where they went, read-only, and withdraws the Add button — otherwise the office met an empty table whose only control would mint the record type the move removes. |
 
-**A rail each, where a box is shown apart.** §537 left the two halves sharing one remembered selection, which was fine while they were tabs. The Reporting page draws both at once, and there a shared key means pressing a row in the lower rail makes the upper pane jump. The half rides in the rail's SUBJECT (`group@cap`), so the shell's one handler is right for both halves and for everything that is not split. A deep link from the missing-elements walk asks `pillarRailKey(u, p)` and `pillarSecKey(u, p, sec)` instead, because that walk runs outside any render and must land on the half the pillar's KIND puts it in.
+**A rail each, where a box is shown apart.** §540 left the two halves sharing one remembered selection, which was fine while they were tabs. The Reporting page draws both at once, and there a shared key means pressing a row in the lower rail makes the upper pane jump. The half rides in the rail's SUBJECT (`group@cap`), so the shell's one handler is right for both halves and for everything that is not split. A deep link from the missing-elements walk asks `pillarRailKey(u, p)` and `pillarSecKey(u, p, sec)` instead, because that walk runs outside any render and must land on the half the pillar's KIND puts it in.
 
 ### A real fault the measurement found, fixed here because leaving it is the regression
 `plansInPillars("group")` has always answered **false**. The company is not in `UNITS`, so `subjUnit("group")` is null and the reader fell through — which sent `subjectAsked("group")` down the holder branch to an empty list. The visible cost on El Abd today: its Reporting rail knows which figures each direction still owes (`askedItems(topAsUnit())` holds 42 rows) and says nothing, while its capabilities DO carry the mark because each is addressed as `cap:<id>` and that branch answers properly. So the move would have taken five red *Still to enter* marks off the page and left the directions' silence in their place.
@@ -65565,7 +65787,7 @@ Three functions in `config-data.js`: `capFoldBlockers()` (what stops it, by name
 - **It refuses rather than guesses.** Projects, more than one inner pillar, key objectives of its own, a definition, a function link — each is a refusal with a reason, and the move is all or nothing. A half-moved client is the worst of the three states.
 - **The inner pillar's id is kept.** Every figure, snapshot, history entry and submitted report is keyed on it (§48); minting a new one silently drops a cycle's reporting. `cap:cap3-P1` stays `cap:cap3-P1`.
 - **The owner comes off the record where the pillar has none.** A capability's seat is `head` and holds a person's KEY; a pillar's `owner` holds their NAME. On El Abd all five inner pillars store an empty owner and three of the five records name a head — without this, three people would lose the rows they report.
-- **It sets §537's split in the same breath**, because the one thing the move must not do is change what anybody sees.
+- **It sets §540's split in the same breath**, because the one thing the move must not do is change what anybody sees.
 
 ### What the comparison says about El Abd
 `node scripts/stage3-before-after.js <working copy>` prints it in three columns — today's build, this build over the same state, and this build after the move — because two columns cannot say which half changed a page. On El Abd: five rows, **C001–C005 → C001–C005**, every id kept, every code unchanged. Four differences, all named: a separator added between Owner and Custodian on the capabilities tab; the Reporting fill bar appearing (the fault above, from the code alone) and then covering all ten rows; the Temple's base reading *6 Key Measures · 4 Tactics* where it read *0 Projects*; and the deck's roll-call reading C001–C005 where it read the two-letter EQ/EE/DT/T&/OE — which is §535.10's own constraint reaching the one surface that still disagreed with it.
@@ -65575,7 +65797,7 @@ Three functions in `config-data.js`: `capFoldBlockers()` (what stops it, by name
 
 Eight deliberate breaks, each counted: the move refusing nothing → 8 red; the owner not carried → 1; the row not marked internal → 14; the split not set → 5; the Temple reading records only → 2; the deck heading dropping a kind → 1; the empty Performance section kept → 2; Reporting drawing no second section → 2. And `checks/top-plan.py` caught a mistake of mine that none of those would have: rewriting the Temple's base, I dropped the Structure step's own gate, so a client with capabilities switched OFF would have been shown a base again. Both guards are there now, in that order.
 
-## §539.2 — Stage 3b (d): the SQL, generated from the move and rehearsed on a real Postgres
+## §542.2 — Stage 3b (d): the SQL, generated from the move and rehearsed on a real Postgres
 Islam set the terms for the data move: the list first, a rehearsal on a copy, *"and the final step handed over as SQL for Neon's SQL editor"*. This is the SQL, and it has been run.
 
 **It is generated, never typed.** `scripts/stage3-move-sql.js` reads a working copy, asks `capFoldBlockers()` whether the move may run at all and `capFoldPlan()` what it would do, and emits statements doing exactly that — so the list Islam approves, the rehearsal that was measured and the statements that run are one thing (§100.3). Change the move and the SQL changes with it; it refuses to emit anything at all where the move is blocked.
@@ -65596,7 +65818,7 @@ A throwaway PostgreSQL 16 cluster, the real `db/schema.sql` applied into an `el_
 
 The cluster was removed afterwards. Nothing was run against any real client.
 
-### §539.3 — the four differences are accepted, and the schema names itself
+### §542.3 — the four differences are accepted, and the schema names itself
 Islam, 2026-10-18: *"the 4 differences are fine, schema how can I know it's name"*. The four are approved; the second half is a fair question with a bad answer, which was *"it is `el_abd` because a migration script says so"*. He should not have to know, and I should not be asking him to confirm a name I read out of a file.
 
 **So the file opens with a read-only lookup that makes the database name itself** — one row per client, each with the name the platform shows on screen and how many capability records it holds, so the right schema is identified by its CONTENT and not by a name anybody has to remember. It skips the `platform` schema on its own, because that one carries no `org` table. Written as a plain `SELECT` (through `query_to_xml`, since a schema name cannot be a parameter) rather than a `DO` block, so Neon's editor returns it as a table instead of hiding it in a notices pane. Tested against a five-schema database built to the real shape before it was handed over.
@@ -65605,18 +65827,18 @@ Islam, 2026-10-18: *"the 4 differences are fine, schema how can I know it's name
 
 The whole rehearsal was then run again, on the exact file being handed over rather than an earlier one: it commits, its result is byte-for-byte identical to `capFoldIntoTop()`, and the pages rendered from the resulting database match the rehearsal on all seven surfaces.
 
-### §539.4 — the client's name, in both places it is stored
+### §542.4 — the client's name, in both places it is stored
 Islam, 2026-10-18: *"we need to fix the company name test 2 once and for all to be ElAbd"*.
 
 **The name is stored twice**, which is why *once and for all* is the right phrase and a hand edit is the wrong tool: `<schema>.org.org_name` is what the chrome and every page read, and `platform.clients.name` is what the client cards read. Change one and the two disagree — the card says one thing, the page another.
 
 So the generator takes `--rename` and emits both, as **step 8, in a transaction of its own** so it can be run without the move. Matched on the SCHEMA rather than on the old name, so it is right however many times it is run and does not depend on the old value being what anybody remembers. It ends by printing both, side by side.
 
-**Ordering matters and is handled**: §539.3's first precondition checks the client's name, so the rename sits after the move's `COMMIT`, never before it.
+**Ordering matters and is handled**: §542.3's first precondition checks the client's name, so the rename sits after the move's `COMMIT`, never before it.
 
 Run end to end on a throwaway Postgres with both the client schema and a `platform.clients` row: the move commits, the rename commits, both read `ElAbd`, and running the rename again leaves it `ElAbd`.
 
-### §539.5 — the live database is not the one in this repository
+### §542.5 — the live database is not the one in this repository
 The first file was run against Neon and **failed at its first precondition, rolling everything back** — the guard doing exactly its job. Two more read-only rounds showed why, and the finding is bigger than the file.
 
 **The deployment has moved past this repository's schema, twice over.** `db/schema.sql` and `scripts/migrate-to-multi-client.js` describe a schema per client — `el_abd.org`, `platform.clients`. The live database has:

@@ -2039,7 +2039,7 @@ var CLIENTSETUP = (function () {
         structWrite(nx);
       });
       wt.appendChild(wsel); wr.appendChild(wt); dr.appendChild(wr);
-      /* ── §537 · AND WHETHER THEY SHOW AS ONE LIST OR APART ──────────────
+      /* ── §540 · AND WHETHER THEY SHOW AS ONE LIST OR APART ──────────────
          The row beside "plans in", for the same reason it sits beside it in
          a unit's dialog: both answer *what does this box's plan look like*.
          Only while it plans in pillars — projects have no second kind.

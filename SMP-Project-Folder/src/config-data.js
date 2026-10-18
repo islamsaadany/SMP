@@ -412,6 +412,38 @@ function newPersonReset(){
    the repaint any other change causes would otherwise throw away what is
    half typed. */
 var NEWMAINBU = "";
+/* The BU rename the platform refused, and what was typed when it did (§534.2).
+   Held rather than discarded, because the repaint that follows a refusal used
+   to put the old name back — so the correction had to be typed twice. */
+var MBWHY = null;
+/* ── AN ACT REFUSED AFTER ITS QUESTION WAS ALREADY OPEN (§534.2) ───────
+   Two panels in the product draw a refusal of their own when they open on
+   something that cannot be deleted — a function with capabilities under it, a
+   person something still points at. Both ALSO had a browser box, for the case
+   where the blocker appeared between the question opening and Yes being
+   pressed: the same refusal, a moment later, in another medium, and closing
+   the panel as it went.
+
+   The panels draw it now. This names which act was refused late, so the
+   sentence can say the one thing that is genuinely different about that
+   moment — not "cannot be deleted" but "was not deleted, since this was
+   asked" — and nothing else about either panel has to change. Cleared
+   whenever a question is opened or closed. */
+var REFUSEDLATE = null;
+/* The season whose removal was refused, so the row can say so under itself
+   rather than in a box over the page (§534.2). */
+var SEASWHY = null;
+/* The person whose retirement is being asked about, in the row's own corner
+   (§534.3) — PDEL's twin, for the act beside it in the same menu. */
+var PRET = null;
+/* The name being typed for a new supporting function, held in a global for
+   the reason NEWMAINBU is: the repaint that follows any other change on the
+   page would take a half-typed name with it (§534.3). */
+var NEWFN = "";
+/* Which line's × has been pressed, and the question it opened under that line
+   (§534.4). One at a time: pressing another × moves the question rather than
+   leaving two open, which is what a list of nine asks for. */
+var RMASK = null;
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
@@ -5709,7 +5741,7 @@ function reportItems(u){
        broken — address by the identifier, label with the word — and it would
        fail invisibly on a tenant where the two happen to coincide. Found by
        pressing Next and watching the rail not move. */
-    /* §539: the rail that HOLDS this pillar, which on a split box is the
+    /* §542: the rail that HOLDS this pillar, which on a split box is the
        half its kind puts it in — not the half on screen, because this walk
        runs outside any render. */
     var place = { key:"p:" + (p.id || pi), label:code,
@@ -8017,7 +8049,7 @@ function gapMap(target, all, fillable){
                      : (canAuthor[w.plan] = mayAuthor(w.plan, target)))))
           n += extraOutcomeGaps(x);
       });
-      /* §539: and the SECTION that holds it, so the walk opens the tab the
+      /* §542: and the SECTION that holds it, so the walk opens the tab the
          pillar is actually drawn on. */
       entry("p:" + (p.id || i), pillarCode(u, i), n,
             { sec: pillarSecKey(u, p, w.sec), page: "plan",
@@ -8257,7 +8289,7 @@ function setKoThisYear(on){
   try { localStorage.setItem(KO_YEAR_KEY, SHOW_KO_THIS_YEAR ? "1" : "0"); } catch (e) {}
 }
 
-/* ── A PILLAR'S CODE COMES FROM ITS KIND (§538, spec 066 stage 3b b) ──────
+/* ── A PILLAR'S CODE COMES FROM ITS KIND (§541, spec 066 stage 3b b) ──────
    Islam, 2026-10-15: *"the capability tab should stay as is and the coding is
    c001 to c005"*.
 
@@ -8281,7 +8313,7 @@ function setKoThisYear(on){
 
    SO THE GUARD IS THE PREFIXES, NOT THE KINDS. Where the internal prefix is
    absent it falls back to the external one, the two are equal, and the
-   function returns exactly what it returned before §538 — which is every box
+   function returns exactly what it returned before §541 — which is every box
    in the product but the company.
 
    STILL DERIVED, NEVER STORED (§46.3). This changes what is SHOWN; `p.code`
@@ -8601,7 +8633,7 @@ function topPrefix(){
 }
 function topAsUnit(){
   return { ukey:"group", topLayer:true, name:labelWord("topword","group") || GROUP.org || "Group",
-           /* §538: two prefixes, because the company's two kinds of pillar
+           /* §541: two prefixes, because the company's two kinds of pillar
               are coded apart — D001 for a direction, C001 for a capability,
               which is what El Abd's Capabilities tab reads today. */
            navName:null, codePrefix:topPrefix(), pillarPrefix:"D", pillarCapPrefix:"C",
@@ -8611,7 +8643,7 @@ function topAsUnit(){
            /* §466: the way it plans and, in projects, its projects — the view
               a unit's own holder reads (§405), so the function pages draw it. */
            format:topWay() === "projects" ? "projects" : undefined,
-           /* §537: and whether its pillars show as one list or as two — the
+           /* §540: and whether its pillars show as one list or as two — the
               Structure step's own key, surfaced here so one reader answers
               for the company and for a unit alike. `undefined` where it is
               not set, so the box is the same shape it was (§50.6). */
@@ -8651,7 +8683,7 @@ function partMine(){
   var u = topAsUnit();
   return !!u && (itemsNow(u) || []).some(function(p){ return SMPRules.ownsDirection(world(), viewer(), p); });
 }
-/* ── §537 · THE HALF OF A SPLIT BOX A PAGE IS DRAWING ────────────────────
+/* ── §540 · THE HALF OF A SPLIT BOX A PAGE IS DRAWING ────────────────────
    The rule (`SMPRules.pillarsSplit`) says whether a box shows its pillars as
    one list or as two; this says WHICH of the two is on screen, and it rides
    beside §517's part filter rather than beside it as a second mechanism —
@@ -8686,10 +8718,10 @@ function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
   return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
 }
-/* §539 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
+/* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
    headed with the client's word for a capability and its external half with
    the word for a pillar, because the two tabs are the two words — that is
-   what §537's setting is for. Asked here rather than at each rail, heading
+   what §540's setting is for. Asked here rather than at each rail, heading
    and empty state, so the page cannot call the same list two things
    (§53.5). Joined, and everywhere outside a split box, it is the pillar
    word exactly as it was. */
@@ -8704,7 +8736,7 @@ function halfFilter(u){
   var half = PILLAR_HALF;
   return function(p){ return SMPRules.pillarInHalf(p, half); };
 }
-/* §537: BOTH REASONS A ROW MIGHT BE SKIPPED, ANSWERED ONCE. The half and the
+/* §540: BOTH REASONS A ROW MIGHT BE SKIPPED, ANSWERED ONCE. The half and the
    half eye are independent — a narrowed direction owner looking at a split
    company sees their own directions on the Directions tab and nothing on the
    Capabilities one — so they compose rather than override. `null` when
@@ -8785,7 +8817,7 @@ function buFoldIntoTop(){
         if (a.hide) t.hide = true;
         dp.tactics.push(t);
       });
-      /* §538: coded AFTER it is in the list, so `pillarCode` can read the
+      /* §541: coded AFTER it is in the list, so `pillarCode` can read the
          row's own kind. Computed from an index one past the end it could
          not, and a folded capability would have taken a direction's code. */
       GROUP.items.push(dp);
@@ -8803,7 +8835,7 @@ function buFoldIntoTop(){
       if (!c.owner && head) c.owner = head.name;
       (c.measures || []).forEach(function(m, i){ m.id = c.id + "-M" + (i + 1); });
       (c.tactics || []).forEach(function(t, i){ t.id = c.id + "-T" + (i + 1); });
-      /* §538: coded after the push, so a folded pillar marked Capability
+      /* §541: coded after the push, so a folded pillar marked Capability
          takes a C and not the next D (see the fold above). */
       GROUP.items.push(c);
       c.code = pillarCode(top, GROUP.items.length - 1);
@@ -8813,7 +8845,7 @@ function buFoldIntoTop(){
   });
   return moved;
 }
-/* ── §539 · A CAPABILITY BECOMES AN INTERNAL PILLAR OF THE COMPANY ────────
+/* ── §542 · A CAPABILITY BECOMES AN INTERNAL PILLAR OF THE COMPANY ────────
    Spec 066 stage 3b, the move itself. Islam: *"a pillar is external and
    internal pillars and they are the same like directions but internal
    directions are called capabilities"*, and *"the capability is either on a
@@ -8846,7 +8878,7 @@ function buFoldIntoTop(){
    this three capabilities would arrive ownerless and three people would lose
    the rows they report.
 
-   AND IT SETS THE SPLIT (§537) IN THE SAME BREATH, because the one thing the
+   AND IT SETS THE SPLIT (§540) IN THE SAME BREATH, because the one thing the
    move must not do is change what anybody sees: the five rows join the
    company's one pillar list, and the setting is what keeps them on their own
    tab, reading Capabilities, exactly as they read now. */
@@ -8914,7 +8946,7 @@ function capFoldIntoTop(){
   /* The records go only once every one of their pillars is in the list. */
   GROUP.capabilities = (GROUP.capabilities || []).filter(function(c){
     return !c || !c.id || !rows.some(function(r){ return r.capId === c.id; }); });
-  /* §537: and the company shows its pillars apart, so the tabs do not move. */
+  /* §540: and the company shows its pillars apart, so the tabs do not move. */
   var st = SMPRules.structureOf(GROUP) ? clone(SMPRules.structureOf(GROUP)) : {};
   st.top = st.top || {}; st.top.plan = st.top.plan || {}; st.top.plan.split = true;
   GROUP.structure = st;
@@ -9005,7 +9037,7 @@ function plansInPillars(target){
   var t = String(target || ""), r = boxRef(t);
   if (r.kind === "cap") return capPlansInPillars(capOfTarget(t));
   if (r.kind === "fn") return fnPlansInPillars(FUNCTIONS[r.key]);
-  /* §539 — AND THE COMPANY ITSELF, WHICH THIS HAS NEVER ANSWERED FOR. The
+  /* §542 — AND THE COMPANY ITSELF, WHICH THIS HAS NEVER ANSWERED FOR. The
      top layer is not in `UNITS`, so `subjUnit("group")` is null and this
      returned FALSE for a company planning in pillars — which sent
      `subjectAsked("group")` down the holder branch to an empty list. The
@@ -9020,7 +9052,7 @@ function plansInPillars(target){
      answers properly. So the move would have taken five red *Still to enter*
      marks off the page and left the directions' silence in their place. It
      is fixed here rather than reported and left, because leaving it is the
-     regression (§539's own requirement) — and the fix gives the directions
+     regression (§542's own requirement) — and the fix gives the directions
      the mark they should always have had. STATED AS A CHANGE in the
      before-and-after list, since it adds marks to five rows that had none.
 
@@ -10073,6 +10105,77 @@ function clearForNewCycle(){
    "1 person" / "2 people". Optional, so every existing call is unchanged —
    and it is here rather than at the call sites because this file already
    records "3 pillarss" as the cost of doing it by hand (§59). */
+/* ── ONE WAY TO WRITE A DATE (§537) ───────────────────────────────────────
+   The usability audit counted six spellings across the product: two spacings
+   of the same options object, "en-GB" hard-coded in two places and the
+   browser's locale everywhere else, and a bare `toLocaleString()`. So how a
+   date read depended on which screen you were standing on — and, wherever the
+   locale was the browser's, on whose machine you were standing at.
+
+   THE FIRST SWEEP FOUND SIX AND THERE WERE NINE. It searched for the
+   browser's formatters and walked past three day dates written out by hand
+   from a `["Jan","Feb",...]` array of their own — the history log's day
+   column, the history log's "set by X on Y", and the Copilot's deliverable
+   dates. Those are the ones this file now also answers; the array is gone
+   from all three. A spelling is a spelling whether a browser made it or a
+   loop did.
+
+   THE SHAPE IS ISLAM'S, and it is one shape: a day reads "5 Mar 26" — day
+   first, no leading zero, the month in three letters, the year in two
+   digits. It is written ONCE, in `DATE_DAY`, so changing it is changing one
+   line. The month picker's "Jul 26" is the same shape with the day taken
+   off, and `dayValue()`'s "30 Sep 2026" is NOT display and is left alone:
+   the platform reads the year back out of that string to do its arithmetic
+   (Islam, asked directly: *"don't touch the stored one"*).
+
+   THE LOCALE IS PINNED, and that is the decision rather than an oversight. A
+   browser set to en-US renders `{day, month:"short"}` as "Sep 30" and a bare
+   time as "09:00 AM" — so one screen would carry the platform's own "30 Sep"
+   beside a "Sep 30" it had just formatted. One of the two has to give, and
+   the authored strings are the ones this product has always shown.
+
+   A DAY, A TIME, AND A STAMP — and the day-with-time is COMPOSED from the
+   first two rather than being a fourth options object. Three formatter calls
+   exist in the whole product and the check counts them.
+
+   A VALUE THAT IS NOT A DATE COMES BACK EMPTY rather than as "Invalid Date" —
+   these are fed from stored strings, and the product's rule is that a value
+   it cannot read is left alone rather than rewritten into nonsense (§96.2). */
+var DATE_LOCALE = "en-GB";
+var DATE_DAY = { day:"numeric", month:"short", year:"2-digit" };
+var DATE_TIME = { hour:"2-digit", minute:"2-digit" };
+function dateOf(x){
+  /* NOTHING IS NOT A DATE, and the browser disagrees: `new Date(null)` is the
+     epoch and `new Date(0)` is a real moment, so a missing value came back as
+     "1 Jan" — the stored-value-rewritten-into-nonsense this is meant to stop,
+     arriving through the one input nobody tests. Caught by the check on its
+     first run, not by reading. */
+  if (x == null || x === "") return null;
+  var d = (x instanceof Date) ? x : new Date(x);
+  return isNaN(d.getTime()) ? null : d;
+}
+function dateDay(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleDateString(DATE_LOCALE, DATE_DAY) : "";
+}
+function timeOf(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleTimeString(DATE_LOCALE, DATE_TIME) : "";
+}
+/* A day with a time on it, for a line that says when something was taken.
+   Found late: the first sweep searched for `toLocaleString()` with empty
+   parens and walked straight past two calls that pass date options to it. */
+function dateAt(x){
+  var d = dateOf(x);
+  return d ? dateDay(d) + ", " + timeOf(d) : "";
+}
+/* The exact moment, on a hover and nowhere else. Deliberately a different
+   register from the day shape: this one is the log's precision, down to the
+   second, and nobody reads it off the screen alongside another date. */
+function dateStamp(x){
+  var d = dateOf(x);
+  return d ? d.toLocaleString(DATE_LOCALE) : "";
+}
 function plural(n, word, many){
   return n + " " + (n === 1 ? word : (many || word + "s"));
 }

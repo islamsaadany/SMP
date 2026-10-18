@@ -6061,5 +6061,115 @@ console.log("\n§520.6 · a capability's owner enters their own capability's fig
   check("§520.6: the office submits it", v.ok, (v.refusals || []).join(" / "));
 })();
 
+/* ── §545: A BOUNDED REPORTER ENTERS A CATEGORY FIGURE ────────────────────
+   §343 gave a pillar a breakdown and the verdict's row index was never told,
+   so every `a_c<n>` reached it as an id the index did not hold — and an id
+   this map misses is refused whoever asks (`!ctx`). Section 40 above missed
+   it because it asks the unit's HEAD, who is unbounded and returns before
+   the per-row filter runs: the fault exists only for the roles narrowed to
+   their own rows, which is the half of §94.2 that was not asserted.
+
+   MEASURED ON EL ABD, 18 October 2026: a direction's owner entered five
+   category figures (Bakery, Barista, Western, Oriental, Ice Cream) beside
+   eight tactic ones and the whole save came back "Your role reports only
+   your own direction — 5 figures is not yours", with all thirteen lines put
+   back. The screen had offered every box, because `reportItems` carries the
+   pillar's Owner onto each cell and `canReportRow` said yes — §42's drift,
+   in the direction that costs somebody their evening.
+
+   BOTH ENDS AND BOTH SHAPES (§94.2, §53.5): the company page where the
+   pillar is a DIRECTION, and a unit's page where it is a plain pillar. A
+   figure on their own, refused on the one beside it, and the TARGET in the
+   same table still refused — or a fix that opened the whole breakdown would
+   pass this. */
+console.log("\n§545 · a bounded reporter enters a category figure (§343)");
+(function () {
+  const bd = function (pid) {
+    return { name: "Categories",
+             cols: [{ id: "c1", name: "Growth", dir: "≥" }],
+             rows: [{ id: pid + "-B1", name: "Bakery",  t_c1: "7%", a_c1: "" },
+                    { id: pid + "-B2", name: "Barista", t_c1: "22%", a_c1: "" }] };
+  };
+
+  /* ── El Abd's shape: the units off, the pillars ARE the directions ── */
+  const B = clone(SEED);
+  B.people = B.people.concat([
+    { key: "t544_own", name: "Testcase Direction Owner", unit: "group" },
+    { key: "t544_cus", name: "Testcase Direction Custodian", unit: "group" }]);
+  B.group[R.STRUCTURE] = { bu: { exists: false }, top: { on: R.STRUCT_COMPONENTS.slice(), temple: true } };
+  B.group.items = [
+    { id: "group-P1", code: "EA01", name: "Direction one", sub: "", kind: "", theme: "",
+      owner: "Testcase Direction Owner", custodian: "Testcase Direction Custodian",
+      measures: [], tactics: [], breakdown: bd("group-P1") },
+    { id: "group-P2", code: "EA02", name: "Direction two", sub: "", kind: "", theme: "",
+      owner: "Somebody Else Entirely",
+      measures: [], tactics: [], breakdown: bd("group-P2") }];
+  const as = function (who, mutate) {
+    const inc = clone(B); mutate(inc); return A.authorize(B, inc, personOf(B, who));
+  };
+  /* The figure is REPORTING before anybody is asked whose it is — a build
+     that classified it as the plan would refuse the owner for the other
+     reason entirely and the assertions below would not say which. */
+  const inc0 = clone(B); inc0.group.items[0].breakdown.rows[0].a_c1 = "4%";
+  const kinds = (A.collect(B, inc0, R.worldOf(B)) || []);
+  check("§545: a category figure on a direction is unitReporting at the group",
+        kinds.length > 0 && kinds.every(function (c) {
+          return c.kind === "unitReporting" && c.target === "group"; }),
+        kinds.map(function (c) { return c.kind + "@" + c.target; }).join(",") || "(nothing classified)");
+
+  const mine  = function (inc) { inc.group.items[0].breakdown.rows[0].a_c1 = "4%"; };
+  const theirs = function (inc) { inc.group.items[1].breakdown.rows[0].a_c1 = "4%"; };
+  let v = as("t544_own", mine);
+  check("§545: a direction's owner enters a category figure on their own direction",
+        v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_cus", mine);
+  check("§545: …so does its custodian", v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_own", function (inc) {
+    inc.group.items[0].breakdown.rows[0].note = "Ramadan shifted the bread mix."; });
+  check("§545: …and the row's note with it", v.ok, (v.refusals || []).join(" / "));
+  /* THE WHOLE SAVE, which is what Islam actually lost: five category figures
+     and a tactic in one post. A fix that took them one at a time would pass
+     the line above and still refuse this. */
+  v = as("t544_own", function (inc) {
+    const p = inc.group.items[0];
+    p.breakdown.rows[0].a_c1 = "4%"; p.breakdown.rows[1].a_c1 = "27%";
+    p.breakdown.rows[0].note = "Ramadan shifted the bread mix."; });
+  check("§545: …and all of them in one save", v.ok, (v.refusals || []).join(" / "));
+  v = as("t544_own", theirs);
+  check("§545 REFUSED: a category figure on the direction beside theirs", !v.ok, "was ALLOWED");
+  v = as("t544_own", function (inc) { inc.group.items[0].breakdown.rows[0].t_c1 = "9%"; });
+  check("§545 REFUSED: …and the TARGET in their own table stays the office's", !v.ok, "was ALLOWED");
+  v = as("smo", theirs);
+  check("§545: the office enters any of them", v.ok, (v.refusals || []).join(" / "));
+
+  /* ── AND A PLAIN PILLAR OWNER IN A UNIT, the same fault one layer down
+     (§147.7). Asserted here rather than left to El Abd's shape: the unit
+     path reaches the per-row filter by a different road (`onlyOwnLines`),
+     and a fix to one that missed the other would pass half this section. */
+  const UK = Object.keys(SEED.units)[0];
+  const P = clone(SEED);
+  P.access.plowner = Object.assign({}, P.access.plowner, { a_unit_own: "edit" });
+  P.people.push({ key: "t544_pill", name: "Pillar Owner 544", active: true });
+  P.units[UK].items[0].owner = "Pillar Owner 544";
+  P.units[UK].items[0].breakdown = bd(P.units[UK].items[0].id);
+  if ((P.units[UK].items || []).length > 1)
+    P.units[UK].items[1].breakdown = bd(P.units[UK].items[1].id);
+  const asP = function (who, mutate) {
+    const inc = clone(P); mutate(inc); return A.authorize(P, inc, personOf(P, who));
+  };
+  check("§545: the fixture's pillar owner derives plowner and nothing bigger",
+        R.personRoleKeys(R.worldOf(P), personOf(P, "t544_pill")).join() === "plowner",
+        R.personRoleKeys(R.worldOf(P), personOf(P, "t544_pill")).join());
+  v = asP("t544_pill", function (inc) { inc.units[UK].items[0].breakdown.rows[0].a_c1 = "4%"; });
+  check("§545: a pillar owner enters a category figure of their own pillar",
+        v.ok, (v.refusals || []).join(" / "));
+  if ((P.units[UK].items || []).length > 1) {
+    v = asP("t544_pill", function (inc) { inc.units[UK].items[1].breakdown.rows[0].a_c1 = "4%"; });
+    check("§545 REFUSED: …and not the pillar beside theirs", !v.ok, "was ALLOWED");
+  }
+  v = asP("t544_pill", function (inc) { inc.units[UK].items[0].breakdown.rows[0].t_c1 = "9%"; });
+  check("§545 REFUSED: …nor its target", !v.ok, "was ALLOWED");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

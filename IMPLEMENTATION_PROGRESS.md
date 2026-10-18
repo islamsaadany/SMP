@@ -10083,3 +10083,26 @@ Two things worth telling you:
 
 - My own check caught me taking the heading off **joined** clients too — every unit in Raya, which has never split anything. The rule is now "drop it when a split leaves one half", not "drop it when there's one section".
 - Breaking the fix on purpose reproduces your exact words — *"This unit has no Pillars yet, so there is nothing to report against"* — so that sentence can't come back without a check going red.
+
+
+## §545 — Amr's category figures were refused (2026-10-18)
+Amr typed 13 lines into his report. The save came back **"5 figures is not yours"** and put all 13 back — the 8 tactic lines he had got right along with them.
+
+The five were the small category table under his pillar: Bakery, Barista, Western, Oriental, Ice Cream.
+
+**What was actually wrong.** The server keeps a list of every row in the plan so it can ask "is this row yours?" — and the category table was never added to it. The server looked for Bakery, could not find it, and a row it cannot find it refuses. Nothing to do with Amr or with directions.
+
+**Why it had never shown up.** The page let him type, because the page knows the pillar is his. Only the server disagreed. And it only bites people who own *part* of the plan — a direction, a pillar. The office and unit heads are never checked row by row, so for them the table always worked, and that is what every earlier check tested.
+
+| | before | after |
+|---|---|---|
+| **Amr** — owns directions | every category figure refused | **enters them** |
+| **A direction's custodian** | the same refusal | **enters them** |
+| **A pillar owner in a unit** | the same refusal | **enters them** |
+| **On somebody else's direction** | refused | **still refused** |
+| **The target in the same table** | the office's | **still the office's** |
+| **The office, a unit head** | worked | **unchanged** |
+
+One more thing worth saying: a save is still all-or-nothing. One line the server won't take puts the whole lot back — that is on purpose, so the screen and the database never hold different pictures. It is why one bad row cost him thirteen.
+
+Breaking the fix on purpose brings your sentence back word for word, so it cannot return quietly.

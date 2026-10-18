@@ -267,10 +267,24 @@ with sync_playwright() as p:
     where0 = ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", [])
     ck("(fixture) the capabilities are a layer of their own, with a side",
        where0 == [False, True], where0)
-    ck("switching the units off leaves them exactly there",
+    # §544.5, REWRITTEN TO THE RULE AS IT STANDS (§218). The first draft of
+    # this asserted that switching the units off left the capabilities
+    # untouched, full stop. That was my too-blunt reading of Islam's *"what's
+    # the relation?"*, and `checks/direction-part.py` showed what it cost:
+    # the line being cut is §465's own, *"planned at company level they are
+    # always the company's"*, which he approved and which §520's whole shape
+    # rests on. It is a DEFAULT now rather than an override, so BOTH halves
+    # are asserted here — the half he objected to is the one the office can
+    # now answer, and until it does, §465 still reads.
+    ck("with nobody having said, switching the units off still carries them (§465's reading)",
        press(pg, ".csetup [data-shlvl=bu]", 350) and press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(2)', 450) and
-       ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", []) == where0,
+       ev(pg, "()=>SMPRules.capAtTop(GROUP)", None) is True,
        ev(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP), navSides().map(s=>s.fold)]"))
+    ck("…but the office's own answer wins over it, which is what the units could not be told before",
+       press(pg, ".csetup [data-shlvl=top]", 350) and press(pg, '.csetup [data-stsec="cap|top"] button:nth-child(2)', 450) and
+       ev(pg, "()=>[SMPRules.capAtTop(GROUP), (SMPRules.structureOf(GROUP).cap||{}).at]", []) == [False, "layer"],
+       ev(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP), (SMPRules.structureOf(GROUP).cap||{}).at]"))
+    ck("…and their side is back on the row with it", ev(pg, "()=>navSides().some(s=>s.fold==='caps')", None) is True)
     ck("…and the office's own switch for them is drawn, whatever the units do",
        press(pg, ".csetup [data-shlvl=top]", 350) and
        ev(pg, "()=>{var b=[...document.querySelectorAll('.csetup [data-stsec=\"cap|top\"] button')]; return b.length===2 && b.every(x=>!x.disabled)}", False))

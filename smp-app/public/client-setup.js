@@ -1821,8 +1821,12 @@ var CLIENTSETUP = (function () {
     var cc = card(topOne + " " + capWord.toLowerCase(), row2);
     cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
     hd(cc, onOff(capTop, function (v) {
+      /* §544.5: BOTH ANSWERS ARE WRITTEN, because absence now means "nobody
+         has said" and falls back to §465's reading (a company that plans its
+         own strategy carries them). Deleting the key would have meant the
+         press could not be made to stick on such a company. */
       var nx = structNow();
-      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
+      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else nx.cap.at = "layer";
       structWrite(nx);
     }, "cap|top"));
     if (capTop) capSettings(cc, true);

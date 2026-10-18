@@ -2642,7 +2642,13 @@ var COPILOT = (function(){
   /* Where capabilities are chosen (spec §4.5): inside the Directions chat
      when Structure keeps them in the company plan, in a section of their own
      when they are a layer. One answer, asked of the shared rule. */
-  function dvCapsHere(){ try { return !!SMPRules.capAtTop(GROUP); } catch (e) { return true; } }
+  /* §544.12: it asks whether the capabilities are part of the COMPANY'S OWN
+     PLAN, and `capAtTop` only answers that while they are still separate
+     records. El Abd's became internal pillars at stage 3b, so `capAtTop` says
+     no for it and the true answer is yes — and this section would have been
+     offered to a client that has had it hidden all along. `capsInTopPlan`
+     is the question itself. */
+  function dvCapsHere(){ try { return !!SMPRules.capsInTopPlan(GROUP, GROUP && GROUP.items); } catch (e) { return true; } }
 
   /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
      The period first, then each Direction and Capability in turn: its

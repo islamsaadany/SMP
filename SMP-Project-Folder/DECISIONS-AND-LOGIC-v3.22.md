@@ -66058,3 +66058,24 @@ So Meridian needs five answers where Wander needed three:
 Meridian is the demo tenant (`key = 'demo'`, named *Meridian Group*), so none of this is a client waiting on it.
 
 **And the backup tables standing in the database**, read while we were there: `org_before_20261018` and `capabilities_before_20261018` (El Abd's, from §542.2), `org_before_wander_development_20261018` and `capabilities_before_wander_development_20261018` (Wander's, from §544.8). Both pairs can be dropped once their pages have been looked at.
+
+### §544.12 — asked before merging, and the answer was no twice
+Islam, with both clients live: *"elabd and wander are active now for the users, this merge to main will not damage anything right?"*
+
+The only honest answer is a measured one, and measuring it found **two regressions that reading the diff had not**.
+
+**First, the measurement itself was worthless and said so.** The first version of the comparison ran the sources in a node vm and reported *"nothing moved"* across ten questions — of which **eight had read nothing on either build**, because `SUBS`, the tab definitions, live in `shell.html` and never reach that vm. Nothing agreeing with nothing is not agreement (§94.2). `scripts/two-builds.py` runs both builds in a real browser and reports a question that reads nothing on both as **UNREAD**, counted apart from the answers it actually compared.
+
+**Then the first regression.** `dvCapsHere()` — which decides whether the Copilot offers a Capabilities section — asks `capAtTop`, and means *"are the capabilities part of the company's own plan?"* Those were the same question until stage 3b and are not any more: El Abd's capabilities are internal pillars now, so `capAtTop` answers no for it, and El Abd was about to be offered a section it has never had. `SMPRules.capsInTopPlan` is the question itself — the records living there, **or** a pillar of the company's marked as a capability — and the Copilot asks that.
+
+**Then the second, which was my description of §544.5 being wrong.** I told him the `if (!buExists(group)) return true` line was a leftover of §447's fold. It was also **§465's own sentence** — *"planned at company level they are always the company's"* — which he approved, and which §520's whole shape rests on: a capability reached as a SECTION of the company's plan. Cutting it outright reversed a decision of his, and `checks/direction-part.py` said so in seven assertions and `direction-seats.py` in one. Neither client was affected; the product was.
+
+**So it is a default now, not an override**, which is what his sentence actually asks for: before, the units' switch answered the question and the office could not say otherwise; now the office's answer wins wherever it has been given, and where it has not, a company that plans its own strategy keeps §465's reading. The units suggest; they no longer decide.
+
+That needed a third state. `at` was `"top"` or absent, so *"their own layer"* and *"nobody has said"* were the same stored thing. The office writes `"layer"` explicitly now, and absence stays absence (§50.6: a client nobody has touched stores nothing).
+
+**What it leaves open, and he should know it.** With nobody having said, switching the units off still carries the capabilities into the company plan. That is §465 reading through, and it is the half of his *"what's the relation?"* that is still true. `checks/shape.py` asserts **both** halves now — the default, and the office overriding it — so whichever way he decides, the check says which rule is in force.
+
+**Measured after the fix, in a browser, against `origin/main`, on all three clients that exist:** El Abd as it now stands, Wander as the move left it, and the demo with its capability records. **Nothing moved** — not the navigation row, the tabs, the Strategy sections, the pillars and their codes, nor either rendered page, and no page errors on either build.
+
+**What this does NOT prove:** the merge itself. `origin/main` is 26 commits ahead; this compares two tips, not their merge. The same three comparisons are what to run again once main is merged in.

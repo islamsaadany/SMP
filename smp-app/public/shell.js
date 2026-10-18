@@ -4236,26 +4236,61 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
      `structure.cap.at = "top"` records the office's answer, stored as an
      absence, so a client that never chose — Raya Trade — keeps them a layer.
 
-     §544.5 — AND THE BUSINESS UNITS HAVE NOTHING TO DO WITH IT. Islam:
-     *"switching units off is not relevant to the capabilities. A capability
-     is something that belongs to the company in general and maybe a business
-     unit if chosen to. What's the relation?"* None. This read `if
-     (!buExists(group)) return true` — switching the units off moved the
-     capabilities into the company plan on its own — and that was never a
-     fact about capabilities: it was a fact about §447's fold, which copied
-     the units' plans onto the company and therefore had to take the
-     capabilities with them. §544.4 removed the fold, so the coupling has
-     nothing left holding it up. The office's answer is the whole of it now.
+     §544.5 — AND THE BUSINESS UNITS DO NOT DECIDE IT. Islam: *"switching
+     units off is not relevant to the capabilities. A capability is something
+     that belongs to the company in general and maybe a business unit if
+     chosen to. What's the relation?"*
 
-     NOTHING MOVES. Measured before it was cut: the only client with the
-     units off is El Abd, whose capabilities became internal pillars at
-     stage 3b — it holds nought capability records, so every reader of this
-     (`topCapsOn`, the navigation's side, the Copilot's) already answered
-     the same either way. Every other client has its units on, where this
-     line never fired. */
+     THE FIRST ANSWER WAS TOO BLUNT AND I SAID IT WRONG TO HIM. This opened
+     `if (!buExists(group)) return true`, and I described that to him as a
+     leftover of §447's fold. It was not only that: it is §465's own
+     sentence, *"planned at company level they are always the company's"*,
+     which he approved. Cutting it outright reversed a decision of his, and
+     `checks/direction-part.py` said so in seven assertions — §520's whole
+     shape is a capability reached as a SECTION of the company's plan, which
+     holds only while this is true.
+
+     SO IT IS A DEFAULT NOW, NOT AN OVERRIDE, and that is the difference his
+     sentence actually asks for. Before, the units' switch answered the
+     question and the office could not say otherwise. Now the office's answer
+     wins wherever it has been given, and where it has not, a company that
+     plans its own strategy keeps §465's reading. The units suggest; they no
+     longer decide.
+
+     WHICH NEEDED A THIRD STATE. `at` was "top" or absent, so "their own
+     layer" and "nobody has said" were the same stored thing and the default
+     could never be overridden. The office writes "layer" explicitly now, and
+     absence means unsaid (§50.6 kept: a client nobody has touched stores
+     nothing and reads exactly as it did). */
   function capAtTop(group) {
-    var s = structureOf(group), c = s && s.cap;
-    return !!(c && c.at === "top");
+    var s = structureOf(group), c = s && s.cap, at = c && c.at;
+    if (at === "top") return true;
+    if (at === "layer") return false;
+    return !buExists(group);
+  }
+  /* §544.12 — DOES THE COMPANY CARRY CAPABILITIES IN ITS OWN PLAN? A
+     different question from `capAtTop`, which is about where the capability
+     RECORDS live, and the two stopped being the same thing at stage 3b: El
+     Abd has no records at all now — its capabilities are internal pillars of
+     the company plan — so `capAtTop` answers no for it and the honest answer
+     is yes.
+
+     THE DISTINCTION WAS HIDING BEHIND §544.5's LINE. `capAtTop` used to
+     return true outright when the units were off, which made it accidentally
+     right for El Abd; cutting that line (correctly — the units have nothing
+     to do with the capabilities) left the Copilot about to offer El Abd a
+     Capabilities section it has not had, because it asks `capAtTop` and means
+     this. Found by measuring the branch against main on El Abd's own state
+     before merging, not by reading the diff.
+
+     Asked of the PLAN: a pillar of the company's marked as a capability, or
+     the records living there. Either way the capabilities are the company's
+     and nothing else should offer to put them somewhere. */
+  function capsInTopPlan(group, topItems) {
+    if (capAtTop(group)) return true;
+    var list = topItems || (group && group.items) || [];
+    for (var i = 0; i < list.length; i++) if (pillarIsCap(list[i])) return true;
+    return false;
   }
   /* §423 — WHAT A LEVEL NOBODY HAS SET CARRIES. Everything, as §404's
      fifth answer says, with ONE exception: a supporting function's own S&W
@@ -5481,7 +5516,7 @@ var GAP_OPTIONAL = { tactic: ["collaborators"],
        the same answer the server does (spec 066 stage 3a). */
     boxRef: boxRef,
     structureOf: structureOf, structLevelOf: structLevelOf,
-    effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, mayReportTop: mayReportTop,
+    effLevel: effLevel, capExists: capExists, capAtTop: capAtTop, capsInTopPlan: capsInTopPlan, mayReportTop: mayReportTop,
     levelComponents: levelComponents, compOn: compOn, templeOn: templeOn,
     midExists: midExists,
     fnExists: fnExists, buExists: buExists,
@@ -61782,7 +61817,13 @@ var COPILOT = (function(){
   /* Where capabilities are chosen (spec §4.5): inside the Directions chat
      when Structure keeps them in the company plan, in a section of their own
      when they are a layer. One answer, asked of the shared rule. */
-  function dvCapsHere(){ try { return !!SMPRules.capAtTop(GROUP); } catch (e) { return true; } }
+  /* §544.12: it asks whether the capabilities are part of the COMPANY'S OWN
+     PLAN, and `capAtTop` only answers that while they are still separate
+     records. El Abd's became internal pillars at stage 3b, so `capAtTop` says
+     no for it and the true answer is yes — and this section would have been
+     offered to a client that has had it hidden all along. `capsInTopPlan`
+     is the question itself. */
+  function dvCapsHere(){ try { return !!SMPRules.capsInTopPlan(GROUP, GROUP && GROUP.items); } catch (e) { return true; } }
 
   /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
      The period first, then each Direction and Capability in turn: its
@@ -64922,8 +64963,12 @@ var CLIENTSETUP = (function () {
     var cc = card(topOne + " " + capWord.toLowerCase(), row2);
     cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
     hd(cc, onOff(capTop, function (v) {
+      /* §544.5: BOTH ANSWERS ARE WRITTEN, because absence now means "nobody
+         has said" and falls back to §465's reading (a company that plans its
+         own strategy carries them). Deleting the key would have meant the
+         press could not be made to stick on such a company. */
       var nx = structNow();
-      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else delete nx.cap.at;
+      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else nx.cap.at = "layer";
       structWrite(nx);
     }, "cap|top"));
     if (capTop) capSettings(cc, true);

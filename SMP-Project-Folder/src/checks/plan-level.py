@@ -105,7 +105,11 @@ with sync_playwright() as p:
     ck("…the navigation loses the capabilities side", safe(pg, CAPSIDE) is False)
     ck("…and the company's Strategy tab gains them", safe(pg, "()=>topCapsOn()===true && topExtrasOn()===true") is True)
     ck("pressing it Off", press(pg, '[data-stsec="cap|top"] button:nth-child(2)'))
-    ck("…removes the place (an absence again)", safe(pg, "()=>!('at' in GROUP.structure.cap)") is True)
+    # §544.5: BOTH ANSWERS ARE WRITTEN now. Absence means "nobody has said"
+    # and falls back to §465's reading, so deleting the key would have left
+    # the press unable to stick on a company that plans its own strategy.
+    ck("…stores the other answer rather than deleting the key",
+       safe(pg, "()=>GROUP.structure.cap.at") == "layer", safe(pg, "()=>GROUP.structure.cap.at"))
     ck("…and the layer and its side come back", safe(pg, CAPSIDE) is True and safe(pg, TAGS, [])[3:4] == ["cap"])
 
     print("3 · the units switched off, on their own card (§544.4)")

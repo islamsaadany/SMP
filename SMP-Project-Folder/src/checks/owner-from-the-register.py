@@ -309,8 +309,17 @@ with sync_playwright() as p:
     ck("...while a stakeholder's kept group says something true of a DEPARTMENT",
        ev(pg, "() => ownerChoices(['Finance Department'], false, 'Not a unit or a person here').map(o => o.group)", [])
          == ["Not a unit or a person here", "People", "Departments"])
-    ev(pg, """() => { const b = [...document.querySelectorAll('button')]
-        .find(x => /^Functions$/.test(x.textContent.trim())); if (b) b.click(); }""")
+    # §544.13: PRESS THE FOLD, NOT A BUTTON WITH THAT WORD ON IT. The demo
+    # used to carry THREE sides (Units · Capabilities · Functions), which the
+    # row draws as three separate buttons — so a button whose whole text is
+    # "Functions" existed to find. Its capabilities are in the company plan
+    # now, so it carries TWO, which the row draws as §41.8's two-sided toggle:
+    # one button holding two spans, whose text is "UnitsFunctions" and whose
+    # spans are not buttons. Nothing about the switch changed; the demo joined
+    # the group every client without capabilities was already in.
+    # `data-fold` names the side to go to on BOTH shapes, which is why the
+    # other checks here press that and this one now does too (§53.5).
+    ev(pg, """() => { const b = document.querySelector('[data-fold="fns"]'); if (b) b.click(); }""")
     pg.wait_for_timeout(900)
     ev(pg, """() => { const b = document.querySelector('[data-u="fn:finance"]'); if (b) b.click(); }""")
     pg.wait_for_timeout(1800)

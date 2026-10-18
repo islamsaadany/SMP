@@ -66530,3 +66530,82 @@ Asked **where** stakeholders are written, the answer was worth having before any
 **CHECK.** The §551 check gained §11 — green here, **9 red on the build before**. It asserts owners keep their wording (the new argument must not have reached them), that what the project held is still picked rather than dropped, and that **picking writes the WHOLE list** to the project — a `<select multiple>` wired through the single-value path saves one name and silently drops the rest, which is the fault §130.1 recorded when the collaborators cell was built.
 
 **NOT DONE, and named (§54.5):** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.
+
+### §544.13c — main merged in, and the three comparisons run again
+
+Islam: *"now merge main and re-run the three comparisons"* — closing §544.12's
+own open item, which said in as many words that comparing two tips is not
+comparing their merge.
+
+`origin/main` was 27 commits ahead and this branch 24. **Four conflicts, and
+none in a source file:** both docs, and the two generated files, which were
+REGENERATED from the merged sources rather than hand-resolved — a built file
+settled by hand is a build nobody can reproduce.
+
+**THE §544 COLLISION IS REAL AND IS NOT RESOLVED HERE.** Stage 4 and main's
+tab-arrow audit were both written as §544 while apart. Both are kept in full
+and neither renamed, because a number is referenced from the code that
+implements it — 169 places across 36 files for stage 4, a comparable spread
+for the audit's — and renumbering is Islam's convention to set, not a side
+effect of a merge. A note at the join says so. **Owed as its own change.**
+
+**THE THREE COMPARISONS, re-run against main's tip (4b88ea1):**
+
+| Client | Result |
+|---|---|
+| **El Abd**, as the stage-3b move left it — 10 company pillars, 5 of them capabilities, no records | **NOTHING MOVED** |
+| **Wander**, as the SQL left it — 4 company pillars, all capabilities, no records | **NOTHING MOVED** |
+| **the demo sample**, which still holds one record | **5 answers moved — all of them the intended change** |
+
+The demo's capability leaves the sidebar and arrives in the company's plan;
+its Strategy tab leads and carries a Capabilities section; `capAtTop` reads
+true. That is §544.13 happening, on the one client that still had somewhere
+to move from. It is the sample compiled into the build, not a client.
+
+**AND THE TWO UNREAD ANSWERS WERE ASKED DIRECTLY**, because the script says
+in its own header that a question reading nothing on both builds is not
+evidence — which is exactly how §544.12's regression got past it once. The
+Copilot's separate-Capabilities-section decision was put to the rule behind
+it on each build: **same for El Abd and Wander, moved for the demo**, as
+designed.
+
+**MEASURING THE MERGE FOUND TWO REDS THAT MEASURING THE TIPS HAD NOT**, and
+both were main's own checks — green on main, red here, which is the only
+signal worth having. Neither was a product fault:
+
+- **`owner-from-the-register`** pressed a button whose whole text is
+  "Functions". The demo used to carry THREE nav sides, drawn as three
+  buttons; its capabilities are in the company plan now, so it carries TWO,
+  drawn as §41.8's two-sided toggle — one button holding two spans. Nothing
+  about the switch changed; the demo joined the group every client without
+  capabilities was already in. It presses `[data-fold="fns"]` now, which
+  names the side on BOTH shapes and is what the other checks here press
+  (§53.5).
+- **`action-keys`** appended its fixture pen at the end of the body and
+  relied on the landing page having none of its own — true while the demo
+  opened on Performance. It opens on Strategy now, which HAS a pen, so Alt+E
+  pressed that one. The fixture goes FIRST in the DOM: the precondition was
+  always "the fixture is the pen the key finds", and it is made rather than
+  left to luck (§255).
+
+Both fixes were then run against **main's own build** and pass there too — a
+fix that only works on one side of a merge is not a fix.
+
+**One more thing the merge moved.** `test-capability-fold`'s §1b compares two
+builds, and main changed something for EVERY owner on every page (§551's
+"not in the register" flag), which a cross-build comparison cannot tell apart
+from a move this branch caused — it went red naming Mohamed Rizk. The pinned
+baseline moves from `b773ac3` to `4b88ea1`, and §1's Reporting exception is
+read out: §542 is on both sides now, so **every page is word for word what it
+was, with nothing excluded** — a stronger claim than the one it replaces, and
+the fill bar is asserted present in this build instead.
+
+**Proof after the merge:** `capability-entry` 52/0, `capability-first`,
+`-seats`, `-remove`, `-pillar-edit`, `-report-column` 16/0, `plan-level`,
+`shape`, `structure`, `top-plan`, `client-setup`, `direction-part`,
+`direction-seats` all good; main's `tab-arrows`, `go-to-a-place`,
+`keyboard-sheet`, `filters-remembered`, `no-grey-descriptions`,
+`owner-from-the-register`, `action-keys` all good;
+`test-capability-fold` 65/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
+Proved able to fail: `pillarIsCap` forced false reds it 19 ways, and
+breaking `renderGroupFoundation` reds §1's rewritten assertion by name.

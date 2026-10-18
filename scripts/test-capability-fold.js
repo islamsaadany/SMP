@@ -65,7 +65,20 @@ const ROOT = path.join(__dirname, "..");
 const SRC = path.join(ROOT, "SMP-Project-Folder", "src");
 const args = process.argv.slice(2);
 const baseArg = args.indexOf("--base");
-const BASE = baseArg >= 0 ? args[baseArg + 1] : "b773ac3";
+/* THE BASELINE IS PINNED, AND MOVING IT IS A DECISION (§218). It was
+   `b773ac3` — the build before stage 3b — so §1b could ask "did stage 3b move
+   a joined unit?" across the two. It is `4b88ea1`, main's tip at the §544.13
+   merge, because main has since changed something for EVERY owner on every
+   page (§551's "not in the register" flag), and a cross-build comparison
+   cannot tell that apart from a move this branch caused: §1b went red naming
+   Mohamed Rizk, which is main's deliberate change showing through a question
+   about capabilities.
+   WHY NOT `origin/main`: once this branch merges, that name IS this work and
+   the comparison would be against itself — green for ever, proving nothing
+   (§113.8). A pinned sha goes stale loudly; a moving one goes stale in
+   silence. Move it forward deliberately, as here, when unrelated drift makes
+   §1b say something it does not mean. */
+const BASE = baseArg >= 0 ? args[baseArg + 1] : "4b88ea1";
 
 let failed = 0, passed = 0;
 function ok(cond, what, detail) {
@@ -181,19 +194,23 @@ console.log("1 · §542's code, over a client that has not moved, changes nothin
     try { a = WORDS(now(PAGES[name])); } catch (e) { a = "threw: " + e.message; }
     if (a !== b) moves.push([name, b.length, a.length]);
   });
-  /* THE REPORTING PAGE IS THE ONE EXCEPTION AND IT IS NAMED (§218, §542):
-     `plansInPillars("group")` answered false for every company in the
-     product, so the company's Reporting rail could not say which row still
-     owed a figure. Fixed, which ADDS the fill bar and its per-row marks to a
-     page that had neither. Asserted as a move rather than excused. */
-  const rep = moves.filter(function (m) { return m[0] === "Reporting"; });
-  ok(rep.length === 1 && rep[0][2] > rep[0][1],
-     "the Reporting page gains the fill bar §542 gave every other box", rep);
-  ok(WORDS(was(`renderReport(topAsUnit())`)).indexOf("to finish") < 0 &&
-     WORDS(now(`renderReport(topAsUnit())`)).indexOf("to finish") >= 0,
-     "and that is specifically the 'N to finish' bar, absent before and present after");
-  const rest = moves.filter(function (m) { return m[0] !== "Reporting"; });
-  ok(rest.length === 0, "and every other page is word for word what it was", rest);
+  /* THE REPORTING PAGE WAS THE ONE EXCEPTION AND IT IS NOT ANY MORE, which
+     the moved baseline makes true and this is rewritten to rather than
+     excused (§218). §542 fixed `plansInPillars("group")`, which answered
+     false for every company in the product, and so ADDED the fill bar and
+     its per-row marks to a page that had neither — a real move, named here
+     rather than filtered out. §542 is on main now, so it is on BOTH sides of
+     the comparison and there is no move left to name: every page, Reporting
+     among them, is word for word what it was.
+     THE CLAIM GETS STRONGER, NOT LOOSER — nothing is excluded now. */
+  ok(moves.length === 0,
+     "every page, the Reporting one included, is word for word what it was", moves);
+  /* AND THE BAR IS STILL THERE, asked of THIS build rather than of a
+     difference between two. §542's gain is shipped, so "it arrived" is no
+     longer a question a cross-build delta can answer; "it is there" is, and
+     it is the half that would notice the bar being lost again (§94.2). */
+  ok(WORDS(now(`renderReport(topAsUnit())`)).indexOf("to finish") >= 0,
+     "and the company's Reporting page still carries the 'N to finish' bar (§542)");
   /* BOTH ENDS (§94.2): pages that rendered nothing would agree perfectly. */
   const size = Object.keys(PAGES).reduce(function (n, k) { return n + WORDS(now(PAGES[k])).length; }, 0);
   ok(size > 3000, "and those pages really drew something — " + size + " words of it", size);

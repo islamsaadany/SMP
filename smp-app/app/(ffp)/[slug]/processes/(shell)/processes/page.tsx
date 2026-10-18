@@ -1,3 +1,4 @@
+import { isOverdueForReview, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
 import { registerReady } from "@/ffp/lib/register-sync";
 import Link from "next/link";
 import { prisma } from "@/ffp/lib/db/client";
@@ -138,6 +139,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
               <th className="px-4 py-2">Process</th>
               <th className="px-4 py-2">Category</th>
               <th className="px-4 py-2">Steps</th>
+              <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">RACI</th>
               <th className="px-4 py-2 text-end">
                 <span className="sr-only">Actions</span>
@@ -196,6 +198,13 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
                   )}
                 </td>
                 <td className="px-4 py-2 text-slate-500">{p._count.steps}</td>
+                <td className="px-4 py-2 text-xs font-semibold">
+                  {isOverdueForReview(p.lifecycleStatus, p.nextReviewDue, new Date()) ? (
+                    <span className="text-rose-700">Review overdue</span>
+                  ) : (
+                    <span className="text-slate-600">{STATUS_LABEL[p.lifecycleStatus]}</span>
+                  )}
+                </td>
                 <td className="px-4 py-2">
                   {p.raciMatrixStatus ? (
                     <span
@@ -248,7 +257,7 @@ export default async function ProcessesPage(props: PageProps<"/[slug]/processes/
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-slate-400">
+                <td colSpan={7} className="px-4 py-6 text-center text-slate-400">
                   {q ? `No processes match "${q}".` : "No processes yet — create one below."}
                 </td>
               </tr>

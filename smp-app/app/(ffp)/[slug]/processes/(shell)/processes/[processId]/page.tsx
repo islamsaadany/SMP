@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/ffp/lib/db/client";
 import type { Revision } from "@/ffp/lib/domain/sop";
 import { ProcessTabs, parseTab } from "./process-tabs";
+import { auth } from "@/ffp/lib/auth/config";
+import { daysToReview, isOverdueForReview, mayApprove, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
+import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 
 type Kpi = { metric: string; target: string; frequency: string };
@@ -47,7 +50,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
   });
   if (!process || process.workspaceId !== workspaceId) notFound();
 
-  const [controls, ncs, stepList] = await Promise.all([
+  const [controls, ncs, stepList, registerPeople, versions, session] = await Promise.all([
     prisma.processControl.findMany({
       where: { processId },
       include: { step: true },
@@ -55,7 +58,27 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     }),
     prisma.processNonConformance.findMany({ where: { processId }, orderBy: { raisedAt: "desc" } }),
     prisma.processStep.findMany({ where: { processId }, orderBy: { order: "asc" } }),
+    prisma.person.findMany({
+      where: { workspaceId, archivedAt: null },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, email: true, personRoles: { select: { role: { select: { name: true, archivedAt: true } } } } },
+    }),
+    prisma.processVersion.findMany({ where: { processId }, orderBy: { number: "desc" } }),
+    auth(),
   ]);
+  const people = registerPeople.map((x) => {
+    const roles = x.personRoles.filter((r) => !r.role.archivedAt).map((r) => r.role.name);
+    return { id: x.id, name: x.name, email: x.email, role: roles.length ? roles.join(", ") : null };
+  });
+  const approverRow = people.find((x) => x.id === process.approverPersonId);
+  const me = (session?.user.email ?? "").trim().toLowerCase();
+  const canApprove =
+    process.lifecycleStatus === "IN_REVIEW" &&
+    mayApprove({ actorEmail: me, approverEmail: approverRow?.email, submitterEmail: process.submittedByEmail }).ok;
+  const canReturnFromReview =
+    !!me && (me === (approverRow?.email ?? "").trim().toLowerCase() || me === (process.submittedByEmail ?? "").trim().toLowerCase());
+  const today = new Date();
+  const overdue = isOverdueForReview(process.lifecycleStatus, process.nextReviewDue, today);
   const covered = new Set(controls.filter((c) => c.control && c.stepId).map((c) => c.stepId));
   const stepsNoControl = stepList.filter((s) => !covered.has(s.id));
 
@@ -75,6 +98,13 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
           <h1 className="text-xl font-semibold text-slate-900">{process.name}</h1>
           <span className="rounded-md bg-indigo-50 px-2 py-0.5 font-mono text-xs font-bold text-indigo-700">
             {process.code}
+          </span>
+          <span
+            className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
+              overdue ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-700"
+            }`}
+          >
+            {overdue ? "Review overdue" : STATUS_LABEL[process.lifecycleStatus]}
           </span>
         </div>
         <p className="mt-1 mb-4 text-sm text-slate-500">
@@ -136,6 +166,50 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
 
         {tab === "lifecycle" && (
           <>
+            <LifecyclePanel
+              workspaceId={workspaceId}
+              processId={processId}
+              status={process.lifecycleStatus}
+              people={people}
+              approver={process.approverName ? { name: process.approverName, role: process.approverRole } : null}
+              reviewers={(process.reviewers as unknown as { name: string; role: string | null }[]) ?? []}
+              changeNote={process.pendingChangeNote}
+              submittedBy={process.submittedByName}
+              returnReason={process.returnReason}
+              reviewIntervalMonths={process.reviewIntervalMonths}
+              canApprove={canApprove}
+              canReturnFromReview={canReturnFromReview}
+            />
+            {process.lifecycleStatus === "PUBLISHED" && process.nextReviewDue && (
+              <Card title="Next review">
+                <p className={`text-sm ${overdue ? "font-semibold text-rose-700" : "text-slate-700"}`}>
+                  {String(process.nextReviewDue.toISOString()).slice(0, 10)} ·{" "}
+                  {overdue
+                    ? `${-daysToReview(process.nextReviewDue, today)} day(s) overdue`
+                    : `in ${daysToReview(process.nextReviewDue, today)} day(s)`}
+                </p>
+              </Card>
+            )}
+            <Card title="Approved versions">
+              {versions.length === 0 ? (
+                <p className="text-sm text-slate-500">Nothing has been approved yet.</p>
+              ) : (
+                <ol className="space-y-2 text-sm">
+                  {versions.map((v) => (
+                    <li key={v.id} className="border-t border-slate-100 pt-2 first:border-0 first:pt-0">
+                      <span className="font-mono font-semibold">v{v.number}</span> · approved{" "}
+                      {v.approvedAt.toISOString().slice(0, 10)} by {v.approvedBy}
+                      {v.approvedRole ? ` (${v.approvedRole})` : ""}
+                      {v.publishedAt ? ` · published ${v.publishedAt.toISOString().slice(0, 10)}` : " · not published"}
+                      <div className="text-slate-600">
+                        {v.changeNote || "No note"}
+                        {v.submittedBy ? ` — sent by ${v.submittedBy}` : ""}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </Card>
             <Card title="Document control">
               <dl className="grid grid-cols-2 gap-2 text-sm">
                 <dt className="text-slate-500">Version</dt>

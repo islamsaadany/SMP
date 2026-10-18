@@ -335,6 +335,30 @@ model Process {
   sopApprovedBy    String?
   sopRevisions     Json     @default("[]")
 
+  /// Controlled lifecycle. Existing processes with an "approved by" were
+  /// backfilled as PUBLISHED; the rest start as DRAFT. The approver and the
+  /// reviewers are chosen from the People register, and their name and role
+  /// are written down here as they stood at the time — a later rename or
+  /// role change must not rewrite who approved what.
+  lifecycleStatus      ProcessLifecycleStatus @default(DRAFT)
+  reviewIntervalMonths Int                    @default(12)
+  nextReviewDue        DateTime?
+  approverPersonId     String?
+  approverName         String?
+  approverRole         String?
+  /// { personId, name, role }[]
+  reviewers            Json                   @default("[]")
+  submittedByName      String?
+  submittedByEmail     String?
+  submittedAt          DateTime?
+  /// Why the last review sent it back, shown until the next submission.
+  returnReason         String?
+  /// What the sender said changed; becomes the version's note on approval.
+  pendingChangeNote    String?
+  publishedAt          DateTime?
+  retiredAt            DateTime?
+  versions             ProcessVersion[]
+
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   parentProcess  Process?         @relation("ProcessHierarchy", fields: [parentProcessId], references: [id])
@@ -553,6 +577,33 @@ model StepConnection {
 /// predecessor of the `to` step, which lives in another process. Kept apart
 /// from StepConnection on purpose — that table is same-process only and the
 /// layout, arrange, readiness, print and export code all rely on it.
+enum ProcessLifecycleStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  PUBLISHED
+  RETIRED
+}
+
+/// One approved version of a process: who changed what, who approved it, and
+/// in which role. Written when a version is approved, never edited after.
+model ProcessVersion {
+  id            String    @id @default(uuid())
+  processId     String
+  number        Int
+  changeNote    String
+  submittedBy   String?
+  approvedBy    String
+  approvedRole  String?
+  approvedAt    DateTime  @default(now())
+  publishedAt   DateTime?
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@unique([processId, number])
+  @@map("process_versions")
+}
+
 // A risk and the control that answers it, on a process (optionally on one step).
 model ProcessControl {
   id             String    @id @default(uuid())

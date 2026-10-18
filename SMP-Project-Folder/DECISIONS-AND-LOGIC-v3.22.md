@@ -65301,3 +65301,10 @@ The product greys a control out in two ways. One leaves it alive — `aria-disab
 **AND IT PUTS A QUESTION ON §329's OWN REASONING**, which is left as a question rather than answered here: that section's argument is *"a change to a frozen source that stops there leaves the new stack serving the old bytes"*, and the build script has made that untrue since whenever it gained those four lines. The check still earns its place — a tracked file that disagrees with its generator is a file somebody will read as the truth — but its stated reason is not the one it now holds. **Not rewritten, because §329 is not this section's to rewrite** (rule 1b).
 
 **THE LIVE READ WAS MADE, which §526 and §528 both had to report they could not.** `https://smp-orpin-tau.vercel.app/` answered 200 from this container. The witnesses before this merge's deployment: shell.js **4,745,497**, platform.css **799,429**, sw.js **4,192** with release stamp **7cc8f01e07f38c24**. After it they should read **4,749,817**, **800,775**, 4,192 and a moved stamp (§397) — recorded so the next reader can tell a deployment that landed from one that did not.
+
+## §539 — Processes lifecycle: decisions (2026-10-18)
+1. **Governance sits in the side rail**, not as a top tab. The Processes side rail already has a "Governance" page (policies, risks, assessments); the new cross-process views (review calendar, compliance coverage, non-conformances, acknowledgements, audit trail) become sections of it.
+2. **The reader view opens to client staff, read-only**: approved or published versions only, with an Acknowledge button; no drafts, risks or quality data. Built after the lifecycle.
+3. **Existing processes**: those that already name an approver start as Published (with a baseline version 1); the rest start as Draft.
+4. **Review interval**: 12 months from publishing by default, changeable per process.
+5. **Approver**: chosen from the People register, must have an email and a role there; the approval records name and role as they stood. The approver cannot be the person who sends it for review.

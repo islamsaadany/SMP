@@ -9671,3 +9671,19 @@ could not reach the live site, because it could not at the last two merges. I
 wrote that without trying it. It worked on the first attempt, so that claim is
 withdrawn — it was not true today, and I should have found that out by running
 the check rather than by remembering.
+
+## §539 — Processes: the controlled lifecycle (2026-10-18)
+Built on branch `claude/vigilant-bohr-snqji9`. Not merged to main. The migration is written and tested on a scratch database, not applied anywhere real.
+
+Every process now has a status: Draft → In review → Approved → Published → Retired, on its Lifecycle tab and as a badge on the process page and the list.
+
+- **Sending for review**: pick the approver from the People register (name and role are written down as they stood), optional reviewers, and say what changed. An approver with no email or no role on the register cannot be picked, and you cannot name yourself.
+- **Approving**: only the named approver, and never the person who sent it. Approval creates a numbered version recording who changed what, who approved it and in which role.
+- **Publishing**: makes the version official, sets the effective date, starts the review clock (12 months by default, changeable per process) and writes the version into the SOP's own document-control fields and revision list, so the SOP and the Export Report show what was approved.
+- **Editing something in force** (Approved or Published) sends it back to Draft. Content edits on the process, its scope, KPIs, SOP fields and its steps do this.
+- **Overdue**: only a Published process can be overdue; it is flagged on its page and in the list.
+- **Existing data**: a process that already named who approved it becomes Published with a baseline version 1 and a review a year out; every other process starts as Draft.
+
+Checked: the rules (26 checks, proved able to fail by breaking one), the typecheck (clean except the `lib/prisma.ts` error that is also present before this change), and the migration with its backfill on a scratch Postgres 16. **Not checked**: the screens have not been opened in a browser and the actions have not been run against a signed-in session.
+
+Not yet built: notifications, the staff reader view and acknowledgements, the Governance review calendar.

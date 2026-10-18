@@ -375,6 +375,47 @@ function mintPlanIds(u, rows){
    prefix to read, because the file carries neither. What remains is whether
    each row can be placed \u2014 a measure whose pillar was never typed \u2014 and
    whether the few coded values are ones the platform knows. */
+/* ── AN OWNER FROM THE WORKBOOK IS CHECKED AGAINST THE REGISTER (§551) ──
+   The screens have picked their owners from the register since §130.7. The
+   WORKBOOK never did: five sheets across the two plan files carry an Owner
+   column, the file holds 22 validations and not one of them was Owner, so
+   anybody could type any name into a cell and import it. That is the widest
+   way a name matching no real person gets into a plan, and the likeliest
+   origin of El Abd's *"Tamer Abdelhamid"* against the register's *"Tamer
+   Abdelhameed"* (§542.6).
+
+   REFUSED, NOT FLAGGED, AND THAT IS ISLAM'S CHOICE FOR THIS ONE SURFACE.
+   Shown both shapes, he took the dropdown with a refusal on import: *"On
+   import: a name not on the list is refused, and the message names the row
+   and the name."* The screens flag instead, and the two are not in conflict —
+   on a screen the name is already IN the plan and the only thing left is to
+   see it; at an import it is not in yet, and the cheapest moment to stop a
+   wrong name is before it lands.
+
+   IT ASKS `ownerKnownSet`, THE SAME QUESTION THE DROPDOWN AND THE FLAG ASK
+   (§53.5), so a name cannot be refused here and offered there.
+
+   THE WORDS ARE `validatePlan`'s OWN, not a new kind of complaint: a theme
+   that is not one of the themes already reads 'theme "X" is not one of A, B'
+   at 'row N — name'. This is that sentence for a person.
+
+   NOT COVERED, and named rather than left as an absence (§54.5): the
+   Collaborators columns. They are picked from this same register on screen
+   and are still free text in the workbook, so the identical hole is open one
+   column over. It is not fixed here because owners are what was asked for,
+   and widening a change past its ask is how a fix becomes unreviewable. */
+function ownerProblems(rows){
+  if (typeof ownerStrays !== "function" || typeof ownerKnownSet !== "function") return [];
+  var known = ownerKnownSet(), out = [];
+  (rows || []).forEach(function(r, n){
+    ownerStrays(r && r.owner, known).forEach(function(bad){
+      out.push({ at:"row " + (n + 2) + (r.name ? " \u2014 " + r.name : ""),
+        msg:'owner "' + bad + '" is not in the register \u2014 pick a name from the ' +
+            'Owner dropdown, or add them to the register first' });
+    });
+  });
+  return out;
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -418,6 +459,7 @@ function validatePlan(u, rows){
     if ((r.type === "MEASURE" || r.type === "NORTHSTAR") && !r.value)
       notices.push({ at:at, msg:"no target \u2014 recorded, not scored" });
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 
@@ -1301,6 +1343,7 @@ function validateCapPlan(c, rows){
           " — saved as entered; either the timeline moves or the overrun stands" });
     }
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 

@@ -4225,19 +4225,78 @@ function ownerDepts(){
   mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
   return a.list;
 }
+/* ── AN OWNER IS PICKED FROM THE REGISTER, NEVER TYPED (§551) ──────────
+   Islam, after the El Abd move turned up a direction owned by *"Tamer
+   Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner
+   should be selected from a drop down, generally all the owners shouldn't be
+   written by hand and only be selected from a list from the registr in a
+   drop down serachable list."*
+
+   THE RULE IS §177's, ONE FIELD OVER. A due date is picked and never typed
+   because a typed date is precision the product cannot use; a typed owner is
+   worse — it is a person who may not exist, and nothing downstream can tell.
+
+   THE SCREENS ALREADY PICKED. Measured before anything was built: all four
+   owner cells on the plan surfaces go through `gapCell` and are fed by
+   `ownerChoices`, which is this register, and past five options `searchsel`
+   makes it the searchable list Islam describes (§536). What was NOT picked
+   was the Copilot's draft table (a bare text box, §551) and the five Owner
+   columns of the workbook (22 validations in it and not one of them Owner).
+
+   AND THE QUIET PART, WHICH IS HOW "Tamer Abdelhamid" SURVIVED. An unknown
+   value was offered back in the dropdown under the heading "Already on this
+   plan" — a label that reads like a fact about the plan rather than a warning
+   about the name, so it looked like a legitimate choice to everyone who ever
+   opened that cell. It is the same group, said truthfully.
+
+   `ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5): the
+   dropdown's grouping, the read-mode flag and the workbook's import refusal
+   all ask it, so a name cannot be a stray in one and fine in another. It is
+   `ownerAdder`'s own set, so trimming and case are settled once.
+
+   NOT MEMOISED, which is deliberate and matches the house: `displayNames()`
+   is recomputed on every call throughout this file, and `ownerChoices` was
+   already paying this exact cost once per cell in the pen. Read mode now
+   pays it too. If a plan is ever large enough for that to show, the cache
+   belongs around `displayNames` for every caller, not here for one. */
+function ownerKnownSet(){
+  var a = ownerAdder();
+  ownerPeople().forEach(function(x){ a.add(x.name); });
+  ownerDepts().forEach(a.add);
+  return a;
+}
+/* The stray values among whatever the field holds — a string or a list.
+   Empty is never a stray: a blank owner is a GAP, which the fill walk and
+   the word "Missing" already handle, and calling it a stray would put two
+   different complaints on one cell. */
+function ownerStrays(v, known){
+  known = known || ownerKnownSet();
+  return (Array.isArray(v) ? v : [v]).map(function(x){
+    return String(x == null ? "" : x).trim();
+  }).filter(function(x){ return x && !known.has(x); });
+}
+/* ── AND IT IS FLAGGED WHERE IT SHOWS, NOT DELETED (Islam's choice) ────
+   Shown the three answers as drawings — flag it, refuse to save it, or leave
+   it — he picked flagging: *"Flag them where they show."* The name STAYS on
+   the row, because a name somebody typed is the only clue to who was meant,
+   and deleting it to satisfy a rule would destroy the thing that lets it be
+   corrected (§96.2's reasoning about an unparseable date, exactly). */
+function ownerShown(v){
+  var txt = esc(String(v == null ? "" : v));
+  return ownerStrays(v).length
+    ? txt + ' <span class="ownerstray hasnote" data-tip="This name is not in the register, so it matches no' +
+      ' real person. Pick somebody from the list, or add them to the register.">not in the register</span>'
+    : txt;
+}
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
 function ownerChoices(current, blank){
   var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
+  var known = ownerKnownSet();
   var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
+  ownerStrays(current, known).forEach(kept.add);
+  var out = blank ? [{ v:"", label:"—" }] : [];
+  if (kept.list.length) out.push({ group:"Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -8282,6 +8341,7 @@ function projFrontMatter(p, ed){
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
         ctx: { project: p },
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8419,6 +8479,7 @@ function projPlanBody(p, subject){
          both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8574,6 +8635,7 @@ function fnObjPlanBody(fk, ed){
         (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
       '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
           ctx: { row: a },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", a.owner == null ? "" : a.owner,
               ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
@@ -9919,6 +9981,7 @@ function unitPlanBody(it, u, railed, bare){
       '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);

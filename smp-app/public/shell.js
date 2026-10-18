@@ -20996,6 +20996,47 @@ function mintPlanIds(u, rows){
    prefix to read, because the file carries neither. What remains is whether
    each row can be placed \u2014 a measure whose pillar was never typed \u2014 and
    whether the few coded values are ones the platform knows. */
+/* ── AN OWNER FROM THE WORKBOOK IS CHECKED AGAINST THE REGISTER (§551) ──
+   The screens have picked their owners from the register since §130.7. The
+   WORKBOOK never did: five sheets across the two plan files carry an Owner
+   column, the file holds 22 validations and not one of them was Owner, so
+   anybody could type any name into a cell and import it. That is the widest
+   way a name matching no real person gets into a plan, and the likeliest
+   origin of El Abd's *"Tamer Abdelhamid"* against the register's *"Tamer
+   Abdelhameed"* (§542.6).
+
+   REFUSED, NOT FLAGGED, AND THAT IS ISLAM'S CHOICE FOR THIS ONE SURFACE.
+   Shown both shapes, he took the dropdown with a refusal on import: *"On
+   import: a name not on the list is refused, and the message names the row
+   and the name."* The screens flag instead, and the two are not in conflict —
+   on a screen the name is already IN the plan and the only thing left is to
+   see it; at an import it is not in yet, and the cheapest moment to stop a
+   wrong name is before it lands.
+
+   IT ASKS `ownerKnownSet`, THE SAME QUESTION THE DROPDOWN AND THE FLAG ASK
+   (§53.5), so a name cannot be refused here and offered there.
+
+   THE WORDS ARE `validatePlan`'s OWN, not a new kind of complaint: a theme
+   that is not one of the themes already reads 'theme "X" is not one of A, B'
+   at 'row N — name'. This is that sentence for a person.
+
+   NOT COVERED, and named rather than left as an absence (§54.5): the
+   Collaborators columns. They are picked from this same register on screen
+   and are still free text in the workbook, so the identical hole is open one
+   column over. It is not fixed here because owners are what was asked for,
+   and widening a change past its ask is how a fix becomes unreviewable. */
+function ownerProblems(rows){
+  if (typeof ownerStrays !== "function" || typeof ownerKnownSet !== "function") return [];
+  var known = ownerKnownSet(), out = [];
+  (rows || []).forEach(function(r, n){
+    ownerStrays(r && r.owner, known).forEach(function(bad){
+      out.push({ at:"row " + (n + 2) + (r.name ? " \u2014 " + r.name : ""),
+        msg:'owner "' + bad + '" is not in the register \u2014 pick a name from the ' +
+            'Owner dropdown, or add them to the register first' });
+    });
+  });
+  return out;
+}
 function validatePlan(u, rows){
   var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
   var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
@@ -21039,6 +21080,7 @@ function validatePlan(u, rows){
     if ((r.type === "MEASURE" || r.type === "NORTHSTAR") && !r.value)
       notices.push({ at:at, msg:"no target \u2014 recorded, not scored" });
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 
@@ -21922,6 +21964,7 @@ function validateCapPlan(c, rows){
           " — saved as entered; either the timeline moves or the overrun stands" });
     }
   });
+  problems = problems.concat(ownerProblems(rows));
   return { problems:problems, notices:notices };
 }
 
@@ -22580,6 +22623,48 @@ function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
 function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
+/* ── THE REGISTER, FOR THE WORKBOOK'S FIVE OWNER COLUMNS (§551) ────────
+   Islam: *"all the owners shouldn't be written by hand and only be selected
+   from a list from the registr in a drop down serachable list."* The screens
+   have done that since §130.7. This file never did: five sheets across the
+   two plan workbooks carry an Owner column — Pillars and Tactics in a unit's
+   file, Projects, Actions and Milestones in a function's — and of the 22
+   validations in them not one was Owner. A spreadsheet is the widest door
+   into a plan, so it was the widest way a name matching no real person got
+   in, and the likeliest origin of El Abd's "Tamer Abdelhamid" (§542.6).
+
+   `from` AND NOT `list`, FOR THE REASON THE WRITER ALREADY REFUSES: 33 names
+   is far past Excel's 255-character inline limit, where a dropdown is
+   silently ignored. That is the fault §67.5 recorded of the Official BU list,
+   so this takes the route that file took.
+
+   AND NO SHEET AND NO DROPDOWN WHEN THE REGISTER IS EMPTY, which is §380's
+   trap exactly: an EMPTY list still applies, and with `showErrorMessage` on
+   it refuses every value there is — the column could be neither picked from
+   nor typed into, and a template nobody can fill in is worse than one that is
+   merely unguarded. The writer cannot catch this for us, and says so: it
+   leaves a `from` range alone because "whether that sheet has anything on it
+   is not knowable from here." Here it IS knowable, so it is asked.
+
+   THE SHEET IS NEVER DROPPED, which matters because `capPlanWorkbook` drops
+   whole sheets per format: five validation ranges point at Owners, and §65's
+   rule is that a range on a missing sheet is worse than none. It is not in
+   any `drop` list and must not be put in one. */
+function ownerListNames(){
+  return (typeof ownerKnownSet === "function") ? ownerKnownSet().list : [];
+}
+function OWNERS_RANGE(n){ return "Owners!$A$2:$A$" + (n + 1); }
+function ownersSheet(names){
+  return names.length ? [{ name:"Owners", widths:[34],
+    head:["Every name a plan may be owned by"],
+    rows:names.map(function(n){ return [n]; }) }] : [];
+}
+function ownerDV(range, names){
+  return names.length ? [{ range:range, from:OWNERS_RANGE(names.length),
+    error:"Choose a name from the Owners sheet. If somebody is missing, add them " +
+          "to the register first \u2014 a name typed here is refused at the upload." }] : [];
+}
+
 /* ── The Read me sheet ────────────────────────────────────────────────────
    The template is GENERIC: the same file whichever unit is being planned, and
    nothing in it names a unit except one cell. B2 is a dropdown of the tenant's
@@ -22707,6 +22792,7 @@ function planSubjectNames(){
 
 function planWorkbook(u){
   var themes = themeNames();
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var units = unitSuggestions();
   var picked = u ? u.name : "";
 
@@ -22846,7 +22932,7 @@ function planWorkbook(u){
         .concat(yr ? ["Years"] : []),
       validations:[{ range:"B2:B60", list:KINDS },
                    { range:"C2:C60", list:themes,
-                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
+                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }].concat(ownerDV("D2:D60", owners)),
       rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]
         .concat(ov ? [p.ovObj || "", p.ovWhy || "", p.ovRisk || ""] : [])
         .concat(yr ? [SMPRules.pillarYears(p).join(", ")] : []); }) };
@@ -22903,7 +22989,7 @@ function planWorkbook(u){
                    { range:"E2:E400", list:["\u2265", "\u2264"], soft:true },
                    { range:"G2:G400", list:COMPILES, soft:true },
                    { range:"J2:M400", list:YESNO },
-                   { range:"N2:N400", list:YESNO, soft:true }],
+                   { range:"N2:N400", list:YESNO, soft:true }].concat(ownerDV("H2:H400", owners)),
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "",
@@ -22985,7 +23071,7 @@ function planWorkbook(u){
         });
         return acc;
       }, []) }];
-  })());
+  })()).concat(ownersSheet(owners));
 }
 
 /* Reporting is unchanged: it is per unit, it amends rows that already exist,
@@ -23701,6 +23787,7 @@ function projectSubjectNames(fmt){
    the file does not carry is a column the plan LOSES (§22). */
 function capPlanWorkbook(c, opts){
   var o = opts || {};
+  var owners = ownerListNames();            /* §551: the Owner columns' list */
   var names = projectSubjectNames(o.fmt);
   var units = unitSuggestions();
   var sheets = [
@@ -23752,7 +23839,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "Repeats"],
       validations:[{ range:"E2:E100", list:TIMELINES },
                    { range:"H2:H100", list:["No"].concat(REPEAT_MONTHS.map(repeatLabel)),
-                     soft:true }],
+                     soft:true }].concat(ownerDV("C2:C100", owners)),
       rows:(c.projects || []).map(function(p){
         return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
                 p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "",
@@ -23810,7 +23897,7 @@ function capPlanWorkbook(c, opts){
        (§22). */
     { name:"Actions", widths:[44, 26, 14, 9],
       head:["Action", "Owner", "Due", "Hidden"],
-      validations:[{ range:"D2:D400", list:YESNO, soft:true }],
+      validations:[{ range:"D2:D400", list:YESNO, soft:true }].concat(ownerDV("B2:B400", owners)),
       rows:(c.actions || []).map(function(a){
         return [a.name, a.owner || "", a.due || "",
                 SMPRules.isHidden(a) ? "Yes" : ""];
@@ -23823,7 +23910,7 @@ function capPlanWorkbook(c, opts){
       head:["Project", "Milestone", "Description", "Owner", "Collaborators", "Due date", "Hidden"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
-                   { range:"G2:G400", list:YESNO, soft:true }],
+                   { range:"G2:G400", list:YESNO, soft:true }].concat(ownerDV("D2:D400", owners)),
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
           acc.push([p.name, m.name, m.covers || "", m.owner || "",
@@ -23832,7 +23919,7 @@ function capPlanWorkbook(c, opts){
         });
         return acc;
       }, []) }
-  ]);
+  ]).concat(ownersSheet(owners));
   if (!o.only) return sheets;
   /* Every sheet a dropped one is referenced BY goes with it: the three project
      sheets each validate their first column against the Projects sheet's own
@@ -30187,19 +30274,78 @@ function ownerDepts(){
   mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
   return a.list;
 }
+/* ── AN OWNER IS PICKED FROM THE REGISTER, NEVER TYPED (§551) ──────────
+   Islam, after the El Abd move turned up a direction owned by *"Tamer
+   Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner
+   should be selected from a drop down, generally all the owners shouldn't be
+   written by hand and only be selected from a list from the registr in a
+   drop down serachable list."*
+
+   THE RULE IS §177's, ONE FIELD OVER. A due date is picked and never typed
+   because a typed date is precision the product cannot use; a typed owner is
+   worse — it is a person who may not exist, and nothing downstream can tell.
+
+   THE SCREENS ALREADY PICKED. Measured before anything was built: all four
+   owner cells on the plan surfaces go through `gapCell` and are fed by
+   `ownerChoices`, which is this register, and past five options `searchsel`
+   makes it the searchable list Islam describes (§536). What was NOT picked
+   was the Copilot's draft table (a bare text box, §551) and the five Owner
+   columns of the workbook (22 validations in it and not one of them Owner).
+
+   AND THE QUIET PART, WHICH IS HOW "Tamer Abdelhamid" SURVIVED. An unknown
+   value was offered back in the dropdown under the heading "Already on this
+   plan" — a label that reads like a fact about the plan rather than a warning
+   about the name, so it looked like a legitimate choice to everyone who ever
+   opened that cell. It is the same group, said truthfully.
+
+   `ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5): the
+   dropdown's grouping, the read-mode flag and the workbook's import refusal
+   all ask it, so a name cannot be a stray in one and fine in another. It is
+   `ownerAdder`'s own set, so trimming and case are settled once.
+
+   NOT MEMOISED, which is deliberate and matches the house: `displayNames()`
+   is recomputed on every call throughout this file, and `ownerChoices` was
+   already paying this exact cost once per cell in the pen. Read mode now
+   pays it too. If a plan is ever large enough for that to show, the cache
+   belongs around `displayNames` for every caller, not here for one. */
+function ownerKnownSet(){
+  var a = ownerAdder();
+  ownerPeople().forEach(function(x){ a.add(x.name); });
+  ownerDepts().forEach(a.add);
+  return a;
+}
+/* The stray values among whatever the field holds — a string or a list.
+   Empty is never a stray: a blank owner is a GAP, which the fill walk and
+   the word "Missing" already handle, and calling it a stray would put two
+   different complaints on one cell. */
+function ownerStrays(v, known){
+  known = known || ownerKnownSet();
+  return (Array.isArray(v) ? v : [v]).map(function(x){
+    return String(x == null ? "" : x).trim();
+  }).filter(function(x){ return x && !known.has(x); });
+}
+/* ── AND IT IS FLAGGED WHERE IT SHOWS, NOT DELETED (Islam's choice) ────
+   Shown the three answers as drawings — flag it, refuse to save it, or leave
+   it — he picked flagging: *"Flag them where they show."* The name STAYS on
+   the row, because a name somebody typed is the only clue to who was meant,
+   and deleting it to satisfy a rule would destroy the thing that lets it be
+   corrected (§96.2's reasoning about an unparseable date, exactly). */
+function ownerShown(v){
+  var txt = esc(String(v == null ? "" : v));
+  return ownerStrays(v).length
+    ? txt + ' <span class="ownerstray hasnote" data-tip="This name is not in the register, so it matches no' +
+      ' real person. Pick somebody from the list, or add them to the register.">not in the register</span>'
+    : txt;
+}
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
 function ownerChoices(current, blank){
   var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
+  var known = ownerKnownSet();
   var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
+  ownerStrays(current, known).forEach(kept.add);
+  var out = blank ? [{ v:"", label:"—" }] : [];
+  if (kept.list.length) out.push({ group:"Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -34244,6 +34390,7 @@ function projFrontMatter(p, ed){
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
         ctx: { project: p },
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
@@ -34381,6 +34528,7 @@ function projPlanBody(p, subject){
          both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
@@ -34536,6 +34684,7 @@ function fnObjPlanBody(fk, ed){
         (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
       '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
           ctx: { row: a },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", a.owner == null ? "" : a.owner,
               ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
@@ -35881,6 +36030,7 @@ function unitPlanBody(it, u, railed, bare){
       '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);
@@ -61613,7 +61763,18 @@ var COPILOT = (function(){
       '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
     var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
-      '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      /* §551: AN OWNER IS PICKED HERE TOO. This was the one free-text owner
+         box left in the product — the draft a chat writes, which is then
+         saved into a real plan, so a name typed here becomes a name on the
+         plan that matches nobody. It is the register's own list
+         (`ownerChoices`), so there is one list and not a second (§53.5), and
+         past five options `searchsel` makes it searchable like every other
+         (§536). The patch hook below reads `el.value`, which a select
+         answers exactly as the input did. */
+      '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-t="' + i + '|owner" aria-label="Owner">' +
+          optionsHtml(ownerChoices(t.owner, true), function(v){
+            return String(t.owner == null ? "" : t.owner) === v; }) + '</select>'
+        : (typeof ownerShown === "function" ? ownerShown(t.owner || "") : E(t.owner || "")) || E("—")) + '</td>' +
       /* NOT A CONTROL, SO NOT A BUTTON (§538). A quarter outside the plan
          period — or any quarter in a view nobody may edit — was drawn as a
          `disabled` button carrying "Q3 is outside the plan period" as a hover

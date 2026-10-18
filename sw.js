@@ -403,7 +403,7 @@
    behind them differ — so the name goes PAST both rather than picking
    either. Confirmed against origin/main once more immediately before the
    push (§94.16). */
-const SHELL = "smp-shell-v6.41-books-closed";
+const SHELL = "smp-shell-v6.42-owner-from-the-register";
 const ASSETS = [
   "/",
   "/index.html",

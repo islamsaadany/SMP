@@ -64,6 +64,8 @@
   li.row{display:flex;align-items:center;gap:11px;padding:10px 11px;margin:0 0 7px;
          border:1px solid var(--line);border-radius:9px;background:var(--surface)}
   li.row.drag{opacity:.4}
+  li.row.faint{opacity:.42}
+  li.row .lock{font-size:12px;color:var(--gold-deep);font-weight:600;padding-right:6px}
   li.row.over{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-wash)}
   li.row .n{flex:0 0 28px;height:28px;border-radius:7px;background:var(--navy);color:var(--navy-ink);
             display:grid;place-items:center;font:700 13px var(--sans);cursor:grab}
@@ -92,6 +94,12 @@
            text-transform:uppercase;color:var(--gold-deep)}
   .note p{margin:0 0 8px;color:var(--ink-2);font-size:15px}
   .note p:last-child{margin:0}
+  .who{margin:2px 0 7px;font:700 11px var(--sans);letter-spacing:var(--track);
+       text-transform:uppercase;color:var(--ink-3)}
+  .who span{font:400 12px var(--sans);text-transform:none;letter-spacing:0;color:var(--ink-3)}
+  .viewers .cbtn[aria-pressed=true]{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
+  .locked{padding:10px 12px;margin:0 0 8px;border:1px dashed var(--line);border-radius:9px;
+          background:var(--surface-2);color:var(--ink-3);font-size:13px}
 </style>
 
 <header>
@@ -100,6 +108,8 @@
   The company's Foundation and its SWOT are parts you place, like a direction or a
   function. The company's own results stay pinned last.</p>
   <div class="clients" id="clients"></div>
+  <p class="who">Who is presenting <span id="whohint"></span></p>
+  <div class="clients viewers" id="viewers"></div>
 </header>
 
 <main>
@@ -145,7 +155,10 @@ const CLIENTS = {
       ["Functions", [
         {id:"f1", t:"Finance", k:"function"}, {id:"f2", t:"HR", k:"function"},
         {id:"f3", t:"IT", k:"function"}]]],
-    start:["u1","u2","u3","u4","f1","f2","f3"] },
+    start:["u1","u2","u3","u4","f1","f2","f3"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"mob", t:"Mobile\u2019s owner", sub:"their own unit", owns:["u1"]},
+              {id:"fin", t:"Finance", sub:"their own function", owns:["f1"]} ] },
 
   elabd: { name:"El Abd", what:"plans on the company",
     groups:[
@@ -164,7 +177,11 @@ const CLIENTS = {
       ["Functions", [
         {id:"f1", t:"Internal Audit", k:"function"}, {id:"f2", t:"Finance", k:"function"},
         {id:"f3", t:"HR", k:"function"}, {id:"f4", t:"Legal", k:"function"}]]],
-    start:["found","swot","d1","d2","d3","d4","c1","c2","c3","f1","f2","f3","f4"] },
+    start:["found","swot","d1","d2","d3","d4","c1","c2","c3","f1","f2","f3","f4"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"dir", t:"A direction\u2019s owner", sub:"Egypt Expansion", owns:["d2"]},
+              {id:"cap", t:"A capability\u2019s owner", sub:"Digital Transformation", owns:["c2"]},
+              {id:"fn",  t:"Internal Audit", sub:"their own function", owns:["f1"]} ] },
 
   rhi: { name:"RHI", what:"plans in pillars on the company",
     groups:[
@@ -177,7 +194,9 @@ const CLIENTS = {
         {id:"p3", t:"Network Growth", k:"pillar"}]],
       ["Functions", [
         {id:"f1", t:"Finance", k:"function"}, {id:"f2", t:"People", k:"function"}]]],
-    start:["found","p1","p2","p3","f1","f2"] }
+    start:["found","p1","p2","p3","f1","f2"],
+    viewers:[ {id:"smo", t:"The SMO team", sub:"the whole review", owns:null},
+              {id:"pil", t:"A pillar\u2019s owner", sub:"Clinical Excellence", owns:["p2"]} ] }
 };
 
 /* What each part puts on the screen. The point of the mockup: EVERY part is
@@ -194,12 +213,13 @@ function slidesFor(p){
   return SLIDES.other;
 }
 
-let CUR = "elabd", ORDER = [];
+let CUR = "elabd", WHO = "smo", ORDER = [];
 const byId = {};
 function load(key){
   CUR = key; byId[key] = byId[key] || {};
   CLIENTS[key].groups.forEach(g => g[1].forEach(p => byId[key][p.id] = p));
   ORDER = CLIENTS[key].start.slice();
+  WHO = "smo";
   draw();
 }
 function part(id){ return byId[CUR][id]; }
@@ -218,15 +238,50 @@ function drawClients(){
   });
 }
 
+/* WHO IS PRESENTING. Islam: *"that's for the smo team but for the user it
+   will only show their things. like for raya every bu will have it's own
+   presentation and for elabd everyone can present their directions or
+   capabilities"*.
+   The point of drawing it on the SAME screen: a person's presentation is
+   not a different builder, it is THIS LIST filtered to the parts they own.
+   The office keeps the order; everyone else inherits it. */
+function viewer(){ return (CLIENTS[CUR].viewers || []).filter(v => v.id === WHO)[0]
+                          || CLIENTS[CUR].viewers[0]; }
+function mine(id){ const v = viewer(); return !v.owns || v.owns.indexOf(id) >= 0; }
+
+function drawViewers(){
+  const host = document.getElementById("viewers"); host.innerHTML = "";
+  (CLIENTS[CUR].viewers || []).forEach(v => {
+    const b = document.createElement("button");
+    b.className = "cbtn"; b.type = "button";
+    b.setAttribute("aria-pressed", v.id === WHO ? "true" : "false");
+    b.setAttribute("data-viewer", v.id);
+    b.innerHTML = '<span class="w">' + v.sub + '</span>' + v.t;
+    b.onclick = () => { WHO = v.id; draw(); };
+    host.appendChild(b);
+  });
+  document.getElementById("whohint").textContent = viewer().owns
+    ? "— they see the office\u2019s order, narrowed to what is theirs"
+    : "— the office builds the order everyone else inherits";
+}
+
 function drawParts(){
   const host = document.getElementById("parts"); host.innerHTML = "";
+  if (viewer().owns) {
+    const p = document.createElement("p");
+    p.className = "locked"; p.setAttribute("data-locked", "1");
+    p.textContent = "The office decides what is in the review and in what order. "
+      + viewer().t + " presents their own part of it.";
+    host.appendChild(p);
+  }
   CLIENTS[CUR].groups.forEach(([label, list]) => {
     const h = document.createElement("p"); h.className = "grp"; h.textContent = label;
     host.appendChild(h);
     list.forEach(p => {
       const inOrder = ORDER.indexOf(p.id) >= 0;
       const b = document.createElement("button");
-      b.className = "part"; b.type = "button"; b.disabled = inOrder;
+      b.className = "part"; b.type = "button";
+      b.disabled = inOrder || !!viewer().owns;
       b.setAttribute("data-add", p.id);
       b.innerHTML = '<span class="p">+</span>' + p.t + '<span class="k">' + p.k + '</span>';
       b.onclick = () => { ORDER.push(p.id); draw(); };
@@ -245,11 +300,15 @@ function drawOrder(){
   ORDER.forEach((id, i) => {
     const p = part(id);
     const li = document.createElement("li");
-    li.className = "row"; li.draggable = true; li.setAttribute("data-row", id);
+    const own = mine(id), office = !viewer().owns;
+    li.className = "row" + (own ? "" : " faint");
+    li.draggable = office; li.setAttribute("data-row", id);
+    if (own && !office) li.setAttribute("data-mine", "1");
     li.innerHTML = '<span class="n" draggable="false">' + (i + 1) + '</span>' +
       '<span class="t"><b>' + p.t + '</b><span>' + p.k + '</span></span>' +
-      '<button class="x" data-drop="' + id + '" aria-label="Take ' + p.t + ' out">&times;</button>';
-    li.querySelector(".x").onclick = () => { ORDER = ORDER.filter(x => x !== id); draw(); };
+      (office ? '<button class="x" data-drop="' + id + '" aria-label="Take ' + p.t + ' out">&times;</button>'
+              : (own ? '<span class="lock">yours</span>' : ''));
+    if (office) li.querySelector(".x").onclick = () => { ORDER = ORDER.filter(x => x !== id); draw(); };
     li.addEventListener("dragstart", e => {
       li.classList.add("drag"); e.dataTransfer.setData("text/plain", id);
     });
@@ -272,6 +331,7 @@ function drawOrder(){
   /* THE RESULTS ARE PINNED (Islam: "last, as now"). Drawn in the list so it is
      obvious they are coming, and not draggable so the one fixed thing looks
      fixed rather than merely being refused when you try. */
+  if (viewer().owns) return;
   const li = document.createElement("li");
   li.className = "row pin"; li.setAttribute("data-pinned", "results");
   li.innerHTML = '<span class="n">' + (ORDER.length + 1) + '</span>' +
@@ -291,17 +351,21 @@ function drawRun(){
                   (sub ? '<em>— ' + sub + '</em>' : '') + '</span>';
     host.appendChild(d);
   };
-  add("Cover", CLIENTS[CUR].name);
-  ORDER.forEach(id => {
+  const office = !viewer().owns;
+  const shown = ORDER.filter(mine);
+  add("Cover", office ? CLIENTS[CUR].name : viewer().sub);
+  shown.forEach(id => {
     const p = part(id);
     slidesFor(p).forEach(s => add(s === "Title" ? p.t : s, s === "Title" ? p.k : p.t));
   });
-  add("How the company did", "results");
+  if (office) add("How the company did", "results");
   add("Thank you", "");
-  document.getElementById("tally").textContent =
-    n + " slides · " + ORDER.length + " parts in the order";
+  document.getElementById("tally").textContent = office
+    ? n + " slides · " + ORDER.length + " parts in the order"
+    : n + " slides · " + shown.length + " of " + ORDER.length + " parts \u2014 "
+      + viewer().t + "\u2019s own";
 }
 
-function draw(){ drawClients(); drawParts(); drawOrder(); drawRun(); }
+function draw(){ drawClients(); drawViewers(); drawParts(); drawOrder(); drawRun(); }
 load("elabd");
 </script>

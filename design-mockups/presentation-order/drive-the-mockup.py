@@ -71,6 +71,52 @@ with sync_playwright() as p:
        "Nothing in the order" in pg.inner_text("#order"))
     ck("…the run is the cover, the results and the thank-you", runN() == 3, runN())
 
+    print("\n6 · the SMO builds the order; everyone else presents their part of it")
+    # Islam: *"that's for the smo team but for the user it will only show
+    # their things"*. The claim being approved is that a person's
+    # presentation is THIS LIST filtered — not a second screen and not a
+    # second builder — so both ends are pressed: what the office can do that
+    # an owner cannot, and that the owner still sees the whole agreed order.
+    pg.click("[data-client=elabd]"); pg.wait_for_timeout(300)
+    ck("the office can take a part out", pg.evaluate("()=>!!document.querySelector('[data-drop]')"))
+    # MAKES ITS OWN STATE (§255): El Abd's order already holds every part, so
+    # every add button is rightly dead. Take one out, then the office can add.
+    pg.click("[data-drop=f4]"); pg.wait_for_timeout(150)
+    ck("…and can add one back once something is out",
+       pg.evaluate("()=>!document.querySelector('[data-add=f4]').disabled"))
+    pg.click("[data-add=f4]"); pg.wait_for_timeout(150)
+    ck("…and its rows are draggable",
+       pg.evaluate("()=>document.querySelector('[data-row]').draggable") is True)
+    office_rows, office_slides = rows(), runN()
+
+    pg.click("[data-viewer=dir]"); pg.wait_for_timeout(300)
+    ck("a direction's owner sees the SAME order, not a different screen",
+       rows() == office_rows, [rows(), office_rows])
+    ck("…but cannot take anything out", pg.evaluate("()=>!document.querySelector('[data-drop]')"))
+    ck("…cannot add anything",
+       pg.evaluate("()=>[...document.querySelectorAll('[data-add]')].every(b=>b.disabled)"))
+    ck("…cannot drag", pg.evaluate("()=>document.querySelector('[data-row]').draggable") is False)
+    ck("…and is told why, rather than finding dead controls (\u00a761)",
+       pg.evaluate("()=>!!document.querySelector('[data-locked]')"))
+    ck("…their own part is marked as theirs",
+       pg.evaluate("()=>document.querySelectorAll('[data-mine]').length") == 1,
+       pg.evaluate("()=>document.querySelectorAll('[data-mine]').length"))
+    ck("…they present FEWER slides than the office", runN() < office_slides,
+       [runN(), office_slides])
+    ck("…and the company's results are not theirs to present",
+       pg.evaluate("()=>!document.querySelector('[data-pinned=results]')"))
+
+    pg.click("[data-viewer=cap]"); pg.wait_for_timeout(250)
+    ck("a capability's owner is the same screen again, one part theirs",
+       rows() == office_rows and
+       pg.evaluate("()=>document.querySelectorAll('[data-mine]').length") == 1)
+    pg.click("[data-client=raya]"); pg.wait_for_timeout(250)
+    ck("switching client resets to the office",
+       pg.evaluate("()=>document.querySelector('[data-viewer=smo]').getAttribute('aria-pressed')") == "true")
+    pg.click("[data-viewer=mob]"); pg.wait_for_timeout(250)
+    ck("a unit owner on Raya presents their unit alone",
+       pg.evaluate("()=>document.querySelectorAll('[data-mine]').length") == 1)
+
     pg.click("[data-client=elabd]"); pg.wait_for_timeout(300)
     pg.screenshot(path=os.path.join(HERE, "shot.png"), full_page=True)
     ck("no page errors", not errs, errs[:2])

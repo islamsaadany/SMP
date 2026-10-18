@@ -30399,13 +30399,20 @@ function collabShown(v){
 }
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
+/* `strayGroup` NAMES THE KEPT GROUP, because one sentence cannot be true of
+   both fields (§551.3). An OWNER is matched against the people register to
+   decide who may report a line, so "Not in the register" is exactly what a
+   stray one is. A STAKEHOLDER is a unit or a person in Islam's own words, so
+   over "Finance Department" that sentence points at the wrong list — it reads
+   as though the platform wanted a person there. The default is unchanged, so
+   §551's owners go on saying what they said. */
+function ownerChoices(current, blank, strayGroup){
   var people = ownerPeople(), depts = ownerDepts();
   var known = ownerKnownSet();
   var kept = ownerAdder();
   ownerStrays(current, known).forEach(kept.add);
   var out = blank ? [{ v:"", label:"—" }] : [];
-  if (kept.list.length) out.push({ group:"Not in the register", items:kept.list });
+  if (kept.list.length) out.push({ group:strayGroup || "Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -34407,9 +34414,43 @@ function projFrontMatter(p, ed){
   /* The pills carry their own leading margin, which is right in a sentence and
      wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
      BORDER lines up with the brief's first letter, not its text. */
+  /* ── A STAKEHOLDER IS PICKED FROM THE SAME LIST (§551.3) ──────────────
+     Islam, asked what a stakeholder is, because the demo held "Unit heads"
+     and "Finance Department" and the answer decided whether a rule could be
+     imposed at all: *"stakeholders are either units or people names so it can
+     be a searchable list with functions and people names to be added."*
+
+     SO IT IS §130.1's OWN CONTROL, NOT A NEW ONE. His words there were almost
+     these — *"for the owners in the plans, projects, tactics, milestones, let
+     it be a searchable list from the registry"*, and, asked what the list
+     holds, *"people or department"*. This is that answer one field further
+     out, so it is the collaborators' control with the collaborators' list
+     (§53.5): `selectManyOr` over `ownerChoices`, several answers, searchable
+     past five options through `searchsel` (§536).
+
+     NOTHING ALREADY TYPED IS LOST, which is why `ownerChoices` is handed the
+     current value: a stakeholder the list does not offer stays in it and
+     stays picked. Measured on the demo before this was built — of twelve
+     distinct stakeholders, seven are already in the list and five are not
+     ("Finance Department" and "IT Department", which are Finance and IT with
+     a word added; "Operations" and "Sales", departments this tenant has no
+     page for; and "Unit heads", which is a role group and neither a unit nor
+     a person). All five survive and remain pickable.
+
+     AND THEY ARE NOT FLAGGED THE WAY AN OWNER IS. An owner is matched against
+     the register BY NAME to decide who may report a line (§130.1, §55) — a
+     stray one is a person who owns work and cannot enter its figure. Nothing
+     downstream resolves a stakeholder to anybody, so a stray costs a tidier
+     chip and nothing else, and five flags on the demo would be noise rather
+     than information. Islam asked for a list to pick from, not a rule to
+     enforce; the rule stays his to ask for. */
   var stake = ed
-    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-        function(v){ p.stakeholders = collabParse(v); })
+    ? selectManyOr("plan", p.stakeholders || [],
+        ownerChoices(p.stakeholders || [], false, "Not a unit or a person here"),
+        "collabsel",
+        function(v){ p.stakeholders = Array.isArray(v)
+          ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+          : collabParse(v); }, "Stakeholders")
     : ((p.stakeholders || []).length
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")

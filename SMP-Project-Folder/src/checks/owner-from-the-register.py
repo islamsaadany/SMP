@@ -294,7 +294,60 @@ with sync_playwright() as p:
     ck("...and PICKING ONE ACTUALLY LANDS IN THE DRAFT, which a select that nobody reads would not",
        bool(wrote.get("picked")) and wrote.get("draft") == wrote.get("picked"), wrote)
 
-    print("\n§11 · and the build is quiet")
+    print("\n§11 · a stakeholder is picked from the same list (§551.3)")
+    # Islam, asked what a stakeholder IS: "stakeholders are either units or
+    # people names so it can be a searchable list with functions and people
+    # names to be added." So it is §130.1's control one field out, not a new one.
+    ck("the stakeholders cell is no longer a typed box",
+       "collabText({ collaborators: p.stakeholders })" not in code)
+    ck("...it is selectManyOr over ownerChoices, the collaborators' own control (§53.5)",
+       'ownerChoices(p.stakeholders || [], false, "Not a unit or a person here")' in code)
+    ck("owners keep §551's wording, untouched by the new argument",
+       ev(pg, "() => ownerChoices('Tamer Abdelhamid', true).map(o => o.group || '')", [])
+         == ["", "Not in the register", "People", "Departments"],
+       ev(pg, "() => ownerChoices('Tamer Abdelhamid', true).map(o => o.group || '')", []))
+    ck("...while a stakeholder's kept group says something true of a DEPARTMENT",
+       ev(pg, "() => ownerChoices(['Finance Department'], false, 'Not a unit or a person here').map(o => o.group)", [])
+         == ["Not a unit or a person here", "People", "Departments"])
+    ev(pg, """() => { const b = [...document.querySelectorAll('button')]
+        .find(x => /^Functions$/.test(x.textContent.trim())); if (b) b.click(); }""")
+    pg.wait_for_timeout(900)
+    ev(pg, """() => { const b = document.querySelector('[data-u="fn:finance"]'); if (b) b.click(); }""")
+    pg.wait_for_timeout(1800)
+    ev(pg, "() => { const b = document.querySelector('.secpen'); if (b) b.click(); }")
+    pg.wait_for_timeout(1900)
+    sh = ev(pg, """() => { const s = document.querySelector("select.collabsel[aria-label='Stakeholders']");
+        if (!s) return { no: true };
+        return { multiple: s.multiple, n: s.options.length,
+                 groups: [...s.querySelectorAll('optgroup')].map(g => g.label),
+                 picked: [...s.selectedOptions].map(o => o.value) }; }""", {})
+    ck("on the page it is a list, and SEVERAL can be chosen",
+       sh.get("multiple") is True and (sh.get("n") or 0) > 20, sh)
+    ck("...holding people AND the units and functions, as Islam described it",
+       "People" in (sh.get("groups") or []) and "Departments" in (sh.get("groups") or []), sh)
+    ck("...with what the project already held still picked, not dropped",
+       sorted(sh.get("picked") or []) == ["Finance Department", "IT Department"], sh)
+    ck("...and it is searchable, through §536's own list",
+       ev(pg, """() => { const s = document.querySelector("select.collabsel[aria-label='Stakeholders']");
+            return (typeof SEARCHSEL !== 'undefined' && SEARCHSEL.openOn) ? SEARCHSEL.openOn(s) : false; }""", False) is True)
+    pg.wait_for_timeout(600)
+    ck("...showing every choice in it", ev(pg, "() => document.querySelectorAll('.sspop .ssrow').length", 0) == sh.get("n"),
+       (ev(pg, "() => document.querySelectorAll('.sspop .ssrow').length", 0), sh.get("n")))
+    ev(pg, "() => { if (typeof SEARCHSEL !== 'undefined' && SEARCHSEL.close) SEARCHSEL.close(); }")
+    pg.wait_for_timeout(300)
+    wrote = ev(pg, """() => { const s = document.querySelector("select.collabsel[aria-label='Stakeholders']");
+        if (!s) return { no: true };
+        [...s.options].forEach(o => o.selected = false);
+        const pick = [...s.options].map(o => o.value).filter(Boolean).slice(0, 2);
+        [...s.options].forEach(o => { if (pick.indexOf(o.value) > -1) o.selected = true; });
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+        const pr = (FUNCTIONS.finance.projects || [])
+          .find(p => (p.name || '').indexOf('debt utilisation') > -1);
+        return { pick: pick, wrote: pr ? pr.stakeholders : null }; }""", {})
+    ck("AND PICKING WRITES THE WHOLE LIST TO THE PROJECT, not just the first name",
+       wrote.get("wrote") == wrote.get("pick") and len(wrote.get("pick") or []) == 2, wrote)
+
+    print("\n§12 · and the build is quiet")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

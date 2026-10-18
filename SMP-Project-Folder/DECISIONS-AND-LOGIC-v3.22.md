@@ -65605,4 +65605,15 @@ Islam, 2026-10-18: *"the 4 differences are fine, schema how can I know it's name
 
 The whole rehearsal was then run again, on the exact file being handed over rather than an earlier one: it commits, its result is byte-for-byte identical to `capFoldIntoTop()`, and the pages rendered from the resulting database match the rehearsal on all seven surfaces.
 
+### §539.4 — the client's name, in both places it is stored
+Islam, 2026-10-18: *"we need to fix the company name test 2 once and for all to be ElAbd"*.
+
+**The name is stored twice**, which is why *once and for all* is the right phrase and a hand edit is the wrong tool: `<schema>.org.org_name` is what the chrome and every page read, and `platform.clients.name` is what the client cards read. Change one and the two disagree — the card says one thing, the page another.
+
+So the generator takes `--rename` and emits both, as **step 8, in a transaction of its own** so it can be run without the move. Matched on the SCHEMA rather than on the old name, so it is right however many times it is run and does not depend on the old value being what anybody remembers. It ends by printing both, side by side.
+
+**Ordering matters and is handled**: §539.3's first precondition checks the client's name, so the rename sits after the move's `COMMIT`, never before it.
+
+Run end to end on a throwaway Postgres with both the client schema and a `platform.clients` row: the move commits, the rename commits, both read `ElAbd`, and running the rename again leaves it `ElAbd`.
+
 **What is still Islam's**: the word to run it. Nothing else is outstanding.

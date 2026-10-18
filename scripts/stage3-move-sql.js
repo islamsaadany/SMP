@@ -45,14 +45,21 @@ const path = require("node:path");
 const ROOT = path.join(__dirname, "..");
 const SRC = path.join(ROOT, "SMP-Project-Folder", "src");
 const argv = process.argv.slice(2);
-const input = argv.find((a) => !a.startsWith("--") && argv[argv.indexOf(a) - 1] !== "--schema");
+const input = argv.find((a) => !a.startsWith("--") &&
+  argv[argv.indexOf(a) - 1] !== "--schema" && argv[argv.indexOf(a) - 1] !== "--rename");
 const sIdx = argv.indexOf("--schema");
 const SCHEMA = sIdx >= 0 ? argv[sIdx + 1] : null;
+/* §539.4: and the client's own name, where it is being corrected at the same
+   time — stored in two places, so a rename done by hand in one of them leaves
+   the cards and the pages disagreeing. */
+const rIdx = argv.indexOf("--rename");
+const RENAME = rIdx >= 0 ? argv[rIdx + 1] : null;
 if (!input || !SCHEMA) {
-  console.error("usage: node scripts/stage3-move-sql.js <working-copy.html> --schema <client schema>");
-  console.error("the schema is the client's own, e.g. el_abd — see scripts/migrate-to-multi-client.js");
+  console.error("usage: node scripts/stage3-move-sql.js <working-copy.html> --schema <client schema> [--rename <name>]");
+  console.error("the schema is the client's own, e.g. el_abd — step 0 of the output finds it for you");
   process.exit(2);
 }
+if (rIdx >= 0 && !String(RENAME || "").trim()) { console.error("--rename needs a name"); process.exit(2); }
 if (!/^[a-z_][a-z0-9_]*$/.test(SCHEMA)) { console.error("that is not a schema name: " + SCHEMA); process.exit(2); }
 
 const html = fs.readFileSync(input, "utf8");
@@ -103,6 +110,7 @@ L.push("--");
 L.push("-- WHAT IT DOES: the " + plan.length + " capability records become " + plan.length +
        " internal pillars of the");
 L.push("-- " + (org || "client") + " company's own plan, and the company is set to show its pillars apart");
+if (RENAME) L.push("-- Step 8 also renames the client to " + RENAME + ", in both places it is stored.");
 L.push("-- so the two tabs people read today do not move.");
 L.push("--");
 L.push("--   CODE          NAME                                     OWNER AFTER       ROW ID");
@@ -251,6 +259,22 @@ L.push("       jsonb_array_length(coalesce(e->'measures','[]'::jsonb)) AS \"meas
 L.push("       jsonb_array_length(coalesce(e->'tactics','[]'::jsonb))  AS \"tactics\"");
 L.push("  FROM org, jsonb_array_elements(extra->'items') WITH ORDINALITY AS t(e, ord)");
 L.push(" WHERE id = 1 ORDER BY ord;");
+L.push("");
+if (RENAME) {
+  L.push("");
+  L.push("-- 8 · AND THE CLIENT'S NAME, in the two places it is stored: inside the client,");
+  L.push("--     where the chrome and every page read it, and on the platform's own list,");
+  L.push("--     where the cards read it. Its own transaction, so it can be run on its own.");
+  L.push("--     Matched on the SCHEMA, never on the old name, so it is right however many");
+  L.push("--     times it is run.");
+  L.push("BEGIN;");
+  L.push("UPDATE org SET org_name = " + q(RENAME) + " WHERE id = 1;");
+  L.push("UPDATE platform.clients SET name = " + q(RENAME) + " WHERE schema_name = " + q(SCHEMA) + ";");
+  L.push("COMMIT;");
+  L.push("");
+  L.push("SELECT (SELECT org_name FROM org WHERE id = 1) AS \"inside the client\",");
+  L.push("       (SELECT name FROM platform.clients WHERE schema_name = " + q(SCHEMA) + ") AS \"on the card\";");
+}
 L.push("");
 L.push("-- TO UNDO IT, before the backups are dropped:");
 L.push("--   BEGIN;");

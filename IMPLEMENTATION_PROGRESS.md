@@ -9970,4 +9970,11 @@ You said the four differences are fine. On the schema: you asked a fair question
 
 I re-ran the whole rehearsal on the exact file you now have, not an earlier one: it commits, it produces byte-for-byte what the platform's own move produces, and the pages built from the resulting database match what I showed you.
 
+## §539.4 — The name is fixed to ElAbd, in both places (2026-10-18)
+The name is stored in **two** places, which is why doing it by hand wouldn't have stuck: one inside the client (what every page says) and one on the platform's client list (what the card says). Change one and they disagree.
+
+The SQL now does both, as **step 8**, in a transaction of its own — so you can run just the rename if you want, without the move. It ends by printing both side by side so you can see they match.
+
+Tested: both read **ElAbd** afterwards, and running it again leaves it alone.
+
 **All that's left is your word to run it.**

@@ -66024,3 +66024,14 @@ Two changes, and the second is the one that matters more:
 - and **the collision is a precondition**, not a `CREATE TABLE` tripped over forty lines in: *"the backup tables … already exist — this file has run before, or they were left from an earlier run; look at them and drop them first."* An error forty lines into a transaction is a reader's puzzle; a sentence in the preconditions is an instruction.
 
 **Re-rehearsed on a fresh throwaway PostgreSQL**, with the collision put there on purpose: the precondition names it and nothing is written; with the table dropped, the file runs clean and the result is **again identical, row for row and key for key, to the product's own move**; a second run is still refused by the capability count.
+
+### §544.10 — a working copy is not the database, and a `coalesce` hid the difference
+Wander's file got further and stopped again: `null value in column "extra" of relation "org" violates not-null constraint`. The transaction rolled back and **nothing was written**. Twice now the file has been right to stop and the fault has been mine, and this one names the real mistake underneath both.
+
+`jsonb_set` returns NULL if any argument is NULL. Wander's company has never planned anything of its own, so its `org.extra` has **no `items` key at all** — not an empty array, nothing — and `o.extra->'items'` was NULL.
+
+**The rehearsal could not have caught it**, because the fixture was built from the working copy, and a working copy is not the database: `state-io` fills an absent `items` in as `[]` on the way out. So the throwaway Postgres got a row with an empty array where the live one has no key, and the file passed against a shape that does not exist.
+
+**And the diagnostic that was supposed to prevent exactly this asked with a `coalesce`** — `jsonb_array_length(coalesce(o.extra->'items','[]'::jsonb))` — which answered *0 company pillars* for a row that has no key and for a row that has an empty one, identically. The question was written to be robust and was therefore blind. §542.5's discipline is to ask the database; this is its second half: **ask it in a way that can tell the two answers apart.**
+
+Both ends are coalesced in the statement now, and the rehearsal runs twice — once against a row shaped like the live one (`extra` = `{}`, no `items`, no `structure`) and once against one with an empty array — with the result identical to the product's own move both times, and a second run still refused.

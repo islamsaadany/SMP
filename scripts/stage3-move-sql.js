@@ -335,7 +335,17 @@ L.push("--     read out and written back.");
    are built separately and appended in the rehearsal's order: by the
    capability's own `idx`, then by the pillar's place in its list. A project
    sorts where its capability sits, with no pillar before it. */
-L.push("UPDATE " + ORG + " o SET extra = jsonb_set(o.extra, '{items}', (o.extra->'items') || (");
+/* §544.10 — AND `items` MAY NOT BE THERE AT ALL. `jsonb_set` returns NULL if
+   any argument is NULL, so on a company that has never planned anything —
+   Wander — `o.extra->'items'` is NULL and the whole UPDATE wrote a NULL into
+   a NOT NULL column. It failed inside the transaction and nothing was
+   written, which is the file working; what was wrong was the rehearsal,
+   whose fixture gave the row an empty `items` because the DIAGNOSTIC had
+   asked with a `coalesce` and never showed the difference. Both ends are
+   coalesced here, and the rehearsal now runs against a row shaped like the
+   live one: no `items`, no `structure`. */
+L.push("UPDATE " + ORG + " o SET extra = jsonb_set(coalesce(o.extra, '{}'::jsonb), '{items}',");
+L.push("  coalesce(o.extra->'items', '[]'::jsonb) || (");
 L.push("  SELECT coalesce(jsonb_agg(r.np ORDER BY r.ci, r.pi), '[]'::jsonb) FROM (");
 L.push("    -- a capability's inner pillars: the rows ALREADY IN THE DATABASE, with");
 L.push("    -- three fields laid over each — the kind, the name where the pillar");
@@ -387,7 +397,7 @@ L.push("      FROM " + TB("projects") + " pr");
 L.push("      JOIN " + CAPS + " c ON c.id = pr.cap_id");
 L.push("     WHERE c." + (TENANT ? "tenant_id = o.tenant_id" : "id IS NOT NULL"));
 L.push("  ) r");
-L.push(")) WHERE o." + WORG + ";");
+L.push("), true) WHERE o." + WORG + ";");
 L.push("");
 L.push("-- 4 · THE COMPANY SHOWS ITS PILLARS APART, so Directions and Capabilities");
 L.push("--     read as two tabs. Written defensively: the levels above the key are");

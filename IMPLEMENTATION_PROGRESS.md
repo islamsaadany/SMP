@@ -10003,4 +10003,8 @@ So my file was right about your data and wrong about every name around it. **I s
 1. A retired client **"ElAbd Foods"** holding 8 capabilities.
 2. Two of El Abd's directions are owned by **"Tamer Abdelhamid"**, but the person in your register is **"Tamer Abdelhameed"**. Different spelling, so those two won't match a real person.
 
-**All that's left is your word to run it.**
+**Run on El Abd, 18 October 2026 — reported successful.** Awaiting a fresh working copy to compare the pages against the before.
+
+**Stage 3b is complete:** (a) the two-tab setting, (b) codes from the row's kind, (c) the pages reading the kind, (d) El Abd's five capabilities moved and the client renamed to ElAbd.
+
+**Still open, not touched:** the retired "ElAbd Foods" client holding 8 capabilities; the "Tamer Abdelhamid" / "Tamer Abdelhameed" spelling on two directions; and the two leftover copies of client data (`elabd` and `public` schemas, and the old `platform.clients` list) sitting unused in the live database.

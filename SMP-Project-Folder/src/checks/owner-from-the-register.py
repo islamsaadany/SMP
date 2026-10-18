@@ -254,7 +254,47 @@ with sync_playwright() as p:
     ck("...in BOTH workbooks, not just the unit's",
        code.count("Pick the name from the dropdown") == 2, code.count("Pick the name from the dropdown"))
 
-    print("\n§10 · and the build is quiet")
+    print("\n§10 · the BUILDER picks too — the surface that actually mattered (§551.2)")
+    # Islam: "do not consider the upload through the sheets. Mostly, we build it
+    # through the app, through the builder itself." §551 and §551.1 both argued
+    # from the workbook being the wide door; it is not, and this section is the
+    # one that guards the path plans are really written through.
+    ck("all five builder owner fields are declared as pickers, none as a text box",
+       code.count('{ k:"owner", label:"Owner", type:"owner" }') == 5,
+       code.count('{ k:"owner", label:"Owner", type:"owner" }'))
+    ck("...and none of them still carries a placeholder a select cannot draw",
+       'k:"owner", label:"Owner", ph:' not in code)
+    ck("the builder's list is ownerChoices and not one of its own (§53.5)",
+       'f.type === "owner"' in code and "optionsHtml(ownerChoices(v, true)" in code)
+    staged = ev(pg, """() => { UNITS.mobile.items = [];
+        const b = document.querySelector('button[data-u="mobile"]'); if (b) b.click(); return true; }""", False)
+    ck("(fixture) a unit with no plan, so the builder's door is drawn", staged is True)
+    pg.wait_for_timeout(1400)
+    ev(pg, "() => { const t = [...document.querySelectorAll('[role=tab]')].find(x => x.textContent.trim() === 'Plan'); if (t) t.click(); }")
+    pg.wait_for_timeout(1300)
+    ev(pg, "() => { const b = document.querySelector('[data-buildplan]'); if (b) b.click(); }")
+    pg.wait_for_timeout(1600)
+    ev(pg, "() => { const b = [...document.querySelectorAll('button')].find(x => /Pillars/.test(x.textContent)); if (b) b.click(); }")
+    pg.wait_for_timeout(1200)
+    ev(pg, "() => { const b = [...document.querySelectorAll('button')].find(x => /add the first/i.test(x.textContent)); if (b) b.click(); }")
+    pg.wait_for_timeout(1500)
+    form = ev(pg, """() => { const s = document.querySelector('[data-bf="owner"]');
+        if (!s) return { no: true };
+        return { tag: s.tagName, n: s.options ? s.options.length : 0,
+                 groups: [...s.querySelectorAll('optgroup')].map(g => g.label) }; }""", {})
+    ck("the builder's owner field is drawn as a dropdown, not a box",
+       form.get("tag") == "SELECT", form)
+    ck("...holding the register and the departments",
+       form.get("groups") == ["People", "Departments"] and (form.get("n") or 0) > 10, form)
+    wrote = ev(pg, """() => { const s = document.querySelector('select[data-bf="owner"]');
+        if (!s) return { no: true };
+        const nm = [...s.options].map(o => o.value).filter(Boolean)[0];
+        s.value = nm; s.dispatchEvent(new Event('change', { bubbles: true }));
+        return { picked: nm, draft: (typeof BFORM !== 'undefined' && BFORM) ? BFORM.draft.owner : null }; }""", {})
+    ck("...and PICKING ONE ACTUALLY LANDS IN THE DRAFT, which a select that nobody reads would not",
+       bool(wrote.get("picked")) and wrote.get("draft") == wrote.get("picked"), wrote)
+
+    print("\n§11 · and the build is quiet")
     ck("no page errors", not errs, errs[:3])
     b.close()
 

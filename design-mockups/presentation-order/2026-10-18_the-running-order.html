@@ -199,18 +199,45 @@ const CLIENTS = {
               {id:"pil", t:"A pillar\u2019s owner", sub:"Clinical Excellence", owns:["p2"]} ] }
 };
 
-/* What each part puts on the screen. The point of the mockup: EVERY part is
-   described the same way, whatever kind it is — that is what "one template"
-   means. A box's own slides are its title, what it is aiming at, its work and
-   how it did. */
+/* WHAT EACH PART PUTS ON THE SCREEN — READ OUT OF THE PRODUCT, NOT INVENTED.
+   The first draft of this mockup made these names up ("What it is aiming
+   at", "Its work", "How it is doing"). Islam: *"that's a very strange
+   components. did you assume that?"* — yes, and a mockup that invents the
+   one thing a reader would check is worse than no mockup. Every line below
+   is the slide's own heading in today's deck, read with
+   scripts/decks/compare.py.
+
+   A CONDITIONAL SLIDE SAYS SO rather than being quietly left out: the
+   Categories slide is drawn only where a pillar HAS categories (`if
+   (bdRows)` in present.js), which is why El Abd's direction has four
+   per-pillar slides and Raya's has three — content, not two builders
+   disagreeing. */
 const SLIDES = {
-  section_found: ["Who we are", "What we are aiming at"],
-  section_swot:  ["Strengths and weaknesses", "Opportunities and threats"],
-  other:         ["Title", "What it is aiming at", "Its work", "How it is doing"]
+  found:      [["Foundation", "divider"],
+               ["What we are aiming at", ""],
+               ["Key Objectives — where we stand", ""]],
+  swot:       [["SWOT", "title page"], ["Strengths", ""], ["Weaknesses", ""],
+               ["Opportunities", ""], ["Threats", ""]],
+  pillarish:  [["{name}", "title page"],
+               ["Key Measures", "{name}"],
+               ["Categories", "{name} — only where it has them"],
+               ["Tactics", "{name}"]],
+  projectish: [["{name}", "title page"],
+               ["Deliverables and outcomes", "{name}"],
+               ["Milestones", "{name}"]],
+  box:        [["{name}", "cover"],
+               ["Strategic Pillars", "divider"],
+               ["Pillars", "the names"],
+               ["…each pillar: title page · Key Measures · Tactics", "{name}"],
+               ["Performance", "{name}"],
+               ["Where {name} stands", ""]],
+  results:    [["Directions — where we stand", ""], ["Where the company stands", ""]]
 };
 function slidesFor(p){
-  if (p.k === "section") return SLIDES["section_" + p.id] || SLIDES.other;
-  return SLIDES.other;
+  if (p.id === "found") return SLIDES.found;
+  if (p.id === "swot")  return SLIDES.swot;
+  if (p.k === "unit" || p.k === "function") return SLIDES.box;
+  return SLIDES.pillarish;      /* a direction, a capability, a pillar */
 }
 
 let CUR = "elabd", WHO = "smo", ORDER = [];
@@ -356,9 +383,10 @@ function drawRun(){
   add("Cover", office ? CLIENTS[CUR].name : viewer().sub);
   shown.forEach(id => {
     const p = part(id);
-    slidesFor(p).forEach(s => add(s === "Title" ? p.t : s, s === "Title" ? p.k : p.t));
+    slidesFor(p).forEach(([title, sub]) =>
+      add(title.replace("{name}", p.t), sub.replace("{name}", p.t)));
   });
-  if (office) add("How the company did", "results");
+  if (office) SLIDES.results.forEach(([t, sub]) => add(t, sub));
   add("Thank you", "");
   document.getElementById("tally").textContent = office
     ? n + " slides · " + ORDER.length + " parts in the order"

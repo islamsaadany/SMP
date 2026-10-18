@@ -69,7 +69,13 @@ with sync_playwright() as p:
     ck("the order can be emptied", rows() == [], rows())
     ck("…and it says so rather than showing a blank",
        "Nothing in the order" in pg.inner_text("#order"))
-    ck("…the run is the cover, the results and the thank-you", runN() == 3, runN())
+    # The results are TWO slides, not one — "Directions — where we stand" and
+    # "Where the company stands", which is what the product actually draws.
+    # This counted 3 while the mockup invented a single "How the company did".
+    ck("…the run is the cover, the company's two results slides and the thank-you",
+       runN() == 4, runN())
+    ck("…and they are the product's own headings, not invented ones",
+       "Where the company stands" in pg.inner_text("#run"), pg.inner_text("#run")[:120])
 
     print("\n6 · the SMO builds the order; everyone else presents their part of it")
     # Islam: *"that's for the smo team but for the user it will only show

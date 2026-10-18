@@ -1516,16 +1516,29 @@
      list is built once and the switch, the destinations and the reset below
      all read it, so the control and the row it governs cannot disagree about
      how many sides there are (§53.5). */
+  /* §544.2 — AND WHICH OF THEM IS ON THE ROW IS CHOSEN. Islam, of the shape
+     screen: *"this should be a choice what are the navigation switch… so it
+     needs to be chosen somehow not derived"*. Four rows can be a side — each
+     bottom kind, and each kind's own layer — and the shape screen ticks them.
+
+     EVERY TICK IS READ AS AN ABSENCE FIRST, and the absence is exactly what
+     this function answered before it existed (navRowUnsaid): the units
+     wherever they plan, the functions beside them, and the functions'
+     divisions in their place where the company plans. So no client's row
+     moves by upgrading, and the only thing that changes it is somebody
+     pressing a tick. */
+  function navPick(row){ return SMPRules.navPicked(GROUP, row); }
   function navSides(){
     var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
-    if (us.length) out.push({ fold:"units", label:navWord("unitword", "Units"),
+    if (us.length && navPick("bu@g")) out = out.concat(companyUnitSides(us, navPick("bu")));
+    if (us.length && navPick("bu")) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
     /* §447: with the units off, capabilities are a section of the company
        page and not a side of the row. */
     if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
       keys:cs.map(function(id){ return "cap:" + id; }) });
-    if (fs.length && !buExists()) return out.concat(companyFnSides(fs));
-    if (fs.length) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
+    if (fs.length && navPick("fn@g")) out = out.concat(companyFnSides(fs, navPick("fn")));
+    if (fs.length && navPick("fn")) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
     return out;
   }
@@ -1542,7 +1555,31 @@
      linking no function this viewer reaches has nothing to list and no
      segment (&sect;61 from the other side: a segment that lists nothing is a
      control with nothing behind it). */
-  function companyFnSides(fs){
+  /* §544.2: THE SAME, FOR THE UNITS' OWN LAYER. Nobody has this row today —
+     Raya's two divisions have never been sides — so this draws nothing until
+     the tick is pressed; it is the segment builder the tick needs to have
+     something behind it (§61). `companyFnSides`'s own shape exactly: one
+     segment per division that holds a unit this viewer reaches, in the order
+     they are declared, and a last segment under the top level's word for the
+     units in none. */
+  /* `alsoWhole` says the kind's OWN row is ticked as well. Then the boxes in
+     no division already have a side, and the catch-all is not added a second
+     time: two sides would carry the same fold key and the row could not say
+     which of them is open. */
+  function companyUnitSides(us, alsoWhole){
+    var left = us.slice(), out = [];
+    activeCompanyKeys().forEach(function(ck){
+      var mine = unitsOfCompany(ck).filter(function(k){ return us.indexOf(k) !== -1; });
+      if (!mine.length) return;
+      left = left.filter(function(k){ return mine.indexOf(k) === -1; });
+      out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name, keys:mine });
+    });
+    if (alsoWhole) return out;
+    if (!out.length) return [{ fold:"units", label:navWord("unitword", "Units"), one:true, keys:us.slice() }];
+    if (left.length) out.push({ fold:"units", label:labelWord("topword", "group"), keys:left });
+    return out;
+  }
+  function companyFnSides(fs, alsoWhole){
     var left = fs.slice(), out = [];
     activeCompanyKeys().forEach(function(ck){
       var mine = companyFnKeys(ck).filter(function(k){ return fs.indexOf(k) !== -1; });
@@ -1551,6 +1588,9 @@
       out.push({ fold:"div:" + ck, co:ck, label:COMPANIES[ck].name,
         keys:mine.map(function(k){ return "fn:" + k; }) });
     });
+    /* §544.2, as above: the kind's own row ticked too means the catch-all
+       already has a side of its own. */
+    if (alsoWhole) return out;
     if (!out.length) return [{ fold:"fns", label:navWord("fnword", "Functions"), one:true,
       keys:fs.map(function(k){ return "fn:" + k; }) }];
     if (left.length) out.push({ fold:"fns", label:labelWord("topword", "group"),

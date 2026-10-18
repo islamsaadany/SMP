@@ -52,17 +52,21 @@ with sync_playwright() as p:
     ck(isinstance(sl, list) and not any(sl), "no function's deck carries an S&W slide", sl)
     ck(js(pg, "()=>FUNCTION_KEYS.every(k=>FUNCTIONS[k].swot.s[0]==='Kept '+k)") is True, "what was written is still stored")
 
-    print("2. the Structure step agrees, and a press elsewhere does not switch it on")
+    print("2. the shape screen's cards agree, and a press elsewhere does not switch it on")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
-        and press(pg, '.wzstep[data-step="structure"]')
-    ck(ok, "the Structure step opens")
+        and press(pg, '.wzstep[data-step="shape"]')
+    ck(ok, "the shape screen opens")
+    # §544: a level's card opens from the tree, one at a time.
+    def lvl(k):
+        return press(pg, '[data-shlvl="%s"]' % k)
+    lvl("fn")
     on = lambda: js(pg, "()=>{var b=document.querySelector('[data-stsec=\"fn|swot\"]');var x=b&&b.querySelector('[aria-pressed=\"true\"]');return x?x.textContent.trim():null}")
     ck(on() == "Off", "the functions' SWOT reads Off", on())
-    press(pg, '[data-stsec="bu|plan"] button:nth-child(2)')
+    lvl("bu"); press(pg, '[data-stsec="bu|plan"] button:nth-child(2)')
     ck(js(pg, "()=>!!GROUP.structure && (GROUP.structure.fn.on||[]).indexOf('swot')<0") is True,
        "a first press on another switch leaves the functions' S&W off", js(pg, "()=>JSON.stringify(GROUP.structure&&GROUP.structure.fn)"))
     press(pg, '[data-stsec="bu|plan"] button:nth-child(1)')
-    press(pg, '[data-stsec="fn|swot"] button:nth-child(1)')
+    lvl("fn"); press(pg, '[data-stsec="fn|swot"] button:nth-child(1)')
     ck(js(pg, "()=>(GROUP.structure.fn.on||[]).indexOf('swot')>=0") is True, "pressing On stores it on the functions' layer")
 
     print("3. on, it comes back whole")

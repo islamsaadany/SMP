@@ -96,10 +96,17 @@ with sync_playwright() as p:
     ck("Setup opens", ok)
     ck("Setup's rail no longer carries a Structure page (§435)",
        safe(pg, "()=>!document.querySelector('[data-setupgo=\"structure\"]')") is True)
-    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
-    ck("Client set-up › Structure opens", ok)
+    # §544: Client set-up › Structure is the shape screen — the same seven
+    # cards, one at a time, opened by pressing a level in the tree. Every
+    # claim below about what a card HOLDS is unchanged (§218).
+    ok = (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]')
+    ck("Client set-up › the shape opens", ok)
+    def lvl(k):
+        return press(pg, '[data-shlvl="%s"]' % k)
     ck("every card below the top carries an Except for box",
-       safe(pg, "()=>['mid','bu','fn','cap'].every(k=>!!document.querySelector('[data-stexcept=\"'+k+'\"]'))") is True)
+       all(lvl(t) and safe(pg, "()=>!!document.querySelector('[data-stexcept=\"'+%r+'\"]')" % k) is True
+           for t, k in (("bu@g", "mid"), ("bu", "bu"), ("fn", "fn"), ("top", "cap"))))
+    lvl("bu")
     ck("…the business units' box starts empty and says so",
        safe(pg, "()=>{var x=document.querySelector('[data-stexcept=\"bu\"]'); return !!x.querySelector('.stxnone') && !x.querySelector('[data-stxitem]')}") is True)
     def pick(k, v):
@@ -135,8 +142,10 @@ with sync_playwright() as p:
     # §437: the key objectives are a function's option again (Islam: *"keep
     # them in the first section as an option"*), so the row offers them
     # beside the description — asserted PRESENT, never merely not-absent.
+    lvl("fn")
     ck("a function's row offers its description and key objectives chips and no brief, themes or values chip",
        pick("fn", "fn:" + str(fk)) and safe(pg, "()=>!['brief','theme','values','purpose'].some(c=>document.querySelector('[data-stxover=\"fn:%s|'+c+'\"]')) && !!document.querySelector('[data-stxover=\"fn:%s|desc\"]') && !!document.querySelector('[data-stxover=\"fn:%s|keyobj\"]')" % (fk, fk, fk)) is True)
+    lvl("bu")
     ck("…and a unit's row offers a brief but no themes (§427)",
        pick("bu", unit) and safe(pg, "()=>!!document.querySelector('[data-stxover=\"%s|brief\"]') && !document.querySelector('[data-stxover=\"%s|theme\"]')" % (unit, unit)) is True)
     ck("…Remove takes a row off without storing anything",
@@ -173,13 +182,31 @@ with sync_playwright() as p:
        safe(pg, "()=>{var o=coFoundWritable('%s'); var m=koMint(o.keyObjectives, koPrefixOf(o)); return m.id}" % co) == "co-%s-KO1" % co)
     safe(pg, "()=>{delete GROUP.coFound;}")
 
-    # ── 5. The set-up flow's Structure step ──────────────────────────
+    # ── 5. The set-up flow's shape screen (§544) ───────────────────
+    # §544, spec 066 §6: SEVEN STEPS BECAME THREE. The Structure step and the
+    # four list steps are one screen — the tree on the left, the level or
+    # box you press on the right — so the step is asserted as the shape and
+    # the cards are read one level at a time. Every claim about what a card
+    # HOLDS below is §404's and §418's, unchanged (§218).
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
     ck("the set-up flow opens", ok)
-    ck("its second step is Structure",
-       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step)[1]") == "structure")
-    ck("pressing it", press(pg, '.wzstep[data-step="structure"]'))
+    ck("it is three steps: the client, the shape, the office",
+       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')") == "client,shape,office",
+       safe(pg, "()=>[...document.querySelectorAll('.wzstep')].map(b=>b.dataset.step).join(',')"))
+    ck("pressing the shape", press(pg, '.wzstep[data-step="shape"]'))
+    # the tree's four rows, and the card each one opens
+    LVLS = [("top", "top"), ("bu@g", "mid"), ("bu", "bu"), ("fn", "fn")]
+    ck("the tree carries a row per level",
+       safe(pg, "()=>[...document.querySelectorAll('[data-shlvl]')].map(b=>b.dataset.shlvl).join(',')") == "top,bu@g,bu,fn",
+       safe(pg, "()=>[...document.querySelectorAll('[data-shlvl]')].map(b=>b.dataset.shlvl).join(',')"))
+    def each(js, dflt=None):
+        """Read one answer off every level's card, in the tree's order."""
+        out = []
+        for row, k in LVLS:
+            lvl(row); out.append(safe(pg, js % k if "%s" in js else js, dflt))
+        lvl("top")
+        return out
     # §418 REWROTE THIS STEP INTO THREE SECTIONS PER LAYER, so the chips are
     # asserted as the sections' own rows now (§218: rewritten, never
     # loosened). The first section's parts are the rule's own list, filtered
@@ -188,13 +215,15 @@ with sync_playwright() as p:
     # function's own description; the functions offer that and their key
     # objectives.
     want = safe(pg, "()=>({top:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('group',c)).length, fn:SMPRules.SEC_FOUND_PARTS.filter(c=>SMPRules.compOffered('fn:',c)).length})", {})
-    got = safe(pg, "()=>['top','mid','bu','fn'].map(k=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"'+k+'|'+c+'\"]')).length)", [])
+    got = each("()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"%s|'+c+'\"]')).length", 0)
     ck("every layer's first section offers its parts, the functions' fewer (§404.1)",
        bool(want) and got == [want.get("top")] * 3 + [want.get("fn")], [got, want])
+    lvl("fn")
     ck("…the functions' level offers no Brief, Themes, Pillars, Capabilities or Values chip",
        safe(pg, "()=>!['brief','theme','pillar','capability','values'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
     ck("…offers its Description AND its key objectives, with its SWOT a section switch (§436, §437)",
        safe(pg, "()=>!!document.querySelector('[data-stcomp=\"fn|desc\"]') && !!document.querySelector('[data-stcomp=\"fn|keyobj\"]') && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
+    lvl("top")
     ck("the capabilities' first section offers the brief and the North Star, as the directions do (§436)",
        safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')") == "brief,keyobj",
        safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')"))
@@ -202,7 +231,8 @@ with sync_playwright() as p:
     # a function draws either, so a tick there would do nothing. Both ends: a
     # unit's row still offers them (asserted just below).
     ck("…and no Purpose or Aspiration chip on the functions' row (§426)",
-       safe(pg, "()=>!['purpose','aspiration'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
+       lvl("fn") and safe(pg, "()=>!['purpose','aspiration'].some(c=>document.querySelector('[data-stcomp=\"fn|'+c+'\"]'))") is True)
+    lvl("bu")
     ck("…and draws no 'Plan in, by default' row (§404.2: chosen per function later)",
        safe(pg, "()=>![...document.querySelectorAll('.stcard .lab')].some(x=>/Plan in/.test(x.textContent))") is True)
     ck("the default words are singular but for Objectives, Pillars, Capabilities, Values (and Themes)",
@@ -217,23 +247,29 @@ with sync_playwright() as p:
        safe(pg, "()=>['theme'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')&&!!t.closest('.dummy')})") is True)
     ck("…while purpose and values are live ticks, off until pressed (§479)",
        safe(pg, "()=>['purpose','values'].every(c=>{var t=document.querySelector('[data-stcomp=\"bu|'+c+'\"]'); return t&&!t.disabled&&!t.classList.contains('on')})") is True)
+    lvl("bu@g")
     ck("the second layer's themes tick is greyed and off, its brief live (§427)",
        safe(pg, "()=>['theme'].every(c=>{var t=document.querySelector('[data-stcomp=\"mid|'+c+'\"]'); return t&&t.disabled&&!t.classList.contains('on')}) && !document.querySelector('[data-stcomp=\"mid|brief\"]').disabled") is True)
     ck("…its SWOT and plan switches are greyed with Off lit and cannot be pressed (§427)",
        safe(pg, "()=>['mid|swot','mid|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); if(!w||!w.classList.contains('dummy')) return false; var b=[...w.querySelectorAll('button')]; return b.every(x=>x.disabled) && b.some(x=>x.textContent==='Off'&&x.getAttribute('aria-pressed')==='true')})") is True)
     ck("…and its Temple switch is greyed, off and disabled (§427)",
        safe(pg, "()=>{var b=document.querySelector('[data-sttemple=\"mid\"]'); return !!b&&b.disabled&&b.getAttribute('aria-pressed')==='false'&&!!b.closest('.dummy')}") is True)
+    lvl("top")
     ck("…while the top level's SWOT and plan switches stay live",
        safe(pg, "()=>['top|swot','top|plan'].every(k=>{var w=document.querySelector('[data-stsec=\"'+k+'\"]'); return w&&!w.classList.contains('dummy')&&[...w.querySelectorAll('button')].every(x=>!x.disabled)})") is True)
     # §465: the top card keeps two sections; its plan is the Directions card.
     # §492: How we compete is its own section on the top and units cards only, so
     # it is asserted where it lives and left out of the three-section count (§218).
+    # §544: counted a level at a time. The top brings its own card (two
+    # sections, its plan being the Directions card) and the capabilities'
+    # (three), so its answer is "2,3"; every other level is one card.
+    secn = "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')"
     ck("each layer draws three sections, the top two (its plan is the Directions card, §465)",
-       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')") == "2,3,3,3,3",
-       safe(pg, "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')"))
+       each(secn, "") == ["2,3", "3", "3", "3"], each(secn, ""))
+    comp = "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).sort().join(',')"
     ck("…and How we compete is a section on the top and units cards and no other",
-       safe(pg, "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).sort().join(',')") == "bu,top",
-       safe(pg, "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).join(',')"))
+       each(comp, "") == ["top", "", "bu", ""], each(comp, ""))
+    lvl("top")
     # §428: the fifth card is the capabilities', and its plan names two ways, never three.
     ck("the capabilities card names pillars and projects only",
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects",
@@ -242,18 +278,21 @@ with sync_playwright() as p:
        safe(pg, "()=>!document.querySelector('[data-stcomp$=\"|capability\"]')") is True)
     # §465: unsaid, the company plans nothing of its own, so the Directions
     # card is off and names no way; it is switched on further down.
+    ways = "()=>[...document.querySelectorAll('[data-stway^=\"%s|\"]')].length"
     ck("the plan section names all three ways on units and functions, none on the company while its Directions are off",
-       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')") == "0,0,3,3",
-       safe(pg, "()=>['top','mid','bu','fn'].map(k=>[...document.querySelectorAll('[data-stway^=\"'+k+'|\"]')].length).join(',')"))
+       each(ways, 0) == [0, 0, 3, 3], each(ways, 0))
+    # the top card's three (its two sections and How we compete), as before:
+    # the panel's first .stsecs, which is the card the top level opens.
     ck("the sections sit side by side on a wide window",
-       safe(pg, "()=>{var s=[...document.querySelector('.stsecs').children].map(x=>Math.round(x.getBoundingClientRect().top)); return new Set(s).size===1}") is True)
+       lvl("top") and safe(pg, "()=>{var s=[...document.querySelector('.stsecs').children].map(x=>Math.round(x.getBoundingClientRect().top)); return new Set(s).size===1}") is True)
     ck("nothing is stored until something is pressed", safe(pg, "()=>!('structure' in GROUP)") is True)
     # §428.2: what the top card SHOWS unsaid is what the press stores for it —
     # the top layer's own SWOT and Plan start off, so it is not all nine.
     topShown = safe(pg, "()=>SMPRules.levelComponents(GROUP,'top').join(',')", "")
     ck("§428.2: unsaid, the top level carries neither its own SWOT nor its own Plan",
        ",swot" not in ","+topShown and ",pillar" not in ","+topShown and len(topShown.split(",")) == 7, topShown)
-    ck("pressing the business units' SWOT off", press(pg, '[data-stsec="bu|swot"] button:nth-child(2)'))
+    ck("pressing the business units' SWOT off",
+       lvl("bu") and press(pg, '[data-stsec="bu|swot"] button:nth-child(2)'))
     st = safe(pg, "()=>JSON.stringify(GROUP.structure)", "") or ""
     ck("…materialises the structure with SWOT off at that level only",
        safe(pg, "()=>GROUP.structure.bu.on.indexOf('swot')<0 && GROUP.structure.top.on.join(',')===" + json.dumps(topShown) + " && GROUP.structure.top.temple===true") is True, st)
@@ -263,6 +302,7 @@ with sync_playwright() as p:
     # and many) and the parts inside the pillars way; the top card itself
     # carries no plan section at all. BOTH ENDS: off it draws none of it.
     snap = safe(pg, "()=>JSON.stringify(GROUP.structure)", "{}")
+    lvl("top")
     ck("§465 the Directions card is there, and off for a client that never chose",
        safe(pg, "()=>{var c=document.querySelector('[data-stcard=\"dir\"]'); return !!c && !!c.querySelector('.sthid') && !c.querySelector('[data-stway]')}") is True)
     ck("…pressing it On", press(pg, '[data-stsec="top|plan"] button:nth-child(1)'))
@@ -275,6 +315,7 @@ with sync_playwright() as p:
     ck("…pressing it Off", press(pg, '[data-stsec="top|plan"] button:nth-child(2)'))
     ck("…hides it and keeps the pillars carried", safe(pg, "()=>!SMPRules.planOn(GROUP,'group') && GROUP.structure.top.on.indexOf('pillar')>=0") is True)
     safe(pg, "()=>{GROUP.structure=JSON.parse(%s)}" % json.dumps(snap))
+    lvl("bu")
     press(pg, '[data-stsec="bu|swot"] button:nth-child(2)')
     # §418.1: a key this step does not draw survives a press (another
     # session's Plan details switches ride the same object). BOTH ENDS: it
@@ -297,6 +338,7 @@ with sync_playwright() as p:
     # on a client whose shape is still open (§113.8).
     ck("the worked example holds a plan, so its shape is frozen",
        safe(pg, "()=>{var h=__smpHoldsNow(); return !!(h.plans||h.capabilities)}") is True)
+    lvl("bu")
     was = safe(pg, "()=>labelWord('unitword','bu')", "")
     wasP = safe(pg, "()=>labelWord('pillar','bu')", "")
     ro = safe(pg, "()=>[...document.querySelectorAll('input[data-stword],input[data-stlw],input[data-sttitle]')].filter(i=>i.readOnly).length", -1)
@@ -332,6 +374,7 @@ with sync_playwright() as p:
     # plan, with nothing saying why. PRESSED and read back (§70, §96), and
     # the lit button asserted to FOLLOW, or a press that stored the word
     # still reads as a press that did nothing.
+    lvl("top")
     wasT = safe(pg, "()=>labelWord('topword','group')", "")
     dis = safe(pg, "()=>[...document.querySelectorAll('.stcard .wzband button')].filter(b=>b.disabled && /^(Group|Company|Holding|Division|Sector|Another name…)$/.test(b.textContent)).length", -1)
     ck("no name button on the step is greyed", dis == 0, dis)
@@ -343,8 +386,10 @@ with sync_playwright() as p:
        safe(pg, "()=>labelWord('topword','group')") == "Company", safe(pg, "()=>labelWord('topword','group')"))
     ck("…and Company is the button lit",
        safe(pg, "()=>{var b=[...document.querySelectorAll('.stcard')][0].querySelector('.wzband button[aria-pressed=true]'); return b&&b.textContent}") == "Company")
-    ck("the step says what is still changeable on a client with a plan",
-       safe(pg, "()=>/Every name and switch on this step can still be changed/.test(document.body.innerText)") is True)
+    # §544: the two frozen-shape notices were about one screen and are one
+    # notice now — what is set, then what is still yours.
+    ck("the screen says what is still changeable on a client with a plan",
+       safe(pg, "()=>/Every name and switch on this screen can still be changed/.test(document.body.innerText)") is True)
     safe(pg, "()=>{var e=LABELS.entries.filter(x=>x.key==='topword')[0]; e.group=e.bu=%r; paint();}" % wasT)
 
     ck("no page errors", not errs, errs[:3])

@@ -67,8 +67,11 @@ with sync_playwright() as p:
     ck("…and no section is called Group capabilities", not any(x.startswith("Group ") and "apabilit" in x for x in secs0), secs0)
 
     # ── 1. The switch, pressed in Client set-up › Structure ──────────
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
-    ck("Client set-up › Structure opens", ok)
+    # §544: Client set-up › Structure is the shape screen; the top level's
+    # card, which asks where the strategy is planned, opens from the tree.
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) \
+        and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
+    ck("Client set-up › the shape, on the top level, opens", ok)
     ck("§448 the top card asks where the strategy is planned", safe(pg, "()=>!!document.querySelector('[data-stplan]')") is True)
     geo = safe(pg, "()=>{var l=document.querySelector('.stplanq .lab'),b=document.querySelector('[data-stplan]');if(!l||!b)return null;var a=l.getBoundingClientRect(),c=b.getBoundingClientRect();return {below:c.top>=a.bottom-1,left:Math.abs(c.left-a.left)<2}}", None)
     ck("§450 the two buttons sit UNDER the question, at its left edge", bool(geo) and geo.get("below") and geo.get("left"), geo)

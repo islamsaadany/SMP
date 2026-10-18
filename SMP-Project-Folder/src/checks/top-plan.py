@@ -130,8 +130,12 @@ with sync_playwright() as p:
     # ── 5. The Capabilities card ──────────────────────────────────────
     safe(pg, "()=>{delete GROUP.structure;}")
     ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]'))
-    ck("the set-up flow opens on Structure", ok and press(pg, '.wzstep[data-step="structure"]'))
-    ck("a fifth card is the capabilities'", safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"]')") is True)
+    # §544: the Structure step is the shape screen, and the capabilities'
+    # card rides with the top level's (§218: the card and everything it
+    # holds are unchanged; only the way in is).
+    ck("the set-up flow opens on the shape screen",
+       ok and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]'))
+    ck("the top level brings the capabilities' card", safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"]')") is True)
     ck("…whose plan names pillars and projects only",
        safe(pg, "()=>[...document.querySelectorAll('[data-stway^=\"cap|\"]')].map(x=>x.dataset.stway.split('|')[1]).sort().join(',')") == "pillars,projects")
     ck("…and nothing is stored while it only holds the functions' answers",

@@ -111,7 +111,7 @@ with sync_playwright() as p:
     ck("…and it is not the hidden direction's 80%", want != 80, want)
 
     # ── 6. The set-up flow's Directions card says how it plans ────────
-    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="structure"]')
+    ok = press(pg, '[data-md="setup"]') and (press(pg, '.ritem[data-setupgo="start"]') or press(pg, '[data-setupgo="start"]')) and press(pg, '.wzstep[data-step="shape"]') and press(pg, '[data-shlvl="top"]')
     ck("the Directions card carries a plans-in choice", ok and safe(pg, "()=>{var s=document.querySelector('[data-stcard=\"dir\"] select[data-wztopway]'); return s?s.value:null}") == "projects")
     try: pg.select_option('[data-stcard="dir"] select[data-wztopway]', "pillars", timeout=3000)
     except Exception: pass

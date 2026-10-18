@@ -111,6 +111,32 @@ def rows(pg):
     return ev(pg, "()=>document.querySelectorAll('.csetup .wzrow').length", -1)
 
 
+# §544 — THE SHAPE SCREEN. Five steps (Structure, the divisions, the units,
+# the functions, the capabilities) became one, so what was "press the units
+# step and read its rows" is "press the shape, read the tree, press a box".
+def shape(pg):
+    return press(pg, ".csetup .wzstep[data-step=shape]", 500)
+
+
+def count(pg, lvl):
+    """How many boxes the tree says this level holds."""
+    return ev(pg, '()=>{var n=document.querySelector(\'.csetup [data-shcount="%s"]\'); return n?Number(n.textContent):-1}' % lvl, -1)
+
+
+def boxes(pg, kind):
+    """The boxes of one kind drawn right now (one division's at a time)."""
+    return ev(pg, '()=>[...document.querySelectorAll(\'.csetup [data-shbox^="%s:"]\')].map(b=>b.dataset.shbox)' % kind, [])
+
+
+def openbox(pg, kind, at):
+    sel = ".csetup [data-shbox='%s:%s']" % (kind, at)
+    if not ev(pg, "()=>!!document.querySelector(%r)" % sel, False):
+        for d in range(ev(pg, "()=>document.querySelectorAll('.csetup [data-shbox^=\"co:\"]').length", 0) or 0):
+            press(pg, ".csetup [data-shbox='co:%d']" % d, 250)
+            if ev(pg, "()=>!!document.querySelector(%r)" % sel, False): break
+    return press(pg, sel, 350)
+
+
 # THE STATE IS MADE (§255): every plan line cleared out of a copy, the
 # platform rebound to it through SYNC.hydrate (the flow's own road), and
 # the page opened on Getting started.
@@ -151,7 +177,7 @@ with sync_playwright() as p:
     ck("…its count AGREES with CLIENTSETUP.progress() (never a literal)",
        isinstance(pr, dict) and pr.get("total") and prog.startswith("%s of %s done" % (pr.get("done"), pr.get("total"))), (prog, pr))
     ck("…the total is the number of steps the flow draws",
-       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 7, pr)
+       isinstance(pr, dict) and pr.get("total") == ev(pg, "()=>CLIENTSETUP.STEPS.length", -1) == 3, pr)
     ck("…and it names what is left", isinstance(pr, dict) and bool(pr.get("todo")) and all(t in prog for t in pr["todo"][:2]), (prog, pr))
     ck("…and the def is NOT a row in any group while the strip stands",
        q(pg, '.setuprail .ritem[data-setupgo="start"]') is None and q(pg, '.setuprail .rgroup[data-railgrp="client"]') is None)
@@ -166,9 +192,12 @@ with sync_playwright() as p:
     ck("…and the strip is lit as the page you are on",
        ev(pg, "()=>{const s=document.querySelector('.railstart');return !!s && s.classList.contains('on') && s.getAttribute('aria-current')==='page';}", False))
     steps = ev(pg, "()=>Array.from(document.querySelectorAll('.csetup .wzstep')).map(e=>e.dataset.step)", [])
-    ck("seven steps, in order — client, structure, divisions, units, functions, capabilities, office (§404.4)",
-       steps == ["client", "structure", "cos", "units", "fns", "caps", "office"], steps)
-    ck("…the same seven the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
+    # §544, spec 066 §6: THE SEVEN STEPS ARE THREE. Structure and the four
+    # list steps are one screen — the shape — and every answer they held is
+    # asserted below on the level or the box it is about.
+    ck("three steps, in order — the client, the shape, the office (§544)",
+       steps == ["client", "shape", "office"], steps)
+    ck("…the same three the flow declares (§53.5)", steps == ev(pg, "()=>CLIENTSETUP.STEPS.map(s=>s.k)", None), steps)
     ck("standing on the first", at(pg) == "client" and ev(pg, "()=>(document.querySelector('.csetup .wzstep[aria-current=step]')||{}).dataset.step", None) == "client")
     ck("Done with set-up is offered", bool(q(pg, ".csetup [data-wzdone]")))
     ck("…Next too, and Back is shut on the first step", bool(q(pg, ".csetup [data-wznext]")) and
@@ -197,27 +226,27 @@ with sync_playwright() as p:
 
     # ── 4 · THE UNITS STEP: ADD, TYPE, NEXT — READ BACK OFF THE GRAPH ─────
     print("\n§4 · a business unit is added")
-    ck("the units step opens", press(pg, ".csetup .wzstep[data-step=units]") and at(pg) == "units", at(pg))
+    ck("the shape opens", shape(pg) and at(pg) == "shape", at(pg))
     n_units = ev(pg, "()=>UNIT_KEYS.length", -1)
     head0 = ev(pg, "()=>({key:UNIT_KEYS[0], head:(UNIT_ROLES[UNIT_KEYS[0]]||{}).head, mob:(UNIT_ROLES.mobile||{}).head})", {})
     ck("(fixture) the first unit has somebody in charge — the refusal below needs one (§113.8)",
        isinstance(head0, dict) and bool(head0.get("head")), head0)
-    r0 = rows(pg)
-    ck("one row per unit, and the Add button (the shape is not frozen)", r0 == n_units and bool(q(pg, ".csetup .wzadd")), (r0, n_units))
-    ck("pressing Add puts the cursor in the new box",
-       press(pg, ".csetup .wzadd", 400) and rows(pg) == r0 + 1 and
-       ev(pg, "()=>{const b=document.querySelectorAll('.csetup .wzrow input.fld');return b.length>0 && document.activeElement===b[b.length-1];}", False),
+    ck("the tree counts every unit, and offers Add (the shape is not frozen)",
+       count(pg, "bu") == n_units and bool(q(pg, ".csetup [data-shrow=bu] .shadd")), (count(pg, "bu"), n_units))
+    ck("pressing Add opens the new box with the cursor in its name",
+       press(pg, ".csetup [data-shrow=bu] .shadd", 400) and count(pg, "bu") == n_units + 1 and
+       ev(pg, "()=>{const b=document.querySelector('.csetup [data-shname]');return !!b && document.activeElement===b;}", False),
        ev(pg, "()=>document.activeElement && document.activeElement.className"))
     ck("…and nothing is written until Next", ev(pg, "()=>UNIT_KEYS.length", -1) == n_units)
     try:
-        pg.fill(".csetup .wzrow input.fld >> nth=-1", "Test Unit X"); pg.wait_for_timeout(100)
+        pg.fill(".csetup [data-shname]", "Test Unit X"); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("FILL: " + str(e)[:90])
     ck("Next writes the unit into the STORED graph", press(pg, ".csetup [data-wznext]", 500) and
        ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1 and
        ev(pg, "()=>UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name", None) == "Test Unit X",
        ev(pg, "()=>[UNIT_KEYS.length, UNITS[UNIT_KEYS[UNIT_KEYS.length-1]].name]"))
-    ck("…and moves on to the next step — the functions, since the divisions come first now", at(pg) == "fns", at(pg))
+    ck("…and moves on to the office, the last of the three", at(pg) == "office", at(pg))
     ck("the heads survive the pass (§346): who runs Mobile before is who runs it after",
        ev(pg, "()=>(UNIT_ROLES.mobile||{}).head", None) == head0.get("mob") and bool(head0.get("mob")),
        (head0.get("mob"), ev(pg, "()=>(UNIT_ROLES.mobile||{}).head")))
@@ -229,27 +258,28 @@ with sync_playwright() as p:
 
     # ── 5 · REMOVING A HEADED UNIT IS REFUSED BY NAME, AND THE ROW IS BACK ─
     print("\n§5 · a headed unit cannot be removed here")
-    press(pg, ".csetup .wzstep[data-step=units]")
-    r1 = rows(pg); keys1 = ev(pg, "()=>UNIT_KEYS.slice()", None)
+    shape(pg)
+    c1 = count(pg, "bu"); keys1 = ev(pg, "()=>UNIT_KEYS.slice()", None)
     name0 = ev(pg, "()=>UNITS[UNIT_KEYS[0]].name", "")
-    ck("(fixture) the first row is the headed unit", at(pg) == "units" and r1 == n_units + 1 and bool(name0), (at(pg), r1))
-    ck("the × takes the row off the step", press(pg, ".csetup .wzrow >> nth=0 >> .wzx", 300) and rows(pg) == r1 - 1, rows(pg))
+    ck("(fixture) the first box is the headed unit", at(pg) == "shape" and c1 == n_units + 1 and bool(name0), (at(pg), c1))
+    ck("Remove takes the box off the tree",
+       openbox(pg, "bu", 0) and press(pg, ".csetup [data-shremove='bu:0']", 300) and count(pg, "bu") == c1 - 1, count(pg, "bu"))
     press(pg, ".csetup [data-wznext]", 500)
     s = said(pg)
     ck("Next is refused, naming the unit somebody is in charge of", "Somebody is in charge of" in s and name0 in s, s[:120])
     ck("…and saying the row is back", "back as it was" in s, s[:160])
-    ck("…the row IS back on the step", rows(pg) == r1, (rows(pg), r1))
-    ck("…the flow stays on the units step", at(pg) == "units", at(pg))
+    ck("…the box IS back on the tree", count(pg, "bu") == c1, (count(pg, "bu"), c1))
+    ck("…the flow stays on the shape", at(pg) == "shape", at(pg))
     ck("…and the stored graph is untouched", ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1 and
        ev(pg, "()=>(UNIT_ROLES[UNIT_KEYS[0]]||{}).head", None) == head0.get("head"))
     ck("the very next Next then proceeds (§360.3 — the person is not held on the step)",
-       press(pg, ".csetup [data-wznext]", 500) and at(pg) == "fns" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
+       press(pg, ".csetup [data-wznext]", 500) and at(pg) == "office" and ev(pg, "()=>UNIT_KEYS.slice()", None) == keys1, (at(pg), said(pg)[:80]))
 
     # ── 6 · A ROW WITH NO NAME ─────────────────────────────────────────────
-    print("\n§6 · a row with no name")
-    press(pg, ".csetup .wzstep[data-step=units]")
-    r2 = rows(pg)
-    press(pg, ".csetup .wzadd", 300)
+    print("\n§6 · a box with no name")
+    shape(pg)
+    c2 = count(pg, "bu")
+    press(pg, ".csetup [data-shrow=bu] .shadd", 300)
     press(pg, ".csetup [data-wznext]", 400)
     s = said(pg)
     # §395: the sentence names the thing in the CLIENT's word, so it is asked
@@ -260,9 +290,10 @@ with sync_playwright() as p:
     # same rule, worked out here rather than read back from the product.
     one = " ".join(x if x[1:] != x[1:].lower() else x[:1].lower() + x[1:] for x in one.split())
     ck("Next with an empty row is refused in words", ("Name a " + one) in s and "remove the empty row" in s, s[:120])
-    ck("…and nothing is written", at(pg) == "units" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
-    ck("taking the empty row off lets Next through", press(pg, ".csetup .wzrow >> nth=-1 >> .wzx", 300) and rows(pg) == r2
-       and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "fns", (rows(pg), at(pg), said(pg)[:60]))
+    ck("…and nothing is written", at(pg) == "shape" and ev(pg, "()=>UNIT_KEYS.length", -1) == n_units + 1)
+    ck("taking the empty box off lets Next through",
+       press(pg, ".csetup [data-shremove='bu:%d']" % c2, 300) and count(pg, "bu") == c2
+       and press(pg, ".csetup [data-wznext]", 500) and at(pg) == "office", (count(pg, "bu"), at(pg), said(pg)[:60]))
 
     # ── 7 · DONE WITH SET-UP ───────────────────────────────────────────────
     print("\n§7 · Done with set-up")
@@ -285,103 +316,140 @@ with sync_playwright() as p:
 
     # ── 8 · THE SHAPE FREEZES WITH A PLAN ──────────────────────────────────
     print("\n§8 · a client with a plan in it")
-    press(pg, ".csetup .wzstep[data-step=units]")
-    ck("(before) the Add button is there", at(pg) == "units" and bool(q(pg, ".csetup .wzadd")) and q(pg, ".csetup .wzarched") is None)
+    shape(pg)
+    ck("(before) the Add button is there", at(pg) == "shape" and bool(q(pg, ".csetup [data-shrow=bu] .shadd")) and q(pg, ".csetup .wzarched") is None)
     ev(pg, "()=>{UNITS[UNIT_KEYS[0]].items.push({id:'x-P1', code:'X01', name:'A pillar', measures:[], tactics:[]}); paint();}")
     pg.wait_for_timeout(400)
-    ck("with a plan line, the Add button is gone and no common name is offered",
-       q(pg, ".csetup .wzadd") is None and q(pg, ".csetup .wzcm") is None)
-    ck("…the step says the shape is set", ev(pg, "()=>/shape is set from here on/.test((document.querySelector('.csetup .wzarched')||{}).textContent||'')", False))
-    ck("…and the names are read-only", ev(pg, "()=>{const b=Array.from(document.querySelectorAll('.csetup .wzrow input.fld'));return b.length>0 && b.every(x=>x.readOnly);}", False))
+    ck("with a plan line, no Add anywhere on the tree and no common name offered",
+       q(pg, ".csetup .shadd") is None and q(pg, ".csetup .shchip") is None)
+    ck("…the screen says the shape is set", ev(pg, "()=>/shape is set from here on/.test((document.querySelector('.csetup .wzarched')||{}).textContent||'')", False))
+    ck("…and says in the same notice what is still changeable (§544: one notice, not two)",
+       ev(pg, "()=>/Every name and switch on this screen can still be changed/.test((document.querySelector('.csetup .wzarched')||{}).textContent||'')", False))
+    openbox(pg, "bu", 0)
+    ck("…and a box's name is read-only",
+       ev(pg, "()=>{const b=Array.from(document.querySelectorAll('.csetup [data-shname]'));return b.length>0 && b.every(x=>x.readOnly);}", False))
     ev(pg, "()=>{UNITS[UNIT_KEYS[0]].items.pop(); paint();}")
     pg.wait_for_timeout(300)
-    ck("…and back again with the line gone (§94.2)", bool(q(pg, ".csetup .wzadd")))
+    ck("…and back again with the line gone (§94.2)", bool(q(pg, ".csetup [data-shrow=bu] .shadd")))
 
-    # ── 9 · §404.4: DIVISIONS NAMED, A ROW PUT IN ONE, NO WORDS STEP ───────
-    print("\n§9 · divisions, the division pickers, and the words on Structure")
+    # ── 9 · §544: THE TREE — LAYERS, DIVISIONS, THE NAVIGATION TICK ────
+    # §404.4's claims, asked where they live now: the divisions are a layer
+    # ABOVE A KIND rather than a step of their own, a box is put in one from
+    # its own panel, and the words are on the level's card. Nothing is
+    # loosened — every answer the five steps held is asserted below (§218).
+    print("\n§9 · the tree: the layers, the divisions and the navigation")
     fixture = ev(pg, "()=>JSON.stringify({st:GROUP[SMPRules.STRUCTURE]||null})", "{}")
     ck("(fixture) this client has divisions", ev(pg, "()=>COMPANY_KEYS.length", 0) > 0)
-    press(pg, ".csetup .wzstep[data-step=cos]")
-    ck("the divisions step asks no Yes/No — Structure answers that (both ends: its rows ARE drawn)",
-       q(pg, ".csetup .wzchoice") is None and rows(pg) == ev(pg, "()=>COMPANY_KEYS.length", -1), rows(pg))
-    ck("…and asks the question in the client's word for them",
-       ev(pg, "()=>{const w=labelWord('division','bu').toLowerCase();return (document.querySelector('.csetup .wzq')||{}).textContent.toLowerCase().indexOf(w)>=0;}", False))
-    ck("…and no mapping list sits under it any more (it moved onto the rows)",
-       not ev(pg, "()=>/each .* belongs to$/i.test(Array.from(document.querySelectorAll('.csetup .lab')).map(e=>e.textContent).join('|'))", True))
-    press(pg, ".csetup .wzstep[data-step=units]")
-    nd = ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv=unit]').length", -1)
-    ck("every unit row offers its division", nd == rows(pg) and nd > 0, (nd, rows(pg)))
+    shape(pg)
+    lv = ev(pg, "()=>[...document.querySelectorAll('.csetup [data-shlvl]')].map(b=>b.dataset.shlvl)", [])
+    ck("the tree is the top, the units' own layer, the units, then the functions (§544)",
+       lv == ["top", "bu@g", "bu", "fn"], lv)
+    ck("…the divisions are counted on the units' layer and nowhere else",
+       count(pg, "bu@g") == ev(pg, "()=>COMPANY_KEYS.length", -1) and count(pg, "fn@g") == -1,
+       [count(pg, "bu@g"), count(pg, "fn@g")])
+    ck("…and the functions' row offers to group them under a layer of their own",
+       bool(q(pg, ".csetup [data-shgroup=fn]")) and q(pg, ".csetup [data-shgroup=bu]") is None)
+    # the navigation tick (§544.2), read as an absence first: exactly what
+    # navSides() answers for this client today.
+    ticks = ev(pg, "()=>[...document.querySelectorAll('.csetup [data-shnav]')].map(b=>b.dataset.shnav+'='+b.getAttribute('aria-pressed')).join(',')", "")
+    ck("the navigation ticks open as the row this client already has",
+       ticks == "bu@g=false,bu=true,fn=true", ticks)
+    ck("…and nothing is stored by looking (§50.6)",
+       ev(pg, "()=>{var s=SMPRules.structureOf(GROUP)||{}; return !['bu','fn'].some(k=>s[k]&&('nav' in s[k]||'layerNav' in s[k]))}", False))
+    sides0 = ev(pg, "()=>navSides().map(s=>s.fold).join(',')", "")
+    press(pg, ".csetup [data-shnav='fn']", 400)
+    ck("unticking the functions stores a real false and takes their side off the row",
+       ev(pg, "()=>SMPRules.structureOf(GROUP).fn.nav", None) is False and
+       ev(pg, "()=>navSides().map(s=>s.fold).join(',')", "") == sides0.replace(",fns", ""),
+       [ev(pg, "()=>navSides().map(s=>s.fold).join(',')"), sides0])
+    press(pg, ".csetup [data-shnav='fn']", 400)
+    ck("…and ticking it back DELETES the key rather than writing true, the row as it was",
+       ev(pg, "()=>{var f=(SMPRules.structureOf(GROUP)||{}).fn||{}; return !('nav' in f)}", False) and
+       ev(pg, "()=>navSides().map(s=>s.fold).join(',')", "") == sides0)
+    # a box is put in a division from its own panel (§391, §404.4, §96)
     coname = ev(pg, "()=>COMPANIES[COMPANY_KEYS[0]].name", "")
     lastk = ev(pg, "()=>UNIT_KEYS[UNIT_KEYS.length-1]", None)
+    openbox(pg, "bu", ev(pg, "()=>UNIT_KEYS.length-1", 0))
+    ck("a unit's panel offers its division", bool(q(pg, ".csetup [data-wzdiv=unit]")))
     try:
-        pg.select_option(".csetup [data-wzdiv=unit] >> nth=-1", coname); pg.wait_for_timeout(100)
+        pg.select_option(".csetup [data-wzdiv=unit]", coname); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
     press(pg, ".csetup [data-wznext]", 500)
     ck("…and picking one WRITES the unit's division (§96)",
        ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk)), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
        ev(pg, "()=>UNITS[%s] && UNITS[%s].company" % (json.dumps(lastk), json.dumps(lastk))))
-    ck("…landing on the functions step", at(pg) == "fns", at(pg))
     fk = ev(pg, "()=>FUNCTION_KEYS[0]", None)
     other = ev(pg, "()=>JSON.stringify(FUNCTION_KEYS.slice(1).map(k=>[k,FUNCTIONS[k].company||null]))", "")
-    ck("every function row offers its division too", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv=fn]').length", -1) == rows(pg))
+    shape(pg); openbox(pg, "fn", 0)
+    ck("a function's panel offers one too (§391)", bool(q(pg, ".csetup [data-wzdiv=fn]")))
     try:
-        pg.select_option(".csetup [data-wzdiv=fn] >> nth=0", coname); pg.wait_for_timeout(100)
+        pg.select_option(".csetup [data-wzdiv=fn]", coname); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
-    press(pg, ".csetup .wzstep[data-step=units]", 500)
+    press(pg, ".csetup [data-wznext]", 500); shape(pg)
     ck("…and picking one WRITES the function's division (§391's field)",
        ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk), None) == ev(pg, "()=>COMPANY_KEYS[0]"),
        ev(pg, "()=>FUNCTIONS[%s].company" % json.dumps(fk)))
     ck("…and every other function's division is exactly what it was",
        ev(pg, "()=>JSON.stringify(FUNCTION_KEYS.slice(1).map(k=>[k,FUNCTIONS[k].company||null]))", None) == other)
-    press(pg, ".csetup .wzstep[data-step=fns]")
+    # §544: and THAT is what puts a division on the functions' row — the
+    # layer belongs to the kind that uses it.
+    lv2 = ev(pg, "()=>[...document.querySelectorAll('.csetup [data-shlvl]')].map(b=>b.dataset.shlvl)", [])
+    ck("a function in a division gives the functions a layer of their own",
+       lv2 == ["top", "bu@g", "bu", "fn@g", "fn"], lv2)
+    openbox(pg, "fn", 0)
     try:
-        pg.select_option(".csetup [data-wzdiv=fn] >> nth=0", ""); pg.wait_for_timeout(100)
+        pg.select_option(".csetup [data-wzdiv=fn]", ""); pg.wait_for_timeout(100)
     except Exception as e:
         errs.append("SELECT: " + str(e)[:90])
-    press(pg, ".csetup .wzstep[data-step=units]", 500)
+    press(pg, ".csetup [data-wznext]", 500); shape(pg)
     ck("…and choosing none takes it off again (the key DELETED, §50.6)",
        ev(pg, "()=>!('company' in FUNCTIONS[%s])" % json.dumps(fk), False))
-    press(pg, ".csetup .wzstep[data-step=structure]")
-    ck("Structure names the units and the functions, one and many, where the Words step used to",
-       all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("unitword|one", "unitword|many", "fnword|one", "fnword|many")))
-    # §418: a part is named per LAYER, inside the plan section's pillars way
-    # (rewritten, never loosened, §218 — every layer, both forms).
-    ck("…and the key measures and tactics beside the pillars, on the units and the functions",
-       all(q(pg, '.csetup [data-stway="%s|pillars"] [data-stlw="%s|%s|%s"]' % (k, k, part, form))
-           for k in ("bu", "fn") for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
-    # §465: the company's own names live on the Directions card, once it is on.
+    ck("…and the functions' layer goes with it",
+       ev(pg, "()=>[...document.querySelectorAll('.csetup [data-shlvl]')].map(b=>b.dataset.shlvl)", []) == ["top", "bu@g", "bu", "fn"])
+    # the words, on the level's own card (§404.4, §418)
+    press(pg, ".csetup [data-shlvl=bu]", 350)
+    ck("the units' card names them, one and many, where the Words step used to",
+       all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("unitword|one", "unitword|many")))
+    ck("…and the key measures and tactics beside the pillars",
+       all(q(pg, '.csetup [data-stway="bu|pillars"] [data-stlw="bu|%s|%s"]' % (part, form))
+           for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
+    press(pg, ".csetup [data-shlvl=fn]", 350)
+    ck("…the functions' card names them too",
+       all(q(pg, '.csetup [data-stword="%s"]' % k) for k in ("fnword|one", "fnword|many")) and
+       all(q(pg, '.csetup [data-stway="fn|pillars"] [data-stlw="fn|%s|%s"]' % (part, form))
+           for part in ("pillar", "measure", "tactic") for form in ("one", "many")))
+    press(pg, ".csetup [data-shlvl=top]", 350)
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(1)')
     ck("…and on the company's Directions card once it is switched on (§465)",
        all(q(pg, '.csetup [data-stcard="dir"] [data-stlw="top|pillar|%s"]' % f) for f in ("one", "many")) and
        all(q(pg, '.csetup [data-stway="top|pillars"] [data-stlw="top|%s|%s"]' % (p, f)) for p in ("measure", "tactic") for f in ("one", "many")))
     press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)')
     ck("there is no Words step", q(pg, ".csetup .wzstep[data-step=words]") is None)
-    # no second layer: the divisions step says so and no row offers a division
+    ck("…and no Structure, divisions, units, functions or capabilities step either (§544)",
+       all(q(pg, ".csetup .wzstep[data-step=%s]" % k) is None for k in ("structure", "cos", "units", "fns", "caps")))
+    # no second layer: the tree draws no layer row at all, and a box's panel
+    # offers no division (§61: a control with nothing behind it)
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));st.mid=Object.assign({},st.mid||{},{exists:false});GROUP[SMPRules.STRUCTURE]=st;paint();}")
-    press(pg, ".csetup .wzstep[data-step=cos]")
-    ck("with no second layer the divisions step says so and points to Structure",
-       rows(pg) == 0 and ev(pg, "()=>/no second layer/.test(document.querySelector('.csetup').textContent) && /Structure step/.test(document.querySelector('.csetup').textContent)", False))
-    press(pg, ".csetup .wzstep[data-step=units]")
-    ck("…and no unit offers a division", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv]').length", -1) == 0)
-    # §438 REWROTE THIS (§218): the line used to say "a unit plans in pillars",
-    # which stopped being true of every unit once the step asks each unit how
-    # it plans. It says what the plan type decides now, and never claims pillars.
-    ck("…and the units' step says a unit's plan type decides its pages, beside a plans-in select per row",
-       ev(pg, "()=>/plan type decides what its pages hold/.test(document.querySelector('.csetup').textContent) && document.querySelectorAll('.csetup select[data-wzfmt]').length===document.querySelectorAll('.csetup .wzrow').length", False))
+    shape(pg)
+    ck("with no second layer the tree draws no layer row",
+       ev(pg, "()=>[...document.querySelectorAll('.csetup [data-shlvl]')].map(b=>b.dataset.shlvl)", []) == ["top", "bu", "fn"])
+    openbox(pg, "bu", 0)
+    ck("…and no box offers a division", ev(pg, "()=>document.querySelectorAll('.csetup [data-wzdiv]').length", -1) == 0)
+    # §438: the line says what the plan type decides, and never claims pillars
+    ck("…and a unit's panel says its plan type decides its pages, beside a plans-in select",
+       ev(pg, "()=>/plan type decides what its pages hold/.test(document.querySelector('.csetup').textContent) && document.querySelectorAll('.csetup select[data-wzfmt]').length===1", False))
     ev(pg, "()=>{const st=JSON.parse(JSON.stringify(SMPRules.structureOf(GROUP)||{}));['top','mid','bu'].forEach(k=>{st[k]=Object.assign({},st[k]||{});st[k].on=SMPRules.STRUCT_COMPONENTS.filter(c=>c!=='capability'&&c!=='pillar');});GROUP[SMPRules.STRUCTURE]=st;paint();}")
-    press(pg, ".csetup .wzstep[data-step=fns]"); press(pg, ".csetup .wzstep[data-step=units]")
-    ck("…and nothing claims every unit plans in pillars once units carry none", not ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", True))
-    press(pg, ".csetup .wzstep[data-step=caps]")
-    ck("with no level carrying capabilities the step says so in one line, and offers no Add",
-       q(pg, ".csetup .wzadd") is None and ev(pg, "()=>/does not use/.test(document.querySelector('.csetup').textContent)", False))
+    shape(pg); openbox(pg, "bu", 0)
+    ck("…and nothing claims every unit plans in pillars once units carry none",
+       not ev(pg, "()=>/plans in pillars/.test(document.querySelector('.csetup').textContent)", True))
+    # the capabilities: the step is gone, and the tree says where they are
     ev(pg, "()=>{const f=JSON.parse(%s); if(f.st) GROUP[SMPRules.STRUCTURE]=f.st; else delete GROUP[SMPRules.STRUCTURE]; paint();}" % json.dumps(fixture))
-    press(pg, ".csetup .wzstep[data-step=caps]")
-    ck("…and with them carried again the step is a list (§94.2)", bool(q(pg, ".csetup .wzadd")))
-    press(pg, ".csetup .wzstep[data-step=fns]")
-    ck("the functions step says its plan-type line exactly once",
-       ev(pg, "()=>(document.querySelector('.csetup').textContent.match(/plan type decides/g)||[]).length", -1) == 1)
+    shape(pg)
+    ck("the capabilities a client still holds are named with where they are managed (§544)",
+       ev(pg, "()=>{var n=(GROUP.capabilities||[]).length; var t=document.querySelector('.csetup .shtree').textContent; return n===0 || /managed on Setup/.test(t)}", False),
+       ev(pg, "()=>[(GROUP.capabilities||[]).length, document.querySelector('.csetup .shtree').textContent.slice(-120)]"))
 
     print("\n§10 · the console")
     ck("no page errors", not errs, errs[:3])

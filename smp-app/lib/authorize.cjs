@@ -1599,6 +1599,27 @@ function ctxOfUnit(u) {
     (p.tactics || []).forEach(function (t) {
       out[t.id] = { row: t, pillarOwner: p.owner, pillarCust: p.custodian };
     });
+    /* §545: AND THE BREAKDOWN'S ROWS (§343). They were never here, so every
+       `a_c<n>` and every row note arrived at the verdict as an id the index
+       did not hold — and an id this map misses is refused to EVERYBODY it is
+       asked about (`!ctx` is the first clause of both filters below). The
+       third time that shape has cost somebody their work: §334.18 on a
+       function's own projects, §191 on the pillar walk, and this.
+       NOT MEASURED BY THE OFFICE OR A UNIT HEAD, which is why it shipped —
+       an unbounded reporter returns before the per-row filter runs, so the
+       fault is invisible to everyone except the roles bounded to their own
+       rows. Found on El Abd: a direction's owner entering five category
+       figures beside eight tactic ones was refused the whole save, under
+       "5 figures is not yours".
+       A BREAKDOWN ROW LEANS ON ITS PILLAR'S OWNER, exactly as a measure does
+       (§55) — it has no owner of its own and the screen draws its box from
+       `p.owner`/`p.custodian` (reportItems' `bds`), so this is the same
+       answer the page already gives rather than a second one (§42). */
+    R.bdRows(p).forEach(function (r) {
+      if (!r || r.id === undefined) return;
+      out[r.id] = { row: { owner: p.owner },
+                    pillarOwner: p.owner, pillarCust: p.custodian };
+    });
   });
   return out;
 }

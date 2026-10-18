@@ -65694,6 +65694,23 @@ Islam, 2026-10-15, of §536: *"the concept is right but you are having the mark 
 
 Published as version 2. The five sign-off points of §536 §5 stand unchanged; the correction is to the drawing, not to the design.
 
+## §539 — What the keys do: the four idioms, written down (usability audit, heuristic 7; 2026-10-18)
+The audit's headline finding is that the platform has ONE keyboard idiom and it is the projector. Measured against the sources it has **four** — the projector, §528's reporting keys, §536's dropdown and `arrange.js`'s row move — plus Escape bound fifteen times and Enter eleven.
+
+**AND THE FINDING THE AUDIT DOES NOT MAKE is the one this answers: nothing on any screen said so.** There was no list of keys anywhere in the product; every source was searched. §528's hints ride a hover and a per-control `aria-keyshortcuts`, so the only way to discover Alt+Enter was to hover the one button carrying it. Four idioms, no index.
+
+**THIS BOUND NO NEW SHORTCUT.** Every key on the sheet already worked; what is new is that they are written down. **Islam chose treatment A** of the drawing (`design-mockups/shortcuts-sheet/`): the whole product, with the sections that work HERE marked — so a reporter learns the deck and the lists have keys too, which is the thing nobody could find out. Treatment B showed only what was live where you stand, and its cost was exactly the fault this section exists to fix: it answers *what can I press now* and never *what does this product do*.
+
+**EACH SECTION ASKS THE MODULE THAT OWNS IT** whether it is live, through that module's own marker and never a rule copied into the sheet (§53.5): the reporting boxes through `REP_BOXES` itself, the string `shell.html` names once and the walks already read; the dropdown through `data-ss`; the row move through `.grip`; the deck through `#deckroot.on`.
+
+**TWO REFUSALS, BOTH DELIBERATE AND BOTH ASSERTED.** `?` does NOT fire while somebody is typing — a question mark is a character people mean to write, and most of this product is fields, so the guard is the one §528's keys already use. And `?` does NOT open over the deck: the modal is outside the fullscreen element, so there it would open where nobody can see it, which is the control-that-looks-live-and-does-nothing §534 spent thirty conversions removing.
+
+**TWO WAYS IN**, because a sheet reachable only by knowing the key to reach it is this section's own fault one level up: `?`, and a `?` in the top bar beside Light and Dark carrying its own `aria-keyshortcuts`.
+
+**A SECTION NOT LIVE HERE IS QUIETER, NEVER HIDDEN**, and the check asserts it: that is the whole argument for A over B, so a build that quietly hid them would pass every other assertion.
+
+**CHECK.** `checks/keyboard-sheet.py` — green here, **18 red on the build before**. It proves "no new shortcut" rather than claiming it: `?` appears as a binding in exactly ONE place in the whole built file, and every key the sheet names is one the build already tests for, so changing a binding without changing the sheet goes red.
+
 ## §540 — Stage 3b (a): joined or split, as one setting on the box
 Islam, 2026-10-15, authorising it: *"go ahead with a"*. The mockup it builds is §536 / §536.1, signed off at version 2.
 
@@ -65797,6 +65814,17 @@ Three functions in `config-data.js`: `capFoldBlockers()` (what stops it, by name
 
 Eight deliberate breaks, each counted: the move refusing nothing → 8 red; the owner not carried → 1; the row not marked internal → 14; the split not set → 5; the Temple reading records only → 2; the deck heading dropping a kind → 1; the empty Performance section kept → 2; Reporting drawing no second section → 2. And `checks/top-plan.py` caught a mistake of mine that none of those would have: rewriting the Temple's base, I dropped the Structure step's own gate, so a client with capabilities switched OFF would have been shown a base again. Both guards are there now, in that order.
 
+## §542.1 — The deck's roll-call asks the setting, not the mark (spec 066 stage 3b; 2026-10-18)
+**NOT THIS SESSION'S WORK.** It was built and pushed as `c23a62d` from another session, under the number §539.1 — which the renumber of §537–§539 to §540–§542 made §542.1, and which no entry was ever written for. It is written here because A7/A8 says the books carry the work, and it was **found by reading every § in the recent commits against this file** rather than by anybody noticing. The code was verified against the commit's own account before this was written; the account is accurate, and what was not re-run is named at the end.
+
+**`checks/deck-figures.py` went red on §542, and it was right.** The roll-call heading named **both kinds** whenever the list held a pillar marked Capability. **Six of the worked example's ten units carry both kinds in ONE JOINED list**, so they read *"Pillars & Capabilities"* on their decks overnight, and their marked rows gained a *"Capability"* sub-line they never had — **exactly the change spec 066 exists to avoid**, and committed by the work meant to prevent it.
+
+**THE SETTING DECIDES, NEVER THE MARK ALONE.** Both the sub-line and the heading now ask `boxSplit(u)` first, which is the rule every other surface in §540–§542 already followed. Verified present on main today at `present.js:535` and `present.js:569`.
+
+**AND THE GAP IN ITS OWN CHECK WAS CLOSED, which is the part worth keeping.** `test-capability-fold` measured the **COMPANY**, whose capabilities are records — so nothing in it ever asked what the new code does to a **joined box holding both kinds**, the one shape the fault lived in. Section 1b does: the plan, the reporting and the deck of every such unit, word for word against the build before §542. **42 agreements, and the break (asking the mark) turns it red 2 of 42** — verified as the script's own words at `scripts/test-capability-fold.js:48`.
+
+**NOT VERIFIED HERE (§54.5):** neither `deck-figures.py` nor `test-capability-fold.js` was re-run for this entry. The code and the counts were read; the checks were not executed. The entry records work already on main, and re-running another stream's suite is not what writing it down requires — but saying so is.
+
 ## §542.2 — Stage 3b (d): the SQL, generated from the move and rehearsed on a real Postgres
 Islam set the terms for the data move: the list first, a rehearsal on a copy, *"and the final step handed over as SQL for Neon's SQL editor"*. This is the SQL, and it has been run.
 
@@ -65867,6 +65895,23 @@ So a file generated from the repository was correct about the data and wrong abo
 **What is still Islam's**: the word to run it. Nothing else is outstanding.
 
 
+## §542.6 — The move ran on El Abd, and what it has NOT yet proved (spec 066 stage 3b; 2026-10-18)
+**NOT THIS SESSION'S WORK EITHER.** Pushed as `7ee00f4` from the same other session, under §539.6, which the §537–§539 → §540–§542 renumber made §542.6. It is the one entry in that family with **no code behind it at all** — it changed a single file, `IMPLEMENTATION_PROGRESS.md` — and that is exactly why it was easy to leave out of this file and worth putting in: **an operational record is the kind that matters most later and is written down least.**
+
+**WHAT HAPPENED.** Islam, 18 October 2026, of the SQL in §542.5: *"successfuly"*. With that, **stage 3b is complete end to end**: (a) the joined-or-split setting, (b) a pillar's code from its kind, (c) the pages reading the kind rather than the container, and (d) El Abd's five capability records moved to internal pillars of its company plan, with the client renamed to **ElAbd**.
+
+**AND WHAT IT HAS NOT PROVED, which is the point of recording it.** The SQL **checks its own work before it commits and refuses to commit otherwise**, so the rows are right — that is an assertion about the DATABASE. **What has not been measured is the PAGES on the live client.** A fresh working copy was asked for, and `scripts/stage3-before-after.js` is what will read it. **It is still outstanding**: 61 commits have landed since, and not one of them reports the comparison or touches the migration. A migration that reports success is not a migration that has been seen working, and the gap between those two is where §54.5 lives.
+
+**THREE THINGS LEFT OPEN IN THE LIVE DATA, named rather than left as an absence** — and still open, verified by reading all 61 commits since for any mention of them, which found none:
+
+1. ~~the retired tenant **"ElAbd Foods"**, holding 8 capabilities~~ — **CLOSED. Islam removed it permanently on 2026-10-18**, in his words: *"I removed the retired project premnantly."* Not verified from here and it cannot be: nothing in this repository reaches the live database. Recorded on his word, which is the only measurement available for it;
+2. **"Tamer Abdelhamid"** owning two of El Abd's directions while the register holds **"Tamer Abdelhameed"** — a different spelling, so those two match no real person. **The rows are still as they were; what changed is that the platform now SAYS so** (§551): the name is flagged wherever it shows, the dropdown groups it as "Not in the register" instead of "Already on this plan", and no new one can arrive by hand from a screen or a workbook;
+3. two leftover copies of client data sitting unused — the `elabd` and `public` schemas, and the old `platform.clients` register.
+
+**AND THE FAULT §542.5 RECORDED IS THE REASON THIS ENTRY EXISTS AT ALL.** That round's own words: *"I wrote the file from the code in this repository and assumed the live database matched it. It doesn't… I should have asked the database to describe itself before writing a line. That's three read-only queries and one message; instead it cost three rounds."* The live database held **three copies** of the tables and an older client list, and the generator now takes the layout as an explicit option so it cannot be guessed again. **A record of what the environment actually is, rather than what the repository implies, is not a footnote to the work — it is the work.**
+
+**NOT VERIFIED HERE (§54.5):** nothing in the live database was read for this entry, and nothing could be — there is no connection to it from here. Every claim above is read out of `IMPLEMENTATION_PROGRESS.md` §542.5, commit `7ee00f4`, and the commit log. **Whether those three items are still true of the live data today is unknown**; what is established is that nothing in this repository has addressed them.
+
 ## §543 — A half is offered to the people who have something in it
 Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing as osama I shouldn't see the directions part at the top, only the capabilities and no need as well to see key measures and tactics.. the title is not relevant. for the user he is just reporting for the office it might be useful"*, and *"viewing as amr I shouldn't see the capabilities tab as it has nothing for him there"*. Asked whether to drop the heading where only one half is left: *"yes"*.
 
@@ -65879,6 +65924,17 @@ Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing a
 **THE HEADING RULE IS ABOUT THE SPLIT, NOT ABOUT THE COUNT**, and the first draft got that wrong: written as *drop the title when only one section is drawn*, it took the heading off every **joined** box in every client — every unit in Raya, which has never split anything. Caught by section 1b of `scripts/test-capability-fold.js`, the section written three commits earlier from exactly this class of mistake (§542.1: asking the mark instead of the setting). It is `!boxSplit(u) || (showDir && showCap)`.
 
 **The check** gains a sixth section, measured on three people at once — the office and two part owners the file makes, because the worked example's people all hold a unit or function seat and none of them is narrowed. Asserting on the part owners alone would pass over a build that hid the halves from everybody. 52 agreements. Two deliberate breaks: `boxHasHalf` asking the box → 4 red, and its output is Islam's own symptom word for word; the heading never dropping → 1 red.
+
+
+> **TWO §544s, AND NEITHER IS RENUMBERED HERE.** Stage 4 (this branch) and the
+> tab-arrow audit (main) were both written as §544 while apart, the same way
+> §531–§536 collided before. The merge keeps BOTH in full and renames
+> NEITHER, because a number is referenced from the code that implements it —
+> 169 places across 36 files for stage 4, a comparable spread for the audit's
+> run — and renumbering is Islam's convention to set, not a side effect of a
+> merge. Stage 4 and its §544.1–§544.13b run first below; the audit's §544
+> and everything after it follow, unchanged. **Owed: one of the two renamed,
+> with its references, as its own change.**
 
 ## §544 — Stage 4: seven set-up steps become three, and the tree is the screen
 Islam, having pressed the mockup through eight versions: *"the shape is good, let's build stage 4"*. Spec 066 §6, and the first four stages' reason exactly: *"every change requires me a new addition"*.
@@ -66232,3 +66288,245 @@ all"* green by cheating. The stand-ins ask `capsReachable()` first and refuse
 where the rail would not be drawn, and they do what a real press does
 (`leaveModes`, `entrySub`), without which `capability-pillar-edit` lost its
 pen and went from 1 red to 4.
+
+
+## §544 — A row of tabs answers the arrows (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no keyboard route between destinations, tabs or sections"*. Measured, the product draws **eight** `role="tablist"` groups — the destinations, the tab row, the section row, the chat queue, the Copilot side, the knowledge base, the Setup rail — and not one of them bound an arrow key.
+
+**WHICH MAKES THIS §536 AGAIN, ONE CONTROL OVER.** `role="tablist"` is not decoration: it is a promise that Left and Right move along the row and Home and End reach its ends, and a screen reader announcing *"tab, 2 of 5"* tells somebody to press keys that did nothing here. The row was always OPERABLE — the tabs are real buttons and Tab reaches them — so nobody was locked out; it simply did not behave the way its own markup said. **Nothing is invented and no mockup was owed**: arrows on a row of tabs is what every row of tabs does.
+
+**TWO DECISIONS, BOTH DELIBERATE:**
+
+- **THE ARROWS MOVE FOCUS AND DO NOT PICK.** These tabs are DESTINATIONS — a row of them is Mobile, Retail, Logistics — and picking on arrow would walk somebody through five whole pages, five repaints and five reads, while they looked for the sixth. Enter and Space pick, which a button already does, so nothing had to be bound for that either.
+- **THE TAB PATH IS NOT CHANGED**, and this departs from the pattern knowingly. The textbook version roves `tabindex` so Tab stops once per row. That is fewer stops — and it TAKES AWAY a route that works today for everyone who reaches a tab by pressing Tab and has since the product shipped. Adding the arrows costs nobody anything; removing the stops costs somebody something, so it is its own decision with its own drawing (rule 1b). **The check asserts it was NOT done**, so a build that quietly roved goes red.
+
+**ONE HANDLER, NOT EIGHT (§53.5):** delegated from the document and finding the row from the tab that has focus, so a tablist drawn tomorrow answers the arrows without being told — asserted by building a tablist the product does not contain and arrowing along it.
+
+**AND ONE TAB GROUP DID NOT SAY WHICH WAS CURRENT.** The chat queue's three carried that in `class="on"` alone until somebody pressed one; the handler has always set `aria-selected` afterwards, so a screen reader was told which tab was current only once the person had chosen it — the one moment they did not need telling.
+
+**A CORRECTION THIS SECTION OWES.** It was reported that ten of fifteen tabs lacked a selected state. Re-read from the sources, almost all set it; the real gap was this one group, at first draw. The first count had taken occurrences of an attribute string for a count of controls.
+
+**CHECK.** `checks/tab-arrows.py` — green here, **6 red on the build before**. One of its assertions passed on that build **for the wrong reason** and is recorded rather than quietly fixed: with no handler nothing moves, so *"Down wrapped to the first"* was true of a row that never left it (§113.8). Rewritten to assert the whole path at once.
+
+**AND THE SHEET LEARNED THE KEYS THE SAME DAY** (§539). Not updating it would be the exact fault the sheet was built to fix — a fifth idiom nobody can discover.
+
+## §544.1 — Re-carrying the two rule modules spec 066 left behind (2026-10-18)
+**§330's own trap, found by §330's own check, and not this branch's**: established by running the check in a worktree of `origin/main`, where it failed identically (§303).
+
+`smp-app/lib/*.cjs` are the frozen product's pure modules carried across for Node, byte for byte with ONE declared transform. Spec 066's stage 3a rewrote `lib/rules.js` and `lib/authorize.js` — *"one address, one parse"*, §531 — and the carried copies stayed where they were. `rules.cjs` was **12,350 bytes** behind its twin and `authorize.cjs` 100.
+
+**WHAT THE DRIFT ACTUALLY WAS, read before anything was overwritten:** the lines present in the copies and absent from the originals are the OLD prefix-slicing — `s.indexOf("cap:") === 0`, `s.slice(4)` — which is exactly the code §531 replaced with a single parse. So the copies were **stale, not hand-edited**, and a clean re-carry is the right answer rather than a merge of two intentions. Had they been hand-edits, overwriting would have destroyed somebody's work.
+
+§330 records what this costs when missed: the carried copies went stale once before and the new stack's landing page threw `SMPRules.dissolvePlan is not a function` for every person in every client.
+
+**RE-CARRIED WITH THE CHECK'S OWN TRANSFORM**, read out of the check rather than written again (§53.5) — the same git-tracked file list, the same regex.
+
+**VERIFIED, AND THE LIMITS SAID RATHER THAN LEFT OUT** (§54.5): `generated-in-step` all clear; both parse; **every export present** — 332 from rules, 4 from authorize, nothing missing against the frozen twins, which is §330's failure mode measured directly; **1,659 calls across 237 functions** compared between carry and twin over six target shapes and the empty string, **zero differences**. `scripts/test-authorize.js` passed 1082/0 — **though that exercises the FROZEN module and so proves that side, not the carry**, and is reported as such. The **21 Next-side consumers could not be run**: `smp-app` has no `node_modules` in this container. Unverified, and said to be.
+
+**AND MAIN KEPT IT IN STEP AFTERWARDS** — its §545 changed `lib/authorize.js` and the carried copy in the same commit, so the pattern held.
+
+## §545 — A bounded reporter enters a category figure
+From the live deployment, 18 October 2026. A direction owner on El Abd entered thirteen reporting lines in one save — five category figures (Bakery, Barista, Western, Oriental, Ice Cream, all `a_c1`) beside eight on tactics — and the band came back **"Your role reports only your own direction — 5 figures is not yours"**, with all thirteen lines listed and put back.
+
+**The row index never held the breakdown's rows.** `ctxOfUnit()` in `lib/authorize.js` walks a unit's key objectives, its pillars' measures and its pillars' tactics, and builds the map the two reporting verdicts filter against. §343 gave a pillar a `breakdown` whose rows carry figures (`a_c<n>`) and a note, classified correctly as `unitReporting` by the collector in the same section — and this map was never told. Both filters open on `!ctx`, so **an id this map misses is refused to everybody it is asked about**, whoever they are and whatever they own.
+
+**The third time that exact shape has cost somebody their work**: §191 on the pillar walk, §334.18 on a supporting function's own projects, and this. A row kind added to the collector and not to the index reads, at the verdict, as a row that does not exist.
+
+**Why it shipped, and why section 40 did not catch it.** An unbounded reporter never reaches the filter: on the company page `mayReportTop` returns first, and on a unit `if (!R.onlyOwnLines(...)) return;` returns before the ids are read. So the fault exists *only* for the roles narrowed to their own rows — a direction's owner and custodian, a pillar's owner, a contributor. Section 40 asserts the unit's own **head** and the office, which is the half of §94.2 that cannot see this.
+
+**And the screen was right throughout**, which is what made it read as a bug rather than as a permission: `reportItems()` carries `owner`, `pown` and `pcust` onto every breakdown cell (§147.7's fields, added to the `bds` builder when the table was built), so `canReportRow` says yes and draws the box. §42's drift, in the direction that costs somebody their evening — the screen offering a pen the save refuses.
+
+**The fix is the index, not the rule.** Each breakdown row joins the map with its pillar's Owner and Custodian — `{ row: { owner: p.owner }, pillarOwner: p.owner, pillarCust: p.custodian }`, a measure's shape (§55: a row with no owner of its own leans on its pillar's). That is the same context the screen already passes, so the two now answer one question one way rather than two (§42). Read through `R.bdRows()`, the shared accessor, never `p.breakdown.rows` spelled again here. No rule moved: what a bounded role may reach is `mayReportRow`'s answer exactly as before, and the office, the CEO and every unit head are byte-identical.
+
+**Carried into `smp-app/lib/authorize.cjs`** in the same edit. That copy is the rewrite's save path (`lib/save.ts`), it is one section behind the live file (§531's address parse), and leaving it would plant the same fault in the app being built.
+
+**The check** gains §545, at both ends and in both shapes (§94.2, §53.5): the company page where the pillar is a DIRECTION — the owner and the custodian enter a figure, a row note, and all of them in one save; the direction beside theirs is refused; the target in their own table stays the office's — and a unit's page where it is a plain pillar, by the other road (`onlyOwnLines`), so a fix to one that missed the other cannot pass. The figure is first asserted to classify as `unitReporting@group`, or a build that called it the plan would refuse the owner for a different reason and the rest would not say which. Five deliberate breaks against the unfixed file, reproducing Islam's sentence word for word including its count. 1094 agreements, 0 red.
+
+## §546 — Three actions from the keyboard: Alt+S, Alt+D, Alt+E (usability audit, heuristic 7; 2026-10-18)
+The audit: *"no accelerator for Submit, Save draft, or the pen"*. §544 answered the navigation half with the arrows every row of tabs already promised. This half had **no standard to follow** — somebody had to pick the keys, and **Islam picked these**.
+
+**ALT IS THE PRODUCT'S OWN MODIFIER AND NOT A NEW ONE** (§528 chose it for the reporting walk), and the one thing wrong with it here was already solved there: on a Mac, Option+S types "ß" and `e.key` says so, so the match is on the **physical key** (`e.code`) and never on the character. Reusing that answer is the whole reason Alt was safe to pick again. **The check asserts it over the built file**, because a build matching `e.key` would pass every behavioural assertion on this machine and fail for every Mac.
+
+**SUBMIT JUMPS, THE OTHER TWO ACT, and the line is where the work goes.** Islam, asked directly whether one key should send a report: *"jump to the button"*. So Alt+S lands the cursor ON Submit and the person presses Enter. Save draft and the pen act on the single press, and the rule behind the difference is said rather than left as an inconsistency: **Submit leaves your screen and the other two do not.** A draft is yours until you submit it; the pen only decides whether you can type on the page in front of you. Neither is seen by anybody else, so neither is worth a second press. Submit is read by the office the moment it lands.
+
+**AND JUMPING TO A HELD SUBMIT IS BETTER THAN PRESSING ONE.** When the report is not ready, §538 draws Submit held with its reason in a bubble that opens ON FOCUS — so Alt+S on an unready report lands on the button AND opens the sentence saying what is missing. The accelerator and the refusal were built two sections apart and **meet here without either being changed**.
+
+**A HELD CONTROL IS NOT PRESSED BY A KEY EITHER.** A shortcut that clicked through a refusal would be the one way round something the rest of the product enforces (§538); the key lands on it instead.
+
+The pen's selector is read from the check that already walks it, which records that `.penbtn[data-page]` alone was not enough (§53.5).
+
+**THE KEYS SAY THEMSELVES** on the buttons they belong to, marked in the paint tail beside §528's own marks — so somebody who never opens the sheet still meets them (§61: said only where the control exists). And **the sheet learned them the same day** (§539): it claims seven idioms now, and its check counts them and verifies these three letters against what the build tests for.
+
+**CHECK.** `checks/action-keys.py` — green here, **10 red on the build before**.
+
+**THREE COLLISIONS IN TWO DAYS, AND WHAT THEY COST.** This work was renumbered three times while it was being verified — §540 → §543 → §544 for the tab arrows, and §545 → §546 for these keys — because main landed spec 066's stages 3a and 3b in the same window. Each renumber **ran before merging main in**, which is the only moment one is provably scoped (§264.3). One stale reference could not be fixed and is recorded instead: `d5463c7`'s commit message calls the re-carry §543.1, which is now main's number. It is pushed, so it stays as written; that work is **§544.1**.
+
+
+## §547 — Going to a place: Alt+G (usability audit, heuristic 7; 2026-10-18)
+The last piece of heuristic 7. Alt+G opens a list of every place you can reach, you type a few letters, and Enter takes you there. Islam picked the letter, joining §546's Alt+S, Alt+D and Alt+E — one modifier for everything that does something. Drawn first and signed off (`design-mockups/go-to-a-place/`).
+
+**A KEY PER DESTINATION IS NOT POSSIBLE**, and that is why this shape rather than a row of them: the places are each tenant's **own** units, capabilities, functions and divisions. There is nothing fixed to bind. This was reported the other way round earlier in the same session and corrected.
+
+**ALMOST NONE OF IT IS NEW, AND THAT IS THE ARGUMENT FOR IT:**
+
+- **THE LIST IS THE NAVIGATION'S OWN BUTTONS**, read off the page. Measured before anything was written: every destination is in the DOM at once as a `[data-u]` button, including the ones inside closed folds. So there is no second idea of what the places are (§53.5), and a place added tomorrow appears without anybody being told — the check asserts the list IS those buttons, name for name, so a build that grew its own list goes red.
+- **PICKING PRESSES THE REAL BUTTON**, which is exactly what the product's own `[data-gounit]` jump already does. Dropping out of edit mode and landing on the tab that place opens on happen here because it **is** the same press. A second route to a destination is a second place for that behaviour to drift.
+- **THE LIST IS `searchsel`'s**, through `openOn` — the entry the register already uses to reopen a list after a repaint. The box, the rows, match-anywhere, and every key §536 gave it arrive with it. A second popup here would be writing §536 again and then maintaining both.
+
+**ONE THING `searchsel` HAD TO LEARN.** It enhances a single select only past five options, which is the right rule for a form field and the wrong one here: **a tenant with four places needs this list more than one with forty, not less.** `data-ss-always` is the opt-in, one line there rather than a second popup here.
+
+**IT OPENS ON WHERE YOU ARE**, marked and under the cursor, read from the nav's own `aria-current`/`aria-selected` rather than decided again — so Alt+G then Escape costs nothing and the list reads as a map rather than a blank box.
+
+**TWO REAL FAULTS, BOTH FOUND BY THE CHECK AND BOTH FIXED:**
+
+- **`close()` removed the host and left the POPUP**, which lives on `<body>`. Escape hid it, because `searchsel`'s own handler closes the popup — so the two looked like one act until a check called `close()` by itself and the next press found a list already open. A half-close is how a control comes back wrong.
+- **IT HELD THE BUTTONS, NOT THEIR KEYS.** A repaint between opening the list and picking replaces them, so it was pressing a node no longer in the document — **and it still navigated**, because a listener bound to a detached element still fires. Working by luck, which is the kind that stops. The live button is found at the moment of the press now, as `[data-gounit]` has always done.
+
+**AND ONE FAULT WAS THE CHECK'S OWN**, recorded in its docstring rather than quietly fixed: its `ev()` helper accepted an argument and called `pg.evaluate` without it, so the assertion watching the real button get pressed attached its listener to **nothing** and reported the PRODUCT broken. Traced by hand — the right button was being clicked all along. **This project has made that exact mistake once before**, in `restore-a-person`'s own `who()`. A helper that silently drops what it is handed turns a check into a thing that measures nothing and says FAIL.
+
+**THE PLUMBING IS INERT.** The select and the button `searchsel` builds for it are not controls: both out of the tab order and out of the accessibility tree, so a host left standing is unreachable. §536 records what a hidden select with its furniture left on did here — every page became a keyboard trap on its first control.
+
+**CHECK.** `checks/go-to-a-place.py` — green here, **10 red on the build before**. And the sheet learned Alt+G the same day (§539), which is the whole reason the sheet exists.
+
+## §548 — The one grey description, moved to the hover (usability audit, heuristic 8; 2026-10-18)
+Heuristic 8 is the one the audit measured **halfway and said so**: it counted the `.why` and `.note` strings and admitted in its own words that reading them *"needs a page-by-page pass and is the honest limit of this finding."* This is that pass, and a check so it stays done.
+
+**WHAT THE PASS FOUND.** **257** `.why` and `.note` strings — 185 built from a value (a fact by construction), 18 a bare mark, and some fifty of real prose which are pending states (*"Asking…"*), empty states (*"Nothing planned yet."*), values on a row (*"only the SMO can move it"*), and warnings about consequence (*"Floors must descend. Two bands overlap, so a figure would fall into both."*). **NOT ONE is a description.** §127 already settles the empty states: it kept *"No one is set"* because **a status is not a description**. The audit's guess about these was right, and it is worth saying so plainly — the value of the pass is that it is now measured rather than guessed.
+
+**AND THE AUDIT WAS WRONG THE OTHER WAY on the half it did measure.** It reports **zero** `note:` arguments passed to a `section()` call. There were **three**. Two are **conditional** — written `x ? null : "…"`, so they appear only when there is something true to say (no factor values entered; nothing written yet) — and §127 protects those. The third stood on the page every time, under *Who got &lt;subject&gt;*:
+
+> *"Written when it was sent, so it is what actually happened rather than what the screen worked out beforehand."*
+
+**MOVED, NOT DELETED**, which is exactly what rule 1b-ii says to do with it: *"it is information, and it belongs on a hover … never as a paragraph"*, and *"flag it rather than deleting it silently."* **The fact is worth keeping** — without it the table reads as something the screen worked out just now, when it is the record written at the moment of sending. **`section()`'s own fifth argument draws the hover, so nothing new was built and the words did not change.**
+
+**SHOWN BEFORE IT WAS CHOSEN, and not as a drawing.** Islam: *"I don't know what you are talking about it .. always show me visually."* Two screenshots of the **real** `section()` rendered from the built file with the real words — the page as it stands, and the same page with the sentence on the hover — so the choice was made against the thing itself rather than a description of it. The standing instruction out of it is wider than this section: **show it, do not describe it.**
+
+**CHECK.** `checks/no-grey-descriptions.py` — green here, **2 red on the build before**, where it names the sentence. It asserts the rule's **shape** rather than a judgement about tone, so it cannot drift with whoever runs it: no heading followed by a grey paragraph, and no `section()` carrying a standing note, with the two conditional ones asserted to still be there. **And it asserts THE FACT SURVIVED** — a check that only counted paragraphs would be satisfied by deleting the sentence, which is the one outcome the rule forbids.
+
+**TWO FAULTS IN THE PASS ITSELF, both recorded in the check rather than quietly fixed**, because both are the kind that make a measurement look authoritative while being wrong:
+
+- the first run **stripped the comments outright**, so every line number after the first comment was wrong and it reported a heading-followed-by-a-paragraph **that does not exist in the file**. Comments are blanked and their newlines kept now, so a position still means something;
+- the call scan read **`function section(eyebrow, title, note, body, …)` as a call** carrying a standing note, because that parameter is named `note`.
+
+**AND THIS CLOSES THE AUDIT.** Of its ten: 1, 3, 4, 5, 7 and 8 are closed; 2 and 6 passed on measurement; 9 is Islam's ruling and not a defect; 10 was dropped at his word. **It was wrong five times** and every correction is now in the record rather than only in a reply — four undercounts (26 dialogs that were 30, six date spellings that were nine, one dead-greyed control that was four, one keyboard idiom that was four) and **one overcount the other way**, the zero section notes that were three. It also twice reported as missing something already built. That is not a criticism of the audit; it is why each of these closed with **a check that goes red** rather than a note saying somebody looked.
+
+## §549 — Heuristic 9 was answered before it was asked (usability audit, heuristic 9; 2026-10-18)
+The audit's ninth section reports that a failed save puts **four lines of developer vocabulary** on a client unit head's screen — `HTTP 500 · reference 7f3a2c`, a reason, a table, the server's own sentence — calls the result a **trade** between Nielsen's *plain language, no error codes* and §502's *a fault must carry a traceable reference*, and hands it to Islam: *"this is Islam's call, not a defect to fix."*
+
+**THERE WAS NOTHING TO DECIDE.** What the banner draws is:
+
+> **Your changes are safe, and the office has a copy.**
+> They still save by themselves as soon as the server answers.
+
+That is the whole of it. The technical block **exists and is untouched** — it simply is not drawn on the page. It rides the `title` on that bold line, goes into the console as an error, and sits on the clipboard behind the copy link, so the person can paste it to the office and the office can find the failure in the log by its reference (§502's own words: *"the details travel with the bar"*).
+
+**SO THE TWO RULES DO NOT PULL AGAINST EACH OTHER.** Nielsen asks for plain language and no codes on screen: met. §502 asks for a traceable reference: met. §502 did not choose between them — **it put them in different places**, which is what the rest of the audit asks for everywhere else, and what §538 spent a whole section on.
+
+**AND IT IS NOT STALENESS.** The plain-English banner landed in **§504 on 2026-10-07**, three days BEFORE this audit was written. The section quotes `sync.js:963` — the line that **builds** the string — and never asked where that string is **drawn**. A measurement of the source that is not a measurement of the screen. The same reading would have called §538's unreachable sentences *reachable*, because they exist in the file.
+
+**WHAT IT COST.** An open question carried for eight days, presented as a decision the product's owner had to make, about a product that already did the right thing. That is worse than any of the five miscounts before it: a wrong number is corrected the first time somebody re-measures, but an invented dilemma is **never** re-measured, because it does not look like a finding — it looks like a choice somebody owes an answer to.
+
+**SHOWN, NOT ARGUED.** The banner was rendered from the built file with a real HTTP 500 behind it and put in front of Islam before a word of this was written, under the instruction he gave the day before: *"always show me visually."* He then closed it.
+
+**NOTHING WAS BUILT FOR THIS SECTION, AND NOTHING SHOULD BE.** The only change is in the record: the audit's heuristic 9 is marked wrong, with the reading error named, so nobody brings the same question back next year.
+
+## §550 — The change log's filters come back as you left them (usability audit, heuristic 7; 2026-10-18)
+The audit's seventh section ends: *"there is **no customisation anywhere**: the only per-person state in the product is the theme, the text size in the Copilot, the folded rail groups, the remembered place (§173) and the Setup rail's folds. No saved views, no default filters, no favourites."*
+
+**THE SENTENCE IS WRONG, AND IT IS THE AUDIT'S SIXTH MISCOUNT.** Measured in the sources: **18 named stores** before this change, **12 of which are a choice somebody made** — and it named five. The eight it did not name are the **palette**, the **typeface**, the **people table's columns** (§47.1), the **functions table's columns**, the **key-objective year**, the **terse rail**, the **knowledge-base tab**, and the **chat popup's place**. The remaining six are machinery rather than preference: the offline copy, unsaved work kept through a reload, the tour's marks, the welcome's mark and the reason a client page carries. (Two of the five it *did* name — the remembered place and the Setup rail's folds — have no store of their own that could be found by key, so what they rest on was not verified here, §54.5.)
+
+**BUT THE LAST THREE WORDS WERE RIGHT, AND ONE OF THEM MATTERED.** *No saved views, no default filters, no favourites.* Favourites nobody has asked for; saved views are a feature, not a gap. **Default filters had exactly one real victim**, and it is on the change log: four dropdowns — Everyone, Everywhere, Every kind, Today — reset on every visit. Somebody who checks one person's changes every Monday set all four again every Monday. **That is the whole of the finding worth building for**, and it was shown on the screen before it was chosen rather than described.
+
+**WHAT WAS BUILT.** The four dropdowns are written to `localStorage` on change and read back on arrival. **No new pattern**: it is the people table's own shape (§47.1), one surface further out, read and written the same way so there is one habit and not two.
+
+**THE SEARCH BOX IS NOT REMEMBERED, and that is the one judgement in this entry.** Choosing *"Nadia, Mobile, last 7 days"* is a position you took; **half a word left in a search box is not**. Coming back to a page silently filtered by text you do not remember typing is the kind of help that reads as a bug, so `q` is written nowhere and the box starts empty every time.
+
+**AND A REMEMBERED FILTER NOBODY CAN SEE IS DROPPED.** The one way remembering could **lie**: you filter by a person, that person leaves the register, and the saved key matches no option any more. The dropdown would read **"Everyone"** — nothing selected — while the page went on asking the server for them, and the count underneath would be theirs. **A screen that disagrees with what it is doing is worse than a screen that forgot**, so a saved value no longer on offer is dropped *and unremembered* before the first read (`toolsHtml()` prunes, then the page asks). **An empty list prunes nothing**: over `file://` and before the state lands there are no people and no units to compare against, and pruning then would quietly throw a good filter away.
+
+**CHECK.** `checks/filters-remembered.py` — green here, **15 red on the build before**. It is an own-server check (§316.1) whose stub **records every ask**, because that is the half that matters: it asserts **both ends** (§94.2) — after a full reload the four dropdowns read what they were left at **AND** the first ask to the server carries the same four. Either alone is the bug. It also asserts the search text is written nowhere, and that a planted person who does not exist leaves the dropdown on Everyone, the ask carrying no person, and **the stored value gone** — not merely ignored this once, which is the assertion that distinguishes the two builds.
+
+**WITH HEURISTIC 7 THIS CLOSES, the audit has been wrong six times** — five undercounts (26 dialogs that were 30, six date spellings that were nine, one dead-greyed control that was four, one keyboard idiom that was four, five remembered things that were 18) and one overcount (zero `section()` notes that were three) — besides twice reporting as missing something already built, and once inventing a decision for Islam that the product had already made. Every correction is in this record, each closed by a check that goes red rather than a note saying somebody looked.
+
+## §551 — An owner is picked from the register, never typed (2026-10-18)
+Islam, straight after §542.6 named a direction owned by *"Tamer Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner should be selected from a drop down, generally all the owners shouldn't be written by hand and only be selected from a list from the registr in a drop down serachable list."*
+
+**THE RULE IS §177's, ONE FIELD OVER.** A due date is picked and never typed because a typed date is precision the product cannot use. A typed owner is worse: it is a **person who may not exist**, and nothing downstream can tell the difference.
+
+**MEASURED FIRST, AND THE ASK WAS ALREADY TRUE OF THE SCREENS.** All four owner cells on the plan surfaces go through `gapCell` fed by `ownerChoices` — 33 people from the register and 25 departments — and past five options `searchsel` makes it the searchable list Islam describes (§536). **Shown to him as two screenshots of the real page rather than claimed**, under the standing instruction *"always show me visually."* So three quarters of the request needed nothing built, and saying so is the point: a fix nobody needs is as expensive as a missing one.
+
+**WHAT WAS NOT TRUE — three things, and the quiet one matters most.**
+
+1. **The Copilot's draft table typed it.** The one free-text owner box left in the product, and that draft is **saved into a real plan**, so a name typed in a chat became a name on a plan matching nobody. It is `ownerChoices` now, so there is one list and not a second (§53.5).
+2. **The workbook typed it, five columns over** — **and the sentence that follows is WRONG, corrected in §551.2**: Islam has since said plans are built in the app through the builder, not uploaded, so the workbook is a side road and the surface that mattered was the builder's own five text boxes. — Pillars and Tactics in a unit's file, Projects, Actions and Milestones in a function's. **22 validations across the two files and not one of them was Owner.** A spreadsheet is the widest door into a plan, so this was the widest way a name matching no real person got in, and the likeliest origin of "Tamer Abdelhamid".
+3. **AND THE DROPDOWN LIED ABOUT IT.** An unknown value was offered back under the heading **"Already on this plan"** — a label that reads as a fact about the plan rather than a warning about the name. That is why nobody caught it: to everyone who ever opened that cell, "Tamer Abdelhamid" looked like a legitimate choice. The group is still there and still keeps the name; it now says **"Not in the register"**.
+
+**TWO DIFFERENT ANSWERS FOR TWO DIFFERENT MOMENTS, BOTH ISLAM'S, BOTH DRAWN BEFORE THEY WERE BUILT.** On a **screen** the name is already in the plan and the only thing left is to see it, so it is **flagged**: *"Flag them where they show."* At an **upload** it is not in yet, and the cheapest moment to stop a wrong name is before it lands, so it is **refused**, naming the row and the name — his words: *"a name not on the list is refused, and the message names the row and the name."* The two are not in conflict; they are the same rule at the only two points where it can be applied.
+
+**THE NAME IS NEVER DELETED.** He was shown refusing-to-save and leaving-alone as well, and flagging won for the reason §96.2 already settled about an unparseable date: **a name somebody typed is the only clue to who was meant**, so destroying it to satisfy a rule destroys the thing that lets it be corrected. The check asserts the name survives, because a check that only looked for the mark would be satisfied by deleting it.
+
+**`ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5).** The flag, the dropdown's grouping and the import refusal all ask it, so a name cannot be refused at the upload and offered in the pen. It is `ownerAdder`'s own set, so trimming and case are settled once. **A blank owner is never a stray**: it is a gap, which the fill walk and the word *Missing* already own, and calling it a stray would put two complaints on one cell.
+
+**TWO FAULTS THE WORKBOOK'S OWN HISTORY PREDICTED, both avoided by reading it first.** The dropdown is a **`from` range and not an inline list**, because 58 names is far past Excel's 255-character limit where a dropdown is **silently** ignored — §67.5's recorded fault, on the Official BU list. And **nothing is written at all when the register is empty**, which is §380's trap: an empty list still applies and, with `showErrorMessage` on, refuses every value there is, so the column could be neither picked from nor typed into. The writer cannot catch that for us and says so in its own words — *"whether that sheet has anything on it is not knowable from here"* — but here it **is** knowable, so it is asked.
+
+**CHECK.** `checks/owner-from-the-register.py` — green here, **28 red on the build before**. **And one of its own assertions could not fail** (§113.8): the §65 check that every validation range names a sheet in the file was first written as the two assertions above it, said a third time. It now reads every `from` range in both workbooks, pulls the sheet name out, and demands it be present — recorded in the check rather than quietly fixed.
+
+**NOT COVERED, named rather than left as an absence (§54.5):** the **Collaborators** columns in the workbook. They are picked from this same register on screen and are still free text in the file, so the identical hole is open one column over. Owners are what was asked for, and widening a change past its ask is how a fix becomes unreviewable. It is Islam's to call. — **He called it the same day: §551.1.** Naming it is what got it closed, which is the argument for naming a boundary rather than quietly drawing it.
+
+## §551.1 — Collaborators too, and the Read me that had gone stale (2026-10-18)
+Islam, told that the Collaborators columns were the same hole one column over and left out of §551 deliberately: *"fix the collaborators too."* §551 named it rather than hiding it, and this is the follow-on it was named for.
+
+**THE SCREEN NEEDED NOTHING, AGAIN.** Both collaborator cells — a milestone's and a tactic's — are already `selectManyOr` fed by `ownerChoices`, the same register list as the owner, ticked and never typed (§227 said so when it built them). So, as with §551, three quarters of the fix was already standing, and the gap was in the file and in how a stray is SHOWN.
+
+**MARKED NAME BY NAME, NOT ONCE FOR THE CELL.** A collaborator cell reading *"Nadia Fouad, Tamer Abdelhamid"* holds one real person and one who matches nobody; one mark on the cell would not say which. `collabShown` splits the joined string `gapCell` built and marks each name on its own. **The mark's words and markup live in ONE place** (`strayMark`) for both readers — or the day somebody improves the sentence they improve half the product (§53.5).
+
+**AND A ROW CAN BE WRONG IN BOTH FIELDS AT ONCE**, so the upload refusal names which: `owner "Ghost One" …` and `collaborator "Ghost Two" …` on the same row. It is the same `ownerProblems` reading one more field rather than a second validator, because a second one would be a second answer to *"is this a real person"*.
+
+**THERE IS NO EXCEL DROPDOWN FOR IT, and that is the format rather than a decision** (and see §551.2: this whole surface turned out to be a side road, not the wide door this entry and §551 took it for).** A data validation list validates **one** value per cell; a collaborator cell holds a comma-separated list. Offering the dropdown would mark **every multi-name cell invalid**, which is worse than no dropdown at all. So the file **guides instead of guarding**: the Owners sheet §551 put in both workbooks is the list to copy from, and the refusal at the upload still catches a wrong name. **Said plainly in the Read me rather than left for somebody to discover at the upload.**
+
+**AND THE READ ME HAD GONE STALE THE MOMENT §551 LANDED — found here, not reported by anything.** Both workbooks' Read me carried:
+
+> **Owners** — *"Type the person's name."*
+
+**That instruction told you to do the one thing the file now refuses.** It is §61's trap written into a Read me, and it is exactly the class of fault §551's own entry warns about: a change that is right everywhere except in the place that tells people what to do. Both files now say to pick from the dropdown, that the Owners sheet is the same list, and that a name not on it is refused — and the Collaborators line says why it has no dropdown.
+
+**CHECK.** The §551 check gained §8 and §9 — green here, **10 red on the build before** (which is §551 itself on main, so those 10 are precisely this entry's work). §9 asserts the Read me **in both workbooks**, because a document that contradicts the product is a fault the product's own tests will never feel.
+
+**STILL NOT COVERED, and named rather than left as an absence (§54.5): `stakeholders`.** — **Done in §551.3, and the guess in this paragraph was wrong**: not one stakeholder in the demo is a person's name. Islam settled what they are (*"either units or people names"*), which made it §130.1's existing control rather than the wider job this paragraph expected. A project's stakeholders are people's names too, and they are **typed on the screen as well** — an `inputOr` text box, not a picker — besides being free text in the workbook's Stakeholders column. So this one is a wider job than collaborators was: it needs the control changed, not just the file. It is not done here because it was not asked for, and because a stakeholder may legitimately be somebody outside the register (a client, a regulator, a partner) — which is a question for Islam before any rule is imposed on it.
+
+## §551.2 — The builder picks the owner, and §551's premise was wrong (2026-10-18)
+Islam, after §551 and §551.1 had both been built and merged: *"Actually, after working some time on the platform, do not consider the upload through the sheets. Mostly, we build it through the app, through the builder itself, so this shouldn't be an issue later on."*
+
+**THAT CORRECTS THE REASONING OF BOTH ENTRIES, AND THE CORRECTION IS THE POINT OF THIS ONE.** §551 called the workbook *"the widest door into a plan"* and *"the likeliest origin of El Abd's 'Tamer Abdelhamid'"*, and §551.1 argued from the same premise. **Neither was true.** Plans are written in the app, through the builder; the spreadsheet is a side road. So the two entries fixed a real hole in a path almost nobody walks, and **argued for it with a claim about traffic that nobody had measured — including me.**
+
+**AND THE SURFACE THAT ACTUALLY MATTERED WAS IN MY OWN FIRST MEASUREMENT, UNREAD.** The grep that opened §551 counted owner references per file and printed `builder.js  16` on its third line. I did not open it, because I already had a theory about the workbook and went looking for evidence of that instead. **Five forms in the builder — pillar, tactic, project, milestone and action — each carried a bare text box reading "Who answers for it", and a name typed into one goes straight into the plan.** That is the fault §551 was asked to fix, sitting in the file my own scan had named.
+
+**THE LESSON IS NOT "measure more", IT IS "FINISH THE MEASUREMENT BEFORE FORMING THE THEORY."** A count per file is a map of where to look; I read it as a result. §542.5 recorded the same shape of error from the other direction — *"I should have asked the database to describe itself before writing a line"* — and this is that again, one surface up.
+
+**WHAT WAS BUILT.** A field type, used five times: the builder's Owner is `ownerChoices` now, so the register, the departments, the "Not in the register" grouping and `searchsel`'s search past five options all arrive with it (§53.5 — not a sixth list). **The reader is untouched**: `shell.html` writes `el.value` for every `[data-bf]` on input and change, which a select answers exactly as the input did. The `ph:` came off those five, because a placeholder on a select draws nothing and a line that looks like a hint nobody can see is worse than no line.
+
+**THE SPREADSHEET GUARDS STAY, AND ARE NOT DEFENDED.** The Owners sheet, the five dropdowns and the import refusals are built, verified and cost nothing at rest, and they still catch a stray name on the rare upload — so removing them would be churn that loses a working guard. **But they are no longer presented as the fix for this problem.** They are a guard on a side road, and §551's and §551.1's claims about their importance are wrong where they stand; this entry is the correction, written here rather than by editing them, so the mistaken reasoning stays legible.
+
+**AND THE "LIKELIEST ORIGIN" OF "Tamer Abdelhamid" IS NOW UNKNOWN (§54.5).** It was not the workbook. It is most likely older than the register picker or arrived with the migrated data, but **nothing here can establish that**, and guessing a second cause after the first one was wrong would be the same error twice. What is established: no screen in the product can produce a new one, the builder included.
+
+**CHECK.** The §551 check gained §10 — green here, **6 red on the build before**. Its last assertion picks a name through the real control and demands it reach `BFORM.draft`, because a dropdown nobody reads would satisfy every assertion above it.
+
+**STANDING, for future work:** the sheet upload path is not how plans are built, and a finding about it is not a finding about the product's main route. Weigh it accordingly.
+
+## §551.3 — A stakeholder is picked from the same list (2026-10-18)
+Asked **where** stakeholders are written, the answer was worth having before anything was built: **one place in the whole app** — a project's row on a function's or capability's Projects page, with the pen on, as a single comma-separated text box. **The builder never asks for them at all**, so a project created the way plans are actually made (§551.2) starts with none and only ever gets them from that one box. The other two doors are the workbook's Stakeholders column and the template round-trip, and §551.2 settled what those are worth.
+
+**AND THE MEASUREMENT CHANGED MY OWN RECOMMENDATION.** §551.1 had left stakeholders alone partly on the guess that *"a stakeholder may legitimately be somebody outside the register."* Reading all 21 values in the demo settled it differently: **not one is a person's name** — Operations, IT, Finance, HR, Marketing, Sales, Care, Treasury, Unit heads, Finance Department, IT Department, Strategy Management Office. So the advice I gave was *"leave it"*, on the grounds that forcing a register of PEOPLE onto a field holding departments would break it.
+
+**ISLAM ANSWERED THE QUESTION THAT DECIDED IT:** *"stakeholders are either units or people names so it can be a searchable list with functions and people names to be added."* Both, then — which is exactly the list the product already has.
+
+**SO IT IS §130.1's OWN CONTROL, NOT A NEW ONE.** His words there were almost these: *"for the owners in the plans, projects, tactics, milestones, let it be a searchable list from the registry"*, and, asked what the list holds, *"people or department"*. This is that answer one field further out, so it is the collaborators' control over the collaborators' list — `selectManyOr` across `ownerChoices`, several at a time, searchable past five options through `searchsel` (§536). **Nothing new was built**: one call site changed, and one optional argument added.
+
+**NOTHING ALREADY TYPED IS LOST.** `ownerChoices` is handed the current value, so a stakeholder the list does not offer stays in it and stays picked. **Measured before building**, of twelve distinct stakeholders in the demo: **seven are already on the list** and five are not — *"Finance Department"* and *"IT Department"*, which are Finance and IT with a word added; *"Operations"* and *"Sales"*, departments this tenant has no page for; and *"Unit heads"*, a role group that is neither. All five survive.
+
+**AND ONE SENTENCE COULD NOT BE TRUE OF BOTH FIELDS.** §551 renamed the kept group to **"Not in the register"**, which is exactly right for an owner: an owner is matched against the people register to decide who may report a line (§130.1, §55), so a stray one is a person who owns work and cannot enter its figure. Over *"Finance Department"* that same sentence **points at the wrong list** — it reads as though the platform wanted a person there. `ownerChoices` takes an optional group name now; the default is unchanged, so §551's owners go on saying what they said, and the stakeholders list says **"Not a unit or a person here"**.
+
+**A STRAY STAKEHOLDER IS NOT FLAGGED, and that is deliberate.** Nothing downstream resolves a stakeholder to anybody, so a stray costs a tidier chip and nothing else — where a stray owner costs somebody the ability to report their own line. Five flags on the demo would be noise rather than information. **Islam asked for a list to pick from, not a rule to enforce**; the rule stays his to ask for.
+
+**CHECK.** The §551 check gained §11 — green here, **9 red on the build before**. It asserts owners keep their wording (the new argument must not have reached them), that what the project held is still picked rather than dropped, and that **picking writes the WHOLE list** to the project — a `<select multiple>` wired through the single-value path saves one name and silently drops the rest, which is the fault §130.1 recorded when the collaborators cell was built.
+
+**NOT DONE, and named (§54.5):** the five non-conforming stakeholders in the **demo seed data**. By Islam's rule they are wrong — "Finance Department" where the register says "Finance" — but that is demo content, and tidying it is a separate change with his name on it, not a side effect of this one.

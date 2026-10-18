@@ -516,6 +516,17 @@
            background:var(--surface); border:1px solid var(--gold); border-radius:10px;
            box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
   .sspop .sssearch { width:100%; margin:0 0 6px; }
+  /* ── THE GO-TO LIST'S HOST (§547) ─────────────────────────────────────
+     Plumbing, not a control: a `select` and the button `searchsel` builds for
+     it, parked at the top of the window so the popup — which anchors to that
+     button — opens where somebody is already looking. Both are out of the tab
+     order and the accessibility tree, so a host left standing is unreachable;
+     it is 1px rather than `display:none` because a box with no size has no
+     rect for the popup to anchor to. */
+  #gotohost { position:fixed; left:50%; top:76px; transform:translateX(-50%);
+              width:1px; height:1px; overflow:hidden; z-index:119; }
+  #gotohost button, #gotohost select { opacity:0; width:1px; height:1px;
+                                       padding:0; border:0; pointer-events:none; }
   .sslist { max-height:230px; overflow-y:auto; }
   /* Select all / none (§304): a row of its own between the search and the
      list, so a press cannot be mistaken for a row of the list. */

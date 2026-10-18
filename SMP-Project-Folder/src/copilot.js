@@ -2725,7 +2725,18 @@ var COPILOT = (function(){
       '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-m="' + i + '|compile" aria-label="Compile"><option value="">—</option>' + comp.map(function(c){ return '<option' + (c === m.compile ? ' selected' : '') + '>' + c + '</option>'; }).join("") + '</select>' : E(m.compile || "—")) + '</td>' +
       (ed ? '<td><button type="button" class="xbtn" data-cop-ex-mx="' + i + '" aria-label="Remove this measure">&times;</button></td>' : '') + '</tr>'; };
     var trow = function(t, i){ return '<tr><td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|name" value="' + E(t.name) + '" aria-label="Tactic">' : E(t.name)) + '</td>' +
-      '<td>' + (ed ? '<input class="fld" data-cop-ex-t="' + i + '|owner" value="' + E(t.owner) + '" aria-label="Owner">' : E(t.owner || "—")) + '</td>' +
+      /* §551: AN OWNER IS PICKED HERE TOO. This was the one free-text owner
+         box left in the product — the draft a chat writes, which is then
+         saved into a real plan, so a name typed here becomes a name on the
+         plan that matches nobody. It is the register's own list
+         (`ownerChoices`), so there is one list and not a second (§53.5), and
+         past five options `searchsel` makes it searchable like every other
+         (§536). The patch hook below reads `el.value`, which a select
+         answers exactly as the input did. */
+      '<td>' + (ed ? '<select class="fld copdv-own" data-cop-ex-t="' + i + '|owner" aria-label="Owner">' +
+          optionsHtml(ownerChoices(t.owner, true), function(v){
+            return String(t.owner == null ? "" : t.owner) === v; }) + '</select>'
+        : (typeof ownerShown === "function" ? ownerShown(t.owner || "") : E(t.owner || "")) || E("—")) + '</td>' +
       /* NOT A CONTROL, SO NOT A BUTTON (§538). A quarter outside the plan
          period — or any quarter in a view nobody may edit — was drawn as a
          `disabled` button carrying "Q3 is outside the plan period" as a hover

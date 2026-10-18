@@ -495,7 +495,11 @@ var SEARCHSEL = (function(){
        the native multiple select is a scrolling list box that ctrl-clicks, and
        it is not a control this product uses anywhere. Below the floor there is
        still nothing to search — the box is there and matches nothing away. */
-    if (!sel.multiple && sel.options.length < MIN) return;
+    /* §547: the five-option floor is the right rule for a FORM FIELD and the
+       wrong one for the go-to list — a tenant with four places needs that
+       list more than one with forty, not less. One opt-in here rather than a
+       second popup over there (§53.5). */
+    if (!sel.multiple && sel.options.length < MIN && sel.dataset.ssAlways !== "1") return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
       var prev = buttonFor(sel);
       if (prev) {

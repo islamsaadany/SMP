@@ -4225,19 +4225,103 @@ function ownerDepts(){
   mainbus().forEach(function(b){ if (!mainbuAts(b).length) a.add(b.name); });
   return a.list;
 }
+/* ── AN OWNER IS PICKED FROM THE REGISTER, NEVER TYPED (§551) ──────────
+   Islam, after the El Abd move turned up a direction owned by *"Tamer
+   Abdelhamid"* while the register holds *"Tamer Abdelhameed"*: *"the owner
+   should be selected from a drop down, generally all the owners shouldn't be
+   written by hand and only be selected from a list from the registr in a
+   drop down serachable list."*
+
+   THE RULE IS §177's, ONE FIELD OVER. A due date is picked and never typed
+   because a typed date is precision the product cannot use; a typed owner is
+   worse — it is a person who may not exist, and nothing downstream can tell.
+
+   THE SCREENS ALREADY PICKED. Measured before anything was built: all four
+   owner cells on the plan surfaces go through `gapCell` and are fed by
+   `ownerChoices`, which is this register, and past five options `searchsel`
+   makes it the searchable list Islam describes (§536). What was NOT picked
+   was the Copilot's draft table (a bare text box, §551) and the five Owner
+   columns of the workbook (22 validations in it and not one of them Owner).
+
+   AND THE QUIET PART, WHICH IS HOW "Tamer Abdelhamid" SURVIVED. An unknown
+   value was offered back in the dropdown under the heading "Already on this
+   plan" — a label that reads like a fact about the plan rather than a warning
+   about the name, so it looked like a legitimate choice to everyone who ever
+   opened that cell. It is the same group, said truthfully.
+
+   `ownerKnownSet` IS THE ONE PLACE THE QUESTION IS ASKED (§53.5): the
+   dropdown's grouping, the read-mode flag and the workbook's import refusal
+   all ask it, so a name cannot be a stray in one and fine in another. It is
+   `ownerAdder`'s own set, so trimming and case are settled once.
+
+   NOT MEMOISED, which is deliberate and matches the house: `displayNames()`
+   is recomputed on every call throughout this file, and `ownerChoices` was
+   already paying this exact cost once per cell in the pen. Read mode now
+   pays it too. If a plan is ever large enough for that to show, the cache
+   belongs around `displayNames` for every caller, not here for one. */
+function ownerKnownSet(){
+  var a = ownerAdder();
+  ownerPeople().forEach(function(x){ a.add(x.name); });
+  ownerDepts().forEach(a.add);
+  return a;
+}
+/* The stray values among whatever the field holds — a string or a list.
+   Empty is never a stray: a blank owner is a GAP, which the fill walk and
+   the word "Missing" already handle, and calling it a stray would put two
+   different complaints on one cell. */
+function ownerStrays(v, known){
+  known = known || ownerKnownSet();
+  return (Array.isArray(v) ? v : [v]).map(function(x){
+    return String(x == null ? "" : x).trim();
+  }).filter(function(x){ return x && !known.has(x); });
+}
+/* ── AND IT IS FLAGGED WHERE IT SHOWS, NOT DELETED (Islam's choice) ────
+   Shown the three answers as drawings — flag it, refuse to save it, or leave
+   it — he picked flagging: *"Flag them where they show."* The name STAYS on
+   the row, because a name somebody typed is the only clue to who was meant,
+   and deleting it to satisfy a rule would destroy the thing that lets it be
+   corrected (§96.2's reasoning about an unparseable date, exactly). */
+/* ONE MARK, TWO SHAPES (§53.5). An owner is one name and a collaborator cell
+   is a list of them, so the two readers differ in how they split — and in
+   nothing else. The words and the markup live here once, or the day somebody
+   improves the sentence they improve half the product. */
+function strayMark(){
+  return ' <span class="ownerstray hasnote" data-tip="This name is not in the register,' +
+    ' so it matches no real person. Pick somebody from the list, or add them to the' +
+    ' register.">not in the register</span>';
+}
+function ownerShown(v){
+  return esc(String(v == null ? "" : v)) + (ownerStrays(v).length ? strayMark() : "");
+}
+/* ── AND THE SAME FLAG ON A LIST OF THEM (§551.1) ──────────────────────
+   Islam: *"fix the collaborators too."* A collaborator cell is a comma-
+   separated list, so it is marked PER NAME rather than once for the cell: a
+   cell reading "Nadia Fouad, Tamer Abdelhamid" has one real person in it and
+   one that matches nobody, and a single mark on the whole cell would not say
+   which. `gapCell` hands this the joined string its own `text:` built, which
+   is why it splits on the comma it was joined with and nothing cleverer. */
+function collabShown(v){
+  var known = ownerKnownSet();
+  return String(v == null ? "" : v).split(/\s*,\s*/).filter(Boolean).map(function(n){
+    return esc(n) + (known.has(n) ? "" : strayMark());
+  }).join(", ");
+}
 /* `current` is a string or a list of them — whatever the field already holds,
    so the caller never has to reason about which of its values are known. */
-function ownerChoices(current, blank){
+/* `strayGroup` NAMES THE KEPT GROUP, because one sentence cannot be true of
+   both fields (§551.3). An OWNER is matched against the people register to
+   decide who may report a line, so "Not in the register" is exactly what a
+   stray one is. A STAKEHOLDER is a unit or a person in Islam's own words, so
+   over "Finance Department" that sentence points at the wrong list — it reads
+   as though the platform wanted a person there. The default is unchanged, so
+   §551's owners go on saying what they said. */
+function ownerChoices(current, blank, strayGroup){
   var people = ownerPeople(), depts = ownerDepts();
-  var known = ownerAdder();
-  people.forEach(function(x){ known.add(x.name); });
-  depts.forEach(known.add);
+  var known = ownerKnownSet();
   var kept = ownerAdder();
-  (Array.isArray(current) ? current : [current]).forEach(function(v){
-    if (!known.has(v)) kept.add(v);
-  });
-  var out = blank ? [{ v:"", label:"\u2014" }] : [];
-  if (kept.list.length) out.push({ group:"Already on this plan", items:kept.list });
+  ownerStrays(current, known).forEach(kept.add);
+  var out = blank ? [{ v:"", label:"—" }] : [];
+  if (kept.list.length) out.push({ group:strayGroup || "Not in the register", items:kept.list });
   if (people.length) out.push({ group:"People", items: people.map(function(x){
     return { v:x.name, label:x.name, hint:x.where }; }) });
   if (depts.length)     out.push({ group:"Departments", items:depts });
@@ -8243,9 +8327,43 @@ function projFrontMatter(p, ed){
   /* The pills carry their own leading margin, which is right in a sentence and
      wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
      BORDER lines up with the brief's first letter, not its text. */
+  /* ── A STAKEHOLDER IS PICKED FROM THE SAME LIST (§551.3) ──────────────
+     Islam, asked what a stakeholder is, because the demo held "Unit heads"
+     and "Finance Department" and the answer decided whether a rule could be
+     imposed at all: *"stakeholders are either units or people names so it can
+     be a searchable list with functions and people names to be added."*
+
+     SO IT IS §130.1's OWN CONTROL, NOT A NEW ONE. His words there were almost
+     these — *"for the owners in the plans, projects, tactics, milestones, let
+     it be a searchable list from the registry"*, and, asked what the list
+     holds, *"people or department"*. This is that answer one field further
+     out, so it is the collaborators' control with the collaborators' list
+     (§53.5): `selectManyOr` over `ownerChoices`, several answers, searchable
+     past five options through `searchsel` (§536).
+
+     NOTHING ALREADY TYPED IS LOST, which is why `ownerChoices` is handed the
+     current value: a stakeholder the list does not offer stays in it and
+     stays picked. Measured on the demo before this was built — of twelve
+     distinct stakeholders, seven are already in the list and five are not
+     ("Finance Department" and "IT Department", which are Finance and IT with
+     a word added; "Operations" and "Sales", departments this tenant has no
+     page for; and "Unit heads", which is a role group and neither a unit nor
+     a person). All five survive and remain pickable.
+
+     AND THEY ARE NOT FLAGGED THE WAY AN OWNER IS. An owner is matched against
+     the register BY NAME to decide who may report a line (§130.1, §55) — a
+     stray one is a person who owns work and cannot enter its figure. Nothing
+     downstream resolves a stakeholder to anybody, so a stray costs a tidier
+     chip and nothing else, and five flags on the demo would be noise rather
+     than information. Islam asked for a list to pick from, not a rule to
+     enforce; the rule stays his to ask for. */
   var stake = ed
-    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-        function(v){ p.stakeholders = collabParse(v); })
+    ? selectManyOr("plan", p.stakeholders || [],
+        ownerChoices(p.stakeholders || [], false, "Not a unit or a person here"),
+        "collabsel",
+        function(v){ p.stakeholders = Array.isArray(v)
+          ? v.map(function(x){ return String(x).trim(); }).filter(Boolean)
+          : collabParse(v); }, "Stakeholders")
     : ((p.stakeholders || []).length
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
@@ -8286,6 +8404,7 @@ function projFrontMatter(p, ed){
          list while gapCell keeps the pending lifecycle. */
       row("l", "Owner", gapCell("plan", "k_proj", p, "owner", {
         ctx: { project: p },
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", p.owner == null ? "" : p.owner,
             ownerChoices(p.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8423,6 +8542,7 @@ function projPlanBody(p, subject){
          both, and `ctx` narrows them to the project's own owner (§177). */
       '<td class="cc">' + gapCell("plan", "k_proj", m, "owner", {
           ctx: { project: p, row: m },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", m.owner == null ? "" : m.owner,
               ownerChoices(m.owner, true), "ownersel " + (pendCls || ""), set);
@@ -8442,6 +8562,7 @@ function projPlanBody(p, subject){
             : collabParse(v); },
           del: true,
           readEmpty: '<span class="nobody">&mdash;</span>',
+          read: collabShown,
           control: function(set, pendCls){
             return selectManyOr("plan", collabNames(m),
               ownerChoices(collabNames(m), false),
@@ -8578,6 +8699,7 @@ function fnObjPlanBody(fk, ed){
         (ed ? eyeBtn(a, "plan", "k_proj") : hidChip(a)) + objXb(ed, a.id) + '</td>' +
       '<td class="cc">' + gapCell("plan", "k_proj", a, "owner", {
           ctx: { row: a },
+          read: ownerShown,
           control: function(set, pendCls){
             return selectOr("plan", a.owner == null ? "" : a.owner,
               ownerChoices(a.owner, true), "ownersel " + (pendCls || ""), set);
@@ -9801,6 +9923,7 @@ function unitPlanBody(it, u, railed, bare){
           : collabParse(v); },
         del: true,
         readEmpty: '<span class="nobody">&mdash;</span>',
+        read: collabShown,
         control: function(set, pendCls){
           return selectManyOr("plan", collabNames(t),
             ownerChoices(collabNames(t), false),
@@ -9923,6 +10046,7 @@ function unitPlanBody(it, u, railed, bare){
       '<td' + rs + '>' + gapCell("plan", "u_plan", t, "owner", {
         ctx:pctx(t),
         readEmpty:'<span class="missing">Missing</span>',
+        read: ownerShown,
         control: function(set, pendCls){
           return selectOr("plan", t.owner == null ? "" : t.owner,
             ownerChoices(t.owner, true), "ownersel " + (pendCls || ""), set);

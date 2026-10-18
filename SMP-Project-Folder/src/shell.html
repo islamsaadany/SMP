@@ -258,6 +258,9 @@
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
 <script src="KEYSHEET"></script>
+<script src="TABKEYS"></script>
+<script src="ACTIONKEYS"></script>
+<script src="GOTO"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -3827,6 +3830,11 @@
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
+    /* §546: and the three action keys say themselves on the buttons they
+       belong to, marked here for the same reason the boxes above are —
+       these controls are drawn by several renderers and a mark set at each
+       is several places to forget. */
+    if (typeof ACTIONKEYS !== "undefined") ACTIONKEYS.mark();
     /* AND THE KEYS, over that same list and in the same one place (§528).
        Not inside wire(): these boxes are built by eight renderers and a
        keydown wired at each of them is eight places to forget, which is the
@@ -12675,6 +12683,13 @@
   /* §539: the key and the "?" beside Light and Dark. Wired here beside the
      theme because both are chrome that exists before any page is drawn. */
   KEYSHEET.wire();
+  /* §544: the arrows every row of tabs already promises. One handler for
+     all eight rows, delegated, so a row drawn tomorrow answers them too. */
+  TABKEYS.wire();
+  /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  ACTIONKEYS.wire();
+  /* §547: Alt+G, the list of places. */
+  GOTO.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
      It no longer has anything to do with the first paint — the skeleton wears
      none of these tokens, deliberately, and where there is a server the only

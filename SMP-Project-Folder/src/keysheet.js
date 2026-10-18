@@ -42,8 +42,26 @@ var KEYSHEET = (function(){
     figures: function(){
       return typeof REP_BOXES === "string" && has(REP_BOXES);
     },
+    /* §546: live where any of the three controls is actually on screen. */
+    acts: function(){
+      return has("[data-submit]") || has("[data-repsave]") ||
+             has(".penbtn[data-page], .secpen[data-page], .editbtn[data-page]");
+    },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
+    /* §544: a row worth walking is one with somewhere to walk to. Counted
+       rather than assumed — a tablist holding a single tab answers the arrows
+       and has nothing to say about it. */
+    tabs: function(){
+      var out = false;
+      Array.prototype.forEach.call(document.querySelectorAll('[role="tablist"]'), function(l){
+        if (out) return;
+        var n = Array.prototype.filter.call(l.querySelectorAll('[role="tab"]'),
+          function(t){ return t.offsetParent !== null; }).length;
+        if (n >= 2) out = true;
+      });
+      return out;
+    },
     /* present.js puts `on` on the deck's root while it is showing (§265). */
     deck: function(){
       var d = document.getElementById("deckroot");
@@ -69,6 +87,14 @@ var KEYSHEET = (function(){
         { keys:[["Home"], ["End"]], what:"First or last of what is showing" },
         { keys:[["Enter"]], what:"Take the marked row — or the first one showing" }
       ] },
+    /* §546 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
+    { id:"acts", name:"Doing the thing", where:"a report, or a page you can edit",
+      rows:[
+        { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },
+        { keys:[["Alt","D"]], what:"Save draft" },
+        { keys:[["Alt","E"]], what:"The pen, on or off" },
+        { keys:[["Alt","G"]], what:"Go to another place — type a few letters" }
+      ] },
     { id:"figures", name:"Entering figures", where:"Reporting",
       rows:[
         { keys:[["Enter"]], what:"The next figure" },
@@ -76,6 +102,14 @@ var KEYSHEET = (function(){
         { keys:[["Alt","Enter"]], what:"Jump to the next thing still owed" },
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
+      ] },
+    /* §544 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+       sheet exists: the alternative is a fifth idiom nobody can discover. */
+    { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
+      rows:[
+        { keys:[["←"], ["→"]], what:"Move along the row, wrapping at the ends" },
+        { keys:[["Home"], ["End"]], what:"First or last tab on the row" },
+        { keys:[["Enter"]], what:"Open the one you have landed on" }
       ] },
     { id:"rows", name:"Moving a row", where:"wherever rows can be rearranged",
       rows:[

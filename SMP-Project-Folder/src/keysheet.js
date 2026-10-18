@@ -44,7 +44,7 @@ var KEYSHEET = (function(){
     },
     /* arrange.js draws a `.grip` on every row it can move (§266.10). */
     rows: function(){ return has(".grip"); },
-    /* §540: a row worth walking is one with somewhere to walk to. Counted
+    /* §543: a row worth walking is one with somewhere to walk to. Counted
        rather than assumed — a tablist holding a single tab answers the arrows
        and has nothing to say about it. */
     tabs: function(){
@@ -90,7 +90,7 @@ var KEYSHEET = (function(){
         { keys:[["Alt","N"]], what:"The note for this row" },
         { keys:[["Esc"]], what:"Put the box back as it was" }
       ] },
-    /* §540 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
+    /* §543 — ADDED THE DAY THE KEYS WERE, which is the whole reason this
        sheet exists: the alternative is a fifth idiom nobody can discover. */
     { id:"tabs", name:"A row of tabs", where:"places, tabs, sections",
       rows:[

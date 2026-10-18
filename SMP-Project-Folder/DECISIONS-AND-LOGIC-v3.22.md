@@ -65895,6 +65895,23 @@ So a file generated from the repository was correct about the data and wrong abo
 **What is still Islam's**: the word to run it. Nothing else is outstanding.
 
 
+## §542.6 — The move ran on El Abd, and what it has NOT yet proved (spec 066 stage 3b; 2026-10-18)
+**NOT THIS SESSION'S WORK EITHER.** Pushed as `7ee00f4` from the same other session, under §539.6, which the §537–§539 → §540–§542 renumber made §542.6. It is the one entry in that family with **no code behind it at all** — it changed a single file, `IMPLEMENTATION_PROGRESS.md` — and that is exactly why it was easy to leave out of this file and worth putting in: **an operational record is the kind that matters most later and is written down least.**
+
+**WHAT HAPPENED.** Islam, 18 October 2026, of the SQL in §542.5: *"successfuly"*. With that, **stage 3b is complete end to end**: (a) the joined-or-split setting, (b) a pillar's code from its kind, (c) the pages reading the kind rather than the container, and (d) El Abd's five capability records moved to internal pillars of its company plan, with the client renamed to **ElAbd**.
+
+**AND WHAT IT HAS NOT PROVED, which is the point of recording it.** The SQL **checks its own work before it commits and refuses to commit otherwise**, so the rows are right — that is an assertion about the DATABASE. **What has not been measured is the PAGES on the live client.** A fresh working copy was asked for, and `scripts/stage3-before-after.js` is what will read it. **It is still outstanding**: 61 commits have landed since, and not one of them reports the comparison or touches the migration. A migration that reports success is not a migration that has been seen working, and the gap between those two is where §54.5 lives.
+
+**THREE THINGS LEFT OPEN IN THE LIVE DATA, named rather than left as an absence** — and still open, verified by reading all 61 commits since for any mention of them, which found none:
+
+1. the retired tenant **"ElAbd Foods"**, holding 8 capabilities;
+2. **"Tamer Abdelhamid"** owning two of El Abd's directions while the register holds **"Tamer Abdelhameed"** — a different spelling, so those two match no real person;
+3. two leftover copies of client data sitting unused — the `elabd` and `public` schemas, and the old `platform.clients` register.
+
+**AND THE FAULT §542.5 RECORDED IS THE REASON THIS ENTRY EXISTS AT ALL.** That round's own words: *"I wrote the file from the code in this repository and assumed the live database matched it. It doesn't… I should have asked the database to describe itself before writing a line. That's three read-only queries and one message; instead it cost three rounds."* The live database held **three copies** of the tables and an older client list, and the generator now takes the layout as an explicit option so it cannot be guessed again. **A record of what the environment actually is, rather than what the repository implies, is not a footnote to the work — it is the work.**
+
+**NOT VERIFIED HERE (§54.5):** nothing in the live database was read for this entry, and nothing could be — there is no connection to it from here. Every claim above is read out of `IMPLEMENTATION_PROGRESS.md` §542.5, commit `7ee00f4`, and the commit log. **Whether those three items are still true of the live data today is unknown**; what is established is that nothing in this repository has addressed them.
+
 ## §543 — A half is offered to the people who have something in it
 Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing as osama I shouldn't see the directions part at the top, only the capabilities and no need as well to see key measures and tactics.. the title is not relevant. for the user he is just reporting for the office it might be useful"*, and *"viewing as amr I shouldn't see the capabilities tab as it has nothing for him there"*. Asked whether to drop the heading where only one half is left: *"yes"*.
 

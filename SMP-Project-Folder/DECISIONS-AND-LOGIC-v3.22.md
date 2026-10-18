@@ -65991,3 +65991,24 @@ A deliverable reports Not started / In progress / Delivered with a per-cent (§1
 **The check** goes to 67 agreements, red three ways: dropping the deliverables again → 3, dropping the outcome refusal → 2, letting the plan list a refused row → 1.
 
 **And the register, read while we were there:** ElAbd 0 capabilities and 10 company pillars (stage 3b, done), Raya Trade 0 (Islam: *"raya old ones are already removed"*), RHI 0 with 15 company pillars, testing 0 — so **Wander's three and Meridian Group's two are all that is left** of the old kind anywhere.
+
+### §544.8 — Wander's SQL, generated from the move and rehearsed on a real Postgres
+Islam: *"generate the SQL"*. The same shape as El Abd's (§542.2): the statements are **generated from the product's own `capFoldPlan()`**, never typed, so the list he approved, the rehearsal that was measured and the statements that run are one thing (§100.3).
+
+What `scripts/stage3-move-sql.js` had to learn, all of it from Wander:
+
+- **`--to-company`**, the office's statement that the capabilities are the company's. Without it a record a function holds refuses, because §7.1's other answer is still real. The emitted file writes `structure.cap.at = "top"` so the stored state ends as the rehearsal left it.
+- **One row per inner pillar**, built with `jsonb_array_elements … WITH ORDINALITY` instead of `extra->'items'->0`, ordered by the capability's `idx` then the pillar's place — the rehearsal's own order.
+- **A project becomes a pillar**, built from the `projects`, `deliverables` and `milestones` tables (they are tables, not JSON on the capability row — the read-only look is what established that). The project's id becomes the pillar's and every deliverable and milestone keeps its own.
+- **The company's plan switched on** and `pillar` ticked, or the rows land invisible (§544.6).
+- **DISTINCT capability ids**: one record may plan several rows now, and counting the plan would have asserted four records where there are three.
+- **It refuses to emit at all** when a milestone or deliverable carries a date, a state or a note. Translating those would mean working a quarter out inside PL/pgSQL where nothing here could test it; when a client turns up with one, that is when it gets written, and tested (§113.8). Wander's ten rows carry none, and the SQL asserts that too, inside the transaction.
+
+**REHEARSED ON A REAL POSTGRES**, not reasoned about: a throwaway PostgreSQL 16, the `smp` schema built to the columns the database itself reported, Wander's own rows loaded into it, and the generated file run.
+
+- it ran clean — `UPDATE 1 · UPDATE 1 · UPDATE 1 · DELETE 3 · COMMIT`;
+- the resulting `org.extra` is **identical, row for row and key for key, to what the product's own `capFoldIntoTop()` produces over the same state** — items and structure both;
+- a **second run** raises *expected 3 capabilities by id, found 0* and changes nothing;
+- the same statements pointed at **another client** raise *this is not Wander Development* and change nothing.
+
+The file is `scripts/wander/move.sql`, with the two read-only looks beside it.

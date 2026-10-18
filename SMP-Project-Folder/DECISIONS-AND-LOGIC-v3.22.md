@@ -65904,7 +65904,7 @@ So a file generated from the repository was correct about the data and wrong abo
 
 **THREE THINGS LEFT OPEN IN THE LIVE DATA, named rather than left as an absence** — and still open, verified by reading all 61 commits since for any mention of them, which found none:
 
-1. the retired tenant **"ElAbd Foods"**, holding 8 capabilities;
+1. ~~the retired tenant **"ElAbd Foods"**, holding 8 capabilities~~ — **CLOSED. Islam removed it permanently on 2026-10-18**, in his words: *"I removed the retired project premnantly."* Not verified from here and it cannot be: nothing in this repository reaches the live database. Recorded on his word, which is the only measurement available for it;
 2. **"Tamer Abdelhamid"** owning two of El Abd's directions while the register holds **"Tamer Abdelhameed"** — a different spelling, so those two match no real person;
 3. two leftover copies of client data sitting unused — the `elabd` and `public` schemas, and the old `platform.clients` register.
 

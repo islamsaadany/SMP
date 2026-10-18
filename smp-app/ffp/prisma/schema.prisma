@@ -358,6 +358,7 @@ model Process {
   publishedAt          DateTime?
   retiredAt            DateTime?
   versions             ProcessVersion[]
+  acknowledgements     ProcessAcknowledgement[]
 
   workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   category       ProcessCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -602,6 +603,25 @@ model ProcessVersion {
 
   @@unique([processId, number])
   @@map("process_versions")
+}
+
+/// "I have read version N" — one row per person per version. Keyed by the
+/// person's People-register key (not a Person row) so a member of staff can
+/// acknowledge without the office having opened the client first; the name is
+/// written down as it was.
+model ProcessAcknowledgement {
+  id             String   @id @default(uuid())
+  processId      String
+  versionNumber  Int
+  personKey      String
+  personName     String
+  acknowledgedAt DateTime @default(now())
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@unique([processId, versionNumber, personKey])
+  @@index([processId, versionNumber])
+  @@map("process_acknowledgements")
 }
 
 // A risk and the control that answers it, on a process (optionally on one step).

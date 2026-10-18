@@ -6,6 +6,7 @@ import type { Revision } from "@/ffp/lib/domain/sop";
 import { ProcessTabs, parseTab } from "./process-tabs";
 import { auth } from "@/ffp/lib/auth/config";
 import { daysToReview, isOverdueForReview, mayApprove, STATUS_LABEL } from "@/ffp/lib/domain/process-lifecycle";
+import { acknowledgementProgress, expectedAcknowledgers } from "@/ffp/lib/domain/process-reader";
 import { LifecyclePanel } from "./lifecycle-panel";
 import { AddControlForm, DeleteControlButton, AddNonConformanceForm, NonConformanceStatus } from "./quality-forms";
 
@@ -61,7 +62,7 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     prisma.person.findMany({
       where: { workspaceId, archivedAt: null },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, email: true, personRoles: { select: { role: { select: { name: true, archivedAt: true } } } } },
+      select: { id: true, name: true, email: true, smpKey: true, personRoles: { select: { roleId: true, role: { select: { name: true, archivedAt: true } } } } },
     }),
     prisma.processVersion.findMany({ where: { processId }, orderBy: { number: "desc" } }),
     auth(),
@@ -70,6 +71,20 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
     const roles = x.personRoles.filter((r) => !r.role.archivedAt).map((r) => r.role.name);
     return { id: x.id, name: x.name, email: x.email, role: roles.length ? roles.join(", ") : null };
   });
+  // Who is expected to have read the version in force, and who has: people
+  // holding a role one of the steps is given to, against the acknowledgements.
+  const inForce = versions.find((v) => v.publishedAt);
+  const ackRows =
+    process.lifecycleStatus === "PUBLISHED" && inForce
+      ? await prisma.processAcknowledgement.findMany({ where: { processId, versionNumber: inForce.number }, select: { personKey: true } })
+      : [];
+  const progress = acknowledgementProgress(
+    expectedAcknowledgers({
+      stepRoleIds: stepList.map((s) => s.assignedRoleId),
+      people: registerPeople.map((x) => ({ personKey: x.smpKey, name: x.name, roleIds: x.personRoles.map((r) => r.roleId) })),
+    }),
+    new Set(ackRows.map((a) => a.personKey))
+  );
   const approverRow = people.find((x) => x.id === process.approverPersonId);
   const me = (session?.user.email ?? "").trim().toLowerCase();
   const canApprove =
@@ -188,6 +203,24 @@ export default async function ProcessPage(props: PageProps<"/[slug]/processes/pr
                     ? `${-daysToReview(process.nextReviewDue, today)} day(s) overdue`
                     : `in ${daysToReview(process.nextReviewDue, today)} day(s)`}
                 </p>
+              </Card>
+            )}
+            {process.lifecycleStatus === "PUBLISHED" && inForce && (
+              <Card title={`Read and acknowledged · v${inForce.number}`}>
+                {progress.total === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No step is given to a role that anybody on the People register holds, so nobody is expected to acknowledge yet.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-sm text-slate-700">
+                      <span className="font-semibold">{progress.done}</span> of {progress.total} have confirmed they have read it.
+                    </p>
+                    {progress.outstanding.length > 0 && (
+                      <p className="mt-1 text-sm text-slate-600">Still to read: {progress.outstanding.map((o) => o.name).join(", ")}.</p>
+                    )}
+                  </>
+                )}
               </Card>
             )}
             <Card title="Approved versions">

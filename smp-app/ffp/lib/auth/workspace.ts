@@ -7,6 +7,7 @@ import { forbidden, unauthorized, type ActionResult } from "@/ffp/lib/actions/er
 import { currentUser } from "@/lib/session.ts";
 import { doorPool } from "@/lib/auth.ts";
 import { resolveTenant } from "@/lib/door.ts";
+import { mayRead } from "@/ffp/lib/domain/process-reader";
 
 export type WorkspaceAccess = {
   userId: string;
@@ -35,6 +36,35 @@ export const officeSeat = cache(async (slug: string): Promise<{ ok: true; userId
     create: { id: door.tenant.key, firmId, name: door.tenant.name },
   });
   return { ok: true, userId: session.user.id };
+});
+
+/* WHO MAY OPEN THE STAFF READER VIEW — the one part of Processes that is not
+   the office's alone. The office, or a client's own person who holds a row on
+   that client's People register. Everything else in Processes still asks
+   officeSeat above; a page that does not ask for either is open to nobody it
+   should not be, because tests/processes-gate.mjs fails if one is left bare. */
+export type ReaderSeat =
+  | { ok: true; office: boolean; userId: string; email: string; name: string; personKey: string | null; tenantName: string }
+  | { ok: false };
+
+export const readerSeat = cache(async (slug: string): Promise<ReaderSeat> => {
+  const session = await auth();
+  if (!session) return { ok: false };
+  const user = await currentUser();
+  if (!user) return { ok: false };
+  const door = await resolveTenant(doorPool(), user, slug);
+  if (!door.ok) return { ok: false };
+  const office = door.seat === "super" || door.seat === "smoteam";
+  if (!mayRead({ office, userKind: user.kind, personKey: door.personKey })) return { ok: false };
+  return {
+    ok: true,
+    office,
+    userId: session.user.id,
+    email: session.user.email,
+    name: session.user.name ?? session.user.email,
+    personKey: door.personKey,
+    tenantName: door.tenant.name,
+  };
 });
 
 export async function requireWorkspaceAccess(

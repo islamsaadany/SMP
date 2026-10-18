@@ -9687,3 +9687,19 @@ Every process now has a status: Draft → In review → Approved → Published �
 Checked: the rules (26 checks, proved able to fail by breaking one), the typecheck (clean except the `lib/prisma.ts` error that is also present before this change), and the migration with its backfill on a scratch Postgres 16. **Not checked**: the screens have not been opened in a browser and the actions have not been run against a signed-in session.
 
 Not yet built: notifications, the staff reader view and acknowledgements, the Governance review calendar.
+
+## §540 — Processes: the review calendar, and the staff reader view (2026-10-18)
+Built on branch `claude/vigilant-bohr-snqji9`. Not merged to main. The new migration (`20261018130000_process_acknowledgements`) is tested on a scratch database, applied nowhere real.
+
+**Review calendar** (Governance page, office only, read-only): every Published process by next review date — Overdue, Next 30 days, 31 to 90 days, Later — each linking to its Lifecycle tab.
+
+**Staff reader view** at `/<client>/processes/read`: the first part of Processes a client's own person may open. Who: the office, or a client person holding a row on that client's People register. They see only Published processes — purpose, scope, what changed in this version, the steps with who does them — and a bar to confirm "I have read version N". Nothing else from Processes is shown or reachable to them.
+- **Who is expected to acknowledge**: people holding a role one of the process's steps is given to. A process whose steps name no role expects nobody (it does not fall back to everyone).
+- **Per version**: a new published version needs everybody to acknowledge again.
+- **The office sees the count** on the Lifecycle tab: "4 of 13 have confirmed", with the names still to read.
+
+**The gate moved, and this is the part to review.** The Processes frame used to turn every non-office person away for every page beneath it. It now only checks the person got through the door; the refusal moved into the two office-only areas (`(shell)` and `reports`), each calling `officeOnlyNotice` first, and the reader area asks `readerSeat`. `tests/processes-gate.mjs` walks every page under Processes and fails if one has neither above it; it was proved able to fail by taking a gate off. The module-level rule in `lib/access.ts` (Processes is the office's) is untouched: staff still do not see Processes in their top bar and have no entry point to `/read` until one is added.
+
+Checked: 12 reader/acknowledgement rules, 7 more calendar rules (33 lifecycle in all), the gate check (37), the typecheck (clean except the `lib/prisma.ts` error present before), the migration applied after all 49 before it, and the reader pages rendered and clicked in Chromium with the data stubbed (9 + 5 checks). **Not checked**: the real signed-in flow — a real client person opening `/read`, and the real door deciding. That needs a deployment with the database.
+
+Not built: how staff get to `/read` (a link from their landing or a notification), and reminders.

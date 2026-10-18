@@ -75,6 +75,11 @@
   .linkish { border:0; background:none; padding:0; color:var(--gold-deep);
              font:600 11.5px var(--sans); letter-spacing:0; text-transform:none; cursor:pointer; }
   .linkish:hover { text-decoration:underline; }
+  .navtick { border:1px solid var(--line); background:var(--surface); color:var(--ink-3);
+             border-radius:999px; padding:.08rem .5rem; font:600 10.5px var(--sans);
+             letter-spacing:var(--track); text-transform:uppercase; cursor:pointer; }
+  .navtick[aria-pressed="true"] { background:var(--navy); border-color:var(--navy); color:var(--navy-ink); }
+  .navtick:hover { border-color:var(--gold); }
   .needs { margin-top:.5rem; border:1px dashed var(--bad); border-radius:8px;
            padding:.45rem .55rem; background:color-mix(in srgb, var(--bad) 7%, transparent); }
   .needs .h { font-size:11px; font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
@@ -169,7 +174,7 @@
 </div>
 
 <div class="navprev">
-  <div class="h">and this is the navigation it gives — derived, never set</div>
+  <div class="h">the navigation — the rows you tick <b>nav</b> above become its switches</div>
   <div class="navrow" id="navrow"></div>
   <div class="navrow" id="navrow2" style="background:#E8D9BE"></div>
 </div>
@@ -213,7 +218,7 @@ function elabd() {
   return { name:"ElAbd", top:{ one:"Company", many:"Company", on:["found","swot","pillar","keyobj"] },
     kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar"], group:null },
              { k:"fn", one:"Function", many:"Functions", on:["found","keyobj","project"],
-               group:{ one:"Division", many:"Divisions", on:["found"] } } ],
+               group:{ one:"Division", many:"Divisions", on:["found"], nav:true } } ],
     boxes: g.concat(fns) };
 }
 function raya() {
@@ -224,15 +229,19 @@ function raya() {
   bus = bus.concat(mk(["B2B Ecomm","Corporate","Logistics","Nigeria"], "bu", "top"));
   const fns = mk(["Finance","HR","Treasury","Marketing","IT","Care","Strategy Management Office","Merchandising"], "fn", "top");
   return { name:"Raya Trade", top:{ one:"Group", many:"Group", on:["found","theme","keyobj"] },
-    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar","keyobj"],
+    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar","keyobj"], nav:true,
                group:{ one:"Division", many:"Divisions", on:["found"] } },
-             { k:"fn", one:"Function", many:"Supporting Functions", on:["found","project"], group:null } ],
+             { k:"fn", one:"Function", many:"Supporting Functions", on:["found","project"], group:null, nav:true } ],
     boxes: g.concat(bus, fns) };
 }
 function fresh() {
   return { name:"New client", top:{ one:"Company", many:"Company", on:["found","keyobj"] },
-    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar"], group:null },
-             { k:"fn", one:"Function", many:"Functions", on:["found","project"], group:null } ],
+    /* A NEW CLIENT OPENS WITH ITS TWO KINDS TICKED. Chosen, not derived — but
+       a starting value, because an empty navigation is a dead end and the
+       commonest shape by far is "the units and the functions". Untick either
+       and it goes; tick a layer instead and the layer takes its place. */
+    kinds: [ { k:"bu", one:"Business unit", many:"Business units", on:["found","swot","pillar"], group:null, nav:true },
+             { k:"fn", one:"Function", many:"Functions", on:["found","project"], group:null, nav:true } ],
     boxes: [] };
 }
 const MAKE = { elabd, raya, fresh };
@@ -264,9 +273,14 @@ function parentFor(k) {
 }
 
 /* ── the shape ───────────────────────────────────────────────────────────── */
-function lvlRow(label, layer, extra) {
+function navTick(lvl) {
+  const w = wordsOf(lvl);
+  return '<button class="navtick" data-nav="' + lvl + '" aria-pressed="' + !!(w && w.nav) +
+         '" title="Show this row as a switch in the navigation">nav</button>';
+}
+function lvlRow(label, layer, extra, lvl) {
   return '<div class="lvl"><span class="lay">Layer ' + layer + '</span>' + label +
-         (extra || '') + '</div>';
+         (lvl ? ' ' + navTick(lvl) : '') + (extra || '') + '</div>';
 }
 function boxesRow(list, cls) {
   return list.map(b => '<button class="box' + (cls || '') +
@@ -292,7 +306,7 @@ function drawShape() {
       out.push(lvlRow('<button data-lvl="' + g + '">' + esc(k.group.many) + '</button>' +
                       '<span class="n">' + gl.length + '</span>', 2,
                       '<span class="under">above the ' + esc(k.many.toLowerCase()) +
-                      ' &nbsp;<button class="linkish" data-ungroup="' + k.k + '">remove this layer</button></span>'));
+                      ' &nbsp;<button class="linkish" data-ungroup="' + k.k + '">remove this layer</button></span>', g));
       out.push('<div class="row">' + boxesRow(gl) +
         (adding === g ? '<input class="newin" id="newin" placeholder="name it, then Enter" autocomplete="off">'
                       : '<button class="add" data-add="' + g + '">+ add</button>') + '</div>');
@@ -308,7 +322,7 @@ function drawShape() {
           ' under ' + esc(boxOf(par).name) + ')</span>' : ''),
       k.group ? 3 : 2,
       k.group ? '' : '<span class="under"><button class="linkish" data-group="' + k.k +
-        '">group these under a layer…</button></span>'));
+        '">group these under a layer…</button></span>', k.k));
     out.push('<div class="row">' + boxesRow(list) +
       (adding === k.k ? '<input class="newin" id="newin" placeholder="name it, then Enter" autocomplete="off">'
         : '<button class="add" data-add="' + k.k + '">+ add' +
@@ -407,44 +421,48 @@ function drawPanel() {
    So there is nothing to set here, and one fewer thing to keep in step with
    the shape. */
 function navSidesOf() {
-  const kinds = S.kinds.filter(k => at(k.k).length);
-  if (kinds.length === 1 && kinds[0].group && at(gKey(kinds[0].k)).length)
-    return { lead: at(gKey(kinds[0].k)).map(x => ({ id:x.id, name:x.name })),
-             why: "only " + kinds[0].many.toLowerCase() + ", so its " +
-                  kinds[0].group.many.toLowerCase() + " are the sides" };
-  return { lead: kinds.map(k => ({ id:"kind:" + k.k, name:k.many })),
-           why: kinds.length
-             ? kinds.map(k => k.many.toLowerCase()).join(" and ") + " each get a side"
-             : "nothing under it yet" };
+  /* CHOSEN, NOT DERIVED. Islam, of the first draft, which worked out the
+     sides from the shape: "this should be a choice what are the navigation
+     switch… so it needs to be chosen somehow not derived." He is right that
+     a rule read off two clients is a rule invented from two clients — a
+     third with units, functions AND divisions could reasonably want any of
+     them on the row, and a derivation decides that for them.
+
+     So every row carries a `nav` tick, and the sides are the rows that are
+     ticked. The existing clients open ticked exactly as they read today, so
+     nothing moves; what changes is that it can now be answered. */
+  const out = [];
+  S.kinds.forEach(k => {
+    if (k.group && k.group.nav && at(gKey(k.k)).length)
+      at(gKey(k.k)).forEach(x => out.push({ id:x.id, name:x.name }));
+    if (k.nav && at(k.k).length) out.push({ id:"kind:" + k.k, name:k.many });
+  });
+  return out;
 }
 function drawNav() {
-  const n = navSidesOf(), selId = sel.kind === "box" ? sel.id : null;
+  const lead = navSidesOf(), selId = sel.kind === "box" ? sel.id : null;
   $("navrow").innerHTML =
     '<span class="t home' + (selId === "top" ? " on" : "") + '">' + esc(S.name) + '</span>' +
-    (n.lead.length ? '<span class="sep"></span>' : '') +
-    (n.lead.length
-      ? n.lead.map(x => '<span class="t' + (x.id === selId ? " on" : "") + '">' + esc(x.name) + '</span>').join("")
-      : '<span class="none">nothing under it yet</span>');
-  /* what opens inside the side you are on */
+    (lead.length ? '<span class="sep"></span>' : '') +
+    (lead.length
+      ? lead.map(x => '<span class="t' + (x.id === selId ? " on" : "") + '">' + esc(x.name) + '</span>').join("")
+      : '<span class="none">nothing on it \u2014 tick a row above</span>');
+  /* what opens inside whichever side you are on */
   const inside = [];
   S.kinds.forEach(k => {
     if (!at(k.k).length) return;
-    if (n.lead.length && n.lead[0].id.indexOf("kind:") !== 0) {
-      /* the sides ARE the layer, so the second row is that one's children */
-      const par = chosen[gKey(k.k)] || (n.lead[0] && n.lead[0].id);
-      kids(par, k.k).forEach(x => inside.push(x.name));
-    } else if (k.group) {
-      /* grouped inside its own side: the division, then its boxes */
-      at(gKey(k.k)).forEach(g => inside.push(g.name + " \u203a " + kids(g.id, k.k).length));
-    } else {
-      at(k.k).forEach(x => inside.push(x.name));
+    if (k.group && k.group.nav) {
+      const par = chosen[gKey(k.k)] || (at(gKey(k.k))[0] || {}).id;
+      if (par) kids(par, k.k).forEach(x => inside.push(x.name));
+    } else if (k.nav) {
+      if (k.group) at(gKey(k.k)).forEach(g => inside.push(g.name + " \u203a " + kids(g.id, k.k).length));
+      else at(k.k).forEach(x => inside.push(x.name));
     }
   });
-  $("navrow2").innerHTML = (inside.length
+  $("navrow2").innerHTML = inside.length
     ? inside.slice(0, 12).map(x => '<span class="t">' + esc(x) + '</span>').join("") +
       (inside.length > 12 ? '<span class="none">+' + (inside.length - 12) + ' more</span>' : '')
-    : '<span class="none">\u2014</span>') +
-    '<span class="none" style="margin-left:auto">' + esc(n.why) + '</span>';
+    : '<span class="none">\u2014</span>';
 }
 function draw() { drawShape(); drawPanel(); drawNav(); }
 
@@ -461,6 +479,8 @@ $("shape").addEventListener("click", (e) => {
        exists — "Cannot read properties of null". Found by pressing it. */
     sel = { kind:"box", id:"top" }; chosen = {}; adding = null; draw(); return;
   }
+  const nv = e.target.closest("[data-nav]");
+  if (nv) { const w = wordsOf(nv.dataset.nav); if (w) w.nav = !w.nav; draw(); return; }
   const a = e.target.closest("[data-add]"), b = e.target.closest("[data-box]"),
         l = e.target.closest("[data-lvl]");
   if (a) { adding = a.dataset.add; draw(); return; }

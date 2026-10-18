@@ -98,7 +98,7 @@ with sync_playwright() as p:
        r[2].startswith("LAYER 2 DIVISIONS 1") and r[3].startswith("LAYER 3 FUNCTIONS 1"), r)
     ck("and Finance is waiting for a Division", pg.locator(".box.orphan").count()==1)
     ck("the units are untouched at Layer 2", rows(pg)[1].startswith("LAYER 2 BUSINESS UNITS 0"), rows(pg)[1])
-    print("7 \u00b7 the navigation, derived \u2014 held to what the live platform answers")
+    print("7 \u00b7 the navigation \u2014 CHOSEN on the row, and it opens as each client reads today")
     def sides(pg): return [t.strip() for t in pg.locator("#navrow .t").all_inner_texts()]
     def inside(pg): return [t.strip() for t in pg.locator("#navrow2 .t").all_inner_texts()]
     pg.locator('[data-client="elabd"]').click(); pg.wait_for_timeout(300)
@@ -112,7 +112,22 @@ with sync_playwright() as p:
     ck("its divisions group the units inside their own side",
        any("Distribution" in x for x in inside(pg)), inside(pg))
     pg.locator('[data-client="fresh"]').click(); pg.wait_for_timeout(300)
-    ck("a new client has no sides at all", sides(pg)==["New client"], sides(pg))
+    ck("a new client has no sides yet, because it has no boxes", sides(pg)==["New client"], sides(pg))
+    ck("but its two kinds open ticked, so the navigation is never a dead end",
+       [pg.locator("[data-nav]").nth(i).get_attribute("aria-pressed") for i in range(2)]==["true","true"],
+       [pg.locator("[data-nav]").nth(i).get_attribute("aria-pressed") for i in range(2)])
+    print("8 \u00b7 and the choice can be changed")
+    pg.locator('[data-client="elabd"]').click(); pg.wait_for_timeout(300)
+    ck("El Abd has a tick on each of its three rows", pg.locator("[data-nav]").count()==3,
+       pg.locator("[data-nav]").count())
+    ck("only the divisions are ticked", pg.locator('[data-nav="fn@g"]').get_attribute("aria-pressed")=="true"
+       and pg.locator('[data-nav="fn"]').get_attribute("aria-pressed")=="false")
+    pg.locator('[data-nav="fn@g"]').click(); pg.wait_for_timeout(250)
+    ck("unticking them empties the navigation", sides(pg)==["ElAbd"], sides(pg))
+    pg.locator('[data-nav="fn"]').click(); pg.wait_for_timeout(250)
+    ck("ticking the functions puts them there instead", sides(pg)==["ElAbd","Functions"], sides(pg))
+    ck("and inside, the 22 are grouped by their three divisions rather than listed flat",
+       len(inside(pg))==3 and all("\u203a" in x for x in inside(pg)), inside(pg))
     ck("no script errors anywhere", not errs, errs[:2])
     pg.screenshot(path="/tmp/claude-0/-home-user-SMP/a7f5ef4d-11bc-512f-b7f0-b2913a11888a/scratchpad/shape.png")
     b.close()

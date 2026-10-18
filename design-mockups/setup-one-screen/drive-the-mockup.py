@@ -98,8 +98,23 @@ with sync_playwright() as p:
        r[2].startswith("LAYER 2 DIVISIONS 1") and r[3].startswith("LAYER 3 FUNCTIONS 1"), r)
     ck("and Finance is waiting for a Division", pg.locator(".box.orphan").count()==1)
     ck("the units are untouched at Layer 2", rows(pg)[1].startswith("LAYER 2 BUSINESS UNITS 0"), rows(pg)[1])
+    print("7 \u00b7 the navigation, derived \u2014 held to what the live platform answers")
+    def sides(pg): return [t.strip() for t in pg.locator("#navrow .t").all_inner_texts()]
+    def inside(pg): return [t.strip() for t in pg.locator("#navrow2 .t").all_inner_texts()]
+    pg.locator('[data-client="elabd"]').click(); pg.wait_for_timeout(300)
+    ck("El Abd's sides are its divisions \u2014 navSides() answers the same today",
+       sides(pg)==["ElAbd","Commercial","Operations","Corporate Support"], sides(pg))
+    ck("and inside is the first division's five functions",
+       inside(pg)==["Retail","External Sales","E-Commerce","Marketing","Customer Experience"], inside(pg))
+    pg.locator('[data-client="raya"]').click(); pg.wait_for_timeout(300)
+    ck("Raya's sides are the two KINDS, not its divisions \u2014 as today",
+       sides(pg)==["Raya Trade","Business units","Supporting Functions"], sides(pg))
+    ck("its divisions group the units inside their own side",
+       any("Distribution" in x for x in inside(pg)), inside(pg))
+    pg.locator('[data-client="fresh"]').click(); pg.wait_for_timeout(300)
+    ck("a new client has no sides at all", sides(pg)==["New client"], sides(pg))
     ck("no script errors anywhere", not errs, errs[:2])
     pg.screenshot(path="/tmp/claude-0/-home-user-SMP/a7f5ef4d-11bc-512f-b7f0-b2913a11888a/scratchpad/shape.png")
     b.close()
-print("\nALL GOOD — %d assertions" % (0,) if not bad else "\n%d FAILED"%bad)
+print("\nALL GOOD" if not bad else "\n%d FAILED"%bad)
 sys.exit(1 if bad else 0)

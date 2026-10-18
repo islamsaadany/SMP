@@ -7064,10 +7064,28 @@ function renderReport(u, opt){
   }
   return pillars;
   };
-  var pillars = drawHalf("dir", halfBlock);
-  /* §542: the internal half, where the box is shown apart and holds one —
-     a heading over nothing is not an empty state (§45.2). */
-  var capPillars = boxHasHalf(u, "cap") ? drawHalf("cap", halfBlock) : "";
+  /* §543 — EACH HALF ONLY WHERE THIS VIEWER REACHES ONE, AND THE HEADING
+     ONLY WHERE THERE ARE TWO. Islam, reporting as a capability's owner:
+     *"I shouldn't see the directions part at the top, only the capabilities
+     and no need as well to see key measures and tactics.. the title is not
+     relevant. for the user he is just reporting; for the office it might be
+     useful"*.
+
+     Two rules in one sentence, and the second follows from the first: a half
+     that holds nothing of theirs is not drawn at all — no heading, no empty
+     state — and once only one half is left there is nothing for a title to
+     tell apart, so it goes too. The office, who sees both, keeps both
+     headings because for them the title is doing its job. */
+  var showDir = !boxSplit(u) || boxHasHalf(u, "dir");
+  var showCap = boxHasHalf(u, "cap");
+  var pillars = showDir ? drawHalf("dir", halfBlock) : "";
+  var capPillars = showCap ? drawHalf("cap", halfBlock) : "";
+  /* THE HEADING GOES ONLY WHERE A SPLIT LEFT ONE HALF. A joined box has one
+     section and has always been headed, so dropping the title there would
+     take a heading off every unit in every client that never split anything
+     — which is what the first draft of this did, and what section 1b of
+     scripts/test-capability-fold.js caught. */
+  var titled = !boxSplit(u) || (showDir && showCap);
 
   /* Published to the chrome rather than drawn here (§150): the shell reads
      REPORT_CHROME after this render and hangs it on the tab row, the same
@@ -7172,15 +7190,17 @@ function renderReport(u, opt){
     /* §520.6: a part owner narrowed to a part that is not a direction is not
        told the company has no directions to report against (§45.2, §61) —
        the section is theirs only where one of its rows is. */
-    (u.topLayer && partOnly() && !partItems(u).length ? "" :
-      section("", L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, pillars)) +
+    (!pillars || (u.topLayer && partOnly() && !partItems(u).length) ? "" :
+      section("", titled ? L("pillar","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+              null, pillars)) +
     /* §542: AND THE INTERNAL HALF AS A SECOND SECTION, headed with the
        client's own word for a capability — the shape §520.8 settled for the
        capability RECORDS ("it should say Capabilities - key measures and
        tactics"), kept for the pillars that replace them. Empty on every box
        that is not shown apart, which is every box today. */
     (capPillars
-      ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null, capPillars)
+      ? section("", titled ? L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic") : "",
+                null, capPillars)
       : "") +
     /* §520.6: WITH THE UNITS OFF A CAPABILITY'S FIGURES ARE ENTERED HERE. It is
        a section of the company's plan and never a destination (§520.1), so

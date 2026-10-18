@@ -65865,3 +65865,17 @@ So a file generated from the repository was correct about the data and wrong abo
 **Two things found in the live data, reported rather than touched**: a retired tenant *ElAbd Foods* holding 8 capabilities, and two of El Abd's directions owned by "Tamer Abdelhamid" while the register holds "Tamer Abdelhameed" — a spelling that will not match a person.
 
 **What is still Islam's**: the word to run it. Nothing else is outstanding.
+
+
+## §543 — A half is offered to the people who have something in it
+Islam, on El Abd with the half eye on and the two tabs finally live: *"viewing as osama I shouldn't see the directions part at the top, only the capabilities and no need as well to see key measures and tactics.. the title is not relevant. for the user he is just reporting for the office it might be useful"*, and *"viewing as amr I shouldn't see the capabilities tab as it has nothing for him there"*. Asked whether to drop the heading where only one half is left: *"yes"*.
+
+**§540 asked the wrong question.** `boxHasHalf` asked whether the BOX holds a pillar of that kind, which is true of El Abd for everybody. So a direction owner narrowed to two directions was offered a Capabilities tab with nothing of theirs on it, and a capability's owner opened Reporting onto the words *This unit has no Directions yet, so there is nothing to report against* — a heading over an empty state answering a question nobody asked. §45.2 with the viewer left out of it.
+
+**It now goes through `partItems`**, which is the list as drawn — the half and the half eye composed (§542). For the office, narrowed by neither, the answer is exactly what it was; for a part owner it is their own, and a half holding none of theirs is not offered at all. One change, and it reaches the Strategy tabs on the company and on a unit, and both sections of Reporting, because all four already asked the same function (§53.5).
+
+**And the heading goes with it.** Two rules in one sentence, the second following from the first: a half that holds nothing of theirs is not drawn, and once only one half is left there is nothing for a title to tell apart. The office keeps both, because for them the title is doing its job.
+
+**THE HEADING RULE IS ABOUT THE SPLIT, NOT ABOUT THE COUNT**, and the first draft got that wrong: written as *drop the title when only one section is drawn*, it took the heading off every **joined** box in every client — every unit in Raya, which has never split anything. Caught by section 1b of `scripts/test-capability-fold.js`, the section written three commits earlier from exactly this class of mistake (§542.1: asking the mark instead of the setting). It is `!boxSplit(u) || (showDir && showCap)`.
+
+**The check** gains a sixth section, measured on three people at once — the office and two part owners the file makes, because the worked example's people all hold a unit or function seat and none of them is narrowed. Asserting on the part owners alone would pass over a build that hid the halves from everybody. 52 agreements. Two deliberate breaks: `boxHasHalf` asking the box → 4 red, and its output is Islam's own symptom word for word; the heading never dropping → 1 red.

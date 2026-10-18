@@ -369,7 +369,14 @@
                        else — so a capability's owner, who owns no direction,
                        is not shown the directions rail at all rather than an
                        empty one (§61). partMine() is the one question. */
-                    when: function(){ return topPlanOn() && (!partOnly() || partMine()); } },
+                    /* §543: on a box shown apart the tab follows what this
+                       viewer reaches in THIS half — a capability's owner is
+                       offered no Directions tab at all, rather than one over
+                       an empty rail. Joined, it is the question it always
+                       asked. */
+                    when: function(){ return topPlanOn() &&
+                      (boxSplit(topAsUnit()) ? boxHasHalf(topAsUnit(), "dir")
+                                             : (!partOnly() || partMine())); } },
                   /* ── §540 · AND THE INTERNAL HALF, WHERE IT IS SHOWN APART ──
                      The same renderer over the same list, filtered to the
                      pillars marked Capability and labelled with the client's
@@ -393,7 +400,9 @@
                      it (`capsReachable()`), so the handover needs no flag. */
                   { k:"plancap", ac:"g_found", label:L("capability", "bu"),
                     render: function(){ return drawHalf("cap", function(){ return renderUnitPlan(topAsUnit()); }); },
-                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap") && (!partOnly() || partMine()); } },
+                    /* §543: and `boxHasHalf` now answers for the viewer, so
+                       a direction owner is offered no Capabilities tab. */
+                    when: function(){ return topPlanOn() && boxHasHalf(topAsUnit(), "cap"); } },
                   /* §447: with the units off the company page carries its
                      capabilities as a section of their own. */
                   { k:"caps", ac:"g_found", label:L("capability", "bu"),
@@ -642,7 +651,11 @@
                      tab it drew before. */
                   { k:"plan",  ac:"u_plan",  label:SMPRules.planTitle(GROUP, (u && u.ukey) || "u:", unitFormat(u)) || "Plan",
                     render: function(x){ return drawHalf("dir", function(){ return renderUnitPlan(x); }); },
-                    when: function(t){ return planOn(t); } },
+                    /* §543: a split unit's external tab follows what the
+                       viewer reaches in it; a joined one keeps its empty
+                       state, which is the door to the first pillar (§61). */
+                    when: function(t){ var b = unitLike(t);
+                      return planOn(t) && (!boxSplit(b) || boxHasHalf(b, "dir")); } },
                   /* §540: and the internal half, with the client's own word
                      for a capability over it, while the box is shown apart
                      AND holds one (§45.2). Raya's units carry both kinds in

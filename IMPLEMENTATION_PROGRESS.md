@@ -10067,3 +10067,19 @@ So my file was right about your data and wrong about every name around it. **I s
 **Stage 3b is complete:** (a) the two-tab setting, (b) codes from the row's kind, (c) the pages reading the kind, (d) El Abd's five capabilities moved and the client renamed to ElAbd.
 
 **Still open, not touched:** the retired "ElAbd Foods" client holding 8 capabilities; the "Tamer Abdelhamid" / "Tamer Abdelhameed" spelling on two directions; and the two leftover copies of client data (`elabd` and `public` schemas, and the old `platform.clients` list) sitting unused in the live database.
+
+
+## §543 — Each person sees the half they have (2026-10-18)
+You were right on both counts, and the cause was one wrong question in my code: I asked whether *the company* had capabilities, not whether *you* did.
+
+| | before | after |
+|---|---|---|
+| **Osama** — owns one capability | Directions tab, and "nothing to report against" | **Capabilities only**, opening straight on C001 |
+| **Amr** — owns two directions | Directions plus an empty Capabilities tab | **Directions only** |
+| **The office** | both tabs, both headings | **unchanged** |
+| **Section titles** | always shown | **dropped when there's only one half** |
+
+Two things worth telling you:
+
+- My own check caught me taking the heading off **joined** clients too — every unit in Raya, which has never split anything. The rule is now "drop it when a split leaves one half", not "drop it when there's one section".
+- Breaking the fix on purpose reproduces your exact words — *"This unit has no Pillars yet, so there is nothing to report against"* — so that sentence can't come back without a check going red.

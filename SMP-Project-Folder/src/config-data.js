@@ -8714,9 +8714,26 @@ function boxSplit(u){ return SMPRules.pillarsSplit(u); }
    before it draws itself, because a heading over nothing is not an empty
    state (§520.2, §45.2) — and today it is false for every box in every
    client, which is why turning the setting on moves nobody yet. */
+/* §543 — AND IT IS WHAT *THIS VIEWER* REACHES, NOT WHAT THE BOX HOLDS.
+   Islam, looking at El Abd with the half eye on: *"viewing as osama I
+   shouldn't see the directions part at the top … for amr I shouldn't see the
+   capabilities tab as it has nothing for him there"*.
+
+   He is right and §540 asked the wrong question. It asked *does this box hold
+   an internal pillar*, which is true of El Abd for everybody — so a direction
+   owner narrowed to two directions was still offered a Capabilities tab with
+   nothing of theirs on it, and a capability's owner was shown a Directions
+   heading over the words *there is nothing to report against*. §45.2's rule
+   with the viewer left out of it: an empty state is not an answer to a
+   question nobody asked.
+
+   SO IT GOES THROUGH `partItems`, which is the list AS DRAWN — the half AND
+   the half eye, composed (§539). For the office, who is narrowed by neither,
+   that is every pillar of the half and the answer is what it was. For a part
+   owner it is their own, and a half holding none of theirs is not offered. */
 function boxHasHalf(u, half){
   if (!u || !boxSplit(u)) return false;
-  return ((u.items) || []).some(function(p){ return SMPRules.pillarInHalf(p, half); });
+  return drawHalf(half, function(){ return partItems(u).length > 0; });
 }
 /* §542 — THE WORD OVER THE LIST AS DRAWN. A split box's internal half is
    headed with the client's word for a capability and its external half with

@@ -8516,9 +8516,8 @@ function renderCaps(){
   /* §542: this client's capabilities are pillars, not records. */
   var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
-    var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+    return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
       (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
@@ -8529,18 +8528,14 @@ function renderCaps(){
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
-      '<td>' + (editable
-        /* NAMED. Eight of these on one page announced as eight identical
-           unnamed combo boxes, and the searchable button in front of each
-           inherits the name from here (§48.5). */
-        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
-          esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
-            FUNCTION_KEYS.map(function(k){
-              return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
-                esc(FUNCTIONS[k].name) + '</option>';
-            }).join("") + '</select>'
-        : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
+      /* §544.13 — THE "HELD BY" COLUMN IS GONE. Islam, asked whether set-up
+         should still let the office put a capability under a function:
+         **"no — remove it"**; a capability is the company's. The picker was
+         the last way to attach one, so it goes with the column it sat in,
+         and what is left is the two seats §412 gave it — an Owner and a
+         Custodian of its own, which is how a capability is answered for
+         now. The `fn` already on a record is neither read here nor written
+         (§405). */
       /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
          used to borrow the holding function's head, which is right while a
          capability is only ever held by a function and wrong for a
@@ -8569,7 +8564,9 @@ function renderCaps(){
   /* A capability with no function is a real answer now (§412) — a
      company-wide one is held by nobody. What is still outstanding is one
      that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  /* §544.13: "no owner and no holding function" is just "no owner" — no
+     capability has a holding function any more. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
@@ -8587,7 +8584,7 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +

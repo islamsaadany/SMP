@@ -11061,11 +11061,14 @@ function promoteToCapability(fnKey, ids, name){
    no help: a project's code has always been its position across the whole
    FUNCTION and not inside its box (§310), so they close up on their own and
    nothing a person reads is renamed. */
+/* §544.13 — EVERY OTHER CAPABILITY IS A SIBLING. This grouped them by the
+   function holding them and answered NOTHING for a capability holding none,
+   which since Islam's *"the company only"* is every capability — so the
+   Remove dialog offered no destination at all and could only delete the
+   work. They are all the company's; they are all siblings. */
 function capSiblings(c){
-  if (!c || !c.fn) return [];
-  return GROUP.capabilities.filter(function(x){
-    return x && x.id !== c.id && x.fn === c.fn;
-  });
+  if (!c) return [];
+  return GROUP.capabilities.filter(function(x){ return x && x.id !== c.id; });
 }
 /* What removing it would move, so the dialog can say so: its own key
    objectives, and every figure inside every project it holds. */
@@ -11130,7 +11133,13 @@ function removeCapability(id, moveToId){
      so it is resolved as a HOLDER and through the WRITING half — a reader
      hands out a frozen empty and the move would push into it. */
   var to = moveToId ? holderByIdWritable(moveToId) : null;
-  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
+  /* §544.13: `to.fn !== c.fn` refused every move the moment a capability
+     stopped having a function — including to a sibling, which is now any
+     other capability. What the guard is for survives in two halves: never
+     into itself, and a FUNCTION destination only for a record that is that
+     function's own. */
+  if (to && to.id === c.id) return false;
+  if (to && to.own && to.fn !== c.fn) return false;
   archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
     "\u201d was removed");
   /* §326: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the

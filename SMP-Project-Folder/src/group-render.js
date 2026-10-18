@@ -10302,11 +10302,11 @@ function renderUnitPlan(u){
    (§211, §213), so there is one.
 
    WHO IT IS HELD BY IS READ, NEVER SET HERE. A function's head is a fact the
-   register holds and Setup's own picker writes (§33, §226). A capability is
-   held by the function that carries it, so its holder is that function's head
-   — one fact, one door, and no second control that could disagree with the
-   first. Changing which function holds a capability is Setup › Capabilities',
-   because it is a Setup change and the server classifies it as one (§42). */
+   register holds and Setup's own picker writes (§33, §226). §544.13: a
+   capability's is its OWN owner, read the same way from the same door —
+   Setup › Capabilities' Owner picker — because a capability is the
+   company's and no function carries it any more. One fact, one door, and no
+   second control that could disagree with the first. */
 function holderOverview(subject){
   var t = holderTarget(subject), isCap = isCapTarget(t);
   var c = isCap ? capById(capKeyOf(t)) : null;
@@ -10370,16 +10370,20 @@ function holderOverview(subject){
            held by anybody else would be the screen offering what the save
            refuses (§42). The sentence is a hover, never a printed line (1b-ii).
 
-           ON A CAPABILITY IT IS READ AND NAMES THE FUNCTION TOO, because
-           "Rana Fouad" alone does not say which desk holds this work — and
-           editing it here would be a second control writing the FUNCTION's
-           head from a capability's page (§53.5). */
-        '<div class="clause"><dt>' + (isCap ? 'Held by' : 'Led by') + '</dt><dd' +
+           §544.13 — AND ON A CAPABILITY IT IS ITS OWN OWNER NOW. This read
+           *Held by* and named the holding function's head, because "Rana
+           Fouad" alone did not say which desk held the work. A capability
+           is the company's (Islam: *"the company only"*), so there is no
+           desk: this would have printed an em dash on every capability
+           there is, for ever — a row that can only be empty is not a row
+           (§45.2, §61). It reads the OWNER §412 gave it, which is the same
+           fact Setup › Capabilities' own picker writes and the People page
+           shows (§33, §53.5), and it is read here, never set, exactly as a
+           function's head is. */
+        '<div class="clause"><dt>' + (isCap ? 'Owner' : 'Led by') + '</dt><dd' +
           (!isCap && ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
           (isCap
-            ? (f && f.head
-                ? esc(personName(f.head)) + ' <span class="why">' + esc(f.name) + '</span>'
-                : (f ? esc(f.name) : "&mdash;"))
+            ? (c.head ? esc(personName(c.head)) : "&mdash;")
             : (ed && inOffice()
                 ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
                 : (f.head ? esc(personName(f.head)) : "&mdash;"))) + '</dd></div>' +

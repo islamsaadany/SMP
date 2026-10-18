@@ -5379,12 +5379,9 @@
     }
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", addFnFromField);
-    document.querySelectorAll("[data-capfn]").forEach(function(el){
-      el.addEventListener("change", function(){
-        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
-        paint();
-      });
-    });
+    /* §544.13: the Held by picker is gone from Setup › Capabilities, so
+       nothing renders that column's select any more and the handler which
+       wrote a capability's function through it goes with it (§61). */
     /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
@@ -11871,11 +11868,26 @@
        a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+    /* §544.13 — THE FUNCTION IS A DESTINATION ONLY WHERE THERE IS ONE. A
+       capability is the company's, so a new one has no holding function and
+       this list used to offer "the function itself" anyway: `fn:null`, with
+       the words "the function", and pressing it refused silently inside
+       `removeCapability` — a button that does nothing, which is the one
+       thing a control must never be (§61). Offered where `c.fn` resolves,
+       which is the records that still carry one, and left out where it does
+       not.
+
+       Islam, asked where a company capability's projects should go when
+       there is nowhere to move them: *"deleting is fine"*. So there is
+       nothing to build behind this — only the honest sentence about why
+       Keep them is not available, which `whyNot` now gives. */
+    var dests = (f ? [{ id: "fn:" + c.fn, label: fname + " itself", own: true }] : [])
       .concat(sibs.map(function(x){
         return { id: x.id, label: x.name || x.id, own: false }; }));
-    var keepable = np > 0;
-    var dest = dests.length === 1
+    var toFnOnly = dests.length === 1 && dests[0].own;
+    var keepable = np > 0 && dests.length > 0;
+    var dest = !dests.length ? ''
+      : dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
@@ -11888,7 +11900,7 @@
        which is what this dialog has always said. */
     var fnHasKo = !!((f && f.keyObjectives) || []).length;
     var koNote = !nko ? ''
-      : (dests.length === 1
+      : (toFnOnly
           ? (fnHasKo
               ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
@@ -11897,7 +11909,17 @@
           : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
             '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
-    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
+    /* §544.13: TWO REASONS NOW, AND THE SECOND ONE CAN HAPPEN. "It holds no
+       projects" was the only way Keep them could be unavailable while every
+       capability had a function to fall back on. A company capability with
+       projects and no sibling has nowhere to put them, and saying it holds
+       none would be a lie on the screen about the work it is about to take
+       (§96.2). Removing it removes them, which the row beside this says in
+       full and the archive line backs. */
+    var whyNot = !np
+      ? 'It holds no ' + L("project") + ', so there is nothing to move.'
+      : 'There is nowhere to move ' + (np === 1 ? 'it' : 'them') + ' to \u2014 this is the only ' +
+        L1("capability") + '. Removing it removes ' + (np === 1 ? 'the ' + L1("project") : 'the ' + L("project")) + ' too.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +

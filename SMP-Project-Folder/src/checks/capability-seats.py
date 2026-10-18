@@ -118,14 +118,26 @@ with sync_playwright() as pw:
     r = ev(pg, "(id) => capById(id).custodian", CID)
     ck("the Custodian picker writes the capability's custodian", r == "rethead", r)
 
-    print("── 3 · held by nobody")
-    opts = ev(pg, """() => { var s = document.querySelector('[data-capfn="0"]');
-      return s ? [].map.call(s.options, o => o.textContent.trim()) : null; }""")
-    ck("Held by offers none", isinstance(opts, list) and opts and "none" in opts[0], opts)
-    ev(pg, """() => { var s = document.querySelector('[data-capfn="0"]'); s.value = ''; s.dispatchEvent(new Event('change', {bubbles:true})); }""")
-    pg.wait_for_timeout(300)
+    print("── 3 · held by nobody, because there is nobody to be held by")
+    # §544.13 REVERSES THIS SECTION (§218). "Held by none" used to be one
+    # choice in a picker; Islam, asked whether set-up should still let the
+    # office put a capability under a function, answered **"no — remove
+    # it"**, so the picker and its whole column are gone and held-by-nobody
+    # is the only state there is. What answers for a capability is the Owner
+    # beside it, which section 2 just wrote.
+    ck("there is no Held by picker to attach it to a function",
+       ev(pg, """() => !document.querySelector('[data-capfn]')""") is True)
+    ck("...nor a Held by column for one to sit in",
+       ev(pg, """() => { var h = [...document.querySelectorAll('.setuppane th')]
+         .map(x => x.textContent.trim()); return h.length > 0 && h.indexOf('Held by') < 0; }""") is True,
+       ev(pg, """() => [...document.querySelectorAll('.setuppane th')].map(x => x.textContent.trim())"""))
+    ck("...and the Owner and Custodian columns are what is left",
+       ev(pg, """() => { var h = [...document.querySelectorAll('.setuppane th')]
+         .map(x => x.textContent.trim()); return h.indexOf('Owner') >= 0 && h.indexOf('Custodian') >= 0; }""") is True,
+       ev(pg, """() => [...document.querySelectorAll('.setuppane th')].map(x => x.textContent.trim())"""))
     r = ev(pg, "(id) => ({ fn: capById(id).fn || null, head: capById(id).head })", CID)
-    ck("the capability keeps its owner with no function", isinstance(r, dict) and not r.get("fn") and r.get("head") == "cfo", r)
+    ck("the capability keeps the owner it was given, whatever its old function says",
+       isinstance(r, dict) and r.get("head") == "cfo", r)
     pill = ev(pg, "() => document.querySelector('.setuppane').textContent.indexOf('with no owner') >= 0")
     ck("...and is not counted as having no owner", pill is False, pill)
     # BOTH ENDS (§94.2, §113.8): nothing here proved the alarm could light at

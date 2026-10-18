@@ -66159,3 +66159,76 @@ Recorded as a reversal, not overwritten (Principle II).
 **And it closes §544.12's open point** rather than answering it — the
 question *"what happens to the capabilities when the units go off"* has no
 answer any more, because the units are not in the question.
+
+### §544.13b — what taking the function out actually reached
+
+The rule in §544.13 is one sentence. Applying it reached five more places that
+nothing in the rule names, and each is written down here because each was
+found by running the product, not by reading it.
+
+**The "Held by" column, gone from Setup › Capabilities.** Islam: *"no —
+remove it"*. The column's picker was the last way to attach a capability to a
+function, so it goes with the column; what is left is the Owner and Custodian
+§412 gave a capability of its own. The `[data-capfn]` handler goes with the
+select nothing renders (§61). The `fn` already on a record is neither read
+there nor written (§405).
+
+**The Overview's second row reads Owner, not Held by.** It named the holding
+function's head, because *"Rana Fouad" alone does not say which desk holds
+this work*. There is no desk; this would have printed an em dash on every
+capability there is, for ever — a row that can only be empty is not a row
+(§45.2, §61). It reads the capability's own owner, from the same door Setup
+writes (§33, §53.5).
+
+**Every other capability is a sibling.** `capSiblings` grouped them by the
+holding function and answered NOTHING for a capability holding none — which,
+after the rule, is every capability. The Remove dialog was left with no
+destination at all.
+
+**The Remove dialog offered a destination that did not exist.** It always
+listed *"the function itself"*, so with no function it offered `fn:null`,
+labelled "the function", and pressing it refused silently inside
+`removeCapability` — a button that does nothing, the one thing a control must
+never be (§61). The entry is offered only where `c.fn` resolves. The guard
+`to.fn !== c.fn` that refused every move survives as two halves: never into
+itself, and a FUNCTION destination only for a record that is that function's
+own.
+
+**And the sentence under Keep them was a lie.** With no destination it read
+*"It holds no projects, so there is nothing to move"* over a capability
+holding projects it was about to delete (§96.2). Islam, asked where a company
+capability's projects should go when there is nowhere to move them:
+**"deleting is fine"** — so nothing is built behind it and the sentence says
+what happens instead.
+
+**THE COST, STATED RATHER THAN DISCOVERED LATER.** §326 made the holding
+function a destination because Islam asked for *"the ability to turn
+functional projects to a capability and vice versa"*. Promoting still works —
+a function's projects become a capability, which is now the company's. The
+**vice versa does not**: a company capability has no function to be given
+back to, so its work goes to a sibling capability or goes. `capability-entry`
+asserts the new behaviour in full, and says in its own comment that this is
+what the rule costs.
+
+**Proof:** `capability-entry` 52/0 (was 29/14), `capability-seats`,
+`plan-level`, `shape`, `structure`, `top-plan`, `client-setup` all good,
+`test-capability-fold` 66/0, `test-shape` 30/0, `test-stage1-rules` 38/0.
+`direction-part` and `direction-seats` — the two that caught §544.5's
+overreach — green untouched.
+
+**Proved able to fail (§113.8), two deliberate breaks.** Putting the old
+`capAtTop` back (`return !buExists(group)`) reds `shape` 3, `plan-level` 2 and
+`capability-entry` 1. `top-plan` stays green under that break and is proved by
+its own: `topCapsOn` no longer asks `capAtTop` — with one answer there is
+nothing to ask — so forcing `topCapsOn` false is the break that reaches it,
+and it reds 2. Both restored; the build is the unbroken one.
+
+**And one §266 trap worth naming.** Four checks reached a capability by
+pressing its side on the row, which §544.13 removed. The stand-in that
+replaced it assigned `current` — and a check that assigns `current` walks a
+viewer somewhere the product would refuse, which turned
+`capability-report-column`'s *"a business unit's head has no route to it at
+all"* green by cheating. The stand-ins ask `capsReachable()` first and refuse
+where the rail would not be drawn, and they do what a real press does
+(`leaveModes`, `entrySub`), without which `capability-pillar-edit` lost its
+pen and went from 1 red to 4.

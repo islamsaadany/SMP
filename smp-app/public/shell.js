@@ -18635,11 +18635,14 @@ function promoteToCapability(fnKey, ids, name){
    no help: a project's code has always been its position across the whole
    FUNCTION and not inside its box (§310), so they close up on their own and
    nothing a person reads is renamed. */
+/* §544.13 — EVERY OTHER CAPABILITY IS A SIBLING. This grouped them by the
+   function holding them and answered NOTHING for a capability holding none,
+   which since Islam's *"the company only"* is every capability — so the
+   Remove dialog offered no destination at all and could only delete the
+   work. They are all the company's; they are all siblings. */
 function capSiblings(c){
-  if (!c || !c.fn) return [];
-  return GROUP.capabilities.filter(function(x){
-    return x && x.id !== c.id && x.fn === c.fn;
-  });
+  if (!c) return [];
+  return GROUP.capabilities.filter(function(x){ return x && x.id !== c.id; });
 }
 /* What removing it would move, so the dialog can say so: its own key
    objectives, and every figure inside every project it holds. */
@@ -18704,7 +18707,13 @@ function removeCapability(id, moveToId){
      so it is resolved as a HOLDER and through the WRITING half — a reader
      hands out a frozen empty and the move would push into it. */
   var to = moveToId ? holderByIdWritable(moveToId) : null;
-  if (to && (to.id === c.id || to.fn !== c.fn)) return false;
+  /* §544.13: `to.fn !== c.fn` refused every move the moment a capability
+     stopped having a function — including to a sibling, which is now any
+     other capability. What the guard is for survives in two halves: never
+     into itself, and a FUNCTION destination only for a record that is that
+     function's own. */
+  if (to && to.id === c.id) return false;
+  if (to && to.own && to.fn !== c.fn) return false;
   archiveCapPlan(c, "before \u201c" + (c.name || "a capability") +
     "\u201d was removed");
   /* §326: GIVING THE WORK BACK TO THE FUNCTION carries the definition and the
@@ -36624,11 +36633,11 @@ function renderUnitPlan(u){
    (§211, §213), so there is one.
 
    WHO IT IS HELD BY IS READ, NEVER SET HERE. A function's head is a fact the
-   register holds and Setup's own picker writes (§33, §226). A capability is
-   held by the function that carries it, so its holder is that function's head
-   — one fact, one door, and no second control that could disagree with the
-   first. Changing which function holds a capability is Setup › Capabilities',
-   because it is a Setup change and the server classifies it as one (§42). */
+   register holds and Setup's own picker writes (§33, §226). §544.13: a
+   capability's is its OWN owner, read the same way from the same door —
+   Setup › Capabilities' Owner picker — because a capability is the
+   company's and no function carries it any more. One fact, one door, and no
+   second control that could disagree with the first. */
 function holderOverview(subject){
   var t = holderTarget(subject), isCap = isCapTarget(t);
   var c = isCap ? capById(capKeyOf(t)) : null;
@@ -36692,16 +36701,20 @@ function holderOverview(subject){
            held by anybody else would be the screen offering what the save
            refuses (§42). The sentence is a hover, never a printed line (1b-ii).
 
-           ON A CAPABILITY IT IS READ AND NAMES THE FUNCTION TOO, because
-           "Rana Fouad" alone does not say which desk holds this work — and
-           editing it here would be a second control writing the FUNCTION's
-           head from a capability's page (§53.5). */
-        '<div class="clause"><dt>' + (isCap ? 'Held by' : 'Led by') + '</dt><dd' +
+           §544.13 — AND ON A CAPABILITY IT IS ITS OWN OWNER NOW. This read
+           *Held by* and named the holding function's head, because "Rana
+           Fouad" alone did not say which desk held the work. A capability
+           is the company's (Islam: *"the company only"*), so there is no
+           desk: this would have printed an em dash on every capability
+           there is, for ever — a row that can only be empty is not a row
+           (§45.2, §61). It reads the OWNER §412 gave it, which is the same
+           fact Setup › Capabilities' own picker writes and the People page
+           shows (§33, §53.5), and it is read here, never set, exactly as a
+           function's head is. */
+        '<div class="clause"><dt>' + (isCap ? 'Owner' : 'Led by') + '</dt><dd' +
           (!isCap && ed && inOffice() ? ' title="Names the function’s head — the same fact the register holds"' : '') + '>' +
           (isCap
-            ? (f && f.head
-                ? esc(personName(f.head)) + ' <span class="why">' + esc(f.name) + '</span>'
-                : (f ? esc(f.name) : "&mdash;"))
+            ? (c.head ? esc(personName(c.head)) : "&mdash;")
             : (ed && inOffice()
                 ? assignPicker("fn:" + fk, "fnhead", f.head || null, true)
                 : (f.head ? esc(personName(f.head)) : "&mdash;"))) + '</dd></div>' +
@@ -45650,9 +45663,8 @@ function renderCaps(){
   /* §542: this client's capabilities are pillars, not records. */
   var capsAreP = !GROUP.capabilities.length && capsAsPillars().length > 0;
   var rows = GROUP.capabilities.map(function(c, i){
-    var f = functionOf(c.fn);
     var editable = mayEdit && rowEditIs("caps", String(i));
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+    return '<tr data-tkrow="' + (c.head ? "assigned" : "unassigned") + '"' +
       (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
@@ -45663,18 +45675,14 @@ function renderCaps(){
         ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of ' + L1("capability") + ' ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
-      '<td>' + (editable
-        /* NAMED. Eight of these on one page announced as eight identical
-           unnamed combo boxes, and the searchable button in front of each
-           inherits the name from here (§48.5). */
-        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
-          esc(c.name) + '">' +
-            '<option value="">\u2014 none \u2014</option>' +
-            FUNCTION_KEYS.map(function(k){
-              return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
-                esc(FUNCTIONS[k].name) + '</option>';
-            }).join("") + '</select>'
-        : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
+      /* §544.13 — THE "HELD BY" COLUMN IS GONE. Islam, asked whether set-up
+         should still let the office put a capability under a function:
+         **"no — remove it"**; a capability is the company's. The picker was
+         the last way to attach one, so it goes with the column it sat in,
+         and what is left is the two seats §412 gave it — an Owner and a
+         Custodian of its own, which is how a capability is answered for
+         now. The `fn` already on a record is neither read here nor written
+         (§405). */
       /* §412: A CAPABILITY HAS ITS OWN OWNER AND CUSTODIAN, LIKE A UNIT. It
          used to borrow the holding function's head, which is right while a
          capability is only ever held by a function and wrong for a
@@ -45703,7 +45711,9 @@ function renderCaps(){
   /* A capability with no function is a real answer now (§412) — a
      company-wide one is held by nobody. What is still outstanding is one
      that nobody is accountable for: no owner and no holding function. */
-  var orphan = GROUP.capabilities.filter(function(c){ return !c.fn && !c.head; }).length;
+  /* §544.13: "no owner and no holding function" is just "no owner" — no
+     capability has a holding function any more. */
+  var orphan = GROUP.capabilities.filter(function(c){ return !c.head; }).length;
   /* THE `SMO` PILL GOES AND THE ALARM STAYS (§135.1). "all assigned" goes with
      it — a green chip saying nothing is wrong is the state this page is in
      almost always, and §41's budget says a mark that is always lit is not a
@@ -45721,7 +45731,7 @@ function renderCaps(){
       tkBar("caps", { placeholder:"Search the " + L("capability") + "\u2026" }) +
       '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
         (function(){ var h = tkHead("caps");
-          return h("#", "idx", false) + h(L1("capability")) + h("Held by") + h("Owner") + h("Custodian") +
+          return h("#", "idx", false) + h(L1("capability")) + h("Owner") + h("Custodian") +
                  h("Plans in") +
                  h(L("keyobj"), "cc") + h(L("project") + " / " + L("pillar","bu"), "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
@@ -73341,12 +73351,9 @@ var SYNC = (function () {
     }
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", addFnFromField);
-    document.querySelectorAll("[data-capfn]").forEach(function(el){
-      el.addEventListener("change", function(){
-        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
-        paint();
-      });
-    });
+    /* §544.13: the Held by picker is gone from Setup › Capabilities, so
+       nothing renders that column's select any more and the handler which
+       wrote a capability's function through it goes with it (§61). */
     /* §334: HOW A CAPABILITY IS PLANNED. Pillars, or an overview and projects
        — Islam's *"yes the capability can be built in pillars."* Addressed by
        ID rather than by position, because this control can change which side
@@ -79833,11 +79840,26 @@ var SYNC = (function () {
        a box holding no projects at all. */
     var sibs = capSiblings(c), np = (c.projects || []).length,
         nko = (c.keyObjectives || []).length, rep = capReportedCount(c);
-    var dests = [{ id: "fn:" + c.fn, label: fname + " itself", own: true }]
+    /* §544.13 — THE FUNCTION IS A DESTINATION ONLY WHERE THERE IS ONE. A
+       capability is the company's, so a new one has no holding function and
+       this list used to offer "the function itself" anyway: `fn:null`, with
+       the words "the function", and pressing it refused silently inside
+       `removeCapability` — a button that does nothing, which is the one
+       thing a control must never be (§61). Offered where `c.fn` resolves,
+       which is the records that still carry one, and left out where it does
+       not.
+
+       Islam, asked where a company capability's projects should go when
+       there is nowhere to move them: *"deleting is fine"*. So there is
+       nothing to build behind this — only the honest sentence about why
+       Keep them is not available, which `whyNot` now gives. */
+    var dests = (f ? [{ id: "fn:" + c.fn, label: fname + " itself", own: true }] : [])
       .concat(sibs.map(function(x){
         return { id: x.id, label: x.name || x.id, own: false }; }));
-    var keepable = np > 0;
-    var dest = dests.length === 1
+    var toFnOnly = dests.length === 1 && dests[0].own;
+    var keepable = np > 0 && dests.length > 0;
+    var dest = !dests.length ? ''
+      : dests.length === 1
       ? '<b>' + esc(dests[0].label) + '</b>'
       : '<select class="fld" data-capdest="1" aria-label="Where the ' + L("project") + ' go">' +
           dests.map(function(x){
@@ -79850,7 +79872,7 @@ var SYNC = (function () {
        which is what this dialog has always said. */
     var fnHasKo = !!((f && f.keyObjectives) || []).length;
     var koNote = !nko ? ''
-      : (dests.length === 1
+      : (toFnOnly
           ? (fnHasKo
               ? ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) + ' stay in the archive \u2014 ' +
                 esc(fname) + ' already has its own.'
@@ -79859,7 +79881,17 @@ var SYNC = (function () {
           : ' Its ' + plural(nko, L1("keyobj"), L("keyobj")) +
             (nko === 1 ? ' comes' : ' come') + ' across only to ' + esc(fname) +
             '; a ' + L1("capability") + ' takes the ' + L("project") + ' alone.');
-    var whyNot = 'It holds no ' + L("project") + ', so there is nothing to move.';
+    /* §544.13: TWO REASONS NOW, AND THE SECOND ONE CAN HAPPEN. "It holds no
+       projects" was the only way Keep them could be unavailable while every
+       capability had a function to fall back on. A company capability with
+       projects and no sibling has nowhere to put them, and saying it holds
+       none would be a lie on the screen about the work it is about to take
+       (§96.2). Removing it removes them, which the row beside this says in
+       full and the archive line backs. */
+    var whyNot = !np
+      ? 'It holds no ' + L("project") + ', so there is nothing to move.'
+      : 'There is nowhere to move ' + (np === 1 ? 'it' : 'them') + ' to \u2014 this is the only ' +
+        L1("capability") + '. Removing it removes ' + (np === 1 ? 'the ' + L1("project") : 'the ' + L("project")) + ' too.';
     var keepRow =
       '<div class="pick' + (keepable ? ' safe' : '') + '">' +
         '<div class="txt"><p class="t">Keep the ' + L("project") + '</p><p class="d">' +

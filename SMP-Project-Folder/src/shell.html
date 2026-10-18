@@ -257,6 +257,7 @@
 <script src="SAFETY"></script>
 <script src="CONTINGENCY"></script>
 <script src="CLIENTSETUP"></script>
+<script src="KEYSHEET"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -12537,6 +12538,9 @@
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
+  /* §539: the key and the "?" beside Light and Dark. Wired here beside the
+     theme because both are chrome that exists before any page is drawn. */
+  KEYSHEET.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
      It no longer has anything to do with the first paint — the skeleton wears
      none of these tokens, deliberately, and where there is a server the only

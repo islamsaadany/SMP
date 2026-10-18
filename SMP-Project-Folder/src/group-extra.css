@@ -419,6 +419,43 @@
   .modal-b table { min-width:0; width:100%; }
   .modal-b .scroll { border:1px solid var(--line-soft); }
   .modal-b h4.mini:first-child { margin-top:0; }
+
+  /* ── THE KEYBOARD SHEET (§539) ────────────────────────────────────────
+     A two-column grid rather than a table: the keycaps set their own width and
+     the sentence takes the rest, and at phone width the two stack instead of
+     squeezing a run of caps into a column it cannot hold. */
+  .ks-rows { display:grid; grid-template-columns:auto 1fr; gap:6px 14px;
+             align-items:baseline; margin:0 0 4px; }
+  .ks-k { text-align:right; white-space:nowrap; font-size:var(--fs-small); }
+  .ks-v { font-size:13px; color:var(--ink-2); line-height:1.45; }
+  /* "type" is a thing you do, not a key you press, so it must not wear a
+     keycap - a cap around it would be a key nobody can find. */
+  .ks-typ { font-style:italic; color:var(--ink-3); font-size:var(--fs-small); }
+  .ks-or { color:var(--ink-3); font-size:11px; margin:0 2px; }
+  .modal-b kbd { display:inline-block; font:600 11px/1 var(--mono, ui-monospace, monospace);
+                 color:var(--ink); background:var(--surface-2);
+                 border:1px solid var(--field-line); border-bottom-width:2px;
+                 border-radius:4px; padding:4px 6px; margin:0 1px; }
+  h4.mini .ks-where { color:var(--ink-3); letter-spacing:0; text-transform:none;
+                      font-weight:600; font-size:11.5px; margin-left:7px; }
+  /* THE MARK IS A WORD IN A PILL, never a colour alone (§68.10): "here" is
+     legible to somebody who cannot tell the green from the grey. */
+  h4.mini .ks-here { background:var(--good-bg); color:var(--good-tx); border-radius:99px;
+                     padding:2px 8px; font:700 9px/1 var(--sans); letter-spacing:.08em;
+                     margin-left:8px; vertical-align:1px; }
+  /* A section that is not live here is QUIETER AND NOT HIDDEN - the whole
+     argument for treatment A is that a reporter finds out the deck has keys. */
+  .ks-rows.ks-dim .ks-v { color:var(--ink-3); }
+  .ks-rows.ks-dim kbd { opacity:.62; }
+  .ks-foot { border-top:1px solid var(--line-soft); margin-top:18px; padding-top:12px;
+             font-size:var(--fs-small); color:var(--ink-3); line-height:1.5; }
+  .keysbtn { padding:5px 0; width:28px; text-align:center; letter-spacing:0;
+             font-size:13px; text-transform:none; }
+  @media (max-width:560px) {
+    .ks-rows { grid-template-columns:1fr; gap:2px; }
+    .ks-k { text-align:left; }
+    .ks-v { margin-bottom:7px; }
+  }
   @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
 
   /* ── REMOVING A PILLAR OR A PROJECT: the confirmation (§232) ──────────

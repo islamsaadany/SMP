@@ -139,6 +139,7 @@
 <div class="bar" style="margin-top:1.2rem">
   <button class="cbtn" data-client="elabd" aria-pressed="true">El Abd</button>
   <button class="cbtn" data-client="raya" aria-pressed="false">Raya Trade</button>
+  <button class="cbtn" data-client="fresh" aria-pressed="false">A new client</button>
   <button class="reset" id="reset">start again</button>
 </div>
 
@@ -198,7 +199,17 @@ function raya() {
     boxes: mid.concat(bus, fns)
   };
 }
-const MAKE = { elabd, raya };
+function fresh() {
+  return {
+    name: "New client",
+    levels: [ { k:"top", one:"Company",  many:"Company",   on:["found","keyobj"] },
+              { k:"mid", one:"Division", many:"Divisions", on:["found"], under:"top" },
+              { k:"bu",  one:"Business unit", many:"Business units", on:["found","swot","pillar"], under:"top" },
+              { k:"fn",  one:"Function", many:"Functions", on:["found","project"], under:"top" } ],
+    boxes: []
+  };
+}
+const MAKE = { elabd, raya, fresh };
 
 let which = "elabd", S = MAKE[which](), sel = { kind:"box", id:"top" }, adding = null;
 
@@ -220,7 +231,13 @@ function layerOf(l) {
   if (l.k === "mid") return 2;
   return l.under === "mid" ? 3 : 2;
 }
-const hasMid = () => S.levels.some(l => l.k === "mid");
+/* A LAYER EXISTS BECAUSE SOMETHING IS IN IT. There is no step that creates
+   layer 2 and no switch that turns it on: add a division and the layer is
+   there; remove the last one and it is gone, and every kind that sat under
+   it reads Layer 2 again. That is what makes a clean slate need no setting —
+   a new client is the company and three empty rows, and the shape appears as
+   it is filled in. */
+const hasMid = () => S.boxes.some(b => b.lvl === "mid");
 /* The boxes of a level that have no parent while the level says they should:
    all-or-nothing switching (Islam's B) means these are not a second shape,
    they are rows waiting to be assigned, and the screen names them. */
@@ -289,7 +306,10 @@ function drawShape() {
       : '<button class="add" data-add="' + l.k + '">' + esc(addLabel) + '</button>';
     out.push('<div class="row">' + rows + add + '</div>');
     if (!list.length && adding !== l.k)
-      out.push('<p class="why">None here yet.</p>');
+      out.push('<p class="why">' + (hasMid() && l.under === "mid"
+        ? 'None under ' + esc(boxOf(par).name) + ' yet.'
+        : 'None yet \u2014 add one, or leave the ' + esc(l.many.toLowerCase()) +
+          ' out of this client altogether.') + '</p>');
     /* AND THE ONES WAITING FOR A PARENT, always on screen rather than hidden
        behind whichever division happens to be chosen — a row nobody can see
        is a row nobody assigns. */

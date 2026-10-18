@@ -65497,7 +65497,7 @@ var KEYSHEET = (function(){
     figures: function(){
       return typeof REP_BOXES === "string" && has(REP_BOXES);
     },
-    /* §545: live where any of the three controls is actually on screen. */
+    /* §546: live where any of the three controls is actually on screen. */
     acts: function(){
       return has("[data-submit]") || has("[data-repsave]") ||
              has(".penbtn[data-page], .secpen[data-page], .editbtn[data-page]");
@@ -65542,7 +65542,7 @@ var KEYSHEET = (function(){
         { keys:[["Home"], ["End"]], what:"First or last of what is showing" },
         { keys:[["Enter"]], what:"Take the marked row — or the first one showing" }
       ] },
-    /* §545 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
+    /* §546 — ADDED THE DAY THE KEYS WERE (§539's own reason for existing). */
     { id:"acts", name:"Doing the thing", where:"a report, or a page you can edit",
       rows:[
         { keys:[["Alt","S"]], what:"Go to Submit — then Enter sends it" },
@@ -65778,7 +65778,7 @@ var TABKEYS = (function(){
 })();
 
 /* ── actionkeys.js ── */
-/* ══ THREE ACTIONS, FROM THE KEYBOARD (§545) ═══════════════════════════════
+/* ══ THREE ACTIONS, FROM THE KEYBOARD (§546) ═══════════════════════════════
    Usability audit, heuristic 7: *"no accelerator for Submit, Save draft, or
    the pen"*. §544 answered the navigation half of that finding with the arrows
    every row of tabs already promised; this is the other half, and unlike the
@@ -71466,7 +71466,7 @@ var SYNC = (function () {
        merge offered them as alternatives; they are not (§56.7's shape, caught
        by reading the conflict rather than taking a side). */
     if (typeof repMarkControls === "function") repMarkControls();
-    /* §545: and the three action keys say themselves on the buttons they
+    /* §546: and the three action keys say themselves on the buttons they
        belong to, marked here for the same reason the boxes above are —
        these controls are drawn by several renderers and a mark set at each
        is several places to forget. */
@@ -80306,7 +80306,7 @@ var SYNC = (function () {
   /* §544: the arrows every row of tabs already promises. One handler for
      all eight rows, delegated, so a row drawn tomorrow answers them too. */
   TABKEYS.wire();
-  /* §545: Alt+S, Alt+D, Alt+E — Islam's letters. */
+  /* §546: Alt+S, Alt+D, Alt+E — Islam's letters. */
   ACTIONKEYS.wire();
   /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
      It no longer has anything to do with the first paint — the skeleton wears

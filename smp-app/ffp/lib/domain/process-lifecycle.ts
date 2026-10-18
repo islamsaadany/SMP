@@ -76,3 +76,14 @@ export const STATUS_LABEL: Record<ProcessLifecycleStatus, string> = {
   PUBLISHED: "Published",
   RETIRED: "Retired",
 };
+
+export type ReviewBucket = "overdue" | "next30" | "next90" | "later";
+
+/** Which calendar group a review date falls in. Overdue uses the same test as isOverdueForReview, so the two never disagree. */
+export function reviewBucket(due: Date, today: Date): ReviewBucket {
+  if (due.getTime() < today.getTime()) return "overdue";
+  const days = (due.getTime() - today.getTime()) / 86_400_000;
+  if (days <= 30) return "next30";
+  if (days <= 90) return "next90";
+  return "later";
+}

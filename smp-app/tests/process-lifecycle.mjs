@@ -41,5 +41,14 @@ check("31 Jan + 1 month clamps to 28 Feb", L.addMonths(d("2026-01-31"), 1).toISO
 check("29 Feb + 12 months clamps to 28 Feb", L.addMonths(d("2028-02-29"), 12).toISOString().slice(0, 10) === "2029-02-28");
 check("days to review goes negative when late", L.daysToReview(d("2026-01-01"), d("2026-01-11")) === -10);
 
+// Review calendar groups
+check("past date is overdue", L.reviewBucket(d("2026-01-01"), d("2026-01-02")) === "overdue");
+check("due today is not overdue", L.reviewBucket(d("2026-01-02"), d("2026-01-02")) === "next30");
+check("bucket agrees with isOverdueForReview at the boundary", (L.reviewBucket(new Date(1000), new Date(1001)) === "overdue") === L.isOverdueForReview("PUBLISHED", new Date(1000), new Date(1001)));
+check("30 days out is in the 30-day group", L.reviewBucket(d("2026-01-31"), d("2026-01-01")) === "next30");
+check("31 days out is in the 90-day group", L.reviewBucket(d("2026-02-01"), d("2026-01-01")) === "next90");
+check("90 days out is in the 90-day group", L.reviewBucket(d("2026-04-01"), d("2026-01-01")) === "next90");
+check("91 days out is later", L.reviewBucket(d("2026-04-02"), d("2026-01-01")) === "later");
+
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

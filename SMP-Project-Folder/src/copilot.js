@@ -106,7 +106,7 @@ var COPILOT = (function(){
   function here(){
     var t = typeof TARGET !== "undefined" ? String(TARGET || "") : "";
     return SECTIONS.filter(function(s){
-      if (s.k === "capabilities") return !dvCapsHere();
+      if (s.k === "capabilities") return false;  /* §544.13 */
       if (s.k !== "compete") return true;
       try { return SMPRules.compOffered(t, SMPRules.COMPETE); } catch (e) { return false; }
     });
@@ -2536,7 +2536,7 @@ var COPILOT = (function(){
     if ((s.mode === "capabilities" || s.withCaps) && typeof addCapability === "function" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities)) {
       s.caps.filter(function(x){ return x.keep; }).forEach(function(x){
         var c = x.planId ? GROUP.capabilities.filter(function(y){ return y && y.id === x.planId; })[0] : null;
-        if (!c) c = addCapability(x.ownedBy || null);
+        if (!c) c = addCapability();
         if (!c) return;
         c.name = x.title;
         if (x.ownedBy) c.fn = x.ownedBy;
@@ -2629,7 +2629,7 @@ var COPILOT = (function(){
   }
   function dvNew(mode){
     act({ act:"newDirections", place: place(), mode: mode, title: dvTitle(mode),
-          withCaps: mode === "directions" && dvCapsHere(), hadPlan: dvExisting().length }, function(j){
+          withCaps: mode === "directions", hadPlan: dvExisting().length }, function(j){
       var l = list(); if (l && l.chats) l.chats.unshift(j.chat);
       PANE = { id: j.chat.id, chat: j.chat, messages: [] };
       dvView(j);
@@ -2639,16 +2639,17 @@ var COPILOT = (function(){
       if (PANE.dirs && PANE.dirs.start === "fresh") dvAsk({ act: mode === "capabilities" ? "capSuggest" : "dirSuggest" });
     });
   }
-  /* Where capabilities are chosen (spec §4.5): inside the Directions chat
-     when Structure keeps them in the company plan, in a section of their own
-     when they are a layer. One answer, asked of the shared rule. */
-  /* §544.12: it asks whether the capabilities are part of the COMPANY'S OWN
-     PLAN, and `capAtTop` only answers that while they are still separate
-     records. El Abd's became internal pillars at stage 3b, so `capAtTop` says
-     no for it and the true answer is yes — and this section would have been
-     offered to a client that has had it hidden all along. `capsInTopPlan`
-     is the question itself. */
-  function dvCapsHere(){ try { return !!SMPRules.capsInTopPlan(GROUP, GROUP && GROUP.items); } catch (e) { return true; } }
+  /* §544.13 — AND THE QUESTION ITSELF IS GONE. Capabilities were chosen
+     inside the Directions chat when Structure kept them in the company plan,
+     and in a section of their own when they were a layer; there is no layer
+     any more, so they are always chosen in the Directions chat. The rule that
+     asked it answered true for every client the day `capAtTop` did, and a
+     rule that cannot say no is not a rule (§61) — so it is read out here
+     rather than left standing as a constant for a reader to re-derive.
+
+     §544.12's catch is KEPT by this, not lost: it was that El Abd's
+     capabilities are in its company plan although `capAtTop` said otherwise.
+     They are now, for every client. */
 
   /* ══ EXECUTION (spec 064 §6, §495; mockup panel F) ═════════════════════
      The period first, then each Direction and Capability in turn: its
@@ -2668,7 +2669,7 @@ var COPILOT = (function(){
       var h = dvHolder(), p = h && h.items ? h.items.filter(function(x){ return x && x.id === d.id; })[0] : null;
       return { kind:"direction", planId: d.id, title: d.title, ownedBy: p && p.ownedBy ? dvFnName(p.ownedBy) : "" };
     });
-    if (place() === "group" && dvCapsHere() && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
+    if (place() === "group" && typeof GROUP !== "undefined" && Array.isArray(GROUP.capabilities))
       GROUP.capabilities.forEach(function(c){ if (c && String(c.name || "").trim()) out.push({ kind:"capability", planId: String(c.id), title: String(c.name).trim(), ownedBy: c.fn ? dvFnName(c.fn) : "" }); });
     return out;
   }

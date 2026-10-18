@@ -58,9 +58,13 @@ with sync_playwright() as pw:
       if (typeof addCapability !== 'function') return { threw: 'no addCapability' };
       var c = GROUP.capabilities[0]; if (!c) return { threw: 'no capability' };
       var n = GROUP.capabilities.length;
-      addCapability(c.fn || null);
+      /* §544.13: `addCapability` takes no function — a capability is the
+         company's — so the minted one is held by nobody, and it is given an
+         owner here or it lights the orphan alarm section 3 asserts about a
+         DIFFERENT capability (§255: the check makes the state it means). */
+      addCapability();
       var p = GROUP.capabilities[n]; if (!p) return { threw: 'add minted nothing' };
-      p.name = 'Company Wide'; p.format = 'pillars';
+      p.name = 'Company Wide'; p.format = 'pillars'; p.head = 'cfo';
       p.items = [{ id: p.id + '-P1', code: 'CW1', name: 'One', measures: [], tactics: [] },
                  { id: p.id + '-P2', code: 'CW2', name: 'Two', measures: [], tactics: [] },
                  { id: p.id + '-P3', code: 'CW3', name: 'Three', measures: [], tactics: [] }];
@@ -124,6 +128,17 @@ with sync_playwright() as pw:
     ck("the capability keeps its owner with no function", isinstance(r, dict) and not r.get("fn") and r.get("head") == "cfo", r)
     pill = ev(pg, "() => document.querySelector('.setuppane').textContent.indexOf('with no owner') >= 0")
     ck("...and is not counted as having no owner", pill is False, pill)
+    # BOTH ENDS (§94.2, §113.8): nothing here proved the alarm could light at
+    # all, and §544.13 makes it the only half of the rule left — every
+    # capability is held by nobody now, so "no owner and no holding function"
+    # IS "no owner". Taking this one's owner away must light it, and giving
+    # it back must put it out.
+    ev(pg, "(id) => { delete capById(id).head; paint(); }", CID); pg.wait_for_timeout(300)
+    ck("...and the alarm DOES light once its owner is taken away",
+       ev(pg, "() => document.querySelector('.setuppane').textContent.indexOf('with no owner') >= 0") is True)
+    ev(pg, "(id) => { capById(id).head = 'cfo'; paint(); }", CID); pg.wait_for_timeout(300)
+    ck("...and goes out when the owner is put back",
+       ev(pg, "() => document.querySelector('.setuppane').textContent.indexOf('with no owner') >= 0") is False)
 
     print("── 4 · somebody without Setup sees names, not pickers")
     ev(pg, "() => { var c = GROUP.capabilities[0]; VIEWER = 'mobhead'; leaveModes(); paint(); }")

@@ -239,16 +239,10 @@ function __smpShape(state, a, hydrate) {
     if (co) FUNCTIONS[k].company = co;
     else { delete FUNCTIONS[k].company; delete FUNCTIONS[k].coWeight; }
   });
-  var fnByName = {};
-  (FUNCTION_KEYS || []).forEach(function (k) {
-    var nm = String((FUNCTIONS[k] && FUNCTIONS[k].name) || "").trim().toLowerCase();
-    if (nm && !fnByName[nm]) fnByName[nm] = k;
-  });
   (a.capabilities || []).forEach(function (cp) {
     var nm = String((cp && cp.name) || "").trim();
     if (!nm) return;
-    var holder = fnByName[String((cp && cp.fn) || "").trim().toLowerCase()] || null;
-    var made = addCapability(holder);
+    var made = addCapability();
     made.name = nm;
     made.format = (cp && cp.format) === "pillars" ? "pillars" : "projects";
     var had = wasCaps[nm.toLowerCase()];
@@ -1656,30 +1650,18 @@ var CLIENTSETUP = (function () {
     /* Two cards side by side in one row (§468): the company's pillars and its
        capabilities, and the bottom pair when both are off. */
     var pair = function () { if (only) return box; var w = el("div", "stpair"); box.appendChild(w); return w; };
-    /* §465: a switch shown in its state and not pressable here, the reason on
-       the hover (1b-ii); disabled, never merely dimmed (§220). */
-    var held = function (cur, why) {
-      var b = onOff(cur, function () {}); b.classList.add("dummy"); b.title = why;
-      [].slice.call(b.querySelectorAll("button")).forEach(function (x) { x.disabled = true; });
-      return b;
-    };
     /* §468: inside the company plan a capability is a part of that plan, so
        it has no first or second section of its own and no Except for — only
        its name and its plan section (Islam: *"the capabilities has no first
        section and second section"*). What was set there is kept, not shown. */
-    var capSettings = function (c, inPlan) {
+    /* §544.13: `inPlan` is gone with the layer — a capability is in the
+       company's plan, so it is always a part of that plan and never a page
+       of its own with an Except for. */
+    var capSettings = function (c) {
       callBoxes(c, "capability", ro);
       structLevel(c, lv, "cap");
-      if (!inPlan) { exceptBox(c, "cap"); return; }
       var g = c.querySelector(".stsecs"), ss = g ? g.querySelectorAll(":scope > .stsec") : [];
       if (ss.length > 1) { for (var i = 0; i < ss.length - 1; i++) g.removeChild(ss[i]); g.classList.add("stsecs1"); }
-    };
-    var capCard = function (c, onWhy, offLine, inPlan) {
-      hd(c, onOff(lv.cap.exists, function (v) {
-        var nx = structNow(); nx.cap.exists = v; structWrite(nx);
-      }, "cap|layer"));
-      if (lv.cap.exists) { if (onWhy) c.appendChild(el("p", "wzwhy", onWhy)); capSettings(c, inPlan); }
-      else c.appendChild(el("p", "sthid", offLine || "Not asked about in set-up and not shown in the navigation. Nothing entered is lost."));
     };
 
     var top = want("top") ? card("Top level") : null;
@@ -1719,7 +1701,6 @@ var CLIENTSETUP = (function () {
        capabilities the company carries get a card beside it. The order is the
        same at both levels — what a card holds is what changes. */
     var topOne = W("topword", "one", "company"), topLow = topOne.toLowerCase();
-    var capTop = SMPRules.capAtTop(GROUP);
     var capWord = W("capability", "many", "Capabilities");
     if (want("top")) {
     var row2 = pair();
@@ -1807,30 +1788,24 @@ var CLIENTSETUP = (function () {
       planWays(dr, "top", "group", [topWayNow], ["pillar"]);
     } else dr.appendChild(el("p", "sthid", "Off: the " + topLow + " plans nothing of its own."));
 
-    /* Capabilities live in ONE place at a time: in the company plan (this
-       card) or as a layer of their own (the last card), and the OFFICE says
-       which. The settings travel with them, so whichever card holds them
-       carries data-stcard="cap" and the On/Off "cap|layer".
+    /* §544.13 — ONE CAPABILITIES CARD, AND IT ASKS WHETHER, NOT WHERE.
+       Islam: *"who can a capability belong to?"* — **the company only**;
+       *"where does it appear?"* — **inside its owner's plan, with the
+       directions**. So there is one place and nothing to choose between:
+       this card sits beside the Directions card in the company's plan, and
+       its switch is §428's "does this client have capabilities", which the
+       layer card used to carry.
 
-       §544.5: the business units used to decide this — switching them off
-       moved the capabilities here on its own, and the switch was not drawn
-       at all. Islam: *"switching units off is not relevant to the
-       capabilities … what's the relation?"* None; it was §447's fold
-       dragging them along, and the fold is gone (§544.4). One switch, always
-       drawn, always the office's. */
+       WHAT WENT: the where-switch (`cap|top`, two answers written into
+       `structure.cap.at`) and the layer card it chose between. `cap.at` is
+       dead storage and is left where it lies (§405). */
     var cc = card(topOne + " " + capWord.toLowerCase(), row2);
-    cc.setAttribute("data-stcard", capTop ? "cap" : "capco");
-    hd(cc, onOff(capTop, function (v) {
-      /* §544.5: BOTH ANSWERS ARE WRITTEN, because absence now means "nobody
-         has said" and falls back to §465's reading (a company that plans its
-         own strategy carries them). Deleting the key would have meant the
-         press could not be made to stick on such a company. */
-      var nx = structNow();
-      if (v) { nx.cap.at = "top"; nx.cap.exists = true; } else nx.cap.at = "layer";
-      structWrite(nx);
-    }, "cap|top"));
-    if (capTop) capSettings(cc, true);
-    else cc.appendChild(el("p", "sthid", "Off: they are their own layer (below)."));
+    cc.setAttribute("data-stcard", "cap");
+    hd(cc, onOff(lv.cap.exists, function (v) {
+      var nx = structNow(); nx.cap.exists = v; structWrite(nx);
+    }, "cap|layer"));
+    if (lv.cap.exists) capSettings(cc);
+    else cc.appendChild(el("p", "sthid", "Not asked about in set-up and not shown in the " + topLow + " plan. Nothing entered is lost."));
     }
 
     /* §418: a layer the client does not have is switched off as a whole —
@@ -1863,13 +1838,10 @@ var CLIENTSETUP = (function () {
     /* §447/§448: the business-unit card has no switch of its own; whether it
        is used is answered on the top card ("Where the strategy is planned").
        Not used, it says so and keeps everything. */
-    /* §468: the bottom pair, the third layer and independent capabilities.
-       Each is a whole layer when on, so they stack; only when both are off
-       do they share a row, one line each. */
-    var bothOff = !lv.bu.exists && (capTop || !lv.cap.exists);
-    var row5 = bothOff ? pair() : box;
+    /* §544.13: §468's bottom PAIR is a single card now — the independent
+       capabilities that shared the row with it have no layer to be. */
     if (want("bu")) {
-    var bu = card("Third layer", row5);
+    var bu = card("Third layer", box);
     bu.setAttribute("data-stcard", "bu");
     /* §544.4: its own switch, the functions' card's exactly (§418). Off
        hides the layer and keeps every plan, figure and page behind it. */
@@ -1883,20 +1855,15 @@ var CLIENTSETUP = (function () {
     } else bu.appendChild(el("p", "sthid", "Not shown in the navigation. Nothing entered is lost."));
     }
 
-    /* §428: CAPABILITIES AS A LAYER OF THEIR OWN, after the functions, with
-       the same three sections. §465: greyed whenever they are in the company
-       plan instead — always at company level, by choice at units level. */
-    if (want("cap")) {
-    var cp = card("Independent " + capWord.toLowerCase(), row5);
-    if (capTop) {
-      cp.setAttribute("data-stcard", "caplayer");
-      hd(cp, held(false, capWord + " are part of the company plan."));
-      cp.appendChild(el("p", "sthid", "Off: they are in the " + topLow + " plan (above)."));
-    } else {
-      cp.setAttribute("data-stcard", "cap");
-      capCard(cp, "As their own layer: each has its own plan, owner, custodian and page.");
-    }
-    }
+    /* §544.13 — AND NO INDEPENDENT-CAPABILITIES CARD. §428 gave the
+       capabilities a layer of their own after the functions, with its own
+       plan, owner, custodian and page; §465 greyed it whenever they were in
+       the company plan instead. They are always in the company plan now, so
+       the card is always the greyed one — a control with nothing behind it
+       (§61), and it is read out rather than left drawn and dead. Its switch
+       (`cap|layer`) and its settings moved onto the company's capabilities
+       card above, which is where they were already drawn whenever the office
+       had said "in the company plan". */
 
     box.appendChild(el("p", "wzwhy",
       "These apply to every item at a layer. Where one item needs to differ, add it under Except for on that layer's card. " +
@@ -2193,9 +2160,6 @@ var CLIENTSETUP = (function () {
          card is about. */
       if (sel.lvl.indexOf("@g") > 0) layerNameBoxes(host, sel.lvl.slice(0, -2));
       structureStep(host, k);
-      /* §544: the independent-capabilities card has no row in the tree and
-         is still the office's to set, so it rides under the top card. */
-      if (k === "top") structureStep(host, "cap");
       return;
     }
     host.setAttribute("data-shpanel", sel.box + ":" + sel.at);

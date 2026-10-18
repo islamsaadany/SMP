@@ -260,35 +260,42 @@ with sync_playwright() as p:
     press(pg, ".csetup [data-shlvl=bu]", 350); press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 400)
     press(pg, ".csetup [data-shlvl=top]", 350); press(pg, '.csetup [data-stsec="top|plan"] button:nth-child(2)', 400)
 
-    # §544.5: and the capabilities have nothing to do with the units.
-    # Islam: *"switching units off is not relevant to the capabilities.
-    # A capability is something that belongs to the company in general and
-    # maybe a business unit if chosen to. What's the relation?"* None.
-    where0 = ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", [])
-    ck("(fixture) the capabilities are a layer of their own, with a side",
-       where0 == [False, True], where0)
-    # §544.5, REWRITTEN TO THE RULE AS IT STANDS (§218). The first draft of
-    # this asserted that switching the units off left the capabilities
-    # untouched, full stop. That was my too-blunt reading of Islam's *"what's
-    # the relation?"*, and `checks/direction-part.py` showed what it cost:
-    # the line being cut is §465's own, *"planned at company level they are
-    # always the company's"*, which he approved and which §520's whole shape
-    # rests on. It is a DEFAULT now rather than an override, so BOTH halves
-    # are asserted here — the half he objected to is the one the office can
-    # now answer, and until it does, §465 still reads.
-    ck("with nobody having said, switching the units off still carries them (§465's reading)",
+    # §544.13: AND THE RELATION IS NONE, FULL STOP — ASSERTED AS AN ABSENCE.
+    # Islam first: *"switching units off is not relevant to the capabilities
+    # … what's the relation?"*, and this check's §544.5 draft answered it
+    # with a default the office could override, which he then rejected
+    # outright: *"It's not about switching units off. Leave the capability
+    # completely alone … It's about fixing the whole structure."* Asked the
+    # three questions plainly he answered **the company only**, **inside its
+    # owner's plan, with the directions**, **yes, always**.
+    #
+    # So the three things this used to press no longer exist, and the right
+    # assertion is that they do not (§45.2 — a heading over nothing is not an
+    # empty state; an absence is asserted, not left unmentioned):
+    #   · the capabilities never have a side on the row;
+    #   · there is no where-switch to press (`cap|top`);
+    #   · and the units move none of it, whichever way they go.
+    ck("the capabilities have no side on the row — they are in the company plan",
+       ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps')]", []) == [True, False],
+       ev(pg, "()=>[SMPRules.capAtTop(GROUP), navSides().map(s=>s.fold)]"))
+    ck("…and the office is offered no choice about where they live",
+       ev(pg, "()=>!document.querySelector('.csetup [data-stsec=\"cap|top\"]')", None) is True)
+    # BOTH ENDS (§94.2), and the end that matters: the units switched OFF and
+    # back ON, with the capabilities reading the same at every step. This is
+    # the assertion his sentence actually asks for, and nothing stored makes
+    # it true — there is no setting left to store.
+    caps = "()=>[SMPRules.capAtTop(GROUP), navSides().some(s=>s.fold==='caps'), !!(SMPRules.structureOf(GROUP).cap||{}).at]"
+    before = ev(pg, caps, [])
+    ck("(fixture) nothing is stored about where the capabilities live",
+       before == [True, False, False], before)
+    ck("switching the units OFF moves nothing about the capabilities",
        press(pg, ".csetup [data-shlvl=bu]", 350) and press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(2)', 450) and
-       ev(pg, "()=>SMPRules.capAtTop(GROUP)", None) is True,
-       ev(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP), navSides().map(s=>s.fold)]"))
-    ck("…but the office's own answer wins over it, which is what the units could not be told before",
-       press(pg, ".csetup [data-shlvl=top]", 350) and press(pg, '.csetup [data-stsec="cap|top"] button:nth-child(2)', 450) and
-       ev(pg, "()=>[SMPRules.capAtTop(GROUP), (SMPRules.structureOf(GROUP).cap||{}).at]", []) == [False, "layer"],
-       ev(pg, "()=>[buExists(), SMPRules.capAtTop(GROUP), (SMPRules.structureOf(GROUP).cap||{}).at]"))
-    ck("…and their side is back on the row with it", ev(pg, "()=>navSides().some(s=>s.fold==='caps')", None) is True)
-    ck("…and the office's own switch for them is drawn, whatever the units do",
-       press(pg, ".csetup [data-shlvl=top]", 350) and
-       ev(pg, "()=>{var b=[...document.querySelectorAll('.csetup [data-stsec=\"cap|top\"] button')]; return b.length===2 && b.every(x=>!x.disabled)}", False))
-    press(pg, ".csetup [data-shlvl=bu]", 350); press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 450)
+       ev(pg, "()=>buExists()", None) is False and ev(pg, caps, []) == before,
+       [ev(pg, "()=>buExists()"), ev(pg, caps, [])])
+    ck("…and switching them back ON moves nothing either",
+       press(pg, '.csetup [data-stsec="bu|layer"] button:nth-child(1)', 450) and
+       ev(pg, "()=>buExists()", None) is True and ev(pg, caps, []) == before,
+       [ev(pg, "()=>buExists()"), ev(pg, caps, [])])
 
     print("\n8 · the console")
     ck("no page errors", not errs, errs[:3])

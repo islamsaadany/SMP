@@ -340,10 +340,12 @@
   /* §466: the top's plan is drawn while it is switched on and either it
      plans in projects or its pillars component is on. */
   function topPlanOn(){ return planOn("group") && (topWay() === "projects" || compOn("group", "pillar")); }
-  /* §465: the capabilities are a section of this tab wherever the office put
-     them in the company plan — always at company level, by choice at units
-     level — and never while they are a layer of their own. */
-  function topCapsOn(){ return SMPRules.capAtTop(GROUP) && SMPRules.capExists(GROUP) && capsReachable().length > 0; }
+  /* §544.13: the capabilities are a section of this tab, full stop. There is
+     no longer a "wherever the office put them" — a capability is the
+     company's, so the company's plan is where it shows (`capAtTop`). What is
+     left to ask is only whether this client has any and whether this viewer
+     reaches them. */
+  function topCapsOn(){ return SMPRules.capExists(GROUP) && capsReachable().length > 0; }
   function topStrategyTab(lead){
     return { k:"strategy", ac:"g_found",
       get label(){ return lead ? "Strategy" : SMPRules.foundTitle(GROUP, "group"); },
@@ -1529,14 +1531,16 @@
      pressing a tick. */
   function navPick(row){ return SMPRules.navPicked(GROUP, row); }
   function navSides(){
-    var out = [], us = myUnits(), cs = myCaps(), fs = myFns();
+    var out = [], us = myUnits(), fs = myFns();
     if (us.length && navPick("bu@g")) out = out.concat(companyUnitSides(us, navPick("bu")));
     if (us.length && navPick("bu")) out.push({ fold:"units", label:navWord("unitword", "Units"),
       keys:us });
-    /* §447: with the units off, capabilities are a section of the company
-       page and not a side of the row. */
-    if (cs.length && !SMPRules.capAtTop(GROUP)) out.push({ fold:"caps",  label:navWord("capability", "Capabilities"),
-      keys:cs.map(function(id){ return "cap:" + id; }) });
+    /* §544.13 — AND NO CAPABILITIES SIDE AT ALL. Islam, asked where a
+       capability appears: *"inside its owner's plan, with the directions"*.
+       A capability is the company's, so it shows in the company's plan and
+       is reached from there (§520's rail) — never as a third kind of thing
+       on this row. The `cap:<id>` destination stays reachable for the
+       clients that still hold records; what goes is the side. */
     if (fs.length && navPick("fn@g")) out = out.concat(companyFnSides(fs, navPick("fn")));
     if (fs.length && navPick("fn")) out.push({ fold:"fns",   label:navWord("fnword", "Functions"),
       keys:fs.map(function(k){ return "fn:" + k; }) });
@@ -1628,7 +1632,9 @@
        says what the row beside it lists. */
     if (!buExists() && myFns().length) return true;
     if (sides.length < 2) return false;
-    return myCaps().length ? true : (myUnits().length > 1 && myFns().length > 1);
+    /* §544.13: the capabilities clause went with the capabilities side —
+       three kinds can no longer share this row because there are two. */
+    return myUnits().length > 1 && myFns().length > 1;
   }
 
   /* ONE LABEL FUNCTION FOR THE THREE KINDS (§334, §51.7's own lesson): a
@@ -10254,15 +10260,9 @@
         promoOpen(fk);
       });
     });
-    document.querySelectorAll("[data-fncapadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = b.dataset.fncapadd;
-        if (!mayAuthor("k_found", "fn:" + fk)) return;
-        if (BUILDER && BUILDER.target === "fn:" + fk) { openBuilderForm("cap", { fnKey:fk }); return; }
-        addCapability(fk);
-        fieldSaved(); paint();
-      });
-    });
+    /* §544.13: the "add a capability under this function" button is gone —
+       a capability is the company's, and nothing renders `[data-fncapadd]`
+       any more, so the handler that waited for it goes too (§61). */
     /* ── THE SET-UP FLOW LEFT (§322) ────────────────────────────────
        §318 put it here, inside a client's Setup. Islam moved it out:
        "the setup should happen on the external creatoin not inside ..

@@ -105,7 +105,13 @@ with sync_playwright() as p:
         return press(pg, '[data-shlvl="%s"]' % k)
     ck("every card below the top carries an Except for box",
        all(lvl(t) and safe(pg, "()=>!!document.querySelector('[data-stexcept=\"'+%r+'\"]')" % k) is True
-           for t, k in (("bu@g", "mid"), ("bu", "bu"), ("fn", "fn"), ("top", "cap"))))
+           for t, k in (("bu@g", "mid"), ("bu", "bu"), ("fn", "fn"))))
+    # §544.13 ASSERTS THE OTHER END (§94.2): the capabilities are no longer a
+    # layer, so their card has no Except for — Islam, of a capability inside
+    # the company plan, *"the capabilities has no first section and second
+    # section"* (§468), and an Except for is a layer's control.
+    ck("…and the capabilities' card does not, being a part of the company plan",
+       lvl("top") and safe(pg, "()=>!document.querySelector('[data-stexcept=\"cap\"]')") is True)
     lvl("bu")
     ck("…the business units' box starts empty and says so",
        safe(pg, "()=>{var x=document.querySelector('[data-stexcept=\"bu\"]'); return !!x.querySelector('.stxnone') && !x.querySelector('[data-stxitem]')}") is True)
@@ -224,9 +230,17 @@ with sync_playwright() as p:
     ck("…offers its Description AND its key objectives, with its SWOT a section switch (§436, §437)",
        safe(pg, "()=>!!document.querySelector('[data-stcomp=\"fn|desc\"]') && !!document.querySelector('[data-stcomp=\"fn|keyobj\"]') && !!document.querySelector('[data-stsec=\"fn|swot\"]')") is True)
     lvl("top")
-    ck("the capabilities' first section offers the brief and the North Star, as the directions do (§436)",
-       safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')") == "brief,keyobj",
-       safe(pg, "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')"))
+    # §544.13 REWRITES THIS, and the reversal is the point (§218). §436 gave
+    # the capabilities a first section of their own because they were a LAYER
+    # of their own. They are a part of the company's plan now and nothing
+    # else, so there is no first section to offer anything on — which is
+    # §468's rule arriving everywhere rather than only where the office had
+    # said so. BOTH ENDS: the plan section IS drawn.
+    chips = "()=>SMPRules.SEC_FOUND_PARTS.filter(c=>document.querySelector('[data-stcomp=\"cap|'+c+'\"]')).join(',')"
+    ck("the capabilities offer no first section — they are a part of the company plan (§468)",
+       safe(pg, chips) == "", safe(pg, chips))
+    ck("…and their plan section is drawn, so the card is not merely empty",
+       safe(pg, "()=>!!document.querySelector('[data-stcard=\"cap\"] [data-stsec=\"cap|plan\"]')") is True)
     # §426: Purpose and Aspiration are never offered to a function — no page of
     # a function draws either, so a tick there would do nothing. Both ends: a
     # unit's row still offers them (asserted just below).
@@ -261,11 +275,12 @@ with sync_playwright() as p:
     # §492: How we compete is its own section on the top and units cards only, so
     # it is asserted where it lives and left out of the three-section count (§218).
     # §544: counted a level at a time. The top brings its own card (two
-    # sections, its plan being the Directions card) and the capabilities'
-    # (three), so its answer is "2,3"; every other level is one card.
+    # sections, its plan being the Directions card) and the capabilities',
+    # which since §544.13 draw their PLAN SECTION ALONE — so its answer is
+    # "2,1"; every other level is one card.
     secn = "()=>[...document.querySelectorAll('.stsecs')].map(x=>x.querySelectorAll(':scope > .stsec:not([data-stcompete])').length).join(',')"
     ck("each layer draws three sections, the top two (its plan is the Directions card, §465)",
-       each(secn, "") == ["2,3", "3", "3", "3"], each(secn, ""))
+       each(secn, "") == ["2,1", "3", "3", "3"], each(secn, ""))
     comp = "()=>[...document.querySelectorAll('[data-stcompete]')].map(x=>x.dataset.stcompete).sort().join(',')"
     ck("…and How we compete is a section on the top and units cards and no other",
        each(comp, "") == ["top", "", "bu", ""], each(comp, ""))

@@ -8907,11 +8907,11 @@ function buFoldIntoTop(){
    working — and then Islam answered all three:
 
      · *"the capabilities are on the company level"* — so a record held by a
-       function is no longer a blocker ONCE THE OFFICE HAS SAID the
-       capabilities live in the company plan (`capAtTop`). That setting is
-       the statement; without it the refusal stands, because §7.1's answer
-       (a capability becomes a pillar of the function holding it) is still
-       the other way to do this and nothing should guess between them.
+       function is no longer a blocker. §544.13 finished this: asked straight
+       out where a function-held capability should land, Islam answered
+       **"on the company"**, and §7.1's other way (a pillar of the function
+       holding it) is reversed. There is nothing left to guess between, so
+       the office's statement is no longer needed either.
      · Data Management's two pillars: *"two capability pillars"* — each
        keeps its own name, measures and tactics. One capability may become
        several; nothing is merged.
@@ -8927,7 +8927,7 @@ function buFoldIntoTop(){
    silently is the one thing this must not do (§96.2). */
 function capFoldBlockers(){
   var caps = Array.isArray(GROUP.capabilities) ? GROUP.capabilities : [];
-  var out = [], toTop = SMPRules.capAtTop(GROUP);
+  var out = [];
   caps.forEach(function(c){
     if (!c || !c.id) return;
     var why = [], prs = c.projects || [];
@@ -8968,7 +8968,6 @@ function capFoldBlockers(){
     }
     if ((c.keyObjectives || []).length) why.push((c.keyObjectives || []).length + " " + L("keyobj").toLowerCase() + " of its own");
     if (String(c.def || "").trim()) why.push("a definition of its own");
-    if (c.fn && !toTop) why.push("held by " + ((FUNCTIONS[c.fn] || {}).name || c.fn));
     if (why.length) out.push({ id: c.id, name: c.name || "", why: why });
   });
   return out;
@@ -10985,9 +10984,14 @@ function mintCapId(){
   });
   return "cap" + (n + 1);
 }
-function addCapability(fnKey){
+/* §544.13 — AND IT TAKES NO FUNCTION. Islam, asked whether the set-up should
+   still let the office put a capability under a function: **"no — remove
+   it"**. A capability is the company's, so a new one is the company's; `fn`
+   is minted null and stays readable only for the records that already carry
+   one (Meridian's), which stage 3b folds. */
+function addCapability(){
   var made = { id:mintCapId(), name:"New " + labelWord("capability","group"), def:"",
-               fn:fnKey || null, keyObjectives:[], projects:[] };
+               fn:null, keyObjectives:[], projects:[] };
   GROUP.capabilities.push(made);
   renumberCapability(made);
   return made;
@@ -11025,8 +11029,11 @@ function promoteToCapability(fnKey, ids, name){
   var own = fnOwnHolder(fnKey);
   if (own) archiveCapPlan(own, "before " + plural(mv.projects.length, L1("project"), L("project")) +
     " became \u201c" + (String(name || "").trim() || "a capability") + "\u201d");
+  /* §544.13: the projects leave the function and the capability that
+     receives them is the COMPANY'S, not the function's — which is what
+     promoting them means now. The projects keep their ids (§232). */
   var made = { id:mintCapId(), name:String(name || "").trim() || "New " + labelWord("capability","group"),
-               def:"", fn:fnKey, keyObjectives:[], projects:mv.projects.slice() };
+               def:"", fn:null, keyObjectives:[], projects:mv.projects.slice() };
   mv.projects.forEach(function(p){
     var i = f.projects.indexOf(p);
     if (i > -1) f.projects.splice(i, 1);

@@ -652,7 +652,7 @@ function bApply(kind, ctx, d){
     return true;
   }
   if (kind === "cap") {
-    var made = addCapability(ctx.fnKey); if (!made) return false;
+    var made = addCapability(); if (!made) return false;
     made.name = v("name") || made.name; made.def = v("def");
     return true;
   }

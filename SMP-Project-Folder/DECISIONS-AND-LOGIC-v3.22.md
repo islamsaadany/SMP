@@ -66079,3 +66079,83 @@ That needed a third state. `at` was `"top"` or absent, so *"their own layer"* an
 **Measured after the fix, in a browser, against `origin/main`, on all three clients that exist:** El Abd as it now stands, Wander as the move left it, and the demo with its capability records. **Nothing moved** — not the navigation row, the tabs, the Strategy sections, the pillars and their codes, nor either rendered page, and no page errors on either build.
 
 **What this does NOT prove:** the merge itself. `origin/main` is 26 commits ahead; this compares two tips, not their merge. The same three comparisons are what to run again once main is merged in.
+
+### §544.13 — a capability is the company's
+
+Islam, on being told the units-off case was the half still true: *"It's not
+about switching units off. Leave the capability completely alone. Everything
+should follow the rules. Does the capability belong to the business units or
+not? If it doesn't belong and it belongs to the company, they should be
+irrelevant. It's not about fixing this. It's about fixing the whole
+structure."*
+
+Then, asked plainly rather than told: *"I think there is some confusion. I
+want you to ask me what you need to understand and the cases that we have, in
+a very simple way, to get answers."* So the questions were asked one line
+each, and answered one line each:
+
+| Asked | Answered |
+|---|---|
+| Who can a capability belong to? | **The company only** |
+| Where does it appear on screen? | **Inside its owner's plan, with the directions** |
+| Someone owns one — can they always open it and report it? | **Yes, always** |
+| Should set-up still put a capability under a function? | **No — remove it** |
+| "Product Mindset" sits under Marketing — where does it end up? | **On the company** |
+
+**He also corrected the cases themselves**, which is why they were asked for:
+*"I removed all raya's capabilities already you are reading something old"*,
+and of Meridian, *"meridian is not live and not a priority"*. So the four
+real clients are El Abd (folded at stage 3b), Wander (folded at §544.6–.10),
+Raya (emptied by him) and Meridian (two records, not live). **No live client
+holds a capability record.** The only shape this changes on screen is the
+demo sample compiled into the build, which is code, not a client — which is
+exactly why this is the moment to make the change rather than defend it.
+
+**THE RULE, STATED ONCE.** A capability is the company's. Always. It lives as
+a pillar in the company's plan, beside the company's directions. Nothing
+below the company holds one. Its owner always reaches it.
+
+**THE FOUR PLACES THE BUSINESS UNITS DECIDED IT.** §544.5 had taken them out
+of one and called that the fix. Measuring rather than reading found four,
+each added for its own reason — which is what *"fixing the whole structure"*
+meant and what a patch would have missed:
+
+| # | Where | What it did | Now |
+|---|---|---|---|
+| 1 | `capAtTop` | Unsaid, the units decided where the records lived | `return true` — there is nothing left to ask |
+| 2 | `ownsTopPillar` | A direction's owner refused the moment the client had a unit | The name on the direction is the whole of it |
+| 3 | `ownsTopCapability` | A capability's owner refused the same way | *"Yes, always"* |
+| 4 | `group-render` | The Reporting page's capabilities section drawn only where there were no units | Drawn wherever there are capabilities |
+
+**WHAT ELSE WENT, AND WHY IT HAD TO.** Once the question has one answer, the
+things that existed to ask it are controls with nothing behind them (§61) and
+are read out rather than left standing as constants a reader must re-derive:
+
+- `capsInTopPlan` — §544.12's own rule, which answered true for every client
+  the day `capAtTop` did. Its *catch* is kept, not lost: it was that El Abd's
+  capabilities are in its company plan although `capAtTop` said otherwise.
+  They are, for everyone, now.
+- `dvCapsHere` in the Copilot, and the Capabilities section it gated — they
+  are always chosen inside the Directions chat.
+- The **capabilities side** in the navigation, and `foldsNeeded`'s clause
+  about it: three kinds cannot share that row because there are two.
+- The **independent-capabilities card** in set-up, and the where-switch
+  (`cap|top`) that chose between it and the company's. One card now, and its
+  switch is §428's *does this client have capabilities*, which the layer card
+  used to carry.
+- `addCapability(fnKey)` — it takes no function; the `[data-fncapadd]`
+  handler was already waiting for a button nothing renders.
+- `promoteToCapability` still promotes a function's projects, and the
+  capability that receives them is the company's.
+
+**`structure.cap.at` is dead storage.** Neither read nor written; the clients
+that hold one keep it (§405 — hidden, never cleared).
+
+**THIS REVERSES §7.1**, approved 2026-10-07 (*"ok for your recommendation"*):
+a capability held by a function was to become an internal pillar of that
+function. Asked again against the live shapes he chose **"on the company"**.
+Recorded as a reversal, not overwritten (Principle II).
+
+**And it closes §544.12's open point** rather than answering it — the
+question *"what happens to the capabilities when the units go off"* has no
+answer any more, because the units are not in the question.

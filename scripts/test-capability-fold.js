@@ -249,33 +249,40 @@ console.log("2 · what the move cannot carry it refuses, by name — and what it
   const clean = clientAt(readNow, elAbd());
   ok(JSON.stringify(clean(`capFoldBlockers()`)) === "[]", "the clean shape has no blockers",
      clean(`capFoldBlockers()`));
-  /* §544.6 LIFTED TWO OF THESE AND KEPT TWO, and the four are asserted
-     together so the line between them is visible (§218: rewritten to the
-     new rule, never loosened). Wander Development's own copy is what moved
-     it: one capability holding TWO pillars, one planning in PROJECTS, all
-     three held by a function. Islam answered each — two pillars become two
-     capabilities, a project becomes a capability whose tactics are its
-     milestones, and a record held by a function moves to the company once
-     the office has said that is where the capabilities live. */
-  [["kos", "of its own"], ["fn", "held by"]].forEach(function (b) {
-    const run = clientAt(readNow, elAbd(b[0]));
+  /* §544.6 LIFTED TWO OF THESE AND KEPT TWO. §544.13 LIFTS THE THIRD, and
+     the line between what refuses and what carries is asserted here so it
+     stays visible (§218: rewritten to the new rule, never loosened).
+     Wander Development's own copy is what moved it: one capability holding
+     TWO pillars, one planning in PROJECTS, all three held by a function.
+     Islam answered each — two pillars become two capabilities, a project
+     becomes a capability whose tactics are its milestones, and a record
+     held by a function moves to the company. */
+  {
+    const run = clientAt(readNow, elAbd("kos"));
     const blk = run(`capFoldBlockers()`);
-    ok(blk.length === 1 && JSON.stringify(blk[0].why).indexOf(b[1]) >= 0,
-       "a capability that " + b[0] + " is named, with the reason", blk);
+    ok(blk.length === 1 && JSON.stringify(blk[0].why).indexOf("of its own") >= 0,
+       "a capability that kos is named, with the reason", blk);
     ok(run(`capFoldIntoTop()`) === -1 && run(`GROUP.capabilities.length`) === 5,
-       "and the whole move is refused — all five records are still there", b[0]);
-  });
-  /* held by a function, once the office says the capabilities are the
-     company's: the refusal lifts and nothing else about it changes */
+       "and the whole move is refused — all five records are still there");
+  }
+  /* §544.13 — HELD BY A FUNCTION IS NOT A REFUSAL AND NEEDS NOTHING SAID.
+     Islam, asked where a function-held capability should land: **"on the
+     company"**, and of the route that put one under a function: **"no —
+     remove it"**. §544.6 lifted this refusal only once `structure.cap.at`
+     said "top"; there is no such setting any more, so the shape alone is
+     enough. ASSERTED WITH NOTHING STORED, which is the whole of the change:
+     the same state that refused before carries now. */
   {
     const st = elAbd("fn");
-    st.group.structure = { cap: { at: "top", exists: true } };
+    ok(!(st.group.structure || {}).cap,
+       "…with nothing stored about the capabilities — only the units, switched off",
+       st.group.structure);
     const run = clientAt(readNow, st);
     ok(JSON.stringify(run(`capFoldBlockers()`)) === "[]",
-       "…and the held-by refusal lifts once the office says they live in the company plan",
+       "…and a record held by a function is no longer refused, with nothing said",
        run(`capFoldBlockers()`));
     ok(run(`capFoldIntoTop()`) === 5 && run(`GROUP.capabilities.length`) === 0,
-       "…and then all five move");
+       "…and all five move");
   }
   /* two inner pillars: two rows, each under its OWN name */
   {

@@ -7217,7 +7217,11 @@ function renderReport(u, opt){
        capability through `capReportBody`. The owner types on theirs, a
        direction's owner reads it, the office types on all — the pane asks
        `cap:<id>` for itself exactly as before. */
-    (u.topLayer && !SMPRules.buExists(GROUP) && SMPRules.capExists(GROUP) && capsHere().length
+    /* §544.13: `!buExists(GROUP)` was the third of the four places the
+       business units decided something about a capability — here it meant
+       the section appeared only on a client that had no units, although the
+       capabilities it reports are the company's either way. Gone. */
+    (u.topLayer && SMPRules.capExists(GROUP) && capsHere().length
       ? section("", L("capability","bu") + " &mdash; " + L("measure") + " and " + L("tactic"), null,
           reportCapsSplit(capsHere()))
       : "") +
